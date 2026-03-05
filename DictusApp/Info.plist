@@ -20,6 +20,17 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.pivi.dictus</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>dictus</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Dictus needs microphone access to transcribe your voice.</string>
 	<key>UIApplicationSceneManifest</key>
