@@ -36,6 +36,9 @@ struct KeyboardView: View {
                             insertCharacter(char)
                         },
                         onDelete: {
+                            if hasFullAccess {
+                                UIDevice.current.playInputClick()
+                            }
                             controller.textDocumentProxy.deleteBackward()
                         },
                         onGlobe: {
@@ -48,9 +51,15 @@ struct KeyboardView: View {
                             toggleNumbersSymbols()
                         },
                         onSpace: {
+                            if hasFullAccess {
+                                UIDevice.current.playInputClick()
+                            }
                             controller.textDocumentProxy.insertText(" ")
                         },
                         onReturn: {
+                            if hasFullAccess {
+                                UIDevice.current.playInputClick()
+                            }
                             controller.textDocumentProxy.insertText("\n")
                         },
                         hasFullAccess: hasFullAccess

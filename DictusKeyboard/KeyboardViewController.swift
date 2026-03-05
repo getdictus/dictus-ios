@@ -19,13 +19,13 @@ class KeyboardViewController: UIInputViewController {
         }
         #endif
 
-        // Register custom input view to enable system keyboard click sounds.
-        // UIInputViewAudioFeedback must be on a UIView subclass — see InputView.swift.
-        let inputView = KeyboardInputView(
-            frame: CGRect(x: 0, y: 0, width: 0, height: 0)
-        )
-        inputView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(inputView)
+        // Create a KeyboardInputView (UIInputView + UIInputViewAudioFeedback)
+        // and assign it as the controller's inputView. This is the critical step
+        // that makes playInputClick() work: iOS checks that the UIInputViewController's
+        // inputView conforms to UIInputViewAudioFeedback and returns true from
+        // enableInputClicksWhenVisible. Without this assignment, click sounds are silent.
+        let kbInputView = KeyboardInputView(frame: .zero, inputViewStyle: .keyboard)
+        kbInputView.translatesAutoresizingMaskIntoConstraints = false
 
         let rootView = KeyboardRootView(controller: self)
         let hosting = UIHostingController(rootView: rootView)
@@ -34,7 +34,8 @@ class KeyboardViewController: UIInputViewController {
         self.hostingController = hosting
 
         addChild(hosting)
-        view.addSubview(hosting.view)
+        // Add hosting view as subview of kbInputView (NOT self.view)
+        kbInputView.addSubview(hosting.view)
         hosting.didMove(toParent: self)
 
         // Remove default background so the keyboard blends with host app
@@ -42,11 +43,14 @@ class KeyboardViewController: UIInputViewController {
 
         hosting.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            hosting.view.topAnchor.constraint(equalTo: view.topAnchor),
-            hosting.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            hosting.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            hosting.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            hosting.view.topAnchor.constraint(equalTo: kbInputView.topAnchor),
+            hosting.view.bottomAnchor.constraint(equalTo: kbInputView.bottomAnchor),
+            hosting.view.leadingAnchor.constraint(equalTo: kbInputView.leadingAnchor),
+            hosting.view.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor)
         ])
+
+        // Assign as the controller's inputView — this activates audio feedback
+        self.inputView = kbInputView
     }
 
     override func viewDidDisappear(_ animated: Bool) {
