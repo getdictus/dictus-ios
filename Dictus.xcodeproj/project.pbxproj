@@ -3,20 +3,21 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA000020 /* DictusKeyboard.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = AA200002 /* DictusKeyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		AA000001 /* DictusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001 /* DictusApp.swift */; };
 		AA000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100002 /* ContentView.swift */; };
 		AA000003 /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100003 /* KeyboardViewController.swift */; };
 		AA000004 /* KeyboardRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100004 /* KeyboardRootView.swift */; };
-		AA000010 /* DictusCore in Frameworks (App) */ = {isa = PBXBuildFile; productRef = AA900010 /* DictusCore */; };
-		AA000011 /* DictusCore in Frameworks (Keyboard) */ = {isa = PBXBuildFile; productRef = AA900011 /* DictusCore */; };
 		AA000005 /* DictationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100009 /* DictationCoordinator.swift */; };
 		AA000006 /* DictationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000A /* DictationView.swift */; };
 		AA000007 /* KeyboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000B /* KeyboardState.swift */; };
 		AA000008 /* MicButtonDisabled.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000C /* MicButtonDisabled.swift */; };
+		AA000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA900010 /* DictusCore */; };
+		AA000011 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA900011 /* DictusCore */; };
 		AA000030 /* InputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100030 /* InputView.swift */; };
 		AA000031 /* KeyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100031 /* KeyButton.swift */; };
 		AA000032 /* SpecialKeyButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100032 /* SpecialKeyButton.swift */; };
@@ -35,10 +36,8 @@
 		AA100004 /* KeyboardRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardRootView.swift; sourceTree = "<group>"; };
 		AA100005 /* DictusApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DictusApp.entitlements; sourceTree = "<group>"; };
 		AA100006 /* DictusKeyboard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DictusKeyboard.entitlements; sourceTree = "<group>"; };
-		AA100007 /* Info.plist (App) */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AA100008 /* Info.plist (Keyboard) */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		AA200001 /* Dictus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dictus.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA200002 /* DictusKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA100007 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA100008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA100009 /* DictationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationCoordinator.swift; sourceTree = "<group>"; };
 		AA10000A /* DictationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationView.swift; sourceTree = "<group>"; };
 		AA10000B /* KeyboardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardState.swift; sourceTree = "<group>"; };
@@ -52,29 +51,55 @@
 		AA100036 /* KeyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyDefinition.swift; sourceTree = "<group>"; };
 		AA100037 /* KeyboardLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayer.swift; sourceTree = "<group>"; };
 		AA100038 /* KeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
+		AA200001 /* DictusApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DictusApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA200002 /* DictusKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXContainerItemProxy section */
+		AA050001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA500002;
+			remoteInfo = DictusKeyboard;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		AA060001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AA000020 /* DictusKeyboard.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFrameworksBuildPhase section */
-		AA300001 /* Frameworks (App) */ = {
+		AA300001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA000010 /* DictusCore in Frameworks (App) */,
+				AA000010 /* DictusCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AA300002 /* Frameworks (Keyboard) */ = {
+		AA300002 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA000011 /* DictusCore in Frameworks (Keyboard) */,
+				AA000011 /* DictusCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AA400000 /* Root */ = {
+		AA400000 = {
 			isa = PBXGroup;
 			children = (
 				AA400001 /* DictusApp */,
@@ -92,7 +117,7 @@
 				AA100009 /* DictationCoordinator.swift */,
 				AA10000A /* DictationView.swift */,
 				AA100005 /* DictusApp.entitlements */,
-				AA100007 /* Info.plist (App) */,
+				AA100007 /* Info.plist */,
 			);
 			path = DictusApp;
 			sourceTree = "<group>";
@@ -107,9 +132,25 @@
 				AA400005 /* Views */,
 				AA400006 /* Models */,
 				AA100006 /* DictusKeyboard.entitlements */,
-				AA100008 /* Info.plist (Keyboard) */,
+				AA100008 /* Info.plist */,
 			);
 			path = DictusKeyboard;
+			sourceTree = "<group>";
+		};
+		AA400003 /* DictusCore (local package) */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "DictusCore (local package)";
+			sourceTree = "<group>";
+		};
+		AA400004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA200001 /* DictusApp.app */,
+				AA200002 /* DictusKeyboard.appex */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		AA400005 /* Views */ = {
@@ -135,22 +176,6 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		AA400003 /* DictusCore (local package) */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "DictusCore (local package)";
-			sourceTree = "<group>";
-		};
-		AA400004 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				AA200001 /* Dictus.app */,
-				AA200002 /* DictusKeyboard.appex */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -158,29 +183,31 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA700001 /* Build configuration list for PBXNativeTarget "DictusApp" */;
 			buildPhases = (
-				AA600001 /* Sources (App) */,
-				AA300001 /* Frameworks (App) */,
-				AA600003 /* Resources (App) */,
+				AA600001 /* Sources */,
+				AA300001 /* Frameworks */,
+				AA600003 /* Resources */,
+				AA060001 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AA070001 /* PBXTargetDependency */,
 			);
 			name = DictusApp;
 			packageProductDependencies = (
 				AA900010 /* DictusCore */,
 			);
 			productName = DictusApp;
-			productReference = AA200001 /* Dictus.app */;
+			productReference = AA200001 /* DictusApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 		AA500002 /* DictusKeyboard */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AA700002 /* Build configuration list for PBXNativeTarget "DictusKeyboard" */;
 			buildPhases = (
-				AA600002 /* Sources (Keyboard) */,
-				AA300002 /* Frameworks (Keyboard) */,
-				AA600004 /* Resources (Keyboard) */,
+				AA600002 /* Sources */,
+				AA300002 /* Frameworks */,
+				AA600004 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -196,8 +223,16 @@
 		};
 /* End PBXNativeTarget section */
 
+/* Begin PBXTargetDependency section */
+		AA070001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA500002 /* DictusKeyboard */;
+			targetProxy = AA050001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXProject section */
-		AA000000 /* Project */ = {
+		AA000000 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
@@ -220,7 +255,7 @@
 				fr,
 				Base,
 			);
-			mainGroup = AA400000 /* Root */;
+			mainGroup = AA400000;
 			packageReferences = (
 				AA800001 /* XCLocalSwiftPackageReference "DictusCore" */,
 			);
@@ -235,14 +270,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		AA600003 /* Resources (App) */ = {
+		AA600003 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AA600004 /* Resources (Keyboard) */ = {
+		AA600004 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -252,7 +287,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		AA600001 /* Sources (App) */ = {
+		AA600001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -263,7 +298,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AA600002 /* Sources (Keyboard) */ = {
+		AA600002 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -286,7 +321,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		AA710000 /* Debug (Project) */ = {
+		AA710000 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -346,7 +381,7 @@
 			};
 			name = Debug;
 		};
-		AA710001 /* Release (Project) */ = {
+		AA710001 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -400,7 +435,7 @@
 			};
 			name = Release;
 		};
-		AA720001 /* Debug (DictusApp) */ = {
+		AA720001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -408,7 +443,7 @@
 				CODE_SIGN_ENTITLEMENTS = DictusApp/DictusApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = QN58279822;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DictusApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -422,7 +457,7 @@
 			};
 			name = Debug;
 		};
-		AA720002 /* Release (DictusApp) */ = {
+		AA720002 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -430,7 +465,7 @@
 				CODE_SIGN_ENTITLEMENTS = DictusApp/DictusApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = QN58279822;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DictusApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -444,14 +479,14 @@
 			};
 			name = Release;
 		};
-		AA730001 /* Debug (DictusKeyboard) */ = {
+		AA730001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = DictusKeyboard/DictusKeyboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = QN58279822;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DictusKeyboard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -466,14 +501,14 @@
 			};
 			name = Debug;
 		};
-		AA730002 /* Release (DictusKeyboard) */ = {
+		AA730002 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_ENTITLEMENTS = DictusKeyboard/DictusKeyboard.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = QN58279822;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DictusKeyboard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -528,18 +563,17 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		AA900010 /* DictusCore (App) */ = {
+		AA900010 /* DictusCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AA800001 /* XCLocalSwiftPackageReference "DictusCore" */;
 			productName = DictusCore;
 		};
-		AA900011 /* DictusCore (Keyboard) */ = {
+		AA900011 /* DictusCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = AA800001 /* XCLocalSwiftPackageReference "DictusCore" */;
 			productName = DictusCore;
 		};
 /* End XCSwiftPackageProductDependency section */
-
 	};
-	rootObject = AA000000 /* Project */;
+	rootObject = AA000000 /* Project object */;
 }
