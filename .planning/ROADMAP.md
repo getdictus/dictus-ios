@@ -34,6 +34,8 @@
 
 **Requirements:** STT-01, STT-02, STT-03, STT-04, STT-05, APP-02
 
+**Plans:** 3 plans
+
 ### Success Criteria
 1. Recording 10 seconds of spoken French in the main app produces a transcription in under 3 seconds on an iPhone 12 or newer
 2. Filler words ("euh", "hm", "bah", "voila", "um", "uh") are absent from the transcription output
@@ -42,9 +44,9 @@
 5. User can download, select, and delete Whisper models (tiny, base, small, medium, large-v3-turbo) from within the app
 
 ### Plans
-- Plan 2.1: WhisperKit integration — add `argmaxinc/WhisperKit` via SPM to main app target only, `AVAudioEngine` + `AVAudioSession` recording pipeline, model pre-compilation on first launch with `modelReady` flag written to App Group, file integrity check after download
-- Plan 2.2: Transcription quality — `FillerWordFilter` (French + English word list, rule-based), `SmartModelRouter` (duration threshold → tiny vs small), punctuation pass-through validation, latency benchmarks on physical device
-- Plan 2.3: Model Manager screen — list of available models with size and WER labels, download progress indicator, active model selection, delete with confirmation, `modelReady` state surfaced to keyboard extension
+- [ ] 02-01-PLAN.md — WhisperKit SPM integration, AudioRecorder, TranscriptionService, RecordingView with waveform + stop + timer, DictationCoordinator rewrite
+- [ ] 02-02-PLAN.md — FillerWordFilter (TDD), SmartModelRouter (TDD), ModelInfo, SharedKeys extensions
+- [ ] 02-03-PLAN.md — ModelManager + ModelManagerView (download/select/delete), wire SmartModelRouter + FillerWordFilter into pipeline
 
 ---
 
