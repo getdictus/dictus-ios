@@ -25,7 +25,9 @@ class KeyboardViewController: UIInputViewController {
         // inputView conforms to UIInputViewAudioFeedback and returns true from
         // enableInputClicksWhenVisible. Without this assignment, click sounds are silent.
         let kbInputView = KeyboardInputView(frame: .zero, inputViewStyle: .keyboard)
-        kbInputView.translatesAutoresizingMaskIntoConstraints = false
+        // Do NOT set translatesAutoresizingMaskIntoConstraints = false on the inputView.
+        // iOS manages the inputView's frame via autoresizing masks — disabling them
+        // causes the view to collapse to zero width.
 
         let rootView = KeyboardRootView(controller: self)
         let hosting = UIHostingController(rootView: rootView)
