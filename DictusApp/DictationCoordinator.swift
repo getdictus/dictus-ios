@@ -7,7 +7,8 @@ import DictusCore
 import WhisperKit
 
 /// Manages the dictation lifecycle in the main app.
-/// Phase 2: Real WhisperKit recording + transcription pipeline.
+/// Phase 2.3: Integrated with SmartModelRouter for duration-based model selection
+/// and FillerWordFilter (applied in TranscriptionService).
 ///
 /// WHY this class is @MainActor and uses static let shared:
 /// - @MainActor ensures all @Published property updates happen on the main thread (required by SwiftUI)
@@ -63,9 +64,19 @@ class DictationCoordinator: ObservableObject {
 
     /// Called when the app receives dictus://dictate URL.
     /// Starts the full recording pipeline.
+    ///
+    /// Phase 2.3: Now checks SharedKeys.modelReady before starting.
+    /// If no model is downloaded, writes a descriptive error instead of crashing.
     func startDictation() {
         if #available(iOS 14.0, *) {
             DictusLogger.app.info("Dictation started via URL scheme")
+        }
+
+        // Check if a model is downloaded and ready
+        let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
+        guard modelReady else {
+            handleError("No model downloaded. Open Dictus to download a model.")
+            return
         }
 
         // Cancel any in-flight dictation before starting a new one
@@ -101,6 +112,10 @@ class DictationCoordinator: ObservableObject {
 
     /// Called when user taps the stop button.
     /// Stops recording and starts transcription.
+    ///
+    /// Phase 2.3: Uses SmartModelRouter to select the best model based on
+    /// recorded audio duration. Short clips (< 5s) use fast models, longer
+    /// clips use accurate models.
     func stopDictation() {
         dictationTask?.cancel()
 
@@ -114,15 +129,37 @@ class DictationCoordinator: ObservableObject {
                     return
                 }
 
+                // Step 2: Calculate audio duration for smart routing
+                let audioDuration = bufferSeconds
+
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Recording stopped. Samples: \(samples.count), Duration: \(String(format: "%.1f", Double(samples.count) / Double(WhisperKit.sampleRate)))s")
+                    DictusLogger.app.info("Recording stopped. Samples: \(samples.count), Duration: \(String(format: "%.1f", audioDuration))s")
                 }
 
-                // Step 2: Transcribe
+                // Step 3: Use SmartModelRouter to select the best model
+                // Read downloaded models from App Group (loose coupling — no reference to ModelManager)
+                let downloadedModels = readDownloadedModels()
+                let selectedModel = SmartModelRouter.selectModel(
+                    audioDuration: audioDuration,
+                    downloadedModels: downloadedModels
+                )
+
+                if #available(iOS 14.0, *) {
+                    DictusLogger.app.info("SmartModelRouter selected: \(selectedModel) for \(String(format: "%.1f", audioDuration))s audio")
+                }
+
+                // Step 4: Ensure WhisperKit is loaded with the selected model
+                // If the router selected a different model than currently loaded,
+                // this will reinitialize WhisperKit with the new model.
+                if !selectedModel.isEmpty {
+                    try await ensureWhisperKitReady(preferredModel: selectedModel)
+                }
+
+                // Step 5: Transcribe (FillerWordFilter.clean() is applied inside TranscriptionService)
                 updateStatus(.transcribing)
                 let text = try await transcriptionService.transcribe(audioSamples: samples)
 
-                // Step 3: Write result to App Group
+                // Step 6: Write result to App Group
                 // IMPORTANT: Write both lastTranscription AND status to UserDefaults
                 // BEFORE posting any Darwin notifications. This prevents a race condition
                 // where the keyboard reads UserDefaults between two separate notifications
@@ -142,7 +179,7 @@ class DictationCoordinator: ObservableObject {
                     DictusLogger.app.info("Transcription complete: \(text)")
                 }
 
-                // Step 4: Brief delay for checkmark flash before returning to idle
+                // Step 7: Brief delay for checkmark flash before returning to idle
                 try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
                 if status == .ready {
                     updateStatus(.idle)
@@ -164,20 +201,30 @@ class DictationCoordinator: ObservableObject {
 
     // MARK: - Private Helpers
 
-    /// Initialize WhisperKit with the default model if not already loaded.
+    /// Initialize WhisperKit with the preferred model if not already loaded.
     ///
-    /// WHY we hardcode "openai_whisper-tiny" as the fallback model:
-    /// Plan 2.3 will add Model Manager with user-selectable models. For now,
-    /// we use the smallest model as a safe default. It's ~40 MB and works on all devices.
-    private func ensureWhisperKitReady() async throws {
-        guard whisperKit == nil else { return }
+    /// Phase 2.3: Now accepts an optional preferredModel parameter from SmartModelRouter.
+    /// Falls back to the active model from App Group, then to "openai_whisper-tiny".
+    ///
+    /// WHY we support model switching:
+    /// SmartModelRouter may select different models for different audio durations.
+    /// A 3-second voice note should use tiny/base for speed, while a 30-second
+    /// dictation benefits from small/medium for accuracy. This method handles
+    /// lazy initialization AND model switching.
+    private func ensureWhisperKitReady(preferredModel: String? = nil) async throws {
+        let modelName = preferredModel
+            ?? defaults.string(forKey: SharedKeys.activeModel)
+            ?? "openai_whisper-tiny"
 
-        if #available(iOS 14.0, *) {
-            DictusLogger.app.info("Initializing WhisperKit...")
+        // If WhisperKit is already loaded with a compatible model, reuse it
+        // (We reinitialize only when the model changes)
+        if whisperKit != nil, preferredModel == nil {
+            return
         }
 
-        // Check if user has a preferred model from App Group, fallback to tiny
-        let modelName = defaults.string(forKey: "dictus.activeModel") ?? "openai_whisper-tiny"
+        if #available(iOS 14.0, *) {
+            DictusLogger.app.info("Initializing WhisperKit with model: \(modelName)")
+        }
 
         let config = WhisperKitConfig(
             model: modelName,
@@ -197,6 +244,25 @@ class DictationCoordinator: ObservableObject {
         if #available(iOS 14.0, *) {
             DictusLogger.app.info("WhisperKit ready with model: \(modelName)")
         }
+    }
+
+    /// Reads the list of downloaded model identifiers from App Group UserDefaults.
+    ///
+    /// WHY read from App Group instead of holding a ModelManager reference:
+    /// Loose coupling — the coordinator doesn't need to know about ModelManager's
+    /// UI state or lifecycle. It only needs the list of available models, which
+    /// ModelManager persists to the shared App Group. This also means the keyboard
+    /// extension could use the same pattern in the future.
+    private func readDownloadedModels() -> [String] {
+        guard let data = defaults.data(forKey: SharedKeys.downloadedModels),
+              let models = try? JSONDecoder().decode([String].self, from: data) else {
+            // Fallback: if no models stored yet, check for active model
+            if let active = defaults.string(forKey: SharedKeys.activeModel) {
+                return [active]
+            }
+            return []
+        }
+        return models
     }
 
     /// Write dictation status to App Group so the keyboard can observe it.

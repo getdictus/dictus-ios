@@ -1,7 +1,8 @@
 // DictusApp/Audio/TranscriptionService.swift
-// Encapsulates WhisperKit transcription with French language settings.
+// Encapsulates WhisperKit transcription with French language settings and post-processing.
 import Foundation
 import WhisperKit
+import DictusCore
 
 /// Errors that can occur during transcription.
 enum TranscriptionError: Error, LocalizedError {
@@ -26,19 +27,53 @@ enum TranscriptionError: Error, LocalizedError {
 /// WHY this is a separate class from AudioRecorder:
 /// Single Responsibility — AudioRecorder handles recording, TranscriptionService handles
 /// transcription. This also makes it easy to swap or test each independently.
+///
+/// Phase 2.3 additions:
+/// - Supports loading/switching WhisperKit instances for different models
+/// - Applies FillerWordFilter.clean() to remove filler words from output
 class TranscriptionService {
     private var whisperKit: WhisperKit?
+
+    /// The folder path of the currently loaded model, used to detect when
+    /// we need to reinitialize WhisperKit for a different model.
+    private var loadedModelFolder: String?
 
     /// Inject or re-use a WhisperKit instance.
     func prepare(whisperKit: WhisperKit) {
         self.whisperKit = whisperKit
     }
 
+    /// Prepare TranscriptionService with a specific model at a given path.
+    ///
+    /// WHY a separate prepare method for model paths:
+    /// SmartModelRouter may select a different model for each transcription based
+    /// on audio duration. When the selected model differs from the currently loaded
+    /// one, we need to reinitialize WhisperKit with the new model. This method
+    /// handles that switch transparently.
+    func prepare(modelPath: String) async throws {
+        // Skip reinitialization if same model is already loaded
+        if loadedModelFolder == modelPath, whisperKit != nil {
+            return
+        }
+
+        let config = WhisperKitConfig(
+            modelFolder: modelPath,
+            verbose: false,
+            prewarm: true,
+            load: true,
+            download: false
+        )
+
+        let kit = try await WhisperKit(config)
+        self.whisperKit = kit
+        self.loadedModelFolder = modelPath
+    }
+
     /// Transcribe audio samples to text using WhisperKit.
     ///
     /// - Parameter audioSamples: Array of Float32 audio samples at 16 kHz mono
     ///   (as returned by `AudioRecorder.stopRecording()`).
-    /// - Returns: Transcribed text with punctuation (Whisper provides this natively).
+    /// - Returns: Transcribed text with filler words removed and punctuation preserved.
     ///
     /// WHY these DecodingOptions:
     /// - `language: "fr"` — Forces French transcription (no language detection overhead)
@@ -47,8 +82,8 @@ class TranscriptionService {
     /// - `usePrefillCache: true` — Caches prefill results between transcriptions for speed
     /// - `skipSpecialTokens: true` — Removes Whisper's special tokens from output
     ///
-    /// NOTE: No filler word filtering is applied here — that comes in Plan 2.2.
-    /// This method returns raw Whisper output.
+    /// Phase 2.3: FillerWordFilter.clean() is applied to remove filler words
+    /// (euh, hm, bah, um, etc.) from the transcription output before returning.
     func transcribe(audioSamples: [Float]) async throws -> String {
         guard let whisperKit else {
             throw TranscriptionError.notReady
@@ -84,7 +119,13 @@ class TranscriptionService {
                 throw TranscriptionError.transcriptionFailed("Empty transcription result")
             }
 
-            return trimmed
+            // Apply filler word removal (Phase 2.3 integration).
+            // This removes words like "euh", "hm", "um" that are common in spoken French
+            // but unwanted in written text. The filter preserves valid words containing
+            // filler substrings (e.g., "humain" is kept, "hm" is removed).
+            let cleaned = FillerWordFilter.clean(trimmed)
+
+            return cleaned
         } catch let error as TranscriptionError {
             throw error
         } catch {
