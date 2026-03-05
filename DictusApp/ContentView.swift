@@ -3,6 +3,7 @@ import SwiftUI
 import DictusCore
 
 struct ContentView: View {
+    @EnvironmentObject var coordinator: DictationCoordinator
     @State private var diagnosticResult: DiagnosticResult?
 
     var body: some View {
@@ -10,6 +11,21 @@ struct ContentView: View {
             VStack(spacing: 20) {
                 Text("Dictus")
                     .font(.largeTitle.bold())
+
+                // Show dictation state when active
+                if coordinator.status != .idle {
+                    DictationStatusView(status: coordinator.status)
+                }
+
+                if let result = coordinator.lastResult {
+                    Text("Last result: \(result)")
+                        .font(.body)
+                        .padding()
+                        .background(Color(.tertiarySystemBackground))
+                        .cornerRadius(8)
+                }
+
+                Divider()
 
                 if let result = diagnosticResult {
                     DiagnosticView(result: result)
@@ -58,4 +74,5 @@ struct DiagnosticView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(DictationCoordinator.shared)
 }
