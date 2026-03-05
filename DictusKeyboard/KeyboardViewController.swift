@@ -19,6 +19,14 @@ class KeyboardViewController: UIInputViewController {
         }
         #endif
 
+        // Register custom input view to enable system keyboard click sounds.
+        // UIInputViewAudioFeedback must be on a UIView subclass — see InputView.swift.
+        let inputView = KeyboardInputView(
+            frame: CGRect(x: 0, y: 0, width: 0, height: 0)
+        )
+        inputView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(inputView)
+
         let rootView = KeyboardRootView(controller: self)
         let hosting = UIHostingController(rootView: rootView)
 

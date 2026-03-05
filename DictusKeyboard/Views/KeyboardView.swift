@@ -1,5 +1,6 @@
 // DictusKeyboard/Views/KeyboardView.swift
 import SwiftUI
+import UIKit
 import DictusCore
 
 /// The main keyboard view composing all rows and managing layer/shift state.
@@ -69,6 +70,12 @@ struct KeyboardView: View {
     }
 
     private func insertCharacter(_ char: String) {
+        // Play system keyboard click sound when Full Access is enabled.
+        // Requires KeyboardInputView (UIInputViewAudioFeedback) to be in view hierarchy.
+        if hasFullAccess {
+            UIDevice.current.playInputClick()
+        }
+
         controller.textDocumentProxy.insertText(char)
 
         // Auto-unshift after one character (unless caps locked)
