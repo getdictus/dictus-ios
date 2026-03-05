@@ -4,22 +4,53 @@ import DictusCore
 
 struct ContentView: View {
     @EnvironmentObject var coordinator: DictationCoordinator
+    @StateObject private var modelManager = ModelManager()
     @State private var diagnosticResult: DiagnosticResult?
 
     var body: some View {
         ZStack {
-            // Base content: diagnostic view (will be replaced by Model Manager in Plan 2.3)
             NavigationStack {
                 VStack(spacing: 20) {
                     Text("Dictus")
                         .font(.largeTitle.bold())
 
+                    // Show last transcription result when idle
                     if let result = coordinator.lastResult, coordinator.status == .idle {
                         Text("Last result: \(result)")
                             .font(.body)
                             .padding()
                             .background(Color(.tertiarySystemBackground))
                             .cornerRadius(8)
+                    }
+
+                    // Get Started prompt when no model is downloaded yet
+                    // WHY a prominent card instead of just a nav link:
+                    // First-time users need clear guidance. Without a model,
+                    // the app can't transcribe anything. This makes the first
+                    // required action obvious.
+                    if !modelManager.isModelReady {
+                        VStack(spacing: 12) {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .font(.system(size: 40))
+                                .foregroundColor(.accentColor)
+                            Text("Telecharger un modele pour commencer")
+                                .font(.headline)
+                                .multilineTextAlignment(.center)
+                            NavigationLink("Gerer les modeles") {
+                                ModelManagerView(modelManager: modelManager)
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(16)
+                    } else {
+                        // Normal navigation to model manager
+                        NavigationLink {
+                            ModelManagerView(modelManager: modelManager)
+                        } label: {
+                            Label("Modeles", systemImage: "cpu")
+                        }
                     }
 
                     Divider()

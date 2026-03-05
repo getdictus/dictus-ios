@@ -6,7 +6,12 @@ import Foundation
 ///
 /// Each model has a WhisperKit identifier (matching the argmaxinc/whisperkit-coreml
 /// repository naming), a human-readable display name, and labels for size/accuracy/speed.
-public struct ModelInfo {
+public struct ModelInfo: Identifiable {
+    /// Identifiable conformance uses `identifier` as the unique ID.
+    /// WHY Identifiable: SwiftUI's ForEach requires elements to be Identifiable
+    /// so it can efficiently diff and animate list changes.
+    public var id: String { identifier }
+
     public let identifier: String
     public let displayName: String
     public let sizeLabel: String
