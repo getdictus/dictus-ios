@@ -27,6 +27,9 @@
 		AA000036 /* KeyDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100036 /* KeyDefinition.swift */; };
 		AA000037 /* KeyboardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100037 /* KeyboardLayer.swift */; };
 		AA000038 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100038 /* KeyboardLayout.swift */; };
+		AA000040 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100040 /* AudioRecorder.swift */; };
+		AA000041 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100041 /* TranscriptionService.swift */; };
+		AA000042 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA900020 /* WhisperKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +54,8 @@
 		AA100036 /* KeyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyDefinition.swift; sourceTree = "<group>"; };
 		AA100037 /* KeyboardLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayer.swift; sourceTree = "<group>"; };
 		AA100038 /* KeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
+		AA100040 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
+		AA100041 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
 		AA200001 /* DictusApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DictusApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA200002 /* DictusKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -85,6 +90,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA000010 /* DictusCore in Frameworks */,
+				AA000042 /* WhisperKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,10 +122,20 @@
 				AA100002 /* ContentView.swift */,
 				AA100009 /* DictationCoordinator.swift */,
 				AA10000A /* DictationView.swift */,
+				AA400007 /* Audio */,
 				AA100005 /* DictusApp.entitlements */,
 				AA100007 /* Info.plist */,
 			);
 			path = DictusApp;
+			sourceTree = "<group>";
+		};
+		AA400007 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				AA100040 /* AudioRecorder.swift */,
+				AA100041 /* TranscriptionService.swift */,
+			);
+			path = Audio;
 			sourceTree = "<group>";
 		};
 		AA400002 /* DictusKeyboard */ = {
@@ -196,6 +212,7 @@
 			name = DictusApp;
 			packageProductDependencies = (
 				AA900010 /* DictusCore */,
+				AA900020 /* WhisperKit */,
 			);
 			productName = DictusApp;
 			productReference = AA200001 /* DictusApp.app */;
@@ -258,6 +275,7 @@
 			mainGroup = AA400000;
 			packageReferences = (
 				AA800001 /* XCLocalSwiftPackageReference "DictusCore" */,
+				AA800002 /* XCRemoteSwiftPackageReference "WhisperKit" */,
 			);
 			productRefGroup = AA400004 /* Products */;
 			projectDirPath = "";
@@ -295,6 +313,8 @@
 				AA000002 /* ContentView.swift in Sources */,
 				AA000005 /* DictationCoordinator.swift in Sources */,
 				AA000006 /* DictationView.swift in Sources */,
+				AA000040 /* AudioRecorder.swift in Sources */,
+				AA000041 /* TranscriptionService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -562,6 +582,17 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		AA800002 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.16.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		AA900010 /* DictusCore */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -572,6 +603,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AA800001 /* XCLocalSwiftPackageReference "DictusCore" */;
 			productName = DictusCore;
+		};
+		AA900020 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA800002 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
