@@ -45,4 +45,6 @@ Thumbs.db
 
 # Whisper models (downloaded at runtime, too large for git)
 *.mlmodelc
-Models/
+# Only ignore top-level Models/ directory (downloaded Whisper model files)
+# DictusKeyboard/Models/ contains Swift source files and must be tracked
+/Models/
