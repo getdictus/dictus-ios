@@ -15,10 +15,22 @@ struct RecordingOverlay: View {
     let onCancel: () -> Void
     let onStop: () -> Void
 
+    /// Adaptive foreground color — dark on light keyboard, light on dark keyboard.
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var foregroundColor: Color {
+        colorScheme == .dark ? .white : Color(white: 0.15)
+    }
+
+    private var secondaryForeground: Color {
+        colorScheme == .dark ? Color.white.opacity(0.5) : Color(white: 0.15).opacity(0.5)
+    }
+
     var body: some View {
         ZStack {
-            // Dark immersive background
-            Color.black.opacity(0.95)
+            // Transparent background — the native iOS keyboard chrome shows through.
+            // No dark rectangle, the overlay blends seamlessly with the keyboard.
+            Color.clear
 
             if isTranscribing {
                 transcribingContent
@@ -37,7 +49,7 @@ struct RecordingOverlay: View {
                 Button(action: onCancel) {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 28))
-                        .foregroundColor(Color.white.opacity(0.7))
+                        .foregroundColor(secondaryForeground)
                 }
 
                 Spacer()
@@ -45,7 +57,7 @@ struct RecordingOverlay: View {
                 Button(action: onStop) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 28))
-                        .foregroundColor(.white)
+                        .foregroundColor(foregroundColor)
                 }
             }
             .padding(.horizontal, 16)
@@ -54,19 +66,19 @@ struct RecordingOverlay: View {
             Spacer()
 
             // Waveform visualization
-            KeyboardWaveformView(energy: waveformEnergy)
+            KeyboardWaveformView(energy: waveformEnergy, colorScheme: colorScheme)
                 .frame(height: 60)
                 .padding(.horizontal, 20)
 
             // Timer in MM:SS format
             Text(formattedTime)
                 .font(.system(size: 20, weight: .medium, design: .monospaced))
-                .foregroundColor(.white)
+                .foregroundColor(foregroundColor)
 
             // Status label
             Text("Listening...")
                 .font(.system(size: 14))
-                .foregroundColor(Color.white.opacity(0.5))
+                .foregroundColor(secondaryForeground)
 
             Spacer()
         }
@@ -79,12 +91,12 @@ struct RecordingOverlay: View {
             Spacer()
 
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                .progressViewStyle(CircularProgressViewStyle(tint: foregroundColor))
                 .scaleEffect(1.2)
 
             Text("Processing...")
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.white)
+                .foregroundColor(foregroundColor)
 
             Spacer()
         }
@@ -109,9 +121,15 @@ struct RecordingOverlay: View {
 /// This is a self-contained waveform optimized for the smaller keyboard area.
 private struct KeyboardWaveformView: View {
     let energy: [Float]
+    let colorScheme: ColorScheme
 
     /// Number of bars to display
     private let barCount = 30
+
+    /// Bar color adapts to keyboard theme — dark bars on light keyboard, light bars on dark.
+    private var barColor: Color {
+        colorScheme == .dark ? .white : Color(white: 0.2)
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -119,7 +137,7 @@ private struct KeyboardWaveformView: View {
                 ForEach(0..<barCount, id: \.self) { index in
                     let value = energyValue(at: index)
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(Color.white.opacity(Double(0.3 + value * 0.7)))
+                        .fill(barColor.opacity(Double(0.3 + value * 0.7)))
                         .frame(width: barWidth(in: geometry), height: barHeight(value, in: geometry))
                         .frame(height: geometry.size.height, alignment: .center)
                         .animation(.easeOut(duration: 0.15), value: value)

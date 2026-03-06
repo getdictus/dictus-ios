@@ -61,7 +61,11 @@ struct KeyboardRootView: View {
                 )
             }
         }
-        .background(Color(.secondarySystemBackground))
+        // WHY .clear: The native iOS keyboard container already provides a
+        // blurred background. Using secondarySystemBackground created visible
+        // gray bands at the top and bottom that didn't match the native chrome.
+        // Transparent background lets the native keyboard styling show through.
+        .background(Color.clear)
         .onAppear {
             // Provide controller reference to KeyboardState for auto-insert.
             // WHY here and not in init: KeyboardState is created by @StateObject

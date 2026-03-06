@@ -39,7 +39,13 @@ class DictationCoordinator: ObservableObject {
     private var whisperKit: WhisperKit?
     private var currentModelName: String?
     private var dictationTask: Task<Void, Never>?
-    private var isInitializing = false
+
+    /// Task that resolves when WhisperKit is fully loaded.
+    /// WHY: Both init() pre-load and startDictation() call ensureWhisperKitReady().
+    /// If startDictation() arrives while pre-load is still running, it must AWAIT
+    /// the ongoing init instead of starting a duplicate one. This Task acts as
+    /// a concurrency lock — the first caller creates it, subsequent callers await it.
+    private var initTask: Task<Void, Error>?
 
     /// Timestamp of last waveform write to App Group.
     /// Used to throttle writes to ~5Hz (every 200ms) to avoid overwhelming UserDefaults
@@ -106,9 +112,10 @@ class DictationCoordinator: ObservableObject {
     /// Start the recording pipeline.
     /// Called from URL scheme (first time) or Darwin notification (subsequent times).
     func startDictation() {
-        // Guard against duplicate URL calls — iOS can fire dictus://dictate twice.
-        // If we're already recording or initializing, ignore the duplicate.
-        guard status == .idle || status == .failed else {
+        // Guard against duplicate calls while actively recording or transcribing.
+        // Allow .ready (previous transcription just finished) and .idle — both are valid
+        // states to start a new recording from.
+        guard status == .idle || status == .failed || status == .ready else {
             if #available(iOS 14.0, *) {
                 DictusLogger.app.info("Ignoring duplicate startDictation — already \(self.status.rawValue)")
             }
@@ -364,28 +371,50 @@ class DictationCoordinator: ObservableObject {
             return
         }
 
-        if #available(iOS 14.0, *) {
-            DictusLogger.app.info("Initializing WhisperKit with model: \(modelName)")
+        // If an init is already in progress (e.g., pre-load from init()),
+        // await it instead of starting a duplicate initialization.
+        if let existingTask = initTask {
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.info("WhisperKit init already in progress — awaiting existing task")
+            }
+            try await existingTask.value
+            return
         }
 
-        let config = WhisperKitConfig(
-            model: modelName,
-            verbose: false,
-            prewarm: true,
-            load: true,
-            download: true
-        )
+        // Create and store the init task so concurrent callers can await it
+        let task = Task<Void, Error> {
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.info("Initializing WhisperKit with model: \(modelName)")
+            }
 
-        let kit = try await WhisperKit(config)
-        self.whisperKit = kit
-        self.currentModelName = modelName
+            let config = WhisperKitConfig(
+                model: modelName,
+                verbose: false,
+                prewarm: true,
+                load: true,
+                download: true
+            )
 
-        // Share the instance with AudioRecorder and TranscriptionService
-        audioRecorder.prepare(whisperKit: kit)
-        transcriptionService.prepare(whisperKit: kit)
+            let kit = try await WhisperKit(config)
+            self.whisperKit = kit
+            self.currentModelName = modelName
 
-        if #available(iOS 14.0, *) {
-            DictusLogger.app.info("WhisperKit ready with model: \(modelName)")
+            // Share the instance with AudioRecorder and TranscriptionService
+            audioRecorder.prepare(whisperKit: kit)
+            transcriptionService.prepare(whisperKit: kit)
+
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.info("WhisperKit ready with model: \(modelName)")
+            }
+        }
+        initTask = task
+
+        do {
+            try await task.value
+            initTask = nil
+        } catch {
+            initTask = nil
+            throw error
         }
     }
 

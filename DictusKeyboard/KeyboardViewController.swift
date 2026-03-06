@@ -7,6 +7,12 @@ class KeyboardViewController: UIInputViewController {
 
     private var hostingController: UIHostingController<KeyboardRootView>?
 
+    /// Explicit height constraint on inputView to prevent layout issues after app switch.
+    /// WHY: Without this, iOS may not recalculate the keyboard height correctly when the
+    /// extension is brought back to foreground after a URL scheme app switch. The system
+    /// keyboard row (globe, mic) bleeds through and the recording overlay gets compressed.
+    private var heightConstraint: NSLayoutConstraint?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -51,13 +57,41 @@ class KeyboardViewController: UIInputViewController {
             hosting.view.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor)
         ])
 
+        // Set explicit height constraint on inputView.
+        // This tells iOS exactly how tall our keyboard should be, preventing
+        // the system from guessing wrong after app transitions.
+        let height = self.computeKeyboardHeight()
+        let constraint = kbInputView.heightAnchor.constraint(equalToConstant: height)
+        constraint.priority = .defaultHigh  // don't fight iOS if it needs to adjust
+        constraint.isActive = true
+        self.heightConstraint = constraint
+
         // Assign as the controller's inputView — this activates audio feedback
         self.inputView = kbInputView
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Force height recalculation when keyboard reappears (e.g., after app switch).
+        // Without this, the inputView may retain a stale height from before the switch.
+        heightConstraint?.constant = computeKeyboardHeight()
+        inputView?.setNeedsLayout()
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         // Darwin observers cleaned up by KeyboardState deinit
+    }
+
+    /// Calculate the total keyboard height including toolbar.
+    /// Must match the height computed in KeyboardRootView/KeyboardView.
+    private func computeKeyboardHeight() -> CGFloat {
+        let rows: CGFloat = 4
+        let keyHeight: CGFloat = 42     // KeyMetrics.keyHeight
+        let rowSpacing: CGFloat = 6     // KeyMetrics.rowSpacing
+        let verticalPadding: CGFloat = 8
+        let toolbarHeight: CGFloat = 44 // ToolbarView approximate height
+        return (rows * keyHeight) + ((rows - 1) * rowSpacing) + verticalPadding + toolbarHeight
     }
 
     override func textDidChange(_ textInput: UITextInput?) {
