@@ -43,9 +43,9 @@ struct MainTabView: View {
                 }
                 .tag(1)
 
-                // Tab 2: Settings (placeholder — built in Plan 04-02)
+                // Tab 2: Settings
                 NavigationStack {
-                    settingsPlaceholder
+                    SettingsView()
                 }
                 .tabItem {
                     Label("Reglages", systemImage: "gearshape.fill")
@@ -68,24 +68,6 @@ struct MainTabView: View {
                     .ignoresSafeArea()
             }
         }
-    }
-
-    // MARK: - Settings Placeholder
-
-    /// Temporary placeholder for Settings tab.
-    /// Will be replaced by SettingsView in Plan 04-02.
-    private var settingsPlaceholder: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "gearshape.fill")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-            Text("Reglages")
-                .font(.dictusHeading)
-            Text("Bientot disponible")
-                .font(.dictusBody)
-                .foregroundColor(.secondary)
-        }
-        .navigationTitle("Reglages")
     }
 }
 
