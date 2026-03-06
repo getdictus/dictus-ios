@@ -5,13 +5,15 @@ import DictusCore
 /// Toolbar displayed above the keyboard with app shortcut and mic button.
 /// Inspired by Wispr Flow — the mic button is the primary dictation trigger.
 ///
-/// WHY Link instead of Button:
-/// Keyboard extensions cannot access UIApplication.shared, so opening a URL scheme
-/// requires using SwiftUI's Link(destination:) which bypasses UIApplication entirely.
-/// This is the only way to open DictusApp from within the keyboard extension.
+/// WHY onMicTap callback:
+/// The mic button calls back to KeyboardState.startRecording(), which sets local
+/// state to .requested (triggering the recording overlay) and then opens DictusApp
+/// via URL scheme to begin the actual recording. This replaces the Phase 2 Link
+/// approach that opened the app without showing any in-keyboard UI.
 struct ToolbarView: View {
     let hasFullAccess: Bool
     let dictationStatus: DictationStatus
+    var onMicTap: () -> Void
 
     var body: some View {
         HStack {
@@ -51,8 +53,8 @@ struct ToolbarView: View {
         } else {
             switch dictationStatus {
             case .idle, .ready, .failed:
-                // Idle: subtle mic icon that opens DictusApp via URL scheme
-                Link(destination: URL(string: "dictus://dictate")!) {
+                // Idle: subtle mic icon triggers in-keyboard recording flow
+                Button(action: onMicTap) {
                     micIcon(color: Color(.systemGray), background: Color(.systemGray5))
                 }
 

@@ -25,6 +25,13 @@ class KeyboardState: ObservableObject {
     /// a retain cycle: controller -> view -> state -> controller.
     weak var controller: UIInputViewController?
 
+    /// Closure to open a URL from the keyboard extension.
+    /// WHY a closure: KeyboardState is not a SwiftUI View, so it cannot use
+    /// @Environment(\.openURL). KeyboardRootView captures its own openURL
+    /// environment action and injects it here via .onAppear — same pattern
+    /// as the controller reference above.
+    var openURL: ((URL) -> Void)?
+
     private let defaults = AppGroup.defaults
 
     init() {
@@ -169,8 +176,21 @@ class KeyboardState: ObservableObject {
         }
     }
 
+    /// Start recording: set local state to .requested, then open DictusApp to begin recording.
+    ///
+    /// WHY the keyboard opens a URL instead of recording directly:
+    /// WhisperKit requires loading ML models (~50-200MB) which exceeds the keyboard
+    /// extension's ~50MB memory limit. The actual recording runs in DictusApp.
+    /// The difference from Phase 2: the keyboard now controls the flow by setting
+    /// local state FIRST (so the recording overlay appears immediately), then
+    /// signaling the app. Previously a Link opened the app and the user stayed there.
+    func startRecording() {
+        markRequested()
+        // Safe to force-unwrap: compile-time literal, always valid URL
+        openURL?(URL(string: "dictus://dictate")!)
+    }
+
     /// Write "requested" status to App Group before triggering URL.
-    /// Called just before the Link opens dictus://dictate.
     func markRequested() {
         defaults.set(DictationStatus.requested.rawValue, forKey: SharedKeys.dictationStatus)
         defaults.synchronize()
