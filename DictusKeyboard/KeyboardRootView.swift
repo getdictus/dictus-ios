@@ -14,6 +14,12 @@ struct KeyboardRootView: View {
     let controller: UIInputViewController
     @StateObject private var state = KeyboardState()
 
+    /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
+    /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
+    /// openURL environment action works because it goes through the responder
+    /// chain. We capture it here and inject it into KeyboardState via .onAppear.
+    @Environment(\.openURL) private var openURL
+
     /// Standard keyboard height for 4 rows of keys.
     /// Used by both KeyboardView and RecordingOverlay to ensure identical heights,
     /// preventing jarring resize when switching between them.
@@ -34,7 +40,8 @@ struct KeyboardRootView: View {
             // Toolbar always visible: gear icon (left) + mic button (right)
             ToolbarView(
                 hasFullAccess: controller.hasFullAccess,
-                dictationStatus: state.dictationStatus
+                dictationStatus: state.dictationStatus,
+                onMicTap: { state.startRecording() }
             )
 
             // Conditional: normal keyboard OR recording overlay
@@ -61,6 +68,7 @@ struct KeyboardRootView: View {
             // before the view body runs. The controller is only available as a
             // View property, so we pass it on first appearance.
             state.controller = controller
+            state.openURL = { url in openURL(url) }
         }
     }
 }
