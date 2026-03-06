@@ -67,50 +67,63 @@ Task {
 
 ---
 
-## Remaining Issues (for next session)
+## Fixed Issues (commit 970d9cf)
 
-### BUG 1: First launch still slow (4-5s) despite pre-load
-**Severity:** High
-**Description:** When app is force-closed and user taps mic in keyboard, the URL opens Dictus but it takes 4-5 seconds before recording starts. Pre-load happens in `init()` but if app was killed, init + WhisperKit load takes time.
-**Possible causes:**
-- WhisperKit model loading (small model = ~4-5s, tiny = ~1s)
-- The pre-load runs in `init()` but `startDictation()` from URL may arrive before pre-load completes
+### ~~BUG 1~~ FIXED: WhisperKit init race condition
+**Fix:** Replaced unused `isInitializing` flag with `initTask: Task<Void, Error>?`. Concurrent callers now await the ongoing init instead of starting a duplicate one.
+
+### ~~BUG 2~~ FIXED: First recording via URL sometimes fails
+**Fix:** Same initTask fix as BUG 1 — `startDictation()` awaits in-progress pre-load.
+
+### ~~BUG 2b~~ FIXED: Second recording rejected ("already ready")
+**Fix:** Guard in `startDictation()` now accepts `.ready` status (was only `.idle` and `.failed`). The 2-second checkmark flash no longer blocks a new recording.
+
+### ~~BUG 3~~ FIXED: Recording overlay height after app switch
+**Fix:** Added explicit height constraint on inputView + `viewWillAppear` layout refresh.
+
+### ~~BUG 4~~ FIXED: Recording overlay visual issues
+**Fix:** Overlay background is now `Color.clear` (native keyboard chrome shows through). All text/waveform colors adapt to light/dark mode via `@Environment(\.colorScheme)`.
+
+---
+
+## Remaining Issues
+
+### ISSUE 1: Cold start — app opens but no feedback + no auto-return
+**Severity:** High (UX)
+**When:** User taps mic in keyboard, app is NOT running (force-closed or killed by iOS).
+**What happens:**
+1. Keyboard opens DictusApp via URL scheme (`dictus://dictate`)
+2. App opens on its main screen (settings/home) — no loading indicator
+3. WhisperKit loads in background (3-5s depending on model)
+4. Recording starts silently — user doesn't know it's happening
+5. User must manually tap "◄ Back" in status bar to return to keyboard
+
+**Two sub-problems:**
+
+#### 1a. Auto-return to previous app
+Super Whisper and Wispr Flow both return the user to the previous app automatically after opening. Need to research how they achieve this.
 **Ideas to investigate:**
-- Check if `ensureWhisperKitReady()` in `startDictation()` waits properly for ongoing init
-- Consider showing a minimal "loading" UI in the app during first launch
-- Check `isInitializing` flag — there's a race between pre-load Task and URL handler Task
-- Other dictation apps (Wispr Flow, Super Whisper) may use smaller models or pre-compiled CoreML
-- Consider using `tiny` model for first recording, switch to user's preferred model after
+- `NSExtensionContext.completeRequest()` or similar API
+- Private API that Super Whisper/Wispr Flow might use (risk of App Store rejection)
+- `UIApplication.shared.perform(#selector(NSXPCConnection.suspend))` — we tried this, it goes to Home Screen instead
+- Observing `UIScene.didEnterBackgroundNotification` and using that as trigger
+- Check if there's a way to immediately dismiss via `openURL` back to the host app
+- Reverse-engineer Super Whisper's approach (check their entitlements, background modes)
 
-### BUG 2: First recording via URL sometimes fails / needs retry
-**Severity:** High
-**Description:** The first transcription after app opens often fails. User has to retry.
-**Likely cause:** Race condition between pre-load Task and URL-triggered `startDictation()`. Both call `ensureWhisperKitReady()`. The `isInitializing` flag exists but may not be properly guarded.
-**Where to look:** `DictationCoordinator.startDictation()` and `ensureWhisperKitReady()` — need to handle concurrent calls properly (await the ongoing init instead of starting a new one).
+#### 1b. Loading/feedback screen when app opens from keyboard
+If auto-return can't be solved, the UX needs improvement:
+- **In-app:** Show a dedicated "loading" screen when opened via `dictus://dictate` — progress indicator + "WhisperKit is loading..." message + "You can return to your keyboard" instruction
+- **In-keyboard:** Before opening URL, show a brief message like "Opening Dictus... Please return here after" so the user knows what to expect
+- **After recording starts:** Show "Recording in progress — tap ◄ Back to return to your keyboard"
 
-### BUG 3: Recording overlay not taking full keyboard height (intermittent)
-**Severity:** Medium
-**Description:** After returning from Dictus app (first launch), the recording overlay doesn't fill the full keyboard area. The toolbar icons (X and checkmark) are compressed/cut off at the top. The globe and mic icons from the system keyboard row are visible at the bottom.
-**When it happens:** Only after the first app switch (URL opens Dictus, user returns). Switching keyboards and coming back fixes it.
-**Likely cause:** When the keyboard extension is brought back to foreground after an app switch, the `inputView` height may not be properly recalculated. The `keyboardHeight` computed property uses fixed values that may not account for the keyboard's actual available height after an app transition.
-**Where to look:**
-- `KeyboardRootView.swift` — `keyboardHeight` calculation
-- `KeyboardViewController.swift` — `viewWillAppear` / `viewDidAppear` height updates
-- Consider using `GeometryReader` instead of fixed height calculation
-- Consider calling `self.inputView?.needsUpdateConstraints()` or similar on view reappear
+**Priority:** Research auto-return first (1a). If not feasible, implement the loading/feedback UX (1b) as a fallback.
 
-### BUG 4: Light mode — black recording overlay looks bad
-**Severity:** Medium (visual/design)
-**Description:** Recording overlay uses `Color.black.opacity(0.95)` background which looks jarring in light mode. Should adapt to system appearance.
-**Where to fix:** `RecordingOverlay.swift` line 21 — use `Color(.systemBackground)` or a dynamic color.
-**Note:** General design polish (colors, branding, logo) is planned for a later phase. Pierre mentioned he hasn't done the design system yet.
-
-### BUG 5: Engine start fails from background on cold start
+### ISSUE 2: Engine start fails from background on cold start
 **Severity:** Low (mitigated by warm-up)
 **Description:** If the app was in background but engine was NOT running (cold), `startRecordingLive()` fails with `AUIOClient_StartIO failed (2003329396)`. iOS doesn't allow starting audio IO from background.
 **Current mitigation:** `warmUp()` starts the engine at launch. As long as the app isn't killed, the engine stays warm.
 **Edge case:** If iOS kills the app in background due to memory pressure, the engine dies. Next keyboard tap will trigger URL fallback (which opens app → foreground → can start engine).
-**The URL fallback path works but is slow** (see BUG 1).
+**The URL fallback path works but UX is poor** (see ISSUE 1).
 
 ---
 

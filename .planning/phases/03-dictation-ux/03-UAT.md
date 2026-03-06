@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 03-dictation-ux
 source: [03-01-SUMMARY.md, 03-02-SUMMARY.md, 03-03-SUMMARY.md]
 started: 2026-03-06T11:30:00Z
-updated: 2026-03-06T11:45:00Z
+updated: 2026-03-06T11:50:00Z
 ---
 
 ## Current Test
@@ -56,17 +56,27 @@ skipped: 1
   reason: "User reported: Mic button opens Dictus app instead of showing recording overlay in keyboard. Recording happens in the app, not in the keyboard extension."
   severity: blocker
   test: 2
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "ToolbarView.swift line 55 uses Link(destination: 'dictus://dictate') — the Phase 2 URL-scheme flow. Opens main app instead of triggering local recording state. KeyboardState has no startRecording() method."
+  artifacts:
+    - path: "DictusKeyboard/Views/ToolbarView.swift"
+      issue: "Line 55: Link opens app via URL scheme instead of Button triggering local recording"
+    - path: "DictusKeyboard/KeyboardState.swift"
+      issue: "No startRecording() method — only observes app state, cannot initiate recording locally"
+  missing:
+    - "Replace Link with Button calling onMicTap callback in ToolbarView"
+    - "Add startRecording() method to KeyboardState that sets dictationStatus = .recording"
+    - "Wire onMicTap from KeyboardRootView to state.startRecording()"
+  debug_session: ".planning/debug/mic-button-opens-app.md"
 
 - truth: "Stop recording auto-inserts transcribed text into active text field via textDocumentProxy"
   status: failed
   reason: "User reported: Blocked by test 2. Recording/transcription works in app but no auto-insert into keyboard text field since recording is not happening in keyboard context."
   severity: blocker
   test: 3
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Same root cause as test 2. Recording never happens in keyboard extension context, so textDocumentProxy auto-insert path is never reached. Once test 2 fix enables in-keyboard recording, the existing auto-insert code in KeyboardState should work."
+  artifacts:
+    - path: "DictusKeyboard/KeyboardState.swift"
+      issue: "Auto-insert code exists but is unreachable because recording never starts in keyboard"
+  missing:
+    - "Fix test 2 (mic button) — auto-insert should work once recording happens in-keyboard"
+  debug_session: ".planning/debug/mic-button-opens-app.md"
