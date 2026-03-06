@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 03-04
+current_plan: 04-01
 status: executing
-last_updated: "2026-03-06T11:41:26Z"
+last_updated: "2026-03-06T22:11:21Z"
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 12
 ---
 
 # Project State: Dictus
@@ -20,10 +20,10 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 **Current focus:** Phase 3 (Dictation UX)
 
 ## Current Phase
-Phase: 3
+Phase: 4
 Status: In Progress
-Plans completed: 3/4
-Current plan: 03-04
+Plans completed: 1/3
+Current plan: 04-02
 
 ## Phase History
 
@@ -123,7 +123,25 @@ Current plan: 03-04
 - KeyboardRootView wires @Environment(\.openURL) to KeyboardState and passes onMicTap to ToolbarView
 - Fixes UAT blockers 2 and 3: mic button now triggers in-keyboard recording overlay instead of opening DictusApp
 
+### Plan 4.1: Design System + TabView Restructure — COMPLETED (2026-03-06)
+- Design system: GlassModifier (iOS 26 Liquid Glass + fallback), DictusColors (adaptive light/dark with hex init), BrandWaveform (3-bar logo), AnimatedMicButton (4 states), DictusTypography (SF Pro Rounded)
+- App restructured from NavigationStack to 3-tab TabView (Home, Models, Settings placeholder)
+- HomeView dashboard with brand waveform, model status card, transcription preview, test dictation link
+- RecordingView overlay covers entire screen including tab bar via ZStack
+- 4 new SharedKeys (language, hapticsEnabled, fillerWordsEnabled, hasCompletedOnboarding) with 6 unit tests (52 total)
+- Onboarding gate placeholder in DictusApp.swift with fullScreenCover
+- DiagnosticView extracted to DiagnosticDetailView for Settings reuse
+
 ## Key Decisions
+
+### Color(hex:) over Asset Catalog
+Used Color(hex:UInt) initializer instead of Asset Catalog ColorSets because DictusApp has no .xcassets directory. Hex init provides compile-time validation of color values. Adaptive light/dark colors use UIColor dynamicProvider bridge since SwiftUI Color lacks a built-in light/dark initializer on iOS 16.
+
+### dictusGlass() modifier pattern
+Centralized glass effect modifier: `.dictusGlass()` applies `.glassEffect(.regular)` on iOS 26+ and `.regularMaterial` on iOS 16-25. Every glass surface in the app calls this one modifier, so the iOS 26 upgrade is automatic.
+
+### hasCompletedOnboarding defaults to true during dev
+Set to true so the app is immediately usable without onboarding. Plan 04-02 will flip to false and build the real OnboardingView.
 
 ### DarwinNotifications C callback
 Module-level registry (`_darwinCallbacks: [String: () -> Void]`) protected by `NSLock`, exposed via a `let _darwinCallback: CFNotificationCallback` constant. This is the required pattern — `CFNotificationCenterAddObserver` takes a C function pointer that cannot capture Swift context.
@@ -237,3 +255,6 @@ KeyboardState holds `weak var controller: UIInputViewController?` set via `.onAp
 *Plan 3.1 completed: 2026-03-06*
 *Plan 3.2 completed: 2026-03-06*
 *Plan 3.3 completed: 2026-03-06*
+*Plan 3.4 completed: 2026-03-06*
+*Phase 3 completed: 2026-03-06*
+*Plan 4.1 completed: 2026-03-06*

@@ -72,7 +72,7 @@
 - [x] 03-01-PLAN.md — DictusCore contracts (SharedKeys, Darwin notifications, QWERTY layout data, accented character mappings, haptic helper), DictationCoordinator wired for keyboard stop/cancel signals and waveform forwarding *(completed 2026-03-06)*
 - [x] 03-02-PLAN.md — Wispr Flow-inspired keyboard recording UX (ToolbarView with mic button, RecordingOverlay replacing keyboard, auto-insert via textDocumentProxy, haptic feedback, mic button states) *(completed 2026-03-06)*
 - [x] 03-03-PLAN.md — QWERTY layout switching in keyboard, accented character long-press popup on AZERTY, in-app TestDictationView *(completed 2026-03-06)*
-- [ ] 03-04-PLAN.md — UAT gap closure: replace Link with Button in ToolbarView mic button, add startRecording() to KeyboardState, wire callback through KeyboardRootView
+- [x] 03-04-PLAN.md — UAT gap closure: replace Link with Button in ToolbarView mic button, add startRecording() to KeyboardState, wire callback through KeyboardRootView *(completed 2026-03-06)*
 
 ---
 
@@ -82,7 +82,7 @@
 
 **Requirements:** APP-01, APP-03, KBD-06, DSN-01, DSN-02, DSN-03, DSN-04
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans complete
 
 ### Success Criteria
 1. A first-time user who has never installed a third-party keyboard reaches their first successful dictation solely by following the onboarding flow — no external documentation needed
@@ -93,7 +93,7 @@
 6. Light and dark mode render correctly without any hardcoded colors
 
 ### Plans
-- [ ] 04-01-PLAN.md — SharedKeys extensions (language, haptics, fillerWords, hasCompletedOnboarding), Design system components (GlassModifier, DictusColors, BrandWaveform, AnimatedMicButton, DictusTypography), app restructure into TabView with Home/Models/Settings tabs
+- [x] 04-01-PLAN.md — SharedKeys extensions (language, haptics, fillerWords, hasCompletedOnboarding), Design system components (GlassModifier, DictusColors, BrandWaveform, AnimatedMicButton, DictusTypography), app restructure into TabView with Home/Models/Settings tabs *(completed 2026-03-06)*
 - [ ] 04-02-PLAN.md — 5-step onboarding flow (welcome, mic permission, keyboard+Full Access, model download, test transcription), Settings screen with 3 sections (Transcription, Clavier, A propos)
 - [ ] 04-03-PLAN.md — Design system pass: glass effect on all app + keyboard surfaces, BrandWaveform replacing old waveforms, AnimatedMicButton in keyboard toolbar, Dynamic Type audit, light/dark mode audit
 

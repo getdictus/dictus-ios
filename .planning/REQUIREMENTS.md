@@ -43,10 +43,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Design
 
-- [ ] **DSN-01**: All UI surfaces use iOS 26 Liquid Glass material (.glassEffect)
-- [ ] **DSN-02**: Mic button has animated states (idle glow, recording pulse, transcribing shimmer)
-- [ ] **DSN-03**: Light and dark mode supported automatically
-- [ ] **DSN-04**: SF Pro Rounded for headings, SF Pro Text for body, Dynamic Type throughout
+- [x] **DSN-01**: All UI surfaces use iOS 26 Liquid Glass material (.glassEffect)
+- [x] **DSN-02**: Mic button has animated states (idle glow, recording pulse, transcribing shimmer)
+- [x] **DSN-03**: Light and dark mode supported automatically
+- [x] **DSN-04**: SF Pro Rounded for headings, SF Pro Text for body, Dynamic Type throughout
 
 ## v2 Requirements
 
@@ -117,10 +117,10 @@ Deferred to future release. Tracked but not in current roadmap.
 | APP-01 | Phase 4: Main App, Onboarding, and Polish | Not Started |
 | APP-03 | Phase 4: Main App, Onboarding, and Polish | Not Started |
 | KBD-06 | Phase 4: Main App, Onboarding, and Polish | Not Started |
-| DSN-01 | Phase 4: Main App, Onboarding, and Polish | Not Started |
-| DSN-02 | Phase 4: Main App, Onboarding, and Polish | Not Started |
-| DSN-03 | Phase 4: Main App, Onboarding, and Polish | Not Started |
-| DSN-04 | Phase 4: Main App, Onboarding, and Polish | Not Started |
+| DSN-01 | Phase 4: Main App, Onboarding, and Polish | Complete |
+| DSN-02 | Phase 4: Main App, Onboarding, and Polish | Complete |
+| DSN-03 | Phase 4: Main App, Onboarding, and Polish | Complete |
+| DSN-04 | Phase 4: Main App, Onboarding, and Polish | Complete |
 
 **Coverage:**
 - v1 requirements: 22 total
@@ -129,4 +129,4 @@ Deferred to future release. Tracked but not in current roadmap.
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-06 after Plan 04-01 completion (DSN-01 through DSN-04)*
