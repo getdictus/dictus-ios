@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 04-01
+current_plan: 04-03
 status: executing
-last_updated: "2026-03-06T22:11:21Z"
+last_updated: "2026-03-06T22:23:28Z"
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State: Dictus
@@ -22,8 +22,8 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Phase
 Phase: 4
 Status: In Progress
-Plans completed: 1/3
-Current plan: 04-02
+Plans completed: 2/3
+Current plan: 04-03
 
 ## Phase History
 
@@ -132,7 +132,27 @@ Current plan: 04-02
 - Onboarding gate placeholder in DictusApp.swift with fullScreenCover
 - DiagnosticView extracted to DiagnosticDetailView for Settings reuse
 
+### Plan 4.2: Onboarding Flow & Settings Screen — COMPLETED (2026-03-06)
+- 5-step onboarding flow: welcome, mic permission, keyboard setup, model download, test recording
+- OnboardingView as paged TabView with non-dismissible fullScreenCover
+- Mic permission page doesn't block on denial (user can grant later)
+- Keyboard setup page: Settings deep-link + auto-detection + manual fallback button
+- Model download page: pre-selects whisper-small, shows progress via ModelManager
+- Test recording page: validates pipeline end-to-end with live transcription
+- SettingsView: 3 sections (Transcription, Clavier, A propos) with @AppStorage via App Group
+- LicensesView: MIT attribution for WhisperKit and Dictus
+- hasCompletedOnboarding default changed from true to false
+
 ## Key Decisions
+
+### Don't block onboarding on mic denial
+Apple HIG and research best practices recommend against blocking progress on permission denial. The user can still set up the keyboard and download a model without mic access. They can grant mic permission later from iOS Settings.
+
+### Manual keyboard detection fallback
+UITextInputMode.activeInputModes is unreliable for detecting keyboard installation -- it may not update immediately. A manual "J'ai ajoute le clavier" button is always visible as a reliable fallback path.
+
+### Pre-select whisper-small for onboarding
+The "small" model offers the best accuracy/speed balance for most modern iPhones (A12+). Users can change models later in the Models tab. The onboarding gets users started with quality transcription.
 
 ### Color(hex:) over Asset Catalog
 Used Color(hex:UInt) initializer instead of Asset Catalog ColorSets because DictusApp has no .xcassets directory. Hex init provides compile-time validation of color values. Adaptive light/dark colors use UIColor dynamicProvider bridge since SwiftUI Color lacks a built-in light/dark initializer on iOS 16.
@@ -258,3 +278,4 @@ KeyboardState holds `weak var controller: UIInputViewController?` set via `.onAp
 *Plan 3.4 completed: 2026-03-06*
 *Phase 3 completed: 2026-03-06*
 *Plan 4.1 completed: 2026-03-06*
+*Plan 4.2 completed: 2026-03-06*
