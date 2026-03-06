@@ -36,6 +36,7 @@
 		AA000060 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100060 /* ToolbarView.swift */; };
 		AA000061 /* RecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100061 /* RecordingOverlay.swift */; };
 		AA000070 /* AccentPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100070 /* AccentPopup.swift */; };
+		AA000071 /* TestDictationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100071 /* TestDictationView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +71,7 @@
 		AA200001 /* DictusApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DictusApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA200002 /* DictusKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA100070 /* AccentPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccentPopup.swift; sourceTree = "<group>"; };
+		AA100071 /* TestDictationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDictationView.swift; sourceTree = "<group>"; };
 	/* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -157,6 +159,7 @@
 			children = (
 				AA100043 /* RecordingView.swift */,
 				AA100051 /* ModelManagerView.swift */,
+				AA100071 /* TestDictationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";

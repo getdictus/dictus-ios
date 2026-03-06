@@ -51,6 +51,16 @@ struct ContentView: View {
                         } label: {
                             Label("Modeles", systemImage: "cpu")
                         }
+
+                        // Test dictation screen — only shown when a model is ready.
+                        // WHY gated on modelReady:
+                        // Without a downloaded model, transcription will fail. Showing the
+                        // link only when ready prevents confusion and wasted time.
+                        NavigationLink {
+                            TestDictationView()
+                        } label: {
+                            Label("Tester la dictee", systemImage: "waveform")
+                        }
                     }
 
                     Divider()
