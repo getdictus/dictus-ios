@@ -159,6 +159,11 @@ class ModelManager: ObservableObject {
             modelStates[identifier] = .error(error.localizedDescription)
             downloadProgress.removeValue(forKey: identifier)
 
+            // Clean up partially downloaded/corrupted model files so retry starts fresh.
+            // ANE compilation failures (E5 bundle errors) leave behind unusable cached files
+            // that prevent re-download from working correctly.
+            cleanupModelFiles(identifier)
+
             if #available(iOS 14.0, *) {
                 DictusLogger.app.error("Model download/prewarm failed: \(error.localizedDescription)")
             }
@@ -192,12 +197,15 @@ class ModelManager: ObservableObject {
             }
         }
 
-        // Also try to remove from WhisperKit's default download location
-        // (WhisperKit.download may store models in its own cache directory)
-        let homeDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-        if let whisperKitDir = homeDir?.deletingLastPathComponent().appendingPathComponent("huggingface/models/argmaxinc/whisperkit-coreml/\(identifier)") {
+        // Also remove from WhisperKit's default download location
+        // WhisperKit.download stores models at Documents/huggingface/models/argmaxinc/whisperkit-coreml/{identifier}
+        let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        if let whisperKitDir = docsDir?.appendingPathComponent("huggingface/models/argmaxinc/whisperkit-coreml/\(identifier)") {
             if FileManager.default.fileExists(atPath: whisperKitDir.path) {
-                try? FileManager.default.removeItem(at: whisperKitDir)
+                try FileManager.default.removeItem(at: whisperKitDir)
+                if #available(iOS 14.0, *) {
+                    DictusLogger.app.info("Deleted model files at: \(whisperKitDir.path)")
+                }
             }
         }
 
@@ -223,6 +231,29 @@ class ModelManager: ObservableObject {
         // for most modern iPhones (iPhone 12+).
         // A future enhancement could cache WhisperKit.recommendedModels() result.
         return identifier == "openai_whisper-small"
+    }
+
+    /// Removes partially downloaded or corrupted model files from disk.
+    /// Called after download/prewarm failure so a retry starts clean.
+    private func cleanupModelFiles(_ identifier: String) {
+        // Clean from App Group container
+        if let modelsDir = modelsDirectory {
+            let modelPath = modelsDir.appendingPathComponent(identifier)
+            try? FileManager.default.removeItem(at: modelPath)
+        }
+
+        // Clean from WhisperKit's default download location
+        let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        if let whisperKitDir = docsDir?.appendingPathComponent("huggingface/models/argmaxinc/whisperkit-coreml/\(identifier)") {
+            try? FileManager.default.removeItem(at: whisperKitDir)
+        }
+
+        // Remove from downloaded list if it was added prematurely
+        downloadedModels.removeAll { $0 == identifier }
+        if activeModel == identifier {
+            activeModel = downloadedModels.first
+        }
+        persistState()
     }
 
     /// Whether at least one model is downloaded and ready for transcription.

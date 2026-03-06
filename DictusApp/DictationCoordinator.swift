@@ -35,7 +35,9 @@ class DictationCoordinator: ObservableObject {
     private let audioRecorder = AudioRecorder()
     private let transcriptionService = TranscriptionService()
     private var whisperKit: WhisperKit?
+    private var currentModelName: String?
     private var dictationTask: Task<Void, Never>?
+    private var isInitializing = false
 
     /// Combine subscription forwarding AudioRecorder's published values to coordinator.
     ///
@@ -68,6 +70,15 @@ class DictationCoordinator: ObservableObject {
     /// Phase 2.3: Now checks SharedKeys.modelReady before starting.
     /// If no model is downloaded, writes a descriptive error instead of crashing.
     func startDictation() {
+        // Guard against duplicate URL calls — iOS can fire dictus://dictate twice.
+        // If we're already recording or initializing, ignore the duplicate.
+        guard status == .idle || status == .failed else {
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.info("Ignoring duplicate startDictation — already \(self.status.rawValue)")
+            }
+            return
+        }
+
         if #available(iOS 14.0, *) {
             DictusLogger.app.info("Dictation started via URL scheme")
         }
@@ -216,9 +227,8 @@ class DictationCoordinator: ObservableObject {
             ?? defaults.string(forKey: SharedKeys.activeModel)
             ?? "openai_whisper-tiny"
 
-        // If WhisperKit is already loaded with a compatible model, reuse it
-        // (We reinitialize only when the model changes)
-        if whisperKit != nil, preferredModel == nil {
+        // If WhisperKit is already loaded with the same model, reuse it
+        if whisperKit != nil, currentModelName == modelName {
             return
         }
 
@@ -236,6 +246,7 @@ class DictationCoordinator: ObservableObject {
 
         let kit = try await WhisperKit(config)
         self.whisperKit = kit
+        self.currentModelName = modelName
 
         // Share the instance with AudioRecorder and TranscriptionService
         audioRecorder.prepare(whisperKit: kit)

@@ -188,21 +188,40 @@ private struct ModelRow: View {
                         .foregroundColor(.green)
                 }
             } else {
-                Button("Choisir") {
-                    modelManager.selectModel(model.identifier)
+                HStack(spacing: 8) {
+                    Button("Choisir") {
+                        modelManager.selectModel(model.identifier)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+
+                    if !isLastModel {
+                        Button {
+                            onDelete()
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
             }
 
         case .error(let message):
-            VStack(spacing: 2) {
-                Image(systemName: "exclamationmark.triangle")
-                    .foregroundColor(.red)
-                Text("Erreur")
-                    .font(.caption2)
-                    .foregroundColor(.red)
+            Button {
+                // Reset state and allow retry
+                modelManager.modelStates[model.identifier] = .notDownloaded
+            } label: {
+                VStack(spacing: 2) {
+                    Image(systemName: "arrow.clockwise.circle")
+                        .font(.title3)
+                        .foregroundColor(.orange)
+                    Text("Réessayer")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                }
             }
+            .buttonStyle(.plain)
             .help(message)
         }
     }
