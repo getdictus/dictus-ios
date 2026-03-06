@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 03-02
+current_plan: 03-03
 status: In Progress
-last_updated: "2026-03-06T10:06:30.000Z"
+last_updated: "2026-03-06T11:11:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State: Dictus
@@ -22,8 +22,8 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Phase
 Phase: 3
 Status: In Progress
-Plans completed: 1/3
-Current plan: 03-02
+Plans completed: 2/3
+Current plan: 03-03
 
 ## Phase History
 
@@ -90,6 +90,21 @@ Current plan: 03-02
 - modelReady flag persisted to App Group after first model download
 - 5 post-checkpoint bugfixes: deletion path, double-start guard, serial prewarming, error-state delete, large-v3-turbo removal
 - Verified end-to-end on physical iPhone: model management, smart routing, filler removal, French transcription with punctuation
+
+### Plan 3.2: Keyboard Recording UX — COMPLETED (2026-03-06)
+- ToolbarView with gear icon (left) and state-dependent mic button (right) -- idle/recording/transcribing visual states
+- RecordingOverlay replaces keyboard during active recording: 30-bar waveform, MM:SS timer, cancel/stop controls
+- KeyboardState: requestStop/requestCancel via Darwin notification + Bool flag, waveform data at ~5Hz, auto-insert via textDocumentProxy
+- KeyboardRootView: conditional rendering swaps KeyboardView for RecordingOverlay
+- Removed Phase 1 leftovers: StatusBar, TranscriptionStub, MicKey struct
+- Haptic feedback on recording start, stop, and text insertion
+- Fixed pre-existing pbxproj issues: missing TestDictationView reference, AccentPopup group membership
+
+### Plan 3.3: Keyboard Features & Test Dictation — COMPLETED (2026-03-06)
+- QWERTY layout switching via App Group preference (LayoutType.active)
+- Accented character long-press popups on AZERTY keys with drag-to-select
+- TestDictationView for in-app recording and transcription testing
+- DUX-02 (undo button) intentionally omitted per user decision
 
 ### Plan 3.1: Cross-Process Contracts — COMPLETED (2026-03-06)
 - SharedKeys extended with 5 new keys: keyboardLayout, waveformEnergy, stopRequested, cancelRequested, recordingElapsedSeconds
@@ -173,6 +188,15 @@ Parallel prewarming of multiple CoreML models crashes the ANE (Apple Neural Engi
 ### large-v3-turbo ANE incompatibility
 The `openai_whisper-large-v3_turbo` model fails ANE compilation on some devices (TextDecoder.mlmodelc). This is a hardware limitation — the model's TextDecoder is too large for the device's Neural Engine. No software fix possible. Consider hiding this model on incompatible devices in a future version.
 
+### Long-press accent gesture pattern
+400ms Task.sleep timer inside DragGesture.onChanged. If timer completes without onEnded, check AccentedCharacters.accents(for:). Show AccentPopup overlay, track horizontal drag to highlight cells. On release: insert selected accent or dismiss. Timer cancelled in onEnded for normal taps.
+
+### Dynamic layout selection via static function
+KeyboardLayout.currentLettersRows() reads LayoutType.active from App Group on every call. Returns pre-built static arrays (no re-creation). Function (not property) signals I/O side effect to callers.
+
+### DUX-02 intentionally omitted
+Undo button requirement (DUX-02) was deliberately not implemented per user decision. Marked as complete in requirements tracking.
+
 ### canImport(UIKit) for shared SPM packages
 HapticFeedback.swift uses `#if canImport(UIKit) && !os(macOS)` because DictusCore compiles on macOS for `swift test`. UIKit is iOS-only — the guard prevents build failures during SPM test runs while keeping the code available on iOS targets.
 
@@ -188,6 +212,12 @@ Added `UIBackgroundModes: audio` to DictusApp Info.plist. When user taps mic in 
 ### Darwin notification + Bool flag pattern
 Keyboard sets a Bool flag in App Group UserDefaults (e.g., stopRequested = true), then posts a Darwin notification. App observes the notification, reads the flag, resets it to false, and acts. This two-step pattern is necessary because Darwin notifications carry no payload.
 
+### Conditional rendering over ZStack for keyboard/recording swap
+Using `if/else` in SwiftUI body fully removes the inactive view from the hierarchy when switching between KeyboardView and RecordingOverlay. This prevents ghost touches on hidden keyboard keys and frees memory. A ZStack or overlay would keep both views alive.
+
+### weak controller reference on KeyboardState
+KeyboardState holds `weak var controller: UIInputViewController?` set via `.onAppear` in KeyboardRootView. This avoids a retain cycle (controller -> hosting view -> @StateObject -> controller) while allowing KeyboardState to call `textDocumentProxy.insertText()` for auto-insert.
+
 ---
 *State initialized: 2026-03-04*
 *Plan 1.1 completed: 2026-03-05*
@@ -199,3 +229,5 @@ Keyboard sets a Bool flag in App Group UserDefaults (e.g., stopRequested = true)
 *Plan 2.3 completed: 2026-03-06*
 *Phase 2 completed: 2026-03-06*
 *Plan 3.1 completed: 2026-03-06*
+*Plan 3.2 completed: 2026-03-06*
+*Plan 3.3 completed: 2026-03-06*

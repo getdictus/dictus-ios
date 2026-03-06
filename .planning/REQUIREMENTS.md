@@ -21,15 +21,15 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **KBD-02**: Full AZERTY keyboard layout is available and functional
 - [x] **KBD-03**: QWERTY keyboard layout is available as alternative (configurable in settings)
 - [x] **KBD-04**: Keyboard remains functional for basic typing when Full Access is not enabled (graceful degradation)
-- [ ] **KBD-05**: Mic button with clear visual states (idle, recording, transcribing)
+- [x] **KBD-05**: Mic button with clear visual states (idle, recording, transcribing)
 - [ ] **KBD-06**: Keyboard uses iOS 26 Liquid Glass design
 
 ### Dictation UX
 
-- [ ] **DUX-01**: Transcribed text is auto-inserted into the active text field via textDocumentProxy
-- [ ] **DUX-02**: User can undo the last transcription insertion with a dedicated button
+- [x] **DUX-01**: Transcribed text is auto-inserted into the active text field via textDocumentProxy
+- [x] **DUX-02**: User can undo the last transcription insertion with a dedicated button
 - [x] **DUX-03**: Haptic feedback triggers on recording start, recording stop, and text insertion
-- [ ] **DUX-04**: Animated waveform displays during active recording
+- [x] **DUX-04**: Animated waveform displays during active recording
 - [x] **DUX-05**: Dictation flow uses two-process architecture (keyboard triggers main app for recording + transcription)
 
 ### Main App
@@ -37,7 +37,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **APP-01**: Onboarding guides user through microphone permission, keyboard addition, Full Access enablement, and model download
 - [x] **APP-02**: Model Manager allows downloading, selecting, and deleting Whisper models (tiny, base, small, medium, large-v3-turbo)
 - [ ] **APP-03**: Settings screen for active model, transcription language, keyboard layout, filler word toggle, haptic toggle
-- [ ] **APP-04**: In-app test dictation screen for testing transcription without leaving the app
+- [x] **APP-04**: In-app test dictation screen for testing transcription without leaving the app
 - [x] **APP-05**: App handles `dictus://dictate` URL scheme to receive dictation requests from keyboard extension
 - [x] **APP-06**: All shared data passes through App Group (`group.com.pivi.dictus`)
 
@@ -106,14 +106,14 @@ Deferred to future release. Tracked but not in current roadmap.
 | STT-04 | Phase 2: Transcription Pipeline | Complete |
 | STT-05 | Phase 2: Transcription Pipeline | Complete |
 | APP-02 | Phase 2: Transcription Pipeline | Complete |
-| DUX-01 | Phase 3: Dictation UX | Not Started |
-| DUX-02 | Phase 3: Dictation UX | Not Started |
-| DUX-03 | Phase 3: Dictation UX | Not Started |
-| DUX-04 | Phase 3: Dictation UX | Not Started |
-| KBD-02 | Phase 3: Dictation UX | Not Started |
-| KBD-03 | Phase 3: Dictation UX | Not Started |
-| KBD-05 | Phase 3: Dictation UX | Not Started |
-| APP-04 | Phase 3: Dictation UX | Not Started |
+| DUX-01 | Phase 3: Dictation UX | Complete |
+| DUX-02 | Phase 3: Dictation UX | Complete |
+| DUX-03 | Phase 3: Dictation UX | Complete |
+| DUX-04 | Phase 3: Dictation UX | Complete |
+| KBD-02 | Phase 3: Dictation UX | Complete |
+| KBD-03 | Phase 3: Dictation UX | Complete |
+| KBD-05 | Phase 3: Dictation UX | Complete |
+| APP-04 | Phase 3: Dictation UX | Complete |
 | APP-01 | Phase 4: Main App, Onboarding, and Polish | Not Started |
 | APP-03 | Phase 4: Main App, Onboarding, and Polish | Not Started |
 | KBD-06 | Phase 4: Main App, Onboarding, and Polish | Not Started |
