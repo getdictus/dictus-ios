@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictus — Brand Kit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400&display=swap');
+
+  :root {
+    --ink:        #0B0F1A;
+    --ink-2:      #111827;
+    --ink-3:      #1C2333;
+    --surface:    #161C2C;
+    --border:     rgba(255,255,255,0.07);
+    --border-hi:  rgba(255,255,255,0.14);
+
+    --blue-900:   #0A1628;
+    --blue-800:   #0D2040;
+    --blue-700:   #0F3460;
+    --blue-600:   #1A4E8A;
+    --blue-500:   #2563EB;
+    --blue-400:   #3B82F6;
+    --blue-300:   #93C5FD;
+    --blue-100:   #DBEAFE;
+
+    --accent:     #3D7EFF;
+    --accent-hi:  #6BA3FF;
+    --glow:       rgba(61,126,255,0.35);
+    --glow-soft:  rgba(61,126,255,0.12);
+
+    --white:      #FFFFFF;
+    --white-70:   rgba(255,255,255,0.70);
+    --white-40:   rgba(255,255,255,0.40);
+    --white-15:   rgba(255,255,255,0.08);
+
+    --font-sans: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--ink);
+    color: var(--white);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout ── */
+  .page { max-width: 960px; margin: 0 auto; padding: 80px 32px 120px; }
+
+  section { margin-bottom: 80px; }
+
+  h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 200;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--white);
+  }
+  h1 span { color: var(--accent-hi); }
+
+  h2 {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--white-40);
+    margin-bottom: 32px;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--white-70);
+    margin-bottom: 8px;
+  }
+
+  p { color: var(--white-70); line-height: 1.7; }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--white-40);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 48px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    padding: 80px 0 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--white-40);
+    letter-spacing: 0.02em;
+    font-style: italic;
+  }
+
+  /* ── Logo showcase ── */
+  .logo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+  }
+
+  .logo-cell {
+    padding: 48px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .logo-cell:first-child { border-radius: 16px 0 0 16px; }
+  .logo-cell:last-child  { border-radius: 0 16px 16px 0; }
+
+  .cell-dark   { background: var(--ink-2); }
+  .cell-mid    { background: var(--surface); }
+  .cell-light  { background: var(--white); }
+
+  /* ── THE LOGO MARK ── */
+  .dictus-mark {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .dictus-mark svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* App icon container */
+  .app-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .app-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── Palette ── */
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+
+  .swatch {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .swatch-color {
+    height: 72px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .swatch-color.accent-glow::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 100%, var(--glow), transparent 70%);
+  }
+
+  .swatch-info { display: flex; flex-direction: column; gap: 2px; }
+  .swatch-name { font-size: 13px; font-weight: 500; color: var(--white-70); }
+  .swatch-hex  { font-family: var(--font-mono); font-size: 11px; color: var(--white-40); }
+  .swatch-role { font-size: 10px; color: var(--white-40); }
+
+  /* ── Typography ── */
+  .type-samples {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .type-row {
+    display: flex;
+    align-items: baseline;
+    gap: 32px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .type-meta { width: 120px; flex-shrink: 0; }
+  .type-sample { flex: 1; }
+
+  /* ── Usage guidelines ── */
+  .do-dont {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .guideline {
+    padding: 24px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+
+  .guideline.do   { border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.04); }
+  .guideline.dont { border-color: rgba(239,68,68,0.25);  background: rgba(239,68,68,0.04); }
+
+  .guideline-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .do   .guideline-tag { color: #22C55E; }
+  .dont .guideline-tag { color: #EF4444; }
+
+  .guideline p { font-size: 13px; color: var(--white-70); }
+
+  /* ── Sizes ── */
+  .sizes-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .size-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* ── Gradient tokens ── */
+  .gradient-samples {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .grad-swatch {
+    height: 120px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 14px;
+  }
+
+  .grad-label { font-family: var(--font-mono); font-size: 10px; color: rgba(255,255,255,0.6); }
+
+  /* ── Token table ── */
+  .token-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .token-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white-40);
+    padding: 0 16px 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .token-table td {
+    padding: 12px 16px 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--white-70);
+    vertical-align: middle;
+  }
+
+  .token-table td:first-child {
+    font-family: var(--font-mono);
+    color: var(--accent-hi);
+    font-size: 12px;
+  }
+
+  .token-table td .dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  /* ── Motion badge ── */
+  .state-strip {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .state-badge {
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .state-badge .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .state-badge.idle     { background: rgba(255,255,255,0.05); color: var(--white-70); }
+  .state-badge.idle .dot { background: rgba(255,255,255,0.3); }
+
+  .state-badge.recording { background: rgba(239,68,68,0.12); color: #FCA5A5; border-color: rgba(239,68,68,0.3); }
+  .state-badge.recording .dot { background: #EF4444; box-shadow: 0 0 6px #EF4444; animation: pulse 1.2s ease infinite; }
+
+  .state-badge.processing { background: rgba(61,126,255,0.12); color: #93C5FD; border-color: rgba(61,126,255,0.3); }
+  .state-badge.processing .dot { background: var(--accent); animation: pulse 0.8s ease infinite; }
+
+  .state-badge.smart { background: rgba(139,92,246,0.12); color: #C4B5FD; border-color: rgba(139,92,246,0.3); }
+  .state-badge.smart .dot { background: #8B5CF6; animation: pulse 0.8s ease infinite; }
+
+  .state-badge.success { background: rgba(34,197,94,0.1); color: #86EFAC; border-color: rgba(34,197,94,0.25); }
+  .state-badge.success .dot { background: #22C55E; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  /* ── Footer ── */
+  .footer {
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer p { font-size: 12px; color: var(--white-40); }
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <h1><span>Dictus</span><br>Brand Kit</h1>
+    </div>
+    <p class="hero-sub">v1.0 · Mars 2026 · PIVI Solutions</p>
+    <p style="max-width:520px;font-size:14px;">Identité visuelle pour Dictus — clavier iOS de dictation vocale offline. Direction : premium, sombre, glassmorphism. Cohérent avec iOS 26 Liquid Glass.</p>
+  </div>
+
+  <!-- LOGO MARK -->
+  <section>
+    <h2>Logo Mark</h2>
+    <div class="divider"></div>
+
+    <!-- Concept note -->
+    <p style="max-width:600px;margin-bottom:40px;font-size:14px;">
+      L'icône représente une <strong style="color:var(--white-70)">onde sonore stylisée</strong> — trois barres verticales de hauteurs asymétriques évoquant l'amplitude d'une voix humaine. La barre centrale, plus haute, forme implicitement la lettre <strong style="color:var(--accent-hi)">i</strong> de Dictus. La forme d'ensemble s'inscrit dans un carré superellipse (squircle) aux coins iOS.
+    </p>
+
+    <div class="logo-grid">
+      <!-- Dark background -->
+      <div class="logo-cell cell-dark">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- App icon squircle background -->
+          <rect width="80" height="80" rx="18" fill="url(#grad-dark)"/>
+          <!-- Subtle inner glow ring -->
+          <rect width="80" height="80" rx="18" fill="none" stroke="url(#stroke-glow)" stroke-width="1"/>
+          <!-- Waveform bars -->
+          <!-- Bar 1 (short left) -->
+          <rect x="19" y="34" width="9" height="18" rx="4.5" fill="white" opacity="0.45"/>
+          <!-- Bar 2 (tall center) -->
+          <rect x="35.5" y="22" width="9" height="42" rx="4.5" fill="url(#bar-accent)"/>
+          <!-- Bar 3 (medium right) -->
+          <rect x="52" y="29" width="9" height="27" rx="4.5" fill="white" opacity="0.65"/>
+          <defs>
+            <linearGradient id="grad-dark" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#0D2040"/>
+              <stop offset="100%" stop-color="#071020"/>
+            </linearGradient>
+            <linearGradient id="stroke-glow" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="rgba(61,126,255,0.5)"/>
+              <stop offset="100%" stop-color="rgba(61,126,255,0)"/>
+            </linearGradient>
+            <linearGradient id="bar-accent" x1="35.5" y1="22" x2="44.5" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#6BA3FF"/>
+              <stop offset="100%" stop-color="#2563EB"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div style="text-align:center">
+          <div class="label">Sur fond sombre</div>
+          <div class="label" style="color:rgba(255,255,255,0.25)">Utilisation principale</div>
+        </div>
+      </div>
+
+      <!-- Medium -->
+      <div class="logo-cell cell-mid">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="80" height="80" rx="18" fill="url(#grad-mid)"/>
+          <rect width="80" height="80" rx="18" fill="none" stroke="rgba(61,126,255,0.3)" stroke-width="1"/>
+          <rect x="19" y="34" width="9" height="18" rx="4.5" fill="white" opacity="0.35"/>
+          <rect x="35.5" y="22" width="9" height="42" rx="4.5" fill="url(#bar-accent-2)"/>
+          <rect x="52" y="29" width="9" height="27" rx="4.5" fill="white" opacity="0.55"/>
+          <defs>
+            <linearGradient id="grad-mid" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#1C2333"/>
+              <stop offset="100%" stop-color="#111827"/>
+            </linearGradient>
+            <linearGradient id="bar-accent-2" x1="35.5" y1="22" x2="44.5" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#93C5FD"/>
+              <stop offset="100%" stop-color="#3B82F6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div style="text-align:center">
+          <div class="label">Sur fond surface</div>
+          <div class="label" style="color:rgba(255,255,255,0.25)">In-app, UI cards</div>
+        </div>
+      </div>
+
+      <!-- Light -->
+      <div class="logo-cell cell-light">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="80" height="80" rx="18" fill="url(#grad-light)"/>
+          <rect x="19" y="34" width="9" height="18" rx="4.5" fill="#0F3460" opacity="0.4"/>
+          <rect x="35.5" y="22" width="9" height="42" rx="4.5" fill="url(#bar-light)"/>
+          <rect x="52" y="29" width="9" height="27" rx="4.5" fill="#0F3460" opacity="0.6"/>
+          <defs>
+            <linearGradient id="grad-light" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#EFF6FF"/>
+              <stop offset="100%" stop-color="#DBEAFE"/>
+            </linearGradient>
+            <linearGradient id="bar-light" x1="35.5" y1="22" x2="44.5" y2="64" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#1D4ED8"/>
+              <stop offset="100%" stop-color="#1E40AF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div style="text-align:center">
+          <div class="label" style="color:#9CA3AF">Sur fond clair</div>
+          <div class="label" style="color:#D1D5DB">App Store, print</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wordmark -->
+    <div style="margin-top:32px;padding:40px;background:var(--ink-2);border-radius:16px;border:1px solid var(--border);display:flex;align-items:center;gap:20px;">
+      <svg width="48" height="48" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="80" height="80" rx="18" fill="url(#grad-wm)"/>
+        <rect width="80" height="80" rx="18" fill="none" stroke="url(#stroke-wm)" stroke-width="1"/>
+        <rect x="19" y="34" width="9" height="18" rx="4.5" fill="white" opacity="0.45"/>
+        <rect x="35.5" y="22" width="9" height="42" rx="4.5" fill="url(#bar-wm)"/>
+        <rect x="52" y="29" width="9" height="27" rx="4.5" fill="white" opacity="0.65"/>
+        <defs>
+          <linearGradient id="grad-wm" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#0D2040"/>
+            <stop offset="100%" stop-color="#071020"/>
+          </linearGradient>
+          <linearGradient id="stroke-wm" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(61,126,255,0.5)"/>
+            <stop offset="100%" stop-color="rgba(61,126,255,0)"/>
+          </linearGradient>
+          <linearGradient id="bar-wm" x1="35.5" y1="22" x2="44.5" y2="64" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#6BA3FF"/>
+            <stop offset="100%" stop-color="#2563EB"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div>
+        <div style="font-size:32px;font-weight:200;letter-spacing:-0.04em;color:var(--white);">dictus</div>
+        <div class="label" style="margin-top:4px;">Wordmark — DM Sans 200 · lowercase</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ICON SIZES -->
+  <section>
+    <h2>Tailles d'icône iOS</h2>
+    <div class="divider"></div>
+    <div class="sizes-row">
+      <!-- 1024 -->
+      <div class="size-item">
+        <svg width="120" height="120" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="url(#gs1)"/>
+          <rect width="80" height="80" rx="18" fill="none" stroke="url(#ss1)" stroke-width="1"/>
+          <rect x="19" y="34" width="9" height="18" rx="4.5" fill="white" opacity="0.45"/>
+          <rect x="35.5" y="22" width="9" height="42" rx="4.5" fill="url(#bs1)"/>
+          <rect x="52" y="29" width="9" height="27" rx="4.5" fill="white" opacity="0.65"/>
+          <defs>
+            <linearGradient id="gs1" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0D2040"/><stop offset="100%" stop-color="#071020"/></linearGradient>
+            <linearGradient id="ss1" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="rgba(61,126,255,0.5)"/><stop offset="100%" stop-color="rgba(61,126,255,0)"/></linearGradient>
+            <linearGradient id="bs1" x1="35.5" y1="22" x2="44.5" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#6BA3FF"/><stop offset="100%" stop-color="#2563EB"/></linearGradient>
+          </defs>
+        </svg>
+        <div class="label" style="text-align:center">1024×1024<br>App Store</div>
+      </div>
+      <!-- 60 -->
+      <div class="size-item">
+        <svg width="60" height="60" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="url(#gs2)"/>
+          <rect x="19" y="34" width="9" height="18" rx="4.5" fill="white" opacity="0.45"/>
+          <rect x="35.5" y="22" width="9" height="42" rx="4.5" fill="url(#bs2)"/>
+          <rect x="52" y="29" width="9" height="27" rx="4.5" fill="white" opacity="0.65"/>
+          <defs>
+            <linearGradient id="gs2" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0D2040"/><stop offset="100%" stop-color="#071020"/></linearGradient>
+            <linearGradient id="bs2" x1="35.5" y1="22" x2="44.5" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#6BA3FF"/><stop offset="100%" stop-color="#2563EB"/></linearGradient>
+          </defs>
+        </svg>
+        <div class="label" style="text-align:center">60×60<br>Home Screen</div>
+      </div>
+      <!-- 40 -->
+      <div class="size-item">
+        <svg width="40" height="40" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="url(#gs3)"/>
+          <rect x="19" y="34" width="9" height="18" rx="4.5" fill="white" opacity="0.45"/>
+          <rect x="35.5" y="22" width="9" height="42" rx="4.5" fill="url(#bs3)"/>
+          <rect x="52" y="29" width="9" height="27" rx="4.5" fill="white" opacity="0.65"/>
+          <defs>
+            <linearGradient id="gs3" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0D2040"/><stop offset="100%" stop-color="#071020"/></linearGradient>
+            <linearGradient id="bs3" x1="35.5" y1="22" x2="44.5" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#6BA3FF"/><stop offset="100%" stop-color="#2563EB"/></linearGradient>
+          </defs>
+        </svg>
+        <div class="label" style="text-align:center">40×40<br>Spotlight</div>
+      </div>
+      <!-- 29 -->
+      <div class="size-item">
+        <svg width="29" height="29" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="url(#gs4)"/>
+          <rect x="19" y="34" width="9" height="18" rx="4.5" fill="white" opacity="0.45"/>
+          <rect x="35.5" y="22" width="9" height="42" rx="4.5" fill="url(#bs4)"/>
+          <rect x="52" y="29" width="9" height="27" rx="4.5" fill="white" opacity="0.65"/>
+          <defs>
+            <linearGradient id="gs4" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0D2040"/><stop offset="100%" stop-color="#071020"/></linearGradient>
+            <linearGradient id="bs4" x1="35.5" y1="22" x2="44.5" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#6BA3FF"/><stop offset="100%" stop-color="#2563EB"/></linearGradient>
+          </defs>
+        </svg>
+        <div class="label" style="text-align:center">29×29<br>Settings</div>
+      </div>
+      <!-- 20 -->
+      <div class="size-item">
+        <svg width="20" height="20" viewBox="0 0 80 80" fill="none">
+          <rect width="80" height="80" rx="18" fill="url(#gs5)"/>
+          <rect x="19" y="34" width="9" height="18" rx="4.5" fill="white" opacity="0.45"/>
+          <rect x="35.5" y="22" width="9" height="42" rx="4.5" fill="url(#bs5)"/>
+          <rect x="52" y="29" width="9" height="27" rx="4.5" fill="white" opacity="0.65"/>
+          <defs>
+            <linearGradient id="gs5" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0D2040"/><stop offset="100%" stop-color="#071020"/></linearGradient>
+            <linearGradient id="bs5" x1="35.5" y1="22" x2="44.5" y2="64" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#6BA3FF"/><stop offset="100%" stop-color="#2563EB"/></linearGradient>
+          </defs>
+        </svg>
+        <div class="label" style="text-align:center">20×20<br>Notification</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PALETTE -->
+  <section>
+    <h2>Palette de couleurs</h2>
+    <div class="divider"></div>
+    <div class="palette-grid">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0A1628;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Ink Deep</div>
+          <div class="swatch-hex">#0A1628</div>
+          <div class="swatch-role">Background principal</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0F3460;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Navy</div>
+          <div class="swatch-hex">#0F3460</div>
+          <div class="swatch-role">Gradient icône</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color accent-glow" style="background:#3D7EFF;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Accent Blue</div>
+          <div class="swatch-hex">#3D7EFF</div>
+          <div class="swatch-role">CTA, boutons, actif</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#93C5FD;"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Sky</div>
+          <div class="swatch-hex">#93C5FD</div>
+          <div class="swatch-role">Highlights, icônes</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#DBEAFE;border-color:rgba(0,0,0,0.1)"></div>
+        <div class="swatch-info">
+          <div class="swatch-name">Mist</div>
+          <div class="swatch-hex">#DBEAFE</div>
+          <div class="swatch-role">Texte sur clair</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semantic / states -->
+    <div style="margin-top:32px;">
+      <h3 style="margin-bottom:20px;font-size:14px;">Couleurs sémantiques</h3>
+      <table class="token-table">
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Hex</th>
+            <th>Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>--color-recording</td>
+            <td><span class="dot" style="background:#EF4444"></span>#EF4444</td>
+            <td>État enregistrement actif</td>
+          </tr>
+          <tr>
+            <td>--color-smart-mode</td>
+            <td><span class="dot" style="background:#8B5CF6"></span>#8B5CF6</td>
+            <td>Mode LLM intelligent actif</td>
+          </tr>
+          <tr>
+            <td>--color-success</td>
+            <td><span class="dot" style="background:#22C55E"></span>#22C55E</td>
+            <td>Insertion réussie</td>
+          </tr>
+          <tr>
+            <td>--color-warning</td>
+            <td><span class="dot" style="background:#F59E0B"></span>#F59E0B</td>
+            <td>Erreur, modèle lent</td>
+          </tr>
+          <tr>
+            <td>--color-surface</td>
+            <td><span class="dot" style="background:#161C2C"></span>#161C2C</td>
+            <td>Cards, panels</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- GRADIENTS -->
+  <section>
+    <h2>Gradients</h2>
+    <div class="divider"></div>
+    <div class="gradient-samples">
+      <div class="grad-swatch" style="background:linear-gradient(135deg,#0D2040,#071020);">
+        <div class="grad-label">Icon BG · 135°<br>#0D2040 → #071020</div>
+      </div>
+      <div class="grad-swatch" style="background:linear-gradient(135deg,#1A4E8A,#0F3460);">
+        <div class="grad-label">Button · 135°<br>#1A4E8A → #0F3460</div>
+      </div>
+      <div class="grad-swatch" style="background:linear-gradient(180deg,#6BA3FF,#2563EB);">
+        <div class="grad-label">Bar accent · 180°<br>#6BA3FF → #2563EB</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section>
+    <h2>Typographie</h2>
+    <div class="divider"></div>
+    <div class="type-samples">
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="label">Display</div>
+          <div class="label" style="margin-top:4px;">DM Sans · 200</div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:40px;font-weight:200;letter-spacing:-0.03em;color:var(--white);">dictus</div>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="label">Heading</div>
+          <div class="label" style="margin-top:4px;">DM Sans · 400</div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:22px;font-weight:400;color:var(--white);">Dictation vocale offline</div>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="label">Body</div>
+          <div class="label" style="margin-top:4px;">DM Sans · 300</div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:15px;font-weight:300;color:var(--white-70);">Transcription en temps réel, 100% sur l'appareil.</div>
+        </div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="label">Mono / Code</div>
+          <div class="label" style="margin-top:4px;">DM Mono · 400</div>
+        </div>
+        <div class="type-sample">
+          <div style="font-family:var(--font-mono);font-size:13px;color:var(--accent-hi);">group.com.pivi.dictus</div>
+        </div>
+      </div>
+      <div class="type-row" style="border:none;padding:0;">
+        <div class="type-meta">
+          <div class="label">iOS native</div>
+          <div class="label" style="margin-top:4px;">SF Pro Rounded</div>
+        </div>
+        <div class="type-sample">
+          <div style="font-size:15px;color:var(--white-70);">Pour toute l'UI SwiftUI in-app</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATES -->
+  <section>
+    <h2>États du bouton micro</h2>
+    <div class="divider"></div>
+    <p style="font-size:14px;margin-bottom:28px;">Chaque état du cycle de dictation a sa propre signature visuelle et couleur. Ces tokens s'appliquent au bouton micro, au ring d'animation et au mode pill.</p>
+    <div class="state-strip" style="flex-wrap:wrap;">
+      <div class="state-badge idle"><div class="dot"></div> Idle</div>
+      <div class="state-badge recording"><div class="dot"></div> Recording</div>
+      <div class="state-badge processing"><div class="dot"></div> Transcribing</div>
+      <div class="state-badge smart"><div class="dot"></div> Smart Mode</div>
+      <div class="state-badge success"><div class="dot"></div> Inserted</div>
+    </div>
+  </section>
+
+  <!-- DO / DON'T -->
+  <section>
+    <h2>Règles d'utilisation</h2>
+    <div class="divider"></div>
+    <div class="do-dont">
+      <div class="guideline do">
+        <div class="guideline-tag">✓ À faire</div>
+        <p>Toujours utiliser le logo sur un fond sombre (#0A1628 ou équivalent) comme usage principal.</p>
+      </div>
+      <div class="guideline dont">
+        <div class="guideline-tag">✗ À éviter</div>
+        <p>Ne pas utiliser le logo sur un fond coloré vif ou un fond photographique sans couche sombre.</p>
+      </div>
+      <div class="guideline do">
+        <div class="guideline-tag">✓ À faire</div>
+        <p>Utiliser le wordmark en minuscules <em>dictus</em>, poids 200, avec le tracking -0.03em.</p>
+      </div>
+      <div class="guideline dont">
+        <div class="guideline-tag">✗ À éviter</div>
+        <p>Ne pas écrire DICTUS en majuscules ni modifier les proportions de l'icône.</p>
+      </div>
+      <div class="guideline do">
+        <div class="guideline-tag">✓ À faire</div>
+        <p>Respecter les espacements iOS (Safe Area, Dynamic Type) pour toute implémentation in-app.</p>
+      </div>
+      <div class="guideline dont">
+        <div class="guideline-tag">✗ À éviter</div>
+        <p>Ne pas recréer la waveform avec des barres égales ou symétriques — l'asymétrie est intentionnelle.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    <p>Dictus Brand Kit v1.0 · PIVI Solutions · 2026</p>
+    <p>MIT License · dictus.app</p>
+  </div>
+
+</div>
+</body>
+</html>
