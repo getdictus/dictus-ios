@@ -37,6 +37,11 @@
 		AA000061 /* RecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100061 /* RecordingOverlay.swift */; };
 		AA000070 /* AccentPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100070 /* AccentPopup.swift */; };
 		AA000071 /* TestDictationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100071 /* TestDictationView.swift */; };
+		AA000080 /* GlassModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100080 /* GlassModifier.swift */; };
+		AA000081 /* DictusColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100081 /* DictusColors.swift */; };
+		AA000082 /* BrandWaveform.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100082 /* BrandWaveform.swift */; };
+		AA000083 /* AnimatedMicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100083 /* AnimatedMicButton.swift */; };
+		AA000084 /* DictusTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100084 /* DictusTypography.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -72,6 +77,11 @@
 		AA200002 /* DictusKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA100070 /* AccentPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccentPopup.swift; sourceTree = "<group>"; };
 		AA100071 /* TestDictationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestDictationView.swift; sourceTree = "<group>"; };
+		AA100080 /* GlassModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassModifier.swift; sourceTree = "<group>"; };
+		AA100081 /* DictusColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusColors.swift; sourceTree = "<group>"; };
+		AA100082 /* BrandWaveform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandWaveform.swift; sourceTree = "<group>"; };
+		AA100083 /* AnimatedMicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedMicButton.swift; sourceTree = "<group>"; };
+		AA100084 /* DictusTypography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusTypography.swift; sourceTree = "<group>"; };
 	/* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -137,12 +147,25 @@
 				AA100009 /* DictationCoordinator.swift */,
 				AA10000A /* DictationView.swift */,
 				AA400007 /* Audio */,
+				AA40000A /* Design */,
 				AA400008 /* Views */,
 				AA400009 /* Models */,
 				AA100005 /* DictusApp.entitlements */,
 				AA100007 /* Info.plist */,
 			);
 			path = DictusApp;
+			sourceTree = "<group>";
+		};
+		AA40000A /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				AA100080 /* GlassModifier.swift */,
+				AA100081 /* DictusColors.swift */,
+				AA100082 /* BrandWaveform.swift */,
+				AA100083 /* AnimatedMicButton.swift */,
+				AA100084 /* DictusTypography.swift */,
+			);
+			path = Design;
 			sourceTree = "<group>";
 		};
 		AA400007 /* Audio */ = {
@@ -356,6 +379,11 @@
 				AA000050 /* ModelManager.swift in Sources */,
 				AA000051 /* ModelManagerView.swift in Sources */,
 				AA000071 /* TestDictationView.swift in Sources */,
+				AA000080 /* GlassModifier.swift in Sources */,
+				AA000081 /* DictusColors.swift in Sources */,
+				AA000082 /* BrandWaveform.swift in Sources */,
+				AA000083 /* AnimatedMicButton.swift in Sources */,
+				AA000084 /* DictusTypography.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
