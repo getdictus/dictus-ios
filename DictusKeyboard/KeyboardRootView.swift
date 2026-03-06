@@ -37,14 +37,7 @@ struct KeyboardRootView: View {
                 FullAccessBanner()
             }
 
-            // Toolbar always visible: gear icon (left) + mic button (right)
-            ToolbarView(
-                hasFullAccess: controller.hasFullAccess,
-                dictationStatus: state.dictationStatus,
-                onMicTap: { state.startRecording() }
-            )
-
-            // Conditional: normal keyboard OR recording overlay
+            // Conditional: recording overlay (full area) OR toolbar + keyboard
             if state.dictationStatus == .recording || state.dictationStatus == .transcribing {
                 RecordingOverlay(
                     waveformEnergy: state.waveformEnergy,
@@ -55,6 +48,13 @@ struct KeyboardRootView: View {
                 )
                 .frame(height: keyboardHeight)
             } else {
+                // Toolbar visible only when not recording
+                ToolbarView(
+                    hasFullAccess: controller.hasFullAccess,
+                    dictationStatus: state.dictationStatus,
+                    onMicTap: { state.startRecording() }
+                )
+
                 KeyboardView(
                     controller: controller,
                     hasFullAccess: controller.hasFullAccess

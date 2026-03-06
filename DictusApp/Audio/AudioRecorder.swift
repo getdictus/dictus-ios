@@ -57,7 +57,18 @@ class AudioRecorder: ObservableObject {
 
     /// Inject or re-use a WhisperKit instance.
     /// Called by DictationCoordinator after WhisperKit initialization.
+    ///
+    /// WHY we reset isEngineRunning on model switch: SmartModelRouter may select
+    /// a different model (e.g., tiny for short audio, small for long audio).
+    /// When DictationCoordinator creates a new WhisperKit instance, the OLD
+    /// instance's audio engine is gone. We must reset so the next startRecording()
+    /// does a cold start with the new WhisperKit's AudioProcessor.
     func prepare(whisperKit: WhisperKit) {
+        if self.whisperKit !== whisperKit {
+            // Model switch — old engine is gone, need cold start next time
+            self.whisperKit?.audioProcessor.stopRecording()
+            isEngineRunning = false
+        }
         self.whisperKit = whisperKit
     }
 
