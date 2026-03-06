@@ -56,7 +56,7 @@
 
 **Requirements:** DUX-01, DUX-02 (DROPPED by user decision), DUX-03, DUX-04, KBD-02, KBD-03, KBD-05, APP-04
 
-**Plans:** 1/3 plans executed
+**Plans:** 4 plans (3 executed + 1 gap closure)
 
 ### Success Criteria
 1. Tapping mic in keyboard toolbar opens DictusApp briefly; keyboard shows recording overlay (waveform, timer, cancel/stop)
@@ -69,9 +69,10 @@
 8. In-app test dictation screen allows end-to-end transcription testing without leaving Dictus
 
 ### Plans
-- [ ] 03-01-PLAN.md — DictusCore contracts (SharedKeys, Darwin notifications, QWERTY layout data, accented character mappings, haptic helper), DictationCoordinator wired for keyboard stop/cancel signals and waveform forwarding
-- [ ] 03-02-PLAN.md — Wispr Flow-inspired keyboard recording UX (ToolbarView with mic button, RecordingOverlay replacing keyboard, auto-insert via textDocumentProxy, haptic feedback, mic button states)
-- [ ] 03-03-PLAN.md — QWERTY layout switching in keyboard, accented character long-press popup on AZERTY, in-app TestDictationView
+- [x] 03-01-PLAN.md — DictusCore contracts (SharedKeys, Darwin notifications, QWERTY layout data, accented character mappings, haptic helper), DictationCoordinator wired for keyboard stop/cancel signals and waveform forwarding *(completed 2026-03-06)*
+- [x] 03-02-PLAN.md — Wispr Flow-inspired keyboard recording UX (ToolbarView with mic button, RecordingOverlay replacing keyboard, auto-insert via textDocumentProxy, haptic feedback, mic button states) *(completed 2026-03-06)*
+- [x] 03-03-PLAN.md — QWERTY layout switching in keyboard, accented character long-press popup on AZERTY, in-app TestDictationView *(completed 2026-03-06)*
+- [ ] 03-04-PLAN.md — UAT gap closure: replace Link with Button in ToolbarView mic button, add startRecording() to KeyboardState, wire callback through KeyboardRootView
 
 ---
 
