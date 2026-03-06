@@ -43,6 +43,12 @@ class AudioRecorder: ObservableObject {
     /// Elapsed recording time in seconds.
     @Published var bufferSeconds: Double = 0
 
+    /// Whether the audio session has been configured at least once.
+    /// WHY: iOS forbids changing AVAudioSession category from background.
+    /// We configure once (first recording) and keep the category set forever.
+    /// Subsequent recordings just start the audio engine — no session config needed.
+    private var sessionConfigured = false
+
     /// Inject or re-use a WhisperKit instance.
     /// Called by DictationCoordinator after WhisperKit initialization.
     func prepare(whisperKit: WhisperKit) {
@@ -72,28 +78,31 @@ class AudioRecorder: ObservableObject {
         }
     }
 
+    /// Configure the audio session once. Called on first recording only.
+    /// Must happen while app is in foreground — iOS forbids setCategory from background.
+    func configureAudioSession() throws {
+        guard !sessionConfigured else { return }
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.playAndRecord, mode: .measurement, options: [.duckOthers, .defaultToSpeaker])
+        try session.setActive(true)
+        sessionConfigured = true
+
+        if #available(iOS 14.0, *) {
+            DictusLogger.app.info("AVAudioSession configured (.playAndRecord, active)")
+        }
+    }
+
     /// Start recording audio using WhisperKit's AudioProcessor.
     ///
-    /// WHY we configure AVAudioSession with `.record` category and `.measurement` mode:
-    /// - `.record` tells iOS this app captures audio (required for microphone access)
-    /// - `.measurement` provides the rawest audio signal with minimal processing
-    /// - `.duckOthers` lowers other audio (like music) while recording
+    /// Audio session must be configured before calling this (via configureAudioSession).
+    /// On subsequent recordings (including from background), only the audio engine
+    /// is started — no session reconfiguration needed.
     func startRecording() throws {
         guard let whisperKit else { throw AudioRecorderError.notReady }
 
-        // Configure AVAudioSession for recording.
-        // WHY .playAndRecord instead of .record: allows background activation.
-        // WHY we catch setActive errors: session may already be active from a
-        // previous recording. That's fine — we just start the engine.
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.playAndRecord, mode: .measurement, options: [.duckOthers, .defaultToSpeaker])
-        do {
-            try session.setActive(true)
-        } catch {
-            // Session may already be active — that's OK for subsequent recordings
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.warning("AVAudioSession setActive warning (may already be active): \(error.localizedDescription)")
-            }
+        // Configure session if first time (must be foreground)
+        if !sessionConfigured {
+            try configureAudioSession()
         }
 
         // Use WhisperKit's AudioProcessor — it handles format conversion to 16 kHz mono Float32

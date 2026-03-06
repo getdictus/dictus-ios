@@ -133,6 +133,10 @@ class DictationCoordinator: ObservableObject {
                 // Step 2: Initialize WhisperKit if not already ready
                 try await ensureWhisperKitReady()
 
+                // Step 2b: Configure audio session while in foreground.
+                // Must happen before any background recording attempt.
+                try audioRecorder.configureAudioSession()
+
                 // Step 3: Start recording
                 updateStatus(.recording)
                 try audioRecorder.startRecording()
