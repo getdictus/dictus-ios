@@ -25,4 +25,14 @@ public enum SharedKeys {
     public static let cancelRequested = "dictus.cancelRequested"
     /// Double: elapsed recording seconds, updated at ~5Hz during recording
     public static let recordingElapsedSeconds = "dictus.recordingElapsedSeconds"
+
+    // User preferences (added for Plan 4.1 onboarding + settings)
+    /// Language code for transcription ("fr" or "en"), default "fr"
+    public static let language = "dictus.language"
+    /// Whether haptic feedback is enabled, default true
+    public static let hapticsEnabled = "dictus.hapticsEnabled"
+    /// Whether filler word removal is enabled, default true
+    public static let fillerWordsEnabled = "dictus.fillerWordsEnabled"
+    /// Whether the user has completed onboarding, default false
+    public static let hasCompletedOnboarding = "dictus.hasCompletedOnboarding"
 }
