@@ -1,10 +1,16 @@
 // DictusKeyboard/Models/KeyboardLayout.swift
 import Foundation
+import DictusCore
 
-/// Defines the complete AZERTY keyboard layout matching iOS native French keyboard.
+/// Defines keyboard layouts (AZERTY and QWERTY) matching iOS native French keyboard.
+///
+/// WHY two separate static arrays instead of one computed property:
+/// The layout data is constant — only the selection between them changes at runtime.
+/// Using static lets avoids re-creating KeyDefinition arrays on every frame during
+/// SwiftUI redraws. The dynamic selection happens only in `currentLettersRows()`.
 enum KeyboardLayout {
 
-    // MARK: - Letters layer (lowercase shown; shift applies uppercasing)
+    // MARK: - AZERTY Letters layer (default for French users)
 
     static let lettersRows: [[KeyDefinition]] = [
         // Row 1: top letter row
@@ -35,6 +41,58 @@ enum KeyboardLayout {
             KeyDefinition("return", type: .returnKey, width: 1.8),
         ],
     ]
+
+    // MARK: - QWERTY Letters layer (when user selects QWERTY in settings)
+
+    /// QWERTY layout converted from DictusCore's QWERTYLayout string arrays to KeyDefinitions.
+    /// Row 4 has no mic key -- the mic button lives in the toolbar (Plan 03-02).
+    /// The mic key's width is redistributed to the space bar for a wider touch target.
+    static let qwertyLettersRows: [[KeyDefinition]] = [
+        // Row 1: top letter row
+        ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"].map {
+            KeyDefinition($0, output: $0.lowercased())
+        },
+        // Row 2: home row
+        ["A", "S", "D", "F", "G", "H", "J", "K", "L"].map {
+            KeyDefinition($0, output: $0.lowercased())
+        },
+        // Row 3: bottom letter row with shift and delete
+        [
+            KeyDefinition("shift", type: .shift, width: 1.5),
+            KeyDefinition("Z", output: "z"),
+            KeyDefinition("X", output: "x"),
+            KeyDefinition("C", output: "c"),
+            KeyDefinition("V", output: "v"),
+            KeyDefinition("B", output: "b"),
+            KeyDefinition("N", output: "n"),
+            KeyDefinition("M", output: "m"),
+            KeyDefinition("delete", type: .delete, width: 1.5),
+        ],
+        // Row 4: bottom function row (no mic -- mic is in toolbar per Plan 03-02)
+        [
+            KeyDefinition("globe", type: .globe, width: 1.2),
+            KeyDefinition("123", type: .layerSwitch, width: 1.2),
+            KeyDefinition("space", output: " ", type: .space, width: 5.7),
+            KeyDefinition("return", type: .returnKey, width: 1.8),
+        ],
+    ]
+
+    // MARK: - Dynamic Layout Selection
+
+    /// Returns the correct letter rows based on the user's layout preference in App Group.
+    ///
+    /// WHY a static function instead of a computed property:
+    /// This reads from UserDefaults on every call (to pick up preference changes without
+    /// requiring a restart). Making it a function signals to callers that there's a side
+    /// effect (I/O) happening, unlike a property which implies a lightweight computation.
+    static func currentLettersRows() -> [[KeyDefinition]] {
+        switch LayoutType.active {
+        case .qwerty:
+            return qwertyLettersRows
+        case .azerty:
+            return lettersRows
+        }
+    }
 
     // MARK: - Numbers layer
     // Note: Mic key is intentionally absent from numbers/symbols layers,

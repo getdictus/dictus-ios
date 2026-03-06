@@ -33,6 +33,9 @@
 		AA000043 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
 		AA000050 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100050 /* ModelManager.swift */; };
 		AA000051 /* ModelManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100051 /* ModelManagerView.swift */; };
+		AA000060 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100060 /* ToolbarView.swift */; };
+		AA000061 /* RecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100061 /* RecordingOverlay.swift */; };
+		AA000070 /* AccentPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100070 /* AccentPopup.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,9 +65,12 @@
 		AA100043 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
 		AA100050 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
 		AA100051 /* ModelManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManagerView.swift; sourceTree = "<group>"; };
+		AA100060 /* ToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarView.swift; sourceTree = "<group>"; };
+		AA100061 /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
 		AA200001 /* DictusApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DictusApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA200002 /* DictusKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-/* End PBXFileReference section */
+		AA100070 /* AccentPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccentPopup.swift; sourceTree = "<group>"; };
+	/* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
 		AA050001 /* PBXContainerItemProxy */ = {
@@ -203,6 +209,9 @@
 				AA100033 /* KeyRow.swift */,
 				AA100034 /* KeyboardView.swift */,
 				AA100035 /* FullAccessBanner.swift */,
+				AA100060 /* ToolbarView.swift */,
+				AA100061 /* RecordingOverlay.swift */,
+				AA100070 /* AccentPopup.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -343,6 +352,7 @@
 				AA000043 /* RecordingView.swift in Sources */,
 				AA000050 /* ModelManager.swift in Sources */,
 				AA000051 /* ModelManagerView.swift in Sources */,
+				AA000071 /* TestDictationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,6 +373,9 @@
 				AA000036 /* KeyDefinition.swift in Sources */,
 				AA000037 /* KeyboardLayer.swift in Sources */,
 				AA000038 /* KeyboardLayout.swift in Sources */,
+				AA000060 /* ToolbarView.swift in Sources */,
+				AA000061 /* RecordingOverlay.swift in Sources */,
+				AA000070 /* AccentPopup.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

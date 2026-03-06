@@ -17,7 +17,14 @@ struct KeyboardView: View {
 
     private var currentRows: [[KeyDefinition]] {
         switch currentLayer {
-        case .letters: return KeyboardLayout.lettersRows
+        case .letters:
+            // Use dynamic layout (AZERTY or QWERTY) based on App Group preference.
+            // Filter out .mic keys from every row -- the mic button now lives in the
+            // toolbar above the keyboard (Plan 03-02). Filtering all rows (not just row 4)
+            // is a safety measure in case layouts are restructured in the future.
+            return KeyboardLayout.currentLettersRows().map { row in
+                row.filter { $0.type != .mic }
+            }
         case .numbers: return KeyboardLayout.numbersRows
         case .symbols: return KeyboardLayout.symbolsRows
         }
