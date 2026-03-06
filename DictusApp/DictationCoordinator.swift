@@ -9,6 +9,8 @@ import WhisperKit
 /// Manages the dictation lifecycle in the main app.
 /// Phase 2.3: Integrated with SmartModelRouter for duration-based model selection
 /// and FillerWordFilter (applied in TranscriptionService).
+/// Phase 3.1: Observes keyboard stop/cancel signals via Darwin notifications,
+/// forwards waveform energy to App Group for keyboard visualization.
 ///
 /// WHY this class is @MainActor and uses static let shared:
 /// - @MainActor ensures all @Published property updates happen on the main thread (required by SwiftUI)
@@ -39,6 +41,11 @@ class DictationCoordinator: ObservableObject {
     private var dictationTask: Task<Void, Never>?
     private var isInitializing = false
 
+    /// Timestamp of last waveform write to App Group.
+    /// Used to throttle writes to ~5Hz (every 200ms) to avoid overwhelming UserDefaults
+    /// with high-frequency updates from the audio recorder's energy callback.
+    private var lastWaveformWriteDate = Date.distantPast
+
     /// Combine subscription forwarding AudioRecorder's published values to coordinator.
     ///
     /// WHY Combine sink instead of direct observation:
@@ -54,12 +61,22 @@ class DictationCoordinator: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] energy in
                 self?.bufferEnergy = energy
+                self?.forwardWaveformToAppGroup(energy: energy)
             }
         secondsCancellable = audioRecorder.$bufferSeconds
             .receive(on: DispatchQueue.main)
             .sink { [weak self] seconds in
                 self?.bufferSeconds = seconds
             }
+
+        // Observe keyboard-initiated stop/cancel signals via Darwin notifications.
+        //
+        // WHY Darwin notifications for keyboard -> app signaling:
+        // The keyboard extension runs in a separate process. It cannot call methods
+        // on DictationCoordinator directly. Instead, it sets a Bool flag in App Group
+        // UserDefaults and posts a Darwin notification. The app observes the notification,
+        // reads the flag, resets it, and acts.
+        observeKeyboardSignals()
     }
 
     // MARK: - Public API
@@ -190,7 +207,10 @@ class DictationCoordinator: ObservableObject {
                     DictusLogger.app.info("Transcription complete: \(text)")
                 }
 
-                // Step 7: Brief delay for checkmark flash before returning to idle
+                // Step 7: Clean up recording keys from App Group
+                cleanupRecordingKeys()
+
+                // Step 8: Brief delay for checkmark flash before returning to idle
                 try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
                 if status == .ready {
                     updateStatus(.idle)
@@ -204,6 +224,30 @@ class DictationCoordinator: ObservableObject {
         }
     }
 
+    /// Cancel the current dictation without transcribing.
+    /// Called when the keyboard sends a cancel signal via Darwin notification.
+    ///
+    /// WHY cancel is different from stop:
+    /// Stop triggers transcription of recorded audio. Cancel discards everything —
+    /// the user changed their mind and doesn't want any text inserted.
+    func cancelDictation() {
+        dictationTask?.cancel()
+        dictationTask = nil
+
+        // Stop recording and discard the audio samples
+        _ = audioRecorder.stopRecording()
+
+        // Reset all state
+        bufferEnergy = []
+        bufferSeconds = 0
+        cleanupRecordingKeys()
+        updateStatus(.idle)
+
+        if #available(iOS 14.0, *) {
+            DictusLogger.app.info("Dictation cancelled by keyboard")
+        }
+    }
+
     /// Reset status to idle (e.g., after user returns to keyboard).
     func resetStatus() {
         updateStatus(.idle)
@@ -211,6 +255,76 @@ class DictationCoordinator: ObservableObject {
     }
 
     // MARK: - Private Helpers
+
+    /// Register Darwin notification observers for keyboard stop/cancel signals.
+    ///
+    /// WHY nonisolated(unsafe) and DispatchQueue.main.async:
+    /// Darwin notification callbacks fire on an arbitrary thread (they use C function pointers).
+    /// DictationCoordinator is @MainActor, so we must hop back to the main thread before
+    /// accessing any properties or calling methods.
+    private func observeKeyboardSignals() {
+        DarwinNotificationCenter.addObserver(for: DarwinNotificationName.stopRecording) { [weak self] in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                let requested = self.defaults.bool(forKey: SharedKeys.stopRequested)
+                if requested {
+                    self.defaults.set(false, forKey: SharedKeys.stopRequested)
+                    self.defaults.synchronize()
+                    self.stopDictation()
+                }
+            }
+        }
+
+        DarwinNotificationCenter.addObserver(for: DarwinNotificationName.cancelRecording) { [weak self] in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                let requested = self.defaults.bool(forKey: SharedKeys.cancelRequested)
+                if requested {
+                    self.defaults.set(false, forKey: SharedKeys.cancelRequested)
+                    self.defaults.synchronize()
+                    self.cancelDictation()
+                }
+            }
+        }
+    }
+
+    /// Forward waveform energy data to App Group for the keyboard extension to display.
+    /// Throttled to ~5Hz (every 200ms) to avoid overwhelming UserDefaults.
+    ///
+    /// WHY throttle to 5Hz:
+    /// AudioRecorder publishes energy updates at ~60Hz (every audio buffer callback).
+    /// Writing to UserDefaults + synchronize + Darwin notification at 60Hz would cause
+    /// excessive disk I/O and cross-process overhead. 5Hz provides smooth-enough waveform
+    /// animation in the keyboard while keeping overhead minimal.
+    private func forwardWaveformToAppGroup(energy: [Float]) {
+        // Only forward during active recording
+        guard status == .recording else { return }
+
+        // Throttle: only write if 200ms+ since last write
+        let now = Date()
+        guard now.timeIntervalSince(lastWaveformWriteDate) >= 0.2 else { return }
+        lastWaveformWriteDate = now
+
+        // Encode energy as JSON and write to App Group
+        if let data = try? JSONEncoder().encode(energy) {
+            defaults.set(data, forKey: SharedKeys.waveformEnergy)
+        }
+        defaults.set(bufferSeconds, forKey: SharedKeys.recordingElapsedSeconds)
+        defaults.synchronize()
+
+        // Signal keyboard that new waveform data is available
+        DarwinNotificationCenter.post(DarwinNotificationName.waveformUpdate)
+    }
+
+    /// Clean up recording-related App Group keys after recording completes or is cancelled.
+    /// Safety reset to prevent stale data from being read by the keyboard extension.
+    private func cleanupRecordingKeys() {
+        defaults.removeObject(forKey: SharedKeys.waveformEnergy)
+        defaults.removeObject(forKey: SharedKeys.recordingElapsedSeconds)
+        defaults.set(false, forKey: SharedKeys.stopRequested)
+        defaults.set(false, forKey: SharedKeys.cancelRequested)
+        defaults.synchronize()
+    }
 
     /// Initialize WhisperKit with the preferred model if not already loaded.
     ///
