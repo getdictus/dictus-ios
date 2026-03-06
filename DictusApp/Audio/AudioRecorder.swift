@@ -109,6 +109,33 @@ class AudioRecorder: ObservableObject {
         }
     }
 
+    /// Start the audio engine in idle mode (not recording, just keeping it alive).
+    /// Must be called from foreground. Keeps the app alive in background via
+    /// UIBackgroundModes:audio so subsequent recordings work without app switch.
+    func warmUp() throws {
+        guard let whisperKit else { throw AudioRecorderError.notReady }
+        guard !isEngineRunning else { return }
+
+        if !sessionConfigured {
+            try configureAudioSession()
+        }
+
+        try whisperKit.audioProcessor.startRecordingLive { [weak self] _ in
+            DispatchQueue.main.async {
+                guard let self, let wk = self.whisperKit else { return }
+                guard self.isRecording else { return }
+                self.bufferEnergy = wk.audioProcessor.relativeEnergy
+                self.bufferSeconds = Double(wk.audioProcessor.audioSamples.count)
+                    / Double(WhisperKit.sampleRate)
+            }
+        }
+        isEngineRunning = true
+
+        if #available(iOS 14.0, *) {
+            DictusLogger.app.info("Audio engine warmed up (idle, ready for background recording)")
+        }
+    }
+
     /// Start recording audio using WhisperKit's AudioProcessor.
     ///
     /// Two modes:

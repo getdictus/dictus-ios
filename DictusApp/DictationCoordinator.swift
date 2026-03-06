@@ -89,9 +89,9 @@ class DictationCoordinator: ObservableObject {
 
             do {
                 try await ensureWhisperKitReady()
-                try audioRecorder.configureAudioSession()
+                try audioRecorder.warmUp()
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("WhisperKit + audio session pre-loaded at launch")
+                    DictusLogger.app.info("WhisperKit + audio engine pre-loaded at launch")
                 }
             } catch {
                 if #available(iOS 14.0, *) {
