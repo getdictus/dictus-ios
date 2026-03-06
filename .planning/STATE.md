@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_plan: 03-03
+current_plan: 03-04
 status: executing
-last_updated: "2026-03-06T11:17:41.081Z"
+last_updated: "2026-03-06T11:41:26Z"
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 11
+  completed_plans: 11
 ---
 
 # Project State: Dictus
@@ -22,8 +22,8 @@ See: .planning/PROJECT.md (updated 2026-03-04)
 ## Current Phase
 Phase: 3
 Status: In Progress
-Plans completed: 2/3
-Current plan: 03-03
+Plans completed: 3/4
+Current plan: 03-04
 
 ## Phase History
 
@@ -117,6 +117,12 @@ Current plan: 03-03
 - Audio background mode added to Info.plist for background recording
 - 16 new unit tests (6 QWERTY + 10 accented), 46 total DictusCore tests passing
 
+### Plan 3.4: Mic Button Gap Closure — COMPLETED (2026-03-06)
+- ToolbarView mic button changed from Link(destination:) to Button with onMicTap callback
+- KeyboardState.startRecording() sets local state to .requested then opens dictus://dictate via injected openURL closure
+- KeyboardRootView wires @Environment(\.openURL) to KeyboardState and passes onMicTap to ToolbarView
+- Fixes UAT blockers 2 and 3: mic button now triggers in-keyboard recording overlay instead of opening DictusApp
+
 ## Key Decisions
 
 ### DarwinNotifications C callback
@@ -137,8 +143,8 @@ Ties `KeyboardState` lifetime to the SwiftUI view. `deinit` removes Darwin obser
 ### 100ms UserDefaults retry in `KeyboardState`
 Darwin notifications are posted immediately after `defaults.synchronize()`, but cross-App-Group UserDefaults propagation can lag on-device. A 100ms deferred read guards against receiving the notification before the value is readable.
 
-### MicKey uses `Link` not `Button`
-Only `Link(destination:)` can open a URL scheme from inside a keyboard extension without `UIApplication.shared` (unavailable in extensions). Using `Button` + `openURL` environment does not work in extensions.
+### MicKey uses `Button` with injected openURL closure (revised from Phase 2)
+Phase 2 used `Link(destination:)` which opened DictusApp but gave the keyboard no control over the flow. Phase 3 revised this: ToolbarView uses `Button(action: onMicTap)` which calls `KeyboardState.startRecording()`. This sets local state to `.requested` first (triggering the recording overlay immediately), then opens the URL via an `openURL` closure injected from `@Environment(\.openURL)` in KeyboardRootView. The `@Environment(\.openURL)` action works in keyboard extensions because it uses the responder chain, not `UIApplication.shared`.
 
 ### `Task.sleep` for delete key repeat
 `Timer.scheduledTimer` is unreliable in keyboard extensions — the main RunLoop is not always in `.default` mode. `Task { @MainActor in try? await Task.sleep(...) }` is the correct pattern for async repeat in extensions.
