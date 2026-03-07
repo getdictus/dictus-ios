@@ -34,6 +34,19 @@ struct DictusApp: App {
                 .onOpenURL { url in
                     handleIncomingURL(url)
                 }
+                .onChange(of: hasCompletedOnboarding) { completed in
+                    // WHY this notification:
+                    // MainTabView's HomeView mounts BEHIND the fullScreenCover before
+                    // onboarding completes. Its onAppear fires early with stale state.
+                    // When onboarding finishes and the cover dismisses, onAppear does NOT
+                    // re-fire. This notification tells HomeView to refresh model state.
+                    if completed {
+                        NotificationCenter.default.post(
+                            name: Notification.Name("DictusOnboardingCompleted"),
+                            object: nil
+                        )
+                    }
+                }
                 .fullScreenCover(isPresented: .constant(!hasCompletedOnboarding)) {
                     OnboardingView(isComplete: $hasCompletedOnboarding)
                         .environmentObject(coordinator)

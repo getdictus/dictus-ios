@@ -19,32 +19,39 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                // Logo mark
-                logoSection
+        VStack(spacing: 24) {
+            Spacer()
 
-                // Model status card
-                modelStatusCard
+            // Logo mark
+            logoSection
 
-                // Last transcription preview
-                if let result = coordinator.lastResult {
-                    transcriptionCard(result: result)
-                }
+            // Model status card
+            modelStatusCard
 
-                // Test dictation button
-                if modelManager.isModelReady {
-                    testDictationLink
-                }
+            // Last transcription preview
+            if let result = coordinator.lastResult {
+                transcriptionCard(result: result)
             }
-            .padding()
+
+            // Test dictation button
+            if modelManager.isModelReady {
+                testDictationLink
+            }
+
+            Spacer()
         }
+        .padding()
         .background(Color.dictusBackground.ignoresSafeArea())
         .onAppear {
             // Refresh model state every time HomeView appears.
-            // WHY: After onboarding, a separate ModelManager instance downloads the model.
-            // Without this refresh, HomeView's modelManager has stale state and shows
-            // "Telecharger un modele" even though a model was just downloaded.
+            modelManager.loadState()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("DictusOnboardingCompleted"))) { _ in
+            // WHY onReceive in addition to onAppear:
+            // HomeView mounts behind the onboarding fullScreenCover, so onAppear fires
+            // before the model is downloaded. When onboarding completes and dismisses
+            // the cover, onAppear does NOT re-fire. This notification-based refresh
+            // ensures HomeView shows the correct model state immediately.
             modelManager.loadState()
         }
     }
