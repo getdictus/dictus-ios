@@ -1,142 +1,305 @@
 // DictusApp/Views/RecordingView.swift
-// Full-screen recording UI with brand waveform, stop button, and elapsed time.
+// Immersive full-screen recording UI shared between onboarding and standalone test.
 import SwiftUI
 import DictusCore
 
-/// Full-screen view shown during dictation (recording, transcribing, ready states).
+/// Determines the context in which RecordingView is shown.
 ///
-/// WHY this is a separate view from ContentView:
-/// Single Responsibility -- RecordingView handles the recording UI exclusively.
-/// ContentView decides *when* to show it based on coordinator status.
+/// WHY a mode enum instead of separate views:
+/// The recording experience should feel identical whether the user reaches it
+/// from onboarding step 5 or from HomeView's "Tester la dictee" button.
+/// The only difference is what happens when the user finishes:
+/// - onboarding: calls onComplete to advance onboarding
+/// - standalone: offers "Nouvelle dictee" to reset or "Terminer" to dismiss
+enum RecordingMode {
+    case onboarding
+    case standalone
+}
+
+/// Immersive Voice Memos-style recording screen with centered mic button,
+/// ambient waveform, and fade-to-text transcription result.
+///
+/// WHY this design:
+/// The test recording is the user's first real interaction with dictation.
+/// An immersive, focused screen with a large centered mic button and ambient
+/// waveform creates a polished, confidence-inspiring experience. The waveform
+/// fades out and transcription text fades in — no cards, no chrome — just clean
+/// transitions between states.
 struct RecordingView: View {
+    let mode: RecordingMode
+    var onComplete: (() -> Void)?
+
     @EnvironmentObject var coordinator: DictationCoordinator
+    @Environment(\.dismiss) private var dismiss
+
+    /// Tracks whether the user has seen a transcription result (to show action buttons).
+    @State private var transcriptionResult: String?
+    /// Controls the fade transition between waveform and transcription text.
+    @State private var showResult = false
+    @State private var showError = false
+    @State private var errorMessage: String?
+
+    init(mode: RecordingMode, onComplete: (() -> Void)? = nil) {
+        self.mode = mode
+        self.onComplete = onComplete
+    }
 
     var body: some View {
         ZStack {
-            // Dark background for recording focus -- uses brand color instead of Color.black
+            // Full-screen dark background for immersive feel
             Color.dictusBackground.ignoresSafeArea()
 
-            VStack(spacing: 40) {
+            VStack(spacing: 0) {
                 Spacer()
 
-                // Status-dependent content
-                switch coordinator.status {
-                case .recording:
-                    recordingContent
-                case .transcribing:
-                    transcribingContent
-                case .ready:
-                    readyContent
-                case .failed:
-                    failedContent
-                default:
-                    // For .idle, .requested -- show nothing (shouldn't normally appear)
-                    EmptyView()
+                // Ambient waveform behind mic button — only visible during recording
+                // WHY 30% opacity: The waveform is ambient decoration, not primary UI.
+                // It creates atmosphere without competing with the mic button for attention.
+                if coordinator.status == .recording {
+                    BrandWaveform(
+                        energyLevels: coordinator.bufferEnergy,
+                        maxHeight: 120
+                    )
+                    .opacity(0.3)
+                    .padding(.horizontal)
+                    .transition(.opacity)
+                }
+
+                // Transcribing state: show ProcessingAnimation where waveform was
+                if coordinator.status == .transcribing {
+                    ProcessingAnimation(height: 64)
+                        .transition(.opacity)
+                        .padding(.bottom, 24)
+
+                    Text("Transcription en cours...")
+                        .font(.dictusCaption)
+                        .foregroundStyle(.secondary)
+                }
+
+                // Result state: transcription text fades in where waveform was
+                if showResult, let result = transcriptionResult {
+                    Text(result)
+                        .font(.dictusBody)
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                        .transition(.opacity)
+                        .padding(.bottom, 16)
+                }
+
+                // Error state
+                if showError, let error = errorMessage {
+                    VStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 40))
+                            .foregroundColor(.orange)
+                        Text(error)
+                            .font(.dictusCaption)
+                            .foregroundColor(.dictusRecording)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                    }
+                    .padding(.bottom, 16)
                 }
 
                 Spacer()
+
+                // Main mic / stop button — large and centered
+                micOrStopButton
+                    .padding(.bottom, 16)
+
+                // Recording duration display
+                if coordinator.status == .recording {
+                    Text(formattedTime)
+                        .font(.system(size: 20, weight: .light, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .padding(.bottom, 16)
+                }
+
+                // Action buttons after transcription result
+                if showResult && transcriptionResult != nil {
+                    actionButtons
+                        .padding(.horizontal, 32)
+                        .padding(.bottom, 16)
+                        .transition(.opacity)
+                }
+
+                // Error retry button
+                if showError {
+                    Button(action: startRecording) {
+                        Text("Reessayer")
+                            .font(.dictusSubheading)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .fill(Color.dictusAccent)
+                            )
+                    }
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 16)
+                }
+
+                Spacer()
+                    .frame(height: 60)
             }
-            .padding()
         }
+        .animation(.easeOut(duration: 0.3), value: showResult)
+        .animation(.easeInOut(duration: 0.3), value: coordinator.status)
+        .onChange(of: coordinator.status) { newStatus in
+            handleStatusChange(newStatus)
+        }
+        .navigationBarHidden(true)
     }
 
-    // MARK: - Recording State
+    // MARK: - Mic / Stop Button
 
-    /// Shows BrandWaveform + elapsed time + stop button during recording.
+    /// Large centered button that toggles between mic (start) and stop (recording).
     ///
-    /// WHY BrandWaveform instead of 50-bar WaveformView:
-    /// The 3-bar brand waveform matches the Dictus logo identity and provides
-    /// a cleaner, more branded recording experience. The energy is computed from
-    /// the most recent buffer values for smooth animation.
-    private var recordingContent: some View {
-        VStack(spacing: 32) {
-            // Elapsed time display -- monospaced for timer readability
-            Text(formattedTime)
-                .font(.system(size: 48, weight: .light, design: .monospaced))
-                .foregroundStyle(.primary)
-
-            // Brand waveform driven by live audio energy
-            BrandWaveform(energyLevels: coordinator.bufferEnergy, maxHeight: 120)
-                .padding(.horizontal)
-
-            // Stop button with branded accent color
-            Button(action: {
-                coordinator.stopDictation()
-            }) {
-                Image(systemName: "stop.circle.fill")
-                    .font(.system(size: 72))
-                    .foregroundColor(.dictusRecording)
+    /// WHY separate from AnimatedMicButton:
+    /// In the idle state we use the AnimatedMicButton for its branded pulsing glow.
+    /// In the recording state we show a red stop button (circle with white square)
+    /// matching the Voice Memos pattern — universally recognized as "stop recording".
+    @ViewBuilder
+    private var micOrStopButton: some View {
+        if coordinator.status == .recording {
+            // Stop button: red circle with white square
+            Button(action: stopRecording) {
+                ZStack {
+                    Circle()
+                        .fill(Color.dictusRecording)
+                        .frame(width: 80, height: 80)
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.white)
+                        .frame(width: 28, height: 28)
+                }
             }
             .accessibilityLabel("Arreter l'enregistrement")
+        } else if coordinator.status == .transcribing {
+            // During transcription, show disabled mic
+            AnimatedMicButton(status: .transcribing) {}
+                .disabled(true)
+        } else if showResult || showError {
+            // After result or error, hide the mic button (action buttons shown instead)
+            EmptyView()
+        } else {
+            // Idle state: branded animated mic button
+            AnimatedMicButton(status: .idle) {
+                startRecording()
+            }
         }
     }
 
-    // MARK: - Transcribing State
+    // MARK: - Action Buttons
 
-    /// Shows a progress indicator while WhisperKit processes the audio.
-    private var transcribingContent: some View {
-        VStack(spacing: 24) {
-            ProcessingAnimation(height: 64)
-
-            Text("Transcription en cours...")
-                .font(.dictusSubheading)
-                .foregroundStyle(.primary)
-        }
-    }
-
-    // MARK: - Ready State
-
-    /// Shows a checkmark briefly after transcription completes.
-    private var readyContent: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 80))
-                .foregroundColor(.dictusSuccess)
-
-            if let result = coordinator.lastResult {
-                Text(result)
-                    .font(.dictusBody)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .lineLimit(4)
-                    .padding()
-                    .dictusGlass()
+    /// Buttons shown after transcription completes. Content depends on mode.
+    @ViewBuilder
+    private var actionButtons: some View {
+        switch mode {
+        case .onboarding:
+            // In onboarding, just a "Terminer" button to advance
+            Button(action: {
+                coordinator.resetStatus()
+                onComplete?()
+            }) {
+                Text("Terminer")
+                    .font(.dictusSubheading)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.dictusSuccess)
+                    )
             }
 
-            Text("Termine")
-                .font(.dictusSubheading)
-                .foregroundStyle(.primary)
+        case .standalone:
+            // In standalone, offer retry or dismiss
+            VStack(spacing: 12) {
+                Button(action: resetForNewRecording) {
+                    Text("Nouvelle dictee")
+                        .font(.dictusSubheading)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(Color.dictusAccent)
+                        )
+                }
+
+                Button(action: {
+                    coordinator.resetStatus()
+                    dismiss()
+                }) {
+                    Text("Terminer")
+                        .font(.dictusSubheading)
+                        .foregroundColor(.dictusAccent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(Color.dictusAccent, lineWidth: 1.5)
+                        )
+                }
+            }
         }
     }
 
-    // MARK: - Failed State
+    // MARK: - Actions
 
-    private var failedContent: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 64))
-                .foregroundColor(.orange)
+    private func startRecording() {
+        // Reset state for new recording
+        transcriptionResult = nil
+        showResult = false
+        showError = false
+        errorMessage = nil
 
-            Text("Erreur")
-                .font(.dictusSubheading)
-                .foregroundStyle(.primary)
+        // Haptic feedback on mic tap
+        HapticFeedback.recordingStarted()
 
-            Button("Reessayer") {
-                coordinator.startDictation()
+        coordinator.startDictation()
+    }
+
+    private func stopRecording() {
+        // Haptic feedback on stop tap
+        HapticFeedback.recordingStopped()
+
+        coordinator.stopDictation()
+    }
+
+    private func resetForNewRecording() {
+        coordinator.resetStatus()
+        transcriptionResult = nil
+        showResult = false
+        showError = false
+        errorMessage = nil
+    }
+
+    // MARK: - Status Handling
+
+    private func handleStatusChange(_ newStatus: DictationStatus) {
+        switch newStatus {
+        case .ready:
+            // Transcription complete — fade in result text
+            if let result = coordinator.lastResult, !result.isEmpty {
+                transcriptionResult = result
+                withAnimation(.easeOut(duration: 0.4)) {
+                    showResult = true
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.dictusAccent)
+        case .failed:
+            showError = true
+            errorMessage = coordinator.lastResult ?? "La transcription a echoue. Verifiez que le modele est telecharge."
+        default:
+            break
         }
     }
 
     // MARK: - Helpers
 
     /// Format elapsed seconds as "M:SS".
-    ///
-    /// WHY not use DateComponentsFormatter:
-    /// For a simple "minutes:seconds" format, manual formatting is simpler and avoids
-    /// the overhead of creating a formatter object on every view update.
     private var formattedTime: String {
         let totalSeconds = Int(coordinator.bufferSeconds)
         let minutes = totalSeconds / 60
@@ -145,7 +308,7 @@ struct RecordingView: View {
     }
 }
 
-#Preview("Recording") {
-    RecordingView()
+#Preview("Recording - Idle") {
+    RecordingView(mode: .standalone)
         .environmentObject(DictationCoordinator.shared)
 }

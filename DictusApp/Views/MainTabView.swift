@@ -63,7 +63,7 @@ struct MainTabView: View {
             // Uses brand accent color for the selected tab icon/text instead of default blue.
             // On iOS 26, TabView automatically gets Liquid Glass styling -- no manual glass needed.
             if coordinator.status != .idle {
-                RecordingView()
+                RecordingView(mode: .standalone)
                     .transition(.opacity)
                     .ignoresSafeArea()
             }
