@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UX & Keyboard
-status: planning
-stopped_at: Phase 6 context gathered
-last_updated: "2026-03-07T20:35:01.065Z"
-last_activity: 2026-03-07 — v1.1 roadmap created
+status: executing
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-07T21:04:21Z"
+last_activity: 2026-03-07 — Phase 6 Plan 1 complete (design consolidation + app icon)
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 50
+  total_plans: 3
+  completed_plans: 1
+  percent: 53
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 6 of 10 (Infrastructure & App Polish)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-07 — v1.1 roadmap created
+Plan: 1 of 3 in current phase
+Status: Executing
+Last activity: 2026-03-07 — Phase 6 Plan 1 complete (design consolidation + app icon)
 
-Progress: [██████████░░░░░░░░░░] 50% (5/10 phases complete)
+Progress: [██████████▓░░░░░░░░░] 53% (5/10 phases, 1/3 plans in phase 6)
 
 ## Performance Metrics
 
@@ -48,9 +48,11 @@ Progress: [██████████░░░░░░░░░░] 50% (5/
 | 3. Dictation UX | 4 | ~100 min | ~25 min |
 | 4. App & Polish | 5 | ~125 min | ~25 min |
 | 5. Settings | 2 | ~50 min | ~25 min |
+| 6. Infra & Polish | 1/3 | ~9 min | ~9 min |
 
 **Recent Trend:**
 - v1.0: 18 plans in 4 days
+- v1.1: Plan 1 completed in 9 min (faster due to no TDD overhead)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -62,9 +64,11 @@ Progress: [██████████░░░░░░░░░░] 50% (5/
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v1.0]: Design file duplication between DictusApp and DictusKeyboard needs revisiting — now INFRA-01
-- [v1.0]: FillerWordFilter removed — Whisper handles fillers natively
-- [v1.0]: SmartModelRouter bypassed — runtime model switching breaks background recording
+- [06-01]: Design files consolidated into DictusCore with public access -- INFRA-01 resolved
+- [06-01]: public extension pattern for cross-module design tokens (Color.dictusAccent etc.)
+- [06-01]: CoreGraphics script for reproducible app icon generation
+- [v1.0]: FillerWordFilter removed -- Whisper handles fillers natively
+- [v1.0]: SmartModelRouter bypassed -- runtime model switching breaks background recording
 
 ### Pending Todos
 
@@ -78,9 +82,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T20:35:01.063Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-infrastructure-app-polish/06-CONTEXT.md
+Last session: 2026-03-07T21:04:21Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: .planning/phases/06-infrastructure-app-polish/06-01-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*

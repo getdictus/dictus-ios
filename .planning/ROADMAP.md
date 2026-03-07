@@ -124,7 +124,7 @@ Note: Phase 9 (Cold Start) is independent of Phases 7-8 and could execute in par
 | 3. Dictation UX | v1.0 | 4/4 | Complete | 2026-03-06 |
 | 4. Main App & Polish | v1.0 | 5/5 | Complete | 2026-03-07 |
 | 5. Wire Settings & Hygiene | v1.0 | 2/2 | Complete | 2026-03-07 |
-| 6. Infrastructure & App Polish | v1.1 | 0/3 | Planning | - |
+| 6. Infrastructure & App Polish | 1/3 | In Progress|  | - |
 | 7. Keyboard Parity & Visual | v1.1 | 0/? | Not started | - |
 | 8. Text Prediction | v1.1 | 0/? | Not started | - |
 | 9. Cold Start | v1.1 | 0/? | Not started | - |

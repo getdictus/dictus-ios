@@ -9,8 +9,8 @@ Requirements for v1.1 UX & Keyboard milestone. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: Design files consolidated into a shared DictusUI package (no more duplication between DictusApp and DictusKeyboard)
-- [ ] **INFRA-02**: App icon generated from brand kit (SVG to PNG, adaptive light/dark)
+- [x] **INFRA-01**: Design files consolidated into a shared DictusUI package (no more duplication between DictusApp and DictusKeyboard)
+- [x] **INFRA-02**: App icon generated from brand kit (SVG to PNG, adaptive light/dark)
 
 ### Keyboard Parity
 
@@ -92,8 +92,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 6 | Pending |
-| INFRA-02 | Phase 6 | Pending |
+| INFRA-01 | Phase 6 | Complete |
+| INFRA-02 | Phase 6 | Complete |
 | KBD-01 | Phase 7 | Pending |
 | KBD-02 | Phase 7 | Pending |
 | KBD-03 | Phase 7 | Pending |
