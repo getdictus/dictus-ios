@@ -47,11 +47,12 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
   3. HomeView shows correct state after onboarding (no stale "download model" prompt when a model exists, no side band artifacts)
   4. Onboarding flow blocks progression until each step is completed (mic permission, keyboard added, model downloaded)
   5. Test recording and recording stop screens match the app's Liquid Glass theme with no visual inconsistencies
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: TBD
-- [ ] 06-02: TBD
+- [ ] 06-01-PLAN.md — Consolidate design files into DictusCore and generate app icon
+- [ ] 06-02-PLAN.md — Fix HomeView duplicate title and model state bug
+- [ ] 06-03-PLAN.md — Redesign test recording screen and fix onboarding blocking
 
 ### Phase 7: Keyboard Parity & Visual
 **Goal**: Users perceive the Dictus keyboard as equal to or better than Apple's native keyboard in core interactions, with a polished mic button and recording experience
@@ -123,7 +124,7 @@ Note: Phase 9 (Cold Start) is independent of Phases 7-8 and could execute in par
 | 3. Dictation UX | v1.0 | 4/4 | Complete | 2026-03-06 |
 | 4. Main App & Polish | v1.0 | 5/5 | Complete | 2026-03-07 |
 | 5. Wire Settings & Hygiene | v1.0 | 2/2 | Complete | 2026-03-07 |
-| 6. Infrastructure & App Polish | v1.1 | 0/? | Not started | - |
+| 6. Infrastructure & App Polish | v1.1 | 0/3 | Planning | - |
 | 7. Keyboard Parity & Visual | v1.1 | 0/? | Not started | - |
 | 8. Text Prediction | v1.1 | 0/? | Not started | - |
 | 9. Cold Start | v1.1 | 0/? | Not started | - |
