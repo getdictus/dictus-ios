@@ -48,6 +48,7 @@
 		AA0000A5 /* TestRecordingPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A5 /* TestRecordingPage.swift */; };
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
 		AA0000A7 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A7 /* LicensesView.swift */; };
+		AA0000C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA1000C0 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -94,6 +95,7 @@
 		AA1000A5 /* TestRecordingPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRecordingPage.swift; sourceTree = "<group>"; };
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA1000A7 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
+		AA1000C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 	/* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -162,6 +164,7 @@
 				AA40000B /* Onboarding */,
 				AA400008 /* Views */,
 				AA400009 /* Models */,
+				AA1000C0 /* Assets.xcassets */,
 				AA100005 /* DictusApp.entitlements */,
 				AA100007 /* Info.plist */,
 			);
@@ -370,6 +373,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0000C0 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
