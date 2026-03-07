@@ -18,6 +18,9 @@ struct BrandWaveform: View {
     /// Bar width scales with Dynamic Type for accessibility.
     @ScaledMetric private var barWidth: CGFloat = 4
 
+    /// Adaptive color for outer bars: gray in light mode, white in dark mode.
+    @Environment(\.colorScheme) private var colorScheme
+
     /// Number of bars to display.
     private let barCount = 30
 
@@ -68,7 +71,8 @@ struct BrandWaveform: View {
             )
         } else {
             let opacity = Double(1.0 - distanceFromCenter) * 0.9 + 0.15
-            return AnyShapeStyle(Color.white.opacity(opacity))
+            let barColor: Color = colorScheme == .dark ? .white : .gray
+            return AnyShapeStyle(barColor.opacity(opacity))
         }
     }
 }

@@ -67,7 +67,7 @@ struct KeyboardSetupPage: View {
                 Button(action: onNext) {
                     Text(keyboardDetected ? "Continuer" : "J'ai ajoute le clavier")
                         .font(.dictusSubheading)
-                        .foregroundStyle(.primary)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(

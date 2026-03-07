@@ -114,7 +114,7 @@ struct TestRecordingPage: View {
                 }) {
                     Text("Reessayer")
                         .font(.dictusSubheading)
-                        .foregroundStyle(.primary)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(
@@ -132,7 +132,7 @@ struct TestRecordingPage: View {
                 }) {
                     Text("Terminer")
                         .font(.dictusSubheading)
-                        .foregroundStyle(.primary)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(

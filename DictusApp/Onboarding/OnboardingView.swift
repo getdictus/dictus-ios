@@ -17,7 +17,12 @@ import SwiftUI
 struct OnboardingView: View {
     @Binding var isComplete: Bool
 
-    @State private var currentPage: Int = 0
+    /// WHY @SceneStorage instead of @State:
+    /// @SceneStorage persists the value across scene phase changes (background/foreground).
+    /// Without this, returning from iOS Settings (e.g., after adding the keyboard) would
+    /// reset the onboarding to step 1 because the view gets recreated. @SceneStorage
+    /// remembers which page the user was on.
+    @SceneStorage("onboarding_currentPage") private var currentPage: Int = 0
 
     /// Track which steps have been completed to prevent skipping ahead.
     @State private var completedSteps: Set<Int> = []

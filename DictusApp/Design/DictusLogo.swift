@@ -15,6 +15,10 @@ struct DictusLogo: View {
     /// Bar width.
     @ScaledMetric private var barWidth: CGFloat = 12
 
+    /// WHY @Environment colorScheme:
+    /// Side bars use white in dark mode and gray in light mode for visibility.
+    @Environment(\.colorScheme) private var colorScheme
+
     /// Bar proportions from brand kit: left=18/42, center=42/42, right=27/42
     private let proportions: [CGFloat] = [0.43, 1.0, 0.64]
 
@@ -37,9 +41,11 @@ struct DictusLogo: View {
                         )
                         .frame(width: barWidth, height: barHeight)
                 } else {
-                    // Side bars: white with brand opacity
+                    // Side bars: adaptive color with brand opacity
+                    // Gray in light mode (visible on light backgrounds), white in dark mode
+                    let barColor: Color = colorScheme == .dark ? .white : .gray
                     RoundedRectangle(cornerRadius: 4.5)
-                        .fill(Color.white.opacity(opacities[index]))
+                        .fill(barColor.opacity(opacities[index]))
                         .frame(width: barWidth, height: barHeight)
                 }
             }
