@@ -21,9 +21,19 @@ public struct BrandWaveform: View {
     /// Fixed height of the waveform container. Bars grow within this space.
     public var maxHeight: CGFloat = 80
 
-    public init(energyLevels: [Float], maxHeight: CGFloat = 80) {
+    /// When true, generates a synthetic sinusoidal wave pattern instead of using energyLevels.
+    /// WHY: During transcription processing, the audio engine is idle but we want continuous
+    /// visual feedback. A traveling sine wave maintains waveform continuity from the recording
+    /// state while indicating "processing" rather than "recording".
+    public var isProcessing: Bool = false
+
+    /// Animation phase for the sinusoidal processing wave (0.0 to 1.0).
+    @State private var processingPhase: Double = 0
+
+    public init(energyLevels: [Float] = [], maxHeight: CGFloat = 80, isProcessing: Bool = false) {
         self.energyLevels = energyLevels
         self.maxHeight = maxHeight
+        self.isProcessing = isProcessing
     }
 
     /// WHY @Environment colorScheme:
@@ -51,6 +61,17 @@ public struct BrandWaveform: View {
         }
         .frame(height: maxHeight)
         .animation(.easeOut(duration: 0.08), value: energyLevels)
+        .onAppear {
+            if isProcessing {
+                // Start continuous sinusoidal animation for processing state.
+                // WHY linear + repeatForever: Creates a smooth, endlessly traveling
+                // sine wave. The phase goes from 0 to 1, shifting the wave pattern
+                // across all bars to create a flowing "thinking" effect.
+                withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
+                    processingPhase = 1.0
+                }
+            }
+        }
     }
 
     // MARK: - Private
@@ -66,12 +87,25 @@ public struct BrandWaveform: View {
             .frame(width: barWidth, height: height)
     }
 
-    /// Map bar index to an energy value from the energyLevels array.
+    /// Map bar index to an energy value from the energyLevels array,
+    /// or generate a synthetic sinusoidal value when in processing mode.
     ///
-    /// WHY interpolation:
+    /// WHY interpolation (normal mode):
     /// energyLevels may have fewer or more entries than barCount.
     /// We map each bar position proportionally into the array.
+    ///
+    /// WHY sinusoidal (processing mode):
+    /// Creates a smooth traveling wave: each bar computes its energy from a sine
+    /// function offset by processingPhase. The wave "moves" across the bars as
+    /// processingPhase animates from 0 to 1.
     private func energyForBar(at index: Int) -> Float {
+        if isProcessing {
+            let normalizedIndex = Double(index) / Double(max(barCount - 1, 1))
+            let sineValue = sin(2 * .pi * (normalizedIndex + processingPhase))
+            // Map sine (-1...1) to energy (0.2...0.7) for a subtle ambient effect
+            return Float(0.2 + 0.25 * (sineValue + 1.0))
+        }
+
         guard !energyLevels.isEmpty else { return 0 }
         let position = Float(index) / Float(max(barCount - 1, 1))
         let arrayIndex = position * Float(energyLevels.count - 1)
@@ -126,5 +160,14 @@ public struct BrandWaveform: View {
         BrandWaveform(energyLevels: (0..<30).map { i in
             Float.random(in: 0.2...0.8)
         })
+    }
+}
+
+#Preview("Processing") {
+    ZStack {
+        Color(hex: 0x0A1628).ignoresSafeArea()
+        BrandWaveform(maxHeight: 120, isProcessing: true)
+            .opacity(0.3)
+            .padding(.horizontal)
     }
 }

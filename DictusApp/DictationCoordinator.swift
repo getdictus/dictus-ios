@@ -276,11 +276,12 @@ class DictationCoordinator: ObservableObject {
                 // Step 7: Clean up recording keys from App Group
                 cleanupRecordingKeys()
 
-                // Step 8: Brief delay for checkmark flash before returning to idle
-                try? await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
-                if status == .ready {
-                    updateStatus(.idle)
-                }
+                // WHY no auto-idle timer:
+                // Previously a 2s timer reset status to .idle automatically, causing
+                // the RecordingView overlay to dismiss before the user could read the
+                // transcription or tap action buttons. Now the coordinator stays in
+                // .ready state until RecordingView explicitly calls resetStatus()
+                // when the user taps "Terminer" or "Nouvelle dictee".
             } catch {
                 if #available(iOS 14.0, *) {
                     DictusLogger.app.error("Transcription failed: \(error.localizedDescription)")

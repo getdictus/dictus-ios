@@ -65,15 +65,22 @@ struct RecordingView: View {
                     .transition(.opacity)
                 }
 
-                // Transcribing state: show ProcessingAnimation where waveform was
+                // Transcribing state: sinusoidal waveform maintains visual continuity
+                // WHY BrandWaveform instead of ProcessingAnimation:
+                // The waveform transitions from audio-driven (recording) to sinusoidal
+                // (processing), keeping the same visual element. This feels like the
+                // waveform "calms down" into a smooth wave while thinking, rather than
+                // abruptly switching to a different animation.
                 if coordinator.status == .transcribing {
-                    ProcessingAnimation(height: 64)
+                    BrandWaveform(maxHeight: 120, isProcessing: true)
+                        .opacity(0.3)
+                        .padding(.horizontal)
                         .transition(.opacity)
-                        .padding(.bottom, 24)
 
                     Text("Transcription en cours...")
                         .font(.dictusCaption)
                         .foregroundStyle(.secondary)
+                        .padding(.top, 8)
                 }
 
                 // Result state: transcription text fades in where waveform was
