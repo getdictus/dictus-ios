@@ -30,17 +30,17 @@ struct AccentPopup: View {
                     .font(.system(size: fontSize, weight: .regular))
                     .frame(width: cellWidth, height: cellHeight)
                     .background(
-                        RoundedRectangle(cornerRadius: 5)
+                        RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                             .fill(index == selectedIndex
                                   ? Color.blue
-                                  : Color(.systemBackground))
+                                  : KeyMetrics.letterKeyColor)
                     )
                     .foregroundColor(index == selectedIndex ? .white : .primary)
             }
         }
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.systemBackground))
+                .fill(KeyMetrics.letterKeyColor)
                 .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
         )
     }

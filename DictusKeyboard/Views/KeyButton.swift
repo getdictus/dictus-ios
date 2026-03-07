@@ -133,10 +133,10 @@ struct KeyButton: View {
     /// to only apply the fallback material on older versions.
     @ViewBuilder
     private var keyBackground: some View {
-        RoundedRectangle(cornerRadius: 5)
-            .fill(Color(.systemBackground))
+        RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+            .fill(KeyMetrics.letterKeyColor)
             .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-            .dictusGlass(in: RoundedRectangle(cornerRadius: 5))
+            .dictusGlass(in: RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius))
     }
 
     // MARK: - Long-press helpers
@@ -209,7 +209,7 @@ struct KeyPopup: View {
             .frame(width: 50, height: 56)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.systemBackground))
+                    .fill(KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.2), radius: 3, x: 0, y: 2)
             )
     }
@@ -221,4 +221,13 @@ enum KeyMetrics {
     static let rowSpacing: CGFloat = 6
     static let keySpacing: CGFloat = 4
     static let rowHorizontalPadding: CGFloat = 3
+    static let keyCornerRadius: CGFloat = 6
+
+    /// Letter key background — matches native iOS keyboard.
+    /// Dark mode: visible gray (not pure black). Light mode: white.
+    static let letterKeyColor = Color(UIColor { tc in
+        tc.userInterfaceStyle == .dark
+            ? UIColor(white: 0.22, alpha: 1)
+            : .white
+    })
 }

@@ -54,8 +54,8 @@ struct RecordingOverlay: View {
     // MARK: - Recording state
 
     private var recordingContent: some View {
-        VStack(spacing: 16) {
-            // Top bar: cancel (left) and stop (right)
+        VStack(spacing: 0) {
+            // Top bar: cancel (left) and stop (right) — fixed height
             HStack {
                 Button(action: onCancel) {
                     Image(systemName: "xmark.circle.fill")
@@ -72,29 +72,36 @@ struct RecordingOverlay: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 8)
+            .padding(.vertical, 8)
 
-            Spacer()
+            // Waveform fills all remaining vertical space between buttons and footer.
+            // WHY GeometryReader: The waveform must adapt to whatever space is
+            // available rather than using a fixed maxHeight that can overflow.
+            GeometryReader { geo in
+                VStack(spacing: 8) {
+                    Spacer(minLength: 0)
 
-            // Brand waveform -- 3-bar logo-inspired visualization
-            //
-            // WHY BrandWaveform instead of 30-bar KeyboardWaveformView:
-            // Unifies the visual language between app and keyboard extension.
-            // The 3-bar waveform matches the Dictus logo proportions.
-            BrandWaveform(energyLevels: waveformEnergy, maxHeight: 140)
-                .padding(.horizontal, 2)
+                    BrandWaveform(
+                        energyLevels: waveformEnergy,
+                        maxHeight: geo.size.height * 0.7
+                    )
+                    .padding(.horizontal, 2)
 
-            // Timer in MM:SS format -- monospaced for digit alignment
+                    Spacer(minLength: 0)
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
+            }
+
+            // Footer: timer + status — fixed height
             Text(formattedTime)
                 .font(.system(size: timerFontSize, weight: .medium, design: .monospaced))
                 .foregroundColor(foregroundColor)
+                .padding(.bottom, 4)
 
-            // Status label
             Text("Listening...")
                 .font(.dictusCaption)
                 .foregroundColor(secondaryForeground)
-
-            Spacer()
+                .padding(.bottom, 8)
         }
     }
 

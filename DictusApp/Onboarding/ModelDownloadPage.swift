@@ -90,7 +90,7 @@ struct ModelDownloadPage: View {
                 Button(action: onNext) {
                     Text("Continuer")
                         .font(.dictusSubheading)
-                        .foregroundStyle(.primary)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(
@@ -105,7 +105,7 @@ struct ModelDownloadPage: View {
                     Button(action: startDownload) {
                         Text("Telecharger")
                             .font(.dictusSubheading)
-                            .foregroundStyle(.primary)
+                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                             .background(

@@ -64,7 +64,7 @@ struct MicPermissionPage: View {
                 Button(action: requestPermission) {
                     Text("Autoriser le micro")
                         .font(.dictusSubheading)
-                        .foregroundStyle(.primary)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(
@@ -80,7 +80,7 @@ struct MicPermissionPage: View {
                 Button(action: onNext) {
                     Text("Continuer")
                         .font(.dictusSubheading)
-                        .foregroundStyle(.primary)
+                        .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(

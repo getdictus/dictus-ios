@@ -83,7 +83,7 @@ class KeyboardViewController: UIInputViewController {
         // Darwin observers cleaned up by KeyboardState deinit
     }
 
-    /// Calculate the total keyboard height including toolbar.
+    /// Calculate the total keyboard height including toolbar and banner.
     /// Must match the height computed in KeyboardRootView/KeyboardView.
     private func computeKeyboardHeight() -> CGFloat {
         let rows: CGFloat = 4
@@ -91,7 +91,8 @@ class KeyboardViewController: UIInputViewController {
         let rowSpacing: CGFloat = KeyMetrics.rowSpacing  // 6pt
         let verticalPadding: CGFloat = 8
         let toolbarHeight: CGFloat = 44 // ToolbarView approximate height
-        return (rows * keyHeight) + ((rows - 1) * rowSpacing) + verticalPadding + toolbarHeight
+        let bannerHeight: CGFloat = hasFullAccess ? 0 : 40 // FullAccessBanner when shown
+        return (rows * keyHeight) + ((rows - 1) * rowSpacing) + verticalPadding + toolbarHeight + bannerHeight
     }
 
     override func textDidChange(_ textInput: UITextInput?) {

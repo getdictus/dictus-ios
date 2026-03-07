@@ -41,7 +41,13 @@ struct KeyboardRootView: View {
         VStack(spacing: 0) {
             // Full Access banner — persistent when disabled
             if !controller.hasFullAccess {
-                FullAccessBanner()
+                FullAccessBanner {
+                    // app-settings: opens the containing app's settings page in iOS Settings,
+                    // which is the closest path to the Full Access toggle for the keyboard.
+                    if let url = URL(string: "app-settings:") {
+                        state.openURLFromExtension(url)
+                    }
+                }
             }
 
             // Conditional: recording overlay (full area) OR toolbar + keyboard

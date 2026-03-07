@@ -34,7 +34,7 @@ struct ShiftKey: View {
                 .frame(width: width)
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
-                    RoundedRectangle(cornerRadius: 5)
+                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                         .fill(shiftState != .off
                               ? Color(.label)
                               : Color(.systemGray3))
@@ -77,7 +77,7 @@ struct DeleteKey: View {
             .frame(width: width)
             .frame(height: KeyMetrics.keyHeight)
             .background(
-                RoundedRectangle(cornerRadius: 5)
+                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(Color(.systemGray3))
             )
             .foregroundColor(Color(.label))
@@ -120,8 +120,8 @@ struct SpaceKey: View {
                 .frame(width: width)
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(Color(.systemBackground))
+                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                        .fill(KeyMetrics.letterKeyColor)
                         .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                 )
         }
@@ -141,7 +141,7 @@ struct ReturnKey: View {
                 .frame(width: width)
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
-                    RoundedRectangle(cornerRadius: 5)
+                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                         .fill(Color(.systemGray3))
                 )
         }
@@ -161,7 +161,7 @@ struct GlobeKey: View {
                 .frame(width: width)
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
-                    RoundedRectangle(cornerRadius: 5)
+                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                         .fill(Color(.systemGray3))
                 )
         }
@@ -182,7 +182,7 @@ struct LayerSwitchKey: View {
                 .frame(width: width)
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
-                    RoundedRectangle(cornerRadius: 5)
+                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                         .fill(Color(.systemGray3))
                 )
         }

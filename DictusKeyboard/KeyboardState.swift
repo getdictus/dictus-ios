@@ -32,6 +32,14 @@ class KeyboardState: ObservableObject {
     /// as the controller reference above.
     var openURL: ((URL) -> Void)?
 
+    /// Opens a URL from the keyboard extension using NSExtensionContext.
+    /// WHY extensionContext: This is the Apple-documented API for app extensions
+    /// to open URLs. Neither SwiftUI's openURL nor the responder chain work
+    /// reliably in keyboard extensions.
+    func openURLFromExtension(_ url: URL) {
+        controller?.extensionContext?.open(url)
+    }
+
     private let defaults = AppGroup.defaults
 
     init() {
@@ -212,7 +220,7 @@ class KeyboardState: ObservableObject {
             guard let self = self else { return }
             if self.dictationStatus == .requested {
                 // App didn't respond — not running. Open URL to launch it.
-                self.openURL?(URL(string: "dictus://dictate")!)
+                self.openURLFromExtension(URL(string: "dictus://dictate")!)
             }
         }
     }
