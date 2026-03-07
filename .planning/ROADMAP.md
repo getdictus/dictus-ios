@@ -29,7 +29,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 **Milestone Goal:** Bring the keyboard to Apple-level parity and polish the overall UX — cold start, trackpad, prediction, haptics, animations, and model catalog.
 
-- [ ] **Phase 6: Infrastructure & App Polish** - Consolidate design files into shared package, generate app icon, fix app-side visual bugs and onboarding flow
+- [x] **Phase 6: Infrastructure & App Polish** - Consolidate design files into shared package, generate app icon, fix app-side visual bugs and onboarding flow (completed 2026-03-07)
 - [ ] **Phase 7: Keyboard Parity & Visual** - Spacebar trackpad, adaptive accent key, haptics, bottom row cleanup, mic/recording pill redesign, waveform rework, performance optimization
 - [ ] **Phase 8: Text Prediction** - 3-slot suggestion bar with French autocorrect and accent suggestions
 - [ ] **Phase 9: Cold Start** - Minimize cold start frequency, optimize init time, research auto-return
@@ -124,7 +124,7 @@ Note: Phase 9 (Cold Start) is independent of Phases 7-8 and could execute in par
 | 3. Dictation UX | v1.0 | 4/4 | Complete | 2026-03-06 |
 | 4. Main App & Polish | v1.0 | 5/5 | Complete | 2026-03-07 |
 | 5. Wire Settings & Hygiene | v1.0 | 2/2 | Complete | 2026-03-07 |
-| 6. Infrastructure & App Polish | 1/3 | In Progress|  | - |
+| 6. Infrastructure & App Polish | 3/3 | Complete   | 2026-03-07 | - |
 | 7. Keyboard Parity & Visual | v1.1 | 0/? | Not started | - |
 | 8. Text Prediction | v1.1 | 0/? | Not started | - |
 | 9. Cold Start | v1.1 | 0/? | Not started | - |

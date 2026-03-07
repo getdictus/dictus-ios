@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UX & Keyboard
 status: executing
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-03-07T21:10:04.465Z"
-last_activity: 2026-03-07 — Phase 6 Plan 1 complete (design consolidation + app icon)
+stopped_at: "06-03-PLAN.md checkpoint:human-verify (Task 3)"
+last_updated: "2026-03-07T21:12:01Z"
+last_activity: 2026-03-07 — Phase 6 Plan 3 Tasks 1-2 complete, checkpoint pending
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 53
+  completed_plans: 3
+  percent: 67
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 6 of 10 (Infrastructure & App Polish)
-Plan: 2 of 3 in current phase
-Status: Executing
-Last activity: 2026-03-07 — Phase 6 Plan 2 complete (HomeView visual fixes)
+Plan: 3 of 3 in current phase (checkpoint pending)
+Status: Executing — awaiting human verification
+Last activity: 2026-03-07 — Phase 6 Plan 3 Tasks 1-2 complete, checkpoint pending
 
-Progress: [█████████████░░░░░░░] 67% (5/10 phases, 2/3 plans in phase 6)
+Progress: [██████████████████░░] 90% (5/10 phases, 3/3 plans in phase 6, Task 3 checkpoint pending)
 
 ## Performance Metrics
 
@@ -48,11 +48,11 @@ Progress: [█████████████░░░░░░░] 67% (5/
 | 3. Dictation UX | 4 | ~100 min | ~25 min |
 | 4. App & Polish | 5 | ~125 min | ~25 min |
 | 5. Settings | 2 | ~50 min | ~25 min |
-| 6. Infra & Polish | 2/3 | ~10 min | ~5 min |
+| 6. Infra & Polish | 3/3 | ~14 min | ~5 min |
 
 **Recent Trend:**
 - v1.0: 18 plans in 4 days
-- v1.1: Plan 1 in 9 min, Plan 2 in 1 min
+- v1.1: Plan 1 in 9 min, Plan 2 in 1 min, Plan 3 in 4 min (checkpoint pending)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -70,6 +70,9 @@ Recent decisions affecting current work:
 - [v1.0]: FillerWordFilter removed -- Whisper handles fillers natively
 - [v1.0]: SmartModelRouter bypassed -- runtime model switching breaks background recording
 - [Phase 06]: onAppear loadState() to fix stale model state after onboarding
+- [06-03]: RecordingMode enum (.onboarding/.standalone) for shared RecordingView
+- [06-03]: switch/case replaces TabView to block onboarding step swiping
+- [06-03]: Keyboard auto-detection via UITextInputMode.activeInputModes, no manual confirm
 
 ### Pending Todos
 
@@ -83,9 +86,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-07T21:10:04.464Z
-Stopped at: Completed 06-02-PLAN.md
-Resume file: None
+Last session: 2026-03-07T21:12:01Z
+Stopped at: 06-03-PLAN.md checkpoint:human-verify (Task 3)
+Resume file: .planning/phases/06-infrastructure-app-polish/06-03-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*
