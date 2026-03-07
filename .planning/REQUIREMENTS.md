@@ -92,37 +92,37 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| KBD-01 | — | Pending |
-| KBD-02 | — | Pending |
-| KBD-03 | — | Pending |
-| KBD-04 | — | Pending |
-| KBD-05 | — | Pending |
-| KBD-06 | — | Pending |
-| PRED-01 | — | Pending |
-| PRED-02 | — | Pending |
-| PRED-03 | — | Pending |
-| VIS-01 | — | Pending |
-| VIS-02 | — | Pending |
-| VIS-03 | — | Pending |
-| VIS-04 | — | Pending |
-| VIS-05 | — | Pending |
-| VIS-06 | — | Pending |
-| VIS-07 | — | Pending |
-| VIS-08 | — | Pending |
-| COLD-01 | — | Pending |
-| COLD-02 | — | Pending |
-| COLD-03 | — | Pending |
-| MOD-01 | — | Pending |
-| MOD-02 | — | Pending |
-| MOD-03 | — | Pending |
+| INFRA-01 | Phase 6 | Pending |
+| INFRA-02 | Phase 6 | Pending |
+| KBD-01 | Phase 7 | Pending |
+| KBD-02 | Phase 7 | Pending |
+| KBD-03 | Phase 7 | Pending |
+| KBD-04 | Phase 7 | Pending |
+| KBD-05 | Phase 7 | Pending |
+| KBD-06 | Phase 7 | Pending |
+| PRED-01 | Phase 8 | Pending |
+| PRED-02 | Phase 8 | Pending |
+| PRED-03 | Phase 8 | Pending |
+| VIS-01 | Phase 7 | Pending |
+| VIS-02 | Phase 7 | Pending |
+| VIS-03 | Phase 7 | Pending |
+| VIS-04 | Phase 6 | Pending |
+| VIS-05 | Phase 6 | Pending |
+| VIS-06 | Phase 6 | Pending |
+| VIS-07 | Phase 6 | Pending |
+| VIS-08 | Phase 6 | Pending |
+| COLD-01 | Phase 9 | Pending |
+| COLD-02 | Phase 9 | Pending |
+| COLD-03 | Phase 9 | Pending |
+| MOD-01 | Phase 10 | Pending |
+| MOD-02 | Phase 10 | Pending |
+| MOD-03 | Phase 10 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-07*
-*Last updated: 2026-03-07 after initial definition*
+*Last updated: 2026-03-07 after roadmap creation*

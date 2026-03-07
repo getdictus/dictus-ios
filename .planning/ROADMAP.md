@@ -8,6 +8,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-5 (shipped 2026-03-07)
+- 🚧 **v1.1 UX & Keyboard** — Phases 6-10 (in progress)
 
 ## Phases
 
@@ -24,7 +25,96 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 
 </details>
 
+### 🚧 v1.1 UX & Keyboard (In Progress)
+
+**Milestone Goal:** Bring the keyboard to Apple-level parity and polish the overall UX — cold start, trackpad, prediction, haptics, animations, and model catalog.
+
+- [ ] **Phase 6: Infrastructure & App Polish** - Consolidate design files into shared package, generate app icon, fix app-side visual bugs and onboarding flow
+- [ ] **Phase 7: Keyboard Parity & Visual** - Spacebar trackpad, adaptive accent key, haptics, bottom row cleanup, mic/recording pill redesign, waveform rework, performance optimization
+- [ ] **Phase 8: Text Prediction** - 3-slot suggestion bar with French autocorrect and accent suggestions
+- [ ] **Phase 9: Cold Start** - Minimize cold start frequency, optimize init time, research auto-return
+- [ ] **Phase 10: Model Catalog** - Clean underperforming models, integrate Parakeet v3, update model selection UI
+
+## Phase Details
+
+### Phase 6: Infrastructure & App Polish
+**Goal**: Eliminate design file duplication and fix all app-side visual issues so every subsequent phase builds on a clean, consolidated codebase
+**Depends on**: Phase 5 (v1.0 complete)
+**Requirements**: INFRA-01, INFRA-02, VIS-04, VIS-05, VIS-06, VIS-07, VIS-08
+**Success Criteria** (what must be TRUE):
+  1. Design components (colors, styles, shared views) live in one place and are imported by both DictusApp and DictusKeyboard — no duplicated design files
+  2. App icon renders correctly in light and dark mode on the home screen, generated from the brand kit
+  3. HomeView shows correct state after onboarding (no stale "download model" prompt when a model exists, no side band artifacts)
+  4. Onboarding flow blocks progression until each step is completed (mic permission, keyboard added, model downloaded)
+  5. Test recording and recording stop screens match the app's Liquid Glass theme with no visual inconsistencies
+**Plans**: TBD
+
+Plans:
+- [ ] 06-01: TBD
+- [ ] 06-02: TBD
+
+### Phase 7: Keyboard Parity & Visual
+**Goal**: Users perceive the Dictus keyboard as equal to or better than Apple's native keyboard in core interactions, with a polished mic button and recording experience
+**Depends on**: Phase 6 (shared design package available)
+**Requirements**: KBD-01, KBD-02, KBD-03, KBD-04, KBD-05, KBD-06, VIS-01, VIS-02, VIS-03
+**Success Criteria** (what must be TRUE):
+  1. User can long-press the spacebar and drag to move the cursor through text, with haptic ticks per character and a greyed-out keyboard overlay
+  2. The key next to N shows apostrophe or accent contextually based on what the user just typed — no more 3-tap layer switching for apostrophes
+  3. Every key tap (letters, space, return, delete, symbols) produces haptic feedback
+  4. Bottom row has emoji button (cycles to system emoji keyboard) instead of duplicate globe, and Apple dictation mic is removed
+  5. Mic button and recording validate/cancel buttons are pill-shaped, larger, and waveform animation runs at smooth 60fps
+**Plans**: TBD
+
+Plans:
+- [ ] 07-01: TBD
+- [ ] 07-02: TBD
+- [ ] 07-03: TBD
+
+### Phase 8: Text Prediction
+**Goal**: Users get French word completions and spelling corrections as they type, bridging the gap between dictation keyboard and full replacement keyboard
+**Depends on**: Phase 7 (keyboard layout finalized, gesture architecture stable)
+**Requirements**: PRED-01, PRED-02, PRED-03
+**Success Criteria** (what must be TRUE):
+  1. A 3-slot suggestion bar appears above the keyboard and updates with word completions on each keystroke
+  2. Tapping a suggestion inserts the word and adds a space — misspelled words get auto-corrected on validation
+  3. When typing characters that could be accented (a, e, u, etc.), the suggestion bar offers accented variants (a, à, â)
+**Plans**: TBD
+
+Plans:
+- [ ] 08-01: TBD
+- [ ] 08-02: TBD
+
+### Phase 9: Cold Start
+**Goal**: Users rarely experience cold starts, and when they do, the app recovers to a usable state in under 2 seconds
+**Depends on**: Phase 6 (app-side infrastructure)
+**Requirements**: COLD-01, COLD-02, COLD-03
+**Success Criteria** (what must be TRUE):
+  1. Background audio keep-alive significantly reduces how often iOS kills the app between dictation sessions
+  2. When a cold start does occur, WhisperKit initializes and the app is ready to record in under 2 seconds
+  3. After cold start, the user is guided back to the keyboard with clear UI direction (auto-return if technically achievable, explicit guidance otherwise)
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01: TBD
+
+### Phase 10: Model Catalog
+**Goal**: Users see only performant models in the catalog and can choose between WhisperKit and Parakeet engines for transcription
+**Depends on**: Phase 7 (keyboard stable, no pipeline changes during keyboard work)
+**Requirements**: MOD-01, MOD-02, MOD-03
+**Success Criteria** (what must be TRUE):
+  1. Underperforming models (confirmed unhelpful tiny/base variants) are removed from the catalog — users only see models worth downloading
+  2. Parakeet v3 is available as an alternative STT engine via the SpeechModel protocol abstraction
+  3. Model selection UI clearly displays both engines (WhisperKit and Parakeet) with relevant metadata (size, accuracy, speed)
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 6 → 7 → 8 → 9 → 10
+Note: Phase 9 (Cold Start) is independent of Phases 7-8 and could execute in parallel if needed.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -33,6 +123,12 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 | 3. Dictation UX | v1.0 | 4/4 | Complete | 2026-03-06 |
 | 4. Main App & Polish | v1.0 | 5/5 | Complete | 2026-03-07 |
 | 5. Wire Settings & Hygiene | v1.0 | 2/2 | Complete | 2026-03-07 |
+| 6. Infrastructure & App Polish | v1.1 | 0/? | Not started | - |
+| 7. Keyboard Parity & Visual | v1.1 | 0/? | Not started | - |
+| 8. Text Prediction | v1.1 | 0/? | Not started | - |
+| 9. Cold Start | v1.1 | 0/? | Not started | - |
+| 10. Model Catalog | v1.1 | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-04*
+*v1.1 phases added: 2026-03-07*
