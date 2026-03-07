@@ -81,8 +81,8 @@ struct RecordingOverlay: View {
             // WHY BrandWaveform instead of 30-bar KeyboardWaveformView:
             // Unifies the visual language between app and keyboard extension.
             // The 3-bar waveform matches the Dictus logo proportions.
-            BrandWaveform(energyLevels: waveformEnergy, maxHeight: 100)
-                .padding(.horizontal, 8)
+            BrandWaveform(energyLevels: waveformEnergy, maxHeight: 140)
+                .padding(.horizontal, 2)
 
             // Timer in MM:SS format -- monospaced for digit alignment
             Text(formattedTime)

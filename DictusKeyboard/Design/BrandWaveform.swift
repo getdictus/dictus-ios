@@ -15,23 +15,24 @@ struct BrandWaveform: View {
     /// Fixed height of the waveform container. Bars grow within this space.
     var maxHeight: CGFloat = 80
 
-    /// Bar width scales with Dynamic Type for accessibility.
-    @ScaledMetric private var barWidth: CGFloat = 4
+    /// Fixed bar width — visualization element, not text. No @ScaledMetric needed.
+    private let barWidth: CGFloat = 5
 
     /// Adaptive color for outer bars: gray in light mode, white in dark mode.
     @Environment(\.colorScheme) private var colorScheme
 
-    /// Number of bars to display.
-    private let barCount = 30
+    /// Number of bars to display. 40 bars * 5pt + 39 * 2pt spacing = 278pt,
+    /// filling most of a 375pt+ screen width.
+    private let barCount = 40
 
     var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: 2) {
             ForEach(0..<barCount, id: \.self) { index in
                 barView(index: index)
             }
         }
         .frame(height: maxHeight)
-        .animation(.easeOut(duration: 0.15), value: energyLevels)
+        .animation(.easeOut(duration: 0.08), value: energyLevels)
     }
 
     // MARK: - Private
