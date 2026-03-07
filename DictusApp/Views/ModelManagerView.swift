@@ -21,21 +21,27 @@ struct ModelManagerView: View {
     @State private var showErrorAlert = false
 
     var body: some View {
-        List {
-            ForEach(ModelInfo.all) { model in
-                ModelRow(
-                    model: model,
-                    modelManager: modelManager,
-                    onDelete: {
-                        modelToDelete = model
-                        showDeleteAlert = true
-                    },
-                    onDownloadError: { error in
-                        downloadError = error
-                        showErrorAlert = true
-                    }
-                )
+        ScrollView {
+            VStack(spacing: 12) {
+                ForEach(ModelInfo.all) { model in
+                    ModelRow(
+                        model: model,
+                        modelManager: modelManager,
+                        onDelete: {
+                            modelToDelete = model
+                            showDeleteAlert = true
+                        },
+                        onDownloadError: { error in
+                            downloadError = error
+                            showErrorAlert = true
+                        }
+                    )
+                    .padding(16)
+                    .dictusGlass()
+                }
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
         }
         .navigationTitle("Modeles")
         .background(Color.dictusBackground.ignoresSafeArea())
@@ -125,16 +131,6 @@ private struct ModelRow: View {
             trailingContent
         }
         .padding(.vertical, 4)
-        // Swipe to delete (only for ready, non-active, non-last models)
-        .swipeActions(edge: .trailing) {
-            if case .ready = state, !isActive, !isLastModel {
-                Button(role: .destructive) {
-                    onDelete()
-                } label: {
-                    Label("Supprimer", systemImage: "trash")
-                }
-            }
-        }
     }
 
     /// The trailing content changes based on the model's current state.

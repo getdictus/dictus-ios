@@ -46,6 +46,7 @@ struct SettingsView: View {
             } footer: {
                 Text("Supprime automatiquement 'euh', 'hm', 'bah', etc.")
             }
+            .listRowBackground(Color.dictusAccent.opacity(0.05))
 
             // Section 2: Clavier
             Section("Clavier") {
@@ -56,6 +57,7 @@ struct SettingsView: View {
 
                 Toggle("Retour haptique", isOn: $hapticsEnabled)
             }
+            .listRowBackground(Color.dictusAccent.opacity(0.05))
 
             // Section 3: A propos
             Section("A propos") {
@@ -79,7 +81,10 @@ struct SettingsView: View {
                     diagnosticView
                 }
             }
+            .listRowBackground(Color.dictusAccent.opacity(0.05))
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.dictusBackground.ignoresSafeArea())
         .navigationTitle("Reglages")
     }
 
