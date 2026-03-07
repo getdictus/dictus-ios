@@ -39,8 +39,14 @@ struct HomeView: View {
             }
             .padding()
         }
-        .navigationTitle("Dictus")
         .background(Color.dictusBackground.ignoresSafeArea())
+        .onAppear {
+            // Refresh model state every time HomeView appears.
+            // WHY: After onboarding, a separate ModelManager instance downloads the model.
+            // Without this refresh, HomeView's modelManager has stale state and shows
+            // "Telecharger un modele" even though a model was just downloaded.
+            modelManager.loadState()
+        }
     }
 
     // MARK: - Logo Section
@@ -67,14 +73,22 @@ struct HomeView: View {
     private var modelStatusCard: some View {
         Group {
             if modelManager.isModelReady, let modelName = activeModelName {
-                // Active model display
+                // Active model display using ModelInfo for human-readable name/size.
+                // WHY ModelInfo.forIdentifier: The raw identifier (e.g. "openai_whisper-small")
+                // is not user-friendly. ModelInfo maps it to "Small" + "~250 MB".
                 HStack {
+                    let info = ModelInfo.forIdentifier(modelName)
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Modele actif")
                             .font(.dictusCaption)
                             .foregroundColor(.secondary)
-                        Text(modelName)
+                        Text("Whisper \(info?.displayName ?? modelName)")
                             .font(.dictusSubheading)
+                        if let size = info?.sizeLabel {
+                            Text(size)
+                                .font(.dictusCaption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     Spacer()
                     Image(systemName: "checkmark.circle.fill")
