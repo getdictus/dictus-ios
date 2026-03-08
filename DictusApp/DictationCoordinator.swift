@@ -228,24 +228,19 @@ class DictationCoordinator: ObservableObject {
         // iOS forbids setActive(true) from background, so this must happen first.
         try? audioRecorder.configureAudioSession()
 
-        // Three recording paths based on WhisperKit state and caller:
+        // Two recording paths:
         //
-        // 1. COLD START FROM KEYBOARD (fromURL + whisperKit nil):
-        //    Use RawAudioCapture for instant recording while WhisperKit loads.
-        //    Auto-background after WhisperKit is ready.
+        // 1. COLD START (whisperKit nil): RawAudioCapture for instant recording.
+        //    WhisperKit loads in parallel — its loading time is absorbed by the
+        //    recording duration. A 30s vocal absorbs a 4s (or even 20s) WhisperKit load.
+        //    If fromURL: auto-background after WhisperKit is ready.
         //
-        // 2. COLD START IN-APP (whisperKit nil, not fromURL):
-        //    Wait for WhisperKit first (old behavior). The init() pre-load usually
-        //    finishes before the user taps the record button, so recording feels
-        //    instant. If not, the user sees a brief loading state — but transcription
-        //    after stopping is instant (no waiting at the end).
-        //
-        // 3. WARM START (whisperKit loaded):
-        //    Start recording immediately via WhisperKit's AudioProcessor.
+        // 2. WARM START (whisperKit loaded): AudioRecorder via WhisperKit's engine.
+        //    If fromURL: auto-background after 0.5s.
         let isColdStart = whisperKit == nil
 
-        if isColdStart && fromURL {
-            // PATH 1: Cold start from keyboard — RawAudioCapture for instant recording
+        if isColdStart {
+            // COLD START: RawAudioCapture for instant recording
             dictationTask = Task {
                 do {
                     let hasPermission = try await audioRecorder.ensureMicrophonePermission()
@@ -254,27 +249,29 @@ class DictationCoordinator: ObservableObject {
                         return
                     }
 
-                    // Start raw capture immediately (<100ms)
+                    // Start raw capture immediately (<100ms, no WhisperKit needed)
                     try rawCapture.startCapture()
                     updateStatus(.recording)
-                    PersistentLog.log("Cold start (keyboard): RawAudioCapture started, WhisperKit loading in parallel")
+                    PersistentLog.log("Cold start: RawAudioCapture started, WhisperKit loading in parallel")
 
-                    // Load WhisperKit while app is STILL in foreground.
-                    // WHY before auto-background: iOS severely throttles CPU for background
-                    // apps. WhisperKit takes ~4s in foreground but 20+ seconds from background.
-                    PersistentLog.log("Cold start (keyboard): loading WhisperKit (app stays foreground)...")
+                    // Load WhisperKit in parallel while the user is recording.
+                    // WHY keep app in foreground: iOS throttles background CPU heavily
+                    // (~4s foreground vs 20+ seconds background for model loading).
+                    // For fromURL: auto-background AFTER WhisperKit is ready.
+                    PersistentLog.log("Cold start: loading WhisperKit...")
                     try await ensureWhisperKitReady()
-                    PersistentLog.log("Cold start (keyboard): WhisperKit ready, auto-backgrounding")
+                    PersistentLog.log("Cold start: WhisperKit ready")
 
-                    // NOW auto-return to keyboard (WhisperKit is loaded)
-                    autoBackgroundApp(afterDelay: 0.3)
+                    if fromURL {
+                        PersistentLog.log("Cold start: auto-backgrounding now that WhisperKit is ready")
+                        autoBackgroundApp(afterDelay: 0.3)
+                    }
                 } catch {
-                    PersistentLog.log("Cold start (keyboard): WhisperKit load FAILED: \(error.localizedDescription)")
+                    PersistentLog.log("Cold start: WhisperKit load FAILED: \(error.localizedDescription)")
                 }
             }
         } else {
-            // PATH 2 & 3: In-app recording (cold or warm start)
-            // Wait for WhisperKit if needed, then use AudioRecorder (standard flow).
+            // WARM START: WhisperKit loaded, use AudioRecorder directly
             dictationTask = Task {
                 do {
                     let hasPermission = try await audioRecorder.ensureMicrophonePermission()
@@ -283,21 +280,12 @@ class DictationCoordinator: ObservableObject {
                         return
                     }
 
-                    // Wait for WhisperKit if not yet loaded (cold start in-app)
-                    if whisperKit == nil {
-                        PersistentLog.log("In-app cold start: waiting for WhisperKit...")
-                        try await ensureWhisperKitReady()
-                        PersistentLog.log("In-app cold start: WhisperKit ready")
-                    }
-
-                    // Start recording via WhisperKit's AudioProcessor
                     updateStatus(.recording)
                     try audioRecorder.startRecording()
-                    PersistentLog.log("Recording started (whisperKit loaded, engineRunning: \(audioRecorder.isEngineRunning))")
+                    PersistentLog.log("Warm start: recording started")
 
-                    // Auto-return to keyboard if opened via URL scheme (warm start from keyboard)
                     if fromURL {
-                        PersistentLog.log("Warm start (keyboard): scheduling auto-background")
+                        PersistentLog.log("Warm start: scheduling auto-background")
                         autoBackgroundApp(afterDelay: 0.5)
                     }
                 } catch {
