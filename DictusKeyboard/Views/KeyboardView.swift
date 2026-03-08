@@ -1,6 +1,7 @@
 // DictusKeyboard/Views/KeyboardView.swift
 import SwiftUI
 import UIKit
+import Combine
 import DictusCore
 
 /// The main keyboard view composing all rows and managing layer/shift state.

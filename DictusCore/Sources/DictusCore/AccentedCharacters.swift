@@ -60,6 +60,14 @@ public enum AccentedCharacters {
         return "'"
     }
 
+    /// Returns true if the adaptive key should replace the previous character
+    /// (i.e., when the key is showing an accent for a vowel, not apostrophe).
+    /// Used by KeyboardView to deleteBackward() before inserting the accent.
+    public static func shouldReplace(afterTyping lastChar: String?) -> Bool {
+        guard let lastChar = lastChar?.lowercased() else { return false }
+        return defaultAccents[lastChar] != nil
+    }
+
     /// Returns the base vowel that triggered the adaptive key's accent display.
     /// Used to determine which accent variants to show on long-press.
     /// Returns nil when the adaptive key is showing apostrophe (no long-press popup needed).

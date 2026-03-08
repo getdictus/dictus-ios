@@ -79,6 +79,12 @@ struct KeyboardRootView: View {
                     controller: controller,
                     hasFullAccess: controller.hasFullAccess
                 )
+
+                // Experimental: extra bottom padding to push system keyboard row
+                // (globe, dictation mic icons) further down. Wispr Flow appears to use
+                // extra height to overlay-hide the system dictation mic icon.
+                // If this doesn't work, it confirms an iOS limitation (KBD-05).
+                Spacer().frame(height: 8)
             }
         }
         // WHY .clear: The native iOS keyboard container already provides a
