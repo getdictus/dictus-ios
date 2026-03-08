@@ -3,7 +3,7 @@ import SwiftUI
 import DictusCore
 
 /// Root SwiftUI view for the keyboard extension.
-/// Phase 3 layout: FullAccessBanner + ToolbarView + (KeyboardView OR RecordingOverlay).
+/// Phase 3 layout: ToolbarView + (KeyboardView OR RecordingOverlay).
 ///
 /// WHY conditional rendering instead of overlay:
 /// When recording, the keyboard letters must be completely replaced by the recording UI
@@ -39,19 +39,6 @@ struct KeyboardRootView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Full Access banner — persistent when disabled
-            if !controller.hasFullAccess {
-                FullAccessBanner {
-                    // WHY dictus:// instead of app-settings:
-                    // app-settings: opens a blank iOS Settings page (not the keyboard settings).
-                    // dictus:// opens the Dictus app, which can guide the user through
-                    // enabling Full Access via its onboarding flow.
-                    if let url = URL(string: "dictus://") {
-                        state.openURLFromExtension(url)
-                    }
-                }
-            }
-
             // Conditional: recording overlay (full area) OR toolbar + keyboard
             if state.dictationStatus == .recording || state.dictationStatus == .transcribing {
                 RecordingOverlay(
