@@ -28,6 +28,7 @@
 		AA000037 /* KeyboardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100037 /* KeyboardLayer.swift */; };
 		AA000038 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100038 /* KeyboardLayout.swift */; };
 		AA000040 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100040 /* AudioRecorder.swift */; };
+		AA000045 /* RawAudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100045 /* RawAudioCapture.swift */; };
 		AA000041 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100041 /* TranscriptionService.swift */; };
 		AA000042 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA900020 /* WhisperKit */; };
 		AA000043 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
@@ -75,6 +76,7 @@
 		AA100037 /* KeyboardLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayer.swift; sourceTree = "<group>"; };
 		AA100038 /* KeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
 		AA100040 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
+		AA100045 /* RawAudioCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawAudioCapture.swift; sourceTree = "<group>"; };
 		AA100041 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
 		AA100043 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
 		AA100050 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
@@ -191,6 +193,7 @@
 			isa = PBXGroup;
 			children = (
 				AA100040 /* AudioRecorder.swift */,
+				AA100045 /* RawAudioCapture.swift */,
 				AA100041 /* TranscriptionService.swift */,
 			);
 			path = Audio;
@@ -400,6 +403,7 @@
 				AA000005 /* DictationCoordinator.swift in Sources */,
 				AA000006 /* DictationView.swift in Sources */,
 				AA000040 /* AudioRecorder.swift in Sources */,
+				AA000045 /* RawAudioCapture.swift in Sources */,
 				AA000041 /* TranscriptionService.swift in Sources */,
 				AA000043 /* RecordingView.swift in Sources */,
 				AA000050 /* ModelManager.swift in Sources */,

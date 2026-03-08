@@ -36,6 +36,13 @@ class DictationCoordinator: ObservableObject {
     private let defaults = AppGroup.defaults
     private let audioRecorder = AudioRecorder()
     private let transcriptionService = TranscriptionService()
+
+    /// Lightweight audio capture for cold start recording while WhisperKit loads.
+    /// WHY: On cold start, WhisperKit takes 3-4s to initialize. RawAudioCapture uses
+    /// a plain AVAudioEngine to start recording in <100ms. Samples are later passed
+    /// to WhisperKit's transcribe(audioArray:) once it finishes loading.
+    private let rawCapture = RawAudioCapture()
+
     private var whisperKit: WhisperKit?
     private var currentModelName: String?
     private var dictationTask: Task<Void, Never>?
@@ -61,6 +68,10 @@ class DictationCoordinator: ObservableObject {
     private var energyCancellable: AnyCancellable?
     private var secondsCancellable: AnyCancellable?
 
+    /// Combine subscriptions for RawAudioCapture (used during cold start).
+    private var rawEnergyCancellable: AnyCancellable?
+    private var rawSecondsCancellable: AnyCancellable?
+
     private init() {
         // Forward AudioRecorder's energy levels and seconds to coordinator
         energyCancellable = audioRecorder.$bufferEnergy
@@ -73,6 +84,21 @@ class DictationCoordinator: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] seconds in
                 self?.bufferSeconds = seconds
+            }
+
+        // Forward RawAudioCapture's energy and seconds (used during cold start recording)
+        rawEnergyCancellable = rawCapture.$bufferEnergy
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] energy in
+                guard let self, self.rawCapture.isCapturing else { return }
+                self.bufferEnergy = energy
+                self.forwardWaveformToAppGroup(energy: energy)
+            }
+        rawSecondsCancellable = rawCapture.$bufferSeconds
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] seconds in
+                guard let self, self.rawCapture.isCapturing else { return }
+                self.bufferSeconds = seconds
             }
 
         // Observe keyboard-initiated stop/cancel signals via Darwin notifications.
@@ -149,7 +175,11 @@ class DictationCoordinator: ObservableObject {
 
     /// Start the recording pipeline.
     /// Called from URL scheme (first time) or Darwin notification (subsequent times).
-    func startDictation() {
+    ///
+    /// - Parameter fromURL: If true, the app was opened via URL scheme from the keyboard.
+    ///   On cold start, this triggers auto-background after 0.5s so the user returns
+    ///   to the keyboard automatically while recording continues in background.
+    func startDictation(fromURL: Bool = false) {
         // Guard against duplicate calls while actively recording or transcribing.
         // Allow .ready (previous transcription just finished) and .idle — both are valid
         // states to start a new recording from.
@@ -176,7 +206,7 @@ class DictationCoordinator: ObservableObject {
         }
 
         if #available(iOS 14.0, *) {
-            DictusLogger.app.info("Dictation started")
+            DictusLogger.app.info("Dictation started (fromURL: \(fromURL))")
         }
 
         // Check if a model is downloaded and ready
@@ -195,93 +225,183 @@ class DictationCoordinator: ObservableObject {
         // iOS forbids setActive(true) from background, so this must happen first.
         try? audioRecorder.configureAudioSession()
 
-        dictationTask = Task {
-            do {
-                // Step 1: Check microphone permission
-                let hasPermission = try await audioRecorder.ensureMicrophonePermission()
-                guard hasPermission else {
-                    handleError("Microphone permission denied")
-                    return
-                }
+        // COLD START PATH: WhisperKit not loaded yet — use RawAudioCapture for instant recording
+        // WHY: On cold start, ensureWhisperKitReady() takes 3-4s. Instead of blocking,
+        // we start recording immediately with RawAudioCapture (plain AVAudioEngine, <100ms)
+        // and load WhisperKit in parallel. Samples are transcribed at stopDictation().
+        let isColdStart = whisperKit == nil
 
-                // Step 2: Initialize WhisperKit if not already ready
-                try await ensureWhisperKitReady()
+        if isColdStart {
+            dictationTask = Task {
+                do {
+                    // Step 1: Check microphone permission
+                    let hasPermission = try await audioRecorder.ensureMicrophonePermission()
+                    guard hasPermission else {
+                        handleError("Microphone permission denied")
+                        return
+                    }
 
-                // Step 3: Start recording
-                updateStatus(.recording)
-                try audioRecorder.startRecording()
+                    // Step 2: Start raw capture immediately (<100ms)
+                    try rawCapture.startCapture()
+                    updateStatus(.recording)
 
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Recording started successfully")
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.info("Cold start: RawAudioCapture started, WhisperKit loading in parallel")
+                    }
+
+                    // Step 3: Auto-return to keyboard if opened via URL scheme
+                    if fromURL {
+                        autoBackgroundApp(afterDelay: 0.5)
+                    }
+
+                    // Step 4: Load WhisperKit in parallel (non-blocking for the user)
+                    // This runs while the user is already recording and back in their app.
+                    try await ensureWhisperKitReady()
+
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.info("Cold start: WhisperKit ready while recording continues via RawAudioCapture")
+                    }
+                } catch {
+                    // WhisperKit init failed — recording continues via rawCapture,
+                    // we'll handle the error at stopDictation() time
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.warning("Cold start: WhisperKit parallel load failed: \(error.localizedDescription)")
+                    }
                 }
-            } catch {
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.error("Failed to start dictation: \(error.localizedDescription)")
+            }
+        } else {
+            // WARM START PATH: WhisperKit already loaded — use existing flow
+            dictationTask = Task {
+                do {
+                    // Step 1: Check microphone permission
+                    let hasPermission = try await audioRecorder.ensureMicrophonePermission()
+                    guard hasPermission else {
+                        handleError("Microphone permission denied")
+                        return
+                    }
+
+                    // Step 2: Start recording via WhisperKit's AudioProcessor
+                    updateStatus(.recording)
+                    try audioRecorder.startRecording()
+
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.info("Warm start: recording started successfully")
+                    }
+
+                    // Step 3: Auto-return to keyboard if opened via URL scheme
+                    if fromURL {
+                        autoBackgroundApp(afterDelay: 0.5)
+                    }
+                } catch {
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.error("Failed to start dictation: \(error.localizedDescription)")
+                    }
+                    handleError(error.localizedDescription)
                 }
-                handleError(error.localizedDescription)
             }
         }
     }
 
     /// Called when user taps the stop button.
     /// Stops recording and starts transcription using the already-loaded model.
+    ///
+    /// Two paths:
+    /// - **RawAudioCapture active** (cold start): stop raw capture, ensure WhisperKit is ready,
+    ///   transcribe the raw samples, then warm up audioRecorder for subsequent recordings.
+    /// - **AudioRecorder active** (warm start): collect samples from WhisperKit's AudioProcessor
+    ///   and transcribe (existing flow).
     func stopDictation() {
         dictationTask?.cancel()
 
         dictationTask = Task {
             do {
-                // Step 1: Collect audio samples WITHOUT stopping the engine.
-                // Engine keeps running so iOS doesn't suspend us — allows
-                // subsequent recordings from background via Darwin notification.
-                let samples = audioRecorder.collectSamples()
+                let samples: [Float]
 
-                guard !samples.isEmpty else {
-                    handleError("No audio recorded")
-                    return
+                if rawCapture.isCapturing {
+                    // COLD START PATH: audio was captured via RawAudioCapture
+                    samples = rawCapture.stopCapture()
+
+                    guard !samples.isEmpty else {
+                        handleError("No audio recorded")
+                        return
+                    }
+
+                    let audioDuration = Double(samples.count) / 16000.0
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.info("Cold start stop. Raw samples: \(samples.count), Duration: \(String(format: "%.1f", audioDuration))s")
+                    }
+
+                    // Ensure WhisperKit is ready before transcription.
+                    // WHY: If the user recorded for >3s, WhisperKit should already be loaded
+                    // (parallel init started in startDictation). For very short recordings (<3s),
+                    // the user waits 1-2s extra here — acceptable tradeoff for instant start.
+                    updateStatus(.transcribing)
+                    try await ensureWhisperKitReady()
+
+                    let text = try await transcriptionService.transcribe(audioSamples: samples)
+
+                    // Warm up audioRecorder for subsequent recordings (warm start path).
+                    // WHY: Now that WhisperKit is loaded, prepare the WhisperKit-based
+                    // AudioRecorder so the next recording uses the warm start path.
+                    // RawAudioCapture's engine is already stopped, so no conflict.
+                    try? audioRecorder.warmUp()
+
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.info("AudioRecorder warmed up for subsequent recordings")
+                    }
+
+                    // Write result to App Group
+                    lastResult = text
+                    status = .ready
+                    defaults.set(text, forKey: SharedKeys.lastTranscription)
+                    defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
+                    defaults.set(DictationStatus.ready.rawValue, forKey: SharedKeys.dictationStatus)
+                    defaults.synchronize()
+
+                    DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
+                    DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
+
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.info("Transcription complete: \(text)")
+                    }
+
+                    cleanupRecordingKeys()
+                } else {
+                    // WARM START PATH: existing flow via WhisperKit's AudioProcessor
+                    samples = audioRecorder.collectSamples()
+
+                    guard !samples.isEmpty else {
+                        handleError("No audio recorded")
+                        return
+                    }
+
+                    let audioDuration = Double(samples.count) / 16000.0
+
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.info("Recording stopped. Samples: \(samples.count), Duration: \(String(format: "%.1f", audioDuration))s")
+                    }
+
+                    // Transcribe with the already-loaded model (no model switching).
+                    updateStatus(.transcribing)
+                    let text = try await transcriptionService.transcribe(audioSamples: samples)
+
+                    // Write result to App Group
+                    lastResult = text
+                    status = .ready
+                    defaults.set(text, forKey: SharedKeys.lastTranscription)
+                    defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
+                    defaults.set(DictationStatus.ready.rawValue, forKey: SharedKeys.dictationStatus)
+                    defaults.synchronize()
+
+                    DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
+                    DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
+
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.info("Transcription complete: \(text)")
+                    }
+
+                    cleanupRecordingKeys()
                 }
-
-                let audioDuration = Double(samples.count) / 16000.0
-
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Recording stopped. Samples: \(samples.count), Duration: \(String(format: "%.1f", audioDuration))s")
-                }
-
-                // Transcribe with the already-loaded model (no model switching).
-                // WHY no SmartModelRouter: switching models reinitializes WhisperKit,
-                // which kills the warm audio engine and breaks background recording.
-                // The user's chosen model is loaded once and reused for all recordings.
-                updateStatus(.transcribing)
-                let text = try await transcriptionService.transcribe(audioSamples: samples)
-
-                // Step 6: Write result to App Group
-                // IMPORTANT: Write both lastTranscription AND status to UserDefaults
-                // BEFORE posting any Darwin notifications. This prevents a race condition
-                // where the keyboard reads UserDefaults between two separate notifications
-                // and sees status=ready but lastTranscription is still nil.
-                lastResult = text
-                status = .ready
-                defaults.set(text, forKey: SharedKeys.lastTranscription)
-                defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
-                defaults.set(DictationStatus.ready.rawValue, forKey: SharedKeys.dictationStatus)
-                defaults.synchronize()
-
-                // Post notifications after ALL writes are complete
-                DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
-                DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
-
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Transcription complete: \(text)")
-                }
-
-                // Step 7: Clean up recording keys from App Group
-                cleanupRecordingKeys()
-
-                // WHY no auto-idle timer:
-                // Previously a 2s timer reset status to .idle automatically, causing
-                // the RecordingView overlay to dismiss before the user could read the
-                // transcription or tap action buttons. Now the coordinator stays in
-                // .ready state until RecordingView explicitly calls resetStatus()
-                // when the user taps "Terminer" or "Nouvelle dictee".
             } catch {
                 if #available(iOS 14.0, *) {
                     DictusLogger.app.error("Transcription failed: \(error.localizedDescription)")
@@ -301,12 +421,18 @@ class DictationCoordinator: ObservableObject {
         dictationTask?.cancel()
         dictationTask = nil
 
-        // Discard samples but keep engine alive for next recording.
-        // WHY collectSamples() not stopRecording(): stopRecording() kills the
-        // audio engine, which means the next recording from background fails
-        // (cold start requires foreground). collectSamples() discards audio
-        // without stopping the engine — same pattern as normal stop flow.
-        _ = audioRecorder.collectSamples()
+        if rawCapture.isCapturing {
+            // Cold start path: stop raw capture and discard samples
+            _ = rawCapture.stopCapture()
+
+            // Warm up audioRecorder if WhisperKit is ready, for subsequent recordings
+            if whisperKit != nil {
+                try? audioRecorder.warmUp()
+            }
+        } else {
+            // Warm start path: discard samples but keep engine alive for next recording.
+            _ = audioRecorder.collectSamples()
+        }
 
         // Reset all state
         bufferEnergy = []
@@ -326,6 +452,34 @@ class DictationCoordinator: ObservableObject {
     }
 
     // MARK: - Private Helpers
+
+    /// Programmatically send the app to background, returning the user to the keyboard.
+    ///
+    /// WHY this technique: There is no public iOS API to "go back" to the previous app.
+    /// This uses UIControl.sendAction with URLSessionTask.suspend selector — a technique
+    /// that simulates a "Home button" press. It uses public API classes in a non-documented
+    /// way. Several published App Store apps use this (Wispr Flow, SuperWhisper).
+    ///
+    /// WHY the delay: We need the audio session to be fully active and the status written
+    /// to App Group before backgrounding. The 0.5s delay ensures:
+    /// 1. AVAudioEngine is running and capturing audio
+    /// 2. Status .recording is written to App Group (keyboard shows overlay)
+    /// 3. The audio engine keeps the app alive via UIBackgroundModes:audio
+    private func autoBackgroundApp(afterDelay delay: TimeInterval = 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            guard let self, self.status == .recording else { return }
+
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.info("Auto-backgrounding app to return user to keyboard")
+            }
+
+            UIControl().sendAction(
+                #selector(URLSessionTask.suspend),
+                to: UIApplication.shared,
+                for: nil
+            )
+        }
+    }
 
     /// Register Darwin notification observers for keyboard stop/cancel signals.
     ///
