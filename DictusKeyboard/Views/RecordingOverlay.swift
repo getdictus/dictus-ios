@@ -27,9 +27,6 @@ struct RecordingOverlay: View {
     /// while keeping monospaced design for proper digit alignment.
     @ScaledMetric private var timerFontSize: CGFloat = 20
 
-    /// Icon size scales with Dynamic Type.
-    @ScaledMetric private var iconSize: CGFloat = 28
-
     private var foregroundColor: Color {
         colorScheme == .dark ? .white : Color(white: 0.15)
     }
@@ -56,21 +53,13 @@ struct RecordingOverlay: View {
 
     private var recordingContent: some View {
         VStack(spacing: 0) {
-            // Top bar: cancel (left) and stop (right) — fixed height
+            // Top bar: cancel (left) and validate (right) — pill-shaped Liquid Glass buttons
             HStack {
-                Button(action: onCancel) {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: iconSize))
-                        .foregroundColor(secondaryForeground)
-                }
+                PillButton(icon: "xmark", color: secondaryForeground, action: onCancel)
 
                 Spacer()
 
-                Button(action: onStop) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: iconSize))
-                        .foregroundColor(foregroundColor)
-                }
+                PillButton(icon: "checkmark", color: .dictusSuccess, action: onStop)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
@@ -128,5 +117,30 @@ struct RecordingOverlay: View {
         let minutes = Int(elapsedSeconds) / 60
         let seconds = Int(elapsedSeconds) % 60
         return String(format: "%02d:%02d", minutes, seconds)
+    }
+
+    // MARK: - Pill Button
+
+    /// Pill-shaped recording control button with Liquid Glass styling.
+    ///
+    /// WHY pill shape instead of SF Symbol circles:
+    /// The old xmark.circle.fill / checkmark.circle.fill were small and hard to tap.
+    /// Pill buttons (56x36) match the toolbar mic button shape, create visual consistency
+    /// across the recording UI, and provide a larger hit target.
+    private struct PillButton: View {
+        let icon: String
+        let color: Color
+        let action: () -> Void
+
+        var body: some View {
+            Button(action: action) {
+                Image(systemName: icon)
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(color)
+                    .frame(width: 56, height: 36)
+                    .dictusGlass(in: Capsule())
+            }
+            .buttonStyle(GlassPressStyle())
+        }
     }
 }
