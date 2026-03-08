@@ -2,7 +2,22 @@
 import SwiftUI
 import UIKit
 import Combine
+import AudioToolbox
 import DictusCore
+
+/// System sound IDs matching Apple's 3-category keyboard click sounds.
+/// These are the standard iOS keyboard sounds that differentiate letter keys,
+/// delete, and modifier keys (space, return, shift, globe, layer switch).
+///
+/// WHY AudioServicesPlaySystemSound instead of UIDevice.playInputClick():
+/// playInputClick() produces a single identical click for all keys. Apple's
+/// native keyboard uses 3 distinct sounds. AudioServicesPlaySystemSound()
+/// respects the ringer/silent switch, so it behaves correctly on mute.
+enum KeySound {
+    static let letter: SystemSoundID = 1104
+    static let delete: SystemSoundID = 1155
+    static let modifier: SystemSoundID = 1156
+}
 
 /// The main keyboard view composing all rows and managing layer/shift state.
 struct KeyboardView: View {
@@ -50,9 +65,7 @@ struct KeyboardView: View {
                                 insertCharacter(char)
                             },
                             onDelete: {
-                                if hasFullAccess {
-                                    UIDevice.current.playInputClick()
-                                }
+                                AudioServicesPlaySystemSound(KeySound.delete)
                                 controller.textDocumentProxy.deleteBackward()
                                 lastTypedChar = nil
                                 checkAutocapitalize()
@@ -61,48 +74,42 @@ struct KeyboardView: View {
                                 // Delete backward to the previous word boundary.
                                 // textDocumentProxy has no deleteWordBackward(), so we
                                 // read the text before the cursor and find the last word boundary.
-                                if hasFullAccess {
-                                    UIDevice.current.playInputClick()
-                                }
+                                AudioServicesPlaySystemSound(KeySound.delete)
                                 deleteWordBackward()
                                 lastTypedChar = nil
                                 checkAutocapitalize()
                             },
                             onGlobe: {
                                 HapticFeedback.keyTapped()
-                                UIDevice.current.playInputClick()
+                                AudioServicesPlaySystemSound(KeySound.modifier)
                                 controller.advanceToNextInputMode()
                             },
                             onLayerSwitch: {
                                 HapticFeedback.keyTapped()
-                                UIDevice.current.playInputClick()
+                                AudioServicesPlaySystemSound(KeySound.modifier)
                                 toggleLettersNumbers()
                             },
                             onSymbolToggle: {
                                 HapticFeedback.keyTapped()
-                                UIDevice.current.playInputClick()
+                                AudioServicesPlaySystemSound(KeySound.modifier)
                                 toggleNumbersSymbols()
                             },
                             onSpace: {
-                                if hasFullAccess {
-                                    UIDevice.current.playInputClick()
-                                }
+                                AudioServicesPlaySystemSound(KeySound.modifier)
                                 controller.textDocumentProxy.insertText(" ")
                                 lastTypedChar = nil
                                 checkAutocapitalize()
                             },
                             onReturn: {
                                 HapticFeedback.keyTapped()
-                                if hasFullAccess {
-                                    UIDevice.current.playInputClick()
-                                }
+                                AudioServicesPlaySystemSound(KeySound.modifier)
                                 controller.textDocumentProxy.insertText("\n")
                                 lastTypedChar = nil
                                 checkAutocapitalize()
                             },
                             onAccentAdaptive: { char in
                                 HapticFeedback.keyTapped()
-                                UIDevice.current.playInputClick()
+                                AudioServicesPlaySystemSound(KeySound.letter)
                                 // If the accent key is replacing a vowel (not inserting apostrophe),
                                 // delete the previous vowel first, then insert the accented version.
                                 if AccentedCharacters.shouldReplace(afterTyping: lastTypedChar) {
@@ -156,11 +163,9 @@ struct KeyboardView: View {
     }
 
     private func insertCharacter(_ char: String) {
-        // Play system keyboard click sound when Full Access is enabled.
-        // Requires KeyboardInputView (UIInputViewAudioFeedback) to be in view hierarchy.
-        if hasFullAccess {
-            UIDevice.current.playInputClick()
-        }
+        // Play letter-category keyboard click sound.
+        // AudioServicesPlaySystemSound respects the ringer/silent switch automatically.
+        AudioServicesPlaySystemSound(KeySound.letter)
 
         // Track last typed character for the adaptive accent key.
         // The accent key uses this to decide whether to show apostrophe or an accent.

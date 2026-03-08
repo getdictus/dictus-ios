@@ -1,5 +1,6 @@
 // DictusKeyboard/Views/SpecialKeyButton.swift
 import SwiftUI
+import AudioToolbox
 import DictusCore
 
 /// Shift key with three states: off, shift (single character), caps lock.
@@ -13,7 +14,7 @@ struct ShiftKey: View {
     var body: some View {
         Button {
             HapticFeedback.keyTapped()
-            UIDevice.current.playInputClick()
+            AudioServicesPlaySystemSound(KeySound.modifier)
             let now = Date()
             let interval = now.timeIntervalSince(lastTapTime)
             lastTapTime = now
@@ -100,6 +101,7 @@ struct DeleteKey: View {
                             isHolding = true
                             onDelete() // Immediate first delete
                             HapticFeedback.keyTapped()
+                            AudioServicesPlaySystemSound(KeySound.delete)
                             deleteCount = 1
                             repeatTask = Task { @MainActor in
                                 // Initial delay before repeat begins (~400ms,
@@ -111,10 +113,12 @@ struct DeleteKey: View {
                                         // Word-level deletion: delete back to previous word boundary
                                         onWordDelete()
                                         HapticFeedback.keyTapped()
+                                        AudioServicesPlaySystemSound(KeySound.delete)
                                         try? await Task.sleep(nanoseconds: 120_000_000)
                                     } else {
                                         onDelete()
                                         HapticFeedback.keyTapped()
+                                        AudioServicesPlaySystemSound(KeySound.delete)
                                         try? await Task.sleep(nanoseconds: 100_000_000)
                                     }
                                     deleteCount += 1
