@@ -55,8 +55,13 @@ public enum AccentedCharacters {
     /// It appears in "l'", "d'", "n'", "j'", "c'", "s'" etc. Having it one tap away
     /// on the letters layer eliminates the 3-tap layer switch currently needed.
     public static func adaptiveKeyLabel(afterTyping lastChar: String?) -> String {
-        guard let lastChar = lastChar?.lowercased() else { return "'" }
-        if let accent = defaultAccents[lastChar] { return accent }
+        guard let lastChar = lastChar else { return "'" }
+        let lowered = lastChar.lowercased()
+        if let accent = defaultAccents[lowered] {
+            // Preserve original case: if user typed "A", return "À" not "à"
+            return lastChar == lastChar.uppercased() && lastChar != lastChar.lowercased()
+                ? accent.uppercased() : accent
+        }
         return "'"
     }
 
