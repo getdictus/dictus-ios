@@ -16,10 +16,10 @@ Requirements for v1.1 UX & Keyboard milestone. Each maps to roadmap phases.
 
 - [ ] **KBD-01**: User can long-press spacebar to activate trackpad mode (greyed-out keyboard, drag to move cursor, haptic tick per character)
 - [ ] **KBD-02**: Adaptive key next to N displays apostrophe or accent based on typing context
-- [ ] **KBD-03**: Haptic feedback fires on every key tap (space, return, delete, letters, symbols)
+- [x] **KBD-03**: Haptic feedback fires on every key tap (space, return, delete, letters, symbols)
 - [ ] **KBD-04**: Duplicate globe key removed, replaced with emoji button (cycles to system emoji keyboard via advanceToNextInputMode)
-- [ ] **KBD-05**: Apple dictation mic removed from keyboard
-- [ ] **KBD-06**: Keyboard typing performance optimized — input latency and haptic response comparable to native Apple keyboard
+- [x] **KBD-05**: Apple dictation mic removed from keyboard
+- [x] **KBD-06**: Keyboard typing performance optimized — input latency and haptic response comparable to native Apple keyboard
 
 ### Text Prediction
 
@@ -96,10 +96,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-02 | Phase 6 | Complete |
 | KBD-01 | Phase 7 | Pending |
 | KBD-02 | Phase 7 | Pending |
-| KBD-03 | Phase 7 | Pending |
+| KBD-03 | Phase 7 | Complete |
 | KBD-04 | Phase 7 | Pending |
-| KBD-05 | Phase 7 | Pending |
-| KBD-06 | Phase 7 | Pending |
+| KBD-05 | Phase 7 | Complete |
+| KBD-06 | Phase 7 | Complete |
 | PRED-01 | Phase 8 | Pending |
 | PRED-02 | Phase 8 | Pending |
 | PRED-03 | Phase 8 | Pending |

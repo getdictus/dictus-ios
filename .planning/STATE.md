@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UX & Keyboard
 status: executing
-stopped_at: Completed 07-03-PLAN.md
-last_updated: "2026-03-08T11:32:28.740Z"
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-03-08T11:32:47.842Z"
 last_activity: "2026-03-08 — Plan 07-03 complete (visual polish: pill buttons, Canvas waveform)"
 progress:
   total_phases: 5
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 7 of 10 (Keyboard Parity & Visual)
-Plan: 3 of 5 in current phase (1 complete)
+Plan: 3 of 5 in current phase (2 complete)
 Status: In progress
-Last activity: 2026-03-08 — Plan 07-03 complete (visual polish: pill buttons, Canvas waveform)
+Last activity: 2026-03-08 — Plan 07-02 complete (emoji key + adaptive accent key)
 
-Progress: [████░░░░░░░░░░░░░░░░] 20% (Phase 7: 1/5 plans complete)
+Progress: [████████░░░░░░░░░░░░] 40% (Phase 7: 2/5 plans complete)
 
 ## Performance Metrics
 
@@ -59,6 +59,7 @@ Progress: [████░░░░░░░░░░░░░░░░] 20% (Ph
 | Phase 06 P03 | 5min | 3 tasks | 6 files |
 | Phase 07 P03 | 5min | 2 tasks | 4 files |
 | Phase 07 P01 | 5min | 2 tasks | 6 files |
+| Phase 07 P02 | 5min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -80,6 +81,11 @@ Recent decisions affecting current work:
 - [07-03]: AnyShape type erasure for conditional Circle/Capsule rendering in AnimatedMicButton
 - [07-03]: Canvas single-pass rendering for BrandWaveform (solid Color, not per-bar gradient)
 - [07-03]: dictusSuccess green for validate button to distinguish from cancel
+- [Phase 07]: Pre-allocated static UIImpactFeedbackGenerator instances eliminate 2-5ms per-tap haptic latency
+- [Phase 07]: Device-adaptive key height: 42pt SE, 46pt standard, 50pt Plus/Max via UIScreen.main.bounds
+- [Phase 07]: KBD-05: system dictation mic icon is iOS limitation with no public API to suppress
+- [Phase 07]: Apostrophe as adaptive key default -- most common non-letter char in French
+- [Phase 07]: Long-press on adaptive key only when showing accent (not apostrophe)
 
 ### Pending Todos
 
@@ -93,9 +99,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-08T11:31:02Z
-Stopped at: Completed 07-03-PLAN.md
-Resume file: .planning/phases/07-keyboard-parity-visual/07-03-SUMMARY.md
+Last session: 2026-03-08T11:32:41.232Z
+Stopped at: Completed 07-02-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*
