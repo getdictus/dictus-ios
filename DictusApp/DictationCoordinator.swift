@@ -446,15 +446,22 @@ class DictationCoordinator: ObservableObject {
 
     // MARK: - Private Helpers
 
-    /// Programmatically send the app to background, returning the user to the keyboard.
+    /// Return the user to the app they were using (the keyboard host app).
     ///
-    /// WHY this technique: There is no public iOS API to "go back" to the previous app.
-    /// This uses UIControl.sendAction with URLSessionTask.suspend selector — a technique
-    /// that simulates a "Home button" press. It uses public API classes in a non-documented
-    /// way. Several published App Store apps use this (Wispr Flow, SuperWhisper).
+    /// WHY two strategies:
+    /// 1. **Preferred**: Read the host app's bundle ID from App Group (written by
+    ///    the keyboard extension) and reopen it via LSApplicationWorkspace.
+    ///    This returns the user to the EXACT app they were in, not the Home screen.
+    /// 2. **Fallback**: If the bundle ID is unknown, use the UIControl.sendAction
+    ///    suspend technique (simulates Home button). Better than nothing.
+    ///
+    /// WHY LSApplicationWorkspace: There is no public iOS API to "go back" to a
+    /// specific app by bundle ID. LSApplicationWorkspace is a private framework class,
+    /// but openApplicationWithBundleID: is the technique used by published App Store
+    /// apps (Wispr Flow, SuperWhisper) for this exact use case.
     ///
     /// WHY the delay: We need the audio session to be fully active and the status written
-    /// to App Group before backgrounding. The 0.5s delay ensures:
+    /// to App Group before leaving. The 0.5s delay ensures:
     /// 1. AVAudioEngine is running and capturing audio
     /// 2. Status .recording is written to App Group (keyboard shows overlay)
     /// 3. The audio engine keeps the app alive via UIBackgroundModes:audio
@@ -462,14 +469,56 @@ class DictationCoordinator: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self, self.status == .recording else { return }
 
-            PersistentLog.log("Auto-backgrounding app to return user to keyboard")
+            let hostBundleID = self.defaults.string(forKey: SharedKeys.hostBundleID)
+            PersistentLog.log("Auto-return: hostBundleID=\(hostBundleID ?? "nil")")
 
-            UIControl().sendAction(
-                #selector(URLSessionTask.suspend),
-                to: UIApplication.shared,
-                for: nil
-            )
+            if let bundleID = hostBundleID, self.openAppByBundleID(bundleID) {
+                PersistentLog.log("Returned to host app: \(bundleID)")
+            } else {
+                // Fallback: simulate Home button press
+                PersistentLog.log("Fallback: suspend (Home) — no host bundle ID")
+                UIControl().sendAction(
+                    #selector(URLSessionTask.suspend),
+                    to: UIApplication.shared,
+                    for: nil
+                )
+            }
         }
+    }
+
+    /// Open an app by its bundle identifier using LSApplicationWorkspace.
+    ///
+    /// WHY this private API: There is no public iOS API to open an arbitrary app
+    /// by bundle ID. LSApplicationWorkspace.openApplicationWithBundleID: is a
+    /// private API used by several published App Store apps for auto-return.
+    /// Returns true if the call succeeded, false otherwise.
+    @discardableResult
+    private func openAppByBundleID(_ bundleID: String) -> Bool {
+        guard let workspaceClass = NSClassFromString("LSApplicationWorkspace") else {
+            PersistentLog.log("LSApplicationWorkspace not available")
+            return false
+        }
+
+        let selector = NSSelectorFromString("defaultWorkspace")
+        guard workspaceClass.responds(to: selector) else {
+            PersistentLog.log("defaultWorkspace selector not available")
+            return false
+        }
+
+        guard let result = (workspaceClass as AnyObject).perform(selector),
+              let workspace = result.takeUnretainedValue() as AnyObject? else {
+            PersistentLog.log("Could not get defaultWorkspace")
+            return false
+        }
+
+        let openSelector = NSSelectorFromString("openApplicationWithBundleID:")
+        guard workspace.responds(to: openSelector) else {
+            PersistentLog.log("openApplicationWithBundleID: not available")
+            return false
+        }
+
+        workspace.perform(openSelector, with: bundleID)
+        return true
     }
 
     /// Register Darwin notification observers for keyboard stop/cancel signals.

@@ -219,10 +219,13 @@ class KeyboardState: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
             if self.dictationStatus == .requested {
+                // Save the host app's bundle ID so DictusApp can return to it.
+                // WHY here (not earlier): We only need this for the URL fallback path
+                // (cold start). When the app handles via Darwin notification, the user
+                // never leaves their current app.
+                self.saveHostBundleID()
+
                 // App didn't respond — not running. Open URL to launch it.
-                // WHY try both methods: extensionContext.open() can silently fail on
-                // some iOS versions. SwiftUI's openURL uses the responder chain which
-                // may work more reliably for keyboard extensions.
                 let url = URL(string: "dictus://dictate")!
                 if let openURL = self.openURL {
                     openURL(url)
@@ -230,6 +233,19 @@ class KeyboardState: ObservableObject {
                     self.openURLFromExtension(url)
                 }
             }
+        }
+    }
+
+    /// Save the host app's bundle ID to App Group for auto-return.
+    ///
+    /// WHY this technique: UIInputViewController doesn't expose the host bundle ID
+    /// publicly. We use the parent view controller's private _hostBundleID property
+    /// via key-value coding. This is the same approach used by other published
+    /// App Store apps (Wispr Flow, SuperWhisper) for auto-return functionality.
+    private func saveHostBundleID() {
+        if let bundleID = controller?.parent?.value(forKey: "_hostBundleID") as? String {
+            defaults.set(bundleID, forKey: SharedKeys.hostBundleID)
+            defaults.synchronize()
         }
     }
 
