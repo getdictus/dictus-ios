@@ -39,12 +39,10 @@ struct ShiftKey: View {
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                         .fill(shiftState != .off
-                              ? Color(.label)
-                              : Color(.systemGray3))
+                              ? Color(.systemBackground)  // light bg when active (Apple convention)
+                              : Color(.systemGray5))
                 )
-                .foregroundColor(shiftState != .off
-                                 ? Color(.systemBackground)
-                                 : Color(.label))
+                .foregroundColor(Color(.label))
         }
     }
 
@@ -92,7 +90,7 @@ struct DeleteKey: View {
             .frame(height: KeyMetrics.keyHeight)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                    .fill(Color(.systemGray3))
+                    .fill(Color(.systemGray5))
             )
             .foregroundColor(Color(.label))
             .gesture(
@@ -164,10 +162,15 @@ struct SpaceKey: View {
 
     // Sensitivity: ~9pt per character horizontally (Apple parity)
     private let pointsPerCharacter: CGFloat = 9.0
-    // Vertical sensitivity: ~15pt per character for smooth proportional movement.
-    // Previously 20pt with 40-char line jumps, which felt "locked to lines".
-    // Now each 15pt of vertical drag = 1 character offset, creating smooth vertical scrolling.
-    private let pointsPerVerticalChar: CGFloat = 15.0
+
+    /// Estimated characters per visible line in the host text field.
+    /// Since UITextDocumentProxy has no line-width API, this is a heuristic.
+    /// 40 chars is typical for iPhone body text in Messages/Notes.
+    private let estimatedCharsPerLine: Int = 40
+
+    /// Points of vertical drag that correspond to one visual text line.
+    /// ~40pt matches a typical line height at standard iOS font sizes.
+    private let pointsPerVerticalLine: CGFloat = 40.0
 
     var body: some View {
         Text("espace")
@@ -226,14 +229,17 @@ struct SpaceKey: View {
             accumulatedOffsetX -= CGFloat(horizontalChars) * pointsPerCharacter
         }
 
-        // Vertical cursor movement: smooth proportional movement (1 char per 15pt).
-        // Previously used 40-char line jumps which felt jarring. Now moves the cursor
-        // by individual character offsets for smooth vertical scrolling through text.
+        // Vertical cursor movement: estimate line jumps.
+        // Apple's trackpad moves the cursor between visual lines. Since
+        // UITextDocumentProxy only offers adjustTextPosition(byCharacterOffset:),
+        // we estimate ~40 characters per visible line and jump that many chars
+        // per ~40pt of vertical drag — one line-height worth of finger movement.
         accumulatedOffsetY += deltaY
-        let verticalChars = acceleratedOffset(accumulatedOffsetY, sensitivity: pointsPerVerticalChar)
-        if verticalChars != 0 {
-            onCursorMove(verticalChars)
-            accumulatedOffsetY -= CGFloat(verticalChars) * pointsPerVerticalChar
+        let verticalLines = Int(accumulatedOffsetY / pointsPerVerticalLine)
+        if verticalLines != 0 {
+            let charOffset = verticalLines * estimatedCharsPerLine
+            onCursorMove(charOffset)
+            accumulatedOffsetY -= CGFloat(verticalLines) * pointsPerVerticalLine
         }
     }
 
@@ -277,7 +283,7 @@ struct ReturnKey: View {
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(Color(.systemGray3))
+                        .fill(Color(.systemGray5))
                 )
         }
         .foregroundColor(Color(.label))
@@ -297,15 +303,21 @@ struct GlobeKey: View {
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(Color(.systemGray3))
+                        .fill(Color(.systemGray5))
                 )
         }
         .foregroundColor(Color(.label))
     }
 }
 
-/// Emoji key — replaces the globe key visually with a smiling face emoji icon.
-/// Functionally identical to globe: tapping cycles to the next input mode.
+/// Emoji key — shows a face.smiling icon matching Apple's native AZERTY visual style.
+/// Tapping cycles to the next installed input mode via advanceToNextInputMode().
+///
+/// KNOWN iOS LIMITATION: No public API exists to target the emoji keyboard
+/// specifically. advanceToNextInputMode() cycles through ALL installed keyboards
+/// in order. This matches Gboard, SwiftKey, and other third-party keyboard behavior.
+/// The emoji icon is used because Apple's native AZERTY shows this icon, and in most
+/// user configurations, the next input mode IS the emoji keyboard.
 ///
 /// WHY emoji icon instead of globe:
 /// Apple's native AZERTY keyboard shows an emoji face icon in the bottom-left,
@@ -324,7 +336,7 @@ struct EmojiKey: View {
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(Color(.systemGray3))
+                        .fill(Color(.systemGray5))
                 )
         }
         .foregroundColor(Color(.label))
@@ -364,9 +376,10 @@ struct AdaptiveAccentKey: View {
     private let keyFontSize: CGFloat = 22
 
     /// The character the key should display right now.
+    /// The accent already has the correct case from adaptiveKeyLabel (which
+    /// preserves the case of lastTypedChar). No need for isShifted re-casing.
     private var displayChar: String {
-        let base = AccentedCharacters.adaptiveKeyLabel(afterTyping: lastTypedChar)
-        return isShifted ? base.uppercased() : base
+        AccentedCharacters.adaptiveKeyLabel(afterTyping: lastTypedChar)
     }
 
     var body: some View {
@@ -441,7 +454,9 @@ struct AdaptiveAccentKey: View {
             // Look up the vowel that triggered the current accent display.
             if let vowel = AccentedCharacters.adaptiveKeyVowel(afterTyping: lastTypedChar),
                let accents = AccentedCharacters.accents(for: vowel), !accents.isEmpty {
-                if isShifted {
+                // Derive case from lastTypedChar (not isShifted, which auto-unshifts after typing)
+                let isUppercase = lastTypedChar?.uppercased() == lastTypedChar && lastTypedChar?.lowercased() != lastTypedChar
+                if isUppercase {
                     accentOptions = accents.map { $0.uppercased() }
                 } else {
                     accentOptions = accents
@@ -480,7 +495,7 @@ struct LayerSwitchKey: View {
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(Color(.systemGray3))
+                        .fill(Color(.systemGray5))
                 )
         }
         .foregroundColor(Color(.label))
