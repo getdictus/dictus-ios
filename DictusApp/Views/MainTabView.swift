@@ -64,7 +64,6 @@ struct MainTabView: View {
             // On iOS 26, TabView automatically gets Liquid Glass styling -- no manual glass needed.
             if coordinator.status != .idle {
                 RecordingView(mode: .standalone)
-                    .transition(.opacity)
             }
         }
     }

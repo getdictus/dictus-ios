@@ -39,6 +39,8 @@ struct RecordingView: View {
     @State private var errorMessage: String?
     /// Brief "Copie !" feedback when user taps the transcription result.
     @State private var showCopiedFeedback = false
+    /// Two-step dismissal: animate out first, then reset coordinator status.
+    @State private var isDismissing = false
 
     init(mode: RecordingMode, onComplete: (() -> Void)? = nil) {
         self.mode = mode
@@ -54,15 +56,24 @@ struct RecordingView: View {
                 HStack {
                     if mode == .standalone {
                         Button {
-                            coordinator.resetStatus()
+                            HapticFeedback.recordingStopped()
+                            // Step 1: animate RecordingView out
+                            withAnimation(.easeOut(duration: 0.25)) {
+                                isDismissing = true
+                            }
+                            // Step 2: after animation, reset status (no animation leak to HomeView)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                                coordinator.resetStatus()
+                            }
                         } label: {
                             Image(systemName: "xmark")
                                 .font(.system(size: 17, weight: .medium))
                                 .foregroundColor(.secondary)
-                                .frame(width: 36, height: 36)
+                                .frame(width: 40, height: 40)
                                 .dictusGlass(in: Circle())
                         }
-                        .buttonStyle(GlassPressStyle())
+                        .frame(width: 44, height: 44)
+                        .buttonStyle(GlassPressStyle(pressedScale: 1.35))
                         .padding(.leading, 20)
                         .padding(.top, 8)
                     }
@@ -161,6 +172,7 @@ struct RecordingView: View {
                     .frame(height: 40)
             }
         }
+        .opacity(isDismissing ? 0 : 1)
         .animation(.easeOut(duration: 0.3), value: showResult)
         .animation(.easeOut(duration: 0.3), value: showCopiedFeedback)
         .onChange(of: coordinator.status) { newStatus in

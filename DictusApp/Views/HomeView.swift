@@ -12,6 +12,7 @@ import DictusCore
 struct HomeView: View {
     @EnvironmentObject var coordinator: DictationCoordinator
     @ObservedObject var modelManager: ModelManager
+    @State private var showCopiedFeedback = false
 
     /// Read active model name from App Group for display.
     private var activeModelName: String? {
@@ -126,19 +127,39 @@ struct HomeView: View {
 
     // MARK: - Last Transcription Card
 
-    /// Shows the most recent transcription result in a glass card.
+    /// Shows the most recent transcription result in a tappable glass card.
+    /// Tap to copy to clipboard (same behavior as RecordingView result).
     private func transcriptionCard(result: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Derniere transcription")
-                .font(.dictusCaption)
-                .foregroundColor(.secondary)
-            Text(result)
-                .font(.dictusBody)
-                .lineLimit(3)
+        Button {
+            UIPasteboard.general.string = result
+            HapticFeedback.recordingStopped()
+            showCopiedFeedback = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                showCopiedFeedback = false
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(showCopiedFeedback ? "Copie !" : "Derniere transcription")
+                        .font(.dictusCaption)
+                        .foregroundColor(showCopiedFeedback ? .dictusSuccess : .secondary)
+                        .animation(.easeOut(duration: 0.2), value: showCopiedFeedback)
+                    Spacer()
+                    Image(systemName: "doc.on.doc")
+                        .font(.system(size: 13))
+                        .foregroundColor(.secondary.opacity(0.6))
+                }
+                Text(result)
+                    .font(.dictusBody)
+                    .foregroundColor(.primary)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .dictusGlass()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .dictusGlass()
+        .buttonStyle(GlassPressStyle(pressedScale: 0.97))
     }
 
     // MARK: - Test Dictation Link
