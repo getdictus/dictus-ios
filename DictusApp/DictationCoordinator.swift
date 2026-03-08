@@ -301,8 +301,12 @@ class DictationCoordinator: ObservableObject {
         dictationTask?.cancel()
         dictationTask = nil
 
-        // Stop recording and discard the audio samples
-        _ = audioRecorder.stopRecording()
+        // Discard samples but keep engine alive for next recording.
+        // WHY collectSamples() not stopRecording(): stopRecording() kills the
+        // audio engine, which means the next recording from background fails
+        // (cold start requires foreground). collectSamples() discards audio
+        // without stopping the engine — same pattern as normal stop flow.
+        _ = audioRecorder.collectSamples()
 
         // Reset all state
         bufferEnergy = []
@@ -318,7 +322,7 @@ class DictationCoordinator: ObservableObject {
     /// Reset status to idle (e.g., after user returns to keyboard).
     func resetStatus() {
         updateStatus(.idle)
-        lastResult = nil
+        // Keep lastResult so HomeView can display the last transcription card.
     }
 
     // MARK: - Private Helpers
