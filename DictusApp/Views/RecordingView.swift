@@ -75,27 +75,34 @@ struct RecordingView: View {
                 // pushing anything down when text appears.
                 ZStack {
                     if showResult, let result = transcriptionResult {
-                        ScrollView {
-                            Button {
-                                UIPasteboard.general.string = result
-                                showCopiedFeedback = true
-                                HapticFeedback.recordingStopped()
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                    showCopiedFeedback = false
+                        // WHY GeometryReader + ScrollView combo:
+                        // GeometryReader gives us the available height so we can
+                        // vertically center short text. ScrollView handles long text
+                        // that exceeds the zone. Short text sits centered; long text scrolls.
+                        GeometryReader { geo in
+                            ScrollView {
+                                Button {
+                                    UIPasteboard.general.string = result
+                                    showCopiedFeedback = true
+                                    HapticFeedback.recordingStopped()
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                        showCopiedFeedback = false
+                                    }
+                                } label: {
+                                    Text(result)
+                                        .font(.dictusBody)
+                                        .foregroundStyle(.primary)
+                                        .multilineTextAlignment(.center)
+                                        .padding()
+                                        .frame(maxWidth: .infinity)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 14)
+                                                .fill(Color.dictusSurface.opacity(0.5))
+                                        )
                                 }
-                            } label: {
-                                Text(result)
-                                    .font(.dictusBody)
-                                    .foregroundStyle(.primary)
-                                    .multilineTextAlignment(.center)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 14)
-                                            .fill(Color.dictusSurface.opacity(0.5))
-                                    )
+                                .padding(.horizontal, 32)
+                                .frame(minHeight: geo.size.height)
                             }
-                            .padding(.horizontal, 32)
                         }
                         .transition(.opacity)
                     } else if showError, let error = errorMessage {
