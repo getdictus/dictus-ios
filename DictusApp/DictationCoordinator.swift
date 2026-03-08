@@ -190,28 +190,31 @@ class DictationCoordinator: ObservableObject {
             return
         }
 
-        // WHY this early return:
+        // WHY this early return (only for Darwin notification path, NOT URL scheme):
         // iOS forbids starting an audio engine from background. If the engine isn't
         // running and we're in background (Darwin notification from keyboard), attempting
         // to start will fail. By returning early WITHOUT changing status, the keyboard's
         // dictationStatus stays ".requested". After 500ms, the keyboard's fallback opens
         // the dictus:// URL scheme, which brings the app to foreground. Then
         // handleIncomingURL calls startDictation() again — this time from foreground.
-        let isBackground = UIApplication.shared.applicationState != .active
-        if isBackground && !audioRecorder.isEngineRunning {
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Deferring dictation — engine not running and app in background (keyboard URL fallback will bring us to foreground)")
-            }
+        //
+        // WHY NOT when fromURL:
+        // When opened via URL scheme, the app IS transitioning to foreground, but
+        // applicationState may still be .inactive (not yet .active). Returning early
+        // here would prevent cold start recording entirely. RawAudioCapture doesn't
+        // need audioRecorder's engine — it has its own AVAudioEngine.
+        let appState = UIApplication.shared.applicationState
+        if !fromURL && appState != .active && !audioRecorder.isEngineRunning {
+            PersistentLog.log("Deferring dictation — engine not running and app state=\(appState.rawValue) (keyboard URL fallback will bring us to foreground)")
             return
         }
 
-        if #available(iOS 14.0, *) {
-            DictusLogger.app.info("Dictation started (fromURL: \(fromURL))")
-        }
+        PersistentLog.log("startDictation(fromURL: \(fromURL), appState: \(appState.rawValue), whisperKit: \(whisperKit != nil ? "loaded" : "nil"), engineRunning: \(audioRecorder.isEngineRunning))")
 
         // Check if a model is downloaded and ready
         let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
         guard modelReady else {
+            PersistentLog.log("No model downloaded — aborting")
             handleError("No model downloaded. Open Dictus to download a model.")
             return
         }
@@ -244,29 +247,23 @@ class DictationCoordinator: ObservableObject {
                     // Step 2: Start raw capture immediately (<100ms)
                     try rawCapture.startCapture()
                     updateStatus(.recording)
-
-                    if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Cold start: RawAudioCapture started, WhisperKit loading in parallel")
-                    }
+                    PersistentLog.log("Cold start: RawAudioCapture started, WhisperKit loading in parallel")
 
                     // Step 3: Auto-return to keyboard if opened via URL scheme
                     if fromURL {
+                        PersistentLog.log("Cold start: scheduling auto-background in 0.5s")
                         autoBackgroundApp(afterDelay: 0.5)
                     }
 
                     // Step 4: Load WhisperKit in parallel (non-blocking for the user)
                     // This runs while the user is already recording and back in their app.
+                    PersistentLog.log("Cold start: loading WhisperKit in parallel...")
                     try await ensureWhisperKitReady()
-
-                    if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Cold start: WhisperKit ready while recording continues via RawAudioCapture")
-                    }
+                    PersistentLog.log("Cold start: WhisperKit ready while recording continues via RawAudioCapture")
                 } catch {
                     // WhisperKit init failed — recording continues via rawCapture,
                     // we'll handle the error at stopDictation() time
-                    if #available(iOS 14.0, *) {
-                        DictusLogger.app.warning("Cold start: WhisperKit parallel load failed: \(error.localizedDescription)")
-                    }
+                    PersistentLog.log("Cold start: WhisperKit parallel load FAILED: \(error.localizedDescription)")
                 }
             }
         } else {
@@ -283,19 +280,15 @@ class DictationCoordinator: ObservableObject {
                     // Step 2: Start recording via WhisperKit's AudioProcessor
                     updateStatus(.recording)
                     try audioRecorder.startRecording()
-
-                    if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Warm start: recording started successfully")
-                    }
+                    PersistentLog.log("Warm start: recording started successfully")
 
                     // Step 3: Auto-return to keyboard if opened via URL scheme
                     if fromURL {
+                        PersistentLog.log("Warm start: scheduling auto-background in 0.5s")
                         autoBackgroundApp(afterDelay: 0.5)
                     }
                 } catch {
-                    if #available(iOS 14.0, *) {
-                        DictusLogger.app.error("Failed to start dictation: \(error.localizedDescription)")
-                    }
+                    PersistentLog.log("Warm start FAILED: \(error.localizedDescription)")
                     handleError(error.localizedDescription)
                 }
             }
@@ -469,9 +462,7 @@ class DictationCoordinator: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self, self.status == .recording else { return }
 
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Auto-backgrounding app to return user to keyboard")
-            }
+            PersistentLog.log("Auto-backgrounding app to return user to keyboard")
 
             UIControl().sendAction(
                 #selector(URLSessionTask.suspend),

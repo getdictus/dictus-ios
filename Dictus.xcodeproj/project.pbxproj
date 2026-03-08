@@ -49,6 +49,7 @@
 		AA0000A5 /* TestRecordingPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A5 /* TestRecordingPage.swift */; };
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
 		AA0000A7 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A7 /* LicensesView.swift */; };
+		AA0000A8 /* DebugLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A8 /* DebugLogView.swift */; };
 		AA0000C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA1000C0 /* Assets.xcassets */; };
 		AA0000C1 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = AA1000C1 /* Settings.bundle */; };
 /* End PBXBuildFile section */
@@ -98,6 +99,7 @@
 		AA1000A5 /* TestRecordingPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestRecordingPage.swift; sourceTree = "<group>"; };
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AA1000A7 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
+		AA1000A8 /* DebugLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLogView.swift; sourceTree = "<group>"; };
 		AA1000C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA1000C1 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 	/* End PBXFileReference section */
@@ -210,6 +212,7 @@
 				AA100092 /* DiagnosticDetailView.swift */,
 				AA1000A6 /* SettingsView.swift */,
 				AA1000A7 /* LicensesView.swift */,
+				AA1000A8 /* DebugLogView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -420,6 +423,7 @@
 				AA0000A5 /* TestRecordingPage.swift in Sources */,
 				AA0000A6 /* SettingsView.swift in Sources */,
 				AA0000A7 /* LicensesView.swift in Sources */,
+				AA0000A8 /* DebugLogView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
