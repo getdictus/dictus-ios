@@ -86,6 +86,10 @@ struct KeyboardRootView: View {
             // View property, so we pass it on first appearance.
             state.controller = controller
             state.openURL = { url in openURL(url) }
+
+            // Pre-allocate haptic generators so the first key tap has zero latency.
+            // Without this, the Taptic Engine needs ~2-5ms to spin up on first use.
+            HapticFeedback.warmUp()
         }
     }
 }

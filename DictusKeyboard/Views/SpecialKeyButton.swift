@@ -1,5 +1,6 @@
 // DictusKeyboard/Views/SpecialKeyButton.swift
 import SwiftUI
+import DictusCore
 
 /// Shift key with three states: off, shift (single character), caps lock.
 /// Double-tap detected via timestamp: if second tap arrives within 400ms, activate caps lock.
@@ -11,6 +12,7 @@ struct ShiftKey: View {
 
     var body: some View {
         Button {
+            HapticFeedback.keyTapped()
             let now = Date()
             let interval = now.timeIntervalSince(lastTapTime)
             lastTapTime = now
@@ -166,6 +168,32 @@ struct GlobeKey: View {
                 )
         }
         .foregroundColor(Color(.label))
+    }
+}
+
+/// Emoji key — replaces the globe key visually with a smiling face emoji icon.
+/// Functionally identical to globe: tapping cycles to the next input mode.
+///
+/// WHY emoji icon instead of globe:
+/// Apple's native AZERTY keyboard shows an emoji face icon in the bottom-left,
+/// not a globe. The globe icon appears only when multiple keyboards are installed
+/// AND the user hasn't set a default. Our keyboard always shows emoji to match
+/// the most common native experience.
+struct EmojiKey: View {
+    let width: CGFloat
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            Text("\u{1F60A}")  // smiling face emoji
+                .font(.system(size: 18))
+                .frame(width: width)
+                .frame(height: KeyMetrics.keyHeight)
+                .background(
+                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                        .fill(Color(.systemGray3))
+                )
+        }
     }
 }
 

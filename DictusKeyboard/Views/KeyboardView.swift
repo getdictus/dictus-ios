@@ -43,27 +43,33 @@ struct KeyboardView: View {
                             insertCharacter(char)
                         },
                         onDelete: {
+                            HapticFeedback.keyTapped()
                             if hasFullAccess {
                                 UIDevice.current.playInputClick()
                             }
                             controller.textDocumentProxy.deleteBackward()
                         },
                         onGlobe: {
+                            HapticFeedback.keyTapped()
                             controller.advanceToNextInputMode()
                         },
                         onLayerSwitch: {
+                            HapticFeedback.keyTapped()
                             toggleLettersNumbers()
                         },
                         onSymbolToggle: {
+                            HapticFeedback.keyTapped()
                             toggleNumbersSymbols()
                         },
                         onSpace: {
+                            HapticFeedback.keyTapped()
                             if hasFullAccess {
                                 UIDevice.current.playInputClick()
                             }
                             controller.textDocumentProxy.insertText(" ")
                         },
                         onReturn: {
+                            HapticFeedback.keyTapped()
                             if hasFullAccess {
                                 UIDevice.current.playInputClick()
                             }
