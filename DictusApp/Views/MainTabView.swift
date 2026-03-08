@@ -65,7 +65,6 @@ struct MainTabView: View {
             if coordinator.status != .idle {
                 RecordingView(mode: .standalone)
                     .transition(.opacity)
-                    .ignoresSafeArea()
             }
         }
     }
