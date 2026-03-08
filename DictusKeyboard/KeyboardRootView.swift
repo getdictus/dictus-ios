@@ -42,9 +42,11 @@ struct KeyboardRootView: View {
             // Full Access banner — persistent when disabled
             if !controller.hasFullAccess {
                 FullAccessBanner {
-                    // app-settings: opens the containing app's settings page in iOS Settings,
-                    // which is the closest path to the Full Access toggle for the keyboard.
-                    if let url = URL(string: "app-settings:") {
+                    // WHY dictus:// instead of app-settings:
+                    // app-settings: opens a blank iOS Settings page (not the keyboard settings).
+                    // dictus:// opens the Dictus app, which can guide the user through
+                    // enabling Full Access via its onboarding flow.
+                    if let url = URL(string: "dictus://") {
                         state.openURLFromExtension(url)
                     }
                 }
@@ -61,6 +63,11 @@ struct KeyboardRootView: View {
                 )
                 .frame(height: totalContentHeight)
             } else {
+                // KBD-05: The system-provided Apple dictation mic icon below the keyboard cannot be
+                // removed by third-party keyboard extensions. No public API exists to suppress it.
+                // Users can disable it in Settings > General > Keyboard > Enable Dictation.
+                // Our mic button in ToolbarView is the Dictus-specific dictation trigger.
+
                 // Toolbar visible only when not recording
                 ToolbarView(
                     hasFullAccess: controller.hasFullAccess,

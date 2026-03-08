@@ -10,6 +10,10 @@ struct KeyboardView: View {
 
     @State private var currentLayer: KeyboardLayerType = .letters
     @State private var shiftState: ShiftState = .off
+    /// Tracks the last typed character for the adaptive accent key.
+    /// After typing a vowel (e, a, u, i, o), the adaptive key shows the most
+    /// common accent for that vowel. Reset on space, delete, return, or layer switch.
+    @State private var lastTypedChar: String? = nil
 
     private var isShifted: Bool {
         shiftState == .shifted || shiftState == .capsLocked
@@ -48,6 +52,7 @@ struct KeyboardView: View {
                                 UIDevice.current.playInputClick()
                             }
                             controller.textDocumentProxy.deleteBackward()
+                            lastTypedChar = nil
                         },
                         onGlobe: {
                             HapticFeedback.keyTapped()
@@ -67,6 +72,7 @@ struct KeyboardView: View {
                                 UIDevice.current.playInputClick()
                             }
                             controller.textDocumentProxy.insertText(" ")
+                            lastTypedChar = nil
                         },
                         onReturn: {
                             HapticFeedback.keyTapped()
@@ -74,7 +80,13 @@ struct KeyboardView: View {
                                 UIDevice.current.playInputClick()
                             }
                             controller.textDocumentProxy.insertText("\n")
+                            lastTypedChar = nil
                         },
+                        onAccentAdaptive: { char in
+                            HapticFeedback.keyTapped()
+                            insertCharacter(char)
+                        },
+                        lastTypedChar: lastTypedChar,
                         hasFullAccess: hasFullAccess
                     )
                 }
@@ -97,6 +109,10 @@ struct KeyboardView: View {
         if hasFullAccess {
             UIDevice.current.playInputClick()
         }
+
+        // Track last typed character for the adaptive accent key.
+        // The accent key uses this to decide whether to show apostrophe or an accent.
+        lastTypedChar = char
 
         controller.textDocumentProxy.insertText(char)
 

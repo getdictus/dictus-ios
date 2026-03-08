@@ -66,6 +66,11 @@ class KeyboardViewController: UIInputViewController {
         constraint.isActive = true
         self.heightConstraint = constraint
 
+        // Attempt to prevent top-row key popup clipping. iOS may re-enforce
+        // clipsToBounds — if so, this is a known limitation of third-party keyboard extensions.
+        kbInputView.clipsToBounds = false
+        hosting.view.clipsToBounds = false
+
         // Assign as the controller's inputView — this activates audio feedback
         self.inputView = kbInputView
     }
@@ -87,7 +92,7 @@ class KeyboardViewController: UIInputViewController {
     /// Must match the height computed in KeyboardRootView/KeyboardView.
     private func computeKeyboardHeight() -> CGFloat {
         let rows: CGFloat = 4
-        let keyHeight: CGFloat = KeyMetrics.keyHeight  // 46pt, matches native iOS keyboard
+        let keyHeight: CGFloat = KeyMetrics.keyHeight  // Dynamic: 42pt SE, 46pt standard, 50pt Plus/Max
         let rowSpacing: CGFloat = KeyMetrics.rowSpacing  // 6pt
         let verticalPadding: CGFloat = 8
         let toolbarHeight: CGFloat = 44 // ToolbarView approximate height

@@ -218,8 +218,20 @@ struct KeyPopup: View {
 }
 
 /// Shared key dimension constants.
+///
+/// WHY dynamic keyHeight:
+/// Apple's keyboard uses taller keys on Plus/Max devices (larger screens) and shorter
+/// keys on SE/compact devices. A fixed 46pt height feels cramped on large screens and
+/// oversized on small ones. We scale based on UIScreen.main.bounds.height to match
+/// the native feel per device class.
 enum KeyMetrics {
-    static let keyHeight: CGFloat = 46
+    /// Device-adaptive key height: 42pt (SE/compact), 46pt (standard), 50pt (Plus/Max).
+    static var keyHeight: CGFloat {
+        let screenHeight = UIScreen.main.bounds.height
+        if screenHeight <= 667 { return 42 }       // SE / compact (667pt = iPhone SE)
+        else if screenHeight <= 852 { return 46 }   // Standard (844-852pt = iPhone 14/15/16)
+        else { return 50 }                           // Plus / Max (926pt+)
+    }
     static let rowSpacing: CGFloat = 6
     static let keySpacing: CGFloat = 4
     static let rowHorizontalPadding: CGFloat = 3
