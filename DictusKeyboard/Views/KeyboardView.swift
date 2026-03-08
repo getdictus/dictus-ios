@@ -65,7 +65,7 @@ struct KeyboardView: View {
                                 insertCharacter(char)
                             },
                             onDelete: {
-                                AudioServicesPlaySystemSound(KeySound.delete)
+                                // Sound is played by DeleteKey directly (alongside haptic)
                                 controller.textDocumentProxy.deleteBackward()
                                 lastTypedChar = nil
                                 checkAutocapitalize()
@@ -74,7 +74,7 @@ struct KeyboardView: View {
                                 // Delete backward to the previous word boundary.
                                 // textDocumentProxy has no deleteWordBackward(), so we
                                 // read the text before the cursor and find the last word boundary.
-                                AudioServicesPlaySystemSound(KeySound.delete)
+                                // Sound is played by DeleteKey directly (alongside haptic)
                                 deleteWordBackward()
                                 lastTypedChar = nil
                                 checkAutocapitalize()
