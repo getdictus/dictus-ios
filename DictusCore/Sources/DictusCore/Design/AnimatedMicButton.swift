@@ -80,23 +80,41 @@ public struct AnimatedMicButton: View {
     private var ringEffect: some View {
         switch status {
         case .idle, .ready, .failed:
-            // Soft glow ring pulsing 0.3-0.6 opacity over 2s
+            // Glass ring with soft glow pulsing 0.3-0.6 opacity over 2s
             Circle()
-                .stroke(Color.dictusAccent.opacity(glowOpacity), lineWidth: 3)
-                .frame(width: buttonSize + 12, height: buttonSize + 12)
+                .fill(Color.clear)
+                .frame(width: buttonSize + 20, height: buttonSize + 20)
+                .dictusGlass(in: Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color.dictusAccent.opacity(glowOpacity), lineWidth: 2)
+                        .frame(width: buttonSize + 20, height: buttonSize + 20)
+                )
 
         case .recording:
             // Red pulse ring scaling 1.0-1.3 over 0.8s
             Circle()
-                .stroke(Color.dictusRecording.opacity(0.5), lineWidth: 4)
-                .frame(width: buttonSize + 12, height: buttonSize + 12)
+                .fill(Color.clear)
+                .frame(width: buttonSize + 20, height: buttonSize + 20)
+                .dictusGlass(in: Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color.dictusRecording.opacity(0.5), lineWidth: 3)
+                        .frame(width: buttonSize + 20, height: buttonSize + 20)
+                )
                 .scaleEffect(pulseScale)
 
         case .transcribing, .requested:
-            // Static blue ring during transcription
+            // Static glass ring during transcription
             Circle()
-                .stroke(Color.dictusAccent.opacity(0.4), lineWidth: 3)
-                .frame(width: buttonSize + 12, height: buttonSize + 12)
+                .fill(Color.clear)
+                .frame(width: buttonSize + 20, height: buttonSize + 20)
+                .dictusGlass(in: Circle())
+                .overlay(
+                    Circle()
+                        .stroke(Color.dictusAccent.opacity(0.4), lineWidth: 2)
+                        .frame(width: buttonSize + 20, height: buttonSize + 20)
+                )
         }
     }
 

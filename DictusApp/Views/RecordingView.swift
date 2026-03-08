@@ -60,8 +60,7 @@ struct RecordingView: View {
                                 .font(.system(size: 17, weight: .medium))
                                 .foregroundColor(.secondary)
                                 .frame(width: 36, height: 36)
-                                .background(Color.dictusSurface.opacity(0.6))
-                                .clipShape(Circle())
+                                .dictusGlass(in: Circle())
                         }
                         .padding(.leading, 20)
                         .padding(.top, 8)
@@ -95,10 +94,7 @@ struct RecordingView: View {
                                         .multilineTextAlignment(.center)
                                         .padding()
                                         .frame(maxWidth: .infinity)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 14)
-                                                .fill(Color.dictusSurface.opacity(0.5))
-                                        )
+                                        .dictusGlass(in: RoundedRectangle(cornerRadius: 14))
                                 }
                                 .padding(.horizontal, 32)
                                 .frame(minHeight: geo.size.height)
@@ -232,15 +228,20 @@ struct RecordingView: View {
     @ViewBuilder
     private var micOrStopButton: some View {
         if coordinator.status == .recording {
-            // Red stop button
+            // Red stop button with glass ring
             Button(action: stopRecording) {
                 ZStack {
+                    // Glass ring behind the stop button
+                    Circle()
+                        .fill(Color.clear)
+                        .frame(width: 96, height: 96)
+                        .dictusGlass(in: Circle())
                     Circle()
                         .fill(Color.dictusRecording)
-                        .frame(width: 80, height: 80)
+                        .frame(width: 72, height: 72)
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color.white)
-                        .frame(width: 28, height: 28)
+                        .frame(width: 26, height: 26)
                 }
             }
             .accessibilityLabel("Arreter l'enregistrement")
