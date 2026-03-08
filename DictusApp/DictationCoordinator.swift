@@ -644,29 +644,27 @@ class DictationCoordinator: ObservableObject {
 
         // Create and store the init task so concurrent callers can await it
         let task = Task<Void, Error> {
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Initializing WhisperKit with model: \(modelName)")
-            }
+            PersistentLog.log("WhisperKit init START — model: \(modelName)")
+            let startTime = CFAbsoluteTimeGetCurrent()
 
             let config = WhisperKitConfig(
                 model: modelName,
-                verbose: false,
+                verbose: true,
                 prewarm: true,
                 load: true,
                 download: true
             )
 
             let kit = try await WhisperKit(config)
+            let elapsed = CFAbsoluteTimeGetCurrent() - startTime
+            PersistentLog.log("WhisperKit init DONE — \(String(format: "%.1f", elapsed))s for \(modelName)")
+
             self.whisperKit = kit
             self.currentModelName = modelName
 
             // Share the instance with AudioRecorder and TranscriptionService
             audioRecorder.prepare(whisperKit: kit)
             transcriptionService.prepare(whisperKit: kit)
-
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.info("WhisperKit ready with model: \(modelName)")
-            }
         }
         initTask = task
 
