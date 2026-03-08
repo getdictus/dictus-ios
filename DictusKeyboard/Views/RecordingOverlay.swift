@@ -101,7 +101,12 @@ struct RecordingOverlay: View {
         VStack(spacing: 16) {
             Spacer()
 
-            ProcessingAnimation(height: 40)
+            // WHY BrandWaveform instead of ProcessingAnimation:
+            // ProcessingAnimation showed 3 logo-based pulsing bars. BrandWaveform with
+            // isProcessing: true produces a sinusoidal traveling wave that visually
+            // continues from the recording waveform, signaling "processing audio data".
+            BrandWaveform(maxHeight: 60, isProcessing: true)
+                .padding(.horizontal, 16)
 
             Text("Transcription...")
                 .font(.dictusCaption)

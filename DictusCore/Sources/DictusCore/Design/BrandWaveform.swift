@@ -119,7 +119,10 @@ public struct BrandWaveform: View {
         let upper = min(lower + 1, energyLevels.count - 1)
         let fraction = arrayIndex - Float(lower)
         let value = energyLevels[lower] * (1 - fraction) + energyLevels[upper] * fraction
-        return min(max(value, 0), 1)
+        // Silence threshold: ambient mic noise produces small non-zero energy (0.01-0.05).
+        // Treat anything below 0.05 as true silence so bars are perfectly still.
+        let thresholded = value < 0.05 ? Float(0) : value
+        return min(max(thresholded, 0), 1)
     }
 
     /// Brand-inspired color resolved to a plain Color for Canvas rendering.

@@ -95,7 +95,7 @@ class KeyboardViewController: UIInputViewController {
         let keyHeight: CGFloat = KeyMetrics.keyHeight  // Dynamic: 42pt SE, 46pt standard, 50pt Plus/Max
         let rowSpacing: CGFloat = KeyMetrics.rowSpacing  // 6pt
         let verticalPadding: CGFloat = 8
-        let toolbarHeight: CGFloat = 44 // ToolbarView approximate height
+        let toolbarHeight: CGFloat = 48 // ToolbarView height (48pt for mic pill glow room)
         let bannerHeight: CGFloat = hasFullAccess ? 0 : 40 // FullAccessBanner when shown
         return (rows * keyHeight) + ((rows - 1) * rowSpacing) + verticalPadding + toolbarHeight + bannerHeight
     }

@@ -45,6 +45,9 @@ struct ToolbarView: View {
             }
         }
         .padding(.horizontal, 12)
-        .frame(height: 44)
+        // WHY 48pt instead of 44pt: The AnimatedMicButton pill (36pt tall) has glow/shadow
+        // effects that extend slightly above. 44pt clipped the top of the mic pill.
+        // 48pt provides 6pt breathing room above and below the pill.
+        .frame(height: 48)
     }
 }

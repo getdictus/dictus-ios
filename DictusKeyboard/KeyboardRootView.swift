@@ -28,8 +28,8 @@ struct KeyboardRootView: View {
             + 8  // vertical padding
     }
 
-    /// Toolbar height — must match ToolbarView's intrinsic height.
-    private let toolbarHeight: CGFloat = 44
+    /// Toolbar height — must match ToolbarView's intrinsic height (48pt for mic pill glow room).
+    private let toolbarHeight: CGFloat = 48
 
     /// Total content height (toolbar + keyboard). RecordingOverlay uses this
     /// to cover the full area, preventing layout shift when switching to recording.
