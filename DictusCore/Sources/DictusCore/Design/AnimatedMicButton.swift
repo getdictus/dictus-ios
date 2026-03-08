@@ -17,10 +17,12 @@ import SwiftUI
 /// - Transition from transcribing to ready: brief green flash (0.3s fade)
 public struct AnimatedMicButton: View {
     public let status: DictationStatus
+    public let isPill: Bool
     public let onTap: () -> Void
 
-    public init(status: DictationStatus, onTap: @escaping () -> Void) {
+    public init(status: DictationStatus, isPill: Bool = false, onTap: @escaping () -> Void) {
         self.status = status
+        self.isPill = isPill
         self.onTap = onTap
     }
 
@@ -32,7 +34,23 @@ public struct AnimatedMicButton: View {
     @State private var showSuccessFlash: Bool = false
     @State private var previousStatus: DictationStatus = .idle
 
-    private let buttonSize: CGFloat = 72
+    /// Circle mode: 72pt diameter. Pill mode: 56x36 capsule for keyboard toolbar.
+    private var buttonWidth: CGFloat { isPill ? 56 : 72 }
+    private var buttonHeight: CGFloat { isPill ? 36 : 72 }
+    private var ringWidth: CGFloat { isPill ? 66 : 92 }
+    private var ringHeight: CGFloat { isPill ? 46 : 92 }
+
+    /// Returns Capsule or Circle based on isPill.
+    /// WHY AnyShape: @ViewBuilder wraps conditionals in _ConditionalContent which
+    /// doesn't conform to Shape. AnyShape (available since iOS 16) erases the
+    /// concrete type so both branches return the same Shape-conforming type.
+    private func mainShape() -> AnyShape {
+        if isPill {
+            return AnyShape(Capsule())
+        } else {
+            return AnyShape(Circle())
+        }
+    }
 
     public var body: some View {
         Button(action: onTap) {
@@ -40,10 +58,10 @@ public struct AnimatedMicButton: View {
                 // Background ring effects
                 ringEffect
 
-                // Main button circle
-                Circle()
+                // Main button shape (circle or pill)
+                mainShape()
                     .fill(buttonFillColor)
-                    .frame(width: buttonSize, height: buttonSize)
+                    .frame(width: buttonWidth, height: buttonHeight)
 
                 // Shimmer overlay for transcribing state
                 if status == .transcribing {
@@ -52,14 +70,14 @@ public struct AnimatedMicButton: View {
 
                 // Success flash overlay
                 if showSuccessFlash {
-                    Circle()
+                    mainShape()
                         .fill(Color.dictusSuccess.opacity(0.6))
-                        .frame(width: buttonSize, height: buttonSize)
+                        .frame(width: buttonWidth, height: buttonHeight)
                 }
 
                 // Mic icon
                 Image(systemName: "mic.fill")
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: isPill ? 14 : 16, weight: .medium))
                     .foregroundColor(.white)
                     .scaleEffect(status == .recording ? pulseScale * 0.9 + 0.1 : 1.0)
             }
@@ -82,39 +100,39 @@ public struct AnimatedMicButton: View {
         switch status {
         case .idle, .ready, .failed:
             // Glass ring with soft glow pulsing 0.3-0.6 opacity over 2s
-            Circle()
+            mainShape()
                 .fill(Color.clear)
-                .frame(width: buttonSize + 20, height: buttonSize + 20)
-                .dictusGlass(in: Circle())
+                .frame(width: ringWidth, height: ringHeight)
+                .dictusGlass(in: isPill ? AnyShape(Capsule()) : AnyShape(Circle()))
                 .overlay(
-                    Circle()
+                    mainShape()
                         .stroke(Color.dictusAccent.opacity(glowOpacity), lineWidth: 2)
-                        .frame(width: buttonSize + 20, height: buttonSize + 20)
+                        .frame(width: ringWidth, height: ringHeight)
                 )
 
         case .recording:
             // Red pulse ring scaling 1.0-1.3 over 0.8s
-            Circle()
+            mainShape()
                 .fill(Color.clear)
-                .frame(width: buttonSize + 20, height: buttonSize + 20)
-                .dictusGlass(in: Circle())
+                .frame(width: ringWidth, height: ringHeight)
+                .dictusGlass(in: isPill ? AnyShape(Capsule()) : AnyShape(Circle()))
                 .overlay(
-                    Circle()
+                    mainShape()
                         .stroke(Color.dictusRecording.opacity(0.5), lineWidth: 3)
-                        .frame(width: buttonSize + 20, height: buttonSize + 20)
+                        .frame(width: ringWidth, height: ringHeight)
                 )
                 .scaleEffect(pulseScale)
 
         case .transcribing, .requested:
             // Static glass ring during transcription
-            Circle()
+            mainShape()
                 .fill(Color.clear)
-                .frame(width: buttonSize + 20, height: buttonSize + 20)
-                .dictusGlass(in: Circle())
+                .frame(width: ringWidth, height: ringHeight)
+                .dictusGlass(in: isPill ? AnyShape(Capsule()) : AnyShape(Circle()))
                 .overlay(
-                    Circle()
+                    mainShape()
                         .stroke(Color.dictusAccent.opacity(0.4), lineWidth: 2)
-                        .frame(width: buttonSize + 20, height: buttonSize + 20)
+                        .frame(width: ringWidth, height: ringHeight)
                 )
         }
     }
@@ -127,7 +145,7 @@ public struct AnimatedMicButton: View {
     /// A moving gradient overlay creates the "shimmer" effect without custom drawing.
     /// The offset animation moves the bright spot across the button surface.
     private var shimmerOverlay: some View {
-        Circle()
+        mainShape()
             .fill(
                 LinearGradient(
                     colors: [
@@ -139,7 +157,7 @@ public struct AnimatedMicButton: View {
                     endPoint: UnitPoint(x: shimmerOffset + 0.3, y: 0.5)
                 )
             )
-            .frame(width: buttonSize, height: buttonSize)
+            .frame(width: buttonWidth, height: buttonHeight)
     }
 
     // MARK: - Helpers
@@ -149,7 +167,7 @@ public struct AnimatedMicButton: View {
         case .recording:
             return .dictusRecording
         case .transcribing:
-            return .dictusAccent
+            return .dictusAccentHighlight.opacity(0.5)
         default:
             return .dictusAccent
         }
@@ -205,11 +223,21 @@ public struct AnimatedMicButton: View {
     }
 }
 
-#Preview {
+#Preview("Circle") {
     VStack(spacing: 40) {
         AnimatedMicButton(status: .idle) {}
         AnimatedMicButton(status: .recording) {}
         AnimatedMicButton(status: .transcribing) {}
+    }
+    .padding()
+    .background(Color(hex: 0x0A1628))
+}
+
+#Preview("Pill") {
+    VStack(spacing: 40) {
+        AnimatedMicButton(status: .idle, isPill: true) {}
+        AnimatedMicButton(status: .recording, isPill: true) {}
+        AnimatedMicButton(status: .transcribing, isPill: true) {}
     }
     .padding()
     .background(Color(hex: 0x0A1628))

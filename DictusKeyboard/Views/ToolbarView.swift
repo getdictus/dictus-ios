@@ -32,18 +32,16 @@ struct ToolbarView: View {
 
             Spacer()
 
-            // Right: AnimatedMicButton with state-dependent animations
+            // Right: AnimatedMicButton as pill (56x36) -- fits naturally in 44pt toolbar
+            // WHY isPill: The pill shape is wider than tall, making it a bigger tap target
+            // in the toolbar vs the old 0.45x scaled circle that was only 32x32.
             if !hasFullAccess {
-                // Disabled state: show idle button with reduced opacity
-                AnimatedMicButton(status: .idle, onTap: {})
-                    .scaleEffect(0.45)
-                    .frame(width: 32, height: 32)
+                // Disabled state: show idle pill with reduced opacity
+                AnimatedMicButton(status: .idle, isPill: true, onTap: {})
                     .disabled(true)
                     .opacity(0.4)
             } else {
-                AnimatedMicButton(status: dictationStatus, onTap: onMicTap)
-                    .scaleEffect(0.45)
-                    .frame(width: 32, height: 32)
+                AnimatedMicButton(status: dictationStatus, isPill: true, onTap: onMicTap)
             }
         }
         .padding(.horizontal, 12)
