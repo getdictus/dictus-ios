@@ -647,12 +647,16 @@ class DictationCoordinator: ObservableObject {
             PersistentLog.log("WhisperKit init START — model: \(modelName)")
             let startTime = CFAbsoluteTimeGetCurrent()
 
+            // WHY download: false — the model is already on disk (downloaded during
+            // onboarding). Setting download: true causes WhisperKit to check Hugging Face
+            // for model availability on every cold start, adding network latency or timeout
+            // delays. With download: false, WhisperKit loads directly from local storage.
             let config = WhisperKitConfig(
                 model: modelName,
                 verbose: true,
                 prewarm: true,
                 load: true,
-                download: true
+                download: false
             )
 
             let kit = try await WhisperKit(config)
