@@ -96,9 +96,8 @@ class KeyboardViewController: UIInputViewController {
         let rowSpacing: CGFloat = KeyMetrics.rowSpacing  // 6pt
         let verticalPadding: CGFloat = 8
         let toolbarHeight: CGFloat = 48 // ToolbarView height (48pt for mic pill glow room)
-        let bannerHeight: CGFloat = hasFullAccess ? 0 : 40 // FullAccessBanner when shown
         let bottomPadding: CGFloat = 8 // Experimental: push system dictation mic area down
-        return (rows * keyHeight) + ((rows - 1) * rowSpacing) + verticalPadding + toolbarHeight + bannerHeight + bottomPadding
+        return (rows * keyHeight) + ((rows - 1) * rowSpacing) + verticalPadding + toolbarHeight + bottomPadding
     }
 
     override func textDidChange(_ textInput: UITextInput?) {

@@ -18,30 +18,43 @@ struct ToolbarView: View {
     @ScaledMetric private var gearIconSize: CGFloat = 16
 
     var body: some View {
-        HStack {
-            // Left: gear icon to open DictusApp settings
+        // WHY ZStack: ensures the banner text is centered horizontally across the
+        // full toolbar width, independent of the mic pill position on the right.
+        // Both layers are vertically centered by the ZStack's default alignment.
+        ZStack {
             if hasFullAccess {
-                // Safe to force-unwrap: compile-time literal, always valid URL
-                Link(destination: URL(string: "dictus://")!) {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: gearIconSize, weight: .medium))
-                        .foregroundColor(Color(.systemGray))
-                        .frame(width: 32, height: 32)
+                // Normal mode: gear left, mic right
+                HStack {
+                    Link(destination: URL(string: "dictus://")!) {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: gearIconSize, weight: .medium))
+                            .foregroundColor(Color(.systemGray))
+                            .frame(width: 32, height: 32)
+                    }
+
+                    Spacer()
+
+                    AnimatedMicButton(status: dictationStatus, isPill: true, onTap: onMicTap)
                 }
-            }
-
-            Spacer()
-
-            // Right: AnimatedMicButton as pill (56x36) -- fits naturally in 44pt toolbar
-            // WHY isPill: The pill shape is wider than tall, making it a bigger tap target
-            // in the toolbar vs the old 0.45x scaled circle that was only 32x32.
-            if !hasFullAccess {
-                // Disabled state: show idle pill with reduced opacity
-                AnimatedMicButton(status: .idle, isPill: true, onTap: {})
-                    .disabled(true)
-                    .opacity(0.4)
             } else {
-                AnimatedMicButton(status: dictationStatus, isPill: true, onTap: onMicTap)
+                // No Full Access: centered banner text + disabled mic on the right
+                HStack(spacing: 6) {
+                    Image(systemName: "keyboard")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+
+                    Text("Acces complet requis")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack {
+                    Spacer()
+
+                    AnimatedMicButton(status: .idle, isPill: true, onTap: {})
+                        .disabled(true)
+                        .opacity(0.4)
+                }
             }
         }
         .padding(.horizontal, 12)

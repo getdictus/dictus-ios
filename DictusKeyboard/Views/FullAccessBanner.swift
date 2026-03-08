@@ -2,41 +2,21 @@
 import SwiftUI
 import DictusCore
 
-/// Non-dismissible banner shown when Full Access is disabled.
-/// Guides the user to Settings to enable Full Access for dictation.
-///
-/// WHY onActivate closure instead of Link:
-/// SwiftUI's Link view does not work in keyboard extensions — the responder chain
-/// doesn't route URL opening correctly. Instead we accept a closure from the parent
-/// that calls openURL through the environment, which does work.
+/// Non-dismissible info banner shown when Full Access is disabled.
+/// Simple centered layout inspired by Super Whisper: keyboard icon + text.
+/// Non-interactive — just informs the user to enable Full Access in Settings.
 struct FullAccessBanner: View {
-    let onActivate: () -> Void
-
     var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.orange)
+        HStack(spacing: 6) {
+            Image(systemName: "keyboard")
                 .font(.footnote)
+                .foregroundStyle(.secondary)
 
-            Text("Dictee desactivee.")
+            Text("Acces complet requis")
                 .font(.footnote)
-                .foregroundStyle(.primary)
-
-            Spacer()
-
-            Button(action: onActivate) {
-                Text("Activer")
-                    .font(.footnote.bold())
-                    .foregroundColor(.dictusAccent)
-            }
+                .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.systemGray6))
-        )
-        .padding(.horizontal, 6)
-        .padding(.top, 4)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
     }
 }

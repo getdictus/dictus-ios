@@ -6,19 +6,22 @@ import DictusCore
 
 /// Guides the user through adding the Dictus keyboard in iOS Settings.
 ///
-/// WHY auto-detection instead of manual confirm button:
-/// Per locked design decision: the keyboard is detected automatically via
-/// UITextInputMode.activeInputModes when the app returns to foreground.
-/// This eliminates user confusion ("did I add it correctly?") and prevents
-/// false positives from users tapping "J'ai ajoute le clavier" without
-/// actually completing the setup. When the keyboard is detected, the page
-/// auto-advances after a brief delay so the user sees the checkmark feedback.
+/// WHY animated fake Settings card:
+/// Users need to enable two toggles in iOS Settings (add keyboard + Full Access).
+/// A visual simulation showing exactly what to toggle reduces friction and support
+/// requests. The toggles animate in sequence on a loop so the user sees the steps
+/// before opening Settings. Inspired by Wispr Flow / Super Whisper onboarding.
 struct KeyboardSetupPage: View {
     let onNext: () -> Void
 
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var keyboardDetected = false
+
+    // Animation state for the fake toggles
+    @State private var dictusToggleOn = false
+    @State private var fullAccessToggleOn = false
+    @State private var animationTimer: Timer?
 
     var body: some View {
         ScrollView {
@@ -35,24 +38,20 @@ struct KeyboardSetupPage: View {
                 Text("Ajouter le clavier")
                     .font(.dictusHeading)
                     .foregroundStyle(.primary)
-                    .padding(.bottom, 32)
+                    .padding(.bottom, 28)
 
-                // Instruction block 1: Add keyboard
-                instructionBlock(
-                    number: "1",
-                    title: "Ouvrez Reglages > Dictus > Claviers > Ajouter un clavier",
-                    buttonTitle: "Ouvrir les Reglages",
-                    action: openSettings
-                )
-                .padding(.bottom, 24)
+                // Fake Settings card
+                fakeSettingsCard
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 24)
 
-                // Instruction block 2: Enable Full Access
-                instructionBlock(
-                    number: "2",
-                    title: "Activez l'Acces complet pour le microphone",
-                    subtitle: "L'acces complet permet a Dictus d'enregistrer votre voix depuis le clavier"
-                )
-                .padding(.bottom, 24)
+                // Open Settings link — plain text, no card wrapper
+                Button(action: openSettings) {
+                    Label("Ouvrir les Reglages", systemImage: "arrow.up.right")
+                        .font(.dictusBody)
+                        .foregroundColor(.dictusAccent)
+                }
+                .padding(.bottom, 20)
 
                 // Auto-detection helper text
                 Text("Le clavier sera detecte automatiquement")
@@ -60,86 +59,143 @@ struct KeyboardSetupPage: View {
                     .foregroundStyle(.secondary)
                     .padding(.bottom, 16)
 
-                // Detection feedback
+                // Detection feedback + continue button
                 if keyboardDetected {
-                    Label("Clavier detecte", systemImage: "checkmark.circle.fill")
-                        .font(.dictusBody)
-                        .foregroundColor(.dictusSuccess)
-                        .padding(.bottom, 16)
-                        .transition(.opacity)
+                    VStack(spacing: 16) {
+                        Label("Clavier detecte", systemImage: "checkmark.circle.fill")
+                            .font(.dictusBody)
+                            .foregroundColor(.dictusSuccess)
+
+                        Button(action: onNext) {
+                            Text("Continuer")
+                                .font(.dictusSubheading)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .fill(Color.dictusAccent)
+                                )
+                        }
+                        .padding(.horizontal, 32)
+                    }
+                    .padding(.bottom, 16)
+                    .transition(.opacity)
                 }
 
                 Spacer(minLength: 48)
             }
         }
         .onAppear {
-            // Check immediately in case keyboard was already installed
-            // (e.g., user reached this step before, went to Settings, came back)
             checkKeyboardInstalled()
+            startToggleAnimation()
+        }
+        .onDisappear {
+            animationTimer?.invalidate()
+            animationTimer = nil
         }
         .onChange(of: scenePhase) { newPhase in
-            // When user returns from Settings, check if keyboard was added
             if newPhase == .active {
                 checkKeyboardInstalled()
             }
         }
         .onChange(of: keyboardDetected) { detected in
-            // Auto-advance after brief delay so user sees the checkmark
             if detected {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    onNext()
+                // Stop animation loop once detected
+                animationTimer?.invalidate()
+                animationTimer = nil
+                // Show both toggles ON
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    dictusToggleOn = true
+                    fullAccessToggleOn = true
                 }
             }
         }
         .animation(.easeInOut(duration: 0.3), value: keyboardDetected)
     }
 
-    // MARK: - Instruction Block
+    // MARK: - Fake Settings Card
 
-    private func instructionBlock(
-        number: String,
-        title: String,
-        subtitle: String? = nil,
-        buttonTitle: String? = nil,
-        action: (() -> Void)? = nil
-    ) -> some View {
-        HStack(alignment: .top, spacing: 16) {
-            // Step number circle
-            Text(number)
-                .font(.system(.title3, design: .rounded, weight: .bold))
-                .foregroundStyle(.primary)
-                .frame(width: 36, height: 36)
-                .background(Circle().fill(Color.dictusAccent.opacity(0.3)))
+    /// Simulates the iOS Settings screen for Dictus keyboard configuration.
+    /// Uses real SwiftUI Toggle components (non-interactive) so they automatically
+    /// adopt the native Liquid Glass style on iOS 26.
+    private var fakeSettingsCard: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Image(systemName: "gearshape.fill")
+                    .foregroundStyle(.secondary)
+                    .font(.footnote)
+                Text("Reglages > Dictus")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text(title)
-                    .font(.dictusBody)
-                    .foregroundStyle(.primary)
+            // Toggle rows using native SwiftUI Toggle for Liquid Glass styling.
+            // allowsHitTesting(false) prevents user interaction — toggles are
+            // driven programmatically by the animation timer.
+            VStack(spacing: 0) {
+                Toggle("Dictus", isOn: $dictusToggleOn)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: dictusToggleOn)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
 
-                if let subtitle {
-                    Text(subtitle)
-                        .font(.dictusCaption)
-                        .foregroundStyle(.secondary)
-                }
+                Divider()
+                    .opacity(0.3)
+                    .padding(.leading, 16)
 
-                if let buttonTitle, let action {
-                    Button(action: action) {
-                        Label(buttonTitle, systemImage: "arrow.up.right")
-                            .font(.dictusCaption)
-                            .foregroundColor(.dictusAccent)
-                    }
-                    .padding(.top, 4)
-                }
+                Toggle("Autoriser l'acces complet", isOn: $fullAccessToggleOn)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: fullAccessToggleOn)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+            }
+            .allowsHitTesting(false)
+            .padding(.vertical, 4)
+        }
+        .padding(.bottom, 4)
+        .dictusGlass(in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    // MARK: - Toggle Animation Loop
+
+    /// Starts a repeating animation cycle:
+    /// 0.0s → reset both OFF
+    /// 1.0s → toggle 1 ON (Dictus)
+    /// 2.0s → toggle 2 ON (Full Access)
+    /// 4.0s → restart cycle
+    private func startToggleAnimation() {
+        // Reset state
+        dictusToggleOn = false
+        fullAccessToggleOn = false
+
+        // Run first cycle
+        runAnimationCycle()
+
+        // Repeat every 4 seconds
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: true) { _ in
+            dictusToggleOn = false
+            fullAccessToggleOn = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                runAnimationCycle()
             }
         }
-        .padding(.horizontal, 32)
+    }
+
+    private func runAnimationCycle() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            dictusToggleOn = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            fullAccessToggleOn = true
+        }
     }
 
     // MARK: - Private
 
     private func openSettings() {
-        // UIApplication.openSettingsURLString opens the app's own Settings page
-        // in the iOS Settings app. From there the user navigates to Keyboards.
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)
         }
