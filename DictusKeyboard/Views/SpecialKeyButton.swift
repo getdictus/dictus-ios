@@ -39,11 +39,10 @@ struct ShiftKey: View {
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(shiftState != .off
-                              ? Color(.systemBackground)  // light bg when active (Apple convention)
-                              : Color(.systemGray5))
+                        .fill(KeyMetrics.letterKeyColor)
+                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                 )
-                .foregroundColor(Color(.label))
+                .foregroundColor(shiftState != .off ? .white : Color(.label))
         }
     }
 
@@ -91,7 +90,8 @@ struct DeleteKey: View {
             .frame(height: KeyMetrics.keyHeight)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                    .fill(Color(.systemGray5))
+                    .fill(KeyMetrics.letterKeyColor)
+                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
             )
             .foregroundColor(Color(.label))
             .gesture(
@@ -167,15 +167,6 @@ struct SpaceKey: View {
     // Sensitivity: ~9pt per character horizontally (Apple parity)
     private let pointsPerCharacter: CGFloat = 9.0
 
-    /// Estimated characters per visible line in the host text field.
-    /// Since UITextDocumentProxy has no line-width API, this is a heuristic.
-    /// 40 chars is typical for iPhone body text in Messages/Notes.
-    private let estimatedCharsPerLine: Int = 40
-
-    /// Points of vertical drag that correspond to one visual text line.
-    /// ~40pt matches a typical line height at standard iOS font sizes.
-    private let pointsPerVerticalLine: CGFloat = 40.0
-
     var body: some View {
         Text("espace")
             .font(.system(size: 15))
@@ -233,17 +224,15 @@ struct SpaceKey: View {
             accumulatedOffsetX -= CGFloat(horizontalChars) * pointsPerCharacter
         }
 
-        // Vertical cursor movement: estimate line jumps.
-        // Apple's trackpad moves the cursor between visual lines. Since
+        // Vertical cursor movement: treat same as horizontal (character-by-character).
         // UITextDocumentProxy only offers adjustTextPosition(byCharacterOffset:),
-        // we estimate ~40 characters per visible line and jump that many chars
-        // per ~40pt of vertical drag — one line-height worth of finger movement.
+        // so vertical drag moves cursor by characters just like horizontal drag,
+        // giving a free-form feel in all directions.
         accumulatedOffsetY += deltaY
-        let verticalLines = Int(accumulatedOffsetY / pointsPerVerticalLine)
-        if verticalLines != 0 {
-            let charOffset = verticalLines * estimatedCharsPerLine
-            onCursorMove(charOffset)
-            accumulatedOffsetY -= CGFloat(verticalLines) * pointsPerVerticalLine
+        let verticalChars = acceleratedOffset(accumulatedOffsetY, sensitivity: pointsPerCharacter)
+        if verticalChars != 0 {
+            onCursorMove(verticalChars)
+            accumulatedOffsetY -= CGFloat(verticalChars) * pointsPerCharacter
         }
     }
 
@@ -287,7 +276,8 @@ struct ReturnKey: View {
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(Color(.systemGray5))
+                        .fill(KeyMetrics.letterKeyColor)
+                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                 )
         }
         .foregroundColor(Color(.label))
@@ -307,7 +297,8 @@ struct GlobeKey: View {
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(Color(.systemGray5))
+                        .fill(KeyMetrics.letterKeyColor)
+                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                 )
         }
         .foregroundColor(Color(.label))
@@ -340,7 +331,8 @@ struct EmojiKey: View {
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(Color(.systemGray5))
+                        .fill(KeyMetrics.letterKeyColor)
+                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                 )
         }
         .foregroundColor(Color(.label))
@@ -499,7 +491,8 @@ struct LayerSwitchKey: View {
                 .frame(height: KeyMetrics.keyHeight)
                 .background(
                     RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(Color(.systemGray5))
+                        .fill(KeyMetrics.letterKeyColor)
+                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                 )
         }
         .foregroundColor(Color(.label))

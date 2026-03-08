@@ -40,8 +40,8 @@ enum KeyboardLayout {
         // Mic removed from layout — it lives in the toolbar (Plan 03-02).
         // Mic's width redistributed to space bar for a wider touch target.
         [
-            KeyDefinition("emoji", type: .emoji, width: 1.2),
             KeyDefinition("123", type: .layerSwitch, width: 1.2),
+            KeyDefinition("emoji", type: .emoji, width: 1.2),
             KeyDefinition("space", output: " ", type: .space, width: 4.5),
             KeyDefinition("return", type: .returnKey, width: 1.8),
         ],
@@ -76,8 +76,8 @@ enum KeyboardLayout {
         // Row 4: bottom function row (no mic -- mic is in toolbar per Plan 03-02)
         // Emoji replaces globe — same as AZERTY. No adaptive accent key on QWERTY (Apple convention).
         [
-            KeyDefinition("emoji", type: .emoji, width: 1.2),
             KeyDefinition("123", type: .layerSwitch, width: 1.2),
+            KeyDefinition("emoji", type: .emoji, width: 1.2),
             KeyDefinition("space", output: " ", type: .space, width: 5.7),
             KeyDefinition("return", type: .returnKey, width: 1.8),
         ],
