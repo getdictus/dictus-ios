@@ -66,7 +66,7 @@ Plans:
   3. Every key tap (letters, space, return, delete, symbols) produces haptic feedback and click sound
   4. Bottom row has emoji button (cycles to system emoji keyboard) instead of duplicate globe, and Apple dictation mic is hidden or minimized
   5. Mic button and recording validate/cancel buttons are pill-shaped, larger, and waveform animation runs at smooth 60fps
-**Plans**: 9 plans
+**Plans**: 12 plans
 
 Plans:
 - [x] 07-01-PLAN.md — Haptic pre-allocation, universal key haptics, dynamic height, banner fix, popup clipping
@@ -74,10 +74,13 @@ Plans:
 - [x] 07-03-PLAN.md — Mic pill redesign, recording pill buttons, Canvas waveform with zero-energy stillness
 - [x] 07-04-PLAN.md — Spacebar trackpad mode (long-press, cursor drag, overlay)
 - [x] 07-05-PLAN.md — Full keyboard UAT checkpoint (gaps found)
-- [ ] 07-06-PLAN.md — Fix accent key replacement, SF Symbol icons for special keys (gap closure)
-- [ ] 07-07-PLAN.md — Smooth trackpad, delete acceleration, autocapitalisation (gap closure)
-- [ ] 07-08-PLAN.md — Mic pill clip fix, waveform silence, processing animation, key sounds, dictation mic overlay (gap closure)
-- [ ] 07-09-PLAN.md — Gap closure UAT checkpoint
+- [x] 07-06-PLAN.md — Fix accent key replacement, SF Symbol icons for special keys (gap closure)
+- [x] 07-07-PLAN.md — Smooth trackpad, delete acceleration, autocapitalisation (gap closure)
+- [x] 07-08-PLAN.md — Mic pill clip fix, waveform silence, processing animation, key sounds, dictation mic overlay (gap closure)
+- [x] 07-09-PLAN.md — Gap closure UAT checkpoint
+- [ ] 07-10-PLAN.md — Fix accent uppercase, special key colors, shift styling (gap closure)
+- [ ] 07-11-PLAN.md — Trackpad vertical line movement, 3-category key sounds (gap closure)
+- [ ] 07-12-PLAN.md — Fix waveform after cancel, document emoji limitation (gap closure)
 
 ### Phase 8: Text Prediction
 **Goal**: Users get French word completions and spelling corrections as they type, bridging the gap between dictation keyboard and full replacement keyboard
@@ -133,7 +136,7 @@ Note: Phase 9 (Cold Start) is independent of Phases 7-8 and could execute in par
 | 4. Main App & Polish | v1.0 | 5/5 | Complete | 2026-03-07 |
 | 5. Wire Settings & Hygiene | v1.0 | 2/2 | Complete | 2026-03-07 |
 | 6. Infrastructure & App Polish | v1.1 | 3/5 | Gap closure | - |
-| 7. Keyboard Parity & Visual | v1.1 | 5/9 | Gap closure | - |
+| 7. Keyboard Parity & Visual | v1.1 | 9/12 | Gap closure | - |
 | 8. Text Prediction | v1.1 | 0/? | Not started | - |
 | 9. Cold Start | v1.1 | 0/? | Not started | - |
 | 10. Model Catalog | v1.1 | 0/? | Not started | - |
