@@ -228,68 +228,67 @@ class DictationCoordinator: ObservableObject {
         // iOS forbids setActive(true) from background, so this must happen first.
         try? audioRecorder.configureAudioSession()
 
-        // Two recording paths:
-        //
-        // 1. COLD START (whisperKit nil): RawAudioCapture for instant recording.
-        //    WhisperKit loads in parallel — its loading time is absorbed by the
-        //    recording duration. A 30s vocal absorbs a 4s (or even 20s) WhisperKit load.
-        //    If fromURL: auto-background after WhisperKit is ready.
-        //
-        // 2. WARM START (whisperKit loaded): AudioRecorder via WhisperKit's engine.
-        //    If fromURL: auto-background after 0.5s.
+        // COLD START PATH: WhisperKit not loaded yet — use RawAudioCapture for instant recording
+        // WHY: On cold start, ensureWhisperKitReady() takes 3-4s. Instead of blocking,
+        // we start recording immediately with RawAudioCapture (plain AVAudioEngine, <100ms)
+        // and load WhisperKit in parallel. Samples are transcribed at stopDictation().
         let isColdStart = whisperKit == nil
 
         if isColdStart {
-            // COLD START: RawAudioCapture for instant recording
             dictationTask = Task {
                 do {
+                    // Step 1: Check microphone permission
                     let hasPermission = try await audioRecorder.ensureMicrophonePermission()
                     guard hasPermission else {
                         handleError("Microphone permission denied")
                         return
                     }
 
-                    // Start raw capture immediately (<100ms, no WhisperKit needed)
+                    // Step 2: Start raw capture immediately (<100ms)
                     try rawCapture.startCapture()
                     updateStatus(.recording)
                     PersistentLog.log("Cold start: RawAudioCapture started, WhisperKit loading in parallel")
 
-                    // Load WhisperKit in parallel while the user is recording.
-                    // WHY keep app in foreground: iOS throttles background CPU heavily
-                    // (~4s foreground vs 20+ seconds background for model loading).
-                    // For fromURL: auto-background AFTER WhisperKit is ready.
-                    PersistentLog.log("Cold start: loading WhisperKit...")
-                    try await ensureWhisperKitReady()
-                    PersistentLog.log("Cold start: WhisperKit ready")
-
+                    // Step 3: Auto-return to keyboard if opened via URL scheme
                     if fromURL {
-                        PersistentLog.log("Cold start: auto-backgrounding now that WhisperKit is ready")
-                        autoBackgroundApp(afterDelay: 0.3)
+                        PersistentLog.log("Cold start: scheduling auto-background in 0.5s")
+                        autoBackgroundApp(afterDelay: 0.5)
                     }
+
+                    // Step 4: Load WhisperKit in parallel (non-blocking for the user)
+                    // This runs while the user is already recording and back in their app.
+                    PersistentLog.log("Cold start: loading WhisperKit in parallel...")
+                    try await ensureWhisperKitReady()
+                    PersistentLog.log("Cold start: WhisperKit ready while recording continues via RawAudioCapture")
                 } catch {
-                    PersistentLog.log("Cold start: WhisperKit load FAILED: \(error.localizedDescription)")
+                    // WhisperKit init failed — recording continues via rawCapture,
+                    // we'll handle the error at stopDictation() time
+                    PersistentLog.log("Cold start: WhisperKit parallel load FAILED: \(error.localizedDescription)")
                 }
             }
         } else {
-            // WARM START: WhisperKit loaded, use AudioRecorder directly
+            // WARM START PATH: WhisperKit already loaded — use existing flow
             dictationTask = Task {
                 do {
+                    // Step 1: Check microphone permission
                     let hasPermission = try await audioRecorder.ensureMicrophonePermission()
                     guard hasPermission else {
                         handleError("Microphone permission denied")
                         return
                     }
 
+                    // Step 2: Start recording via WhisperKit's AudioProcessor
                     updateStatus(.recording)
                     try audioRecorder.startRecording()
-                    PersistentLog.log("Warm start: recording started")
+                    PersistentLog.log("Warm start: recording started successfully")
 
+                    // Step 3: Auto-return to keyboard if opened via URL scheme
                     if fromURL {
-                        PersistentLog.log("Warm start: scheduling auto-background")
+                        PersistentLog.log("Warm start: scheduling auto-background in 0.5s")
                         autoBackgroundApp(afterDelay: 0.5)
                     }
                 } catch {
-                    PersistentLog.log("Recording FAILED: \(error.localizedDescription)")
+                    PersistentLog.log("Warm start FAILED: \(error.localizedDescription)")
                     handleError(error.localizedDescription)
                 }
             }
@@ -447,22 +446,15 @@ class DictationCoordinator: ObservableObject {
 
     // MARK: - Private Helpers
 
-    /// Return the user to the app they were using (the keyboard host app).
+    /// Programmatically send the app to background.
     ///
-    /// WHY two strategies:
-    /// 1. **Preferred**: Read the host app's bundle ID from App Group (written by
-    ///    the keyboard extension) and reopen it via LSApplicationWorkspace.
-    ///    This returns the user to the EXACT app they were in, not the Home screen.
-    /// 2. **Fallback**: If the bundle ID is unknown, use the UIControl.sendAction
-    ///    suspend technique (simulates Home button). Better than nothing.
-    ///
-    /// WHY LSApplicationWorkspace: There is no public iOS API to "go back" to a
-    /// specific app by bundle ID. LSApplicationWorkspace is a private framework class,
-    /// but openApplicationWithBundleID: is the technique used by published App Store
-    /// apps (Wispr Flow, SuperWhisper) for this exact use case.
+    /// WHY this technique: There is no public iOS API to "go back" to the previous app.
+    /// This uses UIControl.sendAction with URLSessionTask.suspend selector — a technique
+    /// that simulates a "Home button" press. The user then taps the "< Back to [App]"
+    /// banner in the status bar to return to their previous app.
     ///
     /// WHY the delay: We need the audio session to be fully active and the status written
-    /// to App Group before leaving. The 0.5s delay ensures:
+    /// to App Group before backgrounding. The 0.5s delay ensures:
     /// 1. AVAudioEngine is running and capturing audio
     /// 2. Status .recording is written to App Group (keyboard shows overlay)
     /// 3. The audio engine keeps the app alive via UIBackgroundModes:audio
@@ -470,61 +462,13 @@ class DictationCoordinator: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self, self.status == .recording else { return }
 
-            let hostBundleID = self.defaults.string(forKey: SharedKeys.hostBundleID)
-            PersistentLog.log("Auto-return: hostBundleID=\(hostBundleID ?? "nil")")
-
-            // Validate: must be a real bundle ID (contains dots, not empty/null)
-            let validBundleID = hostBundleID.flatMap { id in
-                id.contains(".") && !id.isEmpty ? id : nil
-            }
-
-            if let bundleID = validBundleID, self.openAppByBundleID(bundleID) {
-                PersistentLog.log("Returned to host app: \(bundleID)")
-            } else {
-                // Fallback: simulate Home button press
-                PersistentLog.log("Fallback: suspend (Home) — hostBundleID invalid or LSApplicationWorkspace failed")
-                UIControl().sendAction(
-                    #selector(URLSessionTask.suspend),
-                    to: UIApplication.shared,
-                    for: nil
-                )
-            }
+            PersistentLog.log("Auto-backgrounding app (suspend)")
+            UIControl().sendAction(
+                #selector(URLSessionTask.suspend),
+                to: UIApplication.shared,
+                for: nil
+            )
         }
-    }
-
-    /// Open an app by its bundle identifier using LSApplicationWorkspace.
-    ///
-    /// WHY this private API: There is no public iOS API to open an arbitrary app
-    /// by bundle ID. LSApplicationWorkspace.openApplicationWithBundleID: is a
-    /// private API used by several published App Store apps for auto-return.
-    /// Returns true if the call succeeded, false otherwise.
-    @discardableResult
-    private func openAppByBundleID(_ bundleID: String) -> Bool {
-        guard let workspaceClass = NSClassFromString("LSApplicationWorkspace") else {
-            PersistentLog.log("LSApplicationWorkspace not available")
-            return false
-        }
-
-        let selector = NSSelectorFromString("defaultWorkspace")
-        guard workspaceClass.responds(to: selector) else {
-            PersistentLog.log("defaultWorkspace selector not available")
-            return false
-        }
-
-        guard let result = (workspaceClass as AnyObject).perform(selector),
-              let workspace = result.takeUnretainedValue() as AnyObject? else {
-            PersistentLog.log("Could not get defaultWorkspace")
-            return false
-        }
-
-        let openSelector = NSSelectorFromString("openApplicationWithBundleID:")
-        guard workspace.responds(to: openSelector) else {
-            PersistentLog.log("openApplicationWithBundleID: not available")
-            return false
-        }
-
-        workspace.perform(openSelector, with: bundleID)
-        return true
     }
 
     /// Register Darwin notification observers for keyboard stop/cancel signals.
@@ -606,7 +550,6 @@ class DictationCoordinator: ObservableObject {
     private func cleanupRecordingKeys() {
         defaults.removeObject(forKey: SharedKeys.waveformEnergy)
         defaults.removeObject(forKey: SharedKeys.recordingElapsedSeconds)
-        defaults.removeObject(forKey: SharedKeys.hostBundleID)
         defaults.set(false, forKey: SharedKeys.stopRequested)
         defaults.set(false, forKey: SharedKeys.cancelRequested)
         defaults.synchronize()
@@ -644,31 +587,29 @@ class DictationCoordinator: ObservableObject {
 
         // Create and store the init task so concurrent callers can await it
         let task = Task<Void, Error> {
-            PersistentLog.log("WhisperKit init START — model: \(modelName)")
-            let startTime = CFAbsoluteTimeGetCurrent()
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.info("Initializing WhisperKit with model: \(modelName)")
+            }
 
-            // WHY download: false — the model is already on disk (downloaded during
-            // onboarding). Setting download: true causes WhisperKit to check Hugging Face
-            // for model availability on every cold start, adding network latency or timeout
-            // delays. With download: false, WhisperKit loads directly from local storage.
             let config = WhisperKitConfig(
                 model: modelName,
-                verbose: true,
+                verbose: false,
                 prewarm: true,
                 load: true,
-                download: false
+                download: true
             )
 
             let kit = try await WhisperKit(config)
-            let elapsed = CFAbsoluteTimeGetCurrent() - startTime
-            PersistentLog.log("WhisperKit init DONE — \(String(format: "%.1f", elapsed))s for \(modelName)")
-
             self.whisperKit = kit
             self.currentModelName = modelName
 
             // Share the instance with AudioRecorder and TranscriptionService
             audioRecorder.prepare(whisperKit: kit)
             transcriptionService.prepare(whisperKit: kit)
+
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.info("WhisperKit ready with model: \(modelName)")
+            }
         }
         initTask = task
 

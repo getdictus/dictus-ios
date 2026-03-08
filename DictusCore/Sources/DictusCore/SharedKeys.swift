@@ -25,10 +25,6 @@ public enum SharedKeys {
     public static let cancelRequested = "dictus.cancelRequested"
     /// Double: elapsed recording seconds, updated at ~5Hz during recording
     public static let recordingElapsedSeconds = "dictus.recordingElapsedSeconds"
-    /// Bundle ID of the app hosting the keyboard (e.g., "com.apple.mobilenotes").
-    /// Written by the keyboard extension before opening URL scheme, read by DictusApp
-    /// to return the user to the correct app after auto-backgrounding.
-    public static let hostBundleID = "dictus.hostBundleID"
 
     // User preferences (added for Plan 4.1 onboarding + settings)
     /// Language code for transcription ("fr" or "en"), default "fr"

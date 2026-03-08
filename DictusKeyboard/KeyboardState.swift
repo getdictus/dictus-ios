@@ -219,12 +219,6 @@ class KeyboardState: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
             if self.dictationStatus == .requested {
-                // Save the host app's bundle ID so DictusApp can return to it.
-                // WHY here (not earlier): We only need this for the URL fallback path
-                // (cold start). When the app handles via Darwin notification, the user
-                // never leaves their current app.
-                self.saveHostBundleID()
-
                 // App didn't respond — not running. Open URL to launch it.
                 let url = URL(string: "dictus://dictate")!
                 if let openURL = self.openURL {
@@ -233,43 +227,6 @@ class KeyboardState: ObservableObject {
                     self.openURLFromExtension(url)
                 }
             }
-        }
-    }
-
-    /// Save the host app's bundle ID to App Group for auto-return.
-    ///
-    /// WHY this technique: UIInputViewController doesn't expose the host bundle ID
-    /// publicly. We try multiple known locations for this private property via KVC.
-    /// This is the same approach used by other published App Store apps (Wispr Flow,
-    /// SuperWhisper) for auto-return functionality.
-    ///
-    /// WHY multiple attempts: The _hostBundleID property location varies across iOS
-    /// versions and view controller hierarchies. We try the most common locations.
-    private func saveHostBundleID() {
-        // WHY responds(to:) before value(forKey:):
-        // KVC (value(forKey:)) throws NSUnknownKeyException (Objective-C exception) if
-        // the key doesn't exist on the object. Swift cannot catch ObjC exceptions —
-        // it's an immediate crash. responds(to:) checks if the getter exists first.
-        let key = "_hostBundleID"
-        let selector = NSSelectorFromString(key)
-        var bundleID: String?
-
-        // Attempt 1: directly on the UIInputViewController
-        if bundleID == nil, let ctrl = controller, ctrl.responds(to: selector) {
-            bundleID = ctrl.value(forKey: key) as? String
-        }
-
-        // Attempt 2: on the parent view controller
-        if bundleID == nil, let parent = controller?.parent, parent.responds(to: selector) {
-            bundleID = parent.value(forKey: key) as? String
-        }
-
-        if let id = bundleID, !id.isEmpty, id.contains(".") {
-            defaults.set(id, forKey: SharedKeys.hostBundleID)
-            defaults.synchronize()
-            PersistentLog.log("Keyboard: saved hostBundleID=\(id)")
-        } else {
-            PersistentLog.log("Keyboard: could not retrieve hostBundleID (bundleID=\(bundleID ?? "nil"))")
         }
     }
 
