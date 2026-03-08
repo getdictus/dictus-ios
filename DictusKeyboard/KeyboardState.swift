@@ -246,28 +246,30 @@ class KeyboardState: ObservableObject {
     /// WHY multiple attempts: The _hostBundleID property location varies across iOS
     /// versions and view controller hierarchies. We try the most common locations.
     private func saveHostBundleID() {
+        // WHY responds(to:) before value(forKey:):
+        // KVC (value(forKey:)) throws NSUnknownKeyException (Objective-C exception) if
+        // the key doesn't exist on the object. Swift cannot catch ObjC exceptions —
+        // it's an immediate crash. responds(to:) checks if the getter exists first.
+        let key = "_hostBundleID"
+        let selector = NSSelectorFromString(key)
         var bundleID: String?
 
         // Attempt 1: directly on the UIInputViewController
-        bundleID = controller?.value(forKey: "_hostBundleID") as? String
+        if bundleID == nil, let ctrl = controller, ctrl.responds(to: selector) {
+            bundleID = ctrl.value(forKey: key) as? String
+        }
 
         // Attempt 2: on the parent view controller
-        if bundleID == nil {
-            bundleID = controller?.parent?.value(forKey: "_hostBundleID") as? String
+        if bundleID == nil, let parent = controller?.parent, parent.responds(to: selector) {
+            bundleID = parent.value(forKey: key) as? String
         }
 
-        // Attempt 3: via the host's bundle identifier in the extension context
-        // WHY: On some iOS versions, extensionContext exposes host info differently
-        if bundleID == nil {
-            bundleID = controller?.extensionContext?.value(forKey: "_hostBundleIdentifier") as? String
-        }
-
-        if let id = bundleID, !id.isEmpty {
+        if let id = bundleID, !id.isEmpty, id.contains(".") {
             defaults.set(id, forKey: SharedKeys.hostBundleID)
             defaults.synchronize()
             PersistentLog.log("Keyboard: saved hostBundleID=\(id)")
         } else {
-            PersistentLog.log("Keyboard: could not retrieve hostBundleID")
+            PersistentLog.log("Keyboard: could not retrieve hostBundleID (bundleID=\(bundleID ?? "nil"))")
         }
     }
 
