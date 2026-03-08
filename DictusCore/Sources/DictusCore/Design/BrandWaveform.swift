@@ -27,9 +27,6 @@ public struct BrandWaveform: View {
     /// state while indicating "processing" rather than "recording".
     public var isProcessing: Bool = false
 
-    /// Animation phase for the sinusoidal processing wave (0.0 to 1.0).
-    @State private var processingPhase: Double = 0
-
     public init(energyLevels: [Float] = [], maxHeight: CGFloat = 80, isProcessing: Bool = false) {
         self.energyLevels = energyLevels
         self.maxHeight = maxHeight
@@ -48,36 +45,40 @@ public struct BrandWaveform: View {
     private let barSpacing: CGFloat = 2
 
     public var body: some View {
+        if isProcessing {
+            // WHY TimelineView instead of withAnimation:
+            // sin(2π*(x+0)) == sin(2π*(x+1)), so animating a phase from 0→1 produces
+            // identical start/end values — SwiftUI sees no change and nothing moves.
+            // TimelineView gives us a continuous clock to compute the phase from real time.
+            TimelineView(.animation) { timeline in
+                let phase = timeline.date.timeIntervalSinceReferenceDate / 2.0
+                waveformContent(processingPhase: phase)
+            }
+        } else {
+            waveformContent(processingPhase: 0)
+                .animation(.easeOut(duration: 0.08), value: energyLevels)
+        }
+    }
+
+    private func waveformContent(processingPhase: Double) -> some View {
         GeometryReader { geometry in
             let totalSpacing = barSpacing * CGFloat(barCount - 1)
             let barWidth = max((geometry.size.width - totalSpacing) / CGFloat(barCount), 2)
 
             HStack(spacing: barSpacing) {
                 ForEach(0..<barCount, id: \.self) { index in
-                    barView(index: index, barWidth: barWidth)
+                    barView(index: index, barWidth: barWidth, processingPhase: processingPhase)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(height: maxHeight)
-        .animation(.easeOut(duration: 0.08), value: energyLevels)
-        .onAppear {
-            if isProcessing {
-                // Start continuous sinusoidal animation for processing state.
-                // WHY linear + repeatForever: Creates a smooth, endlessly traveling
-                // sine wave. The phase goes from 0 to 1, shifting the wave pattern
-                // across all bars to create a flowing "thinking" effect.
-                withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
-                    processingPhase = 1.0
-                }
-            }
-        }
     }
 
     // MARK: - Private
 
-    private func barView(index: Int, barWidth: CGFloat) -> some View {
-        let energy = energyForBar(at: index)
+    private func barView(index: Int, barWidth: CGFloat, processingPhase: Double) -> some View {
+        let energy = energyForBar(at: index, processingPhase: processingPhase)
         // Minimum bar height so bars are visible even at zero energy
         let minHeight: CGFloat = 4
         let height = minHeight + CGFloat(energy) * (maxHeight - minHeight)
@@ -98,7 +99,7 @@ public struct BrandWaveform: View {
     /// Creates a smooth traveling wave: each bar computes its energy from a sine
     /// function offset by processingPhase. The wave "moves" across the bars as
     /// processingPhase animates from 0 to 1.
-    private func energyForBar(at index: Int) -> Float {
+    private func energyForBar(at index: Int, processingPhase: Double) -> Float {
         if isProcessing {
             let normalizedIndex = Double(index) / Double(max(barCount - 1, 1))
             let sineValue = sin(2 * .pi * (normalizedIndex + processingPhase))

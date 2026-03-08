@@ -30,7 +30,6 @@ struct RecordingView: View {
     var onComplete: (() -> Void)?
 
     @EnvironmentObject var coordinator: DictationCoordinator
-    @Environment(\.dismiss) private var dismiss
 
     /// Tracks whether the user has seen a transcription result (to show action buttons).
     @State private var transcriptionResult: String?
@@ -236,9 +235,12 @@ struct RecordingView: View {
                         )
                 }
 
+                // WHY no dismiss() call:
+                // RecordingView is shown as a ZStack overlay in MainTabView, not via
+                // sheet or NavigationLink. Setting status to .idle removes the overlay
+                // automatically via the condition (coordinator.status != .idle).
                 Button(action: {
                     coordinator.resetStatus()
-                    dismiss()
                 }) {
                     Text("Terminer")
                         .font(.dictusSubheading)
@@ -276,12 +278,20 @@ struct RecordingView: View {
         coordinator.stopDictation()
     }
 
+    /// Reset local UI state for a new recording WITHOUT dismissing the overlay.
+    ///
+    /// WHY we don't call coordinator.resetStatus() here:
+    /// resetStatus() sets status to .idle, which removes the RecordingView overlay
+    /// (MainTabView shows it only when status != .idle). The user wants to stay in
+    /// the recording view and start a new dictation — not go back to HomeView.
+    /// By only resetting local state, the overlay stays visible and the mic button
+    /// reappears. coordinator.status stays at .ready, which startDictation() accepts.
     private func resetForNewRecording() {
-        coordinator.resetStatus()
         transcriptionResult = nil
         showResult = false
         showError = false
         errorMessage = nil
+        coordinator.lastResult = nil
     }
 
     // MARK: - Status Handling
