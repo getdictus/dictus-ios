@@ -55,6 +55,7 @@ struct KeyboardView: View {
                                 }
                                 controller.textDocumentProxy.deleteBackward()
                                 lastTypedChar = nil
+                                checkAutocapitalize()
                             },
                             onWordDelete: {
                                 // Delete backward to the previous word boundary.
@@ -65,6 +66,7 @@ struct KeyboardView: View {
                                 }
                                 deleteWordBackward()
                                 lastTypedChar = nil
+                                checkAutocapitalize()
                             },
                             onGlobe: {
                                 HapticFeedback.keyTapped()
@@ -87,6 +89,7 @@ struct KeyboardView: View {
                                 }
                                 controller.textDocumentProxy.insertText(" ")
                                 lastTypedChar = nil
+                                checkAutocapitalize()
                             },
                             onReturn: {
                                 HapticFeedback.keyTapped()
@@ -95,6 +98,7 @@ struct KeyboardView: View {
                                 }
                                 controller.textDocumentProxy.insertText("\n")
                                 lastTypedChar = nil
+                                checkAutocapitalize()
                             },
                             onAccentAdaptive: { char in
                                 HapticFeedback.keyTapped()
@@ -133,6 +137,15 @@ struct KeyboardView: View {
             }
         }
         .frame(height: keyboardHeight)
+        .onAppear {
+            // Set initial shift state based on text field content.
+            // Empty field = capitalize first letter (standard iOS behavior).
+            checkAutocapitalize()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .dictusTextDidChange)) { _ in
+            // External text changes (paste, cursor move) may expose a sentence ending.
+            checkAutocapitalize()
+        }
     }
 
     private var keyboardHeight: CGFloat {
@@ -158,6 +171,48 @@ struct KeyboardView: View {
         // Auto-unshift after one character (unless caps locked)
         if shiftState == .shifted {
             shiftState = .off
+        }
+    }
+
+    /// Check whether autocapitalisation should activate shift.
+    /// Respects the host app's autocapitalizationType: .none disables autocap entirely,
+    /// .sentences (default) capitalizes after ". ", "! ", "? ", newline, or empty field.
+    ///
+    /// WHY only auto-SHIFT, never auto-unshift:
+    /// Auto-unshift is already handled by insertCharacter() (shifts off after one char).
+    /// If we auto-unshifted here, it would fight with manual shift taps.
+    /// Caps lock is never touched by autocap — it's always a deliberate user action.
+    private func checkAutocapitalize() {
+        let proxy = controller.textDocumentProxy
+
+        // Respect autocapitalizationType from the host text field.
+        // .none = never autocap (e.g., email, password fields).
+        // .sentences = capitalize after sentence-ending punctuation (default).
+        // .words and .allCharacters are less common; we handle .sentences and .none.
+        if let autocapType = proxy.autocapitalizationType,
+           autocapType == .none {
+            return
+        }
+
+        let before = proxy.documentContextBeforeInput ?? ""
+
+        let shouldCap: Bool
+        if before.isEmpty {
+            // Empty field = capitalize first letter
+            shouldCap = true
+        } else if before.hasSuffix(". ") || before.hasSuffix("! ") || before.hasSuffix("? ") {
+            // After sentence-ending punctuation followed by space
+            shouldCap = true
+        } else if before.hasSuffix("\n") {
+            // After newline
+            shouldCap = true
+        } else {
+            shouldCap = false
+        }
+
+        // Only auto-activate shift; don't interfere with caps lock or manual shift
+        if shouldCap && shiftState == .off {
+            shiftState = .shifted
         }
     }
 

@@ -103,6 +103,16 @@ class KeyboardViewController: UIInputViewController {
 
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
-        // Future: react to cursor position changes, return key type, etc.
+        // Notify KeyboardView that text changed externally (paste, cursor move, etc.)
+        // so it can recheck autocapitalisation state.
+        NotificationCenter.default.post(name: .dictusTextDidChange, object: nil)
     }
+}
+
+// MARK: - Notification names for keyboard internal communication
+
+extension Notification.Name {
+    /// Posted by KeyboardViewController when text changes externally (paste, cursor move).
+    /// KeyboardView listens for this to recheck autocapitalisation.
+    static let dictusTextDidChange = Notification.Name("dictusTextDidChange")
 }
