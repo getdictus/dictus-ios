@@ -1,9 +1,9 @@
 // DictusApp/Onboarding/OnboardingView.swift
-// Container for the 5-step onboarding flow with programmatic-only step advancement.
+// Container for the 6-step onboarding flow with programmatic-only step advancement.
 import SwiftUI
 import DictusCore
 
-/// 5-step onboarding flow presented as a fullScreenCover on first launch.
+/// 6-step onboarding flow presented as a fullScreenCover on first launch.
 ///
 /// WHY switch/case instead of TabView:
 /// TabView(.page) allows the user to swipe between pages, which means they could
@@ -29,8 +29,8 @@ struct OnboardingView: View {
     /// Track which steps have been completed to show in the step indicator.
     @State private var completedSteps: Set<Int> = []
 
-    /// Total number of onboarding steps.
-    private let totalSteps = 5
+    /// Total number of onboarding steps (Welcome, Mic, Keyboard, Mode, Model, Test).
+    private let totalSteps = 6
 
     var body: some View {
         ZStack {
@@ -51,8 +51,10 @@ struct OnboardingView: View {
                     case 2:
                         KeyboardSetupPage(onNext: { advanceToPage(3) })
                     case 3:
-                        ModelDownloadPage(onNext: { advanceToPage(4) })
+                        ModeSelectionPage(onNext: { advanceToPage(4) })
                     case 4:
+                        ModelDownloadPage(onNext: { advanceToPage(5) })
+                    case 5:
                         TestRecordingPage(onComplete: {
                             isComplete = true
                         })

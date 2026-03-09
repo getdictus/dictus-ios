@@ -20,6 +20,12 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.language, store: UserDefaults(suiteName: AppGroup.identifier))
     private var language = "fr"
 
+    /// WHY rawValue default `.full`:
+    /// Existing users already have the full keyboard. On app update, they keep it.
+    /// New users choose their mode during onboarding (which writes to this key).
+    @AppStorage(SharedKeys.keyboardMode, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var keyboardMode = KeyboardMode.full.rawValue
+
     @AppStorage(SharedKeys.keyboardLayout, store: UserDefaults(suiteName: AppGroup.identifier))
     private var keyboardLayout = "azerty"
 
@@ -47,15 +53,31 @@ struct SettingsView: View {
             .listRowBackground(Color.dictusAccent.opacity(0.05))
 
             // Section 2: Clavier
+            // WHY conditional toggles per mode:
+            // Micro mode has no tappable keys, so haptics and autocorrect are irrelevant.
+            // Emoji+ mode has no text keys, so autocorrect and AZERTY/QWERTY don't apply,
+            // but it has tappable emoji cells, so haptics makes sense.
+            // Only Full mode needs all options (layout, haptics, autocorrect).
             Section("Clavier") {
-                Picker("Disposition", selection: $keyboardLayout) {
-                    Text("AZERTY").tag("azerty")
-                    Text("QWERTY").tag("qwerty")
+                KeyboardModePicker(selectedMode: $keyboardMode)
+
+                // AZERTY/QWERTY layout only relevant for Full mode (has actual letter keys)
+                if keyboardMode == KeyboardMode.full.rawValue {
+                    Picker("Disposition", selection: $keyboardLayout) {
+                        Text("AZERTY").tag("azerty")
+                        Text("QWERTY").tag("qwerty")
+                    }
                 }
 
-                Toggle("Retour haptique", isOn: $hapticsEnabled)
+                // Haptics available for Emoji+ and Full (both have tappable elements)
+                if keyboardMode != KeyboardMode.micro.rawValue {
+                    Toggle("Retour haptique", isOn: $hapticsEnabled)
+                }
 
-                Toggle("Correction automatique", isOn: $autocorrectEnabled)
+                // Autocorrect only relevant for Full mode (has text input)
+                if keyboardMode == KeyboardMode.full.rawValue {
+                    Toggle("Correction automatique", isOn: $autocorrectEnabled)
+                }
             }
             .listRowBackground(Color.dictusAccent.opacity(0.05))
 
