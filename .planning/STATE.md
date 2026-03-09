@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UX & Keyboard
-status: In Progress
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-03-09T22:12:34.770Z"
-last_activity: 2026-03-09 — Phase 8 complete, Phase 9 redefined (Cold Start → Keyboard Modes)
+status: executing
+stopped_at: Completed 09-02-PLAN.md
+last_updated: "2026-03-09T22:17:41.864Z"
+last_activity: 2026-03-09 — Plan 09-02 complete (MicroModeView + EmojiMicroModeView + mode routing)
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 22
-  completed_plans: 20
-  percent: 0
+  completed_plans: 22
+  percent: 95
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 ## Current Position
 
 Phase: 9 of 10 (Keyboard Modes)
-Plan: 1 of 3 in current phase (1 complete)
+Plan: 2 of 3 in current phase (2 complete)
 Status: In Progress
-Last activity: 2026-03-09 — Plan 09-01 complete (KeyboardMode enum)
+Last activity: 2026-03-09 — Plan 09-02 complete (MicroModeView + EmojiMicroModeView + mode routing)
 
-Progress: [█████████░] 91% (Phase 9: 1/3 plans)
+Progress: [██████████] 95% (Phase 9: 2/3 plans)
 
 ## Performance Metrics
 
@@ -69,6 +69,7 @@ Progress: [█████████░] 91% (Phase 9: 1/3 plans)
 | Phase 08 P01 | 7min | 3 tasks | 10 files |
 | Phase 08 P02 | 12min | 2 tasks | 6 files |
 | Phase 09 P01 | 2min | 1 tasks | 3 files |
+| Phase 09 P02 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -117,6 +118,8 @@ Recent decisions affecting current work:
 - [Phase 08]: Autocorrect undo stores original word and restores on immediate backspace
 - [Phase 09]: KeyboardMode defaults to .full to protect existing users on update
 - [Phase 09]: KeyboardMode follows LayoutType pattern exactly for DictusCore consistency
+- [Phase 09]: Custom 120pt mic pill instead of scaleEffect to avoid retina blur
+- [Phase 09]: RecordingOverlay above mode switch for all-mode coverage; isEmojiMode only in .full mode
 
 ### Pending Todos
 
@@ -130,8 +133,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T22:12:34.767Z
-Stopped at: Completed 09-01-PLAN.md
+Last session: 2026-03-09T22:17:32.181Z
+Stopped at: Completed 09-02-PLAN.md
 Resume file: None
 
 ---
