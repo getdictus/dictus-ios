@@ -10,32 +10,32 @@ struct CategoryInfo: Identifiable {
 }
 
 /// Full emoji picker matching Apple/SuperWhisper style:
-/// - Search bar at top
+/// - Search bar at top (pill shape)
 /// - Single continuous horizontal LazyHGrid (4 rows, swipe left/right)
 /// - Category bar at bottom as bookmarks into the grid
-///
-/// WHY continuous grid instead of TabView pages:
-/// Apple and Super Whisper treat all emojis as one long strip. Categories
-/// in the bottom bar are shortcuts to jump within that strip, not separate pages.
-/// Recents appear first, followed by smileys, people, etc. in one flow.
 struct EmojiPickerView: View {
     let onEmojiInsert: (String) -> Void
     let onDelete: () -> Void
     let onDismiss: () -> Void
 
-    /// Loaded once on appear, NOT updated live (avoids emoji "holes" mid-session).
     @State private var recentEmojis: [String] = []
     @State private var selectedCategoryID: String = "smileys"
     @State private var scrollToken: Int = 0
     @State private var isSearchActive: Bool = false
     @State private var searchText: String = ""
+    @State private var showCursor: Bool = true
 
     private let categories = EmojiStore.categories
-    private let gridRows = Array(repeating: GridItem(.fixed(42), spacing: 2), count: 4)
+    private let gridRows = Array(repeating: GridItem(.fixed(46), spacing: 2), count: 4)
+
+    /// Dynamic cell width: exactly 8 emojis per row on any device.
+    /// (screenWidth - 4pt grid padding) / 8
+    private var emojiCellWidth: CGFloat {
+        (UIScreen.main.bounds.width - 4) / 8
+    }
 
     // MARK: - Computed data
 
-    /// Flat list of all emoji items: recents first, then each category in order.
     private var flatItems: [EmojiGridItem] {
         var items: [EmojiGridItem] = []
         for (i, emoji) in recentEmojis.enumerated() {
@@ -49,7 +49,6 @@ struct EmojiPickerView: View {
         return items
     }
 
-    /// First emoji ID per category (for ScrollViewReader bookmark scrolling).
     private var categoryFirstIDs: [String: String] {
         var result: [String: String] = [:]
         if !recentEmojis.isEmpty { result["recents"] = "recents_0" }
@@ -59,7 +58,6 @@ struct EmojiPickerView: View {
         return result
     }
 
-    /// Ordered list of sections for the category bar.
     private var sectionInfos: [CategoryInfo] {
         var infos: [CategoryInfo] = []
         if !recentEmojis.isEmpty {
@@ -89,29 +87,17 @@ struct EmojiPickerView: View {
         }
     }
 
-    // MARK: - Normal mode (grid + category bar)
+    // MARK: - Normal mode
 
     @ViewBuilder
     private var normalMode: some View {
-        // Search bar button
-        Button { isSearchActive = true } label: {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                Text("Rechercher des Emoji")
-                    .foregroundColor(.secondary)
-                Spacer()
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
-            .background(Color(.tertiarySystemFill))
-            .cornerRadius(10)
-        }
-        .padding(.horizontal, 8)
-        .padding(.top, 4)
-        .padding(.bottom, 4)
+        // Search bar (pill shape)
+        searchBarButton
+            .padding(.horizontal, 8)
+            .padding(.top, 4)
+            .padding(.bottom, 4)
 
-        // Continuous horizontal emoji grid (4 rows)
+        // Continuous horizontal emoji grid (4 rows, 8 per row)
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHGrid(rows: gridRows, alignment: .top, spacing: 0) {
@@ -121,8 +107,8 @@ struct EmojiPickerView: View {
                             RecentEmojis.add(item.emoji)
                         } label: {
                             Text(item.emoji)
-                                .font(.system(size: 32))
-                                .frame(width: 44, height: 42)
+                                .font(.system(size: 34))
+                                .frame(width: emojiCellWidth, height: 46)
                         }
                         .id(item.id)
                     }
@@ -138,7 +124,6 @@ struct EmojiPickerView: View {
             }
         }
 
-        // Category bar (bookmarks)
         EmojiCategoryBar(
             sections: sectionInfos,
             selectedCategoryID: selectedCategoryID,
@@ -151,74 +136,64 @@ struct EmojiPickerView: View {
         )
     }
 
+    /// Normal mode search bar — tapping opens search mode.
+    private var searchBarButton: some View {
+        Button { isSearchActive = true } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                Text("Rechercher des Emoji")
+                    .foregroundColor(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background(
+                Capsule().fill(Color(.systemGray6))
+            )
+        }
+    }
+
     // MARK: - Search mode
 
     @ViewBuilder
     private var searchMode: some View {
-        // Search input
-        HStack(spacing: 8) {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                Text(searchText.isEmpty ? "Rechercher des Emoji" : searchText)
-                    .foregroundColor(searchText.isEmpty ? .secondary : .primary)
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                if !searchText.isEmpty {
-                    Button { searchText = "" } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
+        // Search input bar
+        searchInputBar
             .padding(.horizontal, 8)
-            .padding(.vertical, 7)
-            .background(Color(.tertiarySystemFill))
-            .cornerRadius(10)
+            .padding(.top, 4)
+            .padding(.bottom, 2)
 
-            Button("Annuler") {
-                isSearchActive = false
-                searchText = ""
-            }
-            .foregroundColor(.accentColor)
-            .font(.system(size: 15))
-        }
-        .padding(.horizontal, 8)
-        .padding(.top, 4)
-
-        // Search results
-        let results = searchResults
-        if searchText.isEmpty {
-            Spacer()
-        } else if results.isEmpty {
-            Spacer()
+        // Emoji row: recents when empty, results when searching.
+        // Apple always shows emojis here — recents if nothing typed, or all emojis
+        // sorted by last usage if no recents exist (row is never empty).
+        let emojiRow = searchModeEmojis
+        if emojiRow.isEmpty {
             Text("Aucun résultat")
                 .foregroundColor(.secondary)
-                .font(.system(size: 15))
-            Spacer()
+                .font(.system(size: 14))
+                .frame(height: 48)
         } else {
             ScrollView(.horizontal, showsIndicators: false) {
-                LazyHGrid(
-                    rows: Array(repeating: GridItem(.fixed(42)), count: 2),
-                    spacing: 0
-                ) {
-                    ForEach(results, id: \.self) { emoji in
+                HStack(spacing: 2) {
+                    ForEach(Array(emojiRow.enumerated()), id: \.offset) { _, emoji in
                         Button {
                             onEmojiInsert(emoji)
                             RecentEmojis.add(emoji)
                         } label: {
                             Text(emoji)
-                                .font(.system(size: 32))
-                                .frame(width: 44, height: 42)
+                                .font(.system(size: 34))
+                                .frame(width: emojiCellWidth, height: 46)
                         }
                     }
                 }
                 .padding(.horizontal, 4)
             }
-            .frame(height: 88)
+            .frame(height: 48)
         }
 
-        // Mini AZERTY keyboard for typing search queries
+        Spacer(minLength: 0)
+
         MiniSearchKeyboard(
             onCharacter: { searchText.append($0) },
             onDelete: { if !searchText.isEmpty { searchText.removeLast() } },
@@ -226,93 +201,230 @@ struct EmojiPickerView: View {
         )
     }
 
-    // MARK: - Search logic
+    /// Search bar for search mode with cursor.
+    private var searchInputBar: some View {
+        HStack(spacing: 0) {
+            Image(systemName: "magnifyingglass")
+                .foregroundColor(.secondary)
+                .padding(.trailing, 6)
 
-    /// Filter emojis by Unicode name matching the search query.
+            // Cursor at the start, then text or placeholder
+            if searchText.isEmpty {
+                blinkingCursor
+                Text("Rechercher des Emoji")
+                    .foregroundColor(.secondary)
+            } else {
+                Text(searchText)
+                    .foregroundColor(.primary)
+                blinkingCursor
+            }
+
+            Spacer(minLength: 0)
+
+            // × button: clears text if any, closes search if empty
+            Button {
+                if searchText.isEmpty {
+                    isSearchActive = false
+                } else {
+                    searchText = ""
+                }
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .lineLimit(1)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 7)
+        .background(
+            Capsule().fill(Color(.systemGray6))
+        )
+    }
+
+    private var blinkingCursor: some View {
+        Rectangle()
+            .fill(Color.accentColor)
+            .frame(width: 2, height: 18)
+            .opacity(showCursor ? 1 : 0)
+            .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: showCursor)
+            .onAppear { showCursor.toggle() }
+    }
+
+    /// Emojis to show in search mode row.
+    /// When nothing typed: recents (or first emojis from catalog if no recents).
+    /// When searching: filtered results.
+    private var searchModeEmojis: [String] {
+        if searchText.isEmpty {
+            // Show recents, or default emojis if no recents exist
+            if recentEmojis.isEmpty {
+                return Array(EmojiStore.allEmojis.prefix(30))
+            }
+            return recentEmojis
+        }
+        return searchResults
+    }
+
+    // MARK: - Search logic (optimized with pre-computed names)
+
     private var searchResults: [String] {
         guard !searchText.isEmpty else { return [] }
         let query = searchText.lowercased()
-        return EmojiStore.allEmojis.filter { emoji in
-            guard let name = emoji.applyingTransform(.toUnicodeName, reverse: false) else {
-                return false
-            }
-            return name.lowercased().contains(query)
+        let language = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
+
+        if language == "fr" {
+            return searchFrench(query: query)
+        } else {
+            return searchUnicodeName(query: query)
         }
+    }
+
+    private func searchFrench(query: String) -> [String] {
+        var results: [String] = []
+        var seen = Set<String>()
+
+        for (keyword, emojis) in EmojiSearchFR.keywords {
+            if keyword.contains(query) {
+                for emoji in emojis where !seen.contains(emoji) {
+                    results.append(emoji)
+                    seen.insert(emoji)
+                }
+            }
+        }
+
+        // Fallback to pre-computed Unicode names
+        for entry in EmojiStore.allEmojiNames where !seen.contains(entry.emoji) {
+            if entry.name.contains(query) {
+                results.append(entry.emoji)
+                seen.insert(entry.emoji)
+            }
+        }
+        return results
+    }
+
+    private func searchUnicodeName(query: String) -> [String] {
+        EmojiStore.allEmojiNames
+            .filter { $0.name.contains(query) }
+            .map { $0.emoji }
     }
 }
 
 // MARK: - Supporting types
 
-/// A single emoji in the flat grid with its category membership.
 private struct EmojiGridItem: Identifiable {
     let id: String
     let emoji: String
     let categoryID: String
 }
 
-/// Compact AZERTY keyboard for typing emoji search queries.
-/// Self-contained within the emoji picker — no need to route through
-/// the main keyboard's textDocumentProxy.
+/// Mini keyboard for emoji search with key popups and haptic feedback.
+/// Uses 40pt key height to fit within the emoji picker without clipping.
 private struct MiniSearchKeyboard: View {
     let onCharacter: (String) -> Void
     let onDelete: () -> Void
     let onSpace: () -> Void
 
-    private let rows: [[String]] = [
-        ["a", "z", "e", "r", "t", "y", "u", "i", "o", "p"],
-        ["q", "s", "d", "f", "g", "h", "j", "k", "l", "m"],
-        ["w", "x", "c", "v", "b", "n"]
-    ]
+    private let keyHeight: CGFloat = 40
+
+    private var rows: [[String]] {
+        switch LayoutType.active {
+        case .azerty:
+            return [
+                ["a", "z", "e", "r", "t", "y", "u", "i", "o", "p"],
+                ["q", "s", "d", "f", "g", "h", "j", "k", "l", "m"],
+                ["w", "x", "c", "v", "b", "n"]
+            ]
+        case .qwerty:
+            return [
+                ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+                ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+                ["z", "x", "c", "v", "b", "n", "m"]
+            ]
+        }
+    }
 
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 5) {
             ForEach(Array(rows.enumerated()), id: \.offset) { rowIndex, row in
-                HStack(spacing: 3) {
+                HStack(spacing: 4) {
                     ForEach(row, id: \.self) { letter in
-                        Button {
+                        MiniKeyButton(label: letter, height: keyHeight) {
+                            HapticFeedback.keyTapped()
                             AudioServicesPlaySystemSound(1104)
                             onCharacter(letter)
-                        } label: {
-                            Text(letter)
-                                .font(.system(size: 18))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 36)
-                                .background(KeyMetrics.letterKeyColor)
-                                .cornerRadius(5)
                         }
-                        .foregroundColor(Color(.label))
                     }
                     if rowIndex == 2 {
                         Button {
+                            HapticFeedback.keyTapped()
                             AudioServicesPlaySystemSound(1155)
                             onDelete()
                         } label: {
                             Image(systemName: "delete.backward")
-                                .font(.system(size: 16))
+                                .font(.system(size: 18))
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 36)
+                                .frame(height: keyHeight)
                                 .background(KeyMetrics.letterKeyColor)
-                                .cornerRadius(5)
+                                .cornerRadius(KeyMetrics.keyCornerRadius)
                         }
                         .foregroundColor(Color(.label))
                     }
                 }
             }
-            // Space bar
             Button {
+                HapticFeedback.keyTapped()
                 AudioServicesPlaySystemSound(1156)
                 onSpace()
             } label: {
                 Text("espace")
-                    .font(.system(size: 15))
+                    .font(.system(size: 16))
                     .frame(maxWidth: .infinity)
-                    .frame(height: 36)
+                    .frame(height: keyHeight)
                     .background(KeyMetrics.letterKeyColor)
-                    .cornerRadius(5)
+                    .cornerRadius(KeyMetrics.keyCornerRadius)
             }
             .foregroundColor(Color(.label))
         }
-        .padding(.horizontal, 3)
-        .padding(.bottom, 2)
+        .padding(.horizontal, KeyMetrics.rowHorizontalPadding)
+        .padding(.bottom, 4)
+    }
+}
+
+/// A single key in the mini search keyboard with press popup.
+/// Uses DragGesture(minimumDistance: 0) to detect press/release and show
+/// a magnified popup above the key (matching the main keyboard behavior).
+private struct MiniKeyButton: View {
+    let label: String
+    let height: CGFloat
+    let action: () -> Void
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Text(label)
+            .font(.system(size: 22))
+            .foregroundColor(Color(.label))
+            .frame(maxWidth: .infinity)
+            .frame(height: height)
+            .background(KeyMetrics.letterKeyColor)
+            .cornerRadius(KeyMetrics.keyCornerRadius)
+            .overlay(
+                Group {
+                    if isPressed {
+                        KeyPopup(label: label)
+                            .offset(y: -(height + 8))
+                    }
+                },
+                alignment: .top
+            )
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed { isPressed = true }
+                    }
+                    .onEnded { _ in
+                        isPressed = false
+                        action()
+                    }
+            )
     }
 }

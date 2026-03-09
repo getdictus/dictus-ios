@@ -232,4 +232,15 @@ enum EmojiStore {
 
     /// Flat array of all emojis across all categories (for search).
     static let allEmojis: [String] = categories.flatMap { $0.emojis }
+
+    /// Pre-computed Unicode names for fast search (computed once, cached).
+    /// WHY pre-compute: `applyingTransform(.toUnicodeName)` is expensive (~0.1ms per emoji).
+    /// With 1800 emojis, calling it on every keystroke = ~180ms delay per character typed.
+    /// Pre-computing once reduces per-keystroke search to simple string matching.
+    static let allEmojiNames: [(emoji: String, name: String)] = {
+        allEmojis.compactMap { emoji in
+            guard let name = emoji.applyingTransform(.toUnicodeName, reverse: false) else { return nil }
+            return (emoji, name.lowercased())
+        }
+    }()
 }
