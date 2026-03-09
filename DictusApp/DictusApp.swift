@@ -55,18 +55,15 @@ struct DictusApp: App {
     }
 
     private func handleIncomingURL(_ url: URL) {
-        if #available(iOS 14.0, *) {
-            DictusLogger.app.info("Received URL: \(url.absoluteString)")
-        }
+        PersistentLog.log("Received URL: \(url.absoluteString)")
         guard url.scheme == "dictus" else { return }
 
         switch url.host {
         case "dictate":
-            coordinator.startDictation()
+            PersistentLog.log("URL dictate → calling startDictation(fromURL: true)")
+            coordinator.startDictation(fromURL: true)
         default:
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.warning("Unknown URL host: \(url.host ?? "nil")")
-            }
+            PersistentLog.log("Unknown URL host: \(url.host ?? "nil")")
         }
     }
 }

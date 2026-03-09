@@ -73,6 +73,10 @@ struct SettingsView: View {
                 NavigationLink("Diagnostic") {
                     diagnosticView
                 }
+
+                NavigationLink("Debug Logs") {
+                    DebugLogView()
+                }
             }
             .listRowBackground(Color.dictusAccent.opacity(0.05))
         }
