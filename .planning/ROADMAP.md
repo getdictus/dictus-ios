@@ -90,11 +90,11 @@ Plans:
   1. A 3-slot suggestion bar appears above the keyboard and updates with word completions on each keystroke
   2. Tapping a suggestion inserts the word and adds a space — misspelled words get auto-corrected on validation
   3. When typing characters that could be accented (a, e, u, etc.), the suggestion bar offers accented variants (a, à, â)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md — Core prediction engine, frequency dictionary, suggestion state
+- [ ] 08-02-PLAN.md — Suggestion bar UI, autocorrect wiring, undo-on-backspace, settings toggle
 
 ### Phase 9: Cold Start
 **Goal**: Users rarely experience cold starts, and when they do, the app recovers to a usable state in under 2 seconds
@@ -137,7 +137,7 @@ Note: Phase 9 (Cold Start) is independent of Phases 7-8 and could execute in par
 | 5. Wire Settings & Hygiene | v1.0 | 2/2 | Complete | 2026-03-07 |
 | 6. Infrastructure & App Polish | v1.1 | 3/5 | Gap closure | - |
 | 7. Keyboard Parity & Visual | 12/12 | Complete   | 2026-03-08 | - |
-| 8. Text Prediction | v1.1 | 0/? | Not started | - |
+| 8. Text Prediction | v1.1 | 0/2 | Planned | - |
 | 9. Cold Start | v1.1 | 0/? | Not started | - |
 | 10. Model Catalog | v1.1 | 0/? | Not started | - |
 
