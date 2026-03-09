@@ -55,6 +55,8 @@
 		AA0000B2 /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000B2 /* EmojiPickerView.swift */; };
 		AA0000B3 /* EmojiCategoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000B3 /* EmojiCategoryBar.swift */; };
 		AA0000B4 /* EmojiSearchFR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000B4 /* EmojiSearchFR.swift */; };
+		AA0000D0 /* TextPredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000D0 /* TextPredictionEngine.swift */; };
+		AA0000D1 /* SuggestionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000D1 /* SuggestionState.swift */; };
 		AA0000C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA1000C0 /* Assets.xcassets */; };
 		AA0000C1 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = AA1000C1 /* Settings.bundle */; };
 /* End PBXBuildFile section */
@@ -110,6 +112,8 @@
 		AA1000B2 /* EmojiPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
 		AA1000B3 /* EmojiCategoryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCategoryBar.swift; sourceTree = "<group>"; };
 		AA1000B4 /* EmojiSearchFR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSearchFR.swift; sourceTree = "<group>"; };
+		AA1000D0 /* TextPredictionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextPredictionEngine.swift; sourceTree = "<group>"; };
+		AA1000D1 /* SuggestionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionState.swift; sourceTree = "<group>"; };
 		AA1000C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA1000C1 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 	/* End PBXFileReference section */
@@ -244,10 +248,20 @@
 				AA100030 /* InputView.swift */,
 				AA400005 /* Views */,
 				AA400006 /* Models */,
+				AA40000D /* TextPrediction */,
 				AA100006 /* DictusKeyboard.entitlements */,
 				AA100008 /* Info.plist */,
 			);
 			path = DictusKeyboard;
+			sourceTree = "<group>";
+		};
+		AA40000D /* TextPrediction */ = {
+			isa = PBXGroup;
+			children = (
+				AA1000D0 /* TextPredictionEngine.swift */,
+				AA1000D1 /* SuggestionState.swift */,
+			);
+			path = TextPrediction;
 			sourceTree = "<group>";
 		};
 		AA400003 /* DictusCore (local package) */ = {
@@ -467,6 +481,8 @@
 				AA0000B2 /* EmojiPickerView.swift in Sources */,
 				AA0000B3 /* EmojiCategoryBar.swift in Sources */,
 				AA0000B4 /* EmojiSearchFR.swift in Sources */,
+				AA0000D0 /* TextPredictionEngine.swift in Sources */,
+				AA0000D1 /* SuggestionState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
