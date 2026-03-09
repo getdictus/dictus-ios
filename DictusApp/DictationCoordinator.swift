@@ -249,13 +249,7 @@ class DictationCoordinator: ObservableObject {
                     updateStatus(.recording)
                     PersistentLog.log("Cold start: RawAudioCapture started, WhisperKit loading in parallel")
 
-                    // Step 3: Auto-return to keyboard if opened via URL scheme
-                    if fromURL {
-                        PersistentLog.log("Cold start: scheduling auto-background in 0.5s")
-                        autoBackgroundApp(afterDelay: 0.5)
-                    }
-
-                    // Step 4: Load WhisperKit in parallel (non-blocking for the user)
+                    // Step 3: Load WhisperKit in parallel (non-blocking for the user)
                     // This runs while the user is already recording and back in their app.
                     PersistentLog.log("Cold start: loading WhisperKit in parallel...")
                     try await ensureWhisperKitReady()
@@ -282,11 +276,6 @@ class DictationCoordinator: ObservableObject {
                     try audioRecorder.startRecording()
                     PersistentLog.log("Warm start: recording started successfully")
 
-                    // Step 3: Auto-return to keyboard if opened via URL scheme
-                    if fromURL {
-                        PersistentLog.log("Warm start: scheduling auto-background in 0.5s")
-                        autoBackgroundApp(afterDelay: 0.5)
-                    }
                 } catch {
                     PersistentLog.log("Warm start FAILED: \(error.localizedDescription)")
                     handleError(error.localizedDescription)
@@ -445,31 +434,6 @@ class DictationCoordinator: ObservableObject {
     }
 
     // MARK: - Private Helpers
-
-    /// Programmatically send the app to background.
-    ///
-    /// WHY this technique: There is no public iOS API to "go back" to the previous app.
-    /// This uses UIControl.sendAction with URLSessionTask.suspend selector — a technique
-    /// that simulates a "Home button" press. The user then taps the "< Back to [App]"
-    /// banner in the status bar to return to their previous app.
-    ///
-    /// WHY the delay: We need the audio session to be fully active and the status written
-    /// to App Group before backgrounding. The 0.5s delay ensures:
-    /// 1. AVAudioEngine is running and capturing audio
-    /// 2. Status .recording is written to App Group (keyboard shows overlay)
-    /// 3. The audio engine keeps the app alive via UIBackgroundModes:audio
-    private func autoBackgroundApp(afterDelay delay: TimeInterval = 0.5) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
-            guard let self, self.status == .recording else { return }
-
-            PersistentLog.log("Auto-backgrounding app (suspend)")
-            UIControl().sendAction(
-                #selector(URLSessionTask.suspend),
-                to: UIApplication.shared,
-                for: nil
-            )
-        }
-    }
 
     /// Register Darwin notification observers for keyboard stop/cancel signals.
     ///
