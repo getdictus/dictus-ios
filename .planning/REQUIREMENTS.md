@@ -23,9 +23,9 @@ Requirements for v1.1 UX & Keyboard milestone. Each maps to roadmap phases.
 
 ### Text Prediction
 
-- [ ] **PRED-01**: 3-slot suggestion bar above keyboard with current word completion
-- [ ] **PRED-02**: French autocorrect — spelling correction applied on word validation
-- [ ] **PRED-03**: Accent suggestions in suggestion bar (e.g. typing "a" proposes "a", "à", "â")
+- [x] **PRED-01**: 3-slot suggestion bar above keyboard with current word completion
+- [x] **PRED-02**: French autocorrect — spelling correction applied on word validation
+- [x] **PRED-03**: Accent suggestions in suggestion bar (e.g. typing "a" proposes "a", "à", "â")
 
 ### Visual Polish
 
@@ -100,9 +100,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | KBD-04 | Phase 7 | Complete |
 | KBD-05 | Phase 7 | Complete |
 | KBD-06 | Phase 7 | Complete |
-| PRED-01 | Phase 8 | Pending |
-| PRED-02 | Phase 8 | Pending |
-| PRED-03 | Phase 8 | Pending |
+| PRED-01 | Phase 8 | Complete |
+| PRED-02 | Phase 8 | Complete |
+| PRED-03 | Phase 8 | Complete |
 | VIS-01 | Phase 7 | Complete |
 | VIS-02 | Phase 7 | Complete |
 | VIS-03 | Phase 7 | Complete |

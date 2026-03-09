@@ -4,13 +4,13 @@ milestone: v1.1
 milestone_name: UX & Keyboard
 status: executing
 stopped_at: Phase 8 context gathered
-last_updated: "2026-03-09T17:40:15.233Z"
+last_updated: "2026-03-09T18:32:59.191Z"
 last_activity: 2026-03-08 — Plan 07-11 complete (trackpad line movement, 3-category key sounds)
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 17
-  completed_plans: 17
+  total_plans: 19
+  completed_plans: 18
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-07)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard — no subscription, no cloud, no account.
-**Current focus:** Phase 7 — Keyboard Parity & Visual Polish
+**Current focus:** Phase 8 — Text Prediction
 
 ## Current Position
 
-Phase: 7 of 10 (Keyboard Parity & Visual)
-Plan: 11 of 11 in current phase (11 complete)
+Phase: 8 of 10 (Text Prediction)
+Plan: 1 of 3 in current phase (1 complete)
 Status: In progress
-Last activity: 2026-03-08 — Plan 07-11 complete (trackpad line movement, 3-category key sounds)
+Last activity: 2026-03-09 — Plan 08-01 complete (FrequencyDictionary, TextPredictionEngine, SuggestionState)
 
-Progress: [██████████] 100% (Phase 7: 11/11 plans complete)
+Progress: [██████████] 95% (Phase 8: 1/3 plans complete)
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [██████████] 100% (Phase 7: 11/11 plans complete)
 | Phase 07 P07 | 4min | 2 tasks | 4 files |
 | Phase 07 P11 | 6min | 2 tasks | 2 files |
 | Phase 07 P12 | 2min | 2 tasks | 2 files |
+| Phase 08 P01 | 7min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,10 @@ Recent decisions affecting current work:
 - [07-11]: AudioServicesPlaySystemSound over playInputClick for 3-category key sounds (letter/delete/modifier)
 - [07-11]: 40-char line estimate for vertical cursor jumps (UITextDocumentProxy has no line-width API)
 - [07-11]: Delete sound in DeleteKey view, not callbacks, to avoid duplication
+- [08-01]: FrequencyDictionary as pure Swift struct in DictusCore for testability without UIKit
+- [08-01]: TextPredictionEngine as class (not struct) due to UITextChecker reference type
+- [08-01]: Frequency-ranked UITextChecker completions for better suggestion quality
+- [08-01]: Single language loaded at a time to minimize memory in keyboard extension
 
 ### Pending Todos
 
@@ -118,9 +123,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-09T17:40:15.230Z
-Stopped at: Phase 8 context gathered
-Resume file: .planning/phases/08-text-prediction/08-CONTEXT.md
+Last session: 2026-03-09T18:32:12Z
+Stopped at: Completed 08-01-PLAN.md
+Resume file: .planning/phases/08-text-prediction/08-01-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*
