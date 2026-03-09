@@ -105,10 +105,12 @@ Plans:
   2. User selects their preferred mode in the app's Settings screen
   3. Settings screen shows a non-interactive SwiftUI preview of each mode so the user sees what they're choosing
   4. The keyboard extension reads the selected mode from App Group and renders the correct layout
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 09-01: TBD
+- [ ] 09-01-PLAN.md — KeyboardMode enum, SharedKey, unit tests (DictusCore foundation)
+- [ ] 09-02-PLAN.md — MicroModeView, EmojiMicroModeView, KeyboardRootView mode switching
+- [ ] 09-03-PLAN.md — KeyboardModePicker with previews, Settings integration, onboarding step
 
 ### Phase 10: Model Catalog
 **Goal**: Users see only performant models in the catalog and can choose between WhisperKit and Parakeet engines for transcription
@@ -139,7 +141,7 @@ Note: Phase 9 (Cold Start) is independent of Phases 7-8 and could execute in par
 | 6. Infrastructure & App Polish | v1.1 | 3/5 | Gap closure | - |
 | 7. Keyboard Parity & Visual | 12/12 | Complete   | 2026-03-08 | - |
 | 8. Text Prediction | 2/2 | Complete   | 2026-03-09 | - |
-| 9. Keyboard Modes | v1.1 | 0/? | Not started | - |
+| 9. Keyboard Modes | v1.1 | 0/3 | Planned | - |
 | 10. Model Catalog | v1.1 | 0/? | Not started | - |
 
 ---
