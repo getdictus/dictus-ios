@@ -65,8 +65,9 @@ class ModelManager: ObservableObject {
 
     init() {
         loadState()
-        // Initialize states for all known models
-        for model in ModelInfo.all {
+        // Initialize states for all known models (including deprecated Tiny/Base so
+        // already-downloaded deprecated models still get their state set to .ready).
+        for model in ModelInfo.allIncludingDeprecated {
             if downloadedModels.contains(model.identifier) {
                 modelStates[model.identifier] = .ready
             } else {

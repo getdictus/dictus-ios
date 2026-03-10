@@ -45,10 +45,8 @@ class TranscriptionService {
     /// Prepare TranscriptionService with a specific model at a given path.
     ///
     /// WHY a separate prepare method for model paths:
-    /// SmartModelRouter may select a different model for each transcription based
-    /// on audio duration. When the selected model differs from the currently loaded
-    /// one, we need to reinitialize WhisperKit with the new model. This method
-    /// handles that switch transparently.
+    /// When the user switches models, we need to reinitialize WhisperKit with
+    /// the new model. This method handles that switch transparently.
     func prepare(modelPath: String) async throws {
         // Skip reinitialization if same model is already loaded
         if loadedModelFolder == modelPath, whisperKit != nil {

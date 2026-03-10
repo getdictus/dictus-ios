@@ -8,7 +8,6 @@ import DictusCore
 import WhisperKit
 
 /// Manages the dictation lifecycle in the main app.
-/// Phase 2.3: Integrated with SmartModelRouter for duration-based model selection.
 /// Phase 3.1: Observes keyboard stop/cancel signals via Darwin notifications,
 /// forwards waveform energy to App Group for keyboard visualization.
 ///
@@ -526,18 +525,12 @@ class DictationCoordinator: ObservableObject {
 
     /// Initialize WhisperKit with the preferred model if not already loaded.
     ///
-    /// Phase 2.3: Now accepts an optional preferredModel parameter from SmartModelRouter.
-    /// Falls back to the active model from App Group, then to "openai_whisper-tiny".
-    ///
-    /// WHY we support model switching:
-    /// SmartModelRouter may select different models for different audio durations.
-    /// A 3-second voice note should use tiny/base for speed, while a 30-second
-    /// dictation benefits from small/medium for accuracy. This method handles
-    /// lazy initialization AND model switching.
+    /// Falls back to the active model from App Group, then to "openai_whisper-small".
+    /// Handles lazy initialization and model switching if the user changes model.
     private func ensureWhisperKitReady(preferredModel: String? = nil) async throws {
         let modelName = preferredModel
             ?? defaults.string(forKey: SharedKeys.activeModel)
-            ?? "openai_whisper-tiny"
+            ?? "openai_whisper-small"
 
         // If WhisperKit is already loaded with the same model, reuse it
         if whisperKit != nil, currentModelName == modelName {
