@@ -1,131 +1,192 @@
 // DictusKeyboard/Views/MicroModeView.swift
-// Dictation-only keyboard mode: large centered mic button + bottom utility row.
+// Dictation-only keyboard mode: large centered mic button + bottom key rows.
 import SwiftUI
+import AudioToolbox
 import DictusCore
 
 /// Minimal keyboard layout for dictation-first users.
 ///
-/// WHY a separate view instead of conditionals in KeyboardRootView:
-/// Each keyboard mode has distinct layout logic. Extracting into separate views
-/// keeps KeyboardRootView as a thin router and makes each mode independently
-/// maintainable. Single Responsibility Principle.
-///
-/// Layout:
+/// Layout (when not in emoji):
 /// - Large centered mic button (~120pt wide pill) with "Dicter" label below
-/// - Bottom utility row: emoji, space, return, delete
-/// - No globe button (iOS provides a system globe for all third-party keyboards)
-/// - Uses totalHeight parameter to match other modes' height (no layout jump)
+/// - Penultimate row: delete key right-aligned (like row 3 of real keyboard)
+/// - Bottom row: emoji (left) + space (centered) + return (right)
+///
+/// Layout (when emoji active):
+/// - Full-height EmojiPickerView (same component as full keyboard mode)
+///
+/// WHY Color.clear background: The native iOS keyboard container provides a
+/// blurred background. Using secondarySystemBackground created a visible
+/// color mismatch band. Transparent lets the native chrome show through,
+/// matching the full keyboard mode's approach (see KeyboardRootView).
 struct MicroModeView: View {
     let controller: UIInputViewController
     let dictationStatus: DictationStatus
     let onMicTap: () -> Void
     let totalHeight: CGFloat
 
+    @State private var isEmojiMode = false
+
+    /// Side key width for emoji and return buttons (equal width, centered space).
+    /// Uses the same multiplier-based calculation as the full keyboard's row 4.
+    /// Proportions: emoji(1.2) + space(4.5) + return(1.2) = 6.9 total.
+    private var sideKeyWidth: CGFloat {
+        let totalMult: CGFloat = 1.2 + 4.5 + 1.2
+        let totalSpacing = 2 * KeyMetrics.keySpacing
+        let available = UIScreen.main.bounds.width - (KeyMetrics.rowHorizontalPadding * 2) - totalSpacing
+        return available * 1.2 / totalMult
+    }
+
+    /// Delete key width matching full keyboard's row 3 delete (1.5x unit).
+    private var deleteKeyWidth: CGFloat {
+        // Approximate: use same proportions as row 3 (shift 1.5 + 7 letters + accent 1.0 + delete 1.5 = 11.5)
+        let totalSpacing = 8 * KeyMetrics.keySpacing // 9 keys = 8 gaps
+        let available = UIScreen.main.bounds.width - (KeyMetrics.rowHorizontalPadding * 2) - totalSpacing
+        return available * 1.5 / 11.5
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
-            // Top area: centered mic button with label (takes remaining space)
-            VStack(spacing: 12) {
-                Spacer()
-
-                // Large mic button -- pill shape, ~120pt wide.
-                // WHY not using scaleEffect on AnimatedMicButton:
-                // scaleEffect causes blur on retina displays because it rasterizes
-                // the view at its original size then scales the bitmap. Instead we
-                // build a custom large pill button with the same visual language.
-                Button(action: onMicTap) {
-                    ZStack {
-                        // Glass background pill
-                        Capsule()
-                            .fill(micFillColor)
-                            .frame(width: 120, height: 56)
-                            .dictusGlass(in: Capsule())
-                            .overlay(
-                                Capsule()
-                                    .stroke(micStrokeColor, lineWidth: 2)
-                                    .frame(width: 130, height: 66)
-                            )
-
-                        // Mic icon
-                        Image(systemName: "mic.fill")
-                            .font(.system(size: 22, weight: .medium))
-                            .foregroundColor(.white)
-                    }
-                }
-                .buttonStyle(GlassPressStyle(pressedScale: 0.92))
-                // WHY .requested is included: prevents double-taps during the 500ms
-                // Darwin notification window where the app hasn't yet confirmed recording
-                // start. Tapping during .requested can race with the URL fallback.
-                .disabled(dictationStatus == .recording || dictationStatus == .transcribing || dictationStatus == .requested)
-
-                Text("Dicter")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
-
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-
-            // Bottom utility row: emoji, space, return, delete
-            // WHY these four keys: micro mode users still need basic text editing
-            // (space between words, line breaks, delete typos) and emoji access.
-            HStack(spacing: 0) {
-                // Emoji button -- cycles to next input method which includes emoji.
-                // WHY advanceToNextInputMode: this is the standard iOS API for keyboard
-                // extensions. There is no public API to jump directly to emoji keyboard.
-                utilityButton(icon: "face.smiling") {
-                    controller.advanceToNextInputMode()
-                    HapticFeedback.keyTapped()
-                }
-
-                // Space bar -- takes remaining width
-                Button {
-                    controller.textDocumentProxy.insertText(" ")
-                    HapticFeedback.keyTapped()
-                } label: {
-                    Text("espace")
-                        .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 42)
-                        .background(Color(.systemBackground).opacity(0.6))
-                        .cornerRadius(6)
-                }
-                .padding(.horizontal, 4)
-
-                // Return key
-                utilityButton(icon: "return") {
-                    controller.textDocumentProxy.insertText("\n")
-                    HapticFeedback.keyTapped()
-                }
-
-                // Delete key
-                utilityButton(icon: "delete.left") {
+        if isEmojiMode {
+            // Emoji picker replaces the entire micro mode layout.
+            // Uses full totalHeight so the picker has the same space as in full mode.
+            EmojiPickerView(
+                onEmojiInsert: { emoji in
+                    controller.textDocumentProxy.insertText(emoji)
+                },
+                onDelete: {
                     controller.textDocumentProxy.deleteBackward()
+                },
+                onDismiss: {
                     HapticFeedback.keyTapped()
+                    AudioServicesPlaySystemSound(KeySound.modifier)
+                    isEmojiMode = false
                 }
+            )
+            .frame(height: totalHeight)
+            .clipped()
+        } else {
+            VStack(spacing: 0) {
+                // Top area: centered mic button with label (takes remaining space)
+                VStack(spacing: 12) {
+                    Spacer()
+
+                    // Large mic button -- pill shape, ~120pt wide.
+                    Button(action: onMicTap) {
+                        ZStack {
+                            Capsule()
+                                .fill(micFillColor)
+                                .frame(width: 120, height: 56)
+                                .dictusGlass(in: Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(micStrokeColor, lineWidth: 2)
+                                        .frame(width: 130, height: 66)
+                                )
+
+                            Image(systemName: "mic.fill")
+                                .font(.system(size: 22, weight: .medium))
+                                .foregroundColor(.white)
+                        }
+                    }
+                    .buttonStyle(GlassPressStyle(pressedScale: 0.92))
+                    .disabled(dictationStatus == .recording || dictationStatus == .transcribing || dictationStatus == .requested)
+
+                    Text("Dicter")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.secondary)
+
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity)
+
+                // Penultimate row: delete key right-aligned.
+                // Positioned like row 3 of the real keyboard so muscle memory works.
+                HStack(spacing: KeyMetrics.keySpacing) {
+                    Spacer()
+                    Button {
+                        controller.textDocumentProxy.deleteBackward()
+                        HapticFeedback.keyTapped()
+                        AudioServicesPlaySystemSound(KeySound.delete)
+                    } label: {
+                        Image(systemName: "delete.backward")
+                            .font(.system(size: 16, weight: .medium))
+                            .frame(width: deleteKeyWidth, height: KeyMetrics.keyHeight)
+                            .background(
+                                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                                    .fill(KeyMetrics.letterKeyColor)
+                                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                            )
+                    }
+                    .foregroundColor(Color(.label))
+                }
+                .padding(.horizontal, KeyMetrics.rowHorizontalPadding)
+
+                Spacer().frame(height: KeyMetrics.rowSpacing)
+
+                // Bottom row: emoji (left) + space (centered) + return (right).
+                // Emoji and return have equal widths for visual balance.
+                // Space bar is centered between them, matching full keyboard proportions.
+                HStack(spacing: KeyMetrics.keySpacing) {
+                    // Emoji button -- opens our custom EmojiPickerView
+                    Button {
+                        HapticFeedback.keyTapped()
+                        AudioServicesPlaySystemSound(KeySound.modifier)
+                        isEmojiMode = true
+                    } label: {
+                        Image(systemName: "face.smiling")
+                            .font(.system(size: 18, weight: .medium))
+                            .frame(width: sideKeyWidth, height: KeyMetrics.keyHeight)
+                            .background(
+                                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                                    .fill(KeyMetrics.letterKeyColor)
+                                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                            )
+                    }
+                    .foregroundColor(Color(.label))
+
+                    // Space bar -- takes remaining width, centered between emoji and return
+                    Button {
+                        controller.textDocumentProxy.insertText(" ")
+                        HapticFeedback.keyTapped()
+                        AudioServicesPlaySystemSound(KeySound.modifier)
+                    } label: {
+                        Text("espace")
+                            .font(.system(size: 15))
+                            .foregroundColor(Color(.label))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: KeyMetrics.keyHeight)
+                            .background(
+                                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                                    .fill(KeyMetrics.letterKeyColor)
+                                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                            )
+                    }
+
+                    // Return key -- same width as emoji for balance
+                    Button {
+                        controller.textDocumentProxy.insertText("\n")
+                        HapticFeedback.keyTapped()
+                        AudioServicesPlaySystemSound(KeySound.modifier)
+                    } label: {
+                        Image(systemName: "return.left")
+                            .font(.system(size: 16, weight: .medium))
+                            .frame(width: sideKeyWidth, height: KeyMetrics.keyHeight)
+                            .background(
+                                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                                    .fill(KeyMetrics.letterKeyColor)
+                                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                            )
+                    }
+                    .foregroundColor(Color(.label))
+                }
+                .padding(.horizontal, KeyMetrics.rowHorizontalPadding)
+                .padding(.bottom, 4)
             }
-            .padding(.horizontal, 4)
-            .padding(.bottom, 4)
-            .frame(height: 50) // Match standard keyboard bottom row height
+            .frame(height: totalHeight)
+            .background(Color.clear)
         }
-        .frame(height: totalHeight)
-        .background(Color(.secondarySystemBackground))
     }
 
     // MARK: - Helpers
-
-    /// Uniform utility button for the bottom row (emoji, return, delete).
-    @ViewBuilder
-    private func utilityButton(icon: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.system(size: 18, weight: .medium))
-                .foregroundColor(.primary)
-                .frame(width: 44, height: 42)
-                .background(Color(.systemGray4).opacity(0.5))
-                .cornerRadius(6)
-        }
-    }
 
     private var micFillColor: Color {
         switch dictationStatus {
