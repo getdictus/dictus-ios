@@ -112,7 +112,7 @@ Plans:
 - [x] 09-02-PLAN.md — MicroModeView, EmojiMicroModeView, KeyboardRootView mode switching
 - [x] 09-03-PLAN.md — KeyboardModePicker with previews, Settings integration, onboarding step
 - [ ] 09-04-PLAN.md — Fix App Group mode sync via viewWillAppear notification (gap closure)
-- [ ] 09-05-PLAN.md — Fix MicroModeView background, utility keys, mic states (gap closure)
+- [x] 09-05-PLAN.md — Fix MicroModeView background, utility keys, mic states (gap closure)
 - [ ] 09-06-PLAN.md — Fix EmojiMicroModeView overflow, toolbar gear, ABC wiring (gap closure)
 
 ### Phase 10: Model Catalog
