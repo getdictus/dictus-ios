@@ -32,7 +32,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 - [ ] **Phase 6: Infrastructure & App Polish** - Consolidate design files into shared package, generate app icon, fix app-side visual bugs and onboarding flow (UAT gap closure in progress)
 - [x] **Phase 7: Keyboard Parity & Visual** - Spacebar trackpad, adaptive accent key, haptics, bottom row cleanup, mic/recording pill redesign, waveform rework, performance optimization (completed 2026-03-08)
 - [x] **Phase 8: Text Prediction** - 3-slot suggestion bar with French autocorrect and accent suggestions (completed 2026-03-09)
-- [x] **Phase 9: Keyboard Modes** - Three switchable keyboard layouts (full, mic-only, emoji+mic) with live preview in settings (completed 2026-03-09)
+- [ ] **Phase 9: Keyboard Modes** - Three switchable keyboard layouts (full, mic-only, emoji+mic) with live preview in settings (UAT gap closure in progress)
 - [ ] **Phase 10: Model Catalog** - Clean underperforming models, integrate Parakeet v3, update model selection UI
 
 ## Phase Details
@@ -105,12 +105,15 @@ Plans:
   2. User selects their preferred mode in the app's Settings screen
   3. Settings screen shows a non-interactive SwiftUI preview of each mode so the user sees what they're choosing
   4. The keyboard extension reads the selected mode from App Group and renders the correct layout
-**Plans**: 3 plans
+**Plans**: 6 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — KeyboardMode enum, SharedKey, unit tests (DictusCore foundation)
-- [ ] 09-02-PLAN.md — MicroModeView, EmojiMicroModeView, KeyboardRootView mode switching
-- [ ] 09-03-PLAN.md — KeyboardModePicker with previews, Settings integration, onboarding step
+- [x] 09-01-PLAN.md — KeyboardMode enum, SharedKey, unit tests (DictusCore foundation)
+- [x] 09-02-PLAN.md — MicroModeView, EmojiMicroModeView, KeyboardRootView mode switching
+- [x] 09-03-PLAN.md — KeyboardModePicker with previews, Settings integration, onboarding step
+- [ ] 09-04-PLAN.md — Fix App Group mode sync via viewWillAppear notification (gap closure)
+- [ ] 09-05-PLAN.md — Fix MicroModeView background, utility keys, mic states (gap closure)
+- [ ] 09-06-PLAN.md — Fix EmojiMicroModeView overflow, toolbar gear, ABC wiring (gap closure)
 
 ### Phase 10: Model Catalog
 **Goal**: Users see only performant models in the catalog and can choose between WhisperKit and Parakeet engines for transcription
@@ -141,7 +144,7 @@ Note: Phase 9 (Cold Start) is independent of Phases 7-8 and could execute in par
 | 6. Infrastructure & App Polish | v1.1 | 3/5 | Gap closure | - |
 | 7. Keyboard Parity & Visual | 12/12 | Complete   | 2026-03-08 | - |
 | 8. Text Prediction | 2/2 | Complete   | 2026-03-09 | - |
-| 9. Keyboard Modes | 3/3 | Complete   | 2026-03-09 | - |
+| 9. Keyboard Modes | v1.1 | 3/6 | Gap closure | - |
 | 10. Model Catalog | v1.1 | 0/? | Not started | - |
 
 ---
