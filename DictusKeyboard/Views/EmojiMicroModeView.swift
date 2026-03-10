@@ -11,9 +11,10 @@ import DictusCore
 /// -- there's no keyboard to toggle back to. Different mental model = different view.
 ///
 /// Layout (top to bottom):
-/// - Simplified toolbar: globe (left) + mic pill (right). No suggestions, no gear.
+/// - Simplified toolbar: gear icon (left, opens Dictus app) + mic pill (right).
 /// - EmojiPickerView: horizontal LazyHGrid with category bar and search.
-/// - Uses totalHeight parameter to match other modes' height.
+/// - Uses totalHeight + 56 to compensate for toolbar stealing vertical space
+///   (matching full mode's expansion when emoji is active).
 struct EmojiMicroModeView: View {
     let controller: UIInputViewController
     let hasFullAccess: Bool
@@ -23,19 +24,17 @@ struct EmojiMicroModeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Simplified toolbar: globe left, mic pill right.
-            // WHY no suggestions or gear:
-            // This mode is for emoji + dictation users. Text suggestions don't apply
-            // (no typing happening), and settings are accessible from the main app.
+            // Simplified toolbar: gear left, mic pill right.
             HStack {
-                // Globe for input method switching
-                Button {
-                    controller.advanceToNextInputMode()
-                } label: {
-                    Image(systemName: "globe")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.secondary)
-                        .frame(width: 44, height: 44)
+                // Gear icon -- opens Dictus app for settings.
+                // WHY gear instead of globe: iOS already provides a globe icon
+                // via the system keyboard switcher. The gear matches ToolbarView's
+                // pattern and gives users quick access to settings.
+                Link(destination: URL(string: "dictus://")!) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(Color(.systemGray))
+                        .frame(width: 32, height: 32)
                 }
 
                 Spacer()
@@ -48,8 +47,8 @@ struct EmojiMicroModeView: View {
 
             // Emoji picker -- reuses the existing EmojiPickerView component.
             // WHY reuse: Same horizontal grid, category bar, search functionality.
-            // The onDismiss closure is a no-op because in this mode there's no
-            // keyboard to "dismiss back to" -- emoji IS the mode.
+            // onDismiss wired to advanceToNextInputMode so the ABC button in
+            // EmojiCategoryBar acts as keyboard switcher (replaces removed globe).
             EmojiPickerView(
                 onEmojiInsert: { emoji in
                     controller.textDocumentProxy.insertText(emoji)
@@ -58,11 +57,17 @@ struct EmojiMicroModeView: View {
                     controller.textDocumentProxy.deleteBackward()
                 },
                 onDismiss: {
-                    // No-op: emoji picker is always visible in this mode.
-                    // In full keyboard mode, this would toggle back to AZERTY.
+                    // ABC button switches to next input method.
+                    controller.advanceToNextInputMode()
                 }
             )
+            .clipped()
         }
-        .frame(height: totalHeight)
+        // WHY totalHeight + 56: EmojiPickerView was designed to use the full
+        // keyboard height. In full mode, the toolbar (48pt) and spacer (8pt) are
+        // hidden when emoji is active, giving emoji the full space. Here the toolbar
+        // stays visible, so we add 56pt to compensate.
+        .frame(height: totalHeight + 56)
+        .clipped()
     }
 }
