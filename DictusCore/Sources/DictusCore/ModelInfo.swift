@@ -69,7 +69,22 @@ public struct ModelInfo: Identifiable {
     // MARK: - Catalog
 
     /// Models available for new downloads. Excludes deprecated Tiny/Base.
-    public static let all: [ModelInfo] = allIncludingDeprecated.filter { $0.visibility == .available }
+    /// On iOS 17+, includes Parakeet models. On iOS 16, Parakeet is filtered out.
+    ///
+    /// WHY runtime OS version check instead of #available:
+    /// ModelInfo is in DictusCore (a framework), not the app target.
+    /// Static properties can't use @available. ProcessInfo gives the same
+    /// result at runtime, ensuring iOS 16 users never see Parakeet models
+    /// they can't download or use.
+    public static let all: [ModelInfo] = {
+        let isIOS17OrLater = ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 17
+        return allIncludingDeprecated.filter { model in
+            guard model.visibility == .available else { return false }
+            // Hide Parakeet models on iOS 16
+            if model.engine == .parakeet && !isIOS17OrLater { return false }
+            return true
+        }
+    }()
 
     /// All known models including deprecated ones. Used for backward compatibility
     /// so already-downloaded Tiny/Base models still resolve and function.
@@ -149,6 +164,17 @@ public struct ModelInfo: Identifiable {
             accuracyScore: 0.9,
             speedScore: 0.6,
             description: "Precision maximale",
+            visibility: .available
+        ),
+        ModelInfo(
+            identifier: "parakeet-tdt-0.6b-v3",
+            displayName: "Parakeet v3",
+            sizeLabel: "~800 MB",
+            sizeBytes: 800_000_000,
+            engine: .parakeet,
+            accuracyScore: 0.85,
+            speedScore: 0.9,
+            description: "Rapide et precis (NVIDIA)",
             visibility: .available
         ),
     ]

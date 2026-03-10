@@ -91,18 +91,36 @@ class ModelManager: ObservableObject {
         activeModel = defaults.string(forKey: SharedKeys.activeModel)
     }
 
-    /// Downloads a WhisperKit model variant, prewarms it, and updates state.
+    /// Downloads a model variant, prewarms it, and updates state.
+    ///
+    /// WHY engine-aware download:
+    /// WhisperKit and Parakeet use completely different download pipelines.
+    /// WhisperKit downloads from HuggingFace via WhisperKit.download().
+    /// Parakeet downloads via FluidAudio's AsrModels.downloadAndLoad().
+    /// This method routes to the correct pipeline based on the model's engine.
     ///
     /// WHY foreground download (not background session):
     /// Background URLSession adds significant complexity (delegate callbacks, session
     /// restoration, app lifecycle handling). For v1, foreground download with visible
     /// progress is simpler and sufficient. Users will have the app open during download.
+    func downloadModel(_ identifier: String) async throws {
+        // Check if this is a Parakeet model and route accordingly
+        let modelInfo = ModelInfo.forIdentifier(identifier)
+        if modelInfo?.engine == .parakeet {
+            try await downloadParakeetModel(identifier)
+            return
+        }
+
+        try await downloadWhisperKitModel(identifier)
+    }
+
+    /// Download a WhisperKit model variant from HuggingFace.
     ///
     /// WHY prewarm after download:
     /// WhisperKit models need Core ML compilation on first use. Prewarming does this
     /// compilation immediately after download, so the first transcription is fast.
     /// Without prewarming, the first transcription would have a ~10-30s delay.
-    func downloadModel(_ identifier: String) async throws {
+    private func downloadWhisperKitModel(_ identifier: String) async throws {
         guard let modelsDir = modelsDirectory else {
             throw ModelManagerError.noContainer
         }
@@ -190,6 +208,77 @@ class ModelManager: ObservableObject {
             }
             throw error
         }
+    }
+
+    /// Download a Parakeet model via FluidAudio SDK (iOS 17+ only).
+    ///
+    /// WHY a separate method:
+    /// FluidAudio's download + CoreML compilation is handled by a single call
+    /// (AsrModels.downloadAndLoad). There's no separate progress callback —
+    /// the download/compile is atomic. This is simpler than WhisperKit's
+    /// two-step download + prewarm, but means no progress bar during download.
+    ///
+    /// WHY guard with #available:
+    /// FluidAudio requires iOS 17+. On iOS 16, Parakeet models don't appear
+    /// in the catalog so this method should never be called, but the guard
+    /// is a safety net.
+    private func downloadParakeetModel(_ identifier: String) async throws {
+        modelStates[identifier] = .downloading
+        downloadProgress[identifier] = 0.0
+
+        #if FLUIDAUDIO_AVAILABLE
+        if #available(iOS 17.0, *) {
+            do {
+                // Wait for any WhisperKit prewarm to finish (ANE conflict avoidance)
+                while isPrewarming {
+                    try await Task.sleep(nanoseconds: 500_000_000)
+                }
+
+                isPrewarming = true
+                modelStates[identifier] = .prewarming
+                defer { isPrewarming = false }
+
+                // FluidAudio handles download + CoreML compilation in one call
+                let parakeetEngine = ParakeetEngine()
+                try await parakeetEngine.prepare(modelIdentifier: identifier)
+
+                downloadProgress.removeValue(forKey: identifier)
+
+                // Update state
+                if !downloadedModels.contains(identifier) {
+                    downloadedModels.append(identifier)
+                }
+
+                if activeModel == nil {
+                    activeModel = identifier
+                }
+
+                modelStates[identifier] = .ready
+                persistState()
+
+                if #available(iOS 14.0, *) {
+                    DictusLogger.app.info("Parakeet model \(identifier) ready")
+                }
+            } catch {
+                modelStates[identifier] = .error(error.localizedDescription)
+                downloadProgress.removeValue(forKey: identifier)
+
+                if #available(iOS 14.0, *) {
+                    DictusLogger.app.error("Parakeet download failed: \(error.localizedDescription)")
+                }
+                throw error
+            }
+        } else {
+            modelStates[identifier] = .error("Parakeet requires iOS 17+")
+            downloadProgress.removeValue(forKey: identifier)
+            throw ModelManagerError.parakeetUnavailable
+        }
+        #else
+        // FluidAudio not linked — Parakeet download not available in this build
+        modelStates[identifier] = .error("Parakeet not available in this build")
+        downloadProgress.removeValue(forKey: identifier)
+        throw ModelManagerError.parakeetUnavailable
+        #endif
     }
 
     /// Sets the active model for transcription.
@@ -307,6 +396,7 @@ class ModelManager: ObservableObject {
 enum ModelManagerError: Error, LocalizedError {
     case cannotDeleteLastModel
     case noContainer
+    case parakeetUnavailable
 
     var errorDescription: String? {
         switch self {
@@ -314,6 +404,8 @@ enum ModelManagerError: Error, LocalizedError {
             return "Cannot delete the last remaining model"
         case .noContainer:
             return "App Group container not available"
+        case .parakeetUnavailable:
+            return "Parakeet requires iOS 17+ or FluidAudio is not linked"
         }
     }
 }

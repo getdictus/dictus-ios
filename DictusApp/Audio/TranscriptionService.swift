@@ -1,5 +1,5 @@
 // DictusApp/Audio/TranscriptionService.swift
-// Encapsulates WhisperKit transcription with French language settings and post-processing.
+// Encapsulates speech-to-text transcription with multi-engine routing.
 import Foundation
 import WhisperKit
 import DictusCore
@@ -13,7 +13,7 @@ enum TranscriptionError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notReady:
-            return "TranscriptionService is not ready — WhisperKit not initialized"
+            return "TranscriptionService is not ready — no engine initialized"
         case .emptyAudio:
             return "No audio samples to transcribe"
         case .transcriptionFailed(let message):
@@ -22,24 +22,48 @@ enum TranscriptionError: Error, LocalizedError {
     }
 }
 
-/// Handles WhisperKit transcription with French language configuration.
+/// Handles transcription with multi-engine routing via SpeechModelProtocol.
 ///
 /// WHY this is a separate class from AudioRecorder:
 /// Single Responsibility — AudioRecorder handles recording, TranscriptionService handles
 /// transcription. This also makes it easy to swap or test each independently.
 ///
-/// Phase 2.3 additions:
-/// - Supports loading/switching WhisperKit instances for different models
+/// Phase 10.3 additions:
+/// - SpeechModelProtocol-based engine routing (WhisperKit or Parakeet)
+/// - Backward-compatible: existing prepare(whisperKit:) still works
 class TranscriptionService {
     private var whisperKit: WhisperKit?
+
+    /// The active STT engine, set via prepare(engine:).
+    /// WHY a protocol reference:
+    /// DictationCoordinator creates the appropriate engine (WhisperKitEngine or
+    /// ParakeetEngine) based on the user's active model. TranscriptionService
+    /// doesn't know or care which engine it is — it just calls transcribe().
+    private var activeEngine: SpeechModelProtocol?
 
     /// The folder path of the currently loaded model, used to detect when
     /// we need to reinitialize WhisperKit for a different model.
     private var loadedModelFolder: String?
 
-    /// Inject or re-use a WhisperKit instance.
+    /// Inject or re-use a WhisperKit instance (backward-compatible path).
+    ///
+    /// WHY keep this method:
+    /// DictationCoordinator and AudioRecorder still use the WhisperKit instance
+    /// directly for audio recording (WhisperKit's AudioProcessor). This method
+    /// injects the same WhisperKit instance for the WhisperKit transcription path.
     func prepare(whisperKit: WhisperKit) {
         self.whisperKit = whisperKit
+    }
+
+    /// Set the active engine for protocol-based transcription routing.
+    ///
+    /// WHY a separate method from prepare(whisperKit:):
+    /// The engine abstraction is layered on top of the existing WhisperKit path.
+    /// When activeEngine is set, transcribe() delegates to it instead of using
+    /// the raw WhisperKit instance. This allows both paths to coexist during
+    /// the transition to multi-engine support.
+    func prepare(engine: SpeechModelProtocol) {
+        self.activeEngine = engine
     }
 
     /// Prepare TranscriptionService with a specific model at a given path.
@@ -66,26 +90,26 @@ class TranscriptionService {
         self.loadedModelFolder = modelPath
     }
 
-    /// Transcribe audio samples to text using WhisperKit.
+    /// Transcribe audio samples to text.
     ///
-    /// - Parameter audioSamples: Array of Float32 audio samples at 16 kHz mono
-    ///   (as returned by `AudioRecorder.stopRecording()`).
-    /// - Returns: Transcribed text with filler words removed and punctuation preserved.
+    /// Routes to the active SpeechModelProtocol engine if set,
+    /// otherwise falls back to the direct WhisperKit path.
     ///
-    /// WHY these DecodingOptions:
-    /// - `language` — Reads from App Group settings, defaulting to "fr" if never set.
-    ///   No model reload needed — WhisperKit accepts the language parameter per transcription call.
-    /// - `temperature: 0.0` — Greedy decoding = fastest and most deterministic output
-    /// - `usePrefillPrompt: true` — Enables language-specific prompt prefill for better accuracy
-    /// - `usePrefillCache: true` — Caches prefill results between transcriptions for speed
-    /// - `skipSpecialTokens: true` — Removes Whisper's special tokens from output
-    ///
-    /// WHY settings are read at transcription time (not cached):
-    /// Changes in SettingsView write to App Group UserDefaults immediately. Reading here
-    /// means the next dictation uses the updated language/filler preference without
-    /// requiring app restart or notification-based refresh.
-    ///
+    /// WHY the fallback:
+    /// During transition to multi-engine, existing code paths (cold start via
+    /// RawAudioCapture, warm start via AudioRecorder) still use prepare(whisperKit:).
+    /// The fallback ensures zero regressions while new engine routing is added.
     func transcribe(audioSamples: [Float]) async throws -> String {
+        // Read user settings from App Group at transcription time
+        let defaults = UserDefaults(suiteName: AppGroup.identifier)
+        let language = defaults?.string(forKey: SharedKeys.language) ?? "fr"
+
+        // Route to active engine if set (multi-engine path)
+        if let activeEngine {
+            return try await activeEngine.transcribe(audioSamples: audioSamples, language: language)
+        }
+
+        // Fallback: direct WhisperKit path (backward compatibility)
         guard let whisperKit else {
             throw TranscriptionError.notReady
         }
@@ -93,10 +117,6 @@ class TranscriptionService {
         guard !audioSamples.isEmpty else {
             throw TranscriptionError.emptyAudio
         }
-
-        // Read user settings from App Group at transcription time
-        let defaults = UserDefaults(suiteName: AppGroup.identifier)
-        let language = defaults?.string(forKey: SharedKeys.language) ?? "fr"
 
         let options = DecodingOptions(
             task: .transcribe,

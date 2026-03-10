@@ -47,7 +47,7 @@ class DictationCoordinator: ObservableObject {
     private var dictationTask: Task<Void, Never>?
 
     /// Task that resolves when WhisperKit is fully loaded.
-    /// WHY: Both init() pre-load and startDictation() call ensureWhisperKitReady().
+    /// WHY: Both init() pre-load and startDictation() call ensureEngineReady().
     /// If startDictation() arrives while pre-load is still running, it must AWAIT
     /// the ongoing init instead of starting a duplicate one. This Task acts as
     /// a concurrency lock — the first caller creates it, subsequent callers await it.
@@ -127,7 +127,7 @@ class DictationCoordinator: ObservableObject {
             guard modelReady else { return }
 
             do {
-                try await ensureWhisperKitReady()
+                try await ensureEngineReady()
                 try audioRecorder.warmUp()
                 if #available(iOS 14.0, *) {
                     DictusLogger.app.info("WhisperKit + audio engine pre-loaded at launch")
@@ -156,7 +156,7 @@ class DictationCoordinator: ObservableObject {
 
                 do {
                     try self.audioRecorder.configureAudioSession()
-                    try await self.ensureWhisperKitReady()
+                    try await self.ensureEngineReady()
                     try self.audioRecorder.warmUp()
                     if #available(iOS 14.0, *) {
                         DictusLogger.app.info("Audio engine warmed up on foreground return")
@@ -222,13 +222,13 @@ class DictationCoordinator: ObservableObject {
         dictationTask?.cancel()
 
         // Configure audio session NOW while we're in the foreground.
-        // WHY before the Task: ensureWhisperKitReady() takes 4-5s on cold start.
+        // WHY before the Task: ensureEngineReady() takes 4-5s on cold start.
         // By then the app may be backgrounded (opened via URL from keyboard).
         // iOS forbids setActive(true) from background, so this must happen first.
         try? audioRecorder.configureAudioSession()
 
         // COLD START PATH: WhisperKit not loaded yet — use RawAudioCapture for instant recording
-        // WHY: On cold start, ensureWhisperKitReady() takes 3-4s. Instead of blocking,
+        // WHY: On cold start, ensureEngineReady() takes 3-4s. Instead of blocking,
         // we start recording immediately with RawAudioCapture (plain AVAudioEngine, <100ms)
         // and load WhisperKit in parallel. Samples are transcribed at stopDictation().
         let isColdStart = whisperKit == nil
@@ -251,7 +251,7 @@ class DictationCoordinator: ObservableObject {
                     // Step 3: Load WhisperKit in parallel (non-blocking for the user)
                     // This runs while the user is already recording and back in their app.
                     PersistentLog.log("Cold start: loading WhisperKit in parallel...")
-                    try await ensureWhisperKitReady()
+                    try await ensureEngineReady()
                     PersistentLog.log("Cold start: WhisperKit ready while recording continues via RawAudioCapture")
                 } catch {
                     // WhisperKit init failed — recording continues via rawCapture,
@@ -317,7 +317,7 @@ class DictationCoordinator: ObservableObject {
                     // (parallel init started in startDictation). For very short recordings (<3s),
                     // the user waits 1-2s extra here — acceptable tradeoff for instant start.
                     updateStatus(.transcribing)
-                    try await ensureWhisperKitReady()
+                    try await ensureEngineReady()
 
                     let text = try await transcriptionService.transcribe(audioSamples: samples)
 
@@ -523,15 +523,36 @@ class DictationCoordinator: ObservableObject {
         defaults.synchronize()
     }
 
-    /// Initialize WhisperKit with the preferred model if not already loaded.
+    /// Initialize the appropriate STT engine based on the active model.
+    ///
+    /// WHY engine-aware:
+    /// The user can select either a WhisperKit or Parakeet model. This method
+    /// checks the active model's engine type and initializes the correct engine.
+    /// For WhisperKit models, it uses the existing WhisperKit initialization path.
+    /// For Parakeet models (iOS 17+ only), it creates a ParakeetEngine.
     ///
     /// Falls back to the active model from App Group, then to "openai_whisper-small".
     /// Handles lazy initialization and model switching if the user changes model.
-    private func ensureWhisperKitReady(preferredModel: String? = nil) async throws {
+    private func ensureEngineReady(preferredModel: String? = nil) async throws {
         let modelName = preferredModel
             ?? defaults.string(forKey: SharedKeys.activeModel)
             ?? "openai_whisper-small"
 
+        // Resolve the model's engine type from the catalog
+        let modelInfo = ModelInfo.forIdentifier(modelName)
+        let engine = modelInfo?.engine ?? .whisperKit
+
+        // Route to the correct engine initialization
+        switch engine {
+        case .parakeet:
+            try await ensureParakeetReady(modelName: modelName)
+        case .whisperKit:
+            try await ensureWhisperKitEngineReady(modelName: modelName)
+        }
+    }
+
+    /// Initialize WhisperKit with the preferred model if not already loaded.
+    private func ensureWhisperKitEngineReady(modelName: String) async throws {
         // If WhisperKit is already loaded with the same model, reuse it
         if whisperKit != nil, currentModelName == modelName {
             return
@@ -541,7 +562,7 @@ class DictationCoordinator: ObservableObject {
         // await it instead of starting a duplicate initialization.
         if let existingTask = initTask {
             if #available(iOS 14.0, *) {
-                DictusLogger.app.info("WhisperKit init already in progress — awaiting existing task")
+                DictusLogger.app.info("Engine init already in progress — awaiting existing task")
             }
             try await existingTask.value
             return
@@ -569,6 +590,11 @@ class DictationCoordinator: ObservableObject {
             audioRecorder.prepare(whisperKit: kit)
             transcriptionService.prepare(whisperKit: kit)
 
+            // Also set up the WhisperKitEngine as the active protocol engine
+            let whisperKitEngine = WhisperKitEngine()
+            whisperKitEngine.setWhisperKit(kit)
+            transcriptionService.prepare(engine: whisperKitEngine)
+
             if #available(iOS 14.0, *) {
                 DictusLogger.app.info("WhisperKit ready with model: \(modelName)")
             }
@@ -581,6 +607,67 @@ class DictationCoordinator: ObservableObject {
         } catch {
             initTask = nil
             throw error
+        }
+    }
+
+    /// Initialize Parakeet engine (iOS 17+ only).
+    ///
+    /// WHY separate from WhisperKit initialization:
+    /// Parakeet uses a completely different SDK (FluidAudio) with its own download,
+    /// compilation, and transcription pipeline. It cannot share WhisperKit's
+    /// AudioProcessor or audio engine. On cold start with Parakeet, we still use
+    /// RawAudioCapture for instant recording, then transcribe via ParakeetEngine.
+    private func ensureParakeetReady(modelName: String) async throws {
+        // Already loaded with same model
+        if currentModelName == modelName, whisperKit == nil {
+            // Parakeet doesn't use whisperKit, so nil whisperKit + matching model = already ready
+            return
+        }
+
+        if #available(iOS 17.0, *) {
+            // If an init is already in progress, await it
+            if let existingTask = initTask {
+                if #available(iOS 14.0, *) {
+                    DictusLogger.app.info("Parakeet init already in progress — awaiting existing task")
+                }
+                try await existingTask.value
+                return
+            }
+
+            let task = Task<Void, Error> {
+                if #available(iOS 14.0, *) {
+                    DictusLogger.app.info("Initializing ParakeetEngine for model: \(modelName)")
+                }
+
+                let parakeetEngine = ParakeetEngine()
+                try await parakeetEngine.prepare(modelIdentifier: modelName)
+
+                // Clear WhisperKit references since we're using Parakeet now
+                self.whisperKit = nil
+                self.currentModelName = modelName
+
+                // Set ParakeetEngine as active transcription engine
+                transcriptionService.prepare(engine: parakeetEngine)
+
+                if #available(iOS 14.0, *) {
+                    DictusLogger.app.info("ParakeetEngine ready for model: \(modelName)")
+                }
+            }
+            initTask = task
+
+            do {
+                try await task.value
+                initTask = nil
+            } catch {
+                initTask = nil
+                throw error
+            }
+        } else {
+            // iOS 16: Parakeet is not available, fall back to WhisperKit small
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.warning("Parakeet not available on iOS 16 — falling back to WhisperKit small")
+            }
+            try await ensureWhisperKitEngineReady(modelName: "openai_whisper-small")
         }
     }
 
