@@ -4,6 +4,7 @@ import Foundation
 import Combine
 import DictusCore
 import WhisperKit
+import FluidAudio
 
 /// Represents the current state of a model in the download/preparation lifecycle.
 ///
@@ -145,9 +146,7 @@ class ModelManager: ObservableObject {
                 }
             )
 
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Model downloaded to: \(modelFolder)")
-            }
+            DictusLogger.app.info("Model downloaded to: \(modelFolder)")
 
             // Prewarm: compile Core ML model for this device's Neural Engine/GPU.
             // Serialized — only one model compiles at a time. Multiple simultaneous
@@ -164,9 +163,7 @@ class ModelManager: ObservableObject {
             isPrewarming = true
             defer { isPrewarming = false }
 
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Prewarming model: \(identifier)")
-            }
+            DictusLogger.app.info("Prewarming model: \(identifier)")
 
             let config = WhisperKitConfig(
                 model: identifier,
@@ -191,9 +188,7 @@ class ModelManager: ObservableObject {
             modelStates[identifier] = .ready
             persistState()
 
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Model \(identifier) ready")
-            }
+            DictusLogger.app.info("Model \(identifier) ready")
         } catch {
             modelStates[identifier] = .error(error.localizedDescription)
             downloadProgress.removeValue(forKey: identifier)
@@ -203,9 +198,7 @@ class ModelManager: ObservableObject {
             // that prevent re-download from working correctly.
             cleanupModelFiles(identifier)
 
-            if #available(iOS 14.0, *) {
-                DictusLogger.app.error("Model download/prewarm failed: \(error.localizedDescription)")
-            }
+            DictusLogger.app.error("Model download/prewarm failed: \(error.localizedDescription)")
             throw error
         }
     }
@@ -218,67 +211,48 @@ class ModelManager: ObservableObject {
     /// the download/compile is atomic. This is simpler than WhisperKit's
     /// two-step download + prewarm, but means no progress bar during download.
     ///
-    /// WHY guard with #available:
-    /// FluidAudio requires iOS 17+. On iOS 16, Parakeet models don't appear
-    /// in the catalog so this method should never be called, but the guard
-    /// is a safety net.
+    /// Since Dictus now targets iOS 17, no availability guard is needed.
+    /// FluidAudio is always available.
     private func downloadParakeetModel(_ identifier: String) async throws {
         modelStates[identifier] = .downloading
         downloadProgress[identifier] = 0.0
 
-        #if FLUIDAUDIO_AVAILABLE
-        if #available(iOS 17.0, *) {
-            do {
-                // Wait for any WhisperKit prewarm to finish (ANE conflict avoidance)
-                while isPrewarming {
-                    try await Task.sleep(nanoseconds: 500_000_000)
-                }
-
-                isPrewarming = true
-                modelStates[identifier] = .prewarming
-                defer { isPrewarming = false }
-
-                // FluidAudio handles download + CoreML compilation in one call
-                let parakeetEngine = ParakeetEngine()
-                try await parakeetEngine.prepare(modelIdentifier: identifier)
-
-                downloadProgress.removeValue(forKey: identifier)
-
-                // Update state
-                if !downloadedModels.contains(identifier) {
-                    downloadedModels.append(identifier)
-                }
-
-                if activeModel == nil {
-                    activeModel = identifier
-                }
-
-                modelStates[identifier] = .ready
-                persistState()
-
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Parakeet model \(identifier) ready")
-                }
-            } catch {
-                modelStates[identifier] = .error(error.localizedDescription)
-                downloadProgress.removeValue(forKey: identifier)
-
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.error("Parakeet download failed: \(error.localizedDescription)")
-                }
-                throw error
+        do {
+            // Wait for any WhisperKit prewarm to finish (ANE conflict avoidance)
+            while isPrewarming {
+                try await Task.sleep(nanoseconds: 500_000_000)
             }
-        } else {
-            modelStates[identifier] = .error("Parakeet requires iOS 17+")
+
+            isPrewarming = true
+            modelStates[identifier] = .prewarming
+            defer { isPrewarming = false }
+
+            // FluidAudio handles download + CoreML compilation in one call
+            let parakeetEngine = ParakeetEngine()
+            try await parakeetEngine.prepare(modelIdentifier: identifier)
+
             downloadProgress.removeValue(forKey: identifier)
-            throw ModelManagerError.parakeetUnavailable
+
+            // Update state
+            if !downloadedModels.contains(identifier) {
+                downloadedModels.append(identifier)
+            }
+
+            if activeModel == nil {
+                activeModel = identifier
+            }
+
+            modelStates[identifier] = .ready
+            persistState()
+
+            DictusLogger.app.info("Parakeet model \(identifier) ready")
+        } catch {
+            modelStates[identifier] = .error(error.localizedDescription)
+            downloadProgress.removeValue(forKey: identifier)
+
+            DictusLogger.app.error("Parakeet download failed: \(error.localizedDescription)")
+            throw error
         }
-        #else
-        // FluidAudio not linked — Parakeet download not available in this build
-        modelStates[identifier] = .error("Parakeet not available in this build")
-        downloadProgress.removeValue(forKey: identifier)
-        throw ModelManagerError.parakeetUnavailable
-        #endif
     }
 
     /// Sets the active model for transcription.
@@ -313,9 +287,7 @@ class ModelManager: ObservableObject {
         if let whisperKitDir = docsDir?.appendingPathComponent("huggingface/models/argmaxinc/whisperkit-coreml/\(identifier)") {
             if FileManager.default.fileExists(atPath: whisperKitDir.path) {
                 try FileManager.default.removeItem(at: whisperKitDir)
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Deleted model files at: \(whisperKitDir.path)")
-                }
+                DictusLogger.app.info("Deleted model files at: \(whisperKitDir.path)")
             }
         }
 

@@ -31,6 +31,7 @@
 		AA000045 /* RawAudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100045 /* RawAudioCapture.swift */; };
 		AA000041 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100041 /* TranscriptionService.swift */; };
 		AA000042 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA900020 /* WhisperKit */; };
+		AA000043 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = AA900030 /* FluidAudio */; };
 		AA000043 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
 		AA000050 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100050 /* ModelManager.swift */; };
 		AA000051 /* ModelManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100051 /* ModelManagerView.swift */; };
@@ -167,6 +168,7 @@
 			files = (
 				AA000010 /* DictusCore in Frameworks */,
 				AA000042 /* WhisperKit in Frameworks */,
+				AA000043 /* FluidAudio in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -367,6 +369,7 @@
 			packageProductDependencies = (
 				AA900010 /* DictusCore */,
 				AA900020 /* WhisperKit */,
+				AA900030 /* FluidAudio */,
 			);
 			productName = DictusApp;
 			productReference = AA200001 /* DictusApp.app */;
@@ -584,7 +587,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -638,7 +641,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -659,7 +662,7 @@
 				DEVELOPMENT_TEAM = QN58279822;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DictusApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pivi.dictus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -681,7 +684,7 @@
 				DEVELOPMENT_TEAM = QN58279822;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DictusApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pivi.dictus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -702,7 +705,7 @@
 				DEVELOPMENT_TEAM = QN58279822;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DictusKeyboard/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pivi.dictus.keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -724,7 +727,7 @@
 				DEVELOPMENT_TEAM = QN58279822;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = DictusKeyboard/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pivi.dictus.keyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -809,6 +812,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AA800002 /* XCRemoteSwiftPackageReference "WhisperKit" */;
 			productName = WhisperKit;
+		};
+		AA900030 /* FluidAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA800003 /* XCRemoteSwiftPackageReference "FluidAudio" */;
+			productName = FluidAudio;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

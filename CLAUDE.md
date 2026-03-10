@@ -9,8 +9,9 @@ Voir PRD.md pour les specs complètes et DEVELOPMENT.md pour le guide de dévelo
 
 - Swift 5.9+ / SwiftUI
 - WhisperKit (argmaxinc) via SPM
+- FluidAudio (Parakeet STT) via SPM — DictusApp only
 - App Group: group.com.pivi.dictus
-- Minimum iOS: 16.0
+- Minimum iOS: 17.0
 - Design: iOS 26 Liquid Glass
 
 ## Targets Xcode

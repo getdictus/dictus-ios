@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "DictusCore",
-    platforms: [.iOS(.v16)],
+    platforms: [.iOS(.v17)],
     products: [
         .library(name: "DictusCore", targets: ["DictusCore"])
     ],
