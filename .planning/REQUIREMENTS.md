@@ -47,7 +47,7 @@ Requirements for v1.1 UX & Keyboard milestone. Each maps to roadmap phases.
 
 ### Models
 
-- [ ] **MOD-01**: Model catalog cleaned — remove underperforming models (tiny/base if confirmed unhelpful)
+- [x] **MOD-01**: Model catalog cleaned — remove underperforming models (tiny/base if confirmed unhelpful)
 - [ ] **MOD-02**: Parakeet v3 integrated as alternative STT option (SpeechModel protocol + FluidAudio runtime)
 - [ ] **MOD-03**: Model selection UI updated to display both engines (WhisperKit + Parakeet)
 
@@ -122,7 +122,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MODE-02 | Phase 9 | Complete |
 | MODE-03 | Phase 9 | Complete |
 | MODE-04 | Phase 9 | Complete |
-| MOD-01 | Phase 10 | Pending |
+| MOD-01 | Phase 10 | Complete |
 | MOD-02 | Phase 10 | Pending |
 | MOD-03 | Phase 10 | Pending |
 

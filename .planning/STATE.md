@@ -4,13 +4,13 @@ milestone: v1.1
 milestone_name: UX & Keyboard
 status: completed
 stopped_at: Phase 10 context gathered
-last_updated: "2026-03-10T21:02:17.517Z"
+last_updated: "2026-03-10T21:46:23.982Z"
 last_activity: 2026-03-10 — Plan 09-06 gap closure (emoji micro mode layout fix)
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 25
-  completed_plans: 25
+  total_plans: 28
+  completed_plans: 26
   percent: 100
 ---
 
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-07)
 
 ## Current Position
 
-Phase: 9 of 10 (Keyboard Modes)
-Plan: 6 of 6 in current phase (6 complete)
-Status: Complete
-Last activity: 2026-03-10 — Plan 09-06 gap closure (emoji micro mode layout fix)
+Phase: 10 of 10 (Model Catalog)
+Plan: 1 of 3 in current phase (1 complete)
+Status: In Progress
+Last activity: 2026-03-10 — Plan 10-01 model catalog cleanup (3 new models added)
 
-Progress: [██████████] 100% (Phase 9: 6/6 plans)
+Progress: [█████████░] 93% (Phase 10: 1/3 plans)
 
 ## Performance Metrics
 
@@ -74,6 +74,7 @@ Progress: [██████████] 100% (Phase 9: 6/6 plans)
 | Phase 09 P04 | 2min | 1 tasks | 2 files |
 | Phase 09 P05 | 3min | 1 tasks | 1 files |
 | Phase 09 P06 | 2min | 1 tasks | 1 files |
+| Phase 10 P01 | 3min | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,10 @@ Recent decisions affecting current work:
 - [Phase 09]: Empty string default in onboarding forces explicit mode selection
 - [Phase 09]: Conditional toggles: AZERTY/QWERTY and autocorrect only for Complet, haptics hidden for Micro
 - [Phase 09]: NotificationCenter bridge over computed property to avoid reading UserDefaults on every SwiftUI body evaluation
+- [10-01]: SpeechEngine enum with WK/PK raw values for multi-engine model catalog
+- [10-01]: CatalogVisibility soft-deprecation: Tiny/Base hidden but still resolvable
+- [10-01]: All 3 new WhisperKit candidates added (turbo, distil, small216) -- user will test on device
+- [10-01]: Fallback model changed from tiny to small in DictationCoordinator
 - [09-05]: secondarySystemBackground for MicroModeView to match system keyboard chrome
 - [09-05]: Mic button disabled during .requested state to prevent double-tap race with Darwin notification
 - [Phase 09]: Gear icon replaces globe in EmojiMicroModeView -- iOS provides system globe, gear opens settings
@@ -143,9 +148,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-10T21:02:17.509Z
-Stopped at: Phase 10 context gathered
-Resume file: .planning/phases/10-model-catalog/10-CONTEXT.md
+Last session: 2026-03-10T21:45:39Z
+Stopped at: Completed 10-01-PLAN.md
+Resume file: .planning/phases/10-model-catalog/10-01-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*
