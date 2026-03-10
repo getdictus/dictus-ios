@@ -72,6 +72,7 @@ Progress: [██████████] 100% (Phase 9: 6/6 plans)
 | Phase 09 P02 | 3min | 2 tasks | 4 files |
 | Phase 09 P03 | 3min | 2 tasks | 4 files |
 | Phase 09 P04 | 2min | 1 tasks | 2 files |
+| Phase 09 P05 | 3min | 1 tasks | 1 files |
 | Phase 09 P06 | 2min | 1 tasks | 1 files |
 
 ## Accumulated Context
@@ -126,6 +127,8 @@ Recent decisions affecting current work:
 - [Phase 09]: Empty string default in onboarding forces explicit mode selection
 - [Phase 09]: Conditional toggles: AZERTY/QWERTY and autocorrect only for Complet, haptics hidden for Micro
 - [Phase 09]: NotificationCenter bridge over computed property to avoid reading UserDefaults on every SwiftUI body evaluation
+- [09-05]: secondarySystemBackground for MicroModeView to match system keyboard chrome
+- [09-05]: Mic button disabled during .requested state to prevent double-tap race with Darwin notification
 - [Phase 09]: Gear icon replaces globe in EmojiMicroModeView -- iOS provides system globe, gear opens settings
 
 ### Pending Todos
