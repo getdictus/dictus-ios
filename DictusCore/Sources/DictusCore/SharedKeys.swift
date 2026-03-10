@@ -28,7 +28,11 @@ public enum SharedKeys {
 
     // Keyboard mode preference (added for Phase 09 keyboard modes)
     /// Current keyboard mode stored as String ("micro", "emojiMicro", "full")
+    @available(*, deprecated, message: "Use defaultKeyboardLayer instead. Kept for migration only.")
     public static let keyboardMode = "dictus.keyboardMode"
+
+    /// Default keyboard layer: "letters" or "numbers". Replaces keyboardMode.
+    public static let defaultKeyboardLayer = "dictus.defaultKeyboardLayer"
 
     // User preferences (added for Plan 4.1 onboarding + settings)
     /// Language code for transcription ("fr" or "en"), default "fr"

@@ -42,7 +42,11 @@ struct ShiftKey: View {
                         .fill(KeyMetrics.letterKeyColor)
                         .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                 )
-                .foregroundColor(shiftState != .off ? .white : Color(.label))
+                // WHY Color(.label) for all states:
+                // .label is black in light mode, white in dark mode — always
+                // visible against the key background. The filled icon (shift.fill,
+                // capslock.fill) already indicates the active state visually.
+                .foregroundColor(Color(.label))
         }
     }
 

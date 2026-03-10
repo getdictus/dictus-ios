@@ -3,6 +3,16 @@ import SwiftUI
 import Combine
 import DictusCore
 
+/// Bridge between DictusCore's DefaultKeyboardLayer and DictusKeyboard's KeyboardLayerType.
+extension DefaultKeyboardLayer {
+    var asLayerType: KeyboardLayerType {
+        switch self {
+        case .letters: return .letters
+        case .numbers: return .numbers
+        }
+    }
+}
+
 /// Root SwiftUI view for the keyboard extension.
 /// Phase 3 layout: ToolbarView + (KeyboardView OR RecordingOverlay).
 ///
@@ -19,11 +29,19 @@ struct KeyboardRootView: View {
     /// @StateObject ensures a single instance is created and owned by this view.
     @StateObject private var suggestionState = SuggestionState()
     @State private var isEmojiMode = false
-    /// Active keyboard mode read from App Group on each appearance.
-    /// WHY @State: The mode is read once when the keyboard opens (onAppear) and
-    /// doesn't change during the keyboard session. @State is sufficient — no need
-    /// for @StateObject or continuous observation.
-    @State private var currentMode: KeyboardMode = .full
+    /// Default keyboard layer read from App Group on each appearance.
+    /// Controls which layer (letters or numbers) the keyboard opens on.
+    ///
+    /// WHY initialized from UserDefaults (not just .letters):
+    /// In SwiftUI, child .onAppear fires BEFORE parent .onAppear. If we default
+    /// to .letters here and only read UserDefaults in .onAppear, KeyboardView
+    /// would always see .letters on first render — even if the user chose 123.
+    /// Reading the stored value at @State init time ensures the correct layer
+    /// is available when KeyboardView first renders.
+    @State private var defaultLayer: KeyboardLayerType = {
+        DefaultKeyboardLayer.migrateFromKeyboardModeIfNeeded()
+        return DefaultKeyboardLayer.active.asLayerType
+    }()
 
     /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
     /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
@@ -61,62 +79,34 @@ struct KeyboardRootView: View {
                 )
                 .frame(height: totalContentHeight)
             } else {
-                // Mode-based rendering: each KeyboardMode gets its own layout.
-                // WHY switch instead of if/else: Swift exhaustive switch ensures we
-                // handle every mode — if a new mode is added to KeyboardMode, the
-                // compiler will flag this switch as incomplete.
-                switch currentMode {
-                case .micro:
-                    MicroModeView(
-                        controller: controller,
-                        dictationStatus: state.dictationStatus,
-                        onMicTap: { state.startRecording() },
-                        totalHeight: totalContentHeight
-                    )
+                // Single keyboard layout — no more mode switching.
+                // The only variable is which layer opens first (letters vs numbers),
+                // controlled by the user's DefaultKeyboardLayer preference.
 
-                case .emojiMicro:
-                    EmojiMicroModeView(
-                        controller: controller,
+                // Hide toolbar in emoji mode to give full height to emoji picker
+                if !isEmojiMode {
+                    ToolbarView(
                         hasFullAccess: controller.hasFullAccess,
                         dictationStatus: state.dictationStatus,
                         onMicTap: { state.startRecording() },
-                        totalHeight: totalContentHeight
+                        suggestions: suggestionState.suggestions,
+                        suggestionMode: suggestionState.mode,
+                        onSuggestionTap: { index in
+                            handleSuggestionTap(index: index)
+                        }
                     )
+                }
 
-                case .full:
-                    // KBD-05: The system-provided Apple dictation mic icon below the keyboard cannot be
-                    // removed by third-party keyboard extensions. No public API exists to suppress it.
-                    // Users can disable it in Settings > General > Keyboard > Enable Dictation.
-                    // Our mic button in ToolbarView is the Dictus-specific dictation trigger.
+                KeyboardView(
+                    controller: controller,
+                    hasFullAccess: controller.hasFullAccess,
+                    isEmojiMode: $isEmojiMode,
+                    suggestionState: suggestionState,
+                    initialLayer: defaultLayer
+                )
 
-                    // Hide toolbar in emoji mode to give full height to emoji picker
-                    if !isEmojiMode {
-                        ToolbarView(
-                            hasFullAccess: controller.hasFullAccess,
-                            dictationStatus: state.dictationStatus,
-                            onMicTap: { state.startRecording() },
-                            suggestions: suggestionState.suggestions,
-                            suggestionMode: suggestionState.mode,
-                            onSuggestionTap: { index in
-                                handleSuggestionTap(index: index)
-                            }
-                        )
-                    }
-
-                    KeyboardView(
-                        controller: controller,
-                        hasFullAccess: controller.hasFullAccess,
-                        isEmojiMode: $isEmojiMode,
-                        suggestionState: suggestionState
-                    )
-
-                    // Experimental: extra bottom padding to push system keyboard row
-                    // (globe, dictation mic icons) further down. Wispr Flow appears to use
-                    // extra height to overlay-hide the system dictation mic icon.
-                    // If this doesn't work, it confirms an iOS limitation (KBD-05).
-                    if !isEmojiMode {
-                        Spacer().frame(height: 8)
-                    }
+                if !isEmojiMode {
+                    Spacer().frame(height: 8)
                 }
             }
         }
@@ -133,11 +123,8 @@ struct KeyboardRootView: View {
             state.controller = controller
             state.openURL = { url in openURL(url) }
 
-            // Read keyboard mode from App Group each time keyboard opens.
-            // WHY on every appear: The user may have changed the mode in the main app's
-            // settings. The keyboard extension is a separate process, so we re-read the
-            // persisted value each time the keyboard appears.
-            currentMode = KeyboardMode.active
+            // Re-read default layer in case user changed settings since extension loaded.
+            defaultLayer = DefaultKeyboardLayer.active.asLayerType
 
             // Pre-allocate haptic generators so the first key tap has zero latency.
             // Without this, the Taptic Engine needs ~2-5ms to spin up on first use.
@@ -147,12 +134,12 @@ struct KeyboardRootView: View {
             let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
             suggestionState.setLanguage(lang)
         }
-        // Re-read keyboard mode every time the keyboard reappears (not just the
+        // Re-read default layer every time the keyboard reappears (not just the
         // first .onAppear). viewWillAppear fires on every keyboard show, whereas
         // .onAppear only fires once per extension process lifetime. This ensures
-        // mode changes made in Settings are picked up immediately.
+        // preference changes made in Settings are picked up immediately.
         .onReceive(NotificationCenter.default.publisher(for: .dictusKeyboardWillAppear)) { _ in
-            currentMode = KeyboardMode.active
+            defaultLayer = DefaultKeyboardLayer.active.asLayerType
         }
     }
 

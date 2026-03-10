@@ -30,6 +30,10 @@ struct KeyboardView: View {
     /// updates and read autocorrect settings.
     @ObservedObject var suggestionState: SuggestionState
 
+    /// Which layer to show on first appearance. Set by KeyboardRootView
+    /// based on the user's DefaultKeyboardLayer preference.
+    var initialLayer: KeyboardLayerType = .letters
+
     @State private var currentLayer: KeyboardLayerType = .letters
     @State private var shiftState: ShiftState = .off
     /// Tracks the last typed character for the adaptive accent key.
@@ -218,9 +222,17 @@ struct KeyboardView: View {
         }
         .frame(height: keyboardHeight)
         .onAppear {
+            // Set the starting layer from the user's preference.
+            currentLayer = initialLayer
             // Set initial shift state based on text field content.
             // Empty field = capitalize first letter (standard iOS behavior).
             checkAutocapitalize()
+        }
+        // React to parent changing initialLayer (e.g. keyboard reappearance
+        // after user changed the default in Settings, or after recording overlay
+        // dismisses and this view is recreated by SwiftUI's conditional rendering).
+        .onChange(of: initialLayer) { newLayer in
+            currentLayer = newLayer
         }
         .onReceive(NotificationCenter.default.publisher(for: .dictusTextDidChange)) { _ in
             // External text changes (paste, cursor move) may expose a sentence ending.

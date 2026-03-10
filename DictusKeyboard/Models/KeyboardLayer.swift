@@ -2,7 +2,7 @@
 import Foundation
 
 /// Represents a full keyboard layer (letters, numbers, symbols).
-enum KeyboardLayerType {
+enum KeyboardLayerType: Equatable {
     case letters
     case numbers
     case symbols

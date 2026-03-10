@@ -62,8 +62,6 @@
 		AA0000D3 /* en_frequency.json in Resources */ = {isa = PBXBuildFile; fileRef = AA1000D3 /* en_frequency.json */; };
 		AA0000E0 /* KeyboardModePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000E0 /* KeyboardModePicker.swift */; };
 		AA0000E1 /* ModeSelectionPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000E1 /* ModeSelectionPage.swift */; };
-		AA0000F0 /* MicroModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F0 /* MicroModeView.swift */; };
-		AA0000F1 /* EmojiMicroModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F1 /* EmojiMicroModeView.swift */; };
 		AA0000C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA1000C0 /* Assets.xcassets */; };
 		AA0000C1 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = AA1000C1 /* Settings.bundle */; };
 /* End PBXBuildFile section */
@@ -126,8 +124,6 @@
 		AA1000D3 /* en_frequency.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = en_frequency.json; sourceTree = "<group>"; };
 		AA1000E0 /* KeyboardModePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardModePicker.swift; sourceTree = "<group>"; };
 		AA1000E1 /* ModeSelectionPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeSelectionPage.swift; sourceTree = "<group>"; };
-		AA1000F0 /* MicroModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicroModeView.swift; sourceTree = "<group>"; };
-		AA1000F1 /* EmojiMicroModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiMicroModeView.swift; sourceTree = "<group>"; };
 		AA1000C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA1000C1 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 	/* End PBXFileReference section */
@@ -321,8 +317,6 @@
 				AA1000B2 /* EmojiPickerView.swift */,
 				AA1000B3 /* EmojiCategoryBar.swift */,
 				AA1000D4 /* SuggestionBarView.swift */,
-				AA1000F0 /* MicroModeView.swift */,
-				AA1000F1 /* EmojiMicroModeView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -517,8 +511,6 @@
 				AA0000D0 /* TextPredictionEngine.swift in Sources */,
 				AA0000D1 /* SuggestionState.swift in Sources */,
 				AA0000D4 /* SuggestionBarView.swift in Sources */,
-				AA0000F0 /* MicroModeView.swift in Sources */,
-				AA0000F1 /* EmojiMicroModeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

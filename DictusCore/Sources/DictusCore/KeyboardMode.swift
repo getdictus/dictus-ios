@@ -1,46 +1,73 @@
 // DictusCore/Sources/DictusCore/KeyboardMode.swift
-// Shared keyboard mode enum accessible by both DictusApp and DictusKeyboard.
+// Default keyboard layer enum — replaces the old 3-mode KeyboardMode system.
 import Foundation
 
-/// Keyboard mode persisted to App Group so both targets agree on the active mode.
+/// Which keyboard layer to show when the keyboard first appears.
 ///
-/// WHY this lives in DictusCore:
-/// Both the main app (settings UI, onboarding) and the keyboard extension need to read/write
-/// the keyboard mode preference. Putting the enum and its persistence logic in the shared
-/// framework prevents each target from defining its own incompatible version.
-///
-/// WHY three modes:
-/// - `.micro`: Minimal layout — large mic button + minimal keys for dictation-first users
-/// - `.emojiMicro`: Micro layout with emoji access — for users who also send emoji frequently
-/// - `.full`: Full AZERTY/QWERTY keyboard — traditional typing experience with mic in toolbar
-///
-/// WHY CaseIterable:
-/// The settings UI and onboarding need to iterate all modes to display a mode picker.
-public enum KeyboardMode: String, CaseIterable, Codable {
-    case micro
-    case emojiMicro
-    case full
+/// WHY only two cases:
+/// The old system had 3 modes (micro, emojiMicro, full) with separate layouts.
+/// This caused recurring layout bugs and code duplication. Now there's always
+/// a full keyboard — this enum just controls which layer opens first:
+/// letters (AZERTY/QWERTY) or numbers (123/symbols).
+public enum DefaultKeyboardLayer: String, CaseIterable, Codable {
+    case letters
+    case numbers
 
-    /// Reads the active keyboard mode from App Group UserDefaults, defaulting to `.full`.
-    ///
-    /// WHY `.full` as default:
-    /// Existing users already have the full keyboard. Switching them to micro mode on update
-    /// would be disruptive. New users choose their mode during onboarding.
-    public static var active: KeyboardMode {
-        guard let raw = AppGroup.defaults.string(forKey: SharedKeys.keyboardMode),
-              let mode = KeyboardMode(rawValue: raw) else {
-            return .full
+    /// Reads the active default layer from App Group UserDefaults.
+    /// Defaults to `.letters` if nothing is stored.
+    public static var active: DefaultKeyboardLayer {
+        guard let raw = AppGroup.defaults.string(forKey: SharedKeys.defaultKeyboardLayer),
+              let layer = DefaultKeyboardLayer(rawValue: raw) else {
+            return .letters
         }
-        return mode
+        return layer
     }
 
     /// User-facing display name for settings and onboarding UI.
-    /// French is the primary language (see CLAUDE.md).
+    /// Matches the labels on the keyboard's layer-switch key (ABC / 123).
     public var displayName: String {
         switch self {
-        case .micro: return "Micro"
-        case .emojiMicro: return "Emoji+"
-        case .full: return "Complet"
+        case .letters: return "ABC"
+        case .numbers: return "123"
         }
+    }
+
+    /// Migrates from the old KeyboardMode system to DefaultKeyboardLayer.
+    ///
+    /// WHY migration:
+    /// Existing users may have "micro", "emojiMicro", or "full" stored.
+    /// We map them to the new system and clean up the old key.
+    ///
+    /// Mapping:
+    /// - "micro" → "numbers" (dictation-first users wanted minimal typing)
+    /// - "full" → "letters" (same behavior as before)
+    /// - "emojiMicro" → "letters" (emoji is accessible via button on all layers)
+    /// - absent/invalid → no-op (defaults handle it)
+    public static func migrateFromKeyboardModeIfNeeded() {
+        let defaults = AppGroup.defaults
+
+        // Skip if already migrated (new key exists)
+        if defaults.string(forKey: SharedKeys.defaultKeyboardLayer) != nil {
+            return
+        }
+
+        // Read old value — suppress deprecation warning since we need it for migration
+        let oldKey = "dictus.keyboardMode"
+        guard let oldValue = defaults.string(forKey: oldKey) else {
+            return // No old value stored, defaults will handle it
+        }
+
+        let newValue: String
+        switch oldValue {
+        case "micro":
+            newValue = DefaultKeyboardLayer.numbers.rawValue
+        case "full", "emojiMicro":
+            newValue = DefaultKeyboardLayer.letters.rawValue
+        default:
+            newValue = DefaultKeyboardLayer.letters.rawValue
+        }
+
+        defaults.set(newValue, forKey: SharedKeys.defaultKeyboardLayer)
+        defaults.removeObject(forKey: oldKey)
     }
 }

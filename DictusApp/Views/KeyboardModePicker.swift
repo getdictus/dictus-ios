@@ -1,172 +1,192 @@
 // DictusApp/Views/KeyboardModePicker.swift
-// Reusable keyboard mode picker with segmented control and miniature previews.
+// Reusable default layer picker with segmented control and miniature previews.
 import SwiftUI
 import DictusCore
 
-/// Segmented picker for selecting keyboard mode with a non-interactive miniature preview.
+/// Segmented picker for selecting the default keyboard layer with a miniature preview.
 ///
 /// WHY reusable component:
 /// This picker appears in both SettingsView and onboarding (ModeSelectionPage).
-/// Extracting it into a single component ensures consistent look and behavior,
-/// and any future design changes only need to happen in one place.
+/// Extracting it into a single component ensures consistent look and behavior.
 ///
-/// WHY @Binding var selectedMode: String (not KeyboardMode):
-/// @AppStorage stores the raw String value. Binding directly to the raw value
-/// avoids an unnecessary conversion layer in every parent that uses @AppStorage.
-struct KeyboardModePicker: View {
+/// WHY @AppStorage instead of @Binding:
+/// When used inside onboarding (which has .id(currentPage) + transitions),
+/// a @Binding from the parent's @AppStorage doesn't propagate updates reliably.
+/// Owning the @AppStorage directly ensures the picker always reads/writes
+/// the correct value and triggers view updates on selection change.
+struct DefaultLayerPicker: View {
 
-    @Binding var selectedMode: String
+    @AppStorage(SharedKeys.defaultKeyboardLayer, store: UserDefaults(suiteName: AppGroup.identifier))
+    var selectedLayer: String = "letters"
 
     var body: some View {
         VStack(spacing: 16) {
-            // Segmented picker with display names from KeyboardMode enum
-            Picker("Mode", selection: $selectedMode) {
-                ForEach(KeyboardMode.allCases, id: \.rawValue) { mode in
-                    Text(mode.displayName).tag(mode.rawValue)
-                }
+            // WHY explicit tags instead of ForEach:
+            // SwiftUI's Picker with segmented style can have tag-matching issues
+            // when tags come from ForEach with dynamic content. Explicit Text/tag
+            // pairs guarantee the correct String value is written to the binding.
+            Picker("Page par defaut", selection: $selectedLayer) {
+                Text("ABC").tag("letters")
+                Text("123").tag("numbers")
             }
             .pickerStyle(.segmented)
 
-            // Non-interactive miniature preview of the selected mode
-            previewForMode
+            // Non-interactive miniature preview of the selected layer.
+            // WHY .id(selectedLayer): Forces SwiftUI to recreate the preview
+            // when the selection changes, instead of trying to diff two very
+            // different view hierarchies. Without this, the segmented picker
+            // updates visually but the preview can stay stale.
+            previewForLayer
+                .id(selectedLayer)
                 .frame(height: 140)
                 .frame(maxWidth: .infinity)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.dictusBackground)
+                        .fill(Color(.secondarySystemBackground))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
                         .strokeBorder(Color.dictusAccent.opacity(0.15), lineWidth: 1)
                 )
                 .allowsHitTesting(false)
+                .animation(.easeInOut(duration: 0.2), value: selectedLayer)
         }
     }
 
     // MARK: - Preview Router
 
-    /// Routes to the correct miniature preview based on the selected mode.
-    ///
-    /// WHY switch on rawValue:
-    /// selectedMode is a String from @AppStorage. We compare against KeyboardMode
-    /// raw values to determine which preview to show.
     @ViewBuilder
-    private var previewForMode: some View {
-        switch selectedMode {
-        case KeyboardMode.micro.rawValue:
-            microModePreview
-        case KeyboardMode.emojiMicro.rawValue:
-            emojiModePreview
-        default:
-            fullModePreview
+    private var previewForLayer: some View {
+        if selectedLayer == DefaultKeyboardLayer.numbers.rawValue {
+            numbersModePreview
+        } else {
+            lettersModePreview
         }
     }
 
-    // MARK: - Micro Mode Preview
+    // MARK: - Shared Toolbar Preview
 
-    /// Large centered mic circle with a small globe icon in bottom-left.
-    /// Represents the minimal dictation-first layout.
-    private var microModePreview: some View {
-        ZStack {
-            // Large mic button
-            Circle()
+    /// Miniature toolbar matching the real ToolbarView layout:
+    /// gear icon on the left, mic pill on the right.
+    private var toolbarPreview: some View {
+        HStack {
+            // Gear icon (settings shortcut) — left side
+            Image(systemName: "gearshape.fill")
+                .font(.system(size: 8, weight: .medium))
+                .foregroundColor(Color(.systemGray))
+
+            Spacer()
+
+            // Mic pill — right side, matching AnimatedMicButton shape
+            Capsule()
                 .fill(Color.dictusAccent)
-                .frame(width: 56, height: 56)
+                .frame(width: 36, height: 18)
                 .overlay(
                     Image(systemName: "mic.fill")
-                        .font(.title2)
+                        .font(.system(size: 8))
                         .foregroundColor(.white)
                 )
-
-            // Globe icon bottom-left
-            VStack {
-                Spacer()
-                HStack {
-                    Image(systemName: "globe")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .padding(8)
-                    Spacer()
-                }
-            }
         }
-        .padding(12)
+        .frame(height: 22)
     }
 
-    // MARK: - Emoji Mode Preview
+    // MARK: - Letters Preview (AZERTY)
 
-    /// Grid of colored rounded rectangles (emoji placeholders) with a toolbar bar
-    /// at the top containing a mic circle. Represents the emoji + mic layout.
-    private var emojiModePreview: some View {
-        VStack(spacing: 6) {
-            // Toolbar bar with mic
-            HStack {
-                Spacer()
-                Circle()
-                    .fill(Color.dictusAccent)
-                    .frame(width: 24, height: 24)
-                    .overlay(
-                        Image(systemName: "mic.fill")
-                            .font(.system(size: 10))
-                            .foregroundColor(.white)
-                    )
-                Spacer()
-            }
-            .frame(height: 28)
+    /// Four rows with actual AZERTY letters to be immediately recognizable.
+    private var lettersModePreview: some View {
+        VStack(spacing: 3) {
+            toolbarPreview
 
-            // Emoji grid placeholder — 3 rows x 6 columns of colored blocks
-            let emojiColors: [Color] = [
-                .yellow, .orange, .red, .pink, .purple, .blue,
-                .green, .mint, .cyan, .indigo, .brown, .yellow,
-                .orange, .red, .green, .blue, .purple, .pink,
+            // AZERTY rows with actual letters
+            let rows = [
+                ["A","Z","E","R","T","Y","U","I","O","P"],
+                ["Q","S","D","F","G","H","J","K","L","M"],
+                ["W","X","C","V","B","N"],
+                ["123","espace"]
             ]
 
-            ForEach(0..<3, id: \.self) { row in
-                HStack(spacing: 4) {
-                    ForEach(0..<6, id: \.self) { col in
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(emojiColors[row * 6 + col].opacity(0.6))
-                            .frame(height: 22)
+            ForEach(0..<rows.count, id: \.self) { rowIndex in
+                HStack(spacing: 2) {
+                    if rowIndex == 3 {
+                        // Bottom row: 123 key + space bar
+                        miniKey("123", width: 32, isSpecial: true)
+                        miniKey("espace", isSpace: true)
+                    } else {
+                        ForEach(rows[rowIndex], id: \.self) { letter in
+                            miniKey(letter)
+                        }
                     }
                 }
             }
         }
-        .padding(12)
+        .padding(10)
     }
 
-    // MARK: - Full Mode Preview
+    // MARK: - Numbers Preview (123 + symbols)
 
-    /// Four rows of small rounded rectangles (key placeholders) with a toolbar bar at top.
-    /// Represents the full AZERTY/QWERTY keyboard layout.
-    private var fullModePreview: some View {
-        VStack(spacing: 4) {
-            // Toolbar bar
-            HStack {
-                Spacer()
-                Circle()
-                    .fill(Color.dictusAccent)
-                    .frame(width: 20, height: 20)
-                    .overlay(
-                        Image(systemName: "mic.fill")
-                            .font(.system(size: 8))
-                            .foregroundColor(.white)
-                    )
-                Spacer()
+    /// Number row + symbol rows to clearly distinguish from letters.
+    private var numbersModePreview: some View {
+        VStack(spacing: 3) {
+            toolbarPreview
+
+            // Number row
+            HStack(spacing: 2) {
+                ForEach(["1","2","3","4","5","6","7","8","9","0"], id: \.self) { num in
+                    miniKey(num, isHighlighted: true)
+                }
             }
-            .frame(height: 24)
 
-            // Key rows — 10, 10, 9, 5 keys mimicking AZERTY layout proportions
-            let keyCounts = [10, 10, 9, 5]
-            ForEach(0..<keyCounts.count, id: \.self) { row in
-                HStack(spacing: 3) {
-                    ForEach(0..<keyCounts[row], id: \.self) { _ in
-                        RoundedRectangle(cornerRadius: 3)
-                            .fill(Color.gray.opacity(0.3))
-                            .frame(height: 18)
+            // Symbol rows
+            let symbolRows = [
+                ["-","/",":",";","(",")","€","&","@"],
+                [".",",","?","!","'"]
+            ]
+
+            ForEach(0..<symbolRows.count, id: \.self) { rowIndex in
+                HStack(spacing: 2) {
+                    ForEach(symbolRows[rowIndex], id: \.self) { sym in
+                        miniKey(sym)
                     }
                 }
             }
+
+            // Bottom row: ABC key + space bar
+            HStack(spacing: 2) {
+                miniKey("ABC", width: 32, isSpecial: true)
+                miniKey("espace", isSpace: true)
+            }
         }
-        .padding(12)
+        .padding(10)
+    }
+
+    // MARK: - Mini Key Helper
+
+    /// A tiny key cell for the miniature keyboard previews.
+    /// All keys use maxWidth: .infinity so they fill the available row width evenly,
+    /// just like the real keyboard. Special keys (123, ABC) get a fixed width instead.
+    private func miniKey(
+        _ label: String,
+        width: CGFloat? = nil,
+        isSpace: Bool = false,
+        isSpecial: Bool = false,
+        isHighlighted: Bool = false
+    ) -> some View {
+        // Adaptive colors: work on both light and dark backgrounds
+        let bg: Color = isSpecial
+            ? Color(.systemGray4)
+            : isHighlighted
+                ? Color.dictusAccent.opacity(0.2)
+                : Color(.systemGray5)
+
+        let maxW: CGFloat = width ?? .infinity
+
+        return Text(label)
+            .font(.system(size: isSpace ? 6 : 7, weight: .medium))
+            .foregroundStyle(isHighlighted ? Color.dictusAccent : .primary)
+            .frame(maxWidth: maxW, minHeight: 16)
+            .background(
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(bg)
+            )
     }
 }
