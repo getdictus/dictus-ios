@@ -41,11 +41,24 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 
 ### Active
 
-<!-- Next milestone: v1.2 -->
+## Current Milestone: v1.2 Beta Ready
 
-- [ ] Cold start auto-return to keyboard (competitors handle this, frequent in production)
-- [ ] Cold start optimization (init time < 2s)
-- [ ] Background audio keep-alive to reduce iOS app kills
+**Goal:** Fix bugs, improve UX, and deploy to TestFlight for public beta.
+
+**Target features:**
+- Production-ready persistent logging system (privacy-safe)
+- Fix intermittent recording/transcription animation bug
+- Fix Large Turbo v3 CoreML compilation failure
+- French accent audit across all UI strings
+- Model download/preparation UX overhaul (modal, onboarding reorder, ANE protection)
+- CoreML pre-compilation during onboarding and model download
+- Cold start auto-return to keyboard (Audio Bridge pattern)
+- Design polish (model manager, recording overlay, keyboard UX)
+- Filler words toggle cleanup
+- Migrate Xcode signing to professional developer account
+- TestFlight deployment for public beta
+
+<!-- From issues: #7, #8, #9, #16, #17, #18, #19, #20 -->
 
 ### Out of Scope
 
@@ -59,6 +72,7 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 - Smart Model Routing at runtime — breaks background recording, user selects model once
 - Full emoji picker in keyboard extension — memory-unsafe (emoji glyph cache), use system cycling
 - Apple Foundation Models — requires iPhone 15 Pro+, iOS 26.1+ — too restrictive
+- Real-time streaming transcription — v2+ feature, current batch approach works well
 
 ## Context
 
@@ -107,4 +121,4 @@ Known remaining issues:
 | NotificationCenter for mode refresh | viewWillAppear bridge avoids stale @State in SwiftUI | ✓ Good — reliable sync |
 
 ---
-*Last updated: 2026-03-11 after v1.1 milestone completion*
+*Last updated: 2026-03-11 after v1.2 milestone start*

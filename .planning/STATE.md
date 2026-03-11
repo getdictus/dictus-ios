@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: UX & Keyboard
-status: shipped
-stopped_at: Milestone v1.1 complete
-last_updated: "2026-03-11T11:00:00.000Z"
-last_activity: 2026-03-11 — Milestone v1.1 archived and completed
+milestone: v1.2
+milestone_name: Beta Ready
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-11T14:00:00.000Z"
+last_activity: 2026-03-11 — Milestone v1.2 started
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 29
-  completed_plans: 29
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,12 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard — no subscription, no cloud, no account.
-**Current focus:** Planning next milestone (v1.2)
+**Current focus:** Milestone v1.2 Beta Ready — defining requirements
 
 ## Current Position
 
-Milestone v1.1 UX & Keyboard: SHIPPED 2026-03-11
-All 5 phases, 29 plans complete.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-11 — Milestone v1.2 started
 
 ## Performance Metrics
 
@@ -47,15 +49,17 @@ None.
 
 ### Blockers/Concerns
 
-- COLD-* requirements deferred to v1.2 — cold start auto-return needs deeper research
+- Cold start auto-return needs deeper research (Audio Bridge pattern, competitor analysis)
 - Text prediction memory budget needs real-device profiling (5MB keyboard extension limit)
+- Developer account not yet purchased (blocks TestFlight deployment)
 
 ## Session Continuity
 
 Last session: 2026-03-11
-Stopped at: Milestone v1.1 complete
+Stopped at: Defining requirements for v1.2
 Resume file: None
 
 ---
 *State initialized: 2026-03-04*
 *v1.1 shipped: 2026-03-11*
+*v1.2 started: 2026-03-11*
