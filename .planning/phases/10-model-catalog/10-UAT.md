@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 10-model-catalog
 source: 10-01-SUMMARY.md, 10-02-SUMMARY.md, 10-03-SUMMARY.md
 started: 2026-03-11T10:00:00Z
@@ -61,10 +61,19 @@ skipped: 0
   reason: "User reported: After first download, transcription outputs English instead of French. Must toggle language in settings, restart app, then it works. Also ANE compilation/pre-warming is very slow on first use."
   severity: major
   test: 6
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "Two issues: (1) Language preference never written to UserDefaults on fresh install — @AppStorage default 'fr' is in-memory only, never persisted, so scattered ?? 'fr' fallbacks are fragile. (2) distil-whisper_distil-large-v3_turbo is English-only (logitsDim=51864 triggers isModelMultilingual=false in WhisperKit, silently ignoring language parameter)."
+  artifacts:
+    - path: "DictusApp/Views/SettingsView.swift"
+      issue: "@AppStorage default 'fr' never written to UserDefaults — only written when user interacts with Picker"
+    - path: "DictusCore/Sources/DictusCore/ModelInfo.swift"
+      issue: "distil-large-v3_turbo listed as available without English-only warning"
+    - path: "DictusApp/Audio/TranscriptionService.swift"
+      issue: "Language read with ?? 'fr' fallback but key may not exist in UserDefaults"
+  missing:
+    - "Persist language default ('fr') in UserDefaults during app init or onboarding"
+    - "Mark distil-large-v3_turbo as English-only or remove from French catalog"
+    - "Add diagnostic logging for language value passed to WhisperKit"
+  debug_session: ".planning/debug/language-default-english.md"
 
 ## UX Improvement Notes (from passing tests)
 
