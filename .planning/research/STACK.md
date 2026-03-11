@@ -1,378 +1,378 @@
-# Technology Stack — v1.1 Additions
+# Technology Stack — v1.2 Beta Ready
 
-**Project:** Dictus v1.1 UX & Keyboard
-**Researched:** 2026-03-07
-**Scope:** Stack additions for new features only. Existing stack (WhisperKit, Swift 5.9+, SwiftUI, App Group, DictusCore) is validated and unchanged.
-
----
-
-## 1. Text Prediction / Autocorrect (French)
-
-### Recommendation: Build custom using UITextChecker + n-gram model
-
-**Confidence:** MEDIUM
-
-There is no production-ready, open-source, French text prediction library for iOS. The options are:
-
-| Option | Verdict | Why |
-|--------|---------|-----|
-| **UITextChecker (Apple)** | USE for spell-check | Built-in, supports `fr_FR`, no dependency. `rangeOfMisspelledWord()` + `guesses(forWordRange:in:language:)` work for French out of the box |
-| **UILexicon (Apple)** | USE as supplement | Available in keyboard extensions via `requestSupplementaryLexicon()`. Contains contact names + user shortcuts. Free data source |
-| **Custom n-gram model** | BUILD for word prediction | Train trigram model on French corpus (Wikipedia FR dump). Ship as SQLite DB in App Group. ~5-15MB compressed |
-| **KeyboardKit Pro** | DO NOT USE | Commercial license ($$$), closed-source Pro for autocorrect/prediction. Contradicts MIT open-source positioning |
-| **Presage** | DO NOT USE | C++ library, no iOS/Swift bindings, GPL license (incompatible with MIT), unmaintained |
-| **Predict4All** | DO NOT USE | Java-based, no iOS port, research project |
-| **Apple Foundation Models (iOS 26.1+)** | DEFER to v1.2+ | On-device next word prediction via Apple Intelligence, but requires iPhone 15 Pro+ and iOS 26.1+. Too restrictive for iOS 16+ target |
-
-### Implementation approach
-
-```
-Autocorrect pipeline:
-1. UITextChecker.rangeOfMisspelledWord() -> detect typos
-2. UITextChecker.guesses(forWordRange:in:language:"fr") -> get corrections
-3. Custom n-gram DB -> rank corrections by context probability
-4. Display top 3 in suggestion bar
-
-Word prediction pipeline:
-1. Track last 2 words typed (trigram context)
-2. Query n-gram SQLite DB for most probable next words
-3. Display top 3 predictions in suggestion bar
-4. Tap suggestion -> insert word + space
-```
-
-### Dependencies needed
-
-| Technology | Purpose | Size Impact | Notes |
-|------------|---------|-------------|-------|
-| UITextChecker | Spell-check + corrections | 0 (system) | Already available, language param `"fr"` |
-| UILexicon | Contact names supplement | 0 (system) | `requestSupplementaryLexicon()` in UIInputViewController |
-| SQLite (via Foundation) | n-gram storage | 0 (system) | No third-party SQLite wrapper needed, use Foundation's built-in |
-| French n-gram DB | Word prediction data | ~10-15MB | Generate offline from French Wikipedia corpus using text2ngram or custom Python script, ship via App Group |
-
-### Key constraints
-
-- Keyboard extension 50MB memory limit applies -- n-gram DB must be queried via SQLite (not loaded into memory)
-- UITextChecker guesses on iOS are alphabetically ordered, not probability-ranked -- need n-gram model to re-rank
-- Must handle French-specific challenges: accented characters (e/e/e/e), elision (l'homme), compound words
-
-### Sources
-
-- [UITextChecker Apple Docs](https://developer.apple.com/documentation/uikit/uitextchecker)
-- [UITextChecker guesses method](https://developer.apple.com/documentation/uikit/uitextchecker/guesses(forwordrange:in:language:))
-- [NSHipster UITextChecker](https://nshipster.com/uitextchecker/)
-- [ios-uitextchecker-autocorrect](https://github.com/ansonl/ios-uitextchecker-autocorrect) -- reference implementation (unmaintained but useful pattern)
+**Project:** Dictus v1.2 Beta Ready
+**Researched:** 2026-03-11
+**Scope:** Stack additions for production logging, Audio Bridge / cold start auto-return, CoreML pre-compilation, animation fixes, TestFlight deployment. Existing stack (WhisperKit 0.16.0+, FluidAudio/Parakeet, Swift 5.9+, SwiftUI, iOS 17.0, App Group, DictusCore, two-process Darwin + URL scheme architecture) is validated and unchanged.
 
 ---
 
-## 2. Spacebar Trackpad Cursor Movement
+## Critical Finding: Zero New SPM Dependencies Needed
 
-### Recommendation: Custom gesture recognizer on space bar key (no library needed)
-
-**Confidence:** HIGH
-
-This is a pure UIKit gesture implementation. No third-party library exists or is needed. Apple's own keyboard does this with a UILongPressGestureRecognizer transitioning to UIPanGestureRecognizer.
-
-### Implementation approach
-
-| Component | Technology | Notes |
-|-----------|------------|-------|
-| Long-press detection | UILongPressGestureRecognizer | 0.3s threshold on spacebar |
-| Pan tracking | UIPanGestureRecognizer | Track X/Y translation after long-press activates |
-| Cursor movement | `textDocumentProxy.adjustTextPosition(byCharacterOffset:)` | UIInputViewController API -- moves cursor left/right |
-| Visual feedback | SwiftUI animation | Fade keyboard labels, show trackpad indicator |
-| Haptic feedback | UIImpactFeedbackGenerator(.light) | Tick on each character position change |
-
-### Key detail: `adjustTextPosition(byCharacterOffset:)`
-
-This is the official UITextDocumentProxy method for moving the cursor. Takes a positive (right) or negative (left) integer offset. Call it based on pan gesture translation divided by a sensitivity threshold (~8-10pt per character step).
-
-### Vertical movement
-
-Vertical cursor movement (line up/down) is NOT supported by `adjustTextPosition()` -- it only moves horizontally by character count. This matches Apple's keyboard behavior on non-3D-Touch devices. Do not attempt vertical movement.
-
-### Dependencies needed
-
-None. All APIs are built into UIKit.
-
-### Sources
-
-- [UITextDocumentProxy adjustTextPosition](https://developer.apple.com/documentation/uikit/uitextdocumentproxy/1618198-adjusttextposition)
+All five v1.2 feature areas are served by built-in Apple frameworks and existing custom code. No new packages to install. This is excellent for a beta release -- no new integration risk, no dependency version conflicts.
 
 ---
 
-## 3. Adaptive Accent Key
+## 1. Production Logging System
 
-### Recommendation: Context-aware key using textDocumentProxy + frequency table
+### Recommendation: Upgrade existing PersistentLog + os.Logger + OSLogStore for export
 
-**Confidence:** HIGH
+**Confidence:** HIGH -- all built-in Apple APIs, partially already in codebase
 
-No library needed. Build a simple state machine that checks the previous character(s) via `textDocumentProxy.documentContextBeforeInput` and shows the most likely accent/punctuation.
+### Current State
 
-### Implementation approach
+The project has two logging systems already:
+- `DictusLogger` (os.Logger) -- structured logging with subsystem/category, used throughout both targets
+- `PersistentLog` -- file-based logger in App Group container, critical for cross-process debugging when Xcode debugger disconnects
 
-```
-Context rules (French-specific):
-- After vowel -> show accent acute (e)
-- After consonant at word end -> show apostrophe (')
-- After "c" -> show cedilla (c)
-- After space/start -> show apostrophe (for l', d', s', n', j', qu')
-- Default -> show apostrophe (most common in French)
-```
+### What Needs to Change
 
-| Input context | Key shows | Rationale |
-|---------------|-----------|-----------|
-| After a vowel | acute accent (e) | Most common French accent |
-| After "c" | cedilla (c) | Cedilla after c |
-| After space or start | apostrophe (') | Elision is very frequent |
-| Default | apostrophe (') | Highest-frequency French punctuation |
+**PersistentLog has production-quality issues that must be fixed:**
 
-### Dependencies needed
+| Issue | Current | Fix |
+|-------|---------|-----|
+| DateFormatter allocation | Creates `ISO8601DateFormatter()` on every `log()` call | Static cached formatter |
+| Thread safety | Concurrent writes to FileHandle can corrupt | `NSLock` or dedicated serial `DispatchQueue` |
+| Capacity | `maxLines = 200` too small for production debugging | Increase to `maxLines = 2000` with 500KB file size cap |
+| Log levels | Everything is one level | Add `.debug`, `.info`, `.warning`, `.error` levels |
+| Structured metadata | Only `[timestamp] function: message` | Add `[timestamp] [level] [subsystem] function: message` |
+| Privacy | Logs could contain transcription text | Strip user transcription content; log only durations, byte counts, error codes |
+| Export | No way for TestFlight users to share logs | Add "Export & Share" via `UIActivityViewController` |
 
-None. Uses `textDocumentProxy.documentContextBeforeInput` (already available in keyboard extension).
-
----
-
-## 4. Cold Start Auto-Return to Keyboard
-
-### Recommendation: Wispr Flow "session" model -- minimize cold starts, don't solve auto-return
-
-**Confidence:** LOW -- This is the hardest unsolved problem in the milestone
-
-### The problem
-
-When DictusApp is not running (cold start), the keyboard extension opens DictusApp via URL scheme. After DictusApp starts recording, the user needs to return to the host app. There is NO public API to programmatically return to the previous app.
-
-### What competitors do
-
-**Wispr Flow's approach** (reverse-engineered from behavior, not documented):
-1. Opens main app from keyboard for "Flow Session" activation
-2. Claims to auto-return to previous app
-3. FAQ admits "Not all apps allow the app to reopen" -- meaning it is selective/imperfect
-4. Session stays active for 5 minutes of idle, so cold start only happens once per session
-
-**Technical options investigated:**
-
-| Technique | Status | Risk |
-|-----------|--------|------|
-| `_hostBundleID` private API | Blocked in iOS 18+ | App Store rejection |
-| `UIApplication.suspend()` | Goes to home screen, not previous app | Wrong behavior |
-| x-callback-url | Requires host app cooperation | Only works with specific apps |
-| NSUserActivity / Handoff | Not applicable to keyboard extensions | Wrong use case |
-| Clipboard-based bundle ID stash | Store host bundle ID before opening app, use URL scheme to return | Only works for apps with known URL schemes |
-| Background URL scheme timer | Open dictus://, do work, then open host app URL scheme | Requires knowing host app's URL scheme |
-| "Session" model (Wispr Flow pattern) | Keep app alive with audio background mode, only cold start once | Best practical approach |
-
-### Recommended approach: Wispr Flow session model
-
-1. **First cold start:** User taps mic in keyboard -> opens DictusApp -> user manually returns (swipe/tap status bar "< Back")
-2. **DictusApp stays alive** via `UIBackgroundModes:audio` (already implemented)
-3. **Subsequent taps:** Darwin notification works instantly, no app switch needed
-4. **Session timeout:** After 5 min idle, audio session ends, next tap = cold start again (rare)
-
-This is what Wispr Flow does. The "auto-return" is not truly automatic -- they minimize cold starts. The key improvement for Dictus is to **extend the audio session keep-alive duration** and **show a clear "tap Back to return" instruction** on first cold start.
-
-### Dependencies needed
-
-None new. Existing Darwin notification + URL scheme + audio background mode.
-
-### Open research question
-
-How exactly does Wispr Flow return to the previous app on cold start? The Swift Forums thread (Jan 2026) found no public API. Either they use a private API (risky for App Store) or they have a clever workaround not yet discovered. Flag this for deeper reverse-engineering research during implementation.
-
-### Sources
-
-- [Swift Forums discussion -- auto-return](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988)
-- [Wispr Flow FAQ](https://docs.wisprflow.ai/iphone/faq)
-
----
-
-## 5. Removing Apple Dictation Mic Button
-
-### Recommendation: Already handled by custom keyboard -- non-issue
-
-**Confidence:** HIGH
-
-Custom keyboard extensions (UIInputViewController) do NOT show the Apple dictation mic button. That button only appears on the system keyboard. Since Dictus IS a custom keyboard, the Apple mic is not present when Dictus keyboard is active.
-
-### What you actually need to address
-
-The real issue may be the **system keyboard bottom bar** (globe button area) that iOS shows beneath custom keyboards on certain devices. This is controlled by iOS, not by the extension.
-
-| Concern | Solution |
-|---------|----------|
-| Globe button shows at bottom | Check `needsInputModeSwitchKey` -- if true, show your own globe key. System globe appears in bottom bar on iPhone X+ regardless |
-| Dictation mic in system bar | Cannot be removed programmatically. Users disable via Settings > General > Keyboard > Enable Dictation |
-| System keyboard bleeding through | Ensure `inputView` height constraint is properly set (already done in KeyboardViewController) |
-
-### Dependencies needed
-
-None. This is a design/layout concern, not a technology concern.
-
-### Sources
-
-- [Apple Custom Keyboard Guide](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html)
-
----
-
-## 6. Parakeet v3 / Alternative STT Models
-
-### Recommendation: FluidAudio SDK with Parakeet TDT v3 CoreML -- as optional ALTERNATIVE to WhisperKit
-
-**Confidence:** MEDIUM
-
-### FluidAudio + Parakeet TDT v3
-
-| Attribute | Value |
-|-----------|-------|
-| **Library** | [FluidAudio](https://github.com/FluidInference/FluidAudio) |
-| **Model** | Parakeet TDT 0.6B v3 (CoreML) |
-| **Languages** | 25 European languages including French |
-| **iOS minimum** | iOS 17.0+ (higher than Dictus's iOS 16.0 target) |
-| **Model size on disk** | ~2.5GB (significantly larger than WhisperKit small ~460MB) |
-| **RAM usage** | ~1.2GB (vs WhisperKit small ~150-200MB) |
-| **Performance** | ~110x RTF on M4 Pro (batch mode). Much faster than Whisper |
-| **Accuracy** | Beats Whisper Large v3 on benchmarks |
-| **License** | MIT/Apache 2.0 (models permissive) |
-| **Integration** | Swift native, SPM, CoreML on Neural Engine |
-
-### Critical constraints for Dictus
-
-| Constraint | Impact |
-|------------|--------|
-| iOS 17.0+ minimum | Raises Dictus minimum from iOS 16.0 to 17.0 if adopted. Acceptable -- iOS 17 adoption >95% |
-| 2.5GB model size | Cannot coexist easily with WhisperKit models. Must be an either/or choice for users |
-| 1.2GB RAM | Cannot run in keyboard extension (50MB limit). Must run in DictusApp process (same as current WhisperKit architecture) |
-| Batch-only transcription | No streaming/real-time mode documented. Compatible with current batch approach |
-
-### Recommendation
-
-Add Parakeet v3 as an **optional model** in the model manager alongside existing WhisperKit models. Users choose one engine. Do NOT replace WhisperKit -- it remains the default for users with storage constraints.
-
-### Integration plan
-
-```
-Model Manager UI:
-+-- WhisperKit Models (default)
-|   +-- tiny (~40MB) -- fast, lower accuracy
-|   +-- base (~140MB) -- balanced
-|   +-- small (~460MB) -- best WhisperKit accuracy
-+-- Parakeet v3 (alternative)
-    +-- parakeet-tdt-0.6b-v3 (~2.5GB) -- highest accuracy, needs more storage
-```
-
-### Dependencies needed
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| FluidAudio | latest (SPM) | Parakeet CoreML inference engine |
-
-### Installation
+**Add OSLogStore export for current-session structured logs:**
 
 ```swift
-// Xcode SPM: File > Add Package Dependencies
-// URL: https://github.com/FluidInference/FluidAudio.git
+// iOS 15+ (well within iOS 17 minimum). Current process only.
+let store = try OSLogStore(scope: .currentProcessIdentifier)
+let position = store.position(date: Date().addingTimeInterval(-3600))
+let entries = try store.getEntries(at: position)
+    .compactMap { $0 as? OSLogEntryLog }
+    .filter { $0.subsystem == "com.pivi.dictus" }
+    .map { "[\($0.date.formatted())] [\($0.category)] \($0.composedMessage)" }
 ```
+
+**Critical limitation:** `OSLogStore(scope: .currentProcessIdentifier)` only sees logs from the current app session. It cannot access keyboard extension logs or previous session logs. This is why PersistentLog (file-based, App Group shared container) remains essential for cross-process debugging.
+
+### Combined Log Strategy
+
+| Need | Tool | Why |
+|------|------|-----|
+| Real-time debugging (Xcode attached) | `DictusLogger` (os.Logger) | Zero overhead, structured, filterable in Console.app |
+| Cross-process debugging (keyboard + app) | `PersistentLog` (file in App Group) | Only mechanism that works across extension boundary and survives Signal 9 |
+| TestFlight bug reports | OSLogStore + PersistentLog export | User taps "Export Logs" in Settings, shares combined log file |
+| Privacy compliance | Log levels + content stripping | Never log transcription text, user input, or microphone audio |
+
+### What NOT to Add
+
+| Library | Why Not |
+|---------|---------|
+| CocoaLumberjack | Adds SPM dependency for no gain over os.Logger + PersistentLog |
+| SwiftyBeaver | Cloud-based log destination contradicts offline/privacy identity |
+| Bugfender | Remote logging service -- privacy violation, cloud dependency |
+| OSLog (legacy function) | Use os.Logger (iOS 14+) instead -- better Swift integration |
+
+### iOS 17 Cleanup Opportunity
+
+Since Dictus targets iOS 17.0 minimum, **all `if #available(iOS 14.0, *)` guards around `DictusLogger` calls can be removed**. These guards appear throughout the codebase (DictationCoordinator, AudioRecorder, KeyboardState, etc.) and are unnecessary noise. This is a straightforward cleanup task for v1.2.
 
 ### Sources
 
-- [FluidAudio GitHub](https://github.com/FluidInference/FluidAudio)
-- [Parakeet TDT v3 CoreML on HuggingFace](https://huggingface.co/FluidInference/parakeet-tdt-0.6b-v3-coreml)
-- [sherpa-onnx RAM issue #2626](https://github.com/k2-fsa/sherpa-onnx/issues/2626) -- confirms 1.2GB RAM for Parakeet 0.6B
+- [Apple OSLogStore documentation](https://developer.apple.com/documentation/oslog/oslogstore) -- HIGH confidence
+- [Apple OSLogPrivacy documentation](https://developer.apple.com/documentation/os/oslogprivacy) -- HIGH confidence
+- [Exporting data from Unified Logging System (Swift with Majid)](https://swiftwithmajid.com/2022/04/19/exporting-data-from-unified-logging-system-in-swift/) -- MEDIUM confidence
+- [Apple Developer Forums: OSLogStore limitations](https://developer.apple.com/forums/thread/691093) -- HIGH confidence
 
 ---
 
-## 7. Emoji Picker in Keyboard Extension
+## 2. Cold Start Audio Bridge / Auto-Return
 
-### Recommendation: Build custom emoji grid in SwiftUI (no library needed)
+### Recommendation: Accept the limitation, optimize the cold-start UX path
 
-**Confidence:** HIGH
+**Confidence:** MEDIUM -- no public API solution exists. Pragmatic UX optimization is the path forward.
 
-### Options evaluated
+### The Hard Truth
 
-| Option | Pros | Cons | Verdict |
-|--------|------|------|---------|
-| **Custom SwiftUI grid** | Full Liquid Glass design control, zero dependencies | More work (~2-3 days), must handle categories/skin tones | RECOMMENDED |
-| **ISEmojiView** | Battle-tested, SPM support, ~0.3.0 | UIKit-based (needs bridging in SwiftUI keyboard), may not match Liquid Glass | ACCEPTABLE for faster delivery |
-| **MCEmojiPicker** | SwiftUI native, small (795KB), updated Feb 2026 | Popover-style (macOS-like), not keyboard-style grid | NOT IDEAL for keyboard context |
-| **KeyboardKit emoji module** | Professional, categorized | Commercial Pro required for full features | DO NOT USE (license conflict) |
+**No public iOS API exists to programmatically return from the containing app to the previous (host) app.** This is confirmed by:
 
-### Recommended approach: Custom SwiftUI grid
+- [Swift Forums discussion (Jan 2026)](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988) -- developer asked exactly this question, no solution found
+- `_hostBundleID` private API -- blocked in iOS 18+
+- `UIApplication.suspend()` -- goes to home screen, not previous app
+- x-callback-url -- requires host app cooperation (Messages, WhatsApp do not support it)
+- KeyboardKit Pro's "Audio Bridge" -- closed-source, proprietary, $129-599/year. Maintainer [explicitly refuses to share implementation details](https://github.com/KeyboardKit/KeyboardKit/issues/903)
 
-Emojis are Unicode strings. No library needed to render them.
+### What KeyboardKit 10.2 Does (and Doesn't)
 
-```swift
-// Emojis are just strings -- insert via textDocumentProxy
-textDocumentProxy.insertText("emoji-character")
+KeyboardKit 10.2 introduced `.keyboard` dictation that "navigates back to the keyboard" after opening the main app. However:
+- This likely uses Apple's native `SFSpeechRecognizer` which has system-level privileges for mic access handoff
+- The "audio bridge" concept = keyboard opens app once to establish mic session, then subsequent recordings happen without app switch
+- This is functionally what Dictus already does with Darwin notifications + audio background mode (warm path)
+- The cold start problem (iOS killed the app) is the unsolved part
 
-// Use LazyVGrid for scrollable grid
-// Categories: Smileys, People, Animals, Food, Travel, Activities, Objects, Symbols, Flags
-// Skin tone: long-press popup (same pattern as existing AccentPopup)
-// Recents: store in UserDefaults via App Group
-```
-
-### Dependencies needed
-
-None for recommended approach. ISEmojiView (~0.3.0 via SPM) as fallback option.
-
-### Sources
-
-- [ISEmojiView GitHub](https://github.com/isaced/ISEmojiView)
-- [MCEmojiPicker GitHub](https://github.com/izyumkin/MCEmojiPicker)
-
----
-
-## Summary: New Dependencies for v1.1
-
-### Required additions
-
-| Dependency | Version | Purpose | Feature | Size Impact |
-|------------|---------|---------|---------|-------------|
-| French n-gram SQLite DB | Custom-built | Word prediction | Text prediction | ~10-15MB in App Group |
-
-### Optional additions
-
-| Dependency | Version | Purpose | Feature | Size Impact |
-|------------|---------|---------|---------|-------------|
-| FluidAudio | latest via SPM | Parakeet v3 STT engine | Model catalog | SDK ~5MB, model ~2.5GB user-downloaded |
-| ISEmojiView | ~0.3.0 via SPM | Emoji picker grid (if not building custom) | Emoji keyboard | ~100KB |
-
-### Explicitly NOT adding
+### What NOT to Add
 
 | Technology | Why Not |
 |------------|---------|
-| KeyboardKit / KeyboardKit Pro | Commercial, closed-source, contradicts MIT open-source project |
-| Presage | C++ only, GPL license, unmaintained |
-| LanguageTool | Server-based, contradicts offline-first |
-| Any autocorrect API service | Contradicts privacy/offline identity |
-| Apple Foundation Models | Requires iPhone 15 Pro+ and iOS 26.1+ -- too restrictive for current target |
-| sherpa-onnx for Parakeet | ONNX Runtime on iOS has CoreML instability; FluidAudio's native CoreML conversion is superior |
+| KeyboardKit Pro | $129-599/year, closed-source, proprietary Audio Bridge. Your existing Darwin + URL scheme architecture is functionally equivalent for the warm path |
+| Private APIs | `_hostBundleID`, `LSApplicationWorkspace` -- App Review rejection risk |
+| SFSpeechRecognizer | Apple's built-in speech recognizer. Dictus uses custom WhisperKit models for better French accuracy. Switching to Apple STT defeats the product purpose |
 
-### Unchanged from v1.0
+### Recommended Approach: Three-Prong Strategy
 
-| Technology | Version | Status |
-|------------|---------|--------|
-| WhisperKit | 0.16.0+ | Stays as default STT engine |
-| Swift | 5.9+ | Unchanged |
-| SwiftUI | - | Unchanged |
-| App Group | group.com.pivi.dictus | Unchanged |
-| Minimum iOS | 16.0 (or 17.0 if Parakeet added) | Potentially raised |
+**Prong 1: Make cold starts rare (already mostly done)**
+- Audio background mode keeps the app alive as long as the audio engine runs
+- `collectSamples()` pattern keeps engine warm between recordings (already implemented)
+- Key improvement: investigate extending background duration by playing an inaudible audio tone at ultra-low volume
+
+**Prong 2: Make cold starts fast (the main engineering work)**
+- Current cold start: URL scheme opens app -> WhisperKit init (3-4s) -> RawAudioCapture starts (<100ms)
+- RawAudioCapture already provides instant recording on cold start (implemented in v1.1)
+- Key improvement: verify CoreML compiled model cache persistence across app restarts. If the compiled model is cached, WhisperKit init drops from 4s to <2s
+
+**Prong 3: Make the transition graceful (UX design)**
+- On cold start URL open: show minimal branded overlay with recording waveform + "Recording... Swipe down to return"
+- Auto-start recording immediately (already happens via `handleIncomingURL`)
+- Consider adding a local notification after 1s: "Dictus is recording. Tap to return to [app name]" -- the notification shows the host app name in the "< Back" status bar area
+
+### Stack Impact
+
+**Zero new dependencies.** The existing two-process architecture handles everything. The work is:
+1. UX design of the cold-start overlay (SwiftUI view)
+2. Timing optimization (CoreML cache verification)
+3. Optional: silent audio tone for extended background keep-alive
+
+### Sources
+
+- [Swift Forums: auto-return keyboard discussion](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988) -- HIGH confidence
+- [KeyboardKit 10.2 blog](https://keyboardkit.com/blog/2026/01/09/keyboardkit-10-2) -- MEDIUM confidence (marketing, no implementation details)
+- [KeyboardKit issue #903](https://github.com/KeyboardKit/KeyboardKit/issues/903) -- HIGH confidence (maintainer confirms Pro-only)
+- [KeyboardKit dictation feature page](https://keyboardkit.com/features/dictation) -- MEDIUM confidence
 
 ---
 
-## Installation (new dependencies only)
+## 3. CoreML Pre-Compilation / Prewarming
+
+### Recommendation: Use existing WhisperKit `prewarm: true` with better error handling and UX
+
+**Confidence:** HIGH -- all within existing WhisperKit API. Work is error handling and UX, not new technology.
+
+### How WhisperKit Handles CoreML Compilation
+
+WhisperKit's `WhisperKitConfig` has three relevant flags:
+- `prewarm: true` -- triggers CoreML compilation for the device's Neural Engine/GPU on first load. Minimizes peak memory but adds compile time
+- `load: true` -- loads the compiled model into memory
+- `download: true` -- downloads model from HuggingFace if not present locally
+
+The existing `ModelManager.downloadWhisperKitModel()` already uses all three correctly. The existing `DictationCoordinator.ensureEngineReady()` uses `prewarm: true, load: true, download: true`.
+
+### Current Issue: Large Turbo v3 Compilation Failure
+
+The PROJECT.md mentions "Fix Large Turbo v3 CoreML compilation failure." Based on research:
+
+| Finding | Detail |
+|---------|--------|
+| ANE first-run compilation | On first use, the ANE service optimizes the model for the specific device. Can take 2-4 minutes for large models |
+| E5 bundle errors | Multiple simultaneous CoreML compilations crash the ANE. Already handled by `isPrewarming` serial lock in ModelManager |
+| 4-minute uncached load penalty | Large Turbo v3 with encoder on ANE has a 4-minute uncached load time. Subsequent loads use cache |
+| Device-specific compilation | CoreML compilation result is cached per-device. Moving a compiled model between devices does not work |
+
+### Recommended Fixes (No New Dependencies)
+
+1. **Timeout wrapper around prewarm:** Add `Task.withTimeout(seconds: 300)` around the `WhisperKit(config)` call during model download/prewarm. If compilation exceeds 5 minutes, cancel and show "This model may be too large for your device. Try a smaller model."
+
+2. **ANE protection during compilation:** While a model is compiling (`.prewarming` state), disable UI interactions that could trigger another compilation. Show a non-dismissable modal with progress.
+
+3. **Progress indication during prewarming:** Current code jumps from `.downloading` to `.prewarming` with no feedback. Add a timer-based simulated progress bar (0-100% over estimated compile time based on model size).
+
+4. **Cache validation after prewarm:** After `WhisperKit(config)` returns, verify the compiled model directory exists before marking `.ready`. If files are missing (ANE failure), clean up and offer retry with a smaller model suggestion.
+
+5. **Move prewarm into onboarding flow:** Currently download + prewarm are in ModelManager. For v1.2, add an explicit "Optimizing for your device..." step in onboarding after model download completes. User expects a wait during onboarding.
+
+6. **Disk space pre-check:** Large Turbo v3 requires ~3GB total (download + compiled cache). Check `FileManager.default.attributesOfFileSystem(forPath:)[.systemFreeSize]` before download and show clear error if insufficient.
+
+### What NOT to Add
+
+| Technology | Why Not |
+|------------|---------|
+| Manual `MLModel.compileModel(at:)` | WhisperKit handles CoreML compilation internally via `prewarm`. Calling compileModel directly duplicates work and may conflict with WhisperKit's internal state |
+| Pre-compiled model downloads | Device-specific ANE compilation means pre-compiled models from a server do not work. Each device must compile locally |
+| Background NSURLSession for model download | Adds significant complexity. For v1.2 beta, foreground download with progress is sufficient |
+
+### Sources
+
+- [Apple compileModel(at:) documentation](https://developer.apple.com/documentation/coreml/mlmodel/compilemodel(at:)-6442s) -- HIGH confidence
+- [WhisperKit Configurations.swift](https://github.com/argmaxinc/whisperkit/blob/main/Sources/WhisperKit/Core/Configurations.swift) -- HIGH confidence
+- [WhisperKit issue #171: prewarmModels error](https://github.com/argmaxinc/WhisperKit/issues/171) -- MEDIUM confidence
+
+---
+
+## 4. TestFlight Deployment
+
+### Recommendation: Manual Xcode archive + upload. No CI/CD tooling for first beta.
+
+**Confidence:** HIGH -- standard Apple deployment process. Well-documented.
+
+### Prerequisites
+
+| Requirement | Status | Action |
+|-------------|--------|--------|
+| Apple Developer Program ($99/year) | Mentioned in PROJECT.md as pending | Enroll at developer.apple.com. Required for TestFlight distribution |
+| Bundle ID registration | Needs migration from personal team | Register `com.pivi.dictus` (or `com.pivisolutions.dictus`) as explicit App ID |
+| App Group registration | Already set: `group.com.pivi.dictus` | Verify App Group is registered under new developer account |
+| Provisioning profiles | Need new profiles | Generate for both DictusApp and DictusKeyboard targets. Both need explicit App ID (not wildcard) due to App Group + Microphone entitlements |
+| Xcode signing | Currently personal team | Switch to professional team in both targets' Signing & Capabilities |
+
+### Keyboard Extension Specific Requirements
+
+| Requirement | Detail |
+|-------------|--------|
+| `RequestsOpenAccess = true` | Already in DictusKeyboard Info.plist. Required for mic access |
+| `NSMicrophoneUsageDescription` | Must be in DictusApp Info.plist (mic is used in app process, not extension) |
+| App Group entitlement | Both targets need `com.apple.security.application-groups` with `group.com.pivi.dictus` |
+| Full Access justification | Beta App Review will ask why Full Access is needed. Prepare: "Required for microphone access for voice dictation. No keystroke data is collected or transmitted." |
+
+### TestFlight Process
+
+1. **Archive:** Xcode > Product > Archive (both targets bundled automatically)
+2. **Upload:** Xcode Organizer > Distribute App > App Store Connect
+3. **App Store Connect setup:**
+   - Create app record, primary language: French
+   - Category: Utilities
+   - Privacy nutrition label: Audio data (used on-device only, not collected)
+   - Beta App Review information: testing instructions
+4. **Testing instructions for reviewers and testers:**
+   - "Enable Dictus keyboard: Settings > General > Keyboards > Add New Keyboard > Dictus"
+   - "Grant Full Access: Settings > General > Keyboards > Dictus > Allow Full Access"
+   - "Download a speech model in the app before using dictation"
+5. **Beta App Review:** First build to external testers requires review. Expect 24-48h. Subsequent builds may not require re-review unless significant changes.
+6. **Distribution:** Up to 10,000 external testers via public TestFlight link. Builds expire after 90 days.
+
+### What NOT to Add
+
+| Technology | Why Not |
+|------------|---------|
+| Fastlane | Overkill for solo developer's first TestFlight. Manual Xcode workflow is simpler and sufficient |
+| GitHub Actions CI/CD | Add after first successful manual deployment when the process is understood |
+| Firebase App Distribution | Apple's TestFlight is the standard for iOS beta testing, no reason to use a third-party |
+
+### Sources
+
+- [Apple TestFlight overview](https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/) -- HIGH confidence
+- [Apple App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) -- HIGH confidence
+- [TestFlight test information requirements](https://developer.apple.com/help/app-store-connect/test-a-beta-version/provide-test-information/) -- HIGH confidence
+
+---
+
+## 5. Animation State Management Fixes
+
+### Recommendation: Fix state timing in Darwin notification handlers + use withAnimation completion callbacks
+
+**Confidence:** MEDIUM -- the specific animation bug is intermittent and needs device testing to confirm root cause. Patterns below address the most common SwiftUI animation issues.
+
+### Technologies Available (All Built-In)
+
+| Technology | iOS Min | Purpose |
+|------------|---------|---------|
+| `withAnimation(_:completionCriteria:_:completion:)` | 17.0 | Animation completion callbacks -- coordinate state after animation finishes |
+| `Transaction` | 13.0 | Control animation propagation, disable unwanted inherited animations |
+| `PhaseAnimator` | 17.0 | Multi-phase animations without manual state management |
+
+### Root Cause Analysis: Intermittent Recording/Transcription Animation Bug
+
+The recording overlay transitions through states: `.idle` -> `.requested` -> `.recording` -> `.transcribing` -> `.ready` -> `.idle`. Based on code review, the likely causes of intermittent animation bugs are:
+
+**Cause 1: @Published state changes without animation context**
+
+In `KeyboardState.refreshFromDefaults()`, `dictationStatus` is set directly from a `DispatchQueue.main.async` block triggered by a Darwin notification. No `withAnimation` wrapper means SwiftUI applies the state change instantly (no transition animation) or with an inherited animation from a parent view.
+
+```swift
+// CURRENT (no animation context):
+DarwinNotificationCenter.addObserver(for: .statusChanged) { [weak self] in
+    DispatchQueue.main.async {
+        self?.refreshFromDefaults()
+    }
+}
+
+// FIX (explicit animation context):
+DarwinNotificationCenter.addObserver(for: .statusChanged) { [weak self] in
+    DispatchQueue.main.async {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            self?.refreshFromDefaults()
+        }
+    }
+}
+```
+
+**Cause 2: ProcessingAnimation onAppear restart**
+
+`ProcessingAnimation` starts its repeating animation in `.onAppear`. If the view is conditionally shown/hidden (via `if isTranscribing` in RecordingOverlay), each show triggers a new `.onAppear`, potentially creating duplicate overlapping animations.
+
+Fix: use `.task` modifier instead of `.onAppear`, or gate animation start with a `@State` flag that is only set once.
+
+**Cause 3: Rapid state transitions collapse animations**
+
+When recording stops and transcription completes quickly (<1s), the state goes `.recording` -> `.transcribing` -> `.ready` -> `.idle` in rapid succession. SwiftUI may collapse or skip intermediate animations.
+
+Fix: Use `withAnimation` completion callbacks (iOS 17+) to gate state transitions:
+
+```swift
+withAnimation(.easeOut(duration: 0.3)) {
+    status = .transcribing
+} completion: {
+    // Only proceed to next state after animation completes
+    startTranscription()
+}
+```
+
+**Cause 4: NavigationStack interference (iOS 17-18 known bug)**
+
+iOS 17-18 have a [documented bug](https://medium.com/@talessilveira/ios-17-swiftui-animation-bugs-6b8d8951d029) where NavigationSplitView/NavigationStack interfere with all `withAnimation` and `.transition()` calls. If any view in the hierarchy uses NavigationStack, it can suppress animations in child views.
+
+Fix: Verify whether MainTabView or any parent uses NavigationStack. If so, test wrapping animated content in a view that is not a NavigationStack descendant.
+
+### What NOT to Add
+
+| Library | Why Not |
+|---------|---------|
+| Lottie | Adds 2MB+ dependency for animations that SwiftUI handles natively |
+| Spring (animation library) | Unnecessary -- SwiftUI `.spring()` animation is built-in |
+| CADisplayLink for manual animation | UIKit approach that breaks SwiftUI's declarative model |
+
+### Sources
+
+- [Apple withAnimation completion documentation](https://developer.apple.com/documentation/swiftui/withanimation(_:completioncriteria:_:completion:)) -- HIGH confidence
+- [iOS 17 SwiftUI animation bugs](https://medium.com/@talessilveira/ios-17-swiftui-animation-bugs-6b8d8951d029) -- MEDIUM confidence
+- [Mastering SwiftUI Transactions (Fat Bob Man)](https://fatbobman.com/en/posts/mastering-transaction/) -- MEDIUM confidence
+- [Animatable Protocol deep dive](https://fatbobman.com/en/posts/animatable-protocol-taming-unruly-swiftui-animation/) -- MEDIUM confidence
+
+---
+
+## Summary: No New Dependencies for v1.2
+
+### Stack Unchanged
+
+| Technology | Version | Status |
+|------------|---------|--------|
+| WhisperKit | 0.16.0+ via SPM | Unchanged |
+| FluidAudio (Parakeet) | latest via SPM | Unchanged |
+| Swift | 5.9+ | Unchanged |
+| SwiftUI | - | Unchanged |
+| DictusCore | local SPM package | Unchanged |
+| App Group | `group.com.pivi.dictus` | Unchanged |
+| Minimum iOS | 17.0 | Unchanged |
+
+### New Built-In APIs to Use
+
+| API | iOS Min | Purpose |
+|-----|---------|---------|
+| `OSLogStore` | 15.0 | Log export for TestFlight bug reports |
+| `withAnimation(completion:)` | 17.0 | Animation state coordination |
+| `PhaseAnimator` | 17.0 | Multi-phase animation (optional, for recording overlay) |
+| `UIActivityViewController` | 6.0 | Share exported logs |
+
+### Installation
 
 ```bash
-# If adding FluidAudio for Parakeet v3:
-# Xcode: File > Add Package Dependencies
-# URL: https://github.com/FluidInference/FluidAudio.git
-
-# If using ISEmojiView for emoji picker:
-# URL: https://github.com/isaced/ISEmojiView.git
-# Version: Up to Next Minor from 0.3.0
-
-# French n-gram database:
-# Generated offline with Python script (not an SPM dependency)
-# Placed in App Group container at build time or first launch
+# No new packages to install.
+# Existing Package.swift (DictusCore) and Xcode SPM dependencies unchanged.
 ```
 
 ---
@@ -381,10 +381,8 @@ None for recommended approach. ISEmojiView (~0.3.0 via SPM) as fallback option.
 
 | Feature Area | Confidence | Reason |
 |--------------|------------|--------|
-| Text prediction/autocorrect | MEDIUM | UITextChecker for French is documented but under-tested in production keyboards. N-gram approach is proven but requires building from scratch |
-| Spacebar trackpad | HIGH | `adjustTextPosition(byCharacterOffset:)` is well-documented Apple API, widely implemented |
-| Adaptive accent key | HIGH | Simple context logic using existing `textDocumentProxy` API |
-| Cold start auto-return | LOW | No public API exists. Wispr Flow's technique is unknown. Best approach is minimizing cold starts |
-| Remove Apple mic | HIGH | Non-issue for custom keyboards -- mic is system keyboard only |
-| Parakeet v3 models | MEDIUM | FluidAudio is young (2025), CoreML conversion works, but production iOS stories are limited |
-| Emoji picker | HIGH | Well-understood problem, multiple proven approaches, existing AccentPopup pattern to follow |
+| Production logging | HIGH | Built-in Apple APIs, existing code to upgrade |
+| Cold start auto-return | MEDIUM | No public API for auto-return. UX optimization is pragmatic but not a full solution |
+| CoreML pre-compilation | HIGH | WhisperKit handles compilation. Work is error handling and UX around existing API |
+| TestFlight deployment | HIGH | Standard Apple process, well-documented |
+| Animation fixes | MEDIUM | Root causes identified from code review, but intermittent bug needs device testing to confirm |

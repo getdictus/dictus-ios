@@ -1,183 +1,199 @@
 # Project Research Summary
 
-**Project:** Dictus v1.1 -- UX & Keyboard Parity
-**Domain:** iOS keyboard extension -- French speech-to-text with offline dictation
-**Researched:** 2026-03-07
+**Project:** Dictus v1.2 Beta Ready
+**Domain:** iOS keyboard extension with on-device voice dictation (WhisperKit)
+**Researched:** 2026-03-11
 **Confidence:** MEDIUM-HIGH
 
 ## Executive Summary
 
-Dictus v1.1 is a UX and keyboard parity milestone for an existing iOS custom keyboard with offline French speech-to-text (WhisperKit). The v1.0 MVP ships a functional AZERTY keyboard with recording overlay and two-process architecture (keyboard extension + main app via Darwin notifications). Research reveals that the biggest gaps are missing Apple keyboard parity features -- spacebar trackpad, adaptive apostrophe key, and haptic feedback on all keys -- that make users perceive the keyboard as incomplete. These are well-understood, low-risk features using documented Apple APIs (`adjustTextPosition`, `UITextChecker`, `textDocumentProxy`). They should ship first because they have the highest user impact per engineering hour.
+Dictus v1.2 is a stabilization and polish release that prepares an existing two-process iOS keyboard dictation app for TestFlight beta distribution. The existing architecture (keyboard extension communicating via Darwin notifications and App Group with a main app that owns WhisperKit and the audio session) is validated and unchanged. The critical finding across all research is that **zero new SPM dependencies are needed** -- every v1.2 feature is served by built-in Apple frameworks and upgrades to existing custom code. This dramatically reduces integration risk for a beta release.
 
-The recommended approach is to prioritize keyboard-only changes (no IPC modifications) before touching the transcription pipeline or app-side logic. The existing two-process architecture is sound and does not need modification for most v1.1 features. Text prediction runs entirely in the keyboard extension using Apple's zero-memory-cost `UITextChecker`, and the spacebar trackpad uses the official `adjustTextPosition(byCharacterOffset:)` API. The only new external dependency is a French n-gram SQLite database (~10-15MB) for word prediction re-ranking, and optionally FluidAudio SDK for Parakeet v3 model support. A prerequisite infrastructure task -- consolidating 6+ duplicated design files into a shared `DictusUI` package -- should precede all feature work to prevent compounding tech debt.
+The recommended approach is a six-phase build that starts with production logging (enables debugging everything else), then fixes the most user-visible bug (animation state in the keyboard extension), then addresses cold start UX (the biggest user friction), then polishes the model download/compilation pipeline, then handles cosmetic polish, and finally gates everything behind TestFlight deployment. The cold start auto-return problem -- where the app opens in the foreground and the user must manually tap "< Back" -- has no public API solution. Research confirms this across Swift Forums, Apple Developer Forums, and competitor analysis (Wispr Flow). The pragmatic path is to accept the limitation, minimize cold start frequency (audio engine keep-alive), and make the transition graceful with clear UX messaging.
 
-The two highest-risk items are cold start auto-return (no public API exists; competitors use unknown techniques) and Parakeet v3 model integration (entirely different STT pipeline from WhisperKit). Research strongly recommends deferring Parakeet integration to v1.2 and limiting model work to curating the existing WhisperKit catalog. For cold start, the pragmatic path is minimizing cold start frequency (keep-alive via background audio) and optimizing cold start speed, rather than chasing an auto-return solution that may require private APIs.
+The top risks are: (1) logging user-dictated text to the persistent log file, which violates GDPR and triggers App Store rejection -- this must be designed out before writing any logging code; (2) CoreML compilation of Large Turbo v3 crashing on 4GB RAM devices, requiring a device capability gate; (3) missing Privacy Manifest (`PrivacyInfo.xcprivacy`) blocking all TestFlight submissions -- this should be validated with a smoke-test upload early, not discovered at the end. Total estimated effort is 8-12 days across all phases.
 
 ## Key Findings
 
 ### Recommended Stack
 
-No major new dependencies are needed. The existing stack (Swift 5.9+, SwiftUI, WhisperKit, App Group) is unchanged. All keyboard parity features use built-in iOS APIs.
+No stack changes. The existing technology set is validated and sufficient. See [STACK.md](STACK.md) for full details.
 
-**Core technologies (new for v1.1):**
-- **UITextChecker** (system): French spell-check and word completion -- zero memory cost, available in keyboard extensions
-- **UILexicon** (system): Supplementary user vocabulary from contacts and shortcuts -- free data source via `requestSupplementaryLexicon()`
-- **French n-gram SQLite DB** (custom-built, ~10-15MB): Word prediction frequency re-ranking -- queried via SQLite, not loaded into memory to respect 50MB extension limit
-- **TimelineView + Canvas** (SwiftUI, iOS 15+): Waveform animation rewrite for smooth 60fps interpolation between 5Hz data updates
+**Core technologies (unchanged):**
+- **WhisperKit 0.16.0+ via SPM**: on-device speech-to-text -- mature, handles CoreML compilation internally
+- **Swift 5.9+ / SwiftUI**: iOS 17.0 minimum -- enables `withAnimation(completion:)` and `PhaseAnimator`
+- **DictusCore (local SPM package)**: shared framework for App Group, Darwin notifications, logging, design tokens
+- **App Group (`group.com.pivi.dictus`)**: cross-process data sharing between app and keyboard extension
 
-**Explicitly not adding:** KeyboardKit Pro (commercial, contradicts MIT), Presage (GPL, unmaintained), any server-based autocorrect (contradicts offline-first), Apple Foundation Models (requires iPhone 15 Pro+, iOS 26.1+).
-
-**Optional (defer to v1.2):** FluidAudio SDK for Parakeet v3 CoreML inference. Requires iOS 17+, 2.5GB model, entirely different STT pipeline. Not ready for v1.1.
+**New built-in APIs to leverage (no dependencies):**
+- `OSLogStore` (iOS 15+) -- export structured logs for TestFlight bug reports
+- `withAnimation(completion:)` (iOS 17+) -- coordinate animation state transitions
+- `UIActivityViewController` -- share exported logs from Settings
 
 ### Expected Features
 
-**Must have (table stakes):**
-- **Spacebar trackpad** -- every iOS user expects long-press spacebar for cursor movement (since iOS 12)
-- **Adaptive apostrophe key** -- French users type apostrophes 5-10 times per paragraph; currently requires 3 taps via layer switch
-- **Haptic feedback on all keys** -- Apple's keyboard has this since iOS 16; absence feels broken
-- **Bottom row reorganization** -- replace filtered mic slot with emoji button, match Apple's layout
+See [FEATURES.md](FEATURES.md) for full analysis including complexity estimates.
+
+**Must have (table stakes for beta):**
+- Production logging system with privacy safeguards and export
+- CoreML pre-compilation progress UX during onboarding
+- Model download progress UX with disk space checks
+- Animation state consistency (fix stale recording overlay)
+- TestFlight deployment (the exit gate)
+- French accent audit across UI strings
 
 **Should have (differentiators):**
-- **Text prediction / suggestion bar** -- bridges gap between "dictation keyboard" and "full replacement keyboard"
-- **Pill-shaped mic button** -- modern iOS design language, larger tap target
-- **Waveform animation rework** -- smoother, premium feel via TimelineView + Canvas
-- **Cold start UX improvement** -- minimize cold starts, faster warm-up, clear "tap Back" guidance
+- Cold start auto-return UX messaging (Flow Session pattern)
+- Privacy-safe open-source logging (marketing differentiator)
+- ANE protection with retry-on-failure for CoreML compilation
 
-**Defer (v1.2+):**
-- Built-in emoji picker (use `advanceToNextInputMode()` to cycle to system emoji keyboard)
-- Next-word prediction (requires custom ML model beyond UITextChecker capabilities)
-- Swipe typing (years of engineering from Gboard/SwiftKey, not in scope)
-- Keyboard themes / custom colors
-- Parakeet v3 model integration (different pipeline, needs its own research spike)
-- Auto-capitalize after punctuation (needs French-specific rules)
+**Defer (post-beta):**
+- Cloud logging / analytics (contradicts privacy identity)
+- Background model downloads (URLSession delegate complexity)
+- Automatic model updates (risky before beta)
+- Real-time streaming transcription (scope creep)
+- GitHub issue integration in logs (nice-to-have)
+- Fastlane/CI automation (manual upload is fine for first builds)
 
 ### Architecture Approach
 
-The two-process architecture (keyboard extension + main app via Darwin notifications + App Group) remains unchanged. All keyboard parity features run entirely in the extension with zero IPC overhead. Text prediction must run locally in the extension (<50ms response) using UITextChecker. The key architectural addition is a `SpeechModel` protocol abstraction over the transcription pipeline, designed now but only fully used when Parakeet is added in v1.2.
+The existing two-process architecture is stable and requires no structural changes. See [ARCHITECTURE.md](ARCHITECTURE.md) for component diagrams and data flow.
 
-**Major new components:**
-1. **TextPredictionService** (DictusKeyboard) -- wraps UITextChecker + UILexicon, computes suggestions on each keystroke via `textDidChange()`
-2. **SuggestionBarView** (DictusKeyboard) -- 3-slot horizontal bar above keyboard rows
-3. **SpacebarTrackpadModifier** (DictusKeyboard) -- ViewModifier handling long-press + drag gesture on spacebar
-4. **AdaptiveAccentKeyResolver** (DictusCore) -- stateless context function: preceding text in, key config out
-5. **ColdStartView** (DictusApp) -- minimal overlay for cold-start dictation launch
-6. **SpeechModel protocol** (DictusCore) -- abstraction for future multi-engine support
-7. **WaveformInterpolator** (both targets) -- smooth interpolation between 5Hz energy data
+**Major components to modify:**
+1. **PersistentLog (DictusCore)** -- add log levels, process tags, privacy filtering, increased line cap. Consider per-process log files to eliminate cross-process file contention entirely
+2. **KeyboardRootView + KeyboardState (DictusKeyboard)** -- include `.requested` status in overlay condition, add debounce on rapid status transitions, reset animation state on `viewWillAppear`
+3. **ModelManager + ModelDownloadPage (DictusApp)** -- add retry-with-cleanup on prewarm failure, time-estimate-based progress indication, device RAM gating for large models
+
+**One new component:**
+- **ColdStartOverlay (DictusApp)** -- minimal recording UI shown when launched via `dictus://dictate` URL scheme with the app not running. Shows "Recording..." with a prominent "< Back" instruction
+
+**New IPC addition:**
+- `appLaunched` Darwin notification -- app posts immediately on cold-start URL launch, keyboard receives it to transition from `.requested` to `.recording` without waiting for the full engine warmup
 
 ### Critical Pitfalls
 
-1. **Spacebar trackpad gesture conflicts with accent popup system** -- Both use `DragGesture(minimumDistance: 0)` with timer-based detection. Trackpad mode must be a keyboard-level state that overlays a transparent gesture capture and disables all per-key gestures. Must be implemented FIRST because it changes the gesture architecture.
+See [PITFALLS.md](PITFALLS.md) for the full list of 12 pitfalls with recovery strategies.
 
-2. **Text prediction blows 50MB memory budget** -- n-gram dictionaries expand 3-5x from disk to memory. Start with UITextChecker only (zero memory cost). Hard budget: prediction system must use <5MB resident memory. Profile on iPhone 12 before adding any dictionary data.
-
-3. **Emoji glyph cache is unrecoverable** -- iOS caches emoji bitmaps permanently for the process lifetime. Never show more than 50-80 unique emoji in the extension. Use a recent-emoji row (8-12 items), not a full category picker.
-
-4. **Cold start auto-return has no public API** -- Apple intentionally restricts programmatic app switching. Wispr Flow's technique is undocumented. Best strategy: minimize cold starts via background audio keep-alive, optimize cold start to <2s, show clear "tap Back" guidance.
-
-5. **Design file duplication compounds with every feature** -- 6 files already duplicated between DictusApp and DictusKeyboard. Create a shared `DictusUI` Swift Package BEFORE starting feature work, or use `#if canImport(SwiftUI)` in DictusCore.
+1. **PersistentLog concurrent write corruption** -- two processes writing to the same file without coordination. Fix: use per-process log files (`dictus_app.log`, `dictus_keyboard.log`) merged at display time, or use `O_APPEND` mode for atomic small writes
+2. **Logging dictated text violates GDPR / App Store rules** -- `PersistentLog` writes plaintext with zero redaction. Fix: define privacy rules BEFORE writing code. Never log transcription text, keystrokes, or audio content. Use OSLog `.private` for development-only diagnostics
+3. **Private API usage for auto-return causes App Store rejection** -- Apple's static analysis detects private APIs even via `#selector`. Fix: do NOT pursue programmatic auto-return. Use the Flow Session UX pattern (accept one manual tap on cold start)
+4. **CoreML Large Turbo v3 compilation crashes on 4GB devices** -- ANE compilation requires 1-3GB of memory. Fix: gate large models behind `ProcessInfo.processInfo.physicalMemory >= 6_000_000_000`. Offer CPU+GPU fallback on constrained devices
+5. **Missing Privacy Manifest blocks TestFlight** -- `PrivacyInfo.xcprivacy` required since May 2024 for both DictusApp and DictusKeyboard targets. Fix: create manifests and validate the upload pipeline early with a smoke-test archive
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure:
+Based on dependency analysis across all four research files, here is the suggested phase structure:
 
-### Phase 0: Infrastructure -- Design File Consolidation
-**Rationale:** 6+ duplicated design files will grow to 9+ with v1.1 features. Every feature that touches design must be implemented twice without consolidation. This is a force-multiplier that prevents compounding tech debt.
-**Delivers:** Shared `DictusUI` Swift Package (or DictusCore with SwiftUI views) imported by both targets
-**Addresses:** Pitfall 7 (design file duplication)
-**Avoids:** Visual inconsistencies between app and keyboard, doubled implementation time for design changes
+### Phase 1: Logging Foundation
+**Rationale:** Every subsequent phase depends on production-quality logging for debugging. This is the infrastructure layer. Low risk, high enablement value.
+**Delivers:** Production-ready PersistentLog with log levels, privacy filtering, process tags, export capability. DebugLogView with filtering and share. iOS 17 cleanup (remove unnecessary `#available` guards).
+**Addresses:** Production logging system (table stakes), privacy-safe logging (differentiator)
+**Avoids:** Pitfall 1 (concurrent write corruption), Pitfall 2 (logging user text), Pitfall 10 (DateFormatter allocation)
+**Effort:** 1-2 days
 
-### Phase 1: Keyboard Parity -- Core UX Gaps
-**Rationale:** These are the highest-impact, lowest-risk features. All use documented Apple APIs, run entirely in the keyboard extension, require no IPC changes. Spacebar trackpad must come first because it changes the gesture architecture for all keys.
-**Delivers:** Keyboard that matches Apple's native AZERTY in core interactions
-**Addresses:** Spacebar trackpad, adaptive apostrophe key, haptic feedback on all keys, bottom row reorganization
-**Avoids:** Pitfall 1 (gesture conflicts -- solve by implementing trackpad as keyboard-level state first), Pitfall 10 (haptic battery drain -- use single prepared generator with `.light` style)
+### Phase 2: Animation State Fixes
+**Rationale:** The most user-visible bug. Needs logging from Phase 1 to diagnose intermittent issues on device. Keyboard-only changes, low integration risk.
+**Delivers:** Reliable recording/transcription overlay transitions. No more stuck states. Timestamp-based state validation, debounce on rapid status changes, `viewWillAppear` state reset.
+**Addresses:** Animation state consistency (table stakes)
+**Avoids:** Pitfall 7 (stale @State in persistent keyboard views)
+**Effort:** 1-2 days
 
-### Phase 2: Visual Polish -- Buttons and Waveform
-**Rationale:** Pure visual improvements with no architectural risk. Can be tested independently. Waveform rewrite uses TimelineView + Canvas (available since iOS 15).
-**Delivers:** Premium visual feel -- pill-shaped mic button, smooth waveform animation
-**Addresses:** Pill-shaped button design, waveform animation rework
-**Avoids:** Pitfall 9 (suggestion bar height) -- design decision about toolbar integration should be resolved here before Phase 3
+### Phase 3: Cold Start Audio Bridge UX
+**Rationale:** Highest UX friction point. Depends on stable animation (Phase 2) and logging (Phase 1). New component (ColdStartOverlay) with clear boundaries.
+**Delivers:** ColdStartOverlay view, `appLaunched` Darwin notification, cold-start detection in DictationCoordinator. User sees "Recording... tap < Back to return" instead of the full app UI.
+**Addresses:** Cold start auto-return (differentiator -- UX messaging approach only)
+**Avoids:** Pitfall 3 (private API rejection), Pitfall 6 (AVAudioSession conflicts)
+**Effort:** 1-2 days
 
-### Phase 3: Text Prediction -- Suggestion Bar
-**Rationale:** Highest-complexity keyboard feature. Depends on Phase 1 (bottom row must be finalized) and Phase 2 (toolbar/suggestion bar height decision). Memory-sensitive -- must be profiled on real devices.
-**Delivers:** 3-slot suggestion bar with French spell-check and word completion
-**Uses:** UITextChecker (system), UILexicon, optional French n-gram SQLite DB
-**Implements:** TextPredictionService, SuggestionBarView, AutocompleteSuggestion model
-**Avoids:** Pitfall 2 (memory budget -- start with UITextChecker only), Pitfall 5 (poor French suggestions -- supplement with frequency re-ranking), Pitfall 13 (keystroke logging -- in-memory only, audit before submission)
+### Phase 4: CoreML Compilation + Model Download UX
+**Rationale:** Isolated to the model pipeline, no IPC changes. Prevents the most frustrating onboarding failure (model compilation hang/crash). Must ship before beta testers download models.
+**Delivers:** Retry-with-cleanup on prewarm failure, time-estimate progress indication, device RAM gating for large models, disk space pre-check, modal download protection against accidental navigation.
+**Addresses:** CoreML pre-compilation UX (table stakes), model download UX (table stakes), ANE protection (differentiator)
+**Avoids:** Pitfall 4 (CoreML crash on 4GB devices), Pitfall 8 (main thread blocking during downloads), Pitfall 9 (ANE contention)
+**Effort:** 2-3 days
 
-### Phase 4: Cold Start UX
-**Rationale:** App-side changes, user-facing UX improvement. Independent of keyboard features. Research spike at start to determine if auto-return is achievable; if not, optimize cold start speed and add clear user guidance.
-**Delivers:** Faster cold start (<2s), minimal ColdStartView overlay, extended background keep-alive
-**Addresses:** Cold start auto-return (best-effort), background session keep-alive
-**Avoids:** Pitfall 4 (no public API -- accept limitation, optimize speed instead)
+### Phase 5: Polish + French Accent Audit
+**Rationale:** Cosmetic pass before beta. Low risk, high perceived quality impact. Includes the filler words toggle cleanup.
+**Delivers:** Correct French accents in all UI strings, design polish across model manager/recording overlay/keyboard, filler words toggle decision (remove or fix).
+**Addresses:** French accent audit (table stakes), design polish
+**Avoids:** No critical pitfalls -- this is quality polish
+**Effort:** 1-2 days
 
-### Phase 5: Model Catalog Curation
-**Rationale:** Riskiest phase -- touches the transcription pipeline. Should come last after all simpler features are stable. Limit scope to curating WhisperKit models (remove English-only models) and designing the SpeechModel protocol for future Parakeet integration.
-**Delivers:** Cleaned model catalog, SpeechModel protocol abstraction (no behavior change), WhisperKitModel wrapper
-**Uses:** Existing WhisperKit, no new dependencies
-**Implements:** SpeechModel protocol, WhisperKitModel, ModelCatalog registry
-**Avoids:** Pitfall 6 (Parakeet scope bloat -- defer actual integration to v1.2)
+### Phase 6: TestFlight Deployment
+**Rationale:** The exit gate. Must come last because everything above must be stable. Includes developer account migration, Privacy Manifest creation, provisioning profiles, and first archive/upload.
+**Delivers:** Working TestFlight build distributed to beta testers. Privacy policy URL. App Store Connect metadata.
+**Addresses:** TestFlight deployment (table stakes)
+**Avoids:** Pitfall 5 (missing Privacy Manifest), Pitfall 12 (App Group ID change during account migration)
+**Effort:** 1-2 days
 
 ### Phase Ordering Rationale
 
-- **Phase 0 before everything** because every subsequent phase creates design components that would be duplicated without consolidation
-- **Phase 1 before Phase 3** because the suggestion bar depends on finalized keyboard layout and the trackpad gesture changes the architecture for all keys
-- **Phase 2 before Phase 3** because the toolbar/suggestion bar height trade-off must be resolved before building the suggestion bar UI
-- **Phase 4 is independent** and can run in parallel with Phases 2-3 if resources allow, since it only touches app-side code
-- **Phase 5 last** because it refactors the transcription pipeline (AudioRecorder, DictationCoordinator, TranscriptionService) which is the riskiest change
+- **Logging first** because it enables debugging for all subsequent phases. Every research file identified logging as the prerequisite.
+- **Animation before cold start** because the animation fix is contained within the keyboard extension, while cold start UX touches both processes. Fix the simpler, higher-visibility bug first.
+- **Cold start before model UX** because cold start is the highest-friction user experience issue and has clear component boundaries (one new view, one new notification).
+- **Model UX before polish** because model download/compilation failures during onboarding are beta-blocking, while French accents are not.
+- **TestFlight last** because it is the quality gate. All features must be stable before submitting for Beta App Review.
+- **Smoke-test the upload pipeline early** (Phase 1 timeframe) -- archive and upload the current v1.1 codebase to validate signing/manifest/entitlements before writing any v1.2 code. This avoids discovering blocking issues at the end.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 3 (Text Prediction):** UITextChecker French quality is unknown in production. Needs prototyping to evaluate whether suggestions are usable or need heavy supplementation. Memory profiling on iPhone 12 is mandatory.
-- **Phase 4 (Cold Start UX):** 1-2 day research spike needed at phase start. Reverse-engineer Wispr Flow's cold start behavior using Console.app. Investigate PiP as potential workaround.
-- **Phase 5 (Model Catalog):** If Parakeet v3 integration is pulled into scope, needs dedicated research on FluidAudio SDK iOS compatibility, Core ML conversion quality, and French accuracy benchmarks.
+- **Phase 3 (Cold Start Audio Bridge):** The auto-return mechanism remains unresolved. Research confirmed no public API exists. The PiP-based approach (Pitfall 3, Option C) is speculative and needs a spike. Recommend timeboxing to 1 day -- if PiP does not work, fall back to UX messaging only.
+- **Phase 4 (CoreML Compilation):** ANE compilation timing is device-specific and opaque. Time estimates for the progress UI need real-device calibration. Budget testing time on at least 3 device tiers (4GB, 6GB, 8GB RAM).
 
-Phases with standard patterns (skip research-phase):
-- **Phase 0 (Infrastructure):** Well-documented Swift Package creation pattern
-- **Phase 1 (Keyboard Parity):** All APIs are official Apple documentation with multiple reference implementations
-- **Phase 2 (Visual Polish):** Standard SwiftUI animation patterns (TimelineView + Canvas, Capsule shape)
+Phases with standard patterns (skip additional research):
+- **Phase 1 (Logging):** Well-documented Apple APIs (OSLog, OSLogStore). Straightforward extension of existing code.
+- **Phase 2 (Animation):** Standard SwiftUI patterns. Root causes identified in code review.
+- **Phase 5 (Polish):** No technical research needed, purely cosmetic.
+- **Phase 6 (TestFlight):** Standard Apple deployment process, thoroughly documented.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Almost no new dependencies. All core APIs are system-provided (UITextChecker, adjustTextPosition, textDocumentProxy). Only new dep is self-built n-gram DB |
-| Features | HIGH | Table stakes features clearly identified from Apple keyboard analysis. Differentiators have clear scope boundaries. Anti-features well-reasoned |
-| Architecture | HIGH | Existing two-process architecture validated. New components fit cleanly into existing targets. Integration points are specific and well-mapped |
-| Pitfalls | MEDIUM-HIGH | Critical pitfalls (gesture conflicts, memory budget, emoji cache) are well-sourced. Cold start auto-return is the one area with genuine uncertainty |
+| Stack | HIGH | Zero new dependencies. All built-in APIs verified against official documentation. |
+| Features | HIGH | Feature list is well-scoped. Clear table stakes vs differentiators. Complexity estimates grounded in existing codebase knowledge. |
+| Architecture | MEDIUM-HIGH | Existing architecture validated. New components (ColdStartOverlay) have clear boundaries. Cross-process file safety for logging needs real-device testing. |
+| Pitfalls | HIGH | Based on project history (v1.0/v1.1 bugs), Apple documentation, WhisperKit GitHub issues, and Swift Forums. Concrete prevention strategies for each pitfall. |
 
 **Overall confidence:** MEDIUM-HIGH
 
 ### Gaps to Address
 
-- **UITextChecker French quality**: No production data on how good French suggestions actually are. Must prototype and user-test before committing to the full suggestion bar feature. If quality is poor, fall back to spell-check only with accent shortcuts.
-- **Cold start auto-return mechanism**: How Wispr Flow returns to the previous app remains unknown. A 1-2 day research spike (Console.app monitoring, network inspection) during Phase 4 planning is needed. May ultimately be unsolvable with public APIs.
-- **Parakeet v3 French accuracy on iPhone**: CoreML conversions exist on HuggingFace but are third-party. No published benchmarks for French accuracy on mobile. Must be validated before any integration work begins (v1.2 scope).
-- **Emoji glyph memory threshold**: The "50-80 unique emoji" limit cited in pitfall research is approximate. Actual jetsam threshold varies by device and iOS version. Must be profiled on iPhone 12 (lowest target) during implementation.
-- **Suggestion bar vs toolbar height trade-off**: Two approaches (integrate into toolbar vs add separate row) have different UX implications. Needs design decision before Phase 3 implementation.
+- **Auto-return mechanism:** No public API confirmed. PiP-based approach is speculative. Must be validated with a spike early in Phase 3. Fallback (UX messaging) is ready.
+- **CoreML compilation timing:** Progress estimates (10-40s by model size) are approximations from research, not measured on Dictus specifically. Need real-device calibration during Phase 4 implementation.
+- **Cross-process log file safety:** The `O_APPEND` atomicity guarantee for regular files on APFS is de facto but not POSIX-guaranteed. Per-process log files (recommended by PITFALLS.md) eliminate this concern entirely. Decision needed at Phase 1 start.
+- **App Group ID stability across team migration:** Research says the group ID is team-independent, but this must be verified on a real device with the new developer account before any v1.2 code ships.
+- **Wispr Flow's exact return mechanism:** Research identified the "Flow Session" pattern but the precise iOS API used for auto-return remains unknown. LOW confidence this gap can be closed -- it may be a whitelisted behavior or undocumented API.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Apple UITextDocumentProxy Documentation](https://developer.apple.com/documentation/uikit/uitextdocumentproxy) -- cursor movement, text context APIs
-- [Apple UITextChecker Documentation](https://developer.apple.com/documentation/uikit/uitextchecker) -- spell-check, completions for French
-- [Apple Custom Keyboard Guide](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html) -- extension constraints, memory limits
-- [Apple App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) -- keyboard privacy requirements
-- [adjustTextPosition(byCharacterOffset:)](https://developer.apple.com/documentation/uikit/uitextdocumentproxy/1618194-adjusttextposition) -- spacebar trackpad API
+- [Apple OSLogStore documentation](https://developer.apple.com/documentation/oslog/oslogstore)
+- [Apple OSLogPrivacy documentation](https://developer.apple.com/documentation/os/oslogprivacy)
+- [Apple Privacy Manifest documentation](https://developer.apple.com/documentation/bundleresources/privacy-manifest-files)
+- [Apple TestFlight overview](https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/)
+- [Apple App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
+- [Apple CoreML compileModel(at:) documentation](https://developer.apple.com/documentation/coreml/mlmodel/compilemodel(at:)-6442s)
+- [Apple Custom Keyboard Guide](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html)
+- [Apple Background Execution](https://developer.apple.com/documentation/uikit/extending-your-app-s-background-execution-time)
+- [Swift Forums: auto-return keyboard discussion](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988)
+- [WhisperKit Configurations.swift source](https://github.com/argmaxinc/whisperkit/blob/main/Sources/WhisperKit/Core/Configurations.swift)
+- [WhisperKit issue #171: prewarmModels error](https://github.com/argmaxinc/WhisperKit/issues/171)
 
 ### Secondary (MEDIUM confidence)
-- [NSHipster UITextChecker](https://nshipster.com/uitextchecker/) -- French support analysis, limitations
-- [Swift Forums: Auto-return from keyboard extension](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988) -- confirms no public API
-- [Wispr Flow FAQ](https://docs.wisprflow.ai/iphone/faq) -- competitor analysis, session model
-- [FluidAudio GitHub](https://github.com/FluidInference/FluidAudio) -- Parakeet CoreML wrapper
-- [Parakeet-TDT-0.6B-v3 CoreML](https://huggingface.co/FluidInference/parakeet-tdt-0.6b-v3-coreml) -- model availability
-- [High memory usage of emojis on iOS](https://vinceyuan.github.io/high-memory-usage-of-emojis-on-ios/) -- emoji glyph cache behavior
+- [WhisperKit issue #268: Unable to load model](https://github.com/argmaxinc/WhisperKit/issues/268)
+- [KeyboardKit 10.2 blog](https://keyboardkit.com/blog/2026/01/09/keyboardkit-10-2)
+- [Apple ml-stable-diffusion issue #255: ANECompiler failures](https://github.com/apple/ml-stable-diffusion/issues/255)
+- [fatbobman: SwiftUI animation and state pitfalls](https://fatbobman.com/en/posts/serious-issues-caused-by-delayed-state-updates-in-swiftui/)
+- [SwiftLee: OSLog and Unified Logging](https://www.avanderlee.com/debugging/oslog-unified-logging/)
+- [iOS 17 SwiftUI animation bugs (Medium)](https://medium.com/@talessilveira/ios-17-swiftui-animation-bugs-6b8d8951d029)
+- [Wispr Flow FAQ](https://docs.wisprflow.ai/iphone/faq)
 
 ### Tertiary (LOW confidence)
-- [ios-uitextchecker-autocorrect GitHub](https://github.com/ansonl/ios-uitextchecker-autocorrect) -- reference implementation, unmaintained
-- [Limitations of custom iOS keyboards (Medium)](https://medium.com/@inFullMobile/limitations-of-custom-ios-keyboards-3be88dfb694) -- general constraints overview
+- [CocoaLumberjack issue #439: log files from extensions](https://github.com/CocoaLumberjack/CocoaLumberjack/issues/439)
+- Wispr Flow exact auto-return mechanism -- inferred from behavior, not documented
 
 ---
-*Research completed: 2026-03-07*
+*Research completed: 2026-03-11*
 *Ready for roadmap: yes*

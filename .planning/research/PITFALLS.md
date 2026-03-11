@@ -1,340 +1,434 @@
-# Domain Pitfalls
+# Pitfalls Research
 
-**Domain:** iOS keyboard extension — v1.1 feature additions (text prediction, spacebar trackpad, cold start auto-return, emoji picker, model catalog update)
-**Researched:** 2026-03-07
-**Context:** Existing v1.0 shipped with AZERTY/QWERTY layouts, long-press accent popup, recording overlay, two-process architecture (keyboard + app via Darwin notifications), WhisperKit STT in app process. 50MB extension memory limit. 6 design files duplicated between DictusApp and DictusKeyboard.
+**Domain:** iOS keyboard dictation app — v1.2 Beta Ready (logging, Audio Bridge, CoreML precompilation, model download UX, animation fixes, TestFlight deployment)
+**Researched:** 2026-03-11
+**Confidence:** HIGH (based on project history, Apple documentation, WhisperKit issues, and v1.0/v1.1 lessons learned)
+
+**Context:** Dictus is a shipped two-process iOS keyboard dictation app (keyboard extension + main app). v1.0 and v1.1 are complete. The keyboard extension has a 50MB memory limit. AVAudioSession management has been a recurring source of bugs. Darwin notifications handle cross-process IPC. Previous attempts at auto-return used private APIs that crashed or were rejected. The existing `PersistentLog` writes to App Group with no concurrency protection and no privacy redaction.
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, App Review rejections, or ship-blocking issues.
+### Pitfall 1: PersistentLog Concurrent Write Corruption from Two Processes
+
+**What goes wrong:**
+The current `PersistentLog.log()` dispatches to `DispatchQueue.global(qos: .utility)` which creates a new queue per process. When the keyboard extension and DictusApp both call `PersistentLog.log()` simultaneously (which happens during every dictation flow), two processes open `FileHandle(forWritingTo:)` on the same file, both `seekToEndOfFile()`, and both write. Result: interleaved bytes, truncated lines, or a corrupted file. The `trimIfNeeded()` method is even worse — it reads the entire file, then writes a trimmed version with `write(to:atomically:true)`, which creates a temp file and renames. If the other process has the file open for writing, the rename can fail silently or the other process writes to the now-deleted old file.
+
+This is not theoretical. The keyboard extension and app process run concurrently during every dictation session. The more verbose the logging (which is the whole point of v1.2 production logging), the more frequent the collisions.
+
+**Why it happens:**
+`DispatchQueue.global` is process-local. A serial queue in the keyboard extension provides no serialization with a serial queue in DictusApp. Cross-process file coordination requires either `NSFileCoordinator` or POSIX file locks (`flock`/`fcntl`). The current implementation uses neither.
+
+**How to avoid:**
+1. Use `NSFileCoordinator` with `NSFilePresenter` for all log file writes. Both processes register as presenters, and writes are coordinated through the system
+2. Simpler alternative: use POSIX `flock(fd, LOCK_EX)` before writing and `flock(fd, LOCK_UN)` after. This is lighter weight than NSFileCoordinator
+3. Simplest alternative: each process writes to its OWN log file (`dictus_app.log`, `dictus_keyboard.log`). The log viewer in Settings merges and sorts by timestamp. This eliminates cross-process contention entirely and is the recommended approach
+4. Replace `FileHandle.seekToEndOfFile()` with `O_APPEND` mode opens: `open(path, O_WRONLY | O_APPEND | O_CREAT)`. The OS guarantees atomic append for writes under `PIPE_BUF` (4096 bytes on iOS), even across processes
+
+**Warning signs:**
+Log file shows garbled lines, missing entries, or entries from one process disappearing after the other process trims. Log file size grows unexpectedly or drops to zero.
+
+**Phase to address:**
+Logging phase (first phase of v1.2) — this is the foundation. Must be fixed before adding more logging.
 
 ---
 
-### Pitfall 1: Spacebar Trackpad Gesture Conflicts with Existing Long-Press Accent System
+### Pitfall 2: Logging Dictated Text Violates GDPR and Triggers App Store Rejection
 
-**What goes wrong:** The spacebar trackpad (long-press spacebar to enter cursor movement mode) uses the same gesture primitive as the existing accent popup system: `DragGesture(minimumDistance: 0)` with a timer-based long-press detection. Both features rely on detecting a hold gesture followed by horizontal drag. When both are active, SwiftUI's gesture resolution becomes unpredictable. Specifically:
+**What goes wrong:**
+Production logging naturally wants to capture "what happened" — including the transcription result for debugging accuracy issues. But logging user-dictated text means storing user speech content on disk. This violates:
+- **GDPR Article 5(1)(c)** — data minimization: you are storing personal data (what users said) that is not necessary for app functionality
+- **App Store Guideline 5.1.1** — keyboard extensions that store keystrokes or user input face rejection. Apple's review specifically checks keyboard extensions for data exfiltration
+- **Apple's OSLog privacy model** — by default, `os.log` redacts dynamic string content in production builds (shows `<private>`). But `PersistentLog` writes to a plain text file with ZERO redaction. Every `PersistentLog.log("Transcription: \(result)")` call persists user speech in cleartext
 
-- The spacebar's long-press must transition the entire keyboard into "trackpad mode" (all keys become a touch surface for cursor movement, letters disappear)
-- But the accent popup system expects per-key DragGesture ownership to track which accent the finger hovers over
-- If the user long-presses the spacebar and then drags upward into the letter rows, the system cannot determine if the user wants trackpad cursor movement or accidentally triggered an accent popup on a letter key above
+The existing `DictationCoordinator.swift` has ~20 log/print calls. If any log the transcription result, model input, or audio buffer content, this is a ship-blocker.
 
-The current `KeyButton.swift` uses a `DragGesture(minimumDistance: 0)` per key with a 400ms timer. The spacebar trackpad needs a single DragGesture across the entire keyboard area after spacebar long-press. These two gesture systems will fight each other.
+**Why it happens:**
+During development, logging everything helps debugging. The transition from debug logging to production logging requires an explicit privacy audit, which is easy to skip under time pressure.
 
-**Why it happens:** Apple's stock keyboard handles this at the UIKit level with gesture recognizer priority and exclusive touch handling. SwiftUI does not expose gesture recognizer priority or `require(toFail:)` relationships between gestures on different views. The two gesture systems are architecturally incompatible as currently designed.
+**How to avoid:**
+1. Use Apple's `os.Logger` with privacy annotations as the primary logging API: `logger.info("Transcription completed: \(result, privacy: .private)")`. In production, this redacts automatically. In debug (attached to Xcode), it shows the value
+2. For `PersistentLog` (file-based), define strict categories: NEVER log user input text, audio content, or transcription results to file. Only log events, durations, error codes, and model names
+3. Create a `LogSanitizer` that strips or hashes any string longer than 50 characters before writing to persistent logs. Transcriptions are always longer than 50 characters; model names and error codes are shorter
+4. Pre-submission audit: `grep -r "lastTranscription\|transcriptionResult\|documentContext" *.swift` in all files that call any log function. Remove or redact every match
+5. Add a PrivacyInfo.xcprivacy entry for `NSPrivacyCollectedDataTypes` if ANY user data touches disk, even temporarily
 
-**Consequences:** Trackpad mode activates when user wants accents, or accents appear when user wants trackpad. Both features feel broken. Users lose trust in the keyboard.
+**Warning signs:**
+App Store review rejection citing Guideline 5.1.1. GDPR complaint from EU user who exports their data. Privacy-conscious beta tester reads the log file from Settings and sees their dictated text.
 
-**Prevention:**
-1. Trackpad mode must be a **keyboard-level state**, not a per-key gesture. When spacebar long-press is detected, set `KeyboardState.isTrackpadMode = true` and overlay a transparent gesture capture view on top of all keys
-2. While in trackpad mode, all per-key DragGestures are disabled (don't render KeyButton gesture at all when `isTrackpadMode`)
-3. Use `adjustTextPosition(byCharacterOffset:)` on `textDocumentProxy` for cursor movement — this is the official API. Map horizontal drag delta to character offset: ~10pt per character works well
-4. Exit trackpad mode on finger lift (DragGesture.onEnded)
-5. Add haptic feedback (light impact) per cursor step to match Apple's stock behavior
-6. Test the transition: long-press spacebar -> drag up into letter area -> release. This must NOT trigger any letter key or accent popup
-
-**Detection:** User reports of "wrong letter inserted when trying to move cursor" or "cursor moves when trying to type accents on E"
-
-**Phase:** Must be the FIRST keyboard feature implemented in v1.1 — it changes the gesture architecture for all keys.
-
----
-
-### Pitfall 2: Text Prediction Blows the 50MB Memory Budget
-
-**What goes wrong:** A French text prediction system (autocorrect + suggestion bar) requires at minimum:
-- A French dictionary/word frequency model: 5-15MB depending on coverage
-- N-gram or trie data structure for prefix matching: 8-20MB resident
-- UITextChecker (Apple's built-in) is essentially free on memory but has poor French support and no word frequency ranking
-- Any ML-based prediction model (even a small one): 15-50MB
-
-The keyboard extension is already consuming memory for: SwiftUI view hierarchy (~8-10MB), DictusCore framework, Darwin notification observers, keyboard layout data, and the accent character mapping. Realistic baseline is ~15-20MB before any prediction engine loads. Adding even a modest prediction system pushes total memory toward or past the ~30-40MB jetsam kill threshold.
-
-**Why it happens:** Developers underestimate the resident memory of dictionary/trie structures because they see small on-disk sizes. A compressed dictionary might be 3MB on disk but expand to 15MB when loaded into a trie for fast prefix lookup. Additionally, the suggestion bar itself (3 UILabel/Text views that update on every keystroke) triggers frequent SwiftUI re-renders that add to heap pressure.
-
-**Consequences:** Extension gets killed by jetsam mid-typing. iOS replaces Dictus with the stock keyboard without warning. User loses their current text input context. This happens more on older devices (iPhone 12, 4GB RAM) where the threshold is lower.
-
-**Prevention:**
-1. Start with `UITextChecker` only — it is built into iOS, costs zero additional memory, supports French (`"fr"` language code), and provides spelling corrections via `guesses(forWordRange:in:language:)` and completions via `completions(forPartialWordRange:in:language:)`
-2. UITextChecker limitations for French: no word frequency ranking (suggestions are alphabetical), no contextual prediction (doesn't know "je" should be followed by "suis"), no accented character suggestions based on context
-3. If UITextChecker is insufficient, use a **compact frequency-based approach**: ship a pre-sorted top-10K French words file (~200KB), load it lazily, and do prefix matching in a sorted array with binary search. This adds <1MB resident memory
-4. Do NOT ship a full French dictionary (300K+ words) in the extension. If needed, keep it in the app and query via App Group file reads
-5. Profile memory after adding prediction: `Instruments > Allocations > mark generation before/after prediction init`
-6. Set a hard budget: prediction system must use <5MB resident memory total
-
-**Detection:** Extension crashes increase on iPhone 12/13 mini. Jetsam events in device logs. Users report "keyboard disappears randomly while typing."
-
-**Phase:** Text prediction should be implemented AFTER trackpad and emoji, once the memory baseline is known. It has the highest memory risk.
+**Phase to address:**
+Logging phase — define the privacy policy for logs BEFORE writing any new logging code. This is a design decision, not an afterthought.
 
 ---
 
-### Pitfall 3: Emoji Picker Memory Is Unrecoverable
+### Pitfall 3: Audio Bridge Private API Usage Causes App Store Rejection
 
-**What goes wrong:** iOS renders emoji as bitmap glyphs, and these bitmaps are cached in memory by the system font rendering pipeline. The critical issue: **after destroying a view that displays emoji, the emoji glyph cache is NOT released**. iOS keeps this cache for the lifetime of the process. In a normal app this is fine (plenty of memory), but in a keyboard extension with a ~40MB budget, rendering even 100-200 emoji can consume 5-15MB of cache that never comes back.
+**What goes wrong:**
+The "Audio Bridge" pattern for cold start auto-return needs the app to programmatically return the user to the previous app after launching. Previous v1.0/v1.1 attempts used:
+- `UIApplication.shared.perform(#selector(NSXPCConnection.suspend))` — sent user to Home Screen, not previous app
+- `LSApplicationWorkspace` — private API, crashes on iOS 18+
+- `_hostBundleID` via KVC on `NSExtensionContext` — crashes with keypath exception
 
-A full emoji picker showing all Unicode 15.1 emoji (~3,700+ emoji) will consume far more memory than the extension can afford. The picker will work the first time, but each category switch loads more emoji bitmaps into the permanent cache. After browsing 3-4 categories, the extension hits jetsam and dies.
+Apple's static analysis tool (`otool` / App Thinning) detects private API usage in binaries even if called via `#selector` or `NSStringFromSelector`. Rejection message: "Your app contains or references non-public APIs: [API name]". This blocks TestFlight external distribution AND App Store submission.
 
-**Why it happens:** The emoji glyph cache is managed by CoreText/CoreGraphics at the system level, not by the app. There is no API to flush this cache. Setting the view to `nil`, removing it from the hierarchy, or calling `removeFromSuperview()` does not release the cached glyphs.
+**Why it happens:**
+There is genuinely no public API to navigate the user from App A back to App B. Apple considers this a security boundary. Competitors like Wispr Flow likely use one of: (a) a technique that Apple has whitelisted for their specific app, (b) an undocumented-but-not-private API that Apple tolerates, or (c) a creative use of legitimate APIs (NSUserActivity, Handoff, UIScene lifecycle) that achieves the same effect.
 
-**Consequences:** First use of emoji picker works. After browsing several categories, the keyboard crashes and iOS replaces it with the stock keyboard. This is not reproducible in the Simulator (which has much higher memory limits).
+**How to avoid:**
+1. Do NOT use any API that starts with underscore (`_`), belongs to `LSApplicationWorkspace`, or uses `performSelector` on undocumented selectors
+2. Research the "Audio Bridge" approach via legitimate APIs only:
+   - **Option A**: App opens, immediately calls `UIApplication.shared.open(URL(string: "shortcuts://")!)` to open a Shortcuts action that returns to the previous app. Requires user to install a shortcut — poor UX but public API
+   - **Option B**: Use `BGTaskScheduler` to schedule a background task, then immediately background the app via no user interaction. The system handles returning to the frontmost app. Risk: iOS may not foreground the previous app
+   - **Option C**: Use Picture-in-Picture (PiP) mode with a tiny transparent video. PiP allows the app to "appear" backgrounded while maintaining audio. The previous app returns to foreground naturally. Requires `AVPictureInPictureController` and a video asset
+   - **Option D**: Accept the limitation. Optimize cold start to be <1.5 seconds total (launch + WhisperKit load + recording start). Show a "Return to keyboard" instruction. User taps status bar "< Back"
+3. Before implementing ANY auto-return technique, test it through TestFlight external review. Apple's review catches private APIs that local testing does not
 
-**Prevention:**
-1. Do NOT build a full-category emoji picker inside the extension. Instead, show only a **single row of recent/frequent emoji** (8-12 emoji max) directly in the keyboard toolbar
-2. For the full picker, open it as a **scrolling grid that renders only visible cells** — use SwiftUI `LazyVGrid` so off-screen emoji views are destroyed. However, note that the glyph cache still accumulates
-3. Hard limit: never render more than ~50-80 unique emoji glyphs in a single session. After that threshold, the extension is at risk
-4. Consider a "search-first" emoji design: user types emoji name, show 5-8 matching results. This avoids rendering hundreds of glyphs
-5. Pre-populate the "recent emoji" row from the main app (store in App Group UserDefaults) so the extension never needs to show the full picker
-6. Profile with `Instruments > VM Tracker` on an iPhone 12 — track dirty memory specifically, as the emoji cache shows up there
+**Warning signs:**
+Binary scan warnings from `xcodebuild -exportArchive`. App Store Connect "Invalid Binary" email within 24 hours of upload. Rejection citing "non-public API usage."
 
-**Detection:** Memory grows monotonically during emoji browsing and never decreases. Extension crashes after extended emoji picker use.
-
-**Phase:** Emoji button should replace the duplicate globe key with a simple recent-emoji row, NOT a full category picker. Full picker is out of scope for v1.1 given memory constraints.
+**Phase to address:**
+Audio Bridge phase — spike research first (1-2 days). Choose between Option C (PiP) or Option D (accept limitation + optimize speed). Do not spend more than 3 days on auto-return if no public API solution is found.
 
 ---
 
-### Pitfall 4: Cold Start Auto-Return Has No Public API Solution
+### Pitfall 4: CoreML Compilation of Large Turbo v3 Kills the App on Low-Memory Devices
 
-**What goes wrong:** When the app is not running (cold start), the keyboard must open the app via URL scheme to start recording. The app launches, records, transcribes — but there is NO public iOS API to programmatically return the user to the previous app. The user is stranded in the Dictus app and must manually swipe back or tap the status bar "< Back" arrow.
+**What goes wrong:**
+CoreML model compilation (`.mlmodel` to `.mlmodelc` or ANE compilation at runtime) is extremely memory-intensive for large models. The WhisperKit Large Turbo v3 model (`openai_whisper-large-v3-v20240930_turbo`) triggers `ANECompilerService` which:
+- Spawns a helper process that allocates 1-3GB of memory during compilation
+- Takes 30-120 seconds depending on device (longer on A14/A15 chips)
+- Can fail entirely on devices with 4GB RAM (iPhone 12, 13 mini, SE 3rd gen) with error: `MILCompileForANE error: failed to compile ANE model`
+- Blocks the ANE for ALL other apps during compilation — camera, Siri, and other ML features become unresponsive
 
-Competitors like Wispr Flow handle this, but the technique is not publicly documented. Research into the Swift Forums and Apple Developer Forums reveals:
-- `suspend()` on UIApplication goes to home screen, not the previous app
-- `x-callback-url` requires cooperation from the host app (Messages, WhatsApp, etc. don't support it)
-- Private APIs like `_hostBundleID` and `LSApplicationWorkspace` are blocked in iOS 18+
-- Wispr Flow's approach appears to involve "Flow Sessions" where the app opens and immediately returns, but the exact mechanism is unclear
+If this happens during onboarding (user just downloaded the model and expects to use it immediately), the app appears frozen, the system may kill it for exceeding memory limits, or the user force-quits. The model is then in a partially compiled state, and subsequent launches may repeatedly fail.
 
-**Why it happens:** Apple intentionally restricts apps from controlling navigation flow between apps. This is a security/UX design decision. The "< Back to [previous app]" arrow in the status bar is an iOS system feature that apps cannot programmatically trigger.
+**Why it happens:**
+`ANECompilerService` compiles the full model graph for the Neural Engine on first load. This is a one-time cost per model per device, but it is enormous for large models. Apple's system does not expose progress, cancellation, or memory budget controls for this compilation. WhisperKit's `prewarmModels()` triggers this compilation but cannot control its resource usage.
 
-**Consequences:** Cold start requires 2 taps (1st opens app, 2nd starts recording from keyboard after manually returning). This is the worst UX issue in v1.0 and the top priority for v1.1, but it may not be fully solvable without reverse-engineering competitor approaches.
+**How to avoid:**
+1. Gate Large Turbo v3 behind a device capability check: only offer it on devices with >= 6GB RAM (`ProcessInfo.processInfo.physicalMemory >= 6_000_000_000`). On 4GB devices, cap at the `small` or `base` model
+2. Run CoreML compilation on a background thread with `Task.detached(priority: .utility)` — never on MainActor. Show a non-dismissable progress modal: "Preparing model for your device... This may take 1-2 minutes"
+3. Use `beginBackgroundTask(withName:)` to request background time if the user leaves the app during compilation. But note: background tasks get only ~30 seconds, which is insufficient for large model compilation. Warn users: "Please keep Dictus open while the model prepares"
+4. Implement retry-with-cleanup: if compilation fails, delete the model's `.mlmodelc` directory and re-download. Corrupted partial compilations cause permanent failures otherwise (WhisperKit issue #171)
+5. Pre-compile during onboarding, NOT on first dictation. The onboarding flow should: download model -> compile model -> verify model loads -> proceed. Never let the user reach the keyboard with an uncompiled model
+6. For the v1.2 "CoreML pre-compilation during onboarding" feature: add a `ModelCompilationManager` that tracks compilation state per model in App Group UserDefaults (`modelName_compiled: true/false`). Check this flag before every `WhisperKit.init()` call
 
-**Prevention:**
-1. **Minimize cold starts**: Keep the app alive as long as possible using `UIBackgroundModes: audio` (already implemented). Configure the audio session to maintain background execution even when not recording — play a silent audio loop if needed
-2. **Speed up the cold start flow**: If the app must open, make it transcription-ready in <1 second. Pre-load WhisperKit at app launch, pre-warm the audio engine. The faster the round-trip, the less painful the UX
-3. **Auto-start recording on URL scheme launch**: When opened via `dictus://dictate`, skip any UI and immediately start recording + show a minimal overlay with "Recording... Tap to stop". Auto-stop after silence detection
-4. **Research Wispr Flow's exact technique**: Install Wispr Flow, use `Console.app` to monitor its system calls during cold start. Check if it uses `NSUserActivity` continuation, Handoff, or another system API
-5. **Consider PiP (Picture-in-Picture) as a workaround**: A small floating recording indicator via PiP might keep the app "present" while the user returns to their previous app. This is a stretch but worth investigating
-6. **Accept the limitation for v1.1**: Document the cold start behavior clearly in onboarding ("First tap opens Dictus, then tap the mic again"). Focus engineering effort on preventing cold starts rather than solving the auto-return
+**Warning signs:**
+App hangs for 30+ seconds with no UI feedback after model download. Xcode memory gauge spikes to 2GB+. Device becomes hot during model preparation. Crash reports with jetsam reason code `REASON_MEMORY_PRESSURE`.
 
-**Detection:** Users complain about "needing to tap twice" or "being stuck in the Dictus app after recording."
+**Phase to address:**
+Model download UX phase and CoreML precompilation phase — these MUST be implemented together. Never ship model download without compilation progress UI.
 
-**Phase:** Research spike at the START of v1.1 (1-2 days max). Either find a working technique or accept the limitation and optimize the cold start speed instead.
+---
+
+### Pitfall 5: TestFlight Submission Fails Due to Missing Privacy Manifest or Mismatched Entitlements
+
+**What goes wrong:**
+Since May 2024, Apple requires `PrivacyInfo.xcprivacy` in ALL apps submitted to App Store Connect (including TestFlight). Keyboard extensions that use certain APIs must declare them. Dictus uses:
+- **UserDefaults** (App Group suite) — requires `NSPrivacyAccessedAPICategoryUserDefaults` with reason `CA92.1` (App Group access)
+- **File timestamp APIs** — if logging writes check file modification dates
+- **Active keyboard APIs** — if `needsInputModeSwitchKey` or related APIs are used
+- **System boot time** — if any timing code uses `ProcessInfo.processInfo.systemUptime`
+
+Missing ANY of these declarations causes App Store Connect to reject the binary with "ITMS-91053: Missing API declaration." This blocks both TestFlight internal and external distribution.
+
+Additionally, keyboard extensions require matching entitlements between the main app and extension:
+- Both must list the same App Group ID (`group.com.pivi.dictus`)
+- The extension must have `com.apple.security.application-groups` entitlement
+- The provisioning profiles for BOTH targets must include the App Group capability
+- If signing migrates to a new developer account (as planned in v1.2), ALL provisioning profiles must be regenerated with the new team ID
+
+**Why it happens:**
+Privacy manifest is a relatively new requirement. Developers who have only tested locally or on TestFlight internal (which previously did not enforce this) get blocked when submitting for external testing. Entitlement mismatches are common when changing developer accounts because the App Group ID is tied to the team ID prefix.
+
+**How to avoid:**
+1. Create `PrivacyInfo.xcprivacy` for BOTH targets (DictusApp AND DictusKeyboard) BEFORE attempting any TestFlight upload
+2. Required declarations for Dictus:
+   - `NSPrivacyAccessedAPICategoryUserDefaults` — reason `CA92.1` (app group container)
+   - `NSPrivacyAccessedAPICategoryFileTimestamp` — reason `C617.1` (if log file timestamps are used)
+   - `NSPrivacyAccessedAPICategoryDiskSpace` — only if checking available disk space for model downloads
+3. When migrating to a new developer account: the App Group ID changes from `group.com.pivi.dictus` (old team) to potentially a different prefix. This breaks ALL cross-process communication. Solution: keep the same App Group ID string but ensure both new provisioning profiles include it
+4. Test the full upload pipeline early: Archive -> Upload to App Store Connect -> Check processing status. Do this BEFORE writing any v1.2 code, with the current v1.1 codebase, to validate the signing/manifest/entitlement chain
+5. TestFlight external distribution requires App Review. Budget 1-3 days for the first review. Common rejection reasons for keyboard extensions: missing privacy policy URL, Full Access justification not in App Review notes, missing `NSMicrophoneUsageDescription` explanation
+
+**Warning signs:**
+"ITMS-91053" error during upload. "Invalid Binary" email from App Store Connect. "Profile doesn't include entitlement" error during archive export.
+
+**Phase to address:**
+TestFlight deployment phase — but validate the upload pipeline in the FIRST phase as a smoke test. Do not wait until the end to discover signing/manifest issues.
 
 ---
 
 ## Moderate Pitfalls
 
-Issues that cause significant rework or degraded UX.
+### Pitfall 6: AVAudioSession Conflicts Between App and Keyboard During Audio Bridge
+
+**What goes wrong:**
+The Audio Bridge pattern requires both the keyboard extension and DictusApp to interact with the audio system. The keyboard detects mic tap and signals the app. The app activates the audio session for recording. But:
+- If the keyboard extension has ANY active audio session (even inactive/deactivated), it can interfere with the app's session activation
+- WhisperKit internally calls `AVAudioSession.sharedInstance().setCategory(.record)` and `setActive(true)` inside `startRecordingLive()`. This overrides any configuration you set beforehand
+- The `setAllowHapticsAndSystemSoundsDuringRecording(true)` must be called AFTER `startRecordingLive()`, not before (learned in v1.0/v1.1)
+- `setActive(true)` fails when called from background with error `2003329396` (NSOSStatusErrorDomain). The app MUST be in foreground or have an already-active session
+
+On cold start, the Audio Bridge flow is: keyboard taps mic -> URL scheme opens app -> app is in foreground -> configures audio -> starts recording -> needs to background itself for auto-return. The moment the app backgrounds, if the audio session was not already active and recording, it cannot be reactivated.
+
+**Why it happens:**
+AVAudioSession is per-process but the system manages a single audio route. Two processes (keyboard + app) competing for the audio route creates conflicts that iOS resolves unpredictably.
+
+**How to avoid:**
+1. The keyboard extension should NEVER configure or activate its own AVAudioSession. Only the DictusApp process should own the audio session
+2. On cold start URL launch: `configureAudioSession()` synchronously in `application(_:open:options:)` BEFORE returning. The app is guaranteed to be in foreground at this point
+3. Keep using `collectSamples()` (not `stopRecording()`) between recordings so the audio session stays active — this was a hard-won v1.0 lesson
+4. If implementing PiP-based auto-return: the audio session must be category `.playAndRecord` (not just `.record`) for PiP to work. Ensure WhisperKit's internal session configuration is compatible
+
+**Warning signs:**
+`AUIOClient_StartIO failed` errors. Silent recordings (audio engine running but no samples captured). Haptics stop working after dictation (audio session override).
+
+**Phase to address:**
+Audio Bridge phase — audio session management must be designed alongside the auto-return mechanism, not separately.
 
 ---
 
-### Pitfall 5: UITextChecker French Suggestions Are Poor Quality
+### Pitfall 7: SwiftUI Animation @State Not Resetting in Persistent Keyboard Views
 
-**What goes wrong:** UITextChecker uses Apple's built-in dictionary infrastructure. While it supports French (`"fr"` language parameter), the quality of suggestions is significantly worse than Apple's stock keyboard prediction because:
-- UITextChecker only does spell-checking (is this word misspelled?) and basic completions (prefix matching). It does NOT do contextual prediction ("after 'je', suggest 'suis', 'vais', 'peux'")
-- Suggestions are alphabetically ordered, not frequency-ordered. For the prefix "con", it returns "conaissance" before "contacter" even though "contacter" is far more common
-- French accentuation errors are handled inconsistently: "ecole" might not suggest "ecole" (missing accent) depending on the iOS version
-- No n-gram or language model — each word is evaluated independently
+**What goes wrong:**
+The keyboard extension's root view persists for the lifetime of the extension process. Unlike normal SwiftUI views that are created and destroyed with navigation, `KeyboardRootView` stays alive across app switches, keyboard dismissals, and reappearances. This causes:
+- `@State` properties that track animation state (e.g., `isRecording`, `showTranscription`, `waveformPhase`) retain their values across keyboard invocations. If the user dismisses the keyboard while recording, `isRecording` is still `true` when the keyboard reappears
+- `withAnimation` blocks that were mid-flight when the keyboard was dismissed leave the view in an intermediate state. SwiftUI does not resume or cancel animations when the view reappears
+- `.onAppear` does NOT fire when the keyboard reappears (the view was never removed from the hierarchy). Only `viewWillAppear` on the `UIInputViewController` fires reliably
 
-Developers who prototype with UITextChecker and show it to testers get feedback like "the suggestions are useless" because users compare it to Apple's built-in keyboard which has a full neural language model.
+The v1.2 "intermittent recording/transcription animation bug" is almost certainly caused by stale `@State` in the persistent keyboard view.
 
-**Prevention:**
-1. Set expectations: UITextChecker is a v1.1 starting point, not the final solution. It is "free" in terms of memory and implementation time
-2. Supplement with a hand-curated top-1000 French words list sorted by frequency. When UITextChecker returns suggestions, re-rank them against this frequency list
-3. For accented character suggestions specifically (the v1.1 feature "accented character suggestions in suggestion bar"): build a simple rule-based system. After typing "e", show "e", "e", "e", "e" in the suggestion bar based on the preceding consonant pattern. This does not require UITextChecker at all
-4. Do NOT build a custom language model for v1.1. Defer ML-based prediction to v1.2 when it can be researched properly
-5. Label the feature as "Spelling suggestions" not "Predictive text" to set correct user expectations
+**Why it happens:**
+SwiftUI's lifecycle assumes views are ephemeral. Keyboard extensions violate this assumption. The `UIInputViewController` keeps its view hierarchy alive, so `@State`, `@StateObject`, and `@ObservedObject` all persist.
 
-**Phase:** Implement after spacebar trackpad and emoji row. Use UITextChecker as the base, add frequency re-ranking and accent rules on top.
+**How to avoid:**
+1. Use `NotificationCenter` to bridge `viewWillAppear` from the `UIInputViewController` to SwiftUI views. Post a custom notification in `viewWillAppear`, observe it in SwiftUI views, and reset animation state
+2. For recording state specifically: always re-read the ground truth from App Group UserDefaults in `viewWillAppear`, not from `@State`. If UserDefaults says `dictationStatus == .idle` but `@State isRecording == true`, force reset
+3. Never use `.onAppear` for state initialization in keyboard extension views. It fires once when the extension loads and never again
+4. For async state updates from Darwin notifications: always dispatch to `MainActor` and use `withAnimation(.none)` to reset state, then apply the intended animation. This prevents "animation from previous state" artifacts
+5. The existing `NotificationCenter.viewWillAppear` bridge pattern (used for mode refresh in v1.1) should be extended to cover ALL animation-related state
 
----
+**Warning signs:**
+Recording overlay visible when keyboard appears but no recording is active. Waveform animation frozen mid-frame. "Transcription ready" message stuck from a previous session. Animation plays in reverse direction.
 
-### Pitfall 6: Adding Non-Whisper STT Models Breaks the Two-Process Architecture
-
-**What goes wrong:** The v1.1 scope includes "Model catalog update (remove weak models, research Parakeet v3+)." Adding NVIDIA Parakeet alongside WhisperKit introduces several integration risks:
-
-- **Different APIs**: WhisperKit has a specific Swift API (`WhisperKit.transcribe()`). Parakeet models via FluidAudio/CoreML have a completely different interface. The `TranscriptionService` and `AudioRecorder` would need an abstraction layer
-- **Different model formats**: WhisperKit uses its own `.mlmodelc` packaging with specific encoder/decoder structure. Parakeet CoreML models from HuggingFace (FluidInference/parakeet-tdt-0.6b-v2-coreml) use a different architecture (TDT = Token-and-Duration Transducer, not encoder-decoder)
-- **Different audio preprocessing**: Whisper expects 16kHz 80-channel mel spectrogram. Parakeet expects 16kHz 80-channel mel spectrogram but with different normalization. Sending Whisper-preprocessed audio to Parakeet produces garbage output
-- **Memory**: Parakeet 0.6B is 600M parameters — far too large for the current architecture. Even quantized to INT4, it would be ~300MB resident
-
-**Why it happens:** "Add Parakeet" sounds simple because both are "speech-to-text CoreML models." But the preprocessing, inference pipeline, and output format are completely different. This is not a model swap — it is a second complete STT pipeline.
-
-**Prevention:**
-1. For v1.1, limit scope to **curating the WhisperKit model catalog**: remove models with poor French accuracy (tiny.en, base.en), add better French-specific Whisper variants if available on the WhisperKit model hub
-2. Do NOT add Parakeet in v1.1. It requires: a new model loader, new audio preprocessor, new output parser, abstraction layer over TranscriptionService, and memory profiling of a much larger model
-3. If Parakeet is desired for v1.2+: design the `TranscriptionService` protocol NOW (in v1.1) with `protocol STTEngine { func transcribe(audioURL: URL) async throws -> String }` so WhisperKit and future engines conform to the same interface
-4. Research Parakeet v3 CoreML availability: as of March 2026, FluidInference has published `parakeet-tdt-0.6b-v2-coreml` on HuggingFace but it requires FluidAudio SDK — check licensing and iOS compatibility
-
-**Phase:** Model catalog curation (removing weak models) is safe for v1.1. Parakeet integration is a v1.2 feature that needs its own research spike.
+**Phase to address:**
+Animation fix phase — this is the root cause of the "intermittent recording/transcription animation bug." Fix the state management pattern before fixing individual animations.
 
 ---
 
-### Pitfall 7: Design File Duplication Worsens with Every v1.1 Feature
+### Pitfall 8: Model Download UX Blocks Main Thread During Progress Updates
 
-**What goes wrong:** Six design files are currently duplicated between DictusApp and DictusKeyboard:
-- `GlassModifier.swift`
-- `DictusColors.swift`
-- `AnimatedMicButton.swift`
-- `DictusTypography.swift`
-- `ProcessingAnimation.swift`
-- `BrandWaveform.swift`
+**What goes wrong:**
+Model downloads for WhisperKit can be 50-500MB. The download progress must be shown in a modal UI during onboarding. Common implementation mistakes:
+- Updating `@Published var progress: Double` on every `URLSessionDownloadDelegate` callback. For large files, this fires hundreds of times per second, causing SwiftUI to re-render the progress view at an unsustainable rate
+- Running `FileManager.moveItem` (to move the downloaded temp file to the App Group container) on the main thread. For a 500MB file, this can take 2-5 seconds and freezes the UI
+- Not handling download interruption (user kills app mid-download). The partially downloaded file wastes disk space and the next attempt starts from zero
+- Not checking available disk space before download. A 500MB model on a 16GB device with 1GB free will fail with a cryptic `NSURLErrorDomain` error
 
-Every v1.1 feature that touches design (suggestion bar styling, emoji button, mic button redesign, waveform animation rework, recording overlay redesign) must be implemented in BOTH copies. Forgetting to sync one copy creates visual inconsistencies between the keyboard and the app.
+**Why it happens:**
+URLSession delegates fire on a background queue by default, but updating SwiftUI `@Published` properties requires MainActor. Naive bridging (`DispatchQueue.main.async { self.progress = newValue }`) floods the main thread.
 
-The v1.1 scope adds at least 3 new shared design components (suggestion bar, emoji row, new mic button shape). This will grow the duplicated file count from 6 to potentially 9.
+**How to avoid:**
+1. Throttle progress updates to 10Hz maximum: only update the published property if at least 100ms have elapsed since the last update. Use a `Date` comparison, not a timer
+2. Move file operations (`moveItem`, `removeItem`, `createDirectory`) to a background task. Show a "Preparing model..." step in the UI while this happens
+3. Implement download resumption: use `URLSession.downloadTask(withResumeData:)` to resume interrupted downloads. Store resume data in App Group UserDefaults
+4. Check disk space before download: `FileManager.default.attributesOfFileSystem(forPath:)[.systemFreeSize]`. Require 2x the model size as free space (download + extraction)
+5. Show file size in the download UI so users know what to expect: "Downloading Small French model (150 MB)"
 
-**Why it happens:** DictusKeyboard cannot import DictusApp code (they are separate targets). DictusCore is a Swift Package that cannot contain UIKit/SwiftUI views (it is a pure data/logic layer).
+**Warning signs:**
+UI jank during download (progress bar stutters). App killed by watchdog during file move. Downloads restart from zero after app switch.
 
-**Prevention:**
-1. **Before starting v1.1 features**: Create a `DictusUI` Swift Package (or framework target) that contains all shared design files. Both DictusApp and DictusKeyboard import DictusUI
-2. DictusUI should contain: colors, typography, glass modifiers, animations, shared button styles, suggestion bar view
-3. DictusUI CAN use SwiftUI — Swift Packages support platform-specific code with `#if canImport(SwiftUI)`
-4. Move existing duplicated files into DictusUI first, verify both targets still build, THEN start implementing v1.1 features
-5. If creating a new target feels too heavy: at minimum, move shared design into DictusCore with `#if canImport(SwiftUI)` guards. DictusCore already compiles into both targets
-
-**Detection:** Visual differences between app and keyboard (different button radius, wrong color, missing animation). Bug reports like "the mic button looks different in the app vs the keyboard."
-
-**Phase:** Must be done BEFORE any v1.1 design work. It is infrastructure that prevents compounding tech debt.
+**Phase to address:**
+Model download UX phase — design the download flow with all error states before coding.
 
 ---
 
-### Pitfall 8: adjustTextPosition(byCharacterOffset:) Behaves Inconsistently Across Apps
+### Pitfall 9: ANE Resource Contention During CoreML Pre-compilation Breaks Other Apps
 
-**What goes wrong:** The spacebar trackpad uses `textDocumentProxy.adjustTextPosition(byCharacterOffset:)` to move the cursor. This API works reliably in UITextField and UITextView but has inconsistent behavior in:
-- **WKWebView** text fields (Safari, web-based apps): cursor may not move, or moves by wrong amount
-- **Messages app**: works for single-line messages, behaves erratically in multi-line
-- **Some third-party apps** (Slack, Discord): may not respond to cursor adjustment at all
-- **Emoji characters**: adjusting by 1 character offset may skip emoji that use multiple Unicode code points (emoji with skin tones, flags, ZWJ sequences are 2-7 code points)
+**What goes wrong:**
+When `ANECompilerService` compiles a model for the Neural Engine, it monopolizes the ANE. During this time:
+- The camera app's ML features (face detection, scene classification) become slow or unavailable
+- Siri's on-device speech recognition degrades
+- Other apps using CoreML experience increased latency
+- The system may throttle or kill the compilation if the device overheats
 
-**Prevention:**
-1. Map drag distance to character offset conservatively: ~15pt per character (not 10pt). Overshooting is worse than undershooting for UX
-2. Add a small delay (50ms) between consecutive `adjustTextPosition` calls — calling it too rapidly causes iOS to batch/drop adjustments
-3. Test in: Messages, Notes, Safari, WhatsApp, Slack, Gmail. Each has different UITextInput behavior
-4. For emoji-aware movement: read `documentContextBeforeInput` after each adjustment to detect if the cursor actually moved. If it didn't, increase the offset
-5. Provide haptic feedback (light impact) per successful cursor step so the user knows the cursor is moving even if they can't see it clearly
+If the user switches to the camera during model compilation, the camera may fail to detect faces or apply portrait mode. The user blames their phone, not Dictus.
 
-**Phase:** Implement during spacebar trackpad feature. Test across at least 5 different host apps before marking complete.
+**Why it happens:**
+The ANE is a shared resource with no public priority or scheduling API. `ANECompilerService` runs at default priority and does not yield to other processes.
+
+**How to avoid:**
+1. Only trigger CoreML compilation when the user explicitly initiates it (model download or onboarding). Never compile in the background opportunistically
+2. Show a clear modal that says "Preparing model... Other apps may be slower during this process. Please keep Dictus open." This sets expectations
+3. Pause compilation if the app backgrounds: check `UIApplication.shared.applicationState` and defer if not `.active`. Resume when the app returns to foreground
+4. Set `MLModelConfiguration.computeUnits = .cpuAndGPU` for compilation of the large model to avoid ANE entirely. The trade-off: inference will be slower without ANE, but compilation succeeds on all devices. Then offer an "Optimize for speed" option that triggers ANE compilation separately
+5. On 4GB RAM devices (iPhone 12, 13 mini): skip ANE compilation for Large Turbo v3 entirely. Use CPU+GPU inference. The model works, just ~2x slower
+
+**Warning signs:**
+Device becomes very warm during onboarding. Other apps visibly lag. Compilation takes >2 minutes with no progress feedback.
+
+**Phase to address:**
+CoreML precompilation phase — must be designed with ANE awareness. Cannot be a simple "call prewarmModels() in the background."
 
 ---
 
 ## Minor Pitfalls
 
-Issues that cause friction or polish problems.
+### Pitfall 10: ISO8601DateFormatter Allocation in Every Log Call
+
+**What goes wrong:**
+The current `PersistentLog.log()` creates a new `ISO8601DateFormatter()` on every call. `DateFormatter` allocation is expensive (~0.5ms per instance). At high logging frequency (10-50 calls per dictation session), this adds measurable overhead. In the keyboard extension where every millisecond of latency matters for key press responsiveness, this adds up.
+
+**How to avoid:**
+Use a static `ISO8601DateFormatter` instance. `DateFormatter` is thread-safe for formatting (reading) since iOS 7. Store as `private static let formatter = ISO8601DateFormatter()`.
+
+**Phase to address:** Logging phase — trivial fix during logging system rewrite.
 
 ---
 
-### Pitfall 9: Suggestion Bar Steals Vertical Space from Keys
+### Pitfall 11: beginBackgroundTask Not Ended Causes Watchdog Kill
 
-**What goes wrong:** Adding a suggestion/prediction bar above the keyboard rows reduces the available height for keys. The current keyboard height is precisely calculated in `computeKeyboardHeight()` (4 rows * 46pt + spacing + toolbar + banner). Adding a suggestion bar (~36-44pt) without adjusting the total height compresses the key rows, making them harder to tap accurately. Alternatively, increasing total height makes the keyboard feel oversized and leaves less screen space for the host app content.
+**What goes wrong:**
+If `beginBackgroundTask(withName:expirationHandler:)` is called to protect CoreML compilation or recording, but `endBackgroundTask()` is never called (e.g., the completion path throws an error and skips the cleanup), iOS kills the app after the expiration handler fires. The expiration handler itself must complete in <1 second or the app is killed immediately.
 
-**Prevention:**
-1. The suggestion bar should be integrated INTO the existing toolbar area (44pt), not added as a separate row. When prediction is active, the toolbar switches from showing globe/mic/layout buttons to showing 3 suggestion pills
-2. Alternatively, add the suggestion bar and reduce key height from 46pt to 42pt (still within Apple's recommended minimum of 40pt). Update `KeyMetrics.keyHeight` and `computeKeyboardHeight()` together
-3. Update `heightConstraint?.constant` in `viewWillAppear` to include the new height
-4. Test on iPhone 12 mini (smallest screen) — the keyboard must not consume more than ~40% of screen height
+**How to avoid:**
+Always use a `defer` block: `let taskID = UIApplication.shared.beginBackgroundTask { ... }; defer { UIApplication.shared.endBackgroundTask(taskID) }`. Never rely on normal control flow to call `endBackgroundTask`.
 
-**Phase:** Design decision needed before implementing text prediction UI.
+**Phase to address:** Audio Bridge phase — any background execution must use this pattern.
 
 ---
 
-### Pitfall 10: Haptic Feedback on Every Key Press Drains Battery
+### Pitfall 12: App Group ID Change During Developer Account Migration
 
-**What goes wrong:** The v1.1 scope includes "Haptic feedback on all keyboard keys." The Taptic Engine consumes measurable power per actuation. At 60 WPM (average typing speed), that is ~300 key presses per minute, each triggering `UIImpactFeedbackGenerator`. On devices with smaller batteries (iPhone 12 mini, iPhone SE), this can noticeably impact battery life during extended typing sessions.
+**What goes wrong:**
+v1.2 includes "Migrate Xcode signing to professional developer account." The App Group ID (`group.com.pivi.dictus`) is embedded in both targets' entitlements. If the new developer account's provisioning profiles do not include this exact App Group ID, ALL cross-process communication breaks: Darwin notifications still work (they are system-level), but UserDefaults suite access and shared file container access fail silently. The keyboard extension can no longer read dictation status, transcription results, or model preferences.
 
-Additionally, preparing the haptic engine (`prepare()`) before each tap adds ~2ms of latency. If `prepare()` is not called, the first tap of a burst has a noticeable delay (~50ms).
+**How to avoid:**
+1. Register the SAME App Group ID (`group.com.pivi.dictus`) in the NEW developer account's portal before generating provisioning profiles
+2. Test cross-process UserDefaults read/write on a real device with the new profiles BEFORE merging any v1.2 code
+3. If the App Group ID must change: implement a migration that copies all data from the old container to the new one on first launch
 
-**Prevention:**
-1. Use `UIImpactFeedbackGenerator(style: .light)` for key taps — lightest haptic, lowest power
-2. Keep one `UIImpactFeedbackGenerator` instance alive and call `prepare()` once when the keyboard appears, not per-tap
-3. Make haptics a user-toggleable setting (already exists in v1.0 Settings) — default ON but clearly visible
-4. Consider haptics only on special keys (space, return, delete, shift) not every letter — this is what many third-party keyboards do
-5. Test battery impact: use Xcode Energy Diagnostics over a 10-minute typing session and compare with/without haptics
+**Warning signs:**
+Keyboard shows "No model selected" after account migration. Dictation status stuck on "idle" even while app is recording. Transcription never reaches the keyboard.
 
-**Phase:** Implement alongside the spacebar trackpad (which already needs haptics for cursor steps).
-
----
-
-### Pitfall 11: Removing Apple Dictation Mic May Confuse Users
-
-**What goes wrong:** The v1.1 scope includes "Remove Apple dictation mic from keyboard." The globe key and Apple dictation mic are system elements that users expect. Removing the dictation mic (if it is a system-provided button) is not directly controllable by the custom keyboard — iOS may still show it in the bottom bar. If Dictus replaces it with its own mic button, users who expect Apple's dictation to work will be confused when it doesn't.
-
-**Prevention:**
-1. The Apple dictation mic in the keyboard toolbar is a system element. Custom keyboards can choose NOT to show it by not including `needsInputModeSwitchKey`-related system elements, but iOS may still show its own toolbar below the custom keyboard
-2. Focus on making Dictus's mic button prominent and clearly different from Apple's (the pill shape redesign helps)
-3. Do not claim to "replace" Apple dictation — position Dictus as an alternative
-4. Test: does removing/hiding the system dictation button trigger any App Review concern? Apple allows custom keyboards to have their own mic buttons as long as Full Access is properly handled
-
-**Phase:** UI redesign phase. Test on device to understand what the custom keyboard actually controls vs what iOS shows.
+**Phase to address:** TestFlight deployment phase — test this FIRST after account migration, before any other work.
 
 ---
 
-## App Review Pitfalls (Keyboard-Specific for v1.1)
+## Technical Debt Patterns
 
----
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Logging user text for debugging | Faster bug diagnosis for transcription issues | GDPR violation, App Store rejection, user trust damage | Never in production. Use redacted hashes only |
+| Skipping file locking on logs | Simpler implementation, works in single-process testing | Log corruption in production when both processes write | Never — use per-process log files from day one |
+| Hardcoding background task timeout (30s) | Quick implementation | iOS changes the timeout between versions. App killed without warning | Never — always use `UIApplication.shared.backgroundTimeRemaining` |
+| Skipping Privacy Manifest | Saves 30 minutes of configuration | Blocks ALL TestFlight and App Store submissions | Never — required since May 2024 |
+| Using `.cpuAndNeuralEngine` for all models | Best inference performance | Compilation fails on 4GB devices for large models | Only for small/base models. Gate large models behind RAM check |
 
-### Pitfall 12: Full Emoji Picker May Require Justifying Full Access Scope
+## Integration Gotchas
 
-**Risk:** If the emoji picker sends any data through the App Group (e.g., syncing recent emoji between app and extension), App Review may question whether this data sharing is necessary. Keyboard extensions that share more data than strictly needed through App Groups face scrutiny under Guideline 5.1.1.
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| WhisperKit `prewarmModels()` | Calling on MainActor, blocking UI for 30-120s | Call from `Task.detached(priority: .utility)`. Show progress modal. Handle failure with model deletion + re-download |
+| App Group UserDefaults from extension | Calling `.synchronize()` and assuming cross-process consistency | `.synchronize()` is deprecated and unreliable cross-process. Read on demand, never cache. Use Darwin notifications to signal "data ready" |
+| TestFlight upload with keyboard extension | Uploading without testing entitlements match between app and extension | Archive, export, and inspect the `.ipa` entitlements with `codesign -d --entitlements -` before uploading |
+| CoreML model compilation | Assuming compilation is fast because model download was fast | Compilation takes 10-120x longer than download. Show a separate "Preparing" step with its own progress indicator |
+| AVAudioSession from background | Calling `setActive(true)` from background state | Only activate from foreground. Use `didBecomeActive` (not `willEnterForeground`) as the trigger |
+| Developer account migration | Assuming App Group survives team ID change | Register same App Group ID in new account. Test UserDefaults cross-process access on device before shipping |
 
-**Prevention:** Only share the `recentEmoji: [String]` array via App Group UserDefaults. Do not share emoji usage analytics, frequency data, or typing patterns. Document this in App Review notes.
+## Performance Traps
 
----
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Progress updates flooding MainActor during download | UI stutters, dropped frames, watchdog kill | Throttle to 10Hz with Date comparison | Downloads > 100MB |
+| DateFormatter allocation per log line | Keystroke latency increases | Static formatter instance | > 20 log calls per second |
+| CoreML compilation on main thread | App appears frozen, force-quit by user | `Task.detached(priority: .utility)` | Any model larger than "base" |
+| Unthrottled Darwin notification posting | System drops notifications, IPC becomes unreliable | Minimum 50ms between posts | > 20 notifications per second |
+| PersistentLog trimIfNeeded on every write | File I/O blocks logging queue, log entries delayed | Trim only when line count exceeds 2x max (trim from 400 to 200, not from 201 to 200) | > 50 log entries per session |
 
-### Pitfall 13: Text Prediction Must Not Log Keystrokes
+## Security Mistakes
 
-**Risk:** Implementing text prediction requires reading `documentContextBeforeInput` on every keystroke to generate relevant suggestions. If ANY of this text is logged (even in debug builds), persisted to disk, or sent over the network, Apple will reject under Guideline 5.1.1 (Data Collection). Even storing word frequency data locally could be flagged if the privacy policy does not disclose it.
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Logging transcription text to PersistentLog | User speech stored in cleartext in App Group container. Accessible by any debugger or file browser | Never log user content. Log event names and durations only. Use OSLog `.private` for development |
+| Storing audio buffer in App Group for cross-process transfer | Raw audio of user speech persisted on disk | Transfer audio via shared memory or immediately delete after transcription. Never persist audio files |
+| Logging model download URLs with auth tokens | API keys exposed in log files | Strip query parameters from URLs before logging |
+| Privacy manifest omitting UserDefaults declaration | App Store Connect rejects binary | Declare all required-reason APIs in PrivacyInfo.xcprivacy for both targets |
 
-**Prevention:**
-1. Text prediction must be purely in-memory. No keystroke logging, no word frequency persistence, no disk writes of user input
-2. If word frequency data is desired (to improve predictions), store it as anonymized frequency counts in App Group, never raw text. Disclose this in the privacy policy
-3. In App Review notes, explicitly state: "The keyboard does not log, store, or transmit any keystrokes. Text prediction operates entirely in-memory using the iOS built-in UITextChecker API."
-4. Remove ALL `print()` and `DictusLogger` calls that output `documentContextBeforeInput` content before submitting to App Review
+## UX Pitfalls
 
-**Phase:** Pre-submission checklist item. Audit all logging before every App Store submission.
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| CoreML compilation with no progress indicator | User thinks app froze, force-quits, model is corrupted | Non-dismissable modal with progress bar and time estimate |
+| Model download fails silently on low disk space | User waits, nothing happens, no error message | Check disk space before download, show clear error: "Need 300MB free space" |
+| Auto-return fails, user stranded in DictusApp | User confused about how to get back to keyboard, abandons flow | Show prominent "Tap < Back to return to your keyboard" instruction with arrow pointing to status bar |
+| Recording animation stuck from previous session | User sees recording indicator but nothing is recording, loses trust | Reset all animation state in `viewWillAppear`, re-read ground truth from UserDefaults |
+| Large model offered on 4GB device, compilation fails | User downloads 500MB model, waits 2 minutes, gets error, wasted data | Filter model list by device RAM. Show "Recommended" tag on models that work well on their device |
 
----
+## "Looks Done But Isn't" Checklist
 
-### Pitfall 14: Keyboard Must Still Function Without Full Access for v1.1 Features
+- [ ] **Logging system:** Concurrent writes from two processes tested — verify with simultaneous logging from keyboard and app on a real device
+- [ ] **Logging privacy:** No user text in log files — grep for `lastTranscription`, `result`, `documentContext` in all log calls
+- [ ] **Privacy Manifest:** PrivacyInfo.xcprivacy exists in BOTH DictusApp AND DictusKeyboard targets — verify both are embedded in the archive
+- [ ] **TestFlight upload:** Entitlements match between app and extension — run `codesign -d --entitlements -` on both binaries in the exported .ipa
+- [ ] **CoreML compilation:** Tested on a 4GB RAM device (iPhone 12/13 mini) — verify large model compilation does not crash
+- [ ] **Model download:** Tested with network interruption mid-download — verify resume works or clean restart happens (no corrupted partial files)
+- [ ] **Audio Bridge:** Tested cold start flow on a device where app was force-quit — verify recording starts successfully within 3 seconds
+- [ ] **Animation state:** Tested keyboard dismiss during active recording, then keyboard reappear — verify no stale animation state
+- [ ] **Developer account migration:** Cross-process UserDefaults read/write tested on device with new provisioning profiles
+- [ ] **Background task:** Every `beginBackgroundTask` has a matching `endBackgroundTask` in ALL code paths including error paths
 
-**Risk:** With v1.1 adding text prediction, emoji, and trackpad — all of these features must work without Full Access. Only dictation requires Full Access. If the keyboard becomes non-functional or severely degraded without Full Access (e.g., no prediction, no emoji, no trackpad), Apple may reject under Guideline 4.5.1.
+## Recovery Strategies
 
-**Prevention:**
-1. Text prediction via UITextChecker works WITHOUT Full Access (it is a local API)
-2. Emoji row works WITHOUT Full Access (emoji are Unicode characters, inserted via `insertText`)
-3. Spacebar trackpad works WITHOUT Full Access (`adjustTextPosition` is a local API)
-4. Only dictation (mic button) requires Full Access — this is already correctly gated in v1.0
-5. Test all v1.1 features with Full Access DISABLED before submission
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| Log file corruption from concurrent writes | LOW | Delete log file, implement per-process files, re-deploy |
+| User text logged to file in production | HIGH | Issue privacy notice to affected users, delete log files via app update, update privacy policy |
+| App Store rejection for private API | MEDIUM | Remove offending code, re-archive, re-submit. 1-3 day turnaround |
+| CoreML compilation fails on user device | MEDIUM | Add fallback to CPU+GPU compute units. Offer smaller model. Delete corrupted .mlmodelc |
+| Entitlement mismatch after account migration | MEDIUM | Re-generate provisioning profiles with correct App Group, re-archive, re-upload |
+| Privacy Manifest missing | LOW | Add PrivacyInfo.xcprivacy, re-archive, re-upload. 30-minute fix |
+| Stale animation state | LOW | Implement viewWillAppear bridge, reset all @State on keyboard appearance |
 
----
+## Pitfall-to-Phase Mapping
 
-## Phase-Specific Warnings
-
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Design file consolidation | Breaking existing keyboard/app builds when moving files to shared package | Move one file at a time, build both targets after each move |
-| Spacebar trackpad | Gesture conflicts with accent long-press on letter keys | Implement trackpad as keyboard-level state that disables per-key gestures |
-| Text prediction | Memory budget exceeded with dictionary data | Start with zero-memory UITextChecker, add frequency list only if needed |
-| Emoji button | Emoji glyph cache never released, cumulative memory growth | Limit to recent-emoji row (8-12), never show full picker in extension |
-| Cold start auto-return | No public API exists, competitors use undocumented techniques | Research spike first (1-2 days), then decide: solve or optimize cold start speed |
-| Model catalog update | Accidentally adding Parakeet scope bloats v1.1 | Limit to curating WhisperKit models; design STT protocol for future engines |
-| Mic button redesign | Pill shape increases touch target overlap with adjacent keys | Ensure mic button touch area does not overlap with space or return key |
-| Waveform animation rework | Animation frame rate causes memory/CPU pressure in extension | Use `CADisplayLink` or SwiftUI `TimelineView` with 30fps cap, not 60fps |
-| Haptics on all keys | Battery drain at high typing speed, latency on first tap | Single prepared `UIImpactFeedbackGenerator`, `.light` style |
-| Suggestion bar height | Keyboard becomes too tall, steals screen space from host app | Integrate into existing toolbar row, or reduce key height by 4pt |
-| App Review submission | Keystroke logging in debug code left in release build | Pre-submission audit: search for `documentContextBeforeInput` in log statements |
-
----
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Log concurrent write corruption | Logging (Phase 1) | Simultaneous log writes from both processes produce valid interleaved output |
+| Log privacy violation | Logging (Phase 1) | `grep` audit finds zero user-content strings in log calls |
+| Private API rejection | Audio Bridge (Phase 2) | TestFlight external review passes without API rejection |
+| CoreML compilation crash | CoreML + Model UX (Phase 3) | Large Turbo v3 compiles successfully on iPhone 12 (4GB) or gracefully falls back |
+| Privacy Manifest missing | TestFlight (Phase 4) | App Store Connect accepts the binary without ITMS-91053 errors |
+| AVAudioSession conflicts | Audio Bridge (Phase 2) | Cold start recording works within 3 seconds on force-quit device |
+| Stale animation @State | Animation fix (Phase 1-2) | Keyboard dismiss during recording, re-appear shows clean idle state |
+| Model download UX | Model UX (Phase 3) | Download interrupted and resumed successfully. Progress UI smooth at 60fps |
+| ANE contention | CoreML (Phase 3) | Camera app works normally during model compilation on test device |
+| Entitlement mismatch | TestFlight (Phase 4) | Cross-process UserDefaults work on device with new developer account profiles |
+| Background task not ended | Audio Bridge (Phase 2) | No watchdog kills in 24-hour soak test with repeated dictation cycles |
+| App Group ID migration | TestFlight (Phase 4) | Keyboard reads model preference set by app after account migration |
 
 ## Sources
 
-- [Apple App Extension Programming Guide: Custom Keyboard](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html) — HIGH confidence
-- [UITextChecker Apple Documentation](https://developer.apple.com/documentation/uikit/uitextchecker) — HIGH confidence
-- [adjustTextPosition(byCharacterOffset:) Apple Documentation](https://developer.apple.com/documentation/uikit/uitextdocumentproxy/1618194-adjusttextposition) — HIGH confidence
-- [Swift Forums: How do voice dictation keyboard apps return users to previous app?](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988) — MEDIUM confidence
-- [High memory usage of Emojis on iOS](https://vinceyuan.github.io/high-memory-usage-of-emojis-on-ios/) — MEDIUM confidence
-- [React Native iOS Custom Keyboard memory crashes (GitHub #31910)](https://github.com/facebook/react-native/issues/31910) — MEDIUM confidence
-- [Apple Developer Forums: Keyboard Extension Memory Issue](https://developer.apple.com/forums/thread/85478) — MEDIUM confidence
-- [FluidInference/parakeet-tdt-0.6b-v2-coreml on HuggingFace](https://huggingface.co/FluidInference/parakeet-tdt-0.6b-v2-coreml) — MEDIUM confidence
-- [iOS UITextChecker Autocorrect GitHub implementation](https://github.com/ansonl/ios-uitextchecker-autocorrect) — LOW confidence
-- [Wispr Flow Setup Documentation](https://docs.wisprflow.ai/articles/7453988911-set-up-the-flow-keyboard-on-iphone) — MEDIUM confidence
-- [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) — HIGH confidence
-- [Limitations of custom iOS keyboards (Medium)](https://medium.com/@inFullMobile/limitations-of-custom-ios-keyboards-3be88dfb694) — LOW confidence
+- [Apple: Privacy manifest files](https://developer.apple.com/documentation/bundleresources/privacy-manifest-files) — HIGH confidence
+- [Apple: Adding a privacy manifest to your app or third-party SDK](https://developer.apple.com/documentation/bundleresources/adding-a-privacy-manifest-to-your-app-or-third-party-sdk) — HIGH confidence
+- [Apple: OSLogPrivacy](https://developer.apple.com/documentation/os/oslogprivacy) — HIGH confidence
+- [Apple: Extending your app's background execution time](https://developer.apple.com/documentation/uikit/extending-your-app-s-background-execution-time) — HIGH confidence
+- [Apple: App Extension Programming Guide: Custom Keyboard](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html) — HIGH confidence
+- [Apple: App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) — HIGH confidence
+- [WhisperKit issue #171: Error calling prewarmModels()](https://github.com/argmaxinc/WhisperKit/issues/171) — HIGH confidence
+- [WhisperKit issue #268: Unable to load model (very slow)](https://github.com/argmaxinc/WhisperKit/issues/268) — MEDIUM confidence
+- [Apple ml-stable-diffusion issue #255: ANECompiler FAILED](https://github.com/apple/ml-stable-diffusion/issues/255) — MEDIUM confidence
+- [Apple ml-stable-diffusion issue #291: Memory issues on 4GB devices](https://github.com/apple/ml-stable-diffusion/issues/291) — MEDIUM confidence
+- [Apple Developer Forums: UIApplication Background Task Notes](https://developer.apple.com/forums/thread/85066) — HIGH confidence
+- [Apple Developer Forums: NSUserDefaults for App Group suite](https://developer.apple.com/forums/thread/728434) — MEDIUM confidence
+- [fatbobman: Common Pitfalls Caused by Delayed State Updates in SwiftUI](https://fatbobman.com/en/posts/serious-issues-caused-by-delayed-state-updates-in-swiftui/) — MEDIUM confidence
+- [SwiftUI Lab: Safely Updating The View State](https://swiftui-lab.com/state-changes/) — MEDIUM confidence
+- [CocoaLumberjack issue #439: Retrieving log files from extensions](https://github.com/CocoaLumberjack/CocoaLumberjack/issues/439) — LOW confidence
+- [Dictus project: background-recording-session.md](/.planning/debug/background-recording-session.md) — HIGH confidence (project history)
+- [Dictus project: cross-process-transcription-not-received.md](/.planning/debug/cross-process-transcription-not-received.md) — HIGH confidence (project history)
+
+---
+*Pitfalls research for: Dictus v1.2 Beta Ready*
+*Researched: 2026-03-11*
