@@ -75,10 +75,11 @@ Plans:
   1. Recording overlay appears every time user taps mic and dictation starts -- zero intermittent disappearances across 20 consecutive tests
   2. Rapid mic tap sequences (start/stop/start within 1 second) never leave the overlay or waveform in a stale state
   3. Waveform animation stops cleanly when transcription completes and mic button returns to ready state
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md — Overlay visibility fix, .requested state, animation race fixes, diagnostic log events
+- [ ] 12-02-PLAN.md — Watchdog recovery mechanisms (keyboard + app), reset-on-appear, device verification
 
 ### Phase 13: Cold Start Audio Bridge
 **Goal**: Users experience seamless dictation even when the app was killed by iOS, with minimal manual intervention to return to the keyboard
@@ -166,7 +167,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 16
 | 9. Keyboard Modes | v1.1 | 6/6 | Complete | 2026-03-10 |
 | 10. Model Catalog | v1.1 | 4/4 | Complete | 2026-03-11 |
 | 11. Logging Foundation | 2/2 | Complete    | 2026-03-11 | - |
-| 12. Animation State Fixes | v1.2 | 0/1 | Not started | - |
+| 12. Animation State Fixes | v1.2 | 0/2 | Not started | - |
 | 13. Cold Start Audio Bridge | v1.2 | 0/3 | Not started | - |
 | 14. Model Pipeline | v1.2 | 0/3 | Not started | - |
 | 15. Design Polish | v1.2 | 0/2 | Not started | - |
