@@ -33,7 +33,7 @@ Full details: `.planning/milestones/v1.0-ROADMAP.md`
 - [x] **Phase 7: Keyboard Parity & Visual** - Spacebar trackpad, adaptive accent key, haptics, bottom row cleanup, mic/recording pill redesign, waveform rework, performance optimization (completed 2026-03-08)
 - [x] **Phase 8: Text Prediction** - 3-slot suggestion bar with French autocorrect and accent suggestions (completed 2026-03-09)
 - [ ] **Phase 9: Keyboard Modes** - Three switchable keyboard layouts (full, mic-only, emoji+mic) with live preview in settings (UAT gap closure in progress)
-- [x] **Phase 10: Model Catalog** - Clean underperforming models, integrate Parakeet v3, update model selection UI (completed 2026-03-10)
+- [ ] **Phase 10: Model Catalog** - Clean underperforming models, integrate Parakeet v3, update model selection UI (UAT gap closure in progress)
 
 ## Phase Details
 
@@ -123,12 +123,13 @@ Plans:
   1. Underperforming models (confirmed unhelpful tiny/base variants) are removed from the catalog — users only see models worth downloading
   2. Parakeet v3 is available as an alternative STT engine via the SpeechModel protocol abstraction
   3. Model selection UI clearly displays both engines (WhisperKit and Parakeet) with relevant metadata (size, accuracy, speed)
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Catalog cleanup, ModelInfo extension (engine/gauges/visibility), SmartModelRouter removal
-- [ ] 10-02-PLAN.md — Model selection UI redesign with gauge bars, sections, engine badges
-- [ ] 10-03-PLAN.md — Parakeet v3 integration via FluidAudio SDK (go/no-go checkpoint)
+- [x] 10-01-PLAN.md — Catalog cleanup, ModelInfo extension (engine/gauges/visibility), SmartModelRouter removal
+- [x] 10-02-PLAN.md — Model selection UI redesign with gauge bars, sections, engine badges
+- [x] 10-03-PLAN.md — Parakeet v3 integration via FluidAudio SDK (go/no-go checkpoint)
+- [ ] 10-04-PLAN.md — Fix turbo identifier, remove English-only distil model, persist language default (gap closure)
 
 ## Progress
 
@@ -147,7 +148,7 @@ Note: Phase 9 (Cold Start) is independent of Phases 7-8 and could execute in par
 | 7. Keyboard Parity & Visual | 12/12 | Complete   | 2026-03-08 | - |
 | 8. Text Prediction | 2/2 | Complete   | 2026-03-09 | - |
 | 9. Keyboard Modes | 5/6 | In Progress|  | - |
-| 10. Model Catalog | 3/3 | Complete    | 2026-03-10 | - |
+| 10. Model Catalog | 3/4 | Gap closure | - | - |
 
 ---
 *Roadmap created: 2026-03-04*
