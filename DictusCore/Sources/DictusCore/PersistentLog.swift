@@ -1,7 +1,11 @@
 // DictusCore/Sources/DictusCore/PersistentLog.swift
-// File-based logging that persists in the App Group container.
+// File-based structured logging that persists in the App Group container.
 // Readable even when the Xcode debugger disconnects (Signal 9).
 import Foundation
+import os.log
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Persistent file-based logger for debugging without Xcode console.
 ///
@@ -14,60 +18,208 @@ import Foundation
 /// WHY App Group container (not Documents):
 /// The log file needs to be accessible from both the main app and the keyboard
 /// extension for cross-process debugging.
+///
+/// WHY NSFileCoordinator:
+/// Both DictusApp and DictusKeyboard write to the same log file. Without
+/// coordination, concurrent writes corrupt the file. NSFileCoordinator
+/// serializes cross-process access via the App Group.
 public enum PersistentLog {
-    private static let maxLines = 200
+
+    // MARK: - Constants
+
+    static let maxLines = 500
     private static let fileName = "dictus_debug.log"
+
+    /// Serial queue for ordering writes within a single process.
+    /// Cross-process safety is handled by NSFileCoordinator.
+    private static let writeQueue = DispatchQueue(label: "com.pivi.dictus.persistentlog", qos: .utility)
 
     private static var fileURL: URL? {
         AppGroup.containerURL?.appendingPathComponent(fileName)
     }
 
-    /// Append a timestamped log entry to the persistent log file.
-    /// Thread-safe via a serial queue.
+    // MARK: - Public API (Structured)
+
+    /// Log a structured event to the persistent file.
+    /// This is the primary public API — callers pass typed LogEvent cases.
+    public static func log(_ event: LogEvent) {
+        let line = event.formatted() + "\n"
+
+        // Forward to os.log for Xcode console visibility
+        forwardToOSLog(event)
+
+        guard let url = fileURL else { return }
+
+        writeQueue.async {
+            coordinatedAppend(line, to: url)
+            coordinatedTrim(url: url)
+        }
+    }
+
+    /// Read the full log contents.
+    public static func read() -> String {
+        guard let url = fileURL else { return "(no logs)" }
+        return coordinatedRead(from: url)
+    }
+
+    /// Clear all logs.
+    public static func clear() {
+        guard let url = fileURL else { return }
+        coordinatedWrite("", to: url)
+    }
+
+    /// Export log with device header for sharing.
+    /// Returns header + full log content.
+    #if canImport(UIKit)
+    public static func exportContent() -> String {
+        let iosVersion = UIDevice.current.systemVersion
+        let deviceModel = UIDevice.current.model
+        let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        let activeModel = AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? "none"
+
+        let header = buildExportHeader(
+            iosVersion: iosVersion,
+            appVersion: appVersion,
+            buildNumber: buildNumber,
+            deviceModel: deviceModel,
+            activeModel: activeModel
+        )
+        return header + read()
+    }
+    #endif
+
+    /// Testable header builder — accepts injected values so tests don't need UIDevice.
+    static func buildExportHeader(
+        iosVersion: String,
+        appVersion: String,
+        buildNumber: String,
+        deviceModel: String,
+        activeModel: String
+    ) -> String {
+        "Dictus Debug Log\niOS \(iosVersion) | App \(appVersion) (\(buildNumber)) | \(deviceModel) | Model: \(activeModel)\n---\n"
+    }
+
+    // MARK: - Legacy API (Deprecated)
+
+    /// Legacy free-text log method. Use `log(_ event: LogEvent)` instead.
+    @available(*, deprecated, message: "Use log(_ event: LogEvent) instead")
     public static func log(_ message: String, function: String = #function) {
         let timestamp = ISO8601DateFormatter().string(from: Date())
         let entry = "[\(timestamp)] \(function): \(message)\n"
 
-        // Also forward to os.log for when the debugger IS attached
         if #available(iOS 14.0, *) {
             DictusLogger.app.info("\(message)")
         }
 
         guard let url = fileURL else { return }
 
-        DispatchQueue.global(qos: .utility).async {
-            if !FileManager.default.fileExists(atPath: url.path) {
-                FileManager.default.createFile(atPath: url.path, contents: nil)
-            }
+        writeQueue.async {
+            coordinatedAppend(entry, to: url)
+            coordinatedTrim(url: url)
+        }
+    }
 
-            guard let handle = try? FileHandle(forWritingTo: url) else { return }
+    // MARK: - NSFileCoordinator Helpers
+
+    private static func coordinatedAppend(_ text: String, to url: URL) {
+        let coordinator = NSFileCoordinator()
+        var error: NSError?
+
+        coordinator.coordinate(writingItemAt: url, options: .forMerging, error: &error) { coordURL in
+            if !FileManager.default.fileExists(atPath: coordURL.path) {
+                FileManager.default.createFile(atPath: coordURL.path, contents: nil)
+            }
+            guard let handle = try? FileHandle(forWritingTo: coordURL) else { return }
             handle.seekToEndOfFile()
-            if let data = entry.data(using: .utf8) {
+            if let data = text.data(using: .utf8) {
                 handle.write(data)
             }
             handle.closeFile()
-
-            // Trim to maxLines to prevent unbounded growth
-            trimIfNeeded(url: url)
         }
     }
 
-    /// Read the full log contents.
-    public static func read() -> String {
-        guard let url = fileURL,
-              let content = try? String(contentsOf: url, encoding: .utf8) else {
-            return "(no logs)"
+    private static func coordinatedRead(from url: URL) -> String {
+        let coordinator = NSFileCoordinator()
+        var error: NSError?
+        var result = "(no logs)"
+
+        coordinator.coordinate(readingItemAt: url, options: [], error: &error) { coordURL in
+            if let content = try? String(contentsOf: coordURL, encoding: .utf8) {
+                result = content
+            }
         }
-        return content
+        return result
     }
 
-    /// Clear all logs.
-    public static func clear() {
-        guard let url = fileURL else { return }
-        try? "".write(to: url, atomically: true, encoding: .utf8)
+    private static func coordinatedWrite(_ text: String, to url: URL) {
+        let coordinator = NSFileCoordinator()
+        var error: NSError?
+
+        coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { coordURL in
+            try? text.write(to: coordURL, atomically: true, encoding: .utf8)
+        }
     }
 
-    private static func trimIfNeeded(url: URL) {
+    private static func coordinatedTrim(url: URL) {
+        let coordinator = NSFileCoordinator()
+        var error: NSError?
+
+        coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { coordURL in
+            guard let content = try? String(contentsOf: coordURL, encoding: .utf8) else { return }
+            var lines = content.components(separatedBy: "\n")
+            if lines.count > maxLines {
+                lines = Array(lines.suffix(maxLines))
+                let trimmed = lines.joined(separator: "\n")
+                try? trimmed.write(to: coordURL, atomically: true, encoding: .utf8)
+            }
+        }
+    }
+
+    // MARK: - os.log Forwarding
+
+    private static func forwardToOSLog(_ event: LogEvent) {
+        guard #available(iOS 14.0, *) else { return }
+
+        let logger: Logger
+        switch event.subsystem {
+        case .dictation, .audio, .transcription, .model, .lifecycle:
+            logger = DictusLogger.app
+        case .keyboard:
+            logger = DictusLogger.keyboard
+        }
+
+        let msg = "\(event.name) \(event.message)"
+        switch event.level {
+        case .debug: logger.debug("\(msg)")
+        case .info: logger.info("\(msg)")
+        case .warning: logger.warning("\(msg)")
+        case .error: logger.error("\(msg)")
+        }
+    }
+
+    // MARK: - Test Helpers
+
+    /// Append text to an arbitrary URL (for unit tests with temp files).
+    static func appendForTesting(_ text: String, to url: URL) {
+        if !FileManager.default.fileExists(atPath: url.path) {
+            FileManager.default.createFile(atPath: url.path, contents: nil)
+        }
+        guard let handle = try? FileHandle(forWritingTo: url) else { return }
+        handle.seekToEndOfFile()
+        if let data = text.data(using: .utf8) {
+            handle.write(data)
+        }
+        handle.closeFile()
+    }
+
+    /// Read from an arbitrary URL (for unit tests with temp files).
+    static func readForTesting(from url: URL) -> String {
+        (try? String(contentsOf: url, encoding: .utf8)) ?? "(no logs)"
+    }
+
+    /// Trim an arbitrary URL to maxLines (for unit tests).
+    static func trimForTesting(url: URL) {
         guard let content = try? String(contentsOf: url, encoding: .utf8) else { return }
         var lines = content.components(separatedBy: "\n")
         if lines.count > maxLines {
@@ -76,4 +228,12 @@ public enum PersistentLog {
             try? trimmed.write(to: url, atomically: true, encoding: .utf8)
         }
     }
+
+    /// Clear an arbitrary URL (for unit tests).
+    static func clearForTesting(url: URL) {
+        try? "".write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    /// Expose maxLines for test assertions.
+    static var testableMaxLines: Int { maxLines }
 }
