@@ -51,6 +51,56 @@
 
 ---
 
+## Milestone: v1.1 — UX & Keyboard
+
+**Shipped:** 2026-03-11
+**Phases:** 5 | **Plans:** 29 | **Commits:** 186
+
+### What Was Built
+- Shared design system in DictusCore (colors, glass, waveform, mic button, logo)
+- Apple-parity keyboard: spacebar trackpad, adaptive accent key, emoji button, haptics, 3-category key sounds
+- Text prediction: 3-slot suggestion bar, French autocorrect via UITextChecker + frequency dictionary, accent suggestions, undo-on-backspace
+- Keyboard mode system: default layer selection (letters/numbers) with live preview in settings and onboarding
+- Multi-engine model catalog: WhisperKit + Parakeet (FluidAudio), gauge bars, catalog cleanup (7 models, 5 available)
+- Mic pill + recording overlay redesign with Canvas waveform at 60fps
+
+### What Worked
+- **UAT gap closure pattern matured**: Phases 07, 09, 10 all used the "execute → UAT → diagnose → fix" loop. The pattern is now systematic with dedicated UAT.md files.
+- **Integration checker at milestone audit**: Caught the MODE-01 architecture evolution (3 modes → 2 layers) and verified all 26 requirement wiring paths.
+- **Yolo mode + coarse granularity**: 29 plans in 5 days, minimal planning overhead. Average plan execution: ~4 minutes.
+- **DictusCore consolidation (Phase 06)**: Eliminated design file duplication early, every subsequent phase benefited from shared components.
+- **Notification bridge pattern**: viewWillAppear → NotificationCenter → SwiftUI solved the stale @State problem for keyboard mode sync.
+
+### What Was Inefficient
+- **3-mode system built then simplified**: Full MicroModeView + EmojiMicroModeView implementation (Plans 09-02, 09-05, 09-06) was replaced by DefaultKeyboardLayer system. Earlier user testing during planning would have caught this.
+- **Multiple UAT rounds on Phase 07**: 12 plans needed (4 core + 8 gap closure). More thorough initial implementation would reduce rework.
+- **Nyquist validation gaps**: 3 of 5 phases lack Nyquist compliance — validation wasn't prioritized during execution speed.
+- **Human verification backlog**: 11 items accumulated across 3 phases without device testing. Should integrate device testing into each phase completion.
+
+### Patterns Established
+- `DefaultKeyboardLayer` over multi-mode enums — simpler state management for keyboard variants
+- Pre-allocated static `UIImpactFeedbackGenerator` instances for zero-latency haptics
+- `AudioServicesPlaySystemSound` with 3 category IDs (1104/1155/1156) for key sounds
+- `DispatchQueue.main.async` after keystroke for suggestion updates (avoids stale proxy reads)
+- `collectSamples()` instead of `stopRecording()` to keep audio engine alive between recordings
+- Device-adaptive key height via `UIScreen.main.bounds` breakpoints (42pt/46pt/50pt)
+- Canvas single-pass rendering for waveform visualization
+- Word boundary detection via manual iteration (UITextDocumentProxy lacks deleteWordBackward)
+
+### Key Lessons
+1. **UAT before building complex alternatives**: The 3-mode keyboard system was fully implemented before testing showed it was over-engineered. A paper prototype or minimal POC would have saved 3 plans.
+2. **NotificationCenter bridges UIKit lifecycle to SwiftUI**: viewWillAppear doesn't trigger SwiftUI body re-evaluation — posting a notification that SwiftUI observes is the correct pattern.
+3. **iOS keyboard extension constraints compound**: 50MB memory + no UIApplication + stale proxy reads + no line-width API = every feature needs creative workarounds.
+4. **Shared design package pays dividends immediately**: Phase 06's DictusCore consolidation was the foundation for every subsequent phase. Do infrastructure first.
+5. **WhisperKit owns more than you think**: It controls audio session category, activation, and recording lifecycle. Align with it, don't fight it.
+
+### Cost Observations
+- Model mix: ~70% opus, ~30% sonnet (quality profile)
+- Sessions: ~12 across 5 days
+- Notable: Plan execution averaged 4 minutes (down from 25 min in v1.0). Codebase familiarity and established patterns dramatically reduced execution time.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -58,14 +108,19 @@
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
 | v1.0 | ~15 | 5 | Initial process — coarse granularity, yolo mode, UAT gap closure pattern |
+| v1.1 | ~12 | 5 | Matured UAT loop, integration checker, 4min avg plan execution |
 
 ### Cumulative Quality
 
 | Milestone | Tests | LOC | Files |
 |-----------|-------|-----|-------|
 | v1.0 | 52 | 7,305 | 156 |
+| v1.1 | 62+ | 10,893 | ~261 |
 
 ### Top Lessons (Verified Across Milestones)
 
-1. Device testing catches issues simulators miss — always verify on hardware
-2. Milestone audits catch integration gaps — always audit before shipping
+1. Device testing catches issues simulators miss — always verify on hardware (v1.0, v1.1)
+2. Milestone audits catch integration gaps — always audit before shipping (v1.0, v1.1)
+3. Infrastructure phases pay dividends — shared design system enabled all subsequent work (v1.1)
+4. UAT before complex alternatives — test simple approaches before building elaborate systems (v1.1)
+5. Plan execution speeds up with codebase familiarity — 25min → 4min average (v1.0 → v1.1)

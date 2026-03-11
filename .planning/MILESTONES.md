@@ -1,5 +1,31 @@
 # Milestones
 
+## v1.1 UX & Keyboard (Shipped: 2026-03-11)
+
+**Phases completed:** 5 phases, 29 plans
+**Timeline:** 5 days (2026-03-07 -> 2026-03-11)
+**Commits:** 186 | **Files:** 261 modified | **LOC:** 10,893 Swift (+3,588 from v1.0)
+
+**Delivered:** Apple-level keyboard parity with spacebar trackpad, haptics, text prediction, keyboard modes, and multi-engine model catalog (WhisperKit + Parakeet).
+
+**Key accomplishments:**
+1. Design system consolidated into DictusCore — shared colors, glass modifiers, waveform, mic button across all targets
+2. Apple-parity keyboard — spacebar trackpad with haptic ticks, adaptive accent key, emoji button, 3-category key sounds
+3. Text prediction engine — 3-slot suggestion bar with French autocorrect, accent suggestions, undo-on-backspace
+4. Keyboard mode system — user-selectable default layer with live preview in settings and onboarding
+5. Multi-engine model catalog — WhisperKit + Parakeet (FluidAudio), gauge bars for accuracy/speed, catalog cleanup
+6. Mic pill + recording overlay redesign — pill-shaped buttons, Canvas waveform at 60fps, processing animation
+
+**Git range:** `feat(06-01)` -> `fix(10-04)`
+
+### Known Gaps
+- Cold start auto-return deferred to v1.2 (needs deeper research into competitor techniques)
+- Text prediction memory budget needs real-device profiling (5MB keyboard extension limit)
+- 11 human verification items pending device testing across phases 06, 09, 10
+- 3 phases need Nyquist validation (07, 09, 10)
+
+---
+
 ## v1.0 MVP (Shipped: 2026-03-07)
 
 **Phases completed:** 5 phases, 18 plans
