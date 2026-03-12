@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
 status: in-progress
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-03-12T10:08:33Z"
-last_activity: 2026-03-12 -- Plan 13-01 executed (cold start infrastructure)
+stopped_at: Completed 13-02-PLAN.md
+last_updated: "2026-03-12T10:15:06Z"
+last_activity: 2026-03-12 -- Plan 13-02 executed (SwipeBackOverlayView)
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 7
-  completed_plans: 5
-  percent: 71
+  completed_plans: 6
+  percent: 86
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 13 in progress -- Cold Start Audio Bridge (Plan 01 of 03 complete)
+**Current focus:** Phase 13 in progress -- Cold Start Audio Bridge (Plan 02 of 03 complete)
 
 ## Current Position
 
 Phase: 13 of 16 (Cold Start Audio Bridge)
-Plan: 1 of 3 in current phase
-Status: Plan 13-01 complete, ready for Plan 13-02
-Last activity: 2026-03-12 -- Plan 13-01 executed (cold start infrastructure)
+Plan: 2 of 3 in current phase
+Status: Plan 13-02 complete, ready for Plan 13-03
+Last activity: 2026-03-12 -- Plan 13-02 executed (SwipeBackOverlayView)
 
-Progress: [███████---] 71%
+Progress: [████████--] 86%
 
 ## Performance Metrics
 
@@ -52,6 +52,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 12-02]: Do NOT instant-reset on keyboardAppear -- URL scheme causes rapid disappear/appear within ~2s, killing legitimate recordings. Use refreshFromDefaults + 5s watchdog instead.
 - [Phase 13-01]: Dual onOpenURL pattern -- DictusApp sets App Group flag (cross-process), MainTabView drives local @State (SwiftUI reactivity). Both fire on same URL event.
 - [Phase 13-01]: Cold start state cleared on .background (not .inactive) to avoid premature cleanup during URL scheme app transitions.
+- [Phase 13-02]: Pure SwiftUI animation (no Lottie) for swipe-back overlay -- locked decision from CONTEXT.md, keeps dependencies minimal.
+- [Phase 13-02]: Color(hex: UInt) from DictusColors used for brand gradient -- consistent with existing color system.
 
 ### Pending Todos
 
@@ -66,9 +68,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-12T10:08:33Z
-Stopped at: Completed 13-01-PLAN.md
-Resume file: .planning/phases/13-cold-start-audio-bridge/13-02-PLAN.md
+Last session: 2026-03-12T10:15:06Z
+Stopped at: Completed 13-02-PLAN.md
+Resume file: .planning/phases/13-cold-start-audio-bridge/13-03-PLAN.md
 
 ---
 *State initialized: 2026-03-04*

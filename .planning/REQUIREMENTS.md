@@ -31,7 +31,7 @@ Requirements for v1.2 Beta Ready milestone. Each maps to roadmap phases.
 - [x] **COLD-06**: Direct recording in app remains functional (two recording modes coexist)
 - [x] **COLD-07**: Recording starts when user returns to keyboard, not when app opens
 - [ ] **COLD-08**: Auto-return to previous app via URL scheme for known apps (bundleID -> URL scheme mapping)
-- [ ] **COLD-09**: Fallback "swipe back" animation with guided instruction for unknown apps
+- [x] **COLD-09**: Fallback "swipe back" animation with guided instruction for unknown apps
 
 ### Model Pipeline
 
@@ -129,7 +129,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COLD-06 | Phase 13 | Complete |
 | COLD-07 | Phase 13 | Complete |
 | COLD-08 | Phase 13 | Pending |
-| COLD-09 | Phase 13 | Pending |
+| COLD-09 | Phase 13 | Complete |
 | MODEL-01 | Phase 14 | Pending |
 | MODEL-02 | Phase 14 | Pending |
 | MODEL-03 | Phase 14 | Pending |
