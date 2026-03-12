@@ -72,6 +72,9 @@ class RawAudioCapture: ObservableObject {
         audioSamples = []
         bufferEnergy = []
         bufferSeconds = 0
+        audioThreadEnergy = []
+        audioThreadSampleCount = 0
+        lastWaveformWrite = 0
 
         let inputNode = engine.inputNode
         let hwFormat = inputNode.outputFormat(forBus: 0)
@@ -135,6 +138,9 @@ class RawAudioCapture: ObservableObject {
         audioSamples = []
         bufferEnergy = []
         bufferSeconds = 0
+        audioThreadEnergy = []
+        audioThreadSampleCount = 0
+        lastWaveformWrite = 0
     }
 
     /// Whether the underlying AVAudioEngine is currently running.
@@ -174,6 +180,23 @@ class RawAudioCapture: ObservableObject {
     /// Throttled to ~1Hz to avoid excessive UserDefaults writes from the audio thread.
     /// WHY nonisolated(unsafe): Written only from the audio callback thread (single writer).
     private nonisolated(unsafe) var lastHeartbeatWrite: TimeInterval = 0
+
+    /// Timestamp of last waveform write to App Group from the audio thread.
+    /// Throttled to ~5Hz (every 200ms) — same rate as DictationCoordinator.forwardWaveformToAppGroup.
+    /// WHY from the audio thread: In background, iOS throttles DispatchQueue.main.async delivery.
+    /// The Combine-based forwarding path (RawAudioCapture → Coordinator → App Group) goes through
+    /// main thread and fails to deliver waveform updates. Writing directly from the audio thread
+    /// bypasses this throttling, just like the heartbeat.
+    private nonisolated(unsafe) var lastWaveformWrite: TimeInterval = 0
+
+    /// Rolling energy buffer maintained on the audio thread for direct App Group writes.
+    /// Separate from the @Published bufferEnergy (which is main-thread-only for SwiftUI).
+    /// WHY nonisolated(unsafe): Single writer (audio callback thread).
+    private nonisolated(unsafe) var audioThreadEnergy: [Float] = []
+
+    /// Accumulated sample count on the audio thread for elapsed time calculation.
+    /// WHY nonisolated(unsafe): Single writer (audio callback thread).
+    private nonisolated(unsafe) var audioThreadSampleCount: Int = 0
 
     /// Process incoming audio buffer: convert to 16kHz and compute energy for waveform.
     ///
@@ -219,17 +242,40 @@ class RawAudioCapture: ObservableObject {
         // Scale to approximate WhisperKit's relativeEnergy range
         let energy = min(rms * 5.0, 1.0)
 
-        // Write heartbeat directly from the audio thread (~1Hz).
-        // WHY from the audio thread (not main): When the app is in background, iOS
-        // throttles DispatchQueue.main.async delivery. The audio thread keeps running
-        // (UIBackgroundModes:audio), so writing here guarantees the keyboard watchdog
-        // sees fresh heartbeats even when the main run loop is stalled.
-        // UserDefaults is thread-safe on iOS — no synchronization needed.
+        // === Audio thread writes (bypass main thread throttling in background) ===
+
+        // Update audio-thread energy buffer (rolling window of last 30 values)
+        audioThreadEnergy.append(energy)
+        if audioThreadEnergy.count > 30 {
+            audioThreadEnergy.removeFirst(audioThreadEnergy.count - 30)
+        }
+        audioThreadSampleCount += samples.count
+
         let now = Date().timeIntervalSince1970
+
+        // Write heartbeat (~1Hz)
         if now - lastHeartbeatWrite >= 1.0 {
             lastHeartbeatWrite = now
             AppGroup.defaults.set(now, forKey: SharedKeys.recordingHeartbeat)
         }
+
+        // Write waveform data + elapsed time to App Group (~5Hz).
+        // WHY from the audio thread: In background, iOS throttles DispatchQueue.main.async
+        // delivery. The Combine-based path (bufferEnergy → Coordinator → App Group) goes
+        // through main thread and misses updates. Writing here guarantees the keyboard
+        // receives waveform data for smooth animation even during warm start (app in bg).
+        if now - lastWaveformWrite >= 0.2 {
+            lastWaveformWrite = now
+            let snapshot = Array(audioThreadEnergy.suffix(30))
+            if let data = try? JSONEncoder().encode(snapshot) {
+                AppGroup.defaults.set(data, forKey: SharedKeys.waveformEnergy)
+            }
+            AppGroup.defaults.set(Double(audioThreadSampleCount) / 16000.0, forKey: SharedKeys.recordingElapsedSeconds)
+            AppGroup.defaults.synchronize()
+            DarwinNotificationCenter.post(DarwinNotificationName.waveformUpdate)
+        }
+
+        // === Main thread dispatch (for in-app UI: RecordingView, SwiftUI) ===
 
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }

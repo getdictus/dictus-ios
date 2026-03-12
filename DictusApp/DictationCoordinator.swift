@@ -91,13 +91,15 @@ class DictationCoordinator: ObservableObject {
                 self?.bufferSeconds = seconds
             }
 
-        // Forward RawAudioCapture's energy and seconds (used during cold start recording)
+        // Forward RawAudioCapture's energy and seconds (used during cold start recording).
+        // NOTE: App Group forwarding for the keyboard is handled directly from the audio
+        // thread in RawAudioCapture.processBuffer (bypasses main thread throttling in bg).
+        // This sink only updates the coordinator's @Published properties for in-app UI.
         rawEnergyCancellable = rawCapture.$bufferEnergy
             .receive(on: DispatchQueue.main)
             .sink { [weak self] energy in
                 guard let self, self.rawCapture.isCapturing else { return }
                 self.bufferEnergy = energy
-                self.forwardWaveformToAppGroup(energy: energy)
             }
         rawSecondsCancellable = rawCapture.$bufferSeconds
             .receive(on: DispatchQueue.main)
