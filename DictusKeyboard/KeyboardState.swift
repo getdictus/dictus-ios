@@ -295,7 +295,7 @@ class KeyboardState: ObservableObject {
             guard let self = self else { return }
             if self.dictationStatus == .requested {
                 // App didn't respond — not running. Open URL to launch it.
-                let url = URL(string: "dictus://dictate")!
+                let url = URL(string: "dictus://dictate?source=keyboard")!
                 if let openURL = self.openURL {
                     openURL(url)
                 } else {

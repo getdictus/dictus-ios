@@ -42,6 +42,19 @@
 	<array>
 		<string>audio</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>whatsapp</string>
+		<string>sms</string>
+		<string>tg</string>
+		<string>fb-messenger</string>
+		<string>sgnl</string>
+		<string>slack</string>
+		<string>discord</string>
+		<string>msteams</string>
+		<string>instagram</string>
+		<string>mobilenotes</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>
