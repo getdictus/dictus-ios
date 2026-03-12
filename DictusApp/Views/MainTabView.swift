@@ -21,12 +21,13 @@ struct MainTabView: View {
 
     @State private var selectedTab: Int = 0
 
+    /// In-memory flag: true after the first URL has been handled in this process.
+    /// Resets naturally when iOS terminates the process (true cold start).
+    /// WHY static on MainTabView (not DictusApp): onOpenURL fires inner-to-outer in SwiftUI,
+    /// so MainTabView's handler fires BEFORE DictusApp's. We need the detection here.
+    private static var hasHandledURL = false
+
     /// Tracks whether the app was opened from the keyboard for cold start dictation.
-    /// WHY @State instead of reading App Group directly:
-    /// SwiftUI needs a reactive property to trigger view updates. onOpenURL sets this
-    /// to true when source=keyboard is detected, and scenePhase resets it on background.
-    /// The App Group flag (SharedKeys.coldStartActive) persists the value for cross-process
-    /// use; this @State drives the local UI.
     @State private var isColdStartMode = false
 
     @Environment(\.scenePhase) private var scenePhase
@@ -72,29 +73,26 @@ struct MainTabView: View {
                 .tint(.dictusAccent)
             }
 
-            // Full-screen recording overlay covers everything including tab bar
-            // WHY coordinator.status != .idle:
-            // RecordingView handles all non-idle states (requested, recording,
-            // transcribing, ready, failed). The ZStack overlay makes it cover the tab bar.
-            //
-            // WHY .tint on TabView:
-            // Uses brand accent color for the selected tab icon/text instead of default blue.
-            // On iOS 26, TabView automatically gets Liquid Glass styling -- no manual glass needed.
-            if coordinator.status != .idle {
+            // Full-screen recording overlay covers everything including tab bar.
+            // WHY not shown in cold start mode: During cold start, the recording runs
+            // in the background while the user sees the SwipeBackOverlayView. Showing
+            // RecordingView would cover the swipe-back instructions.
+            if coordinator.status != .idle && !isColdStartMode {
                 RecordingView(mode: .standalone)
             }
         }
-        // WHY onOpenURL here AND in DictusApp:
-        // DictusApp.handleIncomingURL writes the App Group flag (only on true cold start).
-        // MainTabView reads that flag to decide whether to show the overlay.
-        // This avoids duplicating the cold start detection logic.
+        // Detect cold start directly from URL params. MainTabView's onOpenURL fires
+        // BEFORE DictusApp's (SwiftUI propagates inner-to-outer), so we can't rely
+        // on DictusApp having set the AppGroup flag yet.
         .onOpenURL { url in
-            if let host = url.host, host == "dictate" {
-                // Read the flag that DictusApp.handleIncomingURL just set.
-                // It's only true on genuine cold start (app was terminated by iOS).
-                if AppGroup.defaults.bool(forKey: SharedKeys.coldStartActive) {
+            if let host = url.host, host == "dictate",
+               let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems,
+               query.contains(where: { $0.name == "source" && $0.value == "keyboard" }) {
+                if !Self.hasHandledURL {
+                    // True cold start: process was just launched by keyboard URL.
                     isColdStartMode = true
                 }
+                Self.hasHandledURL = true
             }
         }
         .onChange(of: scenePhase) { _, newPhase in

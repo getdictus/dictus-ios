@@ -53,6 +53,12 @@ class KeyboardState: ObservableObject {
     /// Used by the watchdog to detect stale states (no updates for 5s).
     private var lastWaveformUpdate: Date = Date()
 
+    /// When set, the watchdog uses a longer threshold (15s) to account for
+    /// the app→keyboard transition during cold start. The app needs time to
+    /// stabilize audio recording and start posting waveform updates.
+    /// Cleared automatically when recording ends (status becomes idle).
+    private var coldStartGraceEnd: Date?
+
 
     init() {
         // Read initial state from App Group
@@ -116,6 +122,7 @@ class KeyboardState: ObservableObject {
     /// WHY 5s threshold: Waveform updates arrive at ~5Hz during recording.
     /// If 5 seconds pass without any update while status is still active,
     /// the app has likely crashed or been killed by iOS.
+    /// During cold start grace period, uses 15s threshold instead.
     private func startWatchdog() {
         stopWatchdog()
         lastWaveformUpdate = Date()
@@ -126,7 +133,11 @@ class KeyboardState: ObservableObject {
                 self.stopWatchdog()
                 return
             }
-            if Date().timeIntervalSince(self.lastWaveformUpdate) > 5.0 {
+            // During cold start, the app transitions foreground→background while
+            // setting up audio. Waveform data may not flow for ~10s. Use 15s threshold.
+            let inGracePeriod = self.coldStartGraceEnd.map { Date() < $0 } ?? false
+            let threshold: TimeInterval = inGracePeriod ? 15.0 : 5.0
+            if Date().timeIntervalSince(self.lastWaveformUpdate) > threshold {
                 PersistentLog.log(.watchdogReset(source: "keyboard", staleState: self.dictationStatus.rawValue))
                 self.forceResetToIdle()
             }
@@ -185,8 +196,16 @@ class KeyboardState: ObservableObject {
                 if !activeStates.contains(oldStatus) || status != oldStatus {
                     startWatchdog()
                 }
+                // During cold start, the app is transitioning between foreground/background.
+                // Waveform data may not flow for several seconds. Activate grace period
+                // so the watchdog uses a longer threshold (15s instead of 5s).
+                if defaults.bool(forKey: SharedKeys.coldStartActive) {
+                    coldStartGraceEnd = Date().addingTimeInterval(15)
+                    lastWaveformUpdate = Date()
+                }
             } else {
                 stopWatchdog()
+                coldStartGraceEnd = nil
             }
         }
     }
