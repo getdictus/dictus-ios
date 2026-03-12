@@ -91,12 +91,12 @@ Plans:
   3. Recording begins when user returns to the keyboard, not when the app opens
   4. For apps with known URL schemes, user is auto-returned to the previous app after audio session activation
   5. Direct recording from the app (non-keyboard flow) still works identically to v1.1
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 13-01: TBD
-- [ ] 13-02: TBD
-- [ ] 13-03: TBD
+- [ ] 13-01-PLAN.md — Cold start infrastructure: SharedKeys, KnownAppSchemes, launch mode detection, conditional MainTabView
+- [ ] 13-02-PLAN.md — SwipeBackOverlayView with animated swipe gesture, brand gradient, bilingual text
+- [ ] 13-03-PLAN.md — Auto-return via URL scheme, keyboard source detection, Info.plist schemes, device verification
 
 ### Phase 14: Model Pipeline
 **Goal**: Model download, CoreML compilation, and engine selection work reliably with clear progress feedback and no crashes on constrained devices
