@@ -45,4 +45,13 @@ public enum SharedKeys {
     // Text prediction preferences (added for Phase 08)
     /// Whether autocorrect is enabled, default true
     public static let autocorrectEnabled = "dictus.autocorrectEnabled"
+
+    // Cold start detection keys (added for Phase 13)
+    /// Bool flag: true when the app was opened from the keyboard for cold start dictation.
+    /// Set by handleIncomingURL when source=keyboard query parameter is present.
+    /// Cleared when the app enters background.
+    public static let coldStartActive = "dictus.coldStartActive"
+    /// String: URL scheme of the source app (e.g., "whatsapp") or "unknown".
+    /// Used by auto-return logic to navigate back to the correct app after dictation.
+    public static let sourceAppScheme = "dictus.sourceAppScheme"
 }
