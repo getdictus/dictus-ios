@@ -55,6 +55,13 @@ struct DictusApp: App {
                         PersistentLog.log(.appWillResignActive)
                     case .background:
                         PersistentLog.log(.appDidEnterBackground)
+                        // Clear cold start state to prevent stale overlay on next normal launch.
+                        // WHY here: When the user leaves the app (swipes away, switches app),
+                        // the cold start flow is over. Next time the app opens normally,
+                        // MainTabView should show regular tabs, not the swipe-back placeholder.
+                        AppGroup.defaults.set(false, forKey: SharedKeys.coldStartActive)
+                        AppGroup.defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
+                        AppGroup.defaults.synchronize()
                     @unknown default:
                         break
                     }
@@ -84,6 +91,20 @@ struct DictusApp: App {
 
         switch url.host {
         case "dictate":
+            // Detect cold start mode: the keyboard appends ?source=keyboard to signal
+            // it opened the app for dictation. This flag drives MainTabView's conditional
+            // rendering (swipe-back placeholder vs normal tabs).
+            let isFromKeyboard = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?
+                .first(where: { $0.name == "source" })?
+                .value == "keyboard"
+
+            if isFromKeyboard {
+                DictusLogger.app.info("Cold start dictation requested from keyboard")
+                AppGroup.defaults.set(true, forKey: SharedKeys.coldStartActive)
+                AppGroup.defaults.synchronize()
+            }
+
             coordinator.startDictation(fromURL: true)
         default:
             break
