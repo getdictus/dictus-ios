@@ -34,20 +34,11 @@ struct MainTabView: View {
     var body: some View {
         ZStack {
             if isColdStartMode {
-                // Placeholder for SwipeBackOverlayView (Plan 02 will replace this).
-                // Shows a simple gradient + text so we can verify the conditional rendering
-                // path works before building the real overlay.
-                ZStack {
-                    LinearGradient(
-                        colors: [Color(red: 0.05, green: 0.13, blue: 0.25),
-                                 Color(red: 0.03, green: 0.06, blue: 0.13)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                    .ignoresSafeArea()
-                    Text("Swipe back to keyboard")
-                        .foregroundColor(.white)
-                }
+                // Full-screen branded overlay with animated swipe gesture and bilingual text.
+                // WHY SwipeBackOverlayView instead of inline code:
+                // The overlay has its own animation state and bilingual logic -- keeping it
+                // in a separate file follows "one file = one responsibility".
+                SwipeBackOverlayView()
             } else {
                 // Main tab navigation (normal launch path)
                 TabView(selection: $selectedTab) {
