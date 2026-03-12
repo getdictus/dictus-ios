@@ -4,7 +4,7 @@ milestone: v1.2
 milestone_name: Beta Ready
 status: completed
 stopped_at: Completed 12-02-PLAN.md (Phase 12 complete)
-last_updated: "2026-03-12T08:15:00Z"
+last_updated: "2026-03-12T08:20:19.160Z"
 last_activity: 2026-03-12 -- Plan 12-02 executed (watchdog recovery, device verification approved)
 progress:
   total_phases: 6
