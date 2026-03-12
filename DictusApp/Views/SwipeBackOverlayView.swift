@@ -37,8 +37,10 @@ struct SwipeBackOverlayView: View {
                 Spacer()
 
                 // Animated iPhone outline with swipe gesture
+                // WHY 120×260: matches iPhone 15 Pro proportions (~9:19.5 aspect ratio).
+                // 200×300 was too wide and looked like an iPad.
                 SwipeAnimationView()
-                    .frame(width: 200, height: 300)
+                    .frame(width: 120, height: 260)
 
                 // Primary instruction text
                 Text(language == "fr"
@@ -86,9 +88,8 @@ private struct SwipeAnimationView: View {
 
     var body: some View {
         ZStack {
-            // iPhone outline
-            // WHY 9:19.5 aspect ratio: matches modern iPhone screen proportions
-            RoundedRectangle(cornerRadius: 30)
+            // iPhone outline — narrower proportions matching real iPhone 15 Pro
+            RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.white.opacity(0.3), lineWidth: 2)
 
             // Home indicator bar at the bottom
@@ -96,8 +97,8 @@ private struct SwipeAnimationView: View {
                 Spacer()
                 RoundedRectangle(cornerRadius: 2.5)
                     .fill(Color.white.opacity(0.4))
-                    .frame(width: 80, height: 5)
-                    .padding(.bottom, 16)
+                    .frame(width: 50, height: 5)
+                    .padding(.bottom, 12)
             }
 
             // Swipe gesture animation area (positioned at bottom)
@@ -106,25 +107,23 @@ private struct SwipeAnimationView: View {
 
                 ZStack {
                     // Trail: fading chevrons behind the moving circle
-                    // WHY chevrons as trail: they reinforce the swipe direction
-                    // more clearly than a simple opacity fade
-                    ForEach(0..<3, id: \.self) { index in
+                    ForEach(0..<2, id: \.self) { index in
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .bold))
+                            .font(.system(size: 10, weight: .bold))
                             .foregroundColor(Color.dictusAccent.opacity(0.3 - Double(index) * 0.1))
                             .offset(x: isAnimating
-                                    ? CGFloat(30 - index * 15)
-                                    : CGFloat(-50 - index * 15))
+                                    ? CGFloat(15 - index * 12)
+                                    : CGFloat(-30 - index * 12))
                     }
 
                     // Moving accent circle (thumb indicator)
                     Circle()
                         .fill(Color.dictusAccent)
-                        .frame(width: 30, height: 30)
-                        .shadow(color: Color.dictusAccent.opacity(0.5), radius: 8)
-                        .offset(x: isAnimating ? 50 : -30)
+                        .frame(width: 24, height: 24)
+                        .shadow(color: Color.dictusAccent.opacity(0.5), radius: 6)
+                        .offset(x: isAnimating ? 30 : -20)
                 }
-                .padding(.bottom, 40)
+                .padding(.bottom, 30)
             }
         }
         .onAppear {
