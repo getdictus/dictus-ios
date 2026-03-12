@@ -23,14 +23,14 @@ Requirements for v1.2 Beta Ready milestone. Each maps to roadmap phases.
 
 ### Cold Start
 
-- [ ] **COLD-01**: Keyboard extension can capture audio directly when mic session is active (Audio Bridge)
+- [x] **COLD-01**: Keyboard extension can capture audio directly when mic session is active (Audio Bridge)
 - [x] **COLD-02**: App serves only to activate the audio session, then user returns to keyboard
-- [ ] **COLD-03**: Keyboard sends captured audio to app for transcription via App Group
-- [ ] **COLD-04**: App returns transcription result to keyboard via Darwin notification + App Group
+- [x] **COLD-03**: Keyboard sends captured audio to app for transcription via App Group
+- [x] **COLD-04**: App returns transcription result to keyboard via Darwin notification + App Group
 - [x] **COLD-05**: Cold start shows dedicated "swipe back" overlay instead of full app UI
 - [x] **COLD-06**: Direct recording in app remains functional (two recording modes coexist)
 - [x] **COLD-07**: Recording starts when user returns to keyboard, not when app opens
-- [ ] **COLD-08**: Auto-return to previous app via URL scheme for known apps (bundleID -> URL scheme mapping)
+- [x] **COLD-08**: Auto-return to previous app via URL scheme for known apps (bundleID -> URL scheme mapping)
 - [x] **COLD-09**: Fallback "swipe back" animation with guided instruction for unknown apps
 
 ### Model Pipeline
@@ -121,14 +121,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ANIM-01 | Phase 12 | Complete |
 | ANIM-02 | Phase 12 | Complete |
 | ANIM-03 | Phase 12 | Pending |
-| COLD-01 | Phase 13 | Pending |
+| COLD-01 | Phase 13 | Complete |
 | COLD-02 | Phase 13 | Complete |
-| COLD-03 | Phase 13 | Pending |
-| COLD-04 | Phase 13 | Pending |
+| COLD-03 | Phase 13 | Complete |
+| COLD-04 | Phase 13 | Complete |
 | COLD-05 | Phase 13 | Complete |
 | COLD-06 | Phase 13 | Complete |
 | COLD-07 | Phase 13 | Complete |
-| COLD-08 | Phase 13 | Pending |
+| COLD-08 | Phase 13 | Complete |
 | COLD-09 | Phase 13 | Complete |
 | MODEL-01 | Phase 14 | Pending |
 | MODEL-02 | Phase 14 | Pending |

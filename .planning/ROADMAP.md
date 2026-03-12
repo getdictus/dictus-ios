@@ -45,7 +45,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 - [x] **Phase 11: Logging Foundation** - Production-ready persistent logging across all subsystems with privacy safeguards and export (completed 2026-03-11)
 - [x] **Phase 12: Animation State Fixes** - Eliminate intermittent recording overlay and waveform animation bugs (completed 2026-03-12)
-- [ ] **Phase 13: Cold Start Audio Bridge** - Audio Bridge pattern for keyboard-captured audio with graceful return-to-keyboard UX
+- [x] **Phase 13: Cold Start Audio Bridge** - Audio Bridge pattern for keyboard-captured audio with graceful return-to-keyboard UX (completed 2026-03-12)
 - [ ] **Phase 14: Model Pipeline** - CoreML compilation UX, model download modal, device RAM gating, Parakeet fixes
 - [ ] **Phase 15: Design Polish** - French accent audit, model manager redesign, recording overlay and keyboard UX refinements
 - [ ] **Phase 16: TestFlight Deployment** - Developer account migration, Privacy Manifest, archive, and first beta distribution
@@ -168,7 +168,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 16
 | 10. Model Catalog | v1.1 | 4/4 | Complete | 2026-03-11 |
 | 11. Logging Foundation | v1.2 | 2/2 | Complete | 2026-03-11 |
 | 12. Animation State Fixes | v1.2 | Complete    | 2026-03-12 | 2026-03-12 |
-| 13. Cold Start Audio Bridge | 2/3 | In Progress|  | - |
+| 13. Cold Start Audio Bridge | 3/3 | Complete   | 2026-03-12 | - |
 | 14. Model Pipeline | v1.2 | 0/3 | Not started | - |
 | 15. Design Polish | v1.2 | 0/2 | Not started | - |
 | 16. TestFlight Deployment | v1.2 | 0/2 | Not started | - |
