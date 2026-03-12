@@ -145,17 +145,6 @@ public struct ModelInfo: Identifiable {
             visibility: .available
         ),
         ModelInfo(
-            identifier: "openai_whisper-large-v3_turbo",
-            displayName: "Large Turbo",
-            sizeLabel: "~954 MB",
-            sizeBytes: 954_000_000,
-            engine: .whisperKit,
-            accuracyScore: 0.9,
-            speedScore: 0.6,
-            description: "Precision maximale",
-            visibility: .available
-        ),
-        ModelInfo(
             identifier: "parakeet-tdt-0.6b-v3",
             displayName: "Parakeet v3",
             sizeLabel: "~800 MB",
@@ -177,5 +166,37 @@ public struct ModelInfo: Identifiable {
     /// Returns nil if the identifier is not in the supported list.
     public static func forIdentifier(_ id: String) -> ModelInfo? {
         allIncludingDeprecated.first { $0.identifier == id }
+    }
+
+    // MARK: - RAM-based Recommendation
+
+    /// Returns the recommended model identifier based on device RAM.
+    ///
+    /// WHY RAM-based instead of hardcoded:
+    /// Different iPhones have different RAM tiers. Parakeet v3 (~800 MB) needs
+    /// enough headroom to compile and run without OOM. Devices with >=6 GB RAM
+    /// (iPhone 12 Pro, 13 Pro, 14+, 15+, 16+) can handle it comfortably.
+    /// Devices with <=4 GB RAM (iPhone 12, 12 mini, 13, 13 mini) should stick
+    /// with the smaller Whisper Small model.
+    ///
+    /// WHY in ModelInfo (not ModelManager):
+    /// This is catalog-level logic — which model fits this device. It doesn't
+    /// depend on download state or any @Published properties. Accessible from
+    /// both ModelManager and onboarding without passing an ObservableObject.
+    public static func recommendedIdentifier() -> String {
+        let ramGB = ProcessInfo.processInfo.physicalMemory / 1_073_741_824
+        #if DEBUG
+        print("[ModelInfo] Device RAM: \(ramGB) GB, recommending: \(ramGB >= 6 ? "parakeet-tdt-0.6b-v3" : "openai_whisper-small")")
+        #endif
+        if ramGB >= 6 {
+            return "parakeet-tdt-0.6b-v3"
+        } else {
+            return "openai_whisper-small"
+        }
+    }
+
+    /// Whether the given model identifier matches the device-recommended model.
+    public static func isRecommended(_ identifier: String) -> Bool {
+        identifier == recommendedIdentifier()
     }
 }
