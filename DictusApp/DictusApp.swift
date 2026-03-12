@@ -1,5 +1,6 @@
 // DictusApp/DictusApp.swift
 import SwiftUI
+import UIKit
 import DictusCore
 
 @main
@@ -105,7 +106,9 @@ struct DictusApp: App {
             // Only show cold start overlay on TRUE cold start: app was terminated by iOS
             // and keyboard just launched it. If app is already in memory (hasBeenActive),
             // just start recording — no overlay, no app switch.
-            if isFromKeyboard && !Self.hasBeenActive {
+            let isColdStart = isFromKeyboard && !Self.hasBeenActive
+
+            if isColdStart {
                 DictusLogger.app.info("Cold start dictation requested from keyboard (first launch)")
                 AppGroup.defaults.set(true, forKey: SharedKeys.coldStartActive)
                 AppGroup.defaults.synchronize()
@@ -115,8 +118,38 @@ struct DictusApp: App {
 
             Self.hasBeenActive = true
             coordinator.startDictation(fromURL: true)
+
+            // Auto-return: attempt to send user back to source app after starting dictation.
+            // WHY after startDictation: Per research pitfall #3, the audio session must be
+            // activated before switching apps. startDictation activates it synchronously.
+            // WHY only on cold start: On warm start, recording happens in background — the
+            // user never left their app, so no return is needed.
+            if isColdStart {
+                attemptAutoReturn()
+            }
         default:
             break
         }
+    }
+
+    /// Attempt to return the user to the app they were typing in.
+    ///
+    /// WHY iterate instead of reading sourceAppScheme: The keyboard extension has no public
+    /// API to detect which app it's currently serving. detectAndSaveSourceApp() would always
+    /// write "unknown". Instead, we try known app schemes directly via canOpenURL.
+    ///
+    /// LIMITATION (v1.2): Opens the FIRST installed known app, which may not be the app the
+    /// user was actually typing in. The swipe-back overlay remains the reliable fallback.
+    /// A future version could explore writing the most recently focused app to App Group.
+    private func attemptAutoReturn() {
+        for appScheme in KnownAppSchemes.all {
+            guard let url = URL(string: appScheme.scheme) else { continue }
+            if UIApplication.shared.canOpenURL(url) {
+                DictusLogger.app.info("Auto-returning to \(appScheme.name) via \(appScheme.scheme)")
+                UIApplication.shared.open(url)
+                return
+            }
+        }
+        DictusLogger.app.info("No known app installed for auto-return, showing swipe-back overlay")
     }
 }
