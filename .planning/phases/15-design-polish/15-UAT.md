@@ -3,7 +3,7 @@ status: resolved
 phase: 15-design-polish
 source: 15-01-SUMMARY.md, 15-02-SUMMARY.md, 15-03-SUMMARY.md, 15-04-SUMMARY.md, 15-05-SUMMARY.md
 started: 2026-03-13T11:00:00Z
-updated: 2026-03-13T13:20:00Z
+updated: 2026-03-13T14:00:00Z
 ---
 
 ## Current Test
@@ -49,7 +49,7 @@ severity: minor
 
 ### 8. Recording Overlay Buttons & Haptics
 expected: Start a dictation from the keyboard. The recording overlay appears. Tap the cancel or stop button — the tap target feels generous (easy to hit), and you feel a light haptic vibration on tap.
-result: [pending]
+result: pass
 
 ### 9. Recording Overlay Transition Animation
 expected: Start a dictation. The recording overlay should appear with a smooth fade+slide animation (not instant pop). When stopping/cancelling, it should disappear with a matching smooth animation.
@@ -102,7 +102,7 @@ severity: major
 ## Summary
 
 total: 16
-passed: 4
+passed: 5
 issues: 11
 pending: 0
 skipped: 0
