@@ -97,7 +97,7 @@ enum SoundFeedbackService {
     }
 
     /// Play the recording-start sound.
-    /// Default: "electronic_01f"
+    /// Default: "electronic_01f" (short distinct beep)
     static func playRecordStart() {
         guard isEnabled() else { return }
         let defaults = UserDefaults(suiteName: AppGroup.identifier)
@@ -106,20 +106,20 @@ enum SoundFeedbackService {
     }
 
     /// Play the recording-stop sound.
-    /// Default: "electronic_02e"
+    /// Default: "electronic_02b"
     static func playRecordStop() {
         guard isEnabled() else { return }
         let defaults = UserDefaults(suiteName: AppGroup.identifier)
-        let name = defaults?.string(forKey: SharedKeys.recordStopSoundName) ?? "electronic_02e"
+        let name = defaults?.string(forKey: SharedKeys.recordStopSoundName) ?? "electronic_02b"
         play(name)
     }
 
     /// Play the recording-cancel sound.
-    /// Default: "electronic_02b"
+    /// Default: "electronic_03c"
     static func playRecordCancel() {
         guard isEnabled() else { return }
         let defaults = UserDefaults(suiteName: AppGroup.identifier)
-        let name = defaults?.string(forKey: SharedKeys.recordCancelSoundName) ?? "electronic_02b"
+        let name = defaults?.string(forKey: SharedKeys.recordCancelSoundName) ?? "electronic_03c"
         play(name)
     }
 

@@ -22,10 +22,10 @@ struct SoundSettingsView: View {
     private var recordStartSoundName = "electronic_01f"
 
     @AppStorage(SharedKeys.recordStopSoundName, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var recordStopSoundName = "electronic_02e"
+    private var recordStopSoundName = "electronic_02b"
 
     @AppStorage(SharedKeys.recordCancelSoundName, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var recordCancelSoundName = "electronic_02b"
+    private var recordCancelSoundName = "electronic_03c"
 
     @AppStorage(SharedKeys.soundVolume, store: UserDefaults(suiteName: AppGroup.identifier))
     private var soundVolume = 0.5
