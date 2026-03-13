@@ -48,7 +48,6 @@ struct SettingsView: View {
             } header: {
                 Text("Transcription")
             }
-            .listRowBackground(Color.dictusAccent.opacity(0.05))
 
             // Section 2: Clavier
             // All toggles are always visible — there's only one keyboard type now.
@@ -64,7 +63,6 @@ struct SettingsView: View {
 
                 Toggle("Correction automatique", isOn: $autocorrectEnabled)
             }
-            .listRowBackground(Color.dictusAccent.opacity(0.05))
 
             // Section 3: A propos
             Section("À propos") {
@@ -115,7 +113,6 @@ struct SettingsView: View {
                 }
                 .disabled(isExporting)
             }
-            .listRowBackground(Color.dictusAccent.opacity(0.05))
         }
         .scrollContentBackground(.hidden)
         .background(Color.dictusBackground.ignoresSafeArea())

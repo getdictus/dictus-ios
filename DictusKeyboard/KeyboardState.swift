@@ -208,6 +208,11 @@ class KeyboardState: ObservableObject {
             let oldStatus = dictationStatus
             dictationStatus = status
 
+            // Diagnostic: log status transitions with waveform state for disappearance debugging
+            if oldStatus != status {
+                PersistentLog.log("[Waveform] Status transition \(oldStatus.rawValue)→\(status.rawValue), energyCount=\(waveformEnergy.count)")
+            }
+
             // Start/restart watchdog on any active state transition, stop when leaving.
             // WHY restart (not just start): transitioning .requested → .recording
             // must reset lastWaveformUpdate. Without this, the watchdog fires
@@ -245,6 +250,10 @@ class KeyboardState: ObservableObject {
         if let data = defaults.data(forKey: SharedKeys.waveformEnergy) {
             do {
                 let energy = try JSONDecoder().decode([Float].self, from: data)
+                // Diagnostic: log when waveform data transitions from populated to empty or vice versa
+                if waveformEnergy.isEmpty != energy.isEmpty {
+                    PersistentLog.log("[Waveform] Data transition: \(waveformEnergy.count) bars → \(energy.count) bars, status=\(dictationStatus.rawValue)")
+                }
                 waveformEnergy = energy
             } catch {
                 // JSON decode failure — keep existing waveform data

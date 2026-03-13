@@ -59,12 +59,13 @@ struct RecordingOverlay: View {
             PersistentLog.log("[Waveform] Overlay appeared — status=\(dictationStatus), energyCount=\(waveformEnergy.count)")
         }
         .onChange(of: waveformEnergy.count) { newCount in
-            // Log significant changes in waveform energy count to diagnose
-            // intermittent waveform disappearance. Only logs transitions to/from 0
-            // to avoid flooding the log on every audio frame.
-            if newCount == 0 || waveformEnergy.count == 0 {
-                PersistentLog.log("[Waveform] Energy count changed — status=\(dictationStatus), count=\(newCount)")
-            }
+            // Log ALL changes in waveform energy count (not just to/from 0)
+            // to diagnose intermittent waveform disappearance after model switch.
+            PersistentLog.log("[Waveform] Energy count changed — status=\(dictationStatus), count=\(newCount)")
+        }
+        .onChange(of: dictationStatus) { newStatus in
+            // Log overlay's view of status transitions with current waveform state.
+            PersistentLog.log("[Waveform] Overlay status changed — \(newStatus), energyCount=\(waveformEnergy.count)")
         }
     }
 
@@ -196,14 +197,16 @@ struct RecordingOverlay: View {
                 .frame(width: geo.size.width, height: geo.size.height)
             }
 
-            // Footer -- matches recording footer height (timer line + status line)
-            Text("Transcription...")
-                .font(.system(size: timerFontSize, weight: .medium, design: .monospaced))
-                .foregroundColor(foregroundColor)
+            // Footer -- matches recording footer total height (timer line + caption line)
+            // WHY Color.clear for timer slot: recordingContent has a timer Text (timerFontSize)
+            // above the caption. We reserve the same space so the waveform doesn't shift.
+            Color.clear
+                .frame(height: timerFontSize)
                 .padding(.bottom, 4)
 
-            Color.clear
-                .frame(height: 16)
+            Text("Transcription...")
+                .font(.dictusCaption)
+                .foregroundColor(secondaryForeground)
                 .padding(.bottom, 8)
         }
     }
