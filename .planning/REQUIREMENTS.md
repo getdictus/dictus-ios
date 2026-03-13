@@ -46,13 +46,13 @@ Requirements for v1.2 Beta Ready milestone. Each maps to roadmap phases.
 
 ### Design Polish
 
-- [ ] **DSGN-01**: All French UI strings have correct accents (modele, dictee, reglages, telecharges, etc.)
+- [x] **DSGN-01**: All French UI strings have correct accents (modele, dictee, reglages, telecharges, etc.)
 - [ ] **DSGN-02**: Active model has blue border highlight in model manager (replaces subtle badge)
 - [ ] **DSGN-03**: Model card layout improved (download button placement, badge/gauge alignment)
 - [ ] **DSGN-04**: Tap anywhere on downloaded model card to select it
 - [ ] **DSGN-05**: X close button on recording overlay has 44pt hit area + haptic feedback
 - [ ] **DSGN-06**: Recording overlay dismissal uses smooth easeOut animation
-- [ ] **DSGN-07**: Mic button shows reduced opacity during transcription processing
+- [x] **DSGN-07**: Mic button shows reduced opacity during transcription processing
 
 ### TestFlight
 
@@ -138,13 +138,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MODEL-06 | Phase 14 | Complete |
 | MODEL-07 | Phase 14 | Complete |
 | MODEL-08 | Phase 14 | Complete |
-| DSGN-01 | Phase 15 | Pending |
+| DSGN-01 | Phase 15 | Complete |
 | DSGN-02 | Phase 15 | Pending |
 | DSGN-03 | Phase 15 | Pending |
 | DSGN-04 | Phase 15 | Pending |
 | DSGN-05 | Phase 15 | Pending |
 | DSGN-06 | Phase 15 | Pending |
-| DSGN-07 | Phase 15 | Pending |
+| DSGN-07 | Phase 15 | Complete |
 | TF-01 | Phase 16 | Pending |
 | TF-02 | Phase 16 | Pending |
 | TF-03 | Phase 16 | Pending |

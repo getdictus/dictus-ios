@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
-status: completed
-stopped_at: Phase 15 context gathered
-last_updated: "2026-03-13T10:10:14.861Z"
-last_activity: 2026-03-12 -- Plan 14-03 executed (ModelInfoTests gap closure after Large Turbo v3 removal)
+status: in-progress
+stopped_at: Completed 15-02-PLAN.md
+last_updated: "2026-03-13T10:40:00Z"
+last_activity: 2026-03-13 -- Plan 15-02 executed (Model card UX redesign)
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_plans: 15
+  completed_plans: 13
+  percent: 87
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 14 complete -- Model Pipeline done (including gap closure). Phase 15 next.
+**Current focus:** Phase 15 in progress -- Design Polish (model card UX done, plans 01/03/04 remaining).
 
 ## Current Position
 
-Phase: 14 of 16 (Model Pipeline) -- COMPLETE
-Plan: 3 of 3 in current phase (all done, including gap closure plan)
-Status: Phase 14 complete, ready for Phase 15
-Last activity: 2026-03-12 -- Plan 14-03 executed (ModelInfoTests gap closure after Large Turbo v3 removal)
+Phase: 15 of 16 (Design Polish) -- IN PROGRESS
+Plan: 2 of 4 in current phase (plan 02 done)
+Status: Plan 15-02 complete, continuing Phase 15
+Last activity: 2026-03-13 -- Plan 15-02 executed (Model card UX redesign)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 87%
 
 ## Performance Metrics
 
 **Velocity:**
 - v1.0: 18 plans in 4 days (~25 min avg)
 - v1.1: 29 plans in 5 days (~4 min avg)
-- v1.2: 10 plans (~7 min avg)
-- Total: 57 plans across 2 milestones
+- v1.2: 12 plans (~6 min avg)
+- Total: 59 plans across 2 milestones
 
 ## Accumulated Context
 
@@ -60,6 +60,11 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 14-01]: PersistentLog uses structured LogEvent enum, not freeform messages -- used #if DEBUG print() for RAM diagnostics.
 - [Phase 14-02]: No code changes needed for Parakeet routing or display names -- verified correct as-is.
 - [Phase 14-03]: Added assertFalse for large-v3_turbo in tests (explicit regression guard) rather than just removing assertTrue.
+- [Phase 15-01]: AnimatedMicButton transcription opacity 0.5 confirmed appropriate -- consistent across pill and circle modes, no adjustment needed.
+- [Phase 15-01]: Settings list rows already use native Button (no custom buttonStyle masking press highlight) -- no changes needed.
+- [Phase 15-02]: Used List with transparent styling (not ScrollView+VStack) to enable native swipeActions on model cards.
+- [Phase 15-02]: Active model highlight is background tint behind glass (not border, not badge) per user preference.
+- [Phase 15-02]: Removed onDelete callback from ModelCardView -- deletion handled exclusively via swipe in parent.
 
 ### Pending Todos
 
@@ -74,9 +79,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T10:10:14.859Z
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-design-polish/15-CONTEXT.md
+Last session: 2026-03-13T10:40:00Z
+Stopped at: Completed 15-02-PLAN.md
+Resume file: .planning/phases/15-design-polish/15-02-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*
