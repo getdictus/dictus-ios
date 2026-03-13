@@ -224,20 +224,40 @@ class ModelManager: ObservableObject {
         PersistentLog.log(.modelDownloadStarted(name: identifier, sizeMB: 0))
 
         do {
-            // Wait for any WhisperKit prewarm to finish (ANE conflict avoidance)
+            // Step 1: Download all raw model files with byte-weighted aggregate progress.
+            // We use DownloadUtils.downloadRepo() instead of AsrModels.download() because
+            // the latter downloads 4 models sequentially (Preprocessor, Encoder, Decoder, Joint),
+            // each resetting progress to 0 — causing the UI bar to jump erratically.
+            // downloadRepo() downloads ALL files in one pass with proper byte-weighted progress.
+            let version: AsrModelVersion = .v3
+            let cacheDir = AsrModels.defaultCacheDirectory(for: version)
+            let parentDir = cacheDir.deletingLastPathComponent()
+            let repo: Repo = version == .v3 ? .parakeet : .parakeetV2
+            try await DownloadUtils.downloadRepo(repo, to: parentDir) { [weak self] progress in
+                // downloadRepo reports 0→0.5 for download phase (byte-weighted across all files)
+                let downloadFraction = Float(min(progress.fractionCompleted / 0.5, 1.0))
+                Task { @MainActor in
+                    self?.downloadProgress[identifier] = downloadFraction
+                }
+            }
+
+            // Step 2: Wait for any other prewarm to finish (ANE conflict avoidance)
             while isPrewarming {
                 try await Task.sleep(nanoseconds: 500_000_000)
             }
 
+            // Step 3: Switch to prewarming state — download is done, CoreML compilation starts.
             isPrewarming = true
             modelStates[identifier] = .prewarming
+            downloadProgress.removeValue(forKey: identifier)
+            PersistentLog.log(.modelPrewarmStarted(name: identifier))
             defer { isPrewarming = false }
 
-            // FluidAudio handles download + CoreML compilation in one call
+            // Step 4: Load and compile CoreML models.
+            // ParakeetEngine.prepare() calls AsrModels.downloadAndLoad() which will find
+            // the already-downloaded files and skip straight to compilation.
             let parakeetEngine = ParakeetEngine()
             try await parakeetEngine.prepare(modelIdentifier: identifier)
-
-            downloadProgress.removeValue(forKey: identifier)
 
             // Update state
             if !downloadedModels.contains(identifier) {
@@ -277,10 +297,13 @@ class ModelManager: ObservableObject {
     /// would have no model to use, resulting in a broken experience.
     func deleteModel(_ identifier: String) throws {
         guard downloadedModels.count > 1 else {
+            PersistentLog.log(.modelDeleteFailed(name: identifier, error: "cannot delete last model"))
             throw ModelManagerError.cannotDeleteLastModel
         }
 
-        // Remove model files from disk
+        let engine = ModelInfo.forIdentifier(identifier)?.engine ?? .whisperKit
+
+        // Remove model files from App Group container
         if let modelsDir = modelsDirectory {
             let modelPath = modelsDir.appendingPathComponent(identifier)
             if FileManager.default.fileExists(atPath: modelPath.path) {
@@ -288,14 +311,23 @@ class ModelManager: ObservableObject {
             }
         }
 
-        // Also remove from WhisperKit's default download location
+        // Remove from WhisperKit's default download location
         // WhisperKit.download stores models at Documents/huggingface/models/argmaxinc/whisperkit-coreml/{identifier}
         let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         if let whisperKitDir = docsDir?.appendingPathComponent("huggingface/models/argmaxinc/whisperkit-coreml/\(identifier)") {
             if FileManager.default.fileExists(atPath: whisperKitDir.path) {
                 try FileManager.default.removeItem(at: whisperKitDir)
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Deleted model files at: \(whisperKitDir.path)")
+            }
+        }
+
+        // Remove FluidAudio/Parakeet cached models
+        // FluidAudio stores downloaded + compiled CoreML models in Application Support/FluidAudio/Models/{version}/
+        // Clean ALL known AsrModelVersion caches so this works for any current or future Parakeet model.
+        if engine == .parakeet {
+            for version: AsrModelVersion in [.v2, .v3] {
+                let versionDir = AsrModels.defaultCacheDirectory(for: version)
+                if FileManager.default.fileExists(atPath: versionDir.path) {
+                    try FileManager.default.removeItem(at: versionDir)
                 }
             }
         }
@@ -309,6 +341,7 @@ class ModelManager: ObservableObject {
         }
 
         persistState()
+        PersistentLog.log(.modelDeleted(name: identifier, engine: engine.displayName))
     }
 
     /// Checks if a model is the device-recommended variant.
@@ -342,6 +375,15 @@ class ModelManager: ObservableObject {
         if let whisperKitDir = docsDir?.appendingPathComponent("huggingface/models/argmaxinc/whisperkit-coreml/\(identifier)") {
             try? FileManager.default.removeItem(at: whisperKitDir)
         }
+
+        // Clean FluidAudio/Parakeet cached models (all versions)
+        if ModelInfo.allIncludingDeprecated.first(where: { $0.identifier == identifier })?.engine == .parakeet {
+            for version: AsrModelVersion in [.v2, .v3] {
+                try? FileManager.default.removeItem(at: AsrModels.defaultCacheDirectory(for: version))
+            }
+        }
+
+        PersistentLog.log(.modelCleanupPerformed(name: identifier, reason: "download-or-prewarm-failure"))
 
         // Remove from downloaded list if it was added prematurely
         downloadedModels.removeAll { $0 == identifier }

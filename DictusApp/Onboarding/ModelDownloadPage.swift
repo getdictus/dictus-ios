@@ -59,9 +59,8 @@ struct ModelDownloadPage: View {
                 .padding(.horizontal, 32)
                 .padding(.bottom, 24)
 
-            // Download progress
-            if isDownloading {
-                let progress = modelManager.downloadProgress[recommendedModel] ?? 0
+            // Download progress (only show bar when we have actual progress data)
+            if isDownloading, let progress = modelManager.downloadProgress[recommendedModel] {
                 VStack(spacing: 8) {
                     ProgressView(value: Double(progress))
                         .tint(.dictusAccent)

@@ -64,6 +64,10 @@ public enum LogEvent: Sendable {
     case modelSelected(name: String)
     case modelCompilationStarted(name: String)
     case modelCompilationCompleted(name: String, durationMs: Int)
+    case modelDeleted(name: String, engine: String)
+    case modelDeleteFailed(name: String, error: String)
+    case modelPrewarmStarted(name: String)
+    case modelCleanupPerformed(name: String, reason: String)
 
     // MARK: Keyboard
     case keyboardDidAppear
@@ -105,7 +109,8 @@ public enum LogEvent: Sendable {
         case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort:
             return .transcription
         case .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadFailed,
-             .modelSelected, .modelCompilationStarted, .modelCompilationCompleted:
+             .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
+             .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .overlayShown, .overlayHidden, .rapidTapRejected:
@@ -128,7 +133,7 @@ public enum LogEvent: Sendable {
         switch self {
         // Errors
         case .dictationFailed, .audioSessionFailed, .transcriptionFailed,
-             .modelDownloadFailed:
+             .modelDownloadFailed, .modelDeleteFailed:
             return .error
 
         // Warnings
@@ -141,6 +146,7 @@ public enum LogEvent: Sendable {
              .transcriptionStarted, .transcriptionCompleted,
              .modelDownloadStarted, .modelDownloadCompleted,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
+             .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
              .keyboardDidAppear, .keyboardMicTapped,
              .appLaunched, .appWhisperKitLoaded,
              .overlayShown, .overlayHidden, .statusChanged:
@@ -178,6 +184,10 @@ public enum LogEvent: Sendable {
         case .modelSelected: return "modelSelected"
         case .modelCompilationStarted: return "modelCompilationStarted"
         case .modelCompilationCompleted: return "modelCompilationCompleted"
+        case .modelDeleted: return "modelDeleted"
+        case .modelDeleteFailed: return "modelDeleteFailed"
+        case .modelPrewarmStarted: return "modelPrewarmStarted"
+        case .modelCleanupPerformed: return "modelCleanupPerformed"
         case .keyboardDidAppear: return "keyboardDidAppear"
         case .keyboardDidDisappear: return "keyboardDidDisappear"
         case .keyboardMicTapped: return "keyboardMicTapped"
@@ -246,6 +256,14 @@ public enum LogEvent: Sendable {
             return "name=\(name)"
         case .modelCompilationCompleted(let name, let durationMs):
             return "name=\(name) duration=\(durationMs)ms"
+        case .modelDeleted(let name, let engine):
+            return "name=\(name) engine=\(engine)"
+        case .modelDeleteFailed(let name, let error):
+            return "name=\(name) error=\(error)"
+        case .modelPrewarmStarted(let name):
+            return "name=\(name)"
+        case .modelCleanupPerformed(let name, let reason):
+            return "name=\(name) reason=\(reason)"
 
         // Keyboard (no content parameters -- privacy)
         case .keyboardDidAppear, .keyboardDidDisappear,
