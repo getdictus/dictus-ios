@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
 status: executing
-stopped_at: Completed 15-06-PLAN.md
-last_updated: "2026-03-13T12:18:19.934Z"
+stopped_at: Completed 15-09-PLAN.md
+last_updated: "2026-03-13T13:03:33.116Z"
 last_activity: 2026-03-13 -- Plan 15-06 executed (model card UX polish)
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 19
-  completed_plans: 19
+  total_plans: 21
+  completed_plans: 21
   percent: 89
 ---
 
@@ -78,6 +78,10 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15-06]: Inline Text rows as section headers (not Section header: parameter) to prevent iOS sticky header behavior
 - [Phase 15-06]: Active model highlight changed from background tint to border stroke overlay on glass
 - [Phase 15-06]: Engine descriptions consolidated into single footer section instead of per-section duplicates
+- [Phase 15]: Matched transcribingContent layout to recordingContent (reserved top bar + footer height) to eliminate waveform Y-jump
+- [Phase 15]: Removed SettingsRowStyle ButtonStyle -- native List press highlight works for Button and NavigationLink without custom masking
+- [Phase 15]: Replaced Link with Button for GitHub row to get native press feedback in scrollContentBackground(.hidden) context
+- [Phase 15]: Active card uses both background tint (0.10 opacity) AND border stroke -- dual visual indicator for active model
 
 ### Pending Todos
 
@@ -92,8 +96,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T12:16:32.966Z
-Stopped at: Completed 15-06-PLAN.md
+Last session: 2026-03-13T13:03:33.114Z
+Stopped at: Completed 15-09-PLAN.md
 Resume file: None
 
 ---
