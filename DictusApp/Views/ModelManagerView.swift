@@ -99,9 +99,12 @@ struct ModelManagerView: View {
                         )
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             if canDelete(model) {
-                                Button("Supprimer", role: .destructive) {
+                                Button(role: .destructive) {
                                     modelToDelete = model
                                     showDeleteAlert = true
+                                } label: {
+                                    Label("Supprimer", systemImage: "trash")
+                                        .frame(maxHeight: .infinity)
                                 }
                                 .tint(.red)
                             }
