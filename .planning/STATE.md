@@ -4,14 +4,14 @@ milestone: v1.2
 milestone_name: Beta Ready
 status: completed
 stopped_at: Completed 15-08-PLAN.md
-last_updated: "2026-03-13T12:15:14.158Z"
-last_activity: 2026-03-13 -- Plan 15-05 executed (French accent gap closure)
+last_updated: "2026-03-13T12:16:08.706Z"
+last_activity: 2026-03-13 -- Plan 15-08 executed (keyboard detection crash resilience)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 19
-  completed_plans: 18
-  percent: 100
+  completed_plans: 19
+  percent: 89
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 15 complete -- Design Polish (all 5 plans done). Ready for Phase 16 (TestFlight).
+**Current focus:** Phase 15 gap closure -- Design Polish hotfix plans. Ready for Phase 16 (TestFlight).
 
 ## Current Position
 
 Phase: 15 of 16 (Design Polish) -- COMPLETE
 Plan: 5 of 5 in current phase (all plans done)
 Status: Phase 15 complete, ready for Phase 16
-Last activity: 2026-03-13 -- Plan 15-05 executed (French accent gap closure)
+Last activity: 2026-03-13 -- Plan 15-08 executed (keyboard detection crash resilience)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 89%
 
 ## Performance Metrics
 
@@ -73,6 +73,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15]: Fixed 'autorise' -> 'autorise' accent alongside planned 'Reglages' fix (Rule 2 auto-fix)
 - [Phase 15]: Auto-advance after 1.5s delay in onboarding -- user sees transcription before success screen
 - [Phase 15]: SettingsRowStyle ButtonStyle restores tap feedback without removing scrollContentBackground
+- [Phase 15-08]: Used structured LogEvent cases for onboarding logging instead of deprecated freeform API
+- [Phase 15-08]: Increased keyboard detection debounce from 500ms to 800ms with 2s retry backoff
 
 ### Pending Todos
 
@@ -87,8 +89,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T12:15:14.156Z
-Stopped at: Completed 15-07-PLAN.md
+Last session: 2026-03-13T12:16:06.085Z
+Stopped at: Completed 15-08-PLAN.md
 Resume file: None
 
 ---
