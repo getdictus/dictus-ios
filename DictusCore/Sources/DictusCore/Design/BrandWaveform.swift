@@ -79,6 +79,19 @@ public struct BrandWaveform: View {
                         updateDisplayLevels()
                     }
                 }
+                // Fallback: update displayLevels when new energy data arrives.
+                // WHY: In keyboard extensions, iOS can suspend the extension process
+                // (e.g., when the user visits Settings then returns). After resumption,
+                // TimelineView's CADisplayLink may not restart, so onChange(of: timeline.date)
+                // never fires. This ensures displayLevels still updates at the input rate
+                // (~5Hz from App Group) even when the animation loop is dead.
+                // When TimelineView IS working, this just adds a redundant update on each
+                // data change — harmless since updateDisplayLevels() is idempotent.
+                .onChange(of: energyLevels) { _ in
+                    if !isProcessing {
+                        updateDisplayLevels()
+                    }
+                }
         }
     }
 

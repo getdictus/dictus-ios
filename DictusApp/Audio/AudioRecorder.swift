@@ -43,6 +43,14 @@ class AudioRecorder: ObservableObject {
     /// Elapsed recording time in seconds.
     @Published var bufferSeconds: Double = 0
 
+    /// Scale raw relativeEnergy values to waveform-visible range.
+    /// WHY: WhisperKit's relativeEnergy produces small values (~0.001-0.05 for normal speech).
+    /// BrandWaveform's silence threshold is 0.05, so most raw values get killed → invisible bars.
+    /// Same 15x scaling as RawAudioCapture.processBuffer to produce visible, dynamic bars.
+    private nonisolated static func scaleEnergy(_ raw: [Float]) -> [Float] {
+        raw.map { min($0 * 15.0, 1.0) }
+    }
+
     /// Timestamp of last heartbeat write to App Group.
     /// Written from the audio callback thread at ~1Hz so the keyboard watchdog
     /// can detect the app is still recording even when main thread is throttled.
@@ -165,7 +173,8 @@ class AudioRecorder: ObservableObject {
             // (bufferEnergy → Coordinator → forwardWaveformToAppGroup) misses updates.
             if now - self.lastWaveformWrite >= 0.2, let wk = self.whisperKit {
                 self.lastWaveformWrite = now
-                let energy = Array(wk.audioProcessor.relativeEnergy.suffix(30))
+                let raw = Array(wk.audioProcessor.relativeEnergy.suffix(30))
+                let energy = AudioRecorder.scaleEnergy(raw)
                 if let data = try? JSONEncoder().encode(energy) {
                     AppGroup.defaults.set(data, forKey: SharedKeys.waveformEnergy)
                 }
@@ -179,7 +188,8 @@ class AudioRecorder: ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 guard let self, let wk = self.whisperKit else { return }
                 guard self.isRecording else { return }
-                self.bufferEnergy = Array(wk.audioProcessor.relativeEnergy.suffix(30))
+                let raw = Array(wk.audioProcessor.relativeEnergy.suffix(30))
+                self.bufferEnergy = AudioRecorder.scaleEnergy(raw)
                 self.bufferSeconds = Double(wk.audioProcessor.audioSamples.count)
                     / Double(WhisperKit.sampleRate)
             }
@@ -233,7 +243,8 @@ class AudioRecorder: ObservableObject {
                 // Waveform to App Group (~5Hz) — audio thread, bypasses main throttling
                 if now - self.lastWaveformWrite >= 0.2, let wk = self.whisperKit {
                     self.lastWaveformWrite = now
-                    let energy = Array(wk.audioProcessor.relativeEnergy.suffix(30))
+                    let raw = Array(wk.audioProcessor.relativeEnergy.suffix(30))
+                    let energy = AudioRecorder.scaleEnergy(raw)
                     if let data = try? JSONEncoder().encode(energy) {
                         AppGroup.defaults.set(data, forKey: SharedKeys.waveformEnergy)
                     }
@@ -247,7 +258,8 @@ class AudioRecorder: ObservableObject {
                 DispatchQueue.main.async { [weak self] in
                     guard let self, let wk = self.whisperKit else { return }
                     guard self.isRecording else { return }
-                    self.bufferEnergy = Array(wk.audioProcessor.relativeEnergy.suffix(30))
+                    let raw = Array(wk.audioProcessor.relativeEnergy.suffix(30))
+                    self.bufferEnergy = AudioRecorder.scaleEnergy(raw)
                     self.bufferSeconds = Double(wk.audioProcessor.audioSamples.count)
                         / Double(WhisperKit.sampleRate)
                 }
