@@ -45,12 +45,12 @@ struct MicPermissionPage: View {
             // Permission result feedback
             if let granted = permissionGranted {
                 if granted {
-                    Label("Microphone autorise", systemImage: "checkmark.circle.fill")
+                    Label("Microphone autorisé", systemImage: "checkmark.circle.fill")
                         .font(.dictusBody)
                         .foregroundColor(.dictusSuccess)
                         .padding(.bottom, 16)
                 } else {
-                    Text("Vous pouvez activer le micro plus tard dans Reglages")
+                    Text("Vous pouvez activer le micro plus tard dans Réglages")
                         .font(.dictusCaption)
                         .foregroundColor(.orange)
                         .multilineTextAlignment(.center)
