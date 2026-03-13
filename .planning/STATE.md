@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
 status: executing
-stopped_at: Phase 15.1 context gathered
-last_updated: "2026-03-13T17:12:53.673Z"
+stopped_at: Completed 15.1-01-PLAN.md
+last_updated: "2026-03-13T17:31:22.260Z"
 last_activity: 2026-03-13 -- Plan 15-06 executed (model card UX polish)
 progress:
   total_phases: 7
   completed_phases: 5
-  total_plans: 21
-  completed_plans: 21
+  total_plans: 23
+  completed_plans: 22
   percent: 89
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-03-11)
 
 ## Current Position
 
-Phase: 15 of 16 (Design Polish) -- COMPLETE
-Plan: 6 of 8 in current phase
-Status: Executing Phase 15 gap closure plans
-Last activity: 2026-03-13 -- Plan 15-06 executed (model card UX polish)
+Phase: 15.1 of 16 (UI Polish Fixes) -- IN PROGRESS
+Plan: 1 of 2 in current phase
+Status: Executing Phase 15.1 UI polish plans
+Last activity: 2026-03-13 -- Plan 15.1-01 executed (app name, icon, button alignment, swipe-back)
 
 Progress: [█████████░] 89%
 
@@ -82,6 +82,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15]: Removed SettingsRowStyle ButtonStyle -- native List press highlight works for Button and NavigationLink without custom masking
 - [Phase 15]: Replaced Link with Button for GitHub row to get native press feedback in scrollContentBackground(.hidden) context
 - [Phase 15]: Active card uses both background tint (0.10 opacity) AND border stroke -- dual visual indicator for active model
+- [Phase 15.1]: Used cairosvg for SVG-to-PNG rendering (ImageMagick MSVG renders gradients as grayscale)
 
 ### Pending Todos
 
@@ -100,9 +101,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T17:12:53.666Z
-Stopped at: Phase 15.1 context gathered
-Resume file: .planning/phases/15.1-ui-polish-fixes-30-33-34-24/15.1-CONTEXT.md
+Last session: 2026-03-13T17:31:22.258Z
+Stopped at: Completed 15.1-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*
