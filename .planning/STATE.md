@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
 status: executing
-stopped_at: Completed 15.1-01-PLAN.md
-last_updated: "2026-03-13T17:31:22.260Z"
-last_activity: 2026-03-13 -- Plan 15-06 executed (model card UX polish)
+stopped_at: Completed 15.1-02-PLAN.md
+last_updated: "2026-03-13T17:32:02.015Z"
+last_activity: 2026-03-13 -- Plan 15.1-01 executed (app name, icon, button alignment, swipe-back)
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 23
-  completed_plans: 22
+  completed_plans: 23
   percent: 89
 ---
 
@@ -83,6 +83,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15]: Replaced Link with Button for GitHub row to get native press feedback in scrollContentBackground(.hidden) context
 - [Phase 15]: Active card uses both background tint (0.10 opacity) AND border stroke -- dual visual indicator for active model
 - [Phase 15.1]: Used cairosvg for SVG-to-PNG rendering (ImageMagick MSVG renders gradients as grayscale)
+- [Phase 15.1]: AudioServicesPlaySystemSound over AVAudioPlayer -- respects silent switch natively
+- [Phase 15.1]: Start sound before configureAudioSession to avoid WhisperKit session suppression
 
 ### Pending Todos
 
@@ -101,8 +103,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T17:31:22.258Z
-Stopped at: Completed 15.1-01-PLAN.md
+Last session: 2026-03-13T17:32:02.013Z
+Stopped at: Completed 15.1-02-PLAN.md
 Resume file: None
 
 ---

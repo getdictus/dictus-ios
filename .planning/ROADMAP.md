@@ -48,7 +48,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 - [x] **Phase 13: Cold Start Audio Bridge** - Audio Bridge pattern for keyboard-captured audio with graceful return-to-keyboard UX (completed 2026-03-12)
 - [x] **Phase 14: Model Pipeline** - CoreML compilation UX, model download modal, device RAM gating, Parakeet fixes (completed 2026-03-12)
 - [x] **Phase 15: Design Polish** - French accent audit, model manager redesign, recording overlay and keyboard UX refinements (completed 2026-03-13)
-- [ ] **Phase 15.1: UI Polish Fixes** - Button alignment, app name/logo, swipe-back overlay, recording sound feedback (INSERTED)
+- [x] **Phase 15.1: UI Polish Fixes** - Button alignment, app name/logo, swipe-back overlay, recording sound feedback (INSERTED) (completed 2026-03-13)
 - [ ] **Phase 16: TestFlight Deployment** - Developer account migration, Privacy Manifest, archive, and first beta distribution
 
 ## Phase Details
@@ -145,7 +145,7 @@ Plans:
 **Goal:** Fix button alignment (#30), app display name and logo centering (#33), swipe-back overlay improvements (#34), and recording sound feedback with settings (#24) before TestFlight beta
 **Requirements**: #30, #33, #34, #24
 **Depends on:** Phase 15
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 15.1-01-PLAN.md — App name/logo (#33), button alignment (#30), swipe-back overlay (#34)
@@ -192,7 +192,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 16
 | 13. Cold Start Audio Bridge | 3/3 | Complete   | 2026-03-12 | - |
 | 14. Model Pipeline | 4/4 | Complete   | 2026-03-13 | - |
 | 15. Design Polish | 10/10 | Complete    | 2026-03-13 | - |
-| 15.1. UI Polish Fixes | 1/2 | In Progress|  | - |
+| 15.1. UI Polish Fixes | 2/2 | Complete   | 2026-03-13 | - |
 | 16. TestFlight Deployment | v1.2 | 0/2 | Not started | - |
 
 ---
