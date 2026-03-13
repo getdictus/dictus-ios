@@ -39,12 +39,11 @@ enum SoundFeedbackService {
     /// `as? Float` fails silently because Swift doesn't bridge Double→Float.
     /// We read as Double first, then convert.
     ///
-    /// WHY maxVolume = 0.2:
-    /// The bundled WAV files are recorded at very high gain. Even at slider minimum
-    /// (5%), the raw volume is too loud for subtle feedback sounds. The 0.2 cap means
-    /// the slider controls a 1%–20% range of the original audio, which feels right
-    /// for short UI feedback beeps.
-    private static let maxVolume: Float = 0.2
+    /// WHY maxVolume = 0.1:
+    /// The bundled WAV files are recorded at very high gain. A 0.1 cap means
+    /// the slider controls a 0.5%–10% range of the original audio. Slider at 100%
+    /// gives a subtle but clearly audible feedback beep.
+    private static let maxVolume: Float = 0.1
 
     private static func volume() -> Float {
         let defaults = UserDefaults(suiteName: AppGroup.identifier)
