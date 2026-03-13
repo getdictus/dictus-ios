@@ -63,16 +63,6 @@ struct ModelManagerView: View {
         }
     }
 
-    /// Which speech engines appear in the downloaded section (for engine descriptions).
-    private var downloadedEngines: Set<SpeechEngine> {
-        Set(downloadedModels.map(\.engine))
-    }
-
-    /// Which speech engines appear in the available section (for engine descriptions).
-    private var availableEngines: Set<SpeechEngine> {
-        Set(availableModels.map(\.engine))
-    }
-
     /// Whether a given model can be deleted (not active, not the last one).
     private func canDelete(_ model: ModelInfo) -> Bool {
         let state = modelManager.modelStates[model.identifier] ?? .notDownloaded
@@ -85,8 +75,19 @@ struct ModelManagerView: View {
     var body: some View {
         List {
             // MARK: - Downloaded section
+            // WHY no Section header: parameter:
+            // List Section headers are sticky by default in iOS. Using an inline Text row
+            // as the first item in a plain Section makes it scroll with the content.
             if !downloadedModels.isEmpty {
                 Section {
+                    // Inline section header — scrolls with content (not sticky)
+                    Text("Téléchargés")
+                        .font(.dictusSubheading)
+                        .foregroundStyle(.secondary)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
+
                     ForEach(downloadedModels) { model in
                         ModelCardView(
                             model: model,
@@ -109,23 +110,20 @@ struct ModelManagerView: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                     }
-
-                    // Engine description paragraphs for downloaded section
-                    engineDescriptions(for: downloadedEngines)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                } header: {
-                    Text("Téléchargés")
-                        .font(.dictusSubheading)
-                        .foregroundStyle(.secondary)
-                        .textCase(nil)
                 }
             }
 
             // MARK: - Available section
             if !availableModels.isEmpty {
                 Section {
+                    // Inline section header — scrolls with content (not sticky)
+                    Text("Disponibles")
+                        .font(.dictusSubheading)
+                        .foregroundStyle(.secondary)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 0, trailing: 16))
+
                     ForEach(availableModels) { model in
                         ModelCardView(
                             model: model,
@@ -139,18 +137,28 @@ struct ModelManagerView: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                     }
-
-                    // Engine description paragraphs for available section
-                    engineDescriptions(for: availableEngines)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                } header: {
-                    Text("Disponibles")
-                        .font(.dictusSubheading)
-                        .foregroundStyle(.secondary)
-                        .textCase(nil)
                 }
+            }
+
+            // MARK: - Engine descriptions footer
+            // WHY a separate section at the bottom:
+            // Engine descriptions are reference info, not per-section content.
+            // Placing them as a fixed footer at the bottom keeps the model sections clean
+            // and avoids duplicating descriptions across Downloaded/Available sections.
+            Section {
+                VStack(alignment: .leading, spacing: 12) {
+                    engineParagraph(
+                        icon: "waveform",
+                        text: "WhisperKit — moteur de transcription développé par Argmax, optimisé pour les puces Apple. Modèles entraînés sur OpenAI Whisper."
+                    )
+                    engineParagraph(
+                        icon: "bolt",
+                        text: "Parakeet — moteur de transcription développé par NVIDIA, optimisé pour la vitesse. Modèles Parakeet TDT."
+                    )
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16))
             }
         }
         .listStyle(.plain)
@@ -191,24 +199,6 @@ struct ModelManagerView: View {
     }
 
     // MARK: - Engine descriptions
-
-    /// Shows a brief paragraph for each speech engine represented in the section.
-    @ViewBuilder
-    private func engineDescriptions(for engines: Set<SpeechEngine>) -> some View {
-        if engines.contains(.whisperKit) {
-            engineParagraph(
-                icon: "waveform",
-                text: "WhisperKit — moteur de transcription développé par Argmax, optimisé pour les puces Apple. Modèles entraînés sur OpenAI Whisper."
-            )
-        }
-
-        if engines.contains(.parakeet) {
-            engineParagraph(
-                icon: "bolt",
-                text: "Parakeet — moteur de transcription développé par NVIDIA, optimisé pour la vitesse. Modèles Parakeet TDT."
-            )
-        }
-    }
 
     /// A single engine description paragraph with icon.
     private func engineParagraph(icon: String, text: String) -> some View {

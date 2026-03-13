@@ -90,7 +90,7 @@ struct HomeView: View {
                         Text("Modèle actif")
                             .font(.dictusCaption)
                             .foregroundColor(.secondary)
-                        Text("Whisper \(info?.displayName ?? modelName)")
+                        Text(info?.displayName ?? modelName)
                             .font(.dictusSubheading)
                         if let size = info?.sizeLabel {
                             Text(size)

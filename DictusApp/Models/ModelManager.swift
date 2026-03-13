@@ -90,6 +90,16 @@ class ModelManager: ObservableObject {
             downloadedModels = models
         }
         activeModel = defaults.string(forKey: SharedKeys.activeModel)
+
+        // Resync modelStates with loaded downloadedModels so models downloaded
+        // by onboarding's separate ModelManager instance show as .ready here.
+        for model in ModelInfo.allIncludingDeprecated {
+            if downloadedModels.contains(model.identifier) {
+                if modelStates[model.identifier] == nil || modelStates[model.identifier] == .notDownloaded {
+                    modelStates[model.identifier] = .ready
+                }
+            }
+        }
     }
 
     /// Downloads a model variant, prewarms it, and updates state.
