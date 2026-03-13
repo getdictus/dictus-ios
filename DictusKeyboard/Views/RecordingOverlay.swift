@@ -158,7 +158,7 @@ struct RecordingOverlay: View {
                 .foregroundColor(foregroundColor)
                 .padding(.bottom, 4)
 
-            Text("Listening...")
+            Text("En écoute...")
                 .font(.dictusCaption)
                 .foregroundColor(secondaryForeground)
                 .padding(.bottom, 8)
@@ -167,22 +167,44 @@ struct RecordingOverlay: View {
 
     // MARK: - Transcribing state
 
+    /// Transcribing state layout matches recordingContent's vertical structure exactly
+    /// so the waveform stays at the same Y position during the state transition.
+    ///
+    /// WHY matching structure:
+    /// recordingContent has: top bar (44pt + padding) → GeometryReader → footer (timer + caption + padding).
+    /// If transcribingContent uses a different layout (e.g. Spacer/Spacer), the waveform's
+    /// GeometryReader gets different available height, causing a visible vertical jump.
+    /// By reserving identical top and bottom space, the waveform stays put.
     private var transcribingContent: some View {
-        VStack(spacing: 16) {
-            Spacer()
-
-            // WHY BrandWaveform instead of ProcessingAnimation:
-            // ProcessingAnimation showed 3 logo-based pulsing bars. BrandWaveform with
-            // isProcessing: true produces a sinusoidal traveling wave that visually
-            // continues from the recording waveform, signaling "processing audio data".
-            BrandWaveform(maxHeight: 60, isProcessing: true)
+        VStack(spacing: 0) {
+            // Reserve same top bar height as recording state (buttons area)
+            Color.clear
+                .frame(height: 44)
                 .padding(.horizontal, 16)
+                .padding(.vertical, 8)
 
+            // Waveform in GeometryReader -- same structure as recording state
+            GeometryReader { geo in
+                VStack(spacing: 8) {
+                    Spacer(minLength: 0)
+
+                    BrandWaveform(maxHeight: geo.size.height * 0.7, isProcessing: true)
+                        .padding(.horizontal, 2)
+
+                    Spacer(minLength: 0)
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
+            }
+
+            // Footer -- matches recording footer height (timer line + status line)
             Text("Transcription...")
-                .font(.dictusCaption)
-                .foregroundColor(secondaryForeground)
+                .font(.system(size: timerFontSize, weight: .medium, design: .monospaced))
+                .foregroundColor(foregroundColor)
+                .padding(.bottom, 4)
 
-            Spacer()
+            Color.clear
+                .frame(height: 16)
+                .padding(.bottom, 8)
         }
     }
 
