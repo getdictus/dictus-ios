@@ -33,10 +33,17 @@ enum SoundFeedbackService {
     }
 
     /// Read the user's volume preference (0.0–1.0), default 0.5.
+    ///
+    /// WHY Double then Float() conversion:
+    /// @AppStorage stores Double in UserDefaults. Casting directly to Float via
+    /// `as? Float` fails silently because Swift doesn't bridge Double→Float.
+    /// We read as Double first, then convert.
     private static func volume() -> Float {
         let defaults = UserDefaults(suiteName: AppGroup.identifier)
-        if let val = defaults?.object(forKey: SharedKeys.soundVolume) as? Float {
-            return val
+        let val = defaults?.double(forKey: SharedKeys.soundVolume)
+        // double(forKey:) returns 0.0 if key not set — treat 0 as "use default"
+        if let val, val > 0 {
+            return Float(val)
         }
         return 0.5
     }
