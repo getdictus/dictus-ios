@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
-status: in-progress
-stopped_at: Completed 15-02-PLAN.md
-last_updated: "2026-03-13T10:40:00Z"
-last_activity: 2026-03-13 -- Plan 15-02 executed (Model card UX redesign)
+status: completed
+stopped_at: Completed 15-03-PLAN.md
+last_updated: "2026-03-13T10:41:39.797Z"
+last_activity: 2026-03-13 -- Plan 15-03 executed (Recording overlay polish)
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 15
-  completed_plans: 13
-  percent: 87
+  completed_plans: 15
+  percent: 93
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 15 in progress -- Design Polish (model card UX done, plans 01/03/04 remaining).
+**Current focus:** Phase 15 in progress -- Design Polish (plans 01-03 done, plan 04 remaining).
 
 ## Current Position
 
 Phase: 15 of 16 (Design Polish) -- IN PROGRESS
-Plan: 2 of 4 in current phase (plan 02 done)
-Status: Plan 15-02 complete, continuing Phase 15
-Last activity: 2026-03-13 -- Plan 15-02 executed (Model card UX redesign)
+Plan: 3 of 4 in current phase (plans 01-03 done)
+Status: Plan 15-03 complete, continuing Phase 15
+Last activity: 2026-03-13 -- Plan 15-03 executed (Recording overlay polish)
 
-Progress: [█████████░] 87%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -65,6 +65,9 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15-02]: Used List with transparent styling (not ScrollView+VStack) to enable native swipeActions on model cards.
 - [Phase 15-02]: Active model highlight is background tint behind glass (not border, not badge) per user preference.
 - [Phase 15-02]: Removed onDelete callback from ModelCardView -- deletion handled exclusively via swipe in parent.
+- [Phase 15-03]: Used HapticFeedback.recordingStopped() (light impact) for both cancel and stop buttons -- consistent dismiss semantics.
+- [Phase 15-03]: Waveform logging uses freeform PersistentLog.log() not LogEvent enum -- diagnostic only, avoids adding enum cases for temporary instrumentation.
+- [Phase 15-03]: Animation value bound to showsOverlay Bool (not dictationStatus enum) for cleaner SwiftUI animation trigger.
 
 ### Pending Todos
 
@@ -79,9 +82,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T10:40:00Z
-Stopped at: Completed 15-02-PLAN.md
-Resume file: .planning/phases/15-design-polish/15-02-SUMMARY.md
+Last session: 2026-03-13T10:41:01Z
+Stopped at: Completed 15-03-PLAN.md
+Resume file: .planning/phases/15-design-polish/15-03-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*

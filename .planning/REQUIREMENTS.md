@@ -50,8 +50,8 @@ Requirements for v1.2 Beta Ready milestone. Each maps to roadmap phases.
 - [x] **DSGN-02**: Active model has blue border highlight in model manager (replaces subtle badge)
 - [x] **DSGN-03**: Model card layout improved (download button placement, badge/gauge alignment)
 - [x] **DSGN-04**: Tap anywhere on downloaded model card to select it
-- [ ] **DSGN-05**: X close button on recording overlay has 44pt hit area + haptic feedback
-- [ ] **DSGN-06**: Recording overlay dismissal uses smooth easeOut animation
+- [x] **DSGN-05**: X close button on recording overlay has 44pt hit area + haptic feedback
+- [x] **DSGN-06**: Recording overlay dismissal uses smooth easeOut animation
 - [x] **DSGN-07**: Mic button shows reduced opacity during transcription processing
 
 ### TestFlight
@@ -142,8 +142,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSGN-02 | Phase 15 | Complete |
 | DSGN-03 | Phase 15 | Complete |
 | DSGN-04 | Phase 15 | Complete |
-| DSGN-05 | Phase 15 | Pending |
-| DSGN-06 | Phase 15 | Pending |
+| DSGN-05 | Phase 15 | Complete |
+| DSGN-06 | Phase 15 | Complete |
 | DSGN-07 | Phase 15 | Complete |
 | TF-01 | Phase 16 | Pending |
 | TF-02 | Phase 16 | Pending |
