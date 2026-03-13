@@ -51,7 +51,10 @@ enum SoundFeedbackService {
     ///
     /// - Parameter soundName: File name without extension (e.g., "electronic_01a")
     static func play(_ soundName: String) {
-        guard !soundName.isEmpty else { return }
+        guard !soundName.isEmpty else {
+            PersistentLog.log("[Sound] play() called with empty name")
+            return
+        }
 
         // Check cache first
         if let cachedID = cachedSounds[soundName] {
@@ -59,8 +62,14 @@ enum SoundFeedbackService {
             return
         }
 
-        // Find the WAV file in the app bundle
-        guard let url = Bundle.main.url(forResource: soundName, withExtension: "wav") else {
+        // Find the WAV file in the app bundle's Sounds subdirectory.
+        // WHY subdirectory: "Sounds":
+        // The Sounds folder is added as a folder reference in Xcode, so WAV files
+        // live at AppBundle/Sounds/*.wav, not at the bundle root. Without the
+        // subdirectory parameter, url(forResource:withExtension:) only searches
+        // the root and returns nil.
+        guard let url = Bundle.main.url(forResource: soundName, withExtension: "wav", subdirectory: "Sounds") else {
+            PersistentLog.log("[Sound] WAV not found in bundle: \(soundName).wav (subdirectory: Sounds)")
             return
         }
 
@@ -74,6 +83,7 @@ enum SoundFeedbackService {
         // Cache and play
         cachedSounds[soundName] = soundID
         AudioServicesPlaySystemSound(soundID)
+        PersistentLog.log("[Sound] Playing: \(soundName)")
     }
 
     /// Play the recording-start sound.

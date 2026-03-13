@@ -44,7 +44,7 @@ struct SoundSettingsView: View {
             // Section 2: Start sound picker
             Section {
                 soundPickerRow(
-                    label: "Debut d'enregistrement",
+                    label: "Début d'enregistrement",
                     selection: $recordStartSoundName
                 )
             }
@@ -95,8 +95,7 @@ struct SoundSettingsView: View {
                         .tag(name)
                 }
             }
-
-            Spacer()
+            .pickerStyle(.menu)
 
             Button {
                 SoundFeedbackService.play(selection.wrappedValue)
