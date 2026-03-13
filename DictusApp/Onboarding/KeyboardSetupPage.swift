@@ -102,19 +102,39 @@ struct KeyboardSetupPage: View {
             animationTimer = nil
         }
         .onChange(of: scenePhase) { newPhase in
-            // WHY debounced check with 500ms delay:
+            // WHY debounced check with 800ms delay (increased from 500ms):
             // When returning from iOS Settings, scenePhase fires .active before
-            // UITextInputMode.activeInputModes has updated. The 500ms delay gives
-            // iOS time to register the newly-enabled keyboard. The isCheckingKeyboard
-            // guard prevents concurrent checks from rapid phase transitions.
+            // UITextInputMode.activeInputModes has updated. The 800ms delay gives
+            // iOS more time to register the newly-enabled keyboard. A second retry
+            // at 2s catches slow Settings sync. The isCheckingKeyboard guard
+            // prevents concurrent checks from rapid phase transitions.
+            PersistentLog.log(.onboardingScenePhaseChanged(phase: "\(newPhase)"))
+
             if newPhase == .active {
-                guard !isCheckingKeyboard else { return }
+                guard !isCheckingKeyboard else {
+                    PersistentLog.log(.onboardingKeyboardCheckSkipped(reason: "alreadyChecking"))
+                    return
+                }
                 isCheckingKeyboard = true
                 Task {
-                    try? await Task.sleep(for: .milliseconds(500))
+                    // First check at 800ms (increased from 500ms for stability)
+                    try? await Task.sleep(for: .milliseconds(800))
                     await MainActor.run {
                         checkKeyboardInstalled()
-                        isCheckingKeyboard = false
+                    }
+
+                    // If not detected, retry at 2s (covers slow Settings sync)
+                    if !keyboardDetected {
+                        try? await Task.sleep(for: .milliseconds(1200))
+                        await MainActor.run {
+                            PersistentLog.log(.onboardingKeyboardRetry)
+                            checkKeyboardInstalled()
+                            isCheckingKeyboard = false
+                        }
+                    } else {
+                        await MainActor.run {
+                            isCheckingKeyboard = false
+                        }
                     }
                 }
             }
@@ -231,14 +251,27 @@ struct KeyboardSetupPage: View {
     /// an array of UITextInputMode objects whose `value(forKey: "identifier")`
     /// contains the bundle identifier. We look for our keyboard extension's
     /// bundle ID "com.pivi.dictus.keyboard".
+    ///
+    /// WHY defensive coding:
+    /// UITextInputMode.activeInputModes can be unstable during rapid scenePhase
+    /// transitions (e.g., returning from Settings). value(forKey:) is KVO and
+    /// can return unexpected types. Guard against both to prevent crashes.
     private func checkKeyboardInstalled() {
         let modes = UITextInputMode.activeInputModes
+        PersistentLog.log(.onboardingKeyboardCheckStarted(modeCount: modes.count))
+
         for mode in modes {
-            if let identifier = mode.value(forKey: "identifier") as? String,
-               identifier.contains("com.pivi.dictus") {
+            // value(forKey:) is KVO — guard against unexpected nil or type mismatch
+            guard let identifier = mode.value(forKey: "identifier") as? String else {
+                continue
+            }
+            if identifier.contains("com.pivi.dictus") {
+                PersistentLog.log(.onboardingKeyboardDetected(identifier: identifier))
                 keyboardDetected = true
                 return
             }
         }
+
+        PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
     }
 }

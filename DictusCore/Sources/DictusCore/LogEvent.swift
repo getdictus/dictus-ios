@@ -90,6 +90,14 @@ public enum LogEvent: Sendable {
     case engineCollectResult(sampleCount: Int, engineRunning: Bool)
     case engineDarwinStartReceived(appState: String, engineRunning: Bool)
 
+    // MARK: Onboarding
+    case onboardingScenePhaseChanged(phase: String)
+    case onboardingKeyboardCheckStarted(modeCount: Int)
+    case onboardingKeyboardDetected(identifier: String)
+    case onboardingKeyboardNotFound(modeCount: Int)
+    case onboardingKeyboardCheckSkipped(reason: String)
+    case onboardingKeyboardRetry
+
     // MARK: Lifecycle
     case appLaunched(version: String)
     case appDidBecomeActive
@@ -120,6 +128,10 @@ public enum LogEvent: Sendable {
         case .engineWarmUpAttempt, .engineWarmUpSuccess, .engineWarmUpFailed,
              .engineStateSnapshot, .engineCollectResult, .engineDarwinStartReceived:
             return .audio
+        case .onboardingScenePhaseChanged, .onboardingKeyboardCheckStarted,
+             .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
+             .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry:
+            return .lifecycle
         case .appLaunched, .appDidBecomeActive, .appWillResignActive,
              .appDidEnterBackground, .appWhisperKitLoaded:
             return .lifecycle
@@ -141,7 +153,8 @@ public enum LogEvent: Sendable {
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
-        case .dictationStarted, .dictationCompleted,
+        case .onboardingKeyboardDetected,
+             .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
              .transcriptionStarted, .transcriptionCompleted,
              .modelDownloadStarted, .modelDownloadCompleted,
@@ -153,7 +166,10 @@ public enum LogEvent: Sendable {
             return .info
 
         // Debug (internal state transitions)
-        case .audioEngineStopped,
+        case .onboardingScenePhaseChanged, .onboardingKeyboardCheckStarted,
+             .onboardingKeyboardNotFound, .onboardingKeyboardCheckSkipped,
+             .onboardingKeyboardRetry,
+             .audioEngineStopped,
              .keyboardDidDisappear, .keyboardTextInserted,
              .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground,
              .rapidTapRejected,
@@ -198,6 +214,12 @@ public enum LogEvent: Sendable {
         case .engineStateSnapshot: return "engineStateSnapshot"
         case .engineCollectResult: return "engineCollectResult"
         case .engineDarwinStartReceived: return "engineDarwinStartReceived"
+        case .onboardingScenePhaseChanged: return "onboardingScenePhaseChanged"
+        case .onboardingKeyboardCheckStarted: return "onboardingKeyboardCheckStarted"
+        case .onboardingKeyboardDetected: return "onboardingKeyboardDetected"
+        case .onboardingKeyboardNotFound: return "onboardingKeyboardNotFound"
+        case .onboardingKeyboardCheckSkipped: return "onboardingKeyboardCheckSkipped"
+        case .onboardingKeyboardRetry: return "onboardingKeyboardRetry"
         case .appLaunched: return "appLaunched"
         case .appDidBecomeActive: return "appDidBecomeActive"
         case .appWillResignActive: return "appWillResignActive"
@@ -283,6 +305,20 @@ public enum LogEvent: Sendable {
             return "sampleCount=\(sampleCount) engineRunning=\(engineRunning)"
         case .engineDarwinStartReceived(let appState, let engineRunning):
             return "appState=\(appState) engineRunning=\(engineRunning)"
+
+        // Onboarding
+        case .onboardingScenePhaseChanged(let phase):
+            return "phase=\(phase)"
+        case .onboardingKeyboardCheckStarted(let modeCount):
+            return "modeCount=\(modeCount)"
+        case .onboardingKeyboardDetected(let identifier):
+            return "identifier=\(identifier)"
+        case .onboardingKeyboardNotFound(let modeCount):
+            return "modeCount=\(modeCount)"
+        case .onboardingKeyboardCheckSkipped(let reason):
+            return "reason=\(reason)"
+        case .onboardingKeyboardRetry:
+            return ""
 
         // Lifecycle
         case .appLaunched(let version):
