@@ -1,5 +1,5 @@
 // DictusApp/Views/SoundSettingsView.swift
-// Sound feedback settings sub-page: global toggle + 3 NavigationLink pickers.
+// Sound feedback settings sub-page: global toggle + volume slider + 3 NavigationLink pickers.
 import SwiftUI
 import DictusCore
 
@@ -19,13 +19,16 @@ struct SoundSettingsView: View {
     private var soundFeedbackEnabled = true
 
     @AppStorage(SharedKeys.recordStartSoundName, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var recordStartSoundName = "electronic_01a"
+    private var recordStartSoundName = "electronic_01f"
 
     @AppStorage(SharedKeys.recordStopSoundName, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var recordStopSoundName = "ui_chime_01"
+    private var recordStopSoundName = "electronic_02e"
 
     @AppStorage(SharedKeys.recordCancelSoundName, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var recordCancelSoundName = "electronic_02a"
+    private var recordCancelSoundName = "electronic_02b"
+
+    @AppStorage(SharedKeys.soundVolume, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var soundVolume = 0.5
 
     // MARK: - Body
 
@@ -38,15 +41,32 @@ struct SoundSettingsView: View {
                 Text("Les sons respectent le bouton silencieux de l'iPhone.")
             }
 
-            // Section 2: Sound pickers as NavigationLinks
+            // Section 2: Volume slider
+            Section {
+                HStack(spacing: 12) {
+                    Image(systemName: "speaker.fill")
+                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                    Slider(value: $soundVolume, in: 0.05...1.0, step: 0.05)
+                        .tint(.accentColor)
+                    Image(systemName: "speaker.wave.3.fill")
+                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                }
+            } header: {
+                Text("Volume")
+            }
+            .disabled(!soundFeedbackEnabled)
+
+            // Section 3: Sound pickers as NavigationLinks
             Section {
                 soundNavigationRow(
-                    label: "Début d'enregistrement",
+                    label: "Début",
                     selection: $recordStartSoundName
                 )
 
                 soundNavigationRow(
-                    label: "Fin d'enregistrement",
+                    label: "Fin",
                     selection: $recordStopSoundName
                 )
 
@@ -54,6 +74,8 @@ struct SoundSettingsView: View {
                     label: "Annulation",
                     selection: $recordCancelSoundName
                 )
+            } header: {
+                Text("Sons par événement")
             }
             .disabled(!soundFeedbackEnabled)
         }
@@ -64,12 +86,12 @@ struct SoundSettingsView: View {
 
     // MARK: - Private
 
-    /// A NavigationLink row that shows the current selection and pushes a sound picker list.
+    /// A NavigationLink row showing label (fixed width) + current value + chevron.
     ///
-    /// WHY NavigationLink with value display (not Picker):
-    /// This follows the iOS Settings pattern: the row shows "Label" on the left and
-    /// the current value on the right with a chevron. Tapping pushes a full list view
-    /// where each sound has a checkmark and tapping plays a preview automatically.
+    /// WHY fixed-width label frame:
+    /// Without a fixed width, longer labels like "Début d'enregistrement" push the
+    /// value text further right, misaligning it with shorter labels. A fixed leading
+    /// column ensures all value texts start at the same horizontal position.
     @ViewBuilder
     private func soundNavigationRow(label: String, selection: Binding<String>) -> some View {
         NavigationLink {

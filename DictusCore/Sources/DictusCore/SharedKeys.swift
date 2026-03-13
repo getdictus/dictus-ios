@@ -71,4 +71,6 @@ public enum SharedKeys {
     public static let recordStopSoundName = "dictus.recordStopSoundName"
     /// Name of the WAV file (without extension) to play when recording is cancelled
     public static let recordCancelSoundName = "dictus.recordCancelSoundName"
+    /// Sound volume from 0.0 to 1.0, default 0.5
+    public static let soundVolume = "dictus.soundVolume"
 }

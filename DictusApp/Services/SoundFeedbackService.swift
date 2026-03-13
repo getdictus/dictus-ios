@@ -1,126 +1,119 @@
 // DictusApp/Services/SoundFeedbackService.swift
-// Plays short WAV sounds at key dictation lifecycle events using AudioToolbox.
-import AudioToolbox
+// Plays short WAV sounds at key dictation lifecycle events using AVAudioPlayer.
+import AVFoundation
 import DictusCore
 
 /// Plays audio feedback for dictation recording events (start, stop, cancel).
 ///
-/// WHY AudioServicesPlaySystemSound (not AVAudioPlayer):
-/// AudioServicesPlaySystemSound is the only API that respects the physical silent switch
-/// on iPhone natively. AVAudioPlayer ignores it unless you manually check the ring/silent
-/// switch state (which has no public API). Using AudioToolbox means: sound plays when
-/// the phone is not on silent, and stays silent when the user has flipped the switch --
-/// exactly the behavior users expect from feedback sounds.
+/// WHY AVAudioPlayer (not AudioServicesPlaySystemSound):
+/// AudioServicesPlaySystemSound respects the silent switch natively but has no volume
+/// control — sounds play at full system volume. AVAudioPlayer has a .volume property
+/// (0.0–1.0) for user-adjustable volume. To still respect the silent switch, we use
+/// the .ambient audio category which is silenced when the hardware switch is flipped.
 ///
-/// WHY static cached sounds:
-/// AudioServicesCreateSystemSoundID has a ~2-5ms overhead per call (reads file from disk,
-/// registers with the system). By caching the SystemSoundID after the first play, subsequent
-/// plays are instant. The cache persists for the app's lifetime -- these IDs are cheap
-/// (just an integer handle) and there are at most 29 of them.
+/// WHY static cached players:
+/// Creating an AVAudioPlayer from a URL has ~5-10ms overhead (file I/O + decode).
+/// By pre-loading and caching players, subsequent plays just call .play() which is
+/// near-instant. We call prepareToPlay() on cache to pre-fill audio buffers.
 ///
 /// WHY enum with static methods (same pattern as HapticFeedback):
-/// Consistency with the existing DictusCore HapticFeedback enum. Both are stateless
-/// utility types with class-level state (generators for haptics, cached IDs for sounds).
+/// Consistency with the existing DictusCore HapticFeedback enum.
 enum SoundFeedbackService {
 
     // MARK: - Cache
 
-    /// Maps sound file name (without extension) to its registered SystemSoundID.
-    private static var cachedSounds: [String: SystemSoundID] = [:]
+    /// Maps sound file name to a pre-loaded AVAudioPlayer ready to play.
+    private static var cachedPlayers: [String: AVAudioPlayer] = [:]
 
     // MARK: - Configuration
 
-    /// Check if sound feedback is enabled in user preferences.
-    ///
-    /// WHY object(forKey:) instead of bool(forKey:):
-    /// Same pattern as HapticFeedback.isEnabled() -- bool(forKey:) returns false
-    /// when the key has never been set, but we want the default to be true
-    /// (sounds enabled out of the box). object(forKey:) returns nil for missing keys.
     private static func isEnabled() -> Bool {
         let defaults = UserDefaults(suiteName: AppGroup.identifier)
         return defaults?.object(forKey: SharedKeys.soundFeedbackEnabled) as? Bool ?? true
+    }
+
+    /// Read the user's volume preference (0.0–1.0), default 0.5.
+    private static func volume() -> Float {
+        let defaults = UserDefaults(suiteName: AppGroup.identifier)
+        if let val = defaults?.object(forKey: SharedKeys.soundVolume) as? Float {
+            return val
+        }
+        return 0.5
     }
 
     // MARK: - Playback
 
     /// Play a sound by file name (without .wav extension).
     ///
-    /// Looks up the sound in the cache first. If not cached, finds the WAV file
-    /// in the app bundle, registers it with AudioToolbox, caches the ID, then plays.
-    /// Silently returns if the file is not found or registration fails.
+    /// Uses AVAudioPlayer with the ambient category so the silent switch is respected.
+    /// Volume is applied from user preferences on each play.
     ///
-    /// - Parameter soundName: File name without extension (e.g., "electronic_01a")
+    /// - Parameter soundName: File name without extension (e.g., "electronic_01f")
     static func play(_ soundName: String) {
         guard !soundName.isEmpty else {
             PersistentLog.log("[Sound] play() called with empty name")
             return
         }
 
-        // Check cache first
-        if let cachedID = cachedSounds[soundName] {
-            AudioServicesPlaySystemSound(cachedID)
+        let vol = volume()
+
+        // Check cache — reuse existing player
+        if let player = cachedPlayers[soundName] {
+            player.volume = vol
+            player.currentTime = 0
+            player.play()
             return
         }
 
         // Find the WAV file in the app bundle's Sounds subdirectory.
-        // WHY subdirectory: "Sounds":
-        // The Sounds folder is added as a folder reference in Xcode, so WAV files
-        // live at AppBundle/Sounds/*.wav, not at the bundle root. Without the
-        // subdirectory parameter, url(forResource:withExtension:) only searches
-        // the root and returns nil.
         guard let url = Bundle.main.url(forResource: soundName, withExtension: "wav", subdirectory: "Sounds") else {
             PersistentLog.log("[Sound] WAV not found in bundle: \(soundName).wav (subdirectory: Sounds)")
             return
         }
 
-        // Register with AudioToolbox
-        var soundID: SystemSoundID = 0
-        let status = AudioServicesCreateSystemSoundID(url as CFURL, &soundID)
-        guard status == kAudioServicesNoError else {
-            return
+        // Create player, cache, and play
+        do {
+            let player = try AVAudioPlayer(contentsOf: url)
+            player.volume = vol
+            player.prepareToPlay()
+            cachedPlayers[soundName] = player
+            player.play()
+            PersistentLog.log("[Sound] Playing: \(soundName) at volume \(vol)")
+        } catch {
+            PersistentLog.log("[Sound] Failed to create player for \(soundName): \(error.localizedDescription)")
         }
-
-        // Cache and play
-        cachedSounds[soundName] = soundID
-        AudioServicesPlaySystemSound(soundID)
-        PersistentLog.log("[Sound] Playing: \(soundName)")
     }
 
     /// Play the recording-start sound.
-    /// Default: "electronic_01a" -- a short, distinct beep that signals "recording has begun".
+    /// Default: "electronic_01f"
     static func playRecordStart() {
         guard isEnabled() else { return }
         let defaults = UserDefaults(suiteName: AppGroup.identifier)
-        let name = defaults?.string(forKey: SharedKeys.recordStartSoundName) ?? "electronic_01a"
+        let name = defaults?.string(forKey: SharedKeys.recordStartSoundName) ?? "electronic_01f"
         play(name)
     }
 
     /// Play the recording-stop sound.
-    /// Default: "ui_chime_01" -- a softer chime that signals "recording stopped, transcribing".
+    /// Default: "electronic_02e"
     static func playRecordStop() {
         guard isEnabled() else { return }
         let defaults = UserDefaults(suiteName: AppGroup.identifier)
-        let name = defaults?.string(forKey: SharedKeys.recordStopSoundName) ?? "ui_chime_01"
+        let name = defaults?.string(forKey: SharedKeys.recordStopSoundName) ?? "electronic_02e"
         play(name)
     }
 
     /// Play the recording-cancel sound.
-    /// Default: "electronic_02a" -- a distinct tone that signals "cancelled, no transcription".
+    /// Default: "electronic_02b"
     static func playRecordCancel() {
         guard isEnabled() else { return }
         let defaults = UserDefaults(suiteName: AppGroup.identifier)
-        let name = defaults?.string(forKey: SharedKeys.recordCancelSoundName) ?? "electronic_02a"
+        let name = defaults?.string(forKey: SharedKeys.recordCancelSoundName) ?? "electronic_02b"
         play(name)
     }
 
     // MARK: - Sound Catalog
 
     /// All available sound file names (without extension), sorted alphabetically.
-    ///
-    /// WHY hardcoded instead of Bundle directory enumeration:
-    /// Bundle.main.urls(forResourcesWithExtension:) can return nil or be unreliable
-    /// depending on how resources are bundled (folder reference vs file reference).
-    /// Hardcoding is explicit, testable, and doesn't break if the bundle structure changes.
     static func availableSounds() -> [String] {
         [
             "electronic_01a", "electronic_01b", "electronic_01c",
@@ -138,7 +131,6 @@ enum SoundFeedbackService {
     }
 
     /// Format a sound file name for display in the UI.
-    /// Replaces underscores with spaces and capitalizes the first letter.
     /// Example: "electronic_01a" -> "Electronic 01a"
     static func displayName(for soundName: String) -> String {
         let formatted = soundName.replacingOccurrences(of: "_", with: " ")
