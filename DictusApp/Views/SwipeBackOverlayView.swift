@@ -92,6 +92,17 @@ private struct SwipeAnimationView: View {
             RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.white.opacity(0.3), lineWidth: 2)
 
+            // Dynamic Island capsule at the top of the mockup
+            // WHY these proportions: real iPhone 15 Pro Dynamic Island is ~32%
+            // of screen width. Scaled to 120pt mockup = ~38pt wide, ~11pt tall.
+            VStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.white.opacity(0.25))
+                    .frame(width: 38, height: 11)
+                    .padding(.top, 14)
+                Spacer()
+            }
+
             // Home indicator bar at the bottom
             VStack {
                 Spacer()
@@ -132,7 +143,7 @@ private struct SwipeAnimationView: View {
             // autoreverses: false makes the circle jump back to start
             // after reaching the end, creating a clear "swipe right" motion.
             withAnimation(
-                .easeInOut(duration: 1.5)
+                .easeInOut(duration: 0.8)
                 .repeatForever(autoreverses: false)
             ) {
                 isAnimating = true

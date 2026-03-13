@@ -87,7 +87,7 @@ struct RecordingOverlay: View {
                 }
                 Spacer()
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 12)
             .padding(.vertical, 8)
 
             // Flat waveform bars -- empty energy array produces flat bars in BrandWaveform
@@ -132,7 +132,7 @@ struct RecordingOverlay: View {
                     onStop()
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 12)
             .padding(.vertical, 8)
 
             // Waveform fills all remaining vertical space between buttons and footer.
@@ -172,7 +172,7 @@ struct RecordingOverlay: View {
     /// so the waveform stays at the same Y position during the state transition.
     ///
     /// WHY matching structure:
-    /// recordingContent has: top bar (44pt + padding) → GeometryReader → footer (timer + caption + padding).
+    /// recordingContent has: top bar (36pt + padding) → GeometryReader → footer (timer + caption + padding).
     /// If transcribingContent uses a different layout (e.g. Spacer/Spacer), the waveform's
     /// GeometryReader gets different available height, causing a visible vertical jump.
     /// By reserving identical top and bottom space, the waveform stays put.
@@ -180,8 +180,8 @@ struct RecordingOverlay: View {
         VStack(spacing: 0) {
             // Reserve same top bar height as recording state (buttons area)
             Color.clear
-                .frame(height: 44)
-                .padding(.horizontal, 16)
+                .frame(height: 36)
+                .padding(.horizontal, 12)
                 .padding(.vertical, 8)
 
             // Waveform in GeometryReader -- same structure as recording state
@@ -237,7 +237,7 @@ struct RecordingOverlay: View {
                 Image(systemName: icon)
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundColor(color)
-                    .frame(width: 56, height: 44)
+                    .frame(width: 56, height: 36)
                     .contentShape(Rectangle())
                     .dictusGlass(in: Capsule())
             }
