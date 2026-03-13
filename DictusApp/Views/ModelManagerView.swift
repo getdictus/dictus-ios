@@ -86,6 +86,7 @@ struct ModelManagerView: View {
                                     modelToDelete = model
                                     showDeleteAlert = true
                                 }
+                                .tint(.red)
                             }
                         }
                         .listRowBackground(Color.clear)

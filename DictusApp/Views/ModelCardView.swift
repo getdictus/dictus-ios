@@ -32,6 +32,9 @@ struct ModelCardView: View {
     @ObservedObject var modelManager: ModelManager
     let onDownloadError: (String) -> Void
 
+    /// Tracks brief spinner while switching active model.
+    @State private var isSwitching = false
+
     /// The current state for this model, with a safe default.
     private var state: ModelState {
         modelManager.modelStates[model.identifier] ?? .notDownloaded
@@ -57,8 +60,9 @@ struct ModelCardView: View {
             handleCardTap()
         } label: {
             cardContent
+                .contentShape(Rectangle())
         }
-        .buttonStyle(GlassPressStyle(pressedScale: 0.97))
+        .buttonStyle(GlassPressStyle(pressedScale: 0.95))
         .disabled(isCardDisabled)
     }
 
@@ -96,19 +100,41 @@ struct ModelCardView: View {
                 .font(.dictusCaption)
                 .foregroundStyle(.secondary)
 
-            // Row 3: Gauge bars (Précision + Vitesse) — both blue palette
-            HStack(spacing: 16) {
-                GaugeBarView(
-                    value: model.accuracyScore,
-                    label: "Précision",
-                    color: .dictusAccent
-                )
+            // Row 3: Gauge bars OR full-width progress during download/prewarming
+            if case .downloading = state, let progress = modelManager.downloadProgress[model.identifier] {
+                // Full-width progress bar replaces gauges during download
+                VStack(spacing: 4) {
+                    ProgressView(value: progress, total: 1.0)
+                        .tint(.dictusAccent)
+                    Text("\(Int(progress * 100))%")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+            } else if case .prewarming = state {
+                // Full-width indeterminate progress during CoreML compilation
+                VStack(spacing: 4) {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                    Text("Optimisation en cours...")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                // Normal gauge bars (Précision + Vitesse) — both blue palette
+                HStack(spacing: 16) {
+                    GaugeBarView(
+                        value: model.accuracyScore,
+                        label: "Précision",
+                        color: .dictusAccent
+                    )
 
-                GaugeBarView(
-                    value: model.speedScore,
-                    label: "Vitesse",
-                    color: .dictusAccentHighlight
-                )
+                    GaugeBarView(
+                        value: model.speedScore,
+                        label: "Vitesse",
+                        color: .dictusAccentHighlight
+                    )
+                }
             }
 
             // Row 4: Size + state-dependent status indicator
@@ -123,16 +149,16 @@ struct ModelCardView: View {
             }
         }
         .padding(16)
-        .background(
-            // Active model gets a subtle blue tint behind the glass
+        .dictusGlass()
+        .overlay(
+            // Active model gets a dark blue border stroke on top of glass
             Group {
                 if isActive {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(Color.dictusAccent.opacity(0.10))
+                        .stroke(Color.dictusAccent.opacity(0.6), lineWidth: 2)
                 }
             }
         )
-        .dictusGlass()
     }
 
     // MARK: - Tap handler
@@ -146,7 +172,13 @@ struct ModelCardView: View {
         switch state {
         case .ready:
             if !isActive {
-                modelManager.selectModel(model.identifier)
+                isSwitching = true
+                Task {
+                    modelManager.selectModel(model.identifier)
+                    // Brief delay so spinner is visible (model switch is near-instant)
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+                    isSwitching = false
+                }
             }
         case .notDownloaded:
             Task {
@@ -178,33 +210,19 @@ struct ModelCardView: View {
                 .foregroundColor(.dictusAccent)
 
         case .downloading:
-            if let progress = modelManager.downloadProgress[model.identifier] {
-                VStack(spacing: 2) {
-                    ProgressView(value: progress, total: 1.0)
-                        .frame(width: 60)
-                        .tint(.dictusAccent)
-                    Text("\(Int(progress * 100))%")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                ProgressView()
-            }
+            // Progress is shown full-width in card body (Row 3)
+            EmptyView()
 
         case .prewarming:
-            VStack(spacing: 2) {
-                ProgressView()
-                Text("Optimisation en cours...")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+            // Progress is shown full-width in card body (Row 3)
+            EmptyView()
 
         case .ready:
-            if isActive {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.dictusSuccess)
+            if isSwitching {
+                // Brief spinner while model switch is preparing
+                ProgressView()
             } else {
-                // No button — tapping card selects. Show subtle hint.
+                // No checkmark, no button — active state shown via border stroke
                 EmptyView()
             }
 
