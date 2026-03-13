@@ -1,5 +1,5 @@
 // DictusApp/Views/ModelCardView.swift
-// Individual model card with gauges, engine badge, and state controls.
+// Individual model card with gauges, engine badge, and tap-to-select/download interaction.
 import SwiftUI
 import DictusCore
 
@@ -10,15 +10,26 @@ import DictusCore
 /// delete, progress, error states). Extracting keeps ModelManagerView's body clean and
 /// makes each card independently previewable.
 ///
+/// INTERACTION MODEL (v2 — tap-to-act):
+/// The entire card is a single tappable surface. Behavior depends on model state:
+/// - .ready + not active -> select as active model
+/// - .notDownloaded -> start download
+/// - .error -> cleanup and retry
+/// - .downloading / .prewarming -> card disabled (no tap)
+///
+/// WHY no separate buttons:
+/// Removing "Choisir", download arrow, and trash buttons simplifies the UI.
+/// Cards behave like native radio buttons — tap to select. Deletion uses
+/// swipe-to-delete in the parent ModelManagerView (like iOS Mail).
+///
 /// LAYOUT (top to bottom):
-/// Row 1: displayName + engine badge ("WK"/"PK") + optional "Recommande" badge
+/// Row 1: displayName + engine badge ("WK"/"PK") + optional "Recommandé" badge
 /// Row 2: Short French description
-/// Row 3: Two gauge bars side-by-side (Precision in blue, Vitesse in green)
-/// Row 4: Size label + state-dependent trailing content
+/// Row 3: Two gauge bars side-by-side (Précision in blue, Vitesse in blue highlight)
+/// Row 4: Size label + state-dependent status indicator
 struct ModelCardView: View {
     let model: ModelInfo
     @ObservedObject var modelManager: ModelManager
-    let onDelete: () -> Void
     let onDownloadError: (String) -> Void
 
     /// The current state for this model, with a safe default.
@@ -31,13 +42,29 @@ struct ModelCardView: View {
         modelManager.activeModel == model.identifier
     }
 
-    /// Whether this is the last downloaded model (cannot be deleted).
-    private var isLastModel: Bool {
-        modelManager.downloadedModels.count <= 1 &&
-        modelManager.downloadedModels.contains(model.identifier)
+    /// Whether the card should be tappable (disabled during download/prewarming).
+    private var isCardDisabled: Bool {
+        switch state {
+        case .downloading, .prewarming:
+            return true
+        default:
+            return false
+        }
     }
 
     var body: some View {
+        Button {
+            handleCardTap()
+        } label: {
+            cardContent
+        }
+        .buttonStyle(GlassPressStyle(pressedScale: 0.97))
+        .disabled(isCardDisabled)
+    }
+
+    // MARK: - Card content
+
+    private var cardContent: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Row 1: Name + engine badge + recommended badge
             HStack(spacing: 6) {
@@ -54,7 +81,7 @@ struct ModelCardView: View {
                     .cornerRadius(4)
 
                 if modelManager.isRecommended(model.identifier) {
-                    Text("Recommande")
+                    Text("Recommandé")
                         .font(.caption2.bold())
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
@@ -69,22 +96,22 @@ struct ModelCardView: View {
                 .font(.dictusCaption)
                 .foregroundStyle(.secondary)
 
-            // Row 3: Gauge bars (Precision + Vitesse)
+            // Row 3: Gauge bars (Précision + Vitesse) — both blue palette
             HStack(spacing: 16) {
                 GaugeBarView(
                     value: model.accuracyScore,
-                    label: "Precision",
+                    label: "Précision",
                     color: .dictusAccent
                 )
 
                 GaugeBarView(
                     value: model.speedScore,
                     label: "Vitesse",
-                    color: .dictusSuccess
+                    color: .dictusAccentHighlight
                 )
             }
 
-            // Row 4: Size + state-dependent controls
+            // Row 4: Size + state-dependent status indicator
             HStack {
                 Label(model.sizeLabel, systemImage: "internaldrive")
                     .font(.dictusCaption)
@@ -96,41 +123,61 @@ struct ModelCardView: View {
             }
         }
         .padding(16)
+        .background(
+            // Active model gets a subtle blue tint behind the glass
+            Group {
+                if isActive {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.dictusAccent.opacity(0.10))
+                }
+            }
+        )
         .dictusGlass()
+    }
+
+    // MARK: - Tap handler
+
+    /// Routes card tap based on current model state.
+    ///
+    /// WHY a function instead of inline closure:
+    /// Multiple state branches with different async/sync behavior.
+    /// A named function keeps the Button action clean and testable.
+    private func handleCardTap() {
+        switch state {
+        case .ready:
+            if !isActive {
+                modelManager.selectModel(model.identifier)
+            }
+        case .notDownloaded:
+            Task {
+                do {
+                    try await modelManager.downloadModel(model.identifier)
+                } catch {
+                    onDownloadError(error.localizedDescription)
+                }
+            }
+        case .error:
+            modelManager.cleanupFailedModel(model.identifier)
+        case .downloading, .prewarming:
+            // Card is disabled in these states — this shouldn't fire
+            break
+        }
     }
 
     // MARK: - State-dependent trailing content
 
     /// The trailing content changes based on the model's current state.
-    ///
-    /// WHY @ViewBuilder:
-    /// Swift's opaque return types require a single concrete type. @ViewBuilder
-    /// lets us return different view types from each switch case using SwiftUI's
-    /// conditional content builder.
+    /// Now shows status indicators only (no action buttons — the card itself is the button).
     @ViewBuilder
     private var trailingContent: some View {
         switch state {
         case .notDownloaded:
-            Button {
-                Task {
-                    do {
-                        try await modelManager.downloadModel(model.identifier)
-                    } catch {
-                        onDownloadError(error.localizedDescription)
-                    }
-                }
-            } label: {
-                Image(systemName: "arrow.down.circle")
-                    .font(.title2)
-                    .foregroundColor(.dictusAccent)
-            }
-            .buttonStyle(.plain)
+            // Subtle download hint icon
+            Image(systemName: "arrow.down.circle")
+                .font(.title2)
+                .foregroundColor(.dictusAccent)
 
         case .downloading:
-            // WHY if-let instead of ?? 0:
-            // Defensive fallback — if downloadProgress is nil (removed before state
-            // transitions to .prewarming), show an indeterminate spinner instead of
-            // a determinate bar stuck at 0%.
             if let progress = modelManager.downloadProgress[model.identifier] {
                 VStack(spacing: 2) {
                     ProgressView(value: progress, total: 1.0)
@@ -154,50 +201,22 @@ struct ModelCardView: View {
 
         case .ready:
             if isActive {
-                HStack(spacing: 4) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.dictusSuccess)
-                    Text("Actif")
-                        .font(.dictusCaption)
-                        .foregroundColor(.dictusSuccess)
-                }
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.dictusSuccess)
             } else {
-                HStack(spacing: 8) {
-                    Button("Choisir") {
-                        modelManager.selectModel(model.identifier)
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                    .tint(.dictusAccent)
-
-                    if !isLastModel {
-                        Button {
-                            onDelete()
-                        } label: {
-                            Image(systemName: "trash")
-                                .foregroundColor(.dictusRecording)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
+                // No button — tapping card selects. Show subtle hint.
+                EmptyView()
             }
 
         case .error(let message):
-            Button {
-                // Clean up corrupted/partial files before resetting state.
-                // cleanupFailedModel already sets state to .notDownloaded.
-                modelManager.cleanupFailedModel(model.identifier)
-            } label: {
-                VStack(spacing: 2) {
-                    Image(systemName: "arrow.clockwise.circle")
-                        .font(.title3)
-                        .foregroundColor(.orange)
-                    Text("Reessayer")
-                        .font(.caption2)
-                        .foregroundColor(.orange)
-                }
+            VStack(spacing: 2) {
+                Image(systemName: "arrow.clockwise.circle")
+                    .font(.title3)
+                    .foregroundColor(.orange)
+                Text("Réessayer")
+                    .font(.caption2)
+                    .foregroundColor(.orange)
             }
-            .buttonStyle(.plain)
             .help(message)
         }
     }
@@ -209,7 +228,6 @@ struct ModelCardView: View {
             ModelCardView(
                 model: ModelInfo.all[0],
                 modelManager: ModelManager(),
-                onDelete: {},
                 onDownloadError: { _ in }
             )
         }
