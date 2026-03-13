@@ -35,16 +35,32 @@ struct ModelManagerView: View {
 
     // MARK: - Computed model lists
 
-    /// Downloaded models — includes deprecated (Tiny/Base) if user has them on device.
-    /// Uses allIncludingDeprecated so deprecated models still show up for management.
+    /// Downloaded models — includes deprecated (Tiny/Base) if user has them on device,
+    /// plus any models currently downloading or prewarming (so they appear here immediately).
     private var downloadedModels: [ModelInfo] {
-        ModelInfo.allIncludingDeprecated.filter { modelManager.downloadedModels.contains($0.identifier) }
+        ModelInfo.allIncludingDeprecated.filter { model in
+            let state = modelManager.modelStates[model.identifier] ?? .notDownloaded
+            switch state {
+            case .downloading, .prewarming, .ready, .error:
+                return true
+            case .notDownloaded:
+                return modelManager.downloadedModels.contains(model.identifier)
+            }
+        }
     }
 
-    /// Available models — only .available visibility, excludes already-downloaded ones.
+    /// Available models — excludes downloaded, downloading, and prewarming models.
     /// Users won't see Tiny/Base here since they're deprecated.
     private var availableModels: [ModelInfo] {
-        ModelInfo.all.filter { !modelManager.downloadedModels.contains($0.identifier) }
+        ModelInfo.all.filter { model in
+            let state = modelManager.modelStates[model.identifier] ?? .notDownloaded
+            switch state {
+            case .downloading, .prewarming, .ready, .error:
+                return false
+            case .notDownloaded:
+                return !modelManager.downloadedModels.contains(model.identifier)
+            }
+        }
     }
 
     /// Which speech engines appear in the downloaded section (for engine descriptions).
