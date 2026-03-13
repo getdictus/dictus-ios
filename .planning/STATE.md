@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
 status: completed
-stopped_at: Completed 15-03-PLAN.md
-last_updated: "2026-03-13T10:41:39.797Z"
+stopped_at: Completed 15-04-PLAN.md
+last_updated: "2026-03-13T10:43:29.988Z"
 last_activity: 2026-03-13 -- Plan 15-03 executed (Recording overlay polish)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
   completed_plans: 15
   percent: 93
@@ -68,6 +68,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15-03]: Used HapticFeedback.recordingStopped() (light impact) for both cancel and stop buttons -- consistent dismiss semantics.
 - [Phase 15-03]: Waveform logging uses freeform PersistentLog.log() not LogEvent enum -- diagnostic only, avoids adding enum cases for temporary instrumentation.
 - [Phase 15-03]: Animation value bound to showsOverlay Bool (not dictationStatus enum) for cleaner SwiftUI animation trigger.
+- [Phase 15]: Success screen as ZStack overlay on TestRecordingPage, not navigation push
+- [Phase 15]: 500ms debounce on keyboard detection after Settings return -- matches iOS Settings sync timing
 
 ### Pending Todos
 
@@ -82,9 +84,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T10:41:01Z
-Stopped at: Completed 15-03-PLAN.md
-Resume file: .planning/phases/15-design-polish/15-03-SUMMARY.md
+Last session: 2026-03-13T10:43:29.986Z
+Stopped at: Completed 15-04-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*

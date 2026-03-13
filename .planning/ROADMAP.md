@@ -47,7 +47,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 - [x] **Phase 12: Animation State Fixes** - Eliminate intermittent recording overlay and waveform animation bugs (completed 2026-03-12)
 - [x] **Phase 13: Cold Start Audio Bridge** - Audio Bridge pattern for keyboard-captured audio with graceful return-to-keyboard UX (completed 2026-03-12)
 - [x] **Phase 14: Model Pipeline** - CoreML compilation UX, model download modal, device RAM gating, Parakeet fixes (completed 2026-03-12)
-- [ ] **Phase 15: Design Polish** - French accent audit, model manager redesign, recording overlay and keyboard UX refinements
+- [x] **Phase 15: Design Polish** - French accent audit, model manager redesign, recording overlay and keyboard UX refinements (completed 2026-03-13)
 - [ ] **Phase 16: TestFlight Deployment** - Developer account migration, Privacy Manifest, archive, and first beta distribution
 
 ## Phase Details
@@ -173,7 +173,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 16
 | 12. Animation State Fixes | v1.2 | Complete    | 2026-03-12 | 2026-03-12 |
 | 13. Cold Start Audio Bridge | 3/3 | Complete   | 2026-03-12 | - |
 | 14. Model Pipeline | 4/4 | Complete   | 2026-03-13 | - |
-| 15. Design Polish | 3/4 | In Progress|  | - |
+| 15. Design Polish | 4/4 | Complete   | 2026-03-13 | - |
 | 16. TestFlight Deployment | v1.2 | 0/2 | Not started | - |
 
 ---
