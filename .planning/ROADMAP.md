@@ -125,7 +125,7 @@ Plans:
   2. Active model in model manager has a visible blue border highlight, and tapping anywhere on a downloaded model card selects it
   3. Recording overlay X button has a generous tap area (44pt minimum) with haptic feedback and smooth easeOut dismiss animation
   4. Mic button shows reduced opacity during transcription processing, giving clear visual feedback that work is happening
-**Plans**: 8 plans
+**Plans**: 10 plans
 
 Plans:
 - [ ] 15-01-PLAN.md — French accent audit, gauge colors, mic button opacity, settings UX
@@ -136,6 +136,8 @@ Plans:
 - [ ] 15-06-PLAN.md — Gap closure: model card UX overhaul (progress bar, active border, tap area, section move)
 - [ ] 15-07-PLAN.md — Gap closure: overlay fade-out fix, onboarding auto-transition to success
 - [ ] 15-08-PLAN.md — Gap closure: keyboard detection crash resilience and diagnostic logging
+- [ ] 15-09-PLAN.md — UAT gap closure: active card blue tint + remove switch spinner + swipe delete height
+- [ ] 15-10-PLAN.md — UAT gap closure: waveform vertical stability + settings tap feedback
 
 ### Phase 16: TestFlight Deployment
 **Goal**: First beta build distributed to testers, with open-source repo ready for contributors
@@ -177,7 +179,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 16
 | 12. Animation State Fixes | v1.2 | Complete    | 2026-03-12 | 2026-03-12 |
 | 13. Cold Start Audio Bridge | 3/3 | Complete   | 2026-03-12 | - |
 | 14. Model Pipeline | 4/4 | Complete   | 2026-03-13 | - |
-| 15. Design Polish | 8/8 | Complete    | 2026-03-13 | - |
+| 15. Design Polish | 10/10 | In Progress | 2026-03-13 | - |
 | 16. TestFlight Deployment | v1.2 | 0/2 | Not started | - |
 
 ---
