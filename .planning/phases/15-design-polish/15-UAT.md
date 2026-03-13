@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: resolved
 phase: 15-design-polish
 source: 15-01-SUMMARY.md, 15-02-SUMMARY.md, 15-03-SUMMARY.md, 15-04-SUMMARY.md, 15-05-SUMMARY.md
 started: 2026-03-13T11:00:00Z
-updated: 2026-03-13T11:10:00Z
+updated: 2026-03-13T13:20:00Z
 ---
 
 ## Current Test
@@ -110,7 +110,7 @@ skipped: 0
 ## Gaps
 
 - truth: "Model card tap interaction: full card tappable, download starts on tap, no separate buttons"
-  status: failed
+  status: resolved
   reason: "User reported: 1) Download progress bar too small, should be full-width hiding gauges during download/optimization (like Handy app). 2) Card should move from Available to Downloaded section when download starts. 3) Tap area not responsive enough, must tap center, multiple taps needed. 4) Missing iOS standard press animation (scale bounce). 5) Active model should have dark blue border instead of background tint."
   severity: major
   test: 5
@@ -130,7 +130,7 @@ skipped: 0
     - "Replace background fill with RoundedRectangle stroke for active model"
 
 - truth: "Swipe-to-delete button appears in red (destructive action)"
-  status: failed
+  status: resolved
   reason: "User reported: Le bouton Supprimer en swipe est bleu au lieu de rouge"
   severity: minor
   test: 7
@@ -142,7 +142,7 @@ skipped: 0
     - "Add .tint(.red) to the swipe delete Button"
 
 - truth: "Recording overlay disappears with smooth matching animation"
-  status: failed
+  status: resolved
   reason: "User reported: Fade in à l'apparition est bien, mais la disparition slide vers le bas — préfère un simple fade out sans mouvement"
   severity: minor
   test: 9
@@ -154,7 +154,7 @@ skipped: 0
     - "Use .asymmetric(insertion: .opacity.combined(with: .move(edge: .bottom)), removal: .opacity) for fade-only disappear"
 
 - truth: "Onboarding success screen flows smoothly after test recording"
-  status: failed
+  status: resolved
   reason: "User reported: Le success screen marche mais le gros bouton vert Terminé juste avant est moche. Supprimer ce bouton, afficher le résultat de transcription brièvement puis enchaîner auto sur success screen. Si échec transcription, proposer réessayer."
   severity: minor
   test: 10
@@ -170,7 +170,7 @@ skipped: 0
     - "Add retry option on transcription failure"
 
 - truth: "Keyboard detection after iOS Settings return works without crash"
-  status: failed
+  status: resolved
   reason: "User reported: Crash intermittent au retour de Settings après activation du clavier. App se relance. Pas de stack trace disponible. Besoin de logging supplémentaire autour de l'onboarding keyboard detection pour diagnostiquer."
   severity: major
   test: 11
@@ -184,7 +184,7 @@ skipped: 0
     - "Consider longer debounce or exponential backoff for resilience"
 
 - truth: "Active model card visually distinct with blue background tint"
-  status: failed
+  status: resolved
   reason: "User reported: Veut bordure bleu foncé au lieu du fond teinté. Enlever le check vert en bas à droite de la carte active. Ajouter feedback de chargement (animation préparation) quand on switch de modèle car le switch peut prendre 1-2s et l'utilisateur ne sait pas si le clic a été pris en compte."
   severity: major
   test: 6
@@ -198,7 +198,7 @@ skipped: 0
     - "Add transient switching state with spinner/progress indicator"
 
 - truth: "Active model name displays correctly on Home screen without wrong engine prefix"
-  status: failed
+  status: resolved
   reason: "User reported: Modèle actif affiche 'Whisper Parakeet v3' au lieu de 'Parakeet v3' — le préfixe Whisper est hardcodé"
   severity: major
   test: 12
@@ -210,7 +210,7 @@ skipped: 0
     - "Remove hardcoded Whisper prefix, use displayName directly or make prefix conditional on engine type"
 
 - truth: "Settings items show tap feedback (gray flash like native iOS Settings)"
-  status: failed
+  status: resolved
   reason: "User reported: Aucun retour visuel quand on clique dans les réglages"
   severity: minor
   test: 13
@@ -222,7 +222,7 @@ skipped: 0
     - "Restore native list row highlighting or add custom tap feedback via listRowBackground or buttonStyle"
 
 - truth: "Model downloaded during onboarding is recognized as active in Model Manager"
-  status: failed
+  status: resolved
   reason: "User reported: Après onboarding, Parakeet v3 dans Téléchargés mais affiche encore icône ⬇ — état pas synchronisé"
   severity: major
   test: 14
@@ -234,7 +234,7 @@ skipped: 0
     - "After loading downloadedModels in loadState(), rebuild modelStates for all models based on new downloadedModels set"
 
 - truth: "Engine descriptions (WhisperKit/Parakeet) are fixed footer at bottom of Models page"
-  status: failed
+  status: resolved
   reason: "User reported: Description Parakeet collée au modèle et suit dans section Téléchargés. Veut descriptions fixes en pied de page."
   severity: minor
   test: 15
@@ -246,7 +246,7 @@ skipped: 0
     - "Move descriptions outside both Sections, place as fixed footer below the List"
 
 - truth: "Section headers (Téléchargés/Disponibles) scroll with content, no sticky overlap"
-  status: failed
+  status: resolved
   reason: "User reported: Les headers de section restent sticky et se superposent sur les cartes au scroll. Téléchargés se retrouve par dessus Parakeet v3."
   severity: major
   test: 16
