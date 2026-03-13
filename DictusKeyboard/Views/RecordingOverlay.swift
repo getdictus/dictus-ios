@@ -87,8 +87,9 @@ struct RecordingOverlay: View {
                 }
                 Spacer()
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.leading, 12)
+            .padding(.trailing, 17)
+            .padding(.vertical, 6)
 
             // Flat waveform bars -- empty energy array produces flat bars in BrandWaveform
             GeometryReader { geo in
@@ -132,8 +133,9 @@ struct RecordingOverlay: View {
                     onStop()
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.leading, 12)
+            .padding(.trailing, 17)
+            .padding(.vertical, 6)
 
             // Waveform fills all remaining vertical space between buttons and footer.
             // WHY GeometryReader: The waveform must adapt to whatever space is
@@ -182,7 +184,7 @@ struct RecordingOverlay: View {
             Color.clear
                 .frame(height: 36)
                 .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .padding(.vertical, 6)
 
             // Waveform in GeometryReader -- same structure as recording state
             GeometryReader { geo in
