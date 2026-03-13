@@ -164,12 +164,12 @@ Plans:
   5. At least one external tester receives and can install the TestFlight build
   6. README.md has build instructions and public TestFlight link
   7. CONTRIBUTING.md and GitHub issue templates are in place for contributors
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 16-01: TBD
-- [ ] 16-02: TBD
-- [ ] 16-03: TBD
+- [ ] 16-01-PLAN.md — Signing migration, Privacy Manifests, version bump, privacy policy, review checklist
+- [ ] 16-02-PLAN.md — README rewrite, CONTRIBUTING.md, GitHub issue templates
+- [ ] 16-03-PLAN.md — Archive, upload, TestFlight distribution, README TestFlight link
 
 ## Progress
 
@@ -194,7 +194,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 16
 | 14. Model Pipeline | 4/4 | Complete   | 2026-03-13 | - |
 | 15. Design Polish | 10/10 | Complete    | 2026-03-13 | - |
 | 15.1. UI Polish Fixes | 3/3 | Complete   | 2026-03-13 | - |
-| 16. TestFlight Deployment | v1.2 | 0/2 | Not started | - |
+| 16. TestFlight Deployment | v1.2 | 0/3 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-04*
