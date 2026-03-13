@@ -69,11 +69,41 @@ result: issue
 reported: "Crash intermittent au retour de iOS Settings après avoir activé le clavier. L'app se relance (visible dans logs : appDidEnterBackground puis appLaunched). Pas de stack trace dans les logs actuels. Demande d'ajouter du logging autour de l'onboarding keyboard detection pour diagnostiquer en bêta."
 severity: major
 
+### 12. Active Model Name on Home Screen
+expected: Home screen shows correct model name without engine prefix. Parakeet models show "Parakeet v3", WhisperKit models show "Small", "Medium", etc.
+result: issue
+reported: "Le modèle actif affiche 'Whisper Parakeet v3' alors que c'est un modèle Parakeet/NVIDIA. Le préfixe Whisper ne devrait pas apparaître pour les modèles Parakeet."
+severity: major
+
+### 13. Settings Tap Feedback
+expected: When tapping items in Settings, the row flashes gray briefly (like native iOS Settings) to confirm the tap was registered.
+result: issue
+reported: "Aucun retour visuel quand on clique sur un item dans les réglages. Devrait avoir un feedback gris clair comme les Settings iOS natifs."
+severity: minor
+
+### 14. Model State Sync After Onboarding
+expected: After completing onboarding, the model downloaded during onboarding appears as active in Model Manager — no download icon, properly recognized.
+result: issue
+reported: "Après l'onboarding, Parakeet v3 est dans Téléchargés mais affiche encore l'icône téléchargement ⬇ en bas à droite. Le modèle n'est pas reconnu comme actif/téléchargé correctement."
+severity: major
+
+### 15. Engine Descriptions Fixed Footer
+expected: The WhisperKit and Parakeet description paragraphs are always at the bottom of the Models page as a fixed footer, not attached to any model card or section.
+result: issue
+reported: "La description Parakeet est collée au modèle Parakeet v3 et suit la carte dans la section Téléchargés quand le modèle est downloadé. Les deux descriptions doivent rester en pied de page fixe, toujours en bas de la page."
+severity: minor
+
+### 16. Section Headers Scroll With Content
+expected: The "Téléchargés" and "Disponibles" section headers scroll naturally with the rest of the content — no sticky/pinned behavior that overlaps cards.
+result: issue
+reported: "Les headers de section Téléchargés et Disponibles restent collés (sticky) en haut et se superposent sur les cartes au scroll. Le texte Téléchargés se retrouve par dessus la carte Parakeet v3. Les headers doivent scroller avec le contenu."
+severity: major
+
 ## Summary
 
-total: 11
+total: 16
 passed: 4
-issues: 6
+issues: 11
 pending: 0
 skipped: 0
 
@@ -166,3 +196,63 @@ skipped: 0
     - "Replace background fill with dark blue stroke border"
     - "Remove green checkmark from active card"
     - "Add transient switching state with spinner/progress indicator"
+
+- truth: "Active model name displays correctly on Home screen without wrong engine prefix"
+  status: failed
+  reason: "User reported: Modèle actif affiche 'Whisper Parakeet v3' au lieu de 'Parakeet v3' — le préfixe Whisper est hardcodé"
+  severity: major
+  test: 12
+  root_cause: "HomeView.swift:93 hardcodes 'Whisper' prefix: Text(\"Whisper \\(info?.displayName ?? modelName)\"). Parakeet models already have full name in displayName."
+  artifacts:
+    - path: "DictusApp/Views/HomeView.swift"
+      issue: "Hardcoded 'Whisper' prefix on model name (L93)"
+  missing:
+    - "Remove hardcoded Whisper prefix, use displayName directly or make prefix conditional on engine type"
+
+- truth: "Settings items show tap feedback (gray flash like native iOS Settings)"
+  status: failed
+  reason: "User reported: Aucun retour visuel quand on clique dans les réglages"
+  severity: minor
+  test: 13
+  root_cause: "SettingsView.swift List uses .scrollContentBackground(.hidden) and custom background (L114-115) which removes native row highlight. No button styling on interactive rows."
+  artifacts:
+    - path: "DictusApp/Views/SettingsView.swift"
+      issue: ".scrollContentBackground(.hidden) removes native tap highlight (L114-115), no buttonStyle on rows"
+  missing:
+    - "Restore native list row highlighting or add custom tap feedback via listRowBackground or buttonStyle"
+
+- truth: "Model downloaded during onboarding is recognized as active in Model Manager"
+  status: failed
+  reason: "User reported: Après onboarding, Parakeet v3 dans Téléchargés mais affiche encore icône ⬇ — état pas synchronisé"
+  severity: major
+  test: 14
+  root_cause: "ModelManager.loadState() (L87-93) reads downloadedModels from defaults but does NOT rebuild modelStates dictionary. init() sets modelStates once (L67-78). After loadState(), downloadedModels is updated but modelStates remains stale with .notDownloaded."
+  artifacts:
+    - path: "DictusApp/Models/ModelManager.swift"
+      issue: "loadState() doesn't resync modelStates after reloading downloadedModels (L87-93)"
+  missing:
+    - "After loading downloadedModels in loadState(), rebuild modelStates for all models based on new downloadedModels set"
+
+- truth: "Engine descriptions (WhisperKit/Parakeet) are fixed footer at bottom of Models page"
+  status: failed
+  reason: "User reported: Description Parakeet collée au modèle et suit dans section Téléchargés. Veut descriptions fixes en pied de page."
+  severity: minor
+  test: 15
+  root_cause: "Descriptions placed inside Section blocks in ModelManagerView.swift (L96-100 in Téléchargés, L127-130 in Disponibles). They move with section content when models change sections."
+  artifacts:
+    - path: "DictusApp/Views/ModelManagerView.swift"
+      issue: "Engine descriptions inside Section blocks instead of outside List as fixed footer (L96-100, L127-130)"
+  missing:
+    - "Move descriptions outside both Sections, place as fixed footer below the List"
+
+- truth: "Section headers (Téléchargés/Disponibles) scroll with content, no sticky overlap"
+  status: failed
+  reason: "User reported: Les headers de section restent sticky et se superposent sur les cartes au scroll. Téléchargés se retrouve par dessus Parakeet v3."
+  severity: major
+  test: 16
+  root_cause: "List Section headers in SwiftUI are sticky/pinned by default. ModelManagerView.swift uses Section with header: which enables iOS default sticky behavior. Combined with .listStyle(.plain) or similar, headers pin to top on scroll."
+  artifacts:
+    - path: "DictusApp/Views/ModelManagerView.swift"
+      issue: "Section headers are sticky by default in SwiftUI List (L69-137)"
+  missing:
+    - "Either switch to ScrollView+VStack layout (no sticky headers) or use .headerProminence(.increased) with non-sticky list style, or move headers outside Section into inline Text views"
