@@ -85,6 +85,8 @@ class DictationCoordinator: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] energy in
                 self?.bufferEnergy = energy
+                // Forward waveform to Dynamic Island (throttled to 1Hz inside manager)
+                LiveActivityManager.shared.updateWaveform(levels: energy)
             }
         secondsCancellable = audioRecorder.$bufferSeconds
             .receive(on: DispatchQueue.main)
@@ -101,6 +103,8 @@ class DictationCoordinator: ObservableObject {
             .sink { [weak self] energy in
                 guard let self, self.rawCapture.isCapturing else { return }
                 self.bufferEnergy = energy
+                // Forward waveform to Dynamic Island (throttled to 1Hz inside manager)
+                LiveActivityManager.shared.updateWaveform(levels: energy)
             }
         rawSecondsCancellable = rawCapture.$bufferSeconds
             .receive(on: DispatchQueue.main)
@@ -284,6 +288,7 @@ class DictationCoordinator: ObservableObject {
                         return
                     }
                     updateStatus(.recording)
+                    LiveActivityManager.shared.transitionToRecording()
                     try audioRecorder.startRecording()
                     PersistentLog.log(.audioEngineStarted)
                 } catch {
@@ -303,6 +308,7 @@ class DictationCoordinator: ObservableObject {
                     }
                     rawCapture.purgeIdleSamples()
                     updateStatus(.recording)
+                    LiveActivityManager.shared.transitionToRecording()
                     PersistentLog.log(.audioEngineStarted)
                     PersistentLog.log(.engineStateSnapshot(
                         engineRunning: rawCapture.isEngineRunning,
@@ -327,6 +333,7 @@ class DictationCoordinator: ObservableObject {
                     }
                     try rawCapture.startCapture()
                     updateStatus(.recording)
+                    LiveActivityManager.shared.transitionToRecording()
                     PersistentLog.log(.audioEngineStarted)
 
                     try await ensureEngineReady()
@@ -398,6 +405,7 @@ class DictationCoordinator: ObservableObject {
                     ))
 
                     updateStatus(.transcribing)
+                    LiveActivityManager.shared.transitionToTranscribing()
                     SoundFeedbackService.playRecordStop()
                     try await ensureEngineReady()
 
@@ -428,6 +436,7 @@ class DictationCoordinator: ObservableObject {
 
                     DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
                     DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
+                    LiveActivityManager.shared.endWithResult(preview: text)
 
                     if #available(iOS 14.0, *) {
                         DictusLogger.app.info("Transcription complete: \(text)")
@@ -457,6 +466,7 @@ class DictationCoordinator: ObservableObject {
 
                     // Transcribe with the already-loaded model (no model switching).
                     updateStatus(.transcribing)
+                    LiveActivityManager.shared.transitionToTranscribing()
                     SoundFeedbackService.playRecordStop()
                     let text = try await transcriptionService.transcribe(audioSamples: samples)
 
@@ -470,6 +480,7 @@ class DictationCoordinator: ObservableObject {
 
                     DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
                     DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
+                    LiveActivityManager.shared.endWithResult(preview: text)
 
                     if #available(iOS 14.0, *) {
                         DictusLogger.app.info("Transcription complete: \(text)")
@@ -846,5 +857,6 @@ class DictationCoordinator: ObservableObject {
         defaults.set(message, forKey: SharedKeys.lastError)
         defaults.synchronize()
         updateStatus(.failed)
+        LiveActivityManager.shared.endWithFailure()
     }
 }

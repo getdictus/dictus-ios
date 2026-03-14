@@ -22,6 +22,12 @@ struct DictusApp: App {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         PersistentLog.log(.appLaunched(version: version))
 
+        // Clean up any Live Activities left over from a previous app session.
+        // WHY in init: If the app crashed or was force-quit, the Dynamic Island
+        // keeps showing stale data for up to 8 hours. Cleaning up here ensures
+        // a fresh start.
+        LiveActivityManager.shared.cleanupStaleActivities()
+
         let result = AppGroupDiagnostic.run()
         DictusLogger.app.info(
             "AppGroup diagnostic: healthy=\(result.isHealthy)"
@@ -62,6 +68,12 @@ struct DictusApp: App {
                         AppGroup.defaults.set(false, forKey: SharedKeys.coldStartActive)
                         AppGroup.defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
                         AppGroup.defaults.synchronize()
+
+                        // Start the Dynamic Island standby mode when app goes to background.
+                        // WHY here: The Dynamic Island is most useful when the user is in
+                        // another app. It shows "Dictus - On" and provides quick access to
+                        // start recording via the expanded view's Record button.
+                        LiveActivityManager.shared.startStandbyActivity()
                     @unknown default:
                         break
                     }
@@ -122,6 +134,13 @@ struct DictusApp: App {
             // Auto-return was removed because there's no public API to detect which app
             // the keyboard is serving — iterating KnownAppSchemes always opened the first
             // installed app (e.g., WhatsApp) regardless of where the user actually was.
+        case "stop":
+            // Stop recording from Dynamic Island expanded view button.
+            coordinator.stopDictation()
+        case "standby-off":
+            // Power off from Dynamic Island expanded view button.
+            // Ends the Live Activity entirely — no more Dynamic Island.
+            LiveActivityManager.shared.stopStandbyActivity()
         default:
             break
         }

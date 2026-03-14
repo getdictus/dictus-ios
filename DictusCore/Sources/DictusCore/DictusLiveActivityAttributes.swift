@@ -1,0 +1,65 @@
+// DictusCore/Sources/DictusCore/DictusLiveActivityAttributes.swift
+// Data model for Dictus Live Activity (Dynamic Island + Lock Screen).
+import ActivityKit
+import Foundation
+
+/// Attributes for the Dictus Live Activity displayed in the Dynamic Island.
+///
+/// WHY in DictusCore (not DictusWidgets):
+/// Both DictusApp (to start/update the activity) and DictusWidgets (to render it)
+/// need access to this type. DictusCore is the shared framework imported by both.
+///
+/// WHY no mutable attributes (only ContentState):
+/// ActivityAttributes properties are set at creation time and never change.
+/// Dictus has no per-activity metadata — the same app, same branding, same behavior.
+/// All dynamic data lives in ContentState, updated via Activity.update().
+public struct DictusLiveActivityAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        /// Current phase of the Live Activity.
+        public var phase: Phase
+
+        /// Recording start date for auto-updating timer display.
+        /// WHY Date instead of TimeInterval: SwiftUI's `Text(date, style: .timer)`
+        /// auto-increments without consuming ActivityKit's update budget (~1/sec cap).
+        /// nil in standby mode, set when recording starts.
+        public var recordingStartDate: Date?
+
+        /// Audio waveform levels for Dynamic Island visualization.
+        /// WHY 5 levels: Dynamic Island compact is ~36pt wide. More bars would be
+        /// invisible. Also, ActivityKit has a 4KB payload limit per update —
+        /// 5 Float values = 20 bytes, well within budget.
+        /// Empty array in standby mode.
+        public var waveformLevels: [Float]
+
+        /// Short preview of the transcription result (~100 chars).
+        /// nil except in .ready phase.
+        public var transcriptionPreview: String?
+
+        public enum Phase: String, Codable, Hashable {
+            /// App is in background, ready to record. Static "On" display.
+            case standby
+            /// Actively recording audio. Shows waveform + timer.
+            case recording
+            /// Processing audio through WhisperKit/Parakeet. Shows pulsing animation.
+            case transcribing
+            /// Transcription result available. Shows preview + checkmark.
+            case ready
+            /// An error occurred during recording or transcription.
+            case failed
+        }
+
+        public init(
+            phase: Phase,
+            recordingStartDate: Date? = nil,
+            waveformLevels: [Float] = [],
+            transcriptionPreview: String? = nil
+        ) {
+            self.phase = phase
+            self.recordingStartDate = recordingStartDate
+            self.waveformLevels = waveformLevels
+            self.transcriptionPreview = transcriptionPreview
+        }
+    }
+
+    public init() {}
+}
