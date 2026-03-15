@@ -137,10 +137,6 @@ struct DictusApp: App {
         case "stop":
             // Stop recording from Dynamic Island expanded view button.
             coordinator.stopDictation()
-        case "standby-off":
-            // Power off from Dynamic Island expanded view button.
-            // Ends the Live Activity entirely — no more Dynamic Island.
-            LiveActivityManager.shared.stopStandbyActivity()
         default:
             break
         }

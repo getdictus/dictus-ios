@@ -183,16 +183,18 @@ public struct ModelInfo: Identifiable {
     /// This is catalog-level logic — which model fits this device. It doesn't
     /// depend on download state or any @Published properties. Accessible from
     /// both ModelManager and onboarding without passing an ObservableObject.
-    public static func recommendedIdentifier() -> String {
+    /// Cached result — computed once per process since device RAM doesn't change.
+    private static let _recommendedIdentifier: String = {
         let ramGB = ProcessInfo.processInfo.physicalMemory / 1_073_741_824
+        let model = ramGB >= 6 ? "parakeet-tdt-0.6b-v3" : "openai_whisper-small"
         #if DEBUG
-        print("[ModelInfo] Device RAM: \(ramGB) GB, recommending: \(ramGB >= 6 ? "parakeet-tdt-0.6b-v3" : "openai_whisper-small")")
+        print("[ModelInfo] Device RAM: \(ramGB) GB, recommending: \(model)")
         #endif
-        if ramGB >= 6 {
-            return "parakeet-tdt-0.6b-v3"
-        } else {
-            return "openai_whisper-small"
-        }
+        return model
+    }()
+
+    public static func recommendedIdentifier() -> String {
+        return _recommendedIdentifier
     }
 
     /// Whether the given model identifier matches the device-recommended model.

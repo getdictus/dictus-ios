@@ -84,8 +84,10 @@ class DictationCoordinator: ObservableObject {
         energyCancellable = audioRecorder.$bufferEnergy
             .receive(on: DispatchQueue.main)
             .sink { [weak self] energy in
-                self?.bufferEnergy = energy
-                // Forward waveform to Dynamic Island (throttled to 1Hz inside manager)
+                guard let self else { return }
+                self.bufferEnergy = energy
+                // Only forward to Dynamic Island when user is actively recording
+                guard self.audioRecorder.isRecording else { return }
                 LiveActivityManager.shared.updateWaveform(levels: energy)
             }
         secondsCancellable = audioRecorder.$bufferSeconds
@@ -103,7 +105,8 @@ class DictationCoordinator: ObservableObject {
             .sink { [weak self] energy in
                 guard let self, self.rawCapture.isCapturing else { return }
                 self.bufferEnergy = energy
-                // Forward waveform to Dynamic Island (throttled to 1Hz inside manager)
+                // Only forward to Dynamic Island during active recording
+                guard self.status == .recording else { return }
                 LiveActivityManager.shared.updateWaveform(levels: energy)
             }
         rawSecondsCancellable = rawCapture.$bufferSeconds
@@ -154,6 +157,33 @@ class DictationCoordinator: ObservableObject {
                 } catch {
                     PersistentLog.log(.engineWarmUpFailed(context: "init-preload-rawCapture", error: error.localizedDescription))
                 }
+            }
+        }
+
+        // Stop audio engine when user taps Power button in Dynamic Island.
+        // WHY here (not in LiveActivityManager):
+        // The audio engine (RawAudioCapture/AudioRecorder) is owned by DictationCoordinator.
+        // StopStandbyIntent posts this notification because it can't reference coordinator
+        // directly (the intent file is compiled into DictusWidgets too).
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("DictusStopStandbyRequested"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in
+                // Stop any active recording first
+                if self.status == .recording {
+                    self.cancelDictation()
+                }
+                // Kill the audio engine — removes the orange mic indicator
+                if self.rawCapture.isCapturing {
+                    _ = self.rawCapture.stopCapture()
+                }
+                if self.audioRecorder.isEngineRunning {
+                    self.audioRecorder.deactivateSession()
+                }
+                PersistentLog.log(.engineWarmUpFailed(context: "standby-power-off", error: "user stopped standby"))
             }
         }
 
@@ -535,6 +565,8 @@ class DictationCoordinator: ObservableObject {
         bufferSeconds = 0
         cleanupRecordingKeys()
         SoundFeedbackService.playRecordCancel()
+        // Return Dynamic Island to standby (cancel = no transcription, go back to "On")
+        Task { await LiveActivityManager.shared.returnToStandby() }
         updateStatus(.idle)
 
         if #available(iOS 14.0, *) {

@@ -79,6 +79,9 @@
 		AA0000F5 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F5 /* LiveActivityManager.swift */; };
 		BB000001 /* DictusWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100001 /* DictusWidgetBundle.swift */; };
 		BB000002 /* DictusLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100002 /* DictusLiveActivity.swift */; };
+		AA0000F6 /* StopStandbyIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100005 /* StopStandbyIntent.swift */; };
+		BB000003 /* StopStandbyIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100005 /* StopStandbyIntent.swift */; };
+
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -154,6 +157,8 @@
 		AA1000F5 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
 		BB100001 /* DictusWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusWidgetBundle.swift; sourceTree = "<group>"; };
 		BB100002 /* DictusLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusLiveActivity.swift; sourceTree = "<group>"; };
+		BB100005 /* StopStandbyIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopStandbyIntent.swift; sourceTree = "<group>"; };
+
 		BB100003 /* DictusWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DictusWidgets.entitlements; sourceTree = "<group>"; };
 		BB100004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -258,6 +263,8 @@
 			children = (
 				BB100001 /* DictusWidgetBundle.swift */,
 				BB100002 /* DictusLiveActivity.swift */,
+				BB100005 /* StopStandbyIntent.swift */,
+
 				BB100003 /* DictusWidgets.entitlements */,
 				BB100004 /* Info.plist */,
 			);
@@ -607,6 +614,7 @@
 				AA0000E4 /* SwipeBackOverlayView.swift in Sources */,
 				AA0000F2 /* SoundFeedbackService.swift in Sources */,
 				AA0000F3 /* SoundSettingsView.swift in Sources */,
+				AA0000F6 /* StopStandbyIntent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -647,6 +655,7 @@
 			files = (
 				BB000001 /* DictusWidgetBundle.swift in Sources */,
 				BB000002 /* DictusLiveActivity.swift in Sources */,
+				BB000003 /* StopStandbyIntent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

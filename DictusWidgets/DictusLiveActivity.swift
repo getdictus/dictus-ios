@@ -172,6 +172,7 @@ struct DictusLiveActivity: Widget {
                 }
             }
         }
+        .frame(maxHeight: .infinity, alignment: .center)
     }
 
     @ViewBuilder
@@ -179,8 +180,8 @@ struct DictusLiveActivity: Widget {
         HStack(spacing: 10) {
             switch context.state.phase {
             case .standby:
-                // Power off button
-                Link(destination: URL(string: "dictus://standby-off")!) {
+                // Power off button — ends Live Activity via LiveActivityIntent (no app open)
+                Button(intent: StopStandbyIntent()) {
                     Image(systemName: "power")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.white.opacity(0.8))
@@ -188,6 +189,7 @@ struct DictusLiveActivity: Widget {
                         .background(Color.white.opacity(0.15))
                         .clipShape(Circle())
                 }
+                .buttonStyle(.plain)
 
                 // Record button
                 Link(destination: URL(string: "dictus://dictate")!) {
@@ -199,15 +201,7 @@ struct DictusLiveActivity: Widget {
                         .clipShape(Circle())
                 }
             case .recording:
-                // Timer
-                if let startDate = context.state.recordingStartDate {
-                    Text(startDate, style: .timer)
-                        .font(.system(size: 16, weight: .medium, design: .monospaced))
-                        .foregroundColor(.white)
-                        .monospacedDigit()
-                }
-
-                // Stop button
+                // Stop button (left side)
                 Link(destination: URL(string: "dictus://stop")!) {
                     Image(systemName: "stop.fill")
                         .font(.system(size: 12, weight: .semibold))
@@ -216,6 +210,14 @@ struct DictusLiveActivity: Widget {
                         .background(Color(hex: 0xEF4444))
                         .clipShape(Circle())
                 }
+
+                // Timer (right, naturally trailing — aligns with compact trailing)
+                if let startDate = context.state.recordingStartDate {
+                    Text(startDate, style: .timer)
+                        .font(.system(size: 16, weight: .medium, design: .monospaced))
+                        .foregroundColor(.white)
+                        .monospacedDigit()
+                }
             case .transcribing:
                 ProgressView()
                     .tint(.white)
@@ -223,16 +225,14 @@ struct DictusLiveActivity: Widget {
                 EmptyView()
             }
         }
+        .frame(maxHeight: .infinity, alignment: .center)
     }
 
     @ViewBuilder
     private func expandedBottom(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
         switch context.state.phase {
         case .recording:
-            // 5-bar waveform visualization
-            WaveformBars(levels: normalizedLevels(context.state.waveformLevels, count: 5))
-                .frame(height: 24)
-                .padding(.horizontal, 8)
+            EmptyView()
         case .ready:
             if let preview = context.state.transcriptionPreview {
                 Text(preview)
@@ -304,7 +304,7 @@ struct DictusLiveActivity: Widget {
             switch context.state.phase {
             case .standby:
                 HStack(spacing: 8) {
-                    Link(destination: URL(string: "dictus://standby-off")!) {
+                    Button(intent: StopStandbyIntent()) {
                         Image(systemName: "power")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.white.opacity(0.7))
@@ -312,6 +312,7 @@ struct DictusLiveActivity: Widget {
                             .background(Color.white.opacity(0.1))
                             .clipShape(Circle())
                     }
+                    .buttonStyle(.plain)
                     Link(destination: URL(string: "dictus://dictate")!) {
                         Image(systemName: "mic.fill")
                             .font(.system(size: 14, weight: .semibold))
@@ -429,7 +430,7 @@ struct WaveformBars: View {
     var body: some View {
         GeometryReader { geo in
             let barWidth: CGFloat = 6
-            let spacing = (geo.size.width - barWidth * 5) / 4
+            let spacing: CGFloat = 4  // Fixed tight spacing
 
             HStack(spacing: spacing) {
                 ForEach(0..<min(levels.count, 5), id: \.self) { index in
