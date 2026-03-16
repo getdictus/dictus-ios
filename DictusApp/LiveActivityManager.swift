@@ -77,6 +77,30 @@ class LiveActivityManager {
             currentActivity = nil
         }
 
+        // Guard against duplicates at the system level, not just our in-memory reference.
+        // WHY: After crash/force-quit, currentActivity is nil but old activities persist
+        // in ActivityKit. cleanupStaleActivities() runs async in init() and may not have
+        // finished yet. Checking the system list prevents creating a second activity.
+        let systemActivities = Activity<DictusLiveActivityAttributes>.activities
+        if currentActivity == nil && !systemActivities.isEmpty {
+            // Recover orphaned activity instead of creating a new one
+            if let existing = systemActivities.first {
+                currentActivity = existing
+                currentPhase = existing.content.state.phase
+                DictusLogger.app.info("Recovered orphaned Live Activity: \(existing.id)")
+            }
+            // End any extras beyond the first (shouldn't happen, but defense in depth)
+            for activity in systemActivities.dropFirst() {
+                Task {
+                    await activity.end(
+                        .init(state: .init(phase: .standby), staleDate: nil),
+                        dismissalPolicy: .immediate
+                    )
+                    DictusLogger.app.info("Ended duplicate Live Activity: \(activity.id)")
+                }
+            }
+        }
+
         // Don't create duplicate activities
         guard currentActivity == nil else {
             DictusLogger.app.info("Live Activity already running — skipping startStandby")
