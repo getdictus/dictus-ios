@@ -42,6 +42,12 @@ class DictationCoordinator: ObservableObject {
     /// to WhisperKit's transcribe(audioArray:) once it finishes loading.
     private let rawCapture = RawAudioCapture()
 
+    /// Whether any audio engine (WhisperKit or RawCapture) is currently running.
+    /// Used by DictusApp to detect "warm but engine-dead" state after Power button stop.
+    var isAnyEngineRunning: Bool {
+        audioRecorder.isEngineRunning || rawCapture.isEngineRunning
+    }
+
     /// Transcription timeout watchdog: fires after 30s in .transcribing state.
     /// WHY 30s: WhisperKit transcription of a typical dictation (<60s audio) should
     /// complete in under 10s even on older devices. 30s provides generous margin

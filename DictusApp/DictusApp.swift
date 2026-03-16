@@ -114,13 +114,18 @@ struct DictusApp: App {
                 .first(where: { $0.name == "source" })?
                 .value == "keyboard"
 
-            // Only show cold start overlay on TRUE cold start: app was terminated by iOS
-            // and keyboard just launched it. If app is already in memory (hasBeenActive),
-            // just start recording — no overlay, no app switch.
+            // Show cold start overlay when:
+            // 1. TRUE cold start: app was terminated by iOS and keyboard just launched it
+            // 2. Engine-dead restart: app is in memory but audio engine was stopped
+            //    (e.g., Power button in Dynamic Island). Functionally a cold start because
+            //    the app must come to foreground to restart the engine.
             let isColdStart = isFromKeyboard && !Self.hasBeenActive
+            let isEngineDeadRestart = isFromKeyboard && Self.hasBeenActive
+                && !DictationCoordinator.shared.isAnyEngineRunning
 
-            if isColdStart {
-                DictusLogger.app.info("Cold start dictation requested from keyboard (first launch)")
+            if isColdStart || isEngineDeadRestart {
+                let reason = isColdStart ? "first launch" : "engine dead"
+                DictusLogger.app.info("Cold/engine-dead start from keyboard (\(reason)) — showing swipe-back overlay")
                 AppGroup.defaults.set(true, forKey: SharedKeys.coldStartActive)
                 AppGroup.defaults.synchronize()
             } else if isFromKeyboard {
