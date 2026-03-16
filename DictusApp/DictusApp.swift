@@ -61,19 +61,30 @@ struct DictusApp: App {
                         PersistentLog.log(.appWillResignActive)
                     case .background:
                         PersistentLog.log(.appDidEnterBackground)
-                        // Clear cold start state to prevent stale overlay on next normal launch.
-                        // WHY here: When the user leaves the app (swipes away, switches app),
-                        // the cold start flow is over. Next time the app opens normally,
-                        // MainTabView should show regular tabs, not the swipe-back placeholder.
-                        AppGroup.defaults.set(false, forKey: SharedKeys.coldStartActive)
-                        AppGroup.defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
-                        AppGroup.defaults.synchronize()
 
-                        // Start the Dynamic Island standby mode when app goes to background.
-                        // WHY here: The Dynamic Island is most useful when the user is in
-                        // another app. It shows "Dictus - On" and provides quick access to
-                        // start recording via the expanded view's Record button.
-                        LiveActivityManager.shared.startStandbyActivity()
+                        let isRecordingActive = coordinator.status == .recording
+                            || coordinator.status == .requested
+                            || coordinator.status == .transcribing
+
+                        // Only clear cold start state if NOT recording.
+                        // During cold start, the app transitions to background while recording
+                        // continues. Clearing the flag here kills the keyboard's watchdog grace period
+                        // and freezes the keyboard UI. The flag is cleared later in
+                        // DictationCoordinator.cleanupRecordingKeys() when the recording finishes.
+                        if !isRecordingActive {
+                            AppGroup.defaults.set(false, forKey: SharedKeys.coldStartActive)
+                            AppGroup.defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
+                            AppGroup.defaults.synchronize()
+                        }
+
+                        // Only start standby activity if NOT recording.
+                        // During cold start recording, transitionToRecording() already manages
+                        // the Live Activity. Calling startStandbyActivity() here creates a race:
+                        // it detects the recording activity as "stale" and replaces it with a new
+                        // standby activity, losing all waveform updates to the Dynamic Island.
+                        if !isRecordingActive {
+                            LiveActivityManager.shared.startStandbyActivity()
+                        }
                     @unknown default:
                         break
                     }

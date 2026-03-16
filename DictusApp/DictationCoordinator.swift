@@ -677,6 +677,14 @@ class DictationCoordinator: ObservableObject {
         defaults.removeObject(forKey: SharedKeys.recordingHeartbeat)
         defaults.set(false, forKey: SharedKeys.stopRequested)
         defaults.set(false, forKey: SharedKeys.cancelRequested)
+
+        // Clear cold start state now that the recording cycle is over.
+        // WHY here: Fix 1 prevents the .background handler from clearing this flag
+        // during active recording. This is the correct place — recording has finished
+        // (success, cancel, or error path all call cleanupRecordingKeys).
+        defaults.set(false, forKey: SharedKeys.coldStartActive)
+        defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
+
         defaults.synchronize()
     }
 
@@ -893,6 +901,12 @@ class DictationCoordinator: ObservableObject {
     /// Handle errors by updating status and writing error to App Group.
     private func handleError(_ message: String) {
         defaults.set(message, forKey: SharedKeys.lastError)
+        // Clear cold start state on error — recording cycle is over.
+        // WHY: If the engine fails to start (e.g., AUIOClient_StartIO error on fast
+        // swipe-back), coldStartActive must be cleared so the keyboard doesn't keep
+        // the 15s grace period on the next normal launch.
+        defaults.set(false, forKey: SharedKeys.coldStartActive)
+        defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
         defaults.synchronize()
         updateStatus(.failed)
         LiveActivityManager.shared.endWithFailure()

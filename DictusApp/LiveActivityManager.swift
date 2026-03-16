@@ -322,8 +322,16 @@ class LiveActivityManager {
     /// on the Dynamic Island until iOS times it out (up to 8 hours).
     /// Cleaning up on launch ensures a fresh state.
     func cleanupStaleActivities() {
+        // Capture current session ID BEFORE entering the async Task.
+        // WHY: On cold start, transitionToRecording() may create a new Live Activity
+        // before this cleanup Task runs. Without this guard, the cleanup would end
+        // the freshly created recording activity (race condition).
+        let currentSessionActivityID = currentActivity?.id
+
         Task {
             for activity in Activity<DictusLiveActivityAttributes>.activities {
+                if activity.id == currentSessionActivityID { continue }
+
                 await activity.end(
                     .init(
                         state: DictusLiveActivityAttributes.ContentState(phase: .standby),
@@ -333,7 +341,9 @@ class LiveActivityManager {
                 )
                 DictusLogger.app.info("Cleaned up stale Live Activity: \(activity.id, privacy: .public)")
             }
-            currentActivity = nil
+            if currentSessionActivityID == nil {
+                currentActivity = nil
+            }
         }
     }
 
