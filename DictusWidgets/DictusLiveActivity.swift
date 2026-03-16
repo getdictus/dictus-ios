@@ -79,12 +79,9 @@ struct DictusLiveActivity: Widget {
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.white)
         case .recording:
-            if let startDate = context.state.recordingStartDate {
-                Text(startDate, style: .timer)
-                    .font(.system(size: 14, weight: .medium, design: .monospaced))
-                    .foregroundColor(.white)
-                    .monospacedDigit()
-            }
+            Text("Rec")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color(hex: 0xEF4444))
         case .transcribing:
             // Small spinner-like indicator via SF Symbol
             Image(systemName: "ellipsis")
@@ -178,6 +175,7 @@ struct DictusLiveActivity: Widget {
     @ViewBuilder
     private func expandedTrailing(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
         HStack(spacing: 10) {
+            Spacer(minLength: 0) // Push trailing elements to the right edge
             switch context.state.phase {
             case .standby:
                 // Power off button — ends Live Activity via LiveActivityIntent (no app open)
