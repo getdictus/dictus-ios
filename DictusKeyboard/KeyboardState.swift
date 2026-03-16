@@ -229,9 +229,22 @@ class KeyboardState: ObservableObject {
                     coldStartGraceEnd = Date().addingTimeInterval(15)
                     lastWaveformUpdate = Date()
                 }
+                // Force-read waveform on keyboard reappear to unstick frozen animations.
+                // WHY: When the extension is suspended (app in foreground), Darwin
+                // notifications are lost. readWaveformData() updates @Published props
+                // which forces SwiftUI to re-render the overlay.
+                readWaveformData()
             } else {
                 stopWatchdog()
                 coldStartGraceEnd = nil
+            }
+
+            // Force SwiftUI re-render when status hasn't changed but we're returning
+            // from suspension (e.g., swipe-back during cold start recording).
+            // WHY: If oldStatus == status == .recording, SwiftUI skips re-render
+            // because no @Published value changed. objectWillChange forces it.
+            if oldStatus == status && activeStates.contains(status) {
+                objectWillChange.send()
             }
         }
     }
