@@ -87,7 +87,7 @@ class LiveActivityManager {
             if let existing = systemActivities.first {
                 currentActivity = existing
                 currentPhase = existing.content.state.phase
-                DictusLogger.app.info("Recovered orphaned Live Activity: \(existing.id)")
+                DictusLogger.app.info("Recovered orphaned Live Activity: \(existing.id, privacy: .public)")
             }
             // End any extras beyond the first (shouldn't happen, but defense in depth)
             for activity in systemActivities.dropFirst() {
@@ -96,7 +96,7 @@ class LiveActivityManager {
                         .init(state: .init(phase: .standby), staleDate: nil),
                         dismissalPolicy: .immediate
                     )
-                    DictusLogger.app.info("Ended duplicate Live Activity: \(activity.id)")
+                    DictusLogger.app.info("Ended duplicate Live Activity: \(activity.id, privacy: .public)")
                 }
             }
         }
@@ -121,9 +121,9 @@ class LiveActivityManager {
             )
             currentActivity = activity
             currentPhase = .standby
-            DictusLogger.app.info("Live Activity started in standby (id: \(activity.id))")
+            DictusLogger.app.info("Live Activity started in standby (id: \(activity.id, privacy: .public))")
         } catch {
-            DictusLogger.app.error("Failed to start Live Activity: \(error.localizedDescription)")
+            DictusLogger.app.error("Failed to start Live Activity: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -331,7 +331,7 @@ class LiveActivityManager {
                     ),
                     dismissalPolicy: .immediate
                 )
-                DictusLogger.app.info("Cleaned up stale Live Activity: \(activity.id)")
+                DictusLogger.app.info("Cleaned up stale Live Activity: \(activity.id, privacy: .public)")
             }
             currentActivity = nil
         }

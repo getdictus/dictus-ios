@@ -256,7 +256,7 @@ class DictationCoordinator: ObservableObject {
         // states to start a new recording from.
         guard status == .idle || status == .failed || status == .ready || status == .requested else {
             if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Ignoring duplicate startDictation — already \(self.status.rawValue)")
+                DictusLogger.app.info("Ignoring duplicate startDictation — already \(self.status.rawValue, privacy: .public)")
             }
             return
         }
@@ -475,7 +475,7 @@ class DictationCoordinator: ObservableObject {
                     LiveActivityManager.shared.endWithResult(preview: text)
 
                     if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Transcription complete: \(text)")
+                        DictusLogger.app.info("Transcription complete: \(text, privacy: .public)")
                     }
 
                     cleanupRecordingKeys()
@@ -497,7 +497,7 @@ class DictationCoordinator: ObservableObject {
                     }
 
                     if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Recording stopped. Samples: \(samples.count), Duration: \(String(format: "%.1f", audioDuration))s")
+                        DictusLogger.app.info("Recording stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", audioDuration), privacy: .public)s")
                     }
 
                     // Transcribe with the already-loaded model (no model switching).
@@ -519,14 +519,14 @@ class DictationCoordinator: ObservableObject {
                     LiveActivityManager.shared.endWithResult(preview: text)
 
                     if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Transcription complete: \(text)")
+                        DictusLogger.app.info("Transcription complete: \(text, privacy: .public)")
                     }
 
                     cleanupRecordingKeys()
                 }
             } catch {
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.error("Transcription failed: \(error.localizedDescription)")
+                    DictusLogger.app.error("Transcription failed: \(error.localizedDescription, privacy: .public)")
                 }
                 handleError(error.localizedDescription)
             }
@@ -728,7 +728,7 @@ class DictationCoordinator: ObservableObject {
         // Create and store the init task so concurrent callers can await it
         let task = Task<Void, Error> {
             if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Initializing WhisperKit with model: \(modelName)")
+                DictusLogger.app.info("Initializing WhisperKit with model: \(modelName, privacy: .public)")
             }
 
             let config = WhisperKitConfig(
@@ -753,7 +753,7 @@ class DictationCoordinator: ObservableObject {
             transcriptionService.prepare(engine: whisperKitEngine)
 
             if #available(iOS 14.0, *) {
-                DictusLogger.app.info("WhisperKit ready with model: \(modelName)")
+                DictusLogger.app.info("WhisperKit ready with model: \(modelName, privacy: .public)")
             }
         }
         initTask = task
@@ -793,7 +793,7 @@ class DictationCoordinator: ObservableObject {
 
             let task = Task<Void, Error> {
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Initializing ParakeetEngine for model: \(modelName)")
+                    DictusLogger.app.info("Initializing ParakeetEngine for model: \(modelName, privacy: .public)")
                 }
 
                 let parakeetEngine = ParakeetEngine()
@@ -807,7 +807,7 @@ class DictationCoordinator: ObservableObject {
                 transcriptionService.prepare(engine: parakeetEngine)
 
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("ParakeetEngine ready for model: \(modelName)")
+                    DictusLogger.app.info("ParakeetEngine ready for model: \(modelName, privacy: .public)")
                 }
             }
             initTask = task

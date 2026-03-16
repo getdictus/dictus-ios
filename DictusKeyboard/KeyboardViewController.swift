@@ -20,7 +20,7 @@ class KeyboardViewController: UIInputViewController {
         let result = AppGroupDiagnostic.run()
         if #available(iOS 14.0, *) {
             DictusLogger.keyboard.debug(
-                "Diagnostic: canWrite=\(result.canWrite) canRead=\(result.canRead)"
+                "Diagnostic: canWrite=\(result.canWrite, privacy: .public) canRead=\(result.canRead, privacy: .public)"
             )
         }
         #endif

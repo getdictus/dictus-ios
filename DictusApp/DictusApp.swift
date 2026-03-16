@@ -30,7 +30,7 @@ struct DictusApp: App {
 
         let result = AppGroupDiagnostic.run()
         DictusLogger.app.info(
-            "AppGroup diagnostic: healthy=\(result.isHealthy)"
+            "AppGroup diagnostic: healthy=\(result.isHealthy, privacy: .public)"
         )
 
         // Persist language default so TranscriptionService always reads "fr"
@@ -125,7 +125,7 @@ struct DictusApp: App {
 
             if isColdStart || isEngineDeadRestart {
                 let reason = isColdStart ? "first launch" : "engine dead"
-                DictusLogger.app.info("Cold/engine-dead start from keyboard (\(reason)) — showing swipe-back overlay")
+                DictusLogger.app.info("Cold/engine-dead start from keyboard (\(reason, privacy: .public)) — showing swipe-back overlay")
                 AppGroup.defaults.set(true, forKey: SharedKeys.coldStartActive)
                 AppGroup.defaults.synchronize()
             } else if isFromKeyboard {

@@ -271,7 +271,7 @@ class KeyboardState: ObservableObject {
             } catch {
                 // JSON decode failure — keep existing waveform data
                 if #available(iOS 14.0, *) {
-                    DictusLogger.keyboard.warning("Failed to decode waveform energy: \(error)")
+                    DictusLogger.keyboard.warning("Failed to decode waveform energy: \(error, privacy: .public)")
                 }
             }
         }
