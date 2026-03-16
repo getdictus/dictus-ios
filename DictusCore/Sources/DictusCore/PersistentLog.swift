@@ -109,7 +109,7 @@ public enum PersistentLog {
         let entry = "[\(timestamp)] \(function): \(message)\n"
 
         if #available(iOS 14.0, *) {
-            DictusLogger.app.info("\(message)")
+            DictusLogger.app.info("\(message, privacy: .public)")
         }
 
         guard let url = fileURL else { return }
@@ -189,12 +189,15 @@ public enum PersistentLog {
             logger = DictusLogger.keyboard
         }
 
+        // WHY privacy: .public — LogEvent is privacy-safe by design (no user text,
+        // no keystrokes). Without .public, os.log masks ALL interpolated values as
+        // <private> in the Xcode console, making debugging impossible.
         let msg = "\(event.name) \(event.message)"
         switch event.level {
-        case .debug: logger.debug("\(msg)")
-        case .info: logger.info("\(msg)")
-        case .warning: logger.warning("\(msg)")
-        case .error: logger.error("\(msg)")
+        case .debug: logger.debug("\(msg, privacy: .public)")
+        case .info: logger.info("\(msg, privacy: .public)")
+        case .warning: logger.warning("\(msg, privacy: .public)")
+        case .error: logger.error("\(msg, privacy: .public)")
         }
     }
 

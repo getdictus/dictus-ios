@@ -22,9 +22,15 @@ struct DictusApp: App {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         PersistentLog.log(.appLaunched(version: version))
 
+        // Clean up any Live Activities left over from a previous app session.
+        // WHY in init: If the app crashed or was force-quit, the Dynamic Island
+        // keeps showing stale data for up to 8 hours. Cleaning up here ensures
+        // a fresh start.
+        LiveActivityManager.shared.cleanupStaleActivities()
+
         let result = AppGroupDiagnostic.run()
         DictusLogger.app.info(
-            "AppGroup diagnostic: healthy=\(result.isHealthy)"
+            "AppGroup diagnostic: healthy=\(result.isHealthy, privacy: .public)"
         )
 
         // Persist language default so TranscriptionService always reads "fr"
@@ -55,13 +61,30 @@ struct DictusApp: App {
                         PersistentLog.log(.appWillResignActive)
                     case .background:
                         PersistentLog.log(.appDidEnterBackground)
-                        // Clear cold start state to prevent stale overlay on next normal launch.
-                        // WHY here: When the user leaves the app (swipes away, switches app),
-                        // the cold start flow is over. Next time the app opens normally,
-                        // MainTabView should show regular tabs, not the swipe-back placeholder.
-                        AppGroup.defaults.set(false, forKey: SharedKeys.coldStartActive)
-                        AppGroup.defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
-                        AppGroup.defaults.synchronize()
+
+                        let isRecordingActive = coordinator.status == .recording
+                            || coordinator.status == .requested
+                            || coordinator.status == .transcribing
+
+                        // Only clear cold start state if NOT recording.
+                        // During cold start, the app transitions to background while recording
+                        // continues. Clearing the flag here kills the keyboard's watchdog grace period
+                        // and freezes the keyboard UI. The flag is cleared later in
+                        // DictationCoordinator.cleanupRecordingKeys() when the recording finishes.
+                        if !isRecordingActive {
+                            AppGroup.defaults.set(false, forKey: SharedKeys.coldStartActive)
+                            AppGroup.defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
+                            AppGroup.defaults.synchronize()
+                        }
+
+                        // Only start standby activity if NOT recording.
+                        // During cold start recording, transitionToRecording() already manages
+                        // the Live Activity. Calling startStandbyActivity() here creates a race:
+                        // it detects the recording activity as "stale" and replaces it with a new
+                        // standby activity, losing all waveform updates to the Dynamic Island.
+                        if !isRecordingActive {
+                            LiveActivityManager.shared.startStandbyActivity()
+                        }
                     @unknown default:
                         break
                     }
@@ -102,13 +125,18 @@ struct DictusApp: App {
                 .first(where: { $0.name == "source" })?
                 .value == "keyboard"
 
-            // Only show cold start overlay on TRUE cold start: app was terminated by iOS
-            // and keyboard just launched it. If app is already in memory (hasBeenActive),
-            // just start recording — no overlay, no app switch.
+            // Show cold start overlay when:
+            // 1. TRUE cold start: app was terminated by iOS and keyboard just launched it
+            // 2. Engine-dead restart: app is in memory but audio engine was stopped
+            //    (e.g., Power button in Dynamic Island). Functionally a cold start because
+            //    the app must come to foreground to restart the engine.
             let isColdStart = isFromKeyboard && !Self.hasBeenActive
+            let isEngineDeadRestart = isFromKeyboard && Self.hasBeenActive
+                && !DictationCoordinator.shared.isAnyEngineRunning
 
-            if isColdStart {
-                DictusLogger.app.info("Cold start dictation requested from keyboard (first launch)")
+            if isColdStart || isEngineDeadRestart {
+                let reason = isColdStart ? "first launch" : "engine dead"
+                DictusLogger.app.info("Cold/engine-dead start from keyboard (\(reason, privacy: .public)) — showing swipe-back overlay")
                 AppGroup.defaults.set(true, forKey: SharedKeys.coldStartActive)
                 AppGroup.defaults.synchronize()
             } else if isFromKeyboard {
@@ -122,6 +150,9 @@ struct DictusApp: App {
             // Auto-return was removed because there's no public API to detect which app
             // the keyboard is serving — iterating KnownAppSchemes always opened the first
             // installed app (e.g., WhatsApp) regardless of where the user actually was.
+        case "stop":
+            // Stop recording from Dynamic Island expanded view button.
+            coordinator.stopDictation()
         default:
             break
         }

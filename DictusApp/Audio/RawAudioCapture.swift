@@ -111,7 +111,7 @@ class RawAudioCapture: ObservableObject {
         isCapturing = true
 
         if #available(iOS 14.0, *) {
-            DictusLogger.app.info("RawAudioCapture started (hw: \(hwFormat.sampleRate)Hz -> 16kHz)")
+            DictusLogger.app.info("RawAudioCapture started (hw: \(hwFormat.sampleRate, privacy: .public)Hz -> 16kHz)")
         }
     }
 
@@ -135,7 +135,7 @@ class RawAudioCapture: ObservableObject {
         PersistentLog.log(.engineCollectResult(sampleCount: samples.count, engineRunning: engine.isRunning))
 
         if #available(iOS 14.0, *) {
-            DictusLogger.app.info("RawAudioCapture collectSamples. Samples: \(samples.count), Duration: \(String(format: "%.1f", Double(samples.count) / 16000.0))s, engine still running")
+            DictusLogger.app.info("RawAudioCapture collectSamples. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", Double(samples.count) / 16000.0), privacy: .public)s, engine still running")
         }
 
         // Reset published state but keep engine running
@@ -178,7 +178,7 @@ class RawAudioCapture: ObservableObject {
         audioSamples = []
 
         if #available(iOS 14.0, *) {
-            DictusLogger.app.info("RawAudioCapture stopped. Samples: \(samples.count), Duration: \(String(format: "%.1f", Double(samples.count) / 16000.0))s")
+            DictusLogger.app.info("RawAudioCapture stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", Double(samples.count) / 16000.0), privacy: .public)s")
         }
 
         // Reset published state
@@ -239,7 +239,7 @@ class RawAudioCapture: ObservableObject {
 
         if let error {
             if #available(iOS 14.0, *) {
-                DictusLogger.app.warning("Audio conversion error: \(error.localizedDescription)")
+                DictusLogger.app.warning("Audio conversion error: \(error.localizedDescription, privacy: .public)")
             }
             return
         }

@@ -1,6 +1,5 @@
 // DictusCore/Sources/DictusCore/AppGroupDiagnostic.swift
 import Foundation
-import os.log
 
 public struct DiagnosticResult {
     public let canWrite: Bool
@@ -40,16 +39,6 @@ public enum AppGroupDiagnostic {
             appGroupID: AppGroup.identifier,
             containerExists: containerExists,
             timestamp: Date()
-        )
-
-        // Log using os_log for broad platform compatibility (iOS 10+, macOS 10.12+)
-        os_log(
-            "AppGroup diagnostic: canWrite=%{public}@ canRead=%{public}@ container=%{public}@",
-            log: OSLog(subsystem: "com.pivi.dictus", category: "diagnostic"),
-            type: .info,
-            canWrite ? "true" : "false",
-            canRead ? "true" : "false",
-            containerExists ? "true" : "false"
         )
 
         // Clean up test key

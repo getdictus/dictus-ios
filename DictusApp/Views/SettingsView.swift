@@ -175,8 +175,7 @@ struct SettingsView: View {
     /// on demand by running the diagnostic check. This is cheap (reads/writes
     /// a single UserDefaults key) and always shows fresh results.
     private var diagnosticView: some View {
-        let result = AppGroupDiagnostic.run()
-        return DiagnosticDetailView(result: result)
+        DiagnosticDetailView(result: AppGroupDiagnostic.run())
             .navigationTitle("Diagnostic")
     }
 }

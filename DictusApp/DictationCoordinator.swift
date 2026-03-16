@@ -42,6 +42,12 @@ class DictationCoordinator: ObservableObject {
     /// to WhisperKit's transcribe(audioArray:) once it finishes loading.
     private let rawCapture = RawAudioCapture()
 
+    /// Whether any audio engine (WhisperKit or RawCapture) is currently running.
+    /// Used by DictusApp to detect "warm but engine-dead" state after Power button stop.
+    var isAnyEngineRunning: Bool {
+        audioRecorder.isEngineRunning || rawCapture.isEngineRunning
+    }
+
     /// Transcription timeout watchdog: fires after 30s in .transcribing state.
     /// WHY 30s: WhisperKit transcription of a typical dictation (<60s audio) should
     /// complete in under 10s even on older devices. 30s provides generous margin
@@ -84,7 +90,11 @@ class DictationCoordinator: ObservableObject {
         energyCancellable = audioRecorder.$bufferEnergy
             .receive(on: DispatchQueue.main)
             .sink { [weak self] energy in
-                self?.bufferEnergy = energy
+                guard let self else { return }
+                self.bufferEnergy = energy
+                // Only forward to Dynamic Island when user is actively recording
+                guard self.audioRecorder.isRecording else { return }
+                LiveActivityManager.shared.updateWaveform(levels: energy)
             }
         secondsCancellable = audioRecorder.$bufferSeconds
             .receive(on: DispatchQueue.main)
@@ -101,6 +111,9 @@ class DictationCoordinator: ObservableObject {
             .sink { [weak self] energy in
                 guard let self, self.rawCapture.isCapturing else { return }
                 self.bufferEnergy = energy
+                // Only forward to Dynamic Island during active recording
+                guard self.status == .recording else { return }
+                LiveActivityManager.shared.updateWaveform(levels: energy)
             }
         rawSecondsCancellable = rawCapture.$bufferSeconds
             .receive(on: DispatchQueue.main)
@@ -150,6 +163,33 @@ class DictationCoordinator: ObservableObject {
                 } catch {
                     PersistentLog.log(.engineWarmUpFailed(context: "init-preload-rawCapture", error: error.localizedDescription))
                 }
+            }
+        }
+
+        // Stop audio engine when user taps Power button in Dynamic Island.
+        // WHY here (not in LiveActivityManager):
+        // The audio engine (RawAudioCapture/AudioRecorder) is owned by DictationCoordinator.
+        // StopStandbyIntent posts this notification because it can't reference coordinator
+        // directly (the intent file is compiled into DictusWidgets too).
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("DictusStopStandbyRequested"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in
+                // Stop any active recording first
+                if self.status == .recording {
+                    self.cancelDictation()
+                }
+                // Kill the audio engine — removes the orange mic indicator
+                if self.rawCapture.isCapturing {
+                    _ = self.rawCapture.stopCapture()
+                }
+                if self.audioRecorder.isEngineRunning {
+                    self.audioRecorder.deactivateSession()
+                }
+                PersistentLog.log(.engineWarmUpFailed(context: "standby-power-off", error: "user stopped standby"))
             }
         }
 
@@ -216,7 +256,7 @@ class DictationCoordinator: ObservableObject {
         // states to start a new recording from.
         guard status == .idle || status == .failed || status == .ready || status == .requested else {
             if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Ignoring duplicate startDictation — already \(self.status.rawValue)")
+                DictusLogger.app.info("Ignoring duplicate startDictation — already \(self.status.rawValue, privacy: .public)")
             }
             return
         }
@@ -284,6 +324,7 @@ class DictationCoordinator: ObservableObject {
                         return
                     }
                     updateStatus(.recording)
+                    LiveActivityManager.shared.transitionToRecording()
                     try audioRecorder.startRecording()
                     PersistentLog.log(.audioEngineStarted)
                 } catch {
@@ -303,6 +344,7 @@ class DictationCoordinator: ObservableObject {
                     }
                     rawCapture.purgeIdleSamples()
                     updateStatus(.recording)
+                    LiveActivityManager.shared.transitionToRecording()
                     PersistentLog.log(.audioEngineStarted)
                     PersistentLog.log(.engineStateSnapshot(
                         engineRunning: rawCapture.isEngineRunning,
@@ -327,6 +369,7 @@ class DictationCoordinator: ObservableObject {
                     }
                     try rawCapture.startCapture()
                     updateStatus(.recording)
+                    LiveActivityManager.shared.transitionToRecording()
                     PersistentLog.log(.audioEngineStarted)
 
                     try await ensureEngineReady()
@@ -398,6 +441,7 @@ class DictationCoordinator: ObservableObject {
                     ))
 
                     updateStatus(.transcribing)
+                    LiveActivityManager.shared.transitionToTranscribing()
                     SoundFeedbackService.playRecordStop()
                     try await ensureEngineReady()
 
@@ -428,9 +472,10 @@ class DictationCoordinator: ObservableObject {
 
                     DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
                     DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
+                    LiveActivityManager.shared.endWithResult(preview: text)
 
                     if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Transcription complete: \(text)")
+                        DictusLogger.app.info("Transcription complete: \(text, privacy: .public)")
                     }
 
                     cleanupRecordingKeys()
@@ -452,11 +497,12 @@ class DictationCoordinator: ObservableObject {
                     }
 
                     if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Recording stopped. Samples: \(samples.count), Duration: \(String(format: "%.1f", audioDuration))s")
+                        DictusLogger.app.info("Recording stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", audioDuration), privacy: .public)s")
                     }
 
                     // Transcribe with the already-loaded model (no model switching).
                     updateStatus(.transcribing)
+                    LiveActivityManager.shared.transitionToTranscribing()
                     SoundFeedbackService.playRecordStop()
                     let text = try await transcriptionService.transcribe(audioSamples: samples)
 
@@ -470,16 +516,17 @@ class DictationCoordinator: ObservableObject {
 
                     DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
                     DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
+                    LiveActivityManager.shared.endWithResult(preview: text)
 
                     if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Transcription complete: \(text)")
+                        DictusLogger.app.info("Transcription complete: \(text, privacy: .public)")
                     }
 
                     cleanupRecordingKeys()
                 }
             } catch {
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.error("Transcription failed: \(error.localizedDescription)")
+                    DictusLogger.app.error("Transcription failed: \(error.localizedDescription, privacy: .public)")
                 }
                 handleError(error.localizedDescription)
             }
@@ -524,6 +571,8 @@ class DictationCoordinator: ObservableObject {
         bufferSeconds = 0
         cleanupRecordingKeys()
         SoundFeedbackService.playRecordCancel()
+        // Return Dynamic Island to standby (cancel = no transcription, go back to "On")
+        Task { await LiveActivityManager.shared.returnToStandby() }
         updateStatus(.idle)
 
         if #available(iOS 14.0, *) {
@@ -628,6 +677,14 @@ class DictationCoordinator: ObservableObject {
         defaults.removeObject(forKey: SharedKeys.recordingHeartbeat)
         defaults.set(false, forKey: SharedKeys.stopRequested)
         defaults.set(false, forKey: SharedKeys.cancelRequested)
+
+        // Clear cold start state now that the recording cycle is over.
+        // WHY here: Fix 1 prevents the .background handler from clearing this flag
+        // during active recording. This is the correct place — recording has finished
+        // (success, cancel, or error path all call cleanupRecordingKeys).
+        defaults.set(false, forKey: SharedKeys.coldStartActive)
+        defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
+
         defaults.synchronize()
     }
 
@@ -679,7 +736,7 @@ class DictationCoordinator: ObservableObject {
         // Create and store the init task so concurrent callers can await it
         let task = Task<Void, Error> {
             if #available(iOS 14.0, *) {
-                DictusLogger.app.info("Initializing WhisperKit with model: \(modelName)")
+                DictusLogger.app.info("Initializing WhisperKit with model: \(modelName, privacy: .public)")
             }
 
             let config = WhisperKitConfig(
@@ -704,7 +761,7 @@ class DictationCoordinator: ObservableObject {
             transcriptionService.prepare(engine: whisperKitEngine)
 
             if #available(iOS 14.0, *) {
-                DictusLogger.app.info("WhisperKit ready with model: \(modelName)")
+                DictusLogger.app.info("WhisperKit ready with model: \(modelName, privacy: .public)")
             }
         }
         initTask = task
@@ -744,7 +801,7 @@ class DictationCoordinator: ObservableObject {
 
             let task = Task<Void, Error> {
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Initializing ParakeetEngine for model: \(modelName)")
+                    DictusLogger.app.info("Initializing ParakeetEngine for model: \(modelName, privacy: .public)")
                 }
 
                 let parakeetEngine = ParakeetEngine()
@@ -758,7 +815,7 @@ class DictationCoordinator: ObservableObject {
                 transcriptionService.prepare(engine: parakeetEngine)
 
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("ParakeetEngine ready for model: \(modelName)")
+                    DictusLogger.app.info("ParakeetEngine ready for model: \(modelName, privacy: .public)")
                 }
             }
             initTask = task
@@ -844,7 +901,14 @@ class DictationCoordinator: ObservableObject {
     /// Handle errors by updating status and writing error to App Group.
     private func handleError(_ message: String) {
         defaults.set(message, forKey: SharedKeys.lastError)
+        // Clear cold start state on error — recording cycle is over.
+        // WHY: If the engine fails to start (e.g., AUIOClient_StartIO error on fast
+        // swipe-back), coldStartActive must be cleared so the keyboard doesn't keep
+        // the 15s grace period on the next normal launch.
+        defaults.set(false, forKey: SharedKeys.coldStartActive)
+        defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
         defaults.synchronize()
         updateStatus(.failed)
+        LiveActivityManager.shared.endWithFailure()
     }
 }

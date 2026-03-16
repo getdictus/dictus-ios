@@ -53,7 +53,7 @@ class ParakeetEngine: SpeechModelProtocol {
             isInitialized = false
             asrManager = nil
 
-            DictusLogger.app.error("ParakeetEngine: initialization failed — \(error.localizedDescription)")
+            DictusLogger.app.error("ParakeetEngine: initialization failed — \(error.localizedDescription, privacy: .public)")
             throw error
         }
     }
