@@ -24,8 +24,8 @@ enum TranscriptionError: Error, LocalizedError {
 
 /// Handles transcription with multi-engine routing via SpeechModelProtocol.
 ///
-/// WHY this is a separate class from AudioRecorder:
-/// Single Responsibility — AudioRecorder handles recording, TranscriptionService handles
+/// WHY this is a separate class from UnifiedAudioEngine:
+/// Single Responsibility — UnifiedAudioEngine handles recording, TranscriptionService handles
 /// transcription. This also makes it easy to swap or test each independently.
 ///
 /// Phase 10.3 additions:
@@ -48,9 +48,8 @@ class TranscriptionService {
     /// Inject or re-use a WhisperKit instance (backward-compatible path).
     ///
     /// WHY keep this method:
-    /// DictationCoordinator and AudioRecorder still use the WhisperKit instance
-    /// directly for audio recording (WhisperKit's AudioProcessor). This method
-    /// injects the same WhisperKit instance for the WhisperKit transcription path.
+    /// DictationCoordinator injects the WhisperKit instance for the transcription path.
+    /// UnifiedAudioEngine doesn't need WhisperKit — it uses native AVAudioEngine.
     func prepare(whisperKit: WhisperKit) {
         self.whisperKit = whisperKit
     }
@@ -96,8 +95,7 @@ class TranscriptionService {
     /// otherwise falls back to the direct WhisperKit path.
     ///
     /// WHY the fallback:
-    /// During transition to multi-engine, existing code paths (cold start via
-    /// RawAudioCapture, warm start via AudioRecorder) still use prepare(whisperKit:).
+    /// During transition to multi-engine, the prepare(whisperKit:) path is still used.
     /// The fallback ensures zero regressions while new engine routing is added.
     func transcribe(audioSamples: [Float]) async throws -> String {
         let transcriptionStart = Date()

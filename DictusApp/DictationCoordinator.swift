@@ -1,5 +1,5 @@
 // DictusApp/DictationCoordinator.swift
-// Manages the dictation lifecycle: recording via AudioRecorder + transcription via TranscriptionService.
+// Manages the dictation lifecycle: recording via UnifiedAudioEngine + transcription via TranscriptionService.
 import Foundation
 import Combine
 import AVFoundation
@@ -24,29 +24,21 @@ class DictationCoordinator: ObservableObject {
     @Published var status: DictationStatus = .idle
     @Published var lastResult: String?
 
-    /// Forwarded from AudioRecorder for waveform visualization in RecordingView.
+    /// Forwarded from UnifiedAudioEngine for waveform visualization in RecordingView.
     @Published var bufferEnergy: [Float] = []
 
-    /// Forwarded from AudioRecorder for elapsed time display in RecordingView.
+    /// Forwarded from UnifiedAudioEngine for elapsed time display in RecordingView.
     @Published var bufferSeconds: Double = 0
 
     // MARK: - Private
 
     private let defaults = AppGroup.defaults
-    private let audioRecorder = AudioRecorder()
+    private let audioEngine = UnifiedAudioEngine()
     private let transcriptionService = TranscriptionService()
 
-    /// Lightweight audio capture for cold start recording while WhisperKit loads.
-    /// WHY: On cold start, WhisperKit takes 3-4s to initialize. RawAudioCapture uses
-    /// a plain AVAudioEngine to start recording in <100ms. Samples are later passed
-    /// to WhisperKit's transcribe(audioArray:) once it finishes loading.
-    private let rawCapture = RawAudioCapture()
-
-    /// Whether any audio engine (WhisperKit or RawCapture) is currently running.
+    /// Whether the audio engine is currently running.
     /// Used by DictusApp to detect "warm but engine-dead" state after Power button stop.
-    var isAnyEngineRunning: Bool {
-        audioRecorder.isEngineRunning || rawCapture.isEngineRunning
-    }
+    var isEngineRunning: Bool { audioEngine.isEngineRunning }
 
     /// Transcription timeout watchdog: fires after 30s in .transcribing state.
     /// WHY 30s: WhisperKit transcription of a typical dictation (<60s audio) should
@@ -67,82 +59,44 @@ class DictationCoordinator: ObservableObject {
 
     /// Timestamp of last waveform write to App Group.
     /// Used to throttle writes to ~5Hz (every 200ms) to avoid overwhelming UserDefaults
-    /// with high-frequency updates from the audio recorder's energy callback.
+    /// with high-frequency updates from the audio engine's energy callback.
     private var lastWaveformWriteDate = Date.distantPast
 
-    /// Combine subscription forwarding AudioRecorder's published values to coordinator.
-    ///
-    /// WHY Combine sink instead of direct observation:
-    /// AudioRecorder is a separate ObservableObject. We need to forward its @Published
-    /// properties to DictationCoordinator's @Published properties so RecordingView can
-    /// observe a single source of truth (the coordinator).
+    /// Combine subscriptions forwarding UnifiedAudioEngine's published values to coordinator.
     private var energyCancellable: AnyCancellable?
     private var secondsCancellable: AnyCancellable?
 
-    /// Combine subscriptions for RawAudioCapture (used during cold start).
-    private var rawEnergyCancellable: AnyCancellable?
-    private var rawSecondsCancellable: AnyCancellable?
-
     private init() {
-        // Forward AudioRecorder's energy levels and seconds to coordinator.
-        // NOTE: App Group forwarding for the keyboard is now handled directly from
-        // the audio thread in AudioRecorder's startRecordingLive callback.
-        energyCancellable = audioRecorder.$bufferEnergy
+        // Forward UnifiedAudioEngine's energy levels and seconds to coordinator.
+        // NOTE: App Group forwarding for the keyboard is handled directly from
+        // the audio thread in UnifiedAudioEngine's processBuffer.
+        energyCancellable = audioEngine.$bufferEnergy
             .receive(on: DispatchQueue.main)
             .sink { [weak self] energy in
                 guard let self else { return }
                 self.bufferEnergy = energy
                 // Only forward to Dynamic Island when user is actively recording
-                guard self.audioRecorder.isRecording else { return }
+                guard self.audioEngine.isRecording else { return }
                 LiveActivityManager.shared.updateWaveform(levels: energy)
             }
-        secondsCancellable = audioRecorder.$bufferSeconds
+        secondsCancellable = audioEngine.$bufferSeconds
             .receive(on: DispatchQueue.main)
             .sink { [weak self] seconds in
                 self?.bufferSeconds = seconds
             }
 
-        // Forward RawAudioCapture's energy and seconds (used during cold start recording).
-        // NOTE: App Group forwarding for the keyboard is handled directly from the audio
-        // thread in RawAudioCapture.processBuffer (bypasses main thread throttling in bg).
-        // This sink only updates the coordinator's @Published properties for in-app UI.
-        rawEnergyCancellable = rawCapture.$bufferEnergy
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] energy in
-                guard let self, self.rawCapture.isCapturing else { return }
-                self.bufferEnergy = energy
-                // Only forward to Dynamic Island during active recording
-                guard self.status == .recording else { return }
-                LiveActivityManager.shared.updateWaveform(levels: energy)
-            }
-        rawSecondsCancellable = rawCapture.$bufferSeconds
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] seconds in
-                guard let self, self.rawCapture.isCapturing else { return }
-                self.bufferSeconds = seconds
-            }
-
         // Observe keyboard-initiated stop/cancel signals via Darwin notifications.
-        //
-        // WHY Darwin notifications for keyboard -> app signaling:
-        // The keyboard extension runs in a separate process. It cannot call methods
-        // on DictationCoordinator directly. Instead, it sets a Bool flag in App Group
-        // UserDefaults and posts a Darwin notification. The app observes the notification,
-        // reads the flag, resets it, and acts.
         observeKeyboardSignals()
 
         // Pre-load WhisperKit + audio session eagerly on app launch.
         // WHY: The first recording via URL scheme takes 4-5s if we load lazily.
         // By loading in init(), the model is ready when the keyboard triggers dictation.
-        // The user sees the app briefly (iOS standard "◄ Back" in status bar),
-        // but recording starts instantly instead of waiting for model loading.
         //
         // WHY configure audio session BEFORE the Task:
         // iOS forbids AVAudioSession.setActive(true) from background. The async Task
-        // may not run until after the app is backgrounded (e.g., when opened via URL
-        // scheme from the keyboard). By configuring synchronously in init(), we guarantee
-        // the session is active while the app is still in the foreground.
-        try? audioRecorder.configureAudioSession()
+        // may not run until after the app is backgrounded. By configuring synchronously
+        // in init(), we guarantee the session is active while still in the foreground.
+        try? audioEngine.configureAudioSession()
 
         Task {
             let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
@@ -151,24 +105,16 @@ class DictationCoordinator: ObservableObject {
             do {
                 try await ensureEngineReady()
                 PersistentLog.log(.engineWarmUpAttempt(context: "init-preload"))
-                try audioRecorder.warmUp()
+                try audioEngine.warmUp()
                 PersistentLog.log(.appWhisperKitLoaded(modelName: self.currentModelName ?? "unknown"))
             } catch {
-                PersistentLog.log(.engineWarmUpFailed(context: "init-preload-audioRecorder", error: error.localizedDescription))
-                // Fallback: warm up RawAudioCapture if AudioRecorder can't (Parakeet model)
-                do {
-                    try rawCapture.warmUp()
-                    PersistentLog.log(.engineWarmUpSuccess(context: "init-preload-rawCapture-fallback"))
-                    PersistentLog.log(.appWhisperKitLoaded(modelName: self.currentModelName ?? "unknown"))
-                } catch {
-                    PersistentLog.log(.engineWarmUpFailed(context: "init-preload-rawCapture", error: error.localizedDescription))
-                }
+                PersistentLog.log(.engineWarmUpFailed(context: "init-preload", error: error.localizedDescription))
             }
         }
 
         // Stop audio engine when user taps Power button in Dynamic Island.
         // WHY here (not in LiveActivityManager):
-        // The audio engine (RawAudioCapture/AudioRecorder) is owned by DictationCoordinator.
+        // The audio engine is owned by DictationCoordinator.
         // StopStandbyIntent posts this notification because it can't reference coordinator
         // directly (the intent file is compiled into DictusWidgets too).
         NotificationCenter.default.addObserver(
@@ -183,11 +129,8 @@ class DictationCoordinator: ObservableObject {
                     self.cancelDictation()
                 }
                 // Kill the audio engine — removes the orange mic indicator
-                if self.rawCapture.isCapturing {
-                    _ = self.rawCapture.stopCapture()
-                }
-                if self.audioRecorder.isEngineRunning {
-                    self.audioRecorder.deactivateSession()
+                if self.audioEngine.isEngineRunning {
+                    self.audioEngine.deactivateSession()
                 }
                 PersistentLog.log(.engineWarmUpFailed(context: "standby-power-off", error: "user stopped standby"))
             }
@@ -205,13 +148,13 @@ class DictationCoordinator: ObservableObject {
             guard let self else { return }
             Task { @MainActor in
                 PersistentLog.log(.engineStateSnapshot(
-                    engineRunning: self.audioRecorder.isEngineRunning,
-                    isRecording: self.audioRecorder.isRecording,
+                    engineRunning: self.audioEngine.isEngineRunning,
+                    isRecording: self.audioEngine.isRecording,
                     hasWhisperKit: self.whisperKit != nil,
-                    sessionConfigured: true, // can't access private, but session was configured in init
+                    sessionConfigured: true,
                     context: "didBecomeActive"
                 ))
-                guard !self.audioRecorder.isEngineRunning && !self.rawCapture.isEngineRunning else {
+                guard !self.audioEngine.isEngineRunning else {
                     PersistentLog.log(.engineWarmUpSuccess(context: "didBecomeActive-already-running"))
                     return
                 }
@@ -222,21 +165,13 @@ class DictationCoordinator: ObservableObject {
                 }
 
                 do {
-                    try self.audioRecorder.configureAudioSession()
+                    try self.audioEngine.configureAudioSession()
                     PersistentLog.log(.engineWarmUpAttempt(context: "didBecomeActive"))
                     try await self.ensureEngineReady()
-                    try self.audioRecorder.warmUp()
+                    try self.audioEngine.warmUp()
                     PersistentLog.log(.engineWarmUpSuccess(context: "didBecomeActive"))
                 } catch {
-                    PersistentLog.log(.engineWarmUpFailed(context: "didBecomeActive-audioRecorder", error: error.localizedDescription))
-                    // Fallback: if AudioRecorder can't warm up (Parakeet model = no WhisperKit),
-                    // warm up RawAudioCapture instead to keep an engine alive in background.
-                    do {
-                        try self.rawCapture.warmUp()
-                        PersistentLog.log(.engineWarmUpSuccess(context: "didBecomeActive-rawCapture-fallback"))
-                    } catch {
-                        PersistentLog.log(.engineWarmUpFailed(context: "didBecomeActive-rawCapture-fallback", error: error.localizedDescription))
-                    }
+                    PersistentLog.log(.engineWarmUpFailed(context: "didBecomeActive", error: error.localizedDescription))
                 }
             }
         }
@@ -247,13 +182,13 @@ class DictationCoordinator: ObservableObject {
     /// Start the recording pipeline.
     /// Called from URL scheme (first time) or Darwin notification (subsequent times).
     ///
+    /// Two paths:
+    /// - WARM START: engine already running → purge idle samples + startRecording()
+    /// - COLD START: engine not running → startRecording() starts it (<100ms) + load model in parallel
+    ///
     /// - Parameter fromURL: If true, the app was opened via URL scheme from the keyboard.
-    ///   On cold start, this triggers auto-background after 0.5s so the user returns
-    ///   to the keyboard automatically while recording continues in background.
     func startDictation(fromURL: Bool = false) {
         // Guard against duplicate calls while actively recording or transcribing.
-        // Allow .ready (previous transcription just finished) and .idle — both are valid
-        // states to start a new recording from.
         guard status == .idle || status == .failed || status == .ready || status == .requested else {
             if #available(iOS 14.0, *) {
                 DictusLogger.app.info("Ignoring duplicate startDictation — already \(self.status.rawValue, privacy: .public)")
@@ -264,24 +199,14 @@ class DictationCoordinator: ObservableObject {
         // WHY this early return (only for Darwin notification path, NOT URL scheme):
         // iOS forbids starting an audio engine from background. If the engine isn't
         // running and we're in background (Darwin notification from keyboard), attempting
-        // to start will fail. By returning early WITHOUT changing status, the keyboard's
-        // dictationStatus stays ".requested". After 500ms, the keyboard's fallback opens
-        // the dictus:// URL scheme, which brings the app to foreground. Then
-        // handleIncomingURL calls startDictation() again — this time from foreground.
-        //
-        // WHY NOT when fromURL:
-        // When opened via URL scheme, the app IS transitioning to foreground, but
-        // applicationState may still be .inactive (not yet .active). Returning early
-        // here would prevent cold start recording entirely. RawAudioCapture doesn't
-        // need audioRecorder's engine — it has its own AVAudioEngine.
+        // to start will fail. The keyboard's fallback opens the URL scheme after 500ms.
         let appState = UIApplication.shared.applicationState
-        let anyEngineRunning = audioRecorder.isEngineRunning || rawCapture.isEngineRunning
-        if !fromURL && appState != .active && !anyEngineRunning {
+        if !fromURL && appState != .active && !audioEngine.isEngineRunning {
             PersistentLog.log(.dictationDeferred(reason: "no engine running, appState=\(appState.rawValue)"))
             return
         }
 
-        PersistentLog.log(.dictationStarted(fromURL: fromURL, appState: "\(appState.rawValue)", engineRunning: anyEngineRunning))
+        PersistentLog.log(.dictationStarted(fromURL: fromURL, appState: "\(appState.rawValue)", engineRunning: audioEngine.isEngineRunning))
 
         // Check if a model is downloaded and ready
         let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
@@ -295,83 +220,46 @@ class DictationCoordinator: ObservableObject {
         dictationTask?.cancel()
 
         // Play start sound BEFORE configuring the audio session.
-        // WHY before: Once WhisperKit configures AVAudioSession with its own category,
-        // AudioServicesPlaySystemSound may be suppressed. Playing first ensures the user
-        // hears the feedback. The natural delay of Task creation + mic permission check
-        // provides enough gap for the short WAV to play (~100-200ms).
+        // WHY before: Once the audio session is configured with .playAndRecord,
+        // AudioServicesPlaySystemSound may be suppressed.
         SoundFeedbackService.playRecordStart()
 
         // Configure audio session NOW while we're in the foreground.
-        // WHY before the Task: ensureEngineReady() takes 4-5s on cold start.
-        // By then the app may be backgrounded (opened via URL from keyboard).
-        // iOS forbids setActive(true) from background, so this must happen first.
-        try? audioRecorder.configureAudioSession()
+        try? audioEngine.configureAudioSession()
 
-        // Determine which recording path to use:
-        // 1. WARM WhisperKit: AudioRecorder engine running → purge + collect (fastest)
-        // 2. WARM Parakeet: RawAudioCapture engine running → purge + collect (fast)
-        // 3. COLD: Neither engine running → start RawAudioCapture + load engine in parallel
-        let useWhisperKitWarm = whisperKit != nil && audioRecorder.isEngineRunning
-        let useRawCaptureWarm = rawCapture.isEngineRunning && !useWhisperKitWarm
-
-        if useWhisperKitWarm {
-            // WARM START PATH: WhisperKit already loaded, engine running
+        if audioEngine.isEngineRunning {
+            // WARM START: engine already running → purge + record (instant)
             dictationTask = Task {
                 do {
-                    let hasPermission = try await audioRecorder.ensureMicrophonePermission()
+                    let hasPermission = try await audioEngine.ensureMicrophonePermission()
                     guard hasPermission else {
                         handleError("Microphone permission denied")
                         return
                     }
                     updateStatus(.recording)
                     LiveActivityManager.shared.transitionToRecording()
-                    try audioRecorder.startRecording()
+                    try audioEngine.startRecording()
                     PersistentLog.log(.audioEngineStarted)
                 } catch {
-                    PersistentLog.log(.dictationFailed(error: "Warm WhisperKit start: \(error.localizedDescription)"))
-                    handleError(error.localizedDescription)
-                }
-            }
-        } else if useRawCaptureWarm {
-            // WARM PARAKEET PATH: RawAudioCapture engine already running
-            // Purge idle samples and start collecting fresh audio.
-            dictationTask = Task {
-                do {
-                    let hasPermission = try await audioRecorder.ensureMicrophonePermission()
-                    guard hasPermission else {
-                        handleError("Microphone permission denied")
-                        return
-                    }
-                    rawCapture.purgeIdleSamples()
-                    updateStatus(.recording)
-                    LiveActivityManager.shared.transitionToRecording()
-                    PersistentLog.log(.audioEngineStarted)
-                    PersistentLog.log(.engineStateSnapshot(
-                        engineRunning: rawCapture.isEngineRunning,
-                        isRecording: true,
-                        hasWhisperKit: whisperKit != nil,
-                        sessionConfigured: true,
-                        context: "warm-parakeet-start"
-                    ))
-                } catch {
-                    PersistentLog.log(.dictationFailed(error: "Warm Parakeet start: \(error.localizedDescription)"))
+                    PersistentLog.log(.dictationFailed(error: "Warm start: \(error.localizedDescription)"))
                     handleError(error.localizedDescription)
                 }
             }
         } else {
-            // COLD START PATH: No engine running — use RawAudioCapture + load engine in parallel
+            // COLD START: engine not running → start engine + record + load model in parallel
             dictationTask = Task {
                 do {
-                    let hasPermission = try await audioRecorder.ensureMicrophonePermission()
+                    let hasPermission = try await audioEngine.ensureMicrophonePermission()
                     guard hasPermission else {
                         handleError("Microphone permission denied")
                         return
                     }
-                    try rawCapture.startCapture()
+                    try audioEngine.startRecording()
                     updateStatus(.recording)
                     LiveActivityManager.shared.transitionToRecording()
                     PersistentLog.log(.audioEngineStarted)
 
+                    // Load the transcription model in parallel while recording
                     try await ensureEngineReady()
                     let loadedName = self.currentModelName ?? "unknown"
                     PersistentLog.log(.appWhisperKitLoaded(modelName: loadedName))
@@ -385,16 +273,12 @@ class DictationCoordinator: ObservableObject {
     /// Called when user taps the stop button.
     /// Stops recording and starts transcription using the already-loaded model.
     ///
-    /// Two paths:
-    /// - **RawAudioCapture active** (cold start): stop raw capture, ensure WhisperKit is ready,
-    ///   transcribe the raw samples, then warm up audioRecorder for subsequent recordings.
-    /// - **AudioRecorder active** (warm start): collect samples from WhisperKit's AudioProcessor
-    ///   and transcribe (existing flow).
+    /// Single path: collectSamples() (keeps engine alive) → transcribe → done.
+    /// No more branching between AudioRecorder and RawAudioCapture.
+
     /// Minimum audio duration required for transcription (in seconds).
     /// WHY 1.0s: Parakeet requires at least 1 second of 16kHz audio.
-    /// WhisperKit also produces garbage on very short clips. Enforcing this
-    /// prevents the cascade: short clip → transcription error → user retaps
-    /// rapidly → even shorter clips → more errors.
+    /// WhisperKit also produces garbage on very short clips.
     private let minimumRecordingDuration: TimeInterval = 1.0
 
     func stopDictation() {
@@ -402,128 +286,49 @@ class DictationCoordinator: ObservableObject {
 
         dictationTask = Task {
             do {
-                let samples: [Float]
+                let samples = audioEngine.collectSamples()
 
-                if rawCapture.isCapturing {
-                    // RAWCAPTURE PATH: audio was captured via RawAudioCapture.
-                    // Use collectSamples (keep engine alive) when Parakeet is active,
-                    // stopCapture (kill engine) when WhisperKit will take over.
-                    let isParakeetActive = self.whisperKit == nil
-                    if isParakeetActive {
-                        samples = rawCapture.collectSamples()
-                    } else {
-                        samples = rawCapture.stopCapture()
-                    }
-
-                    guard !samples.isEmpty else {
-                        handleError("No audio recorded")
-                        return
-                    }
-
-                    let audioDuration = Double(samples.count) / 16000.0
-
-                    // Reject recordings shorter than minimum duration.
-                    // WHY here (not in the keyboard): The keyboard doesn't know the actual
-                    // sample count — only the app has the audio data. Checking here prevents
-                    // Parakeet's "Invalid audio data" error and gives a friendly message.
-                    guard audioDuration >= minimumRecordingDuration else {
-                        PersistentLog.log(.recordingTooShort(durationMs: Int(audioDuration * 1000)))
-                        handleError("Recording too short")
-                        return
-                    }
-
-                    PersistentLog.log(.engineStateSnapshot(
-                        engineRunning: rawCapture.isEngineRunning,
-                        isRecording: rawCapture.isCapturing,
-                        hasWhisperKit: !isParakeetActive,
-                        sessionConfigured: true,
-                        context: "stop-rawCapture-samples=\(samples.count)-dur=\(String(format: "%.1f", audioDuration))s"
-                    ))
-
-                    updateStatus(.transcribing)
-                    LiveActivityManager.shared.transitionToTranscribing()
-                    SoundFeedbackService.playRecordStop()
-                    try await ensureEngineReady()
-
-                    let text = try await transcriptionService.transcribe(audioSamples: samples)
-
-                    // Warm up the appropriate engine for subsequent recordings.
-                    if isParakeetActive {
-                        // Parakeet: RawAudioCapture still alive (collectSamples kept it running).
-                        PersistentLog.log(.engineWarmUpSuccess(context: "post-stop-parakeet-rawCapture-alive"))
-                    } else {
-                        // WhisperKit: warm up AudioRecorder, RawAudioCapture was stopped.
-                        PersistentLog.log(.engineWarmUpAttempt(context: "post-coldstart-transcription"))
-                        do {
-                            try audioRecorder.warmUp()
-                            PersistentLog.log(.engineWarmUpSuccess(context: "post-coldstart-transcription"))
-                        } catch {
-                            PersistentLog.log(.engineWarmUpFailed(context: "post-coldstart-transcription", error: error.localizedDescription))
-                        }
-                    }
-
-                    // Write result to App Group
-                    lastResult = text
-                    status = .ready
-                    defaults.set(text, forKey: SharedKeys.lastTranscription)
-                    defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
-                    defaults.set(DictationStatus.ready.rawValue, forKey: SharedKeys.dictationStatus)
-                    defaults.synchronize()
-
-                    DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
-                    DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
-                    LiveActivityManager.shared.endWithResult(preview: text)
-
-                    if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Transcription complete: \(text, privacy: .public)")
-                    }
-
-                    cleanupRecordingKeys()
-                } else {
-                    // WARM START PATH: existing flow via WhisperKit's AudioProcessor
-                    samples = audioRecorder.collectSamples()
-
-                    guard !samples.isEmpty else {
-                        handleError("No audio recorded")
-                        return
-                    }
-
-                    let audioDuration = Double(samples.count) / 16000.0
-
-                    guard audioDuration >= minimumRecordingDuration else {
-                        PersistentLog.log(.recordingTooShort(durationMs: Int(audioDuration * 1000)))
-                        handleError("Recording too short")
-                        return
-                    }
-
-                    if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Recording stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", audioDuration), privacy: .public)s")
-                    }
-
-                    // Transcribe with the already-loaded model (no model switching).
-                    updateStatus(.transcribing)
-                    LiveActivityManager.shared.transitionToTranscribing()
-                    SoundFeedbackService.playRecordStop()
-                    let text = try await transcriptionService.transcribe(audioSamples: samples)
-
-                    // Write result to App Group
-                    lastResult = text
-                    status = .ready
-                    defaults.set(text, forKey: SharedKeys.lastTranscription)
-                    defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
-                    defaults.set(DictationStatus.ready.rawValue, forKey: SharedKeys.dictationStatus)
-                    defaults.synchronize()
-
-                    DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
-                    DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
-                    LiveActivityManager.shared.endWithResult(preview: text)
-
-                    if #available(iOS 14.0, *) {
-                        DictusLogger.app.info("Transcription complete: \(text, privacy: .public)")
-                    }
-
-                    cleanupRecordingKeys()
+                guard !samples.isEmpty else {
+                    handleError("No audio recorded")
+                    return
                 }
+
+                let audioDuration = Double(samples.count) / 16000.0
+
+                guard audioDuration >= minimumRecordingDuration else {
+                    PersistentLog.log(.recordingTooShort(durationMs: Int(audioDuration * 1000)))
+                    handleError("Recording too short")
+                    return
+                }
+
+                if #available(iOS 14.0, *) {
+                    DictusLogger.app.info("Recording stopped. Samples: \(samples.count, privacy: .public), Duration: \(String(format: "%.1f", audioDuration), privacy: .public)s")
+                }
+
+                updateStatus(.transcribing)
+                LiveActivityManager.shared.transitionToTranscribing()
+                SoundFeedbackService.playRecordStop()
+
+                try await ensureEngineReady()
+                let text = try await transcriptionService.transcribe(audioSamples: samples)
+
+                // Write result to App Group
+                lastResult = text
+                status = .ready
+                defaults.set(text, forKey: SharedKeys.lastTranscription)
+                defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
+                defaults.set(DictationStatus.ready.rawValue, forKey: SharedKeys.dictationStatus)
+                defaults.synchronize()
+
+                DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
+                DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
+                LiveActivityManager.shared.endWithResult(preview: text)
+
+                if #available(iOS 14.0, *) {
+                    DictusLogger.app.info("Transcription complete: \(text, privacy: .public)")
+                }
+
+                cleanupRecordingKeys()
             } catch {
                 if #available(iOS 14.0, *) {
                     DictusLogger.app.error("Transcription failed: \(error.localizedDescription, privacy: .public)")
@@ -535,36 +340,13 @@ class DictationCoordinator: ObservableObject {
 
     /// Cancel the current dictation without transcribing.
     /// Called when the keyboard sends a cancel signal via Darwin notification.
-    ///
-    /// WHY cancel is different from stop:
-    /// Stop triggers transcription of recorded audio. Cancel discards everything —
-    /// the user changed their mind and doesn't want any text inserted.
     func cancelDictation() {
         dictationTask?.cancel()
         dictationTask = nil
         stopTranscriptionWatchdog()
 
-        if rawCapture.isCapturing {
-            let isParakeetActive = whisperKit == nil
-            if isParakeetActive {
-                // Parakeet: discard samples but keep engine alive
-                _ = rawCapture.collectSamples()
-                PersistentLog.log(.engineWarmUpSuccess(context: "post-cancel-parakeet-rawCapture-alive"))
-            } else {
-                // WhisperKit: stop raw capture, warm up AudioRecorder
-                _ = rawCapture.stopCapture()
-                PersistentLog.log(.engineWarmUpAttempt(context: "post-cancel-coldstart"))
-                do {
-                    try audioRecorder.warmUp()
-                    PersistentLog.log(.engineWarmUpSuccess(context: "post-cancel-coldstart"))
-                } catch {
-                    PersistentLog.log(.engineWarmUpFailed(context: "post-cancel-coldstart", error: error.localizedDescription))
-                }
-            }
-        } else {
-            // Warm start path: discard samples but keep engine alive for next recording.
-            _ = audioRecorder.collectSamples()
-        }
+        // Discard samples but keep engine alive for next recording
+        _ = audioEngine.collectSamples()
 
         // Reset all state
         bufferEnergy = []
@@ -589,11 +371,6 @@ class DictationCoordinator: ObservableObject {
     // MARK: - Private Helpers
 
     /// Register Darwin notification observers for keyboard stop/cancel signals.
-    ///
-    /// WHY nonisolated(unsafe) and DispatchQueue.main.async:
-    /// Darwin notification callbacks fire on an arbitrary thread (they use C function pointers).
-    /// DictationCoordinator is @MainActor, so we must hop back to the main thread before
-    /// accessing any properties or calling methods.
     private func observeKeyboardSignals() {
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.stopRecording) { [weak self] in
             DispatchQueue.main.async {
@@ -619,17 +396,13 @@ class DictationCoordinator: ObservableObject {
             }
         }
 
-        // Observe keyboard-initiated start recording signal.
-        // WHY: When the app is already running in background, the keyboard can trigger
-        // recording via Darwin notification instead of opening the URL scheme. This avoids
-        // bringing the app to the foreground — the user stays in their current app.
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.startRecording) { [weak self] in
             DispatchQueue.main.async {
                 guard let self = self else { return }
                 let appState = UIApplication.shared.applicationState
                 PersistentLog.log(.engineDarwinStartReceived(
                     appState: "\(appState.rawValue)",
-                    engineRunning: self.audioRecorder.isEngineRunning
+                    engineRunning: self.audioEngine.isEngineRunning
                 ))
                 self.startDictation()
             }
@@ -638,53 +411,32 @@ class DictationCoordinator: ObservableObject {
 
     /// Forward waveform energy data to App Group for the keyboard extension to display.
     /// Throttled to ~5Hz (every 200ms) to avoid overwhelming UserDefaults.
-    ///
-    /// WHY throttle to 5Hz:
-    /// AudioRecorder publishes energy updates at ~60Hz (every audio buffer callback).
-    /// Writing to UserDefaults + synchronize + Darwin notification at 60Hz would cause
-    /// excessive disk I/O and cross-process overhead. 5Hz provides smooth-enough waveform
-    /// animation in the keyboard while keeping overhead minimal.
     private func forwardWaveformToAppGroup(energy: [Float]) {
-        // Only forward during active recording
         guard status == .recording else { return }
 
-        // Throttle: only write if 200ms+ since last write
         let now = Date()
         guard now.timeIntervalSince(lastWaveformWriteDate) >= 0.2 else { return }
         lastWaveformWriteDate = now
 
-        // Cap to 30 values (one per waveform bar) before encoding.
-        // WHY: AudioRecorder already sends .suffix(30), but this is a safety cap
-        // to ensure the keyboard never receives oversized arrays.
         let cappedEnergy = Array(energy.suffix(30))
-
-        // Encode energy as JSON and write to App Group
         if let data = try? JSONEncoder().encode(cappedEnergy) {
             defaults.set(data, forKey: SharedKeys.waveformEnergy)
         }
         defaults.set(bufferSeconds, forKey: SharedKeys.recordingElapsedSeconds)
         defaults.synchronize()
 
-        // Signal keyboard that new waveform data is available
         DarwinNotificationCenter.post(DarwinNotificationName.waveformUpdate)
     }
 
     /// Clean up recording-related App Group keys after recording completes or is cancelled.
-    /// Safety reset to prevent stale data from being read by the keyboard extension.
     private func cleanupRecordingKeys() {
         defaults.removeObject(forKey: SharedKeys.waveformEnergy)
         defaults.removeObject(forKey: SharedKeys.recordingElapsedSeconds)
         defaults.removeObject(forKey: SharedKeys.recordingHeartbeat)
         defaults.set(false, forKey: SharedKeys.stopRequested)
         defaults.set(false, forKey: SharedKeys.cancelRequested)
-
-        // Clear cold start state now that the recording cycle is over.
-        // WHY here: Fix 1 prevents the .background handler from clearing this flag
-        // during active recording. This is the correct place — recording has finished
-        // (success, cancel, or error path all call cleanupRecordingKeys).
         defaults.set(false, forKey: SharedKeys.coldStartActive)
         defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
-
         defaults.synchronize()
     }
 
@@ -693,21 +445,16 @@ class DictationCoordinator: ObservableObject {
     /// WHY engine-aware:
     /// The user can select either a WhisperKit or Parakeet model. This method
     /// checks the active model's engine type and initializes the correct engine.
-    /// For WhisperKit models, it uses the existing WhisperKit initialization path.
-    /// For Parakeet models (iOS 17+ only), it creates a ParakeetEngine.
     ///
     /// Falls back to the active model from App Group, then to "openai_whisper-small".
-    /// Handles lazy initialization and model switching if the user changes model.
     private func ensureEngineReady(preferredModel: String? = nil) async throws {
         let modelName = preferredModel
             ?? defaults.string(forKey: SharedKeys.activeModel)
             ?? "openai_whisper-small"
 
-        // Resolve the model's engine type from the catalog
         let modelInfo = ModelInfo.forIdentifier(modelName)
         let engine = modelInfo?.engine ?? .whisperKit
 
-        // Route to the correct engine initialization
         switch engine {
         case .parakeet:
             try await ensureParakeetReady(modelName: modelName)
@@ -718,13 +465,10 @@ class DictationCoordinator: ObservableObject {
 
     /// Initialize WhisperKit with the preferred model if not already loaded.
     private func ensureWhisperKitEngineReady(modelName: String) async throws {
-        // If WhisperKit is already loaded with the same model, reuse it
         if whisperKit != nil, currentModelName == modelName {
             return
         }
 
-        // If an init is already in progress (e.g., pre-load from init()),
-        // await it instead of starting a duplicate initialization.
         if let existingTask = initTask {
             if #available(iOS 14.0, *) {
                 DictusLogger.app.info("Engine init already in progress — awaiting existing task")
@@ -733,7 +477,6 @@ class DictationCoordinator: ObservableObject {
             return
         }
 
-        // Create and store the init task so concurrent callers can await it
         let task = Task<Void, Error> {
             if #available(iOS 14.0, *) {
                 DictusLogger.app.info("Initializing WhisperKit with model: \(modelName, privacy: .public)")
@@ -751,11 +494,9 @@ class DictationCoordinator: ObservableObject {
             self.whisperKit = kit
             self.currentModelName = modelName
 
-            // Share the instance with AudioRecorder and TranscriptionService
-            audioRecorder.prepare(whisperKit: kit)
+            // Share with TranscriptionService only — UnifiedAudioEngine doesn't need WhisperKit
             transcriptionService.prepare(whisperKit: kit)
 
-            // Also set up the WhisperKitEngine as the active protocol engine
             let whisperKitEngine = WhisperKitEngine()
             whisperKitEngine.setWhisperKit(kit)
             transcriptionService.prepare(engine: whisperKitEngine)
@@ -776,21 +517,12 @@ class DictationCoordinator: ObservableObject {
     }
 
     /// Initialize Parakeet engine (iOS 17+ only).
-    ///
-    /// WHY separate from WhisperKit initialization:
-    /// Parakeet uses a completely different SDK (FluidAudio) with its own download,
-    /// compilation, and transcription pipeline. It cannot share WhisperKit's
-    /// AudioProcessor or audio engine. On cold start with Parakeet, we still use
-    /// RawAudioCapture for instant recording, then transcribe via ParakeetEngine.
     private func ensureParakeetReady(modelName: String) async throws {
-        // Already loaded with same model
         if currentModelName == modelName, whisperKit == nil {
-            // Parakeet doesn't use whisperKit, so nil whisperKit + matching model = already ready
             return
         }
 
         if #available(iOS 17.0, *) {
-            // If an init is already in progress, await it
             if let existingTask = initTask {
                 if #available(iOS 14.0, *) {
                     DictusLogger.app.info("Parakeet init already in progress — awaiting existing task")
@@ -807,11 +539,9 @@ class DictationCoordinator: ObservableObject {
                 let parakeetEngine = ParakeetEngine()
                 try await parakeetEngine.prepare(modelIdentifier: modelName)
 
-                // Clear WhisperKit references since we're using Parakeet now
                 self.whisperKit = nil
                 self.currentModelName = modelName
 
-                // Set ParakeetEngine as active transcription engine
                 transcriptionService.prepare(engine: parakeetEngine)
 
                 if #available(iOS 14.0, *) {
@@ -828,7 +558,6 @@ class DictationCoordinator: ObservableObject {
                 throw error
             }
         } else {
-            // iOS 16: Parakeet is not available, fall back to WhisperKit small
             if #available(iOS 14.0, *) {
                 DictusLogger.app.warning("Parakeet not available on iOS 16 — falling back to WhisperKit small")
             }
@@ -837,16 +566,9 @@ class DictationCoordinator: ObservableObject {
     }
 
     /// Reads the list of downloaded model identifiers from App Group UserDefaults.
-    ///
-    /// WHY read from App Group instead of holding a ModelManager reference:
-    /// Loose coupling — the coordinator doesn't need to know about ModelManager's
-    /// UI state or lifecycle. It only needs the list of available models, which
-    /// ModelManager persists to the shared App Group. This also means the keyboard
-    /// extension could use the same pattern in the future.
     private func readDownloadedModels() -> [String] {
         guard let data = defaults.data(forKey: SharedKeys.downloadedModels),
               let models = try? JSONDecoder().decode([String].self, from: data) else {
-            // Fallback: if no models stored yet, check for active model
             if let active = defaults.string(forKey: SharedKeys.activeModel) {
                 return [active]
             }
@@ -857,14 +579,10 @@ class DictationCoordinator: ObservableObject {
 
     // MARK: - Transcription Watchdog
 
-    /// Start a one-shot 30s timer that auto-cancels if transcription hangs.
-    /// WHY non-repeating: We only need one fire — if transcription hasn't
-    /// completed in 30s, it's stuck and should be cancelled.
     private func startTranscriptionWatchdog() {
         stopTranscriptionWatchdog()
         transcriptionWatchdog = Timer.scheduledTimer(withTimeInterval: 30.0, repeats: false) { [weak self] _ in
             guard let self = self else { return }
-            // Must dispatch to main for @MainActor-isolated properties
             DispatchQueue.main.async {
                 guard self.status == .transcribing else { return }
                 PersistentLog.log(.watchdogReset(source: "appTranscription", staleState: "transcribing"))
@@ -873,7 +591,6 @@ class DictationCoordinator: ObservableObject {
         }
     }
 
-    /// Invalidate and nil the transcription watchdog timer.
     private func stopTranscriptionWatchdog() {
         transcriptionWatchdog?.invalidate()
         transcriptionWatchdog = nil
@@ -887,24 +604,18 @@ class DictationCoordinator: ObservableObject {
         defaults.set(newStatus.rawValue, forKey: SharedKeys.dictationStatus)
         defaults.synchronize()
 
-        // Manage transcription watchdog based on status transitions
         if newStatus == .transcribing {
             startTranscriptionWatchdog()
         } else if oldStatus == .transcribing {
             stopTranscriptionWatchdog()
         }
 
-        // Signal keyboard that status changed
         DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
     }
 
     /// Handle errors by updating status and writing error to App Group.
     private func handleError(_ message: String) {
         defaults.set(message, forKey: SharedKeys.lastError)
-        // Clear cold start state on error — recording cycle is over.
-        // WHY: If the engine fails to start (e.g., AUIOClient_StartIO error on fast
-        // swipe-back), coldStartActive must be cleared so the keyboard doesn't keep
-        // the 15s grace period on the next normal launch.
         defaults.set(false, forKey: SharedKeys.coldStartActive)
         defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
         defaults.synchronize()
