@@ -49,7 +49,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 - [x] **Phase 14: Model Pipeline** - CoreML compilation UX, model download modal, device RAM gating, Parakeet fixes (completed 2026-03-12)
 - [x] **Phase 15: Design Polish** - French accent audit, model manager redesign, recording overlay and keyboard UX refinements (completed 2026-03-13)
 - [x] **Phase 15.1: UI Polish Fixes** - Button alignment, app name/logo, swipe-back overlay, recording sound feedback (INSERTED) (completed 2026-03-13)
-- [ ] **Phase 15.2: Cleaning and Fix GitHub Issues** - Fix ship-blocking bugs (waveform, DI desync, stale cards) and triage GitHub issues (INSERTED) (gap closure in progress)
+- [x] **Phase 15.2: Cleaning and Fix GitHub Issues** - Fix ship-blocking bugs (waveform, DI desync, stale cards) and triage GitHub issues (INSERTED) (gap closure in progress) (completed 2026-03-17)
 - [ ] **Phase 16: TestFlight Deployment** - Developer account migration, Privacy Manifest, archive, and first beta distribution
 
 ## Phase Details
@@ -151,7 +151,7 @@ Plans:
   2. Dynamic Island stays in sync with dictation state across 5+ chained recordings
   3. Previous transcription card is always cleared when starting a new recording from any entry path
   4. All resolved/duplicate GitHub issues are closed with references; deferred issues remain open
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 15.2-01-PLAN.md — Waveform rendering fix (#37 residual) + entry path state clearing (#41)
@@ -213,7 +213,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 15.2 -> 1
 | 14. Model Pipeline | 4/4 | Complete   | 2026-03-13 | - |
 | 15. Design Polish | 10/10 | Complete    | 2026-03-13 | - |
 | 15.1. UI Polish Fixes | 3/3 | Complete   | 2026-03-13 | - |
-| 15.2. Cleaning & Fix Issues | 3/4 | Gap Closure | | - |
+| 15.2. Cleaning & Fix Issues | 4/4 | Complete   | 2026-03-17 | - |
 | 16. TestFlight Deployment | 1/3 | In Progress|  | - |
 
 ---

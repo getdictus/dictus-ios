@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
 status: completed
-stopped_at: "Phase 15.2 context updated for #45 gap closure"
-last_updated: "2026-03-17T15:20:12.485Z"
+stopped_at: Completed 15.2-04-PLAN.md (waveform freeze fix)
+last_updated: "2026-03-17T15:32:34.114Z"
 last_activity: "2026-03-17 -- Plan 15.2-03 executed (GitHub issue triage: 9 closed, 6 deferred confirmed open)"
 progress:
   total_phases: 8
   completed_phases: 7
-  total_plans: 30
-  completed_plans: 28
+  total_plans: 31
+  completed_plans: 29
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 15.2 complete -- all 3 plans executed. GitHub issue tracker cleaned up. v1.2 milestone complete.
+**Current focus:** Phase 15.2 plan 04 executed -- waveform freeze fix for off-screen keyboard reappear.
 
 ## Current Position
 
 Phase: 15.2 (Cleaning and Fix GitHub Issues)
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: Phase 15.2 complete -- all plans executed
-Last activity: 2026-03-17 -- Plan 15.2-03 executed (GitHub issue triage: 9 closed, 6 deferred confirmed open)
+Plan: 4 of 4 in current phase (COMPLETE)
+Status: Phase 15.2 complete -- all 4 plans executed
+Last activity: 2026-03-17 -- Plan 15.2-04 executed (waveform freeze fix: .id() recreation + .onAppear seeding)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -92,6 +92,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15.2]: renderTick @State counter forces Canvas re-evaluation after extension suspension -- avoids Timer-based approaches
 - [Phase 15.2]: lastResult clearing before guard in startDictation ensures all 5 entry paths clear stale transcription cards
 - [Phase 15.2]: LiveActivityPhase enum separate from ContentState.Phase -- adds .idle state and transition validation to prevent DI desync (#42)
+- [Phase 15.2]: waveformRefreshID incremented inside refreshFromDefaults() to guarantee it fires on every keyboard reappear path
+- [Phase 15.2]: .id(waveformRefreshID) pattern forces BrandWaveform recreation when keyboard returns from off-screen -- solves frozen TimelineView/CADisplayLink
 
 ### Pending Todos
 
@@ -111,9 +113,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T15:20:12.477Z
-Stopped at: Phase 15.2 context updated for #45 gap closure
-Resume file: .planning/phases/15.2-cleaning-and-fix-github-issues/15.2-CONTEXT.md
+Last session: 2026-03-17T15:32:34.111Z
+Stopped at: Completed 15.2-04-PLAN.md (waveform freeze fix)
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*
