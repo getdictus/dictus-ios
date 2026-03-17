@@ -267,7 +267,13 @@ class KeyboardState: ObservableObject {
                 if waveformEnergy.isEmpty != energy.isEmpty {
                     PersistentLog.log("[Waveform] Data transition: \(waveformEnergy.count) bars → \(energy.count) bars, status=\(dictationStatus.rawValue)")
                 }
+                PersistentLog.log("[Waveform] Data received in keyboard: \(energy.count) levels, renderTick will increment")
                 waveformEnergy = energy
+                // Force SwiftUI to re-evaluate even if array equality passes.
+                // WHY: After extension process suspension/resumption, SwiftUI's
+                // observation chain may be stale. Explicit notification ensures
+                // BrandWaveform receives the new energy data.
+                objectWillChange.send()
             } catch {
                 // JSON decode failure — keep existing waveform data
                 if #available(iOS 14.0, *) {

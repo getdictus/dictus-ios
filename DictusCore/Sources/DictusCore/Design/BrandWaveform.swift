@@ -45,6 +45,13 @@ public struct BrandWaveform: View {
     /// energyLevels every frame, producing smooth motion regardless of input rate.
     @State private var displayLevels: [Float] = Array(repeating: 0, count: 30)
 
+    /// Monotonically increasing counter that forces SwiftUI Canvas to redraw.
+    /// WHY: After iOS suspends/resumes the keyboard extension process,
+    /// displayLevels micro-changes may be too small for SwiftUI's diff to detect.
+    /// Incrementing renderTick on every updateDisplayLevels() call creates a
+    /// guaranteed state change that forces Canvas re-evaluation.
+    @State private var renderTick: Int = 0
+
     /// Number of bars to display.
     private let barCount = 30
 
@@ -108,6 +115,10 @@ public struct BrandWaveform: View {
     /// means bars completely disappear at zero energy -- perfectly still.
     private func waveformContent(processingPhase: Double) -> some View {
         Canvas { context, size in
+            // Force Canvas redraw on each tick — ensures extension process
+            // recovery triggers a visible update even when displayLevels
+            // micro-changes are coalesced by SwiftUI's diffing engine.
+            let _ = renderTick
             let totalSpacing = barSpacing * CGFloat(barCount - 1)
             let barWidth = max((size.width - totalSpacing) / CGFloat(barCount), 2)
 
@@ -168,6 +179,7 @@ public struct BrandWaveform: View {
         }
 
         displayLevels = updated
+        renderTick += 1
     }
 
     /// Map energyLevels (variable count) to exactly barCount target values.
