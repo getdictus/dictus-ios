@@ -81,6 +81,19 @@ public struct BrandWaveform: View {
                 ? timeline.date.timeIntervalSinceReferenceDate / 2.0
                 : 0
             waveformContent(processingPhase: phase)
+                .onAppear {
+                    // Seed displayLevels from current energyLevels on first frame.
+                    // WHY: When BrandWaveform is recreated via .id(waveformRefreshID)
+                    // on keyboard reappear, @State displayLevels initializes to all zeros.
+                    // The lerp animation (smoothingFactor=0.3) needs ~10 frames to reach
+                    // visible levels. During cold start, the keyboard may only stay visible
+                    // for ~1 second before going off-screen again. Seeding from current
+                    // energy data ensures the waveform shows correct bars on the very
+                    // first frame — no animation catch-up needed.
+                    if !isProcessing {
+                        displayLevels = targetLevels()
+                    }
+                }
                 .onChange(of: timeline.date) { _ in
                     if !isProcessing {
                         updateDisplayLevels()
