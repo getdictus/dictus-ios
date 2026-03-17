@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
 status: completed
-stopped_at: Completed 16-02-PLAN.md
-last_updated: "2026-03-13T23:08:14.453Z"
-last_activity: 2026-03-13 -- Plan 15.1-03 executed (sound playback fix, picker layout, overlay alignment)
+stopped_at: Phase 15.2 context gathered
+last_updated: "2026-03-17T13:25:23.164Z"
+last_activity: 2026-03-14 -- Plan 16-02 executed (README rewrite, CONTRIBUTING, GitHub issue templates)
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 6
   total_plans: 27
   completed_plans: 25
-  percent: 100
+  percent: 93
 ---
 
 # Project State
@@ -97,6 +97,7 @@ None.
 ### Roadmap Evolution
 
 - Phase 15.1 inserted after Phase 15: UI polish fixes (#30, #33, #34, #24) (URGENT)
+- Phase 15.2 inserted after Phase 15: Cleaning and fix github issues (URGENT)
 
 ### Blockers/Concerns
 
@@ -107,9 +108,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13T23:08:14.451Z
-Stopped at: Completed 16-02-PLAN.md
-Resume file: None
+Last session: 2026-03-17T13:25:23.162Z
+Stopped at: Phase 15.2 context gathered
+Resume file: .planning/phases/15.2-cleaning-and-fix-github-issues/15.2-CONTEXT.md
 
 ---
 *State initialized: 2026-03-04*
