@@ -151,7 +151,7 @@ Plans:
   2. Dynamic Island stays in sync with dictation state across 5+ chained recordings
   3. Previous transcription card is always cleared when starting a new recording from any entry path
   4. All resolved/duplicate GitHub issues are closed with references; deferred issues remain open
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 15.2-01-PLAN.md — Waveform rendering fix (#37 residual) + entry path state clearing (#41)
@@ -212,7 +212,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 15.2 -> 1
 | 14. Model Pipeline | 4/4 | Complete   | 2026-03-13 | - |
 | 15. Design Polish | 10/10 | Complete    | 2026-03-13 | - |
 | 15.1. UI Polish Fixes | 3/3 | Complete   | 2026-03-13 | - |
-| 15.2. Cleaning & Fix Issues | 0/3 | Planning   |  | - |
+| 15.2. Cleaning & Fix Issues | 1/3 | In Progress|  | - |
 | 16. TestFlight Deployment | 1/3 | In Progress|  | - |
 
 ---

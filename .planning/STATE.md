@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 16 in progress -- open-source repo presentation complete (Plan 02). Next: TestFlight submission (Plan 03).
+**Current focus:** Phase 15.2 complete -- waveform recovery (#37) and entry path clearing (#41). Next: return to Phase 16 (TestFlight submission).
 
 ## Current Position
 
-Phase: 16 of 16 (TestFlight Deployment)
-Plan: 2 of 3 in current phase
-Status: Plan 16-02 complete (README, CONTRIBUTING, issue templates)
-Last activity: 2026-03-14 -- Plan 16-02 executed (README rewrite, CONTRIBUTING, GitHub issue templates)
+Phase: 15.2 (Cleaning and Fix GitHub Issues)
+Plan: 1 of 1 in current phase
+Status: Plan 15.2-01 complete (waveform recovery + entry path clearing)
+Last activity: 2026-03-17 -- Plan 15.2-01 executed (waveform Canvas redraw fix #37, entry path state clearing #41)
 
 Progress: [█████████░] 93%
 
@@ -89,6 +89,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15.1-03]: .pickerStyle(.menu) for inline sound picker layout -- .automatic renders stacked in List
 - [Phase 15.1-03]: 5pt extra trailing padding on overlay HStack matches AnimatedMicButton ring-to-pill inset
 - [Phase 16]: No logo SVG found -- used dictus-icon-512.png for README header
+- [Phase 15.2]: renderTick @State counter forces Canvas re-evaluation after extension suspension -- avoids Timer-based approaches
+- [Phase 15.2]: lastResult clearing before guard in startDictation ensures all 5 entry paths clear stale transcription cards
 
 ### Pending Todos
 
@@ -108,9 +110,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T13:25:23.162Z
-Stopped at: Phase 15.2 context gathered
-Resume file: .planning/phases/15.2-cleaning-and-fix-github-issues/15.2-CONTEXT.md
+Last session: 2026-03-17T13:46:00Z
+Stopped at: Completed 15.2-01-PLAN.md
+Resume file: .planning/phases/15.2-cleaning-and-fix-github-issues/15.2-01-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*
