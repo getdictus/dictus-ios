@@ -188,6 +188,16 @@ class DictationCoordinator: ObservableObject {
     ///
     /// - Parameter fromURL: If true, the app was opened via URL scheme from the keyboard.
     func startDictation(fromURL: Bool = false) {
+        // Clear previous recording state before starting new recording.
+        // WHY here (not in stopDictation): DI tap and lockscreen paths call
+        // startDictation directly without going through stopDictation first.
+        // The old result must be cleared regardless of entry path so
+        // RecordingView never shows a stale transcription card.
+        lastResult = nil
+        bufferEnergy = []
+        bufferSeconds = 0
+        PersistentLog.log(.statusChanged(from: status.rawValue, to: "clearing-for-new", source: "startDictation-reset"))
+
         // Guard against duplicate calls while actively recording or transcribing.
         guard status == .idle || status == .failed || status == .ready || status == .requested else {
             if #available(iOS 14.0, *) {
