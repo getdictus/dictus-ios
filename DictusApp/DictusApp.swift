@@ -132,7 +132,7 @@ struct DictusApp: App {
             //    the app must come to foreground to restart the engine.
             let isColdStart = isFromKeyboard && !Self.hasBeenActive
             let isEngineDeadRestart = isFromKeyboard && Self.hasBeenActive
-                && !DictationCoordinator.shared.isAnyEngineRunning
+                && !DictationCoordinator.shared.isEngineRunning
 
             if isColdStart || isEngineDeadRestart {
                 let reason = isColdStart ? "first launch" : "engine dead"

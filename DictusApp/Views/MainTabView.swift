@@ -91,7 +91,7 @@ struct MainTabView: View {
                 if !Self.hasHandledURL {
                     // True cold start: process was just launched by keyboard URL.
                     isColdStartMode = true
-                } else if !coordinator.isAnyEngineRunning {
+                } else if !coordinator.isEngineRunning {
                     // Engine-dead restart: app is in memory but audio engine was stopped
                     // (e.g., Power button in Dynamic Island). User needs the swipe-back
                     // overlay to know how to return to their keyboard.
