@@ -49,6 +49,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 - [x] **Phase 14: Model Pipeline** - CoreML compilation UX, model download modal, device RAM gating, Parakeet fixes (completed 2026-03-12)
 - [x] **Phase 15: Design Polish** - French accent audit, model manager redesign, recording overlay and keyboard UX refinements (completed 2026-03-13)
 - [x] **Phase 15.1: UI Polish Fixes** - Button alignment, app name/logo, swipe-back overlay, recording sound feedback (INSERTED) (completed 2026-03-13)
+- [ ] **Phase 15.2: Cleaning and Fix GitHub Issues** - Fix ship-blocking bugs (waveform, DI desync, stale cards) and triage GitHub issues (INSERTED)
 - [ ] **Phase 16: TestFlight Deployment** - Developer account migration, Privacy Manifest, archive, and first beta distribution
 
 ## Phase Details
@@ -140,6 +141,23 @@ Plans:
 - [ ] 15-09-PLAN.md — UAT gap closure: active card blue tint + remove switch spinner + swipe delete height
 - [ ] 15-10-PLAN.md — UAT gap closure: waveform vertical stability + settings tap feedback
 
+### Phase 15.2: Cleaning and Fix GitHub Issues (INSERTED)
+
+**Goal:** Fix ship-blocking bugs (waveform rendering in keyboard extension, Dynamic Island desync after chaining, stale transcription cards) and triage GitHub issues before TestFlight beta
+**Requirements**: #37, #42, #41
+**Depends on:** Phase 15.1
+**Success Criteria** (what must be TRUE):
+  1. Waveform bars animate visibly during recording in keyboard extension after both cold and warm starts
+  2. Dynamic Island stays in sync with dictation state across 5+ chained recordings
+  3. Previous transcription card is always cleared when starting a new recording from any entry path
+  4. All resolved/duplicate GitHub issues are closed with references; deferred issues remain open
+**Plans:** 3 plans
+
+Plans:
+- [ ] 15.2-01-PLAN.md — Waveform rendering fix (#37 residual) + entry path state clearing (#41)
+- [ ] 15.2-02-PLAN.md — LiveActivityManager state machine refactor (#42)
+- [ ] 15.2-03-PLAN.md — GitHub issue triage (close resolved, consolidate duplicates)
+
 ### Phase 15.1: UI polish fixes (#30, #33, #34, #24) (INSERTED)
 
 **Goal:** Fix button alignment (#30), app display name and logo centering (#33), swipe-back overlay improvements (#34), and recording sound feedback with settings (#24) before TestFlight beta
@@ -174,7 +192,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 16
+Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 15.2 -> 16
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -194,6 +212,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 16
 | 14. Model Pipeline | 4/4 | Complete   | 2026-03-13 | - |
 | 15. Design Polish | 10/10 | Complete    | 2026-03-13 | - |
 | 15.1. UI Polish Fixes | 3/3 | Complete   | 2026-03-13 | - |
+| 15.2. Cleaning & Fix Issues | 0/3 | Planning   |  | - |
 | 16. TestFlight Deployment | 1/3 | In Progress|  | - |
 
 ---
