@@ -16,6 +16,9 @@ struct RecordingOverlay: View {
     let dictationStatus: DictationStatus
     let waveformEnergy: [Float]
     let elapsedSeconds: Double
+    /// Counter from KeyboardState — incremented on every keyboard reappear.
+    /// Applied as .id() modifier on BrandWaveform to force view recreation.
+    let waveformRefreshID: Int
     let onCancel: () -> Void
     let onStop: () -> Void
 
@@ -101,6 +104,7 @@ struct RecordingOverlay: View {
                         maxHeight: geo.size.height * 0.7
                     )
                     .padding(.horizontal, 2)
+                    .id(waveformRefreshID)
 
                     Spacer(minLength: 0)
                 }
@@ -149,6 +153,7 @@ struct RecordingOverlay: View {
                         maxHeight: geo.size.height * 0.7
                     )
                     .padding(.horizontal, 2)
+                    .id(waveformRefreshID)
 
                     Spacer(minLength: 0)
                 }
@@ -193,6 +198,7 @@ struct RecordingOverlay: View {
 
                     BrandWaveform(maxHeight: geo.size.height * 0.7, isProcessing: true)
                         .padding(.horizontal, 2)
+                        .id(waveformRefreshID)
 
                     Spacer(minLength: 0)
                 }

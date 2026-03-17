@@ -18,6 +18,12 @@ class KeyboardState: ObservableObject {
     @Published var statusMessage: String?
     @Published var waveformEnergy: [Float] = []
     @Published var recordingElapsed: Double = 0
+    /// Counter incremented on every keyboard reappear to force BrandWaveform recreation.
+    /// WHY .id() pattern: iOS stops evaluating SwiftUI body for off-screen keyboard
+    /// extensions. When keyboard returns, the TimelineView's CADisplayLink may not
+    /// restart. Changing waveformRefreshID causes SwiftUI to destroy and recreate
+    /// BrandWaveform, getting a fresh CADisplayLink and animation loop.
+    @Published var waveformRefreshID: Int = 0
 
     /// Reference to the keyboard controller for text insertion.
     /// WHY weak: KeyboardState is owned by KeyboardRootView (via @StateObject),
@@ -234,6 +240,15 @@ class KeyboardState: ObservableObject {
                 // notifications are lost. readWaveformData() updates @Published props
                 // which forces SwiftUI to re-render the overlay.
                 readWaveformData()
+
+                // Force BrandWaveform recreation on keyboard reappear.
+                // WHY .id() pattern: iOS stops evaluating SwiftUI body for off-screen
+                // keyboard extensions. When keyboard returns, the TimelineView's
+                // CADisplayLink may not restart. Incrementing waveformRefreshID causes
+                // SwiftUI to destroy and recreate BrandWaveform, getting a fresh
+                // CADisplayLink and TimelineView animation loop.
+                waveformRefreshID += 1
+                PersistentLog.log("[Waveform] Keyboard reappear — refreshID=\(waveformRefreshID), status=\(status.rawValue), energyCount=\(waveformEnergy.count)")
             } else {
                 stopWatchdog()
                 coldStartGraceEnd = nil

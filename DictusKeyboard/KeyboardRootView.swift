@@ -82,6 +82,7 @@ struct KeyboardRootView: View {
                     dictationStatus: state.dictationStatus,
                     waveformEnergy: state.waveformEnergy,
                     elapsedSeconds: state.recordingElapsed,
+                    waveformRefreshID: state.waveformRefreshID,
                     onCancel: { state.requestCancel() },
                     onStop: { state.requestStop() }
                 )
