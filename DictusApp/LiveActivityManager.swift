@@ -22,13 +22,65 @@ import DictusCore
 class LiveActivityManager {
     static let shared = LiveActivityManager()
 
+    // MARK: - State Machine
+
+    /// Internal state machine for Live Activity lifecycle.
+    /// WHY separate from ContentState.Phase: This tracks the manager's own state,
+    /// including .idle (no activity exists). ContentState.Phase is the ActivityKit
+    /// display state sent to the widget. The state machine prevents Dynamic Island
+    /// desync after chaining multiple recordings (#42).
+    private enum LiveActivityPhase: String {
+        case idle       // No activity exists
+        case standby    // Activity exists, waiting for user
+        case recording  // Active recording
+        case transcribing // Processing audio
+        case ready      // Showing result (auto-dismiss pending)
+        case failed     // Showing error (auto-dismiss pending)
+    }
+
+    /// Returns true if transitioning from the current phase to `target` is valid.
+    /// Invalid transitions are logged and rejected -- callers check the return value.
+    /// WHY: Without validation, concurrent Activity.update() calls arrive out of order
+    /// and autoDismissTask from previous recordings can fire mid-recording (#42).
+    private func validateTransition(to target: LiveActivityPhase) -> Bool {
+        let valid: [LiveActivityPhase: Set<LiveActivityPhase>] = [
+            .idle: [.standby],
+            .standby: [.recording, .idle],
+            .recording: [.transcribing, .standby],  // standby = cancel
+            .transcribing: [.ready, .failed],
+            .ready: [.standby, .recording],  // recording = quick chain before auto-dismiss
+            .failed: [.standby]
+        ]
+        let allowed = valid[currentPhase] ?? []
+        if allowed.contains(target) {
+            return true
+        } else {
+            DictusLogger.app.warning("LiveActivity: rejected transition \(self.currentPhase.rawValue, privacy: .public) -> \(target.rawValue, privacy: .public)")
+            PersistentLog.log(.statusChanged(from: currentPhase.rawValue, to: "REJECTED-\(target.rawValue)", source: "LiveActivityManager"))
+            return false
+        }
+    }
+
+    /// Maps ContentState.Phase (ActivityKit display) to LiveActivityPhase (internal state machine).
+    private func mapContentPhase(_ phase: DictusLiveActivityAttributes.ContentState.Phase) -> LiveActivityPhase {
+        switch phase {
+        case .standby: return .standby
+        case .recording: return .recording
+        case .transcribing: return .transcribing
+        case .ready: return .ready
+        case .failed: return .failed
+        }
+    }
+
     /// Current Live Activity instance. nil if no activity is running.
     private var currentActivity: Activity<DictusLiveActivityAttributes>?
 
-    /// Tracks the current phase to guard against stale updates (defense in depth).
+    /// Tracks the current phase via a formal state machine with validated transitions.
     /// WHY: Even if DictationCoordinator guards its sinks, this provides a second
-    /// barrier — updateWaveform() is a no-op unless we're actually recording.
-    private var currentPhase: DictusLiveActivityAttributes.ContentState.Phase = .standby
+    /// barrier -- updateWaveform() is a no-op unless we're actually recording.
+    /// WHY LiveActivityPhase (not ContentState.Phase): Adds .idle state and transition
+    /// validation to prevent DI desync after chaining recordings (#42).
+    private var currentPhase: LiveActivityPhase = .idle
 
     /// Timestamp of last waveform update. Used to throttle to 1Hz.
     private var lastWaveformUpdate = Date.distantPast
@@ -52,7 +104,7 @@ class LiveActivityManager {
     // MARK: - Standby Mode
 
     /// Start a Live Activity in standby mode.
-    /// Called when the app enters background — gives the user a persistent
+    /// Called when the app enters background -- gives the user a persistent
     /// Dynamic Island indicator that Dictus is ready to record.
     ///
     /// WHY check areActivitiesEnabled:
@@ -60,21 +112,29 @@ class LiveActivityManager {
     /// one when disabled throws an error. Checking first avoids log noise.
     /// WHY synchronous (not async):
     /// Called from onChange(scenePhase: .background). If wrapped in Task { await },
-    /// the Task is deferred — by the time it runs, iOS considers the app fully
+    /// the Task is deferred -- by the time it runs, iOS considers the app fully
     /// backgrounded and Activity.request() fails with "Target is not foreground".
     /// Synchronous execution ensures the activity is created during the transition.
     /// Zombie cleanup is handled separately by cleanupStaleActivities() at app init.
     func startStandbyActivity() {
+        // Allow transition from idle->standby or if already standby (no-op)
+        // WHY: Prevents creating duplicate activities when app re-enters background
+        if currentPhase == .standby && currentActivity != nil {
+            DictusLogger.app.info("Live Activity already in standby -- skipping")
+            return
+        }
+
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
-            DictusLogger.app.info("Live Activities disabled by user — skipping")
+            DictusLogger.app.info("Live Activities disabled by user -- skipping")
             return
         }
 
         // Sync currentActivity reference (may be stale after intent or force-quit)
         if let current = currentActivity,
            !Activity<DictusLiveActivityAttributes>.activities.contains(where: { $0.id == current.id }) {
-            DictusLogger.app.info("currentActivity stale (killed by intent or force-quit) — clearing")
+            DictusLogger.app.info("currentActivity stale (killed by intent or force-quit) -- clearing")
             currentActivity = nil
+            currentPhase = .idle
         }
 
         // Guard against duplicates at the system level, not just our in-memory reference.
@@ -86,7 +146,7 @@ class LiveActivityManager {
             // Recover orphaned activity instead of creating a new one
             if let existing = systemActivities.first {
                 currentActivity = existing
-                currentPhase = existing.content.state.phase
+                currentPhase = mapContentPhase(existing.content.state.phase)
                 DictusLogger.app.info("Recovered orphaned Live Activity: \(existing.id, privacy: .public)")
             }
             // End any extras beyond the first (shouldn't happen, but defense in depth)
@@ -103,7 +163,7 @@ class LiveActivityManager {
 
         // Don't create duplicate activities
         guard currentActivity == nil else {
-            DictusLogger.app.info("Live Activity already running — skipping startStandby")
+            DictusLogger.app.info("Live Activity already running -- skipping startStandby")
             return
         }
 
@@ -142,7 +202,7 @@ class LiveActivityManager {
                 dismissalPolicy: .immediate
             )
             currentActivity = nil
-            currentPhase = .standby
+            currentPhase = .idle  // Activity is ending entirely
             DictusLogger.app.info("Live Activity stopped by user (Power button)")
         }
     }
@@ -158,6 +218,9 @@ class LiveActivityManager {
         // briefly flashes the DI back to standby.
         autoDismissTask?.cancel()
         autoDismissTask = nil
+
+        // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
+        guard validateTransition(to: .recording) else { return }
 
         guard let activity = currentActivity else {
             // If no activity exists (e.g., app was in foreground), create one then transition
@@ -177,7 +240,7 @@ class LiveActivityManager {
             )
             await activity.update(.init(state: state, staleDate: nil))
             currentPhase = .recording
-            DictusLogger.app.info("Live Activity → recording")
+            DictusLogger.app.info("Live Activity -> recording")
         }
     }
 
@@ -191,7 +254,7 @@ class LiveActivityManager {
         )
         await activity.update(.init(state: state, staleDate: nil))
         currentPhase = .recording
-        DictusLogger.app.info("Live Activity → recording (delayed)")
+        DictusLogger.app.info("Live Activity -> recording (delayed)")
     }
 
     /// Update waveform levels during recording.
@@ -202,7 +265,7 @@ class LiveActivityManager {
     /// Apple recommends no more than ~1 update/second for Live Activities.
     /// The timer auto-updates independently via Text(date, style: .timer).
     ///
-    /// WHY downsample 30→5:
+    /// WHY downsample 30->5:
     /// DictationCoordinator's bufferEnergy has up to 30 values (one per waveform bar
     /// in the in-app RecordingView). Dynamic Island only shows 5 bars. Averaging
     /// groups of 6 produces smooth, representative levels.
@@ -234,6 +297,9 @@ class LiveActivityManager {
 
     /// Transition from recording to transcribing.
     func transitionToTranscribing() {
+        // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
+        guard validateTransition(to: .transcribing) else { return }
+
         guard let activity = currentActivity else { return }
 
         Task {
@@ -243,17 +309,20 @@ class LiveActivityManager {
             )
             await activity.update(.init(state: state, staleDate: nil))
             currentPhase = .transcribing
-            DictusLogger.app.info("Live Activity → transcribing")
+            DictusLogger.app.info("Live Activity -> transcribing")
         }
     }
 
-    /// Show transcription result, then return to standby after 5 seconds.
+    /// Show transcription result, then return to standby after 1 second.
     ///
     /// WHY return to standby instead of ending:
     /// The user expects the Dynamic Island to persist as long as the app is alive.
     /// After showing the result briefly, we go back to the "On" standby state
     /// so they can start another recording from the Dynamic Island.
     func endWithResult(preview: String?) {
+        // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
+        guard validateTransition(to: .ready) else { return }
+
         guard let activity = currentActivity else { return }
 
         autoDismissTask?.cancel()
@@ -266,19 +335,29 @@ class LiveActivityManager {
             )
             await activity.update(.init(state: state, staleDate: nil))
             currentPhase = .ready
-            DictusLogger.app.info("Live Activity → ready")
+            DictusLogger.app.info("Live Activity -> ready")
         }
 
         // Return to standby after 1 second (fast turnaround for chaining dictations)
         autoDismissTask = Task {
             try? await Task.sleep(nanoseconds: 1_000_000_000) // 1s
             guard !Task.isCancelled else { return }
+            // WHY phase check after sleep: If user started a new recording during the 1s
+            // delay, the auto-dismiss must NOT fire -- it would flash DI back to standby
+            // mid-recording, causing desync (#42).
+            guard currentPhase == .ready else {
+                DictusLogger.app.info("Auto-dismiss skipped -- phase changed to \(self.currentPhase.rawValue, privacy: .public)")
+                return
+            }
             await returnToStandby()
         }
     }
 
     /// Show failure state, then return to standby after 3 seconds.
     func endWithFailure() {
+        // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
+        guard validateTransition(to: .failed) else { return }
+
         guard let activity = currentActivity else { return }
 
         autoDismissTask?.cancel()
@@ -287,13 +366,19 @@ class LiveActivityManager {
             let state = DictusLiveActivityAttributes.ContentState(phase: .failed)
             await activity.update(.init(state: state, staleDate: nil))
             currentPhase = .failed
-            DictusLogger.app.info("Live Activity → failed")
+            DictusLogger.app.info("Live Activity -> failed")
         }
 
         // Return to standby after 3 seconds
         autoDismissTask = Task {
             try? await Task.sleep(nanoseconds: 3_000_000_000) // 3s
             guard !Task.isCancelled else { return }
+            // WHY phase check after sleep: If the phase changed during the 3s delay
+            // (e.g., user retried), the auto-dismiss must NOT fire (#42).
+            guard currentPhase == .failed else {
+                DictusLogger.app.info("Auto-dismiss skipped -- phase changed to \(self.currentPhase.rawValue, privacy: .public)")
+                return
+            }
             await returnToStandby()
         }
     }
@@ -303,6 +388,13 @@ class LiveActivityManager {
     /// Return to standby state. Called after result/failure auto-dismiss,
     /// and also when a recording is cancelled from the keyboard.
     func returnToStandby() async {
+        // WHY: Only return to standby from states that logically precede it.
+        // Prevents stale auto-dismiss tasks from overwriting an active recording (#42).
+        guard currentPhase == .ready || currentPhase == .failed || currentPhase == .recording else {
+            DictusLogger.app.info("returnToStandby skipped -- already \(self.currentPhase.rawValue, privacy: .public)")
+            return
+        }
+
         guard let activity = currentActivity else { return }
 
         let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
@@ -310,7 +402,7 @@ class LiveActivityManager {
         let staleDate = Date().addingTimeInterval(15 * 60)
         await activity.update(.init(state: state, staleDate: staleDate))
         currentPhase = .standby
-        DictusLogger.app.info("Live Activity → standby (auto-return)")
+        DictusLogger.app.info("Live Activity -> standby (auto-return)")
     }
 
     /// Clean up stale Live Activities from previous app launches.
@@ -343,12 +435,13 @@ class LiveActivityManager {
             }
             if currentSessionActivityID == nil {
                 currentActivity = nil
+                currentPhase = .idle
             }
         }
     }
 
     /// Synchronously end all Live Activities. Called from willTerminate which has
-    /// very limited time — cannot use async/await reliably.
+    /// very limited time -- cannot use async/await reliably.
     private func endAllActivitiesSync() {
         for activity in Activity<DictusLiveActivityAttributes>.activities {
             let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
@@ -360,6 +453,7 @@ class LiveActivityManager {
             }
         }
         currentActivity = nil
+        currentPhase = .idle
         DictusLogger.app.info("Ended all Live Activities (app terminating)")
     }
 
