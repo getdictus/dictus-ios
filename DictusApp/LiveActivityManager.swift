@@ -49,7 +49,10 @@ class LiveActivityManager {
             .recording: [.transcribing, .standby],  // standby = cancel
             .transcribing: [.ready, .failed],
             .ready: [.standby, .recording],  // recording = quick chain before auto-dismiss
-            .failed: [.standby]
+            // WHY .recording and .idle: If autoDismissTask is killed by iOS
+            // (cold start, app switching), .failed becomes permanent. Allow recovery
+            // to .recording (new dictation) and .idle (activity teardown).
+            .failed: [.standby, .recording, .idle]
         ]
         let allowed = valid[currentPhase] ?? []
         if allowed.contains(target) {
@@ -212,15 +215,15 @@ class LiveActivityManager {
     /// Transition from standby to recording.
     /// Called when DictationCoordinator starts recording.
     func transitionToRecording() {
-        // Cancel any pending auto-return from a previous dictation's ready/failed state.
-        // WHY: endWithResult() sets a timer to return to standby. If the user starts
-        // a new recording before it elapses, the timer fires mid-recording and
-        // briefly flashes the DI back to standby.
-        autoDismissTask?.cancel()
-        autoDismissTask = nil
-
         // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
         guard validateTransition(to: .recording) else { return }
+
+        // Cancel any pending auto-return from a previous dictation's ready/failed state.
+        // WHY AFTER validation (not before): If state is .failed and validation rejects,
+        // we must NOT cancel the autoDismissTask — it's the only path back to .standby.
+        // Cancelling before validation destroyed the recovery path (#15.2).
+        autoDismissTask?.cancel()
+        autoDismissTask = nil
 
         guard let activity = currentActivity else {
             // If no activity exists (e.g., app was in foreground), create one then transition
