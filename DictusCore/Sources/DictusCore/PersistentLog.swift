@@ -25,9 +25,14 @@ import UIKit
 /// serializes cross-process access via the App Group.
 public enum PersistentLog {
 
+    /// Process source tag — set once at app/extension launch.
+    /// WHY static var (not auto-detected): Bundle.main.bundleIdentifier is
+    /// unreliable in keyboard extensions (can return the host app's ID).
+    public static var source: String = "?"
+
     // MARK: - Constants
 
-    static let maxLines = 500
+    static let maxLines = 1000
     private static let fileName = "dictus_debug.log"
 
     /// Serial queue for ordering writes within a single process.

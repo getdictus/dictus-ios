@@ -15,6 +15,7 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        PersistentLog.source = "KBD"
 
         #if DEBUG
         let result = AppGroupDiagnostic.run()
@@ -107,6 +108,8 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         PersistentLog.log(.keyboardDidDisappear)
+        // Notify KeyboardState so it can track visibility for waveformRefreshID gating.
+        NotificationCenter.default.post(name: .dictusKeyboardDidDisappear, object: nil)
         // Darwin observers cleaned up by KeyboardState deinit
     }
 
@@ -141,4 +144,8 @@ extension Notification.Name {
     /// KeyboardRootView listens for this to re-read KeyboardMode from App Group,
     /// so mode changes made in Settings take effect without a rebuild.
     static let dictusKeyboardWillAppear = Notification.Name("dictusKeyboardWillAppear")
+
+    /// Posted by KeyboardViewController in viewDidDisappear.
+    /// KeyboardState listens for this to track visibility and gate waveformRefreshID.
+    static let dictusKeyboardDidDisappear = Notification.Name("dictusKeyboardDidDisappear")
 }

@@ -215,6 +215,14 @@ class LiveActivityManager {
     /// Transition from standby to recording.
     /// Called when DictationCoordinator starts recording.
     func transitionToRecording() {
+        // Auto-bootstrap: if no activity exists, create standby first.
+        // WHY BEFORE validateTransition: idle→recording is invalid, but idle→standby→recording
+        // is the valid path. Without this, the guard rejects and the fallback at line 228
+        // (which also calls startStandbyActivity) is UNREACHABLE after the guard returns.
+        if currentPhase == .idle {
+            startStandbyActivity()
+        }
+
         // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
         guard validateTransition(to: .recording) else { return }
 

@@ -90,6 +90,21 @@ public enum LogEvent: Sendable {
     case engineCollectResult(sampleCount: Int, engineRunning: Bool)
     case engineDarwinStartReceived(appState: String, engineRunning: Bool)
 
+    // MARK: Waveform Diagnostics
+    case waveformAppeared(refreshID: Int, isProcessing: Bool, energyCount: Int, killedState: Bool)
+    case waveformDisappeared(refreshID: Int, renderTick: Int)
+    case waveformHeartbeat(renderTick: Int, avgLevel: Float, energyCount: Int)
+    case waveformStall(gapMs: Int, renderTick: Int, energyCount: Int)
+    case waveformRefreshIDChanged(oldID: Int, newID: Int, status: String)
+    case waveformEnergyTransition(fromCount: Int, toCount: Int, status: String)
+    case waveformTimelineNotFiring(renderTick: Int, energyCount: Int)
+
+    // MARK: Overlay Diagnostics
+    case overlayBodyEvaluated(status: String, showsOverlay: Bool, energyCount: Int)
+    case overlayTimerStarted
+    case overlayTimerStopped
+    case overlayRecreated(reason: String, status: String)
+
     // MARK: Onboarding
     case onboardingScenePhaseChanged(phase: String)
     case onboardingKeyboardCheckStarted(modeCount: Int)
@@ -121,7 +136,10 @@ public enum LogEvent: Sendable {
              .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
-             .overlayShown, .overlayHidden, .rapidTapRejected:
+             .overlayShown, .overlayHidden, .rapidTapRejected,
+             .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
+             .waveformRefreshIDChanged, .waveformEnergyTransition, .waveformTimelineNotFiring,
+             .overlayBodyEvaluated, .overlayTimerStarted, .overlayTimerStopped, .overlayRecreated:
             return .keyboard
         case .statusChanged, .watchdogReset:
             return .dictation
@@ -149,7 +167,8 @@ public enum LogEvent: Sendable {
             return .error
 
         // Warnings
-        case .dictationDeferred, .watchdogReset, .engineWarmUpFailed, .recordingTooShort:
+        case .dictationDeferred, .watchdogReset, .engineWarmUpFailed, .recordingTooShort,
+             .waveformStall, .waveformTimelineNotFiring:
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
@@ -162,7 +181,9 @@ public enum LogEvent: Sendable {
              .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
              .keyboardDidAppear, .keyboardMicTapped,
              .appLaunched, .appWhisperKitLoaded,
-             .overlayShown, .overlayHidden, .statusChanged:
+             .overlayShown, .overlayHidden, .statusChanged,
+             .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
+             .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated:
             return .info
 
         // Debug (internal state transitions)
@@ -174,7 +195,8 @@ public enum LogEvent: Sendable {
              .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground,
              .rapidTapRejected,
              .engineWarmUpAttempt, .engineWarmUpSuccess,
-             .engineStateSnapshot, .engineCollectResult, .engineDarwinStartReceived:
+             .engineStateSnapshot, .engineCollectResult, .engineDarwinStartReceived,
+             .waveformHeartbeat, .overlayTimerStarted, .overlayTimerStopped:
             return .debug
         }
     }
@@ -230,6 +252,17 @@ public enum LogEvent: Sendable {
         case .statusChanged: return "statusChanged"
         case .watchdogReset: return "watchdogReset"
         case .rapidTapRejected: return "rapidTapRejected"
+        case .waveformAppeared: return "waveformAppeared"
+        case .waveformDisappeared: return "waveformDisappeared"
+        case .waveformHeartbeat: return "waveformHeartbeat"
+        case .waveformStall: return "waveformStall"
+        case .waveformRefreshIDChanged: return "waveformRefreshIDChanged"
+        case .waveformEnergyTransition: return "waveformEnergyTransition"
+        case .waveformTimelineNotFiring: return "waveformTimelineNotFiring"
+        case .overlayBodyEvaluated: return "overlayBodyEvaluated"
+        case .overlayTimerStarted: return "overlayTimerStarted"
+        case .overlayTimerStopped: return "overlayTimerStopped"
+        case .overlayRecreated: return "overlayRecreated"
         }
     }
 
@@ -339,6 +372,30 @@ public enum LogEvent: Sendable {
             return "source=\(source) staleState=\(staleState)"
         case .rapidTapRejected:
             return ""
+
+        // Waveform Diagnostics
+        case .waveformAppeared(let refreshID, let isProcessing, let energyCount, let killedState):
+            return "refreshID=\(refreshID) isProcessing=\(isProcessing) energyCount=\(energyCount) killed=\(killedState)"
+        case .waveformDisappeared(let refreshID, let renderTick):
+            return "refreshID=\(refreshID) renderTick=\(renderTick)"
+        case .waveformHeartbeat(let renderTick, let avgLevel, let energyCount):
+            return "renderTick=\(renderTick) avgLevel=\(String(format: "%.3f", avgLevel)) energyCount=\(energyCount)"
+        case .waveformStall(let gapMs, let renderTick, let energyCount):
+            return "gapMs=\(gapMs) renderTick=\(renderTick) energyCount=\(energyCount)"
+        case .waveformRefreshIDChanged(let oldID, let newID, let status):
+            return "oldID=\(oldID) newID=\(newID) status=\(status)"
+        case .waveformEnergyTransition(let fromCount, let toCount, let status):
+            return "fromCount=\(fromCount) toCount=\(toCount) status=\(status)"
+        case .waveformTimelineNotFiring(let renderTick, let energyCount):
+            return "renderTick=\(renderTick) energyCount=\(energyCount)"
+
+        // Overlay Diagnostics
+        case .overlayBodyEvaluated(let status, let showsOverlay, let energyCount):
+            return "status=\(status) showsOverlay=\(showsOverlay) energyCount=\(energyCount)"
+        case .overlayTimerStarted, .overlayTimerStopped:
+            return ""
+        case .overlayRecreated(let reason, let status):
+            return "reason=\(reason) status=\(status)"
         }
     }
 
@@ -357,10 +414,11 @@ public enum LogEvent: Sendable {
     /// Format: `[ISO8601timestamp] LEVEL  [subsystem] eventName param=value ...`
     public func formatted() -> String {
         let timestamp = Self.isoFormatter.string(from: Date())
+        let src = PersistentLog.source
         let params = message
         if params.isEmpty {
-            return "[\(timestamp)] \(level.paddedName) [\(subsystem.rawValue)] \(name)"
+            return "[\(timestamp)] \(level.paddedName) [\(subsystem.rawValue)] <\(src)> \(name)"
         }
-        return "[\(timestamp)] \(level.paddedName) [\(subsystem.rawValue)] \(name) \(params)"
+        return "[\(timestamp)] \(level.paddedName) [\(subsystem.rawValue)] <\(src)> \(name) \(params)"
     }
 }

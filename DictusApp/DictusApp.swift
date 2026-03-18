@@ -19,6 +19,7 @@ struct DictusApp: App {
     private var hasCompletedOnboarding = false
 
     init() {
+        PersistentLog.source = "APP"
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         PersistentLog.log(.appLaunched(version: version))
 
