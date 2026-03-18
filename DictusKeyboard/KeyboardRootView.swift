@@ -82,7 +82,6 @@ struct KeyboardRootView: View {
                     dictationStatus: state.dictationStatus,
                     waveformEnergy: state.waveformEnergy,
                     elapsedSeconds: state.recordingElapsed,
-                    waveformRefreshID: state.waveformRefreshID,
                     onCancel: { state.requestCancel() },
                     onStop: { state.requestStop() }
                 )
@@ -166,17 +165,8 @@ struct KeyboardRootView: View {
         // preference changes made in Settings are picked up immediately.
         .onReceive(NotificationCenter.default.publisher(for: .dictusKeyboardWillAppear)) { _ in
             defaultLayer = DefaultKeyboardLayer.active.asLayerType
-
-            // Refresh status from App Group on every keyboard appear.
-            // If the app is actively recording, waveform data will arrive
-            // within 200ms and the overlay will show correctly.
-            // If the app crashed, the 5-second waveform watchdog in
-            // KeyboardState handles the reset — no instant kill here.
-            //
-            // WHY no instant reset: The URL scheme flow causes
-            // keyboardDidDisappear → keyboardDidAppear within ~2s.
-            // An instant reset would kill legitimate recordings.
-            state.refreshFromDefaults()
+            // NOTE: refreshFromDefaults() is now called inside KeyboardState.keyboardDidAppear()
+            // which also gates waveformRefreshID increment to true visibility transitions.
         }
     }
 

@@ -4,7 +4,7 @@ import DictusCore
 
 /// Full-screen recording overlay that replaces the keyboard during active recording.
 /// Shows different visual states based on DictationStatus:
-/// - .requested: flat waveform bars, "D\u{00E9}marrage..." text, cancel-only button
+/// - .requested: flat waveform bars, "Démarrage..." text, cancel-only button
 /// - .recording: live waveform, elapsed timer, cancel + stop buttons
 /// - .transcribing: shimmer waveform, "Transcription..." text
 ///
@@ -12,13 +12,20 @@ import DictusCore
 /// Wispr Flow-inspired design -- when recording, the keyboard area transforms into
 /// an immersive recording UI. This prevents accidental key presses during dictation
 /// and provides clear visual feedback that the mic is active.
+///
+/// WHY single BrandWaveform (not one per switch branch):
+/// The old design had 3 separate BrandWaveform instances in requestedContent,
+/// recordingContent, and transcribingContent. When status changed (requested→recording
+/// →transcribing), SwiftUI created the new branch's BrandWaveform BEFORE destroying
+/// the old one. Each BrandWaveform runs a TimelineView with its own CADisplayLink.
+/// Ghost views accumulated across status transitions, producing paired heartbeats
+/// and eventually 4+ concurrent animation loops that consumed the frame budget.
+/// A single BrandWaveform at a fixed structural position survives all status changes
+/// without recreation — SwiftUI just updates its properties in place.
 struct RecordingOverlay: View {
     let dictationStatus: DictationStatus
     let waveformEnergy: [Float]
     let elapsedSeconds: Double
-    /// Counter from KeyboardState — incremented on every keyboard reappear.
-    /// Applied as .id() modifier on BrandWaveform to force view recreation.
-    let waveformRefreshID: Int
     let onCancel: () -> Void
     let onStop: () -> Void
 
@@ -42,47 +49,64 @@ struct RecordingOverlay: View {
     }
 
     var body: some View {
-        ZStack {
-            // Transparent background -- the native iOS keyboard chrome shows through.
-            // No dark rectangle, the overlay blends seamlessly with the keyboard.
-            Color.clear
+        VStack(spacing: 0) {
+            // Top bar: varies by state but has consistent height
+            topBar
 
-            switch dictationStatus {
-            case .requested:
-                requestedContent
-            case .transcribing:
-                transcribingContent
-            default:
-                recordingContent
+            // SINGLE BrandWaveform — never recreated on status change.
+            // WHY outside the switch: SwiftUI preserves @State (displayLevels,
+            // renderTick, CADisplayLink) when a view stays at the same structural
+            // position. Only .id(waveformRefreshID) can force recreation, which
+            // is gated to keyboard reappear events only.
+            GeometryReader { geo in
+                VStack(spacing: 8) {
+                    Spacer(minLength: 0)
+
+                    // WHY no .id(waveformRefreshID):
+                    // The old .id() modifier forced view recreation on keyboard reappear,
+                    // intended to get a fresh CADisplayLink. But during cold start, rapid
+                    // appear/disappear cycles caused a storm of .id() changes, creating
+                    // ghost BrandWaveform instances with orphaned CADisplayLinks (visible
+                    // as multiple simultaneous heartbeats in logs). The overlay's
+                    // conditional rendering already recreates BrandWaveform on each
+                    // show/hide cycle, and onAppear resets the killed flag, making .id()
+                    // unnecessary.
+                    BrandWaveform(
+                        energyLevels: dictationStatus == .requested ? [] : waveformEnergy,
+                        maxHeight: geo.size.height * 0.7,
+                        isProcessing: dictationStatus == .transcribing
+                    )
+                    .padding(.horizontal, 2)
+
+                    Spacer(minLength: 0)
+                }
+                .frame(width: geo.size.width, height: geo.size.height)
             }
+
+            // Footer: varies by state
+            footer
         }
+        .background(Color.clear)
         .onAppear {
-            // Diagnostic logging for waveform disappearance bug investigation.
-            // Logs once on overlay appear to capture initial state.
-            PersistentLog.log("[Waveform] Overlay appeared — status=\(dictationStatus), energyCount=\(waveformEnergy.count)")
-        }
-        .onChange(of: waveformEnergy.count) { newCount in
-            // Log ALL changes in waveform energy count (not just to/from 0)
-            // to diagnose intermittent waveform disappearance after model switch.
-            PersistentLog.log("[Waveform] Energy count changed — status=\(dictationStatus), count=\(newCount)")
-        }
-        .onChange(of: dictationStatus) { newStatus in
-            // Log overlay's view of status transitions with current waveform state.
-            PersistentLog.log("[Waveform] Overlay status changed — \(newStatus), energyCount=\(waveformEnergy.count)")
+            PersistentLog.log(.overlayBodyEvaluated(
+                status: dictationStatus.rawValue,
+                showsOverlay: true,
+                energyCount: waveformEnergy.count
+            ))
         }
     }
 
-    // MARK: - Requested state (waiting for app to start recording)
+    // MARK: - Top bar (varies by state)
 
-    /// Shows flat waveform bars and "D\u{00E9}marrage..." text with cancel-only button.
-    ///
-    /// WHY a distinct visual for .requested:
-    /// The overlay appears immediately on mic tap (before the app starts recording).
-    /// Flat bars + "D\u{00E9}marrage..." gives the user instant visual feedback that their
-    /// tap was registered, while clearly indicating recording hasn't started yet.
-    private var requestedContent: some View {
-        VStack(spacing: 0) {
-            // Top bar: cancel only (no stop button -- nothing to stop yet)
+    /// Top bar with recording control buttons.
+    /// WHY @ViewBuilder: Each state shows different buttons but reserves the same
+    /// vertical space (36pt pill + 6pt vertical padding = 48pt total), so the
+    /// BrandWaveform below never shifts vertically during state transitions.
+    @ViewBuilder
+    private var topBar: some View {
+        switch dictationStatus {
+        case .requested:
+            // Cancel only (no stop button -- nothing to stop yet)
             HStack {
                 PillButton(icon: "xmark", color: secondaryForeground) {
                     HapticFeedback.recordingStopped()
@@ -94,36 +118,15 @@ struct RecordingOverlay: View {
             .padding(.trailing, 17)
             .padding(.vertical, 6)
 
-            // Flat waveform bars -- empty energy array produces flat bars in BrandWaveform
-            GeometryReader { geo in
-                VStack(spacing: 8) {
-                    Spacer(minLength: 0)
+        case .transcribing:
+            // Reserve same height as button row so waveform doesn't shift
+            Color.clear
+                .frame(height: 36)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
 
-                    BrandWaveform(
-                        energyLevels: [],
-                        maxHeight: geo.size.height * 0.7
-                    )
-                    .padding(.horizontal, 2)
-                    .id(waveformRefreshID)
-
-                    Spacer(minLength: 0)
-                }
-                .frame(width: geo.size.width, height: geo.size.height)
-            }
-
-            // Footer: "D\u{00E9}marrage..." status text
-            Text("D\u{00E9}marrage...")
-                .font(.dictusCaption)
-                .foregroundColor(secondaryForeground)
-                .padding(.bottom, 8)
-        }
-    }
-
-    // MARK: - Recording state
-
-    private var recordingContent: some View {
-        VStack(spacing: 0) {
-            // Top bar: cancel (left) and validate (right) -- pill-shaped Liquid Glass buttons
+        default:
+            // Cancel (left) and validate (right) -- pill-shaped Liquid Glass buttons
             HStack {
                 PillButton(icon: "xmark", color: secondaryForeground) {
                     HapticFeedback.recordingStopped()
@@ -140,79 +143,47 @@ struct RecordingOverlay: View {
             .padding(.leading, 12)
             .padding(.trailing, 17)
             .padding(.vertical, 6)
+        }
+    }
 
-            // Waveform fills all remaining vertical space between buttons and footer.
-            // WHY GeometryReader: The waveform must adapt to whatever space is
-            // available rather than using a fixed maxHeight that can overflow.
-            GeometryReader { geo in
-                VStack(spacing: 8) {
-                    Spacer(minLength: 0)
+    // MARK: - Footer (varies by state)
 
-                    BrandWaveform(
-                        energyLevels: waveformEnergy,
-                        maxHeight: geo.size.height * 0.7
-                    )
-                    .padding(.horizontal, 2)
-                    .id(waveformRefreshID)
+    /// Footer with status text and optional timer.
+    /// WHY matching heights: Each state reserves the same total footer height
+    /// (timer line + caption line + padding) so the BrandWaveform above never
+    /// shifts vertically during state transitions.
+    @ViewBuilder
+    private var footer: some View {
+        switch dictationStatus {
+        case .requested:
+            // Reserve timer height (invisible) so waveform doesn't shift
+            Color.clear
+                .frame(height: timerFontSize)
+                .padding(.bottom, 4)
 
-                    Spacer(minLength: 0)
-                }
-                .frame(width: geo.size.width, height: geo.size.height)
-            }
+            Text("Démarrage...")
+                .font(.dictusCaption)
+                .foregroundColor(secondaryForeground)
+                .padding(.bottom, 8)
 
-            // Footer: timer + status -- fixed height
+        case .transcribing:
+            // Reserve timer height (invisible) so waveform doesn't shift
+            Color.clear
+                .frame(height: timerFontSize)
+                .padding(.bottom, 4)
+
+            Text("Transcription...")
+                .font(.dictusCaption)
+                .foregroundColor(secondaryForeground)
+                .padding(.bottom, 8)
+
+        default:
             Text(formattedTime)
                 .font(.system(size: timerFontSize, weight: .medium, design: .monospaced))
                 .foregroundColor(foregroundColor)
                 .padding(.bottom, 4)
 
             Text("En écoute...")
-                .font(.dictusCaption)
-                .foregroundColor(secondaryForeground)
-                .padding(.bottom, 8)
-        }
-    }
-
-    // MARK: - Transcribing state
-
-    /// Transcribing state layout matches recordingContent's vertical structure exactly
-    /// so the waveform stays at the same Y position during the state transition.
-    ///
-    /// WHY matching structure:
-    /// recordingContent has: top bar (36pt + padding) → GeometryReader → footer (timer + caption + padding).
-    /// If transcribingContent uses a different layout (e.g. Spacer/Spacer), the waveform's
-    /// GeometryReader gets different available height, causing a visible vertical jump.
-    /// By reserving identical top and bottom space, the waveform stays put.
-    private var transcribingContent: some View {
-        VStack(spacing: 0) {
-            // Reserve same top bar height as recording state (buttons area)
-            Color.clear
-                .frame(height: 36)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-
-            // Waveform in GeometryReader -- same structure as recording state
-            GeometryReader { geo in
-                VStack(spacing: 8) {
-                    Spacer(minLength: 0)
-
-                    BrandWaveform(maxHeight: geo.size.height * 0.7, isProcessing: true)
-                        .padding(.horizontal, 2)
-                        .id(waveformRefreshID)
-
-                    Spacer(minLength: 0)
-                }
-                .frame(width: geo.size.width, height: geo.size.height)
-            }
-
-            // Footer -- matches recording footer total height (timer line + caption line)
-            // WHY Color.clear for timer slot: recordingContent has a timer Text (timerFontSize)
-            // above the caption. We reserve the same space so the waveform doesn't shift.
-            Color.clear
-                .frame(height: timerFontSize)
-                .padding(.bottom, 4)
-
-            Text("Transcription...")
                 .font(.dictusCaption)
                 .foregroundColor(secondaryForeground)
                 .padding(.bottom, 8)

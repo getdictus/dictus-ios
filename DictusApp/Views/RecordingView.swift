@@ -173,27 +173,20 @@ struct RecordingView: View {
     // MARK: - Waveform Section
 
     /// Always-visible waveform that changes behavior based on state.
-    @ViewBuilder
+    /// Single BrandWaveform instance — properties change dynamically instead of
+    /// swapping 3 separate instances. Prevents ghost CADisplayLinks when the app
+    /// continues its run loop in background (UIBackgroundModes:audio).
     private var waveformSection: some View {
-        if coordinator.status == .recording {
-            // Live audio-driven waveform
-            BrandWaveform(
-                energyLevels: coordinator.bufferEnergy,
-                maxHeight: 120
-            )
-            .opacity(0.5)
-        } else if coordinator.status == .transcribing {
-            // Sinusoidal processing wave
-            BrandWaveform(maxHeight: 120, isProcessing: true)
-                .opacity(0.3)
-        } else {
-            // Flat/idle waveform — all bars at minimum height
-            BrandWaveform(
-                energyLevels: Array(repeating: Float(0), count: 30),
-                maxHeight: 120
-            )
-            .opacity(0.15)
-        }
+        BrandWaveform(
+            energyLevels: coordinator.status == .recording
+                ? coordinator.bufferEnergy
+                : Array(repeating: Float(0), count: 30),
+            maxHeight: 120,
+            isProcessing: coordinator.status == .transcribing,
+            isActive: coordinator.status == .recording || coordinator.status == .transcribing
+        )
+        .opacity(coordinator.status == .recording ? 0.5 :
+                 coordinator.status == .transcribing ? 0.3 : 0.15)
     }
 
     // MARK: - Status Text

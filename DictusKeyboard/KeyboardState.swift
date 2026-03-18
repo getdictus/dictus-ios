@@ -18,12 +18,9 @@ class KeyboardState: ObservableObject {
     @Published var statusMessage: String?
     @Published var waveformEnergy: [Float] = []
     @Published var recordingElapsed: Double = 0
-    /// Counter incremented on every keyboard reappear to force BrandWaveform recreation.
-    /// WHY .id() pattern: iOS stops evaluating SwiftUI body for off-screen keyboard
-    /// extensions. When keyboard returns, the TimelineView's CADisplayLink may not
-    /// restart. Changing waveformRefreshID causes SwiftUI to destroy and recreate
-    /// BrandWaveform, getting a fresh CADisplayLink and animation loop.
-    @Published var waveformRefreshID: Int = 0
+
+    /// Tracks whether the keyboard extension is currently visible on screen.
+    private(set) var isKeyboardVisible: Bool = false
 
     /// Reference to the keyboard controller for text insertion.
     /// WHY weak: KeyboardState is owned by KeyboardRootView (via @StateObject),
@@ -98,6 +95,22 @@ class KeyboardState: ObservableObject {
                 self?.readWaveformData()
             }
         }
+
+        // Observe keyboard appear/disappear to gate waveformRefreshID increments.
+        // WHY NotificationCenter (not Darwin): These are in-process notifications
+        // posted by KeyboardViewController — no cross-process IPC needed.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardDidAppear),
+            name: .dictusKeyboardWillAppear,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardDidDisappear),
+            name: .dictusKeyboardDidDisappear,
+            object: nil
+        )
     }
 
     deinit {
@@ -105,6 +118,7 @@ class KeyboardState: ObservableObject {
         DarwinNotificationCenter.removeObserver(for: DarwinNotificationName.statusChanged)
         DarwinNotificationCenter.removeObserver(for: DarwinNotificationName.transcriptionReady)
         DarwinNotificationCenter.removeObserver(for: DarwinNotificationName.waveformUpdate)
+        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Watchdog
@@ -214,9 +228,8 @@ class KeyboardState: ObservableObject {
             let oldStatus = dictationStatus
             dictationStatus = status
 
-            // Diagnostic: log status transitions with waveform state for disappearance debugging
             if oldStatus != status {
-                PersistentLog.log("[Waveform] Status transition \(oldStatus.rawValue)→\(status.rawValue), energyCount=\(waveformEnergy.count)")
+                PersistentLog.log(.statusChanged(from: oldStatus.rawValue, to: status.rawValue, source: "keyboardState"))
             }
 
             // Start/restart watchdog on any active state transition, stop when leaving.
@@ -240,15 +253,6 @@ class KeyboardState: ObservableObject {
                 // notifications are lost. readWaveformData() updates @Published props
                 // which forces SwiftUI to re-render the overlay.
                 readWaveformData()
-
-                // Force BrandWaveform recreation on keyboard reappear.
-                // WHY .id() pattern: iOS stops evaluating SwiftUI body for off-screen
-                // keyboard extensions. When keyboard returns, the TimelineView's
-                // CADisplayLink may not restart. Incrementing waveformRefreshID causes
-                // SwiftUI to destroy and recreate BrandWaveform, getting a fresh
-                // CADisplayLink and TimelineView animation loop.
-                waveformRefreshID += 1
-                PersistentLog.log("[Waveform] Keyboard reappear — refreshID=\(waveformRefreshID), status=\(status.rawValue), energyCount=\(waveformEnergy.count)")
             } else {
                 stopWatchdog()
                 coldStartGraceEnd = nil
@@ -278,11 +282,14 @@ class KeyboardState: ObservableObject {
         if let data = defaults.data(forKey: SharedKeys.waveformEnergy) {
             do {
                 let energy = try JSONDecoder().decode([Float].self, from: data)
-                // Diagnostic: log when waveform data transitions from populated to empty or vice versa
+                // Log transitions between empty/populated energy data
                 if waveformEnergy.isEmpty != energy.isEmpty {
-                    PersistentLog.log("[Waveform] Data transition: \(waveformEnergy.count) bars → \(energy.count) bars, status=\(dictationStatus.rawValue)")
+                    PersistentLog.log(.waveformEnergyTransition(
+                        fromCount: waveformEnergy.count,
+                        toCount: energy.count,
+                        status: dictationStatus.rawValue
+                    ))
                 }
-                PersistentLog.log("[Waveform] Data received in keyboard: \(energy.count) levels, renderTick will increment")
                 waveformEnergy = energy
                 // Force SwiftUI to re-evaluate even if array equality passes.
                 // WHY: After extension process suspension/resumption, SwiftUI's
@@ -355,6 +362,24 @@ class KeyboardState: ObservableObject {
                 }
             }
         }
+    }
+
+    // MARK: - Keyboard visibility tracking
+
+    /// Called when keyboard appears (viewWillAppear).
+    /// WHY @objc: Required for NotificationCenter selector-based observation.
+    @objc func keyboardDidAppear() {
+        isKeyboardVisible = true
+
+        // Refresh state from App Group — picks up status changes that
+        // happened while the keyboard extension was suspended.
+        refreshFromDefaults()
+    }
+
+    /// Called when keyboard disappears (viewDidDisappear).
+    /// WHY @objc: Required for NotificationCenter selector-based observation.
+    @objc func keyboardDidDisappear() {
+        isKeyboardVisible = false
     }
 
     /// Timestamp of last mic tap — used for debouncing.

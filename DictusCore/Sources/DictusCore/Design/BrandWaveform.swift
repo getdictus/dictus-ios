@@ -27,10 +27,17 @@ public struct BrandWaveform: View {
     /// state while indicating "processing" rather than "recording".
     public var isProcessing: Bool = false
 
-    public init(energyLevels: [Float] = [], maxHeight: CGFloat = 80, isProcessing: Bool = false) {
+    /// When false, pauses the TimelineView animation schedule (stops CADisplayLink).
+    /// WHY: RecordingView stays mounted across recording states. Without this,
+    /// the waveform runs at 60fps even when idle or in background, wasting battery.
+    public var isActive: Bool = true
+
+    public init(energyLevels: [Float] = [], maxHeight: CGFloat = 80,
+                isProcessing: Bool = false, isActive: Bool = true) {
         self.energyLevels = energyLevels
         self.maxHeight = maxHeight
         self.isProcessing = isProcessing
+        self.isActive = isActive
     }
 
     /// WHY @Environment colorScheme:
@@ -43,6 +50,11 @@ public struct BrandWaveform: View {
     /// energyLevels arrive at ~60Hz (app) or ~5Hz (keyboard). Direct rendering causes
     /// either micro-jitter (60Hz) or visible jumps (5Hz). displayLevels lerps toward
     /// energyLevels every frame, producing smooth motion regardless of input rate.
+    /// Kill switch: set on onDisappear to stop the animation loop immediately.
+    /// WHY: SwiftUI may delay view destruction, leaving a ghost CADisplayLink
+    /// that keeps calling updateDisplayLevels(). This flag cuts it off.
+    @State private var killed = false
+
     @State private var displayLevels: [Float] = Array(repeating: 0, count: 30)
 
     /// Monotonically increasing counter that forces SwiftUI Canvas to redraw.
@@ -51,6 +63,12 @@ public struct BrandWaveform: View {
     /// Incrementing renderTick on every updateDisplayLevels() call creates a
     /// guaranteed state change that forces Canvas re-evaluation.
     @State private var renderTick: Int = 0
+
+    /// Timestamp of the last updateDisplayLevels() call — used for stall detection.
+    @State private var lastRenderTime: Date = .distantPast
+
+    /// Timestamp of the last heartbeat log — fires every 2s during active rendering.
+    @State private var lastHeartbeatTime: Date = .distantPast
 
     /// Number of bars to display.
     private let barCount = 30
@@ -76,25 +94,37 @@ public struct BrandWaveform: View {
         // energyLevels. Without TimelineView, SwiftUI only rerenders when energyLevels
         // changes — which means 5Hz keyboard updates produce 5fps animation.
         // TimelineView gives us a 60fps render loop for smooth interpolation in both modes.
-        TimelineView(.animation) { timeline in
+        TimelineView(.animation(paused: !isActive && !isProcessing)) { timeline in
             let phase = isProcessing
                 ? timeline.date.timeIntervalSinceReferenceDate / 2.0
                 : 0
             waveformContent(processingPhase: phase)
                 .onAppear {
+                    // Log killed state BEFORE resetting — confirms SwiftUI @State preservation bug
+                    PersistentLog.log(.waveformAppeared(
+                        refreshID: renderTick,
+                        isProcessing: isProcessing,
+                        energyCount: energyLevels.count,
+                        killedState: killed  // If true here → confirms the bug
+                    ))
+                    // Reset killed in case @State was preserved from a previous instance
+                    killed = false
                     // Seed displayLevels from current energyLevels on first frame.
-                    // WHY: When BrandWaveform is recreated via .id(waveformRefreshID)
-                    // on keyboard reappear, @State displayLevels initializes to all zeros.
-                    // The lerp animation (smoothingFactor=0.3) needs ~10 frames to reach
-                    // visible levels. During cold start, the keyboard may only stay visible
-                    // for ~1 second before going off-screen again. Seeding from current
-                    // energy data ensures the waveform shows correct bars on the very
-                    // first frame — no animation catch-up needed.
                     if !isProcessing {
                         displayLevels = targetLevels()
                     }
+                    lastRenderTime = Date()
+                    lastHeartbeatTime = Date()
+                }
+                .onDisappear {
+                    killed = true
+                    PersistentLog.log(.waveformDisappeared(
+                        refreshID: renderTick,
+                        renderTick: renderTick
+                    ))
                 }
                 .onChange(of: timeline.date) { _ in
+                    guard !killed else { return }
                     if !isProcessing {
                         updateDisplayLevels()
                     }
@@ -108,7 +138,16 @@ public struct BrandWaveform: View {
                 // When TimelineView IS working, this just adds a redundant update on each
                 // data change — harmless since updateDisplayLevels() is idempotent.
                 .onChange(of: energyLevels) { _ in
+                    guard !killed else { return }
                     if !isProcessing {
+                        // Detect timeline-not-firing: energy arrives but TimelineView is dead
+                        if lastRenderTime != .distantPast,
+                           Date().timeIntervalSince(lastRenderTime) > 1.0 {
+                            PersistentLog.log(.waveformTimelineNotFiring(
+                                renderTick: renderTick,
+                                energyCount: energyLevels.count
+                            ))
+                        }
                         updateDisplayLevels()
                     }
                 }
@@ -170,6 +209,33 @@ public struct BrandWaveform: View {
     /// Rising bars should feel snappy (voice → immediate visual response).
     /// Falling bars should feel natural (voice stops → gradual settle, not a snap).
     private func updateDisplayLevels() {
+        guard !killed else { return }
+        let now = Date()
+
+        // Stall detection: if >500ms since last render, the animation loop was frozen
+        if lastRenderTime != .distantPast {
+            let gapMs = Int(now.timeIntervalSince(lastRenderTime) * 1000)
+            if gapMs > 500 {
+                PersistentLog.log(.waveformStall(
+                    gapMs: gapMs,
+                    renderTick: renderTick,
+                    energyCount: energyLevels.count
+                ))
+            }
+        }
+        lastRenderTime = now
+
+        // Heartbeat: log every 2s to prove animation is running
+        if now.timeIntervalSince(lastHeartbeatTime) >= 2.0 {
+            let avg = displayLevels.isEmpty ? Float(0) : displayLevels.reduce(0, +) / Float(displayLevels.count)
+            PersistentLog.log(.waveformHeartbeat(
+                renderTick: renderTick,
+                avgLevel: avg,
+                energyCount: energyLevels.count
+            ))
+            lastHeartbeatTime = now
+        }
+
         let targets = targetLevels()
 
         var updated = displayLevels
