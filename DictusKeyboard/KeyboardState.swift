@@ -25,6 +25,7 @@ class KeyboardState: ObservableObject {
 
     /// Tracks whether the keyboard extension is currently visible on screen.
     @Published private(set) var isKeyboardVisible: Bool = false
+    @Published private(set) var activeControllerID: String?
 
     /// Reference to the keyboard controller for text insertion.
     /// WHY weak: KeyboardState is owned by KeyboardRootView (via @StateObject),
@@ -109,21 +110,6 @@ class KeyboardState: ObservableObject {
             }
         }
 
-        // Observe keyboard appear/disappear to gate waveformRefreshID increments.
-        // WHY NotificationCenter (not Darwin): These are in-process notifications
-        // posted by KeyboardViewController — no cross-process IPC needed.
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardDidAppear),
-            name: .dictusKeyboardWillAppear,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(keyboardDidDisappear),
-            name: .dictusKeyboardDidDisappear,
-            object: nil
-        )
     }
 
     deinit {
@@ -132,7 +118,6 @@ class KeyboardState: ObservableObject {
         DarwinNotificationCenter.removeObserver(for: DarwinNotificationName.statusChanged)
         DarwinNotificationCenter.removeObserver(for: DarwinNotificationName.transcriptionReady)
         DarwinNotificationCenter.removeObserver(for: DarwinNotificationName.waveformUpdate)
-        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Watchdog
@@ -314,6 +299,9 @@ class KeyboardState: ObservableObject {
                     ))
                 }
                 waveformEnergy = energy
+                if !energy.isEmpty {
+                    logProbe("waveformSnapshot", details: waveformStatsDetails(energy))
+                }
             } catch {
                 // JSON decode failure — keep existing waveform data
                 if #available(iOS 14.0, *) {
@@ -387,10 +375,13 @@ class KeyboardState: ObservableObject {
 
     // MARK: - Keyboard visibility tracking
 
-    /// Called when keyboard appears (viewWillAppear).
-    /// WHY @objc: Required for NotificationCenter selector-based observation.
-    @objc func keyboardDidAppear() {
-        logProbe("keyboardDidAppear", details: "wasVisible=\(isKeyboardVisible) \(sessionDetails())")
+    /// Called when a controller becomes the active visible keyboard owner.
+    func registerControllerAppearance(controllerID: String) {
+        logProbe(
+            "registerControllerAppearance",
+            details: "controllerID=\(controllerID) previousOwner=\(activeControllerID ?? "none") wasVisible=\(isKeyboardVisible) \(sessionDetails())"
+        )
+        activeControllerID = controllerID
         isKeyboardVisible = true
 
         // Refresh state from App Group — picks up status changes that
@@ -398,11 +389,18 @@ class KeyboardState: ObservableObject {
         refreshFromDefaults()
     }
 
-    /// Called when keyboard disappears (viewDidDisappear).
-    /// WHY @objc: Required for NotificationCenter selector-based observation.
-    @objc func keyboardDidDisappear() {
-        logProbe("keyboardDidDisappear", details: "wasVisible=\(isKeyboardVisible) \(sessionDetails())")
+    /// Called when a controller disappears. Only the current owner may hide the keyboard.
+    func registerControllerDisappearance(controllerID: String) {
+        let ownsVisibility = activeControllerID == controllerID
+        logProbe(
+            "registerControllerDisappearance",
+            details: "controllerID=\(controllerID) owner=\(activeControllerID ?? "none") ownsVisibility=\(ownsVisibility) wasVisible=\(isKeyboardVisible) \(sessionDetails())"
+        )
+
+        guard ownsVisibility else { return }
+
         isKeyboardVisible = false
+        activeControllerID = nil
     }
 
     /// Timestamp of last mic tap — used for debouncing.
@@ -484,5 +482,25 @@ class KeyboardState: ObservableObject {
             action: action,
             details: details
         ))
+    }
+
+    private func waveformStatsDetails(_ values: [Float]) -> String {
+        guard !values.isEmpty else { return "count=0" }
+        let minValue = values.min() ?? 0
+        let maxValue = values.max() ?? 0
+        let spread = maxValue - minValue
+        let first = values.first ?? 0
+        let middle = values[values.count / 2]
+        let last = values.last ?? 0
+        return String(
+            format: "count=%d min=%.3f max=%.3f spread=%.3f first=%.3f mid=%.3f last=%.3f",
+            values.count,
+            minValue,
+            maxValue,
+            spread,
+            first,
+            middle,
+            last
+        )
     }
 }

@@ -19,6 +19,7 @@ final class KeyboardWaveformDriver: ObservableObject {
     private var status: DictationStatus = .idle
     private var energyLevels: [Float] = []
     private var isVisible = false
+    private var activePresenterID: String?
     private var displayLink: CADisplayLink?
     private var lastTickTime: CFTimeInterval?
     private var lastHeartbeatTime: Date = .distantPast
@@ -31,21 +32,30 @@ final class KeyboardWaveformDriver: ObservableObject {
         displayLink?.invalidate()
     }
 
-    func setVisible(_ isVisible: Bool) {
-        logProbe("setVisible", details: "isVisible=\(isVisible) status=\(status.rawValue)")
-        self.isVisible = isVisible
-        updateDisplayLinkState()
-
-        if !isVisible {
-            lastTickTime = nil
-            lastHeartbeatTime = .distantPast
+    func sync(presenterID: String, status: DictationStatus, energyLevels: [Float], isVisible: Bool) {
+        let ownsPresentation = activePresenterID == presenterID
+        if !isVisible && !ownsPresentation && activePresenterID != nil {
+            logProbe(
+                "syncIgnored",
+                details: "presenterID=\(presenterID) owner=\(activePresenterID ?? "none") status=\(status.rawValue) isVisible=\(isVisible)"
+            )
+            return
         }
-    }
 
-    func update(status: DictationStatus, energyLevels: [Float]) {
-        logProbe("update", details: "status=\(status.rawValue) energyCount=\(energyLevels.count) visible=\(isVisible)")
+        if isVisible {
+            activePresenterID = presenterID
+        } else if ownsPresentation {
+            activePresenterID = nil
+        }
+
+        logProbe(
+            "sync",
+            details: "presenterID=\(presenterID) owner=\(activePresenterID ?? "none") status=\(status.rawValue) energyCount=\(energyLevels.count) isVisible=\(isVisible)"
+        )
+
         self.status = status
         self.energyLevels = energyLevels
+        self.isVisible = isVisible
         isProcessing = status == .transcribing
 
         if status != .transcribing {
@@ -54,6 +64,11 @@ final class KeyboardWaveformDriver: ObservableObject {
 
         if status == .requested || status == .idle || status == .ready {
             displayLevels = Array(repeating: 0, count: barCount)
+        }
+
+        if !isVisible {
+            lastTickTime = nil
+            lastHeartbeatTime = .distantPast
         }
 
         updateDisplayLinkState()
@@ -158,6 +173,8 @@ final class KeyboardWaveformDriver: ObservableObject {
         let now = Date()
         guard now.timeIntervalSince(lastHeartbeatTime) >= 2.0 else { return }
 
+        let targets = targetLevels()
+
         let sourceLevels: [Float]
         if status == .transcribing {
             sourceLevels = (0..<barCount).map { processingEnergy(at: $0, phase: processingPhase) }
@@ -171,6 +188,12 @@ final class KeyboardWaveformDriver: ObservableObject {
             avgLevel: average,
             energyCount: energyLevels.count
         ))
+        if status == .recording {
+            logProbe(
+                "waveformShape",
+                details: "target{\(waveformStatsDetails(targets))} display{\(waveformStatsDetails(displayLevels))}"
+            )
+        }
         lastHeartbeatTime = now
     }
 
@@ -209,6 +232,26 @@ final class KeyboardWaveformDriver: ObservableObject {
             action: action,
             details: details
         ))
+    }
+
+    private func waveformStatsDetails(_ values: [Float]) -> String {
+        guard !values.isEmpty else { return "count=0" }
+        let minValue = values.min() ?? 0
+        let maxValue = values.max() ?? 0
+        let spread = maxValue - minValue
+        let first = values.first ?? 0
+        let middle = values[values.count / 2]
+        let last = values.last ?? 0
+        return String(
+            format: "count=%d min=%.3f max=%.3f spread=%.3f first=%.3f mid=%.3f last=%.3f",
+            values.count,
+            minValue,
+            maxValue,
+            spread,
+            first,
+            middle,
+            last
+        )
     }
 }
 

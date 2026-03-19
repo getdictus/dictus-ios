@@ -23,6 +23,7 @@ extension DefaultKeyboardLayer {
 /// ghost touches. An overlay or ZStack would keep both views alive.
 struct KeyboardRootView: View {
     let controller: UIInputViewController
+    let controllerID: String
     @ObservedObject private var state = KeyboardState.shared
     @ObservedObject private var waveformDriver = KeyboardWaveformDriver.shared
     @State private var instanceID = String(UUID().uuidString.prefix(8))
@@ -71,7 +72,8 @@ struct KeyboardRootView: View {
     /// Whether the recording overlay should be visible.
     /// Extracted as a computed property for clear animation binding.
     private var showsOverlay: Bool {
-        state.isKeyboardVisible
+        state.activeControllerID == controllerID
+            && state.isKeyboardVisible
             && (state.dictationStatus == .requested
                 || state.dictationStatus == .recording
                 || state.dictationStatus == .transcribing)
@@ -132,9 +134,9 @@ struct KeyboardRootView: View {
                 component: "KeyboardRootView",
                 instanceID: instanceID,
                 action: "showsOverlayChanged",
-                details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible)"
+                details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
             ))
-            waveformDriver.setVisible(isShowing)
+            syncWaveformDriver()
         }
         .onChange(of: state.dictationStatus) { _, newStatus in
             let showsOverlay = newStatus == .requested || newStatus == .recording || newStatus == .transcribing
@@ -143,13 +145,32 @@ struct KeyboardRootView: View {
             } else {
                 PersistentLog.log(.overlayHidden(status: newStatus.rawValue))
             }
+            syncWaveformDriver()
+        }
+        .onChange(of: state.waveformEnergy) { _, _ in
+            syncWaveformDriver()
+        }
+        .onChange(of: state.activeControllerID) { _, newOwner in
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardRootView",
+                instanceID: instanceID,
+                action: "activeControllerChanged",
+                details: "newOwner=\(newOwner ?? "none") controllerID=\(controllerID)"
+            ))
+            if newOwner == controllerID {
+                defaultLayer = DefaultKeyboardLayer.active.asLayerType
+            }
+            syncWaveformDriver()
+        }
+        .onChange(of: state.isKeyboardVisible) { _, _ in
+            syncWaveformDriver()
         }
         .onAppear {
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardRootView",
                 instanceID: instanceID,
                 action: "onAppear",
-                details: "status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible)"
+                details: "status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
             ))
             // Provide controller reference to KeyboardState for auto-insert.
             // WHY here and not in init: KeyboardState is created by @StateObject
@@ -168,30 +189,27 @@ struct KeyboardRootView: View {
             // Set prediction engine language from App Group shared preference.
             let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
             suggestionState.setLanguage(lang)
+
+            syncWaveformDriver()
         }
         .onDisappear {
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardRootView",
                 instanceID: instanceID,
                 action: "onDisappear",
-                details: "status=\(state.dictationStatus.rawValue)"
+                details: "status=\(state.dictationStatus.rawValue) controllerID=\(controllerID)"
             ))
+            syncWaveformDriver(forceHidden: true)
         }
-        // Re-read default layer every time the keyboard reappears (not just the
-        // first .onAppear). viewWillAppear fires on every keyboard show, whereas
-        // .onAppear only fires once per extension process lifetime. This ensures
-        // preference changes made in Settings are picked up immediately.
-        .onReceive(NotificationCenter.default.publisher(for: .dictusKeyboardWillAppear)) { _ in
-            PersistentLog.log(.diagnosticProbe(
-                component: "KeyboardRootView",
-                instanceID: instanceID,
-                action: "receivedKeyboardWillAppear",
-                details: ""
-            ))
-            defaultLayer = DefaultKeyboardLayer.active.asLayerType
-            // NOTE: refreshFromDefaults() is now called inside KeyboardState.keyboardDidAppear()
-            // which also gates waveformRefreshID increment to true visibility transitions.
-        }
+    }
+
+    private func syncWaveformDriver(forceHidden: Bool = false) {
+        waveformDriver.sync(
+            presenterID: controllerID,
+            status: state.dictationStatus,
+            energyLevels: state.waveformEnergy,
+            isVisible: !forceHidden && showsOverlay
+        )
     }
 
     // MARK: - Suggestion Handling

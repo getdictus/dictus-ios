@@ -1,6 +1,174 @@
 // DictusCore/Sources/DictusCore/Design/BrandWaveform.swift
 // Multi-bar waveform with brand-inspired colors (blue gradient center, white opacity sides).
 import SwiftUI
+import QuartzCore
+
+@MainActor
+final class BrandWaveformDriver: ObservableObject {
+    @Published private(set) var displayLevels: [Float] = Array(repeating: 0, count: 30)
+    @Published private(set) var processingPhase: Double = 0
+    @Published private(set) var renderTick: Int = 0
+    @Published private(set) var isProcessing = false
+
+    private let barCount = 30
+    private let smoothingFactor: Float = 0.3
+    private let decayFactor: Float = 0.85
+
+    private var energyLevels: [Float] = []
+    private var isActive = false
+    private var displayLink: CADisplayLink?
+    private var lastRenderTime: Date = .distantPast
+    private var lastHeartbeatTime: Date = .distantPast
+
+    deinit {
+        displayLink?.invalidate()
+    }
+
+    func update(energyLevels: [Float], isProcessing: Bool, isActive: Bool) {
+        self.energyLevels = energyLevels
+        self.isProcessing = isProcessing
+        self.isActive = isActive
+
+        if !isProcessing {
+            processingPhase = 0
+        }
+
+        if !isActive {
+            displayLevels = targetLevels()
+        }
+
+        updateLoopState()
+    }
+
+    func forceStop() {
+        stopLoop()
+    }
+
+    private func updateLoopState() {
+        if isActive {
+            startLoopIfNeeded()
+        } else {
+            stopLoop()
+        }
+    }
+
+    private func startLoopIfNeeded() {
+        guard displayLink == nil else { return }
+
+        let link = CADisplayLink(target: self, selector: #selector(handleDisplayLink))
+        link.add(to: .main, forMode: .common)
+        displayLink = link
+        lastRenderTime = Date()
+        lastHeartbeatTime = .distantPast
+
+        PersistentLog.log(.waveformAppeared(
+            refreshID: renderTick,
+            isProcessing: isProcessing,
+            energyCount: energyLevels.count,
+            killedState: false
+        ))
+    }
+
+    private func stopLoop() {
+        guard displayLink != nil else { return }
+
+        displayLink?.invalidate()
+        displayLink = nil
+
+        PersistentLog.log(.waveformDisappeared(
+            refreshID: renderTick,
+            renderTick: renderTick
+        ))
+    }
+
+    @objc
+    private func handleDisplayLink(_ link: CADisplayLink) {
+        let now = Date()
+
+        if lastRenderTime != .distantPast {
+            let gapMs = Int(now.timeIntervalSince(lastRenderTime) * 1000)
+            if gapMs > 500 {
+                PersistentLog.log(.waveformStall(
+                    gapMs: gapMs,
+                    renderTick: renderTick,
+                    energyCount: energyLevels.count
+                ))
+            }
+        }
+        lastRenderTime = now
+
+        if isProcessing {
+            processingPhase += link.duration / 2.0
+        } else {
+            tickLevels()
+        }
+
+        if now.timeIntervalSince(lastHeartbeatTime) >= 2.0 {
+            let sourceLevels: [Float] = isProcessing
+                ? (0..<barCount).map { processingEnergy(at: $0, phase: processingPhase) }
+                : displayLevels
+            let avg = sourceLevels.isEmpty ? Float(0) : sourceLevels.reduce(0, +) / Float(sourceLevels.count)
+            PersistentLog.log(.waveformHeartbeat(
+                renderTick: renderTick,
+                avgLevel: avg,
+                energyCount: energyLevels.count
+            ))
+            lastHeartbeatTime = now
+        }
+
+        renderTick += 1
+    }
+
+    private func tickLevels() {
+        let targets = targetLevels()
+        var updated = displayLevels
+
+        for i in 0..<barCount {
+            let target = targets[i]
+            let current = updated[i]
+
+            if target > current {
+                updated[i] = current + (target - current) * smoothingFactor
+            } else {
+                updated[i] = target + (current - target) * decayFactor
+            }
+
+            if updated[i] < 0.005 {
+                updated[i] = 0
+            }
+        }
+
+        displayLevels = updated
+    }
+
+    func processingEnergy(at index: Int, phase: Double) -> Float {
+        let normalizedIndex = Double(index) / Double(max(barCount - 1, 1))
+        let sineValue = sin(2 * .pi * (normalizedIndex + phase))
+        return Float(0.2 + 0.25 * (sineValue + 1.0))
+    }
+
+    private func targetLevels() -> [Float] {
+        guard !energyLevels.isEmpty else {
+            return Array(repeating: Float(0), count: barCount)
+        }
+
+        var result = [Float]()
+        result.reserveCapacity(barCount)
+
+        for index in 0..<barCount {
+            let position = Float(index) / Float(max(barCount - 1, 1))
+            let arrayIndex = position * Float(energyLevels.count - 1)
+            let lower = Int(arrayIndex)
+            let upper = min(lower + 1, energyLevels.count - 1)
+            let fraction = arrayIndex - Float(lower)
+            let value = energyLevels[lower] * (1 - fraction) + energyLevels[upper] * fraction
+            let thresholded = value < 0.05 ? Float(0) : value
+            result.append(min(max(thresholded, 0), 1))
+        }
+
+        return result
+    }
+}
 
 /// Multi-bar audio waveform styled with Dictus brand colors.
 ///
@@ -28,8 +196,9 @@ public struct BrandWaveform: View {
     public var isProcessing: Bool = false
 
     /// When false, pauses the TimelineView animation schedule (stops CADisplayLink).
-    /// WHY: RecordingView stays mounted across recording states. Without this,
-    /// the waveform runs at 60fps even when idle or in background, wasting battery.
+    /// WHY: Some hosts need a hard kill switch when the view is still structurally
+    /// alive for a moment (for example during keyboard overlay transitions). This
+    /// must stop both live recording animation and the processing sine wave.
     public var isActive: Bool = true
 
     public init(energyLevels: [Float] = [], maxHeight: CGFloat = 80,
@@ -40,118 +209,47 @@ public struct BrandWaveform: View {
         self.isActive = isActive
     }
 
-    /// WHY @Environment colorScheme:
-    /// Outer bars use white in dark mode (original) and gray in light mode.
-    /// Without this, white bars on a light background are invisible.
     @Environment(\.colorScheme) private var colorScheme
-
-    /// Smoothed display levels for fluid animation.
-    /// WHY @State instead of using energyLevels directly:
-    /// energyLevels arrive at ~60Hz (app) or ~5Hz (keyboard). Direct rendering causes
-    /// either micro-jitter (60Hz) or visible jumps (5Hz). displayLevels lerps toward
-    /// energyLevels every frame, producing smooth motion regardless of input rate.
-    /// Kill switch: set on onDisappear to stop the animation loop immediately.
-    /// WHY: SwiftUI may delay view destruction, leaving a ghost CADisplayLink
-    /// that keeps calling updateDisplayLevels(). This flag cuts it off.
-    @State private var killed = false
-
-    @State private var displayLevels: [Float] = Array(repeating: 0, count: 30)
-
-    /// Monotonically increasing counter that forces SwiftUI Canvas to redraw.
-    /// WHY: After iOS suspends/resumes the keyboard extension process,
-    /// displayLevels micro-changes may be too small for SwiftUI's diff to detect.
-    /// Incrementing renderTick on every updateDisplayLevels() call creates a
-    /// guaranteed state change that forces Canvas re-evaluation.
-    @State private var renderTick: Int = 0
-
-    /// Timestamp of the last updateDisplayLevels() call — used for stall detection.
-    @State private var lastRenderTime: Date = .distantPast
-
-    /// Timestamp of the last heartbeat log — fires every 2s during active rendering.
-    @State private var lastHeartbeatTime: Date = .distantPast
+    @StateObject private var driver = BrandWaveformDriver()
 
     /// Number of bars to display.
     private let barCount = 30
 
-    /// Consistent spacing between bars.
     private let barSpacing: CGFloat = 2
 
-    /// Smoothing factor for lerp interpolation (0 = no change, 1 = instant snap).
-    /// WHY 0.3: Balances responsiveness (voice feels reactive) with smoothness
-    /// (no jitter between frames). Lower values feel sluggish, higher values
-    /// reintroduce the jitter we're trying to fix.
-    private let smoothingFactor: Float = 0.3
-
-    /// Exponential decay factor for bars returning to zero when energy drops.
-    /// WHY separate from smoothingFactor: We want bars to rise quickly (responsive)
-    /// but fall slowly (visually pleasing decay). 0.85 = bars take ~10 frames to
-    /// fully settle, creating a smooth "fade out" instead of a harsh snap to zero.
-    private let decayFactor: Float = 0.85
-
     public var body: some View {
-        // WHY TimelineView for both recording AND processing:
-        // Recording mode needs continuous frame updates to lerp displayLevels toward
-        // energyLevels. Without TimelineView, SwiftUI only rerenders when energyLevels
-        // changes — which means 5Hz keyboard updates produce 5fps animation.
-        // TimelineView gives us a 60fps render loop for smooth interpolation in both modes.
-        TimelineView(.animation(paused: !isActive && !isProcessing)) { timeline in
-            let phase = isProcessing
-                ? timeline.date.timeIntervalSinceReferenceDate / 2.0
-                : 0
-            waveformContent(processingPhase: phase)
-                .onAppear {
-                    // Log killed state BEFORE resetting — confirms SwiftUI @State preservation bug
-                    PersistentLog.log(.waveformAppeared(
-                        refreshID: renderTick,
-                        isProcessing: isProcessing,
-                        energyCount: energyLevels.count,
-                        killedState: killed  // If true here → confirms the bug
-                    ))
-                    // Reset killed in case @State was preserved from a previous instance
-                    killed = false
-                    // Seed displayLevels from current energyLevels on first frame.
-                    if !isProcessing {
-                        displayLevels = targetLevels()
-                    }
-                    lastRenderTime = Date()
-                    lastHeartbeatTime = Date()
-                }
-                .onDisappear {
-                    killed = true
-                    PersistentLog.log(.waveformDisappeared(
-                        refreshID: renderTick,
-                        renderTick: renderTick
-                    ))
-                }
-                .onChange(of: timeline.date) { _ in
-                    guard !killed else { return }
-                    if !isProcessing {
-                        updateDisplayLevels()
-                    }
-                }
-                // Fallback: update displayLevels when new energy data arrives.
-                // WHY: In keyboard extensions, iOS can suspend the extension process
-                // (e.g., when the user visits Settings then returns). After resumption,
-                // TimelineView's CADisplayLink may not restart, so onChange(of: timeline.date)
-                // never fires. This ensures displayLevels still updates at the input rate
-                // (~5Hz from App Group) even when the animation loop is dead.
-                // When TimelineView IS working, this just adds a redundant update on each
-                // data change — harmless since updateDisplayLevels() is idempotent.
-                .onChange(of: energyLevels) { _ in
-                    guard !killed else { return }
-                    if !isProcessing {
-                        // Detect timeline-not-firing: energy arrives but TimelineView is dead
-                        if lastRenderTime != .distantPast,
-                           Date().timeIntervalSince(lastRenderTime) > 1.0 {
-                            PersistentLog.log(.waveformTimelineNotFiring(
-                                renderTick: renderTick,
-                                energyCount: energyLevels.count
-                            ))
-                        }
-                        updateDisplayLevels()
-                    }
-                }
-        }
+        waveformContent
+            .onAppear {
+                driver.update(
+                    energyLevels: energyLevels,
+                    isProcessing: isProcessing,
+                    isActive: isActive
+                )
+            }
+            .onDisappear {
+                driver.forceStop()
+            }
+            .onChange(of: energyLevels) { _, newLevels in
+                driver.update(
+                    energyLevels: newLevels,
+                    isProcessing: isProcessing,
+                    isActive: isActive
+                )
+            }
+            .onChange(of: isProcessing) { _, newValue in
+                driver.update(
+                    energyLevels: energyLevels,
+                    isProcessing: newValue,
+                    isActive: isActive
+                )
+            }
+            .onChange(of: isActive) { _, newValue in
+                driver.update(
+                    energyLevels: energyLevels,
+                    isProcessing: isProcessing,
+                    isActive: newValue
+                )
+            }
     }
 
     /// Canvas-based rendering for 60fps waveform.
@@ -165,27 +263,24 @@ public struct BrandWaveform: View {
     /// The old minHeight of 4pt caused visible micro-movements at zero energy,
     /// making the waveform appear "alive" even when silent. Setting minHeight = 0
     /// means bars completely disappear at zero energy -- perfectly still.
-    private func waveformContent(processingPhase: Double) -> some View {
+    private var waveformContent: some View {
         Canvas { context, size in
-            // Force Canvas redraw on each tick — ensures extension process
-            // recovery triggers a visible update even when displayLevels
-            // micro-changes are coalesced by SwiftUI's diffing engine.
-            let _ = renderTick
+            let _ = driver.renderTick
             let totalSpacing = barSpacing * CGFloat(barCount - 1)
             let barWidth = max((size.width - totalSpacing) / CGFloat(barCount), 2)
 
             for index in 0..<barCount {
                 let energy: Float
-                if isProcessing {
-                    energy = processingEnergy(at: index, phase: processingPhase)
+                if driver.isProcessing {
+                    energy = driver.processingEnergy(at: index, phase: driver.processingPhase)
                 } else {
-                    energy = index < displayLevels.count ? displayLevels[index] : 0
+                    energy = index < driver.displayLevels.count ? driver.displayLevels[index] : 0
                 }
 
                 // Minimum bar height so the waveform baseline is always visible,
                 // even in complete silence. 2pt = thin line, enough to see the
                 // colored bar pattern (blue center, gray edges) without looking "active".
-                let minHeight: CGFloat = isProcessing ? 4 : 2
+                let minHeight: CGFloat = driver.isProcessing ? 4 : 2
                 let height = max(minHeight + CGFloat(energy) * (maxHeight - minHeight), minHeight)
 
                 let x = CGFloat(index) * (barWidth + barSpacing)
@@ -197,99 +292,6 @@ public struct BrandWaveform: View {
             }
         }
         .frame(height: maxHeight)
-    }
-
-    /// Update displayLevels toward target energyLevels using lerp + exponential decay.
-    ///
-    /// Called every frame by TimelineView. Each bar interpolates independently:
-    /// - If target > current: lerp UP (responsive to voice)
-    /// - If target < current: decay DOWN (smooth fade-out)
-    ///
-    /// WHY lerp for rise, decay for fall:
-    /// Rising bars should feel snappy (voice → immediate visual response).
-    /// Falling bars should feel natural (voice stops → gradual settle, not a snap).
-    private func updateDisplayLevels() {
-        guard !killed else { return }
-        let now = Date()
-
-        // Stall detection: if >500ms since last render, the animation loop was frozen
-        if lastRenderTime != .distantPast {
-            let gapMs = Int(now.timeIntervalSince(lastRenderTime) * 1000)
-            if gapMs > 500 {
-                PersistentLog.log(.waveformStall(
-                    gapMs: gapMs,
-                    renderTick: renderTick,
-                    energyCount: energyLevels.count
-                ))
-            }
-        }
-        lastRenderTime = now
-
-        // Heartbeat: log every 2s to prove animation is running
-        if now.timeIntervalSince(lastHeartbeatTime) >= 2.0 {
-            let avg = displayLevels.isEmpty ? Float(0) : displayLevels.reduce(0, +) / Float(displayLevels.count)
-            PersistentLog.log(.waveformHeartbeat(
-                renderTick: renderTick,
-                avgLevel: avg,
-                energyCount: energyLevels.count
-            ))
-            lastHeartbeatTime = now
-        }
-
-        let targets = targetLevels()
-
-        var updated = displayLevels
-        for i in 0..<barCount {
-            let target = i < targets.count ? targets[i] : Float(0)
-            let current = updated[i]
-
-            if target > current {
-                // Rising: lerp toward target
-                updated[i] = current + (target - current) * smoothingFactor
-            } else {
-                // Falling: exponential decay toward target
-                updated[i] = target + (current - target) * decayFactor
-            }
-
-            // Snap to zero below perceptual threshold to avoid infinite decay
-            if updated[i] < 0.005 {
-                updated[i] = 0
-            }
-        }
-
-        displayLevels = updated
-        renderTick += 1
-    }
-
-    /// Map energyLevels (variable count) to exactly barCount target values.
-    /// Applies silence thresholding to eliminate ambient mic noise.
-    private func targetLevels() -> [Float] {
-        guard !energyLevels.isEmpty else {
-            return Array(repeating: Float(0), count: barCount)
-        }
-
-        var result = [Float]()
-        for index in 0..<barCount {
-            let position = Float(index) / Float(max(barCount - 1, 1))
-            let arrayIndex = position * Float(energyLevels.count - 1)
-            let lower = Int(arrayIndex)
-            let upper = min(lower + 1, energyLevels.count - 1)
-            let fraction = arrayIndex - Float(lower)
-            let value = energyLevels[lower] * (1 - fraction) + energyLevels[upper] * fraction
-            // Silence threshold: ambient mic noise produces small non-zero energy (0.01-0.05).
-            // Treat anything below 0.05 as true silence so bars are perfectly still.
-            let thresholded = value < 0.05 ? Float(0) : value
-            result.append(min(max(thresholded, 0), 1))
-        }
-        return result
-    }
-
-    /// Generate sinusoidal energy for processing mode.
-    private func processingEnergy(at index: Int, phase: Double) -> Float {
-        let normalizedIndex = Double(index) / Double(max(barCount - 1, 1))
-        let sineValue = sin(2 * .pi * (normalizedIndex + phase))
-        // Map sine (-1...1) to energy (0.2...0.7) for a subtle ambient effect
-        return Float(0.2 + 0.25 * (sineValue + 1.0))
     }
 
     /// Brand-inspired color resolved to a plain Color for Canvas rendering.

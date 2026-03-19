@@ -97,14 +97,24 @@ class UnifiedAudioEngine: ObservableObject {
     /// Writing directly from the audio thread bypasses this throttling.
     private nonisolated(unsafe) var lastWaveformWrite: TimeInterval = 0
 
+    /// Timestamp of the last waveform-shape diagnostic emitted from the audio thread.
+    private nonisolated(unsafe) var lastWaveformDiagnosticsWrite: TimeInterval = 0
+
     /// Rolling energy buffer maintained on the audio thread for direct App Group writes.
     /// Separate from @Published bufferEnergy (which is main-thread-only for SwiftUI).
     /// WHY nonisolated(unsafe): Single writer (audio callback thread).
     private nonisolated(unsafe) var audioThreadEnergy: [Float] = []
 
+    /// Rolling per-bucket waveform shape used by the keyboard/App Group snapshot.
+    /// Unlike audioThreadEnergy (one RMS value per callback), this keeps a short envelope
+    /// history with enough local variation to render an actual waveform silhouette.
+    private nonisolated(unsafe) var audioThreadWaveformBins: [Float] = []
+
     /// Accumulated sample count on the audio thread for elapsed time calculation.
     /// WHY nonisolated(unsafe): Single writer (audio callback thread).
     private nonisolated(unsafe) var audioThreadSampleCount: Int = 0
+
+    private let waveformBarCount = 30
 
     // MARK: - Session & Permissions (ported from AudioRecorder)
 
@@ -250,9 +260,11 @@ class UnifiedAudioEngine: ObservableObject {
     private func startEngine() throws {
         audioSamples = []
         audioThreadEnergy = []
+        audioThreadWaveformBins = []
         audioThreadSampleCount = 0
         lastHeartbeatWrite = 0
         lastWaveformWrite = 0
+        lastWaveformDiagnosticsWrite = 0
 
         let inputNode = engine.inputNode
         let hwFormat = inputNode.outputFormat(forBus: 0)
@@ -292,8 +304,10 @@ class UnifiedAudioEngine: ObservableObject {
         bufferEnergy = []
         bufferSeconds = 0
         audioThreadEnergy = []
+        audioThreadWaveformBins = []
         audioThreadSampleCount = 0
         lastWaveformWrite = 0
+        lastWaveformDiagnosticsWrite = 0
     }
 
     /// Process incoming audio buffer: convert to 16kHz and compute energy for waveform.
@@ -349,6 +363,17 @@ class UnifiedAudioEngine: ObservableObject {
             audioThreadEnergy.removeFirst(audioThreadEnergy.count - 30)
         }
 
+        // Build a short-lived waveform silhouette from local buckets inside the current buffer.
+        // WHY: A single RMS value per callback tends to produce a flat line that only moves
+        // vertically. Splitting the converted buffer into several peak+RMS buckets preserves
+        // intra-utterance shape, which makes the keyboard waveform feel alive even after app
+        // switches or when speech loudness is relatively stable.
+        let waveformBuckets = makeWaveformBuckets(from: samples)
+        audioThreadWaveformBins.append(contentsOf: waveformBuckets)
+        if audioThreadWaveformBins.count > waveformBarCount {
+            audioThreadWaveformBins.removeFirst(audioThreadWaveformBins.count - waveformBarCount)
+        }
+
         let now = Date().timeIntervalSince1970
 
         // Write heartbeat (~1Hz) — always, even when idle (keeps background alive)
@@ -361,13 +386,23 @@ class UnifiedAudioEngine: ObservableObject {
         if isRecordingFlag, now - lastWaveformWrite >= 0.2 {
             lastWaveformWrite = now
             audioThreadSampleCount += 0 // count is updated in main thread dispatch below
-            let snapshot = Array(audioThreadEnergy.suffix(30))
+            let snapshot = makeWaveformSnapshot()
             if let data = try? JSONEncoder().encode(snapshot) {
                 AppGroup.defaults.set(data, forKey: SharedKeys.waveformEnergy)
             }
             AppGroup.defaults.set(Double(audioThreadSampleCount) / 16000.0, forKey: SharedKeys.recordingElapsedSeconds)
             AppGroup.defaults.synchronize()
             DarwinNotificationCenter.post(DarwinNotificationName.waveformUpdate)
+
+            if now - lastWaveformDiagnosticsWrite >= 1.0 {
+                lastWaveformDiagnosticsWrite = now
+                PersistentLog.log(.diagnosticProbe(
+                    component: "UnifiedAudioEngine",
+                    instanceID: "shared",
+                    action: "waveformSnapshot",
+                    details: waveformStatsDetails(snapshot)
+                ))
+            }
         }
 
         // Track sample count on audio thread (needed for elapsed time in App Group writes)
@@ -385,10 +420,117 @@ class UnifiedAudioEngine: ObservableObject {
             self.bufferSeconds = Double(self.audioSamples.count) / 16000.0
 
             // Maintain a rolling window of energy values (last 30 = matches barCount in BrandWaveform)
-            self.bufferEnergy.append(energy)
-            if self.bufferEnergy.count > 30 {
-                self.bufferEnergy.removeFirst(self.bufferEnergy.count - 30)
+            self.bufferEnergy = self.makeWaveformSnapshot()
+        }
+    }
+
+    private nonisolated func makeWaveformBuckets(from samples: [Float]) -> [Float] {
+        guard !samples.isEmpty else { return [] }
+
+        let bucketCount = max(3, min(6, samples.count / 160))
+        let bucketSize = max(samples.count / bucketCount, 1)
+        var buckets: [Float] = []
+        buckets.reserveCapacity(bucketCount)
+
+        var start = 0
+        while start < samples.count {
+            let end = min(start + bucketSize, samples.count)
+            let slice = samples[start..<end]
+
+            var sumSquares: Float = 0
+            var peak: Float = 0
+            for sample in slice {
+                let magnitude = abs(sample)
+                sumSquares += magnitude * magnitude
+                peak = max(peak, magnitude)
+            }
+
+            let rms = sqrt(sumSquares / Float(max(slice.count, 1)))
+            let shaped = min(max((peak * 0.65) + (rms * 6.5), 0), 1)
+            buckets.append(shaped)
+            start = end
+        }
+
+        return buckets
+    }
+
+    private nonisolated func makeWaveformSnapshot() -> [Float] {
+        let source = audioThreadWaveformBins.isEmpty ? audioThreadEnergy : audioThreadWaveformBins
+        let resampled = resampleWaveform(source, targetCount: waveformBarCount)
+        return enhanceWaveformContrast(resampled)
+    }
+
+    private nonisolated func resampleWaveform(_ source: [Float], targetCount: Int) -> [Float] {
+        guard targetCount > 0 else { return [] }
+        guard !source.isEmpty else { return Array(repeating: 0, count: targetCount) }
+        guard source.count != targetCount else { return source }
+
+        var result: [Float] = []
+        result.reserveCapacity(targetCount)
+
+        for index in 0..<targetCount {
+            let position = Float(index) / Float(max(targetCount - 1, 1))
+            let arrayIndex = position * Float(source.count - 1)
+            let lower = Int(arrayIndex)
+            let upper = min(lower + 1, source.count - 1)
+            let fraction = arrayIndex - Float(lower)
+            let value = source[lower] * (1 - fraction) + source[upper] * fraction
+            result.append(min(max(value, 0), 1))
+        }
+
+        return result
+    }
+
+    private nonisolated func enhanceWaveformContrast(_ values: [Float]) -> [Float] {
+        guard !values.isEmpty else { return [] }
+
+        let minValue = values.min() ?? 0
+        let maxValue = values.max() ?? 0
+        let spread = maxValue - minValue
+
+        guard maxValue > 0.06 else { return values }
+
+        if spread < 0.12 {
+            let centerBias = stride(from: 0, to: values.count, by: 1).map { index -> Float in
+                let normalized = Float(index) / Float(max(values.count - 1, 1))
+                let distance = abs(normalized - 0.5)
+                return 1.0 - (distance * 0.18)
+            }
+
+            return values.enumerated().map { index, value in
+                let normalized: Float
+                if spread > 0.0001 {
+                    normalized = (value - minValue) / spread
+                } else {
+                    normalized = 0.5
+                }
+
+                let floor = min(maxValue * 0.28, 0.16)
+                let stretched = floor + normalized * (1 - floor)
+                return min(max(stretched * centerBias[index], 0), 1)
             }
         }
+
+        return values
+    }
+
+    private nonisolated func waveformStatsDetails(_ values: [Float]) -> String {
+        guard !values.isEmpty else { return "count=0" }
+        let minValue = values.min() ?? 0
+        let maxValue = values.max() ?? 0
+        let spread = maxValue - minValue
+        let first = values.first ?? 0
+        let middle = values[values.count / 2]
+        let last = values.last ?? 0
+        return String(
+            format: "count=%d min=%.3f max=%.3f spread=%.3f first=%.3f mid=%.3f last=%.3f",
+            values.count,
+            minValue,
+            maxValue,
+            spread,
+            first,
+            middle,
+            last
+        )
     }
 }

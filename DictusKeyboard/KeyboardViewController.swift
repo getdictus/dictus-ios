@@ -4,7 +4,7 @@ import SwiftUI
 import DictusCore
 
 class KeyboardViewController: UIInputViewController {
-    private let instanceID = String(UUID().uuidString.prefix(8))
+    let controllerID = String(UUID().uuidString.prefix(8))
 
     private var hostingController: UIHostingController<KeyboardRootView>?
 
@@ -19,7 +19,7 @@ class KeyboardViewController: UIInputViewController {
         PersistentLog.source = "KBD"
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
-            instanceID: instanceID,
+            instanceID: controllerID,
             action: "viewDidLoad",
             details: "controllerClass=\(String(describing: type(of: self)))"
         ))
@@ -43,11 +43,11 @@ class KeyboardViewController: UIInputViewController {
         // iOS manages the inputView's frame via autoresizing masks — disabling them
         // causes the view to collapse to zero width.
 
-        let rootView = KeyboardRootView(controller: self)
+        let rootView = KeyboardRootView(controller: self, controllerID: controllerID)
         let hosting = UIHostingController(rootView: rootView)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
-            instanceID: instanceID,
+            instanceID: controllerID,
             action: "hostingCreated",
             details: "hosting=\(ObjectIdentifier(hosting).debugDescription)"
         ))
@@ -93,25 +93,22 @@ class KeyboardViewController: UIInputViewController {
         super.viewWillAppear(animated)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
-            instanceID: instanceID,
+            instanceID: controllerID,
             action: "viewWillAppear",
             details: "animated=\(animated)"
         ))
         PersistentLog.log(.keyboardDidAppear)
+        KeyboardState.shared.registerControllerAppearance(controllerID: controllerID)
 
         // Force height recalculation when keyboard reappears (e.g., after app switch).
         // Without this, the inputView may retain a stale height from before the switch.
         heightConstraint?.constant = computeKeyboardHeight()
         inputView?.setNeedsLayout()
 
-        // Notify SwiftUI views that the keyboard is (re)appearing so they can
-        // refresh state that may have changed while the extension was suspended
-        // (e.g., keyboard mode changed in Settings).
-        NotificationCenter.default.post(name: .dictusKeyboardWillAppear, object: nil)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
-            instanceID: instanceID,
-            action: "postedKeyboardWillAppear",
+            instanceID: controllerID,
+            action: "registeredAppearance",
             details: ""
         ))
 
@@ -134,17 +131,16 @@ class KeyboardViewController: UIInputViewController {
         super.viewDidDisappear(animated)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
-            instanceID: instanceID,
+            instanceID: controllerID,
             action: "viewDidDisappear",
             details: "animated=\(animated)"
         ))
         PersistentLog.log(.keyboardDidDisappear)
-        // Notify KeyboardState so it can track visibility for waveformRefreshID gating.
-        NotificationCenter.default.post(name: .dictusKeyboardDidDisappear, object: nil)
+        KeyboardState.shared.registerControllerDisappearance(controllerID: controllerID)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
-            instanceID: instanceID,
-            action: "postedKeyboardDidDisappear",
+            instanceID: controllerID,
+            action: "registeredDisappearance",
             details: ""
         ))
         // Darwin observers cleaned up by KeyboardState deinit
@@ -153,7 +149,7 @@ class KeyboardViewController: UIInputViewController {
     deinit {
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
-            instanceID: instanceID,
+            instanceID: controllerID,
             action: "deinit",
             details: ""
         ))
@@ -186,12 +182,4 @@ extension Notification.Name {
     /// KeyboardView listens for this to recheck autocapitalisation.
     static let dictusTextDidChange = Notification.Name("dictusTextDidChange")
 
-    /// Posted by KeyboardViewController in viewWillAppear (every keyboard show).
-    /// KeyboardRootView listens for this to re-read KeyboardMode from App Group,
-    /// so mode changes made in Settings take effect without a rebuild.
-    static let dictusKeyboardWillAppear = Notification.Name("dictusKeyboardWillAppear")
-
-    /// Posted by KeyboardViewController in viewDidDisappear.
-    /// KeyboardState listens for this to track visibility and gate waveformRefreshID.
-    static let dictusKeyboardDidDisappear = Notification.Name("dictusKeyboardDidDisappear")
 }

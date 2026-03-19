@@ -77,8 +77,6 @@ struct RecordingOverlay: View {
                 action: "onAppear",
                 details: "status=\(dictationStatus.rawValue) energyCount=\(waveformEnergy.count)"
             ))
-            waveformDriver.setVisible(true)
-            waveformDriver.update(status: dictationStatus, energyLevels: waveformEnergy)
             PersistentLog.log(.overlayBodyEvaluated(
                 status: dictationStatus.rawValue,
                 showsOverlay: true,
@@ -92,7 +90,6 @@ struct RecordingOverlay: View {
                 action: "onDisappear",
                 details: "status=\(dictationStatus.rawValue)"
             ))
-            waveformDriver.setVisible(false)
         }
         .onChange(of: dictationStatus) { _, newStatus in
             PersistentLog.log(.diagnosticProbe(
@@ -101,7 +98,6 @@ struct RecordingOverlay: View {
                 action: "statusChanged",
                 details: "newStatus=\(newStatus.rawValue) energyCount=\(waveformEnergy.count)"
             ))
-            waveformDriver.update(status: newStatus, energyLevels: waveformEnergy)
         }
         .onChange(of: waveformEnergy) { _, newEnergy in
             PersistentLog.log(.diagnosticProbe(
@@ -110,7 +106,6 @@ struct RecordingOverlay: View {
                 action: "waveformEnergyChanged",
                 details: "status=\(dictationStatus.rawValue) energyCount=\(newEnergy.count)"
             ))
-            waveformDriver.update(status: dictationStatus, energyLevels: newEnergy)
         }
     }
 
