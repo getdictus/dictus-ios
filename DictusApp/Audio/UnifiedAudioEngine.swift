@@ -131,7 +131,7 @@ class UnifiedAudioEngine: ObservableObject {
     func configureAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         if !sessionConfigured {
-            try session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth])
+            try session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
         }
         try session.setActive(true)
         try? session.setAllowHapticsAndSystemSoundsDuringRecording(true)
