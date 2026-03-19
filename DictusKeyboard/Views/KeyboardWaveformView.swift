@@ -265,28 +265,18 @@ struct KeyboardWaveformView: View {
     private let barSpacing: CGFloat = 2
 
     var body: some View {
-        Canvas { context, size in
-            let _ = driver.renderTick
-
-            let totalSpacing = barSpacing * CGFloat(barCount - 1)
-            let barWidth = max((size.width - totalSpacing) / CGFloat(barCount), 2)
-
-            for index in 0..<barCount {
-                let energy: Float
-                if driver.isProcessing {
-                    energy = driver.processingEnergy(at: index, phase: driver.processingPhase)
-                } else {
-                    energy = index < driver.displayLevels.count ? driver.displayLevels[index] : 0
-                }
+        HStack(spacing: barSpacing) {
+            ForEach(0..<barCount, id: \.self) { index in
+                let energy: Float = driver.isProcessing
+                    ? driver.processingEnergy(at: index, phase: driver.processingPhase)
+                    : (index < driver.displayLevels.count ? driver.displayLevels[index] : 0)
 
                 let minHeight: CGFloat = driver.isProcessing ? 4 : 2
-                let height = max(minHeight + CGFloat(energy) * (size.height - minHeight), minHeight)
-                let x = CGFloat(index) * (barWidth + barSpacing)
-                let y = (size.height - height) / 2
-                let rect = CGRect(x: x, y: y, width: barWidth, height: max(height, 0))
-                let path = Path(roundedRect: rect, cornerRadius: barWidth / 2)
+                let height = max(minHeight + CGFloat(energy) * (maxHeight - minHeight), minHeight)
 
-                context.fill(path, with: .color(resolvedBarColor(at: index)))
+                Capsule()
+                    .fill(resolvedBarColor(at: index))
+                    .frame(height: height)
             }
         }
         .frame(height: maxHeight)
