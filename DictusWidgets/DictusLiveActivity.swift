@@ -104,13 +104,9 @@ struct DictusLiveActivity: Widget {
     private func minimalView(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
         switch context.state.phase {
         case .standby:
-            // Single center bar as minimal logo
-            RoundedRectangle(cornerRadius: 2)
-                .fill(LinearGradient(
-                    colors: [Color(hex: 0x6BA3FF), Color(hex: 0x2563EB)],
-                    startPoint: .top, endPoint: .bottom
-                ))
-                .frame(width: 4, height: 12)
+            // Full 3-bar logo even in minimal — single bar was invisible
+            MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
+                .frame(width: 14, height: 12)
         case .recording:
             let levels = normalizedLevels(context.state.waveformLevels, count: 3)
             MiniLogoBars(levels: levels, animated: true)
@@ -390,8 +386,10 @@ struct MiniLogoBars: View {
 
     var body: some View {
         GeometryReader { geo in
-            let barWidth = max(2, geo.size.width / 5)
+            let barWidth = max(2.5, geo.size.width / 5)
             let spacing = (geo.size.width - barWidth * 3) / 2
+            // Boost side bar opacity in small frames so bars stay visible
+            let isSmall = geo.size.width < 16
 
             HStack(spacing: spacing) {
                 ForEach(0..<min(levels.count, 3), id: \.self) { index in
@@ -405,8 +403,10 @@ struct MiniLogoBars: View {
                             ))
                             .frame(width: barWidth, height: max(2, height))
                     } else {
-                        // Side bars: white with brand opacity
-                        let opacity: Double = index == 0 ? 0.45 : 0.65
+                        // Side bars: white with brand opacity (boosted when small)
+                        let opacity: Double = index == 0
+                            ? (isSmall ? 0.60 : 0.45)
+                            : (isSmall ? 0.80 : 0.65)
                         RoundedRectangle(cornerRadius: barWidth / 2)
                             .fill(Color.white.opacity(opacity))
                             .frame(width: barWidth, height: max(2, height))
