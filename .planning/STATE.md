@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
-status: completed
-stopped_at: Completed 15.2-04-PLAN.md (waveform freeze fix)
-last_updated: "2026-03-17T15:32:34.114Z"
-last_activity: "2026-03-17 -- Plan 15.2-03 executed (GitHub issue triage: 9 closed, 6 deferred confirmed open)"
+status: in-progress
+stopped_at: "16-01-PLAN.md partially executed (signing migration deferred -- awaiting Apple Developer Team ID)"
+last_updated: "2026-03-19T12:10:33Z"
+last_activity: "2026-03-19 -- Plan 16-01 partial: version bump 1.2, Privacy Manifests, PRIVACY.md, review checklist done. Signing migration blocked on Team ID."
 progress:
   total_phases: 8
   completed_phases: 7
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 15.2 plan 04 executed -- waveform freeze fix for off-screen keyboard reappear.
+**Current focus:** Phase 16 plan 01 partially executed -- version bump, Privacy Manifests, privacy policy, review checklist done. Signing migration blocked on Apple Developer enrollment.
 
 ## Current Position
 
-Phase: 15.2 (Cleaning and Fix GitHub Issues)
-Plan: 4 of 4 in current phase (COMPLETE)
-Status: Phase 15.2 complete -- all 4 plans executed
-Last activity: 2026-03-17 -- Plan 15.2-04 executed (waveform freeze fix: .id() recreation + .onAppear seeding)
+Phase: 16 (TestFlight Deployment)
+Plan: 1 of 3 in current phase (PARTIAL -- signing migration deferred)
+Status: Plan 16-01 partially executed. Version bump, Privacy Manifests, PRIVACY.md, review checklist all done. DEVELOPMENT_TEAM still QN58279822 -- awaiting new Apple Developer Team ID from Pierre.
+Last activity: 2026-03-19 -- Plan 16-01 partial execution (commit 1f2b1d4)
 
-Progress: [█████████░] 94%
+Progress: [█████████░] 95%
 
 ## Performance Metrics
 
@@ -113,8 +113,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-17T15:32:34.111Z
-Stopped at: Completed 15.2-04-PLAN.md (waveform freeze fix)
+Last session: 2026-03-19T12:10:33Z
+Stopped at: 16-01-PLAN.md partial -- awaiting Apple Developer Team ID for signing migration
 Resume file: None
 
 ---

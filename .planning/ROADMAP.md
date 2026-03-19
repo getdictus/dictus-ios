@@ -186,7 +186,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Signing migration, Privacy Manifests, version bump, privacy policy, review checklist
+- [ ] 16-01-PLAN.md — Signing migration, Privacy Manifests, version bump, privacy policy, review checklist (PARTIAL: version bump + Privacy Manifests + PRIVACY.md + review checklist done; signing migration blocked on Team ID)
 - [ ] 16-02-PLAN.md — README rewrite, CONTRIBUTING.md, GitHub issue templates
 - [ ] 16-03-PLAN.md — Archive, upload, TestFlight distribution, README TestFlight link
 
