@@ -105,7 +105,6 @@ class KeyboardState: ObservableObject {
             for: DarwinNotificationName.waveformUpdate
         ) { [weak self] in
             DispatchQueue.main.async {
-                self?.logProbe("receivedDarwinWaveformUpdate")
                 self?.readWaveformData()
             }
         }
@@ -279,7 +278,6 @@ class KeyboardState: ObservableObject {
     /// Called when DictusApp posts waveformUpdate notification during recording.
     /// Updates lastWaveformUpdate so the watchdog knows data is still flowing.
     private func readWaveformData() {
-        logProbe("readWaveformData", details: sessionDetails())
         // Update watchdog timestamp — data is still flowing from the app
         lastWaveformUpdate = Date()
 
@@ -299,9 +297,6 @@ class KeyboardState: ObservableObject {
                     ))
                 }
                 waveformEnergy = energy
-                if !energy.isEmpty {
-                    logProbe("waveformSnapshot", details: waveformStatsDetails(energy))
-                }
             } catch {
                 // JSON decode failure — keep existing waveform data
                 if #available(iOS 14.0, *) {

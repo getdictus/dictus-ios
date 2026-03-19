@@ -99,14 +99,6 @@ struct RecordingOverlay: View {
                 details: "newStatus=\(newStatus.rawValue) energyCount=\(waveformEnergy.count)"
             ))
         }
-        .onChange(of: waveformEnergy) { _, newEnergy in
-            PersistentLog.log(.diagnosticProbe(
-                component: "RecordingOverlay",
-                instanceID: instanceID,
-                action: "waveformEnergyChanged",
-                details: "status=\(dictationStatus.rawValue) energyCount=\(newEnergy.count)"
-            ))
-        }
     }
 
     // MARK: - Top bar (varies by state)

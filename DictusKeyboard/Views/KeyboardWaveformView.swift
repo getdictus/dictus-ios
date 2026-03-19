@@ -35,10 +35,6 @@ final class KeyboardWaveformDriver: ObservableObject {
     func sync(presenterID: String, status: DictationStatus, energyLevels: [Float], isVisible: Bool) {
         let ownsPresentation = activePresenterID == presenterID
         if !isVisible && !ownsPresentation && activePresenterID != nil {
-            logProbe(
-                "syncIgnored",
-                details: "presenterID=\(presenterID) owner=\(activePresenterID ?? "none") status=\(status.rawValue) isVisible=\(isVisible)"
-            )
             return
         }
 
@@ -47,11 +43,6 @@ final class KeyboardWaveformDriver: ObservableObject {
         } else if ownsPresentation {
             activePresenterID = nil
         }
-
-        logProbe(
-            "sync",
-            details: "presenterID=\(presenterID) owner=\(activePresenterID ?? "none") status=\(status.rawValue) energyCount=\(energyLevels.count) isVisible=\(isVisible)"
-        )
 
         self.status = status
         self.energyLevels = energyLevels
@@ -85,10 +76,7 @@ final class KeyboardWaveformDriver: ObservableObject {
     }
 
     private func startDisplayLinkIfNeeded() {
-        guard displayLink == nil else {
-            logProbe("startSkipped", details: "reason=alreadyRunning renderTick=\(renderTick)")
-            return
-        }
+        guard displayLink == nil else { return }
 
         let link = CADisplayLink(target: self, selector: #selector(handleDisplayLink))
         link.add(to: .main, forMode: .common)
