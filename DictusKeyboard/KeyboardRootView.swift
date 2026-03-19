@@ -72,11 +72,26 @@ struct KeyboardRootView: View {
     /// Whether the recording overlay should be visible.
     /// Extracted as a computed property for clear animation binding.
     private var showsOverlay: Bool {
-        state.activeControllerID == controllerID
-            && state.isKeyboardVisible
-            && (state.dictationStatus == .requested
-                || state.dictationStatus == .recording
-                || state.dictationStatus == .transcribing)
+        let isActiveStatus = state.dictationStatus == .requested
+            || state.dictationStatus == .recording
+            || state.dictationStatus == .transcribing
+        guard isActiveStatus else { return false }
+
+        // Normal path: this controller is the registered active one
+        if state.activeControllerID == controllerID && state.isKeyboardVisible {
+            return true
+        }
+
+        // Fallback: active recording but no controller registered yet.
+        // During cold start app transitions, iOS can rapidly create/destroy
+        // keyboard controllers. viewWillAppear may not have fired on the
+        // current controller, leaving activeControllerID == nil.
+        // Show overlay anyway — only one controller is visible on screen.
+        if state.activeControllerID == nil {
+            return true
+        }
+
+        return false
     }
 
     var body: some View {
