@@ -354,20 +354,28 @@ class DictationCoordinator: ObservableObject {
                 try await ensureEngineReady()
                 let text = try await transcriptionService.transcribe(audioSamples: samples)
 
+                // Append trailing separator so chained dictations don't stick together
+                let finalText: String
+                if let last = text.last, ".!?…".contains(last) {
+                    finalText = text + " "
+                } else {
+                    finalText = text + ". "
+                }
+
                 // Write result to App Group
-                lastResult = text
+                lastResult = finalText
                 status = .ready
-                defaults.set(text, forKey: SharedKeys.lastTranscription)
+                defaults.set(finalText, forKey: SharedKeys.lastTranscription)
                 defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
                 defaults.set(DictationStatus.ready.rawValue, forKey: SharedKeys.dictationStatus)
                 defaults.synchronize()
 
                 DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
                 DarwinNotificationCenter.post(DarwinNotificationName.transcriptionReady)
-                LiveActivityManager.shared.endWithResult(preview: text)
+                LiveActivityManager.shared.endWithResult(preview: finalText)
 
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Transcription complete: \(text, privacy: .public)")
+                    DictusLogger.app.info("Transcription complete: \(finalText, privacy: .public)")
                 }
 
                 cleanupRecordingKeys()
