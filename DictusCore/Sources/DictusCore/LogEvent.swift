@@ -98,6 +98,7 @@ public enum LogEvent: Sendable {
     case waveformRefreshIDChanged(oldID: Int, newID: Int, status: String)
     case waveformEnergyTransition(fromCount: Int, toCount: Int, status: String)
     case waveformTimelineNotFiring(renderTick: Int, energyCount: Int)
+    case diagnosticProbe(component: String, instanceID: String, action: String, details: String)
 
     // MARK: Overlay Diagnostics
     case overlayBodyEvaluated(status: String, showsOverlay: Bool, energyCount: Int)
@@ -139,7 +140,8 @@ public enum LogEvent: Sendable {
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
              .waveformRefreshIDChanged, .waveformEnergyTransition, .waveformTimelineNotFiring,
-             .overlayBodyEvaluated, .overlayTimerStarted, .overlayTimerStopped, .overlayRecreated:
+             .overlayBodyEvaluated, .overlayTimerStarted, .overlayTimerStopped, .overlayRecreated,
+             .diagnosticProbe:
             return .keyboard
         case .statusChanged, .watchdogReset:
             return .dictation
@@ -196,7 +198,8 @@ public enum LogEvent: Sendable {
              .rapidTapRejected,
              .engineWarmUpAttempt, .engineWarmUpSuccess,
              .engineStateSnapshot, .engineCollectResult, .engineDarwinStartReceived,
-             .waveformHeartbeat, .overlayTimerStarted, .overlayTimerStopped:
+             .waveformHeartbeat, .overlayTimerStarted, .overlayTimerStopped,
+             .diagnosticProbe:
             return .debug
         }
     }
@@ -259,6 +262,7 @@ public enum LogEvent: Sendable {
         case .waveformRefreshIDChanged: return "waveformRefreshIDChanged"
         case .waveformEnergyTransition: return "waveformEnergyTransition"
         case .waveformTimelineNotFiring: return "waveformTimelineNotFiring"
+        case .diagnosticProbe: return "diagnosticProbe"
         case .overlayBodyEvaluated: return "overlayBodyEvaluated"
         case .overlayTimerStarted: return "overlayTimerStarted"
         case .overlayTimerStopped: return "overlayTimerStopped"
@@ -388,6 +392,8 @@ public enum LogEvent: Sendable {
             return "fromCount=\(fromCount) toCount=\(toCount) status=\(status)"
         case .waveformTimelineNotFiring(let renderTick, let energyCount):
             return "renderTick=\(renderTick) energyCount=\(energyCount)"
+        case .diagnosticProbe(let component, let instanceID, let action, let details):
+            return "component=\(component) instanceID=\(instanceID) action=\(action) details=\(details)"
 
         // Overlay Diagnostics
         case .overlayBodyEvaluated(let status, let showsOverlay, let energyCount):

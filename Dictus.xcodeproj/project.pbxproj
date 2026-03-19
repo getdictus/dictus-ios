@@ -40,6 +40,7 @@
 		AA000051 /* ModelManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100051 /* ModelManagerView.swift */; };
 		AA000060 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100060 /* ToolbarView.swift */; };
 		AA000061 /* RecordingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100061 /* RecordingOverlay.swift */; };
+		AA000062 /* KeyboardWaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100062 /* KeyboardWaveformView.swift */; };
 		AA000070 /* AccentPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100070 /* AccentPopup.swift */; };
 		AA000071 /* TestDictationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100071 /* TestDictationView.swift */; };
 		AA000090 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100090 /* MainTabView.swift */; };
@@ -116,6 +117,7 @@
 		AA100051 /* ModelManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManagerView.swift; sourceTree = "<group>"; };
 		AA100060 /* ToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarView.swift; sourceTree = "<group>"; };
 		AA100061 /* RecordingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingOverlay.swift; sourceTree = "<group>"; };
+		AA100062 /* KeyboardWaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardWaveformView.swift; sourceTree = "<group>"; };
 		AA200001 /* DictusApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DictusApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA200002 /* DictusKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB200001 /* DictusWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -401,6 +403,7 @@
 				AA100035 /* FullAccessBanner.swift */,
 				AA100060 /* ToolbarView.swift */,
 				AA100061 /* RecordingOverlay.swift */,
+				AA100062 /* KeyboardWaveformView.swift */,
 				AA100070 /* AccentPopup.swift */,
 				AA1000B2 /* EmojiPickerView.swift */,
 				AA1000B3 /* EmojiCategoryBar.swift */,
@@ -641,6 +644,7 @@
 				AA000038 /* KeyboardLayout.swift in Sources */,
 				AA000060 /* ToolbarView.swift in Sources */,
 				AA000061 /* RecordingOverlay.swift in Sources */,
+				AA000062 /* KeyboardWaveformView.swift in Sources */,
 				AA000070 /* AccentPopup.swift in Sources */,
 				AA0000B0 /* EmojiData.swift in Sources */,
 				AA0000B1 /* RecentEmojis.swift in Sources */,

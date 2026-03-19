@@ -13,21 +13,19 @@ import DictusCore
 /// an immersive recording UI. This prevents accidental key presses during dictation
 /// and provides clear visual feedback that the mic is active.
 ///
-/// WHY single BrandWaveform (not one per switch branch):
-/// The old design had 3 separate BrandWaveform instances in requestedContent,
-/// recordingContent, and transcribingContent. When status changed (requested→recording
-/// →transcribing), SwiftUI created the new branch's BrandWaveform BEFORE destroying
-/// the old one. Each BrandWaveform runs a TimelineView with its own CADisplayLink.
-/// Ghost views accumulated across status transitions, producing paired heartbeats
-/// and eventually 4+ concurrent animation loops that consumed the frame budget.
-/// A single BrandWaveform at a fixed structural position survives all status changes
-/// without recreation — SwiftUI just updates its properties in place.
+/// WHY dedicated keyboard waveform driver:
+/// The shared BrandWaveform uses TimelineView, which proved fragile inside the keyboard
+/// extension after suspension/resume. The keyboard now owns a single explicit animation
+/// driver that starts and stops with the overlay lifecycle, while this view stays a thin
+/// container around rendering and controls.
 struct RecordingOverlay: View {
     let dictationStatus: DictationStatus
     let waveformEnergy: [Float]
     let elapsedSeconds: Double
+    @ObservedObject var waveformDriver: KeyboardWaveformDriver
     let onCancel: () -> Void
     let onStop: () -> Void
+    @State private var instanceID = String(UUID().uuidString.prefix(8))
 
     /// Adaptive foreground color -- dark on light keyboard, light on dark keyboard.
     @Environment(\.colorScheme) private var colorScheme
@@ -53,28 +51,13 @@ struct RecordingOverlay: View {
             // Top bar: varies by state but has consistent height
             topBar
 
-            // SINGLE BrandWaveform — never recreated on status change.
-            // WHY outside the switch: SwiftUI preserves @State (displayLevels,
-            // renderTick, CADisplayLink) when a view stays at the same structural
-            // position. Only .id(waveformRefreshID) can force recreation, which
-            // is gated to keyboard reappear events only.
             GeometryReader { geo in
                 VStack(spacing: 8) {
                     Spacer(minLength: 0)
 
-                    // WHY no .id(waveformRefreshID):
-                    // The old .id() modifier forced view recreation on keyboard reappear,
-                    // intended to get a fresh CADisplayLink. But during cold start, rapid
-                    // appear/disappear cycles caused a storm of .id() changes, creating
-                    // ghost BrandWaveform instances with orphaned CADisplayLinks (visible
-                    // as multiple simultaneous heartbeats in logs). The overlay's
-                    // conditional rendering already recreates BrandWaveform on each
-                    // show/hide cycle, and onAppear resets the killed flag, making .id()
-                    // unnecessary.
-                    BrandWaveform(
-                        energyLevels: dictationStatus == .requested ? [] : waveformEnergy,
+                    KeyboardWaveformView(
                         maxHeight: geo.size.height * 0.7,
-                        isProcessing: dictationStatus == .transcribing
+                        driver: waveformDriver
                     )
                     .padding(.horizontal, 2)
 
@@ -88,11 +71,46 @@ struct RecordingOverlay: View {
         }
         .background(Color.clear)
         .onAppear {
+            PersistentLog.log(.diagnosticProbe(
+                component: "RecordingOverlay",
+                instanceID: instanceID,
+                action: "onAppear",
+                details: "status=\(dictationStatus.rawValue) energyCount=\(waveformEnergy.count)"
+            ))
+            waveformDriver.setVisible(true)
+            waveformDriver.update(status: dictationStatus, energyLevels: waveformEnergy)
             PersistentLog.log(.overlayBodyEvaluated(
                 status: dictationStatus.rawValue,
                 showsOverlay: true,
                 energyCount: waveformEnergy.count
             ))
+        }
+        .onDisappear {
+            PersistentLog.log(.diagnosticProbe(
+                component: "RecordingOverlay",
+                instanceID: instanceID,
+                action: "onDisappear",
+                details: "status=\(dictationStatus.rawValue)"
+            ))
+            waveformDriver.setVisible(false)
+        }
+        .onChange(of: dictationStatus) { _, newStatus in
+            PersistentLog.log(.diagnosticProbe(
+                component: "RecordingOverlay",
+                instanceID: instanceID,
+                action: "statusChanged",
+                details: "newStatus=\(newStatus.rawValue) energyCount=\(waveformEnergy.count)"
+            ))
+            waveformDriver.update(status: newStatus, energyLevels: waveformEnergy)
+        }
+        .onChange(of: waveformEnergy) { _, newEnergy in
+            PersistentLog.log(.diagnosticProbe(
+                component: "RecordingOverlay",
+                instanceID: instanceID,
+                action: "waveformEnergyChanged",
+                details: "status=\(dictationStatus.rawValue) energyCount=\(newEnergy.count)"
+            ))
+            waveformDriver.update(status: dictationStatus, energyLevels: newEnergy)
         }
     }
 

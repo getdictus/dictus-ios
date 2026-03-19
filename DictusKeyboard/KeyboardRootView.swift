@@ -23,7 +23,9 @@ extension DefaultKeyboardLayer {
 /// ghost touches. An overlay or ZStack would keep both views alive.
 struct KeyboardRootView: View {
     let controller: UIInputViewController
-    @StateObject private var state = KeyboardState()
+    @ObservedObject private var state = KeyboardState.shared
+    @ObservedObject private var waveformDriver = KeyboardWaveformDriver.shared
+    @State private var instanceID = String(UUID().uuidString.prefix(8))
     /// Observable state for the suggestion bar: holds current suggestions, mode, and autocorrect undo.
     /// WHY @StateObject: SuggestionState is an ObservableObject that must survive view re-renders.
     /// @StateObject ensures a single instance is created and owned by this view.
@@ -69,9 +71,10 @@ struct KeyboardRootView: View {
     /// Whether the recording overlay should be visible.
     /// Extracted as a computed property for clear animation binding.
     private var showsOverlay: Bool {
-        state.dictationStatus == .requested
-            || state.dictationStatus == .recording
-            || state.dictationStatus == .transcribing
+        state.isKeyboardVisible
+            && (state.dictationStatus == .requested
+                || state.dictationStatus == .recording
+                || state.dictationStatus == .transcribing)
     }
 
     var body: some View {
@@ -82,14 +85,11 @@ struct KeyboardRootView: View {
                     dictationStatus: state.dictationStatus,
                     waveformEnergy: state.waveformEnergy,
                     elapsedSeconds: state.recordingElapsed,
+                    waveformDriver: waveformDriver,
                     onCancel: { state.requestCancel() },
                     onStop: { state.requestStop() }
                 )
                 .frame(height: totalContentHeight)
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .bottom)),
-                    removal: .opacity
-                ))
             } else {
                 // Single keyboard layout — no more mode switching.
                 // The only variable is which layer opens first (letters vs numbers),
@@ -127,12 +127,16 @@ struct KeyboardRootView: View {
         // gray bands at the top and bottom that didn't match the native chrome.
         // Transparent background lets the native keyboard styling show through.
         .background(Color.clear)
-        // Smooth easeOut animation for overlay show/hide transitions.
-        // WHY on the parent VStack: SwiftUI requires .animation() on the container
-        // that holds the if/else conditional, not inside the branches. This ensures
-        // both appearance and dismissal (cancel or transcription complete) animate.
-        .animation(.easeOut(duration: 0.25), value: showsOverlay)
-        .onChange(of: state.dictationStatus) { newStatus in
+        .onChange(of: showsOverlay) { _, isShowing in
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardRootView",
+                instanceID: instanceID,
+                action: "showsOverlayChanged",
+                details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible)"
+            ))
+            waveformDriver.setVisible(isShowing)
+        }
+        .onChange(of: state.dictationStatus) { _, newStatus in
             let showsOverlay = newStatus == .requested || newStatus == .recording || newStatus == .transcribing
             if showsOverlay {
                 PersistentLog.log(.overlayShown(status: newStatus.rawValue))
@@ -141,6 +145,12 @@ struct KeyboardRootView: View {
             }
         }
         .onAppear {
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardRootView",
+                instanceID: instanceID,
+                action: "onAppear",
+                details: "status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible)"
+            ))
             // Provide controller reference to KeyboardState for auto-insert.
             // WHY here and not in init: KeyboardState is created by @StateObject
             // before the view body runs. The controller is only available as a
@@ -159,11 +169,25 @@ struct KeyboardRootView: View {
             let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
             suggestionState.setLanguage(lang)
         }
+        .onDisappear {
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardRootView",
+                instanceID: instanceID,
+                action: "onDisappear",
+                details: "status=\(state.dictationStatus.rawValue)"
+            ))
+        }
         // Re-read default layer every time the keyboard reappears (not just the
         // first .onAppear). viewWillAppear fires on every keyboard show, whereas
         // .onAppear only fires once per extension process lifetime. This ensures
         // preference changes made in Settings are picked up immediately.
         .onReceive(NotificationCenter.default.publisher(for: .dictusKeyboardWillAppear)) { _ in
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardRootView",
+                instanceID: instanceID,
+                action: "receivedKeyboardWillAppear",
+                details: ""
+            ))
             defaultLayer = DefaultKeyboardLayer.active.asLayerType
             // NOTE: refreshFromDefaults() is now called inside KeyboardState.keyboardDidAppear()
             // which also gates waveformRefreshID increment to true visibility transitions.

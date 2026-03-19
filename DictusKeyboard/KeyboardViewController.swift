@@ -4,6 +4,7 @@ import SwiftUI
 import DictusCore
 
 class KeyboardViewController: UIInputViewController {
+    private let instanceID = String(UUID().uuidString.prefix(8))
 
     private var hostingController: UIHostingController<KeyboardRootView>?
 
@@ -16,6 +17,12 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         PersistentLog.source = "KBD"
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: instanceID,
+            action: "viewDidLoad",
+            details: "controllerClass=\(String(describing: type(of: self)))"
+        ))
 
         #if DEBUG
         let result = AppGroupDiagnostic.run()
@@ -38,6 +45,12 @@ class KeyboardViewController: UIInputViewController {
 
         let rootView = KeyboardRootView(controller: self)
         let hosting = UIHostingController(rootView: rootView)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: instanceID,
+            action: "hostingCreated",
+            details: "hosting=\(ObjectIdentifier(hosting).debugDescription)"
+        ))
 
         // Critical: retain the hosting controller or it gets deallocated
         self.hostingController = hosting
@@ -78,6 +91,12 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: instanceID,
+            action: "viewWillAppear",
+            details: "animated=\(animated)"
+        ))
         PersistentLog.log(.keyboardDidAppear)
 
         // Force height recalculation when keyboard reappears (e.g., after app switch).
@@ -89,6 +108,12 @@ class KeyboardViewController: UIInputViewController {
         // refresh state that may have changed while the extension was suspended
         // (e.g., keyboard mode changed in Settings).
         NotificationCenter.default.post(name: .dictusKeyboardWillAppear, object: nil)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: instanceID,
+            action: "postedKeyboardWillAppear",
+            details: ""
+        ))
 
         // Cold start return detection: log for diagnostics.
         // DON'T clear coldStartActive here — KeyboardState.refreshFromDefaults() reads it
@@ -107,10 +132,31 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: instanceID,
+            action: "viewDidDisappear",
+            details: "animated=\(animated)"
+        ))
         PersistentLog.log(.keyboardDidDisappear)
         // Notify KeyboardState so it can track visibility for waveformRefreshID gating.
         NotificationCenter.default.post(name: .dictusKeyboardDidDisappear, object: nil)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: instanceID,
+            action: "postedKeyboardDidDisappear",
+            details: ""
+        ))
         // Darwin observers cleaned up by KeyboardState deinit
+    }
+
+    deinit {
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: instanceID,
+            action: "deinit",
+            details: ""
+        ))
     }
 
     /// Calculate the total keyboard height including toolbar and banner.

@@ -34,6 +34,7 @@ struct SettingsView: View {
 
     /// Tracks log export async operation for spinner display.
     @State private var isExporting = false
+    @State private var exportURL: URL?
 
     // MARK: - Body
 
@@ -121,6 +122,18 @@ struct SettingsView: View {
         .scrollContentBackground(.hidden)
         .background(Color.dictusBackground.ignoresSafeArea())
         .navigationTitle("Réglages")
+        .sheet(isPresented: Binding(
+            get: { exportURL != nil },
+            set: { isPresented in
+                if !isPresented {
+                    exportURL = nil
+                }
+            }
+        )) {
+            if let exportURL {
+                ShareSheet(items: [exportURL])
+            }
+        }
     }
 
     // MARK: - Private
@@ -136,6 +149,7 @@ struct SettingsView: View {
     /// The spinner gives visual feedback that something is happening. The share
     /// sheet presentation must happen on the main thread (UIKit requirement).
     private func exportLogs() {
+        guard !isExporting else { return }
         isExporting = true
         Task {
             let content = PersistentLog.exportContent()
@@ -144,16 +158,7 @@ struct SettingsView: View {
 
             await MainActor.run {
                 isExporting = false
-
-                // Present UIActivityViewController via the connected window scene.
-                // WHY this approach: SwiftUI doesn't have a native share sheet API.
-                // We use UIApplication.shared.connectedScenes to find the active window
-                // and present from its root view controller.
-                guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                      let root = scene.windows.first?.rootViewController else { return }
-
-                let activityVC = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
-                root.present(activityVC, animated: true)
+                exportURL = tempURL
             }
         }
     }
@@ -178,4 +183,14 @@ struct SettingsView: View {
         DiagnosticDetailView(result: AppGroupDiagnostic.run())
             .navigationTitle("Diagnostic")
     }
+}
+
+private struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

@@ -13,6 +13,10 @@ import DictusCore
 /// - Auto-insert transcription into active text field via textDocumentProxy
 /// - Haptic feedback on recording lifecycle events
 class KeyboardState: ObservableObject {
+    static let shared = KeyboardState()
+    private let instanceID = String(UUID().uuidString.prefix(8))
+    private(set) var activeSessionID: String?
+
     @Published var dictationStatus: DictationStatus = .idle
     @Published var lastTranscription: String?
     @Published var statusMessage: String?
@@ -20,7 +24,7 @@ class KeyboardState: ObservableObject {
     @Published var recordingElapsed: Double = 0
 
     /// Tracks whether the keyboard extension is currently visible on screen.
-    private(set) var isKeyboardVisible: Bool = false
+    @Published private(set) var isKeyboardVisible: Bool = false
 
     /// Reference to the keyboard controller for text insertion.
     /// WHY weak: KeyboardState is owned by KeyboardRootView (via @StateObject),
@@ -63,7 +67,13 @@ class KeyboardState: ObservableObject {
     private var coldStartGraceEnd: Date?
 
 
-    init() {
+    private init() {
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardState",
+            instanceID: instanceID,
+            action: "init",
+            details: ""
+        ))
         // Read initial state from App Group
         refreshFromDefaults()
 
@@ -72,6 +82,7 @@ class KeyboardState: ObservableObject {
             for: DarwinNotificationName.statusChanged
         ) { [weak self] in
             DispatchQueue.main.async {
+                self?.logProbe("receivedDarwinStatusChanged")
                 self?.refreshFromDefaults()
             }
         }
@@ -80,6 +91,7 @@ class KeyboardState: ObservableObject {
             for: DarwinNotificationName.transcriptionReady
         ) { [weak self] in
             DispatchQueue.main.async {
+                self?.logProbe("receivedDarwinTranscriptionReady")
                 self?.handleTranscriptionReady()
             }
         }
@@ -92,6 +104,7 @@ class KeyboardState: ObservableObject {
             for: DarwinNotificationName.waveformUpdate
         ) { [weak self] in
             DispatchQueue.main.async {
+                self?.logProbe("receivedDarwinWaveformUpdate")
                 self?.readWaveformData()
             }
         }
@@ -114,6 +127,7 @@ class KeyboardState: ObservableObject {
     }
 
     deinit {
+        logProbe("deinit")
         stopWatchdog()
         DarwinNotificationCenter.removeObserver(for: DarwinNotificationName.statusChanged)
         DarwinNotificationCenter.removeObserver(for: DarwinNotificationName.transcriptionReady)
@@ -143,6 +157,7 @@ class KeyboardState: ObservableObject {
         waveformEnergy = []
         recordingElapsed = 0
         statusMessage = nil
+        activeSessionID = nil
         // Write to App Group so app side sees the reset
         defaults.set(DictationStatus.idle.rawValue, forKey: SharedKeys.dictationStatus)
         defaults.synchronize()
@@ -197,6 +212,7 @@ class KeyboardState: ObservableObject {
     /// Uses the Darwin notification + Bool flag pattern: write the flag first,
     /// then post the notification so the app reads the flag when it handles the notification.
     func requestStop() {
+        logProbe("requestStop", details: sessionDetails())
         defaults.set(true, forKey: SharedKeys.stopRequested)
         defaults.synchronize()
         DarwinNotificationCenter.post(DarwinNotificationName.stopRecording)
@@ -207,6 +223,7 @@ class KeyboardState: ObservableObject {
     /// Resets local keyboard state immediately for instant UI feedback,
     /// while the Darwin notification tells the app to clean up its side.
     func requestCancel() {
+        logProbe("requestCancel", details: sessionDetails())
         defaults.set(true, forKey: SharedKeys.cancelRequested)
         defaults.synchronize()
         DarwinNotificationCenter.post(DarwinNotificationName.cancelRecording)
@@ -216,6 +233,7 @@ class KeyboardState: ObservableObject {
         waveformEnergy = []
         recordingElapsed = 0
         statusMessage = nil
+        activeSessionID = nil
     }
 
     // MARK: - State observation
@@ -223,6 +241,7 @@ class KeyboardState: ObservableObject {
     /// Read current state from App Group UserDefaults.
     /// Starts/stops the watchdog timer based on the new status.
     func refreshFromDefaults() {
+        logProbe("refreshFromDefaults", details: "storedStatus=\(defaults.string(forKey: SharedKeys.dictationStatus) ?? "nil") visible=\(isKeyboardVisible) \(sessionDetails())")
         if let rawStatus = defaults.string(forKey: SharedKeys.dictationStatus),
            let status = DictationStatus(rawValue: rawStatus) {
             let oldStatus = dictationStatus
@@ -256,13 +275,16 @@ class KeyboardState: ObservableObject {
             } else {
                 stopWatchdog()
                 coldStartGraceEnd = nil
+                if status == .idle || status == .ready || status == .failed {
+                    activeSessionID = nil
+                }
             }
 
             // Force SwiftUI re-render when status hasn't changed but we're returning
             // from suspension (e.g., swipe-back during cold start recording).
             // WHY: If oldStatus == status == .recording, SwiftUI skips re-render
             // because no @Published value changed. objectWillChange forces it.
-            if oldStatus == status && activeStates.contains(status) {
+            if isKeyboardVisible && oldStatus == status && activeStates.contains(status) {
                 objectWillChange.send()
             }
         }
@@ -272,6 +294,7 @@ class KeyboardState: ObservableObject {
     /// Called when DictusApp posts waveformUpdate notification during recording.
     /// Updates lastWaveformUpdate so the watchdog knows data is still flowing.
     private func readWaveformData() {
+        logProbe("readWaveformData", details: sessionDetails())
         // Update watchdog timestamp — data is still flowing from the app
         lastWaveformUpdate = Date()
 
@@ -291,11 +314,6 @@ class KeyboardState: ObservableObject {
                     ))
                 }
                 waveformEnergy = energy
-                // Force SwiftUI to re-evaluate even if array equality passes.
-                // WHY: After extension process suspension/resumption, SwiftUI's
-                // observation chain may be stale. Explicit notification ensures
-                // BrandWaveform receives the new energy data.
-                objectWillChange.send()
             } catch {
                 // JSON decode failure — keep existing waveform data
                 if #available(iOS 14.0, *) {
@@ -311,6 +329,7 @@ class KeyboardState: ObservableObject {
     /// insert it directly into the text field via textDocumentProxy.insertText().
     /// This matches the standard iOS dictation UX — user speaks, text appears at cursor.
     private func handleTranscriptionReady() {
+        logProbe("handleTranscriptionReady", details: sessionDetails())
         refreshFromDefaults()
 
         if let transcription = defaults.string(forKey: SharedKeys.lastTranscription),
@@ -338,6 +357,7 @@ class KeyboardState: ObservableObject {
             recordingElapsed = 0
             statusMessage = nil
             lastTranscription = nil
+            activeSessionID = nil
         } else {
             // Retry after 100ms — mitigates UserDefaults race condition.
             // Darwin notifications are posted immediately after synchronize(),
@@ -359,6 +379,7 @@ class KeyboardState: ObservableObject {
                     self.recordingElapsed = 0
                     self.statusMessage = nil
                     self.lastTranscription = nil
+                    self.activeSessionID = nil
                 }
             }
         }
@@ -369,6 +390,7 @@ class KeyboardState: ObservableObject {
     /// Called when keyboard appears (viewWillAppear).
     /// WHY @objc: Required for NotificationCenter selector-based observation.
     @objc func keyboardDidAppear() {
+        logProbe("keyboardDidAppear", details: "wasVisible=\(isKeyboardVisible) \(sessionDetails())")
         isKeyboardVisible = true
 
         // Refresh state from App Group — picks up status changes that
@@ -379,6 +401,7 @@ class KeyboardState: ObservableObject {
     /// Called when keyboard disappears (viewDidDisappear).
     /// WHY @objc: Required for NotificationCenter selector-based observation.
     @objc func keyboardDidDisappear() {
+        logProbe("keyboardDidDisappear", details: "wasVisible=\(isKeyboardVisible) \(sessionDetails())")
         isKeyboardVisible = false
     }
 
@@ -411,6 +434,8 @@ class KeyboardState: ObservableObject {
             return
         }
         lastMicTapDate = now
+        activeSessionID = String(UUID().uuidString.prefix(8))
+        logProbe("startRecording", details: sessionDetails())
 
         PersistentLog.log(.keyboardMicTapped)
         markRequested()
@@ -425,6 +450,7 @@ class KeyboardState: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
             if self.dictationStatus == .requested {
+                self.logProbe("fallbackOpenURL", details: self.sessionDetails())
                 // App didn't respond — not running. Open URL to launch it.
                 let url = URL(string: "dictus://dictate?source=keyboard")!
                 if let openURL = self.openURL {
@@ -438,10 +464,25 @@ class KeyboardState: ObservableObject {
 
     /// Write "requested" status to App Group before triggering URL.
     func markRequested() {
+        logProbe("markRequested", details: sessionDetails())
         defaults.set(DictationStatus.requested.rawValue, forKey: SharedKeys.dictationStatus)
         defaults.synchronize()
         dictationStatus = .requested
         startWatchdog()
         HapticFeedback.recordingStarted()
+    }
+
+    private func sessionDetails() -> String {
+        let sessionID = activeSessionID ?? "none"
+        return "sessionID=\(sessionID) status=\(dictationStatus.rawValue) energyCount=\(waveformEnergy.count)"
+    }
+
+    private func logProbe(_ action: String, details: String = "") {
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardState",
+            instanceID: instanceID,
+            action: action,
+            details: details
+        ))
     }
 }
