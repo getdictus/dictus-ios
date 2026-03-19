@@ -50,6 +50,10 @@ class DictationCoordinator: ObservableObject {
     private var currentModelName: String?
     private var dictationTask: Task<Void, Never>?
 
+    /// Set when cold start dictation is deferred because the app is .inactive.
+    /// Cleared in didBecomeActive when the retry happens.
+    private var pendingColdStartDictation = false
+
     /// Task that resolves when WhisperKit is fully loaded.
     /// WHY: Both init() pre-load and startDictation() call ensureEngineReady().
     /// If startDictation() arrives while pre-load is still running, it must AWAIT
@@ -154,6 +158,21 @@ class DictationCoordinator: ObservableObject {
                     sessionConfigured: true,
                     context: "didBecomeActive"
                 ))
+
+                // Retry deferred cold start dictation now that app is fully active.
+                // WHY here: URL scheme launches fire handleIncomingURL at .inactive state,
+                // where engine.start() fails. startDictation sets pendingColdStartDictation
+                // and returns. Now that we're .active, retry the full startDictation flow.
+                if self.pendingColdStartDictation {
+                    self.pendingColdStartDictation = false
+                    // Only retry if keyboard is still waiting (watchdog hasn't reset to idle)
+                    let keyboardStatus = self.defaults.string(forKey: SharedKeys.dictationStatus)
+                    if keyboardStatus == DictationStatus.requested.rawValue {
+                        self.startDictation(fromURL: true)
+                    }
+                    return
+                }
+
                 guard !self.audioEngine.isEngineRunning else {
                     PersistentLog.log(.engineWarmUpSuccess(context: "didBecomeActive-already-running"))
                     return
@@ -257,6 +276,18 @@ class DictationCoordinator: ObservableObject {
             }
         } else {
             // COLD START: engine not running → start engine + record + load model in parallel
+            //
+            // WHY defer when not .active:
+            // URL scheme launches fire handleIncomingURL while app is still .inactive.
+            // AVAudioEngine.start() fails with AUIOClient_StartIO error from non-active state.
+            // Deferring to didBecomeActive guarantees the app is fully active.
+            if appState != .active {
+                pendingColdStartDictation = true
+                PersistentLog.log(.dictationDeferred(
+                    reason: "cold start deferred to didBecomeActive, appState=\(appState.rawValue)"))
+                return
+            }
+
             dictationTask = Task {
                 do {
                     let hasPermission = try await audioEngine.ensureMicrophonePermission()
@@ -275,6 +306,7 @@ class DictationCoordinator: ObservableObject {
                     PersistentLog.log(.appWhisperKitLoaded(modelName: loadedName))
                 } catch {
                     PersistentLog.log(.dictationFailed(error: "Cold start engine load: \(error.localizedDescription)"))
+                    self.handleError(error.localizedDescription)
                 }
             }
         }
