@@ -198,14 +198,14 @@ class LiveActivityManager {
         autoDismissTask?.cancel()
         autoDismissTask = nil
 
+        currentActivity = nil
+        currentPhase = .idle  // Update BEFORE async work to prevent races (#49)
         Task {
             let finalState = DictusLiveActivityAttributes.ContentState(phase: .standby)
             await activity.end(
                 .init(state: finalState, staleDate: nil),
                 dismissalPolicy: .immediate
             )
-            currentActivity = nil
-            currentPhase = .idle  // Activity is ending entirely
             DictusLogger.app.info("Live Activity stopped by user (Power button)")
         }
     }
@@ -234,8 +234,12 @@ class LiveActivityManager {
         autoDismissTask = nil
 
         guard let activity = currentActivity else {
-            // If no activity exists (e.g., app was in foreground), create one then transition
+            // If no activity exists (e.g., app was in foreground), create one then transition.
+            // WHY only delayed path: startStandbyActivity() is synchronous but the activity
+            // needs a moment before it can accept updates. The delayed updateToRecording()
+            // is the ONLY update path — no duplicate immediate Task (#49).
             startStandbyActivity()
+            currentPhase = .recording  // Lock state immediately to prevent races (#49)
             Task {
                 try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
                 await updateToRecording()
@@ -243,6 +247,7 @@ class LiveActivityManager {
             return
         }
 
+        currentPhase = .recording  // Update BEFORE async work to prevent races (#49)
         Task {
             let state = DictusLiveActivityAttributes.ContentState(
                 phase: .recording,
@@ -250,7 +255,6 @@ class LiveActivityManager {
                 waveformLevels: [0.3, 0.5, 0.7, 0.5, 0.3]
             )
             await activity.update(.init(state: state, staleDate: nil))
-            currentPhase = .recording
             DictusLogger.app.info("Live Activity -> recording")
         }
     }
@@ -264,7 +268,7 @@ class LiveActivityManager {
             waveformLevels: [0.3, 0.5, 0.7, 0.5, 0.3]
         )
         await activity.update(.init(state: state, staleDate: nil))
-        currentPhase = .recording
+        // currentPhase already set to .recording by caller before Task (#49)
         DictusLogger.app.info("Live Activity -> recording (delayed)")
     }
 
@@ -313,13 +317,13 @@ class LiveActivityManager {
 
         guard let activity = currentActivity else { return }
 
+        currentPhase = .transcribing  // Update BEFORE async work to prevent races (#49)
         Task {
             let state = DictusLiveActivityAttributes.ContentState(
                 phase: .transcribing,
                 waveformLevels: [0.3, 0.5, 0.4, 0.5, 0.3]
             )
             await activity.update(.init(state: state, staleDate: nil))
-            currentPhase = .transcribing
             DictusLogger.app.info("Live Activity -> transcribing")
         }
     }
@@ -338,6 +342,7 @@ class LiveActivityManager {
 
         autoDismissTask?.cancel()
 
+        currentPhase = .ready  // Update BEFORE async work to prevent races (#49)
         Task {
             let truncatedPreview = preview.map { String($0.prefix(100)) }
             let state = DictusLiveActivityAttributes.ContentState(
@@ -345,7 +350,6 @@ class LiveActivityManager {
                 transcriptionPreview: truncatedPreview
             )
             await activity.update(.init(state: state, staleDate: nil))
-            currentPhase = .ready
             DictusLogger.app.info("Live Activity -> ready")
         }
 
@@ -373,10 +377,10 @@ class LiveActivityManager {
 
         autoDismissTask?.cancel()
 
+        currentPhase = .failed  // Update BEFORE async work to prevent races (#49)
         Task {
             let state = DictusLiveActivityAttributes.ContentState(phase: .failed)
             await activity.update(.init(state: state, staleDate: nil))
-            currentPhase = .failed
             DictusLogger.app.info("Live Activity -> failed")
         }
 
@@ -408,11 +412,11 @@ class LiveActivityManager {
 
         guard let activity = currentActivity else { return }
 
+        currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
         let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
         // Refresh staleDate on each return to standby (15 min from now)
         let staleDate = Date().addingTimeInterval(15 * 60)
         await activity.update(.init(state: state, staleDate: staleDate))
-        currentPhase = .standby
         DictusLogger.app.info("Live Activity -> standby (auto-return)")
     }
 
