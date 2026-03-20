@@ -59,7 +59,7 @@ class LiveActivityManager {
             return true
         } else {
             DictusLogger.app.warning("LiveActivity: rejected transition \(self.currentPhase.rawValue, privacy: .public) -> \(target.rawValue, privacy: .public)")
-            PersistentLog.log(.statusChanged(from: currentPhase.rawValue, to: "REJECTED-\(target.rawValue)", source: "LiveActivityManager"))
+            PersistentLog.log(.liveActivityFailed(context: "rejectedTransition", error: "\(currentPhase.rawValue)->\(target.rawValue)"))
             return false
         }
     }
@@ -151,6 +151,7 @@ class LiveActivityManager {
                 currentActivity = existing
                 currentPhase = mapContentPhase(existing.content.state.phase)
                 DictusLogger.app.info("Recovered orphaned Live Activity: \(existing.id, privacy: .public)")
+                PersistentLog.log(.liveActivityStarted(id: "orphan-recovered:\(existing.id)"))
             }
             // End any extras beyond the first (shouldn't happen, but defense in depth)
             for activity in systemActivities.dropFirst() {
@@ -185,8 +186,10 @@ class LiveActivityManager {
             currentActivity = activity
             currentPhase = .standby
             DictusLogger.app.info("Live Activity started in standby (id: \(activity.id, privacy: .public))")
+            PersistentLog.log(.liveActivityStarted(id: activity.id))
         } catch {
             DictusLogger.app.error("Failed to start Live Activity: \(error.localizedDescription, privacy: .public)")
+            PersistentLog.log(.liveActivityFailed(context: "startStandby", error: error.localizedDescription))
         }
     }
 
@@ -198,14 +201,15 @@ class LiveActivityManager {
         autoDismissTask?.cancel()
         autoDismissTask = nil
 
+        currentActivity = nil
+        currentPhase = .idle  // Update BEFORE async work to prevent races (#49)
+        PersistentLog.log(.liveActivityEnded(reason: "powerButton"))
         Task {
             let finalState = DictusLiveActivityAttributes.ContentState(phase: .standby)
             await activity.end(
                 .init(state: finalState, staleDate: nil),
                 dismissalPolicy: .immediate
             )
-            currentActivity = nil
-            currentPhase = .idle  // Activity is ending entirely
             DictusLogger.app.info("Live Activity stopped by user (Power button)")
         }
     }
@@ -220,7 +224,13 @@ class LiveActivityManager {
         // is the valid path. Without this, the guard rejects and the fallback at line 228
         // (which also calls startStandbyActivity) is UNREACHABLE after the guard returns.
         if currentPhase == .idle {
+            PersistentLog.log(.liveActivityTransition(from: "idle", to: "recording-bootstrap"))
             startStandbyActivity()
+            // If bootstrap failed (e.g., app is background), log and continue without DI.
+            // ensureActivityAlive() will retry on didBecomeActive.
+            if currentActivity == nil {
+                PersistentLog.log(.liveActivityFailed(context: "bootstrap", error: "startStandby failed from idle"))
+            }
         }
 
         // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
@@ -234,8 +244,15 @@ class LiveActivityManager {
         autoDismissTask = nil
 
         guard let activity = currentActivity else {
-            // If no activity exists (e.g., app was in foreground), create one then transition
+            // If no activity exists (e.g., app was in foreground), create one then transition.
+            // WHY only delayed path: startStandbyActivity() is synchronous but the activity
+            // needs a moment before it can accept updates. The delayed updateToRecording()
+            // is the ONLY update path — no duplicate immediate Task (#49).
             startStandbyActivity()
+            if currentActivity == nil {
+                PersistentLog.log(.liveActivityFailed(context: "bootstrap-fallback", error: "startStandby failed, no DI"))
+            }
+            currentPhase = .recording  // Lock state immediately to prevent races (#49)
             Task {
                 try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
                 await updateToRecording()
@@ -243,6 +260,8 @@ class LiveActivityManager {
             return
         }
 
+        PersistentLog.log(.liveActivityTransition(from: "standby", to: "recording"))
+        currentPhase = .recording  // Update BEFORE async work to prevent races (#49)
         Task {
             let state = DictusLiveActivityAttributes.ContentState(
                 phase: .recording,
@@ -250,7 +269,6 @@ class LiveActivityManager {
                 waveformLevels: [0.3, 0.5, 0.7, 0.5, 0.3]
             )
             await activity.update(.init(state: state, staleDate: nil))
-            currentPhase = .recording
             DictusLogger.app.info("Live Activity -> recording")
         }
     }
@@ -264,7 +282,7 @@ class LiveActivityManager {
             waveformLevels: [0.3, 0.5, 0.7, 0.5, 0.3]
         )
         await activity.update(.init(state: state, staleDate: nil))
-        currentPhase = .recording
+        // currentPhase already set to .recording by caller before Task (#49)
         DictusLogger.app.info("Live Activity -> recording (delayed)")
     }
 
@@ -313,13 +331,14 @@ class LiveActivityManager {
 
         guard let activity = currentActivity else { return }
 
+        PersistentLog.log(.liveActivityTransition(from: "recording", to: "transcribing"))
+        currentPhase = .transcribing  // Update BEFORE async work to prevent races (#49)
         Task {
             let state = DictusLiveActivityAttributes.ContentState(
                 phase: .transcribing,
                 waveformLevels: [0.3, 0.5, 0.4, 0.5, 0.3]
             )
             await activity.update(.init(state: state, staleDate: nil))
-            currentPhase = .transcribing
             DictusLogger.app.info("Live Activity -> transcribing")
         }
     }
@@ -338,6 +357,8 @@ class LiveActivityManager {
 
         autoDismissTask?.cancel()
 
+        PersistentLog.log(.liveActivityTransition(from: "transcribing", to: "ready"))
+        currentPhase = .ready  // Update BEFORE async work to prevent races (#49)
         Task {
             let truncatedPreview = preview.map { String($0.prefix(100)) }
             let state = DictusLiveActivityAttributes.ContentState(
@@ -345,7 +366,6 @@ class LiveActivityManager {
                 transcriptionPreview: truncatedPreview
             )
             await activity.update(.init(state: state, staleDate: nil))
-            currentPhase = .ready
             DictusLogger.app.info("Live Activity -> ready")
         }
 
@@ -373,10 +393,11 @@ class LiveActivityManager {
 
         autoDismissTask?.cancel()
 
+        PersistentLog.log(.liveActivityTransition(from: "transcribing", to: "failed"))
+        currentPhase = .failed  // Update BEFORE async work to prevent races (#49)
         Task {
             let state = DictusLiveActivityAttributes.ContentState(phase: .failed)
             await activity.update(.init(state: state, staleDate: nil))
-            currentPhase = .failed
             DictusLogger.app.info("Live Activity -> failed")
         }
 
@@ -394,6 +415,29 @@ class LiveActivityManager {
         }
     }
 
+    // MARK: - Recovery
+
+    /// Recreate the Live Activity if it was lost (e.g., Activity.request failed from background).
+    /// Safe to call multiple times -- no-op if activity already exists.
+    /// WHY: After cold start, Activity.request() silently fails from background.
+    /// Calling this on didBecomeActive retries from the foreground where it succeeds.
+    func ensureActivityAlive() {
+        // Detect externally-ended activities (e.g., StopStandbyIntent bypasses manager).
+        // WHY: The intent ends the activity via activity.end() but can't call stopStandbyActivity()
+        // because LiveActivityManager is DictusApp-only. If DictationCoordinator's observer also
+        // missed it, the manager still holds a dead reference. Check the system list as defense in depth.
+        if let current = currentActivity,
+           !Activity<DictusLiveActivityAttributes>.activities.contains(where: { $0.id == current.id }) {
+            PersistentLog.log(.liveActivityFailed(context: "ensureAlive", error: "activity \(current.id) gone from system"))
+            currentActivity = nil
+            currentPhase = .idle
+        }
+
+        guard currentActivity == nil || currentPhase == .idle else { return }
+        PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "recovery-standby"))
+        startStandbyActivity()
+    }
+
     // MARK: - Utilities
 
     /// Return to standby state. Called after result/failure auto-dismiss,
@@ -408,11 +452,12 @@ class LiveActivityManager {
 
         guard let activity = currentActivity else { return }
 
+        PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "standby"))
+        currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
         let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
         // Refresh staleDate on each return to standby (15 min from now)
         let staleDate = Date().addingTimeInterval(15 * 60)
         await activity.update(.init(state: state, staleDate: staleDate))
-        currentPhase = .standby
         DictusLogger.app.info("Live Activity -> standby (auto-return)")
     }
 
@@ -465,6 +510,7 @@ class LiveActivityManager {
         }
         currentActivity = nil
         currentPhase = .idle
+        PersistentLog.log(.liveActivityEnded(reason: "appTerminating"))
         DictusLogger.app.info("Ended all Live Activities (app terminating)")
     }
 

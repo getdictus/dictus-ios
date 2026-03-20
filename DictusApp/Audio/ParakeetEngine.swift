@@ -62,9 +62,8 @@ class ParakeetEngine: SpeechModelProtocol {
     ///
     /// - Parameters:
     ///   - audioSamples: Float32 audio samples at 16 kHz mono.
-    ///   - language: Language code. Parakeet v3 supports 25 European languages
-    ///     including French. The language parameter is passed but Parakeet
-    ///     auto-detects language from audio content.
+    ///   - language: Language code. Parakeet TDT v3 auto-detects language from audio —
+    ///     this parameter is a no-op. Language forcing requires Qwen3-ASR (iOS 18+).
     /// - Returns: Transcribed text.
     func transcribe(audioSamples: [Float], language: String) async throws -> String {
         guard let asrManager else {
