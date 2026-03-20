@@ -114,6 +114,12 @@ public enum LogEvent: Sendable {
     case onboardingKeyboardCheckSkipped(reason: String)
     case onboardingKeyboardRetry
 
+    // MARK: Live Activity
+    case liveActivityStarted(id: String)
+    case liveActivityTransition(from: String, to: String)
+    case liveActivityFailed(context: String, error: String)
+    case liveActivityEnded(reason: String)
+
     // MARK: Lifecycle
     case appLaunched(version: String)
     case appDidBecomeActive
@@ -152,6 +158,8 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry:
             return .lifecycle
+        case .liveActivityStarted, .liveActivityTransition, .liveActivityFailed, .liveActivityEnded:
+            return .lifecycle
         case .appLaunched, .appDidBecomeActive, .appWillResignActive,
              .appDidEnterBackground, .appWhisperKitLoaded:
             return .lifecycle
@@ -165,7 +173,8 @@ public enum LogEvent: Sendable {
         switch self {
         // Errors
         case .dictationFailed, .audioSessionFailed, .transcriptionFailed,
-             .modelDownloadFailed, .modelDeleteFailed:
+             .modelDownloadFailed, .modelDeleteFailed,
+             .liveActivityFailed:
             return .error
 
         // Warnings
@@ -183,6 +192,7 @@ public enum LogEvent: Sendable {
              .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
              .keyboardDidAppear, .keyboardMicTapped,
              .appLaunched, .appWhisperKitLoaded,
+             .liveActivityStarted, .liveActivityTransition, .liveActivityEnded,
              .overlayShown, .overlayHidden, .statusChanged,
              .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
              .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated:
@@ -245,6 +255,10 @@ public enum LogEvent: Sendable {
         case .onboardingKeyboardNotFound: return "onboardingKeyboardNotFound"
         case .onboardingKeyboardCheckSkipped: return "onboardingKeyboardCheckSkipped"
         case .onboardingKeyboardRetry: return "onboardingKeyboardRetry"
+        case .liveActivityStarted: return "liveActivityStarted"
+        case .liveActivityTransition: return "liveActivityTransition"
+        case .liveActivityFailed: return "liveActivityFailed"
+        case .liveActivityEnded: return "liveActivityEnded"
         case .appLaunched: return "appLaunched"
         case .appDidBecomeActive: return "appDidBecomeActive"
         case .appWillResignActive: return "appWillResignActive"
@@ -356,6 +370,16 @@ public enum LogEvent: Sendable {
             return "reason=\(reason)"
         case .onboardingKeyboardRetry:
             return ""
+
+        // Live Activity
+        case .liveActivityStarted(let id):
+            return "id=\(id)"
+        case .liveActivityTransition(let from, let to):
+            return "from=\(from) to=\(to)"
+        case .liveActivityFailed(let context, let error):
+            return "context=\(context) error=\(error)"
+        case .liveActivityEnded(let reason):
+            return "reason=\(reason)"
 
         // Lifecycle
         case .appLaunched(let version):

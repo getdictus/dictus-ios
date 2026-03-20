@@ -128,6 +128,11 @@ class DictationCoordinator: ObservableObject {
         ) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in
+                // Sync LiveActivityManager state — the intent already ended the activity
+                // but the manager doesn't know. Without this, currentActivity stays non-nil
+                // and ensureActivityAlive() is a no-op on next dictation (#50).
+                LiveActivityManager.shared.stopStandbyActivity()
+
                 // Stop any active recording first
                 if self.status == .recording {
                     self.cancelDictation()
@@ -158,6 +163,10 @@ class DictationCoordinator: ObservableObject {
                     sessionConfigured: true,
                     context: "didBecomeActive"
                 ))
+
+                // Recover DI if it was lost (Activity.request fails from background on cold start).
+                // Must happen BEFORE pendingColdStartDictation so transitionToRecording finds an activity.
+                LiveActivityManager.shared.ensureActivityAlive()
 
                 // Retry deferred cold start dictation now that app is fully active.
                 // WHY here: URL scheme launches fire handleIncomingURL at .inactive state,
