@@ -27,10 +27,19 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.hapticsEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var hapticsEnabled = true
 
+    @AppStorage(SharedKeys.activeModel, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var activeModel = "openai_whisper-small"
+
     /// WHY default true: Most users expect autocorrect to be active by default.
     /// Power users who find it annoying can toggle it off here.
     @AppStorage(SharedKeys.autocorrectEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var autocorrectEnabled = true
+
+    /// Whether the currently active model uses the Parakeet engine (CTC/TDT).
+    /// Parakeet auto-detects language — the language picker has no effect on it.
+    private var isParakeetActive: Bool {
+        ModelInfo.forIdentifier(activeModel)?.engine == .parakeet
+    }
 
     /// Tracks log export async operation for spinner display.
     @State private var isExporting = false
@@ -45,6 +54,11 @@ struct SettingsView: View {
                 Picker("Langue", selection: $language) {
                     Text("Français").tag("fr")
                     Text("English").tag("en")
+                }
+                if isParakeetActive {
+                    Text("Parakeet détecte automatiquement la langue parlée. Ce réglage s'applique uniquement aux modèles Whisper.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             } header: {
                 Text("Transcription")
