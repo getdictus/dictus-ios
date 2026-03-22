@@ -50,6 +50,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 - [x] **Phase 15: Design Polish** - French accent audit, model manager redesign, recording overlay and keyboard UX refinements (completed 2026-03-13)
 - [x] **Phase 15.1: UI Polish Fixes** - Button alignment, app name/logo, swipe-back overlay, recording sound feedback (INSERTED) (completed 2026-03-13)
 - [x] **Phase 15.2: Cleaning and Fix GitHub Issues** - Fix ship-blocking bugs (waveform, DI desync, stale cards) and triage GitHub issues (INSERTED) (gap closure in progress) (completed 2026-03-17)
+- [ ] **Phase 15.3: Keyboard Optimization and Responsiveness** - Reduce input latency with UIKit touch handling, device-adaptive key dimensions, and press feedback (INSERTED)
 - [ ] **Phase 16: TestFlight Deployment** - Developer account migration, Privacy Manifest, archive, and first beta distribution
 
 ## Phase Details
@@ -141,6 +142,27 @@ Plans:
 - [ ] 15-09-PLAN.md — UAT gap closure: active card blue tint + remove switch spinner + swipe delete height
 - [ ] 15-10-PLAN.md — UAT gap closure: waveform vertical stability + settings tap feedback
 
+### Phase 15.3: Keyboard optimization and responsiveness (INSERTED)
+
+**Goal:** Reduce keyboard input latency to match native iOS keyboard feel and adjust key spacing/dimensions to match Apple keyboard proportions
+**Requirements**: #44, #29
+**Depends on:** Phase 15.2
+**Success Criteria** (what must be TRUE):
+  1. Letter keys use UIKit UIViewRepresentable (not SwiftUI DragGesture) for touch handling
+  2. Audio and haptic fire on touchDown (not touchUp), matching Apple keyboard behavior
+  3. Suggestion computation runs on background queue with coalescing (not main thread)
+  4. Key dimensions are device-adaptive across 3 device classes (compact, standard, large)
+  5. Side margins approximately equal inter-key gap (not 3pt margins with 4pt/6pt gaps)
+  6. Delete, space, and return keys show background color change on press
+  7. OSSignposter instrumentation ready for Instruments profiling on physical device
+**Plans:** 4 plans
+
+Plans:
+- [ ] 15.3-01-PLAN.md — Quick wins: haptic cache, KeyMetrics static let, pipeline reorder, suggestion background queue, OSSignposter
+- [ ] 15.3-02-PLAN.md — UIViewRepresentable touch handler for letter keys (replace DragGesture)
+- [ ] 15.3-03-PLAN.md — Device-adaptive key dimensions and press feedback colors
+- [ ] 15.3-04-PLAN.md — Visual and functional verification on simulator
+
 ### Phase 15.2: Cleaning and Fix GitHub Issues (INSERTED)
 
 **Goal:** Fix ship-blocking bugs (waveform rendering in keyboard extension, Dynamic Island desync after chaining, stale transcription cards) and triage GitHub issues before TestFlight beta
@@ -193,7 +215,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 15.2 -> 16
+Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 15.2 -> 15.3 -> 16
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -214,6 +236,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 15.2 -> 1
 | 15. Design Polish | 10/10 | Complete    | 2026-03-13 | - |
 | 15.1. UI Polish Fixes | 3/3 | Complete   | 2026-03-13 | - |
 | 15.2. Cleaning & Fix Issues | 4/4 | Complete   | 2026-03-17 | - |
+| 15.3. Keyboard Optimization | 0/4 | In Progress |  | - |
 | 16. TestFlight Deployment | 1/3 | In Progress|  | - |
 
 ---
