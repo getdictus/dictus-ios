@@ -240,31 +240,91 @@ struct KeyPopup: View {
     }
 }
 
-/// Shared key dimension constants.
+/// Device class for adaptive keyboard layout.
 ///
-/// WHY dynamic keyHeight:
-/// Apple's keyboard uses taller keys on Plus/Max devices (larger screens) and shorter
-/// keys on SE/compact devices. A fixed 46pt height feels cramped on large screens and
-/// oversized on small ones. We scale based on UIScreen.main.bounds.height to match
-/// the native feel per device class.
-enum KeyMetrics {
-    /// Device-adaptive key height, computed ONCE at process launch.
-    ///
-    /// WHY static let (not var): The computed var recalculated UIScreen.main.bounds
-    /// on every access. Since screen size never changes during a keyboard session,
-    /// computing once eliminates per-frame overhead.
-    ///
-    /// Values: 42pt (SE/compact), 46pt (standard), 50pt (Plus/Max).
-    static let keyHeight: CGFloat = {
-        let screenHeight = UIScreen.main.bounds.height
-        if screenHeight <= 667 { return 42 }       // SE / compact (667pt = iPhone SE)
-        else if screenHeight <= 852 { return 46 }   // Standard (844-852pt = iPhone 14/15/16)
-        else { return 50 }                           // Plus / Max (926pt+)
+/// WHY 3 classes: Apple's keyboard uses different key sizes and spacing
+/// across device families. A single set of values looks cramped on large
+/// screens and oversized on compact ones.
+///
+/// WHY static let current: Screen size never changes during a keyboard
+/// extension's lifetime. Computing once avoids per-frame UIScreen lookups.
+///
+/// Breakpoints based on UIScreen.main.bounds.height:
+/// - compact: <= 667pt (iPhone SE 3rd gen = 667pt)
+/// - standard: <= 852pt (iPhone 14/15/16 = 844-852pt)
+/// - large: > 852pt (iPhone Plus/Max = 926-932pt)
+///
+/// NOTE: Using 667pt as compact boundary matches iPhone SE exactly.
+/// iPhone 13 mini (812pt) falls into "standard" -- this is intentional because
+/// its screen is physically similar to standard iPhones in width.
+enum DeviceClass {
+    case compact    // iPhone SE
+    case standard   // iPhone 14/15/16
+    case large      // iPhone Plus/Max
+
+    static let current: DeviceClass = {
+        let h = UIScreen.main.bounds.height
+        if h <= 667 { return .compact }
+        else if h <= 852 { return .standard }
+        else { return .large }
     }()
-    static let rowSpacing: CGFloat = 6
-    static let keySpacing: CGFloat = 4
-    static let rowHorizontalPadding: CGFloat = 3
-    static let keyCornerRadius: CGFloat = 6
+}
+
+/// Shared key dimension constants, computed once per device class.
+///
+/// WHY all static let: These values are read hundreds of times per keyboard
+/// render cycle. Static lets compute once at process launch, eliminating
+/// per-frame overhead.
+///
+/// DIMENSION SOURCES:
+/// - keyHeight: Measured from Apple keyboard screenshots across devices
+///   Reference: KeyboardKit uses 51pt for iOS 26 (standard device)
+/// - keySpacing: Apple keyboard inter-key gap ~6pt on standard devices
+/// - rowSpacing: Apple keyboard inter-row gap ~10-11pt on standard devices
+/// - rowHorizontalPadding: Apple side margins ~= inter-key gap (issue #29 finding)
+/// - keyCornerRadius: Apple uses ~5pt on standard devices
+enum KeyMetrics {
+    /// Key height per device class.
+    static let keyHeight: CGFloat = {
+        switch DeviceClass.current {
+        case .compact:  return 42
+        case .standard: return 46
+        case .large:    return 50
+        }
+    }()
+
+    /// Vertical spacing between rows.
+    static let rowSpacing: CGFloat = {
+        switch DeviceClass.current {
+        case .compact:  return 8
+        case .standard: return 10
+        case .large:    return 11
+        }
+    }()
+
+    /// Horizontal spacing between keys within a row.
+    static let keySpacing: CGFloat = {
+        switch DeviceClass.current {
+        case .compact:  return 5
+        case .standard: return 6
+        case .large:    return 6
+        }
+    }()
+
+    /// Horizontal padding on each side of a row.
+    /// CHANGE from old value (3pt for all): Now approximately matches keySpacing.
+    /// Per issue #29: Apple keyboard side margins ~= inter-key gap.
+    /// Old: 3pt uniform. New: 3pt (compact), 4pt (standard), 5pt (large).
+    static let rowHorizontalPadding: CGFloat = {
+        switch DeviceClass.current {
+        case .compact:  return 3
+        case .standard: return 4
+        case .large:    return 5
+        }
+    }()
+
+    /// Corner radius for key backgrounds.
+    static let keyCornerRadius: CGFloat = 5
 
     /// Letter key background — matches native iOS keyboard.
     /// Dark mode: visible gray (not pure black). Light mode: white.
@@ -272,5 +332,14 @@ enum KeyMetrics {
         tc.userInterfaceStyle == .dark
             ? UIColor(white: 0.22, alpha: 1)
             : .white
+    })
+
+    /// Pressed key background color for delete/space/return keys.
+    /// Per locked decision: "brighter in dark mode, darker in light mode"
+    /// Letter keys do NOT use this (they use popup only, no color change).
+    static let pressedKeyColor = Color(UIColor { tc in
+        tc.userInterfaceStyle == .dark
+            ? UIColor(white: 0.32, alpha: 1)   // brighter than 0.22 base
+            : UIColor(white: 0.88, alpha: 1)   // darker than white base
     })
 }
