@@ -94,7 +94,7 @@ struct DeleteKey: View {
             .frame(height: KeyMetrics.keyHeight)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                    .fill(KeyMetrics.letterKeyColor)
+                    .fill(isHolding ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
             )
             .foregroundColor(Color(.label))
@@ -209,7 +209,7 @@ struct SpaceKey: View {
             .frame(height: KeyMetrics.keyHeight)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                    .fill(KeyMetrics.letterKeyColor)
+                    .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
             )
             .gesture(
@@ -338,7 +338,24 @@ struct SpaceKey: View {
     }
 }
 
-/// Return key.
+/// ButtonStyle that shows press feedback via background color change.
+/// Used for return, globe, emoji, layer switch, and other non-letter keys.
+/// Per locked decision: letter keys use popup only (no color change),
+/// special keys use background color change (brighter dark, darker light).
+struct SpecialKeyButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                    .fill(configuration.isPressed
+                        ? KeyMetrics.pressedKeyColor
+                        : KeyMetrics.letterKeyColor)
+                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+            )
+    }
+}
+
+/// Return key with press feedback color.
 struct ReturnKey: View {
     let width: CGFloat
     let onTap: () -> Void
@@ -349,12 +366,8 @@ struct ReturnKey: View {
                 .font(.system(size: 16, weight: .medium))
                 .frame(width: width)
                 .frame(height: KeyMetrics.keyHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(KeyMetrics.letterKeyColor)
-                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-                )
         }
+        .buttonStyle(SpecialKeyButtonStyle())
         .foregroundColor(Color(.label))
     }
 }
@@ -370,12 +383,8 @@ struct GlobeKey: View {
                 .font(.system(size: 16, weight: .medium))
                 .frame(width: width)
                 .frame(height: KeyMetrics.keyHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(KeyMetrics.letterKeyColor)
-                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-                )
         }
+        .buttonStyle(SpecialKeyButtonStyle())
         .foregroundColor(Color(.label))
     }
 }
@@ -394,12 +403,8 @@ struct EmojiKey: View {
                 .font(.system(size: 18, weight: .medium))
                 .frame(width: width)
                 .frame(height: KeyMetrics.keyHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(KeyMetrics.letterKeyColor)
-                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-                )
         }
+        .buttonStyle(SpecialKeyButtonStyle())
         .foregroundColor(Color(.label))
     }
 }
@@ -554,12 +559,8 @@ struct LayerSwitchKey: View {
                 .font(.system(size: 15, weight: .medium))
                 .frame(width: width)
                 .frame(height: KeyMetrics.keyHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(KeyMetrics.letterKeyColor)
-                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-                )
         }
+        .buttonStyle(SpecialKeyButtonStyle())
         .foregroundColor(Color(.label))
     }
 }
