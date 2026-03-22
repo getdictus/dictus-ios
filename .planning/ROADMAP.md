@@ -155,7 +155,7 @@ Plans:
   5. Side margins approximately equal inter-key gap (not 3pt margins with 4pt/6pt gaps)
   6. Delete, space, and return keys show background color change on press
   7. OSSignposter instrumentation ready for Instruments profiling on physical device
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [ ] 15.3-01-PLAN.md — Quick wins: haptic cache, KeyMetrics static let, pipeline reorder, suggestion background queue, OSSignposter
@@ -236,7 +236,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 15.2 -> 1
 | 15. Design Polish | 10/10 | Complete    | 2026-03-13 | - |
 | 15.1. UI Polish Fixes | 3/3 | Complete   | 2026-03-13 | - |
 | 15.2. Cleaning & Fix Issues | 4/4 | Complete   | 2026-03-17 | - |
-| 15.3. Keyboard Optimization | 2/4 | In Progress|  | - |
+| 15.3. Keyboard Optimization | 3/4 | In Progress|  | - |
 | 16. TestFlight Deployment | 1/3 | In Progress|  | - |
 
 ---
