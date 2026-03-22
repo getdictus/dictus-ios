@@ -255,9 +255,9 @@ struct KeyboardView: View {
     }
 
     private func insertCharacter(_ char: String) {
-        // Play letter-category keyboard click sound.
-        // AudioServicesPlaySystemSound respects the ringer/silent switch automatically.
-        AudioServicesPlaySystemSound(KeySound.letter)
+        // NOTE: Audio + haptic are now fired in KeyButton's touchDown handler,
+        // NOT here. This matches Apple's native keyboard: feedback fires on press
+        // (touchDown), not on release (touchUp/insert).
 
         // Any character input clears the autocorrect undo state.
         // The undo window is only valid immediately after the autocorrection.
@@ -274,12 +274,15 @@ struct KeyboardView: View {
             shiftState = .off
         }
 
-        // Update suggestions after the proxy has processed the new character.
-        // WHY DispatchQueue.main.async: UITextDocumentProxy reads can be stale
-        // immediately after insertText(). Deferring by one runloop tick ensures
-        // documentContextBeforeInput reflects the newly inserted character.
-        DispatchQueue.main.async {
-            suggestionState.update(proxy: controller.textDocumentProxy)
+        // Update suggestions on BACKGROUND queue with coalescing.
+        // WHY updateAsync: Moves extractLastWord + engine.suggestions() off main thread.
+        // WHY read context here: UITextDocumentProxy must be read on main thread.
+        // WHY DispatchQueue.main.async: proxy reads can be stale immediately after
+        // insertText(). Deferring by one runloop tick ensures documentContextBeforeInput
+        // reflects the newly inserted character.
+        DispatchQueue.main.async { [self] in
+            let context = controller.textDocumentProxy.documentContextBeforeInput
+            suggestionState.updateAsync(context: context)
         }
     }
 

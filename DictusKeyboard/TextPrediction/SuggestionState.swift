@@ -51,6 +51,20 @@ class SuggestionState: ObservableObject {
 
     private let engine = TextPredictionEngine()
 
+    /// Serial background queue for suggestion computation.
+    /// WHY serial: Ensures suggestion computations don't race each other.
+    /// WHY .userInitiated: Suggestions are user-facing but not blocking the touch pipeline.
+    private let suggestionQueue = DispatchQueue(
+        label: "com.pivi.dictus.suggestions",
+        qos: .userInitiated
+    )
+
+    /// Current in-flight suggestion work. Cancelled when a new keystroke arrives.
+    /// WHY DispatchWorkItem: Thread-safe cancellation built into GCD.
+    /// Without coalescing, rapid typing queues 6-10 suggestion computations per second,
+    /// all running to completion. With coalescing, only the latest keystroke runs.
+    private var currentSuggestionWork: DispatchWorkItem?
+
     /// Whether autocorrect is enabled (reads from App Group shared preferences).
     var autocorrectEnabled: Bool {
         AppGroup.defaults.object(forKey: SharedKeys.autocorrectEnabled) as? Bool ?? true
@@ -107,6 +121,67 @@ class SuggestionState: ObservableObject {
             suggestions = completions
             mode = .completions
         }
+    }
+
+    /// Async suggestion update: takes pre-read context string (read on main thread),
+    /// then dispatches computation to background. Cancels previous in-flight work.
+    ///
+    /// WHY a separate method from update(proxy:):
+    /// update(proxy:) reads UITextDocumentProxy directly and runs synchronously on main.
+    /// updateAsync takes a pre-read context string so the heavy computation
+    /// (extractLastWord + engine lookups) runs on a background queue.
+    /// The synchronous update() is still used by delete/undo paths where fresh proxy
+    /// context is needed immediately.
+    func updateAsync(context: String?) {
+        guard let context = context, !context.isEmpty else {
+            clear()
+            return
+        }
+
+        // If text ends with whitespace, no partial word
+        if let lastChar = context.last, lastChar.isWhitespace || lastChar.isNewline {
+            clear()
+            return
+        }
+
+        // Cancel previous in-flight computation
+        currentSuggestionWork?.cancel()
+
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+
+            let partial = self.extractLastWord(from: context)
+            guard !partial.isEmpty else {
+                DispatchQueue.main.async { self.clear() }
+                return
+            }
+
+            // Compute on background
+            let accents = self.engine.accentSuggestions(for: partial)
+            let completions = accents == nil ? self.engine.suggestions(for: partial) : nil
+
+            // Publish on main thread (required for @Published)
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                // Check cancellation before publishing stale results
+                guard !(self.currentSuggestionWork?.isCancelled ?? true) else { return }
+
+                self.currentWord = partial
+                if let accents = accents {
+                    self.suggestions = accents
+                    self.mode = .accents
+                } else if let completions = completions, !completions.isEmpty {
+                    self.suggestions = completions
+                    self.mode = .completions
+                } else {
+                    self.suggestions = []
+                    self.mode = .idle
+                }
+            }
+        }
+
+        currentSuggestionWork = work
+        suggestionQueue.async(execute: work)
     }
 
     /// Delegates spell-checking to the engine.

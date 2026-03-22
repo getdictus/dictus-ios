@@ -1,5 +1,6 @@
 // DictusKeyboard/Views/KeyButton.swift
 import SwiftUI
+import AudioToolbox
 import DictusCore
 
 /// A standard keyboard key that inserts a character on tap.
@@ -87,8 +88,26 @@ struct KeyButton: View {
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         if !isPressed {
-                            // First touch — start the press and the long-press timer
+                            // === TOUCH DOWN ===
+                            let touchDownState = KeyTapSignposter.beginTouchDown()
+
+                            // 1. Visual highlight (T1 target: <= 16.67ms from touchDown)
                             isPressed = true
+                            KeyTapSignposter.emitHighlight(touchDownState)
+
+                            // 2. Audio on touchDown (matches Apple keyboard: feedback on press)
+                            AudioServicesPlaySystemSound(KeySound.letter)
+
+                            // 3. Haptic on touchDown (matches Apple keyboard: feedback on press)
+                            HapticFeedback.keyTapped()
+                            KeyTapSignposter.emitHaptic(touchDownState)
+
+                            // 4. Prepare Taptic Engine for NEXT tap (primes hardware)
+                            HapticFeedback.prepareForNextTap()
+
+                            KeyTapSignposter.endTouchDown(touchDownState)
+
+                            // 5. Start long-press timer for accent popup
                             dragStartX = value.location.x
                             startLongPressTimer()
                         }
@@ -99,6 +118,8 @@ struct KeyButton: View {
                         }
                     }
                     .onEnded { _ in
+                        let touchUpState = KeyTapSignposter.beginTouchUp()
+
                         isPressed = false
                         longPressTimer?.cancel()
                         longPressTimer = nil
@@ -107,18 +128,20 @@ struct KeyButton: View {
                             // Long-press mode: insert selected accent or dismiss
                             if let index = selectedAccentIndex, index >= 0, index < accentOptions.count {
                                 onTap(accentOptions[index])
-                                HapticFeedback.keyTapped()
+                                // No additional haptic — already fired on touchDown
                             }
                             // Reset accent state
                             showingAccents = false
                             accentOptions = []
                             selectedAccentIndex = nil
                         } else {
-                            // Normal tap: insert the regular character
+                            // Normal tap: insert character (T3 target: <= 33ms from touchUp)
                             onTap(outputChar)
-                            HapticFeedback.keyTapped()
+                            // No haptic/audio — already fired on touchDown
                         }
                         dragStartX = nil
+
+                        KeyTapSignposter.endTouchUp(touchUpState)
                     }
             )
     }
