@@ -225,13 +225,19 @@ struct KeyPopup: View {
 /// oversized on small ones. We scale based on UIScreen.main.bounds.height to match
 /// the native feel per device class.
 enum KeyMetrics {
-    /// Device-adaptive key height: 42pt (SE/compact), 46pt (standard), 50pt (Plus/Max).
-    static var keyHeight: CGFloat {
+    /// Device-adaptive key height, computed ONCE at process launch.
+    ///
+    /// WHY static let (not var): The computed var recalculated UIScreen.main.bounds
+    /// on every access. Since screen size never changes during a keyboard session,
+    /// computing once eliminates per-frame overhead.
+    ///
+    /// Values: 42pt (SE/compact), 46pt (standard), 50pt (Plus/Max).
+    static let keyHeight: CGFloat = {
         let screenHeight = UIScreen.main.bounds.height
         if screenHeight <= 667 { return 42 }       // SE / compact (667pt = iPhone SE)
         else if screenHeight <= 852 { return 46 }   // Standard (844-852pt = iPhone 14/15/16)
         else { return 50 }                           // Plus / Max (926pt+)
-    }
+    }()
     static let rowSpacing: CGFloat = 6
     static let keySpacing: CGFloat = 4
     static let rowHorizontalPadding: CGFloat = 3

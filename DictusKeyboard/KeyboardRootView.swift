@@ -201,6 +201,11 @@ struct KeyboardRootView: View {
             // Without this, the Taptic Engine needs ~2-5ms to spin up on first use.
             HapticFeedback.warmUp()
 
+            // Refresh cached haptic enabled state from UserDefaults.
+            // This fires every time the keyboard opens, ensuring the cached value
+            // reflects any changes made in Settings since last keyboard session.
+            HapticFeedback.refreshEnabledState()
+
             // Set prediction engine language from App Group shared preference.
             let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
             suggestionState.setLanguage(lang)
