@@ -43,6 +43,8 @@ struct KeyboardView: View {
     @State private var isTrackpadActive = false
     /// Remembers which layer to return to when dismissing the emoji picker.
     @State private var previousLayer: KeyboardLayerType? = nil
+    /// Key frames collected from all keys via PreferenceKey for dead zone routing.
+    @State private var keyFrameMap: [String: KeyFrameInfo] = [:]
 
     private var isShifted: Bool {
         shiftState == .shifted || shiftState == .capsLocked
@@ -67,6 +69,17 @@ struct KeyboardView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
+                // Dead zone interceptor: catches touches in gaps between keys
+                // and routes them to the nearest key. Sits behind all key views.
+                if currentLayer != .emoji {
+                    KeyboardTouchInterceptorView(
+                        keyFrames: keyFrameMap,
+                        onDeadZoneTap: { keyId in
+                            handleDeadZoneTap(keyId)
+                        }
+                    )
+                }
+
                 if currentLayer == .emoji {
                     // Emoji picker replaces the keyboard rows entirely
                     EmojiPickerView(
@@ -219,6 +232,11 @@ struct KeyboardView: View {
                     }
                 }
             }
+            // Coordinate space on ZStack so both keys and interceptor share coordinates
+            .coordinateSpace(name: "keyboardArea")
+            .onPreferenceChange(KeyFramePreferenceKey.self) { frames in
+                keyFrameMap = frames
+            }
         }
         .frame(height: keyboardHeight)
         .onAppear {
@@ -360,6 +378,72 @@ struct KeyboardView: View {
         let totalToDelete = trailingSpaces + charsInWord
         for _ in 0..<totalToDelete {
             proxy.deleteBackward()
+        }
+    }
+
+    /// Handle a tap that landed in a dead zone (gap between keys).
+    /// The interceptor already played audio + haptic on touchDown.
+    /// This function performs the key action on touchUp.
+    ///
+    /// WHY simplified actions for special keys:
+    /// Dead zone taps near special keys are brief taps in gap areas.
+    /// Full features like delete repeat, space trackpad, shift double-tap
+    /// are not needed — those require precise touches on the actual key.
+    private func handleDeadZoneTap(_ keyId: String) {
+        // Single-character IDs are letter keys
+        if keyId.count == 1 {
+            let char = isShifted ? keyId.uppercased() : keyId
+            insertCharacter(char)
+            return
+        }
+
+        // Special keys
+        switch keyId {
+        case "delete":
+            suggestionState.lastAutocorrect = nil
+            controller.textDocumentProxy.deleteBackward()
+            lastTypedChar = nil
+            checkAutocapitalize()
+            DispatchQueue.main.async {
+                suggestionState.update(proxy: controller.textDocumentProxy)
+            }
+        case "space":
+            performAutocorrectIfNeeded()
+            controller.textDocumentProxy.insertText(" ")
+            lastTypedChar = nil
+            suggestionState.clear()
+            checkAutocapitalize()
+        case "return":
+            suggestionState.lastAutocorrect = nil
+            controller.textDocumentProxy.insertText("\n")
+            lastTypedChar = nil
+            suggestionState.clear()
+            checkAutocapitalize()
+        case "shift":
+            shiftState = shiftState == .off ? .shifted : .off
+        case "globe":
+            controller.advanceToNextInputMode()
+        case "emoji":
+            previousLayer = currentLayer
+            currentLayer = .emoji
+            isEmojiMode = true
+        case "accentAdaptive":
+            let char = AccentedCharacters.adaptiveKeyLabel(afterTyping: lastTypedChar)
+            if AccentedCharacters.shouldReplace(afterTyping: lastTypedChar) {
+                controller.textDocumentProxy.deleteBackward()
+            }
+            insertCharacter(char)
+        default:
+            // Layer switch / symbol toggle
+            if keyId.hasPrefix("layerSwitch") {
+                suggestionState.lastAutocorrect = nil
+                suggestionState.clear()
+                toggleLettersNumbers()
+            } else if keyId.hasPrefix("symbolToggle") {
+                suggestionState.lastAutocorrect = nil
+                suggestionState.clear()
+                toggleNumbersSymbols()
+            }
         }
     }
 

@@ -290,20 +290,23 @@ enum DeviceClass {
 /// - keyCornerRadius: Apple uses ~5pt on standard devices
 enum KeyMetrics {
     /// Key height per device class.
+    /// Measured from Apple keyboard: ~40pt (SE), ~43pt (standard), ~46pt (Plus/Max).
+    /// Previous values (42/46/50) were too tall, making keys look oversized.
     static let keyHeight: CGFloat = {
         switch DeviceClass.current {
-        case .compact:  return 42
-        case .standard: return 46
-        case .large:    return 50
+        case .compact:  return 40
+        case .standard: return 43
+        case .large:    return 46
         }
     }()
 
     /// Vertical spacing between rows.
+    /// Apple uses slightly more vertical spacing than horizontal (~11pt standard).
     static let rowSpacing: CGFloat = {
         switch DeviceClass.current {
-        case .compact:  return 8
-        case .standard: return 10
-        case .large:    return 11
+        case .compact:  return 9
+        case .standard: return 11
+        case .large:    return 12
         }
     }()
 
@@ -317,16 +320,9 @@ enum KeyMetrics {
     }()
 
     /// Horizontal padding on each side of a row.
-    /// CHANGE from old value (3pt for all): Now approximately matches keySpacing.
-    /// Per issue #29: Apple keyboard side margins ~= inter-key gap.
-    /// Old: 3pt uniform. New: 3pt (compact), 4pt (standard), 5pt (large).
-    static let rowHorizontalPadding: CGFloat = {
-        switch DeviceClass.current {
-        case .compact:  return 3
-        case .standard: return 4
-        case .large:    return 5
-        }
-    }()
+    /// Apple keyboard uses very thin side margins (~3pt across all devices).
+    /// Previous values (3/4/5) made margins too wide on standard and large devices.
+    static let rowHorizontalPadding: CGFloat = 3
 
     /// Corner radius for key backgrounds.
     static let keyCornerRadius: CGFloat = 5
