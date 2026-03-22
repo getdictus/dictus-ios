@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 16 plan 01 partially executed -- version bump, Privacy Manifests, privacy policy, review checklist done. Signing migration blocked on Apple Developer enrollment.
+**Current focus:** Phase 15.3 keyboard optimization -- Plan 01 complete (haptic cache, static KeyMetrics, background suggestions, touchDown pipeline, OSSignposter). Plans 02-04 remaining.
 
 ## Current Position
 
-Phase: 16 (TestFlight Deployment)
-Plan: 1 of 3 in current phase (PARTIAL -- signing migration deferred)
-Status: Plan 16-01 partially executed. Version bump, Privacy Manifests, PRIVACY.md, review checklist all done. DEVELOPMENT_TEAM still QN58279822 -- awaiting new Apple Developer Team ID from Pierre.
-Last activity: 2026-03-19 -- Plan 16-01 partial execution (commit 1f2b1d4)
+Phase: 15.3 (Keyboard Optimization and Responsiveness)
+Plan: 2 of 4 in current phase
+Status: Plan 15.3-01 complete. Quick performance wins: cached haptics, static KeyMetrics, background suggestions, touchDown pipeline, OSSignposter instrumentation.
+Last activity: 2026-03-22 -- Plan 15.3-01 execution (commits 4c8f660, 2375eca)
 
 Progress: [█████████░] 95%
 
@@ -94,6 +94,9 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15.2]: LiveActivityPhase enum separate from ContentState.Phase -- adds .idle state and transition validation to prevent DI desync (#42)
 - [Phase 15.2]: waveformRefreshID incremented inside refreshFromDefaults() to guarantee it fires on every keyboard reappear path
 - [Phase 15.2]: .id(waveformRefreshID) pattern forces BrandWaveform recreation when keyboard returns from off-screen -- solves frozen TimelineView/CADisplayLink
+- [Phase 15.3]: Audio+haptic moved to touchDown (not touchUp) matching Apple keyboard -- feedback on press, character insertion on release
+- [Phase 15.3]: Synchronous update(proxy:) kept for delete/undo paths; new updateAsync(context:) for normal character insertion
+- [Phase 15.3]: OSSignposter emitEvent for sub-interval markers within touchDown interval
 
 ### Pending Todos
 
@@ -114,9 +117,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T13:07:02.341Z
-Stopped at: Phase 15.3 context gathered
-Resume file: .planning/phases/15.3-keyboard-optimization-and-responsiveness/15.3-CONTEXT.md
+Last session: 2026-03-22T22:23:08Z
+Stopped at: Completed 15.3-01-PLAN.md
+Resume file: .planning/phases/15.3-keyboard-optimization-and-responsiveness/15.3-02-PLAN.md
 
 ---
 *State initialized: 2026-03-04*
