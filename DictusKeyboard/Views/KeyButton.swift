@@ -57,7 +57,10 @@ struct KeyButton: View {
             .foregroundStyle(.primary)
             .frame(maxWidth: .infinity)
             .frame(height: KeyMetrics.keyHeight)
-            .background(keyBackground)
+            .background(
+                keyBackground
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+            )
             // Popup preview shown above key on press (hidden when accents are showing)
             .overlay(
                 Group {

@@ -23,20 +23,23 @@ struct KeyRow: View {
     let hasFullAccess: Bool
 
     /// Calculate the width of a 1x key based on row content.
+    ///
+    /// WHY zero-spacing: With HStack(spacing: 0), each key's touch area
+    /// covers the full allocated width including what was previously gap space.
+    /// Visual gaps are created by inset backgrounds (padding on RoundedRectangle).
+    /// This eliminates dead zones AND fixes edge key touch issues (UIView overlay
+    /// bounds now extend to the keyboard edge with no clipping gap).
     private var unitKeyWidth: CGFloat {
         let totalMultiplier = keys.reduce(0) { $0 + $1.widthMultiplier }
-        let totalSpacing = CGFloat(keys.count - 1) * KeyMetrics.keySpacing
-        let availableWidth = rowWidth - (KeyMetrics.rowHorizontalPadding * 2) - totalSpacing
-        return availableWidth / totalMultiplier
+        return rowWidth / totalMultiplier
     }
 
     var body: some View {
-        HStack(spacing: KeyMetrics.keySpacing) {
+        HStack(spacing: 0) {
             ForEach(keys) { key in
                 keyView(for: key)
             }
         }
-        .padding(.horizontal, KeyMetrics.rowHorizontalPadding)
     }
 
     @ViewBuilder

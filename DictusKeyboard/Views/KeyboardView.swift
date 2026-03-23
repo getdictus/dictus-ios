@@ -151,35 +151,29 @@ struct KeyboardView: View {
                                     }
                                 },
                                 onGlobe: {
-                                    HapticFeedback.keyTapped()
-                                    AudioServicesPlaySystemSound(KeySound.modifier)
+                                    // Haptic + audio now handled by GlobeKey internally (touchDown)
                                     controller.advanceToNextInputMode()
                                 },
                                 onEmoji: {
-                                    HapticFeedback.keyTapped()
-                                    AudioServicesPlaySystemSound(KeySound.modifier)
+                                    // Haptic + audio now handled by EmojiKey internally (touchDown)
                                     previousLayer = currentLayer
                                     currentLayer = .emoji
                                     isEmojiMode = true
                                 },
                                 onLayerSwitch: {
-                                    HapticFeedback.keyTapped()
-                                    AudioServicesPlaySystemSound(KeySound.modifier)
+                                    // Haptic + audio now handled by LayerSwitchKey internally (touchDown)
                                     suggestionState.lastAutocorrect = nil
                                     suggestionState.clear()
                                     toggleLettersNumbers()
                                 },
                                 onSymbolToggle: {
-                                    HapticFeedback.keyTapped()
-                                    AudioServicesPlaySystemSound(KeySound.modifier)
+                                    // Haptic + audio now handled by LayerSwitchKey internally (touchDown)
                                     suggestionState.lastAutocorrect = nil
                                     suggestionState.clear()
                                     toggleNumbersSymbols()
                                 },
                                 onSpace: {
-                                    AudioServicesPlaySystemSound(KeySound.modifier)
-                                    // Autocorrect: before inserting space, check if the
-                                    // current word is misspelled and replace it.
+                                    // Audio now handled by SpaceKey internally (touchDown)
                                     performAutocorrectIfNeeded()
                                     controller.textDocumentProxy.insertText(" ")
                                     lastTypedChar = nil
@@ -187,8 +181,7 @@ struct KeyboardView: View {
                                     checkAutocapitalize()
                                 },
                                 onReturn: {
-                                    HapticFeedback.keyTapped()
-                                    AudioServicesPlaySystemSound(KeySound.modifier)
+                                    // Haptic + audio now handled by ReturnKey internally (touchDown)
                                     suggestionState.lastAutocorrect = nil
                                     controller.textDocumentProxy.insertText("\n")
                                     lastTypedChar = nil
