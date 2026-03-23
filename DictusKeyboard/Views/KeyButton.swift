@@ -87,7 +87,10 @@ struct KeyButton: View {
                 },
                 alignment: .top
             )
-            // DragGesture for immediate touchDown handling
+            // Extend hit area to entire frame (including gap padding).
+            // Without this, only the Text content is tappable — the expanded
+            // .frame() area is NOT tappable by default in SwiftUI.
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in

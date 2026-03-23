@@ -29,6 +29,7 @@ struct ShiftKey: View {
                     .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -110,6 +111,7 @@ struct DeleteKey: View {
                     .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -226,6 +228,7 @@ struct SpaceKey: View {
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
                     .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
@@ -376,6 +379,7 @@ struct ReturnKey: View {
                     .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -413,6 +417,7 @@ struct GlobeKey: View {
                     .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -450,6 +455,7 @@ struct EmojiKey: View {
                     .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -519,8 +525,18 @@ struct AdaptiveAccentKey: View {
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
                     .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
+            // Popup preview on press (like letter keys)
             .overlay(
-                // Accent popup on long-press (only when showing an accent, not apostrophe)
+                Group {
+                    if isPressed && !showingAccents {
+                        KeyPopup(label: displayChar)
+                            .offset(y: -(KeyMetrics.keyHeight + 8))
+                    }
+                },
+                alignment: .top
+            )
+            // Accent popup on long-press (only when showing an accent, not apostrophe)
+            .overlay(
                 Group {
                     if showingAccents {
                         AccentPopup(
@@ -532,6 +548,7 @@ struct AdaptiveAccentKey: View {
                 },
                 alignment: .top
             )
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
@@ -628,6 +645,7 @@ struct LayerSwitchKey: View {
                     .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
