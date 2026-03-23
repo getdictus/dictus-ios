@@ -43,6 +43,8 @@ struct KeyboardView: View {
     @State private var isTrackpadActive = false
     /// Remembers which layer to return to when dismissing the emoji picker.
     @State private var previousLayer: KeyboardLayerType? = nil
+    /// Guards against multiple dead zone fires during a single DragGesture.
+    @State private var deadZoneTapFired = false
 
     private var isShifted: Bool {
         shiftState == .shifted || shiftState == .capsLocked
@@ -199,6 +201,22 @@ struct KeyboardView: View {
                             )
                         }
                     }
+                    // Catch-all gesture for dead zone touches.
+                    // Parent gestures have LOWER priority than child gestures in SwiftUI.
+                    // This only fires when NO child key gesture claims the touch (dead zone).
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                if !deadZoneTapFired {
+                                    deadZoneTapFired = true
+                                    handleDeadZoneTap(at: value.location, rowWidth: geometry.size.width)
+                                }
+                            }
+                            .onEnded { _ in
+                                deadZoneTapFired = false
+                            }
+                    )
                     // Greyed-out overlay during trackpad mode (Apple behavior).
                     // allowsHitTesting(false) ensures the spacebar's DragGesture
                     // continues receiving touch events while the overlay is visible.
@@ -352,6 +370,99 @@ struct KeyboardView: View {
         let totalToDelete = trailingSpaces + charsInWord
         for _ in 0..<totalToDelete {
             proxy.deleteBackward()
+        }
+    }
+
+    /// Handle a tap that landed in a dead zone (gap between key gesture areas).
+    /// Computes the nearest key from the touch position using layout math and
+    /// performs the appropriate action with haptic + audio feedback.
+    ///
+    /// WHY layout math instead of PreferenceKey:
+    /// The keyboard layout is deterministic — key positions are computed from
+    /// rowWidth, unitKeyWidth, and widthMultipliers. No need for runtime frame
+    /// collection. This is faster and simpler.
+    private func handleDeadZoneTap(at point: CGPoint, rowWidth: CGFloat) {
+        let rowHeight = KeyMetrics.keyHeight + KeyMetrics.rowSpacing
+        let rowIndex = max(0, min(Int(point.y / rowHeight), currentRows.count - 1))
+        let row = currentRows[rowIndex]
+
+        // Compute unitKeyWidth for this row (same formula as KeyRow)
+        let totalMultiplier = row.reduce(CGFloat(0)) { $0 + $1.widthMultiplier }
+        let unitKeyWidth = rowWidth / totalMultiplier
+
+        // Find which key the x position falls into
+        var x: CGFloat = 0
+        var targetKey: KeyDefinition = row.last!
+        for key in row {
+            let keyWidth = unitKeyWidth * key.widthMultiplier
+            if point.x < x + keyWidth {
+                targetKey = key
+                break
+            }
+            x += keyWidth
+        }
+
+        // Play audio + haptic
+        switch targetKey.type {
+        case .character:
+            AudioServicesPlaySystemSound(KeySound.letter)
+        default:
+            AudioServicesPlaySystemSound(KeySound.modifier)
+        }
+        HapticFeedback.keyTapped()
+        HapticFeedback.prepareForNextTap()
+
+        // Perform action based on key type
+        switch targetKey.type {
+        case .character:
+            let char = isShifted
+                ? (targetKey.output ?? targetKey.label).uppercased()
+                : (targetKey.output ?? targetKey.label)
+            insertCharacter(char)
+        case .delete:
+            suggestionState.lastAutocorrect = nil
+            controller.textDocumentProxy.deleteBackward()
+            lastTypedChar = nil
+            checkAutocapitalize()
+            DispatchQueue.main.async {
+                suggestionState.update(proxy: controller.textDocumentProxy)
+            }
+        case .space:
+            performAutocorrectIfNeeded()
+            controller.textDocumentProxy.insertText(" ")
+            lastTypedChar = nil
+            suggestionState.clear()
+            checkAutocapitalize()
+        case .returnKey:
+            suggestionState.lastAutocorrect = nil
+            controller.textDocumentProxy.insertText("\n")
+            lastTypedChar = nil
+            suggestionState.clear()
+            checkAutocapitalize()
+        case .shift:
+            shiftState = shiftState == .off ? .shifted : .off
+        case .globe:
+            controller.advanceToNextInputMode()
+        case .emoji:
+            previousLayer = currentLayer
+            currentLayer = .emoji
+            isEmojiMode = true
+        case .layerSwitch:
+            suggestionState.lastAutocorrect = nil
+            suggestionState.clear()
+            toggleLettersNumbers()
+        case .symbolToggle:
+            suggestionState.lastAutocorrect = nil
+            suggestionState.clear()
+            toggleNumbersSymbols()
+        case .accentAdaptive:
+            let char = AccentedCharacters.adaptiveKeyLabel(afterTyping: lastTypedChar)
+            if AccentedCharacters.shouldReplace(afterTyping: lastTypedChar) {
+                controller.textDocumentProxy.deleteBackward()
+            }
+            insertCharacter(char)
+        case .mic:
+            break
         }
     }
 
