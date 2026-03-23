@@ -49,15 +49,12 @@ struct KeyRow: View {
         switch key.type {
         case .character:
             KeyButton(key: key, isShifted: isShifted, onTap: onCharacter)
-                .reportKeyFrame(id: key.label.lowercased(), isLetter: true)
 
         case .shift:
             ShiftKey(shiftState: shiftState, width: keyWidth)
-                .reportKeyFrame(id: "shift", isLetter: false)
 
         case .delete:
             DeleteKey(width: keyWidth, onDelete: onDelete, onWordDelete: onWordDelete)
-                .reportKeyFrame(id: "delete", isLetter: false)
 
         case .space:
             SpaceKey(
@@ -66,19 +63,15 @@ struct KeyRow: View {
                 onCursorMove: onCursorMove,
                 onTrackpadStateChange: onTrackpadStateChange
             )
-            .reportKeyFrame(id: "space", isLetter: false)
 
         case .returnKey:
             ReturnKey(width: keyWidth, onTap: onReturn)
-                .reportKeyFrame(id: "return", isLetter: false)
 
         case .globe:
             GlobeKey(width: keyWidth, onTap: onGlobe)
-                .reportKeyFrame(id: "globe", isLetter: false)
 
         case .layerSwitch:
             LayerSwitchKey(label: key.label, width: keyWidth, onTap: onLayerSwitch)
-                .reportKeyFrame(id: "layerSwitch_\(key.label)", isLetter: false)
 
         case .mic:
             // Mic keys are filtered out before reaching KeyRow (Plan 03-02).
@@ -88,11 +81,9 @@ struct KeyRow: View {
 
         case .symbolToggle:
             LayerSwitchKey(label: key.label, width: keyWidth, onTap: onSymbolToggle)
-                .reportKeyFrame(id: "symbolToggle_\(key.label)", isLetter: false)
 
         case .emoji:
             EmojiKey(width: keyWidth, onTap: onEmoji)
-                .reportKeyFrame(id: "emoji", isLetter: false)
 
         case .accentAdaptive:
             AdaptiveAccentKey(
@@ -101,7 +92,6 @@ struct KeyRow: View {
                 lastTypedChar: lastTypedChar,
                 onTap: onAccentAdaptive
             )
-            .reportKeyFrame(id: "accentAdaptive", isLetter: false)
         }
     }
 }

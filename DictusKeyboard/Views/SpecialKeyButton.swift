@@ -20,12 +20,13 @@ struct ShiftKey: View {
         Image(systemName: shiftIconName)
             .font(.system(size: 16, weight: .medium))
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
             .gesture(
@@ -100,12 +101,13 @@ struct DeleteKey: View {
         Image(systemName: "delete.backward")
             .font(.system(size: 16, weight: .medium))
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(isHolding ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
             .gesture(
@@ -216,12 +218,13 @@ struct SpaceKey: View {
             .font(.system(size: 15))
             .foregroundColor(Color(.label))
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .gesture(
                 DragGesture(minimumDistance: 0)
@@ -364,12 +367,13 @@ struct ReturnKey: View {
         Image(systemName: "return.left")
             .font(.system(size: 16, weight: .medium))
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
             .gesture(
@@ -400,12 +404,13 @@ struct GlobeKey: View {
         Image(systemName: "globe")
             .font(.system(size: 16, weight: .medium))
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
             .gesture(
@@ -436,12 +441,13 @@ struct EmojiKey: View {
         Image(systemName: "face.smiling")
             .font(.system(size: 18, weight: .medium))
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
             .gesture(
@@ -505,12 +511,13 @@ struct AdaptiveAccentKey: View {
             .font(.system(size: keyFontSize, weight: .regular))
             .foregroundStyle(.primary)
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .overlay(
                 // Accent popup on long-press (only when showing an accent, not apostrophe)
@@ -612,12 +619,13 @@ struct LayerSwitchKey: View {
         Text(label)
             .font(.system(size: 15, weight: .medium))
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
                     .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
             .gesture(
