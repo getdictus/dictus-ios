@@ -1,5 +1,6 @@
 // DictusKeyboard/Views/KeyButton.swift
 import SwiftUI
+import AudioToolbox
 import DictusCore
 
 /// A standard keyboard key that inserts a character on tap.
@@ -7,11 +8,11 @@ import DictusCore
 /// Long-pressing a key with accented variants (e.g., "e" on AZERTY) shows an AccentPopup
 /// where the user can slide their finger to select an accented character.
 ///
-/// WHY DragGesture handles both tap and long-press:
-/// SwiftUI's LongPressGesture doesn't provide continuous drag tracking after recognition.
-/// By using DragGesture alone with a Task.sleep timer, we get: (1) normal tap when released
-/// before 400ms, (2) long-press accent popup when held past 400ms, (3) continuous drag
-/// tracking to highlight the accent under the finger. This is how Apple's own keyboard works.
+/// WHY DragGesture instead of UIViewRepresentable:
+/// UIViewRepresentable overlays don't reliably receive touches at HStack edge positions
+/// due to SwiftUI's frame-boundary clipping. DragGesture(minimumDistance: 0) works at
+/// all positions and provides touchDown haptic via .onChanged. The ~5-10ms latency
+/// difference is imperceptible during normal typing.
 struct KeyButton: View {
     let key: KeyDefinition
     let isShifted: Bool
@@ -27,12 +28,13 @@ struct KeyButton: View {
     @State private var accentOptions: [String] = []
     /// Which accent cell the user's finger is hovering over (nil = none selected).
     @State private var selectedAccentIndex: Int? = nil
-    /// The async task that waits 400ms before showing the accent popup.
-    /// Stored so it can be cancelled if the user lifts their finger early (normal tap).
-    @State private var longPressTimer: Task<Void, Never>? = nil
-    /// The initial X position when the drag started, used to calculate which accent
+    /// The initial X position when touch started, used to calculate which accent
     /// the finger is hovering over relative to the key's center.
-    @State private var dragStartX: CGFloat? = nil
+    @State private var touchStartX: CGFloat = 0
+    /// Task for 400ms long-press timer (accent popup).
+    @State private var longPressTimer: Task<Void, Never>?
+    /// Whether long-press has fired (accent mode active).
+    @State private var longPressFired = false
 
     private var displayLabel: String {
         isShifted ? key.label.uppercased() : key.label.lowercased()
@@ -52,15 +54,18 @@ struct KeyButton: View {
     private let keyFontSize: CGFloat = 22
 
     var body: some View {
-        // Using a plain gesture to get press/release states
         Text(displayLabel)
             .font(.system(size: keyFontSize, weight: .regular))
             .foregroundStyle(.primary)
             .frame(maxWidth: .infinity)
-            .frame(height: KeyMetrics.keyHeight)
-            .background(keyBackground)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
+            .background(
+                keyBackground
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
+            )
+            // Popup preview shown above key on press (hidden when accents are showing)
             .overlay(
-                // Popup preview shown above key on press (hidden when accents are showing)
                 Group {
                     if isPressed && !showingAccents {
                         KeyPopup(label: displayLabel)
@@ -69,9 +74,8 @@ struct KeyButton: View {
                 },
                 alignment: .top
             )
+            // Accent popup on long-press
             .overlay(
-                // Accent popup shown on long-press, positioned above the key.
-                // Uses .top alignment so offset pushes it above the key.
                 Group {
                     if showingAccents {
                         AccentPopup(
@@ -83,42 +87,23 @@ struct KeyButton: View {
                 },
                 alignment: .top
             )
+            // Extend hit area to entire frame (including gap padding).
+            // Without this, only the Text content is tappable — the expanded
+            // .frame() area is NOT tappable by default in SwiftUI.
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         if !isPressed {
-                            // First touch — start the press and the long-press timer
-                            isPressed = true
-                            dragStartX = value.location.x
-                            startLongPressTimer()
+                            handleTouchDown(position: value.location)
                         }
-
-                        // While accents are showing, track finger position to highlight
+                        // Track drag position for accent selection after long-press fires
                         if showingAccents {
-                            updateSelectedAccent(dragLocation: value.location)
+                            updateSelectedAccent(viewPosition: value.location)
                         }
                     }
                     .onEnded { _ in
-                        isPressed = false
-                        longPressTimer?.cancel()
-                        longPressTimer = nil
-
-                        if showingAccents {
-                            // Long-press mode: insert selected accent or dismiss
-                            if let index = selectedAccentIndex, index >= 0, index < accentOptions.count {
-                                onTap(accentOptions[index])
-                                HapticFeedback.keyTapped()
-                            }
-                            // Reset accent state
-                            showingAccents = false
-                            accentOptions = []
-                            selectedAccentIndex = nil
-                        } else {
-                            // Normal tap: insert the regular character
-                            onTap(outputChar)
-                            HapticFeedback.keyTapped()
-                        }
-                        dragStartX = nil
+                        handleTouchUp()
                     }
             )
     }
@@ -126,13 +111,6 @@ struct KeyButton: View {
     // MARK: - Key Background
 
     /// Key background: glass on iOS 26, material fallback on older versions.
-    ///
-    /// WHY conditional glass:
-    /// On iOS 26, the native keyboard container already has a glass-like chrome.
-    /// Adding individual glass effects to keys might create glass-on-glass artifacts.
-    /// We use dictusGlass which applies .glassEffect on iOS 26 and .regularMaterial
-    /// on older iOS. If glass-on-glass looks wrong on iOS 26, this can be adjusted
-    /// to only apply the fallback material on older versions.
     @ViewBuilder
     private var keyBackground: some View {
         RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
@@ -141,52 +119,95 @@ struct KeyButton: View {
             .dictusGlass(in: RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius))
     }
 
-    // MARK: - Long-press helpers
+    // MARK: - Touch handlers
 
-    /// Starts a 400ms timer. If the timer completes (user hasn't lifted finger),
-    /// check if the key has accented variants and show the popup.
-    ///
-    /// WHY 400ms:
-    /// iOS system keyboard uses ~350-500ms for long-press detection. 400ms balances
-    /// responsiveness (not too slow) with avoiding false triggers during fast typing.
-    private func startLongPressTimer() {
+    /// touchDown: visual highlight -> audio -> haptic -> prepare for next -> start long-press timer
+    /// Per locked decision: audio AND haptic fire on touchDown (not touchUp)
+    private func handleTouchDown(position: CGPoint) {
+        let touchDownState = KeyTapSignposter.beginTouchDown()
+
+        // 1. Visual highlight
+        isPressed = true
+        longPressFired = false
+        KeyTapSignposter.emitHighlight(touchDownState)
+
+        // 2. Audio on touchDown
+        AudioServicesPlaySystemSound(KeySound.letter)
+
+        // 3. Haptic on touchDown
+        HapticFeedback.keyTapped()
+        KeyTapSignposter.emitHaptic(touchDownState)
+
+        // 4. Prepare Taptic Engine for NEXT tap
+        HapticFeedback.prepareForNextTap()
+
+        KeyTapSignposter.endTouchDown(touchDownState)
+
+        // 5. Record initial touch position for accent popup position calculation
+        touchStartX = position.x
+
+        // 6. Start 400ms long-press timer for accent popup
         longPressTimer?.cancel()
         longPressTimer = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 400_000_000) // 400ms
-
-            // Check cancellation — user may have lifted finger before 400ms
+            try? await Task.sleep(nanoseconds: 400_000_000)
             guard !Task.isCancelled else { return }
-
-            // Look up accented variants for this key
-            if let accents = AccentedCharacters.accents(for: key.label.lowercased()), !accents.isEmpty {
-                // Apply shift state: uppercase the accented characters when shifted
-                if isShifted {
-                    accentOptions = accents.map { $0.uppercased() }
-                } else {
-                    accentOptions = accents
-                }
-                showingAccents = true
-                selectedAccentIndex = nil
-            }
+            longPressFired = true
+            handleLongPress()
         }
     }
 
-    /// Maps the current drag position to a selected accent index.
+    /// touchUp: insert character or selected accent
+    private func handleTouchUp() {
+        let touchUpState = KeyTapSignposter.beginTouchUp()
+
+        isPressed = false
+        longPressTimer?.cancel()
+        longPressTimer = nil
+
+        if showingAccents {
+            // Long-press mode: insert selected accent or dismiss
+            if let index = selectedAccentIndex, index >= 0, index < accentOptions.count {
+                onTap(accentOptions[index])
+            }
+            // Reset accent state
+            showingAccents = false
+            accentOptions = []
+            selectedAccentIndex = nil
+        } else {
+            // Normal tap: insert character
+            onTap(outputChar)
+        }
+
+        longPressFired = false
+        KeyTapSignposter.endTouchUp(touchUpState)
+    }
+
+    /// Long-press fired: show accent popup if key has accented variants
     ///
-    /// WHY horizontal position mapping:
-    /// The accent popup is a horizontal row of cells centered above the key.
-    /// As the user slides their finger left/right, we calculate which cell
-    /// they're over based on the horizontal distance from center.
-    private func updateSelectedAccent(dragLocation: CGPoint) {
+    /// WHY 400ms: iOS system keyboard uses ~350-500ms for long-press detection.
+    /// 400ms balances responsiveness with avoiding false triggers during fast typing.
+    private func handleLongPress() {
+        if let accents = AccentedCharacters.accents(for: key.label.lowercased()), !accents.isEmpty {
+            if isShifted {
+                accentOptions = accents.map { $0.uppercased() }
+            } else {
+                accentOptions = accents
+            }
+            showingAccents = true
+            selectedAccentIndex = nil
+        }
+    }
+
+    // MARK: - Accent selection
+
+    /// Maps touch position to accent popup cell index.
+    private func updateSelectedAccent(viewPosition: CGPoint) {
         guard !accentOptions.isEmpty else { return }
 
-        // The popup is centered above the key. Calculate the offset from
-        // the drag start position to determine which cell the finger is over.
         let totalPopupWidth = CGFloat(accentOptions.count) * accentCellWidth
-        let popupStartX = (dragStartX ?? 0) - totalPopupWidth / 2
+        let popupStartX = touchStartX - totalPopupWidth / 2
 
-        // Calculate which cell the finger is over
-        let relativeX = dragLocation.x - popupStartX
+        let relativeX = viewPosition.x - popupStartX
         let index = Int(relativeX / accentCellWidth)
 
         if index >= 0 && index < accentOptions.count {
@@ -217,31 +238,79 @@ struct KeyPopup: View {
     }
 }
 
-/// Shared key dimension constants.
+/// Device class for adaptive keyboard layout.
 ///
-/// WHY dynamic keyHeight:
-/// Apple's keyboard uses taller keys on Plus/Max devices (larger screens) and shorter
-/// keys on SE/compact devices. A fixed 46pt height feels cramped on large screens and
-/// oversized on small ones. We scale based on UIScreen.main.bounds.height to match
-/// the native feel per device class.
-enum KeyMetrics {
-    /// Device-adaptive key height: 42pt (SE/compact), 46pt (standard), 50pt (Plus/Max).
-    static var keyHeight: CGFloat {
-        let screenHeight = UIScreen.main.bounds.height
-        if screenHeight <= 667 { return 42 }       // SE / compact (667pt = iPhone SE)
-        else if screenHeight <= 852 { return 46 }   // Standard (844-852pt = iPhone 14/15/16)
-        else { return 50 }                           // Plus / Max (926pt+)
-    }
-    static let rowSpacing: CGFloat = 6
-    static let keySpacing: CGFloat = 4
-    static let rowHorizontalPadding: CGFloat = 3
-    static let keyCornerRadius: CGFloat = 6
+/// Breakpoints based on UIScreen.main.bounds.height:
+/// - compact: <= 667pt (iPhone SE 3rd gen = 667pt)
+/// - standard: <= 852pt (iPhone 14/15/16 = 844-852pt)
+/// - large: > 852pt (iPhone Plus/Max = 926-932pt)
+enum DeviceClass {
+    case compact    // iPhone SE
+    case standard   // iPhone 14/15/16
+    case large      // iPhone Plus/Max
 
-    /// Letter key background — matches native iOS keyboard.
-    /// Dark mode: visible gray (not pure black). Light mode: white.
+    static let current: DeviceClass = {
+        let h = UIScreen.main.bounds.height
+        if h <= 667 { return .compact }
+        else if h <= 852 { return .standard }
+        else { return .large }
+    }()
+}
+
+/// Shared key dimension constants, computed once per device class.
+enum KeyMetrics {
+    /// Key height per device class (visual key height).
+    static let keyHeight: CGFloat = {
+        switch DeviceClass.current {
+        case .compact:  return 40
+        case .standard: return 43
+        case .large:    return 46
+        }
+    }()
+
+    /// Vertical spacing between rows (used as visual gap via background inset).
+    static let rowSpacing: CGFloat = {
+        switch DeviceClass.current {
+        case .compact:  return 9
+        case .standard: return 11
+        case .large:    return 12
+        }
+    }()
+
+    /// Horizontal spacing between keys (used as visual gap via background inset).
+    static let keySpacing: CGFloat = {
+        switch DeviceClass.current {
+        case .compact:  return 5
+        case .standard: return 6
+        case .large:    return 6
+        }
+    }()
+
+    /// Horizontal padding on each side of a row.
+    /// Creates visual side margins matching Apple keyboard proportions (~equal to keySpacing).
+    static let rowSidePadding: CGFloat = {
+        switch DeviceClass.current {
+        case .compact:  return 3
+        case .standard: return 4
+        case .large:    return 5
+        }
+    }()
+
+    /// Corner radius for key backgrounds.
+    /// Apple keyboard uses ~6pt on standard devices for a softer, more rounded look.
+    static let keyCornerRadius: CGFloat = 8
+
+    /// Letter key background color.
     static let letterKeyColor = Color(UIColor { tc in
         tc.userInterfaceStyle == .dark
             ? UIColor(white: 0.22, alpha: 1)
             : .white
+    })
+
+    /// Pressed key background color for special keys.
+    static let pressedKeyColor = Color(UIColor { tc in
+        tc.userInterfaceStyle == .dark
+            ? UIColor(white: 0.32, alpha: 1)
+            : UIColor(white: 0.88, alpha: 1)
     })
 }

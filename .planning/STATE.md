@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
-status: in-progress
-stopped_at: "16-01-PLAN.md partially executed (signing migration deferred -- awaiting Apple Developer Team ID)"
-last_updated: "2026-03-19T12:10:33Z"
-last_activity: "2026-03-19 -- Plan 16-01 partial: version bump 1.2, Privacy Manifests, PRIVACY.md, review checklist done. Signing migration blocked on Team ID."
+status: completed
+stopped_at: Completed 15.3-02-PLAN.md
+last_updated: "2026-03-24T12:11:49.665Z"
+last_activity: 2026-03-22 -- Plan 15.3-03 execution (commits e00a70c, 427d791)
 progress:
-  total_phases: 8
-  completed_phases: 7
-  total_plans: 31
-  completed_plans: 29
-  percent: 100
+  total_phases: 9
+  completed_phases: 8
+  total_plans: 35
+  completed_plans: 33
+  percent: 91
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 16 plan 01 partially executed -- version bump, Privacy Manifests, privacy policy, review checklist done. Signing migration blocked on Apple Developer enrollment.
+**Current focus:** Phase 15.3 keyboard optimization -- Plan 01 complete (haptic cache, static KeyMetrics, background suggestions, touchDown pipeline, OSSignposter). Plans 02-04 remaining.
 
 ## Current Position
 
-Phase: 16 (TestFlight Deployment)
-Plan: 1 of 3 in current phase (PARTIAL -- signing migration deferred)
-Status: Plan 16-01 partially executed. Version bump, Privacy Manifests, PRIVACY.md, review checklist all done. DEVELOPMENT_TEAM still QN58279822 -- awaiting new Apple Developer Team ID from Pierre.
-Last activity: 2026-03-19 -- Plan 16-01 partial execution (commit 1f2b1d4)
+Phase: 15.3 (Keyboard Optimization and Responsiveness)
+Plan: 4 of 4 in current phase
+Status: Plan 15.3-03 complete. Device-adaptive KeyMetrics across 3 device classes, press feedback on special keys.
+Last activity: 2026-03-22 -- Plan 15.3-03 execution (commits e00a70c, 427d791)
 
-Progress: [█████████░] 95%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -94,6 +94,11 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15.2]: LiveActivityPhase enum separate from ContentState.Phase -- adds .idle state and transition validation to prevent DI desync (#42)
 - [Phase 15.2]: waveformRefreshID incremented inside refreshFromDefaults() to guarantee it fires on every keyboard reappear path
 - [Phase 15.2]: .id(waveformRefreshID) pattern forces BrandWaveform recreation when keyboard returns from off-screen -- solves frozen TimelineView/CADisplayLink
+- [Phase 15.3]: Audio+haptic moved to touchDown (not touchUp) matching Apple keyboard -- feedback on press, character insertion on release
+- [Phase 15.3]: Synchronous update(proxy:) kept for delete/undo paths; new updateAsync(context:) for normal character insertion
+- [Phase 15.3]: OSSignposter emitEvent for sub-interval markers within touchDown interval
+- [Phase 15.3]: 3 device classes (compact/standard/large) based on screen height 667/852pt breakpoints for all KeyMetrics
+- [Phase 15.3]: UIViewRepresentable touch overlay: transparent UIView captures touches, SwiftUI handles rendering -- zero gesture disambiguation delay
 
 ### Pending Todos
 
@@ -103,6 +108,7 @@ None.
 
 - Phase 15.1 inserted after Phase 15: UI polish fixes (#30, #33, #34, #24) (URGENT)
 - Phase 15.2 inserted after Phase 15: Cleaning and fix github issues (URGENT)
+- Phase 15.3 inserted after Phase 15: Keyboard optimization and responsiveness (URGENT)
 
 ### Blockers/Concerns
 
@@ -113,8 +119,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-19T12:10:33Z
-Stopped at: 16-01-PLAN.md partial -- awaiting Apple Developer Team ID for signing migration
+Last session: 2026-03-22T22:31:17.831Z
+Stopped at: Completed 15.3-02-PLAN.md
 Resume file: None
 
 ---

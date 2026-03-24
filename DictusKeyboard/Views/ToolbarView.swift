@@ -75,9 +75,12 @@ struct ToolbarView: View {
             }
         }
         .padding(.horizontal, 12)
-        // WHY 48pt instead of 44pt: The AnimatedMicButton pill (36pt tall) has glow/shadow
-        // effects that extend slightly above. 44pt clipped the top of the mic pill.
-        // 48pt provides 6pt breathing room above and below the pill.
-        .frame(height: 48)
+        // Push content down so the mic ring/glow doesn't get clipped by the
+        // iOS keyboard container's native top border (~2pt separator).
+        .padding(.top, 4)
+        // WHY 52pt: The AnimatedMicButton pill (36pt tall) has ring/glow effects
+        // extending to 46pt. With 4pt top padding, 52pt total provides enough
+        // breathing room above and below the pill without clipping.
+        .frame(height: 52)
     }
 }

@@ -5,49 +5,60 @@ import DictusCore
 
 /// Shift key with three states: off, shift (single character), caps lock.
 /// Double-tap detected via timestamp: if second tap arrives within 400ms, activate caps lock.
+///
+/// WHY DragGesture instead of Button:
+/// Button fires its action on touchUp. DragGesture(minimumDistance: 0) fires .onChanged
+/// on touchDown, allowing immediate haptic feedback (matching Apple keyboard behavior).
 struct ShiftKey: View {
     @Binding var shiftState: ShiftState
     let width: CGFloat
 
+    @State private var isPressed = false
     @State private var lastTapTime: Date = .distantPast
 
     var body: some View {
-        Button {
-            HapticFeedback.keyTapped()
-            AudioServicesPlaySystemSound(KeySound.modifier)
-            let now = Date()
-            let interval = now.timeIntervalSince(lastTapTime)
-            lastTapTime = now
+        Image(systemName: shiftIconName)
+            .font(.system(size: 16, weight: .medium))
+            .frame(width: width)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
+            .background(
+                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                    .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
+                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
+            )
+            .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed {
+                            isPressed = true
+                            HapticFeedback.keyTapped()
+                            AudioServicesPlaySystemSound(KeySound.modifier)
+                        }
+                    }
+                    .onEnded { _ in
+                        isPressed = false
+                        let now = Date()
+                        let interval = now.timeIntervalSince(lastTapTime)
+                        lastTapTime = now
 
-            if interval < 0.4 && shiftState == .shifted {
-                // Double-tap: activate caps lock
-                shiftState = .capsLocked
-            } else {
-                switch shiftState {
-                case .off:
-                    shiftState = .shifted
-                case .shifted:
-                    shiftState = .off
-                case .capsLocked:
-                    shiftState = .off
-                }
-            }
-        } label: {
-            Image(systemName: shiftIconName)
-                .font(.system(size: 16, weight: .medium))
-                .frame(width: width)
-                .frame(height: KeyMetrics.keyHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(KeyMetrics.letterKeyColor)
-                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-                )
-                // WHY Color(.label) for all states:
-                // .label is black in light mode, white in dark mode — always
-                // visible against the key background. The filled icon (shift.fill,
-                // capslock.fill) already indicates the active state visually.
-                .foregroundColor(Color(.label))
-        }
+                        if interval < 0.4 && shiftState == .shifted {
+                            shiftState = .capsLocked
+                        } else {
+                            switch shiftState {
+                            case .off:
+                                shiftState = .shifted
+                            case .shifted:
+                                shiftState = .off
+                            case .capsLocked:
+                                shiftState = .off
+                            }
+                        }
+                    }
+            )
     }
 
     private var shiftIconName: String {
@@ -91,13 +102,16 @@ struct DeleteKey: View {
         Image(systemName: "delete.backward")
             .font(.system(size: 16, weight: .medium))
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                    .fill(KeyMetrics.letterKeyColor)
+                    .fill(isHolding ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
             .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
@@ -206,12 +220,15 @@ struct SpaceKey: View {
             .font(.system(size: 15))
             .foregroundColor(Color(.label))
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                    .fill(KeyMetrics.letterKeyColor)
+                    .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
@@ -220,6 +237,7 @@ struct SpaceKey: View {
                             isPressed = true
                             lastDragLocation = value.location
                             HapticFeedback.keyTapped()
+                            AudioServicesPlaySystemSound(KeySound.modifier)
                             startTrackpadTimer()
                         }
                         if isTrackpadMode {
@@ -338,69 +356,121 @@ struct SpaceKey: View {
     }
 }
 
-/// Return key.
+/// Return key with touchDown haptic feedback.
+///
+/// WHY DragGesture instead of Button:
+/// Button fires action on touchUp. DragGesture(minimumDistance: 0) fires .onChanged
+/// on touchDown for immediate haptic, matching Apple keyboard behavior.
 struct ReturnKey: View {
     let width: CGFloat
     let onTap: () -> Void
 
+    @State private var isPressed = false
+
     var body: some View {
-        Button(action: onTap) {
-            Image(systemName: "return.left")
-                .font(.system(size: 16, weight: .medium))
-                .frame(width: width)
-                .frame(height: KeyMetrics.keyHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(KeyMetrics.letterKeyColor)
-                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-                )
-        }
-        .foregroundColor(Color(.label))
+        Image(systemName: "return.left")
+            .font(.system(size: 16, weight: .medium))
+            .frame(width: width)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
+            .background(
+                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                    .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
+                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
+            )
+            .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed {
+                            isPressed = true
+                            HapticFeedback.keyTapped()
+                            AudioServicesPlaySystemSound(KeySound.modifier)
+                        }
+                    }
+                    .onEnded { _ in
+                        isPressed = false
+                        onTap()
+                    }
+            )
     }
 }
 
-/// Globe key (switch keyboards).
+/// Globe key (switch keyboards) with touchDown haptic.
 struct GlobeKey: View {
     let width: CGFloat
     let onTap: () -> Void
 
+    @State private var isPressed = false
+
     var body: some View {
-        Button(action: onTap) {
-            Image(systemName: "globe")
-                .font(.system(size: 16, weight: .medium))
-                .frame(width: width)
-                .frame(height: KeyMetrics.keyHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(KeyMetrics.letterKeyColor)
-                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-                )
-        }
-        .foregroundColor(Color(.label))
+        Image(systemName: "globe")
+            .font(.system(size: 16, weight: .medium))
+            .frame(width: width)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
+            .background(
+                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                    .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
+                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
+            )
+            .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed {
+                            isPressed = true
+                            HapticFeedback.keyTapped()
+                            AudioServicesPlaySystemSound(KeySound.modifier)
+                        }
+                    }
+                    .onEnded { _ in
+                        isPressed = false
+                        onTap()
+                    }
+            )
     }
 }
 
-/// Emoji key — shows a face.smiling icon matching Apple's native AZERTY visual style.
-/// Tapping opens the built-in emoji picker (EmojiPickerView) within the keyboard extension.
-/// The globe key (managed by iOS, separate from this button) handles switching between
-/// installed keyboards.
+/// Emoji key with touchDown haptic.
 struct EmojiKey: View {
     let width: CGFloat
     let onTap: () -> Void
 
+    @State private var isPressed = false
+
     var body: some View {
-        Button(action: onTap) {
-            Image(systemName: "face.smiling")
-                .font(.system(size: 18, weight: .medium))
-                .frame(width: width)
-                .frame(height: KeyMetrics.keyHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(KeyMetrics.letterKeyColor)
-                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-                )
-        }
-        .foregroundColor(Color(.label))
+        Image(systemName: "face.smiling")
+            .font(.system(size: 18, weight: .medium))
+            .frame(width: width)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
+            .background(
+                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                    .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
+                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
+            )
+            .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed {
+                            isPressed = true
+                            HapticFeedback.keyTapped()
+                            AudioServicesPlaySystemSound(KeySound.modifier)
+                        }
+                    }
+                    .onEnded { _ in
+                        isPressed = false
+                        onTap()
+                    }
+            )
     }
 }
 
@@ -448,14 +518,26 @@ struct AdaptiveAccentKey: View {
             .font(.system(size: keyFontSize, weight: .regular))
             .foregroundStyle(.primary)
             .frame(width: width)
-            .frame(height: KeyMetrics.keyHeight)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
             .background(
                 RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
                     .fill(KeyMetrics.letterKeyColor)
                     .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
             )
+            // Popup preview on press (like letter keys)
             .overlay(
-                // Accent popup on long-press (only when showing an accent, not apostrophe)
+                Group {
+                    if isPressed && !showingAccents {
+                        KeyPopup(label: displayChar)
+                            .offset(y: -(KeyMetrics.keyHeight + 8))
+                    }
+                },
+                alignment: .top
+            )
+            // Accent popup on long-press (only when showing an accent, not apostrophe)
+            .overlay(
                 Group {
                     if showingAccents {
                         AccentPopup(
@@ -467,6 +549,7 @@ struct AdaptiveAccentKey: View {
                 },
                 alignment: .top
             )
+            .contentShape(Rectangle())
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
@@ -542,24 +625,41 @@ struct AdaptiveAccentKey: View {
     }
 }
 
-/// Layer switch key (123 / ABC).
+/// Layer switch key (123 / ABC) with touchDown haptic.
 struct LayerSwitchKey: View {
     let label: String
     let width: CGFloat
     let onTap: () -> Void
 
+    @State private var isPressed = false
+
     var body: some View {
-        Button(action: onTap) {
-            Text(label)
-                .font(.system(size: 15, weight: .medium))
-                .frame(width: width)
-                .frame(height: KeyMetrics.keyHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
-                        .fill(KeyMetrics.letterKeyColor)
-                        .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
-                )
-        }
-        .foregroundColor(Color(.label))
+        Text(label)
+            .font(.system(size: 15, weight: .medium))
+            .frame(width: width)
+            .frame(height: KeyMetrics.keyHeight + KeyMetrics.rowSpacing)
+            .background(
+                RoundedRectangle(cornerRadius: KeyMetrics.keyCornerRadius)
+                    .fill(isPressed ? KeyMetrics.pressedKeyColor : KeyMetrics.letterKeyColor)
+                    .shadow(color: .black.opacity(0.15), radius: 0, x: 0, y: 1)
+                    .padding(.horizontal, KeyMetrics.keySpacing / 2)
+                    .padding(.vertical, KeyMetrics.rowSpacing / 2)
+            )
+            .foregroundColor(Color(.label))
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed {
+                            isPressed = true
+                            HapticFeedback.keyTapped()
+                            AudioServicesPlaySystemSound(KeySound.modifier)
+                        }
+                    }
+                    .onEnded { _ in
+                        isPressed = false
+                        onTap()
+                    }
+            )
     }
 }

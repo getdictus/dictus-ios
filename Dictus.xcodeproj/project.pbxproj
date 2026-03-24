@@ -61,6 +61,7 @@
 		AA0000B2 /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000B2 /* EmojiPickerView.swift */; };
 		AA0000B3 /* EmojiCategoryBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000B3 /* EmojiCategoryBar.swift */; };
 		AA0000B4 /* EmojiSearchFR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000B4 /* EmojiSearchFR.swift */; };
+		AA0000G0 /* KeyTapSignposter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000G0 /* KeyTapSignposter.swift */; };
 		AA0000D0 /* TextPredictionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000D0 /* TextPredictionEngine.swift */; };
 		AA0000D1 /* SuggestionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000D1 /* SuggestionState.swift */; };
 		AA0000D4 /* SuggestionBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000D4 /* SuggestionBarView.swift */; };
@@ -141,6 +142,7 @@
 		AA1000B2 /* EmojiPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
 		AA1000B3 /* EmojiCategoryBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiCategoryBar.swift; sourceTree = "<group>"; };
 		AA1000B4 /* EmojiSearchFR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSearchFR.swift; sourceTree = "<group>"; };
+		AA1000G0 /* KeyTapSignposter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyTapSignposter.swift; sourceTree = "<group>"; };
 		AA1000D0 /* TextPredictionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextPredictionEngine.swift; sourceTree = "<group>"; };
 		AA1000D1 /* SuggestionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionState.swift; sourceTree = "<group>"; };
 		AA1000D4 /* SuggestionBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionBarView.swift; sourceTree = "<group>"; };
@@ -349,6 +351,7 @@
 				AA400005 /* Views */,
 				AA400006 /* Models */,
 				AA40000D /* TextPrediction */,
+				AA400010 /* TouchHandling */,
 				AA40000E /* Resources */,
 				AA100006 /* DictusKeyboard.entitlements */,
 				AA100008 /* Info.plist */,
@@ -364,6 +367,14 @@
 				AA1000D1 /* SuggestionState.swift */,
 			);
 			path = TextPrediction;
+			sourceTree = "<group>";
+		};
+		AA400010 /* TouchHandling */ = {
+			isa = PBXGroup;
+			children = (
+				AA1000G0 /* KeyTapSignposter.swift */,
+			);
+			path = TouchHandling;
 			sourceTree = "<group>";
 		};
 		AA40000E /* Resources */ = {
@@ -654,6 +665,7 @@
 				AA0000D0 /* TextPredictionEngine.swift in Sources */,
 				AA0000D1 /* SuggestionState.swift in Sources */,
 				AA0000D4 /* SuggestionBarView.swift in Sources */,
+				AA0000G0 /* KeyTapSignposter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
