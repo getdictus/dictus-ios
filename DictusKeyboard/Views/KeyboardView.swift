@@ -388,10 +388,11 @@ struct KeyboardView: View {
 
         // Compute unitKeyWidth for this row (same formula as KeyRow)
         let totalMultiplier = row.reduce(CGFloat(0)) { $0 + $1.widthMultiplier }
-        let unitKeyWidth = rowWidth / totalMultiplier
+        let availableWidth = rowWidth - (KeyMetrics.rowSidePadding * 2)
+        let unitKeyWidth = availableWidth / totalMultiplier
 
-        // Find which key the x position falls into
-        var x: CGFloat = 0
+        // Find which key the x position falls into (offset by side padding)
+        var x: CGFloat = KeyMetrics.rowSidePadding
         var targetKey: KeyDefinition = row.last!
         for key in row {
             let keyWidth = unitKeyWidth * key.widthMultiplier

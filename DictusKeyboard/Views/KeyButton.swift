@@ -287,11 +287,18 @@ enum KeyMetrics {
     }()
 
     /// Horizontal padding on each side of a row.
-    /// No longer used for row padding (zero-spacing layout) but kept for reference.
-    static let rowHorizontalPadding: CGFloat = 3
+    /// Creates visual side margins matching Apple keyboard proportions (~equal to keySpacing).
+    static let rowSidePadding: CGFloat = {
+        switch DeviceClass.current {
+        case .compact:  return 3
+        case .standard: return 4
+        case .large:    return 5
+        }
+    }()
 
     /// Corner radius for key backgrounds.
-    static let keyCornerRadius: CGFloat = 5
+    /// Apple keyboard uses ~6pt on standard devices for a softer, more rounded look.
+    static let keyCornerRadius: CGFloat = 8
 
     /// Letter key background color.
     static let letterKeyColor = Color(UIColor { tc in

@@ -403,7 +403,7 @@ private struct MiniSearchKeyboard: View, Equatable {
             }
             .foregroundColor(Color(.label))
         }
-        .padding(.horizontal, KeyMetrics.rowHorizontalPadding)
+        .padding(.horizontal, KeyMetrics.rowSidePadding)
         .padding(.bottom, 4)
     }
 }

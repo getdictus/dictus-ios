@@ -237,6 +237,7 @@ struct SpaceKey: View {
                             isPressed = true
                             lastDragLocation = value.location
                             HapticFeedback.keyTapped()
+                            AudioServicesPlaySystemSound(KeySound.modifier)
                             startTrackpadTimer()
                         }
                         if isTrackpadMode {
