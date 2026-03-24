@@ -60,8 +60,8 @@ struct KeyboardRootView: View {
             + 8  // vertical padding
     }
 
-    /// Toolbar height — must match ToolbarView's intrinsic height (48pt for mic pill glow room).
-    private let toolbarHeight: CGFloat = 48
+    /// Toolbar height — must match ToolbarView's frame height (52pt: 48pt content + 4pt top padding).
+    private let toolbarHeight: CGFloat = 52
 
     /// Total content height (toolbar + keyboard). RecordingOverlay uses this
     /// to cover the full area, preventing layout shift when switching to recording.
@@ -139,10 +139,11 @@ struct KeyboardRootView: View {
                 }
             }
         }
-        // WHY .clear: The native iOS keyboard container already provides a
-        // blurred background. Using secondarySystemBackground created visible
-        // gray bands at the top and bottom that didn't match the native chrome.
-        // Transparent background lets the native keyboard styling show through.
+        // WHY .clear: The UIInputView with .keyboard style provides the
+        // native blurred keyboard background. Any opaque color here would
+        // hide that native styling and look wrong (e.g., pure white in light
+        // mode instead of the native grayish tint). Transparent lets the
+        // system keyboard chrome show through correctly.
         .background(Color.clear)
         .onChange(of: showsOverlay) { _, isShowing in
             PersistentLog.log(.diagnosticProbe(

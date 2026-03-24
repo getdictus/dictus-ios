@@ -162,7 +162,7 @@ class KeyboardViewController: UIInputViewController {
         let keyHeight: CGFloat = KeyMetrics.keyHeight  // Dynamic: 42pt SE, 46pt standard, 50pt Plus/Max
         let rowSpacing: CGFloat = KeyMetrics.rowSpacing  // 6pt
         let verticalPadding: CGFloat = 8
-        let toolbarHeight: CGFloat = 48 // ToolbarView height (48pt for mic pill glow room)
+        let toolbarHeight: CGFloat = 52 // ToolbarView height (52pt: 48pt + 4pt top padding for mic ring)
         let bottomPadding: CGFloat = 8 // Experimental: push system dictation mic area down
         return (rows * keyHeight) + ((rows - 1) * rowSpacing) + verticalPadding + toolbarHeight + bottomPadding
     }
