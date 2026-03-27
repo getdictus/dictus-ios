@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: executing
-stopped_at: Completed 18-01-PLAN.md
-last_updated: "2026-03-27T23:41:39.285Z"
-last_activity: 2026-03-27 — Completed 18-01 vendor giellakbd-ios and French layouts
+stopped_at: Completed 18-02-PLAN.md
+last_updated: "2026-03-27T23:49:29Z"
+last_activity: 2026-03-27 — Completed 18-02 bridge and wire keyboard
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 5
-  completed_plans: 3
-  percent: 10
+  completed_plans: 4
+  percent: 13
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 ## Current Position
 
 Phase: 18 of 22 (Keyboard Base) — second of 6 v1.3 phases
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-03-27 — Completed 18-01 vendor giellakbd-ios and French layouts
+Last activity: 2026-03-27 — Completed 18-02 bridge and wire keyboard
 
 Progress: [█░░░░░░░░░] 10% (v1.3 milestone)
 
@@ -60,6 +60,9 @@ Recent decisions for v1.3:
 - Added programmatic KeyboardDefinition init for constructing French layouts without JSON
 - LegacyCompat.swift provides stubs (KeyMetrics, DeviceClass, KeySound) during UIKit keyboard migration
 - [Phase 18]: Vendored KeyboardView renamed to GiellaKeyboardView to avoid Swift type collision
+- [Phase 18]: DictusKeyboardBridge as separate delegate class for single responsibility and testability
+- [Phase 18]: Hybrid UIKit keyboard + SwiftUI toolbar architecture -- UIKit subview for keys, SwiftUI hosting for chrome
+- [Phase 18]: Combine subscription to @Published dictationStatus for recording state sync between UIKit and SwiftUI
 
 ### Pending Todos
 
@@ -73,8 +76,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-27T23:41:39.283Z
-Stopped at: Completed 18-01-PLAN.md
+Last session: 2026-03-27T23:49:29Z
+Stopped at: Completed 18-02-PLAN.md
 Resume file: None
 
 ---
