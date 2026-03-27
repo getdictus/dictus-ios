@@ -159,6 +159,11 @@ class KeyboardViewController: UIInputViewController {
             keyboard.updateTheme(theme: Theme.current(for: traitCollection))
         }
 
+        // Set initial shift state based on the text field's autocapitalization setting.
+        // WHY here and not viewDidLoad: The textDocumentProxy is not fully connected
+        // until the view is about to appear. Calling in viewDidLoad would read stale data.
+        bridge?.updateCapitalization()
+
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
@@ -269,9 +274,10 @@ class KeyboardViewController: UIInputViewController {
 
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
-        // Notify KeyboardView that text changed externally (paste, cursor move, etc.)
-        // so it can recheck autocapitalisation state.
-        NotificationCenter.default.post(name: .dictusTextDidChange, object: nil)
+        // When text changes externally (paste, cursor move, autocorrect by host app),
+        // recheck autocapitalization. This ensures shift state stays correct even when
+        // the user moves the cursor to a different position in the text.
+        bridge?.updateCapitalization()
     }
 }
 

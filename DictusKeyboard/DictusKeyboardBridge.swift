@@ -36,7 +36,7 @@ final class DictusKeyboardBridge: NSObject,
     /// WHY weak: The keyboard view is owned by the controller's view hierarchy.
     weak var keyboardView: GiellaKeyboardView?
 
-    // MARK: - Shift double-tap detection
+    // MARK: - Shift state tracking
 
     /// Timestamp of the last shift tap, used to detect double-tap for caps lock.
     /// If two shift taps occur within 300ms, we activate caps lock.
@@ -44,6 +44,13 @@ final class DictusKeyboardBridge: NSObject,
 
     /// Threshold for double-tap detection (300ms matches iOS native behavior).
     private static let doubleTapThreshold: TimeInterval = 0.3
+
+    /// Tracks whether shift was activated by the user tapping shift (true)
+    /// or by autocapitalization (false). This distinction matters because:
+    /// - Manual shift: returns to .normal after ONE character typed (one-shot shift)
+    /// - Autocap shift: also returns to .normal after one character, but updateCapitalization
+    ///   may re-apply shift if conditions still hold (e.g., still at start of sentence)
+    private var isManualShift = false
 
     // MARK: - GiellaKeyboardViewDelegate
 
@@ -105,6 +112,7 @@ final class DictusKeyboardBridge: NSObject,
             AudioServicesPlaySystemSound(KeySound.modifier)
             keyboardView?.page = .capslock
             lastShiftTapTime = 0 // Reset to prevent triple-tap confusion
+            isManualShift = false // Caps lock is its own mode, not "manual shift"
 
         default:
             // Other keys don't have double-tap behavior in our layout
@@ -140,7 +148,8 @@ final class DictusKeyboardBridge: NSObject,
     // MARK: - Key Action Handlers
 
     /// Handle character input (letters, numbers, punctuation).
-    /// Inserts the character, plays letter sound + haptic, auto-unshifts after one letter.
+    /// Inserts the character, plays letter sound + haptic, auto-unshifts after one letter,
+    /// then rechecks autocapitalization (e.g., typing "." may prepare shift for next char).
     private func handleInputKey(_ character: String) {
         HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.letter)
@@ -153,42 +162,61 @@ final class DictusKeyboardBridge: NSObject,
         // This matches iOS native behavior: shift is "one-shot" unless locked.
         if let page = keyboardView?.page, page == .shifted {
             keyboardView?.page = .normal
+            isManualShift = false
         }
 
-        postTextDidChange()
+        // Recheck autocapitalization after the character was inserted.
+        // Example: typing "." won't trigger autocap yet (need space after),
+        // but typing after "Hello. " should capitalize.
+        updateCapitalization()
     }
 
     /// Handle backspace/delete key.
+    /// After deleting, recheck autocapitalization -- deleting back to the start
+    /// of a text field or to after a sentence-ending punctuation should re-shift.
     private func handleBackspace() {
         HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.delete)
         controller?.textDocumentProxy.deleteBackward()
-        postTextDidChange()
+        updateCapitalization()
     }
 
     /// Handle spacebar press with auto-full-stop detection.
+    /// If double-space is detected, replaces the trailing space with ". " (period+space).
+    /// Otherwise inserts a normal space. Then rechecks autocapitalization.
     private func handleSpace() {
         HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.modifier)
 
         // Check for double-space -> period BEFORE inserting the space.
-        // This must happen first so we can replace the trailing space.
-        handleAutoFullStop()
+        // handleAutoFullStop returns true if it performed the ". " substitution,
+        // in which case we must NOT insert an additional space.
+        if !handleAutoFullStop() {
+            controller?.textDocumentProxy.insertText(" ")
+        }
 
-        controller?.textDocumentProxy.insertText(" ")
-        postTextDidChange()
+        // After space (or period+space), recheck autocap.
+        // "Hello. " should trigger shift for the next character.
+        updateCapitalization()
     }
 
     /// Handle return/newline key.
+    /// After inserting newline, recheck autocapitalization -- many apps use
+    /// .sentences autocap which should capitalize after a newline.
     private func handleReturn() {
         HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.modifier)
         controller?.textDocumentProxy.insertText("\n")
-        postTextDidChange()
+        updateCapitalization()
     }
 
     /// Handle single shift tap: cycle through normal -> shifted -> normal.
-    /// Double-tap for caps lock is handled by didTriggerDoubleTap.
+    /// Double-tap within 300ms activates caps lock.
+    ///
+    /// WHY we handle double-tap here AND in didTriggerDoubleTap:
+    /// The GiellaKeyboardView fires didTriggerDoubleTap for keys with supportsDoubleTap,
+    /// but we also detect it here as a fallback because the timing can differ between
+    /// the gesture recognizer and our manual tracking. Both paths lead to .capslock.
     private func handleShift() {
         HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.modifier)
@@ -202,6 +230,7 @@ final class DictusKeyboardBridge: NSObject,
             // Double-tap -> caps lock
             kbView.page = .capslock
             lastShiftTapTime = 0
+            isManualShift = false
             return
         }
 
@@ -211,10 +240,13 @@ final class DictusKeyboardBridge: NSObject,
         switch kbView.page {
         case .normal:
             kbView.page = .shifted
+            isManualShift = true
         case .shifted:
             kbView.page = .normal
+            isManualShift = false
         case .capslock:
             kbView.page = .normal
+            isManualShift = false
         default:
             // On symbols pages, shift doesn't do anything
             break
@@ -262,14 +294,18 @@ final class DictusKeyboardBridge: NSObject,
     /// If the user types two spaces in a row after a word character,
     /// replace "  " with ". " to end the sentence.
     ///
+    /// Returns `true` if the substitution was performed (". " was inserted),
+    /// `false` if no substitution happened (caller should insert a normal space).
+    ///
     /// WHY called BEFORE inserting the space: We need to check what's already
-    /// in the text buffer. After inserting, the buffer would have the new space
-    /// and the check would need to account for that.
-    private func handleAutoFullStop() {
+    /// in the text buffer. The caller checks the return value to decide whether
+    /// to insert an additional space.
+    @discardableResult
+    private func handleAutoFullStop() -> Bool {
         guard let proxy = controller?.textDocumentProxy,
               let text = proxy.documentContextBeforeInput?.suffix(3),
               text.count == 3,
-              text.suffix(2) == "  " else { return }
+              text.suffix(2) == "  " else { return false }
 
         let first = text.prefix(1)
         // Only replace if the character before the two spaces is a word character
@@ -278,13 +314,78 @@ final class DictusKeyboardBridge: NSObject,
             proxy.deleteBackward() // delete first space
             proxy.deleteBackward() // delete second space
             proxy.insertText(". ")
+            return true
         }
+        return false
     }
 
-    // MARK: - Notifications
+    // MARK: - Autocapitalization
 
-    /// Post text-did-change notification for autocapitalization checks.
-    private func postTextDidChange() {
-        NotificationCenter.default.post(name: .dictusTextDidChange, object: nil)
+    /// Checks the textDocumentProxy's autocapitalization type and sets the keyboard
+    /// page to .shifted when appropriate.
+    ///
+    /// This implements the standard iOS autocapitalization behavior:
+    /// - `.sentences`: Capitalize at start of text field and after sentence-ending
+    ///   punctuation (.!?) followed by a space or newline.
+    /// - `.words`: Capitalize at start of text field and after each space.
+    /// - `.allCharacters`: Always caps lock.
+    /// - `.none`: Never autocapitalize.
+    ///
+    /// WHY guard against capslock: If the user has manually activated caps lock
+    /// (via double-tap shift), autocapitalization must not interfere. The user
+    /// explicitly wants ALL CAPS and tapping shift will deactivate it.
+    func updateCapitalization() {
+        guard let proxy = controller?.textDocumentProxy else { return }
+        guard let kbView = keyboardView else { return }
+
+        // Don't override user's caps lock
+        guard kbView.page != .capslock else { return }
+        // Only autocap on letter pages (not symbols)
+        guard kbView.page == .normal || kbView.page == .shifted else { return }
+
+        let autocapType = proxy.autocapitalizationType ?? .sentences
+
+        switch autocapType {
+        case .sentences:
+            let beforeInput = proxy.documentContextBeforeInput ?? ""
+            if beforeInput.isEmpty {
+                // Beginning of text field -- capitalize first letter
+                kbView.page = .shifted
+                isManualShift = false
+            } else {
+                let trimmed = beforeInput.trimmingCharacters(in: .whitespaces)
+                let lastChar = trimmed.last
+                let endsWithSentencePunctuation = lastChar != nil && ".!?".contains(lastChar!)
+                let lastInputChar = beforeInput.last
+
+                if endsWithSentencePunctuation && (lastInputChar == " " || lastInputChar == "\n") {
+                    // After sentence-ending punctuation + space/newline -> capitalize
+                    kbView.page = .shifted
+                    isManualShift = false
+                } else if lastInputChar == "\n" {
+                    // After a newline (return key) -> capitalize for new paragraph
+                    kbView.page = .shifted
+                    isManualShift = false
+                } else if kbView.page == .shifted && !isManualShift {
+                    // Was shifted from autocap, now typing regular text -> return to normal
+                    kbView.page = .normal
+                }
+            }
+
+        case .words:
+            let beforeInput = proxy.documentContextBeforeInput ?? ""
+            if beforeInput.isEmpty || beforeInput.last == " " || beforeInput.last == "\n" {
+                kbView.page = .shifted
+                isManualShift = false
+            } else if kbView.page == .shifted && !isManualShift {
+                kbView.page = .normal
+            }
+
+        case .allCharacters:
+            kbView.page = .capslock
+
+        default: // .none
+            break
+        }
     }
 }
