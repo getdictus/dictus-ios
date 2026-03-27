@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
-stopped_at: v1.2 milestone archived. Next milestone not yet planned.
-last_updated: "2026-03-27T16:00:00.000Z"
-last_activity: 2026-03-27 -- v1.2 milestone archived. Planning next milestone.
+milestone: v1.3
+milestone_name: Public Beta
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-27T18:00:00.000Z"
+last_activity: 2026-03-27 -- Milestone v1.3 started
 progress:
   total_phases: 0
   completed_phases: 0
@@ -21,12 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** v1.2 shipped. Private TestFlight beta live. Next: Pierre tests on device, then `/gsd:new-milestone` for keyboard rework.
+**Current focus:** v1.3 Public Beta — keyboard rebuild from giellakbd-ios, bug fixes, public TestFlight.
 
 ## Current Position
 
-Milestone: v1.2 "Beta Ready" — SHIPPED 2026-03-27
-Next: Plan next milestone (`/gsd:new-milestone`)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-27 — Milestone v1.3 started
 
 ## Performance Metrics
 
