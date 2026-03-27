@@ -56,11 +56,11 @@ Requirements for v1.2 Beta Ready milestone. Each maps to roadmap phases.
 
 ### TestFlight
 
-- [ ] **TF-01**: Xcode signing migrated to professional developer account
-- [ ] **TF-02**: Privacy Manifest (PrivacyInfo.xcprivacy) created for both DictusApp and DictusKeyboard targets
+- [x] **TF-01**: Xcode signing migrated to professional developer account
+- [x] **TF-02**: Privacy Manifest (PrivacyInfo.xcprivacy) created for both DictusApp and DictusKeyboard targets
 - [ ] **TF-03**: App successfully archived and uploaded to App Store Connect
 - [ ] **TF-04**: First TestFlight beta build distributed to testers
-- [ ] **TF-05**: App Store Review Guidelines checklist verified (permissions justified, privacy policy, content rules)
+- [x] **TF-05**: App Store Review Guidelines checklist verified (permissions justified, privacy policy, content rules)
 - [x] **TF-06**: README.md updated with build instructions, prerequisites (Xcode version, iOS target, SPM dependencies)
 - [x] **TF-07**: CONTRIBUTING.md with PR guidelines, code conventions, review process
 - [x] **TF-08**: GitHub issue templates (bug report with debug logs section, feature request)
@@ -145,11 +145,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSGN-05 | Phase 15 | Complete |
 | DSGN-06 | Phase 15 | Complete |
 | DSGN-07 | Phase 15 | Complete |
-| TF-01 | Phase 16 | Pending |
-| TF-02 | Phase 16 | Pending |
+| TF-01 | Phase 16 | Complete |
+| TF-02 | Phase 16 | Complete |
 | TF-03 | Phase 16 | Pending |
 | TF-04 | Phase 16 | Pending |
-| TF-05 | Phase 16 | Pending |
+| TF-05 | Phase 16 | Complete |
 | TF-06 | Phase 16 | Complete |
 | TF-07 | Phase 16 | Complete |
 | TF-08 | Phase 16 | Complete |

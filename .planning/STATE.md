@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
 status: completed
-stopped_at: Completed 15.3-02-PLAN.md
-last_updated: "2026-03-24T12:11:49.665Z"
-last_activity: 2026-03-22 -- Plan 15.3-03 execution (commits e00a70c, 427d791)
+stopped_at: Completed 16-01-PLAN.md
+last_updated: "2026-03-27T12:10:14.954Z"
+last_activity: 2026-03-27 -- Plan 16-01 execution (commit bcfa646)
 progress:
   total_phases: 9
   completed_phases: 8
   total_plans: 35
-  completed_plans: 33
-  percent: 91
+  completed_plans: 34
+  percent: 97
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 15.3 keyboard optimization -- Plan 01 complete (haptic cache, static KeyMetrics, background suggestions, touchDown pipeline, OSSignposter). Plans 02-04 remaining.
+**Current focus:** Phase 16 TestFlight deployment -- Plan 01 complete (signing migration, privacy manifests, version bump). Plan 02 remaining (archive and upload).
 
 ## Current Position
 
-Phase: 15.3 (Keyboard Optimization and Responsiveness)
-Plan: 4 of 4 in current phase
-Status: Plan 15.3-03 complete. Device-adaptive KeyMetrics across 3 device classes, press feedback on special keys.
-Last activity: 2026-03-22 -- Plan 15.3-03 execution (commits e00a70c, 427d791)
+Phase: 16 (TestFlight Deployment)
+Plan: 1 of 2 in current phase
+Status: Plan 16-01 complete. Professional signing (9B8B36C2FA), Privacy Manifests, MARKETING_VERSION 1.2, privacy policy, review checklist.
+Last activity: 2026-03-27 -- Plan 16-01 execution (commit bcfa646)
 
-Progress: [█████████░] 91%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -99,6 +99,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 15.3]: OSSignposter emitEvent for sub-interval markers within touchDown interval
 - [Phase 15.3]: 3 device classes (compact/standard/large) based on screen height 667/852pt breakpoints for all KeyMetrics
 - [Phase 15.3]: UIViewRepresentable touch overlay: transparent UIView captures touches, SwiftUI handles rendering -- zero gesture disambiguation delay
+- [Phase 16-01]: Updated all 6 DEVELOPMENT_TEAM entries (not just 4) including DictusWidgets
 
 ### Pending Todos
 
@@ -119,8 +120,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-22T22:31:17.831Z
-Stopped at: Completed 15.3-02-PLAN.md
+Last session: 2026-03-27T12:10:14.952Z
+Stopped at: Completed 16-01-PLAN.md
 Resume file: None
 
 ---

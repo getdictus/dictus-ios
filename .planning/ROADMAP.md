@@ -237,7 +237,7 @@ Phases execute in numeric order: 11 -> 12 -> 13 -> 14 -> 15 -> 15.1 -> 15.2 -> 1
 | 15.1. UI Polish Fixes | 3/3 | Complete   | 2026-03-13 | - |
 | 15.2. Cleaning & Fix Issues | 4/4 | Complete   | 2026-03-17 | - |
 | 15.3. Keyboard Optimization | 4/4 | Complete    | 2026-03-24 | - |
-| 16. TestFlight Deployment | 1/3 | In Progress|  | - |
+| 16. TestFlight Deployment | 2/3 | In Progress|  | - |
 
 ---
 *Roadmap created: 2026-03-04*
