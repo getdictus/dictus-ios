@@ -440,9 +440,15 @@ class KeyboardState: ObservableObject {
         // Fallback: if app didn't respond (not running), open URL to launch it.
         // We check after 500ms whether status progressed past .requested.
         // If the app handled the notification, status will be .recording by now.
+        let darwinPostTime = Date()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
+            let elapsedMs = Int(Date().timeIntervalSince(darwinPostTime) * 1000)
             if self.dictationStatus == .requested {
+                PersistentLog.log(.coldStartDarwinFallback(
+                    elapsedMs: elapsedMs,
+                    status: self.dictationStatus.rawValue
+                ))
                 self.logProbe("fallbackOpenURL", details: self.sessionDetails())
                 // App didn't respond — not running. Open URL to launch it.
                 let url = URL(string: "dictus://dictate?source=keyboard")!

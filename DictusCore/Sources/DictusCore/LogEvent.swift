@@ -120,6 +120,12 @@ public enum LogEvent: Sendable {
     case liveActivityFailed(context: String, error: String)
     case liveActivityEnded(reason: String)
 
+    // MARK: Cold Start Diagnostics
+    case coldStartURLReceived(isColdStart: Bool, isEngineDead: Bool, hasBeenActive: Bool)
+    case coldStartFlagSet(active: Bool, context: String)
+    case coldStartRetry(keyboardStatus: String)
+    case coldStartDarwinFallback(elapsedMs: Int, status: String)
+
     // MARK: Log Management
     case logExportCompleted(durationMs: Int, sizeBytes: Int)
 
@@ -161,6 +167,8 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry:
             return .lifecycle
+        case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback:
+            return .lifecycle
         case .logExportCompleted:
             return .lifecycle
         case .liveActivityStarted, .liveActivityTransition, .liveActivityFailed, .liveActivityEnded:
@@ -184,7 +192,8 @@ public enum LogEvent: Sendable {
 
         // Warnings
         case .dictationDeferred, .watchdogReset, .engineWarmUpFailed, .recordingTooShort,
-             .waveformStall, .waveformTimelineNotFiring:
+             .waveformStall, .waveformTimelineNotFiring,
+             .coldStartDarwinFallback:
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
@@ -198,6 +207,7 @@ public enum LogEvent: Sendable {
              .keyboardDidAppear, .keyboardMicTapped,
              .appLaunched, .appWhisperKitLoaded, .logExportCompleted,
              .liveActivityStarted, .liveActivityTransition, .liveActivityEnded,
+             .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry,
              .overlayShown, .overlayHidden, .statusChanged,
              .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
              .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated:
@@ -286,6 +296,10 @@ public enum LogEvent: Sendable {
         case .overlayTimerStarted: return "overlayTimerStarted"
         case .overlayTimerStopped: return "overlayTimerStopped"
         case .overlayRecreated: return "overlayRecreated"
+        case .coldStartURLReceived: return "coldStartURLReceived"
+        case .coldStartFlagSet: return "coldStartFlagSet"
+        case .coldStartRetry: return "coldStartRetry"
+        case .coldStartDarwinFallback: return "coldStartDarwinFallback"
         case .logExportCompleted: return "logExportCompleted"
         }
     }
@@ -432,6 +446,16 @@ public enum LogEvent: Sendable {
             return ""
         case .overlayRecreated(let reason, let status):
             return "reason=\(reason) status=\(status)"
+
+        // Cold Start Diagnostics
+        case .coldStartURLReceived(let isColdStart, let isEngineDead, let hasBeenActive):
+            return "isColdStart=\(isColdStart) isEngineDead=\(isEngineDead) hasBeenActive=\(hasBeenActive)"
+        case .coldStartFlagSet(let active, let context):
+            return "active=\(active) context=\(context)"
+        case .coldStartRetry(let keyboardStatus):
+            return "keyboardStatus=\(keyboardStatus)"
+        case .coldStartDarwinFallback(let elapsedMs, let status):
+            return "elapsedMs=\(elapsedMs) status=\(status)"
 
         // Log Management
         case .logExportCompleted(let durationMs, let sizeBytes):

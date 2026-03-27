@@ -175,7 +175,8 @@ class DictationCoordinator: ObservableObject {
                 if self.pendingColdStartDictation {
                     self.pendingColdStartDictation = false
                     // Only retry if keyboard is still waiting (watchdog hasn't reset to idle)
-                    let keyboardStatus = self.defaults.string(forKey: SharedKeys.dictationStatus)
+                    let keyboardStatus = self.defaults.string(forKey: SharedKeys.dictationStatus) ?? "nil"
+                    PersistentLog.log(.coldStartRetry(keyboardStatus: keyboardStatus))
                     if keyboardStatus == DictationStatus.requested.rawValue {
                         self.startDictation(fromURL: true)
                     }
