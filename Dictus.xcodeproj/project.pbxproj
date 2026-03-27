@@ -102,6 +102,7 @@
 		CC00000D /* DeadKeyHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC10000D /* DeadKeyHandler.swift */; };
 		CC00000E /* Audio.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC10000E /* Audio.swift */; };
 		CC00000F /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = CC900001 /* DeviceKit */; };
+		CC000020 /* DictusKeyboardBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100020 /* DictusKeyboardBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -217,6 +218,7 @@
 		BB200001 /* DictusWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC100000 /* LegacyCompat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyCompat.swift; sourceTree = "<group>"; };
 		CC100010 /* FrenchKeyboardLayouts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrenchKeyboardLayouts.swift; sourceTree = "<group>"; };
+		CC100020 /* DictusKeyboardBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusKeyboardBridge.swift; sourceTree = "<group>"; };
 		CC100001 /* GiellaUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiellaUtils.swift; sourceTree = "<group>"; };
 		CC100002 /* KeyDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyDefinition.swift; sourceTree = "<group>"; };
 		CC100003 /* KeyboardDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardDefinition.swift; sourceTree = "<group>"; };
@@ -308,6 +310,7 @@
 				AA100030 /* InputView.swift */,
 				CC100000 /* LegacyCompat.swift */,
 				CC100010 /* FrenchKeyboardLayouts.swift */,
+				CC100020 /* DictusKeyboardBridge.swift */,
 				CC400001 /* Vendored */,
 				AA400005 /* Views */,
 				AA400006 /* Models */,
@@ -731,6 +734,7 @@
 				AA0000G0 /* KeyTapSignposter.swift in Sources */,
 				CC000000 /* LegacyCompat.swift in Sources */,
 				CC000010 /* FrenchKeyboardLayouts.swift in Sources */,
+				CC000020 /* DictusKeyboardBridge.swift in Sources */,
 				CC000001 /* GiellaUtils.swift in Sources */,
 				CC000002 /* KeyDefinition.swift in Sources */,
 				CC000003 /* KeyboardDefinition.swift in Sources */,
