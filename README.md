@@ -39,7 +39,7 @@ Dictus is a free, open-source iOS keyboard that adds voice dictation to any app.
 ## Getting Started
 
 ```bash
-git clone https://github.com/Pivii/dictus.git
+git clone https://github.com/getdictus/dictus-ios.git
 cd dictus
 open Dictus.xcodeproj
 ```
@@ -74,7 +74,7 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 ## Privacy
 
-Dictus collects no user data. All speech processing happens on your device. See our [Privacy Policy](PRIVACY.md).
+Dictus collects no user data. All speech processing happens on your device. See our [Privacy Policy](https://www.getdictus.com/en/privacy).
 
 ## License
 

@@ -29,8 +29,7 @@
 
 ## Privacy Policy
 
-- **Interim URL**: https://github.com/Pivii/dictus/blob/main/PRIVACY.md
-- **Production URL**: TBD (Pierre's website)
+- **URL**: https://www.getdictus.com/en/privacy
 - Bilingual: French + English
 - Content: detailed and transparent, covers Full Access justification
 
