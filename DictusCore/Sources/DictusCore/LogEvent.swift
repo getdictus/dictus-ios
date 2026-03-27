@@ -120,6 +120,9 @@ public enum LogEvent: Sendable {
     case liveActivityFailed(context: String, error: String)
     case liveActivityEnded(reason: String)
 
+    // MARK: Log Management
+    case logExportCompleted(durationMs: Int, sizeBytes: Int)
+
     // MARK: Lifecycle
     case appLaunched(version: String)
     case appDidBecomeActive
@@ -158,6 +161,8 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry:
             return .lifecycle
+        case .logExportCompleted:
+            return .lifecycle
         case .liveActivityStarted, .liveActivityTransition, .liveActivityFailed, .liveActivityEnded:
             return .lifecycle
         case .appLaunched, .appDidBecomeActive, .appWillResignActive,
@@ -191,7 +196,7 @@ public enum LogEvent: Sendable {
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
              .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
              .keyboardDidAppear, .keyboardMicTapped,
-             .appLaunched, .appWhisperKitLoaded,
+             .appLaunched, .appWhisperKitLoaded, .logExportCompleted,
              .liveActivityStarted, .liveActivityTransition, .liveActivityEnded,
              .overlayShown, .overlayHidden, .statusChanged,
              .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
@@ -281,6 +286,7 @@ public enum LogEvent: Sendable {
         case .overlayTimerStarted: return "overlayTimerStarted"
         case .overlayTimerStopped: return "overlayTimerStopped"
         case .overlayRecreated: return "overlayRecreated"
+        case .logExportCompleted: return "logExportCompleted"
         }
     }
 
@@ -426,6 +432,10 @@ public enum LogEvent: Sendable {
             return ""
         case .overlayRecreated(let reason, let status):
             return "reason=\(reason) status=\(status)"
+
+        // Log Management
+        case .logExportCompleted(let durationMs, let sizeBytes):
+            return "duration=\(durationMs)ms size=\(sizeBytes)bytes"
         }
     }
 

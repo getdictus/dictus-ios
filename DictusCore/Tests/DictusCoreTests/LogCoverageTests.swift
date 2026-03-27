@@ -29,6 +29,7 @@ final class LogCoverageTests: XCTestCase {
             .keyboardDidDisappear,
             .keyboardMicTapped,
             .keyboardTextInserted,
+            .logExportCompleted(durationMs: 150, sizeBytes: 50000),
             .appLaunched(version: "1.2"),
             .appDidBecomeActive,
             .appWillResignActive,

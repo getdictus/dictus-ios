@@ -166,7 +166,10 @@ struct SettingsView: View {
         guard !isExporting else { return }
         isExporting = true
         Task {
+            let start = CFAbsoluteTimeGetCurrent()
             let content = PersistentLog.exportContent()
+            let duration = CFAbsoluteTimeGetCurrent() - start
+            PersistentLog.log(.logExportCompleted(durationMs: Int(duration * 1000), sizeBytes: content.utf8.count))
             let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("dictus-logs.txt")
             try? content.write(to: tempURL, atomically: true, encoding: .utf8)
 
