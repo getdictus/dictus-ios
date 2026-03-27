@@ -94,7 +94,11 @@ Plans:
   5. User gets autocapitalization after sentence-ending punctuation and double-space period insertion
   6. User feels haptic feedback on touchDown and hears 3-category key sounds respecting silent switch
   7. User sees key popup preview on press (provided by giellakbd-ios)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 18-01-PLAN.md — Vendor giellakbd-ios files, strip dependencies, add DeviceKit, create French layouts
+- [ ] 18-02-PLAN.md — Create keyboard bridge, adapt KeyboardViewController for UIKit keyboard + SwiftUI toolbar
+- [ ] 18-03-PLAN.md — Autocapitalization, double-space period, shift state machine, user verification
 
 ### Phase 19: Complex Touch Features
 **Goal**: Users have access to all advanced touch interactions -- delete repeat, spacebar trackpad, accent selection, and adaptive accent key
@@ -166,7 +170,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 15.3. Keyboard Optimization | v1.2 | 4/4 | Complete | 2026-03-24 |
 | 16. TestFlight Deployment | v1.2 | 3/3 | Complete | 2026-03-27 |
 | 17. Bug Fixes | 2/2 | Complete    | 2026-03-27 | - |
-| 18. Keyboard Base | v1.3 | 0/? | Not started | - |
+| 18. Keyboard Base | v1.3 | 0/3 | Not started | - |
 | 19. Complex Touch Features | v1.3 | 0/? | Not started | - |
 | 20. Feature Reintegration | v1.3 | 0/? | Not started | - |
 | 21. Cleanup & Memory Profiling | v1.3 | 0/? | Not started | - |
