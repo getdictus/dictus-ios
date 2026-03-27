@@ -1,199 +1,191 @@
 # Project Research Summary
 
-**Project:** Dictus v1.2 Beta Ready
-**Domain:** iOS keyboard extension with on-device voice dictation (WhisperKit)
-**Researched:** 2026-03-11
-**Confidence:** MEDIUM-HIGH
+**Project:** Dictus v1.3 Public Beta
+**Domain:** iOS keyboard extension rebuild + public TestFlight distribution
+**Researched:** 2026-03-27
+**Confidence:** HIGH
 
 ## Executive Summary
 
-Dictus v1.2 is a stabilization and polish release that prepares an existing two-process iOS keyboard dictation app for TestFlight beta distribution. The existing architecture (keyboard extension communicating via Darwin notifications and App Group with a main app that owns WhisperKit and the audio session) is validated and unchanged. The critical finding across all research is that **zero new SPM dependencies are needed** -- every v1.2 feature is served by built-in Apple frameworks and upgrades to existing custom code. This dramatically reduces integration risk for a beta release.
+Dictus v1.3 replaces the SwiftUI-based keyboard (which suffers from unfixable dead zones -- 16 approaches failed in Phase 15.4) with a UICollectionView-based keyboard derived from giellakbd-ios (Divvun, Apache-2.0). The giellakbd-ios architecture solves dead zones by design: the UICollectionView has `isUserInteractionEnabled = false` and all touch handling happens via `touchesBegan/Moved/Ended` on the parent UIView, where `point(inside:with:)` correctly participates in hit-testing. This is the exact solution identified in Phase 15.4/15.5 research.
 
-The recommended approach is a six-phase build that starts with production logging (enables debugging everything else), then fixes the most user-visible bug (animation state in the keyboard extension), then addresses cold start UX (the biggest user friction), then polishes the model download/compilation pipeline, then handles cosmetic polish, and finally gates everything behind TestFlight deployment. The cold start auto-return problem -- where the app opens in the foreground and the user must manually tap "< Back" -- has no public API solution. Research confirms this across Swift Forums, Apple Developer Forums, and competitor analysis (Wispr Flow). The pragmatic path is to accept the limitation, minimize cold start frequency (audio engine keep-alive), and make the transition graceful with clear UX messaging.
+The recommended approach is: vendor ~10 giellakbd-ios source files directly into DictusKeyboard (no CocoaPods, no framework dependency), add DeviceKit 5.8.x as the sole new SPM dependency, and rebuild the keyboard as **UIKit keys + SwiftUI chrome** (toolbar, recording overlay, emoji picker stay SwiftUI). The two-process dictation architecture (Darwin notifications, App Group IPC, KeyboardState, Audio Bridge) is completely orthogonal to the key rendering layer and requires zero modifications.
 
-The top risks are: (1) logging user-dictated text to the persistent log file, which violates GDPR and triggers App Store rejection -- this must be designed out before writing any logging code; (2) CoreML compilation of Large Turbo v3 crashing on 4GB RAM devices, requiring a device capability gate; (3) missing Privacy Manifest (`PrivacyInfo.xcprivacy`) blocking all TestFlight submissions -- this should be validated with a smoke-test upload early, not discovered at the end. Total estimated effort is 8-12 days across all phases.
+The highest risks are: (1) hybrid UIKit/SwiftUI touch conflicts at overlay boundaries, (2) memory budget pressure within the 50MB extension limit, and (3) Beta App Review rejection for privacy manifest gaps on the first external TestFlight submission. All are mitigable with the phased approach below.
 
 ## Key Findings
 
 ### Recommended Stack
 
-No stack changes. The existing technology set is validated and sufficient. See [STACK.md](STACK.md) for full details.
+One new SPM dependency: **DeviceKit 5.8.x** for device-specific keyboard height calculations. Everything else is vendored source files from giellakbd-ios (~10 Swift files) adapted for Dictus. No RxSwift, no DivvunSpell, no CocoaPods, no Sentry.
 
-**Core technologies (unchanged):**
-- **WhisperKit 0.16.0+ via SPM**: on-device speech-to-text -- mature, handles CoreML compilation internally
-- **Swift 5.9+ / SwiftUI**: iOS 17.0 minimum -- enables `withAnimation(completion:)` and `PhaseAnimator`
-- **DictusCore (local SPM package)**: shared framework for App Group, Darwin notifications, logging, design tokens
-- **App Group (`group.com.pivi.dictus`)**: cross-process data sharing between app and keyboard extension
+**Core technologies:**
+- **giellakbd-ios source files (vendored):** UICollectionView keyboard grid with zero dead zones -- battle-tested on App Store (Divvun Keyboards app)
+- **DeviceKit 5.8.x:** Pixel-perfect keyboard heights across 30+ iPhone models via screen diagonal lookup
+- **Existing stack unchanged:** WhisperKit, FluidAudio, DictusCore, Swift 5.9+, iOS 17.0 minimum
 
-**New built-in APIs to leverage (no dependencies):**
-- `OSLogStore` (iOS 15+) -- export structured logs for TestFlight bug reports
-- `withAnimation(completion:)` (iOS 17+) -- coordinate animation state transitions
-- `UIActivityViewController` -- share exported logs from Settings
+**Net memory savings:** 4-8MB (UIKit keyboard is lighter than SwiftUI equivalent).
+
+See: [STACK.md](STACK.md) for full details.
 
 ### Expected Features
 
-See [FEATURES.md](FEATURES.md) for full analysis including complexity estimates.
+**giellakbd-ios provides ~60% out of the box:**
+- UICollectionView key layout with zero dead zones
+- Touch handling via touchesBegan/Moved/Ended (centralized)
+- Key overlay popup on press, long-press accent popups
+- Page/layer switching (normal/shifted/caps/symbols1/symbols2)
+- Auto-capitalization, double-space period insertion
+- Key sizing via width ratios, device-adaptive heights
+- Banner/suggestion bar slot
 
-**Must have (table stakes for beta):**
-- Production logging system with privacy safeguards and export
-- CoreML pre-compilation progress UX during onboarding
-- Model download progress UX with disk space checks
-- Animation state consistency (fix stale recording overlay)
-- TestFlight deployment (the exit gate)
-- French accent audit across UI strings
+**Must reintegrate from Dictus (~40%):**
+- French AZERTY + QWERTY layout definitions
+- Spacebar trackpad (HIGH risk -- gesture arbitration with collection view touch handling)
+- Recording overlay + waveform
+- Mic toolbar (above keyboard, SwiftUI island)
+- Text prediction engine + suggestion bar
+- Haptic feedback (pre-allocated generators, touchDown timing)
+- 3-category key sounds (AudioServicesPlaySystemSound)
+- Adaptive accent key (context-aware apostrophe/accent)
+- Liquid Glass theming (replace giellakbd-ios Theme.swift)
 
-**Should have (differentiators):**
-- Cold start auto-return UX messaging (Flow Session pattern)
-- Privacy-safe open-source logging (marketing differentiator)
-- ANE protection with retry-on-failure for CoreML compilation
+**Fully independent of rebuild (zero changes needed):**
+- Dynamic Island live activity (DictusCore)
+- Cold start Audio Bridge (KeyboardState + DictusCore)
+- Export logs (DictusApp)
 
-**Defer (post-beta):**
-- Cloud logging / analytics (contradicts privacy identity)
-- Background model downloads (URLSession delegate complexity)
-- Automatic model updates (risky before beta)
-- Real-time streaming transcription (scope creep)
-- GitHub issue integration in logs (nice-to-have)
-- Fastlane/CI automation (manual upload is fine for first builds)
+**Anti-features (do NOT build):**
+- Full emoji picker in keyboard (memory-unsafe, use system cycling)
+- iPad/split keyboard (out of scope)
+- DivvunSpell integration (use existing UITextChecker)
+
+See: [FEATURES.md](FEATURES.md) for feature dependency graph and risk assessment.
 
 ### Architecture Approach
 
-The existing two-process architecture is stable and requires no structural changes. See [ARCHITECTURE.md](ARCHITECTURE.md) for component diagrams and data flow.
+**UIKit owns the keyboard grid, SwiftUI owns the chrome.** DictusKeyboardView (adapted from giellakbd-ios KeyboardView) renders keys via UICollectionView and handles all touch events. SwiftUI views (ToolbarView, RecordingOverlay, EmojiPickerView) are hosted in UIHostingControllers alongside the UIKit grid. When recording or emoji mode activates, the UIKit grid is hidden and the SwiftUI overlay takes over.
 
-**Major components to modify:**
-1. **PersistentLog (DictusCore)** -- add log levels, process tags, privacy filtering, increased line cap. Consider per-process log files to eliminate cross-process file contention entirely
-2. **KeyboardRootView + KeyboardState (DictusKeyboard)** -- include `.requested` status in overlay condition, add debounce on rapid status transitions, reset animation state on `viewWillAppear`
-3. **ModelManager + ModelDownloadPage (DictusApp)** -- add retry-with-cleanup on prewarm failure, time-estimate-based progress indication, device RAM gating for large models
+**Major components:**
+1. **DictusKeyboardView** (NEW, UIKit) -- key grid + touch dispatcher, adapted from giellakbd-ios
+2. **DictusKeyCell** (NEW, UIKit) -- visual key rendering, adapted from giellakbd-ios KeyView
+3. **KeyboardChrome** (NEW, SwiftUI) -- slim wrapper for toolbar + recording overlay + emoji picker
+4. **KeyboardActionDelegate** (NEW, protocol) -- bridges UIKit touch actions to KeyboardViewController
+5. **AccentOverlayView** (NEW, UIKit) -- long-press accent popup, adapted from giellakbd-ios
+6. **TrackpadController** (NEW) -- spacebar trackpad, ported from SpaceKey + giellakbd-ios cursor controller
 
-**One new component:**
-- **ColdStartOverlay (DictusApp)** -- minimal recording UI shown when launched via `dictus://dictate` URL scheme with the app not running. Shows "Recording..." with a prominent "< Back" instruction
+**Unchanged:** KeyboardState, ToolbarView, RecordingOverlay, SuggestionBarView, TextPredictionEngine, all DictusCore files.
 
-**New IPC addition:**
-- `appLaunched` Darwin notification -- app posts immediately on cold-start URL launch, keyboard receives it to transition from `.requested` to `.recording` without waiting for the full engine warmup
+**Deleted after migration:** KeyButton, KeyRow, KeyboardView (SwiftUI), SpecialKeyButton, AccentPopup (SwiftUI).
+
+See: [ARCHITECTURE.md](ARCHITECTURE.md) for full component mapping, data flow, and build order.
 
 ### Critical Pitfalls
 
-See [PITFALLS.md](PITFALLS.md) for the full list of 12 pitfalls with recovery strategies.
+1. **Hybrid UIKit/SwiftUI touch conflict** -- SwiftUI overlays above UIKit keyboard can intercept or drop touches at boundaries. Prevention: clean boundary (UIKit owns grid area, SwiftUI owns above), toggle `isUserInteractionEnabled` when overlays are active, test touch boundaries after each overlay integration.
 
-1. **PersistentLog concurrent write corruption** -- two processes writing to the same file without coordination. Fix: use per-process log files (`dictus_app.log`, `dictus_keyboard.log`) merged at display time, or use `O_APPEND` mode for atomic small writes
-2. **Logging dictated text violates GDPR / App Store rules** -- `PersistentLog` writes plaintext with zero redaction. Fix: define privacy rules BEFORE writing code. Never log transcription text, keystrokes, or audio content. Use OSLog `.private` for development-only diagnostics
-3. **Private API usage for auto-return causes App Store rejection** -- Apple's static analysis detects private APIs even via `#selector`. Fix: do NOT pursue programmatic auto-return. Use the Flow Session UX pattern (accept one manual tap on cold start)
-4. **CoreML Large Turbo v3 compilation crashes on 4GB devices** -- ANE compilation requires 1-3GB of memory. Fix: gate large models behind `ProcessInfo.processInfo.physicalMemory >= 6_000_000_000`. Offer CPU+GPU fallback on constrained devices
-5. **Missing Privacy Manifest blocks TestFlight** -- `PrivacyInfo.xcprivacy` required since May 2024 for both DictusApp and DictusKeyboard targets. Fix: create manifests and validate the upload pipeline early with a smoke-test archive
+2. **Height constraint flicker on first appearance** -- giellakbd-ios known issue (#28), compounded by Dictus toolbar height. Prevention: single height source of truth, set constraint in viewWillAppear with once-flag, pre-calculate total height.
+
+3. **Memory budget exceeded** -- 50MB limit with no reuse benefit (all ~42 cells visible simultaneously) plus Dictus features. Prevention: profile on device BEFORE adding features, budget <10MB for base keyboard, lazy-load overlays, kill emoji picker.
+
+4. **Beta App Review rejection** -- first external TestFlight triggers review. Full Access justification, Privacy Manifests, privacy policy URL all required. Prevention: audit both targets' PrivacyInfo.xcprivacy, write detailed review notes, do a dry-run review 1 week before planned launch.
+
+5. **CocoaPods conflict** -- giellakbd-ios uses Pods, Dictus uses SPM. Prevention: copy source files directly, never add CocoaPods to Dictus.
+
+See: [PITFALLS.md](PITFALLS.md) for all 14 pitfalls with prevention strategies.
 
 ## Implications for Roadmap
 
-Based on dependency analysis across all four research files, here is the suggested phase structure:
+### Phase 1: Bug Fixes (v1.2 beta issues)
+**Rationale:** Fix existing bugs BEFORE the architecture change -- debugging state issues in a new architecture is harder (Pitfall #10).
+**Delivers:** Dynamic Island REC desync fix (#60), export logs spinner (#61), any additional beta bugs.
+**Avoids:** Pitfall #10 (state desync worsened by architecture change).
 
-### Phase 1: Logging Foundation
-**Rationale:** Every subsequent phase depends on production-quality logging for debugging. This is the infrastructure layer. Low risk, high enablement value.
-**Delivers:** Production-ready PersistentLog with log levels, privacy filtering, process tags, export capability. DebugLogView with filtering and share. iOS 17 cleanup (remove unnecessary `#available` guards).
-**Addresses:** Production logging system (table stakes), privacy-safe logging (differentiator)
-**Avoids:** Pitfall 1 (concurrent write corruption), Pitfall 2 (logging user text), Pitfall 10 (DateFormatter allocation)
-**Effort:** 1-2 days
+### Phase 2: Keyboard Base (giellakbd-ios integration)
+**Rationale:** Foundation that everything else depends on. Import source files, get UICollectionView rendering AZERTY keys, basic character insertion working.
+**Delivers:** UIKit keyboard grid with zero dead zones, French AZERTY/QWERTY layouts, basic character insertion.
+**Addresses:** Table stakes (layout, shift, symbols, backspace, return, globe key).
+**Avoids:** Pitfalls #2 (height flicker), #5 (CocoaPods conflict), #6 (KeyDefinition collision), #11 (frame-zero layout), #13 (pbxproj conflicts).
 
-### Phase 2: Animation State Fixes
-**Rationale:** The most user-visible bug. Needs logging from Phase 1 to diagnose intermittent issues on device. Keyboard-only changes, low integration risk.
-**Delivers:** Reliable recording/transcription overlay transitions. No more stuck states. Timestamp-based state validation, debounce on rapid status changes, `viewWillAppear` state reset.
-**Addresses:** Animation state consistency (table stakes)
-**Avoids:** Pitfall 7 (stale @State in persistent keyboard views)
-**Effort:** 1-2 days
+### Phase 3: Touch Polish (native feel)
+**Rationale:** Must feel like Apple keyboard before adding complex features.
+**Delivers:** touchDown haptics + 3-category sounds, key popup preview, shift states, layer switching.
+**Avoids:** Pitfall #8 (wrong lifecycle point for haptics/audio).
 
-### Phase 3: Cold Start Audio Bridge UX
-**Rationale:** Highest UX friction point. Depends on stable animation (Phase 2) and logging (Phase 1). New component (ColdStartOverlay) with clear boundaries.
-**Delivers:** ColdStartOverlay view, `appLaunched` Darwin notification, cold-start detection in DictationCoordinator. User sees "Recording... tap < Back to return" instead of the full app UI.
-**Addresses:** Cold start auto-return (differentiator -- UX messaging approach only)
-**Avoids:** Pitfall 3 (private API rejection), Pitfall 6 (AVAudioSession conflicts)
-**Effort:** 1-2 days
+### Phase 4: Complex Touch Features
+**Rationale:** Dictus-specific touch behaviors that go beyond basic key taps, need the base to be solid.
+**Delivers:** Delete repeat with acceleration, spacebar trackpad, accent long-press popup, adaptive accent key.
+**Avoids:** Pitfall #7 (spacebar trackpad gesture lost in UICollectionView).
 
-### Phase 4: CoreML Compilation + Model Download UX
-**Rationale:** Isolated to the model pipeline, no IPC changes. Prevents the most frustrating onboarding failure (model compilation hang/crash). Must ship before beta testers download models.
-**Delivers:** Retry-with-cleanup on prewarm failure, time-estimate progress indication, device RAM gating for large models, disk space pre-check, modal download protection against accidental navigation.
-**Addresses:** CoreML pre-compilation UX (table stakes), model download UX (table stakes), ANE protection (differentiator)
-**Avoids:** Pitfall 4 (CoreML crash on 4GB devices), Pitfall 8 (main thread blocking during downloads), Pitfall 9 (ANE contention)
-**Effort:** 2-3 days
+### Phase 5: Feature Reintegration
+**Rationale:** Reconnect all Dictus-specific features to the new UIKit grid.
+**Delivers:** Recording overlay, suggestion bar, autocorrect, autocapitalize, emoji mode, Full Access banner.
+**Avoids:** Pitfall #1 (UIKit/SwiftUI touch conflict -- integrate ONE overlay at a time).
 
-### Phase 5: Polish + French Accent Audit
-**Rationale:** Cosmetic pass before beta. Low risk, high perceived quality impact. Includes the filler words toggle cleanup.
-**Delivers:** Correct French accents in all UI strings, design polish across model manager/recording overlay/keyboard, filler words toggle decision (remove or fix).
-**Addresses:** French accent audit (table stakes), design polish
-**Avoids:** No critical pitfalls -- this is quality polish
-**Effort:** 1-2 days
+### Phase 6: Cleanup + Memory Profiling
+**Rationale:** Delete old SwiftUI keyboard files, verify memory budget, regression test.
+**Delivers:** Clean codebase, memory-verified keyboard, Signposter instrumentation.
+**Avoids:** Pitfall #3 (memory budget exceeded).
 
-### Phase 6: TestFlight Deployment
-**Rationale:** The exit gate. Must come last because everything above must be stable. Includes developer account migration, Privacy Manifest creation, provisioning profiles, and first archive/upload.
-**Delivers:** Working TestFlight build distributed to beta testers. Privacy policy URL. App Store Connect metadata.
-**Addresses:** TestFlight deployment (table stakes)
-**Avoids:** Pitfall 5 (missing Privacy Manifest), Pitfall 12 (App Group ID change during account migration)
-**Effort:** 1-2 days
+### Phase 7: Public TestFlight
+**Rationale:** Only after keyboard rebuilt, bugs fixed, and memory verified.
+**Delivers:** Beta App Review submission, external test group, public TestFlight link, README update.
+**Avoids:** Pitfalls #4 (Beta App Review rejection), #14 (missing test info).
 
 ### Phase Ordering Rationale
 
-- **Logging first** because it enables debugging for all subsequent phases. Every research file identified logging as the prerequisite.
-- **Animation before cold start** because the animation fix is contained within the keyboard extension, while cold start UX touches both processes. Fix the simpler, higher-visibility bug first.
-- **Cold start before model UX** because cold start is the highest-friction user experience issue and has clear component boundaries (one new view, one new notification).
-- **Model UX before polish** because model download/compilation failures during onboarding are beta-blocking, while French accents are not.
-- **TestFlight last** because it is the quality gate. All features must be stable before submitting for Beta App Review.
-- **Smoke-test the upload pipeline early** (Phase 1 timeframe) -- archive and upload the current v1.1 codebase to validate signing/manifest/entitlements before writing any v1.2 code. This avoids discovering blocking issues at the end.
+- **Bug fixes first** because debugging in the old (known) architecture is easier than in the new one.
+- **Keyboard base before features** because every feature depends on the UICollectionView grid existing.
+- **Touch polish before complex features** because haptics/sounds need to work from first keystroke.
+- **Feature reintegration after complex touch** because overlays layer on top of the touch system.
+- **Memory profiling before public beta** because silent keyboard crashes would kill the beta experience.
+- **Public TestFlight last** because it requires everything else to be stable.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 3 (Cold Start Audio Bridge):** The auto-return mechanism remains unresolved. Research confirmed no public API exists. The PiP-based approach (Pitfall 3, Option C) is speculative and needs a spike. Recommend timeboxing to 1 day -- if PiP does not work, fall back to UX messaging only.
-- **Phase 4 (CoreML Compilation):** ANE compilation timing is device-specific and opaque. Time estimates for the progress UI need real-device calibration. Budget testing time on at least 3 device tiers (4GB, 6GB, 8GB RAM).
+- **Phase 2 (Keyboard Base):** giellakbd-ios source files need detailed review during planning to identify exact files to vendor and adaptation points.
+- **Phase 4 (Complex Touch):** Spacebar trackpad gesture arbitration needs prototype validation -- the interaction between UICollectionView-level touch handling and per-cell long-press is the highest-risk integration point.
 
-Phases with standard patterns (skip additional research):
-- **Phase 1 (Logging):** Well-documented Apple APIs (OSLog, OSLogStore). Straightforward extension of existing code.
-- **Phase 2 (Animation):** Standard SwiftUI patterns. Root causes identified in code review.
-- **Phase 5 (Polish):** No technical research needed, purely cosmetic.
-- **Phase 6 (TestFlight):** Standard Apple deployment process, thoroughly documented.
+Phases with standard patterns (skip research-phase):
+- **Phase 1 (Bug Fixes):** Known issues with existing codebase, standard debugging.
+- **Phase 3 (Touch Polish):** Well-understood patterns (haptics, sounds, shift state), straightforward port.
+- **Phase 7 (Public TestFlight):** Apple documentation is clear on requirements.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Zero new dependencies. All built-in APIs verified against official documentation. |
-| Features | HIGH | Feature list is well-scoped. Clear table stakes vs differentiators. Complexity estimates grounded in existing codebase knowledge. |
-| Architecture | MEDIUM-HIGH | Existing architecture validated. New components (ColdStartOverlay) have clear boundaries. Cross-process file safety for logging needs real-device testing. |
-| Pitfalls | HIGH | Based on project history (v1.0/v1.1 bugs), Apple documentation, WhisperKit GitHub issues, and Swift Forums. Concrete prevention strategies for each pitfall. |
+| Stack | HIGH | giellakbd-ios source code verified, DeviceKit confirmed as sole new dependency |
+| Features | HIGH | Both codebases analyzed file-by-file, feature mapping comprehensive |
+| Architecture | HIGH | Integration points traced through code, matches Phase 15.4/15.5 conclusions |
+| Pitfalls | HIGH | Based on project history (16 failed approaches), giellakbd-ios issues, Apple docs |
 
-**Overall confidence:** MEDIUM-HIGH
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Auto-return mechanism:** No public API confirmed. PiP-based approach is speculative. Must be validated with a spike early in Phase 3. Fallback (UX messaging) is ready.
-- **CoreML compilation timing:** Progress estimates (10-40s by model size) are approximations from research, not measured on Dictus specifically. Need real-device calibration during Phase 4 implementation.
-- **Cross-process log file safety:** The `O_APPEND` atomicity guarantee for regular files on APFS is de facto but not POSIX-guaranteed. Per-process log files (recommended by PITFALLS.md) eliminate this concern entirely. Decision needed at Phase 1 start.
-- **App Group ID stability across team migration:** Research says the group ID is team-independent, but this must be verified on a real device with the new developer account before any v1.2 code ships.
-- **Wispr Flow's exact return mechanism:** Research identified the "Flow Session" pattern but the precise iOS API used for auto-return remains unknown. LOW confidence this gap can be closed -- it may be a whitelisted behavior or undocumented API.
+- **Spacebar trackpad gesture arbitration:** Needs prototype during Phase 4 to validate approach before committing to full implementation.
+- **Liquid Glass in UIKit cells:** `.dictusGlass()` is SwiftUI-only. Need UIKit equivalent (UIVisualEffectView or custom CALayer). Investigate during Phase 2 theming.
+- **Exact memory footprint:** Unknown until profiled on device. Base keyboard must be <10MB to leave room for features.
+- **giellakbd-ios Objective-C bridging header:** Check if any vendored Swift files require it during Phase 2 import.
+- **DeviceKit exact version:** Verify latest at `swift package resolve` time (5.8.x or newer).
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Apple OSLogStore documentation](https://developer.apple.com/documentation/oslog/oslogstore)
-- [Apple OSLogPrivacy documentation](https://developer.apple.com/documentation/os/oslogprivacy)
-- [Apple Privacy Manifest documentation](https://developer.apple.com/documentation/bundleresources/privacy-manifest-files)
-- [Apple TestFlight overview](https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/)
-- [Apple App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
-- [Apple CoreML compileModel(at:) documentation](https://developer.apple.com/documentation/coreml/mlmodel/compilemodel(at:)-6442s)
-- [Apple Custom Keyboard Guide](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html)
-- [Apple Background Execution](https://developer.apple.com/documentation/uikit/extending-your-app-s-background-execution-time)
-- [Swift Forums: auto-return keyboard discussion](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988)
-- [WhisperKit Configurations.swift source](https://github.com/argmaxinc/whisperkit/blob/main/Sources/WhisperKit/Core/Configurations.swift)
-- [WhisperKit issue #171: prewarmModels error](https://github.com/argmaxinc/WhisperKit/issues/171)
+- [giellakbd-ios GitHub repository](https://github.com/divvun/giellakbd-ios) -- full source code analysis
+- [DeviceKit GitHub](https://github.com/devicekit/DeviceKit) -- dependency verification
+- [Apple Custom Keyboard Programming Guide](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html) -- extension constraints
+- Dictus Phase 15.4/15.5 dead zones research -- 16 failed SwiftUI approaches
+- Dictus PROJECT.md, MILESTONES.md -- project history and constraints
 
 ### Secondary (MEDIUM confidence)
-- [WhisperKit issue #268: Unable to load model](https://github.com/argmaxinc/WhisperKit/issues/268)
-- [KeyboardKit 10.2 blog](https://keyboardkit.com/blog/2026/01/09/keyboardkit-10-2)
-- [Apple ml-stable-diffusion issue #255: ANECompiler failures](https://github.com/apple/ml-stable-diffusion/issues/255)
-- [fatbobman: SwiftUI animation and state pitfalls](https://fatbobman.com/en/posts/serious-issues-caused-by-delayed-state-updates-in-swiftui/)
-- [SwiftLee: OSLog and Unified Logging](https://www.avanderlee.com/debugging/oslog-unified-logging/)
-- [iOS 17 SwiftUI animation bugs (Medium)](https://medium.com/@talessilveira/ios-17-swiftui-animation-bugs-6b8d8951d029)
-- [Wispr Flow FAQ](https://docs.wisprflow.ai/iphone/faq)
-
-### Tertiary (LOW confidence)
-- [CocoaLumberjack issue #439: log files from extensions](https://github.com/CocoaLumberjack/CocoaLumberjack/issues/439)
-- Wispr Flow exact auto-return mechanism -- inferred from behavior, not documented
+- [giellakbd-ios issue #28](https://github.com/divvun/giellakbd-ios/issues/28) -- height constraint flicker
+- [Apple Developer Forums: UICollectionView in keyboard extension](https://developer.apple.com/forums/thread/24032) -- layout timing
+- [Apple TestFlight documentation](https://developer.apple.com/help/app-store-connect/test-a-beta-version/testflight-overview/) -- public beta requirements
+- Community reports on keyboard extension memory limits (30-50MB range)
 
 ---
-*Research completed: 2026-03-11*
+*Research completed: 2026-03-27*
 *Ready for roadmap: yes*
