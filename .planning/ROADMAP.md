@@ -77,7 +77,10 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 **Success Criteria** (what must be TRUE):
   1. Dynamic Island never gets stuck on REC state after recording ends or is cancelled
   2. Export logs completes within a few seconds and shows a spinner during export
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 17-01-PLAN.md — Dynamic Island watchdog + state machine extraction + unit tests (FIX-01)
+- [ ] 17-02-PLAN.md — Export logs optimization + 7-day retention + spinner UX (FIX-02)
 
 ### Phase 18: Keyboard Base
 **Goal**: Users can type on a UICollectionView-based keyboard with zero dead zones, haptic feedback, key sounds, and key popup -- feels like a real keyboard from day one
@@ -162,7 +165,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 15.2. Cleaning & Fix Issues | v1.2 | 4/4 | Complete | 2026-03-17 |
 | 15.3. Keyboard Optimization | v1.2 | 4/4 | Complete | 2026-03-24 |
 | 16. TestFlight Deployment | v1.2 | 3/3 | Complete | 2026-03-27 |
-| 17. Bug Fixes | v1.3 | 0/? | Not started | - |
+| 17. Bug Fixes | v1.3 | 0/2 | Not started | - |
 | 18. Keyboard Base | v1.3 | 0/? | Not started | - |
 | 19. Complex Touch Features | v1.3 | 0/? | Not started | - |
 | 20. Feature Reintegration | v1.3 | 0/? | Not started | - |
