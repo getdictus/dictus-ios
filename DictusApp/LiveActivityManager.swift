@@ -43,25 +43,39 @@ class LiveActivityManager {
     /// WHY: Without validation, concurrent Activity.update() calls arrive out of order
     /// and autoDismissTask from previous recordings can fire mid-recording (#42).
     private func validateTransition(to target: LiveActivityPhase) -> Bool {
-        let valid: [LiveActivityPhase: Set<LiveActivityPhase>] = [
-            .idle: [.standby],
-            .standby: [.recording, .idle],
-            .recording: [.transcribing, .standby],  // standby = cancel
-            .transcribing: [.ready, .failed],
-            .ready: [.standby, .recording],  // recording = quick chain before auto-dismiss
-            // WHY .recording and .idle: If autoDismissTask is killed by iOS
-            // (cold start, app switching), .failed becomes permanent. Allow recovery
-            // to .recording (new dictation) and .idle (activity teardown).
-            .failed: [.standby, .recording, .idle]
-        ]
-        let allowed = valid[currentPhase] ?? []
-        if allowed.contains(target) {
+        // Delegate validation to the extracted state machine in DictusCore.
+        // WHY keep both: The state machine provides unit-testable validation logic.
+        // The private enum stays as the canonical internal state. We map to the
+        // shared Phase type for validation, then sync if accepted.
+        let smTarget = mapToStateMachinePhase(target)
+        var copy = stateMachine
+        if copy.transition(to: smTarget) {
+            stateMachine = copy
             return true
         } else {
             DictusLogger.app.warning("LiveActivity: rejected transition \(self.currentPhase.rawValue, privacy: .public) -> \(target.rawValue, privacy: .public)")
             PersistentLog.log(.liveActivityFailed(context: "rejectedTransition", error: "\(currentPhase.rawValue)->\(target.rawValue)"))
             return false
         }
+    }
+
+    /// Map internal LiveActivityPhase to the shared state machine Phase.
+    private func mapToStateMachinePhase(_ phase: LiveActivityPhase) -> LiveActivityStateMachine.Phase {
+        switch phase {
+        case .idle: return .idle
+        case .standby: return .standby
+        case .recording: return .recording
+        case .transcribing: return .transcribing
+        case .ready: return .ready
+        case .failed: return .failed
+        }
+    }
+
+    /// Force-sync the state machine to match a direct currentPhase assignment.
+    /// WHY force (not transition): Direct assignments happen in recovery/bootstrap paths
+    /// where the state machine's transition rules may reject the change.
+    private func syncStateMachine(to phase: LiveActivityPhase) {
+        stateMachine.forcePhase(mapToStateMachinePhase(phase))
     }
 
     /// Maps ContentState.Phase (ActivityKit display) to LiveActivityPhase (internal state machine).
@@ -84,6 +98,17 @@ class LiveActivityManager {
     /// WHY LiveActivityPhase (not ContentState.Phase): Adds .idle state and transition
     /// validation to prevent DI desync after chaining recordings (#42).
     private var currentPhase: LiveActivityPhase = .idle
+
+    /// Extracted state machine for transition validation (lives in DictusCore for unit testing).
+    /// WHY a separate struct: The transition rules are pure logic with no ActivityKit dependency.
+    /// Keeping them in DictusCore enables unit testing all valid/invalid paths.
+    private var stateMachine = LiveActivityStateMachine()
+
+    /// Post-recording watchdog: forces DI back to standby if stuck on .recording.
+    /// WHY "post-recording": This does NOT run during recording. It starts only AFTER
+    /// DictationCoordinator signals recording has ended (stop or cancel). If the DI
+    /// successfully transitions away from .recording, the guard exits harmlessly.
+    private var recordingWatchdog: Task<Void, Never>?
 
     /// Timestamp of last waveform update. Used to throttle to 1Hz.
     private var lastWaveformUpdate = Date.distantPast
@@ -138,6 +163,7 @@ class LiveActivityManager {
             DictusLogger.app.info("currentActivity stale (killed by intent or force-quit) -- clearing")
             currentActivity = nil
             currentPhase = .idle
+            syncStateMachine(to: .idle)
         }
 
         // Guard against duplicates at the system level, not just our in-memory reference.
@@ -150,6 +176,7 @@ class LiveActivityManager {
             if let existing = systemActivities.first {
                 currentActivity = existing
                 currentPhase = mapContentPhase(existing.content.state.phase)
+                syncStateMachine(to: currentPhase)
                 DictusLogger.app.info("Recovered orphaned Live Activity: \(existing.id, privacy: .public)")
                 PersistentLog.log(.liveActivityStarted(id: "orphan-recovered:\(existing.id)"))
             }
@@ -185,6 +212,7 @@ class LiveActivityManager {
             )
             currentActivity = activity
             currentPhase = .standby
+            syncStateMachine(to: .standby)
             DictusLogger.app.info("Live Activity started in standby (id: \(activity.id, privacy: .public))")
             PersistentLog.log(.liveActivityStarted(id: activity.id))
         } catch {
@@ -203,6 +231,7 @@ class LiveActivityManager {
 
         currentActivity = nil
         currentPhase = .idle  // Update BEFORE async work to prevent races (#49)
+        syncStateMachine(to: .idle)
         PersistentLog.log(.liveActivityEnded(reason: "powerButton"))
         Task {
             let finalState = DictusLiveActivityAttributes.ContentState(phase: .standby)
@@ -219,6 +248,11 @@ class LiveActivityManager {
     /// Transition from standby to recording.
     /// Called when DictationCoordinator starts recording.
     func transitionToRecording() {
+        // Cancel any stale watchdog from a previous recording cycle.
+        // WHY at the very start: If the user starts a new recording while a watchdog
+        // from the previous cycle is still ticking, the watchdog must NOT fire mid-recording.
+        cancelRecordingWatchdog()
+
         // Auto-bootstrap: if no activity exists, create standby first.
         // WHY BEFORE validateTransition: idle→recording is invalid, but idle→standby→recording
         // is the valid path. Without this, the guard rejects and the fallback at line 228
@@ -253,6 +287,7 @@ class LiveActivityManager {
                 PersistentLog.log(.liveActivityFailed(context: "bootstrap-fallback", error: "startStandby failed, no DI"))
             }
             currentPhase = .recording  // Lock state immediately to prevent races (#49)
+            syncStateMachine(to: .recording)
             Task {
                 try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
                 await updateToRecording()
@@ -431,11 +466,36 @@ class LiveActivityManager {
             PersistentLog.log(.liveActivityFailed(context: "ensureAlive", error: "activity \(current.id) gone from system"))
             currentActivity = nil
             currentPhase = .idle
+            syncStateMachine(to: .idle)
         }
 
         guard currentActivity == nil || currentPhase == .idle else { return }
         PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "recovery-standby"))
         startStandbyActivity()
+    }
+
+    // MARK: - Recording Watchdog
+
+    /// Arm the post-recording watchdog. Called by DictationCoordinator after stop/cancel.
+    /// WHY 10s timeout: Normal transition from .recording to .transcribing/.standby takes <1s.
+    /// 10s provides generous margin for slow devices while still catching genuinely stuck states.
+    func startRecordingWatchdog() {
+        recordingWatchdog?.cancel()
+        recordingWatchdog = Task {
+            try? await Task.sleep(nanoseconds: 10_000_000_000) // 10s
+            guard !Task.isCancelled else { return }
+            guard currentPhase == .recording else { return }
+            // DI is still on .recording but nobody is recording -- force recovery
+            PersistentLog.log(.watchdogReset(source: "liveActivity", staleState: "recording"))
+            DictusLogger.app.error("Recording watchdog fired -- DI stuck on .recording, forcing standby")
+            await returnToStandby()
+        }
+    }
+
+    /// Cancel the watchdog (new recording started, or DI already transitioned).
+    func cancelRecordingWatchdog() {
+        recordingWatchdog?.cancel()
+        recordingWatchdog = nil
     }
 
     // MARK: - Utilities
@@ -454,6 +514,7 @@ class LiveActivityManager {
 
         PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "standby"))
         currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
+        syncStateMachine(to: .standby)
         let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
         // Refresh staleDate on each return to standby (15 min from now)
         let staleDate = Date().addingTimeInterval(15 * 60)
@@ -492,6 +553,7 @@ class LiveActivityManager {
             if currentSessionActivityID == nil {
                 currentActivity = nil
                 currentPhase = .idle
+                syncStateMachine(to: .idle)
             }
         }
     }
@@ -510,6 +572,7 @@ class LiveActivityManager {
         }
         currentActivity = nil
         currentPhase = .idle
+        syncStateMachine(to: .idle)
         PersistentLog.log(.liveActivityEnded(reason: "appTerminating"))
         DictusLogger.app.info("Ended all Live Activities (app terminating)")
     }

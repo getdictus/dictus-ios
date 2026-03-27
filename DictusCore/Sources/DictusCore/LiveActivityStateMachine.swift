@@ -60,4 +60,12 @@ public struct LiveActivityStateMachine {
     public mutating func reset() {
         currentPhase = .idle
     }
+
+    /// Force-set the phase without validation.
+    /// WHY: LiveActivityManager has recovery/bootstrap paths that assign currentPhase
+    /// directly (e.g., idle after crash, standby after orphan recovery). These bypass
+    /// the normal transition rules. forcePhase keeps the state machine in sync.
+    public mutating func forcePhase(_ phase: Phase) {
+        currentPhase = phase
+    }
 }
