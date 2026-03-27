@@ -9,10 +9,10 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 
 ### Keyboard Base
 
-- [ ] **KBD-01**: User can type characters on a UICollectionView-based AZERTY keyboard with zero dead zones
-- [ ] **KBD-02**: User can switch to QWERTY layout in keyboard settings
+- [x] **KBD-01**: User can type characters on a UICollectionView-based AZERTY keyboard with zero dead zones
+- [x] **KBD-02**: User can switch to QWERTY layout in keyboard settings
 - [ ] **KBD-03**: User can toggle shift (single tap) and caps lock (double tap) with visual feedback
-- [ ] **KBD-04**: User can switch between letters, numbers, and symbols layers
+- [x] **KBD-04**: User can switch between letters, numbers, and symbols layers
 - [ ] **KBD-05**: User can delete characters with backspace, with accelerating repeat on hold
 - [ ] **KBD-06**: User can insert space, return, and use globe key to switch keyboards
 - [ ] **KBD-07**: User gets autocapitalization after sentence-ending punctuation
@@ -22,7 +22,7 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 
 - [ ] **FEEL-01**: User gets haptic feedback on touchDown matching Apple keyboard feel
 - [ ] **FEEL-02**: User hears 3-category key sounds (letter/delete/modifier) respecting silent switch
-- [ ] **FEEL-03**: User sees key popup preview on press
+- [x] **FEEL-03**: User sees key popup preview on press
 - [ ] **FEEL-04**: User can long-press vowels to access French accent characters with drag-to-select
 - [ ] **FEEL-05**: User can drag spacebar to move cursor (trackpad) with haptic ticks
 - [ ] **FEEL-06**: User sees adaptive accent key (apostrophe after consonants, accent after vowels)
@@ -96,17 +96,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| KBD-01 | Phase 18 | Pending |
-| KBD-02 | Phase 18 | Pending |
+| KBD-01 | Phase 18 | Complete |
+| KBD-02 | Phase 18 | Complete |
 | KBD-03 | Phase 18 | Pending |
-| KBD-04 | Phase 18 | Pending |
+| KBD-04 | Phase 18 | Complete |
 | KBD-05 | Phase 19 | Pending |
 | KBD-06 | Phase 18 | Pending |
 | KBD-07 | Phase 18 | Pending |
 | KBD-08 | Phase 18 | Pending |
 | FEEL-01 | Phase 18 | Pending |
 | FEEL-02 | Phase 18 | Pending |
-| FEEL-03 | Phase 18 | Pending |
+| FEEL-03 | Phase 18 | Complete |
 | FEEL-04 | Phase 19 | Pending |
 | FEEL-05 | Phase 19 | Pending |
 | FEEL-06 | Phase 19 | Pending |

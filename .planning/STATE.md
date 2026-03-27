@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
-status: completed
-stopped_at: Phase 18 context gathered
-last_updated: "2026-03-27T22:49:27.481Z"
-last_activity: 2026-03-27 — Completed 17-02 export logs optimization
+status: executing
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-03-27T23:41:39.285Z"
+last_activity: 2026-03-27 — Completed 18-01 vendor giellakbd-ios and French layouts
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 5
+  completed_plans: 3
   percent: 10
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 17 — Bug Fixes (fix before architecture change)
+**Current focus:** Phase 18 — Keyboard Base (vendor giellakbd-ios UICollectionView keyboard)
 
 ## Current Position
 
-Phase: 17 of 22 (Bug Fixes) — first of 6 v1.3 phases
-Plan: 2 of 2 in current phase
-Status: Phase 17 complete
-Last activity: 2026-03-27 — Completed 17-02 export logs optimization
+Phase: 18 of 22 (Keyboard Base) — second of 6 v1.3 phases
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-03-27 — Completed 18-01 vendor giellakbd-ios and French layouts
 
 Progress: [█░░░░░░░░░] 10% (v1.3 milestone)
 
@@ -56,6 +56,10 @@ Recent decisions for v1.3:
 - LiveActivityStateMachine: extracted pure logic from @MainActor singleton into DictusCore struct for unit testing
 - Post-recording watchdog: arm after stop/cancel/error, cancel on new recording, forcePhase for recovery sync
 - PersistentLog: O(1) size-based trim (200KB) replaces O(n) line-counting; 7-day retention prunes before export only
+- Vendored KeyboardView renamed to GiellaKeyboardView to avoid type collision with existing SwiftUI view
+- Added programmatic KeyboardDefinition init for constructing French layouts without JSON
+- LegacyCompat.swift provides stubs (KeyMetrics, DeviceClass, KeySound) during UIKit keyboard migration
+- [Phase 18]: Vendored KeyboardView renamed to GiellaKeyboardView to avoid Swift type collision
 
 ### Pending Todos
 
@@ -69,9 +73,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-27T22:49:27.479Z
-Stopped at: Phase 18 context gathered
-Resume file: .planning/phases/18-keyboard-base/18-CONTEXT.md
+Last session: 2026-03-27T23:41:39.283Z
+Stopped at: Completed 18-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*
