@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
-status: planning
-stopped_at: Phase 17 context gathered
+status: executing
+stopped_at: Completed 17-02-PLAN.md
 last_updated: "2026-03-27T16:46:42.570Z"
 last_activity: 2026-03-27 — v1.3 roadmap created
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 2
+  completed_plans: 2
+  percent: 10
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 ## Current Position
 
 Phase: 17 of 22 (Bug Fixes) — first of 6 v1.3 phases
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-27 — v1.3 roadmap created
+Plan: 2 of 2 in current phase
+Status: Phase 17 complete
+Last activity: 2026-03-27 — Completed 17-02 export logs optimization
 
-Progress: [░░░░░░░░░░] 0% (v1.3 milestone)
+Progress: [█░░░░░░░░░] 10% (v1.3 milestone)
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Recent decisions for v1.3:
 - UIKit keys + SwiftUI chrome (toolbar, overlay stay SwiftUI)
 - Fix bugs before architecture change (debug in known codebase)
 - Incremental feature addition with dead zone validation after each phase
+- PersistentLog: O(1) size-based trim (200KB) replaces O(n) line-counting; 7-day retention prunes before export only
 
 ### Pending Todos
 
@@ -66,9 +67,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-27T16:46:42.568Z
-Stopped at: Phase 17 context gathered
-Resume file: .planning/phases/17-bug-fixes/17-CONTEXT.md
+Last session: 2026-03-27T17:25:08Z
+Stopped at: Completed 17-02-PLAN.md
+Resume file: .planning/phases/17-bug-fixes/17-02-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*

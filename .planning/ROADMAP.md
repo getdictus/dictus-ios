@@ -165,7 +165,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 15.2. Cleaning & Fix Issues | v1.2 | 4/4 | Complete | 2026-03-17 |
 | 15.3. Keyboard Optimization | v1.2 | 4/4 | Complete | 2026-03-24 |
 | 16. TestFlight Deployment | v1.2 | 3/3 | Complete | 2026-03-27 |
-| 17. Bug Fixes | v1.3 | 0/2 | Not started | - |
+| 17. Bug Fixes | 1/2 | In Progress|  | - |
 | 18. Keyboard Base | v1.3 | 0/? | Not started | - |
 | 19. Complex Touch Features | v1.3 | 0/? | Not started | - |
 | 20. Feature Reintegration | v1.3 | 0/? | Not started | - |
