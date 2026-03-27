@@ -85,19 +85,19 @@ L'App Group est le mécanisme iOS qui permet à l'app principale et à la keyboa
 ```
 # Dans Xcode, pour CHAQUE target (DictusApp + DictusKeyboard) :
 Signing & Capabilities → + Capability → App Groups
-→ Ajouter : group.com.pivi.dictus
+→ Ajouter : group.solutions.pivi.dictus
 ```
 
 Utilisation dans le code :
 
 ```swift
 // Lire/écrire des préférences partagées
-let defaults = UserDefaults(suiteName: "group.com.pivi.dictus")
+let defaults = UserDefaults(suiteName: "group.solutions.pivi.dictus")
 defaults?.set("small", forKey: "activeModel")
 
 // Chemin vers les modèles partagés
 let containerURL = FileManager.default
-    .containerURL(forSecurityApplicationGroupIdentifier: "group.com.pivi.dictus")!
+    .containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.pivi.dictus")!
 let modelsPath = containerURL.appendingPathComponent("models")
 ```
 
@@ -336,7 +336,7 @@ Dictus — iOS keyboard extension pour dictation vocale offline (WhisperKit)
 ## Stack
 - Swift 5.9+ / SwiftUI
 - WhisperKit (argmaxinc) via SPM
-- App Group: group.com.pivi.dictus
+- App Group: group.solutions.pivi.dictus
 - Minimum iOS: 16.0
 
 ## Conventions
@@ -528,7 +528,7 @@ Les rejets les plus fréquents pour ce type d'app :
 ### Sprint 1 — Setup projet
 
 - [ ] Créer le projet Xcode avec les 2 targets (DictusApp + DictusKeyboard)
-- [ ] Configurer l'App Group `group.com.pivi.dictus`
+- [ ] Configurer l'App Group `group.solutions.pivi.dictus`
 - [ ] Ajouter WhisperKit via SPM
 - [ ] Vérifier que le build compile sans erreur (`Cmd+B`)
 - [ ] Créer le repo GitHub et pusher le projet initial
