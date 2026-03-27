@@ -53,6 +53,8 @@ Recent decisions for v1.3:
 - UIKit keys + SwiftUI chrome (toolbar, overlay stay SwiftUI)
 - Fix bugs before architecture change (debug in known codebase)
 - Incremental feature addition with dead zone validation after each phase
+- LiveActivityStateMachine: extracted pure logic from @MainActor singleton into DictusCore struct for unit testing
+- Post-recording watchdog: arm after stop/cancel/error, cancel on new recording, forcePhase for recovery sync
 - PersistentLog: O(1) size-based trim (200KB) replaces O(n) line-counting; 7-day retention prunes before export only
 
 ### Pending Todos
@@ -67,9 +69,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-27T17:25:08Z
-Stopped at: Completed 17-02-PLAN.md
-Resume file: .planning/phases/17-bug-fixes/17-02-SUMMARY.md
+Last session: 2026-03-27T17:29:51Z
+Stopped at: Completed 17-01-PLAN.md and 17-02-PLAN.md
+Resume file: .planning/phases/17-bug-fixes/17-01-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*

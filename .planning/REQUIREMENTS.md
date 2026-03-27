@@ -46,7 +46,7 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 
 ### Bug Fixes
 
-- [ ] **FIX-01**: Dynamic Island no longer gets stuck on REC state (issue #60)
+- [x] **FIX-01**: Dynamic Island no longer gets stuck on REC state (issue #60)
 - [x] **FIX-02**: Export logs shows spinner and completes quickly (issue #61)
 
 ### Public TestFlight
@@ -118,7 +118,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRED-02 | Phase 20 | Pending |
 | PRED-03 | Phase 20 | Pending |
 | SET-01 | Phase 20 | Pending |
-| FIX-01 | Phase 17 | Pending |
+| FIX-01 | Phase 17 | Complete |
 | FIX-02 | Phase 17 | Complete |
 | TF-01 | Phase 22 | Pending |
 | TF-02 | Phase 22 | Pending |
