@@ -48,3 +48,4 @@ Thumbs.db
 # Only ignore top-level Models/ directory (downloaded Whisper model files)
 # DictusKeyboard/Models/ contains Swift source files and must be tracked
 /Models/
+Library/

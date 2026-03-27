@@ -39,7 +39,7 @@ Dictus is a free, open-source iOS keyboard that adds voice dictation to any app.
 ## Getting Started
 
 ```bash
-git clone https://github.com/Pivii/dictus.git
+git clone https://github.com/getdictus/dictus-ios.git
 cd dictus
 open Dictus.xcodeproj
 ```
@@ -62,7 +62,7 @@ Dictus is organized into three Xcode targets:
 | **DictusKeyboard** | Keyboard extension — custom keyboard + dictation trigger |
 | **DictusCore** | Shared framework — App Group storage, models, preferences |
 
-The app and the keyboard extension communicate through an **App Group** (`group.com.pivi.dictus`). WhisperKit runs inside DictusApp (the keyboard extension has a ~50 MB memory limit), and an audio bridge handles cold start scenarios so dictation works seamlessly from the keyboard.
+The app and the keyboard extension communicate through an **App Group** (`group.solutions.pivi.dictus`). WhisperKit runs inside DictusApp (the keyboard extension has a ~50 MB memory limit), and an audio bridge handles cold start scenarios so dictation works seamlessly from the keyboard.
 
 ## Beta Testing
 
@@ -74,7 +74,7 @@ Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
 
 ## Privacy
 
-Dictus collects no user data. All speech processing happens on your device. See our [Privacy Policy](PRIVACY.md).
+Dictus collects no user data. All speech processing happens on your device. See our [Privacy Policy](https://www.getdictus.com/en/privacy).
 
 ## License
 

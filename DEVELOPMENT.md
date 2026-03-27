@@ -85,19 +85,19 @@ L'App Group est le mécanisme iOS qui permet à l'app principale et à la keyboa
 ```
 # Dans Xcode, pour CHAQUE target (DictusApp + DictusKeyboard) :
 Signing & Capabilities → + Capability → App Groups
-→ Ajouter : group.com.pivi.dictus
+→ Ajouter : group.solutions.pivi.dictus
 ```
 
 Utilisation dans le code :
 
 ```swift
 // Lire/écrire des préférences partagées
-let defaults = UserDefaults(suiteName: "group.com.pivi.dictus")
+let defaults = UserDefaults(suiteName: "group.solutions.pivi.dictus")
 defaults?.set("small", forKey: "activeModel")
 
 // Chemin vers les modèles partagés
 let containerURL = FileManager.default
-    .containerURL(forSecurityApplicationGroupIdentifier: "group.com.pivi.dictus")!
+    .containerURL(forSecurityApplicationGroupIdentifier: "group.solutions.pivi.dictus")!
 let modelsPath = containerURL.appendingPathComponent("models")
 ```
 
@@ -336,7 +336,7 @@ Dictus — iOS keyboard extension pour dictation vocale offline (WhisperKit)
 ## Stack
 - Swift 5.9+ / SwiftUI
 - WhisperKit (argmaxinc) via SPM
-- App Group: group.com.pivi.dictus
+- App Group: group.solutions.pivi.dictus
 - Minimum iOS: 16.0
 
 ## Conventions
@@ -401,6 +401,49 @@ App Store Connect → TestFlight → Groupes externes → +
 → Soumettre le build pour Beta App Review (1-2 jours)
 → Créer un lien public ou inviter par email
 ```
+
+### Versioning
+
+Dictus uses **semantic versioning** with two numbers managed in Xcode:
+
+| Xcode field | Plist key | Format | Example | What it means |
+|---|---|---|---|---|
+| **Marketing Version** | `CFBundleShortVersionString` | `MAJOR.MINOR.PATCH` | 1.2.0 | What users see |
+| **Build Number** | `CFBundleVersion` | Integer | 3 | Unique per upload to App Store Connect |
+
+**When to increment:**
+
+| Action | Marketing Version | Build Number |
+|---|---|---|
+| Fix a bug, rebuild for TestFlight | Same | +1 |
+| New feature or milestone complete | +0.1.0 (e.g., 1.2 → 1.3) | Reset to 1 |
+| Major release (e.g., keyboard rewrite) | +1.0.0 (e.g., 1.x → 2.0) | Reset to 1 |
+| Hotfix on production | +0.0.1 (e.g., 1.2.0 → 1.2.1) | Reset to 1 |
+
+**Git tags and GitHub releases:**
+
+Every TestFlight upload gets a git tag. Every App Store release gets a GitHub Release.
+
+| Event | Tag format | GitHub Release? |
+|---|---|---|
+| TestFlight beta build | `v1.2.0-beta.1` | No |
+| App Store release | `v1.2.0` | Yes (with changelog) |
+
+Tag workflow (Claude handles this automatically):
+```bash
+# After each TestFlight upload:
+git tag v1.2.0-beta.1
+git push origin v1.2.0-beta.1
+
+# After App Store release:
+git tag v1.2.0
+git push origin v1.2.0
+# Create GitHub Release from tag with changelog
+```
+
+**Branch mapping:**
+- `develop` → TestFlight beta (tags: `vX.Y.Z-beta.N`)
+- `main` → App Store production (tags: `vX.Y.Z`)
 
 ### Automatiser avec GitHub Actions
 
@@ -528,7 +571,7 @@ Les rejets les plus fréquents pour ce type d'app :
 ### Sprint 1 — Setup projet
 
 - [ ] Créer le projet Xcode avec les 2 targets (DictusApp + DictusKeyboard)
-- [ ] Configurer l'App Group `group.com.pivi.dictus`
+- [ ] Configurer l'App Group `group.solutions.pivi.dictus`
 - [ ] Ajouter WhisperKit via SPM
 - [ ] Vérifier que le build compile sans erreur (`Cmd+B`)
 - [ ] Créer le repo GitHub et pusher le projet initial

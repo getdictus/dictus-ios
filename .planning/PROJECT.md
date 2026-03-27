@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Dictus is a free, open-source iOS keyboard app for on-device French speech-to-text dictation. Users speak into any iOS app and get accurate French transcription auto-inserted at the cursor — no subscription, no cloud, no account. Built with WhisperKit and Parakeet (FluidAudio) for multi-engine speech recognition, featuring full AZERTY/QWERTY keyboard with text prediction, spacebar trackpad, haptic feedback, and iOS 26 Liquid Glass design.
+Dictus is a free, open-source iOS keyboard app for on-device French speech-to-text dictation. Users speak into any iOS app and get accurate French transcription auto-inserted at the cursor — no subscription, no cloud, no account. Built with WhisperKit and Parakeet (FluidAudio) for multi-engine speech recognition, featuring full AZERTY/QWERTY keyboard with text prediction, spacebar trackpad, haptic feedback, iOS 26 Liquid Glass design, and cold start Audio Bridge for seamless dictation even when iOS kills the app. Currently in private TestFlight beta (v1.2).
 
 ## Core Value
 
@@ -38,31 +38,31 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 - ✓ Keyboard default layer selection with live preview in settings — v1.1
 - ✓ Multi-engine model catalog (WhisperKit + Parakeet via FluidAudio) — v1.1
 - ✓ Model catalog cleaned (tiny/base deprecated, English-only removed) — v1.1
+- ✓ Structured privacy-safe logging with export (LogEvent API, NSFileCoordinator) — v1.2
+- ✓ Animation state machine for reliable recording overlay/waveform transitions — v1.2
+- ✓ Cold start Audio Bridge (keyboard captures audio, swipe-back overlay UX) — v1.2
+- ✓ Model pipeline hardened (RAM gating, compilation progress, retry-with-cleanup) — v1.2
+- ✓ French accent audit across all UI strings — v1.2
+- ✓ Model card redesign (tap-to-select, swipe-to-delete, active highlight) — v1.2
+- ✓ Recording overlay polish (44pt hit areas, haptics, smooth dismiss) — v1.2
+- ✓ Sound feedback service with settings — v1.2
+- ✓ Waveform recovery from off-screen/suspension — v1.2
+- ✓ Dynamic Island state machine for chained recordings — v1.2
+- ✓ Keyboard touchDown haptic/audio matching Apple keyboard — v1.2
+- ✓ Device-adaptive key dimensions (3 device classes) — v1.2
+- ✓ Professional developer signing + Privacy Manifests — v1.2
+- ✓ TestFlight private beta distributed — v1.2
+- ✓ Open-source docs (README, CONTRIBUTING, issue templates) — v1.2
 
 ### Active
 
-## Current Milestone: v1.2 Beta Ready
-
-**Goal:** Fix bugs, improve UX, and deploy to TestFlight for public beta.
-
-**Target features:**
-- Production-ready persistent logging system (privacy-safe)
-- Fix intermittent recording/transcription animation bug
-- Fix Large Turbo v3 CoreML compilation failure
-- French accent audit across all UI strings
-- Model download/preparation UX overhaul (modal, onboarding reorder, ANE protection)
-- CoreML pre-compilation during onboarding and model download
-- Cold start auto-return to keyboard (Audio Bridge pattern)
-- Design polish (model manager, recording overlay, keyboard UX)
-- Filler words toggle cleanup
-- Migrate Xcode signing to professional developer account
-- TestFlight deployment for public beta
-
-<!-- From issues: #7, #8, #9, #16, #17, #18, #19, #20 -->
+- [ ] Keyboard architecture rework (dead zones, touch handling)
+- [ ] Public TestFlight beta link
+- [ ] Real-device user testing feedback loop
 
 ### Out of Scope
 
-- Smart modes (LLM post-processing) — deferred to v1.2+, focus on keyboard UX first
+- Smart modes (LLM post-processing) — deferred, focus on keyboard quality first
 - Real-time streaming transcription — v2+ feature, current batch approach works well
 - iPad support — v2+, iPhone-first
 - Android port — v3+, different platform entirely
@@ -72,28 +72,29 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 - Smart Model Routing at runtime — breaks background recording, user selects model once
 - Full emoji picker in keyboard extension — memory-unsafe (emoji glyph cache), use system cycling
 - Apple Foundation Models — requires iPhone 15 Pro+, iOS 26.1+ — too restrictive
-- Real-time streaming transcription — v2+ feature, current batch approach works well
+- LSApplicationWorkspace for auto-return — private API, App Store rejection confirmed
 
 ## Context
 
-Shipped v1.1 with 10,893 LOC Swift across ~261 files in 8 days total (v1.0 + v1.1).
+Shipped v1.2 with 16,495 LOC Swift across ~333 files in 24 days total (v1.0 + v1.1 + v1.2).
 Tech stack: Swift 5.9+ / SwiftUI / WhisperKit 0.16.0+ / FluidAudio (Parakeet) via SPM.
-Architecture: Two-process (keyboard extension + main app via Darwin notifications + URL scheme).
-App Group: `group.com.pivi.dictus` for all cross-process data sharing.
-Minimum target: iOS 17.0 (raised from 16.0 in v1.1 for Parakeet support).
+Architecture: Two-process (keyboard extension + main app via Darwin notifications + URL scheme + Audio Bridge for cold start).
+App Group: `group.solutions.pivi.dictus` (migrated from group.com.pivi.dictus in v1.2).
+Minimum target: iOS 17.0.
 Keyboard extension memory limit: ~50MB.
+Distribution: Private TestFlight beta (build 1.2(1)), Apple Developer Team 9B8B36C2FA.
 
 Known remaining issues:
-- Cold start auto-return is the top priority for v1.2
+- Keyboard dead zones partially unsolved (Phase 15.4 research documented, needs architecture rework)
 - Text prediction memory budget needs real-device profiling (5MB limit)
-- 11 human verification items pending device testing from v1.1
+- Public TestFlight link deferred until keyboard rework complete
 
 ## Constraints
 
 - **Memory**: Keyboard extensions limited to ~50MB RAM
 - **Permissions**: Microphone in keyboard requires Full Access enabled
 - **Extension limitations**: No `UIApplication.shared` in keyboard extensions
-- **Data sharing**: All shared data via App Group (`group.com.pivi.dictus`)
+- **Data sharing**: All shared data via App Group (`group.solutions.pivi.dictus`)
 - **Minimum target**: iOS 17.0, iPhone 12+ (A14 Bionic) recommended
 - **Stack**: Swift 5.9+ / SwiftUI / WhisperKit + FluidAudio via SPM
 - **License**: MIT — fully open source
@@ -119,6 +120,17 @@ Known remaining issues:
 | iOS 17 minimum (raised from 16) | Required for FluidAudio/Parakeet support | ✓ Good — 95%+ device coverage |
 | collectSamples() for cancel | Keeps audio engine alive between recordings | ✓ Good — no cold restart |
 | NotificationCenter for mode refresh | viewWillAppear bridge avoids stale @State in SwiftUI | ✓ Good — reliable sync |
+| Privacy-by-construction LogEvent enum | No free-text public logging API — typed parameters only | ✓ Good — no transcription leaks possible |
+| Audio Bridge for cold start | Keyboard captures audio directly, app only activates session | ✓ Good — seamless cold start dictation |
+| Auto-return removed | attemptAutoReturn() always opened first installed app, not source app | ✓ Good — swipe-back overlay is correct UX |
+| Audio-thread waveform writes | Write from installTap callback, not main-thread timer | ✓ Good — bypasses iOS background throttling |
+| Large Turbo v3 removed from catalog | Crashes on 4GB RAM devices during CoreML compilation | ✓ Good — no more compilation crashes |
+| AudioServicesPlaySystemSound for key sounds | Respects silent switch natively, no AVAudioPlayer conflict | ✓ Good — works with WhisperKit session |
+| touchDown haptic/audio (not touchUp) | Match Apple keyboard feel — feedback on press, character on release | ✓ Good — native feel achieved |
+| 3 device classes for key dimensions | Screen height breakpoints 667/852pt for compact/standard/large | ✓ Good — adaptive across iPhone lineup |
+| DragGesture over UIViewRepresentable | UIViewRepresentable caused edge clipping issues | ⚠️ Revisit — dead zones remain partially |
+| Private beta only (no public link) | Pierre wants keyboard rework before public exposure | — Pending |
+| App Group migration to group.solutions.pivi.dictus | Old ID claimed by personal team, professional team needed new ID | ✓ Good — clean separation |
 
 ---
-*Last updated: 2026-03-11 after v1.2 milestone start*
+*Last updated: 2026-03-27 after v1.2 milestone*

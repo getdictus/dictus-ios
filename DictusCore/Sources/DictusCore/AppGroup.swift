@@ -2,7 +2,7 @@
 import Foundation
 
 public enum AppGroup {
-    public static let identifier = "group.com.pivi.dictus"
+    public static let identifier = "group.solutions.pivi.dictus"
 
     /// Shared UserDefaults for cross-process data.
     /// Force-unwrap justified: if this fails, the App Group entitlement

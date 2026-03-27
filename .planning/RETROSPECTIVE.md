@@ -101,6 +101,58 @@
 
 ---
 
+## Milestone: v1.2 — Beta Ready
+
+**Shipped:** 2026-03-27
+**Phases:** 9 | **Plans:** 35 | **Commits:** 236
+
+### What Was Built
+- Structured logging system with LogEvent API, privacy-by-construction, NSFileCoordinator cross-process safety
+- Animation state machine eliminating intermittent overlay/waveform bugs
+- Cold start Audio Bridge — keyboard captures audio directly when app was killed, swipe-back overlay UX
+- Model pipeline hardening — RAM gating, CoreML compilation progress, retry-with-cleanup
+- Full French accent audit, model card redesign (tap-to-select, swipe-to-delete), recording overlay polish
+- Sound feedback service with system sound integration
+- Waveform recovery from off-screen/suspension, Dynamic Island state machine for chained recordings
+- Keyboard optimization — touchDown haptic/audio, 3 device classes, zero-dead-zone DragGesture
+- GitHub issue triage (resolved, consolidated, deferred)
+- TestFlight deployment — professional signing, Privacy Manifests, App Group migration, private beta
+
+### What Worked
+- **Inserted phases (15.1, 15.2, 15.3)**: Decimal phase numbering handled urgent work cleanly without disrupting the main roadmap sequence
+- **GitHub issue-driven planning**: Phases 15.1-15.3 were driven by real bug reports and testing feedback, keeping work grounded in actual user problems
+- **Audio Bridge pattern**: Creative solution to cold start — keyboard captures audio directly instead of relying on app, avoiding the unsolvable auto-return-to-keyboard problem
+- **Privacy-by-construction logging**: LogEvent enum with typed parameters makes it impossible to accidentally log transcription text — better than post-hoc filtering
+- **Device-adaptive key dimensions**: 3 device classes with screen height breakpoints scaled well across iPhone lineup
+
+### What Was Inefficient
+- **UIViewRepresentable for keyboard touch → reverted**: Full UIKit touch handler implementation was reverted due to edge clipping — DragGesture with contentShape was simpler and sufficient. Prototype first.
+- **Dead zone investigation (Phase 15.4)**: Extensive research into AOSP/Apple/Fleksy keyboard architectures revealed the problem is architectural (SwiftUI vs UIKit), not solvable with patches. Should have recognized this earlier.
+- **Requirements tracking drift**: Several requirements (LOG-01/02/04, TF-03/04, ANIM-03) weren't updated as work completed. Traceability table became stale.
+- **Multiple App Group migrations**: Changed from group.com.pivi.dictus to group.solutions.pivi.dictus during TestFlight prep — would have been caught earlier with a signing dry-run
+
+### Patterns Established
+- `renderTick` @State counter to force Canvas re-evaluation after extension suspension
+- `LiveActivityPhase` enum separate from `ContentState.Phase` with `.idle` state for transition validation
+- `.id(refreshID)` pattern to force SwiftUI view recreation on keyboard reappear
+- `AudioServicesPlaySystemSound` for key sounds (respects silent switch, no AVAudioPlayer conflict)
+- Start sound before `configureAudioSession` to avoid WhisperKit session suppression
+- 3 device classes via screen height breakpoints for all keyboard metrics
+
+### Key Lessons
+1. **Prototype touch handling approaches before committing**: UIViewRepresentable was fully built, tested, merged, then reverted. A 30-minute prototype would have revealed the edge clipping issue.
+2. **Some problems are architectural, not fixable with patches**: Keyboard dead zones require UIKit-first architecture, not SwiftUI-first with UIKit patches. Recognize when the right fix is a rewrite.
+3. **Keep requirements tracking current**: Stale traceability tables make milestone completion harder. Update requirements as each plan completes, not retroactively.
+4. **Test signing and distribution early**: App Group ID conflicts, icon alpha channels, and missing plist keys were all discovered during archive — a dry-run earlier in the milestone would have caught these.
+5. **Decimal phases work well for urgent insertions**: 15.1, 15.2, 15.3 handled 3 rounds of urgent fixes without renumbering. The pattern is validated.
+
+### Cost Observations
+- Model mix: ~75% opus, ~25% sonnet (quality profile)
+- Sessions: ~20 across 17 days
+- Notable: Longer milestone (17 days vs 5 for v1.1) due to more exploratory work (dead zones research, signing/distribution issues). Plan execution stayed ~6 min avg.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -109,6 +161,7 @@
 |-----------|----------|--------|------------|
 | v1.0 | ~15 | 5 | Initial process — coarse granularity, yolo mode, UAT gap closure pattern |
 | v1.1 | ~12 | 5 | Matured UAT loop, integration checker, 4min avg plan execution |
+| v1.2 | ~20 | 9 | Decimal phases for urgent insertions, GitHub issue-driven planning, TestFlight distribution |
 
 ### Cumulative Quality
 
@@ -116,11 +169,14 @@
 |-----------|-------|-----|-------|
 | v1.0 | 52 | 7,305 | 156 |
 | v1.1 | 62+ | 10,893 | ~261 |
+| v1.2 | 62+ | 16,495 | ~333 |
 
 ### Top Lessons (Verified Across Milestones)
 
-1. Device testing catches issues simulators miss — always verify on hardware (v1.0, v1.1)
+1. Device testing catches issues simulators miss — always verify on hardware (v1.0, v1.1, v1.2)
 2. Milestone audits catch integration gaps — always audit before shipping (v1.0, v1.1)
 3. Infrastructure phases pay dividends — shared design system enabled all subsequent work (v1.1)
-4. UAT before complex alternatives — test simple approaches before building elaborate systems (v1.1)
-5. Plan execution speeds up with codebase familiarity — 25min → 4min average (v1.0 → v1.1)
+4. Prototype before committing to complex approaches — SmartModelRouter (v1.0), 3-mode system (v1.1), UIViewRepresentable touch (v1.2) all reverted (v1.0, v1.1, v1.2)
+5. Plan execution speeds up with codebase familiarity — 25min → 4min → 6min average (v1.0 → v1.1 → v1.2)
+6. Keep requirements tracking current — stale traceability makes milestone completion harder (v1.2)
+7. Test signing/distribution early — dry-run catches ID conflicts and validation issues (v1.2)
