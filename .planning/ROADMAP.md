@@ -10,6 +10,7 @@
 - ✅ **v1.0 MVP** — Phases 1-5 (shipped 2026-03-07)
 - ✅ **v1.1 UX & Keyboard** — Phases 6-10 (shipped 2026-03-11)
 - ✅ **v1.2 Beta Ready** — Phases 11-16 (shipped 2026-03-27)
+- 🚧 **v1.3 Public Beta** — Phases 17-22 (in progress)
 
 ## Phases
 
@@ -56,7 +57,89 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 
 </details>
 
+### 🚧 v1.3 Public Beta (In Progress)
+
+**Milestone Goal:** Rebuild keyboard from scratch using giellakbd-ios (UICollectionView, zero dead zones), fix beta bugs, and open public TestFlight.
+
+- [ ] **Phase 17: Bug Fixes** — Fix Dynamic Island REC desync and export logs performance before architecture change
+- [ ] **Phase 18: Keyboard Base** — Vendor giellakbd-ios, AZERTY/QWERTY with zero dead zones, haptics, sounds, key popup
+- [ ] **Phase 19: Complex Touch Features** — Delete repeat, spacebar trackpad, accent long-press, adaptive accent
+- [ ] **Phase 20: Feature Reintegration** — Reconnect dictation, text prediction, suggestions, and settings
+- [ ] **Phase 21: Cleanup & Memory Profiling** — Delete old SwiftUI keyboard, verify memory budget, instrument
+- [ ] **Phase 22: Public TestFlight** — Beta App Review, external group, public link, README update
+
+## Phase Details
+
+### Phase 17: Bug Fixes
+**Goal**: Known v1.2 beta bugs are fixed before the keyboard architecture change
+**Depends on**: Phase 16 (v1.2 shipped)
+**Requirements**: FIX-01, FIX-02
+**Success Criteria** (what must be TRUE):
+  1. Dynamic Island never gets stuck on REC state after recording ends or is cancelled
+  2. Export logs completes within a few seconds and shows a spinner during export
+**Plans**: TBD
+
+### Phase 18: Keyboard Base
+**Goal**: Users can type on a UICollectionView-based keyboard with zero dead zones, haptic feedback, key sounds, and key popup -- feels like a real keyboard from day one
+**Depends on**: Phase 17
+**Requirements**: KBD-01, KBD-02, KBD-03, KBD-04, KBD-06, KBD-07, KBD-08, FEEL-01, FEEL-02, FEEL-03
+**Success Criteria** (what must be TRUE):
+  1. User can type any character on the AZERTY keyboard with no dead zones anywhere on the key grid
+  2. User can switch to QWERTY layout and type with the same zero-dead-zone behavior
+  3. User can toggle shift (single tap) and caps lock (double tap) with visual state changes on keys
+  4. User can switch between letters, numbers, and symbols layers
+  5. User gets autocapitalization after sentence-ending punctuation and double-space period insertion
+  6. User feels haptic feedback on touchDown and hears 3-category key sounds respecting silent switch
+  7. User sees key popup preview on press (provided by giellakbd-ios)
+**Plans**: TBD
+
+### Phase 19: Complex Touch Features
+**Goal**: Users have access to all advanced touch interactions -- delete repeat, spacebar trackpad, accent selection, and adaptive accent key
+**Depends on**: Phase 18
+**Requirements**: KBD-05, FEEL-04, FEEL-05, FEEL-06
+**Success Criteria** (what must be TRUE):
+  1. User can hold backspace and characters delete with accelerating repeat speed
+  2. User can long-press vowels to see French accent characters and drag to select one
+  3. User can drag the spacebar to move the cursor with haptic ticks at each character position
+  4. User sees adaptive accent key that shows apostrophe after consonants and accent after vowels
+**Plans**: TBD
+
+### Phase 20: Feature Reintegration
+**Goal**: All Dictus-specific features work on the new UIKit keyboard -- dictation, text prediction, suggestions, and settings
+**Depends on**: Phase 19
+**Requirements**: DICT-01, DICT-02, DICT-03, DICT-04, PRED-01, PRED-02, PRED-03, SET-01
+**Success Criteria** (what must be TRUE):
+  1. User can tap mic button in toolbar to start recording and sees the recording overlay with waveform replacing the keyboard
+  2. User gets transcription auto-inserted at cursor after recording completes
+  3. User sees Full Access banner when permissions are needed for microphone access
+  4. User sees 3-slot suggestion bar with French autocorrect, can tap to insert, and can undo autocorrect with backspace
+  5. User can select default opening layer (letters or numbers) in settings with live preview
+**Plans**: TBD
+
+### Phase 21: Cleanup & Memory Profiling
+**Goal**: Old SwiftUI keyboard code is removed, memory budget is verified on device, and the keyboard is instrumented for performance monitoring
+**Depends on**: Phase 20
+**Requirements**: None (quality gate -- no feature requirements, but blocks public beta)
+**Success Criteria** (what must be TRUE):
+  1. All old SwiftUI keyboard files (KeyButton, KeyRow, KeyboardView, SpecialKeyButton, AccentPopup) are deleted from the project
+  2. Keyboard extension memory usage stays under 50MB during all operations (typing, dictation, prediction) on a real device
+  3. OSSignposter instrumentation is in place for key touch-to-character latency measurement
+**Plans**: TBD
+
+### Phase 22: Public TestFlight
+**Goal**: Dictus is available as a public TestFlight beta that anyone can install
+**Depends on**: Phase 21
+**Requirements**: TF-01, TF-02, TF-03, TF-04
+**Success Criteria** (what must be TRUE):
+  1. App passes Beta App Review with complete Privacy Manifests and Full Access justification
+  2. External testing group exists in App Store Connect and public TestFlight link is active
+  3. README on GitHub includes the public TestFlight link with install instructions
+**Plans**: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -79,9 +162,16 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 | 15.2. Cleaning & Fix Issues | v1.2 | 4/4 | Complete | 2026-03-17 |
 | 15.3. Keyboard Optimization | v1.2 | 4/4 | Complete | 2026-03-24 |
 | 16. TestFlight Deployment | v1.2 | 3/3 | Complete | 2026-03-27 |
+| 17. Bug Fixes | v1.3 | 0/? | Not started | - |
+| 18. Keyboard Base | v1.3 | 0/? | Not started | - |
+| 19. Complex Touch Features | v1.3 | 0/? | Not started | - |
+| 20. Feature Reintegration | v1.3 | 0/? | Not started | - |
+| 21. Cleanup & Memory Profiling | v1.3 | 0/? | Not started | - |
+| 22. Public TestFlight | v1.3 | 0/? | Not started | - |
 
 ---
 *Roadmap created: 2026-03-04*
 *v1.0 shipped: 2026-03-07*
 *v1.1 shipped: 2026-03-11*
 *v1.2 shipped: 2026-03-27*
+*v1.3 started: 2026-03-27*

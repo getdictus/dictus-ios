@@ -26,7 +26,6 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 - [ ] **FEEL-04**: User can long-press vowels to access French accent characters with drag-to-select
 - [ ] **FEEL-05**: User can drag spacebar to move cursor (trackpad) with haptic ticks
 - [ ] **FEEL-06**: User sees adaptive accent key (apostrophe after consonants, accent after vowels)
-- [ ] **FEEL-07**: User sees Liquid Glass theming consistent with Dictus design system
 
 ### Dictation Reintegration
 
@@ -89,6 +88,7 @@ Explicitly excluded. Documented to prevent scope creep.
 | Android port | Different platform entirely, v3+ |
 | Cloud transcription | Contradicts privacy/offline identity |
 | Subscription / monetization | Contradicts open-source positioning |
+| Liquid Glass on UIKit keyboard keys | Too complex in UIKit, adding SwiftUI on top defeats the purpose. Liquid Glass already exists on toolbar mic button (separate SwiftUI layer, untouched by rebuild) |
 
 ## Traceability
 
@@ -96,41 +96,40 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| KBD-01 | — | Pending |
-| KBD-02 | — | Pending |
-| KBD-03 | — | Pending |
-| KBD-04 | — | Pending |
-| KBD-05 | — | Pending |
-| KBD-06 | — | Pending |
-| KBD-07 | — | Pending |
-| KBD-08 | — | Pending |
-| FEEL-01 | — | Pending |
-| FEEL-02 | — | Pending |
-| FEEL-03 | — | Pending |
-| FEEL-04 | — | Pending |
-| FEEL-05 | — | Pending |
-| FEEL-06 | — | Pending |
-| FEEL-07 | — | Pending |
-| DICT-01 | — | Pending |
-| DICT-02 | — | Pending |
-| DICT-03 | — | Pending |
-| DICT-04 | — | Pending |
-| PRED-01 | — | Pending |
-| PRED-02 | — | Pending |
-| PRED-03 | — | Pending |
-| SET-01 | — | Pending |
-| FIX-01 | — | Pending |
-| FIX-02 | — | Pending |
-| TF-01 | — | Pending |
-| TF-02 | — | Pending |
-| TF-03 | — | Pending |
-| TF-04 | — | Pending |
+| KBD-01 | Phase 18 | Pending |
+| KBD-02 | Phase 18 | Pending |
+| KBD-03 | Phase 18 | Pending |
+| KBD-04 | Phase 18 | Pending |
+| KBD-05 | Phase 19 | Pending |
+| KBD-06 | Phase 18 | Pending |
+| KBD-07 | Phase 18 | Pending |
+| KBD-08 | Phase 18 | Pending |
+| FEEL-01 | Phase 18 | Pending |
+| FEEL-02 | Phase 18 | Pending |
+| FEEL-03 | Phase 18 | Pending |
+| FEEL-04 | Phase 19 | Pending |
+| FEEL-05 | Phase 19 | Pending |
+| FEEL-06 | Phase 19 | Pending |
+| DICT-01 | Phase 20 | Pending |
+| DICT-02 | Phase 20 | Pending |
+| DICT-03 | Phase 20 | Pending |
+| DICT-04 | Phase 20 | Pending |
+| PRED-01 | Phase 20 | Pending |
+| PRED-02 | Phase 20 | Pending |
+| PRED-03 | Phase 20 | Pending |
+| SET-01 | Phase 20 | Pending |
+| FIX-01 | Phase 17 | Pending |
+| FIX-02 | Phase 17 | Pending |
+| TF-01 | Phase 22 | Pending |
+| TF-02 | Phase 22 | Pending |
+| TF-03 | Phase 22 | Pending |
+| TF-04 | Phase 22 | Pending |
 
 **Coverage:**
-- v1.3 requirements: 29 total
-- Mapped to phases: 0
-- Unmapped: 29
+- v1.3 requirements: 28 total
+- Mapped to phases: 28
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-27*
-*Last updated: 2026-03-27 after initial definition*
+*Last updated: 2026-03-27 after roadmap creation*
