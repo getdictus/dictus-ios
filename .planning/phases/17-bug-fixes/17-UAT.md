@@ -2,8 +2,8 @@
 status: complete
 phase: 17-bug-fixes
 source: [17-01-SUMMARY.md, 17-02-SUMMARY.md]
-started: 2026-03-27T18:00:00Z
-updated: 2026-03-27T21:32:00Z
+started: 2026-03-27T22:00:00Z
+updated: 2026-03-27T22:30:00Z
 ---
 
 ## Current Test
@@ -12,28 +12,28 @@ updated: 2026-03-27T21:32:00Z
 
 ## Tests
 
-### 1. Dynamic Island stops showing REC after recording ends
-expected: Start a dictation from the keyboard. The Dynamic Island shows "REC" state. Stop the recording. The DI transitions away from REC to transcribing, then to ready/standby. It never stays stuck on "REC" after recording has ended.
+### 1. DI ne reste plus bloquée sur REC après stop
+expected: Lance une dictée depuis le clavier. La Dynamic Island affiche l'état REC. Arrête l'enregistrement. La DI passe à transcription puis standby. Elle ne reste jamais bloquée sur "REC" après l'arrêt.
 result: pass
 
-### 2. Dynamic Island recovers after cancel
-expected: Start a dictation, then cancel it (swipe down or tap cancel). The Dynamic Island returns to standby state. It does not stay stuck on "REC".
+### 2. DI récupère après un cancel
+expected: Lance une dictée puis annule-la (swipe down ou tap cancel). La Dynamic Island revient à l'état standby. Elle ne reste pas bloquée sur "REC".
 result: pass
 
-### 3. Quick chain recording (stop then immediately re-record)
-expected: Start a dictation, stop it, then immediately start another dictation before the first finishes transcribing. The Dynamic Island transitions correctly through the states without getting stuck. The second recording works normally.
+### 3. Chaîne rapide stop + re-record
+expected: Lance une dictée, arrête-la, puis relance immédiatement une autre dictée avant que la première finisse de transcrire. La Dynamic Island transite correctement entre les états sans se bloquer. Le second enregistrement fonctionne normalement.
 result: pass
 
-### 4. Export logs completes quickly
-expected: Go to Settings > Export Logs. Tap export. The spinner appears briefly (under 2 seconds) and the share sheet opens with the log file. No long wait.
+### 4. Export logs rapide
+expected: Va dans Réglages > Exporter les logs. Tape export. Le spinner apparaît brièvement (moins de 2 secondes) et la share sheet s'ouvre avec le fichier de logs. Pas d'attente longue.
 result: pass
 
-### 5. Exported log file has recent entries only
-expected: After exporting logs, open the exported file. It should not contain entries older than 7 days. Recent entries from today's dictation sessions should be present with timestamps.
+### 5. Logs exportés = 7 derniers jours uniquement
+expected: Après export des logs, ouvre le fichier. Il ne devrait pas contenir d'entrées de plus de 7 jours. Les entrées récentes de la session d'aujourd'hui sont présentes avec timestamps.
 result: pass
 
-### 6. Export logs shows duration in logs
-expected: After exporting logs, check the last few lines of the exported file. There should be a "log.exportCompleted" entry showing duration in ms and size in bytes.
+### 6. Durée d'export dans les logs
+expected: Après export, vérifie les dernières lignes du fichier exporté. Il devrait y avoir une entrée "logExportCompleted" montrant la durée en ms et la taille en bytes.
 result: pass
 
 ## Summary
