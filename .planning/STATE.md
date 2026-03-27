@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Beta Ready
 status: completed
-stopped_at: Completed 16-01-PLAN.md
-last_updated: "2026-03-27T12:10:14.954Z"
-last_activity: 2026-03-27 -- Plan 16-01 execution (commit bcfa646)
+stopped_at: Phase 16 complete — TestFlight live (v1.2.0-beta.1)
+last_updated: "2026-03-27T15:00:00.000Z"
+last_activity: 2026-03-27 -- Phase 16 complete. TestFlight build 1.2(1) live, tag v1.2.0-beta.1
 progress:
   total_phases: 9
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 35
-  completed_plans: 34
-  percent: 97
+  completed_plans: 35
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-11)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 16 TestFlight deployment -- Plan 01 complete (signing migration, privacy manifests, version bump). Plan 02 remaining (archive and upload).
+**Current focus:** Milestone v1.2 "Beta Ready" complete. TestFlight build live. Next: Pierre tests, then plan next milestone (keyboard rework).
 
 ## Current Position
 
-Phase: 16 (TestFlight Deployment)
-Plan: 1 of 2 in current phase
-Status: Plan 16-01 complete. Professional signing (9B8B36C2FA), Privacy Manifests, MARKETING_VERSION 1.2, privacy policy, review checklist.
-Last activity: 2026-03-27 -- Plan 16-01 execution (commit bcfa646)
+Phase: 16 (TestFlight Deployment) — COMPLETE
+Plan: 3 of 3 complete (16-01 signing/privacy, 16-02 open-source docs, 16-03 archive/upload)
+Status: TestFlight build 1.2(1) live on App Store Connect. Tag v1.2.0-beta.1. Private beta with 2 internal testers.
+Last activity: 2026-03-27 -- Phase 16 complete. Archive uploaded, TestFlight live.
 
-Progress: [██████████] 97%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -115,13 +115,13 @@ None.
 
 - Cold start auto-return has no public API -- Audio Bridge + UX messaging is the pragmatic path (Phase 13)
 - CoreML compilation timing is device-specific -- need real-device calibration on 4GB/6GB/8GB tiers (Phase 14)
-- Developer account not yet purchased -- blocks Phase 16 (TestFlight)
-- App Group ID stability across team migration must be verified before shipping v1.2 code
+- RESOLVED: Developer account purchased, TestFlight live (2026-03-27)
+- RESOLVED: App Group migrated to group.solutions.pivi.dictus, TestFlight build validated
 
 ## Session Continuity
 
-Last session: 2026-03-27T12:10:14.952Z
-Stopped at: Completed 16-01-PLAN.md
+Last session: 2026-03-27T15:00:00.000Z
+Stopped at: Phase 16 complete — milestone v1.2 "Beta Ready" done
 Resume file: None
 
 ---
