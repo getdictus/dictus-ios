@@ -13,7 +13,7 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 - [x] **KBD-02**: User can switch to QWERTY layout in keyboard settings
 - [x] **KBD-03**: User can toggle shift (single tap) and caps lock (double tap) with visual feedback
 - [x] **KBD-04**: User can switch between letters, numbers, and symbols layers
-- [ ] **KBD-05**: User can delete characters with backspace, with accelerating repeat on hold
+- [x] **KBD-05**: User can delete characters with backspace, with accelerating repeat on hold
 - [x] **KBD-06**: User can insert space, return, and use globe key to switch keyboards
 - [x] **KBD-07**: User gets autocapitalization after sentence-ending punctuation
 - [x] **KBD-08**: User gets double-space period insertion
@@ -24,7 +24,7 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 - [x] **FEEL-02**: User hears 3-category key sounds (letter/delete/modifier) respecting silent switch
 - [x] **FEEL-03**: User sees key popup preview on press
 - [x] **FEEL-04**: User can long-press vowels to access French accent characters with drag-to-select
-- [ ] **FEEL-05**: User can drag spacebar to move cursor (trackpad) with haptic ticks
+- [x] **FEEL-05**: User can drag spacebar to move cursor (trackpad) with haptic ticks
 - [ ] **FEEL-06**: User sees adaptive accent key (apostrophe after consonants, accent after vowels)
 
 ### Dictation Reintegration
@@ -100,7 +100,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | KBD-02 | Phase 18 | Complete |
 | KBD-03 | Phase 18 | Complete |
 | KBD-04 | Phase 18 | Complete |
-| KBD-05 | Phase 19 | Pending |
+| KBD-05 | Phase 19 | Complete |
 | KBD-06 | Phase 18 | Complete |
 | KBD-07 | Phase 18 | Complete |
 | KBD-08 | Phase 18 | Complete |
@@ -108,7 +108,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEEL-02 | Phase 18 | Complete |
 | FEEL-03 | Phase 18 | Complete |
 | FEEL-04 | Phase 19 | Complete |
-| FEEL-05 | Phase 19 | Pending |
+| FEEL-05 | Phase 19 | Complete |
 | FEEL-06 | Phase 19 | Pending |
 | DICT-01 | Phase 20 | Pending |
 | DICT-02 | Phase 20 | Pending |

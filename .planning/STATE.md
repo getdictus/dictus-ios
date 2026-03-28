@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: in-progress
-stopped_at: Completed 19-01-PLAN.md
-last_updated: "2026-03-28T10:51:00Z"
-last_activity: 2026-03-28 — Completed Phase 19 Plan 01 (accent data, edge key fallback, double-space fix)
+stopped_at: Completed 19-02-PLAN.md
+last_updated: "2026-03-28T10:57:24.033Z"
+last_activity: 2026-03-28 — Completed Phase 19 Plan 02 (delete repeat acceleration, spacebar trackpad)
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 8
-  completed_plans: 6
-  percent: 17
+  completed_plans: 7
+  percent: 88
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 ## Current Position
 
 Phase: 19 of 22 (Complex Touch Features) — IN PROGRESS
-Plan: 1 of 3 complete in current phase
-Status: Plan 01 complete, ready for Plan 02
-Last activity: 2026-03-28 — Completed Phase 19 Plan 01 (accent data, edge key fallback, double-space fix)
+Plan: 2 of 3 complete in current phase
+Status: Plan 02 complete, ready for Plan 03
+Last activity: 2026-03-28 — Completed Phase 19 Plan 02 (delete repeat acceleration, spacebar trackpad)
 
-Progress: [████████░░] 75% (v1.3 milestone)
+Progress: [█████████░] 88% (v1.3 milestone)
 
 ## Performance Metrics
 
@@ -70,6 +70,8 @@ Recent decisions for v1.3:
 - [Phase 19]: Case-insensitive longpress lookup via key.lowercased() instead of duplicating uppercase entries
 - [Phase 19]: nearestIndexPath maxDistance = 1 key width to prevent phantom hits on distant keys
 - [Phase 19]: hapticFeedback.prepare() in init for zero-latency first touch
+- [Phase 19]: wordModeThreshold=10 chars before word-level delete, stage 3 at 0.05s
+- [Phase 19]: Trackpad dead zone 8pt (down from 20pt), baseDelta 12pt, 60Hz rate limit
 
 ### Pending Todos
 
@@ -83,8 +85,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T10:51:00Z
-Stopped at: Completed 19-01-PLAN.md
+Last session: 2026-03-28T10:57:21.539Z
+Stopped at: Completed 19-02-PLAN.md
 Resume file: None
 
 ---
