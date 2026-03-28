@@ -99,6 +99,11 @@ class KeyboardViewController: UIInputViewController {
         kbInputView.addSubview(keyboard)
         hosting.didMove(toParent: self)
 
+        // Store references for hitTest routing in KeyboardInputView
+        kbInputView.keyboardView = keyboard
+        kbInputView.hostingView = hosting.view
+        kbInputView.toolbarHeight = toolbarHeight
+
         // --- 5. Set up Auto Layout constraints ---
         // Hosting view (toolbar): pinned to top, leading, trailing. Height = toolbarHeight.
         let hostingHeight = hosting.view.heightAnchor.constraint(equalToConstant: toolbarHeight)
