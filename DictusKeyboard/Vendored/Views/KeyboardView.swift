@@ -41,6 +41,9 @@ final internal class GiellaKeyboardView: UIView,
 
     private let definition: KeyboardDefinition
 
+    // DIAG: Log cell frames once after first layout
+    private var didLogCellFrames = false
+
     weak var delegate: (GiellaKeyboardViewDelegate & GiellaKeyboardViewKeyboardKeyDelegate)?
 
     private var ghostKeyView: GhostKeyView?
@@ -109,6 +112,11 @@ final internal class GiellaKeyboardView: UIView,
     private(set) lazy var longpressGestureRecognizer: UILongPressGestureRecognizer = {
         let recognizer = UILongPressGestureRecognizer(target: self, action: #selector(GiellaKeyboardView.touchesFoundLongpress))
         recognizer.cancelsTouchesInView = false
+        // Ensure touchesBegan is delivered immediately to the view, without waiting
+        // for the gesture recognizer to fail. This prevents iOS from delaying touch
+        // delivery at screen edges where system gesture disambiguation can add ~100ms.
+        recognizer.delaysTouchesBegan = false
+        recognizer.delaysTouchesEnded = false
         return recognizer
     }()
 
@@ -493,6 +501,14 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
+        // DIAG: Confirm touches reach GiellaKeyboardView
+        PersistentLog.log(.diagnosticProbe(
+            component: "Touch",
+            instanceID: "",
+            action: "touchesBegan",
+            details: "count=\(touches.count) hasLPC=\(longpressController != nil) hasAK=\(activeKey != nil)"
+        ))
+
         // Fire haptic on touchDown for ALL keys (not just triggersOnTouchDown).
         // The delegate's didTriggerKey() may fire on touchUp for input keys,
         // but the user should FEEL the tap immediately on finger contact.
@@ -518,8 +534,25 @@ final internal class GiellaKeyboardView: UIView,
 
     private func handleTouches(_ touches: Set<UITouch>) {
         for touch in touches {
-            let touchPoint = clampedPoint(touch.location(in: collectionView))
-            if let indexPath = collectionView.indexPathForItem(at: touchPoint) {
+            let rawPoint = touch.location(in: collectionView)
+            let touchPoint = clampedPoint(rawPoint)
+            let indexPath = collectionView.indexPathForItem(at: touchPoint)
+
+            // DIAG: Log every touch that misses OR hits near edges
+            if indexPath == nil || touchPoint.x < 50 || touchPoint.x > collectionView.bounds.width - 50 {
+                var keyName = "nil"
+                if let ip = indexPath, ip.section < currentPage.count, ip.row < currentPage[ip.section].count {
+                    if case let .input(char, _) = currentPage[ip.section][ip.row].type { keyName = char }
+                }
+                PersistentLog.log(.diagnosticProbe(
+                    component: "Touch",
+                    instanceID: "",
+                    action: indexPath == nil ? "MISS" : "HIT(\(keyName))",
+                    details: "raw=(\(String(format:"%.1f",rawPoint.x)),\(String(format:"%.1f",rawPoint.y))) clamped=(\(String(format:"%.1f",touchPoint.x)),\(String(format:"%.1f",touchPoint.y))) bounds=\(Int(collectionView.bounds.width))x\(Int(collectionView.bounds.height))"
+                ))
+            }
+
+            if let indexPath = indexPath {
                 let key = currentPage[indexPath.section][indexPath.row]
 
                 if key.type.supportsDoubleTap {
@@ -858,6 +891,25 @@ final internal class GiellaKeyboardView: UIView,
 
         if let swipeKeyView = cell.keyView, swipeKeyView.isSwipeKey {
             swipeKeyView.percentageAlternative = 0.0
+        }
+
+        // DIAG: Log edge cell frames once after first layout
+        if !didLogCellFrames, indexPath.section == 0, indexPath.row == 0 {
+            didLogCellFrames = true
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                for row in 0..<min(3, self.currentPage.count) {
+                    let lastIdx = self.currentPage[row].count - 1
+                    let firstFrame = self.collectionView.cellForItem(at: IndexPath(row: 0, section: row))?.frame
+                    let lastFrame = self.collectionView.cellForItem(at: IndexPath(row: lastIdx, section: row))?.frame
+                    PersistentLog.log(.diagnosticProbe(
+                        component: "Layout",
+                        instanceID: "",
+                        action: "row\(row)",
+                        details: "first=\(firstFrame.map { "(\(String(format:"%.1f",($0).origin.x)),\(String(format:"%.1f",($0).origin.y)),\(String(format:"%.1f",($0).size.width))x\(String(format:"%.1f",($0).size.height)))" } ?? "nil") last=\(lastFrame.map { "(\(String(format:"%.1f",($0).origin.x)),\(String(format:"%.1f",($0).origin.y)),\(String(format:"%.1f",($0).size.width))x\(String(format:"%.1f",($0).size.height)))" } ?? "nil") cvBounds=\(Int(self.collectionView.bounds.width))x\(Int(self.collectionView.bounds.height))"
+                    ))
+                }
+            }
         }
 
         return cell

@@ -205,6 +205,14 @@ class KeyboardViewController: UIInputViewController {
         // Darwin observers cleaned up by KeyboardState deinit
     }
 
+    // Tell iOS to defer system edge gestures (swipe-back, etc.) on left and right edges.
+    // Without this, iOS delays touchesBegan by ~100ms at screen edges while it disambiguates
+    // system gestures. This causes haptic/popup to fire on touchUp instead of touchDown,
+    // and long-press accent popups to fail on edge keys (a, q, p, m).
+    override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
+        return [.left, .right]
+    }
+
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         // Update keyboard theme when dark/light mode changes while keyboard is visible.
