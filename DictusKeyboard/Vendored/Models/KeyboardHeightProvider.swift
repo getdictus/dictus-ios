@@ -103,19 +103,22 @@ struct KeyboardHeightProvider {
     }
 
     private static func heightForScreenSize(_ screenSize: ScreenSize) -> KeyboardHeight {
+        // Heights tuned to match Apple's native iOS keyboard row height (~42-44pt per row).
+        // Original giellakbd-ios values were 262-272pt (Sami keyboards with larger keys).
+        // Apple keyboard is ~216pt on 6.1" devices, ~226pt on 6.7" devices.
         switch screenSize {
         case .size4_7:
-            return (portrait: 262, landscape: 208)
+            return (portrait: 216, landscape: 175)
         case .size5_4:
-            return (portrait: 272, landscape: 198)
+            return (portrait: 216, landscape: 170)
         case .size5_5:
-            return (portrait: 272, landscape: 208)
+            return (portrait: 216, landscape: 175)
         case .size5_8:
-            return (portrait: 262, landscape: 196)
+            return (portrait: 216, landscape: 170)
         case .size6_1, .size6_3, .size6_5:
-            return (portrait: 262, landscape: 206)
+            return (portrait: 216, landscape: 175)
         case .size6_7, .size6_9:
-            return (portrait: 272, landscape: 206)
+            return (portrait: 226, landscape: 175)
         case .size7_9, .size8_3, .size9_7, .size10_2, .size10_5, .size11_0:
             return (portrait: 318, landscape: 404)
         case .size10_9:
@@ -130,7 +133,7 @@ struct KeyboardHeightProvider {
             let landscape = landscapeDeviceHeight / 2.0 - 70
             return (portrait: 384, landscape: landscape)
         } else if deviceContext.isPhone {
-            return (portrait: 262, landscape: 203)
+            return (portrait: 216, landscape: 175)
         } else {
             let portraitHeight = portraitDeviceHeight / 3.0
             let landscapeHeight = portraitHeight - 56

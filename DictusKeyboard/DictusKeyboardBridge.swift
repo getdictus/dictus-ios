@@ -88,14 +88,12 @@ final class DictusKeyboardBridge: NSObject,
 
         case .keyboard:
             // Globe/next keyboard button -- advance to next input method
-            HapticFeedback.keyTapped()
             AudioServicesPlaySystemSound(KeySound.modifier)
             controller?.advanceToNextInputMode()
 
         case .keyboardMode, .splitKeyboard, .normalKeyboard,
              .sideKeyboardLeft, .sideKeyboardRight:
             // iPad keyboard mode keys -- not supported on iPhone, no-op
-            HapticFeedback.keyTapped()
             AudioServicesPlaySystemSound(KeySound.modifier)
 
         case .spacer, .caps:
@@ -108,7 +106,7 @@ final class DictusKeyboardBridge: NSObject,
         switch key.type {
         case .shift:
             // Double-tap shift activates caps lock
-            HapticFeedback.keyTapped()
+            // Haptic already fired in touchesBegan
             AudioServicesPlaySystemSound(KeySound.modifier)
             keyboardView?.page = .capslock
             lastShiftTapTime = 0 // Reset to prevent triple-tap confusion
@@ -148,10 +146,10 @@ final class DictusKeyboardBridge: NSObject,
     // MARK: - Key Action Handlers
 
     /// Handle character input (letters, numbers, punctuation).
-    /// Inserts the character, plays letter sound + haptic, auto-unshifts after one letter,
+    /// Inserts the character, plays letter sound, auto-unshifts after one letter,
     /// then rechecks autocapitalization (e.g., typing "." may prepare shift for next char).
+    /// NOTE: Haptic fires in GiellaKeyboardView.touchesBegan() for ALL keys on touchDown.
     private func handleInputKey(_ character: String) {
-        HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.letter)
 
         // Insert the character. When on shifted/capslock page, the key definition
@@ -175,7 +173,6 @@ final class DictusKeyboardBridge: NSObject,
     /// After deleting, recheck autocapitalization -- deleting back to the start
     /// of a text field or to after a sentence-ending punctuation should re-shift.
     private func handleBackspace() {
-        HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.delete)
         controller?.textDocumentProxy.deleteBackward()
         updateCapitalization()
@@ -185,7 +182,6 @@ final class DictusKeyboardBridge: NSObject,
     /// If double-space is detected, replaces the trailing space with ". " (period+space).
     /// Otherwise inserts a normal space. Then rechecks autocapitalization.
     private func handleSpace() {
-        HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.modifier)
 
         // Check for double-space -> period BEFORE inserting the space.
@@ -204,7 +200,6 @@ final class DictusKeyboardBridge: NSObject,
     /// After inserting newline, recheck autocapitalization -- many apps use
     /// .sentences autocap which should capitalize after a newline.
     private func handleReturn() {
-        HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.modifier)
         controller?.textDocumentProxy.insertText("\n")
         updateCapitalization()
@@ -218,7 +213,6 @@ final class DictusKeyboardBridge: NSObject,
     /// but we also detect it here as a fallback because the timing can differ between
     /// the gesture recognizer and our manual tracking. Both paths lead to .capslock.
     private func handleShift() {
-        HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.modifier)
 
         guard let kbView = keyboardView else { return }
@@ -256,7 +250,6 @@ final class DictusKeyboardBridge: NSObject,
     /// Handle 123/ABC layer switch.
     /// Toggles between letter pages (normal/shifted/capslock) and symbols1.
     private func handleSymbolsToggle() {
-        HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.modifier)
 
         guard let kbView = keyboardView else { return }
@@ -272,7 +265,6 @@ final class DictusKeyboardBridge: NSObject,
     /// Handle #+=/123 toggle on symbols pages.
     /// Toggles between symbols1 and symbols2.
     private func handleShiftSymbolsToggle() {
-        HapticFeedback.keyTapped()
         AudioServicesPlaySystemSound(KeySound.modifier)
 
         guard let kbView = keyboardView else { return }

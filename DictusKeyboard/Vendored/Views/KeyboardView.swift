@@ -3,6 +3,7 @@
 // Stripped: No external dependencies to remove (no Sentry in this file)
 
 import UIKit
+import DictusCore
 
 protocol GiellaKeyboardViewDelegate: AnyObject {
     func didSwipeKey(_ key: KeyDefinition)
@@ -455,7 +456,12 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
+        // Fire haptic on touchDown for ALL keys (not just triggersOnTouchDown).
+        // The delegate's didTriggerKey() may fire on touchUp for input keys,
+        // but the user should FEEL the tap immediately on finger contact.
         hapticFeedback.prepare()
+        HapticFeedback.keyTapped()
+
         if let longpressController = self.longpressController, let touch = touches.first {
             longpressController.touchesBegan(touch.location(in: collectionView))
             return
