@@ -129,8 +129,12 @@ final class DictusKeyboardBridge: NSObject,
     }
 
     func didTriggerHoldKey(_ key: KeyDefinition) {
-        // Long-press hold triggers are handled by the GiellaKeyboardView's
-        // longpress overlay system. No additional action needed here.
+        switch key.type {
+        case .backspace:
+            handleWordDelete()
+        default:
+            break
+        }
     }
 
     func didMoveCursor(_ movement: Int) {
@@ -180,6 +184,48 @@ final class DictusKeyboardBridge: NSObject,
     private func handleBackspace() {
         AudioServicesPlaySystemSound(KeySound.delete)
         controller?.textDocumentProxy.deleteBackward()
+        lastInsertedCharacter = nil
+        updateCapitalization()
+    }
+
+    /// Delete one word backwards (used during accelerated backspace repeat).
+    ///
+    /// WHY word-level: After holding backspace for ~10 characters, users expect faster
+    /// deletion. Switching to word-level matches iOS native behavior where long backspace
+    /// hold starts eating whole words.
+    ///
+    /// The algorithm: trim trailing spaces, find the previous word boundary (last space),
+    /// delete everything from cursor back to that boundary.
+    private func handleWordDelete() {
+        AudioServicesPlaySystemSound(KeySound.delete)
+        guard let proxy = controller?.textDocumentProxy,
+              let before = proxy.documentContextBeforeInput, !before.isEmpty else {
+            // Fallback: single character delete if no text context
+            controller?.textDocumentProxy.deleteBackward()
+            return
+        }
+
+        // Trim trailing spaces
+        var trimmed = before
+        var trailingSpaces = 0
+        while trimmed.hasSuffix(" ") {
+            trimmed = String(trimmed.dropLast())
+            trailingSpaces += 1
+        }
+
+        // Find word boundary (last space in trimmed text)
+        let charsInWord: Int
+        if let lastSpace = trimmed.lastIndex(of: " ") {
+            charsInWord = trimmed.distance(from: trimmed.index(after: lastSpace), to: trimmed.endIndex)
+        } else {
+            charsInWord = trimmed.count
+        }
+
+        // Delete trailing spaces + word (at least 1 character)
+        let total = trailingSpaces + charsInWord
+        for _ in 0..<max(1, total) {
+            proxy.deleteBackward()
+        }
         lastInsertedCharacter = nil
         updateCapitalization()
     }

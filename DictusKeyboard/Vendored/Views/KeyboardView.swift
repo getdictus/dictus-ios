@@ -402,6 +402,13 @@ final internal class GiellaKeyboardView: UIView,
     var keyRepeatTimer: Timer?
     var dismissOverlayTimer: Timer?
 
+    /// Tracks how many times the key repeat timer has fired during the current hold.
+    /// Used to switch from character-level to word-level deletion after threshold.
+    private var deleteRepeatCount: Int = 0
+
+    /// After this many character deletions, switch to word-level deletion.
+    private static let wordModeThreshold = 10
+
     struct ActiveKey: Hashable {
         static func == (lhs: GiellaKeyboardView.ActiveKey, rhs: GiellaKeyboardView.ActiveKey) -> Bool {
             return lhs.key.type == rhs.key.type
@@ -431,6 +438,7 @@ final internal class GiellaKeyboardView: UIView,
                 })
                 keyRepeatTimer?.invalidate()
                 keyRepeatTimer = nil
+                deleteRepeatCount = 0
             }
 
             if let key = newValue, key.key.type.supportsRepeatTrigger, keyRepeatTimer == nil {
@@ -727,15 +735,35 @@ final internal class GiellaKeyboardView: UIView,
 
     @objc func keyRepeatTimerDidTrigger() {
         if let activeKey = activeKey, activeKey.key.type.supportsRepeatTrigger {
-            delegate?.didTriggerKey(activeKey.key)
+            deleteRepeatCount += 1
+
+            if deleteRepeatCount > Self.wordModeThreshold {
+                // Word-level deletion after threshold
+                delegate?.didTriggerHoldKey(activeKey.key)
+            } else {
+                // Character-level deletion
+                delegate?.didTriggerKey(activeKey.key)
+            }
+
+            // Haptic feedback on each deletion
+            HapticFeedback.keyTapped()
+
             increaseKeyRepeatRateIfNeeded()
         }
     }
 
     private func increaseKeyRepeatRateIfNeeded() {
-        if keyRepeatTimer?.timeInterval == GiellaKeyboardView.pauseBeforeRepeatTimeInterval {
+        guard let timer = keyRepeatTimer else { return }
+
+        // Stage 1 -> Stage 2: After initial pause (0.5s), switch to character repeat (0.1s)
+        if timer.timeInterval == GiellaKeyboardView.pauseBeforeRepeatTimeInterval {
             keyRepeatTimer?.invalidate()
             keyRepeatTimer = makeKeyRepeatTimer(timeInterval: GiellaKeyboardView.keyRepeatTimeInterval)
+        }
+        // Stage 2 -> Stage 3: After word mode threshold, speed up to 0.05s for faster word deletion
+        else if deleteRepeatCount == Self.wordModeThreshold + 1 && timer.timeInterval == GiellaKeyboardView.keyRepeatTimeInterval {
+            keyRepeatTimer?.invalidate()
+            keyRepeatTimer = makeKeyRepeatTimer(timeInterval: 0.05)
         }
     }
 
