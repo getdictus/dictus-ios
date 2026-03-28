@@ -677,14 +677,27 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     private func longpressKeys(for key: String) -> [KeyDefinition]? {
+        // Case-insensitive lookup: AccentedCharacters.mappings uses lowercase keys,
+        // but on shifted/capslock pages the key string is uppercase ("E" not "e").
         let longpressKeys = self.definition
-        .longPress[key]?
+        .longPress[key.lowercased()]?
         .compactMap({
             KeyDefinition(type: .input(key: $0, alternate: nil))
         })
 
         guard var keys = longpressKeys else {
             return nil
+        }
+
+        // Apply case transformation for shifted/capslock pages
+        // so that long-pressing "E" shows uppercase accents (E, E, E, E)
+        if page == .shifted || page == .capslock {
+            keys = keys.map { keyDef in
+                if case let .input(char, alt) = keyDef.type {
+                    return KeyDefinition(type: .input(key: char.uppercased(), alternate: alt))
+                }
+                return keyDef
+            }
         }
 
         if shouldUseiPadLayout == false {

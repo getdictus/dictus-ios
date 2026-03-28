@@ -183,7 +183,13 @@ enum FrenchKeyboardLayouts {
 
     /// Long-press accent data for French keys.
     /// Phase 18 provides empty data -- Phase 19 will add accent variants.
-    private static let frenchLongPress: [String: [String]] = [:]
+    private static let frenchLongPress: [String: [String]] = {
+        var longPress: [String: [String]] = [:]
+        for (baseKey, accents) in AccentedCharacters.mappings {
+            longPress[baseKey] = accents
+        }
+        return longPress
+    }()
 
     // MARK: - Helper Functions
 

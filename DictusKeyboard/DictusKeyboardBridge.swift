@@ -52,6 +52,10 @@ final class DictusKeyboardBridge: NSObject,
     ///   may re-apply shift if conditions still hold (e.g., still at start of sentence)
     private var isManualShift = false
 
+    /// Last character inserted by the keyboard, tracked locally to avoid IPC latency.
+    /// Used by adaptive accent key (Phase 19 Plan 03) and as supplement to proxy reads.
+    private(set) var lastInsertedCharacter: String?
+
     // MARK: - GiellaKeyboardViewDelegate
 
     func didTriggerKey(_ key: KeyDefinition) {
@@ -155,6 +159,7 @@ final class DictusKeyboardBridge: NSObject,
         // Insert the character. When on shifted/capslock page, the key definition
         // already contains the uppercase character, so we insert as-is.
         controller?.textDocumentProxy.insertText(character)
+        lastInsertedCharacter = character
 
         // Auto-unshift after one character (unless caps locked).
         // This matches iOS native behavior: shift is "one-shot" unless locked.
@@ -175,6 +180,7 @@ final class DictusKeyboardBridge: NSObject,
     private func handleBackspace() {
         AudioServicesPlaySystemSound(KeySound.delete)
         controller?.textDocumentProxy.deleteBackward()
+        lastInsertedCharacter = nil
         updateCapitalization()
     }
 
@@ -189,6 +195,9 @@ final class DictusKeyboardBridge: NSObject,
         // in which case we must NOT insert an additional space.
         if !handleAutoFullStop() {
             controller?.textDocumentProxy.insertText(" ")
+            lastInsertedCharacter = " "
+        } else {
+            lastInsertedCharacter = " "
         }
 
         // After space (or period+space), recheck autocap.
@@ -202,6 +211,7 @@ final class DictusKeyboardBridge: NSObject,
     private func handleReturn() {
         AudioServicesPlaySystemSound(KeySound.modifier)
         controller?.textDocumentProxy.insertText("\n")
+        lastInsertedCharacter = "\n"
         updateCapitalization()
     }
 
@@ -295,20 +305,19 @@ final class DictusKeyboardBridge: NSObject,
     @discardableResult
     private func handleAutoFullStop() -> Bool {
         guard let proxy = controller?.textDocumentProxy,
-              let text = proxy.documentContextBeforeInput?.suffix(3),
-              text.count == 3,
-              text.suffix(2) == "  " else { return false }
+              let text = proxy.documentContextBeforeInput,
+              text.count >= 2 else { return false }
 
-        let first = text.prefix(1)
-        // Only replace if the character before the two spaces is a word character
-        // (not a period or another space -- that would create ".. " or " . ")
-        if first != "." && first != " " {
-            proxy.deleteBackward() // delete first space
-            proxy.deleteBackward() // delete second space
-            proxy.insertText(". ")
-            return true
-        }
-        return false
+        // Called BEFORE inserting second space. Buffer has: [char][space]
+        // Check: last char is space, char before space is not space and not period
+        guard text.hasSuffix(" ") else { return false }
+        let beforeSpace = text[text.index(text.endIndex, offsetBy: -2)]
+        guard beforeSpace != " " && beforeSpace != "." else { return false }
+
+        // Replace trailing space with ". "
+        proxy.deleteBackward()
+        proxy.insertText(". ")
+        return true
     }
 
     // MARK: - Autocapitalization
