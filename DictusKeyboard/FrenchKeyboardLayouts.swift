@@ -95,11 +95,15 @@ enum FrenchKeyboardLayouts {
     // MARK: - QWERTY Letter Pages
 
     private static let qwertyNormal: [[KeyDefinition]] = [
-        // Row 1: 10 keys
+        // Row 1: 10 keys = 10 units
         inputRow("q", "w", "e", "r", "t", "y", "u", "i", "o", "p"),
-        // Row 2: 9 keys
-        inputRow("a", "s", "d", "f", "g", "h", "j", "k", "l"),
-        // Row 3: shift + 7 letters + delete = 9 items
+        // Row 2: 9 keys with side spacers = 10 units (matches Apple QWERTY centering)
+        [
+            KeyDefinition(type: .spacer, size: CGSize(width: 0.5, height: 1)),
+            key("a"), key("s"), key("d"), key("f"), key("g"), key("h"), key("j"), key("k"), key("l"),
+            KeyDefinition(type: .spacer, size: CGSize(width: 0.5, height: 1)),
+        ],
+        // Row 3: shift + 7 letters + delete = 10 units
         [
             KeyDefinition(type: .shift, size: CGSize(width: 1.5, height: 1)),
             key("z"), key("x"), key("c"), key("v"), key("b"), key("n"), key("m"),
@@ -111,7 +115,11 @@ enum FrenchKeyboardLayouts {
 
     private static let qwertyShifted: [[KeyDefinition]] = [
         inputRow("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"),
-        inputRow("A", "S", "D", "F", "G", "H", "J", "K", "L"),
+        [
+            KeyDefinition(type: .spacer, size: CGSize(width: 0.5, height: 1)),
+            key("A"), key("S"), key("D"), key("F"), key("G"), key("H"), key("J"), key("K"), key("L"),
+            KeyDefinition(type: .spacer, size: CGSize(width: 0.5, height: 1)),
+        ],
         [
             KeyDefinition(type: .shift, size: CGSize(width: 1.5, height: 1)),
             key("Z"), key("X"), key("C"), key("V"), key("B"), key("N"), key("M"),
