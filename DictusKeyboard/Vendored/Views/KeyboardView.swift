@@ -127,11 +127,6 @@ final internal class GiellaKeyboardView: UIView,
         collectionView.register(KeyCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         collectionView.isUserInteractionEnabled = false
         collectionView.isScrollEnabled = false
-        // Disable automatic content inset adjustments so cells are laid out edge-to-edge.
-        // By default, UIScrollView adjusts contentInset for safe areas, which can cause
-        // the collection view to offset cells from the keyboard edges — creating gaps
-        // where indexPathForItem(at:) returns nil and touches miss their target key.
-        collectionView.contentInsetAdjustmentBehavior = .never
 
         addSubview(collectionView)
         collectionView.topAnchor.constraint(equalTo: topAnchor).enable()
@@ -143,15 +138,6 @@ final internal class GiellaKeyboardView: UIView,
         addGestureRecognizer(longpressGestureRecognizer)
 
         isMultipleTouchEnabled = true
-    }
-
-    // Expand hit-test area by 4pt horizontally so touches at the very edge
-    // of the screen (just barely outside the keyboard view bounds) still reach
-    // touchesBegan. Without this, edge touches are dropped by the hit-test
-    // chain and never trigger haptic or popup on touchDown.
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        let expandedBounds = bounds.insetBy(dx: -4, dy: 0)
-        return expandedBounds.contains(point)
     }
 
     func updateTheme(theme: Theme) {
@@ -493,27 +479,9 @@ final internal class GiellaKeyboardView: UIView,
         handleTouches(touches)
     }
 
-    /// Find the nearest cell index path for a point, with edge fallback.
-    /// UICollectionView.indexPathForItem(at:) can return nil when the touch is at
-    /// the very edge of the keyboard (floating-point cell boundary rounding or
-    /// residual safe area offsets). This fallback clamps the point inward by 8pt
-    /// to reliably find the nearest edge cell.
-    private func indexPathForTouch(at point: CGPoint) -> IndexPath? {
-        if let indexPath = collectionView.indexPathForItem(at: point) {
-            return indexPath
-        }
-        // Clamp the point inward from edges to find the nearest cell.
-        // 8pt margin covers safe area residuals + floating-point rounding.
-        let margin: CGFloat = 8
-        let clampedX = min(max(point.x, margin), collectionView.bounds.width - margin)
-        let clampedY = min(max(point.y, margin), collectionView.bounds.height - margin)
-        let clampedPoint = CGPoint(x: clampedX, y: clampedY)
-        return collectionView.indexPathForItem(at: clampedPoint)
-    }
-
     private func handleTouches(_ touches: Set<UITouch>) {
         for touch in touches {
-            if let indexPath = indexPathForTouch(at: touch.location(in: collectionView)) {
+            if let indexPath = collectionView.indexPathForItem(at: touch.location(in: collectionView)) {
                 let key = currentPage[indexPath.section][indexPath.row]
 
                 if key.type.supportsDoubleTap {
@@ -581,7 +549,7 @@ final internal class GiellaKeyboardView: UIView,
 
         if activeKey != nil {
             for touch in touches {
-                if let indexPath = indexPathForTouch(at: touch.location(in: collectionView)) {
+                if let indexPath = collectionView.indexPathForItem(at: touch.location(in: collectionView)) {
                     let key = currentPage[indexPath.section][indexPath.row]
                     activeKey = ActiveKey(key: key, indexPath: indexPath)
                 } else {
@@ -650,7 +618,7 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     @objc func touchesFoundLongpress(_ longpressGestureRecognizer: UILongPressGestureRecognizer) {
-        if let indexPath = indexPathForTouch(at: longpressGestureRecognizer.location(in: collectionView)),
+        if let indexPath = collectionView.indexPathForItem(at: longpressGestureRecognizer.location(in: collectionView)),
             longpressController == nil {
             let key = currentPage[indexPath.section][indexPath.row]
             currentlyLongpressedKey = key
@@ -797,11 +765,7 @@ final internal class GiellaKeyboardView: UIView,
     func collectionView(_: UICollectionView, layout _: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let key = currentPage[indexPath.section][indexPath.row]
 
-        // Use full bounds width (no -1 gap) so edge cells extend to the very edge.
-        // The original giellakbd-ios used (bounds.width - 1) which left a 1pt gap at the
-        // right edge where indexPathForItem(at:) would return nil, causing edge keys
-        // to miss touchDown events (haptic/popup delayed to touchUp).
-        let width = key.size.width * (bounds.size.width / rowNumberOfUnits[indexPath.section])
+        let width = key.size.width * ((bounds.size.width - 1) / rowNumberOfUnits[indexPath.section])
         let height = bounds.size.height / CGFloat(currentPage.count)
         return CGSize(width: width, height: height)
     }
