@@ -23,7 +23,7 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 - [x] **FEEL-01**: User gets haptic feedback on touchDown matching Apple keyboard feel
 - [x] **FEEL-02**: User hears 3-category key sounds (letter/delete/modifier) respecting silent switch
 - [x] **FEEL-03**: User sees key popup preview on press
-- [ ] **FEEL-04**: User can long-press vowels to access French accent characters with drag-to-select
+- [x] **FEEL-04**: User can long-press vowels to access French accent characters with drag-to-select
 - [ ] **FEEL-05**: User can drag spacebar to move cursor (trackpad) with haptic ticks
 - [ ] **FEEL-06**: User sees adaptive accent key (apostrophe after consonants, accent after vowels)
 
@@ -107,7 +107,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEEL-01 | Phase 18 | Complete |
 | FEEL-02 | Phase 18 | Complete |
 | FEEL-03 | Phase 18 | Complete |
-| FEEL-04 | Phase 19 | Pending |
+| FEEL-04 | Phase 19 | Complete |
 | FEEL-05 | Phase 19 | Pending |
 | FEEL-06 | Phase 19 | Pending |
 | DICT-01 | Phase 20 | Pending |

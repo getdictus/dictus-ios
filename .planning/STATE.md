@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
-status: completed
-stopped_at: Completed 18-03-PLAN.md (Phase 18 complete)
-last_updated: "2026-03-28T08:35:44.918Z"
-last_activity: 2026-03-28 — Completed Phase 18 Keyboard Base (autocap, double-space, shift state machine, user-verified)
+status: in-progress
+stopped_at: Completed 19-01-PLAN.md
+last_updated: "2026-03-28T10:51:00Z"
+last_activity: 2026-03-28 — Completed Phase 19 Plan 01 (accent data, edge key fallback, double-space fix)
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 8
+  completed_plans: 6
   percent: 17
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 18 complete -- ready for Phase 19 (Complex Touch Features)
+**Current focus:** Phase 19 in progress -- Complex Touch Features (accents, edge keys, styling)
 
 ## Current Position
 
-Phase: 18 of 22 (Keyboard Base) — COMPLETE
-Plan: 3 of 3 in current phase (all done)
-Status: Phase complete, ready for Phase 19
-Last activity: 2026-03-28 — Completed Phase 18 Keyboard Base (autocap, double-space, shift state machine, user-verified)
+Phase: 19 of 22 (Complex Touch Features) — IN PROGRESS
+Plan: 1 of 3 complete in current phase
+Status: Plan 01 complete, ready for Plan 02
+Last activity: 2026-03-28 — Completed Phase 19 Plan 01 (accent data, edge key fallback, double-space fix)
 
-Progress: [██░░░░░░░░] 17% (v1.3 milestone)
+Progress: [████████░░] 75% (v1.3 milestone)
 
 ## Performance Metrics
 
@@ -67,6 +67,10 @@ Recent decisions for v1.3:
 - [Phase 18]: iPhone keyboard heights 216-226pt (reduced from 262-272pt) to match Apple keyboard proportions
 - [Phase 18]: QWERTY row 2 needs 0.5-unit spacers for centering 9 keys in 10-unit grid
 
+- [Phase 19]: Case-insensitive longpress lookup via key.lowercased() instead of duplicating uppercase entries
+- [Phase 19]: nearestIndexPath maxDistance = 1 key width to prevent phantom hits on distant keys
+- [Phase 19]: hapticFeedback.prepare() in init for zero-latency first touch
+
 ### Pending Todos
 
 None.
@@ -79,8 +83,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T00:21:40.575Z
-Stopped at: Completed 18-03-PLAN.md (Phase 18 complete)
+Last session: 2026-03-28T10:51:00Z
+Stopped at: Completed 19-01-PLAN.md
 Resume file: None
 
 ---
