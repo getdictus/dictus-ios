@@ -137,6 +137,9 @@ final internal class GiellaKeyboardView: UIView,
 
         addGestureRecognizer(longpressGestureRecognizer)
 
+        // Pre-warm the local haptic generator so first touch has zero latency
+        hapticFeedback.prepare()
+
         isMultipleTouchEnabled = true
     }
 
@@ -481,7 +484,14 @@ final internal class GiellaKeyboardView: UIView,
 
     private func handleTouches(_ touches: Set<UITouch>) {
         for touch in touches {
-            if let indexPath = collectionView.indexPathForItem(at: touch.location(in: collectionView)) {
+            let touchPoint = touch.location(in: collectionView)
+            let indexPath: IndexPath?
+            if let directPath = collectionView.indexPathForItem(at: touchPoint) {
+                indexPath = directPath
+            } else {
+                indexPath = nearestIndexPath(to: touchPoint)
+            }
+            if let indexPath = indexPath {
                 let key = currentPage[indexPath.section][indexPath.row]
 
                 if key.type.supportsDoubleTap {
@@ -520,6 +530,45 @@ final internal class GiellaKeyboardView: UIView,
         }
     }
 
+    /// Find the indexPath of the visible cell closest to the given point.
+    /// Used as fallback when `indexPathForItem(at:)` returns nil for edge touches.
+    ///
+    /// WHY this works: `indexPathForItem(at:)` does strict bounds checking -- if the
+    /// touch point is even 1pt outside a cell's frame, it returns nil. Edge keys have
+    /// their outer edge flush with the screen, but the user's finger center may land
+    /// slightly outside. This finds the intended key without modifying layout geometry.
+    ///
+    /// WHY maxDistance: Prevents phantom hits on distant keys. One key width ensures
+    /// only the nearest adjacent key can match. Without this, a touch far outside the
+    /// keyboard could match a random visible cell.
+    private func nearestIndexPath(to point: CGPoint) -> IndexPath? {
+        let keyWidth = bounds.width / CGFloat(currentPage.first?.count ?? 10)
+        let maxDistance: CGFloat = keyWidth  // Allow up to one full key width distance
+        var bestPath: IndexPath?
+        var bestDistance: CGFloat = .greatestFiniteMagnitude
+
+        for cell in collectionView.visibleCells {
+            guard let path = collectionView.indexPath(for: cell) else { continue }
+            // Bounds check to avoid index-out-of-range
+            guard path.section < currentPage.count,
+                  path.row < currentPage[path.section].count else { continue }
+            let key = currentPage[path.section][path.row]
+            // Skip spacers -- they are not tappable keys
+            if case .spacer = key.type { continue }
+
+            let center = cell.center
+            let dx = point.x - center.x
+            let dy = point.y - center.y
+            let distance = sqrt(dx * dx + dy * dy)
+
+            if distance < bestDistance && distance < maxDistance {
+                bestDistance = distance
+                bestPath = path
+            }
+        }
+        return bestPath
+    }
+
     override func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
         if let longpressController = self.longpressController, let touch = touches.first {
             longpressController.touchesMoved(touch.location(in: collectionView))
@@ -549,7 +598,14 @@ final internal class GiellaKeyboardView: UIView,
 
         if activeKey != nil {
             for touch in touches {
-                if let indexPath = collectionView.indexPathForItem(at: touch.location(in: collectionView)) {
+                let movePoint = touch.location(in: collectionView)
+                let moveIndexPath: IndexPath?
+                if let directPath = collectionView.indexPathForItem(at: movePoint) {
+                    moveIndexPath = directPath
+                } else {
+                    moveIndexPath = nearestIndexPath(to: movePoint)
+                }
+                if let indexPath = moveIndexPath {
                     let key = currentPage[indexPath.section][indexPath.row]
                     activeKey = ActiveKey(key: key, indexPath: indexPath)
                 } else {
@@ -618,7 +674,14 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     @objc func touchesFoundLongpress(_ longpressGestureRecognizer: UILongPressGestureRecognizer) {
-        if let indexPath = collectionView.indexPathForItem(at: longpressGestureRecognizer.location(in: collectionView)),
+        let longpressPoint = longpressGestureRecognizer.location(in: collectionView)
+        let longpressIndexPath: IndexPath?
+        if let directPath = collectionView.indexPathForItem(at: longpressPoint) {
+            longpressIndexPath = directPath
+        } else {
+            longpressIndexPath = nearestIndexPath(to: longpressPoint)
+        }
+        if let indexPath = longpressIndexPath,
             longpressController == nil {
             let key = currentPage[indexPath.section][indexPath.row]
             currentlyLongpressedKey = key
