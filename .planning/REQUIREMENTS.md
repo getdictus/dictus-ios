@@ -15,8 +15,8 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 - [x] **KBD-04**: User can switch between letters, numbers, and symbols layers
 - [ ] **KBD-05**: User can delete characters with backspace, with accelerating repeat on hold
 - [x] **KBD-06**: User can insert space, return, and use globe key to switch keyboards
-- [ ] **KBD-07**: User gets autocapitalization after sentence-ending punctuation
-- [ ] **KBD-08**: User gets double-space period insertion
+- [x] **KBD-07**: User gets autocapitalization after sentence-ending punctuation
+- [x] **KBD-08**: User gets double-space period insertion
 
 ### Keyboard Feel
 
@@ -102,8 +102,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | KBD-04 | Phase 18 | Complete |
 | KBD-05 | Phase 19 | Pending |
 | KBD-06 | Phase 18 | Complete |
-| KBD-07 | Phase 18 | Pending |
-| KBD-08 | Phase 18 | Pending |
+| KBD-07 | Phase 18 | Complete |
+| KBD-08 | Phase 18 | Complete |
 | FEEL-01 | Phase 18 | Complete |
 | FEEL-02 | Phase 18 | Complete |
 | FEEL-03 | Phase 18 | Complete |
