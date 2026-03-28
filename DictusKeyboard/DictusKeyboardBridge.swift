@@ -60,8 +60,12 @@ final class DictusKeyboardBridge: NSObject,
 
     func didTriggerKey(_ key: KeyDefinition) {
         switch key.type {
-        case .input(let character, _):
-            handleInputKey(character)
+        case .input(let character, let alternate):
+            if alternate == "accent" {
+                handleAdaptiveAccentKey()
+            } else {
+                handleInputKey(character)
+            }
 
         case .backspace:
             handleBackspace()
@@ -176,6 +180,7 @@ final class DictusKeyboardBridge: NSObject,
         // Example: typing "." won't trigger autocap yet (need space after),
         // but typing after "Hello. " should capitalize.
         updateCapitalization()
+        updateAccentKeyDisplay()
     }
 
     /// Handle backspace/delete key.
@@ -186,6 +191,7 @@ final class DictusKeyboardBridge: NSObject,
         controller?.textDocumentProxy.deleteBackward()
         lastInsertedCharacter = nil
         updateCapitalization()
+        updateAccentKeyDisplay()
     }
 
     /// Delete one word backwards (used during accelerated backspace repeat).
@@ -249,6 +255,7 @@ final class DictusKeyboardBridge: NSObject,
         // After space (or period+space), recheck autocap.
         // "Hello. " should trigger shift for the next character.
         updateCapitalization()
+        updateAccentKeyDisplay()
     }
 
     /// Handle return/newline key.
@@ -259,6 +266,49 @@ final class DictusKeyboardBridge: NSObject,
         controller?.textDocumentProxy.insertText("\n")
         lastInsertedCharacter = "\n"
         updateCapitalization()
+        updateAccentKeyDisplay()
+    }
+
+    /// Handle the adaptive accent key tap.
+    /// After a vowel: replaces the vowel with its most common French accent.
+    /// After a consonant or other character: inserts an apostrophe.
+    ///
+    /// WHY replace instead of appending: French accented characters are single Unicode
+    /// code points (e.g., e-acute = U+00E9), not base + combining mark. Replacing the
+    /// previous character with the accented version is how iOS native French keyboards
+    /// handle accent insertion as well.
+    private func handleAdaptiveAccentKey() {
+        AudioServicesPlaySystemSound(KeySound.letter)
+
+        let label = AccentedCharacters.adaptiveKeyLabel(afterTyping: lastInsertedCharacter)
+
+        if AccentedCharacters.shouldReplace(afterTyping: lastInsertedCharacter) {
+            // Replace previous vowel with accented version
+            controller?.textDocumentProxy.deleteBackward()
+            controller?.textDocumentProxy.insertText(label)
+        } else {
+            // Insert apostrophe
+            controller?.textDocumentProxy.insertText(label)
+        }
+
+        lastInsertedCharacter = label
+
+        // Auto-unshift after accent insertion (same as regular character)
+        if let page = keyboardView?.page, page == .shifted {
+            keyboardView?.page = .normal
+            isManualShift = false
+        }
+
+        updateCapitalization()
+        updateAccentKeyDisplay()
+    }
+
+    /// Update the accent key's displayed label based on lastInsertedCharacter.
+    /// Called after every keystroke so the accent key always shows the correct symbol:
+    /// an accent character after a vowel, or apostrophe otherwise.
+    private func updateAccentKeyDisplay() {
+        let label = AccentedCharacters.adaptiveKeyLabel(afterTyping: lastInsertedCharacter)
+        keyboardView?.updateAccentKeyLabel(label)
     }
 
     /// Handle single shift tap: cycle through normal -> shifted -> normal.

@@ -148,10 +148,32 @@ final internal class GiellaKeyboardView: UIView,
         update()
     }
 
+    /// Current label for the adaptive accent key. Updated by the bridge after each keystroke.
+    /// Defaults to apostrophe (the most useful non-letter character in French).
+    var accentKeyLabel: String = "'"
+
     public func update() {
         backgroundColor = theme.backgroundColor
         keyboardButtonFrame = nil
         calculateRows()
+    }
+
+    /// Update the accent key label and refresh its cell.
+    /// Called by DictusKeyboardBridge after every keystroke to keep the accent key's
+    /// displayed character in sync with context (accent after vowel, apostrophe otherwise).
+    func updateAccentKeyLabel(_ label: String) {
+        guard label != accentKeyLabel else { return }
+        accentKeyLabel = label
+        // Find and reload only the accent key cell
+        for section in 0..<currentPage.count {
+            for row in 0..<currentPage[section].count {
+                if case .input(_, let alt) = currentPage[section][row].type, alt == "accent" {
+                    let indexPath = IndexPath(row: row, section: section)
+                    collectionView.reloadItems(at: [indexPath])
+                    return
+                }
+            }
+        }
     }
 
     func remove() {
@@ -855,7 +877,14 @@ final internal class GiellaKeyboardView: UIView,
                                                             for: indexPath) as? KeyCell else {
             fatalError("Unable to cast to KeyCell")
         }
-        let key = currentPage[indexPath.section][indexPath.row]
+        var key = currentPage[indexPath.section][indexPath.row]
+
+        // For the adaptive accent key, substitute the display label with the current
+        // dynamic value (accent after vowel, apostrophe otherwise). The sentinel
+        // alternate "accent" is preserved so the bridge can still identify this key.
+        if case .input(_, let alt) = key.type, alt == "accent" {
+            key = KeyDefinition(type: .input(key: accentKeyLabel, alternate: "accent"))
+        }
 
         cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection)
 

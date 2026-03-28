@@ -67,10 +67,11 @@ enum FrenchKeyboardLayouts {
         inputRow("a", "z", "e", "r", "t", "y", "u", "i", "o", "p"),
         // Row 2: 10 keys
         inputRow("q", "s", "d", "f", "g", "h", "j", "k", "l", "m"),
-        // Row 3: shift + 6 letters + delete = 8 items
+        // Row 3: shift + 6 letters + accent key + delete = 9 items (10 units)
         [
             KeyDefinition(type: .shift, size: CGSize(width: 1.5, height: 1)),
             key("w"), key("x"), key("c"), key("v"), key("b"), key("n"),
+            KeyDefinition(type: .input(key: "'", alternate: "accent")),
             KeyDefinition(type: .backspace, size: CGSize(width: 1.5, height: 1)),
         ],
         // Row 4: 123 + space + return (NO emoji per Phase 18)
@@ -82,10 +83,11 @@ enum FrenchKeyboardLayouts {
         inputRow("A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P"),
         // Row 2: uppercase
         inputRow("Q", "S", "D", "F", "G", "H", "J", "K", "L", "M"),
-        // Row 3: shift (filled state handled by KeyView) + uppercase letters + delete
+        // Row 3: shift (filled state handled by KeyView) + uppercase letters + accent key + delete
         [
             KeyDefinition(type: .shift, size: CGSize(width: 1.5, height: 1)),
             key("W"), key("X"), key("C"), key("V"), key("B"), key("N"),
+            KeyDefinition(type: .input(key: "'", alternate: "accent")),
             KeyDefinition(type: .backspace, size: CGSize(width: 1.5, height: 1)),
         ],
         // Row 4: same as normal

@@ -12,7 +12,9 @@ final class KeyView: UIView {
 
     var isSwipeKey: Bool {
         if case let .input(_, alt) = key.type, alt != nil {
-            return true
+            // The "accent" alternate is a sentinel for the adaptive accent key,
+            // not a real swipe alternate. Exclude it from swipe behavior.
+            return alt != "accent"
         }
         switch key.type {
         case .comma, .fullStop:
