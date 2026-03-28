@@ -63,7 +63,7 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 
 - [x] **Phase 17: Bug Fixes** — Fix Dynamic Island REC desync and export logs performance before architecture change (completed 2026-03-27)
 - [x] **Phase 18: Keyboard Base** — Vendor giellakbd-ios, AZERTY/QWERTY with zero dead zones, haptics, sounds, key popup (completed 2026-03-28)
-- [ ] **Phase 19: Complex Touch Features** — Delete repeat, spacebar trackpad, accent long-press, adaptive accent
+- [ ] **Phase 19: Complex Touch Features** — Delete repeat, spacebar trackpad, accent long-press, adaptive accent, edge key touch fix, double-space period fix
 - [ ] **Phase 20: Feature Reintegration** — Reconnect dictation, text prediction, suggestions, and settings
 - [ ] **Phase 21: Cleanup & Memory Profiling** — Delete old SwiftUI keyboard, verify memory budget, instrument
 - [ ] **Phase 22: Public TestFlight** — Beta App Review, external group, public link, README update
@@ -103,13 +103,19 @@ Plans:
 ### Phase 19: Complex Touch Features
 **Goal**: Users have access to all advanced touch interactions -- delete repeat, spacebar trackpad, accent selection, and adaptive accent key
 **Depends on**: Phase 18
-**Requirements**: KBD-05, FEEL-04, FEEL-05, FEEL-06
+**Requirements**: KBD-05, KBD-08, FEEL-04, FEEL-05, FEEL-06
 **Success Criteria** (what must be TRUE):
   1. User can hold backspace and characters delete with accelerating repeat speed
   2. User can long-press vowels to see French accent characters and drag to select one
   3. User can drag the spacebar to move the cursor with haptic ticks at each character position
   4. User sees adaptive accent key that shows apostrophe after consonants and accent after vowels
-**Plans**: TBD
+  5. Double-space inserts a period followed by a space (iOS native behavior)
+  6. Edge keys (a, q, p, m, etc.) produce haptic feedback and popup on touchDown, not touchUp
+**Plans**: 3 plans
+Plans:
+- [ ] 19-01-PLAN.md — Wire accent data, fix double-space period, fix edge key touchDown with nearest-cell fallback
+- [ ] 19-02-PLAN.md — Delete repeat with acceleration and spacebar trackpad cursor movement
+- [ ] 19-03-PLAN.md — Adaptive accent key in AZERTY layout and full device verification
 
 ### Phase 20: Feature Reintegration
 **Goal**: All Dictus-specific features work on the new UIKit keyboard -- dictation, text prediction, suggestions, and settings
@@ -171,7 +177,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 16. TestFlight Deployment | v1.2 | 3/3 | Complete | 2026-03-27 |
 | 17. Bug Fixes | 2/2 | Complete    | 2026-03-27 | - |
 | 18. Keyboard Base | 3/3 | Complete    | 2026-03-28 | - |
-| 19. Complex Touch Features | v1.3 | 0/? | Not started | - |
+| 19. Complex Touch Features | v1.3 | 0/3 | In progress | - |
 | 20. Feature Reintegration | v1.3 | 0/? | Not started | - |
 | 21. Cleanup & Memory Profiling | v1.3 | 0/? | Not started | - |
 | 22. Public TestFlight | v1.3 | 0/? | Not started | - |
