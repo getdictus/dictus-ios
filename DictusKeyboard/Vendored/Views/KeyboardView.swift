@@ -36,7 +36,7 @@ final internal class GiellaKeyboardView: UIView,
     LongPressCursorMovementDelegate
 {
     private static let pauseBeforeRepeatTimeInterval: TimeInterval = 0.5
-    private static let keyRepeatTimeInterval: TimeInterval = 0.1
+    private static let keyRepeatTimeInterval: TimeInterval = 0.2
     private var theme: Theme
 
     private let definition: KeyboardDefinition
@@ -573,22 +573,24 @@ final internal class GiellaKeyboardView: UIView,
     /// keyboard could match a random visible cell.
     private func nearestIndexPath(to point: CGPoint) -> IndexPath? {
         let keyWidth = bounds.width / CGFloat(currentPage.first?.count ?? 10)
-        let maxDistance: CGFloat = keyWidth  // Allow up to one full key width distance
+        let maxDistance: CGFloat = keyWidth * 1.5
         var bestPath: IndexPath?
         var bestDistance: CGFloat = .greatestFiniteMagnitude
 
         for cell in collectionView.visibleCells {
             guard let path = collectionView.indexPath(for: cell) else { continue }
-            // Bounds check to avoid index-out-of-range
             guard path.section < currentPage.count,
                   path.row < currentPage[path.section].count else { continue }
             let key = currentPage[path.section][path.row]
-            // Skip spacers -- they are not tappable keys
             if case .spacer = key.type { continue }
 
-            let center = cell.center
-            let dx = point.x - center.x
-            let dy = point.y - center.y
+            // Use distance to cell frame edge, not center -- much more forgiving for
+            // edge keys where the touch lands just outside the cell boundary.
+            let frame = cell.frame
+            let clampedX = min(max(point.x, frame.minX), frame.maxX)
+            let clampedY = min(max(point.y, frame.minY), frame.maxY)
+            let dx = point.x - clampedX
+            let dy = point.y - clampedY
             let distance = sqrt(dx * dx + dy * dy)
 
             if distance < bestDistance && distance < maxDistance {
@@ -742,6 +744,9 @@ final internal class GiellaKeyboardView: UIView,
                     longpressController.delegate = self
                     self.longpressController = longpressController
                     collectionView.alpha = 0.4
+                    // Initialize baseline so touchesMoved can compute deltas
+                    let startPoint = longpressGestureRecognizer.location(in: collectionView)
+                    longpressController.touchesBegan(startPoint)
                 }
             case .backspace:
                 break
@@ -785,7 +790,7 @@ final internal class GiellaKeyboardView: UIView,
         // Stage 2 -> Stage 3: After word mode threshold, speed up to 0.05s for faster word deletion
         else if deleteRepeatCount == Self.wordModeThreshold + 1 && timer.timeInterval == GiellaKeyboardView.keyRepeatTimeInterval {
             keyRepeatTimer?.invalidate()
-            keyRepeatTimer = makeKeyRepeatTimer(timeInterval: 0.05)
+            keyRepeatTimer = makeKeyRepeatTimer(timeInterval: 0.1)
         }
     }
 
@@ -880,10 +885,11 @@ final internal class GiellaKeyboardView: UIView,
         var key = currentPage[indexPath.section][indexPath.row]
 
         // For the adaptive accent key, substitute the display label with the current
-        // dynamic value (accent after vowel, apostrophe otherwise). The sentinel
-        // alternate "accent" is preserved so the bridge can still identify this key.
+        // dynamic value (accent after vowel, apostrophe otherwise). Pass nil for
+        // alternate so the sentinel "accent" is NOT rendered as a visible label.
+        // The original key in currentPage still has alternate: "accent" for identification.
         if case .input(_, let alt) = key.type, alt == "accent" {
-            key = KeyDefinition(type: .input(key: accentKeyLabel, alternate: "accent"))
+            key = KeyDefinition(type: .input(key: accentKeyLabel, alternate: nil))
         }
 
         cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection)
