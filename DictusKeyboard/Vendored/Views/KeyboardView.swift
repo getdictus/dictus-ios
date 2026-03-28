@@ -127,6 +127,11 @@ final internal class GiellaKeyboardView: UIView,
         collectionView.register(KeyCell.self, forCellWithReuseIdentifier: reuseIdentifier)
         collectionView.isUserInteractionEnabled = false
         collectionView.isScrollEnabled = false
+        // Disable automatic content inset adjustments so cells are laid out edge-to-edge.
+        // By default, UIScrollView adjusts contentInset for safe areas, which can cause
+        // the collection view to offset cells from the keyboard edges — creating gaps
+        // where indexPathForItem(at:) returns nil and touches miss their target key.
+        collectionView.contentInsetAdjustmentBehavior = .never
 
         addSubview(collectionView)
         collectionView.topAnchor.constraint(equalTo: topAnchor).enable()
@@ -138,6 +143,15 @@ final internal class GiellaKeyboardView: UIView,
         addGestureRecognizer(longpressGestureRecognizer)
 
         isMultipleTouchEnabled = true
+    }
+
+    // Expand hit-test area by 4pt horizontally so touches at the very edge
+    // of the screen (just barely outside the keyboard view bounds) still reach
+    // touchesBegan. Without this, edge touches are dropped by the hit-test
+    // chain and never trigger haptic or popup on touchDown.
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let expandedBounds = bounds.insetBy(dx: -4, dy: 0)
+        return expandedBounds.contains(point)
     }
 
     func updateTheme(theme: Theme) {
@@ -481,15 +495,18 @@ final internal class GiellaKeyboardView: UIView,
 
     /// Find the nearest cell index path for a point, with edge fallback.
     /// UICollectionView.indexPathForItem(at:) can return nil when the touch is at
-    /// the very edge of the keyboard (floating-point cell boundary rounding).
-    /// This fallback clamps the point inward by 2pt to find the edge cell.
+    /// the very edge of the keyboard (floating-point cell boundary rounding or
+    /// residual safe area offsets). This fallback clamps the point inward by 8pt
+    /// to reliably find the nearest edge cell.
     private func indexPathForTouch(at point: CGPoint) -> IndexPath? {
         if let indexPath = collectionView.indexPathForItem(at: point) {
             return indexPath
         }
-        // Clamp the point inward from edges to find the nearest cell
-        let clampedX = min(max(point.x, 2), collectionView.bounds.width - 2)
-        let clampedY = min(max(point.y, 2), collectionView.bounds.height - 2)
+        // Clamp the point inward from edges to find the nearest cell.
+        // 8pt margin covers safe area residuals + floating-point rounding.
+        let margin: CGFloat = 8
+        let clampedX = min(max(point.x, margin), collectionView.bounds.width - margin)
+        let clampedY = min(max(point.y, margin), collectionView.bounds.height - margin)
         let clampedPoint = CGPoint(x: clampedX, y: clampedY)
         return collectionView.indexPathForItem(at: clampedPoint)
     }
