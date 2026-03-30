@@ -127,7 +127,10 @@ Plans:
   3. User sees Full Access banner when permissions are needed for microphone access
   4. User sees 3-slot suggestion bar with French autocorrect, can tap to insert, and can undo autocorrect with backspace
   5. User can select default opening layer (letters or numbers) in settings with live preview
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Wire text prediction into bridge, autocorrect, emoji key layout, default layer setting
+- [ ] 20-02-PLAN.md — Emoji picker UI integration, post-transcription suggestion refresh, full UAT
 
 ### Phase 21: Cleanup & Memory Profiling
 **Goal**: Old SwiftUI keyboard code is removed, memory budget is verified on device, and the keyboard is instrumented for performance monitoring
