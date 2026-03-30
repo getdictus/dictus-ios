@@ -140,7 +140,10 @@ Plans:
   1. All old SwiftUI keyboard files (KeyButton, KeyRow, KeyboardView, SpecialKeyButton, AccentPopup) are deleted from the project
   2. Keyboard extension memory usage stays under 50MB during all operations (typing, dictation, prediction) on a real device
   3. OSSignposter instrumentation is in place for key touch-to-character latency measurement
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 21-01-PLAN.md — Extract LegacyCompat types, delete old SwiftUI files, clean pbxproj
+- [ ] 21-02-PLAN.md — Memory profiling on device, leak check, signposter verification, report
 
 ### Phase 22: Public TestFlight
 **Goal**: Dictus is available as a public TestFlight beta that anyone can install
@@ -150,7 +153,10 @@ Plans:
   1. App passes Beta App Review with complete Privacy Manifests and Full Access justification
   2. External testing group exists in App Store Connect and public TestFlight link is active
   3. README on GitHub includes the public TestFlight link with install instructions
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 21-01-PLAN.md — Extract LegacyCompat types, delete old SwiftUI files, clean pbxproj
+- [ ] 21-02-PLAN.md — Memory profiling on device, leak check, signposter verification, report
 
 ## Progress
 
@@ -182,7 +188,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 18. Keyboard Base | 3/3 | Complete    | 2026-03-28 | - |
 | 19. Complex Touch Features | 3/3 | Complete    | 2026-03-30 | - |
 | 20. Feature Reintegration | 2/2 | Complete    | 2026-03-30 | - |
-| 21. Cleanup & Memory Profiling | v1.3 | 0/? | Not started | - |
+| 21. Cleanup & Memory Profiling | v1.3 | 0/2 | Not started | - |
 | 22. Public TestFlight | v1.3 | 0/? | Not started | - |
 
 ---
