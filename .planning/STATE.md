@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 Phase: 19 of 22 (Complex Touch Features) — COMPLETE
 Plan: 3 of 3 complete in current phase
 Status: Phase 19 complete, ready for Phase 20
-Last activity: 2026-03-28 — Completed Phase 19 Plan 03 (adaptive accent key + full UAT)
+Last activity: 2026-03-30 - Completed quick task 260330-e6i: Adaptive accent key shows apostrophe after qu
 
 Progress: [██████████] 100% (v1.3 milestone)
 
@@ -79,6 +79,12 @@ Recent decisions for v1.3:
 ### Pending Todos
 
 None.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260330-e6i | Adaptive accent key shows apostrophe after qu | 2026-03-30 | 5abb2a7 | [260330-e6i-adaptive-accent-key-shows-apostrophe-aft](./quick/260330-e6i-adaptive-accent-key-shows-apostrophe-aft/) |
 
 ### Blockers/Concerns
 
