@@ -184,18 +184,16 @@ struct EmojiPickerView: View {
         // Search input bar
         searchInputBar
             .padding(.horizontal, 8)
-            .padding(.top, 4)
-            .padding(.bottom, 2)
+            .padding(.top, 2)
+            .padding(.bottom, 1)
 
         // Emoji row: recents when empty, results when searching.
-        // Apple always shows emojis here — recents if nothing typed, or all emojis
-        // sorted by last usage if no recents exist (row is never empty).
         let emojiRow = searchModeEmojis
         if emojiRow.isEmpty {
             Text("Aucun résultat")
                 .foregroundColor(.secondary)
                 .font(.system(size: 14))
-                .frame(height: 48)
+                .frame(height: 38)
         } else {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 2) {
@@ -206,14 +204,14 @@ struct EmojiPickerView: View {
                             RecentEmojis.add(emoji)
                         } label: {
                             Text(emoji)
-                                .font(.system(size: 34))
-                                .frame(width: emojiCellWidth, height: 46)
+                                .font(.system(size: 30))
+                                .frame(width: emojiCellWidth, height: 38)
                         }
                     }
                 }
                 .padding(.horizontal, 4)
             }
-            .frame(height: 48)
+            .frame(height: 38)
         }
 
         Spacer(minLength: 0)
@@ -241,7 +239,7 @@ struct EmojiPickerView: View {
 
     /// Search bar for search mode with cursor.
     private var searchInputBar: some View {
-        let barWidth = UIScreen.main.bounds.width - 16 // 8pt margin each side
+        let barWidth = availableWidth - 16 // 8pt margin each side
         return HStack(spacing: 0) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
@@ -273,8 +271,8 @@ struct EmojiPickerView: View {
             }
         }
         .lineLimit(1)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 7)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 5)
         .frame(width: barWidth)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -367,7 +365,7 @@ private struct MiniSearchKeyboard: View, Equatable {
         true // Layout never changes, only closures differ
     }
 
-    private let keyHeight: CGFloat = 40
+    private let keyHeight: CGFloat = 34
 
     private var rows: [[String]] {
         switch LayoutType.active {
@@ -387,7 +385,7 @@ private struct MiniSearchKeyboard: View, Equatable {
     }
 
     var body: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 3) {
             ForEach(Array(rows.enumerated()), id: \.offset) { rowIndex, row in
                 HStack(spacing: 4) {
                     ForEach(row, id: \.self) { letter in
@@ -429,7 +427,7 @@ private struct MiniSearchKeyboard: View, Equatable {
             .foregroundColor(Color(.label))
         }
         .padding(.horizontal, KeyMetrics.rowSidePadding)
-        .padding(.bottom, 4)
+        .padding(.bottom, 2)
     }
 }
 

@@ -16,60 +16,65 @@ struct EmojiCategoryBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // ABC button — return to letter keyboard
+            // ABC button — return to letter keyboard (fixed left)
             Button {
                 onDismiss()
             } label: {
                 Text("ABC")
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 15, weight: .medium))
                     .foregroundColor(Color(.label))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 4)
             }
+            .fixedSize()
 
-            // Search button
+            // Search button (fixed)
             Button {
                 HapticFeedback.keyTapped()
                 onSearch()
             } label: {
                 Image(systemName: "magnifyingglass")
-                    .font(.system(size: 17))
+                    .font(.system(size: 16))
                     .foregroundColor(Color(.label))
-                    .frame(width: 28, height: 28)
+                    .frame(width: 26, height: 26)
             }
+            .fixedSize()
 
-            // Category icons
-            HStack(spacing: 12) {
-                ForEach(sections) { section in
-                    let isSelected = selectedCategoryID == section.id
-                    Button {
-                        onSelectCategory(section.id)
-                    } label: {
-                        Image(systemName: section.icon)
-                            .font(.system(size: 17))
-                            .foregroundColor(isSelected ? Color(.label) : Color(.tertiaryLabel))
-                            .frame(width: 28, height: 28)
-                            .background(
-                                Circle()
-                                    .fill(isSelected ? Color(.systemGray4) : Color.clear)
-                            )
+            // Category icons — scrollable to fit many categories
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(sections) { section in
+                        let isSelected = selectedCategoryID == section.id
+                        Button {
+                            onSelectCategory(section.id)
+                        } label: {
+                            Image(systemName: section.icon)
+                                .font(.system(size: 16))
+                                .foregroundColor(isSelected ? Color(.label) : Color(.tertiaryLabel))
+                                .frame(width: 26, height: 26)
+                                .background(
+                                    Circle()
+                                        .fill(isSelected ? Color(.systemGray4) : Color.clear)
+                                )
+                        }
                     }
                 }
+                .padding(.horizontal, 2)
             }
-            .frame(maxWidth: .infinity)
 
-            // Delete button
+            // Delete button (fixed right)
             Button {
                 HapticFeedback.keyTapped()
                 AudioServicesPlaySystemSound(KeySound.delete)
                 onDelete()
             } label: {
                 Image(systemName: "delete.backward")
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundColor(Color(.label))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 4)
             }
+            .fixedSize()
         }
         .frame(height: 36)
     }
