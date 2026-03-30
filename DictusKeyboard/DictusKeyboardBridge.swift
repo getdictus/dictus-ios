@@ -75,7 +75,9 @@ final class DictusKeyboardBridge: NSObject,
         case .input(let character, let alternate):
             if alternate == "accent" {
                 handleAdaptiveAccentKey()
-            } else if alternate == "emoji" {
+            } else if character == "\u{1F600}" {
+                // Emoji button: identified by the emoji glyph on the key.
+                // No alternate text so the key shows only the smiley icon.
                 handleEmojiToggle()
             } else {
                 handleInputKey(character)

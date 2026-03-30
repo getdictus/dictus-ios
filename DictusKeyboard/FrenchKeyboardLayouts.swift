@@ -170,7 +170,7 @@ enum FrenchKeyboardLayouts {
     /// Note: symbols key uses .symbols type which shows "123" on letter pages and "ABC" on symbol pages.
     private static let lettersBottomRow: [KeyDefinition] = [
         KeyDefinition(type: .symbols, size: CGSize(width: 2.0, height: 1)),
-        KeyDefinition(type: .input(key: "\u{1F600}", alternate: "emoji"), size: CGSize(width: 1.5, height: 1)),
+        KeyDefinition(type: .input(key: "\u{1F600}", alternate: nil), size: CGSize(width: 1.5, height: 1)),
         KeyDefinition(type: .spacebar(name: "espace"), size: CGSize(width: 4.5, height: 1)),
         KeyDefinition(type: .returnkey(name: "retour"), size: CGSize(width: 2.0, height: 1)),
     ]

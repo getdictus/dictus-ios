@@ -99,6 +99,14 @@ class KeyboardViewController: UIInputViewController {
         // Critical: retain the hosting controller or it gets deallocated
         self.hostingController = hosting
 
+        // Disable safe area insets on the hosting controller.
+        // WHY: In keyboard extensions, UIHostingController applies unexpected safe area
+        // insets that clip the leading edge of full-width SwiftUI content (e.g., emoji picker).
+        // Setting safeAreaRegions to empty makes the hosting view use its full bounds.
+        if #available(iOS 16.4, *) {
+            hosting.safeAreaRegions = []
+        }
+
         addChild(hosting)
         hosting.view.translatesAutoresizingMaskIntoConstraints = false
         hosting.view.backgroundColor = .clear
