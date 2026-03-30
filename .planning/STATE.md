@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: completed
-stopped_at: Phase 21 context gathered
-last_updated: "2026-03-30T14:02:18.085Z"
-last_activity: "2026-03-30 - Completed 20-01: prediction pipeline, autocorrect, emoji key, default layer"
+stopped_at: Completed 21-01-PLAN.md
+last_updated: "2026-03-30T16:12:00.609Z"
+last_activity: "2026-03-30 - Completed 21-01: deleted old SwiftUI keyboard code, extracted KeyboardMetrics.swift"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
-  percent: 90
+  total_plans: 12
+  completed_plans: 11
+  percent: 92
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 
 ## Current Position
 
-Phase: 20 of 22 (Feature Reintegration)
+Phase: 21 of 22 (Cleanup & Memory Profiling)
 Plan: 1 of 2 complete in current phase
 Status: Plan 01 complete, ready for Plan 02
-Last activity: 2026-03-30 - Completed 20-01: prediction pipeline, autocorrect, emoji key, default layer
+Last activity: 2026-03-30 - Completed 21-01: deleted old SwiftUI keyboard code, extracted KeyboardMetrics.swift
 
-Progress: [█████████░] 90% (v1.3 milestone)
+Progress: [█████████░] 92% (v1.3 milestone)
 
 ## Performance Metrics
 
@@ -83,6 +83,7 @@ Recent decisions for v1.3:
 - [Phase 20]: Emoji key identified by glyph character, not alternate label, for clean rendering
 - [Phase 20]: UIHostingController.safeAreaRegions disabled for full-width SwiftUI in keyboard extension
 - [Phase 20]: Sound feedback default false to match first-install behavior
+- [Phase 21]: Extracted DeviceClass, KeyMetrics, KeySound, KeyPopup from LegacyCompat into permanent KeyboardMetrics.swift
 
 ### Pending Todos
 
@@ -94,6 +95,7 @@ None.
 |---|-------------|------|--------|-----------|
 | 260330-e6i | Adaptive accent key shows apostrophe after qu | 2026-03-30 | 5abb2a7 | [260330-e6i-adaptive-accent-key-shows-apostrophe-aft](./quick/260330-e6i-adaptive-accent-key-shows-apostrophe-aft/) |
 | Phase 20 P02 | 27min | 2 tasks | 6 files |
+| Phase 21 P01 | 3min | 2 tasks | 7 files |
 
 ### Blockers/Concerns
 
@@ -103,9 +105,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-30T14:02:18.083Z
-Stopped at: Phase 21 context gathered
-Resume file: .planning/phases/21-cleanup-memory-profiling/21-CONTEXT.md
+Last session: 2026-03-30T16:12:00.607Z
+Stopped at: Completed 21-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*
