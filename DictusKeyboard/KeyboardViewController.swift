@@ -146,6 +146,16 @@ class KeyboardViewController: UIInputViewController {
 
         // --- 7. Observe recording state to show/hide keyboard ---
         observeRecordingState()
+
+        // --- 8. Wire post-transcription suggestion refresh ---
+        // After dictation inserts text, update the suggestion bar with completions
+        // for the last word of the transcription.
+        KeyboardState.shared.onTranscriptionInserted = { [weak self] in
+            guard let self = self else { return }
+            let context = self.textDocumentProxy.documentContextBeforeInput
+            self.suggestionState.updateAsync(context: context)
+            self.bridge?.updateCapitalization()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -293,14 +303,19 @@ class KeyboardViewController: UIInputViewController {
     private func handleDictationStatusChange(_ status: DictationStatus) {
         let isRecording = status == .requested || status == .recording || status == .transcribing
 
-        giellaKeyboard?.isHidden = isRecording
+        // Dismiss emoji picker if recording starts
+        if isRecording && isShowingEmoji {
+            isShowingEmoji = false
+        }
+
+        giellaKeyboard?.isHidden = isRecording || isShowingEmoji
 
         if isRecording {
             // Expand hosting view to fill the full keyboard area for the recording overlay
             let fullHeight = computeKeyboardHeight()
             hostingHeightConstraint?.constant = fullHeight
-        } else {
-            // Restore toolbar-only height
+        } else if !isShowingEmoji {
+            // Restore toolbar-only height (unless emoji picker is open)
             hostingHeightConstraint?.constant = toolbarHeight
         }
 

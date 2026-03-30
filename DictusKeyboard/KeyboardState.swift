@@ -40,6 +40,11 @@ class KeyboardState: ObservableObject {
     /// as the controller reference above.
     var openURL: ((URL) -> Void)?
 
+    /// Called after transcription text is inserted into the text field.
+    /// KeyboardViewController sets this to trigger a SuggestionState update
+    /// so the suggestion bar shows completions for the last dictated word.
+    var onTranscriptionInserted: (() -> Void)?
+
     /// Opens a URL from the keyboard extension using NSExtensionContext.
     /// WHY extensionContext: This is the Apple-documented API for app extensions
     /// to open URLs. Neither SwiftUI's openURL nor the responder chain work
@@ -327,6 +332,7 @@ class KeyboardState: ObservableObject {
             controller?.textDocumentProxy.insertText(transcription)
             PersistentLog.log(.keyboardTextInserted)
             HapticFeedback.textInserted()
+            onTranscriptionInserted?()
 
             // Reset state to idle.
             // WHY explicit stopWatchdog: refreshFromDefaults() above may have read
@@ -355,6 +361,7 @@ class KeyboardState: ObservableObject {
                     self.controller?.textDocumentProxy.insertText(transcription)
                     PersistentLog.log(.keyboardTextInserted)
                     HapticFeedback.textInserted()
+                    self.onTranscriptionInserted?()
 
                     self.stopWatchdog()
                     self.dictationStatus = .idle

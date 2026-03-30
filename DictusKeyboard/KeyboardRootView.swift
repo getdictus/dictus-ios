@@ -30,6 +30,9 @@ struct KeyboardRootView: View {
     @ObservedObject private var state = KeyboardState.shared
     @ObservedObject private var waveformDriver = KeyboardWaveformDriver.shared
     @State private var instanceID = String(UUID().uuidString.prefix(8))
+    /// Whether the emoji picker is currently visible.
+    /// Toggled via NotificationCenter from KeyboardViewController.toggleEmojiPicker().
+    @State private var showingEmoji = false
     /// Observable state for the suggestion bar, owned by KeyboardViewController.
     /// WHY @ObservedObject (not @StateObject): The controller creates and owns SuggestionState,
     /// injecting the same instance into both this view (for display) and the bridge (for updates).
@@ -80,6 +83,34 @@ struct KeyboardRootView: View {
                     onCancel: { state.requestCancel() },
                     onStop: { state.requestStop() }
                 )
+            } else if showingEmoji {
+                // Toolbar stays visible during emoji browsing so mic button is accessible
+                ToolbarView(
+                    hasFullAccess: controller.hasFullAccess,
+                    dictationStatus: state.dictationStatus,
+                    onMicTap: {
+                        showingEmoji = false
+                        state.startRecording()
+                    },
+                    suggestions: [],
+                    suggestionMode: .idle,
+                    onSuggestionTap: { _ in }
+                )
+                // Emoji picker fills the keyboard grid area
+                EmojiPickerView(
+                    onEmojiInsert: { emoji in
+                        controller.textDocumentProxy.insertText(emoji)
+                        HapticFeedback.keyTapped()
+                    },
+                    onDelete: {
+                        controller.textDocumentProxy.deleteBackward()
+                        HapticFeedback.keyTapped()
+                    },
+                    onDismiss: {
+                        showingEmoji = false
+                        NotificationCenter.default.post(name: .dictusToggleEmoji, object: nil)
+                    }
+                )
             } else {
                 // Toolbar only -- the keyboard grid is UIKit, managed by KeyboardViewController
                 ToolbarView(
@@ -104,6 +135,10 @@ struct KeyboardRootView: View {
                 action: "showsOverlayChanged",
                 details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
             ))
+            // Dismiss emoji picker when recording starts
+            if isShowing {
+                showingEmoji = false
+            }
             syncWaveformDriver()
         }
         .onChange(of: state.dictationStatus) { _, newStatus in
@@ -160,6 +195,9 @@ struct KeyboardRootView: View {
                 details: "status=\(state.dictationStatus.rawValue) controllerID=\(controllerID)"
             ))
             syncWaveformDriver(forceHidden: true)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .dictusToggleEmoji)) { _ in
+            showingEmoji.toggle()
         }
     }
 
