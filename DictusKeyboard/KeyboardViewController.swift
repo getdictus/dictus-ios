@@ -99,10 +99,11 @@ class KeyboardViewController: UIInputViewController {
         // Critical: retain the hosting controller or it gets deallocated
         self.hostingController = hosting
 
-        // Eliminate ALL safe area and margin insets on the hosting controller.
-        // WHY: In keyboard extensions, UIHostingController applies unexpected safe area
-        // insets and layout margins that offset SwiftUI content from the left edge.
-        // This causes the emoji picker to be clipped on the left side.
+        // Disable safe area regions so SwiftUI content uses the full hosting bounds.
+        // WHY: Keyboard extensions can have unexpected safe area insets from the system.
+        // Note: Do NOT set layoutMargins/directionalLayoutMargins to zero — this
+        // triggers layout recalculation that causes the keyboard height to shrink
+        // when top-row key popups extend above bounds.
         if #available(iOS 16.4, *) {
             hosting.safeAreaRegions = []
         }
@@ -110,9 +111,6 @@ class KeyboardViewController: UIInputViewController {
         addChild(hosting)
         hosting.view.translatesAutoresizingMaskIntoConstraints = false
         hosting.view.backgroundColor = .clear
-        hosting.view.insetsLayoutMarginsFromSafeArea = false
-        hosting.view.layoutMargins = .zero
-        hosting.view.directionalLayoutMargins = .zero
 
         // --- 4. Add both views to kbInputView ---
         // Order matters: hosting (toolbar) at top, keyboard below
