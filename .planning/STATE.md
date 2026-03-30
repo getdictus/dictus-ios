@@ -4,13 +4,13 @@ milestone: v1.3
 milestone_name: Public Beta
 status: completed
 stopped_at: Completed 20-01-PLAN.md
-last_updated: "2026-03-30T09:31:05.625Z"
+last_updated: "2026-03-30T13:43:36.049Z"
 last_activity: "2026-03-30 - Completed 20-01: prediction pipeline, autocorrect, emoji key, default layer"
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
   percent: 90
 ---
 
@@ -80,6 +80,9 @@ Recent decisions for v1.3:
 - [Phase 20]: Autocorrect-on-space matches iOS native behavior, undo via AutocorrectState on next backspace
 - [Phase 20]: Emoji key uses .input with alternate="emoji" routed through bridge callback
 - [Phase 20]: Default layer set in viewWillAppear for immediate setting changes
+- [Phase 20]: Emoji key identified by glyph character, not alternate label, for clean rendering
+- [Phase 20]: UIHostingController.safeAreaRegions disabled for full-width SwiftUI in keyboard extension
+- [Phase 20]: Sound feedback default false to match first-install behavior
 
 ### Pending Todos
 
@@ -90,6 +93,7 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260330-e6i | Adaptive accent key shows apostrophe after qu | 2026-03-30 | 5abb2a7 | [260330-e6i-adaptive-accent-key-shows-apostrophe-aft](./quick/260330-e6i-adaptive-accent-key-shows-apostrophe-aft/) |
+| Phase 20 P02 | 27min | 2 tasks | 6 files |
 
 ### Blockers/Concerns
 
