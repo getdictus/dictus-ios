@@ -84,36 +84,44 @@ struct KeyboardRootView: View {
                     onStop: { state.requestStop() }
                 )
             } else if showingEmoji {
-                // Toolbar stays visible during emoji browsing so mic button is accessible.
-                // .frame(height: 52) prevents compression when the emoji picker fills the rest.
-                ToolbarView(
-                    hasFullAccess: controller.hasFullAccess,
-                    dictationStatus: state.dictationStatus,
-                    onMicTap: {
-                        showingEmoji = false
-                        state.startRecording()
-                    },
-                    suggestions: [],
-                    suggestionMode: .idle,
-                    onSuggestionTap: { _ in }
-                )
-                .frame(height: 52)
-                // Emoji picker fills the remaining keyboard grid area.
-                EmojiPickerView(
-                    onEmojiInsert: { emoji in
-                        controller.textDocumentProxy.insertText(emoji)
-                        HapticFeedback.keyTapped()
-                    },
-                    onDelete: {
-                        controller.textDocumentProxy.deleteBackward()
-                        HapticFeedback.keyTapped()
-                    },
-                    onDismiss: {
-                        showingEmoji = false
-                        NotificationCenter.default.post(name: .dictusToggleEmoji, object: nil)
+                // GeometryReader measures the actual space available to SwiftUI.
+                // WHY: In keyboard extensions, the hosting controller may not give the
+                // full screen width/height to SwiftUI due to safe area or system insets.
+                // Passing measured dimensions to EmojiPickerView guarantees it fits.
+                GeometryReader { geo in
+                    VStack(spacing: 0) {
+                        // Toolbar stays visible during emoji browsing
+                        ToolbarView(
+                            hasFullAccess: controller.hasFullAccess,
+                            dictationStatus: state.dictationStatus,
+                            onMicTap: {
+                                showingEmoji = false
+                                state.startRecording()
+                            },
+                            suggestions: [],
+                            suggestionMode: .idle,
+                            onSuggestionTap: { _ in }
+                        )
+                        .frame(height: 52)
+                        // Emoji picker uses exact measured dimensions
+                        EmojiPickerView(
+                            onEmojiInsert: { emoji in
+                                controller.textDocumentProxy.insertText(emoji)
+                                HapticFeedback.keyTapped()
+                            },
+                            onDelete: {
+                                controller.textDocumentProxy.deleteBackward()
+                                HapticFeedback.keyTapped()
+                            },
+                            onDismiss: {
+                                showingEmoji = false
+                                NotificationCenter.default.post(name: .dictusToggleEmoji, object: nil)
+                            },
+                            availableWidth: geo.size.width,
+                            availableHeight: geo.size.height - 52
+                        )
                     }
-                )
-                .ignoresSafeArea()
+                }
             } else {
                 // Toolbar only -- the keyboard grid is UIKit, managed by KeyboardViewController
                 ToolbarView(

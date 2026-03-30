@@ -84,7 +84,9 @@ struct KeyboardView: View {
                             currentLayer = previousLayer ?? .letters
                             previousLayer = nil
                             isEmojiMode = false
-                        }
+                        },
+                        availableWidth: geometry.size.width,
+                        availableHeight: geometry.size.height
                     )
                 } else {
                     VStack(spacing: 0) {

@@ -18,6 +18,13 @@ struct EmojiPickerView: View {
     let onEmojiInsert: (String) -> Void
     let onDelete: () -> Void
     let onDismiss: () -> Void
+    /// Actual available width passed from the parent GeometryReader.
+    /// WHY a parameter: In keyboard extensions, UIHostingController may not give
+    /// SwiftUI content the full screen width due to safe area or layout margins.
+    /// Using the measured parent width guarantees the grid fits without clipping.
+    let availableWidth: CGFloat
+    /// Actual available height for the picker (excludes the toolbar).
+    let availableHeight: CGFloat
 
     @State private var recentEmojis: [String] = []
     @State private var selectedCategoryID: String = "smileys"
@@ -29,12 +36,29 @@ struct EmojiPickerView: View {
     @State private var searchTask: Task<Void, Never>? = nil
 
     private let categories = EmojiStore.categories
-    private let gridRows = Array(repeating: GridItem(.fixed(40), spacing: 1), count: 5)
 
-    /// Dynamic cell width: exactly 8 emojis per row on any device.
-    /// Uses screen width since the keyboard extension always spans the full screen.
+    // Grid sizing constants
+    private let headerHeight: CGFloat = 20
+    private let categoryBarHeight: CGFloat = 36
+    private let rowSpacing: CGFloat = 1
+
+    /// Number of rows that fit in available height after subtracting header + category bar.
+    private var rowCount: Int {
+        let gridSpace = availableHeight - headerHeight - categoryBarHeight
+        let rowWithSpacing: CGFloat = rowHeight + rowSpacing
+        return max(3, Int(gridSpace / rowWithSpacing))
+    }
+
+    /// Height per emoji row, computed to fill available space evenly.
+    private var rowHeight: CGFloat { 42 }
+
+    private var gridRows: [GridItem] {
+        Array(repeating: GridItem(.fixed(rowHeight), spacing: rowSpacing), count: rowCount)
+    }
+
+    /// Dynamic cell width: exactly 8 emojis per row based on actual available width.
     private var emojiCellWidth: CGFloat {
-        (UIScreen.main.bounds.width - 4) / 8
+        (availableWidth - 4) / 8
     }
 
     // MARK: - Computed data
@@ -87,9 +111,8 @@ struct EmojiPickerView: View {
                 normalMode
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(width: availableWidth, height: availableHeight)
         .clipped()
-        .ignoresSafeArea()
         .onAppear {
             recentEmojis = RecentEmojis.load()
             if !recentEmojis.isEmpty {
@@ -124,8 +147,8 @@ struct EmojiPickerView: View {
                             RecentEmojis.add(item.emoji)
                         } label: {
                             Text(item.emoji)
-                                .font(.system(size: 30))
-                                .frame(width: emojiCellWidth, height: 40)
+                                .font(.system(size: 32))
+                                .frame(width: emojiCellWidth, height: rowHeight)
                         }
                         .id(item.id)
                     }
