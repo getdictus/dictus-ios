@@ -56,6 +56,11 @@ final class DictusKeyboardBridge: NSObject,
     /// Used by adaptive accent key (Phase 19 Plan 03) and as supplement to proxy reads.
     private(set) var lastInsertedCharacter: String?
 
+    /// Second-to-last character, used for 2-char context (e.g., "qu" detection).
+    /// When the user types "qu", lastInsertedCharacter="u" and secondToLastInsertedCharacter="q",
+    /// allowing AccentedCharacters to detect the bigram and show apostrophe instead of u-grave.
+    private var secondToLastInsertedCharacter: String?
+
     // MARK: - GiellaKeyboardViewDelegate
 
     func didTriggerKey(_ key: KeyDefinition) {
@@ -167,6 +172,7 @@ final class DictusKeyboardBridge: NSObject,
         // Insert the character. When on shifted/capslock page, the key definition
         // already contains the uppercase character, so we insert as-is.
         controller?.textDocumentProxy.insertText(character)
+        secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = character
 
         // Auto-unshift after one character (unless caps locked).
@@ -189,6 +195,7 @@ final class DictusKeyboardBridge: NSObject,
     private func handleBackspace() {
         AudioServicesPlaySystemSound(KeySound.delete)
         controller?.textDocumentProxy.deleteBackward()
+        secondToLastInsertedCharacter = nil
         lastInsertedCharacter = nil
         updateCapitalization()
         updateAccentKeyDisplay()
@@ -232,6 +239,7 @@ final class DictusKeyboardBridge: NSObject,
         for _ in 0..<max(1, total) {
             proxy.deleteBackward()
         }
+        secondToLastInsertedCharacter = nil
         lastInsertedCharacter = nil
         updateCapitalization()
     }
@@ -245,6 +253,7 @@ final class DictusKeyboardBridge: NSObject,
         // Check for double-space -> period BEFORE inserting the space.
         // handleAutoFullStop returns true if it performed the ". " substitution,
         // in which case we must NOT insert an additional space.
+        secondToLastInsertedCharacter = lastInsertedCharacter
         if !handleAutoFullStop() {
             controller?.textDocumentProxy.insertText(" ")
             lastInsertedCharacter = " "
@@ -264,6 +273,7 @@ final class DictusKeyboardBridge: NSObject,
     private func handleReturn() {
         AudioServicesPlaySystemSound(KeySound.modifier)
         controller?.textDocumentProxy.insertText("\n")
+        secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = "\n"
         updateCapitalization()
         updateAccentKeyDisplay()
@@ -280,17 +290,21 @@ final class DictusKeyboardBridge: NSObject,
     private func handleAdaptiveAccentKey() {
         AudioServicesPlaySystemSound(KeySound.letter)
 
-        let label = AccentedCharacters.adaptiveKeyLabel(afterTyping: lastInsertedCharacter)
+        let label = AccentedCharacters.adaptiveKeyLabel(
+            afterTyping: lastInsertedCharacter,
+            precedingChar: secondToLastInsertedCharacter
+        )
 
-        if AccentedCharacters.shouldReplace(afterTyping: lastInsertedCharacter) {
+        if AccentedCharacters.shouldReplace(afterTyping: lastInsertedCharacter, precedingChar: secondToLastInsertedCharacter) {
             // Replace previous vowel with accented version
             controller?.textDocumentProxy.deleteBackward()
             controller?.textDocumentProxy.insertText(label)
         } else {
-            // Insert apostrophe
+            // Insert apostrophe (or apostrophe after "qu" bigram)
             controller?.textDocumentProxy.insertText(label)
         }
 
+        secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = label
 
         // Auto-unshift after accent insertion (same as regular character)
@@ -307,7 +321,10 @@ final class DictusKeyboardBridge: NSObject,
     /// Called after every keystroke so the accent key always shows the correct symbol:
     /// an accent character after a vowel, or apostrophe otherwise.
     private func updateAccentKeyDisplay() {
-        let label = AccentedCharacters.adaptiveKeyLabel(afterTyping: lastInsertedCharacter)
+        let label = AccentedCharacters.adaptiveKeyLabel(
+            afterTyping: lastInsertedCharacter,
+            precedingChar: secondToLastInsertedCharacter
+        )
         keyboardView?.updateAccentKeyLabel(label)
     }
 

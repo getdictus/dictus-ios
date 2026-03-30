@@ -36,6 +36,11 @@ public enum AccentedCharacters {
 
     // MARK: - Adaptive accent key support
 
+    /// Bigrams where the second character is a vowel but the user almost certainly
+    /// wants apostrophe, not an accent. "qu" is the canonical French example:
+    /// qu'il, qu'elle, qu'on, qu'un, qu'est-ce, etc.
+    private static let apostropheOverrides: Set<String> = ["qu"]
+
     /// Default accent per vowel (most common in French).
     /// Used by the adaptive accent key on AZERTY row 3.
     public static let defaultAccents: [String: String] = [
@@ -54,9 +59,18 @@ public enum AccentedCharacters {
     /// In French, the apostrophe is the most common non-letter character after space.
     /// It appears in "l'", "d'", "n'", "j'", "c'", "s'" etc. Having it one tap away
     /// on the letters layer eliminates the 3-tap layer switch currently needed.
-    public static func adaptiveKeyLabel(afterTyping lastChar: String?) -> String {
+    public static func adaptiveKeyLabel(afterTyping lastChar: String?, precedingChar: String? = nil) -> String {
         guard let lastChar = lastChar else { return "'" }
         let lowered = lastChar.lowercased()
+
+        // Check if the 2-char context triggers apostrophe override (e.g., "qu")
+        if let prev = precedingChar?.lowercased() {
+            let bigram = prev + lowered
+            if apostropheOverrides.contains(bigram) {
+                return "'"
+            }
+        }
+
         if let accent = defaultAccents[lowered] {
             // Preserve original case: if user typed "A", return "À" not "à"
             return lastChar == lastChar.uppercased() && lastChar != lastChar.lowercased()
@@ -68,16 +82,28 @@ public enum AccentedCharacters {
     /// Returns true if the adaptive key should replace the previous character
     /// (i.e., when the key is showing an accent for a vowel, not apostrophe).
     /// Used by KeyboardView to deleteBackward() before inserting the accent.
-    public static func shouldReplace(afterTyping lastChar: String?) -> Bool {
+    public static func shouldReplace(afterTyping lastChar: String?, precedingChar: String? = nil) -> Bool {
         guard let lastChar = lastChar?.lowercased() else { return false }
+        if let prev = precedingChar?.lowercased() {
+            let bigram = prev + lastChar
+            if apostropheOverrides.contains(bigram) {
+                return false
+            }
+        }
         return defaultAccents[lastChar] != nil
     }
 
     /// Returns the base vowel that triggered the adaptive key's accent display.
     /// Used to determine which accent variants to show on long-press.
     /// Returns nil when the adaptive key is showing apostrophe (no long-press popup needed).
-    public static func adaptiveKeyVowel(afterTyping lastChar: String?) -> String? {
+    public static func adaptiveKeyVowel(afterTyping lastChar: String?, precedingChar: String? = nil) -> String? {
         guard let lastChar = lastChar?.lowercased() else { return nil }
+        if let prev = precedingChar?.lowercased() {
+            let bigram = prev + lastChar
+            if apostropheOverrides.contains(bigram) {
+                return nil
+            }
+        }
         return defaultAccents[lastChar] != nil ? lastChar : nil
     }
 }
