@@ -84,7 +84,8 @@ struct KeyboardRootView: View {
                     onStop: { state.requestStop() }
                 )
             } else if showingEmoji {
-                // Toolbar stays visible during emoji browsing so mic button is accessible
+                // Toolbar stays visible during emoji browsing so mic button is accessible.
+                // .frame(height: 52) prevents compression when the emoji picker fills the rest.
                 ToolbarView(
                     hasFullAccess: controller.hasFullAccess,
                     dictationStatus: state.dictationStatus,
@@ -96,8 +97,10 @@ struct KeyboardRootView: View {
                     suggestionMode: .idle,
                     onSuggestionTap: { _ in }
                 )
+                .frame(height: 52)
                 // Emoji picker fills the remaining keyboard grid area.
-                // .frame + .clipped prevent the picker from overflowing into the toolbar.
+                // The picker uses GeometryReader internally to measure actual available
+                // width and .clipped() to prevent content overflow.
                 EmojiPickerView(
                     onEmojiInsert: { emoji in
                         controller.textDocumentProxy.insertText(emoji)
@@ -112,8 +115,6 @@ struct KeyboardRootView: View {
                         NotificationCenter.default.post(name: .dictusToggleEmoji, object: nil)
                     }
                 )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .clipped()
             } else {
                 // Toolbar only -- the keyboard grid is UIKit, managed by KeyboardViewController
                 ToolbarView(

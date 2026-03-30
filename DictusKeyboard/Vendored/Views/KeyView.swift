@@ -280,7 +280,14 @@ final class KeyView: UIView {
     private func setupContentView(_ key: KeyDefinition, _ page: KeyboardPage, _ traits: UITraitCollection, _ theme: Theme) {
         switch key.type {
         case let .input(string, alt):
-            input(string: string, alt: alt, page: page)
+            // Emoji key: render as monochrome SF Symbol (matches Apple keyboard style)
+            // instead of a colored emoji glyph. The character is used for identification
+            // in the bridge; the visual is always the outline smiley icon.
+            if string == "\u{1F600}" {
+                sfSymbol(named: "face.smiling", traits: traits)
+            } else {
+                input(string: string, alt: alt, page: page)
+            }
         case let .spacebar(string):
             text(string, page: page)
         case let .returnkey(string):

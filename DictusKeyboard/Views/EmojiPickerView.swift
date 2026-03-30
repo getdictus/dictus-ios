@@ -31,10 +31,15 @@ struct EmojiPickerView: View {
     private let categories = EmojiStore.categories
     private let gridRows = Array(repeating: GridItem(.fixed(46), spacing: 2), count: 4)
 
-    /// Dynamic cell width: exactly 8 emojis per row on any device.
-    /// (screenWidth - 4pt grid padding) / 8
+    /// Actual available width measured from the view's geometry.
+    /// WHY not UIScreen.main.bounds.width: In keyboard extensions, the hosting controller
+    /// may have safe area insets or layout margins that make the actual available width
+    /// smaller than the screen width. Using GeometryReader gives us the real usable space.
+    @State private var measuredWidth: CGFloat = UIScreen.main.bounds.width
+
+    /// Dynamic cell width: exactly 8 emojis per row based on actual available width.
     private var emojiCellWidth: CGFloat {
-        (UIScreen.main.bounds.width - 4) / 8
+        (measuredWidth - 4) / 8
     }
 
     // MARK: - Computed data
@@ -87,7 +92,18 @@ struct EmojiPickerView: View {
                 normalMode
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            // Measure actual available width on appear and layout changes.
+            GeometryReader { geo in
+                Color.clear
+                    .onAppear { measuredWidth = geo.size.width }
+                    .onChange(of: geo.size.width) { _, newWidth in
+                        measuredWidth = newWidth
+                    }
+            }
+        )
+        .clipped()
         .onAppear {
             recentEmojis = RecentEmojis.load()
             if !recentEmojis.isEmpty {
