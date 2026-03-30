@@ -99,8 +99,6 @@ struct KeyboardRootView: View {
                 )
                 .frame(height: 52)
                 // Emoji picker fills the remaining keyboard grid area.
-                // The picker uses GeometryReader internally to measure actual available
-                // width and .clipped() to prevent content overflow.
                 EmojiPickerView(
                     onEmojiInsert: { emoji in
                         controller.textDocumentProxy.insertText(emoji)
@@ -115,6 +113,7 @@ struct KeyboardRootView: View {
                         NotificationCenter.default.post(name: .dictusToggleEmoji, object: nil)
                     }
                 )
+                .ignoresSafeArea()
             } else {
                 // Toolbar only -- the keyboard grid is UIKit, managed by KeyboardViewController
                 ToolbarView(

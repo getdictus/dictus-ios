@@ -29,17 +29,12 @@ struct EmojiPickerView: View {
     @State private var searchTask: Task<Void, Never>? = nil
 
     private let categories = EmojiStore.categories
-    private let gridRows = Array(repeating: GridItem(.fixed(46), spacing: 2), count: 4)
+    private let gridRows = Array(repeating: GridItem(.fixed(40), spacing: 1), count: 5)
 
-    /// Actual available width measured from the view's geometry.
-    /// WHY not UIScreen.main.bounds.width: In keyboard extensions, the hosting controller
-    /// may have safe area insets or layout margins that make the actual available width
-    /// smaller than the screen width. Using GeometryReader gives us the real usable space.
-    @State private var measuredWidth: CGFloat = UIScreen.main.bounds.width
-
-    /// Dynamic cell width: exactly 8 emojis per row based on actual available width.
+    /// Dynamic cell width: exactly 8 emojis per row on any device.
+    /// Uses screen width since the keyboard extension always spans the full screen.
     private var emojiCellWidth: CGFloat {
-        (measuredWidth - 4) / 8
+        (UIScreen.main.bounds.width - 4) / 8
     }
 
     // MARK: - Computed data
@@ -93,17 +88,8 @@ struct EmojiPickerView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            // Measure actual available width on appear and layout changes.
-            GeometryReader { geo in
-                Color.clear
-                    .onAppear { measuredWidth = geo.size.width }
-                    .onChange(of: geo.size.width) { _, newWidth in
-                        measuredWidth = newWidth
-                    }
-            }
-        )
         .clipped()
+        .ignoresSafeArea()
         .onAppear {
             recentEmojis = RecentEmojis.load()
             if !recentEmojis.isEmpty {
@@ -123,9 +109,9 @@ struct EmojiPickerView: View {
                 .foregroundColor(.secondary)
             Spacer()
         }
-        .padding(.horizontal, 10)
-        .padding(.top, 6)
-        .padding(.bottom, 2)
+        .padding(.horizontal, 8)
+        .padding(.top, 4)
+        .padding(.bottom, 1)
 
         // Continuous horizontal emoji grid (4 rows, 8 per row)
         ScrollViewReader { proxy in
@@ -138,8 +124,8 @@ struct EmojiPickerView: View {
                             RecentEmojis.add(item.emoji)
                         } label: {
                             Text(item.emoji)
-                                .font(.system(size: 34))
-                                .frame(width: emojiCellWidth, height: 46)
+                                .font(.system(size: 30))
+                                .frame(width: emojiCellWidth, height: 40)
                         }
                         .id(item.id)
                     }

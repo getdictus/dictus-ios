@@ -282,26 +282,44 @@ final internal class GiellaKeyboardView: UIView,
         keyLabelContainerView.backgroundColor = .clear
         keyLabelContainerView.translatesAutoresizingMaskIntoConstraints = false
 
-        let keyLabel = UILabel(frame: .zero)
-        keyLabel.clipsToBounds = false
-        if case let .input(title, _) = key.type {
-            keyLabel.text = title
+        // Emoji key popup: show SF Symbol (monochrome) instead of colored emoji glyph.
+        let isEmojiKey: Bool
+        if case let .input(title, _) = key.type, title == "\u{1F600}" {
+            isEmojiKey = true
+        } else {
+            isEmojiKey = false
         }
-        keyLabel.textColor = theme.textColor
 
-        switch page {
-        case .normal:
-            keyLabel.font = theme.popupLowerKeyFont
-        default:
-            keyLabel.font = theme.popupCapitalKeyFont
-        }
-        keyLabel.textAlignment = .center
-        keyLabel.translatesAutoresizingMaskIntoConstraints = false
         let keyLabelHeight = longpressKeySize().height
         overlay.overlayContentView.addSubview(keyLabelContainerView)
 
-        keyLabelContainerView.addSubview(keyLabel)
-        keyLabel.centerIn(superview: keyLabelContainerView)
+        if isEmojiKey {
+            let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .regular)
+            let imageView = UIImageView(image: UIImage(systemName: "face.smiling", withConfiguration: config))
+            imageView.tintColor = theme.textColor
+            imageView.contentMode = .center
+            imageView.translatesAutoresizingMaskIntoConstraints = false
+            keyLabelContainerView.addSubview(imageView)
+            imageView.centerXAnchor.constraint(equalTo: keyLabelContainerView.centerXAnchor).isActive = true
+            imageView.centerYAnchor.constraint(equalTo: keyLabelContainerView.centerYAnchor).isActive = true
+        } else {
+            let keyLabel = UILabel(frame: .zero)
+            keyLabel.clipsToBounds = false
+            if case let .input(title, _) = key.type {
+                keyLabel.text = title
+            }
+            keyLabel.textColor = theme.textColor
+            switch page {
+            case .normal:
+                keyLabel.font = theme.popupLowerKeyFont
+            default:
+                keyLabel.font = theme.popupCapitalKeyFont
+            }
+            keyLabel.textAlignment = .center
+            keyLabel.translatesAutoresizingMaskIntoConstraints = false
+            keyLabelContainerView.addSubview(keyLabel)
+            keyLabel.centerIn(superview: keyLabelContainerView)
+        }
 
         keyLabelContainerView.heightAnchor.constraint(equalToConstant: keyLabelHeight).enable(priority: .required)
         keyLabelContainerView.fill(superview: overlay.overlayContentView)
