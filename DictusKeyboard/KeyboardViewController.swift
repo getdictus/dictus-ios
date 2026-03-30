@@ -140,6 +140,15 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
+        // CRITICAL: Disable touch delay on system gesture recognizers.
+        // iOS attaches gesture recognizers to the keyboard's UIWindow that have
+        // delaysTouchesBegan=true (for system gesture disambiguation at screen edges).
+        // This causes edge key touches to be delayed ~100ms, making haptic/popup fire
+        // on touchUp instead of touchDown, and long-press accent to fail on outer edges.
+        // The original giellakbd-ios uses this exact same technique.
+        disableWindowGestureDelay()
+
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
@@ -188,6 +197,10 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+
+        // Restore system gesture recognizer delay (be a good citizen)
+        restoreWindowGestureDelay()
+
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
@@ -286,6 +299,41 @@ class KeyboardViewController: UIInputViewController {
         // recheck autocapitalization. This ensures shift state stays correct even when
         // the user moves the cursor to a different position in the text.
         bridge?.updateCapitalization()
+    }
+
+    // MARK: - Window Gesture Delay
+
+    /// Hashes of gesture recognizers we disabled, so we can restore them on disappear.
+    private var disabledGestureHashes = Set<Int>()
+
+    /// Disable `delaysTouchesBegan` on all UIWindow gesture recognizers.
+    ///
+    /// WHY: iOS attaches system gesture recognizers to the keyboard's UIWindow with
+    /// `delaysTouchesBegan = true`. These recognizers check for system gestures (swipe-back,
+    /// Control Center) before delivering touches to the keyboard. This adds ~100ms delay
+    /// on edge key touches, causing haptic/popup to fire on touchUp instead of touchDown
+    /// and long-press accent popup to fail on outer edge of edge keys.
+    ///
+    /// This is the same technique used by the original giellakbd-ios keyboard.
+    private func disableWindowGestureDelay() {
+        guard let window = view.window,
+              let recognizers = window.gestureRecognizers else { return }
+        for recognizer in recognizers {
+            if recognizer.delaysTouchesBegan {
+                recognizer.delaysTouchesBegan = false
+                disabledGestureHashes.insert(recognizer.hash)
+            }
+        }
+    }
+
+    /// Restore `delaysTouchesBegan` on gesture recognizers we previously disabled.
+    private func restoreWindowGestureDelay() {
+        guard let window = view.window,
+              let recognizers = window.gestureRecognizers else { return }
+        for recognizer in recognizers where disabledGestureHashes.contains(recognizer.hash) {
+            recognizer.delaysTouchesBegan = true
+        }
+        disabledGestureHashes.removeAll()
     }
 }
 
