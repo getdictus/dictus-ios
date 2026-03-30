@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: completed
-stopped_at: Phase 20 context gathered
-last_updated: "2026-03-30T09:06:11.574Z"
-last_activity: "2026-03-30 - Completed quick task 260330-e6i: Adaptive accent key shows apostrophe after qu"
+stopped_at: Completed 20-01-PLAN.md
+last_updated: "2026-03-30T09:31:05.625Z"
+last_activity: "2026-03-30 - Completed 20-01: prediction pipeline, autocorrect, emoji key, default layer"
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
-  percent: 100
+  total_plans: 10
+  completed_plans: 9
+  percent: 90
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 19 in progress -- Complex Touch Features (accents, edge keys, styling)
+**Current focus:** Phase 20 in progress -- Feature Reintegration (predictions, emoji, settings)
 
 ## Current Position
 
-Phase: 19 of 22 (Complex Touch Features) — COMPLETE
-Plan: 3 of 3 complete in current phase
-Status: Phase 19 complete, ready for Phase 20
-Last activity: 2026-03-30 - Completed quick task 260330-e6i: Adaptive accent key shows apostrophe after qu
+Phase: 20 of 22 (Feature Reintegration)
+Plan: 1 of 2 complete in current phase
+Status: Plan 01 complete, ready for Plan 02
+Last activity: 2026-03-30 - Completed 20-01: prediction pipeline, autocorrect, emoji key, default layer
 
-Progress: [██████████] 100% (v1.3 milestone)
+Progress: [█████████░] 90% (v1.3 milestone)
 
 ## Performance Metrics
 
@@ -76,6 +76,11 @@ Recent decisions for v1.3:
 - [Phase 19]: Point clamping replaces nearestIndexPath for simpler and more reliable edge touch resolution
 - [Phase 19]: preferredScreenEdgesDeferringSystemGestures = .all to prevent iOS intercepting edge key taps
 
+- [Phase 20]: SuggestionState owned by KeyboardViewController, injected into bridge (weak) and SwiftUI (@ObservedObject)
+- [Phase 20]: Autocorrect-on-space matches iOS native behavior, undo via AutocorrectState on next backspace
+- [Phase 20]: Emoji key uses .input with alternate="emoji" routed through bridge callback
+- [Phase 20]: Default layer set in viewWillAppear for immediate setting changes
+
 ### Pending Todos
 
 None.
@@ -94,9 +99,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-30T09:06:11.571Z
-Stopped at: Phase 20 context gathered
-Resume file: .planning/phases/20-feature-reintegration/20-CONTEXT.md
+Last session: 2026-03-30T09:31:04.971Z
+Stopped at: Completed 20-01-PLAN.md
+Resume file: .planning/phases/20-feature-reintegration/20-02-PLAN.md
 
 ---
 *State initialized: 2026-03-04*

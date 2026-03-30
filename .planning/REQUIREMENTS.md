@@ -36,13 +36,13 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 
 ### Text Prediction
 
-- [ ] **PRED-01**: User sees 3-slot suggestion bar with French autocorrect suggestions
-- [ ] **PRED-02**: User can tap suggestion to insert it
-- [ ] **PRED-03**: User can undo autocorrect by pressing backspace immediately after
+- [x] **PRED-01**: User sees 3-slot suggestion bar with French autocorrect suggestions
+- [x] **PRED-02**: User can tap suggestion to insert it
+- [x] **PRED-03**: User can undo autocorrect by pressing backspace immediately after
 
 ### Keyboard Settings
 
-- [ ] **SET-01**: User can select default opening layer (letters or numbers) with live preview
+- [x] **SET-01**: User can select default opening layer (letters or numbers) with live preview
 
 ### Bug Fixes
 
@@ -114,10 +114,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DICT-02 | Phase 20 | Pending |
 | DICT-03 | Phase 20 | Pending |
 | DICT-04 | Phase 20 | Pending |
-| PRED-01 | Phase 20 | Pending |
-| PRED-02 | Phase 20 | Pending |
-| PRED-03 | Phase 20 | Pending |
-| SET-01 | Phase 20 | Pending |
+| PRED-01 | Phase 20 | Complete |
+| PRED-02 | Phase 20 | Complete |
+| PRED-03 | Phase 20 | Complete |
+| SET-01 | Phase 20 | Complete |
 | FIX-01 | Phase 17 | Complete |
 | FIX-02 | Phase 17 | Complete |
 | TF-01 | Phase 22 | Pending |
