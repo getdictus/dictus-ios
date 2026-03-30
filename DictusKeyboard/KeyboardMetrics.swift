@@ -1,14 +1,10 @@
-// DictusKeyboard/LegacyCompat.swift
-// Temporary compatibility stubs for old SwiftUI keyboard types.
-// These provide KeyMetrics, DeviceClass, KeySound, and a placeholder KeyboardView
-// that keep the existing KeyboardRootView, KeyboardViewController, and EmojiPickerView
-// compiling while the giellakbd-ios UIKit keyboard is being integrated.
-// This file will be removed in Phase 18 Plan 02 when the bridge is complete.
+// DictusKeyboard/KeyboardMetrics.swift
+// Keyboard layout constants and feedback types. Extracted from LegacyCompat.swift (Phase 21).
+// Used by EmojiPickerView, EmojiCategoryBar, DictusKeyboardBridge.
 
 import SwiftUI
 import UIKit
-import DictusCore
-import AVFoundation
+import AudioToolbox
 
 // MARK: - Device Class (from old KeyButton.swift)
 
@@ -98,25 +94,5 @@ struct KeyPopup: View {
             .padding(6)
             .background(KeyMetrics.letterKeyColor)
             .cornerRadius(KeyMetrics.keyCornerRadius)
-    }
-}
-
-// MARK: - Placeholder SwiftUI KeyboardView
-
-/// Placeholder SwiftUI keyboard view that shows during Phase 18 transition.
-/// This replaces the old SwiftUI KeyboardView that was removed from compilation.
-/// Plan 18-02 will replace this with the giellakbd-ios UIKit keyboard bridge.
-struct KeyboardView: View {
-    let controller: UIInputViewController
-    let hasFullAccess: Bool
-    @Binding var isEmojiMode: Bool
-    @ObservedObject var suggestionState: SuggestionState
-    let initialLayer: KeyboardLayerType
-
-    var body: some View {
-        // Temporary placeholder -- the vendored UIKit keyboard will replace this
-        Text("Keyboard loading...")
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.clear)
     }
 }
