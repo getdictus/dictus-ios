@@ -10,6 +10,12 @@ class KeyboardViewController: UIInputViewController {
     private var hostingController: UIHostingController<KeyboardRootView>?
     private var dictationStatusCancellable: AnyCancellable?
 
+    /// Central SuggestionState owned by the controller and injected into both
+    /// the bridge (for keystroke-driven updates) and the SwiftUI root view (for display).
+    /// WHY here: Single ownership avoids duplicate instances and ensures bridge updates
+    /// are reflected in the suggestion bar without additional synchronization.
+    private let suggestionState = SuggestionState()
+
     /// The giellakbd-ios UICollectionView keyboard, added as a direct UIKit subview.
     /// WHY not wrapped in UIViewRepresentable: SwiftUI recreates representable views
     /// on state changes, which would destroy/rebuild the UICollectionView and lose
@@ -73,11 +79,12 @@ class KeyboardViewController: UIInputViewController {
         keyBridge.controller = self
         keyBridge.keyboardView = keyboard
         keyboard.delegate = keyBridge
+        keyBridge.suggestionState = suggestionState
         self.bridge = keyBridge
         self.giellaKeyboard = keyboard
 
         // --- 3. Create SwiftUI hosting for toolbar + recording overlay ONLY ---
-        let rootView = KeyboardRootView(controller: self, controllerID: controllerID)
+        let rootView = KeyboardRootView(controller: self, controllerID: controllerID, suggestionState: suggestionState)
         let hosting = UIHostingController(rootView: rootView)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
@@ -172,6 +179,12 @@ class KeyboardViewController: UIInputViewController {
         // WHY here and not viewDidLoad: The textDocumentProxy is not fully connected
         // until the view is about to appear. Calling in viewDidLoad would read stale data.
         bridge?.updateCapitalization()
+
+        // Refresh prediction language from App Group on every keyboard appearance.
+        // WHY here not viewDidLoad: The user can change language in the app between
+        // keyboard appearances. viewWillAppear fires each time, picking up the change.
+        let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
+        suggestionState.setLanguage(lang)
 
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",

@@ -36,6 +36,10 @@ final class DictusKeyboardBridge: NSObject,
     /// WHY weak: The keyboard view is owned by the controller's view hierarchy.
     weak var keyboardView: GiellaKeyboardView?
 
+    /// Reference to the suggestion state for triggering prediction updates.
+    /// WHY weak: The controller owns SuggestionState. Bridge must not create a retain cycle.
+    weak var suggestionState: SuggestionState?
+
     // MARK: - Shift state tracking
 
     /// Timestamp of the last shift tap, used to detect double-tap for caps lock.
@@ -187,6 +191,10 @@ final class DictusKeyboardBridge: NSObject,
         // but typing after "Hello. " should capitalize.
         updateCapitalization()
         updateAccentKeyDisplay()
+
+        // Trigger suggestion update after every character input.
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
     }
 
     /// Handle backspace/delete key.
@@ -199,6 +207,8 @@ final class DictusKeyboardBridge: NSObject,
         lastInsertedCharacter = nil
         updateCapitalization()
         updateAccentKeyDisplay()
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
     }
 
     /// Delete one word backwards (used during accelerated backspace repeat).
@@ -242,6 +252,8 @@ final class DictusKeyboardBridge: NSObject,
         secondToLastInsertedCharacter = nil
         lastInsertedCharacter = nil
         updateCapitalization()
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
     }
 
     /// Handle spacebar press with auto-full-stop detection.
@@ -261,6 +273,11 @@ final class DictusKeyboardBridge: NSObject,
             lastInsertedCharacter = " "
         }
 
+        // After space, clear current word and update suggestions for new context.
+        suggestionState?.clear()
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
+
         // After space (or period+space), recheck autocap.
         // "Hello. " should trigger shift for the next character.
         updateCapitalization()
@@ -275,6 +292,7 @@ final class DictusKeyboardBridge: NSObject,
         controller?.textDocumentProxy.insertText("\n")
         secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = "\n"
+        suggestionState?.clear()
         updateCapitalization()
         updateAccentKeyDisplay()
     }
@@ -315,6 +333,8 @@ final class DictusKeyboardBridge: NSObject,
 
         updateCapitalization()
         updateAccentKeyDisplay()
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
     }
 
     /// Update the accent key's displayed label based on lastInsertedCharacter.

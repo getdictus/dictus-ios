@@ -30,10 +30,11 @@ struct KeyboardRootView: View {
     @ObservedObject private var state = KeyboardState.shared
     @ObservedObject private var waveformDriver = KeyboardWaveformDriver.shared
     @State private var instanceID = String(UUID().uuidString.prefix(8))
-    /// Observable state for the suggestion bar: holds current suggestions, mode, and autocorrect undo.
-    /// WHY @StateObject: SuggestionState is an ObservableObject that must survive view re-renders.
-    /// @StateObject ensures a single instance is created and owned by this view.
-    @StateObject private var suggestionState = SuggestionState()
+    /// Observable state for the suggestion bar, owned by KeyboardViewController.
+    /// WHY @ObservedObject (not @StateObject): The controller creates and owns SuggestionState,
+    /// injecting the same instance into both this view (for display) and the bridge (for updates).
+    /// Using @ObservedObject here means we observe without owning -- the controller is the source of truth.
+    @ObservedObject var suggestionState: SuggestionState
 
     /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
     /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
@@ -146,9 +147,8 @@ struct KeyboardRootView: View {
             // Refresh cached haptic enabled state from UserDefaults.
             HapticFeedback.refreshEnabledState()
 
-            // Set prediction engine language from App Group shared preference.
-            let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
-            suggestionState.setLanguage(lang)
+            // Language is set in KeyboardViewController.viewWillAppear, which fires
+            // on every keyboard appearance and picks up any App Group preference changes.
 
             syncWaveformDriver()
         }
