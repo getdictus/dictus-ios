@@ -12,7 +12,7 @@ import DictusCore
 /// types as the vendored giellakbd-ios codebase. Each layout includes 5 pages:
 /// normal, shifted, capslock (same visual as shifted), symbols1 (numbers), symbols2 (symbols).
 ///
-/// Bottom row on letter pages: [123] [space] [return] -- no emoji key per Phase 18 decision.
+/// Bottom row on letter pages: [123] [emoji] [space] [return] -- emoji key added in Phase 20.
 /// Globe key is provided by iOS below third-party keyboards -- not part of our layout.
 enum FrenchKeyboardLayouts {
 
@@ -74,7 +74,7 @@ enum FrenchKeyboardLayouts {
             KeyDefinition(type: .input(key: "'", alternate: "accent")),
             KeyDefinition(type: .backspace, size: CGSize(width: 1.5, height: 1)),
         ],
-        // Row 4: 123 + space + return (NO emoji per Phase 18)
+        // Row 4: 123 + emoji + space + return
         lettersBottomRow,
     ]
 
@@ -166,12 +166,13 @@ enum FrenchKeyboardLayouts {
 
     // MARK: - Bottom Rows
 
-    /// Letters page bottom row: [123 1.2w] [space 5.5w] [return 1.8w]
+    /// Letters page bottom row: [123 2.0w] [emoji 1.5w] [space 4.5w] [return 2.0w]
     /// Note: symbols key uses .symbols type which shows "123" on letter pages and "ABC" on symbol pages.
     private static let lettersBottomRow: [KeyDefinition] = [
-        KeyDefinition(type: .symbols, size: CGSize(width: 2.5, height: 1)),
-        KeyDefinition(type: .spacebar(name: "espace"), size: CGSize(width: 5.0, height: 1)),
-        KeyDefinition(type: .returnkey(name: "retour"), size: CGSize(width: 2.5, height: 1)),
+        KeyDefinition(type: .symbols, size: CGSize(width: 2.0, height: 1)),
+        KeyDefinition(type: .input(key: "\u{1F600}", alternate: "emoji"), size: CGSize(width: 1.5, height: 1)),
+        KeyDefinition(type: .spacebar(name: "espace"), size: CGSize(width: 4.5, height: 1)),
+        KeyDefinition(type: .returnkey(name: "retour"), size: CGSize(width: 2.0, height: 1)),
     ]
 
     /// Symbols page bottom row: [ABC 1.2w] [space 4.7w] [return 1.8w]

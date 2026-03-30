@@ -80,6 +80,9 @@ class KeyboardViewController: UIInputViewController {
         keyBridge.keyboardView = keyboard
         keyboard.delegate = keyBridge
         keyBridge.suggestionState = suggestionState
+        keyBridge.onEmojiToggle = { [weak self] in
+            self?.toggleEmojiPicker()
+        }
         self.bridge = keyBridge
         self.giellaKeyboard = keyboard
 
@@ -179,6 +182,14 @@ class KeyboardViewController: UIInputViewController {
         // WHY here and not viewDidLoad: The textDocumentProxy is not fully connected
         // until the view is about to appear. Calling in viewDidLoad would read stale data.
         bridge?.updateCapitalization()
+
+        // Set default opening layer from user preference.
+        // WHY here not viewDidLoad: viewWillAppear fires each time the keyboard appears,
+        // allowing the user to change settings in the app and see the effect immediately.
+        let defaultLayer = DefaultKeyboardLayer.active
+        if defaultLayer == .numbers {
+            giellaKeyboard?.page = .symbols1
+        }
 
         // Refresh prediction language from App Group on every keyboard appearance.
         // WHY here not viewDidLoad: The user can change language in the app between
@@ -340,6 +351,32 @@ class KeyboardViewController: UIInputViewController {
         }
         disabledGestureHashes.removeAll()
     }
+
+    // MARK: - Emoji Picker
+
+    /// Whether the emoji picker is currently visible.
+    private(set) var isShowingEmoji = false
+
+    /// Toggle emoji picker visibility. The emoji picker UI itself is wired in Plan 02.
+    ///
+    /// WHY toggle here (not in bridge): The bridge handles key events but doesn't
+    /// own the view hierarchy. Showing/hiding views is the controller's responsibility.
+    /// The bridge calls this via the onEmojiToggle closure.
+    func toggleEmojiPicker() {
+        isShowingEmoji.toggle()
+        giellaKeyboard?.isHidden = isShowingEmoji
+
+        if isShowingEmoji {
+            // Expand hosting to cover keyboard area for emoji picker
+            hostingHeightConstraint?.constant = computeKeyboardHeight()
+        } else {
+            hostingHeightConstraint?.constant = toolbarHeight
+        }
+        inputView?.setNeedsLayout()
+
+        // Notify SwiftUI to show/hide emoji picker
+        NotificationCenter.default.post(name: .dictusToggleEmoji, object: nil)
+    }
 }
 
 // MARK: - Notification names for keyboard internal communication
@@ -349,5 +386,6 @@ extension Notification.Name {
     /// KeyboardView listens for this to recheck autocapitalisation.
     static let dictusTextDidChange = Notification.Name("dictusTextDidChange")
 
-
+    /// Posted when the emoji picker should toggle visibility.
+    static let dictusToggleEmoji = Notification.Name("dictusToggleEmoji")
 }

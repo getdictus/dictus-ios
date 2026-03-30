@@ -40,6 +40,9 @@ final class DictusKeyboardBridge: NSObject,
     /// WHY weak: The controller owns SuggestionState. Bridge must not create a retain cycle.
     weak var suggestionState: SuggestionState?
 
+    /// Callback to toggle emoji picker visibility. Set by KeyboardViewController.
+    var onEmojiToggle: (() -> Void)?
+
     // MARK: - Shift state tracking
 
     /// Timestamp of the last shift tap, used to detect double-tap for caps lock.
@@ -72,6 +75,8 @@ final class DictusKeyboardBridge: NSObject,
         case .input(let character, let alternate):
             if alternate == "accent" {
                 handleAdaptiveAccentKey()
+            } else if alternate == "emoji" {
+                handleEmojiToggle()
             } else {
                 handleInputKey(character)
             }
@@ -197,11 +202,37 @@ final class DictusKeyboardBridge: NSObject,
         suggestionState?.updateAsync(context: context)
     }
 
-    /// Handle backspace/delete key.
-    /// After deleting, recheck autocapitalization -- deleting back to the start
-    /// of a text field or to after a sentence-ending punctuation should re-shift.
+    /// Handle backspace/delete key with autocorrect undo support.
+    ///
+    /// If the user presses backspace immediately after an autocorrection,
+    /// undo the correction: delete the corrected word + trailing space,
+    /// then re-insert the original word. This matches iOS native behavior
+    /// where backspace after autocorrect restores what the user actually typed.
     private func handleBackspace() {
         AudioServicesPlaySystemSound(KeySound.delete)
+
+        // Check for autocorrect undo: if the last action was an autocorrection,
+        // pressing backspace undoes it instead of deleting a single character.
+        if let autocorrect = suggestionState?.lastAutocorrect {
+            let proxy = controller?.textDocumentProxy
+            // Delete the correction + the trailing space that was auto-inserted
+            let deleteCount = autocorrect.correctedWord.count + (autocorrect.insertedSpace ? 1 : 0)
+            for _ in 0..<deleteCount {
+                proxy?.deleteBackward()
+            }
+            proxy?.insertText(autocorrect.originalWord)
+            suggestionState?.lastAutocorrect = nil
+            lastInsertedCharacter = autocorrect.originalWord.last.map(String.init)
+            secondToLastInsertedCharacter = nil
+            updateCapitalization()
+            updateAccentKeyDisplay()
+            // Update suggestions for the restored original word
+            let context = proxy?.documentContextBeforeInput
+            suggestionState?.updateAsync(context: context)
+            return
+        }
+
+        // Normal backspace: delete one character
         controller?.textDocumentProxy.deleteBackward()
         secondToLastInsertedCharacter = nil
         lastInsertedCharacter = nil
@@ -256,16 +287,48 @@ final class DictusKeyboardBridge: NSObject,
         suggestionState?.updateAsync(context: context)
     }
 
-    /// Handle spacebar press with auto-full-stop detection.
-    /// If double-space is detected, replaces the trailing space with ". " (period+space).
-    /// Otherwise inserts a normal space. Then rechecks autocapitalization.
+    /// Handle spacebar press with autocorrect and auto-full-stop detection.
+    ///
+    /// Autocorrect flow: Before inserting the space, check if the current word is
+    /// misspelled. If so, replace it with the correction and store undo state so
+    /// backspace can restore the original word.
+    ///
+    /// WHY autocorrect-on-space (not on every keystroke): This matches iOS native
+    /// behavior -- corrections appear only when the user finishes the word (space/return).
+    /// Correcting mid-word would be disorienting as the text changes while typing.
     private func handleSpace() {
         AudioServicesPlaySystemSound(KeySound.modifier)
-
-        // Check for double-space -> period BEFORE inserting the space.
-        // handleAutoFullStop returns true if it performed the ". " substitution,
-        // in which case we must NOT insert an additional space.
         secondToLastInsertedCharacter = lastInsertedCharacter
+
+        // Autocorrect check before space insertion.
+        // Only trigger if autocorrect is enabled, there's a current word, and the
+        // spell checker offers a different correction.
+        if let state = suggestionState, state.autocorrectEnabled,
+           !state.currentWord.isEmpty,
+           let correction = state.performSpellCheck(state.currentWord),
+           correction.lowercased() != state.currentWord.lowercased() {
+            // Replace the misspelled word with the correction
+            let proxy = controller?.textDocumentProxy
+            for _ in 0..<state.currentWord.count {
+                proxy?.deleteBackward()
+            }
+            proxy?.insertText(correction)
+            proxy?.insertText(" ")
+            lastInsertedCharacter = " "
+
+            // Store autocorrect state so backspace can undo it
+            state.lastAutocorrect = AutocorrectState(
+                originalWord: state.currentWord,
+                correctedWord: correction,
+                insertedSpace: true
+            )
+            state.clear()
+            updateCapitalization()
+            updateAccentKeyDisplay()
+            return
+        }
+
+        // Normal space handling with double-space period detection
         if !handleAutoFullStop() {
             controller?.textDocumentProxy.insertText(" ")
             lastInsertedCharacter = " "
@@ -279,7 +342,6 @@ final class DictusKeyboardBridge: NSObject,
         suggestionState?.updateAsync(context: context)
 
         // After space (or period+space), recheck autocap.
-        // "Hello. " should trigger shift for the next character.
         updateCapitalization()
         updateAccentKeyDisplay()
     }
@@ -335,6 +397,13 @@ final class DictusKeyboardBridge: NSObject,
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
         suggestionState?.updateAsync(context: context)
+    }
+
+    /// Handle emoji button tap: triggers the emoji picker toggle.
+    private func handleEmojiToggle() {
+        AudioServicesPlaySystemSound(KeySound.modifier)
+        HapticFeedback.keyTapped()
+        onEmojiToggle?()
     }
 
     /// Update the accent key's displayed label based on lastInsertedCharacter.
