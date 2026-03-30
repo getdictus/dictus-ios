@@ -28,7 +28,7 @@ struct EmojiCategoryBar: View {
             }
             .fixedSize()
 
-            // Search button (fixed)
+            // Search button (fixed, 36pt hit area for easy tapping)
             Button {
                 HapticFeedback.keyTapped()
                 onSearch()
@@ -36,7 +36,8 @@ struct EmojiCategoryBar: View {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 16))
                     .foregroundColor(Color(.label))
-                    .frame(width: 26, height: 26)
+                    .frame(width: 36, height: 36)
+                    .contentShape(Rectangle())
             }
             .fixedSize()
 

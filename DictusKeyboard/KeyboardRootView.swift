@@ -114,8 +114,11 @@ struct KeyboardRootView: View {
                                 HapticFeedback.keyTapped()
                             },
                             onDismiss: {
-                                showingEmoji = false
-                                NotificationCenter.default.post(name: .dictusToggleEmoji, object: nil)
+                                // Call toggleEmojiPicker() on the controller which handles:
+                                // hiding emoji, showing giellaKeyboard, shrinking hosting,
+                                // and posting .dictusToggleEmoji (which .onReceive picks up
+                                // to set showingEmoji = false).
+                                (controller as? KeyboardViewController)?.toggleEmojiPicker()
                             },
                             availableWidth: geo.size.width,
                             availableHeight: geo.size.height - 52
