@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
-status: in-progress
-stopped_at: Completed 19-02-PLAN.md
-last_updated: "2026-03-28T10:57:24.033Z"
-last_activity: 2026-03-28 — Completed Phase 19 Plan 02 (delete repeat acceleration, spacebar trackpad)
+status: completed
+stopped_at: Completed 19-03-PLAN.md
+last_updated: "2026-03-28T11:25:00Z"
+last_activity: 2026-03-28 — Completed Phase 19 Plan 03 (adaptive accent key + full UAT with 6 bug fixes)
 progress:
   total_phases: 6
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 8
-  completed_plans: 7
-  percent: 88
+  completed_plans: 8
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 
 ## Current Position
 
-Phase: 19 of 22 (Complex Touch Features) — IN PROGRESS
-Plan: 2 of 3 complete in current phase
-Status: Plan 02 complete, ready for Plan 03
-Last activity: 2026-03-28 — Completed Phase 19 Plan 02 (delete repeat acceleration, spacebar trackpad)
+Phase: 19 of 22 (Complex Touch Features) — COMPLETE
+Plan: 3 of 3 complete in current phase
+Status: Phase 19 complete, ready for Phase 20
+Last activity: 2026-03-28 — Completed Phase 19 Plan 03 (adaptive accent key + full UAT)
 
-Progress: [█████████░] 88% (v1.3 milestone)
+Progress: [██████████] 100% (v1.3 milestone)
 
 ## Performance Metrics
 
@@ -72,6 +72,9 @@ Recent decisions for v1.3:
 - [Phase 19]: hapticFeedback.prepare() in init for zero-latency first touch
 - [Phase 19]: wordModeThreshold=10 chars before word-level delete, stage 3 at 0.05s
 - [Phase 19]: Trackpad dead zone 8pt (down from 20pt), baseDelta 12pt, 60Hz rate limit
+- [Phase 19]: UIWindow gesture delay was root cause of edge key sluggishness since Phase 18 -- override delaysContentTouches on window
+- [Phase 19]: Point clamping replaces nearestIndexPath for simpler and more reliable edge touch resolution
+- [Phase 19]: preferredScreenEdgesDeferringSystemGestures = .all to prevent iOS intercepting edge key taps
 
 ### Pending Todos
 
@@ -85,8 +88,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-28T10:57:21.539Z
-Stopped at: Completed 19-02-PLAN.md
+Last session: 2026-03-28T11:25:00Z
+Stopped at: Completed 19-03-PLAN.md
 Resume file: None
 
 ---

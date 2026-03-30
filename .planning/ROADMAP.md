@@ -63,7 +63,7 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 
 - [x] **Phase 17: Bug Fixes** — Fix Dynamic Island REC desync and export logs performance before architecture change (completed 2026-03-27)
 - [x] **Phase 18: Keyboard Base** — Vendor giellakbd-ios, AZERTY/QWERTY with zero dead zones, haptics, sounds, key popup (completed 2026-03-28)
-- [ ] **Phase 19: Complex Touch Features** — Delete repeat, spacebar trackpad, accent long-press, adaptive accent, edge key touch fix, double-space period fix
+- [x] **Phase 19: Complex Touch Features** — Delete repeat, spacebar trackpad, accent long-press, adaptive accent, edge key touch fix, double-space period fix (completed 2026-03-30)
 - [ ] **Phase 20: Feature Reintegration** — Reconnect dictation, text prediction, suggestions, and settings
 - [ ] **Phase 21: Cleanup & Memory Profiling** — Delete old SwiftUI keyboard, verify memory budget, instrument
 - [ ] **Phase 22: Public TestFlight** — Beta App Review, external group, public link, README update
@@ -177,7 +177,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 16. TestFlight Deployment | v1.2 | 3/3 | Complete | 2026-03-27 |
 | 17. Bug Fixes | 2/2 | Complete    | 2026-03-27 | - |
 | 18. Keyboard Base | 3/3 | Complete    | 2026-03-28 | - |
-| 19. Complex Touch Features | 2/3 | In Progress|  | - |
+| 19. Complex Touch Features | 3/3 | Complete   | 2026-03-30 | - |
 | 20. Feature Reintegration | v1.3 | 0/? | Not started | - |
 | 21. Cleanup & Memory Profiling | v1.3 | 0/? | Not started | - |
 | 22. Public TestFlight | v1.3 | 0/? | Not started | - |

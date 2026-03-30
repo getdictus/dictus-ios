@@ -25,7 +25,7 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 - [x] **FEEL-03**: User sees key popup preview on press
 - [x] **FEEL-04**: User can long-press vowels to access French accent characters with drag-to-select
 - [x] **FEEL-05**: User can drag spacebar to move cursor (trackpad) with haptic ticks
-- [ ] **FEEL-06**: User sees adaptive accent key (apostrophe after consonants, accent after vowels)
+- [x] **FEEL-06**: User sees adaptive accent key (apostrophe after consonants, accent after vowels)
 
 ### Dictation Reintegration
 
@@ -109,7 +109,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FEEL-03 | Phase 18 | Complete |
 | FEEL-04 | Phase 19 | Complete |
 | FEEL-05 | Phase 19 | Complete |
-| FEEL-06 | Phase 19 | Pending |
+| FEEL-06 | Phase 19 | Complete |
 | DICT-01 | Phase 20 | Pending |
 | DICT-02 | Phase 20 | Pending |
 | DICT-03 | Phase 20 | Pending |
