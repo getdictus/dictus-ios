@@ -169,12 +169,18 @@ final internal class GiellaKeyboardView: UIView,
     func updateAccentKeyLabel(_ label: String) {
         guard label != accentKeyLabel else { return }
         accentKeyLabel = label
-        // Find and reload only the accent key cell
+        // Update the accent key cell directly without reloadItems.
+        // reloadItems triggers a collection view layout pass which causes iOS to
+        // recalculate the keyboard height — shrinking keys on top-row taps because
+        // the popup overlay extends above bounds.
         for section in 0..<currentPage.count {
             for row in 0..<currentPage[section].count {
                 if case .input(_, let alt) = currentPage[section][row].type, alt == "accent" {
                     let indexPath = IndexPath(row: row, section: section)
-                    collectionView.reloadItems(at: [indexPath])
+                    if let cell = collectionView.cellForItem(at: indexPath) as? KeyCell {
+                        let key = KeyDefinition(type: .input(key: accentKeyLabel, alternate: nil))
+                        cell.configure(page: page, key: key, theme: theme, traits: self.traitCollection)
+                    }
                     return
                 }
             }
