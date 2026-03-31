@@ -192,7 +192,7 @@ struct EmojiPickerView: View {
                 .frame(height: 38)
         } else {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 2) {
+                LazyHStack(spacing: 2) {
                     ForEach(Array(emojiRow.enumerated()), id: \.offset) { _, emoji in
                         Button {
                             HapticFeedback.keyTapped()
@@ -311,6 +311,8 @@ struct EmojiPickerView: View {
         }
     }
 
+    private let maxSearchResults = 30
+
     private func searchFrench(query: String) -> [String] {
         var results: [String] = []
         var seen = Set<String>()
@@ -320,6 +322,7 @@ struct EmojiPickerView: View {
                 for emoji in emojis where !seen.contains(emoji) {
                     results.append(emoji)
                     seen.insert(emoji)
+                    if results.count >= maxSearchResults { return results }
                 }
             }
         }
@@ -329,15 +332,21 @@ struct EmojiPickerView: View {
             if entry.name.contains(query) {
                 results.append(entry.emoji)
                 seen.insert(entry.emoji)
+                if results.count >= maxSearchResults { return results }
             }
         }
         return results
     }
 
     private func searchUnicodeName(query: String) -> [String] {
-        EmojiStore.allEmojiNames
-            .filter { $0.name.contains(query) }
-            .map { $0.emoji }
+        var results: [String] = []
+        for entry in EmojiStore.allEmojiNames {
+            if entry.name.contains(query) {
+                results.append(entry.emoji)
+                if results.count >= maxSearchResults { return results }
+            }
+        }
+        return results
     }
 }
 
