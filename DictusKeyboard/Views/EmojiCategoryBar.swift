@@ -41,22 +41,31 @@ struct EmojiCategoryBar: View {
             }
             .fixedSize()
 
-            // Category icons — scrollable to fit many categories
+            // Category icons — representative emojis like native iOS picker
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
+                HStack(spacing: 4) {
                     ForEach(sections) { section in
                         let isSelected = selectedCategoryID == section.id
                         Button {
                             onSelectCategory(section.id)
                         } label: {
-                            Image(systemName: section.icon)
-                                .font(.system(size: 16))
-                                .foregroundColor(isSelected ? Color(.label) : Color(.tertiaryLabel))
-                                .frame(width: 26, height: 26)
-                                .background(
-                                    Circle()
-                                        .fill(isSelected ? Color(.systemGray4) : Color.clear)
-                                )
+                            Group {
+                                if let emoji = section.representativeEmoji {
+                                    Text(emoji)
+                                        .font(.system(size: 20))
+                                } else {
+                                    // Recents: use clock SF Symbol
+                                    Image(systemName: section.icon)
+                                        .font(.system(size: 16))
+                                        .foregroundColor(isSelected ? Color(.label) : Color(.tertiaryLabel))
+                                }
+                            }
+                            .frame(width: 30, height: 30)
+                            .background(
+                                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    .fill(isSelected ? Color(.systemGray4) : Color.clear)
+                            )
+                            .opacity(isSelected ? 1.0 : 0.5)
                         }
                     }
                 }

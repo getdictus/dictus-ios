@@ -6,6 +6,7 @@ struct EmojiCategory: Identifiable {
     let id: String
     let name: String
     let icon: String  // SF Symbol name
+    let representativeEmoji: String  // Emoji shown in category bar (like native iOS picker)
     let emojis: [String]
 }
 
@@ -18,6 +19,7 @@ enum EmojiStore {
             id: "smileys",
             name: "Smileys",
             icon: "face.smiling",
+            representativeEmoji: "😀",
             emojis: [
                 "😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂", "🙂", "🙃",
                 "😉", "😊", "😇", "🥰", "😍", "🤩", "😘", "😗", "☺️", "😚",
@@ -41,6 +43,7 @@ enum EmojiStore {
             id: "people",
             name: "People",
             icon: "person.fill",
+            representativeEmoji: "👋",
             emojis: [
                 "👋", "🤚", "🖐️", "✋", "🖖", "🫱", "🫲", "🫳", "🫴", "👌",
                 "🤌", "🤏", "✌️", "🤞", "🫰", "🤟", "🤘", "🤙", "👈", "👉",
@@ -65,6 +68,7 @@ enum EmojiStore {
             id: "animals",
             name: "Animals & Nature",
             icon: "leaf.fill",
+            representativeEmoji: "🐻",
             emojis: [
                 "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐻‍❄️", "🐨",
                 "🐯", "🦁", "🐮", "🐷", "🐽", "🐸", "🐵", "🙈", "🙉", "🙊",
@@ -93,6 +97,7 @@ enum EmojiStore {
             id: "food",
             name: "Food & Drink",
             icon: "fork.knife",
+            representativeEmoji: "🍔",
             emojis: [
                 "🍏", "🍎", "🍐", "🍊", "🍋", "🍌", "🍉", "🍇", "🍓", "🫐",
                 "🍈", "🍒", "🍑", "🥭", "🍍", "🥥", "🥝", "🍅", "🍆", "🥑",
@@ -114,6 +119,7 @@ enum EmojiStore {
             id: "activities",
             name: "Activities",
             icon: "sportscourt.fill",
+            representativeEmoji: "⚽",
             emojis: [
                 "⚽", "🏀", "🏈", "⚾", "🥎", "🎾", "🏐", "🏉", "🥏", "🎱",
                 "🪀", "🏓", "🏸", "🏒", "🏑", "🥍", "🏏", "🪃", "🥅", "⛳",
@@ -132,6 +138,7 @@ enum EmojiStore {
             id: "travel",
             name: "Travel",
             icon: "car.fill",
+            representativeEmoji: "🚗",
             emojis: [
                 "🚗", "🚕", "🚙", "🚌", "🚎", "🏎️", "🚓", "🚑", "🚒", "🚐",
                 "🛻", "🚚", "🚛", "🚜", "🦯", "🦽", "🦼", "🛴", "🚲", "🛵",
@@ -152,6 +159,7 @@ enum EmojiStore {
             id: "objects",
             name: "Objects",
             icon: "lightbulb.fill",
+            representativeEmoji: "💡",
             emojis: [
                 "⌚", "📱", "📲", "💻", "⌨️", "🖥️", "🖨️", "🖱️", "🖲️", "🕹️",
                 "🗜️", "💽", "💾", "💿", "📀", "📼", "📷", "📸", "📹", "🎥",
@@ -182,6 +190,7 @@ enum EmojiStore {
             id: "symbols",
             name: "Symbols",
             icon: "heart.fill",
+            representativeEmoji: "❤️",
             emojis: [
                 "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "❤️‍🔥",
                 "❤️‍🩹", "💔", "❣️", "💕", "💞", "💓", "💗", "💖", "💘", "💝",
@@ -217,6 +226,7 @@ enum EmojiStore {
             id: "flags",
             name: "Flags",
             icon: "flag.fill",
+            representativeEmoji: "🏁",
             emojis: [
                 "🏳️", "🏴", "🏴‍☠️", "🏁", "🚩", "🎌", "🏳️‍🌈", "🏳️‍⚧️",
                 "🇫🇷", "🇺🇸", "🇬🇧", "🇩🇪", "🇪🇸", "🇮🇹", "🇯🇵", "🇨🇳",

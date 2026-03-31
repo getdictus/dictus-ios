@@ -8,6 +8,7 @@ struct CategoryInfo: Identifiable {
     let id: String
     let name: String
     let icon: String
+    let representativeEmoji: String?  // nil for recents (uses SF Symbol clock icon)
 }
 
 /// Full emoji picker matching Apple/SuperWhisper style:
@@ -55,6 +56,11 @@ struct EmojiPickerView: View {
         Array(repeating: GridItem(.fixed(rowHeight), spacing: rowSpacing), count: rowCount)
     }
 
+    /// Columns for vertical grid: 8 emojis per row filling the full width.
+    private var gridColumns: [GridItem] {
+        Array(repeating: GridItem(.fixed(emojiCellWidth), spacing: 0), count: 8)
+    }
+
     /// Dynamic cell width: exactly 8 emojis per row based on actual available width.
     private var emojiCellWidth: CGFloat {
         (availableWidth - 4) / 8
@@ -83,10 +89,10 @@ struct EmojiPickerView: View {
     private var sectionInfos: [CategoryInfo] {
         var infos: [CategoryInfo] = []
         if !recentEmojis.isEmpty {
-            infos.append(CategoryInfo(id: "recents", name: "Récents", icon: "clock"))
+            infos.append(CategoryInfo(id: "recents", name: "Récents", icon: "clock", representativeEmoji: nil))
         }
         for cat in categories {
-            infos.append(CategoryInfo(id: cat.id, name: cat.name, icon: cat.icon))
+            infos.append(CategoryInfo(id: cat.id, name: cat.name, icon: cat.icon, representativeEmoji: cat.representativeEmoji))
         }
         return infos
     }
@@ -131,12 +137,12 @@ struct EmojiPickerView: View {
         .padding(.top, 4)
         .padding(.bottom, 1)
 
-        // Single-category emoji grid (replaces the old continuous grid of ALL emojis).
+        // Vertical emoji grid — fills width first, scrolls down for more.
         // .id(selectedCategoryID) forces SwiftUI to destroy and recreate the grid when
         // the user switches categories, which releases the old Text views and their
         // CoreText glyph caches -- this is the key to keeping memory under 50 MiB.
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHGrid(rows: gridRows, alignment: .top, spacing: 0) {
+        ScrollView(.vertical, showsIndicators: false) {
+            LazyVGrid(columns: gridColumns, spacing: 0) {
                 ForEach(currentCategoryEmojis) { item in
                     Button {
                         HapticFeedback.keyTapped()
