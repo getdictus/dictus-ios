@@ -51,7 +51,7 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 
 ### Public TestFlight
 
-- [ ] **TF-01**: App passes Beta App Review with complete Privacy Manifests
+- [x] **TF-01**: App passes Beta App Review with complete Privacy Manifests
 - [ ] **TF-02**: External testing group created in App Store Connect
 - [ ] **TF-03**: Public TestFlight link active and shareable
 - [ ] **TF-04**: README updated with public TestFlight link and install instructions
@@ -120,7 +120,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SET-01 | Phase 20 | Complete |
 | FIX-01 | Phase 17 | Complete |
 | FIX-02 | Phase 17 | Complete |
-| TF-01 | Phase 22 | Pending |
+| TF-01 | Phase 22 | Complete |
 | TF-02 | Phase 22 | Pending |
 | TF-03 | Phase 22 | Pending |
 | TF-04 | Phase 22 | Pending |

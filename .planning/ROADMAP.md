@@ -189,7 +189,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 19. Complex Touch Features | 3/3 | Complete    | 2026-03-30 | - |
 | 20. Feature Reintegration | 2/2 | Complete    | 2026-03-30 | - |
 | 21. Cleanup & Memory Profiling | 2/2 | Complete   | 2026-03-31 | - |
-| 22. Public TestFlight | v1.3 | 0/2 | Not started | - |
+| 22. Public TestFlight | 1/2 | In Progress|  | - |
 
 ---
 *Roadmap created: 2026-03-04*

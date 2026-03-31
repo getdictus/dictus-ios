@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
-status: completed
-stopped_at: Phase 22 context gathered
-last_updated: "2026-03-31T15:33:23.574Z"
-last_activity: "2026-03-31 - Completed 21-02: memory profiling report, emoji picker 139 MiB critical blocker identified"
+status: executing
+stopped_at: Completed 22-01-PLAN.md
+last_updated: "2026-03-31T18:16:11.545Z"
+last_activity: "2026-03-31 - Completed 22-01: emoji picker memory fix (134 MiB -> 32.67 MiB)"
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 12
-  completed_plans: 12
-  percent: 100
+  total_plans: 14
+  completed_plans: 13
+  percent: 93
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 20 in progress -- Feature Reintegration (predictions, emoji, settings)
+**Current focus:** Phase 22 in progress -- Public TestFlight (emoji picker memory fixed, pending submission)
 
 ## Current Position
 
-Phase: 21 of 22 (Cleanup & Memory Profiling)
-Plan: 2 of 2 complete in current phase
-Status: Phase 21 complete
-Last activity: 2026-03-31 - Completed 21-02: memory profiling report, emoji picker 139 MiB critical blocker identified
+Phase: 22 of 22 (Public TestFlight)
+Plan: 1 of 2 complete in current phase
+Status: Phase 22 in progress
+Last activity: 2026-03-31 - Completed 22-01: emoji picker memory fix (134 MiB -> 32.67 MiB)
 
-Progress: [██████████] 100% (v1.3 milestone)
+Progress: [█████████░] 93% (v1.3 milestone)
 
 ## Performance Metrics
 
@@ -85,6 +85,10 @@ Recent decisions for v1.3:
 - [Phase 20]: Sound feedback default false to match first-install behavior
 - [Phase 21]: Extracted DeviceClass, KeyMetrics, KeySound, KeyPopup from LegacyCompat into permanent KeyboardMetrics.swift
 - [Phase 21]: Emoji picker 139 MiB is critical blocker for public beta -- needs optimization before release
+- [Phase 22]: Category pagination over NSCache eviction -- eliminates root cause (unbounded glyph rendering) instead of managing cache symptoms
+- [Phase 22]: .id(selectedCategoryID) forces SwiftUI grid rebuild on category switch to release CoreText glyph caches
+- [Phase 22]: Search results capped at 30 with LazyHStack to prevent memory spike during search
+- [Phase 22]: Category pagination over NSCache eviction -- eliminates root cause (unbounded glyph rendering)
 
 ### Pending Todos
 
@@ -98,6 +102,7 @@ None.
 | Phase 20 P02 | 27min | 2 tasks | 6 files |
 | Phase 21 P01 | 3min | 2 tasks | 7 files |
 | Phase 21 P02 | 5min | 2 tasks | 1 files |
+| Phase 22 P01 | 130min | 2 tasks | 3 files |
 
 ### Blockers/Concerns
 
@@ -107,9 +112,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-31T15:33:23.571Z
-Stopped at: Phase 22 context gathered
-Resume file: .planning/phases/22-public-testflight/22-CONTEXT.md
+Last session: 2026-03-31T18:15:56.327Z
+Stopped at: Completed 22-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*
