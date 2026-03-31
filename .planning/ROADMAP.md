@@ -155,8 +155,8 @@ Plans:
   3. README on GitHub includes the public TestFlight link with install instructions
 **Plans**: 2 plans
 Plans:
-- [ ] 21-01-PLAN.md — Extract LegacyCompat types, delete old SwiftUI files, clean pbxproj
-- [ ] 21-02-PLAN.md — Memory profiling on device, leak check, signposter verification, report
+- [ ] 22-01-PLAN.md — Fix emoji picker memory blocker (139 MiB -> <50 MiB) via category pagination
+- [ ] 22-02-PLAN.md — Privacy manifests, version bump, Beta App Review submission, README + GitHub Release
 
 ## Progress
 
@@ -189,7 +189,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 19. Complex Touch Features | 3/3 | Complete    | 2026-03-30 | - |
 | 20. Feature Reintegration | 2/2 | Complete    | 2026-03-30 | - |
 | 21. Cleanup & Memory Profiling | 2/2 | Complete   | 2026-03-31 | - |
-| 22. Public TestFlight | v1.3 | 0/? | Not started | - |
+| 22. Public TestFlight | v1.3 | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-04*
