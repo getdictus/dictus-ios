@@ -28,7 +28,6 @@ struct EmojiPickerView: View {
 
     @State private var recentEmojis: [String] = []
     @State private var selectedCategoryID: String = "smileys"
-    @State private var scrollToken: Int = 0
     @State private var isSearchActive: Bool = false
     @State private var searchText: String = ""
     @State private var showCursor: Bool = true
@@ -63,26 +62,22 @@ struct EmojiPickerView: View {
 
     // MARK: - Computed data
 
-    private var flatItems: [EmojiGridItem] {
-        var items: [EmojiGridItem] = []
-        for (i, emoji) in recentEmojis.enumerated() {
-            items.append(EmojiGridItem(id: "recents_\(i)", emoji: emoji, categoryID: "recents"))
-        }
-        for cat in categories {
-            for (i, emoji) in cat.emojis.enumerated() {
-                items.append(EmojiGridItem(id: "\(cat.id)_\(i)", emoji: emoji, categoryID: cat.id))
+    /// Returns only the emojis for the currently selected category.
+    /// WHY category pagination: The previous flat grid rendered ALL ~1800 emojis at once,
+    /// causing CoreText to cache every glyph (~65KB each) = 139 MiB. By showing only one
+    /// category at a time (max ~230 emojis), peak memory stays under ~15 MiB.
+    private var currentCategoryEmojis: [EmojiGridItem] {
+        if selectedCategoryID == "recents" {
+            return recentEmojis.enumerated().map { i, emoji in
+                EmojiGridItem(id: "recents_\(i)", emoji: emoji, categoryID: "recents")
             }
         }
-        return items
-    }
-
-    private var categoryFirstIDs: [String: String] {
-        var result: [String: String] = [:]
-        if !recentEmojis.isEmpty { result["recents"] = "recents_0" }
-        for cat in categories where !cat.emojis.isEmpty {
-            result[cat.id] = "\(cat.id)_0"
+        guard let cat = categories.first(where: { $0.id == selectedCategoryID }) else {
+            return []
         }
-        return result
+        return cat.emojis.enumerated().map { i, emoji in
+            EmojiGridItem(id: "\(cat.id)_\(i)", emoji: emoji, categoryID: cat.id)
+        }
     }
 
     private var sectionInfos: [CategoryInfo] {
@@ -136,32 +131,28 @@ struct EmojiPickerView: View {
         .padding(.top, 4)
         .padding(.bottom, 1)
 
-        // Continuous horizontal emoji grid (4 rows, 8 per row)
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHGrid(rows: gridRows, alignment: .top, spacing: 0) {
-                    ForEach(flatItems) { item in
-                        Button {
-                            HapticFeedback.keyTapped()
-                            onEmojiInsert(item.emoji)
-                            RecentEmojis.add(item.emoji)
-                        } label: {
-                            Text(item.emoji)
-                                .font(.system(size: 32))
-                                .frame(width: emojiCellWidth, height: rowHeight)
-                        }
-                        .id(item.id)
+        // Single-category emoji grid (replaces the old continuous grid of ALL emojis).
+        // .id(selectedCategoryID) forces SwiftUI to destroy and recreate the grid when
+        // the user switches categories, which releases the old Text views and their
+        // CoreText glyph caches -- this is the key to keeping memory under 50 MiB.
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHGrid(rows: gridRows, alignment: .top, spacing: 0) {
+                ForEach(currentCategoryEmojis) { item in
+                    Button {
+                        HapticFeedback.keyTapped()
+                        onEmojiInsert(item.emoji)
+                        RecentEmojis.add(item.emoji)
+                        recentEmojis = RecentEmojis.load()
+                    } label: {
+                        Text(item.emoji)
+                            .font(.system(size: 32))
+                            .frame(width: emojiCellWidth, height: rowHeight)
                     }
-                }
-                .padding(.horizontal, 2)
-            }
-            .onChange(of: scrollToken) { _ in
-                if let firstID = categoryFirstIDs[selectedCategoryID] {
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        proxy.scrollTo(firstID, anchor: .leading)
-                    }
+                    .id(item.id)
                 }
             }
+            .padding(.horizontal, 2)
+            .id(selectedCategoryID)
         }
 
         EmojiCategoryBar(
@@ -169,7 +160,6 @@ struct EmojiPickerView: View {
             selectedCategoryID: selectedCategoryID,
             onSelectCategory: { id in
                 selectedCategoryID = id
-                scrollToken += 1
             },
             onSearch: { isSearchActive = true },
             onDelete: onDelete,
