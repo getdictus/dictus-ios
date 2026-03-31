@@ -65,7 +65,7 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 - [x] **Phase 18: Keyboard Base** — Vendor giellakbd-ios, AZERTY/QWERTY with zero dead zones, haptics, sounds, key popup (completed 2026-03-28)
 - [x] **Phase 19: Complex Touch Features** — Delete repeat, spacebar trackpad, accent long-press, adaptive accent, edge key touch fix, double-space period fix (completed 2026-03-30)
 - [x] **Phase 20: Feature Reintegration** — Reconnect dictation, text prediction, suggestions, and settings (completed 2026-03-30)
-- [ ] **Phase 21: Cleanup & Memory Profiling** — Delete old SwiftUI keyboard, verify memory budget, instrument
+- [x] **Phase 21: Cleanup & Memory Profiling** — Delete old SwiftUI keyboard, verify memory budget, instrument (completed 2026-03-31)
 - [ ] **Phase 22: Public TestFlight** — Beta App Review, external group, public link, README update
 
 ## Phase Details
@@ -188,7 +188,7 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 18. Keyboard Base | 3/3 | Complete    | 2026-03-28 | - |
 | 19. Complex Touch Features | 3/3 | Complete    | 2026-03-30 | - |
 | 20. Feature Reintegration | 2/2 | Complete    | 2026-03-30 | - |
-| 21. Cleanup & Memory Profiling | 1/2 | In Progress|  | - |
+| 21. Cleanup & Memory Profiling | 2/2 | Complete   | 2026-03-31 | - |
 | 22. Public TestFlight | v1.3 | 0/? | Not started | - |
 
 ---
