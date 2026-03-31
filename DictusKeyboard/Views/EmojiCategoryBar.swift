@@ -28,15 +28,15 @@ struct EmojiCategoryBar: View {
             }
             .fixedSize()
 
-            // Search button (fixed, 36pt hit area for easy tapping)
+            // Search button — 44pt minimum tap target (Apple HIG)
             Button {
                 HapticFeedback.keyTapped()
                 onSearch()
             } label: {
                 Image(systemName: "magnifyingglass")
-                    .font(.system(size: 16))
+                    .font(.system(size: 18, weight: .medium))
                     .foregroundColor(Color(.label))
-                    .frame(width: 36, height: 36)
+                    .frame(width: 44, height: 44)
                     .contentShape(Rectangle())
             }
             .fixedSize()
