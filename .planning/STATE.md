@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: planning
-stopped_at: Completed 23-01-PLAN.md
-last_updated: "2026-04-01T19:39:49.656Z"
+stopped_at: Phase 23.1 context gathered
+last_updated: "2026-04-01T20:10:09.623Z"
 last_activity: 2026-04-01 — v1.4 roadmap created (4 phases, 13 requirements mapped)
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 1
   total_plans: 1
   completed_plans: 1
@@ -61,6 +61,10 @@ Recent decisions for v1.4:
 
 None.
 
+### Roadmap Evolution
+
+- Phase 23.1 inserted after Phase 23: App Localization Audit & Fix — ensure all UI strings use NSLocalizedString and app respects device language (URGENT)
+
 ### Blockers/Concerns
 
 - Phase 22 (Public TestFlight) still in progress -- Phase 23 depends on it completing
@@ -69,9 +73,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-01T19:37:16.910Z
-Stopped at: Completed 23-01-PLAN.md
-Resume file: None
+Last session: 2026-04-01T20:10:09.621Z
+Stopped at: Phase 23.1 context gathered
+Resume file: .planning/phases/23.1-app-localization-audit-fix-ensure-all-ui-strings-use-nslocalizedstring-and-app-respects-device-language/23.1-CONTEXT.md
 
 ---
 *State initialized: 2026-03-04*
