@@ -178,6 +178,10 @@ final class DictusKeyboardBridge: NSObject,
     /// then rechecks autocapitalization (e.g., typing "." may prepare shift for next char).
     /// NOTE: Haptic fires in GiellaKeyboardView.touchesBegan() for ALL keys on touchDown.
     private func handleInputKey(_ character: String) {
+        // Invalidate autocorrect undo -- any new character input means the user
+        // accepted the correction. Only immediate backspace should undo.
+        suggestionState?.lastAutocorrect = nil
+
         AudioServicesPlaySystemSound(KeySound.letter)
 
         // Insert the character. When on shifted/capslock page, the key definition
