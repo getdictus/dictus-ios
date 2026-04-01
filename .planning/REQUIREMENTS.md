@@ -70,10 +70,10 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| KenLM (C++ n-gram library) | LGPL license, C++ bridging complexity, overkill for keyboard extension — custom Swift trie instead |
+| KenLM (C++ n-gram library) | LGPL license, C++ bridging complexity, overkill for keyboard extension -- custom Swift trie instead |
 | Neural/ML prediction models | Too large for 50MB keyboard extension memory limit |
 | FleksySDK or proprietary solutions | Contradicts open-source positioning |
-| Swipe typing | High complexity, not core to dictation value — v2+ |
+| Swipe typing | High complexity, not core to dictation value -- v2+ |
 | Private API for auto-return (_hostBundleID, LSApplicationWorkspace) | App Store rejection confirmed |
 | Full emoji picker in keyboard | Memory-unsafe (emoji glyph cache), use system cycling |
 | iPad support | iPhone-first, v1.5+ |
@@ -86,25 +86,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FIX-01 | — | Pending |
-| FIX-02 | — | Pending |
-| FIX-03 | — | Pending |
-| PRED-01 | — | Pending |
-| PRED-02 | — | Pending |
-| PRED-03 | — | Pending |
-| PRED-04 | — | Pending |
-| PRED-05 | — | Pending |
-| PRED-06 | — | Pending |
-| COLD-01 | — | Pending |
-| COLD-02 | — | Pending |
-| COLD-03 | — | Pending |
-| BETA-01 | — | Pending |
+| FIX-01 | Phase 23 | Pending |
+| FIX-02 | Phase 23 | Pending |
+| FIX-03 | Phase 23 | Pending |
+| PRED-01 | Phase 24 | Pending |
+| PRED-02 | Phase 24 | Pending |
+| PRED-03 | Phase 24 | Pending |
+| PRED-04 | Phase 25 | Pending |
+| PRED-05 | Phase 25 | Pending |
+| PRED-06 | Phase 25 | Pending |
+| COLD-01 | Phase 26 | Pending |
+| COLD-02 | Phase 26 | Pending |
+| COLD-03 | Phase 26 | Pending |
+| BETA-01 | Phase 26 | Pending |
 
 **Coverage:**
 - v1.4 requirements: 13 total
-- Mapped to phases: 0
-- Unmapped: 13 ⚠️
+- Mapped to phases: 13
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-01*
-*Last updated: 2026-04-01 after initial definition*
+*Last updated: 2026-04-01 after roadmap creation*

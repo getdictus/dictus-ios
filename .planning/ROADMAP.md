@@ -11,6 +11,7 @@
 - ✅ **v1.1 UX & Keyboard** — Phases 6-10 (shipped 2026-03-11)
 - ✅ **v1.2 Beta Ready** — Phases 11-16 (shipped 2026-03-27)
 - 🚧 **v1.3 Public Beta** — Phases 17-22 (in progress)
+- 📋 **v1.4 Prediction & Stability** — Phases 23-26 (planned)
 
 ## Phases
 
@@ -57,18 +58,33 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 
 </details>
 
-### 🚧 v1.3 Public Beta (In Progress)
+<details>
+<summary>🚧 v1.3 Public Beta (Phases 17-22) — IN PROGRESS</summary>
 
-**Milestone Goal:** Rebuild keyboard from scratch using giellakbd-ios (UICollectionView, zero dead zones), fix beta bugs, and open public TestFlight.
+- [x] Phase 17: Bug Fixes (2/2 plans) — completed 2026-03-27
+- [x] Phase 18: Keyboard Base (3/3 plans) — completed 2026-03-28
+- [x] Phase 19: Complex Touch Features (3/3 plans) — completed 2026-03-30
+- [x] Phase 20: Feature Reintegration (2/2 plans) — completed 2026-03-30
+- [x] Phase 21: Cleanup & Memory Profiling (2/2 plans) — completed 2026-03-31
+- [ ] Phase 22: Public TestFlight (1/2 plans) — in progress
 
-- [x] **Phase 17: Bug Fixes** — Fix Dynamic Island REC desync and export logs performance before architecture change (completed 2026-03-27)
-- [x] **Phase 18: Keyboard Base** — Vendor giellakbd-ios, AZERTY/QWERTY with zero dead zones, haptics, sounds, key popup (completed 2026-03-28)
-- [x] **Phase 19: Complex Touch Features** — Delete repeat, spacebar trackpad, accent long-press, adaptive accent, edge key touch fix, double-space period fix (completed 2026-03-30)
-- [x] **Phase 20: Feature Reintegration** — Reconnect dictation, text prediction, suggestions, and settings (completed 2026-03-30)
-- [x] **Phase 21: Cleanup & Memory Profiling** — Delete old SwiftUI keyboard, verify memory budget, instrument (completed 2026-03-31)
-- [ ] **Phase 22: Public TestFlight** — Beta App Review, external group, public link, README update
+Full details: see Phase Details below (v1.3 phases 17-22)
+
+</details>
+
+### 📋 v1.4 Prediction & Stability (Planned)
+
+**Milestone Goal:** Upgrade the text prediction engine with probability-based suggestions (SymSpell + n-gram), fix known bugs, and stabilize based on beta feedback.
+
+- [ ] **Phase 23: Bug Fixes & License Compliance** — Fix autocorrect undo race condition, update licenses and Parakeet attribution
+- [ ] **Phase 24: SymSpell Spell Correction** — Expand dictionaries, vendor SymSpell, replace UITextChecker for frequency-ranked corrections
+- [ ] **Phase 25: N-gram Next-Word Prediction** — Build trigram data pipeline, integrate NgramPredictor, wire next-word suggestions into UI
+- [ ] **Phase 26: Cold Start & Beta Polish** — Time-boxed cold start auto-return investigation, beta feedback triage
 
 ## Phase Details
+
+<details>
+<summary>v1.3 Phase Details (Phases 17-22)</summary>
 
 ### Phase 17: Bug Fixes
 **Goal**: Known v1.2 beta bugs are fixed before the keyboard architecture change
@@ -79,8 +95,8 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
   2. Export logs completes within a few seconds and shows a spinner during export
 **Plans**: 2 plans
 Plans:
-- [ ] 17-01-PLAN.md — Dynamic Island watchdog + state machine extraction + unit tests (FIX-01)
-- [ ] 17-02-PLAN.md — Export logs optimization + 7-day retention + spinner UX (FIX-02)
+- [x] 17-01-PLAN.md — Dynamic Island watchdog + state machine extraction + unit tests (FIX-01)
+- [x] 17-02-PLAN.md — Export logs optimization + 7-day retention + spinner UX (FIX-02)
 
 ### Phase 18: Keyboard Base
 **Goal**: Users can type on a UICollectionView-based keyboard with zero dead zones, haptic feedback, key sounds, and key popup -- feels like a real keyboard from day one
@@ -96,9 +112,9 @@ Plans:
   7. User sees key popup preview on press (provided by giellakbd-ios)
 **Plans**: 3 plans
 Plans:
-- [ ] 18-01-PLAN.md — Vendor giellakbd-ios files, strip dependencies, add DeviceKit, create French layouts
-- [ ] 18-02-PLAN.md — Create keyboard bridge, adapt KeyboardViewController for UIKit keyboard + SwiftUI toolbar
-- [ ] 18-03-PLAN.md — Autocapitalization, double-space period, shift state machine, user verification
+- [x] 18-01-PLAN.md — Vendor giellakbd-ios files, strip dependencies, add DeviceKit, create French layouts
+- [x] 18-02-PLAN.md — Create keyboard bridge, adapt KeyboardViewController for UIKit keyboard + SwiftUI toolbar
+- [x] 18-03-PLAN.md — Autocapitalization, double-space period, shift state machine, user verification
 
 ### Phase 19: Complex Touch Features
 **Goal**: Users have access to all advanced touch interactions -- delete repeat, spacebar trackpad, accent selection, and adaptive accent key
@@ -113,9 +129,9 @@ Plans:
   6. Edge keys (a, q, p, m, etc.) produce haptic feedback and popup on touchDown, not touchUp
 **Plans**: 3 plans
 Plans:
-- [ ] 19-01-PLAN.md — Wire accent data, fix double-space period, fix edge key touchDown with nearest-cell fallback
-- [ ] 19-02-PLAN.md — Delete repeat with acceleration and spacebar trackpad cursor movement
-- [ ] 19-03-PLAN.md — Adaptive accent key in AZERTY layout and full device verification
+- [x] 19-01-PLAN.md — Wire accent data, fix double-space period, fix edge key touchDown with nearest-cell fallback
+- [x] 19-02-PLAN.md — Delete repeat with acceleration and spacebar trackpad cursor movement
+- [x] 19-03-PLAN.md — Adaptive accent key in AZERTY layout and full device verification
 
 ### Phase 20: Feature Reintegration
 **Goal**: All Dictus-specific features work on the new UIKit keyboard -- dictation, text prediction, suggestions, and settings
@@ -129,8 +145,8 @@ Plans:
   5. User can select default opening layer (letters or numbers) in settings with live preview
 **Plans**: 2 plans
 Plans:
-- [ ] 20-01-PLAN.md — Wire text prediction into bridge, autocorrect, emoji key layout, default layer setting
-- [ ] 20-02-PLAN.md — Emoji picker UI integration, post-transcription suggestion refresh, full UAT
+- [x] 20-01-PLAN.md — Wire text prediction into bridge, autocorrect, emoji key layout, default layer setting
+- [x] 20-02-PLAN.md — Emoji picker UI integration, post-transcription suggestion refresh, full UAT
 
 ### Phase 21: Cleanup & Memory Profiling
 **Goal**: Old SwiftUI keyboard code is removed, memory budget is verified on device, and the keyboard is instrumented for performance monitoring
@@ -142,8 +158,8 @@ Plans:
   3. OSSignposter instrumentation is in place for key touch-to-character latency measurement
 **Plans**: 2 plans
 Plans:
-- [ ] 21-01-PLAN.md — Extract LegacyCompat types, delete old SwiftUI files, clean pbxproj
-- [ ] 21-02-PLAN.md — Memory profiling on device, leak check, signposter verification, report
+- [x] 21-01-PLAN.md — Extract LegacyCompat types, delete old SwiftUI files, clean pbxproj
+- [x] 21-02-PLAN.md — Memory profiling on device, leak check, signposter verification, report
 
 ### Phase 22: Public TestFlight
 **Goal**: Dictus is available as a public TestFlight beta that anyone can install
@@ -155,13 +171,73 @@ Plans:
   3. README on GitHub includes the public TestFlight link with install instructions
 **Plans**: 2 plans
 Plans:
-- [ ] 22-01-PLAN.md — Fix emoji picker memory blocker (139 MiB -> <50 MiB) via category pagination
+- [x] 22-01-PLAN.md — Fix emoji picker memory blocker (139 MiB -> <50 MiB) via category pagination
 - [ ] 22-02-PLAN.md — Privacy manifests, version bump, Beta App Review submission, README + GitHub Release
+
+</details>
+
+### Phase 23: Bug Fixes & License Compliance
+**Goal**: Known bugs are fixed and license compliance is complete before any prediction engine changes
+**Depends on**: Phase 22
+**Requirements**: FIX-01, FIX-02, FIX-03
+**Success Criteria** (what must be TRUE):
+  1. User can type new characters after an autocorrect, then press backspace, and the backspace deletes the last typed character (not undo the earlier autocorrect)
+  2. User can tap "Licenses" in Settings and sees a link pointing to getdictus/dictus-ios repository
+  3. User can see Parakeet/NVIDIA attribution listed on the licenses screen alongside existing credits
+**Plans**: TBD
+
+Plans:
+- [ ] 23-01: Fix autocorrect undo race condition + license updates
+
+### Phase 24: SymSpell Spell Correction
+**Goal**: Users get frequency-ranked spell corrections that match their intent instead of alphabetical guesses
+**Depends on**: Phase 23
+**Requirements**: PRED-01, PRED-02, PRED-03
+**Success Criteria** (what must be TRUE):
+  1. User types a misspelled French word (e.g. "helo") and the suggestion bar shows the most common correct word first (e.g. "hello"), not an alphabetical guess
+  2. User types a word missing an accent (e.g. "cafe") and the suggestion bar offers the accented form ("cafe") as the top correction
+  3. User switches language to English and gets English spell corrections from the expanded English dictionary
+  4. Keyboard extension memory stays under 50MB with SymSpell dictionaries loaded (verified on physical device)
+**Plans**: TBD
+
+Plans:
+- [ ] 24-01: French and English frequency dictionary curation (30-50K words from Lexique 3.83 / OpenSubtitles)
+- [ ] 24-02: Vendor SymSpellSwift, build SymSpellEngine, replace UITextChecker for corrections
+
+### Phase 25: N-gram Next-Word Prediction
+**Goal**: Users see contextual next-word suggestions after completing a word, and all prediction stays fast and within memory budget
+**Depends on**: Phase 24
+**Requirements**: PRED-04, PRED-05, PRED-06
+**Success Criteria** (what must be TRUE):
+  1. User completes a word and presses space -- the suggestion bar shows 3 predicted next words based on previous context (e.g. "Je" + space shows "suis", "ne", "vais")
+  2. User taps a predicted word and it inserts with a trailing space, then the suggestion bar refreshes with new predictions based on the updated context (chained prediction)
+  3. Typing any character produces a suggestion update within 10ms with no visible lag or dropped frames
+  4. Total prediction memory (SymSpell dictionaries + n-gram data) stays under 20MB per language on a physical device
+**Plans**: TBD
+
+Plans:
+- [ ] 25-01: N-gram data pipeline -- corpus processing, binary trie format, offline build tool
+- [ ] 25-02: NgramPredictor integration into TextPredictionEngine + next-word UI in SuggestionBarView
+
+### Phase 26: Cold Start & Beta Polish
+**Goal**: Cold start UX is investigated and improved if viable, and critical beta feedback is addressed
+**Depends on**: Phase 25
+**Requirements**: COLD-01, COLD-02, COLD-03, BETA-01
+**Success Criteria** (what must be TRUE):
+  1. sourceApplication investigation is complete (2h timebox) with a documented conclusion on feasibility
+  2. If auto-return is viable: user returns to their source app automatically after cold start dictation completes
+  3. If auto-return is not viable: swipe-back overlay shows improved guidance (e.g. app name if sourceApplication returns it)
+  4. Critical bugs reported by public beta testers are triaged with fixes shipped or issues filed
+**Plans**: TBD
+
+Plans:
+- [ ] 26-01: Cold start auto-return investigation (2h timebox) + overlay polish
+- [ ] 26-02: Beta feedback triage and fixes
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
+Phases execute in numeric order: 23 -> 24 -> 25 -> 26
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -184,12 +260,16 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 | 15.2. Cleaning & Fix Issues | v1.2 | 4/4 | Complete | 2026-03-17 |
 | 15.3. Keyboard Optimization | v1.2 | 4/4 | Complete | 2026-03-24 |
 | 16. TestFlight Deployment | v1.2 | 3/3 | Complete | 2026-03-27 |
-| 17. Bug Fixes | 2/2 | Complete    | 2026-03-27 | - |
-| 18. Keyboard Base | 3/3 | Complete    | 2026-03-28 | - |
-| 19. Complex Touch Features | 3/3 | Complete    | 2026-03-30 | - |
-| 20. Feature Reintegration | 2/2 | Complete    | 2026-03-30 | - |
-| 21. Cleanup & Memory Profiling | 2/2 | Complete   | 2026-03-31 | - |
-| 22. Public TestFlight | 1/2 | In Progress|  | - |
+| 17. Bug Fixes | v1.3 | 2/2 | Complete | 2026-03-27 |
+| 18. Keyboard Base | v1.3 | 3/3 | Complete | 2026-03-28 |
+| 19. Complex Touch Features | v1.3 | 3/3 | Complete | 2026-03-30 |
+| 20. Feature Reintegration | v1.3 | 2/2 | Complete | 2026-03-30 |
+| 21. Cleanup & Memory Profiling | v1.3 | 2/2 | Complete | 2026-03-31 |
+| 22. Public TestFlight | v1.3 | 1/2 | In progress | - |
+| 23. Bug Fixes & License Compliance | v1.4 | 0/1 | Not started | - |
+| 24. SymSpell Spell Correction | v1.4 | 0/2 | Not started | - |
+| 25. N-gram Next-Word Prediction | v1.4 | 0/2 | Not started | - |
+| 26. Cold Start & Beta Polish | v1.4 | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-03-04*
@@ -197,3 +277,4 @@ Phases execute in numeric order: 17 -> 18 -> 19 -> 20 -> 21 -> 22
 *v1.1 shipped: 2026-03-11*
 *v1.2 shipped: 2026-03-27*
 *v1.3 started: 2026-03-27*
+*v1.4 roadmap: 2026-04-01*
