@@ -1,64 +1,40 @@
-# Requirements: Dictus v1.3 Public Beta
+# Requirements: Dictus v1.4 Prediction & Stability
 
-**Defined:** 2026-03-27
+**Defined:** 2026-04-01
 **Core Value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
 
-## v1.3 Requirements
+## v1.4 Requirements
 
-Requirements for v1.3 milestone. Each maps to roadmap phases.
-
-### Keyboard Base
-
-- [x] **KBD-01**: User can type characters on a UICollectionView-based AZERTY keyboard with zero dead zones
-- [x] **KBD-02**: User can switch to QWERTY layout in keyboard settings
-- [x] **KBD-03**: User can toggle shift (single tap) and caps lock (double tap) with visual feedback
-- [x] **KBD-04**: User can switch between letters, numbers, and symbols layers
-- [x] **KBD-05**: User can delete characters with backspace, with accelerating repeat on hold
-- [x] **KBD-06**: User can insert space, return, and use globe key to switch keyboards
-- [x] **KBD-07**: User gets autocapitalization after sentence-ending punctuation
-- [x] **KBD-08**: User gets double-space period insertion
-
-### Keyboard Feel
-
-- [x] **FEEL-01**: User gets haptic feedback on touchDown matching Apple keyboard feel
-- [x] **FEEL-02**: User hears 3-category key sounds (letter/delete/modifier) respecting silent switch
-- [x] **FEEL-03**: User sees key popup preview on press
-- [x] **FEEL-04**: User can long-press vowels to access French accent characters with drag-to-select
-- [x] **FEEL-05**: User can drag spacebar to move cursor (trackpad) with haptic ticks
-- [x] **FEEL-06**: User sees adaptive accent key (apostrophe after consonants, accent after vowels)
-
-### Dictation Reintegration
-
-- [ ] **DICT-01**: User can tap mic button in toolbar to start recording
-- [ ] **DICT-02**: User sees recording overlay with waveform replacing keyboard during dictation
-- [ ] **DICT-03**: User gets transcription auto-inserted at cursor after recording
-- [ ] **DICT-04**: User sees Full Access banner when permissions needed
-
-### Text Prediction
-
-- [x] **PRED-01**: User sees 3-slot suggestion bar with French autocorrect suggestions
-- [x] **PRED-02**: User can tap suggestion to insert it
-- [x] **PRED-03**: User can undo autocorrect by pressing backspace immediately after
-
-### Keyboard Settings
-
-- [x] **SET-01**: User can select default opening layer (letters or numbers) with live preview
+Requirements for v1.4 milestone. Each maps to roadmap phases.
 
 ### Bug Fixes
 
-- [x] **FIX-01**: Dynamic Island no longer gets stuck on REC state (issue #60)
-- [x] **FIX-02**: Export logs shows spinner and completes quickly (issue #61)
+- [ ] **FIX-01**: Autocorrect undo only triggers on immediate backspace, not after new character input (#67)
+- [ ] **FIX-02**: Settings licenses link points to correct getdictus/dictus-ios repo (#63)
+- [ ] **FIX-03**: Parakeet/NVIDIA model attribution added to licenses screen (#63)
 
-### Public TestFlight
+### Prediction Engine
 
-- [x] **TF-01**: App passes Beta App Review with complete Privacy Manifests
-- [ ] **TF-02**: External testing group created in App Store Connect
-- [ ] **TF-03**: Public TestFlight link active and shareable
-- [ ] **TF-04**: README updated with public TestFlight link and install instructions
+- [ ] **PRED-01**: French frequency dictionary expanded to 30-50K words (from current ~1.3K)
+- [ ] **PRED-02**: English frequency dictionary expanded to 30-50K words (from current ~1.1K)
+- [ ] **PRED-03**: SymSpell replaces UITextChecker for spell correction with sub-millisecond lookups
+- [ ] **PRED-04**: N-gram next-word prediction suggests top 3 words based on previous context (bigram/trigram)
+- [ ] **PRED-05**: Prediction engine stays under 10ms per keystroke with no typing fluidity regression
+- [ ] **PRED-06**: Total prediction memory (dictionaries + models) stays under 20MB per language
+
+### Cold Start UX
+
+- [ ] **COLD-01**: Time-boxed investigation of sourceApplication for auto-return (2h max)
+- [ ] **COLD-02**: If auto-return viable, user returns to source app automatically after cold start dictation
+- [ ] **COLD-03**: If auto-return not viable, swipe-back overlay UX is polished with improved guidance
+
+### Beta Feedback
+
+- [ ] **BETA-01**: Critical bugs reported by public beta testers are triaged and fixed
 
 ## Future Requirements
 
-Deferred to v1.4+. Tracked but not in current roadmap.
+Deferred to v1.5+. Tracked but not in current roadmap.
 
 ### Smart Modes
 
@@ -74,21 +50,35 @@ Deferred to v1.4+. Tracked but not in current roadmap.
 
 - **ADV-01**: User sees real-time streaming transcription during recording
 
+### Premium
+
+- **PRO-01**: SubscriptionManager + StoreKit 2 + Pro feature gating (#55)
+- **PRO-02**: Dictus Pro premium features roadmap (#54)
+
+### Testing
+
+- **TEST-01**: Automated test suite (DictusCore, DictusApp, UI tests) (#22)
+
+### UX Enhancements
+
+- **UX-01**: Language picker redesign with searchable list (#52)
+- **UX-02**: Settings button quick shortcuts from keyboard (#31)
+
 ## Out of Scope
 
 Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Full emoji picker in keyboard | Memory-unsafe (emoji glyph cache blows 50MB limit) -- use system cycling via globe key |
-| iPad/split keyboard support | iPhone-first for v1.3, iPad is v1.4+ |
-| DivvunSpell integration | Dictus uses UITextChecker + FrequencyDictionary, not Divvun's speller |
-| CocoaPods dependency | Dictus uses SPM exclusively. giellakbd-ios files are vendored, not added as a Pod |
-| Auto-return to previous app | No reliable public API -- confirmed in v1.2 research. Swipe-back overlay is correct UX |
-| Android port | Different platform entirely, v3+ |
+| KenLM (C++ n-gram library) | LGPL license, C++ bridging complexity, overkill for keyboard extension — custom Swift trie instead |
+| Neural/ML prediction models | Too large for 50MB keyboard extension memory limit |
+| FleksySDK or proprietary solutions | Contradicts open-source positioning |
+| Swipe typing | High complexity, not core to dictation value — v2+ |
+| Private API for auto-return (_hostBundleID, LSApplicationWorkspace) | App Store rejection confirmed |
+| Full emoji picker in keyboard | Memory-unsafe (emoji glyph cache), use system cycling |
+| iPad support | iPhone-first, v1.5+ |
+| Android port | Different platform, v3+ |
 | Cloud transcription | Contradicts privacy/offline identity |
-| Subscription / monetization | Contradicts open-source positioning |
-| Liquid Glass on UIKit keyboard keys | Too complex in UIKit, adding SwiftUI on top defeats the purpose. Liquid Glass already exists on toolbar mic button (separate SwiftUI layer, untouched by rebuild) |
 
 ## Traceability
 
@@ -96,40 +86,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| KBD-01 | Phase 18 | Complete |
-| KBD-02 | Phase 18 | Complete |
-| KBD-03 | Phase 18 | Complete |
-| KBD-04 | Phase 18 | Complete |
-| KBD-05 | Phase 19 | Complete |
-| KBD-06 | Phase 18 | Complete |
-| KBD-07 | Phase 18 | Complete |
-| KBD-08 | Phase 18 | Complete |
-| FEEL-01 | Phase 18 | Complete |
-| FEEL-02 | Phase 18 | Complete |
-| FEEL-03 | Phase 18 | Complete |
-| FEEL-04 | Phase 19 | Complete |
-| FEEL-05 | Phase 19 | Complete |
-| FEEL-06 | Phase 19 | Complete |
-| DICT-01 | Phase 20 | Pending |
-| DICT-02 | Phase 20 | Pending |
-| DICT-03 | Phase 20 | Pending |
-| DICT-04 | Phase 20 | Pending |
-| PRED-01 | Phase 20 | Complete |
-| PRED-02 | Phase 20 | Complete |
-| PRED-03 | Phase 20 | Complete |
-| SET-01 | Phase 20 | Complete |
-| FIX-01 | Phase 17 | Complete |
-| FIX-02 | Phase 17 | Complete |
-| TF-01 | Phase 22 | Complete |
-| TF-02 | Phase 22 | Pending |
-| TF-03 | Phase 22 | Pending |
-| TF-04 | Phase 22 | Pending |
+| FIX-01 | — | Pending |
+| FIX-02 | — | Pending |
+| FIX-03 | — | Pending |
+| PRED-01 | — | Pending |
+| PRED-02 | — | Pending |
+| PRED-03 | — | Pending |
+| PRED-04 | — | Pending |
+| PRED-05 | — | Pending |
+| PRED-06 | — | Pending |
+| COLD-01 | — | Pending |
+| COLD-02 | — | Pending |
+| COLD-03 | — | Pending |
+| BETA-01 | — | Pending |
 
 **Coverage:**
-- v1.3 requirements: 28 total
-- Mapped to phases: 28
-- Unmapped: 0
+- v1.4 requirements: 13 total
+- Mapped to phases: 0
+- Unmapped: 13 ⚠️
 
 ---
-*Requirements defined: 2026-03-27*
-*Last updated: 2026-03-27 after roadmap creation*
+*Requirements defined: 2026-04-01*
+*Last updated: 2026-04-01 after initial definition*
