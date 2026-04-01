@@ -32,7 +32,18 @@ public enum PersistentLog {
 
     // MARK: - Constants
 
-    static let maxLines = 1000
+    /// Maximum log file size in bytes (~200KB = ~1300 lines at ~150 bytes/line).
+    /// WHY size-based (not line-based): Checking file size is O(1) via FileManager
+    /// attributes, while counting lines requires reading the entire file O(n).
+    /// The old line-counting approach caused write amplification on every log() call.
+    static let maxFileSize: UInt64 = 200_000
+
+    /// Retention period in seconds (7 days).
+    /// WHY 7 days: Keeps logs relevant for debugging recent issues while preventing
+    /// unbounded growth. Pruning happens before export (not on every write) because
+    /// date parsing is more expensive than the O(1) size check.
+    static let retentionPeriod: TimeInterval = 7 * 24 * 3600
+
     private static let fileName = "dictus_debug.log"
 
     /// Serial queue for ordering writes within a single process.
@@ -73,10 +84,48 @@ public enum PersistentLog {
         coordinatedWrite("", to: url)
     }
 
+    /// Remove log entries older than retentionPeriod (7 days).
+    /// Called before export to keep exported logs relevant and file size manageable.
+    /// WHY not on every write: Date parsing is more expensive than size check.
+    /// Pruning before export is sufficient -- size-based trim handles per-write limits.
+    public static func pruneOldEntries() {
+        guard let url = fileURL else { return }
+        pruneOldEntries(url: url, cutoffDate: Date().addingTimeInterval(-retentionPeriod))
+    }
+
+    /// Internal pruning with injectable cutoff date (shared by public API and tests).
+    static func pruneOldEntries(url: URL, cutoffDate: Date) {
+        let formatter = ISO8601DateFormatter()
+
+        let coordinator = NSFileCoordinator()
+        var error: NSError?
+        coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { coordURL in
+            guard let content = try? String(contentsOf: coordURL, encoding: .utf8) else { return }
+            let filtered = content
+                .components(separatedBy: "\n")
+                .filter { line in
+                    // Log format: [2026-03-27T10:30:00Z] ...
+                    guard line.count > 2,
+                          let closeBracket = line.firstIndex(of: "]"),
+                          line.first == "[" else {
+                        return true // keep unparseable lines
+                    }
+                    let dateStr = String(line[line.index(after: line.startIndex)..<closeBracket])
+                    guard let date = formatter.date(from: dateStr) else {
+                        return true // keep unparseable dates
+                    }
+                    return date > cutoffDate
+                }
+                .joined(separator: "\n")
+            try? filtered.write(to: coordURL, atomically: true, encoding: .utf8)
+        }
+    }
+
     /// Export log with device header for sharing.
     /// Returns header + full log content.
     #if canImport(UIKit)
     public static func exportContent() -> String {
+        pruneOldEntries()  // Remove entries older than 7 days before export
         let iosVersion = UIDevice.current.systemVersion
         let deviceModel = UIDevice.current.model
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
@@ -167,16 +216,24 @@ public enum PersistentLog {
     }
 
     private static func coordinatedTrim(url: URL) {
+        // O(1) size check -- no file read needed
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
+              let size = attrs[.size] as? UInt64,
+              size > maxFileSize else { return }
+
+        // Only read file when we actually need to trim
         let coordinator = NSFileCoordinator()
         var error: NSError?
-
         coordinator.coordinate(writingItemAt: url, options: .forReplacing, error: &error) { coordURL in
-            guard let content = try? String(contentsOf: coordURL, encoding: .utf8) else { return }
-            var lines = content.components(separatedBy: "\n")
-            if lines.count > maxLines {
-                lines = Array(lines.suffix(maxLines))
-                let trimmed = lines.joined(separator: "\n")
-                try? trimmed.write(to: coordURL, atomically: true, encoding: .utf8)
+            guard let data = try? Data(contentsOf: coordURL) else { return }
+            // Keep the last maxFileSize bytes (most recent logs)
+            let trimmedData = data.suffix(Int(maxFileSize))
+            // Find first newline in trimmed data to avoid partial first line
+            if let newlineIndex = trimmedData.firstIndex(of: UInt8(ascii: "\n")) {
+                let cleanData = trimmedData.suffix(from: trimmedData.index(after: newlineIndex))
+                try? cleanData.write(to: coordURL)
+            } else {
+                try? trimmedData.write(to: coordURL)
             }
         }
     }
@@ -226,15 +283,32 @@ public enum PersistentLog {
         (try? String(contentsOf: url, encoding: .utf8)) ?? "(no logs)"
     }
 
-    /// Trim an arbitrary URL to maxLines (for unit tests).
-    static func trimForTesting(url: URL) {
-        guard let content = try? String(contentsOf: url, encoding: .utf8) else { return }
-        var lines = content.components(separatedBy: "\n")
-        if lines.count > maxLines {
-            lines = Array(lines.suffix(maxLines))
-            let trimmed = lines.joined(separator: "\n")
-            try? trimmed.write(to: url, atomically: true, encoding: .utf8)
+    /// Check if a file exceeds maxFileSize (for unit tests).
+    static func shouldTrimForTesting(url: URL) -> Bool {
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
+              let size = attrs[.size] as? UInt64 else { return false }
+        return size > maxFileSize
+    }
+
+    /// Trim an arbitrary URL using size-based logic (for unit tests).
+    static func trimBySizeForTesting(url: URL) {
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
+              let size = attrs[.size] as? UInt64,
+              size > maxFileSize else { return }
+
+        guard let data = try? Data(contentsOf: url) else { return }
+        let trimmedData = data.suffix(Int(maxFileSize))
+        if let newlineIndex = trimmedData.firstIndex(of: UInt8(ascii: "\n")) {
+            let cleanData = trimmedData.suffix(from: trimmedData.index(after: newlineIndex))
+            try? cleanData.write(to: url)
+        } else {
+            try? trimmedData.write(to: url)
         }
+    }
+
+    /// Prune old entries from an arbitrary URL with custom cutoff (for unit tests).
+    static func pruneOldEntriesForTesting(url: URL, cutoffDate: Date) {
+        pruneOldEntries(url: url, cutoffDate: cutoffDate)
     }
 
     /// Clear an arbitrary URL (for unit tests).
@@ -242,6 +316,6 @@ public enum PersistentLog {
         try? "".write(to: url, atomically: true, encoding: .utf8)
     }
 
-    /// Expose maxLines for test assertions.
-    static var testableMaxLines: Int { maxLines }
+    /// Expose maxFileSize for test assertions.
+    static var testableMaxFileSize: UInt64 { maxFileSize }
 }

@@ -13,61 +13,37 @@ extension DefaultKeyboardLayer {
     }
 }
 
-/// Root SwiftUI view for the keyboard extension.
-/// Phase 3 layout: ToolbarView + (KeyboardView OR RecordingOverlay).
+/// Root SwiftUI view for the keyboard extension chrome (toolbar + recording overlay).
 ///
-/// WHY conditional rendering instead of overlay:
-/// When recording, the keyboard letters must be completely replaced by the recording UI
-/// to prevent accidental key presses. SwiftUI's conditional rendering (`if/else`) fully
-/// removes the inactive view from the hierarchy, freeing its memory and preventing
-/// ghost touches. An overlay or ZStack would keep both views alive.
+/// Phase 18 architecture change: The keyboard grid is now a UIKit GiellaKeyboardView
+/// added as a direct subview in KeyboardViewController. This SwiftUI view only renders:
+/// - ToolbarView (always visible when not recording)
+/// - RecordingOverlay (replaces keyboard area during recording)
+///
+/// WHY SwiftUI for toolbar/overlay but UIKit for keys:
+/// The toolbar and recording overlay are simple SwiftUI layouts that don't need
+/// zero-latency touch handling. The key grid needs UICollectionView's proven touch
+/// pipeline for zero dead zones. Mixing UIKit keys + SwiftUI chrome gives us both.
 struct KeyboardRootView: View {
     let controller: UIInputViewController
     let controllerID: String
     @ObservedObject private var state = KeyboardState.shared
     @ObservedObject private var waveformDriver = KeyboardWaveformDriver.shared
     @State private var instanceID = String(UUID().uuidString.prefix(8))
-    /// Observable state for the suggestion bar: holds current suggestions, mode, and autocorrect undo.
-    /// WHY @StateObject: SuggestionState is an ObservableObject that must survive view re-renders.
-    /// @StateObject ensures a single instance is created and owned by this view.
-    @StateObject private var suggestionState = SuggestionState()
-    @State private var isEmojiMode = false
-    /// Default keyboard layer read from App Group on each appearance.
-    /// Controls which layer (letters or numbers) the keyboard opens on.
-    ///
-    /// WHY initialized from UserDefaults (not just .letters):
-    /// In SwiftUI, child .onAppear fires BEFORE parent .onAppear. If we default
-    /// to .letters here and only read UserDefaults in .onAppear, KeyboardView
-    /// would always see .letters on first render — even if the user chose 123.
-    /// Reading the stored value at @State init time ensures the correct layer
-    /// is available when KeyboardView first renders.
-    @State private var defaultLayer: KeyboardLayerType = {
-        DefaultKeyboardLayer.migrateFromKeyboardModeIfNeeded()
-        return DefaultKeyboardLayer.active.asLayerType
-    }()
+    /// Whether the emoji picker is currently visible.
+    /// Toggled via NotificationCenter from KeyboardViewController.toggleEmojiPicker().
+    @State private var showingEmoji = false
+    /// Observable state for the suggestion bar, owned by KeyboardViewController.
+    /// WHY @ObservedObject (not @StateObject): The controller creates and owns SuggestionState,
+    /// injecting the same instance into both this view (for display) and the bridge (for updates).
+    /// Using @ObservedObject here means we observe without owning -- the controller is the source of truth.
+    @ObservedObject var suggestionState: SuggestionState
 
     /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
     /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
     /// openURL environment action works because it goes through the responder
     /// chain. We capture it here and inject it into KeyboardState via .onAppear.
     @Environment(\.openURL) private var openURL
-
-    /// Height of just the 4-row keyboard area (without toolbar).
-    private var keyboardHeight: CGFloat {
-        let rows: CGFloat = 4
-        return (rows * KeyMetrics.keyHeight)
-            + ((rows - 1) * KeyMetrics.rowSpacing)
-            + 8  // vertical padding
-    }
-
-    /// Toolbar height — must match ToolbarView's frame height (52pt: 48pt content + 4pt top padding).
-    private let toolbarHeight: CGFloat = 52
-
-    /// Total content height (toolbar + keyboard). RecordingOverlay uses this
-    /// to cover the full area, preventing layout shift when switching to recording.
-    private var totalContentHeight: CGFloat {
-        toolbarHeight + keyboardHeight
-    }
 
     /// Whether the recording overlay should be visible.
     /// Extracted as a computed property for clear animation binding.
@@ -86,7 +62,7 @@ struct KeyboardRootView: View {
         // During cold start app transitions, iOS can rapidly create/destroy
         // keyboard controllers. viewWillAppear may not have fired on the
         // current controller, leaving activeControllerID == nil.
-        // Show overlay anyway — only one controller is visible on screen.
+        // Show overlay anyway -- only one controller is visible on screen.
         if state.activeControllerID == nil {
             return true
         }
@@ -96,8 +72,9 @@ struct KeyboardRootView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Conditional: recording overlay (full area) OR toolbar + keyboard
             if showsOverlay {
+                // Recording overlay fills the full area (toolbar + keyboard space).
+                // The UIKit keyboard is hidden by KeyboardViewController when recording.
                 RecordingOverlay(
                     dictationStatus: state.dictationStatus,
                     waveformEnergy: state.waveformEnergy,
@@ -106,44 +83,64 @@ struct KeyboardRootView: View {
                     onCancel: { state.requestCancel() },
                     onStop: { state.requestStop() }
                 )
-                .frame(height: totalContentHeight)
+            } else if showingEmoji {
+                // GeometryReader measures the actual space available to SwiftUI.
+                // WHY: In keyboard extensions, the hosting controller may not give the
+                // full screen width/height to SwiftUI due to safe area or system insets.
+                // Passing measured dimensions to EmojiPickerView guarantees it fits.
+                GeometryReader { geo in
+                    VStack(spacing: 0) {
+                        // Toolbar stays visible during emoji browsing
+                        ToolbarView(
+                            hasFullAccess: controller.hasFullAccess,
+                            dictationStatus: state.dictationStatus,
+                            onMicTap: {
+                                showingEmoji = false
+                                state.startRecording()
+                            },
+                            suggestions: [],
+                            suggestionMode: .idle,
+                            onSuggestionTap: { _ in }
+                        )
+                        .frame(height: 52)
+                        // Emoji picker uses exact measured dimensions
+                        EmojiPickerView(
+                            onEmojiInsert: { emoji in
+                                controller.textDocumentProxy.insertText(emoji)
+                                HapticFeedback.keyTapped()
+                            },
+                            onDelete: {
+                                controller.textDocumentProxy.deleteBackward()
+                                HapticFeedback.keyTapped()
+                            },
+                            onDismiss: {
+                                // Call toggleEmojiPicker() on the controller which handles:
+                                // hiding emoji, showing giellaKeyboard, shrinking hosting,
+                                // and posting .dictusToggleEmoji (which .onReceive picks up
+                                // to set showingEmoji = false).
+                                (controller as? KeyboardViewController)?.toggleEmojiPicker()
+                            },
+                            availableWidth: geo.size.width,
+                            availableHeight: geo.size.height - 52
+                        )
+                    }
+                }
             } else {
-                // Single keyboard layout — no more mode switching.
-                // The only variable is which layer opens first (letters vs numbers),
-                // controlled by the user's DefaultKeyboardLayer preference.
-
-                // Hide toolbar in emoji mode to give full height to emoji picker
-                if !isEmojiMode {
-                    ToolbarView(
-                        hasFullAccess: controller.hasFullAccess,
-                        dictationStatus: state.dictationStatus,
-                        onMicTap: { state.startRecording() },
-                        suggestions: suggestionState.suggestions,
-                        suggestionMode: suggestionState.mode,
-                        onSuggestionTap: { index in
-                            handleSuggestionTap(index: index)
-                        }
-                    )
-                }
-
-                KeyboardView(
-                    controller: controller,
+                // Toolbar only -- the keyboard grid is UIKit, managed by KeyboardViewController
+                ToolbarView(
                     hasFullAccess: controller.hasFullAccess,
-                    isEmojiMode: $isEmojiMode,
-                    suggestionState: suggestionState,
-                    initialLayer: defaultLayer
+                    dictationStatus: state.dictationStatus,
+                    onMicTap: { state.startRecording() },
+                    suggestions: suggestionState.suggestions,
+                    suggestionMode: suggestionState.mode,
+                    onSuggestionTap: { index in
+                        handleSuggestionTap(index: index)
+                    }
                 )
-
-                if !isEmojiMode {
-                    Spacer().frame(height: 8)
-                }
+                // No KeyboardView here -- it's UIKit, added directly by KeyboardViewController
+                // No bottom spacer -- the UIKit keyboard handles its own height
             }
         }
-        // WHY .clear: The UIInputView with .keyboard style provides the
-        // native blurred keyboard background. Any opaque color here would
-        // hide that native styling and look wrong (e.g., pure white in light
-        // mode instead of the native grayish tint). Transparent lets the
-        // system keyboard chrome show through correctly.
         .background(Color.clear)
         .onChange(of: showsOverlay) { _, isShowing in
             PersistentLog.log(.diagnosticProbe(
@@ -152,6 +149,10 @@ struct KeyboardRootView: View {
                 action: "showsOverlayChanged",
                 details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
             ))
+            // Dismiss emoji picker when recording starts
+            if isShowing {
+                showingEmoji = false
+            }
             syncWaveformDriver()
         }
         .onChange(of: state.dictationStatus) { _, newStatus in
@@ -173,9 +174,6 @@ struct KeyboardRootView: View {
                 action: "activeControllerChanged",
                 details: "newOwner=\(newOwner ?? "none") controllerID=\(controllerID)"
             ))
-            if newOwner == controllerID {
-                defaultLayer = DefaultKeyboardLayer.active.asLayerType
-            }
             syncWaveformDriver()
         }
         .onChange(of: state.isKeyboardVisible) { _, _ in
@@ -189,27 +187,17 @@ struct KeyboardRootView: View {
                 details: "status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
             ))
             // Provide controller reference to KeyboardState for auto-insert.
-            // WHY here and not in init: KeyboardState is created by @StateObject
-            // before the view body runs. The controller is only available as a
-            // View property, so we pass it on first appearance.
             state.controller = controller
             state.openURL = { url in openURL(url) }
 
-            // Re-read default layer in case user changed settings since extension loaded.
-            defaultLayer = DefaultKeyboardLayer.active.asLayerType
-
             // Pre-allocate haptic generators so the first key tap has zero latency.
-            // Without this, the Taptic Engine needs ~2-5ms to spin up on first use.
             HapticFeedback.warmUp()
 
             // Refresh cached haptic enabled state from UserDefaults.
-            // This fires every time the keyboard opens, ensuring the cached value
-            // reflects any changes made in Settings since last keyboard session.
             HapticFeedback.refreshEnabledState()
 
-            // Set prediction engine language from App Group shared preference.
-            let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
-            suggestionState.setLanguage(lang)
+            // Language is set in KeyboardViewController.viewWillAppear, which fires
+            // on every keyboard appearance and picks up any App Group preference changes.
 
             syncWaveformDriver()
         }
@@ -221,6 +209,9 @@ struct KeyboardRootView: View {
                 details: "status=\(state.dictationStatus.rawValue) controllerID=\(controllerID)"
             ))
             syncWaveformDriver(forceHidden: true)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .dictusToggleEmoji)) { _ in
+            showingEmoji.toggle()
         }
     }
 
@@ -263,12 +254,6 @@ struct KeyboardRootView: View {
     }
 
     /// Replaces the word currently being typed with a replacement string.
-    ///
-    /// WHY deleteBackward loop:
-    /// UITextDocumentProxy doesn't support selecting or replacing text directly.
-    /// The only way to "replace" is to delete the current word character by character
-    /// and then insert the replacement. This is the standard pattern used by all
-    /// third-party iOS keyboards.
     private func replaceCurrentWord(
         proxy: UITextDocumentProxy,
         currentWord: String,

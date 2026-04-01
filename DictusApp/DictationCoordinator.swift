@@ -175,7 +175,8 @@ class DictationCoordinator: ObservableObject {
                 if self.pendingColdStartDictation {
                     self.pendingColdStartDictation = false
                     // Only retry if keyboard is still waiting (watchdog hasn't reset to idle)
-                    let keyboardStatus = self.defaults.string(forKey: SharedKeys.dictationStatus)
+                    let keyboardStatus = self.defaults.string(forKey: SharedKeys.dictationStatus) ?? "nil"
+                    PersistentLog.log(.coldStartRetry(keyboardStatus: keyboardStatus))
                     if keyboardStatus == DictationStatus.requested.rawValue {
                         self.startDictation(fromURL: true)
                     }
@@ -358,6 +359,9 @@ class DictationCoordinator: ObservableObject {
 
                 updateStatus(.transcribing)
                 LiveActivityManager.shared.transitionToTranscribing()
+                // Arm watchdog: if DI fails to leave .recording, force recovery after 10s.
+                // If transitionToTranscribing succeeded, the watchdog's guard exits harmlessly.
+                LiveActivityManager.shared.startRecordingWatchdog()
                 SoundFeedbackService.playRecordStop()
 
                 try await ensureEngineReady()
@@ -414,6 +418,8 @@ class DictationCoordinator: ObservableObject {
         SoundFeedbackService.playRecordCancel()
         // Return Dynamic Island to standby (cancel = no transcription, go back to "On")
         Task { await LiveActivityManager.shared.returnToStandby() }
+        // Arm watchdog: safety net if returnToStandby's guard rejects.
+        LiveActivityManager.shared.startRecordingWatchdog()
         updateStatus(.idle)
 
         if #available(iOS 14.0, *) {
@@ -680,5 +686,7 @@ class DictationCoordinator: ObservableObject {
         defaults.synchronize()
         updateStatus(.failed)
         LiveActivityManager.shared.endWithFailure()
+        // Arm watchdog: safety net if endWithFailure's transition guard rejects.
+        LiveActivityManager.shared.startRecordingWatchdog()
     }
 }

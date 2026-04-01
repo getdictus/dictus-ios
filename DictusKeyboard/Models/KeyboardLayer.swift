@@ -9,7 +9,5 @@ enum KeyboardLayerType: Equatable {
     case emoji
 }
 
-struct KeyboardLayer {
-    let type: KeyboardLayerType
-    let rows: [[KeyDefinition]]
-}
+// NOTE: KeyboardLayer struct removed in Phase 18 -- replaced by giellakbd-ios KeyboardPage.
+// KeyboardLayerType enum kept for KeyboardRootView compatibility during migration.

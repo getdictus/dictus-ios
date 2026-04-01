@@ -76,6 +76,7 @@ struct DictusApp: App {
                             AppGroup.defaults.set(false, forKey: SharedKeys.coldStartActive)
                             AppGroup.defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
                             AppGroup.defaults.synchronize()
+                            PersistentLog.log(.coldStartFlagSet(active: false, context: "background-cleanup"))
                         }
 
                         // Only start standby activity if NOT recording.
@@ -135,11 +136,18 @@ struct DictusApp: App {
             let isEngineDeadRestart = isFromKeyboard && Self.hasBeenActive
                 && !DictationCoordinator.shared.isEngineRunning
 
+            PersistentLog.log(.coldStartURLReceived(
+                isColdStart: isColdStart,
+                isEngineDead: isEngineDeadRestart,
+                hasBeenActive: Self.hasBeenActive
+            ))
+
             if isColdStart || isEngineDeadRestart {
                 let reason = isColdStart ? "first launch" : "engine dead"
                 DictusLogger.app.info("Cold/engine-dead start from keyboard (\(reason, privacy: .public)) — showing swipe-back overlay")
                 AppGroup.defaults.set(true, forKey: SharedKeys.coldStartActive)
                 AppGroup.defaults.synchronize()
+                PersistentLog.log(.coldStartFlagSet(active: true, context: reason))
             } else if isFromKeyboard {
                 DictusLogger.app.info("Warm start dictation from keyboard — skipping overlay")
             }

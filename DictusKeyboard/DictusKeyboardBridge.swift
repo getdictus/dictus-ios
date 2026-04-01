@@ -1,0 +1,596 @@
+// DictusKeyboard/DictusKeyboardBridge.swift
+// Delegate bridge from giellakbd-ios GiellaKeyboardView key events to Dictus text actions.
+// Created for Phase 18 Plan 02 -- wires the vendored UICollectionView keyboard
+// to textDocumentProxy operations with haptic feedback and 3-category key sounds.
+
+import UIKit
+import AudioToolbox
+import DictusCore
+
+/// Adapts GiellaKeyboardView delegate callbacks into Dictus keyboard actions.
+///
+/// WHY a separate bridge class (not making KeyboardViewController the delegate):
+/// 1. Single Responsibility: The bridge handles ONLY key event translation.
+///    KeyboardViewController handles view lifecycle, height, and hosting.
+/// 2. Testability: The bridge can be tested in isolation with a mock proxy.
+/// 3. Decoupling: If the vendored delegate protocol changes, only this file changes.
+///
+/// The bridge receives key events from the UICollectionView keyboard and:
+/// - Inserts/deletes text via textDocumentProxy
+/// - Plays haptic feedback via DictusCore's HapticFeedback
+/// - Plays 3-category key sounds via AudioServicesPlaySystemSound
+/// - Manages shift/capslock page state on the keyboard view
+/// - Handles auto-full-stop (double-space -> period)
+final class DictusKeyboardBridge: NSObject,
+    GiellaKeyboardViewDelegate,
+    GiellaKeyboardViewKeyboardKeyDelegate
+{
+    // MARK: - Dependencies
+
+    /// Weak reference to the input view controller for textDocumentProxy access.
+    /// WHY weak: The controller owns the bridge (strong ref). If the bridge held
+    /// a strong ref back, it would create a retain cycle.
+    weak var controller: UIInputViewController?
+
+    /// Reference to the keyboard view for page state management (shift/symbols).
+    /// WHY weak: The keyboard view is owned by the controller's view hierarchy.
+    weak var keyboardView: GiellaKeyboardView?
+
+    /// Reference to the suggestion state for triggering prediction updates.
+    /// WHY weak: The controller owns SuggestionState. Bridge must not create a retain cycle.
+    weak var suggestionState: SuggestionState?
+
+    /// Callback to toggle emoji picker visibility. Set by KeyboardViewController.
+    var onEmojiToggle: (() -> Void)?
+
+    // MARK: - Shift state tracking
+
+    /// Timestamp of the last shift tap, used to detect double-tap for caps lock.
+    /// If two shift taps occur within 300ms, we activate caps lock.
+    private var lastShiftTapTime: TimeInterval = 0
+
+    /// Threshold for double-tap detection (300ms matches iOS native behavior).
+    private static let doubleTapThreshold: TimeInterval = 0.3
+
+    /// Tracks whether shift was activated by the user tapping shift (true)
+    /// or by autocapitalization (false). This distinction matters because:
+    /// - Manual shift: returns to .normal after ONE character typed (one-shot shift)
+    /// - Autocap shift: also returns to .normal after one character, but updateCapitalization
+    ///   may re-apply shift if conditions still hold (e.g., still at start of sentence)
+    private var isManualShift = false
+
+    /// Last character inserted by the keyboard, tracked locally to avoid IPC latency.
+    /// Used by adaptive accent key (Phase 19 Plan 03) and as supplement to proxy reads.
+    private(set) var lastInsertedCharacter: String?
+
+    /// Second-to-last character, used for 2-char context (e.g., "qu" detection).
+    /// When the user types "qu", lastInsertedCharacter="u" and secondToLastInsertedCharacter="q",
+    /// allowing AccentedCharacters to detect the bigram and show apostrophe instead of u-grave.
+    private var secondToLastInsertedCharacter: String?
+
+    // MARK: - GiellaKeyboardViewDelegate
+
+    func didTriggerKey(_ key: KeyDefinition) {
+        switch key.type {
+        case .input(let character, let alternate):
+            if alternate == "accent" {
+                handleAdaptiveAccentKey()
+            } else if character == "\u{1F600}" {
+                // Emoji button: identified by the emoji glyph on the key.
+                // No alternate text so the key shows only the smiley icon.
+                handleEmojiToggle()
+            } else {
+                handleInputKey(character)
+            }
+
+        case .backspace:
+            handleBackspace()
+
+        case .spacebar:
+            handleSpace()
+
+        case .returnkey:
+            handleReturn()
+
+        case .shift:
+            handleShift()
+
+        case .symbols:
+            handleSymbolsToggle()
+
+        case .shiftSymbols:
+            handleShiftSymbolsToggle()
+
+        case .comma:
+            handleInputKey(",")
+
+        case .fullStop:
+            handleInputKey(".")
+
+        case .tab:
+            handleInputKey("\t")
+
+        case .keyboard:
+            // Globe/next keyboard button -- advance to next input method
+            AudioServicesPlaySystemSound(KeySound.modifier)
+            controller?.advanceToNextInputMode()
+
+        case .keyboardMode, .splitKeyboard, .normalKeyboard,
+             .sideKeyboardLeft, .sideKeyboardRight:
+            // iPad keyboard mode keys -- not supported on iPhone, no-op
+            AudioServicesPlaySystemSound(KeySound.modifier)
+
+        case .spacer, .caps:
+            // Spacer is a layout element, caps is handled by double-tap shift
+            break
+        }
+    }
+
+    func didTriggerDoubleTap(forKey key: KeyDefinition) {
+        switch key.type {
+        case .shift:
+            // Double-tap shift activates caps lock
+            // Haptic already fired in touchesBegan
+            AudioServicesPlaySystemSound(KeySound.modifier)
+            keyboardView?.page = .capslock
+            lastShiftTapTime = 0 // Reset to prevent triple-tap confusion
+            isManualShift = false // Caps lock is its own mode, not "manual shift"
+
+        default:
+            // Other keys don't have double-tap behavior in our layout
+            break
+        }
+    }
+
+    func didSwipeKey(_ key: KeyDefinition) {
+        // Swipe key inserts the alternate character (e.g., swipe down on "e" for accent)
+        // For now, treat same as regular trigger -- Phase 19 will add accent handling
+        didTriggerKey(key)
+    }
+
+    func didTriggerHoldKey(_ key: KeyDefinition) {
+        switch key.type {
+        case .backspace:
+            handleWordDelete()
+        default:
+            break
+        }
+    }
+
+    func didMoveCursor(_ movement: Int) {
+        // Spacebar trackpad cursor movement
+        controller?.textDocumentProxy.adjustTextPosition(byCharacterOffset: movement)
+        HapticFeedback.cursorMoved()
+    }
+
+    // MARK: - GiellaKeyboardViewKeyboardKeyDelegate
+
+    @objc func didTriggerKeyboardButton(sender: UIView, forEvent event: UIEvent) {
+        // This is the accessibility/globe button callback from GiellaKeyboardView.
+        // It creates an invisible UIButton over the keyboard/globe key for VoiceOver.
+        controller?.advanceToNextInputMode()
+    }
+
+    // MARK: - Key Action Handlers
+
+    /// Handle character input (letters, numbers, punctuation).
+    /// Inserts the character, plays letter sound, auto-unshifts after one letter,
+    /// then rechecks autocapitalization (e.g., typing "." may prepare shift for next char).
+    /// NOTE: Haptic fires in GiellaKeyboardView.touchesBegan() for ALL keys on touchDown.
+    private func handleInputKey(_ character: String) {
+        AudioServicesPlaySystemSound(KeySound.letter)
+
+        // Insert the character. When on shifted/capslock page, the key definition
+        // already contains the uppercase character, so we insert as-is.
+        controller?.textDocumentProxy.insertText(character)
+        secondToLastInsertedCharacter = lastInsertedCharacter
+        lastInsertedCharacter = character
+
+        // Auto-unshift after one character (unless caps locked).
+        // This matches iOS native behavior: shift is "one-shot" unless locked.
+        if let page = keyboardView?.page, page == .shifted {
+            keyboardView?.page = .normal
+            isManualShift = false
+        }
+
+        // Recheck autocapitalization after the character was inserted.
+        // Example: typing "." won't trigger autocap yet (need space after),
+        // but typing after "Hello. " should capitalize.
+        updateCapitalization()
+        updateAccentKeyDisplay()
+
+        // Trigger suggestion update after every character input.
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
+    }
+
+    /// Handle backspace/delete key with autocorrect undo support.
+    ///
+    /// If the user presses backspace immediately after an autocorrection,
+    /// undo the correction: delete the corrected word + trailing space,
+    /// then re-insert the original word. This matches iOS native behavior
+    /// where backspace after autocorrect restores what the user actually typed.
+    private func handleBackspace() {
+        AudioServicesPlaySystemSound(KeySound.delete)
+
+        // Check for autocorrect undo: if the last action was an autocorrection,
+        // pressing backspace undoes it instead of deleting a single character.
+        if let autocorrect = suggestionState?.lastAutocorrect {
+            let proxy = controller?.textDocumentProxy
+            // Delete the correction + the trailing space that was auto-inserted
+            let deleteCount = autocorrect.correctedWord.count + (autocorrect.insertedSpace ? 1 : 0)
+            for _ in 0..<deleteCount {
+                proxy?.deleteBackward()
+            }
+            proxy?.insertText(autocorrect.originalWord)
+            suggestionState?.lastAutocorrect = nil
+            lastInsertedCharacter = autocorrect.originalWord.last.map(String.init)
+            secondToLastInsertedCharacter = nil
+            updateCapitalization()
+            updateAccentKeyDisplay()
+            // Update suggestions for the restored original word
+            let context = proxy?.documentContextBeforeInput
+            suggestionState?.updateAsync(context: context)
+            return
+        }
+
+        // Normal backspace: delete one character
+        controller?.textDocumentProxy.deleteBackward()
+        secondToLastInsertedCharacter = nil
+        lastInsertedCharacter = nil
+        updateCapitalization()
+        updateAccentKeyDisplay()
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
+    }
+
+    /// Delete one word backwards (used during accelerated backspace repeat).
+    ///
+    /// WHY word-level: After holding backspace for ~10 characters, users expect faster
+    /// deletion. Switching to word-level matches iOS native behavior where long backspace
+    /// hold starts eating whole words.
+    ///
+    /// The algorithm: trim trailing spaces, find the previous word boundary (last space),
+    /// delete everything from cursor back to that boundary.
+    private func handleWordDelete() {
+        AudioServicesPlaySystemSound(KeySound.delete)
+        guard let proxy = controller?.textDocumentProxy,
+              let before = proxy.documentContextBeforeInput, !before.isEmpty else {
+            // Fallback: single character delete if no text context
+            controller?.textDocumentProxy.deleteBackward()
+            return
+        }
+
+        // Trim trailing spaces
+        var trimmed = before
+        var trailingSpaces = 0
+        while trimmed.hasSuffix(" ") {
+            trimmed = String(trimmed.dropLast())
+            trailingSpaces += 1
+        }
+
+        // Find word boundary (last space in trimmed text)
+        let charsInWord: Int
+        if let lastSpace = trimmed.lastIndex(of: " ") {
+            charsInWord = trimmed.distance(from: trimmed.index(after: lastSpace), to: trimmed.endIndex)
+        } else {
+            charsInWord = trimmed.count
+        }
+
+        // Delete trailing spaces + word (at least 1 character)
+        let total = trailingSpaces + charsInWord
+        for _ in 0..<max(1, total) {
+            proxy.deleteBackward()
+        }
+        secondToLastInsertedCharacter = nil
+        lastInsertedCharacter = nil
+        updateCapitalization()
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
+    }
+
+    /// Handle spacebar press with autocorrect and auto-full-stop detection.
+    ///
+    /// Autocorrect flow: Before inserting the space, check if the current word is
+    /// misspelled. If so, replace it with the correction and store undo state so
+    /// backspace can restore the original word.
+    ///
+    /// WHY autocorrect-on-space (not on every keystroke): This matches iOS native
+    /// behavior -- corrections appear only when the user finishes the word (space/return).
+    /// Correcting mid-word would be disorienting as the text changes while typing.
+    private func handleSpace() {
+        AudioServicesPlaySystemSound(KeySound.modifier)
+        secondToLastInsertedCharacter = lastInsertedCharacter
+
+        // Autocorrect check before space insertion.
+        // Only trigger if autocorrect is enabled, there's a current word, and the
+        // spell checker offers a different correction.
+        if let state = suggestionState, state.autocorrectEnabled,
+           !state.currentWord.isEmpty,
+           let correction = state.performSpellCheck(state.currentWord),
+           correction.lowercased() != state.currentWord.lowercased() {
+            // Replace the misspelled word with the correction
+            let proxy = controller?.textDocumentProxy
+            for _ in 0..<state.currentWord.count {
+                proxy?.deleteBackward()
+            }
+            proxy?.insertText(correction)
+            proxy?.insertText(" ")
+            lastInsertedCharacter = " "
+
+            // Store autocorrect state so backspace can undo it
+            state.lastAutocorrect = AutocorrectState(
+                originalWord: state.currentWord,
+                correctedWord: correction,
+                insertedSpace: true
+            )
+            state.clear()
+            updateCapitalization()
+            updateAccentKeyDisplay()
+            return
+        }
+
+        // Normal space handling with double-space period detection
+        if !handleAutoFullStop() {
+            controller?.textDocumentProxy.insertText(" ")
+            lastInsertedCharacter = " "
+        } else {
+            lastInsertedCharacter = " "
+        }
+
+        // After space, clear current word and update suggestions for new context.
+        suggestionState?.clear()
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
+
+        // After space (or period+space), recheck autocap.
+        updateCapitalization()
+        updateAccentKeyDisplay()
+    }
+
+    /// Handle return/newline key.
+    /// After inserting newline, recheck autocapitalization -- many apps use
+    /// .sentences autocap which should capitalize after a newline.
+    private func handleReturn() {
+        AudioServicesPlaySystemSound(KeySound.modifier)
+        controller?.textDocumentProxy.insertText("\n")
+        secondToLastInsertedCharacter = lastInsertedCharacter
+        lastInsertedCharacter = "\n"
+        suggestionState?.clear()
+        updateCapitalization()
+        updateAccentKeyDisplay()
+    }
+
+    /// Handle the adaptive accent key tap.
+    /// After a vowel: replaces the vowel with its most common French accent.
+    /// After a consonant or other character: inserts an apostrophe.
+    ///
+    /// WHY replace instead of appending: French accented characters are single Unicode
+    /// code points (e.g., e-acute = U+00E9), not base + combining mark. Replacing the
+    /// previous character with the accented version is how iOS native French keyboards
+    /// handle accent insertion as well.
+    private func handleAdaptiveAccentKey() {
+        AudioServicesPlaySystemSound(KeySound.letter)
+
+        let label = AccentedCharacters.adaptiveKeyLabel(
+            afterTyping: lastInsertedCharacter,
+            precedingChar: secondToLastInsertedCharacter
+        )
+
+        if AccentedCharacters.shouldReplace(afterTyping: lastInsertedCharacter, precedingChar: secondToLastInsertedCharacter) {
+            // Replace previous vowel with accented version
+            controller?.textDocumentProxy.deleteBackward()
+            controller?.textDocumentProxy.insertText(label)
+        } else {
+            // Insert apostrophe (or apostrophe after "qu" bigram)
+            controller?.textDocumentProxy.insertText(label)
+        }
+
+        secondToLastInsertedCharacter = lastInsertedCharacter
+        lastInsertedCharacter = label
+
+        // Auto-unshift after accent insertion (same as regular character)
+        if let page = keyboardView?.page, page == .shifted {
+            keyboardView?.page = .normal
+            isManualShift = false
+        }
+
+        updateCapitalization()
+        updateAccentKeyDisplay()
+        let context = controller?.textDocumentProxy.documentContextBeforeInput
+        suggestionState?.updateAsync(context: context)
+    }
+
+    /// Handle emoji button tap: triggers the emoji picker toggle.
+    private func handleEmojiToggle() {
+        AudioServicesPlaySystemSound(KeySound.modifier)
+        HapticFeedback.keyTapped()
+        onEmojiToggle?()
+    }
+
+    /// Update the accent key's displayed label based on lastInsertedCharacter.
+    /// Called after every keystroke so the accent key always shows the correct symbol:
+    /// an accent character after a vowel, or apostrophe otherwise.
+    private func updateAccentKeyDisplay() {
+        let label = AccentedCharacters.adaptiveKeyLabel(
+            afterTyping: lastInsertedCharacter,
+            precedingChar: secondToLastInsertedCharacter
+        )
+        keyboardView?.updateAccentKeyLabel(label)
+    }
+
+    /// Handle single shift tap: cycle through normal -> shifted -> normal.
+    /// Double-tap within 300ms activates caps lock.
+    ///
+    /// WHY we handle double-tap here AND in didTriggerDoubleTap:
+    /// The GiellaKeyboardView fires didTriggerDoubleTap for keys with supportsDoubleTap,
+    /// but we also detect it here as a fallback because the timing can differ between
+    /// the gesture recognizer and our manual tracking. Both paths lead to .capslock.
+    private func handleShift() {
+        AudioServicesPlaySystemSound(KeySound.modifier)
+
+        guard let kbView = keyboardView else { return }
+
+        let now = Date.timeIntervalSinceReferenceDate
+
+        // Check if this is a double-tap (within 300ms of last shift tap)
+        if (now - lastShiftTapTime) < Self.doubleTapThreshold {
+            // Double-tap -> caps lock
+            kbView.page = .capslock
+            lastShiftTapTime = 0
+            isManualShift = false
+            return
+        }
+
+        lastShiftTapTime = now
+
+        // Single tap: toggle between normal and shifted
+        switch kbView.page {
+        case .normal:
+            kbView.page = .shifted
+            isManualShift = true
+        case .shifted:
+            kbView.page = .normal
+            isManualShift = false
+        case .capslock:
+            kbView.page = .normal
+            isManualShift = false
+        default:
+            // On symbols pages, shift doesn't do anything
+            break
+        }
+    }
+
+    /// Handle 123/ABC layer switch.
+    /// Toggles between letter pages (normal/shifted/capslock) and symbols1.
+    private func handleSymbolsToggle() {
+        AudioServicesPlaySystemSound(KeySound.modifier)
+
+        guard let kbView = keyboardView else { return }
+
+        switch kbView.page {
+        case .normal, .shifted, .capslock:
+            kbView.page = .symbols1
+        case .symbols1, .symbols2:
+            kbView.page = .normal
+        }
+    }
+
+    /// Handle #+=/123 toggle on symbols pages.
+    /// Toggles between symbols1 and symbols2.
+    private func handleShiftSymbolsToggle() {
+        AudioServicesPlaySystemSound(KeySound.modifier)
+
+        guard let kbView = keyboardView else { return }
+
+        switch kbView.page {
+        case .symbols1:
+            kbView.page = .symbols2
+        case .symbols2:
+            kbView.page = .symbols1
+        default:
+            break
+        }
+    }
+
+    // MARK: - Auto-full-stop
+
+    /// Replaces double-space with ". " (period + space).
+    /// This is the standard iOS auto-punctuation behavior:
+    /// If the user types two spaces in a row after a word character,
+    /// replace "  " with ". " to end the sentence.
+    ///
+    /// Returns `true` if the substitution was performed (". " was inserted),
+    /// `false` if no substitution happened (caller should insert a normal space).
+    ///
+    /// WHY called BEFORE inserting the space: We need to check what's already
+    /// in the text buffer. The caller checks the return value to decide whether
+    /// to insert an additional space.
+    @discardableResult
+    private func handleAutoFullStop() -> Bool {
+        guard let proxy = controller?.textDocumentProxy,
+              let text = proxy.documentContextBeforeInput,
+              text.count >= 2 else { return false }
+
+        // Called BEFORE inserting second space. Buffer has: [char][space]
+        // Check: last char is space, char before space is not space and not period
+        guard text.hasSuffix(" ") else { return false }
+        let beforeSpace = text[text.index(text.endIndex, offsetBy: -2)]
+        guard beforeSpace != " " && beforeSpace != "." else { return false }
+
+        // Replace trailing space with ". "
+        proxy.deleteBackward()
+        proxy.insertText(". ")
+        return true
+    }
+
+    // MARK: - Autocapitalization
+
+    /// Checks the textDocumentProxy's autocapitalization type and sets the keyboard
+    /// page to .shifted when appropriate.
+    ///
+    /// This implements the standard iOS autocapitalization behavior:
+    /// - `.sentences`: Capitalize at start of text field and after sentence-ending
+    ///   punctuation (.!?) followed by a space or newline.
+    /// - `.words`: Capitalize at start of text field and after each space.
+    /// - `.allCharacters`: Always caps lock.
+    /// - `.none`: Never autocapitalize.
+    ///
+    /// WHY guard against capslock: If the user has manually activated caps lock
+    /// (via double-tap shift), autocapitalization must not interfere. The user
+    /// explicitly wants ALL CAPS and tapping shift will deactivate it.
+    func updateCapitalization() {
+        guard let proxy = controller?.textDocumentProxy else { return }
+        guard let kbView = keyboardView else { return }
+
+        // Don't override user's caps lock
+        guard kbView.page != .capslock else { return }
+        // Only autocap on letter pages (not symbols)
+        guard kbView.page == .normal || kbView.page == .shifted else { return }
+
+        let autocapType = proxy.autocapitalizationType ?? .sentences
+
+        switch autocapType {
+        case .sentences:
+            let beforeInput = proxy.documentContextBeforeInput ?? ""
+            if beforeInput.isEmpty {
+                // Beginning of text field -- capitalize first letter
+                kbView.page = .shifted
+                isManualShift = false
+            } else {
+                let trimmed = beforeInput.trimmingCharacters(in: .whitespaces)
+                let lastChar = trimmed.last
+                let endsWithSentencePunctuation = lastChar != nil && ".!?".contains(lastChar!)
+                let lastInputChar = beforeInput.last
+
+                if endsWithSentencePunctuation && (lastInputChar == " " || lastInputChar == "\n") {
+                    // After sentence-ending punctuation + space/newline -> capitalize
+                    kbView.page = .shifted
+                    isManualShift = false
+                } else if lastInputChar == "\n" {
+                    // After a newline (return key) -> capitalize for new paragraph
+                    kbView.page = .shifted
+                    isManualShift = false
+                } else if kbView.page == .shifted && !isManualShift {
+                    // Was shifted from autocap, now typing regular text -> return to normal
+                    kbView.page = .normal
+                }
+            }
+
+        case .words:
+            let beforeInput = proxy.documentContextBeforeInput ?? ""
+            if beforeInput.isEmpty || beforeInput.last == " " || beforeInput.last == "\n" {
+                kbView.page = .shifted
+                isManualShift = false
+            } else if kbView.page == .shifted && !isManualShift {
+                kbView.page = .normal
+            }
+
+        case .allCharacters:
+            kbView.page = .capslock
+
+        default: // .none
+            break
+        }
+    }
+}

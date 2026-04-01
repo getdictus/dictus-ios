@@ -8,6 +8,7 @@ struct CategoryInfo: Identifiable {
     let id: String
     let name: String
     let icon: String
+    let representativeEmoji: String?  // nil for recents (uses SF Symbol clock icon)
 }
 
 /// Full emoji picker matching Apple/SuperWhisper style:
@@ -18,10 +19,16 @@ struct EmojiPickerView: View {
     let onEmojiInsert: (String) -> Void
     let onDelete: () -> Void
     let onDismiss: () -> Void
+    /// Actual available width passed from the parent GeometryReader.
+    /// WHY a parameter: In keyboard extensions, UIHostingController may not give
+    /// SwiftUI content the full screen width due to safe area or layout margins.
+    /// Using the measured parent width guarantees the grid fits without clipping.
+    let availableWidth: CGFloat
+    /// Actual available height for the picker (excludes the toolbar).
+    let availableHeight: CGFloat
 
     @State private var recentEmojis: [String] = []
     @State private var selectedCategoryID: String = "smileys"
-    @State private var scrollToken: Int = 0
     @State private var isSearchActive: Bool = false
     @State private var searchText: String = ""
     @State private var showCursor: Bool = true
@@ -29,45 +36,63 @@ struct EmojiPickerView: View {
     @State private var searchTask: Task<Void, Never>? = nil
 
     private let categories = EmojiStore.categories
-    private let gridRows = Array(repeating: GridItem(.fixed(46), spacing: 2), count: 4)
 
-    /// Dynamic cell width: exactly 8 emojis per row on any device.
-    /// (screenWidth - 4pt grid padding) / 8
+    // Grid sizing constants
+    private let headerHeight: CGFloat = 20
+    private let categoryBarHeight: CGFloat = 36
+    private let rowSpacing: CGFloat = 1
+
+    /// Number of rows that fit in available height after subtracting header + category bar.
+    private var rowCount: Int {
+        let gridSpace = availableHeight - headerHeight - categoryBarHeight
+        let rowWithSpacing: CGFloat = rowHeight + rowSpacing
+        return max(3, Int(gridSpace / rowWithSpacing))
+    }
+
+    /// Height per emoji row, computed to fill available space evenly.
+    private var rowHeight: CGFloat { 42 }
+
+    private var gridRows: [GridItem] {
+        Array(repeating: GridItem(.fixed(rowHeight), spacing: rowSpacing), count: rowCount)
+    }
+
+    /// Columns for vertical grid: 8 emojis per row filling the full width.
+    private var gridColumns: [GridItem] {
+        Array(repeating: GridItem(.fixed(emojiCellWidth), spacing: 0), count: 8)
+    }
+
+    /// Dynamic cell width: exactly 8 emojis per row based on actual available width.
     private var emojiCellWidth: CGFloat {
-        (UIScreen.main.bounds.width - 4) / 8
+        (availableWidth - 4) / 8
     }
 
     // MARK: - Computed data
 
-    private var flatItems: [EmojiGridItem] {
-        var items: [EmojiGridItem] = []
-        for (i, emoji) in recentEmojis.enumerated() {
-            items.append(EmojiGridItem(id: "recents_\(i)", emoji: emoji, categoryID: "recents"))
-        }
-        for cat in categories {
-            for (i, emoji) in cat.emojis.enumerated() {
-                items.append(EmojiGridItem(id: "\(cat.id)_\(i)", emoji: emoji, categoryID: cat.id))
+    /// Returns only the emojis for the currently selected category.
+    /// WHY category pagination: The previous flat grid rendered ALL ~1800 emojis at once,
+    /// causing CoreText to cache every glyph (~65KB each) = 139 MiB. By showing only one
+    /// category at a time (max ~230 emojis), peak memory stays under ~15 MiB.
+    private var currentCategoryEmojis: [EmojiGridItem] {
+        if selectedCategoryID == "recents" {
+            return recentEmojis.enumerated().map { i, emoji in
+                EmojiGridItem(id: "recents_\(i)", emoji: emoji, categoryID: "recents")
             }
         }
-        return items
-    }
-
-    private var categoryFirstIDs: [String: String] {
-        var result: [String: String] = [:]
-        if !recentEmojis.isEmpty { result["recents"] = "recents_0" }
-        for cat in categories where !cat.emojis.isEmpty {
-            result[cat.id] = "\(cat.id)_0"
+        guard let cat = categories.first(where: { $0.id == selectedCategoryID }) else {
+            return []
         }
-        return result
+        return cat.emojis.enumerated().map { i, emoji in
+            EmojiGridItem(id: "\(cat.id)_\(i)", emoji: emoji, categoryID: cat.id)
+        }
     }
 
     private var sectionInfos: [CategoryInfo] {
         var infos: [CategoryInfo] = []
         if !recentEmojis.isEmpty {
-            infos.append(CategoryInfo(id: "recents", name: "Récents", icon: "clock"))
+            infos.append(CategoryInfo(id: "recents", name: "Récents", icon: "clock", representativeEmoji: nil))
         }
         for cat in categories {
-            infos.append(CategoryInfo(id: cat.id, name: cat.name, icon: cat.icon))
+            infos.append(CategoryInfo(id: cat.id, name: cat.name, icon: cat.icon, representativeEmoji: cat.representativeEmoji))
         }
         return infos
     }
@@ -87,7 +112,8 @@ struct EmojiPickerView: View {
                 normalMode
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(width: availableWidth, height: availableHeight)
+        .clipped()
         .onAppear {
             recentEmojis = RecentEmojis.load()
             if !recentEmojis.isEmpty {
@@ -107,36 +133,32 @@ struct EmojiPickerView: View {
                 .foregroundColor(.secondary)
             Spacer()
         }
-        .padding(.horizontal, 10)
-        .padding(.top, 6)
-        .padding(.bottom, 2)
+        .padding(.horizontal, 8)
+        .padding(.top, 4)
+        .padding(.bottom, 1)
 
-        // Continuous horizontal emoji grid (4 rows, 8 per row)
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHGrid(rows: gridRows, alignment: .top, spacing: 0) {
-                    ForEach(flatItems) { item in
-                        Button {
-                            HapticFeedback.keyTapped()
-                            onEmojiInsert(item.emoji)
-                            RecentEmojis.add(item.emoji)
-                        } label: {
-                            Text(item.emoji)
-                                .font(.system(size: 34))
-                                .frame(width: emojiCellWidth, height: 46)
-                        }
-                        .id(item.id)
+        // Vertical emoji grid — fills width first, scrolls down for more.
+        // .id(selectedCategoryID) forces SwiftUI to destroy and recreate the grid when
+        // the user switches categories, which releases the old Text views and their
+        // CoreText glyph caches -- this is the key to keeping memory under 50 MiB.
+        ScrollView(.vertical, showsIndicators: false) {
+            LazyVGrid(columns: gridColumns, spacing: 0) {
+                ForEach(currentCategoryEmojis) { item in
+                    Button {
+                        HapticFeedback.keyTapped()
+                        onEmojiInsert(item.emoji)
+                        RecentEmojis.add(item.emoji)
+                        recentEmojis = RecentEmojis.load()
+                    } label: {
+                        Text(item.emoji)
+                            .font(.system(size: 32))
+                            .frame(width: emojiCellWidth, height: rowHeight)
                     }
-                }
-                .padding(.horizontal, 2)
-            }
-            .onChange(of: scrollToken) { _ in
-                if let firstID = categoryFirstIDs[selectedCategoryID] {
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        proxy.scrollTo(firstID, anchor: .leading)
-                    }
+                    .id(item.id)
                 }
             }
+            .padding(.horizontal, 2)
+            .id(selectedCategoryID)
         }
 
         EmojiCategoryBar(
@@ -144,7 +166,6 @@ struct EmojiPickerView: View {
             selectedCategoryID: selectedCategoryID,
             onSelectCategory: { id in
                 selectedCategoryID = id
-                scrollToken += 1
             },
             onSearch: { isSearchActive = true },
             onDelete: onDelete,
@@ -159,21 +180,19 @@ struct EmojiPickerView: View {
         // Search input bar
         searchInputBar
             .padding(.horizontal, 8)
-            .padding(.top, 4)
-            .padding(.bottom, 2)
+            .padding(.top, 2)
+            .padding(.bottom, 1)
 
         // Emoji row: recents when empty, results when searching.
-        // Apple always shows emojis here — recents if nothing typed, or all emojis
-        // sorted by last usage if no recents exist (row is never empty).
         let emojiRow = searchModeEmojis
         if emojiRow.isEmpty {
             Text("Aucun résultat")
                 .foregroundColor(.secondary)
                 .font(.system(size: 14))
-                .frame(height: 48)
+                .frame(height: 38)
         } else {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 2) {
+                LazyHStack(spacing: 2) {
                     ForEach(Array(emojiRow.enumerated()), id: \.offset) { _, emoji in
                         Button {
                             HapticFeedback.keyTapped()
@@ -181,14 +200,14 @@ struct EmojiPickerView: View {
                             RecentEmojis.add(emoji)
                         } label: {
                             Text(emoji)
-                                .font(.system(size: 34))
-                                .frame(width: emojiCellWidth, height: 46)
+                                .font(.system(size: 30))
+                                .frame(width: emojiCellWidth, height: 38)
                         }
                     }
                 }
                 .padding(.horizontal, 4)
             }
-            .frame(height: 48)
+            .frame(height: 38)
         }
 
         Spacer(minLength: 0)
@@ -216,7 +235,7 @@ struct EmojiPickerView: View {
 
     /// Search bar for search mode with cursor.
     private var searchInputBar: some View {
-        let barWidth = UIScreen.main.bounds.width - 16 // 8pt margin each side
+        let barWidth = availableWidth - 16 // 8pt margin each side
         return HStack(spacing: 0) {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
@@ -248,8 +267,8 @@ struct EmojiPickerView: View {
             }
         }
         .lineLimit(1)
-        .padding(.horizontal, 14)
-        .padding(.vertical, 7)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 5)
         .frame(width: barWidth)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
@@ -292,6 +311,8 @@ struct EmojiPickerView: View {
         }
     }
 
+    private let maxSearchResults = 30
+
     private func searchFrench(query: String) -> [String] {
         var results: [String] = []
         var seen = Set<String>()
@@ -301,6 +322,7 @@ struct EmojiPickerView: View {
                 for emoji in emojis where !seen.contains(emoji) {
                     results.append(emoji)
                     seen.insert(emoji)
+                    if results.count >= maxSearchResults { return results }
                 }
             }
         }
@@ -310,15 +332,21 @@ struct EmojiPickerView: View {
             if entry.name.contains(query) {
                 results.append(entry.emoji)
                 seen.insert(entry.emoji)
+                if results.count >= maxSearchResults { return results }
             }
         }
         return results
     }
 
     private func searchUnicodeName(query: String) -> [String] {
-        EmojiStore.allEmojiNames
-            .filter { $0.name.contains(query) }
-            .map { $0.emoji }
+        var results: [String] = []
+        for entry in EmojiStore.allEmojiNames {
+            if entry.name.contains(query) {
+                results.append(entry.emoji)
+                if results.count >= maxSearchResults { return results }
+            }
+        }
+        return results
     }
 }
 
@@ -342,7 +370,7 @@ private struct MiniSearchKeyboard: View, Equatable {
         true // Layout never changes, only closures differ
     }
 
-    private let keyHeight: CGFloat = 40
+    private let keyHeight: CGFloat = 34
 
     private var rows: [[String]] {
         switch LayoutType.active {
@@ -362,7 +390,7 @@ private struct MiniSearchKeyboard: View, Equatable {
     }
 
     var body: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 3) {
             ForEach(Array(rows.enumerated()), id: \.offset) { rowIndex, row in
                 HStack(spacing: 4) {
                     ForEach(row, id: \.self) { letter in
@@ -404,7 +432,7 @@ private struct MiniSearchKeyboard: View, Equatable {
             .foregroundColor(Color(.label))
         }
         .padding(.horizontal, KeyMetrics.rowSidePadding)
-        .padding(.bottom, 4)
+        .padding(.bottom, 2)
     }
 }
 
