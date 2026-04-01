@@ -184,10 +184,10 @@ Plans:
   1. User can type new characters after an autocorrect, then press backspace, and the backspace deletes the last typed character (not undo the earlier autocorrect)
   2. User can tap "Licenses" in Settings and sees a link pointing to getdictus/dictus-ios repository
   3. User can see Parakeet/NVIDIA attribution listed on the licenses screen alongside existing credits
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 23-01: Fix autocorrect undo race condition + license updates
+- [ ] 23-01-PLAN.md — Fix autocorrect undo race condition + complete license attribution (FIX-01, FIX-02, FIX-03)
 
 ### Phase 24: SymSpell Spell Correction
 **Goal**: Users get frequency-ranked spell corrections that match their intent instead of alphabetical guesses
