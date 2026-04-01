@@ -1,183 +1,178 @@
 # Domain Pitfalls
 
-**Domain:** iOS keyboard extension rebuild (giellakbd-ios integration) + Public TestFlight Beta
-**Researched:** 2026-03-27
-**Confidence:** HIGH (based on giellakbd-ios source analysis, Dictus project history, Apple documentation, community reports, and v1.0-v1.2 lessons learned)
+**Domain:** iOS keyboard extension — probability-based text prediction upgrade + cold start auto-return + stability fixes
+**Researched:** 2026-04-01
+**Confidence:** HIGH (based on SymSpell documentation, Apple DTS responses, issue #23 research report, issue #67/68 analysis, Dictus codebase audit, community reports)
 
-**Context:** Dictus v1.3 replaces the SwiftUI-based keyboard (DragGesture, dead zones) with a UICollectionView-based keyboard derived from giellakbd-ios (Divvun). The existing app has a two-process architecture (keyboard extension + main app), 25+ custom features to reintegrate, and must pass Beta App Review for public TestFlight distribution.
+**Context:** Dictus v1.4 adds SymSpell-based spell correction, n-gram/trigram next-word prediction, fixes autocorrect undo state bug (#67), and researches cold start auto-return (#23). All changes target the existing keyboard extension with a 50MB memory limit, offline-only constraint, and must not degrade typing fluidity (<10ms per prediction).
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, App Store rejection, or multi-day stalls.
+Mistakes that cause rewrites, keyboard crashes, or multi-day stalls.
 
-### Pitfall 1: Hybrid UIKit/SwiftUI Touch Conflict in Reintegrated Overlays
+### Pitfall 1: SymSpell Dictionary Pre-computation Blows Memory Budget at Load Time
 
 **What goes wrong:**
-giellakbd-ios uses raw `touchesBegan/Moved/Ended/Cancelled` on its `KeyboardView` (a UICollectionView) for all key input. Dictus features like the RecordingOverlay, EmojiPickerView, SuggestionBarView, AccentPopup, and ToolbarView are all SwiftUI views. When a SwiftUI view is hosted (via UIHostingController) above or alongside a UIView that handles touches directly, the gesture recognizer systems collide:
+SymSpell's speed comes from pre-computing all deletion variants of dictionary words at startup. For a 82K-word dictionary with max edit distance 2, this generates ~25 delete variants per word = ~2M dictionary entries stored in a hash map. The C# reference implementation reports "significantly" higher memory when the dictionary is loaded all at once.
 
-- SwiftUI's gesture system (DragGesture, TapGesture) competes with UIKit's `touchesBegan` for first-responder hit testing
-- UIHostingController adds its own gesture recognizers that can intercept touches before they reach the UICollectionView
-- The recording overlay needs to block ALL keyboard touches when visible, but UIKit touch methods bypass SwiftUI's `.disabled()` modifier
-- AccentPopup (SwiftUI) shows above keys (UIKit) -- touches on the popup that miss a button fall through to the UICollectionView and type a letter
+In the keyboard extension's 50MB budget, you have roughly 15-20MB available after the keyboard UI, toolbar, and system overhead. Loading a 100K-word French frequency dictionary into SymSpell can easily consume 15-30MB of RAM during pre-computation (the in-memory hash map of all delete variants plus the original entries). On 4GB RAM devices (iPhone 12, SE 3), iOS may terminate the extension mid-load with no crash log — the keyboard simply disappears.
 
-This is exactly the class of problem that caused the Phase 15.4 dead zones. The difference: now the UIKit layer is the keyboard (correct), but the overlaid features are still SwiftUI (risky).
+The SymSpellSwift library (v0.1.4, August 2025) calls `loadDictionary()` synchronously, blocking the thread until all entries are processed. If loaded on the main thread or early in `viewDidLoad`, the keyboard takes 1-3 seconds to appear, triggering iOS's watchdog timer which kills extensions that don't present within ~6 seconds.
 
 **Why it happens:**
-Dictus has 13 SwiftUI view files in the keyboard extension. Rewriting them all in UIKit is prohibitively expensive. The natural approach is to keep them as SwiftUI hosted above the UIKit keyboard. But UIKit and SwiftUI have fundamentally different touch delivery pipelines.
+SymSpell trades memory for speed. The algorithm pre-computes deletions so lookups are O(1), but the pre-computation requires holding all variants in memory simultaneously. Most SymSpell usage is in server-side applications with gigabytes of RAM, not 50MB iOS extensions.
 
 **Consequences:**
-Ghost taps on keys during recording overlay. Accent popup selects wrong character. Emoji picker closes unexpectedly. Dead zones return at SwiftUI/UIKit boundary.
+Keyboard killed silently during dictionary load. Users see system keyboard appear instead of Dictus. On slower devices, keyboard appears blank for 1-3 seconds before keys render.
 
 **Prevention:**
-1. **Use a single UIKit view hierarchy with SwiftUI islands**: The giellakbd-ios KeyboardView should be the root touch handler. SwiftUI overlays (RecordingOverlay, EmojiPicker) should be presented as child UIHostingControllers with `view.isUserInteractionEnabled = true` and the keyboard's `isUserInteractionEnabled = false` when overlays are active
-2. **Block touches at the UIKit level, not SwiftUI level**: When RecordingOverlay is visible, set `keyboardView.isUserInteractionEnabled = false`. Do NOT rely on SwiftUI's `.allowsHitTesting(false)` -- it does not propagate down to UIKit siblings
-3. **Test touch boundary at every overlay edge**: Specifically test: (a) tapping the 1px gap between suggestion bar and keyboard, (b) tapping AccentPopup's triangle pointer, (c) swiping from keyboard area into the recording overlay, (d) tapping emoji picker dismiss area
-4. **Consider pure UIKit for AccentPopup**: This is the highest-risk overlay because it appears directly on top of keys. A simple UIView with UIButtons is safer than a SwiftUI overlay bridged through UIHostingController
+1. **Limit dictionary size to 30K-50K words maximum**: The top 30K French words cover ~99% of daily usage. Pre-compute on a Mac, measure RAM with Instruments on device, and reduce until comfortably under 10MB resident
+2. **Use max edit distance 1, not 2**: Edit distance 1 generates ~5 deletes per word vs ~25 for distance 2. This cuts memory by ~5x. For a keyboard where context disambiguates, edit distance 1 catches most typos (adjacent key errors, missing/extra letter)
+3. **Load dictionary on a background queue, never main thread**: Use `DispatchQueue(label:qos:)` with `.utility` priority. Show basic UITextChecker-based suggestions until SymSpell is ready (progressive enhancement)
+4. **Pre-serialize the SymSpell data structure**: Instead of loading a text dictionary and computing deletions at runtime, serialize the fully-computed hash map to a binary file during development. Load the binary via `mmap` at runtime for near-instant startup with minimal memory overhead (only pages accessed are loaded)
+5. **Profile on iPhone SE or iPhone 12 (4GB RAM)**: These devices have the tightest memory and are the canary for extension crashes. Test with Instruments > Allocations attached to the keyboard extension process
 
 **Warning signs:**
-Tapping a key produces no character. Tapping the recording overlay types a letter underneath. Long-press accent popup shows but selecting an accent also triggers the key below.
+Keyboard disappears after switching languages. Keyboard takes >1 second to appear. Instruments shows >15MB spike during startup.
 
 **Phase to address:**
-Keyboard rebuild phase (feature reintegration sub-phase). Build the keyboard base first, then integrate ONE overlay at a time, testing touch delivery after each.
+Prediction engine upgrade phase. Must be resolved before any n-gram model is added (SymSpell + n-gram together will be even tighter).
 
 ---
 
-### Pitfall 2: giellakbd-ios Height Constraint Flicker on First Appearance
+### Pitfall 2: N-gram Model Too Large or Too Slow Without mmap
 
 **What goes wrong:**
-giellakbd-ios uses `viewDidLayoutSubviews()` to initialize its height constraint and `NSLayoutConstraint` with priority 999. On first keyboard appearance, iOS calls layout multiple times as the input view transitions from zero-height to full-height. This produces a visible "bounce" or "double-height" effect documented in [giellakbd-ios issue #28](https://github.com/divvun/giellakbd-ios/issues/28) -- the keyboard height effectively doubles before settling.
+A trigram language model trained on French Wikipedia/OpenSubtitles can easily reach 50-500MB as a raw text file. Even pruned to top-frequency trigrams, a usable French model is 5-20MB. If loaded entirely into RAM as a Swift `Dictionary<String, [String: Float]>`, the overhead of Swift's reference-counted objects, hash table buckets, and String allocations inflates the on-disk size by 3-5x in memory. A 10MB on-disk trigram file becomes 30-50MB in RAM — enough to kill the extension by itself.
 
-Dictus compounds this because it adds a ToolbarView (mic button + suggestion bar) above the keyboard rows, increasing total height. If the height constraint is set before the toolbar is measured, the keyboard appears too short, then jumps to correct height. If set after, iOS may have already committed the animation and the jump is visible.
-
-Additionally, Dictus currently manages its own `heightConstraint` in KeyboardViewController (line 15) for recording overlay sizing. Introducing giellakbd-ios's separate height management creates two competing constraints.
+Additionally, if using KenLM (C++ library), the model files use a custom binary format designed for `mmap`. KenLM's entire performance story relies on memory-mapped files — the OS loads pages on demand, and the resident memory is only the pages actually queried. But `mmap` in a keyboard extension has a subtlety: the file must be in the extension's bundle or in the shared App Group container. If the model file is in the main app bundle (not the extension bundle), `mmap` returns `MAP_FAILED` because the extension cannot access the main app's sandbox.
 
 **Why it happens:**
-In keyboard extensions, `inputView.frame` is zero in `viewDidLoad`. Height must be set in `viewWillAppear` or `viewDidLayoutSubviews`, but iOS calls these multiple times during the initial presentation animation. The system's own height constraint (default keyboard height) fights with the custom constraint until the priority-999 constraint wins.
+Language models are designed for machines with abundant RAM. iOS keyboard extensions are among the most memory-constrained environments in mobile computing. Developers who prototype on the Simulator (which has the Mac's full RAM) never see the crash — it only appears on physical devices.
 
 **Consequences:**
-Keyboard flickers or bounces on first appearance. Users see a brief flash of incorrect height. On some devices (iPhone SE), the keyboard may appear cut off if the initial constraint is wrong.
+Extension crashes on first prediction query. Or: extension loads but crashes when user types a 3rd word (triggering the first trigram lookup that touches cold pages). Model works on Simulator but fails on every physical device.
 
 **Prevention:**
-1. **Set height constraint in viewWillAppear, not viewDidLayoutSubviews**: Use `viewWillAppear` for initial constraint setup. Use a `Bool` flag to ensure it only runs once per appearance cycle
-2. **Single source of truth for height**: Remove Dictus's existing `heightConstraint` and use only giellakbd-ios's `KeyboardHeightProvider.height()` pattern, extended to include toolbar height
-3. **Disable the system's default constraint**: Set `inputView?.translatesAutoresizingMaskIntoConstraints = false` immediately after assigning the custom inputView (but ONLY on the inputView subviews -- the inputView itself must keep autoresizing masks as noted in Dictus's existing code comment on line 42-44 of KeyboardViewController.swift)
-4. **Pre-calculate total height**: Compute `keyboardRowsHeight + toolbarHeight + safeAreaInset` BEFORE layout, using giellakbd-ios's `KeyboardHeightProvider` extended with Dictus toolbar dimensions
-5. **Test on iPhone SE (compact class) specifically**: This device has the smallest keyboard and is most sensitive to height calculation errors
+1. **Use mmap from the start, not Dictionary in RAM**: Build a custom binary trie or use KenLM's binary format. Memory-map the file so only queried pages are resident. Target <2MB resident memory for the n-gram component
+2. **Store model file in the keyboard extension bundle, not the app bundle**: In Xcode, add the model file's Target Membership to DictusKeyboard, not DictusApp. Or store in the App Group container (writable, accessible by both targets)
+3. **Pure Swift trigram engine over KenLM unless C++ bridging is already needed**: KenLM is fast but adds C++ compilation complexity to the keyboard extension target (see Pitfall 3). A custom binary trie in pure Swift with `mmap` via `Data(contentsOf:options:.mappedIfSafe)` achieves the same result without bridging headers
+4. **Prune aggressively**: Keep only trigrams that appear >5 times in the training corpus. For French, this typically reduces a 500MB model to 5-10MB while retaining 95%+ of prediction quality
+5. **Single language loaded at a time**: Never load both French and English models simultaneously. Load on language switch, unmap the previous model. Current architecture already does this for FrequencyDictionary
 
 **Warning signs:**
-Keyboard appears, shrinks, then grows. Keyboard height is different on first appearance vs subsequent appearances. Toolbar overlaps the text field above.
+Extension works in Simulator but crashes on device. Memory climbs steadily as user types. `os_proc_available_memory()` returns <5MB after model load.
 
 **Phase to address:**
-Keyboard rebuild phase (base integration). This must be solid before adding toolbar or overlays.
+Prediction engine upgrade phase (n-gram sub-task). Must test on physical device after every model size change.
 
 ---
 
-### Pitfall 3: Memory Budget Exceeded by UICollectionView Cell Allocation
+### Pitfall 3: C++ Bridging Header in Keyboard Extension Breaks Build or Blocks APIs
 
 **What goes wrong:**
-The keyboard extension has a ~50MB memory limit (iOS kills it silently above this). The current SwiftUI keyboard is lightweight because SwiftUI manages view lifecycle automatically. UICollectionView with dequeued cells has different memory characteristics:
+If using KenLM (C++ library) for the n-gram model, the keyboard extension target needs either:
+- A bridging header (traditional approach: Obj-C++ wrapper around C++ code)
+- Swift-C++ interop enabled (Xcode 15+: set "C++ and Objective-C Interoperability" to "C/C++")
 
-- giellakbd-ios's `KeyView` creates multiple UILabels and a UIImageView per cell. A 4-row AZERTY keyboard with 10-11 keys per row = ~42 cells. Each `KeyView` has 3-5 subviews with Auto Layout constraints
-- Cell reuse only helps when scrolling. A keyboard shows ALL cells simultaneously -- no reuse occurs. Every cell is fully allocated in memory at once
-- giellakbd-ios's `KeyOverlayView` (the long-press popup) creates additional views on demand
-- Dictus adds: SuggestionBarView (~3 suggestion cells), EmojiPickerView (potentially hundreds of emoji glyphs -- this was already identified as memory-unsafe in PROJECT.md), TextPredictionEngine (~5MB), and RecordingOverlay with Canvas waveform
+Both approaches have pitfalls in extension targets:
 
-Total: keyboard cells + overlay views + text prediction + suggestion bar + waveform. If this exceeds ~35-40MB (leaving room for WhisperKit IPC and system overhead), iOS terminates the extension with no crash log -- the keyboard simply disappears and the system keyboard takes over.
+**Bridging header approach:**
+- Keyboard extensions set `APPLICATION_EXTENSION_API_ONLY = YES` automatically. If KenLM or its dependencies use any UIKit API or `UIApplication.shared`, the build fails with "API unavailable for app extensions"
+- KenLM uses `<iostream>`, `<unordered_map>`, `<string>` — standard C++ headers. These compile fine. But if KenLM's build configuration pulls in `pthread` or `mmap` POSIX APIs in ways that conflict with the extension sandbox, you get runtime crashes, not compile errors
+- The bridging header affects ALL Swift files in the target. If it includes C++ headers that define macros conflicting with Swift keywords (e.g., `#define assert(...)` in a C++ header vs Swift's `assert()`), you get cryptic compile errors across unrelated files
+
+**Swift-C++ interop approach:**
+- This is newer (stable since Xcode 15/Swift 5.9). Not all C++ patterns are supported — KenLM uses templates, exceptions, and custom allocators that may not bridge cleanly
+- The build setting applies to the entire target. If any existing ObjC code in the keyboard target doesn't compile under C++ interop mode, everything breaks
 
 **Why it happens:**
-giellakbd-ios was designed for standalone keyboard extensions without heavy companion features. Dictus loads substantially more into the same 50MB budget. The UICollectionView approach trades dead-zone-free touch handling for higher baseline memory usage compared to SwiftUI's lazy rendering.
+KenLM was designed for Linux/server environments. It has never been tested in an iOS app extension sandbox. The documentation doesn't mention iOS at all.
 
 **Consequences:**
-Keyboard crashes silently (no crash log, just disappears). Users see the system keyboard replace Dictus without warning. Crash frequency varies by device (4GB RAM devices hit the limit sooner).
+Build fails with 50+ errors after adding KenLM. Hours spent chasing linker errors. Or: builds but crashes at runtime when KenLM calls a POSIX function restricted in the extension sandbox.
 
 **Prevention:**
-1. **Profile memory on device immediately after base keyboard works**: Use Instruments > Allocations with the keyboard extension target. Establish baseline before adding any Dictus features
-2. **Budget allocation**: Keyboard base (UICollectionView + cells) target <10MB. Toolbar + suggestions <5MB. Text prediction <5MB. Recording overlay + waveform <5MB. Leaves ~25MB for system overhead and IPC
-3. **Do NOT build EmojiPickerView into the keyboard**: PROJECT.md already notes this is memory-unsafe. Use system emoji cycling (globe key) instead. The existing emoji picker was a v1.1 feature that should not survive the rebuild
-4. **Lazy-load overlays**: RecordingOverlay and AccentPopup should be created on demand and destroyed when dismissed, not kept in the view hierarchy
-5. **Reuse KeyView instances**: Even though UICollectionView doesn't scroll, consider a custom layout that reuses cells when switching between keyboard layers (letters/numbers/symbols) rather than maintaining separate cell sets for each layer
-6. **Use `os_proc_available_memory()` at startup**: Log available memory. If below 30MB at launch, skip non-essential features (disable text prediction, simplify waveform)
+1. **Strongly prefer a pure Swift n-gram engine over KenLM**: Write a custom binary trie reader in Swift. The query logic is simple: given W1 and W2, look up P(W3|W1,W2) and return top-3 candidates. This avoids all C++ complexity
+2. **If KenLM is chosen, wrap it in a static XCFramework**: Build KenLM as a static library (.a) on macOS with the iOS SDK, wrap it in an ObjC++ interface that exposes only `-(NSArray<NSString*>*)predictNext:(NSString*)context`, and import the framework. This isolates C++ from Swift
+3. **Test the build on a clean checkout before adding any feature code**: Add the C++ files, verify `xcodebuild -target DictusKeyboard` succeeds, commit. Then add feature code. This prevents conflating C++ build issues with logic bugs
+4. **Check KenLM does not call `fork()`, `exec()`, or `dlopen()`**: These are prohibited in app extensions. Grep KenLM source for these calls before integrating
 
 **Warning signs:**
-Keyboard disappears during emoji picker scroll. Keyboard disappears after third or fourth recording. Memory warnings in Instruments (but NOT in console -- keyboard extensions don't always log memory warnings before termination).
+`Undefined symbols for architecture arm64` errors. `Use of undeclared identifier 'UIApplication'` in KenLM wrapper. Build succeeds but extension crashes on launch with `EXC_CRASH (SIGKILL)`.
 
 **Phase to address:**
-Keyboard rebuild phase. Memory profiling must happen BEFORE feature reintegration begins. If the base keyboard + giellakbd-ios already uses >15MB, the approach needs revision.
+Prediction engine upgrade phase. Decision must be made BEFORE implementation starts: pure Swift or C++ bridge. Do not defer this decision.
 
 ---
 
-### Pitfall 4: Beta App Review Rejection for Full Access + Privacy Manifest Gaps
+### Pitfall 4: Cold Start Auto-Return is Fundamentally Impossible via Public API
 
 **What goes wrong:**
-Public TestFlight requires Beta App Review. Beta App Review is lighter than full App Store review but still checks for:
-- Privacy Manifest completeness (required since Spring 2024)
-- Full Access justification (keyboard extensions requesting Open Access face extra scrutiny)
-- Obvious guideline violations (5.1.1 data collection, 2.5.1 software requirements)
+The team spends days or weeks researching and prototyping auto-return approaches that have already been proven impossible. Issue #23 documents three failed approaches:
+1. **KnownAppSchemes iteration with canOpenURL**: Always opens the first installed app (WhatsApp), not the source app. `canOpenURL` only checks if an app is installed, not if it's the most recent
+2. **Host bundle ID detection from keyboard extension**: `_hostBundleID` is a private API — fragile and App Store rejection risk. No public API exposes the host app's identity
+3. **Programmatic swipe-back simulation**: No public API for gesture simulation. Private APIs = guaranteed rejection
 
-Dictus has `RequestsOpenAccess = true` because the microphone requires Full Access. Beta App Review will verify:
-1. The Privacy Manifest (`PrivacyInfo.xcprivacy`) in BOTH the app AND the keyboard extension target declares all required API usage reasons
-2. The `NSMicrophoneUsageDescription` explains WHY a keyboard needs the microphone
-3. No user-typed text is persisted to disk (guideline 5.1.1 specifically targets keyboard extensions)
-4. The "What's New" or test notes explain the keyboard's Full Access need
-
-If any of these are missing or vague, the build is rejected. Rejection cycle is 24-48 hours per attempt, and each resubmission goes to the back of the queue.
+An Apple DTS engineer confirmed in January 2026: "There is no API for the containing app to bring the host app back to the foreground." The system back arrow (top-left) is the officially supported mechanism.
 
 **Why it happens:**
-The v1.2 private beta skipped Beta App Review (internal testers only -- no review required for up to 100 internal testers). Moving to external/public TestFlight triggers the first-ever Beta App Review for Dictus. Privacy requirements that were invisible for internal distribution suddenly become blockers.
+Competitors like Wispr Flow appear to do auto-return, creating an expectation. In reality, their "return" is user-assisted (system back arrow + UX guidance), not programmatic. The illusion comes from fast session activation + clear UX instruction.
 
 **Consequences:**
-Build rejected, 24-48 hour delay per cycle. Multiple rejections possible if issues are found incrementally (Apple sometimes reports one issue at a time). Public beta launch delayed by days or weeks.
+Wasted development time on impossible approaches. Risk of implementing private API usage that causes App Store rejection. Frustration cycle of "it almost works" with each new hack.
 
 **Prevention:**
-1. **Audit PrivacyInfo.xcprivacy in BOTH targets**: The keyboard extension AND the main app each need their own Privacy Manifest. Check that `NSPrivacyAccessedAPITypes` lists all required-reason APIs:
-   - `NSPrivacyAccessedAPICategoryFileTimestamp` (if using file modification dates in logging)
-   - `NSPrivacyAccessedAPICategoryUserDefaults` (App Group UserDefaults)
-   - `NSPrivacyAccessedAPICategoryDiskSpace` (if checking available space for models)
-2. **Write detailed Beta App Review notes**: Explain "This keyboard uses Full Access solely for microphone access to provide on-device speech-to-text dictation. No keystroke data is transmitted off-device. All speech processing uses WhisperKit running locally."
-3. **Verify no transcription text hits PersistentLog**: Run `grep -r "lastTranscription\|transcriptionResult\|documentContext\|textDocumentProxy.documentContext" DictusKeyboard/` and verify zero matches in any log call
-4. **Include a privacy policy URL**: App Store Connect requires a privacy policy URL for public TestFlight. This was noted as pending in Phase 16. It MUST be live before submission
-5. **Test the review flow with a dry-run build first**: Upload a build, add it to an external test group with just 1 email, and let it go through review before announcing the public link
+1. **Accept the constraint**: There is no auto-return API. Period. Apple DTS confirmed this. Do not re-research
+2. **Optimize the existing swipe-back overlay UX instead**: The overlay (implemented in Phase 13) works 100% of the time for all apps. Invest in making it faster, clearer, and more polished:
+   - Show the overlay within 200ms of cold start URL open
+   - Auto-dismiss when `sceneDidEnterBackground` fires (user swiped back)
+   - Optional: add the swipe-back instruction as a Dynamic Island Live Activity for even clearer guidance
+3. **Explore `sourceApplication` as a refinement, not a solution**: When the keyboard opens DictusApp via URL scheme, `UIApplication.OpenURLOptionsKey.sourceApplication` in `application(_:open:options:)` MAY contain the host app's bundle ID. If it does, you could display "Swipe back to [App Name]" instead of generic text. But this is a UX polish, not auto-return
+4. **Consider session-based model (Wispr Flow pattern)**: Keep the audio engine alive in background between recordings so cold starts are rare. This is already partially implemented via `collectSamples()` pattern. The real fix for cold start is preventing cold starts, not auto-returning from them
 
 **Warning signs:**
-Email from App Store Connect: "Your build has been rejected." Resolution Center message citing guideline 5.1.1 or missing privacy manifest entries. Binary rejected before review (automated check) for missing `NSMicrophoneUsageDescription`.
+Spending >4 hours researching auto-return approaches. Considering `_hostBundleID`. Testing `LSApplicationWorkspace` (already in Out of Scope).
 
 **Phase to address:**
-Public TestFlight phase. Complete ALL privacy and manifest work BEFORE the first external build submission. Do a dry-run review cycle at least 1 week before planned public launch.
+Cold start phase. Timebox research to 2 hours maximum. If no new public API has appeared since January 2026, move to UX refinement of existing overlay.
 
 ---
 
-### Pitfall 5: CocoaPods-to-SPM Dependency Conflict When Integrating giellakbd-ios
+### Pitfall 5: Autocorrect State Corruption from Race Between Async Suggestions and User Input
 
 **What goes wrong:**
-giellakbd-ios uses CocoaPods (has a `Podfile`). Dictus uses Swift Package Manager exclusively (WhisperKit, FluidAudio, DictusCore all via SPM). Naively adding giellakbd-ios's dependencies via Pods while keeping existing SPM packages creates:
+Issue #67 exposes a specific race condition: `lastAutocorrect` state persists indefinitely after a correction, causing undo to fire on backspace even after the user has typed new characters. But the proposed fix (clear `lastAutocorrect` on any new character) introduces a subtler race when combined with the async prediction pipeline:
 
-- Duplicate symbol errors at link time if any Pod and SPM package share transitive dependencies
-- Two different dependency resolution systems that don't coordinate versions
-- `Pods/` directory and `xcworkspace` that conflicts with Dictus's existing `xcodeproj`-based build
-- CI/CD breakage if GitHub Actions expects `xcodebuild -project` but CocoaPods requires `xcodebuild -workspace`
+1. User types "helo" + space → autocorrect fires, sets `lastAutocorrect`
+2. User immediately types "t" (fast typist, <100ms after space)
+3. The space-triggered autocorrect runs on the suggestion queue (async). It sets `lastAutocorrect` AFTER the "t" character handler has already cleared it
+4. Result: `lastAutocorrect` is set again despite new input, and the next backspace corrupts text
 
-Additionally, giellakbd-ios has a `Keyboard-Bridging-Header.h` for Objective-C interop. Keyboard extensions in Dictus currently have no bridging header. Adding one requires Xcode build settings changes that affect ALL targets.
+This race exists because `SuggestionState.updateAsync()` dispatches to `suggestionQueue` and publishes back to main thread. If autocorrect happens inside this async pipeline, the state mutation ordering depends on GCD scheduling, not user input ordering.
+
+With SymSpell replacing UITextChecker, the race window may widen: SymSpell lookups are faster (<1ms vs UITextChecker's 5-20ms), but the dictionary load is async, so the first few keystrokes may use UITextChecker while SymSpell loads, then switch mid-word — creating inconsistent correction behavior.
 
 **Why it happens:**
-giellakbd-ios is a template project designed to be consumed by `kbdgen` (their build tool), not directly integrated into another app. Its dependency management assumes it IS the project, not a component of one.
+The current architecture has a synchronous path (`update(proxy:)` for delete/undo) and an asynchronous path (`updateAsync(context:)` for character input). Autocorrect state (`lastAutocorrect`) is mutated from both paths without synchronization. The DispatchWorkItem cancellation only prevents publishing stale suggestions, not stale autocorrect state.
 
 **Consequences:**
-Build failures. Hours spent resolving symbol conflicts. Risk of breaking existing WhisperKit/FluidAudio SPM resolution.
+Text corruption: words mangled by stale undo operations. User types "corriger test", backspace produces "CorrCorrigerr" (documented in issue #67). With SymSpell, this may manifest as double-corrections (SymSpell corrects a word that UITextChecker already corrected during the load transition).
 
 **Prevention:**
-1. **Do NOT add CocoaPods to Dictus**: Copy giellakbd-ios source files directly into the DictusKeyboard target. The keyboard view code (KeyboardView.swift, KeyView.swift, KeyOverlayView.swift) plus controllers and models are what you need -- not the Pod dependencies
-2. **Cherry-pick, don't wholesale import**: giellakbd-ios has features Dictus doesn't need (SplitKeyboard, BannerManager, UserDictionaryService, localization infrastructure). Import only: KeyboardView, KeyView, KeyOverlayView, KeyDefinition, KeyboardDefinition, KeyboardHeightProvider, Theme, LongPressController, DeadKeyHandler, Audio
-3. **Adapt the bridging header only if Obj-C code is needed**: Check if any giellakbd-ios code actually uses the bridging header. If the Swift files don't reference Obj-C, skip it entirely
-4. **Rename imported types to avoid confusion**: giellakbd-ios has `KeyDefinition` and Dictus has `KeyDefinition`. They are NOT the same model. Either namespace them (DivvunKeyDefinition vs DictusKeyDefinition) or merge the models explicitly
-5. **Keep the import in a single commit**: Import all giellakbd-ios files in one atomic commit so it's easy to revert if the approach fails
+1. **Fix issue #67 first, before any prediction engine changes**: The state management bug is independent of SymSpell. Fix the easy bug in isolation so you can verify the fix works with the current engine before adding complexity
+2. **Clear `lastAutocorrect` synchronously on main thread in the key handler, before dispatching async work**: The character input handler in `DictusKeyboardBridge` runs on main. Clear `lastAutocorrect = nil` there immediately, not inside the async suggestion callback
+3. **Make autocorrect a synchronous operation, not part of the async suggestion pipeline**: Autocorrect (replace word on space) should be a synchronous check on main thread — it's user-facing and must be deterministic. Only the suggestion bar population (showing 3 candidates) should be async
+4. **Add a generation counter to prevent stale autocorrect**: Increment a counter on every keystroke. The autocorrect callback checks if the counter matches — if not, the autocorrect result is stale and should be discarded
+5. **Test with rapid typing (>5 chars/second)**: Use `XCTestCase.measure {}` or a UI test that simulates fast typing to reproduce the race. The bug is invisible at normal typing speed
 
 **Warning signs:**
-`duplicate symbol` linker errors. `No such module 'Sentry'` or other Pod-specific errors. Xcode can't resolve package graph after adding files.
+Backspace produces garbled text. Autocorrect fires on a word the user already corrected manually. Different corrections appear for the same misspelling on consecutive attempts.
 
 **Phase to address:**
-Keyboard rebuild phase (first step -- base import). Must be resolved before any feature work begins.
+Bug fix phase (issue #67) MUST complete before prediction engine upgrade. The race condition will be harder to debug with two correction engines (UITextChecker during load + SymSpell after load).
 
 ---
 
@@ -185,107 +180,114 @@ Keyboard rebuild phase (first step -- base import). Must be resolved before any 
 
 Issues that cause days of debugging or subtle UX regressions.
 
-### Pitfall 6: KeyDefinition Model Collision Between giellakbd-ios and Dictus
+### Pitfall 6: SymSpell French Dictionary Quality — Garbage In, Garbage Out
 
 **What goes wrong:**
-Both projects define a `KeyDefinition` model. Dictus's version (in `DictusKeyboard/Models/KeyDefinition.swift`) defines key types, sizes, and behaviors for AZERTY/QWERTY layouts with Dictus-specific keys (.mic, .emoji, .layerSwitch, .adaptiveAccent). giellakbd-ios's `KeyDefinition` has different properties, different enums, and different size calculations. Importing both without resolving the conflict means:
+SymSpell is only as good as its frequency dictionary. The current `fr_frequency.json` has ~1.3K words — far too small. Issue #68 proposes replacing it. The risk is choosing a bad source dictionary:
 
-- Compiler errors from ambiguous type references
-- Silent behavior differences if one model is shadowed by the other
-- Layout definitions (AZERTY rows) that reference the wrong KeyDefinition
+- **Raw Wikipedia word frequencies** include proper nouns (place names, people), technical terms, and foreign words that pollute suggestions. "Paris" appears 50,000 times in French Wikipedia but is rarely what someone means when typing "par"
+- **OpenSubtitles frequencies** are better for conversational French but include slang, movie-specific terms, and English loanwords at inflated frequencies
+- **Frequency lists without lemmatization** treat "mange", "manges", "mangeons", "mangez", "mangent" as separate entries, wasting dictionary space on conjugations that SymSpell should derive from the root
+
+A bad dictionary makes SymSpell worse than UITextChecker, which at least uses Apple's curated system dictionary.
 
 **Prevention:**
-1. Use giellakbd-ios's KeyDefinition as the base (it's designed for UICollectionView cell sizing)
-2. Extend it with Dictus-specific key types (.mic, .adaptiveAccent, .emoji)
-3. Delete or archive Dictus's KeyDefinition after migration
-4. Update `KeyboardLayout.swift` (the AZERTY/QWERTY row definitions) to use the new model
+1. **Use a curated frequency list**: The [Lexique 3](http://www.lexique.org/) database is the gold standard for French word frequencies — used by French NLP researchers, covers 140K lemmas with frequency data from books and subtitles
+2. **Filter aggressively**: Remove proper nouns, words with frequency < 0.1 per million, words shorter than 2 characters. Target 30K-50K entries
+3. **Include common French contractions and elisions**: "l'homme", "j'ai", "c'est", "qu'il" must be in the dictionary or SymSpell will flag them as misspelled
+4. **Test with real French text samples**: Run SymSpell against 100 real French sentences and compare suggestions to UITextChecker. If SymSpell is worse, the dictionary needs work
+5. **Build an English dictionary from the same methodology**: Don't ship French-only. English speakers who switch languages will get zero corrections
 
 **Phase to address:**
-Keyboard rebuild phase (model migration sub-step, before view integration).
+Prediction engine upgrade phase. Dictionary curation is a prerequisite — do not start coding SymSpell integration until the dictionary is validated.
 
 ---
 
-### Pitfall 7: Spacebar Trackpad Gesture Lost in UICollectionView Touch Handling
+### Pitfall 7: N-gram Model Ignores French Morphology (Elision, Contractions, Gender)
 
 **What goes wrong:**
-Dictus's spacebar has a long-press trackpad feature (move cursor left/right/up/down). In SwiftUI, this was a `DragGesture` on the spacebar view. In giellakbd-ios's UICollectionView, ALL touches are handled by `KeyboardView.touchesBegan/Moved/Ended`. The spacebar is just another cell -- there's no per-cell gesture recognizer.
+French text has elisions ("l'eau" not "le eau"), contractions ("du" = "de le"), gendered articles ("le/la/les"), and verb conjugations that English n-gram approaches handle poorly:
 
-giellakbd-ios does have swipe detection (`touchesMoved` calculates percentage offset from center for alternate characters), but this is a horizontal-only swipe, not a 2D trackpad. Adapting this for full cursor trackpad (horizontal AND vertical movement) requires modifying the touch pipeline to:
-
-- Detect which cell the touch started on (spacebar specifically)
-- Switch from character-input mode to trackpad mode after a long-press threshold
-- Move the cursor via `textDocumentProxy.adjustTextPosition(byCharacterOffset:)` in response to drag deltas
-- Handle line-based vertical movement (Dictus's existing implementation uses character counting)
+- A trigram model trained naively treats "l'" as a separate token, breaking the context chain: "je bois l'" gives no prediction because "l'" is not a word boundary
+- The apostrophe in "l'eau" confuses `extractLastWord()` which uses `.byWords` enumeration — Swift may treat "l" and "eau" as separate words, or "l'eau" as one word, depending on locale
+- Gender agreement: after "la", the model should predict feminine nouns. After "le", masculine. Without gender-aware training, the model suggests the most frequent word regardless of gender
 
 **Prevention:**
-1. Add a `UILongPressGestureRecognizer` specifically on the spacebar cell (giellakbd-ios already adds one for long-press overlays on letter keys -- follow the same pattern)
-2. On long-press recognized, switch `KeyboardView`'s touch handling to "trackpad mode" that interprets `touchesMoved` as cursor movement instead of key selection
-3. Port the existing cursor movement logic from Dictus's SwiftUI `DragGesture` handler
+1. **Tokenize French text with apostrophe-aware rules**: Treat `[word]'[word]` as two tokens where the first includes the apostrophe: ["l'", "eau"]. This preserves the elision context for n-gram lookup
+2. **Train n-gram model on properly tokenized French corpus**: Use a tokenizer that handles French-specific patterns (elision, hyphenated compounds like "peut-etre", "c'est-a-dire")
+3. **Test `extractLastWord()` with French edge cases**: Verify what Swift's `.byWords` enumeration returns for: "l'homme", "aujourd'hui", "peut-etre", "c'est", "qu'est-ce". If the results are wrong, implement a custom French tokenizer
+4. **Consider HeliBoard's AOSP dictionary approach**: These dictionaries are pre-trained for specific languages including French and handle morphology natively. The binary format would need a Swift reader, but the linguistic quality is pre-validated
 
 **Phase to address:**
-Feature reintegration phase (after base keyboard works).
+Prediction engine upgrade phase (n-gram sub-task). French tokenization must be tested before model training.
 
 ---
 
-### Pitfall 8: Key Sounds and Haptics Fire at Wrong Lifecycle Point
+### Pitfall 8: Prediction Engine Swap Breaks Suggestion Bar Timing Contract
 
 **What goes wrong:**
-Dictus fires haptics and audio on `touchDown` (not `touchUp`) to match Apple's native keyboard feel. This was carefully tuned in Phase 15.3. giellakbd-ios fires key triggers in `touchesEnded` (which is character insertion) but has separate audio handling in `Audio.swift` that may fire at a different point.
+The current `SuggestionState.updateAsync()` has a carefully tuned flow: read `documentContextBeforeInput` on main thread, dispatch computation to background, publish results back to main. This ensures suggestions appear within 1-2 frames (~16-33ms) of a keystroke.
 
-If haptics/audio fire on `touchesEnded` instead of `touchesBegan`, the keyboard feels sluggish -- there's a perceptible delay between finger touching glass and feedback. If they fire on `touchesBegan` but character insertion happens on `touchesEnded`, the feedback doesn't match the action on cancelled touches (finger slides off key).
+Replacing `UITextChecker.completions()` with SymSpell changes the timing profile:
+- **SymSpell lookup**: <1ms (faster) — but only after dictionary is loaded
+- **SymSpell dictionary load**: 500ms-3s (blocking at startup)
+- **N-gram lookup**: 1-10ms depending on model size and cache warmth
 
-Additionally, Dictus uses `AudioServicesPlaySystemSound` (respects silent switch) while giellakbd-ios's `Audio.swift` may use a different audio API.
+If the new engine isn't ready when the first keystroke arrives, `suggestions(for:)` returns empty. The suggestion bar shows nothing. The user types 3-4 characters with no suggestions, then suddenly gets suggestions when SymSpell finishes loading. This "suggestion pop-in" feels broken.
 
-**Prevention:**
-1. Move audio/haptic triggers to `touchesBegan` in `KeyboardView`, not in `touchesEnded`
-2. Keep using `AudioServicesPlaySystemSound` with the existing 3-category system (letter: 1104, delete: 1155, modifier: 1156)
-3. Keep using pre-allocated `UIImpactFeedbackGenerator` instances (static property pattern from v1.1)
-4. Test on device with `OSSignposter` to measure touch-to-feedback latency (<10ms target)
-
-**Phase to address:**
-Feature reintegration phase (immediate after base keyboard -- this is perceptible from first keystroke).
-
----
-
-### Pitfall 9: Theme/Dark Mode Mismatch Between giellakbd-ios and Dictus Design System
-
-**What goes wrong:**
-giellakbd-ios has its own `Theme.swift` that defines key colors, backgrounds, fonts, and active states. It supports dark mode via `checkDarkMode()` in the controller. Dictus has its own design system in DictusCore (Liquid Glass, brand colors, custom gradients). These two color systems will clash:
-
-- giellakbd-ios themes use system colors and standard key styling
-- Dictus uses custom brand colors (#0A1628 background, #3D7EFF accent, etc.)
-- giellakbd-ios's iOS 26 theme update (mentioned in App Store) may or may not match Dictus's Liquid Glass approach
-- The `.dictusGlass()` modifier is SwiftUI-only -- cannot be applied to UIKit cells
+Additionally, if n-gram prediction runs after SymSpell correction (two sequential async operations), the total latency may exceed the 16ms frame budget, causing suggestion bar updates to lag behind typing.
 
 **Prevention:**
-1. Replace giellakbd-ios's `Theme.swift` entirely with a UIKit-compatible version of Dictus's design tokens
-2. Define colors as `UIColor` constants in a shared file, not SwiftUI `Color`
-3. Apply Liquid Glass effects using `UIVisualEffectView` where needed (but keep it minimal in cells for memory/performance)
-4. Test dark mode explicitly -- the keyboard extension inherits the HOST app's appearance, not Dictus app's appearance
-
-**Phase to address:**
-Keyboard rebuild phase (theming sub-step, after layout works but before feature reintegration).
-
----
-
-### Pitfall 10: Dynamic Island State Desync Worsened by Architecture Change
-
-**What goes wrong:**
-Issue #60 documents that the Dynamic Island gets stuck on "REC" state. The current state machine relies on `KeyboardState.shared` (an ObservableObject) observed by SwiftUI views. After the rebuild, the keyboard is UIKit -- it won't automatically react to `@Published` property changes on `KeyboardState`.
-
-If `KeyboardState.isRecording` changes but the UIKit keyboard doesn't observe it (no Combine subscription), the toolbar/overlay won't update. The Dynamic Island (which is in the main app target, still SwiftUI) and the keyboard (now UIKit) can desync even further.
-
-**Prevention:**
-1. Add `Combine` subscriptions in the UIKit KeyboardViewController to observe `KeyboardState.shared` changes
-2. Specifically subscribe to: `isRecording`, `isOverlayVisible`, `waveformAmplitudes`
-3. Use `sink` with `[weak self]` to update UIKit views when state changes
-4. Fix the Dynamic Island state machine bug (#60) BEFORE the keyboard rebuild, not after -- debugging state issues in a new architecture is harder
+1. **Progressive enhancement**: Start with UITextChecker (already loaded by iOS). When SymSpell finishes loading, swap the engine atomically. The suggestion bar should never show "nothing" — it should always show at least UITextChecker results
+2. **Single async dispatch for both correction + prediction**: Don't chain two async operations. In one `DispatchWorkItem`, call SymSpell for correction AND n-gram for next-word, then publish both results to main thread in a single callback
+3. **Pre-load SymSpell dictionary in `viewDidLoad`**: Start loading immediately when the keyboard extension launches, not on first keystroke. Use the 1-2 seconds before the user starts typing
+4. **Measure end-to-end latency on device**: Use `OSSignposter` or `CFAbsoluteTimeGetCurrent()` to measure keystroke-to-suggestion-update latency. If >16ms consistently, the engine needs optimization
 
 **Warning signs:**
-Recording starts but keyboard doesn't show overlay. Recording ends but "stop" button stays visible. Dynamic Island shows "REC" indefinitely.
+Suggestion bar is empty for the first 2-3 words. Suggestions appear with visible delay after fast typing. Suggestion bar "flickers" (shows UITextChecker results then immediately replaces with SymSpell results).
 
 **Phase to address:**
-Bug fix phase (fix #60 first), then keyboard rebuild phase (add Combine bindings).
+Prediction engine upgrade phase. Progressive enhancement pattern must be implemented from the start, not bolted on after.
+
+---
+
+### Pitfall 9: Two Prediction Engines Running Simultaneously Doubles Memory
+
+**What goes wrong:**
+During the transition period (SymSpell loading), both UITextChecker and SymSpell's hash map may be in memory. UITextChecker is loaded by iOS on demand and uses system memory, but its `completions()` and `guesses()` methods allocate temporary arrays. If SymSpell's 10-15MB hash map coexists with UITextChecker's allocations plus the n-gram model, the extension approaches the memory limit.
+
+Even after SymSpell is fully loaded, if the code still holds a reference to the UITextChecker instance (the current `TextPredictionEngine` creates one in `init()`), it stays in memory.
+
+**Prevention:**
+1. **Release UITextChecker after SymSpell is ready**: Set `textChecker = nil` (make it optional) once SymSpell confirms successful load. This frees the system dictionary cache
+2. **Never load both language dictionaries simultaneously**: Current code loads one language at a time — preserve this behavior. When switching FR<>EN, unload SymSpell FR completely before loading SymSpell EN
+3. **Monitor memory at runtime**: Call `os_proc_available_memory()` after SymSpell loads. If <10MB remaining, disable n-gram model and fall back to SymSpell-only mode
+4. **Budget**: SymSpell dict (~8MB) + n-gram model mmap'd (~2MB resident) + keyboard UI (~5MB) + system overhead (~15MB) = ~30MB. Leaves ~20MB headroom. This is tight but workable only if UITextChecker is released
+
+**Phase to address:**
+Prediction engine upgrade phase. Memory profiling after each component integration.
+
+---
+
+### Pitfall 10: SymSpellSwift Library is Minimally Maintained (16 Commits, Single Author)
+
+**What goes wrong:**
+SymSpellSwift (github.com/gdetari/SymSpellSwift) has 16 commits, one contributor, and was last updated August 2025. It is a direct port of the C# reference implementation. Risks:
+- No community review of the Swift code (potential memory leaks, retain cycles, or inefficient Swift patterns)
+- May not handle Swift String's Unicode complexity correctly (French accented characters, emoji in text)
+- If a bug is found, there's no guarantee the maintainer will respond
+- No test suite visible in the repository
+
+If the library has a subtle bug (e.g., crashes on words with combining diacritical marks like "e\u0301" vs "e-acute"), debugging it requires understanding both SymSpell's algorithm AND the library's Swift implementation.
+
+**Prevention:**
+1. **Vendor the source code, do not use as SPM dependency**: Copy the Swift files into `DictusKeyboard/TextPrediction/SymSpell/`. This allows fixing bugs directly without waiting for upstream
+2. **Write integration tests for French-specific cases**: Test with: accented characters (e, e-acute, e-grave, e-circumflex), elisions (l'homme), compound words (peut-etre), Unicode normalization (NFC vs NFD)
+3. **Audit the source for obvious issues**: Check how it handles String iteration (should use `Character`, not `UInt8`). Check for `force try` or `fatalError` calls. Check dictionary loading for error handling
+4. **Consider writing a minimal SymSpell from scratch**: The core algorithm is ~200 lines. Given the library's minimal maintenance, implementing the symmetric delete lookup directly may be more reliable than depending on an unmaintained port
+
+**Phase to address:**
+Prediction engine upgrade phase (first step — evaluate library or rewrite).
 
 ---
 
@@ -293,60 +295,52 @@ Bug fix phase (fix #60 first), then keyboard rebuild phase (add Combine bindings
 
 Issues that cause hours of confusion but are quickly fixable once identified.
 
-### Pitfall 11: `inputView` Frame Zero in viewDidLoad Causes Collection View Layout Failure
+### Pitfall 11: `extractLastWord()` Apostrophe Handling Differs Between iOS Versions
 
 **What goes wrong:**
-UICollectionView needs a non-zero frame to calculate its layout. In `viewDidLoad`, the keyboard extension's `inputView` has frame `.zero`. If the UICollectionView is created and added to the hierarchy in `viewDidLoad` with constraints that reference `inputView.bounds`, the initial layout pass produces zero-width cells.
+The current `extractLastWord()` uses `enumerateSubstrings(options: .byWords)` to find the last word. This relies on iOS's ICU word boundary detection, which handles apostrophes inconsistently:
+- iOS 17: "l'homme" may be split as ["l", "homme"] or kept as ["l'homme"] depending on locale
+- iOS 18+: Word boundary detection may have changed (Apple ships ICU updates with each iOS version)
+
+If `extractLastWord` returns "homme" for "l'homme", the prediction engine looks up "homme" in isolation, losing the context that the user was typing an elision. The suggestion "homme" would be wrong — "hommage" or "hommes" would make more sense.
 
 **Prevention:**
-Create the UICollectionView in `viewDidLoad` but trigger `collectionView.reloadData()` in `viewWillAppear` (or `viewDidLayoutSubviews` with a once-flag) after the frame is established.
+1. **Implement a custom French-aware word extractor**: Don't rely solely on `.byWords`. After extracting the last word, check if the character before it is an apostrophe and include the prefix: "l'" + "homme" = "l'homme"
+2. **Test on both iOS 17 and iOS 18**: Word boundary behavior may differ. Pin expected behavior in unit tests
 
-**Phase to address:** Keyboard rebuild phase (base setup).
+**Phase to address:**
+Prediction engine upgrade phase (tokenization sub-task).
 
 ---
 
-### Pitfall 12: `textDocumentProxy` Becomes Nil or Stale After App Switch
+### Pitfall 12: N-gram Training Corpus Contains English Bleeding Into French Predictions
 
 **What goes wrong:**
-After the user switches to the Dictus app (for recording) and returns, `textDocumentProxy` may point to a stale text field or return nil for `documentContextBeforeInput`. Inserting text via a stale proxy does nothing -- the transcription is lost.
-
-This already happens in the current architecture but is masked by the Darwin notification + retry pattern. After the rebuild, if the transcription insertion path changes, the stale proxy bug resurfaces.
+French Wikipedia articles often contain English words (brand names, technical terms, anglicisms). If the training corpus isn't filtered, the French trigram model will suggest English words in French context: "je vais" → "to" (from code-switched Wikipedia sentences).
 
 **Prevention:**
-1. Always call `textDocumentProxy.documentContextBeforeInput` as a staleness check before inserting text
-2. If nil and text should have been inserted, retry after a 100ms `Task.sleep`
-3. Keep the existing Darwin notification pattern for transcription delivery
+1. **Use a monolingual French corpus**: French OpenSubtitles or French literature corpora are cleaner than Wikipedia for conversational prediction
+2. **Filter training data**: Remove sentences containing >20% non-French words (detected by character set or dictionary membership)
+3. **Keep French and English models completely separate**: Never train a bilingual model. Load the active language's model exclusively
 
-**Phase to address:** Feature reintegration phase (transcription insertion).
+**Phase to address:**
+Prediction engine upgrade phase (model training sub-task).
 
 ---
 
-### Pitfall 13: Xcode Project File Merge Conflicts from Wholesale File Import
+### Pitfall 13: Autocorrect Undo Fix (#67) Breaks Accent Suggestion Flow
 
 **What goes wrong:**
-Adding 15-20 new Swift files to the DictusKeyboard target means 15-20 new PBXFileReference, PBXBuildFile, and PBXGroup entries in `project.pbxproj`. If done across multiple commits or branches, the pbxproj merge conflicts are nightmarish (binary-like conflict markers in XML-ish format).
+The proposed fix for issue #67 is: clear `lastAutocorrect` on every new character. But the accent suggestion flow has a special case: user types "e" → suggestion bar shows ["e", "e-acute", "e-grave"]. If the user taps "e-acute", the suggestion handler replaces "e" with "e-acute" — this is functionally an autocorrect operation. If `lastAutocorrect` is set for this replacement, the next backspace undoes it (expected behavior for accents). But if the fix clears `lastAutocorrect` on the next character, accent undo still works correctly.
+
+The subtle issue: if accent suggestion triggers `lastAutocorrect`, and the user types a space (triggering spell-check autocorrect on the SAME word), the state gets confused — which correction should undo restore? The original unaccented character, or the pre-autocorrect word?
 
 **Prevention:**
-1. Import ALL giellakbd-ios files in a single commit on a feature branch
-2. Use `xcodebuild` to verify the project compiles immediately after import
-3. Do not split the import across multiple PRs
+1. **Separate autocorrect state from accent state**: Use two optional states: `lastAutocorrect` for spell corrections, `lastAccentReplace` for accent selections. Backspace checks both, with accent replacement taking priority (it happened more recently)
+2. **Test the sequence: type vowel → tap accent → type more → space (autocorrect) → backspace**: Verify the undo produces the correct result at each step
 
-**Phase to address:** Keyboard rebuild phase (first commit).
-
----
-
-### Pitfall 14: Beta App Review Requires "What to Test" and Contact Info
-
-**What goes wrong:**
-When creating an external test group in App Store Connect, Apple requires: beta app description, feedback email, privacy policy URL, and "What to Test" notes. Missing any field blocks the submission. The privacy policy URL must be a live, accessible webpage (not a GitHub raw file or localhost).
-
-**Prevention:**
-1. Prepare a simple privacy policy page on the Dictus website or GitHub Pages before submission
-2. Write clear "What to Test" notes: "Test the AZERTY keyboard in various apps (Messages, Notes, WhatsApp). Test dictation via the microphone button. Report dead zones or unresponsive keys."
-3. Use Pierre's developer email for feedback contact
-4. Fill in ALL fields before clicking "Submit for Review"
-
-**Phase to address:** Public TestFlight phase. Prepare these artifacts BEFORE the build is ready.
+**Phase to address:**
+Bug fix phase (issue #67). Must be tested before prediction engine changes.
 
 ---
 
@@ -354,24 +348,27 @@ When creating an external test group in App Store Connect, Apple requires: beta 
 
 | Phase Topic | Likely Pitfall | Mitigation |
 |-------------|---------------|------------|
-| Base keyboard import | CocoaPods conflict (#5), KeyDefinition collision (#6), pbxproj conflicts (#13) | Copy source files directly, rename conflicting types, single-commit import |
-| Height & layout | Height flicker (#2), frame-zero layout (#11) | viewWillAppear constraint, once-flag for reloadData |
-| Touch handling integration | UIKit/SwiftUI touch conflict (#1), spacebar trackpad (#7) | Single UIKit root, UIHostingController islands, per-key gesture recognizer |
-| Memory profiling | 50MB budget exceeded (#3) | Profile BEFORE features, kill emoji picker, lazy-load overlays |
-| Audio/haptic/theme | Wrong lifecycle point (#8), theme mismatch (#9) | touchesBegan triggers, replace Theme.swift with Dictus design tokens |
-| State management | Dynamic Island desync (#10), stale proxy (#12) | Fix #60 first, add Combine subscriptions in UIKit |
-| Public TestFlight | Beta App Review rejection (#4), missing test info (#14) | Privacy audit, dry-run review, prepare all metadata in advance |
+| Bug fix #67 (autocorrect undo) | State corruption from async race (#5), accent flow interaction (#13) | Fix synchronously on main thread, separate accent state from autocorrect state |
+| SymSpell integration | Memory blow-up at load (#1), dictionary quality (#6), library quality (#10) | 30K word limit, edit distance 1, vendor source, curate dictionary first |
+| N-gram model | Memory without mmap (#2), C++ bridging (#3), French morphology (#7), English bleed (#12) | Pure Swift binary trie with mmap, French-aware tokenizer, monolingual corpus |
+| Prediction engine swap | Timing regression (#8), double memory (#9) | Progressive enhancement, release UITextChecker after swap, single async dispatch |
+| Cold start auto-return | Impossible via public API (#4) | Accept constraint, polish swipe-back overlay, explore sourceApplication for UX text only |
+| French tokenization | Apostrophe handling (#11), elision context (#7) | Custom French tokenizer, test on multiple iOS versions |
 
 ## Sources
 
-- [giellakbd-ios GitHub repository](https://github.com/divvun/giellakbd-ios) -- source architecture analysis (HIGH confidence)
-- [giellakbd-ios issue #28: keyboard height doubles](https://github.com/divvun/giellakbd-ios/issues/28) -- height constraint flicker (HIGH confidence)
-- [Apple: Custom Keyboard programming guide](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html) -- extension limitations (HIGH confidence)
-- [Apple: Configuring open access for a custom keyboard](https://developer.apple.com/documentation/uikit/configuring-open-access-for-a-custom-keyboard) -- Full Access requirements (HIGH confidence)
-- [Apple: App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) -- guideline 5.1.1 keyboard data (HIGH confidence)
-- [Apple Developer Forums: UICollectionView in keyboard extension](https://developer.apple.com/forums/thread/24032) -- frame-zero and constraint issues (MEDIUM confidence)
-- [Apple Developer Forums: Keyboard extension memory](https://developer.apple.com/forums/thread/85478) -- 30-50MB limit behavior (MEDIUM confidence)
-- [Apple: TestFlight test information requirements](https://developer.apple.com/help/app-store-connect/test-a-beta-version/provide-test-information/) -- Beta App Review fields (HIGH confidence)
-- [iOS App Store Review Guidelines 2026](https://theapplaunchpad.com/blog/app-store-review-guidelines) -- privacy manifest requirements (MEDIUM confidence)
-- [KeyboardKit: iOS 17.1 extension crashes](https://keyboardkit.com/blog/2023/12/10/critical-extension-crashes-in-ios-17-1) -- extension crash patterns (MEDIUM confidence)
-- Dictus project history: Phase 15.4 dead zones research, v1.2 retrospective, PROJECT.md constraints (HIGH confidence)
+- [SymSpell algorithm documentation](https://github.com/wolfgarbe/SymSpell) — pre-computation strategy, memory characteristics (HIGH confidence)
+- [SymSpellSwift library](https://github.com/gdetari/SymSpellSwift) — Swift port, v0.1.4, 16 commits (HIGH confidence, source code reviewed)
+- [SymSpell dictionary loading optimization issue #16](https://github.com/wolfgarbe/SymSpell/issues/16) — loading time, memory optimization techniques (HIGH confidence)
+- [Apple DTS response on auto-return (January 2026)](https://github.com/getdictus/dictus-ios/issues/23#issuecomment-4117827144) — "No API exists" confirmation (HIGH confidence)
+- [Dictus issue #23 research report](https://github.com/getdictus/dictus-ios/blob/99300f9/assets/reference/issue-23-report.md) — failed auto-return approaches documented (HIGH confidence)
+- [Dictus issue #67](https://github.com/getdictus/dictus-ios/issues/67) — autocorrect undo state bug, root cause analysis (HIGH confidence)
+- [Dictus issue #68](https://github.com/getdictus/dictus-ios/issues/68) — prediction upgrade proposal with SymSpell + n-gram architecture (HIGH confidence)
+- [Swift-C++ interop project setup](https://www.swift.org/documentation/cxx-interop/project-build-setup/) — bridging header requirements, extension limitations not documented (MEDIUM confidence)
+- [Apple: Custom Keyboard programming guide](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html) — extension memory limits, API restrictions (HIGH confidence)
+- [iOS keyboard extension memory limits](https://developer.apple.com/forums/thread/85478) — 30-50MB experimentally determined, device-dependent (MEDIUM confidence)
+- [Dealing with memory limits in iOS app extensions](https://blog.kulman.sk/dealing-with-memory-limits-in-app-extensions/) — practical memory management strategies (MEDIUM confidence)
+- [HeliBoard / AOSP dictionaries](https://codeberg.org/Helium314/aosp-dictionaries) — pre-trained language models for 80+ languages (HIGH confidence)
+- [KenLM paper](https://kheafield.com/papers/avenue/kenlm.pdf) — mmap-based data structures for language models (HIGH confidence)
+- [sourceApplication API documentation](https://developer.apple.com/documentation/uikit/uiapplication/openurloptionskey/sourceapplication) — bundle ID of requesting app (HIGH confidence)
+- Dictus codebase: `TextPredictionEngine.swift`, `SuggestionState.swift`, `DictusKeyboardBridge.swift` — current architecture audit (HIGH confidence)

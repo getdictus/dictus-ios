@@ -1,471 +1,639 @@
-# Architecture: giellakbd-ios Integration with Dictus Two-Process System
+# Architecture Patterns
 
-**Domain:** iOS keyboard extension rebuild from giellakbd-ios (Divvun) base
-**Researched:** 2026-03-27
-**Focus:** Integration points, component mapping, data flow, build order
-**Overall Confidence:** HIGH (based on direct source code analysis of both codebases)
+**Domain:** iOS keyboard extension prediction engine upgrade + cold start auto-return
+**Researched:** 2026-04-01
+**Focus:** Integration of SymSpell, n-gram prediction, autocorrect fix, and cold start auto-return into existing two-process architecture
+**Overall Confidence:** MEDIUM-HIGH (prediction architecture HIGH, cold start LOW)
 
----
-
-## Executive Summary
-
-The giellakbd-ios keyboard uses a UICollectionView with disabled interaction and direct `touchesBegan/Moved/Ended` interception on the parent UIView. This approach eliminates dead zones because touch hit-testing happens at the UIView level (where `point(inside:with:)` works) rather than relying on UICollectionView's internal gesture recognizers or SwiftUI's layout-bound hit areas. The Dictus two-process architecture (Darwin notifications, App Group IPC, KeyboardState observer, recording overlay) is entirely orthogonal to the key rendering layer and integrates cleanly by replacing only the keyboard grid while keeping all dictation infrastructure intact.
-
----
-
-## Current Dictus Keyboard Architecture
+## Current Architecture (Baseline)
 
 ```
-KeyboardViewController (UIInputViewController)
-  |
-  +-- KeyboardInputView (UIInputView + audio feedback)
-       |
-       +-- UIHostingController<KeyboardRootView> (SwiftUI bridge)
-            |
-            +-- KeyboardRootView (SwiftUI)
-                 |
-                 +-- if recording: RecordingOverlay
-                 |
-                 +-- else:
-                      +-- ToolbarView (mic pill, suggestion bar, gear)
-                      +-- KeyboardView (SwiftUI VStack of KeyRows)
-                      |    +-- KeyRow (HStack of key views)
-                      |    |    +-- KeyButton (DragGesture touch handling)
-                      |    |    +-- ShiftKey, DeleteKey, SpaceKey, etc.
-                      |    +-- Dead zone catch-all gesture (PARTIALLY WORKING)
-                      +-- EmojiPickerView (when emoji mode active)
+DictusApp (Main Process)              DictusKeyboard (Extension, ~50MB limit)
++-----------------------+              +--------------------------------------+
+| WhisperKit/Parakeet   |              | KeyboardViewController               |
+| DictationCoordinator  |<--Darwin--->|   +-- DictusKeyboardBridge            |
+| AVAudioSession        |  Notifs     |   +-- GiellaKeyboardView (UIKit)      |
+| SwipeBackOverlay      |             |   +-- KeyboardRootView (SwiftUI)      |
+| ModelManager          |<--AppGrp--->|       +-- SuggestionBarView           |
++-----------------------+              |       +-- ToolbarView                 |
+                                       |                                      |
+                                       | TextPrediction/                      |
+                                       |   +-- SuggestionState (@Published)   |
+                                       |   +-- TextPredictionEngine           |
+                                       |       +-- UITextChecker (system)     |
+                                       |       +-- FrequencyDictionary        |
+                                       +--------------------------------------+
+
+DictusCore (Shared Framework)
++-- SharedKeys, AppGroup, DarwinNotifications
++-- FrequencyDictionary (struct)
++-- AccentedCharacters
++-- HapticFeedback, PersistentLog
++-- Design tokens, themes
 ```
 
-**Problem:** SwiftUI DragGesture hit areas are clipped to layout bounds. 16 approaches failed to extend touch areas beyond view bounds. Dead zones persist between keys.
-
----
-
-## giellakbd-ios Architecture (Source Analysis)
+### Current Data Flow: Keystroke to Suggestion
 
 ```
-KeyboardViewController (UIInputViewController)
-  |
-  +-- keyboardContainer (UIView)
-       |
-       +-- BannerManager (suggestion/spell banner - UIView above keyboard)
-       |
-       +-- KeyboardView (UIView - OWNS ALL TOUCH HANDLING)
-            |
-            +-- UICollectionView (isUserInteractionEnabled = false)
-            |    +-- KeyView cells (visual rendering only, no touch)
-            |
-            +-- touchesBegan/Moved/Ended on KeyboardView itself
-            |    +-- collectionView.indexPathForItem(at:) to find touched key
-            |    +-- activeKey tracking for highlight state
-            |    +-- swipe gesture detection in touchesMoved
-            |
-            +-- UILongPressGestureRecognizer
-                 +-- LongPressOverlayController (accent popup)
-                 +-- LongPressCursorMovementController (spacebar trackpad)
+User types character
+  -> GiellaKeyboardView.touchesBegan (haptic)
+  -> DictusKeyboardBridge.didTriggerKey(.input(char))
+  -> proxy.insertText(character)
+  -> Read proxy.documentContextBeforeInput
+  -> SuggestionState.updateAsync(context:)
+    -> DispatchWorkItem on serial background queue (.userInitiated)
+    -> extractLastWord(from: context)
+    -> TextPredictionEngine.suggestions(for:) or .accentSuggestions(for:)
+      -> UITextChecker.completions() -> re-rank by FrequencyDictionary
+    -> Main thread: @Published suggestions + mode update
+  -> SuggestionBarView re-renders via SwiftUI
 ```
 
-**Key insight:** The UICollectionView is a **rendering engine only**. All touch handling is done by the parent KeyboardView via `touchesBegan/Moved/Ended`. Since these are UIView-level methods, `point(inside:with:)` with negative insets can extend touch areas beyond visual bounds -- solving dead zones.
-
-### giellakbd-ios Key Components
-
-| Component | Role | Dictus Equivalent |
-|-----------|------|-------------------|
-| `KeyboardView` (UIView) | Key grid + touch dispatcher | `KeyboardView.swift` (SwiftUI) |
-| `KeyView` (UIView cell) | Visual key rendering | `KeyButton.swift`, `SpecialKeyButton.swift` |
-| `KeyDefinition` (model) | Key type + size | `KeyDefinition.swift` (very similar) |
-| `KeyboardDefinition` (model) | Layout pages (normal/shifted/symbols1/2) | `KeyboardLayout.swift` |
-| `LongPressController` | Accent popup + cursor trackpad | `AccentPopup.swift` + `SpaceKey` trackpad |
-| `BannerManager` | Spell suggestion banner | `ToolbarView` + `SuggestionBarView` |
-| `DeadKeyHandler` | Diacritical composition | `AccentedCharacters.swift` (DictusCore) |
-| `Theme` | Colors, appearance | `KeyMetrics`, `DictusColors` |
-| `KeyboardHeightProvider` | Device-adaptive height | `computeKeyboardHeight()` in KBViewController |
-| `Audio.swift` | Key click sounds | `KeySound` enum + AudioServicesPlaySystemSound |
-
----
-
-## Integration Architecture (Proposed)
+### Current Data Flow: Autocorrect on Space
 
 ```
-KeyboardViewController (UIInputViewController) ........... KEEP (modify)
-  |
-  +-- KeyboardInputView (UIInputView + audio feedback) ... KEEP
-       |
-       +-- DictusKeyboardView (NEW UIView) ............... REPLACES SwiftUI keyboard grid
-       |    |
-       |    +-- UICollectionView (rendering only) ........ FROM giellakbd-ios
-       |    |    +-- DictusKeyCell (UICollectionViewCell).. ADAPTED from giellakbd-ios KeyView
-       |    |
-       |    +-- touchesBegan/Moved/Ended ................. FROM giellakbd-ios
-       |    +-- Long-press accent overlay ................ ADAPTED from giellakbd-ios
-       |    +-- Spacebar trackpad handling ............... PORTED from SpaceKey
-       |    +-- Delete repeat timer ...................... PORTED from DeleteKey
-       |
-       +-- UIHostingController<KeyboardChrome> (SwiftUI).. SLIMMED DOWN
-            |
-            +-- KeyboardChrome (NEW SwiftUI view) ........ Toolbar + overlay wrapper
-                 |
-                 +-- if recording: RecordingOverlay ...... KEEP AS-IS
-                 +-- else:
-                      +-- ToolbarView .................... KEEP AS-IS
-                      +-- Color.clear spacer ............. Placeholder for UIKit keyboard area
-                      +-- EmojiPickerView ................ KEEP AS-IS (shown/hidden)
+User taps space
+  -> DictusKeyboardBridge.handleSpace()
+  -> SuggestionState.performSpellCheck(currentWord)
+    -> TextPredictionEngine.spellCheck()
+      -> UITextChecker.rangeOfMisspelledWord + guesses()
+      -> Re-rank by FrequencyDictionary
+  -> If correction != original:
+    -> Delete currentWord via proxy.deleteBackward() loop
+    -> proxy.insertText(correction + " ")
+    -> Store AutocorrectState in SuggestionState.lastAutocorrect
+  -> SuggestionState.clear()
 ```
 
-### Why This Split
+## Recommended Architecture (After Upgrade)
 
-The giellakbd-ios touch system requires UIView-level touch methods (`touchesBegan` etc.). These cannot coexist with SwiftUI's gesture system in the same view hierarchy without conflicts. The solution: **UIKit owns the keyboard grid, SwiftUI owns everything else** (toolbar, recording overlay, emoji picker).
+### Component Boundaries
 
-This matches the Phase 15.5 conclusion: "Only keyboard keys change -- ToolbarView, RecordingOverlay, EmojiPicker, KeyboardState, dictation, waveform all stay SwiftUI."
+| Component | Responsibility | Location | Status |
+|-----------|---------------|----------|--------|
+| **SymSpellEngine** | Spell correction via symmetric delete algorithm | DictusKeyboard/TextPrediction/ | NEW |
+| **NgramPredictor** | Next-word prediction from context (trigram with bigram backoff) | DictusKeyboard/TextPrediction/ | NEW |
+| **NgramTrie** | Compact binary trie data structure for trigram storage | DictusKeyboard/TextPrediction/ | NEW |
+| **TextPredictionEngine** | Orchestrator: routes to SymSpell (correction) + UITextChecker (completions) + NgramPredictor (next-word) | DictusKeyboard/TextPrediction/ | MODIFIED |
+| **SuggestionState** | UI-facing adapter, async dispatch, @Published state, autocorrect undo | DictusKeyboard/TextPrediction/ | MODIFIED |
+| **SuggestionBarView** | Displays 3-slot suggestions across all modes | DictusKeyboard/Views/ | MODIFIED |
+| **DictusKeyboardBridge** | Key event translation, autocorrect undo clearing | DictusKeyboard/ | MODIFIED |
+| **FrequencyDictionary** | Word frequency ranking for UITextChecker re-ranking | DictusCore/ | UNCHANGED |
+| **KeyboardViewController** | View lifecycle, language refresh | DictusKeyboard/ | UNCHANGED |
 
-### Component Boundary
-
-```
-+------------------------------------------------------------------+
-|  KeyboardInputView (UIInputView)                                  |
-|                                                                    |
-|  +--------------------------+  +-------------------------------+  |
-|  | DictusKeyboardView       |  | UIHostingController           |  |
-|  | (100% UIKit)             |  | (SwiftUI chrome)              |  |
-|  |                          |  |                               |  |
-|  | - Key grid rendering     |  | - ToolbarView (mic, suggest)  |  |
-|  | - Touch hit-testing      |  | - RecordingOverlay            |  |
-|  | - Accent popup overlay   |  | - EmojiPickerView             |  |
-|  | - Spacebar trackpad      |  | - FullAccessBanner            |  |
-|  | - Delete repeat          |  |                               |  |
-|  | - Shift state visual     |  | Observes: KeyboardState       |  |
-|  |                          |  | Observes: KeyboardTouchState   |  |
-|  +--------------------------+  +-------------------------------+  |
-|                                                                    |
-|  Shared via protocols/delegates:                                   |
-|  - KeyboardActionDelegate (character, delete, space, return...)    |
-|  - KeyboardStateProvider (shift, layer, last typed char)           |
-+------------------------------------------------------------------+
-```
-
----
-
-## Integration Points (Detailed)
-
-### 1. KeyboardViewController Setup (MODIFY)
-
-**Current:** Creates UIHostingController with KeyboardRootView, adds as child.
-**New:** Creates DictusKeyboardView (UIKit) AND UIHostingController (slimmed SwiftUI). Both are subviews of KeyboardInputView. Z-order: UIKit keyboard behind, SwiftUI chrome in front.
+### Upgraded Architecture Diagram
 
 ```
-// Pseudocode for new viewDidLoad
-let kbInputView = KeyboardInputView(...)
-
-// 1. UIKit keyboard grid (behind)
-let keyboardGrid = DictusKeyboardView(delegate: self)
-kbInputView.addSubview(keyboardGrid)
-// Pin to bottom, height = keyboard rows area
-
-// 2. SwiftUI chrome (in front, transparent over keyboard area)
-let chrome = KeyboardChrome(controller: self, ...)
-let hosting = UIHostingController(rootView: chrome)
-kbInputView.addSubview(hosting.view)
-// Pin to all edges, keyboard area is Color.clear
+DictusKeyboard (Extension)
++------------------------------------------------------+
+| KeyboardViewController                                |
+|   +-- DictusKeyboardBridge                            |
+|   |     handleInputKey: clear lastAutocorrect  <- FIX #67
+|   |     handleSpace: correction via engine            |
+|   +-- GiellaKeyboardView (UIKit)                      |
+|   +-- KeyboardRootView (SwiftUI)                      |
+|         +-- SuggestionBarView (4 modes)               |
+|         +-- ToolbarView                               |
+|                                                       |
+| TextPrediction/                                       |
+|   +-- SuggestionState (@Published)                    |
+|   |     mode: .idle / .completions / .accents         |
+|   |           / .nextWord  <- NEW MODE                |
+|   |     lastAutocorrect: cleared on any input <- FIX  |
+|   |                                                   |
+|   +-- TextPredictionEngine (orchestrator)             |
+|   |     +-- UITextChecker (completions -- kept)       |
+|   |     +-- FrequencyDictionary (ranking -- kept)     |
+|   |     +-- SymSpellEngine (spell correction) <- NEW  |
+|   |     +-- NgramPredictor (next-word) <- NEW         |
+|   |                                                   |
+|   +-- SymSpellEngine.swift <- NEW                     |
+|   |     Uses: SymSpellSwift SPM package               |
+|   |     Data: {lang}_symspell.txt                     |
+|   |                                                   |
+|   +-- NgramPredictor.swift <- NEW                     |
+|   |     Uses: NgramTrie (custom Swift struct)         |
+|   |     Data: {lang}_trigram.bin                      |
+|   |                                                   |
+|   +-- NgramTrie.swift <- NEW                          |
+|         Flat sorted array, binary search, mmap        |
+|                                                       |
+| Resources/                                            |
+|   +-- fr_frequency.json (kept)                        |
+|   +-- en_frequency.json (kept)                        |
+|   +-- fr_symspell.txt <- NEW (~2-3MB)                 |
+|   +-- en_symspell.txt <- NEW (~2-3MB)                 |
+|   +-- fr_trigram.bin <- NEW (~5-10MB)                 |
+|   +-- en_trigram.bin <- NEW (~5-10MB)                 |
++------------------------------------------------------+
 ```
 
-**Height management:** KeyboardInputView height constraint stays. DictusKeyboardView height = rows area only. SwiftUI chrome occupies full height but is transparent over the grid area.
+### Memory Budget
 
-### 2. Touch Flow (NEW)
+| Component | Current | After Upgrade | Notes |
+|-----------|---------|---------------|-------|
+| UITextChecker | 0 MB (system) | 0 MB (system) | Shared system resource, zero extension cost |
+| FrequencyDictionary | ~0.3 MB | ~0.3 MB | Kept for UITextChecker completion ranking |
+| SymSpell dictionary (1 lang) | -- | ~3-5 MB | Symmetric delete index in RAM |
+| N-gram model (1 lang) | -- | ~5-10 MB | Trigram trie, single language loaded |
+| Keyboard UI + giellakbd | ~15 MB | ~15 MB | Unchanged |
+| **Total** | ~15 MB | ~25-30 MB | Well within 50 MB limit |
 
-**Current:** SwiftUI DragGesture per key -> callback chain -> KeyboardView -> KeyboardRootView.
-**New:** UIView touchesBegan on DictusKeyboardView -> identify key via collectionView.indexPathForItem(at:) -> delegate callback to KeyboardViewController -> forwards to KeyboardState for IPC actions.
+**Critical constraint:** Load only ONE language at a time. Switch on `SharedKeys.language` change in `viewWillAppear`. This is the existing FrequencyDictionary pattern -- SymSpell and n-gram must follow it exactly.
 
-```
-Touch flow:
-  User finger -> DictusKeyboardView.touchesBegan
-    -> collectionView.indexPathForItem(at: touchPoint)
-    -> keyDefinition = layout[section][item]
-    -> switch keyDefinition.type:
-         .character -> delegate.didTapCharacter("a")
-         .shift     -> delegate.didTapShift()
-         .delete    -> delegate.didTapDelete()
-         .space     -> delegate.didTapSpace()
-         .return    -> delegate.didTapReturn()
-         .globe     -> delegate.didTapGlobe()
-         .emoji     -> delegate.didTapEmoji()
-         .layerSwitch -> delegate.didTapLayerSwitch()
-         .accentAdaptive -> delegate.didTapAccent(char)
-```
+## New Component Designs
 
-### 3. KeyboardState (NO CHANGE)
+### Component 1: SymSpellEngine (Spell Correction)
 
-KeyboardState remains the cross-process observer singleton. It does not care how keys are rendered. It:
-- Triggers recording via Darwin notifications (startRecording, requestStop, requestCancel)
-- Observes dictation status changes
-- Auto-inserts transcription via textDocumentProxy
-- Manages the watchdog timer
-
-**Zero modifications needed.** The UIKit keyboard calls the same delegate methods that currently flow through SwiftUI callbacks.
-
-### 4. Recording Overlay (MINIMAL CHANGE)
-
-**Current:** KeyboardRootView conditionally renders RecordingOverlay OR KeyboardView.
-**New:** KeyboardChrome (SwiftUI) conditionally renders RecordingOverlay (full area) OR ToolbarView + transparent spacer. When recording, DictusKeyboardView.isHidden = true.
+**What it replaces:** `UITextChecker.rangeOfMisspelledWord()` + `guesses()` for spell correction.
+**What it does NOT replace:** `UITextChecker.completions()` for word completions (kept -- zero memory cost, good French morphology coverage).
 
 ```swift
-// In KeyboardChrome
-if showsOverlay {
-    RecordingOverlay(...)  // Full height, covers everything
-} else {
-    ToolbarView(...)
-    Color.clear  // Transparent spacer over UIKit grid
-        .allowsHitTesting(false)
-        .frame(height: keyboardGridHeight)
+// DictusKeyboard/TextPrediction/SymSpellEngine.swift
+
+import SymSpellSwift  // SPM dependency: github.com/gdetari/SymSpellSwift
+
+/// Wraps SymSpellSwift for fast probabilistic spell correction.
+///
+/// WHY SymSpell over UITextChecker for correction:
+/// UITextChecker returns corrections ranked by edit distance only.
+/// SymSpell pre-computes deletion variants and ranks by word frequency,
+/// so "helo" -> "hello" (common word) instead of "helo" -> "helons" (rare).
+class SymSpellEngine {
+    private var symSpell: SymSpell?
+    private var currentLanguage: String = ""
+
+    func load(language: String) {
+        guard language != currentLanguage else { return }
+        currentLanguage = language
+
+        let ss = SymSpell(
+            maxDictionaryEditDistance: 2,
+            prefixLength: 7  // Balance: speed vs memory. 7 = good default.
+        )
+
+        if let path = Bundle.main.path(
+            forResource: "\(language)_symspell", ofType: "txt"
+        ) {
+            ss.loadDictionary(from: path, termIndex: 0, countIndex: 1)
+        }
+        symSpell = ss
+    }
+
+    /// Returns the best correction, or nil if word is correct/unknown.
+    func correct(_ word: String) -> String? {
+        guard let ss = symSpell else { return nil }
+        let results = ss.lookup(
+            word,
+            verbosity: .closest,
+            maxEditDistance: word.count < 3 ? 1 : 2
+        )
+        guard let best = results.first,
+              best.term.lowercased() != word.lowercased() else {
+            return nil
+        }
+        return best.term
+    }
 }
 ```
 
-DictusKeyboardView visibility is toggled by the KeyboardViewController based on dictation status:
+**Key design decisions:**
+- Edit distance adapts to word length: 1 for short words (<3 chars), 2 for longer words. Short words with edit distance 2 produce too many irrelevant matches.
+- Prefix length 7 provides 90%+ memory reduction per SymSpell documentation while maintaining fast lookups.
+
+### Component 2: NgramPredictor (Next-Word Prediction)
+
+**Recommendation: Pure Swift trigram trie** over KenLM C++ because:
+1. No Objective-C++ bridging header complexity
+2. MIT-compatible (KenLM is LGPL -- copyleft concern for MIT project)
+3. Easier to debug for a Swift learner
+4. 5-10 MB binary trie is sufficient for keyboard-grade prediction quality
+
 ```swift
-keyboardGrid.isHidden = (state.dictationStatus != .idle && state.dictationStatus != .ready)
+// DictusKeyboard/TextPrediction/NgramPredictor.swift
+
+/// Trigram-based next-word predictor using a compact binary trie.
+///
+/// Given context words [W1, W2], returns probable next words sorted by frequency.
+/// Uses backoff: tries trigram P(W3|W1,W2) first, falls back to bigram P(W3|W2),
+/// then unigram P(W3). Same approach as Gboard and SwiftKey.
+class NgramPredictor {
+    private var trie: NgramTrie?
+    private var currentLanguage: String = ""
+
+    func load(language: String) {
+        guard language != currentLanguage else { return }
+        currentLanguage = language
+        guard let url = Bundle.main.url(
+            forResource: "\(language)_trigram", withExtension: "bin"
+        ) else {
+            trie = nil; return
+        }
+        trie = NgramTrie.load(from: url)
+    }
+
+    /// Returns up to `max` next-word predictions given 1-2 context words.
+    func predict(context: [String], max: Int = 3) -> [String] {
+        guard let trie = trie else { return [] }
+
+        // Try trigram first (2 context words)
+        if context.count >= 2 {
+            let predictions = trie.query(
+                w1: context[context.count - 2],
+                w2: context[context.count - 1],
+                limit: max
+            )
+            if !predictions.isEmpty { return predictions }
+        }
+
+        // Backoff to bigram (1 context word)
+        if let lastWord = context.last {
+            return trie.query(w2: lastWord, limit: max)
+        }
+        return []
+    }
+}
 ```
 
-### 5. Suggestion Bar / Toolbar (NO CHANGE)
+### Component 3: NgramTrie (Data Structure)
 
-ToolbarView + SuggestionBarView stay in SwiftUI. They live above the keyboard grid and have no touch conflict. The mic button still triggers `KeyboardState.shared.startRecording()`.
+```swift
+// DictusKeyboard/TextPrediction/NgramTrie.swift
 
-TextPredictionEngine + SuggestionState continue to be updated from the keyboard action delegate (same flow, different caller -- UIKit delegate instead of SwiftUI closure).
+/// Compact trigram trie stored as a flat sorted array for cache-friendly access.
+///
+/// Binary format (generated offline by a build tool):
+/// Header: [vocabSize: UInt32, trigramCount: UInt32, bigramCount: UInt32]
+/// Vocab:  [word1\0, word2\0, ...] (null-terminated UTF-8 strings)
+/// Trigram entries: sorted by (w1_idx, w2_idx), each 16 bytes:
+///   [w1_idx: UInt32, w2_idx: UInt32, w3_idx: UInt32, freq: UInt32]
+/// Bigram entries: sorted by w1_idx, each 12 bytes:
+///   [w1_idx: UInt32, w2_idx: UInt32, freq: UInt32]
+///
+/// WHY flat array over nested Dictionary:
+/// Swift Dictionary has ~80 bytes overhead per entry.
+/// A flat sorted array with binary search uses 16 bytes per trigram entry.
+/// For 500K trigrams: ~8MB flat vs ~40MB nested Dictionary.
+struct NgramTrie {
+    private let vocab: [String]
+    private let vocabIndex: [String: UInt32]
+    private let trigrams: UnsafeBufferPointer<TrigramEntry>  // mmap'd
+    private let bigrams: UnsafeBufferPointer<BigramEntry>    // mmap'd
 
-### 6. Emoji Picker (MINIMAL CHANGE)
+    struct TrigramEntry {
+        let w1: UInt32; let w2: UInt32; let w3: UInt32; let freq: UInt32
+    }
+    struct BigramEntry {
+        let w1: UInt32; let w2: UInt32; let freq: UInt32
+    }
 
-EmojiPickerView stays SwiftUI. When emoji mode activates:
-1. DictusKeyboardView.isHidden = true
-2. SwiftUI chrome shows EmojiPickerView instead of transparent spacer
-3. On dismiss: DictusKeyboardView.isHidden = false
+    static func load(from url: URL) -> NgramTrie? {
+        // Memory-map the file for lazy loading
+        // Parse header -> build vocab table -> reference entry arrays
+        // Implementation in build phase
+    }
 
-### 7. Haptic + Audio Feedback (NO CHANGE)
+    func query(w1: String, w2: String, limit: Int) -> [String] {
+        // Binary search for (w1_idx, w2_idx) prefix in trigrams
+        // Collect top-N by freq, map w3_idx to vocab string
+    }
 
-HapticFeedback (DictusCore) and AudioServicesPlaySystemSound work identically from UIKit. The existing pre-allocated generators, touchDown timing, and 3-sound categories (letter/delete/modifier) are called from DictusKeyboardView's touch handlers instead of SwiftUI gesture handlers.
-
-### 8. Accent System (ADAPT)
-
-**Current Dictus:** Long-press timer in KeyButton (400ms Task.sleep), AccentPopup as SwiftUI overlay.
-**giellakbd-ios:** UILongPressGestureRecognizer + LongPressOverlayController with UICollectionView popup.
-**Recommended:** Use giellakbd-ios approach (UIKit accent popup) because it participates in the same touch handling chain. The accent popup is a UIView overlay on DictusKeyboardView, positioned relative to the pressed key cell.
-
-AccentedCharacters.swift (DictusCore) provides the accent data -- no change. The adaptive accent key behavior (vowel context, apostrophe default) is Dictus-specific and must be ported into the UIKit layer.
-
-### 9. Spacebar Trackpad (ADAPT)
-
-**Current Dictus:** SpaceKey with DragGesture, 400ms activation, cosine acceleration, dead zone, 60fps rate limiting.
-**giellakbd-ios:** LongPressCursorMovementController with 20pt delta threshold.
-**Recommended:** Use giellakbd-ios's long-press detection mechanism but port Dictus's superior trackpad tuning (cosine acceleration curve, 8pt dead zone, haptic ticks per character). The giellakbd-ios approach uses `touchesMoved` delta tracking which is more precise than SwiftUI DragGesture for sub-pixel movements.
-
-### 10. Key Metrics / Layout (ADAPT)
-
-**Current Dictus:** KeyMetrics enum (device-adaptive heights), KeyboardLayout (static arrays of KeyDefinition).
-**giellakbd-ios:** KeyboardHeightProvider (screen-diagonal lookup), KeyboardDefinition (JSON-loaded layouts).
-
-**Recommended:** Keep Dictus's KeyMetrics (simpler, already tuned for Dictus device classes) and KeyboardLayout (hardcoded AZERTY/QWERTY, no need for JSON). Adapt giellakbd-ios's row/column sizing formula for the UICollectionView cell layout:
+    func query(w2: String, limit: Int) -> [String] {
+        // Binary search for w1_idx in bigrams (bigram backoff)
+    }
+}
 ```
-cellWidth = key.size.width * (boundsWidth / rowTotalUnits)
-cellHeight = boundsHeight / numberOfRows
+
+### Component 4: TextPredictionEngine (Modified Orchestrator)
+
+```swift
+// Changes to TextPredictionEngine.swift
+
+class TextPredictionEngine {
+    private let textChecker = UITextChecker()        // KEPT: word completions
+    private var frequencyDict = FrequencyDictionary() // KEPT: completion ranking
+    private let symSpell = SymSpellEngine()           // NEW: spell correction
+    private let ngram = NgramPredictor()              // NEW: next-word prediction
+    private var language: String = "fr"
+
+    func setLanguage(_ lang: String) {
+        language = lang
+        frequencyDict.load(language: lang)
+        symSpell.load(language: lang)    // NEW
+        ngram.load(language: lang)       // NEW
+    }
+
+    // suggestions(for:) -- UNCHANGED
+    // Still uses UITextChecker.completions() + FrequencyDictionary ranking
+    func suggestions(for partialWord: String) -> [String] { /* unchanged */ }
+
+    // spellCheck -- CHANGED: SymSpell with UITextChecker fallback
+    func spellCheck(_ word: String) -> String? {
+        if let correction = symSpell.correct(word) { return correction }
+        return fallbackSpellCheck(word)  // UITextChecker as fallback
+    }
+
+    // NEW: next-word predictions from context
+    func nextWordPredictions(context: [String]) -> [String] {
+        return ngram.predict(context: context, max: 3)
+    }
+
+    // accentSuggestions -- UNCHANGED
+    func accentSuggestions(for partialWord: String) -> [String]? { /* unchanged */ }
+
+    // Fallback: original UITextChecker spell check (for graceful degradation)
+    private func fallbackSpellCheck(_ word: String) -> String? {
+        let nsString = word as NSString
+        let range = NSRange(location: 0, length: nsString.length)
+        let misspelled = textChecker.rangeOfMisspelledWord(
+            in: word, range: range, startingAt: 0, wrap: false, language: language
+        )
+        guard misspelled.location != NSNotFound else { return nil }
+        guard let guesses = textChecker.guesses(
+            forWordRange: misspelled, in: word, language: language
+        ), !guesses.isEmpty else { return nil }
+        let ranked = guesses.sorted { frequencyDict.rank(of: $0) < frequencyDict.rank(of: $1) }
+        return ranked.first
+    }
+}
 ```
 
----
+### Component 5: SuggestionState (Modified)
+
+```swift
+// Changes to SuggestionState.swift
+
+enum SuggestionMode {
+    case idle
+    case completions
+    case accents
+    case nextWord    // NEW: showing next-word predictions after space
+}
+
+// In updateAsync(context:):
+// Current behavior when context ends with space/newline: clear() -> .idle
+// NEW behavior: extract last 2 words, query nextWordPredictions
+//   If predictions available -> mode = .nextWord, suggestions = predictions
+//   If no predictions -> mode = .idle (unchanged fallback)
+
+// Context word extraction helper:
+private func extractContextWords(from text: String, max: Int = 2) -> [String] {
+    var words: [String] = []
+    text.enumerateSubstrings(in: text.startIndex..., options: .byWords) { word, _, _, _ in
+        if let word = word { words.append(word) }
+    }
+    return Array(words.suffix(max))
+}
+```
+
+### Component 6: Autocorrect Undo Fix (#67)
+
+**Root cause:** `lastAutocorrect` is never cleared when the user types new characters after a correction. The undo fires on any future backspace, corrupting text.
+
+**Fix location:** `DictusKeyboardBridge.handleInputKey()` -- add one line:
+
+```swift
+private func handleInputKey(_ character: String) {
+    suggestionState?.lastAutocorrect = nil  // FIX #67: clear undo on new input
+    AudioServicesPlaySystemSound(KeySound.letter)
+    // ... rest unchanged
+}
+```
+
+Also clear in `handleReturn()` and `handleAdaptiveAccentKey()` for completeness -- any non-backspace input should invalidate the undo state.
 
 ## Data Flow Changes
 
-### Before (SwiftUI-only)
+### New Flow: Spell Correction via SymSpell
 
 ```
-User touch -> SwiftUI DragGesture.onChanged
-  -> KeyButton.handleTouchDown() [haptic + audio]
-  -> DragGesture.onEnded
-  -> KeyButton.handleTouchUp()
-  -> onTap(char) closure
-  -> KeyRow.onCharacter(char)
-  -> KeyboardView.insertCharacter(char)
-  -> controller.textDocumentProxy.insertText(char)
-  -> suggestionState.updateAsync()
+User taps space
+  -> DictusKeyboardBridge.handleSpace()
+  -> SuggestionState.performSpellCheck(currentWord)
+    -> TextPredictionEngine.spellCheck()
+      -> SymSpellEngine.correct(word)  <- CHANGED (was UITextChecker)
+        -> SymSpell.lookup(word, verbosity: .closest, maxEditDistance: 1 or 2)
+        -> Return best match ranked by corpus frequency
+      -> If SymSpell returns nil: fallbackSpellCheck via UITextChecker
+  -> If correction differs: replace word, store undo state (unchanged)
 ```
 
-### After (UIKit grid + SwiftUI chrome)
+### New Flow: Next-Word Prediction After Space
 
 ```
-User touch -> DictusKeyboardView.touchesBegan
-  -> collectionView.indexPathForItem(at:) [find key]
-  -> highlight cell, play haptic + audio
-  -> DictusKeyboardView.touchesEnded
-  -> delegate.didTapCharacter(char)
-  -> KeyboardViewController.didTapCharacter(char)
-  -> textDocumentProxy.insertText(char)
-  -> suggestionState.updateAsync()
+After space insertion (word spelled correctly or after correction):
+  -> Instead of SuggestionState going to .idle:
+  -> Extract last 2 completed words from documentContextBeforeInput
+  -> TextPredictionEngine.nextWordPredictions(context: [word1, word2])
+    -> NgramPredictor.predict(context:)
+    -> Trigram lookup: binary search (w1, w2) -> collect top-3 by freq
+    -> If no trigram match: bigram backoff with last word only
+  -> If predictions available:
+    -> suggestions = predictions, mode = .nextWord
+  -> If no predictions:
+    -> suggestions = [], mode = .idle
 ```
 
-**Net change:** The touch entry point moves from SwiftUI gesture to UIView touch methods. Everything downstream (textDocumentProxy, suggestion engine, dictation IPC) is unchanged.
-
-### IPC Flow (NO CHANGE)
+### New Flow: Tapping a Next-Word Prediction
 
 ```
-Keyboard mic tap -> KeyboardState.startRecording()
-  -> Darwin notification + 500ms URL fallback
-  -> DictusApp records in background
-  -> Darwin notifications for status updates
-  -> KeyboardState.refreshFromDefaults()
-  -> RecordingOverlay shows/hides (SwiftUI)
-  -> Transcription auto-inserted via textDocumentProxy
+User taps suggestion in .nextWord mode
+  -> KeyboardRootView.onSuggestionTap(index:)
+  -> proxy.insertText(selectedWord + " ")
+  -> Re-query next-word predictions with updated context
+  -> Enables chained predictions:
+    "Je" -> [suis, vais, peux]
+    tap "suis" -> "Je suis " -> [un, en, le]
+    tap "un" -> "Je suis un " -> [homme, bon, peu]
 ```
 
-This flow is completely independent of how keys are rendered.
+### Cold Start Auto-Return Analysis
 
----
+```
+CURRENT (working):
+  Keyboard mic tap
+  -> Darwin notification (warm start) OR URL scheme (cold start)
+  -> DictusApp opens, starts recording
+  -> User manually swipes back (guided by SwipeBackOverlayView)
+  -> Keyboard shows recording overlay, waveform, stop/cancel buttons
 
-## New Components to Create
+PROPOSED AUTO-RETURN:
+  The keyboard would detect the source app -> write to App Group
+  -> App reads source app scheme after transcription
+  -> openURL(sourceScheme://) to return automatically
+```
 
-| File | Type | Source | Purpose |
-|------|------|--------|---------|
-| `DictusKeyboardView.swift` | UIView | **Adapted** from giellakbd-ios KeyboardView | Key grid + touch dispatcher |
-| `DictusKeyCell.swift` | UICollectionViewCell | **Adapted** from giellakbd-ios KeyView | Visual key rendering |
-| `KeyboardActionDelegate.swift` | Protocol | **New** | Bridge UIKit actions to ViewController |
-| `KeyboardChrome.swift` | SwiftUI View | **Refactored** from KeyboardRootView | Toolbar + overlay wrapper |
-| `AccentOverlayView.swift` | UIView | **Adapted** from giellakbd-ios LongPressOverlayController | UIKit accent popup |
-| `TrackpadController.swift` | Class | **Ported** from SpaceKey + giellakbd-ios LongPressCursorMovementController | Spacebar trackpad |
+**Research findings (LOW confidence):**
 
-## Existing Components to Modify
+Based on research including the [Swift Forums discussion on auto-return techniques](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988), there is NO reliable public API to accomplish this:
 
-| File | Change | Scope |
-|------|--------|-------|
-| `KeyboardViewController.swift` | New viewDidLoad layout (UIKit + SwiftUI side-by-side), implement KeyboardActionDelegate | Medium |
-| `KeyboardRootView.swift` | **Replace** with KeyboardChrome (thinner: toolbar + overlay only, no keyboard grid) | Medium |
-| `InputView.swift` | Add hitTest override to route touches to UIKit grid vs SwiftUI chrome | Small |
+| Approach | Status | Problem |
+|----------|--------|---------|
+| `_hostBundleID` | Blocked | Private API, blocked in iOS 18+ |
+| `LSApplicationWorkspace` | Rejected | Private API, confirmed App Store rejection |
+| `UIApplication.suspend()` | Wrong behavior | Goes to home screen, not previous app |
+| `canOpenURL` iteration | Wrong target | Opens first installed app, not source app |
+| `x-callback-url` | Impractical | Requires cooperation from every host app |
+| Accessibility APIs | Risky | Undocumented, App Store review risk |
 
-## Existing Components Unchanged
+**Wispr Flow** appears to achieve auto-return but the mechanism is undocumented. It may rely on a private API that Apple permits for specific apps, or a timing-based trick that is not publicly documented.
 
-| File | Why No Change |
-|------|---------------|
-| `KeyboardState.swift` | IPC layer, orthogonal to rendering |
-| `ToolbarView.swift` | Stays SwiftUI, above grid |
-| `RecordingOverlay.swift` | Stays SwiftUI, replaces grid when active |
-| `SuggestionBarView.swift` | Stays SwiftUI, inside ToolbarView |
-| `EmojiPickerView.swift` | Stays SwiftUI, replaces grid when active |
-| `EmojiCategoryBar.swift` | Part of emoji picker |
-| `EmojiData.swift`, `EmojiSearchFR.swift`, `RecentEmojis.swift` | Data models |
-| `TextPredictionEngine.swift`, `SuggestionState.swift` | Prediction logic, called from delegate |
-| `KeyTapSignposter.swift` | Performance instrumentation, works from UIKit |
-| `KeyboardWaveformView.swift` | Part of recording overlay |
-| `MicButtonDisabled.swift`, `FullAccessBanner.swift` | UI components in SwiftUI chrome |
-| All DictusCore files | Shared framework, no rendering code |
+**Recommendation:** Defer auto-return (#23) to a standalone research spike. The swipe-back overlay works 100% of the time for all apps and is already polished (branded animation, bilingual text). Invest engineering effort in prediction quality -- it has vastly higher user impact per engineering hour.
 
-## Components to Delete (after migration)
+## Patterns to Follow
 
-| File | Reason |
-|------|--------|
-| `KeyButton.swift` | Replaced by DictusKeyCell |
-| `KeyRow.swift` | Replaced by UICollectionView rows |
-| `KeyboardView.swift` | Replaced by DictusKeyboardView |
-| `SpecialKeyButton.swift` | Special keys rendered by DictusKeyCell + touch handler |
-| `AccentPopup.swift` | Replaced by AccentOverlayView (UIKit) |
+### Pattern 1: Single-Language Loading
+**What:** Load SymSpell dictionary and n-gram model for only one language at a time.
+**When:** On `viewWillAppear` language refresh and on `setLanguage()` calls.
+**Why:** Two languages loaded simultaneously = ~25-30 MB, leaving no headroom.
+**Precedent:** FrequencyDictionary already follows this exact pattern.
 
----
+### Pattern 2: Background Queue Reuse
+**What:** Run SymSpell and n-gram queries on the existing `suggestionQueue` serial DispatchQueue.
+**When:** On every keystroke (completions) and after every space (next-word).
+**Why:** The async coalescing with `DispatchWorkItem` cancellation prevents stale results. Same queue = same guarantees, no new threading.
 
-## Suggested Build Order
+### Pattern 3: Async Load with Graceful Degradation
+**What:** Load SymSpell/n-gram data asynchronously. Fall back to UITextChecker until loaded.
+**When:** Extension launch, language change.
+**Why:** SymSpell dictionary pre-computation takes ~500ms. Keyboard must be responsive immediately. UITextChecker is available instantly as the system framework.
+```swift
+func spellCheck(_ word: String) -> String? {
+    if let correction = symSpell.correct(word) { return correction }
+    return fallbackSpellCheck(word)  // UITextChecker until SymSpell loads
+}
+```
 
-Build order is driven by dependencies: the UIKit grid must exist before features can be layered on top.
+### Pattern 4: Offline Trie Generation
+**What:** Build trigram binary trie offline (macOS CLI tool or script), bundle the `.bin` file.
+**When:** During development, before each release. Not at runtime.
+**Why:** Parsing corpus text takes seconds-to-minutes. Keyboard loads pre-built binary in milliseconds.
+**Tool:** Swift command-line target in Xcode project or standalone script.
 
-### Phase 1: Skeleton Grid (Foundation)
-
-**Goal:** UIKit keyboard grid renders keys and responds to taps. No features, just character insertion.
-
-1. **DictusKeyboardView** -- UICollectionView setup, layout delegate, cell sizing from KeyboardLayout data
-2. **DictusKeyCell** -- Render key label (text or SF Symbol), background, press highlight
-3. **KeyboardActionDelegate** protocol -- didTapCharacter, didTapDelete, didTapSpace, didTapReturn, didTapShift, didTapGlobe, didTapLayerSwitch, didTapEmoji, didTapAccent
-4. **KeyboardViewController** -- New viewDidLoad with UIKit grid + SwiftUI chrome
-5. **KeyboardChrome** -- Slimmed SwiftUI wrapper (toolbar + overlay + emoji mode)
-6. **InputView hitTest** -- Route keyboard area touches to UIKit, toolbar/overlay to SwiftUI
-
-**Validation:** Type characters in any text field. Keys highlight on touch. No dead zones between keys.
-
-### Phase 2: Touch Polish (Native Feel)
-
-**Goal:** Match Apple keyboard feel -- haptic on touchDown, 3-sound categories, key popup preview.
-
-7. **touchDown haptic + audio** -- Fire in touchesBegan (not touchesEnded)
-8. **Key popup preview** -- UIView overlay above pressed key (replaces SwiftUI KeyPopup)
-9. **Shift state** -- Single tap shift, double-tap caps lock, visual icon updates
-10. **Layer switching** -- 123/ABC/#+= transitions with UICollectionView reloadData
-
-**Validation:** Typing feels identical to v1.2. All shift states work. Layer switching works.
-
-### Phase 3: Complex Touch Features
-
-**Goal:** Port Dictus-specific touch features that go beyond basic key taps.
-
-11. **Delete repeat** -- touchDown immediate delete, 400ms delay, 100ms repeat, word-mode acceleration after 10 chars
-12. **Spacebar trackpad** -- 400ms long-press activation, cosine acceleration, 8pt dead zone, haptic ticks, 60fps rate limit
-13. **Accent long-press** -- AccentOverlayView (UIKit popup), 400ms timer, drag-to-select, accent data from AccentedCharacters.swift
-14. **Adaptive accent key** -- Context-sensitive apostrophe/accent based on last typed char
-
-**Validation:** Long-press "e" shows accent popup. Delete accelerates. Spacebar trackpad moves cursor.
-
-### Phase 4: Dictus Feature Reintegration
-
-**Goal:** Reconnect all Dictus-specific features to the new UIKit grid.
-
-15. **Recording overlay** -- Toggle DictusKeyboardView.isHidden on dictation status changes
-16. **Suggestion bar** -- Wire SuggestionState.updateAsync() from KeyboardActionDelegate callbacks
-17. **Autocorrect** -- Space tap triggers performAutocorrectIfNeeded() before insertion
-18. **Autocapitalize** -- Check sentence boundaries after space, return, delete
-19. **Emoji mode** -- Hide UIKit grid, show SwiftUI EmojiPickerView, restore on dismiss
-20. **Dead zone elimination** -- Verify with point(inside:with:) negative insets on DictusKeyboardView or cells
-
-**Validation:** Full dictation flow works (mic -> recording -> transcription insert). Suggestions appear. Autocorrect undo works. Emoji picker works.
-
-### Phase 5: Cleanup
-
-21. **Delete old SwiftUI keyboard files** -- KeyButton, KeyRow, KeyboardView, SpecialKeyButton, AccentPopup
-22. **Update KeyboardRootView** references -- Ensure KeyboardChrome is the sole SwiftUI entry point
-23. **Signposter instrumentation** -- Wire KeyTapSignposter from UIKit touch handlers
-24. **Regression testing** -- Full test pass against v1.2 feature set
-
----
-
-## Scalability Considerations
-
-| Concern | Impact | Notes |
-|---------|--------|-------|
-| Memory (~50MB limit) | UICollectionView uses less memory than SwiftUI VStack (cell reuse) | Positive change |
-| Key count | 10 keys/row * 4 rows = 40 cells max | Well within UICollectionView comfort zone |
-| Layout changes | reloadData() is O(n) where n=~40 | Negligible, <1ms |
-| Accent popup | UIView overlay, not SwiftUI rebuild | More predictable frame timing |
-| Recording overlay | SwiftUI conditional still works | No change in memory pattern |
-| Theme/dark mode | UICollectionView cells update via traitCollectionDidChange | Standard UIKit pattern |
-
----
+### Pattern 5: Edit Distance Adaptation
+**What:** Use edit distance 1 for short words (<3 chars), edit distance 2 for longer words.
+**When:** Every SymSpell lookup call.
+**Why:** "ab" with edit distance 2 matches nearly everything. Restricting to 1 for short inputs prevents noise.
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Mixing UIKit touches with SwiftUI gestures in same region
-**What:** Adding SwiftUI gesture recognizers that overlap with UIKit touch area.
-**Why bad:** UIKit and SwiftUI gesture systems fight for touch ownership, causing dropped touches.
-**Instead:** Clean boundary -- UIKit owns keyboard grid touch area, SwiftUI owns everything above.
+### Anti-Pattern 1: Replacing UITextChecker for Completions
+**What:** Using SymSpell instead of UITextChecker for partial word completions.
+**Why bad:** UITextChecker.completions() has zero memory cost (system dictionary), handles French conjugations/morphology for 100K+ words. SymSpell is designed for CORRECTION (finding the closest known word to a misspelled input), not for COMPLETION (finding all words starting with a prefix). Using SymSpell for completions would require a separate prefix-search index.
+**Instead:** Keep UITextChecker for completions, use SymSpell for corrections only.
 
-### Anti-Pattern 2: Using UIStackView for key rows
-**What:** Previous Phase 15.5 attempt used UIStackView, which bypasses point(inside:with:).
-**Why bad:** UIStackView.hitTest uses subview.frame.contains(point), never calls point(inside:with:) on subviews.
-**Instead:** UICollectionView with custom layout, or manual frame layout with overridden hitTest.
+### Anti-Pattern 2: KenLM C++ Bridging
+**What:** Using KenLM via Objective-C++ bridging header.
+**Why bad:** Adds build complexity, LGPL license (copyleft concern for MIT project), harder to debug, and a pure Swift trigram trie is sufficient for keyboard-grade quality.
+**Instead:** Pure Swift trigram trie with offline binary format.
 
-### Anti-Pattern 3: Bridging UIKit state to SwiftUI via @Published
-**What:** Making DictusKeyboardView an ObservableObject with @Published properties for every key state.
-**Why bad:** Causes full SwiftUI re-render on every touch event (60+ times/second during trackpad).
-**Instead:** UIKit manages its own visual state. Only bridge layer/mode changes (infrequent) to SwiftUI via delegate.
+### Anti-Pattern 3: Loading Both Languages
+**What:** Pre-loading FR + EN SymSpell + n-gram data.
+**Why bad:** ~25-30 MB for two languages + ~15 MB existing = 40-45 MB. iOS kills extensions at ~50 MB without warning.
+**Instead:** Single language loaded. 200-500ms reload on language switch is fine (rare event).
 
-### Anti-Pattern 4: Re-creating UICollectionView on layer switch
-**What:** Destroying and recreating the collection view when switching letters/numbers/symbols.
-**Why bad:** Expensive allocation + layout pass, visible flicker.
-**Instead:** Call reloadData() with new layout data. Collection view cells update in-place.
+### Anti-Pattern 4: Nested Swift Dictionaries for N-grams
+**What:** Storing trigrams as `[String: [String: [String: Int]]]`.
+**Why bad:** Swift Dictionary overhead is ~80 bytes per entry. 500K trigrams = ~40 MB.
+**Instead:** Flat sorted array with binary search at 16 bytes/entry = ~8 MB.
 
----
+### Anti-Pattern 5: N-gram Queries on Partial Words
+**What:** Sending partial input ("bon") to the n-gram predictor during typing.
+**Why bad:** N-grams predict NEXT words, not completions. "bon" as a bigram key returns words that follow "bon" in sentences ("jour", "appétit"), not words that start with "bon" ("bonjour", "bonheur").
+**Instead:** Only query n-gram predictor after a word boundary (space/punctuation). Use UITextChecker for partial word completion.
+
+### Anti-Pattern 6: Synchronous Dictionary Loading
+**What:** Calling `symSpell.loadDictionary()` on main thread in `init()` or `viewDidLoad()`.
+**Why bad:** Blocks keyboard appearance for 500ms-2s. User sees frozen keyboard.
+**Instead:** Load async on background queue. UITextChecker covers the first few keystrokes.
+
+## Scalability Considerations
+
+| Concern | Current (v1.3) | After Upgrade (v1.4) | Future (v2+) |
+|---------|----------------|----------------------|--------------|
+| Languages | FR + EN (1 loaded) | FR + EN (1 loaded, richer data) | Add languages by adding dict + trie files |
+| Vocabulary | ~1.2K frequency + system dict | ~80K SymSpell + ~50K trigram vocab | Scale trie vocab, same architecture |
+| Prediction | Current-word only | Current-word + next-word | User-learned words, personalized n-grams |
+| Memory | ~15 MB | ~25-30 MB | Approaching limit -- careful growth |
+| Latency | <5ms per keystroke | <10ms target per keystroke | Profile on oldest device (iPhone 12) |
+| Personalization | None | None | Append user bigrams to trie at runtime |
+
+## Build Order (Dependency-Driven)
+
+```
+Phase 1: Autocorrect undo fix (#67)
+  Dependencies: None
+  Risk: Minimal (single-line fix in 1 file + same in 2 others)
+  Files changed: DictusKeyboardBridge.swift
+  Validation: Type after autocorrect, backspace = normal delete (not undo)
+
+Phase 2: SymSpell integration (#68 part 1)
+  Dependencies: SymSpellSwift SPM package + dictionary files
+  Risk: Medium (memory profiling needed on real device)
+  New files: SymSpellEngine.swift
+  Modified: TextPredictionEngine.swift (spellCheck method)
+  New resources: fr_symspell.txt (~2-3MB), en_symspell.txt (~2-3MB)
+  Validation: "helo" -> "hello" (not "helons"), "caf" -> "cafe"
+
+Phase 3: N-gram trie data structure + offline builder
+  Dependencies: Corpus data (French Wikipedia or OpenSubtitles)
+  Risk: Medium (binary format design, corpus sourcing)
+  New files: NgramTrie.swift, trigram build tool (macOS CLI target or script)
+  New resources: fr_trigram.bin (~5-10MB), en_trigram.bin (~5-10MB)
+  Validation: Trie loads from binary, returns trigram query results correctly
+
+Phase 4: N-gram predictor integration (#68 part 2)
+  Dependencies: Phase 3 (trie data structure must exist first)
+  Risk: Low (follows same wrapper pattern as SymSpellEngine)
+  New files: NgramPredictor.swift
+  Modified: TextPredictionEngine.swift (add nextWordPredictions method)
+  Validation: After "je suis", predictions = [un, en, le] or similar
+
+Phase 5: SuggestionState next-word mode + UI
+  Dependencies: Phase 4 (predictor must produce results)
+  Risk: Low (UI extension of existing mode pattern)
+  Modified: SuggestionState.swift (.nextWord mode + context extraction)
+             SuggestionBarView.swift (next-word mode styling)
+             KeyboardRootView.swift (tap handler for next-word insertion)
+  Validation: Suggestion bar shows next-word after space,
+              tapping inserts word + refreshes to new predictions
+
+Phase 6: Cold start auto-return (#23)
+  Dependencies: None (independent track)
+  Risk: HIGH (no known public API solution)
+  Recommendation: DEFER -- swipe-back overlay already works for all apps
+  If researched: standalone spike, do not block milestone
+
+Phase 7: License update (#63)
+  Dependencies: None
+  Risk: Minimal
+  Files: SettingsView.swift, LICENSE file
+```
+
+**Ordering rationale:**
+- Bug fix first (#67): instant user value, zero risk, unblocks QA testing.
+- SymSpell before n-gram: biggest quality improvement ("helo -> hello" is the most visible failure). Users feel the difference immediately.
+- Trie data structure before predictor: the binary format and load mechanism must exist before the predictor wrapper can use it.
+- Next-word UI last in prediction work: needs all backends working first.
+- Cold start auto-return is highest risk with lowest success probability. Do not block the milestone on it.
 
 ## Sources
 
-- [giellakbd-ios repository](https://github.com/divvun/giellakbd-ios) -- Full source code analysis (HIGH confidence)
-- giellakbd-ios KeyboardView.swift -- UICollectionView + touchesBegan architecture (HIGH confidence)
-- giellakbd-ios LongPressController.swift -- Accent popup + cursor movement (HIGH confidence)
-- giellakbd-ios KeyboardViewController.swift -- Entry point, banner, delegate pattern (HIGH confidence)
-- Dictus Phase 15.4 dead zones learnings (project memory) -- 16 failed SwiftUI approaches (HIGH confidence)
-- Dictus Phase 15.5 UIKit keyboard attempt (project memory) -- UIStackView hitTest bypass discovery (HIGH confidence)
-- Apple `point(inside:with:)` documentation -- UIView hit-testing extension mechanism (HIGH confidence)
+### HIGH Confidence
+- Existing codebase: TextPredictionEngine.swift, SuggestionState.swift, DictusKeyboardBridge.swift, FrequencyDictionary.swift, KeyboardViewController.swift (direct code analysis)
+- [SymSpellSwift](https://github.com/gdetari/SymSpellSwift) -- MIT license, SPM, v0.1.4 (Aug 2025), Swift implementation
+- [SymSpell algorithm](https://github.com/wolfgarbe/SymSpell) -- symmetric delete documentation, prefix indexing for 90%+ memory reduction
+- GitHub issues [#67](https://github.com/getdictus/dictus-ios/issues/67) (autocorrect undo bug), [#68](https://github.com/getdictus/dictus-ios/issues/68) (prediction upgrade), [#23](https://github.com/getdictus/dictus-ios/issues/23) (auto-return)
+- Phase 8 research (08-RESEARCH.md) -- original prediction architecture, UITextChecker analysis
+
+### MEDIUM Confidence
+- [KenLM](https://github.com/kpu/kenlm) -- n-gram toolkit, C++, LGPL (researched, not recommended)
+- [AOSP dictionaries](https://codeberg.org/Helium314/aosp-dictionaries) -- pre-built language models, corpus sourcing reference
+- SymSpell memory estimate: 3-5 MB per language for 80K dictionary at edit distance 2 with prefix length 7 (based on algorithm analysis, not empirically verified on iOS)
+- N-gram trie size estimate: 5-10 MB for 500K trigrams at 16 bytes/entry (needs real-device profiling)
+- [Swift Package Index: SymSpellSwift](https://swiftpackageindex.com/gdetari/SymSpellSwift) -- package metadata
+
+### LOW Confidence
+- [Swift Forums: auto-return techniques](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988) -- no public API solution found, Wispr Flow mechanism undocumented
+- Cold start auto-return feasibility: no evidence of App Store-safe technique
+- SymSpellSwift in iOS keyboard extension: untested in 50MB constrained environment, needs memory profiling
