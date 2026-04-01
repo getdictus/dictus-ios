@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: planning
-stopped_at: Phase 23 context gathered
-last_updated: "2026-04-01T18:35:14.498Z"
+stopped_at: Completed 23-01-PLAN.md
+last_updated: "2026-04-01T19:37:16.912Z"
 last_activity: 2026-04-01 — v1.4 roadmap created (4 phases, 13 requirements mapped)
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -55,6 +55,7 @@ Recent decisions for v1.4:
 - KenLM rejected: C++ bridging, LGPL, 50-500MB models incompatible with 50MB extension limit
 - Cold start auto-return time-boxed to 2h investigation; Apple DTS confirmed no public API exists
 - Memory gate between phases: device profiling mandatory after SymSpell and after n-gram
+- [Phase 23]: Used MIT for giellakbd-ios (dual Apache-2.0/MIT) since helper existed
 
 ### Pending Todos
 
@@ -68,9 +69,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-01T18:35:14.496Z
-Stopped at: Phase 23 context gathered
-Resume file: .planning/phases/23-bug-fixes-license-compliance/23-CONTEXT.md
+Last session: 2026-04-01T19:37:16.910Z
+Stopped at: Completed 23-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*

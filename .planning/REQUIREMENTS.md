@@ -9,9 +9,9 @@ Requirements for v1.4 milestone. Each maps to roadmap phases.
 
 ### Bug Fixes
 
-- [ ] **FIX-01**: Autocorrect undo only triggers on immediate backspace, not after new character input (#67)
-- [ ] **FIX-02**: Settings licenses link points to correct getdictus/dictus-ios repo (#63)
-- [ ] **FIX-03**: Parakeet/NVIDIA model attribution added to licenses screen (#63)
+- [x] **FIX-01**: Autocorrect undo only triggers on immediate backspace, not after new character input (#67)
+- [x] **FIX-02**: Settings licenses link points to correct getdictus/dictus-ios repo (#63)
+- [x] **FIX-03**: Parakeet/NVIDIA model attribution added to licenses screen (#63)
 
 ### Prediction Engine
 
@@ -86,9 +86,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FIX-01 | Phase 23 | Pending |
-| FIX-02 | Phase 23 | Pending |
-| FIX-03 | Phase 23 | Pending |
+| FIX-01 | Phase 23 | Complete |
+| FIX-02 | Phase 23 | Complete |
+| FIX-03 | Phase 23 | Complete |
 | PRED-01 | Phase 24 | Pending |
 | PRED-02 | Phase 24 | Pending |
 | PRED-03 | Phase 24 | Pending |
