@@ -56,25 +56,22 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 
 ### Active
 
-- [ ] Keyboard rebuild from giellakbd-ios (UICollectionView, zero dead zones) — issue #62
-- [ ] Reintegrate Dictus features on new keyboard (toolbar mic, overlay, emoji, prediction, accents)
-- [ ] Fix Dynamic Island stuck on REC (state desync) — issue #60
-- [ ] Fix export logs slow with no spinner — issue #61
-- [ ] Additional bug fixes from v1.2 internal beta testing
-- [ ] Public TestFlight beta (Beta App Review, external testing group, public link)
-- [ ] README update with public TestFlight link
+- [ ] Upgrade text prediction with probability-based suggestions (SymSpell + n-gram) — issue #68
+- [ ] Fix autocorrect undo triggers after typing new characters — issue #67
+- [ ] Update licenses repo link + add Parakeet/NVIDIA attribution — issue #63
+- [ ] Auto-return to source app after cold start dictation — issue #23
+- [ ] Bug fixes from public beta user feedback (TBD)
 
-## Current Milestone: v1.3 Public Beta
+## Current Milestone: v1.4 Prediction & Stability
 
-**Goal:** Rebuild the keyboard from scratch using giellakbd-ios (Divvun) for zero dead zones, fix beta bugs, and open public TestFlight.
+**Goal:** Upgrade the text prediction engine with probability-based suggestions, fix known bugs, and stabilize based on beta feedback.
 
 **Target features:**
-- Keyboard rebuild from giellakbd-ios (100% UIKit, UICollectionView)
-- AZERTY/QWERTY French adaptation on new keyboard base
-- Reintegrate all Dictus keyboard features (mic toolbar, recording overlay, emoji picker, text prediction, accents)
-- Fix Dynamic Island REC state desync (#60)
-- Fix export logs performance + spinner (#61)
-- Submit for Beta App Review and open public TestFlight link
+- Upgrade prediction engine: SymSpell + n-gram model for smarter suggestions (#68)
+- Fix autocorrect undo triggering after new characters (#67)
+- Update licenses & Parakeet attribution in Settings (#63)
+- Research & implement cold start auto-return to source app (#23)
+- Bug fixes from public beta user feedback (TBD)
 
 ### Out of Scope
 
@@ -149,4 +146,4 @@ Known remaining issues:
 | App Group migration to group.solutions.pivi.dictus | Old ID claimed by personal team, professional team needed new ID | ✓ Good — clean separation |
 
 ---
-*Last updated: 2026-03-27 after v1.3 milestone start*
+*Last updated: 2026-04-01 after v1.4 milestone start*

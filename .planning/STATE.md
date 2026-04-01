@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Public Beta
-status: executing
-stopped_at: Completed 22-01-PLAN.md
-last_updated: "2026-03-31T18:16:11.545Z"
-last_activity: "2026-03-31 - Completed 22-01: emoji picker memory fix (134 MiB -> 32.67 MiB)"
+milestone: v1.4
+milestone_name: Prediction & Stability
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-04-01T14:00:00.000Z"
+last_activity: "2026-04-01 - Milestone v1.4 started"
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 14
-  completed_plans: 13
-  percent: 93
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-27)
+See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 22 in progress -- Public TestFlight (emoji picker memory fixed, pending submission)
+**Current focus:** Milestone v1.4 Prediction & Stability — defining requirements
 
 ## Current Position
 
-Phase: 22 of 22 (Public TestFlight)
-Plan: 1 of 2 complete in current phase
-Status: Phase 22 in progress
-Last activity: 2026-03-31 - Completed 22-01: emoji picker memory fix (134 MiB -> 32.67 MiB)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-01 — Milestone v1.4 started
 
-Progress: [█████████░] 93% (v1.3 milestone)
+Progress: [░░░░░░░░░░] 0% (v1.4 milestone)
 
 ## Performance Metrics
 
