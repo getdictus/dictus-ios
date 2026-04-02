@@ -189,6 +189,17 @@ Plans:
 Plans:
 - [ ] 23-01-PLAN.md — Fix autocorrect undo race condition + complete license attribution (FIX-01, FIX-02, FIX-03)
 
+### Phase 23.1: App Localization Audit & Fix — ensure all UI strings use NSLocalizedString and app respects device language (INSERTED)
+
+**Goal:** All UI strings use iOS String Catalogs with English as development language and French translations; app respects device language automatically
+**Requirements**: L10N-01, L10N-02, L10N-03, L10N-04, L10N-05, L10N-06
+**Depends on:** Phase 23
+**Plans:** 2 plans
+
+Plans:
+- [ ] 23.1-01-PLAN.md — DictusApp localization: project config, string replacement, String Catalog, ModelInfo extension (L10N-01 through L10N-05)
+- [ ] 23.1-02-PLAN.md — DictusKeyboard localization: string replacement, String Catalog, human verification (L10N-01, L10N-02, L10N-06)
+
 ### Phase 24: SymSpell Spell Correction
 **Goal**: Users get frequency-ranked spell corrections that match their intent instead of alphabetical guesses
 **Depends on**: Phase 23
@@ -237,7 +248,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 23 -> 24 -> 25 -> 26
+Phases execute in numeric order: 23 -> 23.1 -> 24 -> 25 -> 26
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
