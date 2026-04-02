@@ -19,6 +19,7 @@ class TextPredictionEngine {
 
     private let textChecker = UITextChecker()
     private var frequencyDict = FrequencyDictionary()
+    private let symSpellEngine = SymSpellEngine()
     private var language: String = "fr"
 
     init() {
@@ -28,6 +29,7 @@ class TextPredictionEngine {
             print("[TextPredictionEngine] Warning: '\(language)' not in available languages: \(available)")
         }
         frequencyDict.load(language: language)
+        symSpellEngine.load(language: language)
     }
 
     /// Updates the active language for completions and spell-checking.
@@ -43,6 +45,7 @@ class TextPredictionEngine {
             print("[TextPredictionEngine] Warning: '\(lang)' not in available languages: \(available)")
         }
         frequencyDict.load(language: lang)
+        symSpellEngine.load(language: lang)
     }
 
     /// Returns up to 3 word completions for a partial word, ranked by frequency.
@@ -69,75 +72,20 @@ class TextPredictionEngine {
             return []
         }
 
-        let ranked = completions.sorted { frequencyDict.rank(of: $0) < frequencyDict.rank(of: $1) }
+        let ranked = completions.sorted { frequencyDict.rank(of: $0) > frequencyDict.rank(of: $1) }
         return Array(ranked.prefix(3))
     }
 
-    /// Returns the best correction for a misspelled word, or nil if correctly spelled.
+    /// Returns the best correction and alternatives for a misspelled word.
+    /// Returns nil if the word is correctly spelled (exists in SymSpell dictionary).
     ///
-    /// HOW IT WORKS:
-    /// 1. Check if the word is misspelled using UITextChecker.rangeOfMisspelledWord()
-    /// 2. If not misspelled (location == NSNotFound), return nil
-    /// 3. If misspelled, get guesses and rank them by frequency
-    /// 4. Return the most common guess (lowest frequency rank)
-    ///
-    /// WHY re-rank guesses:
-    /// UITextChecker.guesses() returns corrections ordered by edit distance. But the
-    /// closest edit-distance match isn't always the most likely intended word. Ranking
-    /// by frequency picks "les" over "lez" for a typo of "lrs".
-    func spellCheck(_ word: String) -> String? {
+    /// WHY SymSpell instead of UITextChecker:
+    /// SymSpell returns corrections ranked by frequency (most common word first),
+    /// while UITextChecker returns guesses ordered by edit distance. Frequency-ranked
+    /// corrections pick "bonjour" over "bonsoir" for a typo of "bonour".
+    /// UITextChecker is still used for word completions in suggestions(for:).
+    func spellCheck(_ word: String) -> (correction: String, alternatives: [String])? {
         guard !word.isEmpty else { return nil }
-
-        let nsString = word as NSString
-        let range = NSRange(location: 0, length: nsString.length)
-
-        let misspelled = textChecker.rangeOfMisspelledWord(
-            in: word,
-            range: range,
-            startingAt: 0,
-            wrap: false,
-            language: language
-        )
-
-        // Word is correctly spelled
-        guard misspelled.location != NSNotFound else { return nil }
-
-        guard let guesses = textChecker.guesses(
-            forWordRange: misspelled,
-            in: word,
-            language: language
-        ), !guesses.isEmpty else {
-            return nil
-        }
-
-        // Re-rank guesses by frequency and return the most common
-        let ranked = guesses.sorted { frequencyDict.rank(of: $0) < frequencyDict.rank(of: $1) }
-        return ranked.first
-    }
-
-    /// Returns accent variants for single-character vowel input, or nil if not a vowel.
-    ///
-    /// WHY this feature:
-    /// On a mobile keyboard, typing accented characters requires long-press or special keys.
-    /// When the user types a single vowel (e.g., "e"), the suggestion bar can show the most
-    /// common accented variants (e-acute, e-grave, e-circumflex) for quick one-tap insertion.
-    ///
-    /// FORMAT: [original, variant1, variant2] -- max 3 slots for the suggestion bar.
-    /// Case is preserved: typing "E" returns ["E", "E-acute", "E-grave"].
-    func accentSuggestions(for partialWord: String) -> [String]? {
-        guard partialWord.count == 1 else { return nil }
-
-        let lowered = partialWord.lowercased()
-        guard let variants = AccentedCharacters.mappings[lowered] else { return nil }
-
-        let isUppercase = partialWord == partialWord.uppercased() && partialWord != partialWord.lowercased()
-
-        // Build array: [original char, variant1, variant2] -- max 3 slots
-        var result = [partialWord]
-        for variant in variants.prefix(2) {
-            result.append(isUppercase ? variant.uppercased() : variant)
-        }
-
-        return result
+        return symSpellEngine.spellCheck(word)
     }
 }

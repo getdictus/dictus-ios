@@ -36,9 +36,9 @@ struct SuggestionBarView: View {
                     } label: {
                         Text(suggestion)
                             .font(.system(size: 15))
-                            // Central slot (index 0 for 3 items) is bold to
-                            // indicate the "best" suggestion, matching Apple's style.
-                            .fontWeight(index == 0 ? .semibold : .regular)
+                            // Center slot (index 1) is bold -- the best correction,
+                            // auto-applied on space. Matches standard mobile keyboard layout.
+                            .fontWeight(index == 1 ? .semibold : .regular)
                             .foregroundColor(Color(.label))
                             .frame(maxWidth: .infinity)
                             .frame(height: 36)

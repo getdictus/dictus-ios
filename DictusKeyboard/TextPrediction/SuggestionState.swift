@@ -9,12 +9,12 @@ import DictusCore
 /// The suggestion bar displays different content depending on context:
 /// - idle: empty bar (user just typed a space or field is empty)
 /// - completions: showing word completions for partial input
-/// - accents: showing accent variants for a single vowel
+/// - corrections: showing spell corrections for a complete misspelled word
 /// The UI layer uses this to style the bar differently per mode.
 enum SuggestionMode {
     case idle
     case completions
-    case accents
+    case corrections
 }
 
 /// Tracks the last autocorrection so the user can undo it.
@@ -48,6 +48,11 @@ class SuggestionState: ObservableObject {
 
     /// Tracks the last autocorrection for undo support.
     var lastAutocorrect: AutocorrectState?
+
+    /// Words the user has rejected autocorrection for (undo'd).
+    /// After undo, the same word should not be re-corrected on the next space.
+    /// Cleared when the user starts typing a new word.
+    var rejectedWords: Set<String> = []
 
     private let engine = TextPredictionEngine()
 
@@ -105,14 +110,7 @@ class SuggestionState: ObservableObject {
 
         currentWord = partial
 
-        // Single-char vowel: show accent suggestions
-        if let accents = engine.accentSuggestions(for: partial) {
-            suggestions = accents
-            mode = .accents
-            return
-        }
-
-        // Multi-char: show word completions
+        // Show word completions
         let completions = engine.suggestions(for: partial)
         if completions.isEmpty {
             suggestions = []
@@ -157,8 +155,7 @@ class SuggestionState: ObservableObject {
             }
 
             // Compute on background
-            let accents = self.engine.accentSuggestions(for: partial)
-            let completions = accents == nil ? self.engine.suggestions(for: partial) : nil
+            let completions = self.engine.suggestions(for: partial)
 
             // Publish on main thread (required for @Published)
             DispatchQueue.main.async { [weak self] in
@@ -167,10 +164,7 @@ class SuggestionState: ObservableObject {
                 guard !(self.currentSuggestionWork?.isCancelled ?? true) else { return }
 
                 self.currentWord = partial
-                if let accents = accents {
-                    self.suggestions = accents
-                    self.mode = .accents
-                } else if let completions = completions, !completions.isEmpty {
+                if !completions.isEmpty {
                     self.suggestions = completions
                     self.mode = .completions
                 } else {
@@ -185,8 +179,8 @@ class SuggestionState: ObservableObject {
     }
 
     /// Delegates spell-checking to the engine.
-    /// Returns the best correction for a misspelled word, or nil if correct.
-    func performSpellCheck(_ word: String) -> String? {
+    /// Returns the best correction and alternatives for a misspelled word, or nil if correct.
+    func performSpellCheck(_ word: String) -> (correction: String, alternatives: [String])? {
         return engine.spellCheck(word)
     }
 

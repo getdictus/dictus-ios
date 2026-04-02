@@ -182,6 +182,11 @@ final class DictusKeyboardBridge: NSObject,
         // accepted the correction. Only immediate backspace should undo.
         suggestionState?.lastAutocorrect = nil
 
+        // Clear rejected words when starting a new word
+        if suggestionState?.currentWord.isEmpty == true {
+            suggestionState?.rejectedWords.removeAll()
+        }
+
         AudioServicesPlaySystemSound(KeySound.letter)
 
         // Insert the character. When on shifted/capslock page, the key definition
@@ -227,6 +232,8 @@ final class DictusKeyboardBridge: NSObject,
                 proxy?.deleteBackward()
             }
             proxy?.insertText(autocorrect.originalWord)
+            // Mark this word as rejected so it won't be re-corrected on next space
+            suggestionState?.rejectedWords.insert(autocorrect.originalWord.lowercased())
             suggestionState?.lastAutocorrect = nil
             lastInsertedCharacter = autocorrect.originalWord.last.map(String.init)
             secondToLastInsertedCharacter = nil
@@ -307,25 +314,27 @@ final class DictusKeyboardBridge: NSObject,
         secondToLastInsertedCharacter = lastInsertedCharacter
 
         // Autocorrect check before space insertion.
-        // Only trigger if autocorrect is enabled, there's a current word, and the
-        // spell checker offers a different correction.
+        // Only trigger if autocorrect is enabled, there's a current word, the word
+        // was not previously rejected by the user, and the spell checker offers a
+        // different correction.
         if let state = suggestionState, state.autocorrectEnabled,
            !state.currentWord.isEmpty,
-           let correction = state.performSpellCheck(state.currentWord),
-           correction.lowercased() != state.currentWord.lowercased() {
+           !state.rejectedWords.contains(state.currentWord.lowercased()),
+           let result = state.performSpellCheck(state.currentWord),
+           result.correction.lowercased() != state.currentWord.lowercased() {
             // Replace the misspelled word with the correction
             let proxy = controller?.textDocumentProxy
             for _ in 0..<state.currentWord.count {
                 proxy?.deleteBackward()
             }
-            proxy?.insertText(correction)
+            proxy?.insertText(result.correction)
             proxy?.insertText(" ")
             lastInsertedCharacter = " "
 
             // Store autocorrect state so backspace can undo it
             state.lastAutocorrect = AutocorrectState(
                 originalWord: state.currentWord,
-                correctedWord: correction,
+                correctedWord: result.correction,
                 insertedSpace: true
             )
             state.clear()
@@ -343,7 +352,9 @@ final class DictusKeyboardBridge: NSObject,
         }
 
         // After space, clear current word and update suggestions for new context.
+        // Also clear rejected words -- the user has moved on to a new word.
         suggestionState?.clear()
+        suggestionState?.rejectedWords.removeAll()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
         suggestionState?.updateAsync(context: context)
 
