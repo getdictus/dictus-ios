@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 23 — Bug Fixes & License Compliance
+**Current focus:** Phase 24 — SymSpell Spell Correction
 
 ## Current Position
 
-Phase: 23.1 of 26 (App Localization Audit & Fix)
+Phase: 24 of 26 (SymSpell Spell Correction)
 Plan: 1 of 2 in current phase
 Status: Executing
-Last activity: 2026-04-02 — Completed 23.1-02-PLAN.md (DictusKeyboard localization, verified)
+Last activity: 2026-04-02 — Completed 24-01-PLAN.md (dictionary curation + SymSpell vendoring)
 
-Progress: [███████░░░] 67% (v1.4 milestone: 2/3 plans)
+Progress: [████████░░] 75% (v1.4 milestone: 3/4 plans)
 
 ## Performance Metrics
 
@@ -58,6 +58,9 @@ Recent decisions for v1.4:
 - [Phase 23]: Used MIT for giellakbd-ios (dual Apache-2.0/MIT) since helper existed
 - [Phase 23.1]: English source strings with auto-generated keys for String Catalog localization
 - [Phase 23.1]: Added Open Settings link localization not listed in plan (Rule 2 auto-fix)
+- [Phase 24]: Dictionary format changed from ranks to counts (higher=better) to align with SymSpell
+- [Phase 24]: French frequency: 70% film subtitles + 30% books for natural spoken weighting
+- [Phase 24]: SymSpellSwift vendored as-is, no modifications needed for Swift 5.9+
 
 ### Pending Todos
 
@@ -75,9 +78,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-02T11:00:21.383Z
-Stopped at: Phase 24 context gathered
-Resume file: .planning/phases/24-symspell-spell-correction/24-CONTEXT.md
+Last session: 2026-04-02T12:36:11Z
+Stopped at: Completed 24-01-PLAN.md
+Resume file: .planning/phases/24-symspell-spell-correction/24-01-SUMMARY.md
 
 ---
 *State initialized: 2026-03-04*

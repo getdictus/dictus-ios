@@ -15,8 +15,8 @@ Requirements for v1.4 milestone. Each maps to roadmap phases.
 
 ### Prediction Engine
 
-- [ ] **PRED-01**: French frequency dictionary expanded to 30-50K words (from current ~1.3K)
-- [ ] **PRED-02**: English frequency dictionary expanded to 30-50K words (from current ~1.1K)
+- [x] **PRED-01**: French frequency dictionary expanded to 30-50K words (from current ~1.3K)
+- [x] **PRED-02**: English frequency dictionary expanded to 30-50K words (from current ~1.1K)
 - [ ] **PRED-03**: SymSpell replaces UITextChecker for spell correction with sub-millisecond lookups
 - [ ] **PRED-04**: N-gram next-word prediction suggests top 3 words based on previous context (bigram/trigram)
 - [ ] **PRED-05**: Prediction engine stays under 10ms per keystroke with no typing fluidity regression
@@ -89,8 +89,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FIX-01 | Phase 23 | Complete |
 | FIX-02 | Phase 23 | Complete |
 | FIX-03 | Phase 23 | Complete |
-| PRED-01 | Phase 24 | Pending |
-| PRED-02 | Phase 24 | Pending |
+| PRED-01 | Phase 24 | Complete |
+| PRED-02 | Phase 24 | Complete |
 | PRED-03 | Phase 24 | Pending |
 | PRED-04 | Phase 25 | Pending |
 | PRED-05 | Phase 25 | Pending |
