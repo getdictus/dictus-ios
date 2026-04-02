@@ -72,7 +72,7 @@ Full details: see Phase Details below (v1.3 phases 17-22)
 
 </details>
 
-### 📋 v1.4 Prediction & Stability (Planned)
+### v1.4 Prediction & Stability (Planned)
 
 **Milestone Goal:** Upgrade the text prediction engine with probability-based suggestions (SymSpell + n-gram), fix known bugs, and stabilize based on beta feedback.
 
@@ -209,11 +209,11 @@ Plans:
   2. User types a word missing an accent (e.g. "cafe") and the suggestion bar offers the accented form ("cafe") as the top correction
   3. User switches language to English and gets English spell corrections from the expanded English dictionary
   4. Keyboard extension memory stays under 50MB with SymSpell dictionaries loaded (verified on physical device)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 24-01: French and English frequency dictionary curation (30-50K words from Lexique 3.83 / OpenSubtitles)
-- [ ] 24-02: Vendor SymSpellSwift, build SymSpellEngine, replace UITextChecker for corrections
+- [ ] 24-01-PLAN.md — Curate FR/EN frequency dictionaries (30-50K words), vendor SymSpellSwift, create SymSpellEngine wrapper (PRED-01, PRED-02)
+- [ ] 24-02-PLAN.md — Wire SymSpell into prediction pipeline, suggestion bar reorder, autocorrect rejection, remove accent suggestions, device verification (PRED-03)
 
 ### Phase 25: N-gram Next-Word Prediction
 **Goal**: Users see contextual next-word suggestions after completing a word, and all prediction stays fast and within memory budget
