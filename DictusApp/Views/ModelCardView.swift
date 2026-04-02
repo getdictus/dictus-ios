@@ -23,9 +23,9 @@ import DictusCore
 /// swipe-to-delete in the parent ModelManagerView (like iOS Mail).
 ///
 /// LAYOUT (top to bottom):
-/// Row 1: displayName + engine badge ("WK"/"PK") + optional "Recommandé" badge
-/// Row 2: Short French description
-/// Row 3: Two gauge bars side-by-side (Précision in blue, Vitesse in blue highlight)
+/// Row 1: displayName + engine badge ("WK"/"PK") + optional "Recommended" badge
+/// Row 2: Short localized description
+/// Row 3: Two gauge bars side-by-side (Accuracy in blue, Speed in blue highlight)
 /// Row 4: Size label + state-dependent status indicator
 struct ModelCardView: View {
     let model: ModelInfo
@@ -82,7 +82,7 @@ struct ModelCardView: View {
                     .cornerRadius(4)
 
                 if modelManager.isRecommended(model.identifier) {
-                    Text("Recommandé")
+                    Text("Recommended")
                         .font(.caption2.bold())
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
@@ -92,8 +92,8 @@ struct ModelCardView: View {
                 }
             }
 
-            // Row 2: French description
-            Text(model.description)
+            // Row 2: Localized description
+            Text(model.localizedDescription)
                 .font(.dictusCaption)
                 .foregroundStyle(.secondary)
 
@@ -113,22 +113,22 @@ struct ModelCardView: View {
                 VStack(spacing: 4) {
                     ProgressView()
                         .frame(maxWidth: .infinity)
-                    Text("Optimisation en cours...")
+                    Text("Optimizing...")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
             } else {
-                // Normal gauge bars (Précision + Vitesse) — both blue palette
+                // Normal gauge bars (Accuracy + Speed) — both blue palette
                 HStack(spacing: 16) {
                     GaugeBarView(
                         value: model.accuracyScore,
-                        label: "Précision",
+                        label: "Accuracy",
                         color: .dictusAccent
                     )
 
                     GaugeBarView(
                         value: model.speedScore,
-                        label: "Vitesse",
+                        label: "Speed",
                         color: .dictusAccentHighlight
                     )
                 }
@@ -225,7 +225,7 @@ struct ModelCardView: View {
                 Image(systemName: "arrow.clockwise.circle")
                     .font(.title3)
                     .foregroundColor(.orange)
-                Text("Réessayer")
+                Text("Retry")
                     .font(.caption2)
                     .foregroundColor(.orange)
             }

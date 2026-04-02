@@ -36,9 +36,9 @@ struct SoundSettingsView: View {
         List {
             // Section 1: Global toggle
             Section {
-                Toggle("Activer les sons", isOn: $soundFeedbackEnabled)
+                Toggle("Enable sounds", isOn: $soundFeedbackEnabled)
             } footer: {
-                Text("Les sons respectent le bouton silencieux de l'iPhone.")
+                Text("Sounds follow the iPhone silent switch.")
             }
 
             // Section 2: Volume slider
@@ -61,27 +61,27 @@ struct SoundSettingsView: View {
             // Section 3: Sound pickers as NavigationLinks
             Section {
                 soundNavigationRow(
-                    label: "Début",
+                    label: "Start",
                     selection: $recordStartSoundName
                 )
 
                 soundNavigationRow(
-                    label: "Fin",
+                    label: "End",
                     selection: $recordStopSoundName
                 )
 
                 soundNavigationRow(
-                    label: "Annulation",
+                    label: "Cancel",
                     selection: $recordCancelSoundName
                 )
             } header: {
-                Text("Sons par événement")
+                Text("Sounds by event")
             }
             .disabled(!soundFeedbackEnabled)
         }
         .scrollContentBackground(.hidden)
         .background(Color.dictusBackground.ignoresSafeArea())
-        .navigationTitle("Sons")
+        .navigationTitle("Sounds")
     }
 
     // MARK: - Private

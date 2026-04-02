@@ -1,12 +1,11 @@
 // DictusApp/Views/SwipeBackOverlayView.swift
 // Full-screen branded overlay guiding users to swipe back to the keyboard after cold start.
 import SwiftUI
-import DictusCore
 
 /// Full-screen overlay shown when the app is opened from the keyboard during cold start.
 ///
 /// WHY a separate view instead of inline code in MainTabView:
-/// This view has its own animation state, bilingual text logic, and brand styling.
+/// This view has its own animation state, brand styling, and localized text via String Catalog.
 /// Keeping it in its own file follows the "one file = one responsibility" convention
 /// and makes it easy to preview in isolation.
 ///
@@ -15,14 +14,6 @@ import DictusCore
 /// the user should NOT see the normal app UI. They should see a clean, branded screen
 /// with clear instructions on how to swipe back to the keyboard.
 struct SwipeBackOverlayView: View {
-    /// Language preference from App Group shared storage.
-    /// WHY @AppStorage with App Group store:
-    /// The language is set in Settings and shared between app and keyboard extension
-    /// via the App Group UserDefaults. Reading it here ensures the overlay text
-    /// matches the user's chosen language.
-    @AppStorage(SharedKeys.language, store: AppGroup.defaults)
-    private var language = "fr"
-
     var body: some View {
         ZStack {
             // Brand gradient background matching the app icon gradient
@@ -43,18 +34,14 @@ struct SwipeBackOverlayView: View {
                     .frame(width: 120, height: 260)
 
                 // Primary instruction text
-                Text(language == "fr"
-                     ? "Glisse pour revenir au clavier"
-                     : "Swipe back to the keyboard")
+                Text("Swipe back to the keyboard")
                     .font(.title2.weight(.semibold))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
 
                 // Secondary detail text
-                Text(language == "fr"
-                     ? "Glisse vers la droite en bas de l'ecran"
-                     : "Swipe right on the bottom of your iPhone")
+                Text("Swipe right on the bottom of your iPhone")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.6))
                     .multilineTextAlignment(.center)
@@ -154,14 +141,6 @@ private struct SwipeAnimationView: View {
 
 // MARK: - Previews
 
-#Preview("French") {
+#Preview {
     SwipeBackOverlayView()
-}
-
-#Preview("English") {
-    SwipeBackOverlayView()
-        // Override language for preview
-        .onAppear {
-            AppGroup.defaults.set("en", forKey: SharedKeys.language)
-        }
 }

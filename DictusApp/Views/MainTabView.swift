@@ -48,7 +48,7 @@ struct MainTabView: View {
                         HomeView(modelManager: modelManager)
                     }
                     .tabItem {
-                        Label("Accueil", systemImage: "house.fill")
+                        Label("Home", systemImage: "house.fill")
                     }
                     .tag(0)
 
@@ -57,7 +57,7 @@ struct MainTabView: View {
                         ModelManagerView(modelManager: modelManager)
                     }
                     .tabItem {
-                        Label("Modèles", systemImage: "cpu")
+                        Label("Models", systemImage: "cpu")
                     }
                     .tag(1)
 
@@ -66,7 +66,7 @@ struct MainTabView: View {
                         SettingsView()
                     }
                     .tabItem {
-                        Label("Réglages", systemImage: "gearshape.fill")
+                        Label("Settings", systemImage: "gearshape.fill")
                     }
                     .tag(2)
                 }

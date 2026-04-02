@@ -56,7 +56,7 @@ struct LicensesView: View {
             }
             .padding()
         }
-        .navigationTitle("Licences")
+        .navigationTitle("Licenses")
     }
 
     // MARK: - Private

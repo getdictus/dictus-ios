@@ -15,7 +15,7 @@ import DictusCore
 struct GaugeBarView: View {
     /// Score value from 0.0 (empty) to 1.0 (full).
     let value: Double
-    /// Label displayed above the gauge (e.g. "Precision", "Vitesse").
+    /// Label displayed above the gauge (e.g. "Accuracy", "Speed").
     let label: String
     /// Color for filled segments.
     let color: Color
@@ -46,8 +46,8 @@ struct GaugeBarView: View {
 
 #Preview {
     VStack(spacing: 16) {
-        GaugeBarView(value: 0.6, label: "Précision", color: .dictusAccent)
-        GaugeBarView(value: 0.8, label: "Vitesse", color: .dictusAccentHighlight)
+        GaugeBarView(value: 0.6, label: "Accuracy", color: .dictusAccent)
+        GaugeBarView(value: 0.8, label: "Speed", color: .dictusAccentHighlight)
     }
     .padding()
     .background(Color.dictusBackground)

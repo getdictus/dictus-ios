@@ -25,7 +25,7 @@ struct DefaultLayerPicker: View {
             // SwiftUI's Picker with segmented style can have tag-matching issues
             // when tags come from ForEach with dynamic content. Explicit Text/tag
             // pairs guarantee the correct String value is written to the binding.
-            Picker("Page par defaut", selection: $selectedLayer) {
+            Picker("Default page", selection: $selectedLayer) {
                 Text("ABC").tag("letters")
                 Text("123").tag("numbers")
             }

@@ -4,7 +4,7 @@ import SwiftUI
 import UIKit
 import DictusCore
 
-/// Settings screen with 3 sections: Transcription, Clavier, À propos.
+/// Settings screen with 3 sections: Transcription, Keyboard, About.
 ///
 /// WHY @AppStorage with App Group store:
 /// Preferences need to be readable by both the main app AND the keyboard extension.
@@ -51,12 +51,12 @@ struct SettingsView: View {
         List {
             // Section 1: Transcription
             Section {
-                Picker("Langue", selection: $language) {
+                Picker("Transcription language", selection: $language) {
                     Text("Français").tag("fr")
                     Text("English").tag("en")
                 }
                 if isParakeetActive {
-                    Text("Parakeet détecte automatiquement la langue parlée. Ce réglage s'applique uniquement aux modèles Whisper.")
+                    Text("Parakeet automatically detects the spoken language. This setting only applies to Whisper models.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -66,25 +66,25 @@ struct SettingsView: View {
 
             // Section 2: Clavier
             // All toggles are always visible — there's only one keyboard type now.
-            Section("Clavier") {
+            Section("Keyboard") {
                 DefaultLayerPicker()
 
-                Picker("Disposition", selection: $keyboardLayout) {
+                Picker("Layout", selection: $keyboardLayout) {
                     Text("AZERTY").tag("azerty")
                     Text("QWERTY").tag("qwerty")
                 }
 
-                Toggle("Retour haptique", isOn: $hapticsEnabled)
+                Toggle("Haptic feedback", isOn: $hapticsEnabled)
 
-                NavigationLink("Sons") {
+                NavigationLink("Sounds") {
                     SoundSettingsView()
                 }
 
-                Toggle("Correction automatique", isOn: $autocorrectEnabled)
+                Toggle("Autocorrect", isOn: $autocorrectEnabled)
             }
 
             // Section 3: A propos
-            Section("À propos") {
+            Section("About") {
                 LabeledContent("Version", value: appVersion)
 
                 // WHY Button instead of Link:
@@ -103,7 +103,7 @@ struct SettingsView: View {
                     }
                 }
 
-                NavigationLink("Licences") {
+                NavigationLink("Licenses") {
                     LicensesView()
                 }
 
@@ -119,7 +119,7 @@ struct SettingsView: View {
                     exportLogs()
                 } label: {
                     HStack {
-                        Text("Exporter les logs")
+                        Text("Export logs")
                         Spacer()
                         if isExporting {
                             ProgressView()
@@ -135,7 +135,7 @@ struct SettingsView: View {
         }
         .scrollContentBackground(.hidden)
         .background(Color.dictusBackground.ignoresSafeArea())
-        .navigationTitle("Réglages")
+        .navigationTitle("Settings")
         .sheet(isPresented: Binding(
             get: { exportURL != nil },
             set: { isPresented in
