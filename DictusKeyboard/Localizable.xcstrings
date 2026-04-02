@@ -1,0 +1,96 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Enable Full Access in Settings > Keyboards > Dictus to use dictation." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active l\u2019Acc\u00e8s complet dans R\u00e9glages > Claviers > Dictus pour utiliser la dict\u00e9e."
+          }
+        }
+      }
+    },
+    "Full access required" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acc\u00e8s complet requis"
+          }
+        }
+      }
+    },
+    "Listening..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En \u00e9coute..."
+          }
+        }
+      }
+    },
+    "No results" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun r\u00e9sultat"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir R\u00e9glages"
+          }
+        }
+      }
+    },
+    "Search Emoji" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher des Emoji"
+          }
+        }
+      }
+    },
+    "space" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "espace"
+          }
+        }
+      }
+    },
+    "Starting..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D\u00e9marrage..."
+          }
+        }
+      }
+    },
+    "Transcribing..." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcription..."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

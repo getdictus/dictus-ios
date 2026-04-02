@@ -19,12 +19,12 @@ struct MicButtonDisabled: View {
         }
         .popover(isPresented: $showExplanation) {
             VStack(spacing: 8) {
-                Text("Accès complet requis")
+                Text("Full access required")
                     .font(.headline)
-                Text("Active l'Accès complet dans Réglages > Claviers > Dictus pour utiliser la dictée.")
+                Text("Enable Full Access in Settings > Keyboards > Dictus to use dictation.")
                     .font(.caption)
                     .multilineTextAlignment(.center)
-                Link("Ouvrir Réglages", destination: URL(string: "app-settings:")!)
+                Link("Open Settings", destination: URL(string: "app-settings:")!)
                     .font(.caption.bold())
             }
             .padding()
