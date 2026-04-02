@@ -34,10 +34,16 @@ struct SuggestionBarView: View {
                     Button {
                         onTap(index)
                     } label: {
-                        Text(suggestion)
+                        // In correction mode:
+                        //   index 0 = original word in quotes (tapping keeps it as-is)
+                        //   index 1 = bold correction (auto-applied on space)
+                        //   index 2 = alternative correction
+                        // In completion mode:
+                        //   index 1 = bold (best completion)
+                        //   others = regular weight
+                        // This matches standard iOS keyboard suggestion bar behavior.
+                        Text(displayText(suggestion, at: index))
                             .font(.system(size: 15))
-                            // Center slot (index 1) is bold -- the best correction,
-                            // auto-applied on space. Matches standard mobile keyboard layout.
                             .fontWeight(index == 1 ? .semibold : .regular)
                             .foregroundColor(Color(.label))
                             .frame(maxWidth: .infinity)
@@ -50,5 +56,15 @@ struct SuggestionBarView: View {
             .transition(.opacity)
             .animation(.easeInOut(duration: 0.15), value: suggestions)
         }
+    }
+
+    /// In correction mode, the original word (index 0) is shown in quotes
+    /// to indicate it's the "as-typed" option. Matches iOS native behavior
+    /// where the unquoted bold center word is the one that gets auto-applied.
+    private func displayText(_ suggestion: String, at index: Int) -> String {
+        if mode == .corrections && index == 0 {
+            return "\u{201C}\(suggestion)\u{201D}"
+        }
+        return suggestion
     }
 }

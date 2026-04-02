@@ -81,14 +81,15 @@ class SuggestionState: ObservableObject {
     ///
     /// HOW IT WORKS:
     /// 1. Extract the last partial word from the text before the cursor
-    /// 2. If it's a single accentable vowel, switch to accent mode
-    /// 3. Otherwise, get word completions from the engine
-    /// 4. If no partial word (after space/newline), go idle
+    /// 2. Check SymSpell for a spell correction (same engine that fires on space)
+    /// 3. If correction found: show [original | **correction** | alternative] (standard mobile layout)
+    /// 4. If no correction: show UITextChecker completions
+    /// 5. If no partial word (after space/newline), go idle
     ///
-    /// WHY UITextDocumentProxy:
-    /// In a keyboard extension, we can't access the text field directly.
-    /// UITextDocumentProxy is Apple's API for reading text around the cursor.
-    /// documentContextBeforeInput gives us the text before the cursor position.
+    /// WHY show correction in bar:
+    /// The bar must preview what space will do. Standard iOS keyboard behavior:
+    /// center slot (bold) = what gets auto-applied on space. If the bar shows
+    /// completions but space applies a different correction, that's confusing.
     func update(proxy: UITextDocumentProxy) {
         guard let context = proxy.documentContextBeforeInput, !context.isEmpty else {
             clear()
@@ -110,7 +111,22 @@ class SuggestionState: ObservableObject {
 
         currentWord = partial
 
-        // Show word completions
+        // Check spell correction first (mirrors what handleSpace will do)
+        if autocorrectEnabled,
+           !rejectedWords.contains(partial.lowercased()),
+           let result = engine.spellCheck(partial),
+           result.correction.lowercased() != partial.lowercased() {
+            // Standard mobile layout: [original | correction (bold) | alternative]
+            var correctionSuggestions = [partial, result.correction]
+            if let firstAlt = result.alternatives.first {
+                correctionSuggestions.append(firstAlt)
+            }
+            suggestions = correctionSuggestions
+            mode = .corrections
+            return
+        }
+
+        // No correction — show word completions
         let completions = engine.suggestions(for: partial)
         if completions.isEmpty {
             suggestions = []
@@ -154,7 +170,16 @@ class SuggestionState: ObservableObject {
                 return
             }
 
-            // Compute on background
+            // Check spell correction first (mirrors what handleSpace will do)
+            let spellResult: (correction: String, alternatives: [String])?
+            if self.autocorrectEnabled,
+               !self.rejectedWords.contains(partial.lowercased()) {
+                spellResult = self.engine.spellCheck(partial)
+            } else {
+                spellResult = nil
+            }
+
+            // Compute completions as fallback
             let completions = self.engine.suggestions(for: partial)
 
             // Publish on main thread (required for @Published)
@@ -164,7 +189,17 @@ class SuggestionState: ObservableObject {
                 guard !(self.currentSuggestionWork?.isCancelled ?? true) else { return }
 
                 self.currentWord = partial
-                if !completions.isEmpty {
+
+                // Spell correction takes priority (standard mobile layout)
+                if let result = spellResult,
+                   result.correction.lowercased() != partial.lowercased() {
+                    var correctionSuggestions = [partial, result.correction]
+                    if let firstAlt = result.alternatives.first {
+                        correctionSuggestions.append(firstAlt)
+                    }
+                    self.suggestions = correctionSuggestions
+                    self.mode = .corrections
+                } else if !completions.isEmpty {
                     self.suggestions = completions
                     self.mode = .completions
                 } else {

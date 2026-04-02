@@ -228,17 +228,38 @@ struct KeyboardRootView: View {
 
     /// Handles a tap on one of the suggestion bar slots.
     ///
-    /// WHY two modes:
-    /// - Completion mode: the user is typing a word and taps a completion.
-    ///   We replace the partial word with the full suggestion and add a space
-    ///   so the user can continue typing the next word immediately.
-    /// - Accent mode: the user typed a single vowel and wants an accent variant.
-    ///   We replace just the vowel character without adding a space, because
-    ///   the user may continue typing the same word.
+    /// Three modes:
+    /// - Completion mode: replace partial word with full completion + space.
+    /// - Correction mode: standard mobile behavior:
+    ///   - Tap index 0 (original word): keep as-is + space, reject future autocorrect
+    ///   - Tap index 1 (bold correction): apply correction + space
+    ///   - Tap index 2 (alternative): apply alternative + space
+    /// - Accent mode: replace just the vowel without adding a space.
     private func handleSuggestionTap(index: Int) {
         guard index < suggestionState.suggestions.count else { return }
         let suggestion = suggestionState.suggestions[index]
         let proxy = controller.textDocumentProxy
+
+        if suggestionState.mode == .corrections {
+            // Tapping the original word (index 0) = user rejects the correction
+            if index == 0 {
+                suggestionState.rejectedWords.insert(suggestion.lowercased())
+                // Insert space after original word (user accepted it as-is)
+                proxy.insertText(" ")
+            } else {
+                // Apply the correction or alternative
+                replaceCurrentWord(
+                    proxy: proxy,
+                    currentWord: suggestionState.currentWord,
+                    replacement: suggestion,
+                    addSpace: true
+                )
+            }
+            suggestionState.lastAutocorrect = nil
+            suggestionState.clear()
+            HapticFeedback.keyTapped()
+            return
+        }
 
         let addSpace = suggestionState.mode == .completions
         replaceCurrentWord(
