@@ -194,7 +194,7 @@ Plans:
 **Goal:** All UI strings use iOS String Catalogs with English as development language and French translations; app respects device language automatically
 **Requirements**: L10N-01, L10N-02, L10N-03, L10N-04, L10N-05, L10N-06
 **Depends on:** Phase 23
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 23.1-01-PLAN.md — DictusApp localization: project config, string replacement, String Catalog, ModelInfo extension (L10N-01 through L10N-05)

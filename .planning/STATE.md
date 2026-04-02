@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: executing
-stopped_at: Completed 23.1-01-PLAN.md
-last_updated: "2026-04-02T07:06:25.415Z"
+stopped_at: "Checkpoint: 23.1-02 Task 2 human-verify pending"
+last_updated: "2026-04-02T07:10:34.549Z"
 last_activity: 2026-04-02 — Completed 23.1-01-PLAN.md (DictusApp localization)
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 67
 ---
 
@@ -57,6 +57,7 @@ Recent decisions for v1.4:
 - Memory gate between phases: device profiling mandatory after SymSpell and after n-gram
 - [Phase 23]: Used MIT for giellakbd-ios (dual Apache-2.0/MIT) since helper existed
 - [Phase 23.1]: English source strings with auto-generated keys for String Catalog localization
+- [Phase 23.1]: Added Open Settings link localization not listed in plan (Rule 2 auto-fix)
 
 ### Pending Todos
 
@@ -74,8 +75,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-02T07:06:25.413Z
-Stopped at: Completed 23.1-01-PLAN.md
+Last session: 2026-04-02T07:10:34.547Z
+Stopped at: Checkpoint: 23.1-02 Task 2 human-verify pending
 Resume file: None
 
 ---
