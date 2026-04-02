@@ -83,6 +83,10 @@
 		BB000003 /* StopStandbyIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100005 /* StopStandbyIntent.swift */; };
 		BB000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = BB900010 /* DictusCore */; };
 		BB000020 /* DictusWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = BB200001 /* DictusWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		DD000001 /* SymSpell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD100001 /* SymSpell.swift */; };
+		DD000002 /* SuggestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD100002 /* SuggestItem.swift */; };
+		DD000003 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD100003 /* StringExtension.swift */; };
+		DD000004 /* SymSpellEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD100004 /* SymSpellEngine.swift */; };
 		CC000030 /* KeyboardMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100030 /* KeyboardMetrics.swift */; };
 		CC000010 /* FrenchKeyboardLayouts.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100010 /* FrenchKeyboardLayouts.swift */; };
 		CC000001 /* GiellaUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100001 /* GiellaUtils.swift */; };
@@ -212,6 +216,10 @@
 		BB100004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BB100005 /* StopStandbyIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopStandbyIntent.swift; sourceTree = "<group>"; };
 		BB200001 /* DictusWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD100001 /* SymSpell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymSpell.swift; sourceTree = "<group>"; };
+		DD100002 /* SuggestItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestItem.swift; sourceTree = "<group>"; };
+		DD100003 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
+		DD100004 /* SymSpellEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymSpellEngine.swift; sourceTree = "<group>"; };
 		CC100030 /* KeyboardMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardMetrics.swift; sourceTree = "<group>"; };
 		CC100010 /* FrenchKeyboardLayouts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrenchKeyboardLayouts.swift; sourceTree = "<group>"; };
 		CC100020 /* DictusKeyboardBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusKeyboardBridge.swift; sourceTree = "<group>"; };
@@ -428,6 +436,7 @@
 			children = (
 				AA1000D0 /* TextPredictionEngine.swift */,
 				AA1000D1 /* SuggestionState.swift */,
+				DD100004 /* SymSpellEngine.swift */,
 			);
 			path = TextPrediction;
 			sourceTree = "<group>";
@@ -476,8 +485,19 @@
 				CC400002 /* Views */,
 				CC400003 /* Models */,
 				CC400004 /* Controllers */,
+				DD400001 /* SymSpell */,
 			);
 			path = Vendored;
+			sourceTree = "<group>";
+		};
+		DD400001 /* SymSpell */ = {
+			isa = PBXGroup;
+			children = (
+				DD100001 /* SymSpell.swift */,
+				DD100002 /* SuggestItem.swift */,
+				DD100003 /* StringExtension.swift */,
+			);
+			path = SymSpell;
 			sourceTree = "<group>";
 		};
 		CC400002 /* Views */ = {
@@ -755,6 +775,10 @@
 				CC00000C /* LongPressController.swift in Sources */,
 				CC00000D /* DeadKeyHandler.swift in Sources */,
 				CC00000E /* Audio.swift in Sources */,
+				DD000001 /* SymSpell.swift in Sources */,
+				DD000002 /* SuggestItem.swift in Sources */,
+				DD000003 /* StringExtension.swift in Sources */,
+				DD000004 /* SymSpellEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
