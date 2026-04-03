@@ -37,10 +37,10 @@ final class SymSpellEngine {
     ]
 
     /// Minimum word length for generic spell correction.
-    /// Words of 1-2 characters are too ambiguous in French (de/le/la/il/on/tu/ne...)
-    /// and SymSpell frequently picks the wrong correction.
-    /// Exceptions are handled via frenchOverrides.
-    private static let minCorrectionLength = 3
+    /// Set to 1 to allow correction of all words including short ones.
+    /// French overrides handle known problematic cases ("ca" → "ça").
+    /// Other short-word issues will be addressed based on user feedback.
+    private static let minCorrectionLength = 1
 
     /// Loads a frequency dictionary for the given language.
     /// Expected JSON format: {"word": count, ...} where count is Int (higher = more common).
