@@ -236,10 +236,15 @@ final class DictusKeyboardBridge: NSObject,
             suggestionState?.rejectedWords.insert(autocorrect.originalWord.lowercased())
             suggestionState?.lastAutocorrect = nil
 
-            // Learn the original word: user explicitly rejected the correction,
-            // which is the strongest signal that this word is intentional.
-            UserDictionary.shared.learn(autocorrect.originalWord)
-            suggestionState?.learnWord(autocorrect.originalWord)
+            // Record rejection as a usage signal — NOT immediate learning.
+            // A single rejection might mean "wrong correction, let me retype"
+            // (e.g., user typed "doee" meaning to type "dieu", correction was wrong,
+            // user undoes but doesn't actually want "doee" learned).
+            // After 2 rejections of the same word, it's learned (user really means it).
+            // This matches iOS native / Gboard / SwiftKey behavior.
+            if UserDictionary.shared.recordUsage(autocorrect.originalWord) {
+                suggestionState?.learnWord(autocorrect.originalWord)
+            }
             lastInsertedCharacter = autocorrect.originalWord.last.map(String.init)
             secondToLastInsertedCharacter = nil
             updateCapitalization()
