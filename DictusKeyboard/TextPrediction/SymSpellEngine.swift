@@ -43,6 +43,13 @@ final class SymSpellEngine {
     /// Other short-word issues will be addressed based on user feedback.
     private static let minCorrectionLength = 1
 
+    /// Frequency assigned to user-learned words when injected into SymSpell.
+    /// Set to ~top 500 word frequency (15000). This is high enough that learned
+    /// words appear in suggestions and aren't autocorrected away, but low enough
+    /// that a wrongly-learned word won't override all nearby real words.
+    /// For comparison: "de" = 2.9M, "bonjour" = 15K, median = 137.
+    private static let userWordFrequency = 15000
+
     /// Loads a frequency dictionary for the given language.
     /// Expected JSON format: {"word": count, ...} where count is Int (higher = more common).
     /// Replaces any previously loaded dictionary.
@@ -78,7 +85,7 @@ final class SymSpellEngine {
             userDict.reload()
             let userWords = userDict.allLearnedWords
             for (word, _) in userWords {
-                ss.createDictionaryEntry(key: word.lowercased(), count: 999999)
+                ss.createDictionaryEntry(key: word.lowercased(), count: Self.userWordFrequency)
             }
 
             DispatchQueue.main.async {
@@ -157,7 +164,7 @@ final class SymSpellEngine {
     /// Called when a word is learned mid-session (after rejection or repetition)
     /// so the correction is available immediately without reloading the dictionary.
     func injectUserWord(_ word: String) {
-        symSpell?.createDictionaryEntry(key: word.lowercased(), count: 999999)
+        symSpell?.createDictionaryEntry(key: word.lowercased(), count: Self.userWordFrequency)
     }
 
     /// Whether a dictionary is loaded and ready for lookups.

@@ -36,6 +36,12 @@ public final class UserDictionary {
     /// 2 is the sweet spot: first time could be a typo, second time is intentional.
     public static let repetitionThreshold = 2
 
+    /// Maximum number of learned words. When exceeded, the least-used words
+    /// are dropped. 500 words ≈ 15 KB in UserDefaults — negligible for memory,
+    /// and more than enough for a personal vocabulary. Prevents unbounded growth
+    /// from accidental learning over months/years of use.
+    public static let maxLearnedWords = 500
+
     /// In-memory cache of learned words. Synced to UserDefaults on mutation.
     private var learnedWords: [String: Int] = [:]
 
@@ -112,6 +118,15 @@ public final class UserDictionary {
         saveToDefaults()
     }
 
+    /// Remove all learned words and pending observations.
+    /// Useful for a "Reset keyboard dictionary" option in settings.
+    public func resetAll() {
+        learnedWords.removeAll()
+        pendingWords.removeAll()
+        saveToDefaults()
+        print("[UserDictionary] Reset — all learned words cleared")
+    }
+
     /// Reload from App Group (useful if the other process updated the dictionary).
     public func reload() {
         loadFromDefaults()
@@ -126,6 +141,18 @@ public final class UserDictionary {
     }
 
     private func saveToDefaults() {
+        // Evict least-used words if we exceed the cap.
+        // Keeps the dictionary bounded so it can't grow indefinitely from
+        // accidental learning. Drops the words with the lowest usage count.
+        if learnedWords.count > Self.maxLearnedWords {
+            let sorted = learnedWords.sorted { $0.value < $1.value }
+            let toRemove = learnedWords.count - Self.maxLearnedWords
+            for (key, _) in sorted.prefix(toRemove) {
+                learnedWords.removeValue(forKey: key)
+            }
+            print("[UserDictionary] Evicted \(toRemove) least-used words (cap: \(Self.maxLearnedWords))")
+        }
+
         let defaults = AppGroup.defaults
         defaults.set(learnedWords, forKey: Self.storageKey)
         defaults.set(pendingWords, forKey: Self.pendingKey)
