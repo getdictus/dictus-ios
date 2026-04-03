@@ -323,18 +323,35 @@ final class DictusKeyboardBridge: NSObject,
         AudioServicesPlaySystemSound(KeySound.modifier)
         secondToLastInsertedCharacter = lastInsertedCharacter
 
+        // Read the current word directly from the text field (synchronous, main thread).
+        // WHY not use state.currentWord: it's updated by an async background queue.
+        // If the user types fast and hits space before the async update completes,
+        // state.currentWord can be stale (missing last characters). Using the stale
+        // count for deleteBackward would leave orphan characters (first-letter duplication).
+        let freshWord: String = {
+            guard let context = controller?.textDocumentProxy.documentContextBeforeInput,
+                  !context.isEmpty,
+                  let lastChar = context.last,
+                  !lastChar.isWhitespace, !lastChar.isNewline else { return "" }
+            var word = ""
+            context.enumerateSubstrings(in: context.startIndex..., options: .byWords) { sub, _, _, _ in
+                if let s = sub { word = s }
+            }
+            return word
+        }()
+
         // Autocorrect check before space insertion.
         // Only trigger if autocorrect is enabled, there's a current word, the word
         // was not previously rejected by the user, and the spell checker offers a
         // different correction.
         if let state = suggestionState, state.autocorrectEnabled,
-           !state.currentWord.isEmpty,
-           !state.rejectedWords.contains(state.currentWord.lowercased()),
-           let result = state.performSpellCheck(state.currentWord),
-           result.correction.lowercased() != state.currentWord.lowercased() {
+           !freshWord.isEmpty,
+           !state.rejectedWords.contains(freshWord.lowercased()),
+           let result = state.performSpellCheck(freshWord),
+           result.correction.lowercased() != freshWord.lowercased() {
             // Replace the misspelled word with the correction
             let proxy = controller?.textDocumentProxy
-            for _ in 0..<state.currentWord.count {
+            for _ in 0..<freshWord.count {
                 proxy?.deleteBackward()
             }
             proxy?.insertText(result.correction)
@@ -343,7 +360,7 @@ final class DictusKeyboardBridge: NSObject,
 
             // Store autocorrect state so backspace can undo it
             state.lastAutocorrect = AutocorrectState(
-                originalWord: state.currentWord,
+                originalWord: freshWord,
                 correctedWord: result.correction,
                 insertedSpace: true
             )
@@ -355,8 +372,8 @@ final class DictusKeyboardBridge: NSObject,
 
         // Repetition learning: word was NOT corrected (user typed it as-is).
         // Track usage — after 2 occurrences of an unknown word, learn it.
-        if let state = suggestionState, !state.currentWord.isEmpty {
-            let word = state.currentWord
+        if let state = suggestionState, !freshWord.isEmpty {
+            let word = freshWord
             if UserDictionary.shared.recordUsage(word) {
                 // Word just crossed the learning threshold — notify prediction engine
                 state.learnWord(word)
