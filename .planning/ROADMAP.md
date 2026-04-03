@@ -225,12 +225,12 @@ Plans:
   2. User types a word missing an accent and gets the accented form as top correction
   3. Keyboard extension memory stays under 50MB with trie dictionaries loaded
   4. SymSpell code is fully removed and replaced by AOSP trie engine
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] 24.1-01-PLAN.md — Python dict-builder + C++ trie reader, scorer, proximity maps (PRED-03)
-- [ ] 24.1-02-PLAN.md — ObjC++ bridge, bridging header, Swift AOSPTrieEngine, Xcode project config (PRED-03)
-- [ ] 24.1-03-PLAN.md — Wire into TextPredictionEngine, remove SymSpell, device verification (PRED-03)
+- [x] 24.1-01-PLAN.md — Python dict-builder + C++ trie reader, scorer, proximity maps (PRED-03)
+- [x] 24.1-02-PLAN.md — ObjC++ bridge, bridging header, Swift AOSPTrieEngine, Xcode project config (PRED-03)
+- [x] 24.1-03-PLAN.md — Wire into TextPredictionEngine, remove SymSpell, device verification (PRED-03)
 
 ### Phase 25: N-gram Next-Word Prediction
 **Goal**: Users see contextual next-word suggestions after completing a word, and all prediction stays fast and within memory budget
@@ -296,7 +296,7 @@ Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26
 | 22. Public TestFlight | v1.3 | 1/2 | In progress | - |
 | 23. Bug Fixes & License Compliance | 1/1 | Complete    | 2026-04-01 | - |
 | 24. SymSpell Spell Correction | 2/2 | Complete    | 2026-04-03 | - |
-| 24.1. AOSP Trie Spell Correction | 2/3 | In Progress|  | - |
+| 24.1. AOSP Trie Spell Correction | 3/3 | Complete | 2026-04-03 | - |
 | 25. N-gram Next-Word Prediction | v1.4 | 0/2 | Not started | - |
 | 26. Cold Start & Beta Polish | v1.4 | 0/2 | Not started | - |
 

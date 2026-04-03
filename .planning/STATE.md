@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: executing
-stopped_at: Completed 24.1-02-PLAN.md
-last_updated: "2026-04-03T10:19:00.909Z"
-last_activity: 2026-04-03 — Completed 24.1-02-PLAN.md (ObjC++ bridge + Swift AOSPTrieEngine wrapper)
+stopped_at: Completed 24.1-03-PLAN.md
+last_updated: "2026-04-03T11:07:39Z"
+last_activity: 2026-04-03 — Completed 24.1-03-PLAN.md (AOSPTrieEngine integration, SymSpell removed, device-verified)
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 7
-  percent: 88
+  completed_plans: 8
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 24 — SymSpell Spell Correction
+**Current focus:** Phase 24.1 complete -- AOSP Trie Spell Correction fully integrated
 
 ## Current Position
 
 Phase: 24.1 of 26 (AOSP Trie Spell Correction)
-Plan: 2 of 3 in current phase
-Status: Executing
-Last activity: 2026-04-03 — Completed 24.1-02-PLAN.md (ObjC++ bridge + Swift AOSPTrieEngine wrapper)
+Plan: 3 of 3 in current phase (COMPLETE)
+Status: Phase Complete
+Last activity: 2026-04-03 — Completed 24.1-03-PLAN.md (AOSPTrieEngine integration, SymSpell removed, device-verified)
 
-Progress: [█████████░] 88% (v1.4 milestone: 7/8 plans)
+Progress: [██████████] 100% (v1.4 milestone: 8/8 plans)
 
 ## Performance Metrics
 
@@ -65,6 +65,9 @@ Recent decisions for v1.4:
 - [Phase 24.1]: Vendored C++ engine in DictusKeyboard/Vendored/AOSPTrie/ with mmap-based read-only access
 - [Phase 24.1]: ObjC++ bridge pattern: pure ObjC header + .mm implementation for C++ to Swift interop in keyboard extension
 - [Phase 24.1]: Used 'compiled' file type for .dict binary resources to prevent Xcode CopyPlistFile processing
+- [Phase 24.1]: Two-pass spell check: user dictionary words bypass trie lookup entirely
+- [Phase 24.1]: BFS serialization order for trie binary (not DFS) -- DFS caused segfaults due to non-contiguous child offsets
+- [Phase 24.1]: root_child_count added to binary header for correct C++ traversal from root node
 
 ### Pending Todos
 
@@ -83,8 +86,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-03T10:19:00.907Z
-Stopped at: Completed 24.1-02-PLAN.md
+Last session: 2026-04-03T11:07:39Z
+Stopped at: Completed 24.1-03-PLAN.md (Phase 24.1 complete)
 Resume file: None
 
 ---
