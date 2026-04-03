@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
-status: completed
-stopped_at: Phase 25 context gathered
-last_updated: "2026-04-03T12:35:21.202Z"
-last_activity: 2026-04-03 — Completed 24.1-03-PLAN.md (AOSPTrieEngine integration, SymSpell removed, device-verified)
+status: in-progress
+stopped_at: Completed 25-01-PLAN.md
+last_updated: "2026-04-03T13:06:28Z"
+last_activity: 2026-04-03 — Completed 25-01-PLAN.md (n-gram data pipeline and C++ engine)
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
-  percent: 100
+  total_plans: 11
+  completed_plans: 9
+  percent: 82
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 24.1 complete -- AOSP Trie Spell Correction fully integrated
+**Current focus:** Phase 25 in progress -- N-gram next-word prediction (plan 1/3 complete)
 
 ## Current Position
 
-Phase: 24.1 of 26 (AOSP Trie Spell Correction)
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: Phase Complete
-Last activity: 2026-04-03 — Completed 24.1-03-PLAN.md (AOSPTrieEngine integration, SymSpell removed, device-verified)
+Phase: 25 of 26 (N-gram Next-Word Prediction)
+Plan: 1 of 3 in current phase (COMPLETE)
+Status: In Progress
+Last activity: 2026-04-03 — Completed 25-01-PLAN.md (n-gram data pipeline and C++ engine)
 
-Progress: [██████████] 100% (v1.4 milestone: 8/8 plans)
+Progress: [████████░░] 82% (v1.4 milestone: 9/11 plans)
 
 ## Performance Metrics
 
@@ -68,6 +68,10 @@ Recent decisions for v1.4:
 - [Phase 24.1]: Two-pass spell check: user dictionary words bypass trie lookup entirely
 - [Phase 24.1]: BFS serialization order for trie binary (not DFS) -- DFS caused segfaults due to non-contiguous child offsets
 - [Phase 24.1]: root_child_count added to binary header for correct C++ traversal from root node
+- [Phase 25]: NGRM binary format: 32-byte header + sorted variable-length entries with FNV-1a key hashes + packed string table
+- [Phase 25]: Index-based binary search: build (hash, pointer) vector at load time for O(log n) lookup on variable-length entries
+- [Phase 25]: Google Books Ngram data from orgtre/google-books-ngram-frequency repo (ngrams/ subdirectory)
+- [Phase 25]: Stupid Backoff with lambda=0.4: trigram results + discounted bigram fallback
 
 ### Pending Todos
 
@@ -86,9 +90,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-03T12:35:21.200Z
-Stopped at: Phase 25 context gathered
-Resume file: .planning/phases/25-n-gram-next-word-prediction/25-CONTEXT.md
+Last session: 2026-04-03T13:06:28Z
+Stopped at: Completed 25-01-PLAN.md
+Resume file: .planning/phases/25-n-gram-next-word-prediction/25-02-PLAN.md
 
 ---
 *State initialized: 2026-03-04*
