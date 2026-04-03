@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: executing
-stopped_at: Phase 24.1 context gathered
-last_updated: "2026-04-03T09:41:36.594Z"
+stopped_at: Completed 24.1-01-PLAN.md
+last_updated: "2026-04-03T10:11:35.265Z"
 last_activity: 2026-04-02 — Completed 24-01-PLAN.md (dictionary curation + SymSpell vendoring)
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 8
+  completed_plans: 6
   percent: 75
 ---
 
@@ -61,6 +61,8 @@ Recent decisions for v1.4:
 - [Phase 24]: Dictionary format changed from ranks to counts (higher=better) to align with SymSpell
 - [Phase 24]: French frequency: 70% film subtitles + 30% books for natural spoken weighting
 - [Phase 24]: SymSpellSwift vendored as-is, no modifications needed for Swift 5.9+
+- [Phase 24.1]: DTRI binary format with patricia compression for spell correction dictionaries (~0.4 MiB per language)
+- [Phase 24.1]: Vendored C++ engine in DictusKeyboard/Vendored/AOSPTrie/ with mmap-based read-only access
 
 ### Pending Todos
 
@@ -79,9 +81,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-03T09:41:36.584Z
-Stopped at: Phase 24.1 context gathered
-Resume file: .planning/phases/24.1-replace-symspell-with-aosp-style-compressed-trie-c-with-swift-interop-for-spell-correction-100k-words-edit-distance-2-3-5-mib-memory-via-mmap-based-on-heliboard-aosp-latinime-engine/24.1-CONTEXT.md
+Last session: 2026-04-03T10:11:35.263Z
+Stopped at: Completed 24.1-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*
