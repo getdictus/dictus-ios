@@ -118,6 +118,21 @@ class TextPredictionEngine {
         return aospTrieEngine.spellCheck(word)
     }
 
+    /// Predict next words based on context (1-2 previous words).
+    /// Falls back to top frequent words when no n-gram match exists.
+    ///
+    /// WHY fallback to frequency:
+    /// When the user types a word not in the n-gram model (rare word, name, etc.),
+    /// showing the most common words is better than an empty suggestion bar.
+    /// These are the words most likely to follow any context.
+    func predictNextWords(after words: [String]) -> [String] {
+        let predictions = aospTrieEngine.predictNextWords(after: words)
+        if predictions.isEmpty {
+            return frequencyDict.topWords(count: 3)
+        }
+        return predictions
+    }
+
     /// No-op: user words are handled by the two-pass lookup in spellCheck().
     /// The mmap'd trie is read-only; user words live in UserDictionary (App Group).
     func injectUserWord(_ word: String) {

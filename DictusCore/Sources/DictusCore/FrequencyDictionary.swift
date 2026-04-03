@@ -71,4 +71,18 @@ public struct FrequencyDictionary {
     public func rank(of word: String) -> Int {
         return counts[word.lowercased()] ?? 0
     }
+
+    /// Returns the top N most frequent words, sorted by count descending.
+    /// Used as fallback when n-gram predictions return no results.
+    ///
+    /// WHY filter short words: Single-letter words ("a", "y") and common
+    /// stopwords are poor standalone predictions. We require at least 2 chars
+    /// to provide useful fallback suggestions.
+    public func topWords(count: Int) -> [String] {
+        return counts
+            .filter { $0.key.count >= 2 }
+            .sorted { $0.value > $1.value }
+            .prefix(count)
+            .map { $0.key }
+    }
 }

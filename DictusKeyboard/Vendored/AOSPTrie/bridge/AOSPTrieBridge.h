@@ -36,6 +36,29 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setProximityMapAZERTY;
 - (void)setProximityMapQWERTY;
 
+// --- N-gram prediction methods ---
+
+/// Load n-gram binary file for next-word prediction.
+- (BOOL)loadNgramsAtPath:(NSString *)path;
+
+/// Unload n-gram data and release mmap'd memory.
+- (void)unloadNgrams;
+
+/// Whether n-gram data is loaded and ready for predictions.
+- (BOOL)ngramsLoaded;
+
+/// Predict top-N next words given one previous word (bigram lookup).
+/// Returns array of NSString, sorted by score descending.
+- (NSArray<NSString *> *)predictAfterWord:(NSString *)word maxResults:(NSUInteger)max;
+
+/// Predict top-N next words given two previous words (trigram + bigram backoff).
+/// Returns array of NSString, sorted by score descending.
+- (NSArray<NSString *> *)predictAfterWord1:(NSString *)word1 word2:(NSString *)word2 maxResults:(NSUInteger)max;
+
+/// Get bigram score for a specific word following a previous word (for correction boosting).
+/// Returns 0 if no n-gram match found.
+- (uint16_t)bigramScoreForWord:(NSString *)word afterWord:(NSString *)prevWord;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -6,6 +6,7 @@
 #include "dictus_trie.h"
 #include "dictus_scorer.h"
 #include "dictus_proximity.h"
+#include "dictus_ngram.h"
 
 #include <vector>
 
@@ -21,18 +22,21 @@
     dictus::Scorer _scorer;
     dictus::ProximityMap _proximityMap;
     BOOL _loaded;
+    dictus::NgramEngine* _ngramEngine;
 }
 
 - (instancetype)init {
     self = [super init];
     if (self) {
         _loaded = NO;
+        _ngramEngine = new dictus::NgramEngine();
     }
     return self;
 }
 
 - (void)dealloc {
     _trie.unload();
+    delete _ngramEngine;
 }
 
 - (BOOL)loadDictionaryAtPath:(NSString *)path {
@@ -132,6 +136,52 @@ static int convertString(NSString *str, uint16_t *buffer, int bufferSize) {
     if (_loaded) {
         _scorer.setProximityMap(&_proximityMap);
     }
+}
+
+// --- N-gram prediction methods ---
+
+- (BOOL)loadNgramsAtPath:(NSString *)path {
+    _ngramEngine->unload();
+    return _ngramEngine->load([path UTF8String]) ? YES : NO;
+}
+
+- (void)unloadNgrams {
+    _ngramEngine->unload();
+}
+
+- (BOOL)ngramsLoaded {
+    return _ngramEngine->isLoaded() ? YES : NO;
+}
+
+- (NSArray<NSString *> *)predictAfterWord:(NSString *)word maxResults:(NSUInteger)max {
+    if (!_ngramEngine->isLoaded() || [word length] == 0) return @[];
+
+    auto results = _ngramEngine->predictAfterWord([word UTF8String], (size_t)max);
+
+    NSMutableArray<NSString *> *predictions = [NSMutableArray arrayWithCapacity:results.size()];
+    for (const auto& r : results) {
+        [predictions addObject:[NSString stringWithUTF8String:r.word.c_str()]];
+    }
+    return [predictions copy];
+}
+
+- (NSArray<NSString *> *)predictAfterWord1:(NSString *)word1 word2:(NSString *)word2 maxResults:(NSUInteger)max {
+    if (!_ngramEngine->isLoaded() || [word1 length] == 0 || [word2 length] == 0) return @[];
+
+    auto results = _ngramEngine->predictAfterWords(
+        [word1 UTF8String], [word2 UTF8String], (size_t)max
+    );
+
+    NSMutableArray<NSString *> *predictions = [NSMutableArray arrayWithCapacity:results.size()];
+    for (const auto& r : results) {
+        [predictions addObject:[NSString stringWithUTF8String:r.word.c_str()]];
+    }
+    return [predictions copy];
+}
+
+- (uint16_t)bigramScoreForWord:(NSString *)word afterWord:(NSString *)prevWord {
+    if (!_ngramEngine->isLoaded() || [word length] == 0 || [prevWord length] == 0) return 0;
+    return _ngramEngine->bigramScore([prevWord UTF8String], [word UTF8String]);
 }
 
 @end

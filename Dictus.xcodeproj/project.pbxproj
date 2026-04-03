@@ -90,6 +90,9 @@
 		EE000005 /* AOSPTrieEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE100005 /* AOSPTrieEngine.swift */; };
 		EE000006 /* fr_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE100006 /* fr_spellcheck.dict */; };
 		EE000007 /* en_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE100007 /* en_spellcheck.dict */; };
+		EE000008 /* dictus_ngram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE100008A /* dictus_ngram.cpp */; };
+		EE000009 /* fr_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE100009A /* fr_ngrams.dict */; };
+		EE00000A /* en_ngrams.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE10000AA /* en_ngrams.dict */; };
 		CC000030 /* KeyboardMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100030 /* KeyboardMetrics.swift */; };
 		CC000010 /* FrenchKeyboardLayouts.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100010 /* FrenchKeyboardLayouts.swift */; };
 		CC000001 /* GiellaUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100001 /* GiellaUtils.swift */; };
@@ -249,6 +252,11 @@
 		EE10000B /* dictus_scorer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_scorer.h; sourceTree = "<group>"; };
 		EE10000C /* dictus_proximity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_proximity.h; sourceTree = "<group>"; };
 		EE10000D /* dictus_trie_format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_trie_format.h; sourceTree = "<group>"; };
+		EE100008A /* dictus_ngram.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dictus_ngram.cpp; sourceTree = "<group>"; };
+		EE10000E /* dictus_ngram.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_ngram.h; sourceTree = "<group>"; };
+		EE10000F /* dictus_ngram_format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_ngram_format.h; sourceTree = "<group>"; };
+		EE100009A /* fr_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr_ngrams.dict; sourceTree = "<group>"; };
+		EE10000AA /* en_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en_ngrams.dict; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -461,6 +469,8 @@
 				AA1000D3 /* en_frequency.json */,
 				EE100006 /* fr_spellcheck.dict */,
 				EE100007 /* en_spellcheck.dict */,
+				EE100009A /* fr_ngrams.dict */,
+				EE10000AA /* en_ngrams.dict */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -522,6 +532,8 @@
 				EE10000B /* dictus_scorer.h */,
 				EE10000C /* dictus_proximity.h */,
 				EE10000D /* dictus_trie_format.h */,
+				EE10000E /* dictus_ngram.h */,
+				EE10000F /* dictus_ngram_format.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
@@ -532,6 +544,7 @@
 				EE100001 /* dictus_trie.cpp */,
 				EE100002 /* dictus_scorer.cpp */,
 				EE100003 /* dictus_proximity.cpp */,
+				EE100008A /* dictus_ngram.cpp */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -727,6 +740,8 @@
 				AA0000L2 /* Localizable.xcstrings in Resources */,
 				EE000006 /* fr_spellcheck.dict in Resources */,
 				EE000007 /* en_spellcheck.dict in Resources */,
+				EE000009 /* fr_ngrams.dict in Resources */,
+				EE00000A /* en_ngrams.dict in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -827,6 +842,7 @@
 				EE000003 /* dictus_proximity.cpp in Sources */,
 				EE000004 /* AOSPTrieBridge.mm in Sources */,
 				EE000005 /* AOSPTrieEngine.swift in Sources */,
+				EE000008 /* dictus_ngram.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

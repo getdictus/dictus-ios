@@ -62,6 +62,13 @@ final class AOSPTrieEngine {
                 self.bridge.setProximityMapQWERTY()
             }
 
+            // Load n-gram data on the same queue, right after the spell dict.
+            // WHY here: n-grams are only useful after the dictionary is loaded,
+            // and loading both on the same serial queue ensures correct ordering.
+            if success {
+                self.loadNgrams(language: language, bundle: bundle)
+            }
+
             DispatchQueue.main.async {
                 if success {
                     self.wordCount = Int(self.bridge.wordCount())
@@ -146,4 +153,55 @@ final class AOSPTrieEngine {
 
     /// Number of words in the loaded dictionary.
     var dictionarySize: Int { wordCount }
+
+    // MARK: - N-gram prediction
+
+    /// Load n-gram binary for the given language.
+    /// Called after the spellcheck dictionary loads on the same loadQueue,
+    /// so n-gram data is ready shortly after spell correction is available.
+    func loadNgrams(language: String, bundle: Bundle = .main) {
+        guard let path = bundle.path(forResource: "\(language)_ngrams", ofType: "dict") else {
+            print("[AOSPTrieEngine] No n-gram data for \(language)")
+            return
+        }
+        let success = bridge.loadNgrams(atPath: path)
+        print("[AOSPTrieEngine] N-grams \(language): \(success ? "loaded" : "failed")")
+    }
+
+    /// Predict next words given 1-2 previous words.
+    /// Uses trigram+bigram backoff when 2 words provided, bigram only for 1 word.
+    ///
+    /// WHY [String] input instead of String:
+    /// The n-gram engine supports both bigram (1 word context) and trigram (2 word context).
+    /// Passing an array lets the caller provide as much context as available without
+    /// needing separate methods for each n-gram order.
+    func predictNextWords(after words: [String], maxResults: Int = 3) -> [String] {
+        guard bridge.ngramsLoaded() else { return [] }
+        if words.count >= 2 {
+            let result = bridge.predict(
+                afterWord1: words[words.count - 2],
+                word2: words[words.count - 1],
+                maxResults: UInt(maxResults)
+            )
+            return result as? [String] ?? []
+        } else if words.count == 1 {
+            let result = bridge.predict(
+                afterWord: words[0],
+                maxResults: UInt(maxResults)
+            )
+            return result as? [String] ?? []
+        }
+        return []
+    }
+
+    /// Get bigram score for a candidate correction given previous word context.
+    /// Returns 0 if no n-gram data or no match.
+    /// Used by the prediction pipeline to boost corrections that match n-gram patterns.
+    func bigramScore(for word: String, after prevWord: String) -> UInt16 {
+        guard bridge.ngramsLoaded() else { return 0 }
+        return bridge.bigramScore(forWord: word, afterWord: prevWord)
+    }
+
+    /// Whether n-gram data is loaded and ready for predictions.
+    var ngramsLoaded: Bool { bridge.ngramsLoaded() }
 }
