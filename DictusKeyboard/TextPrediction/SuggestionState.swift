@@ -112,10 +112,13 @@ class SuggestionState: ObservableObject {
 
         currentWord = partial
 
+        // Extract previous word for n-gram context boosting
+        let previousWord = extractPreviousWord(from: context, currentWord: partial)
+
         // Check spell correction first (mirrors what handleSpace will do)
         if autocorrectEnabled,
            !rejectedWords.contains(partial.lowercased()),
-           let result = engine.spellCheck(partial),
+           let result = engine.spellCheck(partial, previousWord: previousWord),
            result.correction.lowercased() != partial.lowercased() {
             // Standard mobile layout: [original | correction (bold) | alternative]
             var correctionSuggestions = [partial, result.correction]
@@ -171,11 +174,14 @@ class SuggestionState: ObservableObject {
                 return
             }
 
+            // Extract previous word for n-gram context boosting
+            let previousWord = self.extractPreviousWord(from: context, currentWord: partial)
+
             // Check spell correction first (mirrors what handleSpace will do)
             let spellResult: (correction: String, alternatives: [String])?
             if self.autocorrectEnabled,
                !self.rejectedWords.contains(partial.lowercased()) {
-                spellResult = self.engine.spellCheck(partial)
+                spellResult = self.engine.spellCheck(partial, previousWord: previousWord)
             } else {
                 spellResult = nil
             }
@@ -218,6 +224,12 @@ class SuggestionState: ObservableObject {
     /// Returns the best correction and alternatives for a misspelled word, or nil if correct.
     func performSpellCheck(_ word: String) -> (correction: String, alternatives: [String])? {
         return engine.spellCheck(word)
+    }
+
+    /// Spell check with optional previous word context for n-gram boosting.
+    /// When previousWord is provided, correction candidates are reranked by bigram frequency.
+    func performSpellCheck(_ word: String, previousWord: String?) -> (correction: String, alternatives: [String])? {
+        return engine.spellCheck(word, previousWord: previousWord)
     }
 
     /// Resets the suggestion state to idle.
@@ -304,6 +316,26 @@ class SuggestionState: ObservableObject {
     }
 
     // MARK: - Private
+
+    /// Extract the word before the current partial word in the text context.
+    /// "Je sui" with currentWord "sui" returns "Je".
+    /// "J'ai un prblm" with currentWord "prblm" returns "un".
+    ///
+    /// WHY not just split on spaces: Swift's enumerateSubstrings handles
+    /// Unicode word boundaries correctly (apostrophes, hyphens, etc.).
+    private func extractPreviousWord(from text: String, currentWord: String) -> String? {
+        var words: [String] = []
+        text.enumerateSubstrings(in: text.startIndex..., options: .byWords) { substring, _, _, _ in
+            if let word = substring {
+                words.append(word)
+            }
+        }
+        // The last word should be currentWord; the one before it is previousWord
+        guard words.count >= 2, words.last?.lowercased() == currentWord.lowercased() else {
+            return nil
+        }
+        return words[words.count - 2]
+    }
 
     /// Extracts the last word from a text context string.
     ///

@@ -344,10 +344,22 @@ final class DictusKeyboardBridge: NSObject,
         // Only trigger if autocorrect is enabled, there's a current word, the word
         // was not previously rejected by the user, and the spell checker offers a
         // different correction.
+        // Extract previous word for n-gram context boost
+        let previousWord: String? = {
+            guard let ctx = controller?.textDocumentProxy.documentContextBeforeInput else { return nil }
+            var words: [String] = []
+            ctx.enumerateSubstrings(in: ctx.startIndex..., options: .byWords) { sub, _, _, _ in
+                if let s = sub { words.append(s) }
+            }
+            // Last word in context is freshWord; the one before is previousWord
+            guard words.count >= 2 else { return nil }
+            return words[words.count - 2]
+        }()
+
         if let state = suggestionState, state.autocorrectEnabled,
            !freshWord.isEmpty,
            !state.rejectedWords.contains(freshWord.lowercased()),
-           let result = state.performSpellCheck(freshWord),
+           let result = state.performSpellCheck(freshWord, previousWord: previousWord),
            result.correction.lowercased() != freshWord.lowercased() {
             // Replace the misspelled word with the correction
             let proxy = controller?.textDocumentProxy

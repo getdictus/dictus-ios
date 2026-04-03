@@ -133,6 +133,50 @@ class TextPredictionEngine {
         return predictions
     }
 
+    /// Spell check with n-gram context boosting.
+    /// When previousWord is provided, candidates are reranked using bigram frequency.
+    /// Example: spellCheck("sui", previousWord: "je") boosts "suis" because
+    /// bigram "je suis" has very high frequency.
+    ///
+    /// WHY context-aware: Without context, "sui" might correct to "sur" or "suc"
+    /// (shorter edit distance). With "je" as context, "suis" gets a massive boost
+    /// from the bigram "je suis", making it the clear winner.
+    func spellCheck(_ word: String, previousWord: String?) -> (correction: String, alternatives: [String])? {
+        // First, get standard spell check result (existing logic)
+        guard let result = spellCheck(word) else { return nil }
+
+        // If no previous word context or n-grams not loaded, return standard result
+        guard let prev = previousWord, !prev.isEmpty, aospTrieEngine.ngramsLoaded else {
+            return result
+        }
+
+        // Collect all candidates: correction + alternatives
+        let candidates = [result.correction] + result.alternatives
+
+        // Score each candidate with n-gram context boost
+        let scored: [(String, UInt16)] = candidates.map { candidate in
+            let lowerCandidate = candidate.lowercased()
+            // Extract word part after apostrophe if present (matching spellCheck behavior)
+            let wordPart: String
+            if let apoIdx = lowerCandidate.lastIndex(of: "'") {
+                wordPart = String(lowerCandidate[lowerCandidate.index(after: apoIdx)...])
+            } else {
+                wordPart = lowerCandidate
+            }
+            let ngramScore = aospTrieEngine.bigramScore(for: wordPart, after: prev.lowercased())
+            return (candidate, ngramScore)
+        }
+
+        // Sort by n-gram score descending (candidates with n-gram support rank first)
+        let reranked = scored.sorted { $0.1 > $1.1 }
+
+        // If the top candidate changed from the original correction, reorder
+        let newCorrection = reranked[0].0
+        let newAlternatives = reranked.dropFirst().map { $0.0 }
+
+        return (newCorrection, Array(newAlternatives.prefix(2)))
+    }
+
     /// No-op: user words are handled by the two-pass lookup in spellCheck().
     /// The mmap'd trie is read-only; user words live in UserDictionary (App Group).
     func injectUserWord(_ word: String) {
