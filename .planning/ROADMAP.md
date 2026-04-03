@@ -240,12 +240,13 @@ Plans:
   1. User completes a word and presses space -- the suggestion bar shows 3 predicted next words based on previous context (e.g. "Je" + space shows "suis", "ne", "vais")
   2. User taps a predicted word and it inserts with a trailing space, then the suggestion bar refreshes with new predictions based on the updated context (chained prediction)
   3. Typing any character produces a suggestion update within 10ms with no visible lag or dropped frames
-  4. Total prediction memory (SymSpell dictionaries + n-gram data) stays under 20MB per language on a physical device
-**Plans**: TBD
+  4. Total prediction memory (AOSP trie dictionaries + n-gram data) stays under 20MB per language on a physical device
+**Plans**: 3 plans
 
 Plans:
-- [ ] 25-01: N-gram data pipeline -- corpus processing, binary trie format, offline build tool
-- [ ] 25-02: NgramPredictor integration into TextPredictionEngine + next-word UI in SuggestionBarView
+- [ ] 25-01-PLAN.md — Python ngram_builder.py + C++ NgramEngine (mmap, binary search, Stupid Backoff) + FR/EN n-gram binaries (PRED-04, PRED-06)
+- [ ] 25-02-PLAN.md — ObjC++ bridge n-gram methods + Swift integration + SuggestionState .predictions mode + keyboard wiring (PRED-04, PRED-05)
+- [ ] 25-03-PLAN.md — N-gram context-boosted spell corrections + device verification checkpoint (PRED-04, PRED-05, PRED-06)
 
 ### Phase 26: Cold Start & Beta Polish
 **Goal**: Cold start UX is investigated and improved if viable, and critical beta feedback is addressed
@@ -297,7 +298,7 @@ Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26
 | 23. Bug Fixes & License Compliance | 1/1 | Complete    | 2026-04-01 | - |
 | 24. SymSpell Spell Correction | 2/2 | Complete    | 2026-04-03 | - |
 | 24.1. AOSP Trie Spell Correction | 3/3 | Complete    | 2026-04-03 | - |
-| 25. N-gram Next-Word Prediction | v1.4 | 0/2 | Not started | - |
+| 25. N-gram Next-Word Prediction | v1.4 | 0/3 | Not started | - |
 | 26. Cold Start & Beta Polish | v1.4 | 0/2 | Not started | - |
 
 ---
