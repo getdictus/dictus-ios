@@ -38,6 +38,9 @@ NGRM_MAX_RESULTS = 8
 # Google Books Ngram frequency data (CSV: ngram,frequency)
 NGRAM_BASE_URL = "https://raw.githubusercontent.com/orgtre/google-books-ngram-frequency/main/ngrams"
 
+# OpenSubtitles top sentences (conversational bigram source)
+OPENSUBS_BASE_URL = "https://raw.githubusercontent.com/orgtre/top-open-subtitles-sentences/main/bld/top_sentences"
+
 LANG_MAP = {
     "fr": "french",
     "en": "english",
@@ -89,8 +92,8 @@ def is_valid_token(token: str) -> bool:
     # Remove numbers and punctuation-only tokens
     if re.match(r'^[\d\W]+$', token):
         return False
-    # Allow letters, apostrophes, hyphens within words
-    if re.match(r"^[a-zA-ZÀ-ÿ'']+(?:[-'][a-zA-ZÀ-ÿ'']+)*$", token):
+    # Allow letters (including œŒ), apostrophes, hyphens within words
+    if re.match(r"^[a-zA-ZÀ-ÿœŒ'']+(?:[-'][a-zA-ZÀ-ÿœŒ'']+)*$", token):
         return True
     return False
 
@@ -183,6 +186,60 @@ def parse_ngram_csv(csv_text: str, n: int, min_freq: int) -> dict[str, list[tupl
     return dict(result)
 
 
+def extract_bigrams_from_sentences(lang: str) -> dict[str, list[tuple[str, int]]]:
+    """
+    Download top 10k sentences from OpenSubtitles and extract bigrams.
+
+    WHY OpenSubtitles: Google Books only provides 5k bigrams of literary French.
+    Subtitles are conversational — "bonjour", "merci", "ça va" all appear naturally.
+    Extracting bigrams from 10k most frequent sentences yields ~7k unique bigrams
+    with ~1100 context words, covering everyday vocabulary.
+    """
+    url = f"{OPENSUBS_BASE_URL}/{lang}_top_sentences.csv"
+    print(f"  Downloading {url}...")
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Dictus/1.0"})
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            data = resp.read().decode("utf-8", errors="replace")
+            print(f"  Downloaded {len(data)} bytes")
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError) as e:
+        print(f"  OpenSubtitles download failed: {e}")
+        return {}
+
+    import csv
+    import io
+
+    bigrams: dict[tuple[str, str], int] = defaultdict(int)
+    reader = csv.reader(io.StringIO(data))
+    next(reader, None)  # skip header
+
+    word_pattern = re.compile(r"[a-zA-ZÀ-ÿœŒ'']+(?:[-'][a-zA-ZÀ-ÿœŒ'']+)*")
+
+    for row in reader:
+        if len(row) < 2:
+            continue
+        try:
+            sentence, count = row[0], int(row[1])
+        except (ValueError, IndexError):
+            continue
+
+        words = word_pattern.findall(sentence)
+        words = [normalize_token(w) for w in words]
+        words = [w for w in words if is_valid_token(w)]
+
+        for i in range(len(words) - 1):
+            bigrams[(words[i], words[i + 1])] += count
+
+    # Group by context word
+    result: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    for (w1, w2), freq in bigrams.items():
+        result[w1].append((w2, freq))
+
+    total_pairs = sum(len(v) for v in result.values())
+    print(f"  Extracted {total_pairs} bigrams from {len(result)} context words (OpenSubtitles)")
+    return dict(result)
+
+
 def generate_fallback_bigrams(freq_json_path: str, lang: str) -> dict[str, list[tuple[str, int]]]:
     """
     Generate synthetic bigrams from frequency dictionary when download fails.
@@ -234,6 +291,33 @@ def generate_fallback_bigrams(freq_json_path: str, lang: str) -> dict[str, list[
     total_pairs = sum(len(v) for v in result.values())
     print(f"  Generated {total_pairs} synthetic bigram pairs for {len(result)} keys")
     return dict(result)
+
+
+def merge_ngram_sources(
+    *sources: dict[str, list[tuple[str, int]]],
+) -> dict[str, list[tuple[str, int]]]:
+    """
+    Merge multiple n-gram sources, summing frequencies for duplicate pairs.
+
+    WHY merge: Google Books provides literary bigrams with accurate frequencies.
+    OpenSubtitles provides conversational bigrams. Combining both gives coverage
+    of formal and informal vocabulary. Summing frequencies means pairs that appear
+    in BOTH sources get boosted (e.g., "je suis" ranks high in both).
+    """
+    merged: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
+    for source in sources:
+        for key, results in source.items():
+            for word, freq in results:
+                merged[key][word] += freq
+
+    result: dict[str, list[tuple[str, int]]] = {}
+    for key, word_freqs in merged.items():
+        result[key] = list(word_freqs.items())
+
+    total_keys = len(result)
+    total_pairs = sum(len(v) for v in result.values())
+    print(f"  Merged: {total_keys} context words, {total_pairs} total bigram pairs")
+    return result
 
 
 def cap_and_sort_results(
@@ -423,13 +507,29 @@ def build_ngrams(
         # No trigram data in fallback mode
         trigram_data = {}
     else:
-        # Try downloading from Google Books Ngram
-        print("Loading bigram data...")
+        # --- Source 1: OpenSubtitles (conversational bigrams from top 10k sentences) ---
+        print("Loading OpenSubtitles bigrams (conversational)...")
+        opensubs_bigrams = extract_bigrams_from_sentences(lang)
+
+        # --- Source 2: Google Books Ngram (literary bigrams, top 5k) ---
+        print("\nLoading Google Books bigrams (literary)...")
+        books_bigrams: dict[str, list[tuple[str, int]]] = {}
         bigram_csv = download_ngram_csv(lang, 2)
         if bigram_csv:
-            bigram_data = parse_ngram_csv(bigram_csv, 2, min_freq)
+            books_bigrams = parse_ngram_csv(bigram_csv, 2, min_freq)
         else:
-            # Fallback to frequency JSON
+            print("  Google Books download failed (continuing with OpenSubtitles only)")
+
+        # --- Merge sources ---
+        print("\nMerging bigram sources...")
+        if opensubs_bigrams and books_bigrams:
+            bigram_data = merge_ngram_sources(opensubs_bigrams, books_bigrams)
+        elif opensubs_bigrams:
+            bigram_data = opensubs_bigrams
+        elif books_bigrams:
+            bigram_data = books_bigrams
+        else:
+            # Last resort: synthetic bigrams from frequency JSON
             fallback_path = f"DictusKeyboard/Resources/{lang}_frequency.json"
             if os.path.exists(fallback_path):
                 print(f"  Falling back to {fallback_path}")
@@ -438,6 +538,7 @@ def build_ngrams(
                 print(f"  ERROR: No data source available for {lang} bigrams")
                 sys.exit(1)
 
+        # --- Trigrams (Google Books only, OpenSubtitles sentences too short for trigrams) ---
         print("\nLoading trigram data...")
         trigram_csv = download_ngram_csv(lang, 3)
         if trigram_csv:
