@@ -74,6 +74,16 @@ final class AOSPTrieEngine {
         }
     }
 
+    /// Check French overrides only (no trie lookup). Returns nil if no override applies.
+    /// Used by TextPredictionEngine to check overrides BEFORE UserDictionary,
+    /// since words like "ca" must always correct to "ça" even if "ca" was learned.
+    func frenchOverride(for word: String) -> (correction: String, alternatives: [String])? {
+        let lowered = word.lowercased()
+        guard let override = Self.frenchOverrides[lowered] else { return nil }
+        let isCapitalized = word.first?.isUppercase == true
+        return (isCapitalized ? override.capitalized : override, [])
+    }
+
     /// Returns best correction and alternatives, or nil if word is correct.
     /// Preserves SymSpellEngine behavior: French overrides, apostrophe handling, case restoration.
     ///

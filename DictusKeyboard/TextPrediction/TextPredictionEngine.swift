@@ -93,6 +93,13 @@ class TextPredictionEngine {
     func spellCheck(_ word: String) -> (correction: String, alternatives: [String])? {
         guard !word.isEmpty else { return nil }
 
+        // French overrides bypass everything — "ca" is never valid French.
+        // Must check before UserDictionary, otherwise typing "ca" twice
+        // would "learn" it and block the ça correction permanently.
+        if let result = aospTrieEngine.frenchOverride(for: word) {
+            return result
+        }
+
         // Two-pass lookup: user dictionary first (learned words are always "correct").
         // Extract the word part after any apostrophe for user dict check, matching
         // the same apostrophe handling that AOSPTrieEngine uses internally.
