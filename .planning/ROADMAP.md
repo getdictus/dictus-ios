@@ -215,6 +215,23 @@ Plans:
 - [ ] 24-01-PLAN.md — Curate FR/EN frequency dictionaries (30-50K words), vendor SymSpellSwift, create SymSpellEngine wrapper (PRED-01, PRED-02)
 - [ ] 24-02-PLAN.md — Wire SymSpell into prediction pipeline, suggestion bar reorder, autocorrect rejection, remove accent suggestions, device verification (PRED-03)
 
+### Phase 24.1: Replace SymSpell with AOSP-style compressed trie (C++ with Swift interop) for spell correction (INSERTED)
+
+**Goal:** Users get production-grade spell corrections from a compressed patricia trie (C++ with ObjC++ bridge) that supports 100K+ words, edit distance 2, keyboard proximity scoring, and accent-aware costs -- all within ~3-5 MiB via mmap
+**Requirements**: PRED-03
+**Depends on:** Phase 24
+**Success Criteria** (what must be TRUE):
+  1. User types a misspelled French word and gets frequency-ranked correction with keyboard proximity scoring
+  2. User types a word missing an accent and gets the accented form as top correction
+  3. Keyboard extension memory stays under 50MB with trie dictionaries loaded
+  4. SymSpell code is fully removed and replaced by AOSP trie engine
+**Plans:** 3 plans
+
+Plans:
+- [ ] 24.1-01-PLAN.md — Python dict-builder + C++ trie reader, scorer, proximity maps (PRED-03)
+- [ ] 24.1-02-PLAN.md — ObjC++ bridge, bridging header, Swift AOSPTrieEngine, Xcode project config (PRED-03)
+- [ ] 24.1-03-PLAN.md — Wire into TextPredictionEngine, remove SymSpell, device verification (PRED-03)
+
 ### Phase 25: N-gram Next-Word Prediction
 **Goal**: Users see contextual next-word suggestions after completing a word, and all prediction stays fast and within memory budget
 **Depends on**: Phase 24
@@ -248,7 +265,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 23 -> 23.1 -> 24 -> 25 -> 26
+Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -279,6 +296,7 @@ Phases execute in numeric order: 23 -> 23.1 -> 24 -> 25 -> 26
 | 22. Public TestFlight | v1.3 | 1/2 | In progress | - |
 | 23. Bug Fixes & License Compliance | 1/1 | Complete    | 2026-04-01 | - |
 | 24. SymSpell Spell Correction | 2/2 | Complete    | 2026-04-03 | - |
+| 24.1. AOSP Trie Spell Correction | v1.4 | 0/3 | Not started | - |
 | 25. N-gram Next-Word Prediction | v1.4 | 0/2 | Not started | - |
 | 26. Cold Start & Beta Polish | v1.4 | 0/2 | Not started | - |
 
