@@ -37,10 +37,10 @@ public final class UserDictionary {
     public static let repetitionThreshold = 2
 
     /// Maximum number of learned words. When exceeded, the least-used words
-    /// are dropped. 500 words ≈ 15 KB in UserDefaults — negligible for memory,
-    /// and more than enough for a personal vocabulary. Prevents unbounded growth
-    /// from accidental learning over months/years of use.
-    public static let maxLearnedWords = 500
+    /// are dropped. 1000 words ≈ 30 KB in UserDefaults — negligible for memory.
+    /// Generous cap for personal vocabulary (names, slang, jargon, brands).
+    /// Prevents unbounded growth from accidental learning over months/years.
+    public static let maxLearnedWords = 1000
 
     /// In-memory cache of learned words. Synced to UserDefaults on mutation.
     private var learnedWords: [String: Int] = [:]
