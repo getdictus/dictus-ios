@@ -87,6 +87,13 @@
 		DD000002 /* SuggestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD100002 /* SuggestItem.swift */; };
 		DD000003 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD100003 /* StringExtension.swift */; };
 		DD000004 /* SymSpellEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD100004 /* SymSpellEngine.swift */; };
+		EE000001 /* dictus_trie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE100001 /* dictus_trie.cpp */; };
+		EE000002 /* dictus_scorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE100002 /* dictus_scorer.cpp */; };
+		EE000003 /* dictus_proximity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE100003 /* dictus_proximity.cpp */; };
+		EE000004 /* AOSPTrieBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = EE100004 /* AOSPTrieBridge.mm */; };
+		EE000005 /* AOSPTrieEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE100005 /* AOSPTrieEngine.swift */; };
+		EE000006 /* fr_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE100006 /* fr_spellcheck.dict */; };
+		EE000007 /* en_spellcheck.dict in Resources */ = {isa = PBXBuildFile; fileRef = EE100007 /* en_spellcheck.dict */; };
 		CC000030 /* KeyboardMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100030 /* KeyboardMetrics.swift */; };
 		CC000010 /* FrenchKeyboardLayouts.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100010 /* FrenchKeyboardLayouts.swift */; };
 		CC000001 /* GiellaUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100001 /* GiellaUtils.swift */; };
@@ -237,6 +244,19 @@
 		CC10000C /* LongPressController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongPressController.swift; sourceTree = "<group>"; };
 		CC10000D /* DeadKeyHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadKeyHandler.swift; sourceTree = "<group>"; };
 		CC10000E /* Audio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio.swift; sourceTree = "<group>"; };
+		EE100001 /* dictus_trie.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dictus_trie.cpp; sourceTree = "<group>"; };
+		EE100002 /* dictus_scorer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dictus_scorer.cpp; sourceTree = "<group>"; };
+		EE100003 /* dictus_proximity.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dictus_proximity.cpp; sourceTree = "<group>"; };
+		EE100004 /* AOSPTrieBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AOSPTrieBridge.mm; sourceTree = "<group>"; };
+		EE100005 /* AOSPTrieEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AOSPTrieEngine.swift; sourceTree = "<group>"; };
+		EE100006 /* fr_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = fr_spellcheck.dict; sourceTree = "<group>"; };
+		EE100007 /* en_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = en_spellcheck.dict; sourceTree = "<group>"; };
+		EE100008 /* AOSPTrieBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AOSPTrieBridge.h; sourceTree = "<group>"; };
+		EE100009 /* DictusKeyboard-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DictusKeyboard-Bridging-Header.h"; sourceTree = "<group>"; };
+		EE10000A /* dictus_trie.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_trie.h; sourceTree = "<group>"; };
+		EE10000B /* dictus_scorer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_scorer.h; sourceTree = "<group>"; };
+		EE10000C /* dictus_proximity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_proximity.h; sourceTree = "<group>"; };
+		EE10000D /* dictus_trie_format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dictus_trie_format.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -327,6 +347,7 @@
 				AA100006 /* DictusKeyboard.entitlements */,
 				AA100008 /* Info.plist */,
 				AA100P20 /* PrivacyInfo.xcprivacy */,
+				EE100009 /* DictusKeyboard-Bridging-Header.h */,
 			);
 			path = DictusKeyboard;
 			sourceTree = "<group>";
@@ -437,6 +458,7 @@
 				AA1000D0 /* TextPredictionEngine.swift */,
 				AA1000D1 /* SuggestionState.swift */,
 				DD100004 /* SymSpellEngine.swift */,
+				EE100005 /* AOSPTrieEngine.swift */,
 			);
 			path = TextPrediction;
 			sourceTree = "<group>";
@@ -446,6 +468,8 @@
 			children = (
 				AA1000D2 /* fr_frequency.json */,
 				AA1000D3 /* en_frequency.json */,
+				EE100006 /* fr_spellcheck.dict */,
+				EE100007 /* en_spellcheck.dict */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -486,8 +510,49 @@
 				CC400003 /* Models */,
 				CC400004 /* Controllers */,
 				DD400001 /* SymSpell */,
+				EE400001 /* AOSPTrie */,
 			);
 			path = Vendored;
+			sourceTree = "<group>";
+		};
+		EE400001 /* AOSPTrie */ = {
+			isa = PBXGroup;
+			children = (
+				EE400002 /* include */,
+				EE400003 /* src */,
+				EE400004 /* bridge */,
+			);
+			path = AOSPTrie;
+			sourceTree = "<group>";
+		};
+		EE400002 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				EE10000A /* dictus_trie.h */,
+				EE10000B /* dictus_scorer.h */,
+				EE10000C /* dictus_proximity.h */,
+				EE10000D /* dictus_trie_format.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		EE400003 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				EE100001 /* dictus_trie.cpp */,
+				EE100002 /* dictus_scorer.cpp */,
+				EE100003 /* dictus_proximity.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		EE400004 /* bridge */ = {
+			isa = PBXGroup;
+			children = (
+				EE100008 /* AOSPTrieBridge.h */,
+				EE100004 /* AOSPTrieBridge.mm */,
+			);
+			path = bridge;
 			sourceTree = "<group>";
 		};
 		DD400001 /* SymSpell */ = {
@@ -680,6 +745,8 @@
 				AA0000D3 /* en_frequency.json in Resources */,
 				AA000P20 /* PrivacyInfo.xcprivacy in Resources */,
 				AA0000L2 /* Localizable.xcstrings in Resources */,
+				EE000006 /* fr_spellcheck.dict in Resources */,
+				EE000007 /* en_spellcheck.dict in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -779,6 +846,11 @@
 				DD000002 /* SuggestItem.swift in Sources */,
 				DD000003 /* StringExtension.swift in Sources */,
 				DD000004 /* SymSpellEngine.swift in Sources */,
+				EE000001 /* dictus_trie.cpp in Sources */,
+				EE000002 /* dictus_scorer.cpp in Sources */,
+				EE000003 /* dictus_proximity.cpp in Sources */,
+				EE000004 /* AOSPTrieBridge.mm in Sources */,
+				EE000005 /* AOSPTrieEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -975,6 +1047,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9B8B36C2FA;
 				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/DictusKeyboard/Vendored/AOSPTrie/include",
+					"$(SRCROOT)/DictusKeyboard/Vendored/AOSPTrie/bridge",
+				);
 				INFOPLIST_FILE = DictusKeyboard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.2;
@@ -983,6 +1060,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DictusKeyboard/DictusKeyboard-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -997,6 +1075,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9B8B36C2FA;
 				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/DictusKeyboard/Vendored/AOSPTrie/include",
+					"$(SRCROOT)/DictusKeyboard/Vendored/AOSPTrie/bridge",
+				);
 				INFOPLIST_FILE = DictusKeyboard/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.2;
@@ -1005,6 +1088,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DictusKeyboard/DictusKeyboard-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
