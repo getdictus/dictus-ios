@@ -231,6 +231,11 @@ class SuggestionState: ObservableObject {
         engine.setLanguage(lang)
     }
 
+    /// Learn a word and inject it into the live SymSpell instance.
+    func learnWord(_ word: String) {
+        engine.injectUserWord(word)
+    }
+
     // MARK: - Private
 
     /// Extracts the last word from a text context string.

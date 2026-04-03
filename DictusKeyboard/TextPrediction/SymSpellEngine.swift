@@ -1,6 +1,7 @@
 // DictusKeyboard/TextPrediction/SymSpellEngine.swift
 // Wraps vendored SymSpell to provide frequency-ranked spell correction.
 import Foundation
+import DictusCore
 
 /// Wraps SymSpell for frequency-ranked spell correction.
 ///
@@ -70,11 +71,21 @@ final class SymSpellEngine {
                 ss.createDictionaryEntry(key: word.lowercased(), count: max(1, count))
             }
 
+            // Inject user-learned words into SymSpell so they're treated as known words.
+            // High frequency (999999) ensures learned words are preferred over similar
+            // dictionary words — if the user taught the keyboard a word, they mean it.
+            let userDict = UserDictionary.shared
+            userDict.reload()
+            let userWords = userDict.allLearnedWords
+            for (word, _) in userWords {
+                ss.createDictionaryEntry(key: word.lowercased(), count: 999999)
+            }
+
             DispatchQueue.main.async {
                 self.symSpell = ss
-                self.wordCount = dict.count
+                self.wordCount = dict.count + userWords.count
                 self.isLoading = false
-                print("[SymSpellEngine] Loaded \(dict.count) words for \(language)")
+                print("[SymSpellEngine] Loaded \(dict.count) words + \(userWords.count) user words for \(language)")
             }
         }
     }
@@ -140,6 +151,13 @@ final class SymSpellEngine {
         }
 
         return (fullCorrection, Array(alts))
+    }
+
+    /// Inject a user-learned word into the live SymSpell instance.
+    /// Called when a word is learned mid-session (after rejection or repetition)
+    /// so the correction is available immediately without reloading the dictionary.
+    func injectUserWord(_ word: String) {
+        symSpell?.createDictionaryEntry(key: word.lowercased(), count: 999999)
     }
 
     /// Whether a dictionary is loaded and ready for lookups.

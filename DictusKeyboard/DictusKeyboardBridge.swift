@@ -235,6 +235,11 @@ final class DictusKeyboardBridge: NSObject,
             // Mark this word as rejected so it won't be re-corrected on next space
             suggestionState?.rejectedWords.insert(autocorrect.originalWord.lowercased())
             suggestionState?.lastAutocorrect = nil
+
+            // Learn the original word: user explicitly rejected the correction,
+            // which is the strongest signal that this word is intentional.
+            UserDictionary.shared.learn(autocorrect.originalWord)
+            suggestionState?.learnWord(autocorrect.originalWord)
             lastInsertedCharacter = autocorrect.originalWord.last.map(String.init)
             secondToLastInsertedCharacter = nil
             updateCapitalization()
@@ -341,6 +346,16 @@ final class DictusKeyboardBridge: NSObject,
             updateCapitalization()
             updateAccentKeyDisplay()
             return
+        }
+
+        // Repetition learning: word was NOT corrected (user typed it as-is).
+        // Track usage — after 2 occurrences of an unknown word, learn it.
+        if let state = suggestionState, !state.currentWord.isEmpty {
+            let word = state.currentWord
+            if UserDictionary.shared.recordUsage(word) {
+                // Word just crossed the learning threshold — inject into SymSpell
+                state.learnWord(word)
+            }
         }
 
         // Normal space handling with double-space period detection

@@ -88,4 +88,9 @@ class TextPredictionEngine {
         guard !word.isEmpty else { return nil }
         return symSpellEngine.spellCheck(word)
     }
+
+    /// Inject a user-learned word into SymSpell so it's recognized immediately.
+    func injectUserWord(_ word: String) {
+        symSpellEngine.injectUserWord(word)
+    }
 }
