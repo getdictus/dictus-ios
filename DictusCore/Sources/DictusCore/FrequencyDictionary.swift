@@ -14,6 +14,12 @@ public struct FrequencyDictionary {
 
     private var counts: [String: Int] = [:]
 
+    /// Maximum words to keep in memory. Only the most frequent words are retained.
+    /// This dictionary is only used for ranking UITextChecker completions —
+    /// we don't need rare words for ranking purposes.
+    /// 10K words ≈ 3 MiB vs 40K ≈ 6 MiB. Every MiB counts in a 50MB extension.
+    private static let maxWords = 10000
+
     public init() {}
 
     /// Loads frequency data from raw JSON Data.
@@ -22,7 +28,19 @@ public struct FrequencyDictionary {
     public mutating func load(from data: Data) {
         do {
             let decoded = try JSONDecoder().decode([String: Int].self, from: data)
-            counts = decoded
+            // Keep only the top N most frequent words to save memory.
+            // Words not in this dictionary get rank 0 (lowest priority in sorting),
+            // which is the correct behavior for rare words.
+            if decoded.count > Self.maxWords {
+                let top = decoded.sorted { $0.value > $1.value }.prefix(Self.maxWords)
+                counts = [:]
+                counts.reserveCapacity(Self.maxWords)
+                for (key, value) in top {
+                    counts[key] = value
+                }
+            } else {
+                counts = decoded
+            }
         } catch {
             print("[FrequencyDictionary] Failed to decode frequency data: \(error)")
             counts = [:]

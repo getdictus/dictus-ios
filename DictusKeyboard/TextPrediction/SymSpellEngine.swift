@@ -51,10 +51,11 @@ final class SymSpellEngine {
     private static let userWordFrequency = 15000
 
     /// Maximum number of words loaded from the frequency dictionary.
-    /// 20K covers all common words. Beyond that, words are extremely rare
-    /// and not worth the memory cost. Each word generates ~7 delete entries
-    /// at edit distance 1. Memory: 20K words ≈ 13 MiB vs 40K ≈ 90 MiB.
-    private static let maxDictionaryWords = 20000
+    /// 10K covers all common vocabulary (word at rank 10K in French: ~6900 frequency,
+    /// still very usable words like "mélancolique", "récompense").
+    /// Each word generates ~7 delete entries at edit distance 1.
+    /// Memory: 10K words ≈ 15 MiB vs 20K ≈ 29 MiB. Saves ~14 MiB.
+    private static let maxDictionaryWords = 10000
 
     /// Loads a frequency dictionary for the given language.
     /// Expected JSON format: {"word": count, ...} where count is Int (higher = more common).
