@@ -358,7 +358,7 @@ final class DictusKeyboardBridge: NSObject,
         if let state = suggestionState, !state.currentWord.isEmpty {
             let word = state.currentWord
             if UserDictionary.shared.recordUsage(word) {
-                // Word just crossed the learning threshold — inject into SymSpell
+                // Word just crossed the learning threshold — notify prediction engine
                 state.learnWord(word)
             }
         }

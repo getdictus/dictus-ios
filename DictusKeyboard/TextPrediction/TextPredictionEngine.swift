@@ -19,7 +19,7 @@ class TextPredictionEngine {
 
     private let textChecker = UITextChecker()
     private var frequencyDict = FrequencyDictionary()
-    private let symSpellEngine = SymSpellEngine()
+    private let aospTrieEngine = AOSPTrieEngine()
     private var language: String = "fr"
 
     init() {
@@ -29,7 +29,7 @@ class TextPredictionEngine {
             print("[TextPredictionEngine] Warning: '\(language)' not in available languages: \(available)")
         }
         frequencyDict.load(language: language)
-        symSpellEngine.load(language: language)
+        aospTrieEngine.load(language: language)
     }
 
     /// Updates the active language for completions and spell-checking.
@@ -45,7 +45,7 @@ class TextPredictionEngine {
             print("[TextPredictionEngine] Warning: '\(lang)' not in available languages: \(available)")
         }
         frequencyDict.load(language: lang)
-        symSpellEngine.load(language: lang)
+        aospTrieEngine.load(language: lang)
     }
 
     /// Returns up to 3 word completions for a partial word, ranked by frequency.
@@ -77,20 +77,43 @@ class TextPredictionEngine {
     }
 
     /// Returns the best correction and alternatives for a misspelled word.
-    /// Returns nil if the word is correctly spelled (exists in SymSpell dictionary).
+    /// Returns nil if the word is correctly spelled or is a user-learned word.
     ///
-    /// WHY SymSpell instead of UITextChecker:
-    /// SymSpell returns corrections ranked by frequency (most common word first),
-    /// while UITextChecker returns guesses ordered by edit distance. Frequency-ranked
-    /// corrections pick "bonjour" over "bonsoir" for a typo of "bonour".
-    /// UITextChecker is still used for word completions in suggestions(for:).
+    /// WHY two-pass lookup:
+    /// Pass 1: Check UserDictionary first. Words the user has learned (via rejection
+    /// or repetition) are always considered correct -- no trie lookup needed. This
+    /// prevents the trie from "correcting" names, slang, or jargon the user has taught.
+    /// Pass 2: Delegate to AOSPTrieEngine for proximity-weighted, accent-aware correction
+    /// against the 100K+ word binary trie dictionary.
+    ///
+    /// WHY AOSPTrieEngine instead of SymSpell:
+    /// The trie walks candidates during lookup with keyboard proximity scoring,
+    /// supporting 100K+ words in ~0.4 MiB per language via mmap. SymSpell pre-generated
+    /// all edit-distance deletes, using 15 MiB for just 10K words.
     func spellCheck(_ word: String) -> (correction: String, alternatives: [String])? {
         guard !word.isEmpty else { return nil }
-        return symSpellEngine.spellCheck(word)
+
+        // Two-pass lookup: user dictionary first (learned words are always "correct").
+        // Extract the word part after any apostrophe for user dict check, matching
+        // the same apostrophe handling that AOSPTrieEngine uses internally.
+        let lowered = word.lowercased()
+        let wordToCheck: String
+        if let apoIndex = lowered.lastIndex(of: "'") {
+            wordToCheck = String(lowered[lowered.index(after: apoIndex)...])
+        } else {
+            wordToCheck = lowered
+        }
+        if UserDictionary.shared.isLearned(wordToCheck) {
+            return nil  // User-learned word: no correction needed
+        }
+
+        // Pass 2: trie spell check (proximity-weighted, accent-aware)
+        return aospTrieEngine.spellCheck(word)
     }
 
-    /// Inject a user-learned word into SymSpell so it's recognized immediately.
+    /// No-op: user words are handled by the two-pass lookup in spellCheck().
+    /// The mmap'd trie is read-only; user words live in UserDictionary (App Group).
     func injectUserWord(_ word: String) {
-        symSpellEngine.injectUserWord(word)
+        // No-op: UserDictionary.shared is checked before trie in spellCheck()
     }
 }

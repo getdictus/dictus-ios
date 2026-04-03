@@ -81,7 +81,7 @@ class SuggestionState: ObservableObject {
     ///
     /// HOW IT WORKS:
     /// 1. Extract the last partial word from the text before the cursor
-    /// 2. Check SymSpell for a spell correction (same engine that fires on space)
+    /// 2. Check spell correction engine (same engine that fires on space)
     /// 3. If correction found: show [original | **correction** | alternative] (standard mobile layout)
     /// 4. If no correction: show UITextChecker completions
     /// 5. If no partial word (after space/newline), go idle
@@ -231,7 +231,7 @@ class SuggestionState: ObservableObject {
         engine.setLanguage(lang)
     }
 
-    /// Learn a word and inject it into the live SymSpell instance.
+    /// Learn a word and notify the prediction engine (no-op for trie engine).
     func learnWord(_ word: String) {
         engine.injectUserWord(word)
     }
