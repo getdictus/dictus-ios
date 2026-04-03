@@ -87,7 +87,7 @@ class KeyboardViewController: UIInputViewController {
         self.giellaKeyboard = keyboard
 
         // --- 3. Create SwiftUI hosting for toolbar + recording overlay ONLY ---
-        let rootView = KeyboardRootView(controller: self, controllerID: controllerID, suggestionState: suggestionState)
+        let rootView = KeyboardRootView(controller: self, controllerID: controllerID, suggestionState: suggestionState, bridge: keyBridge)
         let hosting = UIHostingController(rootView: rootView)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",

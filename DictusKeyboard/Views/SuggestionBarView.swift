@@ -41,10 +41,12 @@ struct SuggestionBarView: View {
                         // In completion mode:
                         //   index 1 = bold (best completion)
                         //   others = regular weight
+                        // In prediction mode:
+                        //   All equal weight -- no "auto-applied" word, all are suggestions
                         // This matches standard iOS keyboard suggestion bar behavior.
                         Text(displayText(suggestion, at: index))
                             .font(.system(size: 15))
-                            .fontWeight(index == 1 ? .semibold : .regular)
+                            .fontWeight(mode == .predictions ? .regular : (index == 1 ? .semibold : .regular))
                             .foregroundColor(Color(.label))
                             .frame(maxWidth: .infinity)
                             .frame(height: 36)

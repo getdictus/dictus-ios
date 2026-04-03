@@ -15,6 +15,7 @@ enum SuggestionMode {
     case idle
     case completions
     case corrections
+    case predictions  // After space: showing n-gram predicted next words
 }
 
 /// Tracks the last autocorrection so the user can undo it.
@@ -234,6 +235,72 @@ class SuggestionState: ObservableObject {
     /// Learn a word and notify the prediction engine (no-op for trie engine).
     func learnWord(_ word: String) {
         engine.injectUserWord(word)
+    }
+
+    // MARK: - N-gram Predictions
+
+    /// Updates suggestion bar with n-gram predicted next words.
+    /// Called after space insertion (handleSpace) and after prediction tap (chaining).
+    ///
+    /// WHY a separate method from update/updateAsync:
+    /// Predictions use a different data path: instead of extracting the current partial
+    /// word and running spell check, we extract the last 1-2 complete words and query
+    /// the n-gram engine. The result is displayed in .predictions mode, not .corrections.
+    func updatePredictions(context: String?) {
+        guard let context = context, !context.isEmpty else {
+            clear()
+            return
+        }
+
+        // Cancel any in-flight completion work
+        currentSuggestionWork?.cancel()
+
+        let work = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+
+            // Extract last 1-2 complete words from context
+            let words = self.extractLastWords(from: context, count: 2)
+            guard !words.isEmpty else {
+                DispatchQueue.main.async { self.clear() }
+                return
+            }
+
+            let predictions = self.engine.predictNextWords(after: words)
+
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                guard !(self.currentSuggestionWork?.isCancelled ?? true) else { return }
+
+                if predictions.isEmpty {
+                    // No predictions available -- stay idle (don't show stale completions)
+                    self.suggestions = []
+                    self.mode = .idle
+                } else {
+                    self.suggestions = Array(predictions.prefix(3))
+                    self.mode = .predictions
+                }
+            }
+        }
+
+        currentSuggestionWork = work
+        suggestionQueue.async(execute: work)
+    }
+
+    /// Extracts the last N complete words from text context.
+    /// Used for n-gram context: "Je suis en " -> ["suis", "en"]
+    ///
+    /// WHY not reuse extractLastWord: that returns the partial word being typed
+    /// (before cursor, no trailing space). For predictions, we need the complete
+    /// words before the space -- the n-gram engine looks up what comes AFTER these words.
+    private func extractLastWords(from text: String, count: Int) -> [String] {
+        var words: [String] = []
+        text.enumerateSubstrings(in: text.startIndex..., options: .byWords) { substring, _, _, _ in
+            if let word = substring {
+                words.append(word)
+            }
+        }
+        let start = max(0, words.count - count)
+        return Array(words[start...])
     }
 
     // MARK: - Private

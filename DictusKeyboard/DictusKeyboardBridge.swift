@@ -392,12 +392,15 @@ final class DictusKeyboardBridge: NSObject,
             lastInsertedCharacter = " "
         }
 
-        // After space, clear current word and update suggestions for new context.
+        // After space, clear current word and trigger n-gram predictions.
+        // WHY updatePredictions instead of updateAsync: After finishing a word,
+        // the user wants to see predicted next words (n-gram), not completions
+        // for a partial word (which doesn't exist yet after a space).
         // Also clear rejected words -- the user has moved on to a new word.
         suggestionState?.clear()
         suggestionState?.rejectedWords.removeAll()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
-        suggestionState?.updateAsync(context: context)
+        suggestionState?.updatePredictions(context: context)
 
         // After space (or period+space), recheck autocap.
         updateCapitalization()
@@ -413,6 +416,28 @@ final class DictusKeyboardBridge: NSObject,
         secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = "\n"
         suggestionState?.clear()
+        updateCapitalization()
+        updateAccentKeyDisplay()
+    }
+
+    /// Insert a predicted word and trigger chained prediction.
+    /// Called from KeyboardRootView when user taps a prediction in the suggestion bar.
+    ///
+    /// WHY separate from handleSpace: prediction tap must bypass autocorrect.
+    /// The predicted word is already correct (it comes from the n-gram model).
+    /// Going through handleSpace() would trigger autocorrect which might
+    /// "correct" a perfectly valid prediction.
+    func handlePredictionTap(word: String) {
+        let proxy = controller?.textDocumentProxy
+        proxy?.insertText(word + " ")
+        lastInsertedCharacter = " "
+        secondToLastInsertedCharacter = nil
+
+        // Chain predictions: query n-gram engine for what comes after this word
+        suggestionState?.lastAutocorrect = nil
+        let context = proxy?.documentContextBeforeInput
+        suggestionState?.updatePredictions(context: context)
+
         updateCapitalization()
         updateAccentKeyDisplay()
     }

@@ -39,6 +39,12 @@ struct KeyboardRootView: View {
     /// Using @ObservedObject here means we observe without owning -- the controller is the source of truth.
     @ObservedObject var suggestionState: SuggestionState
 
+    /// Reference to the keyboard bridge for prediction tap handling.
+    /// WHY needed: When the user taps a prediction, we need to call
+    /// bridge.handlePredictionTap() which inserts the word + space and chains
+    /// new predictions. The bridge owns textDocumentProxy access and state management.
+    var bridge: DictusKeyboardBridge?
+
     /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
     /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
     /// openURL environment action works because it goes through the responder
@@ -239,6 +245,13 @@ struct KeyboardRootView: View {
         guard index < suggestionState.suggestions.count else { return }
         let suggestion = suggestionState.suggestions[index]
         let proxy = controller.textDocumentProxy
+
+        // Prediction mode: insert word + trailing space, bypass autocorrect, chain predictions.
+        if suggestionState.mode == .predictions {
+            bridge?.handlePredictionTap(word: suggestion)
+            HapticFeedback.keyTapped()
+            return
+        }
 
         if suggestionState.mode == .corrections {
             // Tapping the original word (index 0) = user rejects the correction
