@@ -49,6 +49,9 @@ public:
     /// Word count from header.
     uint32_t wordCount() const;
 
+    /// Number of root-level children (top-level siblings in trie).
+    uint8_t rootChildCount() const;
+
     /// Total file size.
     size_t fileSize() const;
 

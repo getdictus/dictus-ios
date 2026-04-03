@@ -109,34 +109,27 @@ def compress_trie(node: TrieNode) -> int:
 
 # --- Binary serialization ---
 def serialize_trie(root: TrieNode, max_freq: int) -> tuple[bytes, int, int]:
-    """Serialize trie to binary DTRI format.
-    Returns (data_bytes, node_count, word_count)."""
-    # Phase 1: Compute serialized size for each node to determine offsets
-    # Phase 2: Write nodes in depth-first pre-order
+    """Serialize trie to binary DTRI format using BFS order.
+    Returns (data_bytes, node_count, word_count).
 
-    node_count = 0
-    word_count = 0
+    BFS ensures children of each parent are stored contiguously,
+    which the C++ reader requires for sibling scanning.
+    root_child_count is stored in header byte 20."""
+    from collections import deque
 
-    # We need two passes: first to assign offsets, then to write.
-    # Collect all nodes in DFS pre-order, with their children info.
-    nodes_order: list[tuple[TrieNode, int]] = []  # (node, placeholder for offset)
-
-    def collect_dfs(node: TrieNode) -> None:
-        nonlocal node_count, word_count
-        if node.chars:  # skip root (has no chars)
-            nodes_order.append((node, 0))
-            node_count += 1
-            if node.is_terminal:
-                word_count += 1
+    # Collect nodes in BFS order (siblings contiguous at every level)
+    nodes_order: list[TrieNode] = []
+    queue: deque[TrieNode] = deque()
+    for child in root.child_list():
+        queue.append(child)
+    while queue:
+        node = queue.popleft()
+        nodes_order.append(node)
         for child in node.child_list():
-            collect_dfs(child)
+            queue.append(child)
 
-    collect_dfs(root)
-
-    # Now compute offsets. We need to know the size of each node to compute
-    # absolute offsets for children_offset fields.
-    # Size of a node:
-    #   1 (flags) + [1 if multi_char] + N*2 (chars) + [2 if terminal] + [1+ptr_size if has children]
+    node_count = len(nodes_order)
+    word_count = sum(1 for n in nodes_order if n.is_terminal)
 
     def node_size(n: TrieNode, ptr_bytes: int) -> int:
         sz = 1  # flags
@@ -149,53 +142,54 @@ def serialize_trie(root: TrieNode, max_freq: int) -> tuple[bytes, int, int]:
             sz += 1 + ptr_bytes  # child_count + children_offset
         return sz
 
-    # We need to iterate to find stable pointer sizes.
-    # Start with 4-byte pointers, compute offsets, then shrink if possible.
-    offsets = {}
-    for attempt in range(3):
+    # Compute offsets with iterative pointer size refinement.
+    # Each iteration uses ONLY the previous iteration's offsets to determine
+    # pointer sizes, then builds a fresh offset map. This avoids mixing
+    # current- and previous-iteration values (BFS children come later in array).
+    offsets: dict[int, int] = {}
+    for attempt in range(10):
+        prev_offsets = dict(offsets)
+        offsets = {}
         offset = HEADER_SIZE
-        for i, (node, _) in enumerate(nodes_order):
+        for node in nodes_order:
             offsets[id(node)] = offset
-            # Determine ptr_bytes for this node
             if not node.children:
                 ptr_bytes = 0
+            elif attempt == 0:
+                ptr_bytes = 4
             else:
-                # Use current estimate (4 bytes max for first pass)
-                if attempt == 0:
-                    ptr_bytes = 4
+                first_child = node.child_list()[0]
+                child_off = prev_offsets.get(id(first_child), 0xFFFFFFFF)
+                if child_off <= 0xFFFF:
+                    ptr_bytes = 2
+                elif child_off <= 0xFFFFFF:
+                    ptr_bytes = 3
                 else:
-                    # Use actual offset of first child to determine ptr size
-                    first_child = node.child_list()[0]
-                    child_off = offsets.get(id(first_child), 0xFFFFFFFF)
-                    if child_off <= 0xFFFF:
-                        ptr_bytes = 2
-                    elif child_off <= 0xFFFFFF:
-                        ptr_bytes = 3
-                    else:
-                        ptr_bytes = 4
+                    ptr_bytes = 4
             offset += node_size(node, ptr_bytes)
+        if offsets == prev_offsets:
+            break
 
-    # Final write pass
+    # Write
     buf = bytearray()
-    # Header
+    root_child_count = len(root.children)
     buf.extend(MAGIC)
     buf.extend(struct.pack("<H", VERSION))
     buf.extend(struct.pack("<H", 0))  # flags
     buf.extend(struct.pack("<I", node_count))
     buf.extend(struct.pack("<I", word_count))
-    # Cap max_freq to uint32 range for header storage (log normalization still uses real value)
     header_max_freq = min(max_freq, 0xFFFFFFFF)
     buf.extend(struct.pack("<I", header_max_freq))
-    buf.extend(b"\x00" * 12)  # reserved
+    buf.extend(struct.pack("<B", root_child_count))
+    buf.extend(b"\x00" * 11)
     assert len(buf) == HEADER_SIZE
 
     log_max = math.log(1 + max_freq) if max_freq > 0 else 1.0
 
-    for node, _ in nodes_order:
+    for node in nodes_order:
         has_children = bool(node.children)
         multi_char = len(node.chars) > 1
 
-        # Determine ptr_bytes
         if not has_children:
             ptr_bytes = 0
         else:
@@ -208,9 +202,7 @@ def serialize_trie(root: TrieNode, max_freq: int) -> tuple[bytes, int, int]:
             else:
                 ptr_bytes = 4
 
-        # Encode ptr_bytes into flag bits 7-6: 00=0, 01=2, 10=3, 11=4
         ptr_code = {0: 0, 2: 1, 3: 2, 4: 3}[ptr_bytes]
-
         flags = (ptr_code << 6)
         if multi_char:
             flags |= 0x20
@@ -218,24 +210,17 @@ def serialize_trie(root: TrieNode, max_freq: int) -> tuple[bytes, int, int]:
             flags |= 0x10
 
         buf.append(flags)
-
         if multi_char:
             buf.append(len(node.chars))
-
         for cu in node.chars:
             buf.extend(struct.pack("<H", cu))
-
         if node.is_terminal:
-            # Log-normalized frequency to uint16
             norm = int(65535 * math.log(1 + node.frequency) / log_max) if node.frequency > 0 else 0
             norm = min(65535, max(0, norm))
             buf.extend(struct.pack("<H", norm))
-
         if has_children:
-            child_count = len(node.children)
-            buf.append(child_count)
-            first_child = node.child_list()[0]
-            child_off = offsets[id(first_child)]
+            buf.append(len(node.children))
+            child_off = offsets[id(node.child_list()[0])]
             if ptr_bytes == 2:
                 buf.extend(struct.pack("<H", child_off))
             elif ptr_bytes == 3:

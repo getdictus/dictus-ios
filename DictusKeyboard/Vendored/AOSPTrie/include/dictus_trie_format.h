@@ -30,7 +30,8 @@ struct DictusHeader {
     uint32_t node_count;
     uint32_t word_count;
     uint32_t max_freq;
-    uint8_t reserved[12];
+    uint8_t root_child_count; // number of top-level trie siblings
+    uint8_t reserved[11];
 };
 #pragma pack(pop)
 

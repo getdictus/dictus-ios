@@ -96,6 +96,11 @@ uint32_t Trie::wordCount() const {
     return reinterpret_cast<const DictusHeader*>(data_)->word_count;
 }
 
+uint8_t Trie::rootChildCount() const {
+    if (!data_) return 0;
+    return reinterpret_cast<const DictusHeader*>(data_)->root_child_count;
+}
+
 size_t Trie::fileSize() const {
     return size_;
 }
@@ -154,51 +159,19 @@ TrieNode Trie::readNode(uint32_t pos) const {
 uint16_t Trie::traverse(const uint16_t* chars, int len) const {
     if (!data_ || len <= 0) return 0;
 
-    const auto* hdr = reinterpret_cast<const DictusHeader*>(data_);
-
-    // The root node's children start at HEADER_SIZE.
-    // Read the first set of sibling nodes.
-    // The root is virtual (no stored node) -- its children are the top-level nodes.
-    // We need to know how many top-level siblings there are.
-    // Convention: the first node at HEADER_SIZE is the first top-level child.
-    // We iterate through siblings by reading each node and advancing past it.
-
-    // Actually, looking at the Python builder, the root TrieNode has no chars
-    // and its children are serialized at HEADER_SIZE. The children are stored
-    // contiguously. We need to scan through them.
-
-    // For traversal, we read children at a given offset with a given count.
-    // The root's children: we need to know how many there are.
-    // The builder doesn't store the root explicitly, so we need another approach.
-    // Let's read the root's children by scanning from HEADER_SIZE.
-
-    // Wait -- the builder serializes children of root as top-level nodes, but
-    // doesn't store a root node with child_count. We need to figure out
-    // child_count of root. The builder uses root.child_list() which is
-    // root.children sorted by first char. The number of root children
-    // equals the number of distinct first characters.
-    // Since we don't store this count, we scan until we run out of file
-    // or find a match. But for efficiency, we could store root child count.
-
-    // Pragmatic solution: scan siblings at each level by reading nodes
-    // sequentially. For root level, scan until offset exceeds file size.
-    // For non-root, use child_count from parent.
-
-    // Actually, let's reconsider the format. Each node with children stores
-    // children_offset and child_count. The root is not stored, so we need
-    // to infer root's child count. The simplest approach: scan top-level
-    // siblings until we find a match or exhaust them.
+    // Root is virtual (not stored). Root child count is in header byte 20.
+    // Children at each level are stored contiguously in the DFS layout.
 
     int inputPos = 0;
     uint32_t searchOffset = HEADER_SIZE;
-    int siblingCount = -1; // -1 means root level (unknown count, scan all)
+    int siblingCount = static_cast<int>(rootChildCount());
 
     while (inputPos < len) {
         bool found = false;
         uint32_t offset = searchOffset;
         int siblingsChecked = 0;
 
-        while (offset < size_ && (siblingCount < 0 || siblingsChecked < siblingCount)) {
+        while (offset < size_ && siblingsChecked < siblingCount) {
             TrieNode node = readNode(offset);
             if (node.charCount == 0) break; // invalid
 

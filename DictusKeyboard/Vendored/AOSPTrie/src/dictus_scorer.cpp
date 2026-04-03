@@ -221,9 +221,10 @@ std::vector<Candidate> Scorer::correct(const Trie& trie,
 
     uint16_t wordBuf[128];
 
-    // Root children start at HEADER_SIZE. We don't know count, scan all.
+    // Root children start at HEADER_SIZE with known count from header.
     uint32_t offset = HEADER_SIZE;
-    while (offset < trie.fileSize()) {
+    int rootCount = static_cast<int>(trie.rootChildCount());
+    for (int ri = 0; ri < rootCount && offset < trie.fileSize(); ri++) {
         TrieNode node = trie.readNode(offset);
         if (node.charCount == 0) break;
 
