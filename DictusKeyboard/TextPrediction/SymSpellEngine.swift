@@ -50,14 +50,33 @@ final class SymSpellEngine {
     /// For comparison: "de" = 2.9M, "bonjour" = 15K, median = 137.
     private static let userWordFrequency = 15000
 
+    /// Maximum number of words loaded from the frequency dictionary.
+    /// 20K covers all common words. Beyond that, words are extremely rare
+    /// and not worth the memory cost. Each word generates ~7 delete entries
+    /// at edit distance 1. Memory: 20K words ≈ 13 MiB vs 40K ≈ 90 MiB.
+    private static let maxDictionaryWords = 20000
+
     /// Loads a frequency dictionary for the given language.
     /// Expected JSON format: {"word": count, ...} where count is Int (higher = more common).
     /// Replaces any previously loaded dictionary.
     ///
     /// WHY async: Prevents blocking the main thread during keyboard init.
     /// The keyboard appears instantly; spell correction becomes available ~0.5-1s later.
+    ///
+    /// MEMORY OPTIMIZATIONS:
+    /// 1. maxEditDistance=1 (not 2): catches 80%+ of typos, uses ~4x less memory.
+    ///    Most typos are single-character errors. Double-typos are rare.
+    /// 2. Top 20K words only: rare words beyond 20K aren't worth the memory.
+    /// 3. Old dictionary is freed before new one is created on language switch,
+    ///    preventing both dictionaries from coexisting in memory.
     func load(language: String, bundle: Bundle = .main) {
         isLoading = true
+
+        // Free old dictionary immediately to avoid two dictionaries in memory
+        // during language switch (was causing 159 MiB peak).
+        symSpell = nil
+        wordCount = 0
+
         loadQueue.async { [weak self] in
             guard let self = self else { return }
 
@@ -66,21 +85,25 @@ final class SymSpellEngine {
                   let dict = try? JSONDecoder().decode([String: Int].self, from: data) else {
                 print("[SymSpellEngine] Failed to load \(language)_frequency.json")
                 DispatchQueue.main.async {
-                    self.symSpell = nil
-                    self.wordCount = 0
                     self.isLoading = false
                 }
                 return
             }
 
-            let ss = SymSpell(maxDictionaryEditDistance: 2, prefixLength: 7)
-            for (word, count) in dict {
+            // Take only the top N most frequent words to stay within memory budget.
+            // Sort by frequency descending, take top maxDictionaryWords.
+            let topWords = dict.sorted { $0.value > $1.value }
+                .prefix(Self.maxDictionaryWords)
+
+            // maxEditDistance=1: single-character errors (insertion, deletion,
+            // substitution, transposition). Covers most real typos.
+            // Memory: ~7 deletes/word vs ~28 at distance 2 → 4x reduction.
+            let ss = SymSpell(maxDictionaryEditDistance: 1, prefixLength: 7)
+            for (word, count) in topWords {
                 ss.createDictionaryEntry(key: word.lowercased(), count: max(1, count))
             }
 
-            // Inject user-learned words into SymSpell so they're treated as known words.
-            // High frequency (999999) ensures learned words are preferred over similar
-            // dictionary words — if the user taught the keyboard a word, they mean it.
+            // Inject user-learned words so they're treated as known words.
             let userDict = UserDictionary.shared
             userDict.reload()
             let userWords = userDict.allLearnedWords
@@ -88,11 +111,13 @@ final class SymSpellEngine {
                 ss.createDictionaryEntry(key: word.lowercased(), count: Self.userWordFrequency)
             }
 
+            let loadedCount = topWords.count
+
             DispatchQueue.main.async {
                 self.symSpell = ss
-                self.wordCount = dict.count + userWords.count
+                self.wordCount = loadedCount + userWords.count
                 self.isLoading = false
-                print("[SymSpellEngine] Loaded \(dict.count) words + \(userWords.count) user words for \(language)")
+                print("[SymSpellEngine] Loaded \(loadedCount)/\(dict.count) words + \(userWords.count) user words for \(language)")
             }
         }
     }
@@ -136,7 +161,7 @@ final class SymSpellEngine {
         // Skip generic correction for very short words (too ambiguous)
         guard wordToCheck.count >= Self.minCorrectionLength else { return nil }
 
-        let results = ss.lookup(wordToCheck, verbosity: .closest, maxEditDistance: 2)
+        let results = ss.lookup(wordToCheck, verbosity: .closest, maxEditDistance: 1)
         guard !results.isEmpty else { return nil }
 
         // If the top result matches the input, the word is correctly spelled
