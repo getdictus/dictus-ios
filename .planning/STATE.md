@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
-status: in-progress
-stopped_at: Completed 25-01-PLAN.md
-last_updated: "2026-04-03T13:06:28Z"
-last_activity: 2026-04-03 — Completed 25-01-PLAN.md (n-gram data pipeline and C++ engine)
+status: executing
+stopped_at: Completed 25-02-PLAN.md
+last_updated: "2026-04-03T13:16:40.440Z"
+last_activity: 2026-04-03 — Completed 25-02-PLAN.md (Swift integration and prediction pipeline)
 progress:
-  total_phases: 7
+  total_phases: 6
   completed_phases: 4
   total_plans: 11
-  completed_plans: 9
-  percent: 82
+  completed_plans: 10
+  percent: 91
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 ## Current Position
 
 Phase: 25 of 26 (N-gram Next-Word Prediction)
-Plan: 1 of 3 in current phase (COMPLETE)
+Plan: 2 of 3 in current phase (COMPLETE)
 Status: In Progress
-Last activity: 2026-04-03 — Completed 25-01-PLAN.md (n-gram data pipeline and C++ engine)
+Last activity: 2026-04-03 — Completed 25-02-PLAN.md (Swift integration and prediction pipeline)
 
-Progress: [████████░░] 82% (v1.4 milestone: 9/11 plans)
+Progress: [█████████░] 91% (v1.4 milestone: 10/11 plans)
 
 ## Performance Metrics
 
@@ -72,6 +72,8 @@ Recent decisions for v1.4:
 - [Phase 25]: Index-based binary search: build (hash, pointer) vector at load time for O(log n) lookup on variable-length entries
 - [Phase 25]: Google Books Ngram data from orgtre/google-books-ngram-frequency repo (ngrams/ subdirectory)
 - [Phase 25]: Stupid Backoff with lambda=0.4: trigram results + discounted bigram fallback
+- [Phase 25]: Swift ObjC bridge auto-renames predictAfterWord to predict(afterWord:) -- use generated names
+- [Phase 25]: Bridge reference passed to KeyboardRootView for prediction tap access
 
 ### Pending Todos
 
@@ -90,9 +92,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-03T13:06:28Z
-Stopped at: Completed 25-01-PLAN.md
-Resume file: .planning/phases/25-n-gram-next-word-prediction/25-02-PLAN.md
+Last session: 2026-04-03T13:16:40.438Z
+Stopped at: Completed 25-02-PLAN.md
+Resume file: .planning/phases/25-n-gram-next-word-prediction/25-03-PLAN.md
 
 ---
 *State initialized: 2026-03-04*
