@@ -385,6 +385,10 @@ final class DictusKeyboardBridge: NSObject,
             controller?.textDocumentProxy.insertText(" ")
             lastInsertedCharacter = " "
         } else {
+            // Auto-full-stop changed the text (". " instead of "  ").
+            // Invalidate any pending autocorrect undo — the text no longer matches
+            // what the undo expects, so backspace should not try to restore.
+            suggestionState?.lastAutocorrect = nil
             lastInsertedCharacter = " "
         }
 
