@@ -257,11 +257,11 @@ Plans:
   2. If auto-return is viable: user returns to their source app automatically after cold start dictation completes
   3. If auto-return is not viable: swipe-back overlay shows improved guidance (e.g. app name if sourceApplication returns it)
   4. Critical bugs reported by public beta testers are triaged with fixes shipped or issues filed
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 26-01: Cold start auto-return investigation (2h timebox) + overlay polish
-- [ ] 26-02: Beta feedback triage and fixes
+- [ ] 26-01-PLAN.md — sourceApplication investigation (2h timebox), ADR documentation, GitHub issue #23 update (COLD-01, COLD-02)
+- [ ] 26-02-PLAN.md — Wispr Flow-style overlay redesign with gesture teaching + localization + beta bug triage (COLD-03, BETA-01)
 
 ## Progress
 
