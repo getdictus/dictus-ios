@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: executing
-stopped_at: Completed 25-02-PLAN.md
-last_updated: "2026-04-03T13:16:40.440Z"
-last_activity: 2026-04-03 — Completed 25-02-PLAN.md (Swift integration and prediction pipeline)
+stopped_at: Completed 25-03-PLAN.md
+last_updated: "2026-04-05T16:24:04.518Z"
+last_activity: 2026-04-05 — Completed 25-03-PLAN.md (context-boosted corrections + device verification)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
   percent: 91
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 25 in progress -- N-gram next-word prediction (plan 1/3 complete)
+**Current focus:** Phase 25 COMPLETE -- N-gram next-word prediction (all 3 plans done). Phase 26 next.
 
 ## Current Position
 
-Phase: 25 of 26 (N-gram Next-Word Prediction)
-Plan: 2 of 3 in current phase (COMPLETE)
-Status: In Progress
-Last activity: 2026-04-03 — Completed 25-02-PLAN.md (Swift integration and prediction pipeline)
+Phase: 25 of 26 (N-gram Next-Word Prediction) -- COMPLETE
+Plan: 3 of 3 in current phase (COMPLETE)
+Status: Phase Complete
+Last activity: 2026-04-05 — Completed 25-03-PLAN.md (context-boosted corrections + device verification)
 
-Progress: [█████████░] 91% (v1.4 milestone: 10/11 plans)
+Progress: [██████████] 100% (v1.4 milestone: 11/11 plans)
 
 ## Performance Metrics
 
@@ -74,6 +74,9 @@ Recent decisions for v1.4:
 - [Phase 25]: Stupid Backoff with lambda=0.4: trigram results + discounted bigram fallback
 - [Phase 25]: Swift ObjC bridge auto-renames predictAfterWord to predict(afterWord:) -- use generated names
 - [Phase 25]: Bridge reference passed to KeyboardRootView for prediction tap access
+- [Phase 25]: Prediction-based context boost: query n-gram predictions then check edit distance 1 to typed word
+- [Phase 25]: Short-word exclusion: words < 3 chars skip context boost to prevent false corrections on a/un/le
+- [Phase 25]: Combined OpenSubtitles + Google Books n-gram data for better spoken French coverage
 
 ### Pending Todos
 
@@ -92,9 +95,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-03T13:16:40.438Z
-Stopped at: Completed 25-02-PLAN.md
-Resume file: .planning/phases/25-n-gram-next-word-prediction/25-03-PLAN.md
+Last session: 2026-04-05T16:24:04.516Z
+Stopped at: Completed 25-03-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*
