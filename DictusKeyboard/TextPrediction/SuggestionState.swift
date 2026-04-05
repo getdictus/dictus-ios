@@ -97,9 +97,12 @@ class SuggestionState: ObservableObject {
             return
         }
 
-        // If text ends with space or newline, no partial word to complete
+        // If text ends with space or newline, no partial word to complete.
+        // Don't clear predictions — they were set by handleSpace()/updatePredictions().
         if let lastChar = context.last, lastChar.isWhitespace || lastChar.isNewline {
-            clear()
+            if mode != .predictions {
+                clear()
+            }
             return
         }
 
@@ -156,9 +159,14 @@ class SuggestionState: ObservableObject {
             return
         }
 
-        // If text ends with whitespace, no partial word
+        // If text ends with whitespace, no partial word to complete.
+        // BUT don't clear if we're showing predictions — handleSpace() already
+        // triggered updatePredictions(), and clearing here would race with the
+        // async prediction result. Predictions are the correct state after space.
         if let lastChar = context.last, lastChar.isWhitespace || lastChar.isNewline {
-            clear()
+            if mode != .predictions {
+                clear()
+            }
             return
         }
 
@@ -278,6 +286,7 @@ class SuggestionState: ObservableObject {
             }
 
             let predictions = self.engine.predictNextWords(after: words)
+            print("[SuggestionState] updatePredictions context=\(words) results=\(predictions)")
 
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }

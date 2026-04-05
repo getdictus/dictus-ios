@@ -165,7 +165,14 @@ final class AOSPTrieEngine {
             return
         }
         let success = bridge.loadNgrams(atPath: path)
-        print("[AOSPTrieEngine] N-grams \(language): \(success ? "loaded" : "failed")")
+        // Log file size to confirm the correct binary is loaded (769 bigrams = 38 KiB old, 1589 = 58 KiB new)
+        let fileSize = (try? FileManager.default.attributesOfItem(atPath: path)[.size] as? Int) ?? 0
+        print("[AOSPTrieEngine] N-grams \(language): \(success ? "loaded" : "failed") (\(fileSize / 1024) KiB)")
+
+        // Write diagnostic to App Group so app logs can confirm n-gram loading
+        if let defaults = UserDefaults(suiteName: "group.solutions.pivi.dictus") {
+            defaults.set("lang=\(language) ok=\(success) size=\(fileSize)", forKey: "ngramDiagnostic")
+        }
     }
 
     /// Predict next words given 1-2 previous words.

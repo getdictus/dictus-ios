@@ -34,6 +34,11 @@ struct DictusApp: App {
             "AppGroup diagnostic: healthy=\(result.isHealthy, privacy: .public)"
         )
 
+        // Read n-gram diagnostic written by keyboard extension
+        if let ngramDiag = UserDefaults(suiteName: AppGroup.identifier)?.string(forKey: "ngramDiagnostic") {
+            DictusLogger.app.info("ngramDiagnostic: \(ngramDiag, privacy: .public)")
+        }
+
         // Persist language default so TranscriptionService always reads "fr"
         // even before user visits Settings. @AppStorage defaults are in-memory only
         // and never written to UserDefaults until the Picker is interacted with.
