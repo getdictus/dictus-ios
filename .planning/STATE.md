@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
-status: completed
-stopped_at: Phase 26 context gathered
-last_updated: "2026-04-05T16:50:18.457Z"
-last_activity: 2026-04-05 — Completed 25-03-PLAN.md (context-boosted corrections + device verification)
+status: executing
+stopped_at: Completed 26-01-PLAN.md
+last_updated: "2026-04-05T20:49:31.169Z"
+last_activity: 2026-04-05 -- Completed 26-01-PLAN.md (cold start auto-return investigation + ADR)
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 11
-  completed_plans: 11
-  percent: 100
+  total_plans: 13
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 25 COMPLETE -- N-gram next-word prediction (all 3 plans done). Phase 26 next.
+**Current focus:** Phase 26 -- Cold Start & Beta Polish (auto-return investigation complete, overlay redesign next).
 
 ## Current Position
 
-Phase: 25 of 26 (N-gram Next-Word Prediction) -- COMPLETE
-Plan: 3 of 3 in current phase (COMPLETE)
-Status: Phase Complete
-Last activity: 2026-04-05 — Completed 25-03-PLAN.md (context-boosted corrections + device verification)
+Phase: 26 of 26 (Cold Start & Beta Polish)
+Plan: 1 of 2 in current phase (COMPLETE)
+Status: In Progress
+Last activity: 2026-04-05 -- Completed 26-01-PLAN.md (cold start auto-return investigation + ADR)
 
-Progress: [██████████] 100% (v1.4 milestone: 11/11 plans)
+Progress: [█████████░] 92% (v1.4 milestone: 12/13 plans)
 
 ## Performance Metrics
 
@@ -77,6 +77,7 @@ Recent decisions for v1.4:
 - [Phase 25]: Prediction-based context boost: query n-gram predictions then check edit distance 1 to typed word
 - [Phase 25]: Short-word exclusion: words < 3 chars skip context boost to prevent false corrections on a/un/le
 - [Phase 25]: Combined OpenSubtitles + Google Books n-gram data for better spoken French coverage
+- [Phase 26]: Auto-return REJECTED: all 5 approaches fail, no public iOS API for keyboard host detection
 
 ### Pending Todos
 
@@ -95,9 +96,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-05T16:50:18.449Z
-Stopped at: Phase 26 context gathered
-Resume file: .planning/phases/26-cold-start-beta-polish/26-CONTEXT.md
+Last session: 2026-04-05T20:49:31.167Z
+Stopped at: Completed 26-01-PLAN.md
+Resume file: None
 
 ---
 *State initialized: 2026-03-04*

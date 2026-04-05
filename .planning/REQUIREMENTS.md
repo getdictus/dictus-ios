@@ -24,8 +24,8 @@ Requirements for v1.4 milestone. Each maps to roadmap phases.
 
 ### Cold Start UX
 
-- [ ] **COLD-01**: Time-boxed investigation of sourceApplication for auto-return (2h max)
-- [ ] **COLD-02**: If auto-return viable, user returns to source app automatically after cold start dictation
+- [x] **COLD-01**: Time-boxed investigation of sourceApplication for auto-return (2h max)
+- [x] **COLD-02**: If auto-return viable, user returns to source app automatically after cold start dictation
 - [ ] **COLD-03**: If auto-return not viable, swipe-back overlay UX is polished with improved guidance
 
 ### Beta Feedback
@@ -95,8 +95,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRED-04 | Phase 25 | Complete |
 | PRED-05 | Phase 25 | Complete |
 | PRED-06 | Phase 25 | Complete |
-| COLD-01 | Phase 26 | Pending |
-| COLD-02 | Phase 26 | Pending |
+| COLD-01 | Phase 26 | Complete |
+| COLD-02 | Phase 26 | Complete |
 | COLD-03 | Phase 26 | Pending |
 | BETA-01 | Phase 26 | Pending |
 
