@@ -376,7 +376,12 @@ final class DictusKeyboardBridge: NSObject,
                 correctedWord: result.correction,
                 insertedSpace: true
             )
+            // Trigger n-gram predictions after autocorrection too.
+            // The corrected word + space is now in the proxy — predict what comes next.
             state.clear()
+            state.rejectedWords.removeAll()
+            let correctedContext = controller?.textDocumentProxy.documentContextBeforeInput
+            state.updatePredictions(context: correctedContext)
             updateCapitalization()
             updateAccentKeyDisplay()
             return
