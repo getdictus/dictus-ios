@@ -1,6 +1,7 @@
 // DictusApp/Views/SwipeBackOverlayView.swift
 // Full-screen Wispr Flow-style overlay teaching the swipe-back gesture during cold start.
 import SwiftUI
+import DictusCore
 
 /// Full-screen overlay shown when the app is opened from the keyboard during cold start.
 ///
