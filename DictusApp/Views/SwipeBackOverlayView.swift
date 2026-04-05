@@ -1,19 +1,20 @@
 // DictusApp/Views/SwipeBackOverlayView.swift
-// Full-screen branded overlay guiding users to swipe back to the keyboard after cold start.
+// Full-screen Wispr Flow-style overlay teaching the swipe-back gesture during cold start.
 import SwiftUI
 
 /// Full-screen overlay shown when the app is opened from the keyboard during cold start.
 ///
-/// WHY a separate view instead of inline code in MainTabView:
-/// This view has its own animation state, brand styling, and localized text via String Catalog.
-/// Keeping it in its own file follows the "one file = one responsibility" convention
-/// and makes it easy to preview in isolation.
+/// WHY Wispr Flow-style redesign (Phase 26):
+/// A real user tester did not know the iOS swipe-back gesture existed. The overlay must
+/// TEACH the gesture visually with an iPhone mockup, animated swipe circle, and empathetic
+/// localized text -- not just mention it in words.
 ///
-/// WHY full-screen replacement (not overlay on top of tabs):
-/// User decision from CONTEXT.md -- when the keyboard opens the app for cold start,
-/// the user should NOT see the normal app UI. They should see a clean, branded screen
-/// with clear instructions on how to swipe back to the keyboard.
+/// WHY no parameters:
+/// MainTabView calls `SwipeBackOverlayView()` with no arguments. Recording happens in
+/// DictationCoordinator -- this view is purely visual.
 struct SwipeBackOverlayView: View {
+    @State private var isAnimating = false
+
     var body: some View {
         ZStack {
             // Brand gradient background matching the app icon gradient
@@ -24,116 +25,140 @@ struct SwipeBackOverlayView: View {
             )
             .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                Spacer()
-
-                // Animated iPhone outline with swipe gesture
-                // WHY 120×260: matches iPhone 15 Pro proportions (~9:19.5 aspect ratio).
-                // 200×300 was too wide and looked like an iPad.
-                SwipeAnimationView()
-                    .frame(width: 120, height: 260)
-
-                // Primary instruction text
-                Text("Swipe back to the keyboard")
+            VStack(spacing: 0) {
+                // Title at top
+                Text("Dictation in progress")
                     .font(.title2.weight(.semibold))
                     .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-
-                // Secondary detail text
-                Text("Swipe right on the bottom of your iPhone")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.6))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
+                    .padding(.top, 60)
 
                 Spacer()
+
+                // iPhone mockup with waveform and swipe animation
+                IPhoneMockupView(isAnimating: isAnimating)
+                    .frame(width: 180, height: 390)
+
+                // Empathetic explanation text below mockup
+                Text("We'd love to skip this step, but iOS requires switching apps to activate the microphone.")
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.7))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .padding(.top, 28)
+
+                Spacer()
+
+                // Bottom instruction pinned at bottom
+                Text("Swipe right at the bottom of your screen")
+                    .font(.callout.weight(.medium))
+                    .foregroundColor(.dictusAccent)
+                    .padding(.bottom, 40)
+            }
+        }
+        .onAppear {
+            withAnimation(
+                .easeInOut(duration: 1.2)
+                .repeatForever(autoreverses: false)
+            ) {
+                isAnimating = true
             }
         }
     }
 }
 
-// MARK: - Swipe Animation View
+// MARK: - iPhone Mockup View
 
-/// Animated iPhone outline with a sliding indicator showing the swipe-right gesture.
+/// Wispr Flow-style iPhone mockup with simplified waveform bars and swipe gesture animation.
 ///
-/// WHY pure SwiftUI animation instead of Lottie:
-/// User decision from CONTEXT.md -- no external animation libraries. SwiftUI's built-in
-/// animation system provides smooth, hardware-accelerated motion without adding a dependency.
+/// WHY simplified bars instead of real WaveformCanvasView:
+/// The mockup is only 180pt wide -- real waveform data would be too small to be useful
+/// and would add unnecessary memory/complexity. Animated bars communicate "app is listening"
+/// without the overhead.
 ///
-/// The animation shows:
-/// 1. A simplified iPhone outline (rounded rectangle with correct aspect ratio)
-/// 2. A home indicator bar at the bottom
-/// 3. An accent-colored circle that slides right repeatedly, simulating the swipe gesture
-/// 4. A fading trail behind the circle to reinforce the swipe direction
-private struct SwipeAnimationView: View {
-    /// Controls the repeating swipe animation.
-    /// WHY @State with onAppear toggle:
-    /// SwiftUI animations need a state change to trigger. Setting this to true in onAppear
-    /// starts the repeating animation immediately when the view appears.
-    @State private var isAnimating = false
+/// WHY fixed bar heights instead of CGFloat.random:
+/// SwiftUI recalculates random values on every frame, causing visual jitter.
+/// Fixed constants give predictable, smooth animation between idle and active states.
+private struct IPhoneMockupView: View {
+    var isAnimating: Bool
+
+    // Fixed bar heights to avoid CGFloat.random jitter in view body
+    private let barHeightsIdle: [CGFloat] = [8, 14, 6, 12, 10]
+    private let barHeightsActive: [CGFloat] = [28, 38, 16, 34, 22]
 
     var body: some View {
         ZStack {
-            // iPhone outline — narrower proportions matching real iPhone 15 Pro
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.white.opacity(0.3), lineWidth: 2)
+            // Device outline -- continuous corner style matches real iPhone
+            RoundedRectangle(cornerRadius: 36, style: .continuous)
+                .stroke(Color.white.opacity(0.3), lineWidth: 2.5)
 
-            // Dynamic Island capsule at the top of the mockup
-            // WHY these proportions: real iPhone 15 Pro Dynamic Island is ~32%
-            // of screen width. Scaled to 120pt mockup = ~38pt wide, ~11pt tall.
+            // Dynamic Island capsule at the top
             VStack {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color.white.opacity(0.25))
-                    .frame(width: 38, height: 11)
-                    .padding(.top, 14)
+                    .frame(width: 50, height: 14)
+                    .padding(.top, 18)
                 Spacer()
             }
 
-            // Home indicator bar at the bottom
-            VStack {
-                Spacer()
-                RoundedRectangle(cornerRadius: 2.5)
-                    .fill(Color.white.opacity(0.4))
-                    .frame(width: 50, height: 5)
-                    .padding(.bottom, 12)
-            }
-
-            // Swipe gesture animation area (positioned at bottom)
-            VStack {
-                Spacer()
-
-                ZStack {
-                    // Trail: fading chevrons behind the moving circle
-                    ForEach(0..<2, id: \.self) { index in
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(Color.dictusAccent.opacity(0.3 - Double(index) * 0.1))
-                            .offset(x: isAnimating
-                                    ? CGFloat(15 - index * 12)
-                                    : CGFloat(-30 - index * 12))
+            // Inner content: simplified waveform + "Listening..." label
+            VStack(spacing: 12) {
+                // Simplified waveform bars
+                HStack(spacing: 4) {
+                    ForEach(0..<5, id: \.self) { i in
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(Color.dictusAccent)
+                            .frame(
+                                width: 4,
+                                height: isAnimating
+                                    ? barHeightsActive[i]
+                                    : barHeightsIdle[i]
+                            )
                     }
+                }
+                .animation(
+                    .easeInOut(duration: 0.6).repeatForever(autoreverses: true),
+                    value: isAnimating
+                )
 
-                    // Moving accent circle (thumb indicator)
+                Text("Listening...")
+                    .font(.caption2)
+                    .foregroundColor(.white.opacity(0.7))
+            }
+
+            // Home indicator + swipe animation at bottom
+            VStack {
+                Spacer()
+
+                // Swipe gesture area
+                ZStack {
+                    // Animated accent circle sliding right
                     Circle()
                         .fill(Color.dictusAccent)
-                        .frame(width: 24, height: 24)
-                        .shadow(color: Color.dictusAccent.opacity(0.5), radius: 6)
-                        .offset(x: isAnimating ? 30 : -20)
+                        .frame(width: 28, height: 28)
+                        .shadow(color: Color.dictusAccent.opacity(0.5), radius: 8)
+                        .offset(x: isAnimating ? 50 : -30)
+
+                    // Chevron trail fading behind the circle
+                    ForEach(0..<2, id: \.self) { i in
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(
+                                Color.dictusAccent.opacity(0.3 - Double(i) * 0.1)
+                            )
+                            .offset(
+                                x: isAnimating
+                                    ? CGFloat(25 - i * 14)
+                                    : CGFloat(-35 - i * 14)
+                            )
+                    }
                 }
-                .padding(.bottom, 30)
-            }
-        }
-        .onAppear {
-            // WHY withAnimation + repeatForever:
-            // Triggers a smooth, continuously repeating animation.
-            // autoreverses: false makes the circle jump back to start
-            // after reaching the end, creating a clear "swipe right" motion.
-            withAnimation(
-                .easeInOut(duration: 0.8)
-                .repeatForever(autoreverses: false)
-            ) {
-                isAnimating = true
+                .padding(.bottom, 8)
+
+                // Home indicator bar
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color.white.opacity(0.4))
+                    .frame(width: 60, height: 5)
+                    .padding(.bottom, 14)
             }
         }
     }
