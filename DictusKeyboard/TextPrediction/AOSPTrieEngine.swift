@@ -209,6 +209,15 @@ final class AOSPTrieEngine {
         return bridge.bigramScore(forWord: word, afterWord: prevWord)
     }
 
+    /// Returns nearby words (edit distance candidates) for a word, excluding the word itself.
+    /// Unlike spellCheck, this returns results even for correctly-spelled words.
+    /// Used by n-gram context boosting to find alternatives for valid-but-rare words
+    /// (e.g., "sui" is valid but "suis" is much more likely after "je").
+    func nearbyWords(for word: String) -> [String] {
+        guard bridge.isLoaded(), !word.isEmpty else { return [] }
+        return bridge.nearbyWords(word, maxEditDistance: 2.0, maxResults: 5) as? [String] ?? []
+    }
+
     /// Whether n-gram data is loaded and ready for predictions.
     var ngramsLoaded: Bool { bridge.ngramsLoaded() }
 }

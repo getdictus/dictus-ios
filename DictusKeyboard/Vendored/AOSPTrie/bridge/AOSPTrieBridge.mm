@@ -103,6 +103,29 @@ static int convertString(NSString *str, uint16_t *buffer, int bufferSize) {
     return result;
 }
 
+- (NSArray<NSString *> *)nearbyWords:(NSString *)word maxEditDistance:(float)maxDist maxResults:(NSUInteger)maxResults {
+    if (!_loaded || [word length] == 0) return @[];
+
+    uint16_t inputBuf[256];
+    int inputLen = convertString(word, inputBuf, 256);
+    if (inputLen == 0) return @[];
+
+    std::vector<dictus::Candidate> candidates = _scorer.correct(
+        _trie, inputBuf, inputLen, maxDist, (int)maxResults + 1
+    );
+
+    NSMutableArray<NSString *> *result = [NSMutableArray arrayWithCapacity:candidates.size()];
+    for (const auto& c : candidates) {
+        NSString *w = [NSString stringWithUTF8String:c.word];
+        // Skip exact match — caller already knows the input word
+        if (![w isEqualToString:word]) {
+            [result addObject:w];
+        }
+        if ([result count] >= maxResults) break;
+    }
+    return [result copy];
+}
+
 - (BOOL)wordExists:(NSString *)word {
     if (!_loaded || [word length] == 0) return NO;
 

@@ -23,6 +23,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// Returns AOSPTrieResult with best correction, up to 2 alternatives, and score.
 - (nullable AOSPTrieResult *)spellCheck:(NSString *)word maxEditDistance:(float)maxDist;
 
+/// Returns nearby words (edit distance candidates) excluding the input word itself.
+/// Unlike spellCheck, this does NOT return nil for correctly-spelled words.
+/// Used by n-gram context boosting to find alternatives for valid-but-rare words.
+- (NSArray<NSString *> *)nearbyWords:(NSString *)word maxEditDistance:(float)maxDist maxResults:(NSUInteger)maxResults;
+
 /// Check if word exists in dictionary.
 - (BOOL)wordExists:(NSString *)word;
 

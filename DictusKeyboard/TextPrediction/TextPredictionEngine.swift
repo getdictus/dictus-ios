@@ -143,38 +143,80 @@ class TextPredictionEngine {
     /// from the bigram "je suis", making it the clear winner.
     func spellCheck(_ word: String, previousWord: String?) -> (correction: String, alternatives: [String])? {
         // First, get standard spell check result (existing logic)
-        guard let result = spellCheck(word) else { return nil }
+        let result = spellCheck(word)
 
         // If no previous word context or n-grams not loaded, return standard result
         guard let prev = previousWord, !prev.isEmpty, aospTrieEngine.ngramsLoaded else {
             return result
         }
 
-        // Collect all candidates: correction + alternatives
-        let candidates = [result.correction] + result.alternatives
+        // If standard spell check found corrections, rerank with n-gram boost
+        if let result = result {
+            let candidates = [result.correction] + result.alternatives
 
-        // Score each candidate with n-gram context boost
-        let scored: [(String, UInt16)] = candidates.map { candidate in
-            let lowerCandidate = candidate.lowercased()
-            // Extract word part after apostrophe if present (matching spellCheck behavior)
-            let wordPart: String
-            if let apoIdx = lowerCandidate.lastIndex(of: "'") {
-                wordPart = String(lowerCandidate[lowerCandidate.index(after: apoIdx)...])
-            } else {
-                wordPart = lowerCandidate
+            let scored: [(String, UInt16)] = candidates.map { candidate in
+                let lowerCandidate = candidate.lowercased()
+                let wordPart: String
+                if let apoIdx = lowerCandidate.lastIndex(of: "'") {
+                    wordPart = String(lowerCandidate[lowerCandidate.index(after: apoIdx)...])
+                } else {
+                    wordPart = lowerCandidate
+                }
+                let ngramScore = aospTrieEngine.bigramScore(for: wordPart, after: prev.lowercased())
+                return (candidate, ngramScore)
             }
-            let ngramScore = aospTrieEngine.bigramScore(for: wordPart, after: prev.lowercased())
-            return (candidate, ngramScore)
+
+            let reranked = scored.sorted { $0.1 > $1.1 }
+            let newCorrection = reranked[0].0
+            let newAlternatives = reranked.dropFirst().map { $0.0 }
+            return (newCorrection, Array(newAlternatives.prefix(2)))
         }
 
-        // Sort by n-gram score descending (candidates with n-gram support rank first)
-        let reranked = scored.sorted { $0.1 > $1.1 }
+        // Word is valid (spellCheck returned nil), but n-gram context might suggest
+        // a better word. Example: "sui" is valid (rare) but after "je", "suis" has
+        // a much higher bigram score → suggest "suis" as correction.
+        let lowered = word.lowercased()
+        let wordToCheck: String
+        let prefix: String?
+        if let apoIdx = lowered.lastIndex(of: "'") {
+            wordToCheck = String(lowered[lowered.index(after: apoIdx)...])
+            prefix = String(lowered[...apoIdx])
+        } else {
+            wordToCheck = lowered
+            prefix = nil
+        }
 
-        // If the top candidate changed from the original correction, reorder
-        let newCorrection = reranked[0].0
-        let newAlternatives = reranked.dropFirst().map { $0.0 }
+        let nearby = aospTrieEngine.nearbyWords(for: wordToCheck)
+        guard !nearby.isEmpty else { return nil }
 
-        return (newCorrection, Array(newAlternatives.prefix(2)))
+        let prevLower = prev.lowercased()
+        let inputScore = aospTrieEngine.bigramScore(for: wordToCheck, after: prevLower)
+
+        // Score nearby words, keep only those with n-gram support
+        let scored = nearby.compactMap { candidate -> (String, UInt16)? in
+            let score = aospTrieEngine.bigramScore(for: candidate, after: prevLower)
+            return score > 0 ? (candidate, score) : nil
+        }
+
+        // Pick the best candidate — must beat the input word's score
+        guard let best = scored.max(by: { $0.1 < $1.1 }), best.1 > inputScore else {
+            return nil
+        }
+
+        // Restore apostrophe prefix and case
+        let isCapitalized = word.first?.isUppercase == true
+        let fullCorrection = prefix != nil ? (prefix! + best.0) : best.0
+        let correction = isCapitalized ? fullCorrection.capitalized : fullCorrection
+
+        let alternatives = scored.filter { $0.0 != best.0 }
+            .sorted { $0.1 > $1.1 }
+            .prefix(2)
+            .map { candidate -> String in
+                let full = prefix != nil ? (prefix! + candidate.0) : candidate.0
+                return isCapitalized ? full.capitalized : full
+            }
+
+        return (correction, Array(alternatives))
     }
 
     /// No-op: user words are handled by the two-pass lookup in spellCheck().
