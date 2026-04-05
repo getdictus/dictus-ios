@@ -162,15 +162,22 @@ class TextPredictionEngine {
 
         let prevLower = prev.lowercased()
 
-        // Get n-gram predictions and find those close to the typed word.
-        // This catches cases like "je sui" → predictions for "je" include "suis",
-        // which is edit distance 1 from "sui".
-        let predictions = aospTrieEngine.predictNextWords(after: [prevLower], maxResults: 8)
-        let closePredictions: [(String, UInt16)] = predictions.compactMap { prediction in
-            let dist = Self.editDistance(wordToCheck, prediction)
-            guard dist > 0 && dist <= 2 else { return nil }
-            let score = aospTrieEngine.bigramScore(for: prediction, after: prevLower)
-            return score > 0 ? (prediction, score) : nil
+        // Get n-gram predictions close to the typed word (edit distance exactly 1).
+        // Only for words of 3+ characters — short words like "a", "à", "un" have too
+        // many neighbors at distance 1-2, causing false corrections (e.g., "a" → "la").
+        // Max distance 1 (not 2): distance 2 is too permissive even for longer words
+        // (e.g., "suis" → "vais" at distance 2 would be a false correction).
+        let closePredictions: [(String, UInt16)]
+        if wordToCheck.count >= 3 {
+            let predictions = aospTrieEngine.predictNextWords(after: [prevLower], maxResults: 8)
+            closePredictions = predictions.compactMap { prediction in
+                let dist = Self.editDistance(wordToCheck, prediction)
+                guard dist == 1 else { return nil }
+                let score = aospTrieEngine.bigramScore(for: prediction, after: prevLower)
+                return score > 0 ? (prediction, score) : nil
+            }
+        } else {
+            closePredictions = []
         }
 
         if let result = result {
@@ -194,7 +201,6 @@ class TextPredictionEngine {
             for (prediction, score) in closePredictions {
                 let full = prefix != nil ? (prefix! + prediction) : prediction
                 let display = isCapitalized ? full.capitalized : full
-                // Keep higher score if already present
                 if let existing = candidateSet[display] {
                     candidateSet[display] = max(existing, score)
                 } else {
@@ -211,6 +217,8 @@ class TextPredictionEngine {
         // Word is valid (spellCheck returned nil). Check if any n-gram prediction
         // is close to the typed word. Example: "je sui" → prediction "suis" at
         // edit distance 1, with high bigram score → suggest as correction.
+        guard !closePredictions.isEmpty else { return nil }
+
         let inputScore = aospTrieEngine.bigramScore(for: wordToCheck, after: prevLower)
 
         guard let best = closePredictions.max(by: { $0.1 < $1.1 }), best.1 > inputScore else {
