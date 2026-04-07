@@ -39,21 +39,35 @@ struct SwipeBackOverlayView: View {
                     IPhoneMockupView(isAnimating: isWaveformAnimating)
                         .frame(width: 180, height: 390)
 
-                    // Glowing blue dot on the bottom edge of the phone
+                    // Glowing blue dot + chevron trail on the bottom edge of the phone
                     // Straddles the outline — half inside, half outside
                     // Slides left→right in sync with the hand to show WHERE to swipe
-                    Circle()
-                        .fill(Color.dictusAccent)
-                        .frame(width: 14, height: 14)
-                        .shadow(color: Color.dictusAccent.opacity(0.7), radius: 10)
-                        .shadow(color: Color.dictusAccent.opacity(0.4), radius: 20)
-                        .offset(
-                            x: -30 + swipeProgress * 80,
-                            y: 7 // half below the phone outline
-                        )
+                    ZStack {
+                        // Chevron trail behind the blue dot
+                        ForEach(0..<3, id: \.self) { i in
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(
+                                    Color.dictusAccent.opacity(
+                                        (0.5 - Double(i) * 0.15) * Double(swipeProgress)
+                                    )
+                                )
+                                .offset(x: -CGFloat(10 + i * 10))
+                        }
+
+                        Circle()
+                            .fill(Color.dictusAccent)
+                            .frame(width: 14, height: 14)
+                            .shadow(color: Color.dictusAccent.opacity(0.7), radius: 10)
+                            .shadow(color: Color.dictusAccent.opacity(0.4), radius: 20)
+                    }
+                    .offset(
+                        x: -30 + swipeProgress * 80,
+                        y: 7 // half below the phone outline
+                    )
                 }
 
-                // Swipe hand gesture below the phone mockup
+                // Swipe hand gesture below the phone mockup (no chevrons — they're on the dot now)
                 SwipeHandView(progress: swipeProgress)
                     .frame(width: 140, height: 48)
                     .padding(.top, 2)
@@ -124,27 +138,12 @@ private struct SwipeHandView: View {
     var progress: CGFloat
 
     var body: some View {
-        ZStack {
-            Image(systemName: "hand.point.up")
-                .font(.system(size: 28, weight: .light))
-                .foregroundColor(.white.opacity(0.85))
-                .offset(x: -30 + progress * 80)
-                .opacity(1.0 - progress * 0.3)
-
-            // Chevron trail behind the hand
-            ForEach(0..<3, id: \.self) { i in
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(
-                        Color.dictusAccent.opacity(
-                            (0.5 - Double(i) * 0.15) * Double(progress)
-                        )
-                    )
-                    .offset(
-                        x: -30 + progress * 80 - CGFloat(14 + i * 12)
-                    )
-            }
-        }
+        // Hand icon only — chevrons are now on the blue dot above
+        Image(systemName: "hand.point.up")
+            .font(.system(size: 28, weight: .light))
+            .foregroundColor(.white.opacity(0.85))
+            .offset(x: -30 + progress * 80)
+            .opacity(1.0 - progress * 0.3)
     }
 }
 
