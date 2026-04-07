@@ -477,12 +477,15 @@ class LiveActivityManager {
     // MARK: - Recording Watchdog
 
     /// Arm the post-recording watchdog. Called by DictationCoordinator after stop/cancel.
-    /// WHY 10s timeout: Normal transition from .recording to .transcribing/.standby takes <1s.
-    /// 10s provides generous margin for slow devices while still catching genuinely stuck states.
+    /// WHY 2s timeout: Normal transition from .recording to .transcribing/.standby takes <1s.
+    /// The watchdog ONLY fires if currentPhase is still .recording after the delay — it does
+    /// NOT interfere with transcription, result display, or any later phase. If the DI already
+    /// moved to .transcribing/.ready/.standby, the guard exits harmlessly.
+    /// Previously 10s — reduced to 2s for faster recovery when DI gets stuck (issue #60).
     func startRecordingWatchdog() {
         recordingWatchdog?.cancel()
         recordingWatchdog = Task {
-            try? await Task.sleep(nanoseconds: 10_000_000_000) // 10s
+            try? await Task.sleep(nanoseconds: 2_000_000_000) // 2s
             guard !Task.isCancelled else { return }
             guard currentPhase == .recording else { return }
             // DI is still on .recording but nobody is recording -- force recovery
