@@ -72,8 +72,8 @@ struct SwipeBackOverlayView: View {
                     .frame(width: 140, height: 48)
                     .padding(.top, 2)
 
-                // Empathetic explanation
-                Text("We'd love to skip this step, but iOS requires opening Dictus to activate the microphone.")
+                // Empathetic explanation — short key to avoid Xcode xcstrings duplicate bug
+                Text("swipeback_empathy_text")
                     .font(.subheadline)
                     .foregroundColor(.white.opacity(0.7))
                     .multilineTextAlignment(.center)
