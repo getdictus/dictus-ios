@@ -45,21 +45,6 @@ final internal class GiellaKeyboardView: UIView,
 
     private var ghostKeyView: GhostKeyView?
 
-    /// Dedicated container for key popup overlays, separate from the collection view.
-    /// WHY: Adding overlay subviews directly to GiellaKeyboardView (which contains
-    /// the UICollectionView) triggers Auto Layout passes that invalidate the collection
-    /// view's flow layout, causing cells to compress on first-row popups (#69).
-    /// By isolating overlays in a sibling container, constraint activation cannot
-    /// cascade into the collection view's layout engine.
-    private let overlayContainer: UIView = {
-        let v = UIView()
-        v.translatesAutoresizingMaskIntoConstraints = false
-        v.clipsToBounds = false
-        v.backgroundColor = .clear
-        v.isUserInteractionEnabled = false
-        return v
-    }()
-
     private var currentPage: [[KeyDefinition]] {
         return keyDefinitionsForPage(page)
     }
@@ -155,13 +140,6 @@ final internal class GiellaKeyboardView: UIView,
         collectionView.rightAnchor.constraint(equalTo: rightAnchor).enable()
         collectionView.backgroundColor = .clear
 
-        // Overlay container sits on top of the collection view but is layout-isolated.
-        addSubview(overlayContainer)
-        overlayContainer.topAnchor.constraint(equalTo: topAnchor).enable()
-        overlayContainer.bottomAnchor.constraint(equalTo: bottomAnchor).enable()
-        overlayContainer.leftAnchor.constraint(equalTo: leftAnchor).enable()
-        overlayContainer.rightAnchor.constraint(equalTo: rightAnchor).enable()
-
         addGestureRecognizer(longpressGestureRecognizer)
 
         // Pre-warm the local haptic generator so first touch has zero latency
@@ -232,11 +210,7 @@ final internal class GiellaKeyboardView: UIView,
     }
 
     private func applyOverlayConstraints(to overlay: KeyOverlayView, ghostKeyView: GhostKeyView) {
-        // Use the keyboard's parent view for boundary constraints (left/right/top edges).
-        // WHY self.superview not overlay.superview: The overlay is now inside
-        // overlayContainer. We want boundary constraints relative to the keyboard's
-        // parent (kbInputView), not the container itself.
-        guard let parentView = superview else {
+        guard let superview = superview else {
             return
         }
 
@@ -250,7 +224,7 @@ final internal class GiellaKeyboardView: UIView,
             .enable(priority: .required)
 
         overlay.topAnchor
-            .constraint(greaterThanOrEqualTo: parentView.topAnchor)
+            .constraint(greaterThanOrEqualTo: superview.topAnchor)
             .enable(priority: .defaultLow)
 
         let offset: CGFloat = 0.5
@@ -263,13 +237,13 @@ final internal class GiellaKeyboardView: UIView,
         overlay.leftAnchor.constraint(greaterThanOrEqualTo: ghostKeyView.leftAnchor)
             .enable(priority: .defaultHigh)
         overlay.leftAnchor
-            .constraint(greaterThanOrEqualTo: parentView.leftAnchor)
+            .constraint(greaterThanOrEqualTo: superview.leftAnchor)
             .enable(priority: .required)
 
         overlay.rightAnchor.constraint(lessThanOrEqualTo: ghostKeyView.rightAnchor)
             .enable(priority: .defaultHigh)
         overlay.rightAnchor
-            .constraint(lessThanOrEqualTo: parentView.rightAnchor)
+            .constraint(lessThanOrEqualTo: superview.rightAnchor)
             .enable(priority: .required)
     }
 
@@ -287,20 +261,17 @@ final internal class GiellaKeyboardView: UIView,
             return
         }
 
-        // Add overlay views to the dedicated container instead of self (#69).
-        // The container is layout-isolated from the collection view, so constraint
-        // activation here cannot trigger collection view cell reflow.
         ghostKeyView.translatesAutoresizingMaskIntoConstraints = false
-        overlayContainer.addSubview(ghostKeyView)
+        self.addSubview(ghostKeyView)
 
-        ghostKeyView.leftAnchor.constraint(equalTo: overlayContainer.leftAnchor, constant: ghostKeyView.frame.minX).enable(priority: .required)
-        ghostKeyView.topAnchor.constraint(equalTo: overlayContainer.topAnchor, constant: ghostKeyView.frame.minY).enable(priority: .required)
+        ghostKeyView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: ghostKeyView.frame.minX).enable(priority: .required)
+        ghostKeyView.topAnchor.constraint(equalTo: self.topAnchor, constant: ghostKeyView.frame.minY).enable(priority: .required)
         ghostKeyView.widthAnchor.constraint(equalToConstant: ghostKeyView.frame.width).enable(priority: .required)
         ghostKeyView.heightAnchor.constraint(equalToConstant: ghostKeyView.frame.height).enable(priority: .required)
 
         let overlay = KeyOverlayView(ghostKeyView: ghostKeyView, key: key, theme: theme)
         overlay.translatesAutoresizingMaskIntoConstraints = false
-        overlayContainer.addSubview(overlay)
+        self.addSubview(overlay)
 
         applyOverlayConstraints(to: overlay, ghostKeyView: ghostKeyView)
         overlays[key.type] = overlay
