@@ -294,7 +294,7 @@ Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26 -> 27
 | 19. Complex Touch Features | v1.3 | 3/3 | Complete | 2026-03-30 |
 | 20. Feature Reintegration | v1.3 | 2/2 | Complete | 2026-03-30 |
 | 21. Cleanup & Memory Profiling | v1.3 | 2/2 | Complete | 2026-03-31 |
-| 22. Public TestFlight | v1.3 | 1/2 | In progress | - |
+| 22. Public TestFlight | 2/2 | Complete   | 2026-04-07 | - |
 | 23. Bug Fixes & License Compliance | 1/1 | Complete    | 2026-04-01 | - |
 | 24. SymSpell Spell Correction | 2/2 | Complete    | 2026-04-03 | - |
 | 24.1. AOSP Trie Spell Correction | 3/3 | Complete    | 2026-04-03 | - |

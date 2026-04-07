@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: executing
-stopped_at: Completed 27-01-PLAN.md
-last_updated: "2026-04-07T18:40:35Z"
-last_activity: 2026-04-07 -- Completed 27-01-PLAN.md (call crash prevention + AirPods session fix)
+stopped_at: Completed 22-02-PLAN.md
+last_updated: "2026-04-07T21:01:45Z"
+last_activity: 2026-04-07 -- Completed 22-02-PLAN.md (public TestFlight submission, README update, GitHub Release)
 progress:
   total_phases: 7
   completed_phases: 7
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 27 -- Critical Audio Bugs & Autocorrect Fix (all plans complete).
+**Current focus:** Phase 22 -- Public TestFlight (all plans complete). Phase 27 also complete.
 
 ## Current Position
 
 Phase: 27 of 27 (Critical Audio Bugs & Autocorrect Fix)
 Plan: 2 of 2 in current phase (PHASE COMPLETE)
 Status: Phase Complete
-Last activity: 2026-04-07 -- Completed 27-01-PLAN.md (call crash prevention + AirPods session fix)
+Last activity: 2026-04-07 -- Completed 22-02-PLAN.md (public TestFlight submission, README update, GitHub Release)
 
-Progress: [██████████] 100% (v1.4 milestone: 15/15 plans)
+Progress: [██████████] 100% (v1.4 milestone: 15/15 plans + Phase 22 complete)
 
 ## Performance Metrics
 
@@ -82,6 +82,9 @@ Recent decisions for v1.4:
 - [Phase 27]: deactivateAndIdle separate from deactivateSession: different lifecycle (auto-cleanup vs user stop)
 - [Phase 27]: Accepted ~100-200ms re-activation cost to release AirPods controls after recording
 - [Phase 27]: CharacterSet.decimalDigits for Unicode-safe digit detection in autocorrect guards
+- [Phase 22]: Per-target privacy manifests: DictusApp gets all APIs, DictusKeyboard only APIs it actually uses
+- [Phase 22]: Tester limit set to 250 for initial public beta (within 100-500 range)
+- [Phase 22]: GitHub Release tagged v1.3.0-beta as pre-release for social media announcement
 
 ### Pending Todos
 
@@ -95,14 +98,14 @@ None.
 
 ### Blockers/Concerns
 
-- Phase 22 (Public TestFlight) still in progress -- Phase 23 depends on it completing
+- Phase 22 (Public TestFlight) COMPLETE -- public beta live at https://testflight.apple.com/join/b55atKYX
 - SymSpell memory on physical device needs empirical validation (estimates: 3-5MB for 30K words)
 - French tokenization for n-gram elisions (l'homme, aujourd'hui) needs custom tokenizer
 
 ## Session Continuity
 
-Last session: 2026-04-07T18:40:35Z
-Stopped at: Completed 27-01-PLAN.md (phase 27 fully complete)
+Last session: 2026-04-07T21:01:45Z
+Stopped at: Completed 22-02-PLAN.md (Phase 22 fully complete -- public TestFlight live)
 Resume file: None
 
 ---
