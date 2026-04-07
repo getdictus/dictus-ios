@@ -340,6 +340,27 @@ final class DictusKeyboardBridge: NSObject,
             return word
         }()
 
+        // Guard: never autocorrect tokens containing digits (#74).
+        // WHY CharacterSet.decimalDigits: covers all Unicode digits (0-9 plus other scripts).
+        // Tokens like "test123", "h2o", "3pm" should be inserted as-is.
+        let containsDigit = freshWord.unicodeScalars.contains {
+            CharacterSet.decimalDigits.contains($0)
+        }
+        if containsDigit {
+            // Skip autocorrect — insert space normally
+            controller?.textDocumentProxy.insertText(" ")
+            lastInsertedCharacter = " "
+            // Clear autocorrect state but still trigger predictions
+            suggestionState?.lastAutocorrect = nil
+            suggestionState?.clear()
+            suggestionState?.rejectedWords.removeAll()
+            let ctx = controller?.textDocumentProxy.documentContextBeforeInput
+            suggestionState?.updatePredictions(context: ctx)
+            updateCapitalization()
+            updateAccentKeyDisplay()
+            return
+        }
+
         // Autocorrect check before space insertion.
         // Only trigger if autocorrect is enabled, there's a current word, the word
         // was not previously rejected by the user, and the spell checker offers a

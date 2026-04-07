@@ -115,6 +115,18 @@ class SuggestionState: ObservableObject {
 
         currentWord = partial
 
+        // Guard: skip spell correction for tokens containing digits (#74)
+        let containsDigit = partial.unicodeScalars.contains {
+            CharacterSet.decimalDigits.contains($0)
+        }
+        if containsDigit {
+            // Show completions only (no corrections) for numeric tokens
+            let completions = engine.suggestions(for: partial)
+            suggestions = completions.isEmpty ? [] : completions
+            mode = completions.isEmpty ? .idle : .completions
+            return
+        }
+
         // Extract previous word for n-gram context boosting
         let previousWord = extractPreviousWord(from: context, currentWord: partial)
 
@@ -179,6 +191,21 @@ class SuggestionState: ObservableObject {
             let partial = self.extractLastWord(from: context)
             guard !partial.isEmpty else {
                 DispatchQueue.main.async { self.clear() }
+                return
+            }
+
+            // Guard: skip spell correction for tokens containing digits (#74)
+            let containsDigit = partial.unicodeScalars.contains {
+                CharacterSet.decimalDigits.contains($0)
+            }
+            if containsDigit {
+                let completions = self.engine.suggestions(for: partial)
+                DispatchQueue.main.async { [weak self] in
+                    guard let self = self else { return }
+                    self.currentWord = partial
+                    self.suggestions = completions.isEmpty ? [] : completions
+                    self.mode = completions.isEmpty ? .idle : .completions
+                }
                 return
             }
 
