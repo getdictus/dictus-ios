@@ -254,6 +254,33 @@ class UnifiedAudioEngine: ObservableObject {
         bufferSeconds = 0
     }
 
+    /// Deactivate audio session after recording completes.
+    /// Stops engine, deactivates session with .notifyOthersOnDeactivation so other
+    /// apps (Spotify, YouTube) resume playback and AirPods controls return to them.
+    ///
+    /// WHY not keep engine running: Keeping .playAndRecord active makes iOS treat
+    /// Dictus as the "now playing" app, hijacking AirPods remote controls (#72).
+    /// The trade-off is ~100-200ms re-activation cost on next recording.
+    ///
+    /// WHY separate from deactivateSession(): deactivateSession is for explicit user
+    /// stop (Power button). deactivateAndIdle is for normal post-recording cleanup.
+    func deactivateAndIdle() {
+        isRecording = false
+        isRecordingFlag = false
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+        audioSamples = []
+
+        let session = AVAudioSession.sharedInstance()
+        try? session.setActive(false, options: .notifyOthersOnDeactivation)
+        sessionConfigured = false
+
+        bufferEnergy = []
+        bufferSeconds = 0
+
+        PersistentLog.log(.audioEngineStopped)
+    }
+
     // MARK: - Private Helpers
 
     /// Start the AVAudioEngine with a tap on the input node.

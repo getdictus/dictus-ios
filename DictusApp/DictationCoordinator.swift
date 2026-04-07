@@ -350,6 +350,10 @@ class DictationCoordinator: ObservableObject {
         dictationTask = Task {
             do {
                 let samples = audioEngine.collectSamples()
+                // Deactivate audio session so other apps resume playback (#72).
+                // WHY here and not in collectSamples: collectSamples is a low-level engine
+                // method. Session lifecycle is a coordinator concern.
+                audioEngine.deactivateAndIdle()
 
                 guard !samples.isEmpty else {
                     handleError("No audio recorded")
@@ -419,8 +423,10 @@ class DictationCoordinator: ObservableObject {
         dictationTask = nil
         stopTranscriptionWatchdog()
 
-        // Discard samples but keep engine alive for next recording
+        // Discard samples and deactivate audio session
         _ = audioEngine.collectSamples()
+        // Deactivate audio session so other apps resume playback (#72).
+        audioEngine.deactivateAndIdle()
 
         // Reset all state
         bufferEnergy = []

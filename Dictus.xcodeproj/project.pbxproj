@@ -32,7 +32,7 @@
 		AA000042 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA900020 /* WhisperKit */; };
 		AA000043 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
 		AA000045 /* UnifiedAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100045 /* UnifiedAudioEngine.swift */; };
-		AA0000C1 /* CallStateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000C1 /* CallStateMonitor.swift */; };
+		AA0000C2 /* CallStateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000C2 /* CallStateMonitor.swift */; };
 		AA000050 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100050 /* ModelManager.swift */; };
 		AA000051 /* ModelManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100051 /* ModelManagerView.swift */; };
 		AA000060 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100060 /* ToolbarView.swift */; };
@@ -170,7 +170,7 @@
 		AA100041 /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
 		AA100043 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
 		AA100045 /* UnifiedAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedAudioEngine.swift; sourceTree = "<group>"; };
-		AA1000C1 /* CallStateMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStateMonitor.swift; sourceTree = "<group>"; };
+		AA1000C2 /* CallStateMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStateMonitor.swift; sourceTree = "<group>"; };
 		AA100050 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
 		AA100051 /* ModelManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManagerView.swift; sourceTree = "<group>"; };
 		AA100060 /* ToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarView.swift; sourceTree = "<group>"; };
@@ -402,7 +402,7 @@
 		AA400007 /* Audio */ = {
 			isa = PBXGroup;
 			children = (
-				AA1000C1 /* CallStateMonitor.swift */,
+				AA1000C2 /* CallStateMonitor.swift */,
 				AA1000F1 /* ParakeetEngine.swift */,
 				AA1000F0 /* SpeechModelProtocol.swift */,
 				AA100041 /* TranscriptionService.swift */,
@@ -768,7 +768,7 @@
 				AA000006 /* DictationView.swift in Sources */,
 				AA0000F5 /* LiveActivityManager.swift in Sources */,
 				AA000045 /* UnifiedAudioEngine.swift in Sources */,
-				AA0000C1 /* CallStateMonitor.swift in Sources */,
+				AA0000C2 /* CallStateMonitor.swift in Sources */,
 				AA000041 /* TranscriptionService.swift in Sources */,
 				AA000043 /* RecordingView.swift in Sources */,
 				AA000050 /* ModelManager.swift in Sources */,

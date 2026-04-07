@@ -2,6 +2,7 @@
 // Detects active phone calls via CXCallObserver to prevent SIGABRT crash (#71).
 import Foundation
 import CallKit
+import DictusCore
 import os
 
 /// Monitors telephony call state using CallKit's CXCallObserver.
