@@ -141,7 +141,7 @@ class KeyboardViewController: UIInputViewController {
         // --- 6. Set explicit height constraint on inputView ---
         let height = computeKeyboardHeight()
         let constraint = kbInputView.heightAnchor.constraint(equalToConstant: height)
-        constraint.priority = .defaultHigh  // don't fight iOS if it needs to adjust
+        constraint.priority = .required  // prevent popup overlays from expanding keyboard height (#69)
         constraint.isActive = true
         self.heightConstraint = constraint
 
