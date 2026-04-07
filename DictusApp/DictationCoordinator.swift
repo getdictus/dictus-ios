@@ -262,6 +262,19 @@ class DictationCoordinator: ObservableObject {
         // AudioServicesPlaySystemSound may be suppressed.
         SoundFeedbackService.playRecordStart()
 
+        // Guard: if the audio session is interrupted (phone call, Siri, alarm),
+        // don't attempt to record. The interruption observer will clear this flag
+        // when the interruption ends, allowing the next recording attempt to succeed.
+        // WHY check here: When the engine is already warm, configureAudioSession()
+        // may succeed (setActive is a no-op on an already-active session), but the
+        // session is actually in a degraded state → installTap or engine.start will
+        // SIGABRT. The interruption flag catches this case (#71).
+        if audioEngine.isSessionInterrupted {
+            PersistentLog.log(.dictationFailed(error: "Audio session interrupted — recording blocked"))
+            handleError("Recording unavailable during a call")
+            return
+        }
+
         // Configure audio session NOW while we're in the foreground.
         // WHY not try?: If session is interrupted (e.g., phone call active), setActive(true)
         // throws. Swallowing this with try? would let startRecording() proceed with a
