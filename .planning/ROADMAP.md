@@ -266,7 +266,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26
+Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26 -> 27
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -300,16 +300,22 @@ Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26
 | 24.1. AOSP Trie Spell Correction | 3/3 | Complete    | 2026-04-03 | - |
 | 25. N-gram Next-Word Prediction | 3/3 | Complete    | 2026-04-05 | - |
 | 26. Cold Start & Beta Polish | 2/2 | Complete   | 2026-04-07 | - |
+| 27. Critical Audio Bugs & Autocorrect | v1.4 | 0/2 | Planned | - |
 
 ### Phase 27: Critical audio bugs & autocorrect fix: crash during phone call (#71), AirPods audio session conflicts (#72), and N-gram autocorrection on numeric tokens (#74)
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Three beta-reported bugs are fixed: no crash when starting dictation during a phone call, AirPods/media apps resume normally after recording, and numeric tokens are never autocorrected
+**Requirements**: BUG-71, BUG-72, BUG-74
 **Depends on:** Phase 26
-**Plans:** 0 plans
+**Success Criteria** (what must be TRUE):
+  1. Starting dictation during a phone call shows "Recording unavailable during a call" instead of crashing
+  2. After recording completes, other apps (Spotify, YouTube) resume playback on AirPods
+  3. Typing "test123" + space does not autocorrect the token
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 27 to break down)
+- [ ] 27-01-PLAN.md — Call state detection (CXCallObserver) + audio session idle deactivation (BUG-71, BUG-72)
+- [ ] 27-02-PLAN.md — Numeric token guard in autocorrect and suggestion paths (BUG-74)
 
 ---
 *Roadmap created: 2026-03-04*
