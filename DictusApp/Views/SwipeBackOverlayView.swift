@@ -35,13 +35,28 @@ struct SwipeBackOverlayView: View {
                 Spacer()
 
                 // iPhone mockup with BrandWaveform-style bars
-                IPhoneMockupView(isAnimating: isWaveformAnimating)
-                    .frame(width: 180, height: 390)
+                ZStack(alignment: .bottom) {
+                    IPhoneMockupView(isAnimating: isWaveformAnimating)
+                        .frame(width: 180, height: 390)
+
+                    // Glowing blue dot on the bottom edge of the phone
+                    // Straddles the outline — half inside, half outside
+                    // Slides left→right in sync with the hand to show WHERE to swipe
+                    Circle()
+                        .fill(Color.dictusAccent)
+                        .frame(width: 14, height: 14)
+                        .shadow(color: Color.dictusAccent.opacity(0.7), radius: 10)
+                        .shadow(color: Color.dictusAccent.opacity(0.4), radius: 20)
+                        .offset(
+                            x: -30 + swipeProgress * 80,
+                            y: 7 // half below the phone outline
+                        )
+                }
 
                 // Swipe hand gesture below the phone mockup
                 SwipeHandView(progress: swipeProgress)
-                    .frame(width: 120, height: 48)
-                    .padding(.top, 4)
+                    .frame(width: 140, height: 48)
+                    .padding(.top, 2)
 
                 // Empathetic explanation
                 Text("We'd love to skip this step, but iOS requires opening Dictus to activate the microphone.")
@@ -62,14 +77,12 @@ struct SwipeBackOverlayView: View {
             }
         }
         .onAppear {
-            // Waveform pulsing
             withAnimation(
                 .easeInOut(duration: 0.7)
                 .repeatForever(autoreverses: true)
             ) {
                 isWaveformAnimating = true
             }
-            // Hand swipe with natural acceleration
             startSwipeLoop()
         }
     }
@@ -78,8 +91,7 @@ struct SwipeBackOverlayView: View {
     ///
     /// WHY Timer-based instead of .repeatForever:
     /// .repeatForever(autoreverses: false) causes an instant jump-back that looks jarring.
-    /// A Timer lets us: animate forward (1.2s) → pause (0.6s) → reset → repeat.
-    /// The easeOut curve gives natural "fast start, gentle landing" like a real swipe.
+    /// A Timer lets us: animate forward (1.2s) → pause (0.8s) → reset → repeat.
     private func startSwipeLoop() {
         animateSwipeForward()
         Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
@@ -89,6 +101,10 @@ struct SwipeBackOverlayView: View {
         }
     }
 
+    /// WHY timingCurve(0.4, 0, 0.2, 1):
+    /// Material Design "emphasized" easing — slow start, acceleration through the middle,
+    /// gentle deceleration at the end. Feels like a natural human swipe gesture rather
+    /// than mechanical linear motion.
     private func animateSwipeForward() {
         swipeProgress = 0
         withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: 1.2)) {
@@ -104,22 +120,16 @@ struct SwipeBackOverlayView: View {
 /// WHY hand.point.up instead of a circle:
 /// User testing showed that a blue circle didn't communicate "swipe gesture" clearly.
 /// A pointing finger is universally understood as "touch here and drag".
-///
-/// WHY timingCurve(0.4, 0, 0.2, 1):
-/// This is a Material Design "emphasized" easing curve — slow start with acceleration
-/// through the middle, then gentle deceleration. Feels like a natural human swipe
-/// rather than a mechanical linear motion.
 private struct SwipeHandView: View {
     var progress: CGFloat
 
     var body: some View {
         ZStack {
-            // Hand icon — slides from left to right
             Image(systemName: "hand.point.up")
                 .font(.system(size: 28, weight: .light))
                 .foregroundColor(.white.opacity(0.85))
                 .offset(x: -30 + progress * 80)
-                .opacity(1.0 - progress * 0.4)
+                .opacity(1.0 - progress * 0.3)
 
             // Chevron trail behind the hand
             ForEach(0..<3, id: \.self) { i in
@@ -140,15 +150,16 @@ private struct SwipeHandView: View {
 
 // MARK: - iPhone Mockup View
 
-/// iPhone mockup with BrandWaveform-style bars and home indicator.
+/// iPhone mockup with BrandWaveform-style animated bars and home indicator.
 ///
 /// WHY 17 bars with brand color scheme:
 /// Matches the real BrandWaveform visual identity — blue gradient center bars,
-/// white opacity edge bars. 17 bars fit the 140pt width of the mockup cleanly.
+/// white opacity edge bars. 17 bars fit the 140pt mockup width cleanly.
 ///
-/// WHY fixed bar heights instead of CGFloat.random:
-/// SwiftUI recalculates random values on every frame, causing visual jitter.
-/// Fixed constants give predictable, smooth pulsing animation.
+/// WHY fixed-height waveform container:
+/// The bars animate height changes. Without a fixed container, the VStack would
+/// recalculate layout on each frame, causing the "Listening..." text below to bounce.
+/// A fixed 60pt frame contains the animation within its bounds.
 private struct IPhoneMockupView: View {
     var isAnimating: Bool
 
@@ -161,20 +172,17 @@ private struct IPhoneMockupView: View {
     ]
 
     /// Bar colors matching BrandWaveform: gradient blue center, white opacity edges.
-    private func barColor(at index: Int) -> some ShapeStyle {
-        let center: CGFloat = 8 // center bar index (0-based, 17 bars)
+    private func barColor(at index: Int) -> Color {
+        let center: CGFloat = 8
         let distance = abs(CGFloat(index) - center) / center
 
         if distance < 0.35 {
-            // Inner: brand blue
-            return Color.dictusGradientStart
+            return .dictusGradientStart
         } else if distance < 0.55 {
-            // Transition: solid accent blue
-            return Color.dictusAccent
+            return .dictusAccent
         } else {
-            // Outer: white with decreasing opacity
             let opacity = (1.0 - distance) * 0.7 + 0.2
-            return Color.white.opacity(opacity)
+            return .white.opacity(opacity)
         }
     }
 
@@ -185,15 +193,16 @@ private struct IPhoneMockupView: View {
                 .stroke(Color.white.opacity(0.3), lineWidth: 2.5)
 
             VStack(spacing: 0) {
-                // Dynamic Island — padded down from top
+                // Dynamic Island — tight to top edge like a real iPhone
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color.white.opacity(0.25))
-                    .frame(width: 50, height: 14)
-                    .padding(.top, 30)
+                    .frame(width: 58, height: 16)
+                    .padding(.top, 14)
 
                 Spacer()
 
-                // BrandWaveform-style bars
+                // BrandWaveform-style bars in a FIXED height container
+                // so the text below doesn't bounce when bars animate
                 HStack(spacing: 2) {
                     ForEach(0..<17, id: \.self) { i in
                         RoundedRectangle(cornerRadius: 1.5)
@@ -206,12 +215,13 @@ private struct IPhoneMockupView: View {
                             )
                     }
                 }
+                .frame(height: 50) // Fixed container — bars animate within
                 .animation(
                     .easeInOut(duration: 0.7).repeatForever(autoreverses: true),
                     value: isAnimating
                 )
 
-                // Listening label — FIXED position, only bars animate
+                // Listening label — FIXED position below the waveform container
                 Text("Listening...")
                     .font(.caption2)
                     .foregroundColor(.white.opacity(0.6))
