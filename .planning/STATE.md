@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: executing
-stopped_at: Completed 27-02-PLAN.md
-last_updated: "2026-04-07T18:39:21.730Z"
-last_activity: 2026-04-05 -- Completed 26-01-PLAN.md (cold start auto-return investigation + ADR)
+stopped_at: Completed 27-01-PLAN.md
+last_updated: "2026-04-07T18:40:35Z"
+last_activity: 2026-04-07 -- Completed 27-01-PLAN.md (call crash prevention + AirPods session fix)
 progress:
   total_phases: 7
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 15
-  completed_plans: 14
-  percent: 92
+  completed_plans: 15
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 26 -- Cold Start & Beta Polish (auto-return investigation complete, overlay redesign next).
+**Current focus:** Phase 27 -- Critical Audio Bugs & Autocorrect Fix (all plans complete).
 
 ## Current Position
 
 Phase: 27 of 27 (Critical Audio Bugs & Autocorrect Fix)
-Plan: 2 of 2 in current phase (27-02 COMPLETE)
-Status: In Progress
-Last activity: 2026-04-07 -- Completed 27-02-PLAN.md (numeric token autocorrect guard)
+Plan: 2 of 2 in current phase (PHASE COMPLETE)
+Status: Phase Complete
+Last activity: 2026-04-07 -- Completed 27-01-PLAN.md (call crash prevention + AirPods session fix)
 
-Progress: [█████████░] 93% (v1.4 milestone: 14/15 plans)
+Progress: [██████████] 100% (v1.4 milestone: 15/15 plans)
 
 ## Performance Metrics
 
@@ -78,6 +78,9 @@ Recent decisions for v1.4:
 - [Phase 25]: Short-word exclusion: words < 3 chars skip context boost to prevent false corrections on a/un/le
 - [Phase 25]: Combined OpenSubtitles + Google Books n-gram data for better spoken French coverage
 - [Phase 26]: Auto-return REJECTED: all 5 approaches fail, no public iOS API for keyboard host detection
+- [Phase 27]: Prevention over try/catch for phone call crash: NSException cannot be caught by Swift do/catch
+- [Phase 27]: deactivateAndIdle separate from deactivateSession: different lifecycle (auto-cleanup vs user stop)
+- [Phase 27]: Accepted ~100-200ms re-activation cost to release AirPods controls after recording
 - [Phase 27]: CharacterSet.decimalDigits for Unicode-safe digit detection in autocorrect guards
 
 ### Pending Todos
@@ -98,8 +101,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-07T18:39:21.728Z
-Stopped at: Completed 27-02-PLAN.md
+Last session: 2026-04-07T18:40:35Z
+Stopped at: Completed 27-01-PLAN.md (phase 27 fully complete)
 Resume file: None
 
 ---
