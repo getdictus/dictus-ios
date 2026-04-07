@@ -139,6 +139,13 @@ class UnifiedAudioEngine: ObservableObject {
             try session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
             observeAudioInterruptions()
         }
+        if sessionConfigured {
+            // Force iOS to re-evaluate session availability. Without this,
+            // setActive(true) on an already-active session is a no-op and
+            // won't detect a phone call that started while the engine was warm (#71).
+            // Safe: this only runs at dictation START, never during active recording.
+            try? session.setActive(false, options: .notifyOthersOnDeactivation)
+        }
         try session.setActive(true)
         try? session.setAllowHapticsAndSystemSoundsDuringRecording(true)
         sessionConfigured = true

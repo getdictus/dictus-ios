@@ -250,7 +250,7 @@ final internal class GiellaKeyboardView: UIView,
             .enable(priority: .required)
 
         overlay.topAnchor
-            .constraint(greaterThanOrEqualTo: overlayContainer.topAnchor)
+            .constraint(greaterThanOrEqualTo: parentView.topAnchor)
             .enable(priority: .defaultLow)
 
         let offset: CGFloat = 0.5
@@ -263,13 +263,13 @@ final internal class GiellaKeyboardView: UIView,
         overlay.leftAnchor.constraint(greaterThanOrEqualTo: ghostKeyView.leftAnchor)
             .enable(priority: .defaultHigh)
         overlay.leftAnchor
-            .constraint(greaterThanOrEqualTo: overlayContainer.leftAnchor)
+            .constraint(greaterThanOrEqualTo: parentView.leftAnchor)
             .enable(priority: .required)
 
         overlay.rightAnchor.constraint(lessThanOrEqualTo: ghostKeyView.rightAnchor)
             .enable(priority: .defaultHigh)
         overlay.rightAnchor
-            .constraint(lessThanOrEqualTo: overlayContainer.rightAnchor)
+            .constraint(lessThanOrEqualTo: parentView.rightAnchor)
             .enable(priority: .required)
     }
 

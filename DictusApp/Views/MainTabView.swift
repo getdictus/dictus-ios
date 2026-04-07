@@ -77,7 +77,10 @@ struct MainTabView: View {
             // WHY not shown in cold start mode: During cold start, the recording runs
             // in the background while the user sees the SwipeBackOverlayView. Showing
             // RecordingView would cover the swipe-back instructions.
-            if coordinator.status != .idle && !isColdStartMode {
+            // Show RecordingView when dictation is active, OR when it failed (even during
+            // cold start). Without the .failed exception, errors during cold start are invisible
+            // because SwipeBackOverlayView covers everything and RecordingView is suppressed (#71).
+            if coordinator.status != .idle && (!isColdStartMode || coordinator.status == .failed) {
                 RecordingView(mode: .standalone)
             }
         }
@@ -102,6 +105,13 @@ struct MainTabView: View {
         }
         .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .background {
+                isColdStartMode = false
+            }
+        }
+        .onChange(of: coordinator.status) { _, newStatus in
+            // Exit cold start mode when dictation fails or completes, so the user
+            // sees the normal app UI with the error message (#71).
+            if newStatus == .failed || newStatus == .idle {
                 isColdStartMode = false
             }
         }
