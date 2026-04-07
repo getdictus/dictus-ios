@@ -4,6 +4,7 @@ import Foundation
 import Combine
 import AVFoundation
 import UIKit
+import CallKit
 import DictusCore
 import WhisperKit
 
@@ -35,6 +36,7 @@ class DictationCoordinator: ObservableObject {
     private let defaults = AppGroup.defaults
     private let audioEngine = UnifiedAudioEngine()
     private let transcriptionService = TranscriptionService()
+    private let callStateMonitor = CallStateMonitor()
 
     /// Whether the audio engine is currently running.
     /// Used by DictusApp to detect "warm but engine-dead" state after Power button stop.
@@ -252,6 +254,15 @@ class DictationCoordinator: ObservableObject {
         guard modelReady else {
             PersistentLog.log(.dictationFailed(error: "No model downloaded"))
             handleError("No model downloaded. Open Dictus to download a model.")
+            return
+        }
+
+        // Guard: prevent SIGABRT crash from installTapOnBus during phone call (#71).
+        // WHY prevention not try/catch: AVAudioNode throws an Objective-C NSException
+        // which Swift do/catch cannot intercept -- the process aborts immediately.
+        if callStateMonitor.isCallActive {
+            PersistentLog.log(.dictationFailed(error: "Phone call active — recording blocked"))
+            handleError("Recording unavailable during a call")
             return
         }
 
