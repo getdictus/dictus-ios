@@ -66,7 +66,20 @@ The app and the keyboard extension communicate through an **App Group** (`group.
 
 ## Beta Testing
 
-Join the beta via TestFlight: _link coming soon_.
+Join the beta via TestFlight: **[Install Dictus Beta](https://testflight.apple.com/join/b55atKYX)**
+
+> **Requirements:** iPhone 12 or later, iOS 17.0+
+
+**How to install:**
+1. Tap the link above on your iPhone (or scan it with your camera)
+2. Install TestFlight from the App Store if you don't have it
+3. Open Dictus and follow the onboarding to download a speech model
+4. Enable the keyboard: **Settings > General > Keyboard > Keyboards > Add New Keyboard > Dictus**
+5. Allow **Full Access** when prompted (required for microphone access)
+
+**Give feedback:**
+- Shake your device in Dictus to send feedback via TestFlight
+- Or open an issue on [GitHub](https://github.com/getdictus/dictus-ios/issues)
 
 ## Contributing
 
