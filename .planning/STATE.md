@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Public Beta
 status: executing
-stopped_at: Completed 26-01-PLAN.md
-last_updated: "2026-04-05T20:49:31.169Z"
+stopped_at: Completed 27-02-PLAN.md
+last_updated: "2026-04-07T18:39:21.730Z"
 last_activity: 2026-04-05 -- Completed 26-01-PLAN.md (cold start auto-return investigation + ADR)
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 13
-  completed_plans: 12
+  total_phases: 7
+  completed_phases: 6
+  total_plans: 15
+  completed_plans: 14
   percent: 92
 ---
 
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-01)
 
 ## Current Position
 
-Phase: 26 of 26 (Cold Start & Beta Polish)
-Plan: 1 of 2 in current phase (COMPLETE)
+Phase: 27 of 27 (Critical Audio Bugs & Autocorrect Fix)
+Plan: 2 of 2 in current phase (27-02 COMPLETE)
 Status: In Progress
-Last activity: 2026-04-05 -- Completed 26-01-PLAN.md (cold start auto-return investigation + ADR)
+Last activity: 2026-04-07 -- Completed 27-02-PLAN.md (numeric token autocorrect guard)
 
-Progress: [█████████░] 92% (v1.4 milestone: 12/13 plans)
+Progress: [█████████░] 93% (v1.4 milestone: 14/15 plans)
 
 ## Performance Metrics
 
@@ -78,6 +78,7 @@ Recent decisions for v1.4:
 - [Phase 25]: Short-word exclusion: words < 3 chars skip context boost to prevent false corrections on a/un/le
 - [Phase 25]: Combined OpenSubtitles + Google Books n-gram data for better spoken French coverage
 - [Phase 26]: Auto-return REJECTED: all 5 approaches fail, no public iOS API for keyboard host detection
+- [Phase 27]: CharacterSet.decimalDigits for Unicode-safe digit detection in autocorrect guards
 
 ### Pending Todos
 
@@ -97,8 +98,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-05T20:49:31.167Z
-Stopped at: Completed 26-01-PLAN.md
+Last session: 2026-04-07T18:39:21.728Z
+Stopped at: Completed 27-02-PLAN.md
 Resume file: None
 
 ---

@@ -300,7 +300,7 @@ Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26 -> 27
 | 24.1. AOSP Trie Spell Correction | 3/3 | Complete    | 2026-04-03 | - |
 | 25. N-gram Next-Word Prediction | 3/3 | Complete    | 2026-04-05 | - |
 | 26. Cold Start & Beta Polish | 2/2 | Complete   | 2026-04-07 | - |
-| 27. Critical Audio Bugs & Autocorrect | v1.4 | 0/2 | Planned | - |
+| 27. Critical Audio Bugs & Autocorrect | 1/2 | In Progress|  | - |
 
 ### Phase 27: Critical audio bugs & autocorrect fix: crash during phone call (#71), AirPods audio session conflicts (#72), and N-gram autocorrection on numeric tokens (#74)
 
@@ -311,7 +311,7 @@ Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26 -> 27
   1. Starting dictation during a phone call shows "Recording unavailable during a call" instead of crashing
   2. After recording completes, other apps (Spotify, YouTube) resume playback on AirPods
   3. Typing "test123" + space does not autocorrect the token
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 27-01-PLAN.md — Call state detection (CXCallObserver) + audio session idle deactivation (BUG-71, BUG-72)
