@@ -80,6 +80,11 @@ class UnifiedAudioEngine: ObservableObject {
     /// We configure once and keep the category set forever.
     private var sessionConfigured = false
 
+    /// Whether the audio session is currently interrupted by the system (e.g., phone call).
+    /// WHY: When interrupted, installTap/engine.start() can SIGABRT. We check this
+    /// before attempting to start and re-activate the session when interruption ends.
+    @Published var isSessionInterrupted = false
+
     /// Sample gating flag read from the audio thread.
     /// WHY nonisolated(unsafe): Read from audio callback thread (single reader pattern).
     /// Written from main thread via startRecording()/collectSamples()/stopEngine().
@@ -132,12 +137,60 @@ class UnifiedAudioEngine: ObservableObject {
         let session = AVAudioSession.sharedInstance()
         if !sessionConfigured {
             try session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
+            observeAudioInterruptions()
         }
         try session.setActive(true)
         try? session.setAllowHapticsAndSystemSoundsDuringRecording(true)
         sessionConfigured = true
+        isSessionInterrupted = false
 
         PersistentLog.log(.audioSessionConfigured(category: "playAndRecord"))
+    }
+
+    /// Observe audio session interruptions (phone calls, Siri, alarms).
+    /// WHY: iOS interrupts the audio session during calls. Without observing this,
+    /// the engine appears "running" but the session is degraded — any attempt to
+    /// restart or install a tap will SIGABRT. The observer lets us:
+    /// 1. Stop recording gracefully when interrupted
+    /// 2. Re-activate the session when the interruption ends
+    private func observeAudioInterruptions() {
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(),
+            queue: .main
+        ) { [weak self] notification in
+            guard let self,
+                  let userInfo = notification.userInfo,
+                  let typeRaw = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+                  let type = AVAudioSession.InterruptionType(rawValue: typeRaw) else { return }
+
+            switch type {
+            case .began:
+                PersistentLog.log(.audioEngineStopped)
+                self.isSessionInterrupted = true
+                if self.isRecording {
+                    self.isRecording = false
+                    self.isRecordingFlag = false
+                    if #available(iOS 14.0, *) {
+                        DictusLogger.app.warning("Audio session interrupted while recording — stopping gracefully")
+                    }
+                }
+            case .ended:
+                self.isSessionInterrupted = false
+                // Re-activate session so next recording works without cold start
+                if let optionsRaw = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
+                    let options = AVAudioSession.InterruptionOptions(rawValue: optionsRaw)
+                    if options.contains(.shouldResume) {
+                        try? AVAudioSession.sharedInstance().setActive(true)
+                        if #available(iOS 14.0, *) {
+                            DictusLogger.app.info("Audio session interruption ended — session re-activated")
+                        }
+                    }
+                }
+            @unknown default:
+                break
+            }
+        }
     }
 
     /// Check and request microphone permission if needed.

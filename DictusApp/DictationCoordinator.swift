@@ -4,7 +4,6 @@ import Foundation
 import Combine
 import AVFoundation
 import UIKit
-import CallKit
 import DictusCore
 import WhisperKit
 
@@ -36,8 +35,6 @@ class DictationCoordinator: ObservableObject {
     private let defaults = AppGroup.defaults
     private let audioEngine = UnifiedAudioEngine()
     private let transcriptionService = TranscriptionService()
-    private let callStateMonitor = CallStateMonitor()
-
     /// Whether the audio engine is currently running.
     /// Used by DictusApp to detect "warm but engine-dead" state after Power button stop.
     var isEngineRunning: Bool { audioEngine.isEngineRunning }
@@ -257,15 +254,6 @@ class DictationCoordinator: ObservableObject {
             return
         }
 
-        // Guard: prevent SIGABRT crash from installTapOnBus during phone call (#71).
-        // WHY prevention not try/catch: AVAudioNode throws an Objective-C NSException
-        // which Swift do/catch cannot intercept -- the process aborts immediately.
-        if callStateMonitor.isCallActive {
-            PersistentLog.log(.dictationFailed(error: "Phone call active — recording blocked"))
-            handleError("Recording unavailable during a call")
-            return
-        }
-
         // Cancel any in-flight dictation before starting a new one
         dictationTask?.cancel()
 
@@ -275,7 +263,17 @@ class DictationCoordinator: ObservableObject {
         SoundFeedbackService.playRecordStart()
 
         // Configure audio session NOW while we're in the foreground.
-        try? audioEngine.configureAudioSession()
+        // WHY not try?: If session is interrupted (e.g., phone call active), setActive(true)
+        // throws. Swallowing this with try? would let startRecording() proceed with a
+        // degraded session → SIGABRT from installTapOnBus. Catching the error shows a
+        // user-friendly message instead of crashing (#71).
+        do {
+            try audioEngine.configureAudioSession()
+        } catch {
+            PersistentLog.log(.dictationFailed(error: "Audio session unavailable: \(error.localizedDescription)"))
+            handleError("Recording unavailable — try again in a moment")
+            return
+        }
 
         if audioEngine.isEngineRunning {
             // WARM START: engine already running → purge + record (instant)

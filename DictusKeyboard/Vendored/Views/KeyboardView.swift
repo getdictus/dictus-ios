@@ -45,6 +45,13 @@ final internal class GiellaKeyboardView: UIView,
 
     private var ghostKeyView: GhostKeyView?
 
+    /// Guards against `bounds.didSet → update()` during overlay insertion.
+    /// WHY: Adding the key popup overlay activates Auto Layout constraints, which
+    /// triggers a layout pass that can change `bounds`. The `bounds.didSet` override
+    /// calls `update()` → `calculateRows()` → `collectionView.reloadData()`, causing
+    /// all visible cells to reflow and compress. This flag blocks that cascade (#69).
+    private var isInsertingOverlay = false
+
     private var currentPage: [[KeyDefinition]] {
         return keyDefinitionsForPage(page)
     }
@@ -198,6 +205,7 @@ final internal class GiellaKeyboardView: UIView,
 
     override var bounds: CGRect {
         didSet {
+            guard !isInsertingOverlay else { return }
             update()
         }
     }
@@ -255,6 +263,10 @@ final internal class GiellaKeyboardView: UIView,
         }
         let key = currentPage[indexPath.section][indexPath.row]
         removeAllOverlays()
+
+        // Block bounds.didSet → update() during overlay constraint activation (#69)
+        isInsertingOverlay = true
+        defer { isInsertingOverlay = false }
 
         ghostKeyView = GhostKeyView(keyView: keyView, in: self)
         guard let ghostKeyView = ghostKeyView else {
