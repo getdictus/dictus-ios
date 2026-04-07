@@ -301,6 +301,16 @@ Phases execute in numeric order: 23 -> 23.1 -> 24 -> 24.1 -> 25 -> 26
 | 25. N-gram Next-Word Prediction | 3/3 | Complete    | 2026-04-05 | - |
 | 26. Cold Start & Beta Polish | 2/2 | Complete   | 2026-04-07 | - |
 
+### Phase 27: Critical audio bugs & autocorrect fix: crash during phone call (#71), AirPods audio session conflicts (#72), and N-gram autocorrection on numeric tokens (#74)
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 26
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 27 to break down)
+
 ---
 *Roadmap created: 2026-03-04*
 *v1.0 shipped: 2026-03-07*

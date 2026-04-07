@@ -87,6 +87,7 @@ None.
 
 - Phase 23.1 inserted after Phase 23: App Localization Audit & Fix — ensure all UI strings use NSLocalizedString and app respects device language (URGENT)
 - Phase 24.1 inserted after Phase 24: Replace SymSpell with AOSP-style compressed trie (C++ with Swift interop) for spell correction (URGENT)
+- Phase 27 added: Critical audio bugs & autocorrect fix — crash during phone call (#71), AirPods audio session conflicts (#72), N-gram autocorrection on numeric tokens (#74)
 
 ### Blockers/Concerns
 
