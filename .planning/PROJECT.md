@@ -2,11 +2,22 @@
 
 ## What This Is
 
-Dictus is a free, open-source iOS keyboard app for on-device French speech-to-text dictation. Users speak into any iOS app and get accurate French transcription auto-inserted at the cursor — no subscription, no cloud, no account. Built with WhisperKit and Parakeet (FluidAudio) for multi-engine speech recognition, featuring full AZERTY/QWERTY UIKit keyboard (giellakbd-ios) with AOSP compressed trie spell correction (C++), n-gram next-word prediction (trigram with Stupid Backoff), spacebar trackpad, haptic feedback, iOS 26 Liquid Glass design, and cold start Audio Bridge for seamless dictation even when iOS kills the app. Currently in public TestFlight beta (v1.4).
+Dictus is a free, open-source iOS keyboard app for on-device French speech-to-text dictation. Users speak into any iOS app and get accurate French transcription auto-inserted at the cursor — no cloud, no account. Built with WhisperKit and Parakeet (FluidAudio) for multi-engine speech recognition, featuring full AZERTY/QWERTY UIKit keyboard (giellakbd-ios) with AOSP compressed trie spell correction (C++), n-gram next-word prediction (trigram with Stupid Backoff), spacebar trackpad, haptic feedback, iOS 26 Liquid Glass design, and cold start Audio Bridge for seamless dictation even when iOS kills the app. Currently in public TestFlight beta (v1.4). Introducing Dictus Pro (v1.5) — a premium tier with Smart Mode LLM reformulation, transcription history, and custom vocabulary, using an Open Core model (all existing features remain free, Pro adds new capabilities).
+
+## Current Milestone: v1.5 Dictus Pro
+
+**Goal:** Introduce a premium tier (Open Core model) with Smart Mode LLM reformulation, transcription history, and custom vocabulary — all processing 100% on-device.
+
+**Target features:**
+- SubscriptionManager + StoreKit 2 infrastructure (#55)
+- Paywall UI with Pro benefits (#78)
+- Transcription history — free base + Pro search/export (#70)
+- Smart Mode with local LLM — Apple Foundation Models + open-source models (#79)
+- Custom vocabulary — personal dictionary injected as Whisper initialPrompt (#80)
 
 ## Core Value
 
-A user can dictate text in French in any iOS app and correct it immediately on the same keyboard without switching — no subscription, no cloud, no account.
+A user can dictate text in French in any iOS app and correct it immediately on the same keyboard without switching — no cloud, no account.
 
 ## Requirements
 
@@ -69,22 +80,32 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 
 ### Active
 
-- [ ] BUG-71: Crash when starting dictation during phone call (CXCallObserver guard needed)
-- [ ] BUG-72: AirPods/media apps not resuming after recording (.notifyOthersOnDeactivation)
-- [ ] Cold start auto-return UX improvement (beyond current swipe-back overlay)
+- [ ] SubscriptionManager + StoreKit 2 with feature gating and beta override (#55)
+- [ ] Paywall UI — upgrade screen with Pro benefits, restore purchases (#78)
+- [ ] Transcription history — local journal with swipe-up, free base + Pro search/export (#70)
+- [ ] Smart Mode LLM — Apple Foundation Models + open-source models, templates (email, SMS, notes, summary) (#79)
+- [ ] Custom vocabulary — personal dictionary injected as Whisper initialPrompt (#80)
 
 ### Out of Scope
 
-- Smart modes (LLM post-processing) — deferred, focus on keyboard quality first
-- Real-time streaming transcription — v2+ feature, current batch approach works well
+- Professional dictionaries (médecin, avocat, dev, psy) — Pro Expert tier, future milestone
+- Continuous long dictation (>5 min, chunks) — Pro Expert tier, future milestone
+- Desktop sync (Dictus Desktop not ready yet) — future milestone
+- Audio file transcription (import .mp3/.m4a/.wav) — backlog
+- Voice message transcription (Telegram/WhatsApp) — backlog
+- Contextual reformulation ("more formal", "shorter") — backlog, after Smart Mode validated
+- Auto-summary / action extraction — backlog
+- Local translation (dictate FR → text EN) — backlog
+- Voice actions ("send by email") — backlog
+- Multi-language in same session — backlog
+- Voice shortcuts (user-defined abbreviations) — backlog
+- Multi-format export (.txt, .md, .docx, .pdf) — backlog, may come with desktop sync
+- Real-time streaming transcription — v2+ feature
 - iPad support — v2+, iPhone-first
 - Android port — v3+, different platform entirely
-- iCloud sync — v2+, local storage sufficient
 - Cloud transcription — contradicts privacy/offline identity
-- Subscription / monetization — contradicts open-source positioning
 - Smart Model Routing at runtime — breaks background recording, user selects model once
 - Full emoji picker in keyboard extension — memory-unsafe (emoji glyph cache), use system cycling
-- Apple Foundation Models — requires iPhone 15 Pro+, iOS 26.1+ — too restrictive
 - LSApplicationWorkspace for auto-return — private API, App Store rejection confirmed
 
 ## Context
@@ -99,9 +120,11 @@ Keyboard extension memory limit: ~50MB (verified on device).
 Distribution: Public TestFlight beta (v1.4 build 6), Apple Developer Team 9B8B36C2FA.
 Public link: https://testflight.apple.com/join/b55atKYX
 
-Known remaining issues:
-- BUG-71: Crash when starting dictation during active phone call (reverted fix, deferred to v1.5)
-- BUG-72: AirPods/media apps not resuming after recording (reverted fix, deferred to v1.5)
+Known remaining issues (handled separately on main repo, not in this milestone):
+- BUG-71: Crash when starting dictation during active phone call
+- BUG-72: AirPods/media apps not resuming after recording
+
+Dictus Desktop: macOS companion app in development (fork of handy.computer). Transcription sync planned for future milestone.
 
 ## Constraints
 
@@ -111,7 +134,10 @@ Known remaining issues:
 - **Data sharing**: All shared data via App Group (`group.solutions.pivi.dictus`)
 - **Minimum target**: iOS 17.0, iPhone 12+ (A14 Bionic) recommended
 - **Stack**: Swift 5.9+ / SwiftUI / WhisperKit + FluidAudio via SPM
-- **License**: MIT — fully open source
+- **License**: MIT — fully open source (Open Core model: Pro features in same repo, gated by StoreKit 2)
+- **Monetization**: Single "Dictus Pro" tier at launch (~4-5€/month), code structured for future tier split
+- **Privacy**: All Pro features 100% on-device — no cloud, no server, no data leaves the phone
+- **LLM**: Apple Foundation Models (iOS 26+, iPhone 15 Pro+) + downloadable open-source models as fallback
 
 ## Key Decisions
 
@@ -134,6 +160,11 @@ Known remaining issues:
 | BUG-71/72 revert | CallStateMonitor caused cold start regressions and post-call crashes | ⚠️ Revisit — need different approach in v1.5 |
 | Public TestFlight beta | Keyboard rework complete, ready for public exposure | ✓ Good — public beta live in v1.3 |
 | App Group migration to group.solutions.pivi.dictus | Old ID claimed by personal team, professional team needed new ID | ✓ Good — clean separation |
+| Open Core model for monetization | All code public (MIT), Pro gated by StoreKit 2 — transparent, privacy-respecting | — Pending |
+| Single Pro tier at launch | Reduce complexity, split into tiers later based on user data | — Pending |
+| Apple Foundation Models + open-source fallback | AFM for new iPhones, downloadable models for older devices | — Pending |
+| initialPrompt for custom vocabulary | Contextual sentences > flat word list (fazm reference) | — Pending |
+| Bug fixes on separate branch | BUG-71/72 and UI bugs handled on main repo, not in premium worktree | ✓ Good — clean separation |
 
 ---
-*Last updated: 2026-04-08 after v1.4 milestone*
+*Last updated: 2026-04-08 after v1.5 milestone definition*

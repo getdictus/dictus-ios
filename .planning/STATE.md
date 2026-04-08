@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: between_milestones
-stopped_at: v1.4 shipped, ready for v1.5 planning
-last_updated: "2026-04-08T08:45:00.000Z"
-last_activity: 2026-04-08 -- Shipped v1.4 Prediction & Stability
+milestone: v1.5
+milestone_name: Dictus Pro
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-04-08T14:00:00.000Z"
+last_activity: 2026-04-08 -- Milestone v1.5 started
 progress:
   total_phases: 0
   completed_phases: 0
@@ -20,16 +20,17 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-08)
 
-**Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Between milestones — v1.4 shipped, planning v1.5
+**Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no cloud, no account.
+**Current focus:** v1.5 Dictus Pro — premium tier with Smart Mode, history, custom vocabulary
 
 ## Current Position
 
-Last shipped: v1.4 Prediction & Stability (2026-04-08)
-Next milestone: v1.5 (not yet planned)
-Last activity: 2026-04-08 -- Shipped v1.4
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-08 — Milestone v1.5 started
 
-Progress: [██████████] 100% (v1.4 complete)
+Progress: ░░░░░░░░░░ 0%
 
 ## Performance Metrics
 
