@@ -15,6 +15,7 @@ struct ToolbarView: View {
     var onMicTap: () -> Void
 
     // Suggestion bar integration parameters (default to idle/empty)
+    var statusMessage: String? = nil
     var suggestions: [String] = []
     var suggestionMode: SuggestionMode = .idle
     var onSuggestionTap: ((Int) -> Void)? = nil
@@ -34,7 +35,13 @@ struct ToolbarView: View {
                 // The gear icon is rarely needed during active typing, and users can
                 // access settings between typing sessions when the bar reverts to idle.
                 HStack {
-                    if suggestions.isEmpty {
+                    if let message = statusMessage {
+                        Text(message)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity)
+                    } else if suggestions.isEmpty {
                         Link(destination: URL(string: "dictus://")!) {
                             Image(systemName: "gearshape.fill")
                                 .font(.system(size: gearIconSize, weight: .medium))
