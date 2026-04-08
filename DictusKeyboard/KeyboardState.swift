@@ -266,6 +266,15 @@ class KeyboardState: ObservableObject {
                 coldStartGraceEnd = nil
                 if status == .idle || status == .ready || status == .failed {
                     activeSessionID = nil
+                    // Read and display error message from App Group
+                    if status == .failed, let errorMsg = defaults.string(forKey: SharedKeys.lastError) {
+                        statusMessage = errorMsg
+                        defaults.removeObject(forKey: SharedKeys.lastError)
+                        defaults.synchronize()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                            self?.statusMessage = nil
+                        }
+                    }
                 }
             }
 

@@ -13,14 +13,14 @@ public enum AccentedCharacters {
     /// Maps a base letter (lowercase) to its accented variants.
     /// Covers all French AZERTY accented characters plus n-tilde (standard on iOS keyboards).
     public static let mappings: [String: [String]] = [
-        "e": ["\u{00E9}", "\u{00E8}", "\u{00EA}", "\u{00EB}"],  // e acute, grave, circumflex, diaeresis
-        "a": ["\u{00E0}", "\u{00E2}", "\u{00E4}"],              // a grave, circumflex, diaeresis
-        "u": ["\u{00F9}", "\u{00FB}", "\u{00FC}"],              // u grave, circumflex, diaeresis
-        "i": ["\u{00EE}", "\u{00EF}"],                          // i circumflex, diaeresis
-        "o": ["\u{00F4}", "\u{00F6}"],                          // o circumflex, diaeresis
-        "c": ["\u{00E7}"],                                      // c cedilla
-        "y": ["\u{00FF}"],                                      // y diaeresis
-        "n": ["\u{00F1}"]                                       // n tilde
+        "e": ["\u{00E9}", "\u{00E8}", "\u{00EA}", "\u{00EB}"],          // e acute, grave, circumflex, diaeresis
+        "a": ["\u{00E0}", "\u{00E2}", "\u{00E4}", "\u{00E1}"],          // a grave, circumflex, diaeresis, acute
+        "u": ["\u{00F9}", "\u{00FB}", "\u{00FC}", "\u{00FA}"],          // u grave, circumflex, diaeresis, acute
+        "i": ["\u{00EE}", "\u{00EF}", "\u{00ED}"],                      // i circumflex, diaeresis, acute
+        "o": ["\u{00F4}", "\u{00F6}", "\u{00F3}"],                      // o circumflex, diaeresis, acute
+        "c": ["\u{00E7}"],                                              // c cedilla
+        "y": ["\u{00FF}"],                                              // y diaeresis
+        "n": ["\u{00F1}"]                                               // n tilde
     ]
 
     /// Returns accented variants for a given key, or nil if no accents exist.

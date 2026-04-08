@@ -93,10 +93,10 @@ class TextPredictionEngine {
     func spellCheck(_ word: String) -> (correction: String, alternatives: [String])? {
         guard !word.isEmpty else { return nil }
 
-        // French overrides bypass everything — "ca" is never valid French.
+        // Language-specific overrides bypass everything — e.g., "ca" is never valid French.
         // Must check before UserDictionary, otherwise typing "ca" twice
         // would "learn" it and block the ça correction permanently.
-        if let result = aospTrieEngine.frenchOverride(for: word) {
+        if let result = aospTrieEngine.languageOverride(for: word) {
             return result
         }
 
