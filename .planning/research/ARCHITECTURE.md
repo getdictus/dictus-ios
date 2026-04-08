@@ -1,639 +1,518 @@
 # Architecture Patterns
 
-**Domain:** iOS keyboard extension prediction engine upgrade + cold start auto-return
-**Researched:** 2026-04-01
-**Focus:** Integration of SymSpell, n-gram prediction, autocorrect fix, and cold start auto-return into existing two-process architecture
-**Overall Confidence:** MEDIUM-HIGH (prediction architecture HIGH, cold start LOW)
+**Domain:** Premium tier integration into existing two-process iOS keyboard app
+**Researched:** 2026-04-08
+**Focus:** How SubscriptionManager, Smart Mode LLM, transcription history, custom vocabulary, and paywall integrate with the existing DictusApp + DictusKeyboard + DictusCore architecture
+**Overall Confidence:** MEDIUM-HIGH
+
+---
 
 ## Current Architecture (Baseline)
 
 ```
-DictusApp (Main Process)              DictusKeyboard (Extension, ~50MB limit)
-+-----------------------+              +--------------------------------------+
-| WhisperKit/Parakeet   |              | KeyboardViewController               |
-| DictationCoordinator  |<--Darwin--->|   +-- DictusKeyboardBridge            |
-| AVAudioSession        |  Notifs     |   +-- GiellaKeyboardView (UIKit)      |
-| SwipeBackOverlay      |             |   +-- KeyboardRootView (SwiftUI)      |
-| ModelManager          |<--AppGrp--->|       +-- SuggestionBarView           |
-+-----------------------+              |       +-- ToolbarView                 |
-                                       |                                      |
-                                       | TextPrediction/                      |
-                                       |   +-- SuggestionState (@Published)   |
-                                       |   +-- TextPredictionEngine           |
-                                       |       +-- UITextChecker (system)     |
-                                       |       +-- FrequencyDictionary        |
-                                       +--------------------------------------+
+DictusApp (Main Process, SwiftUI)       DictusKeyboard (Extension, ~50MB limit, UIKit)
++-----------------------------+          +-------------------------------------------+
+| DictationCoordinator        |          | KeyboardViewController                    |
+|   WhisperKit / Parakeet     |<-Darwin->|   DictusKeyboardBridge                    |
+|   UnifiedAudioEngine        | Notifs   |   GiellaKeyboardView (UICollectionView)   |
+|   TranscriptionService      |          |   KeyboardRootView (SwiftUI host)         |
+|   LiveActivityManager       |<-AppGrp->|     SuggestionBarView                     |
+|   ModelManager              | Defaults |     ToolbarView                           |
+|   SoundFeedbackService      |          |     RecordingOverlay                      |
++-----------------------------+          |   TextPrediction/ (C++ trie + ngram)      |
+                                         +-------------------------------------------+
 
-DictusCore (Shared Framework)
-+-- SharedKeys, AppGroup, DarwinNotifications
-+-- FrequencyDictionary (struct)
-+-- AccentedCharacters
-+-- HapticFeedback, PersistentLog
-+-- Design tokens, themes
+DictusCore (Local SPM package, linked by both targets)
++-- AppGroup (identifier, defaults, containerURL)
++-- SharedKeys (all cross-process UserDefaults keys)
++-- DarwinNotifications (ping-only cross-process signals)
++-- DictationStatus (idle/requested/recording/transcribing/ready/failed)
++-- UserDictionary (learned words, App Group storage)
++-- ModelInfo, SpeechEngine, FrequencyDictionary
++-- Design/, Logger, HapticFeedback, PersistentLog
 ```
 
-### Current Data Flow: Keystroke to Suggestion
+### Key Constraints Carried Forward
+- Keyboard extension: ~50MB RAM hard limit (~35MB free after trie/ngram)
+- No `UIApplication.shared` in keyboard extension
+- Darwin notifications carry NO payload (ping-only, read data from App Group)
+- All cross-process data via `AppGroup.defaults` (UserDefaults) or `AppGroup.containerURL` (files)
+- StoreKit 2 APIs are unreliable in extension sandbox -- must cache state
+- Minimum target: iOS 17.0, but Apple Foundation Models requires iOS 26 + iPhone 15 Pro+
+
+---
+
+## Recommended Architecture: Premium Integration
+
+### New Components Overview
+
+| Component | Target | New/Modified | Responsibility |
+|-----------|--------|-------------|----------------|
+| `ProStatus` | DictusCore | NEW | Lightweight struct: isPro, expiresAt, source. Read by both processes. |
+| `FeatureGate` | DictusCore | NEW | `canUse(.smartMode)` checks. Single API for all gating. |
+| `SubscriptionManager` | DictusApp | NEW | StoreKit 2 lifecycle: products, purchase, restore, Transaction.updates stream. Writes ProStatus to App Group. |
+| `TranscriptionEntry` | DictusCore | NEW | SwiftData @Model for history records. |
+| `TranscriptionStore` | DictusCore | NEW | SwiftData ModelContainer at App Group path. save/fetch/search/export. |
+| `CustomVocabulary` | DictusCore | NEW | Personal terms as [String] in App Group. toInitialPrompt() for WhisperKit. |
+| `SmartModeTemplate` | DictusCore | NEW | Enum: .email, .sms, .notes, .summary with prompt strings. |
+| `SmartModeService` | DictusApp | NEW | Orchestrates Apple Foundation Models (iOS 26) or MLX fallback. |
+| `PaywallView` | DictusApp | NEW | SwiftUI SubscriptionStoreView wrapper with Pro benefits. |
+| `UpgradePrompt` | DictusKeyboard | NEW | Minimal UIKit banner: "Dictus Pro -- Tap to upgrade". Opens dictus://upgrade. |
+| `HistoryListView` | DictusApp | NEW | SwiftUI list with free (10 items) vs Pro (unlimited + search + export). |
+| `VocabularyEditorView` | DictusApp | NEW | Add/remove/edit custom terms. |
+| `SharedKeys` | DictusCore | MODIFIED | 5 new keys for Pro status, Smart Mode, vocabulary. |
+| `DarwinNotifications` | DictusCore | MODIFIED | 1 new notification: proStatusChanged. |
+| `DictationCoordinator` | DictusApp | MODIFIED | After transcription: save history, apply Smart Mode, read custom vocabulary. |
+| `DictusApp.swift` | DictusApp | MODIFIED | dictus://upgrade URL handler, ModelContainer injection, SubscriptionManager start. |
+| `ToolbarView` | DictusKeyboard | MODIFIED | Smart Mode toggle (gated by FeatureGate). |
+
+---
+
+## Component Boundaries & Data Flow
+
+### 1. Subscription & Feature Gating
 
 ```
-User types character
-  -> GiellaKeyboardView.touchesBegan (haptic)
-  -> DictusKeyboardBridge.didTriggerKey(.input(char))
-  -> proxy.insertText(character)
-  -> Read proxy.documentContextBeforeInput
-  -> SuggestionState.updateAsync(context:)
-    -> DispatchWorkItem on serial background queue (.userInitiated)
-    -> extractLastWord(from: context)
-    -> TextPredictionEngine.suggestions(for:) or .accentSuggestions(for:)
-      -> UITextChecker.completions() -> re-rank by FrequencyDictionary
-    -> Main thread: @Published suggestions + mode update
-  -> SuggestionBarView re-renders via SwiftUI
+[App Store] --purchase/restore--> [DictusApp: SubscriptionManager]
+                                       |
+     Transaction.updates               | ProStatus(isPro, expiresAt, source).save()
+     (async stream, real-time)         |
+                                       v
+                               [App Group UserDefaults]
+                                 SharedKeys.proStatus
+                                 (JSON: ~100 bytes)
+                                       |
+                                       v
+                               [DictusKeyboard: FeatureGate]
+                                 ProStatus.load() -> isPro: Bool
+                                 (reads cached JSON, <1ms)
 ```
 
-### Current Data Flow: Autocorrect on Space
+**Why this split:** StoreKit 2 `Transaction.currentEntitlements` and `Product.SubscriptionInfo.Status` require the full StoreKit runtime, which is only reliable in the main app process. Keyboard extensions run in a restricted sandbox where StoreKit 2 APIs may return empty results or fail silently. The correct pattern (confirmed by multiple Apple Developer Forum posts and community implementations) is: DictusApp resolves subscription state, serializes a simple struct to App Group, keyboard reads the cached struct.
 
-```
-User taps space
-  -> DictusKeyboardBridge.handleSpace()
-  -> SuggestionState.performSpellCheck(currentWord)
-    -> TextPredictionEngine.spellCheck()
-      -> UITextChecker.rangeOfMisspelledWord + guesses()
-      -> Re-rank by FrequencyDictionary
-  -> If correction != original:
-    -> Delete currentWord via proxy.deleteBackward() loop
-    -> proxy.insertText(correction + " ")
-    -> Store AutocorrectState in SuggestionState.lastAutocorrect
-  -> SuggestionState.clear()
-```
-
-## Recommended Architecture (After Upgrade)
-
-### Component Boundaries
-
-| Component | Responsibility | Location | Status |
-|-----------|---------------|----------|--------|
-| **SymSpellEngine** | Spell correction via symmetric delete algorithm | DictusKeyboard/TextPrediction/ | NEW |
-| **NgramPredictor** | Next-word prediction from context (trigram with bigram backoff) | DictusKeyboard/TextPrediction/ | NEW |
-| **NgramTrie** | Compact binary trie data structure for trigram storage | DictusKeyboard/TextPrediction/ | NEW |
-| **TextPredictionEngine** | Orchestrator: routes to SymSpell (correction) + UITextChecker (completions) + NgramPredictor (next-word) | DictusKeyboard/TextPrediction/ | MODIFIED |
-| **SuggestionState** | UI-facing adapter, async dispatch, @Published state, autocorrect undo | DictusKeyboard/TextPrediction/ | MODIFIED |
-| **SuggestionBarView** | Displays 3-slot suggestions across all modes | DictusKeyboard/Views/ | MODIFIED |
-| **DictusKeyboardBridge** | Key event translation, autocorrect undo clearing | DictusKeyboard/ | MODIFIED |
-| **FrequencyDictionary** | Word frequency ranking for UITextChecker re-ranking | DictusCore/ | UNCHANGED |
-| **KeyboardViewController** | View lifecycle, language refresh | DictusKeyboard/ | UNCHANGED |
-
-### Upgraded Architecture Diagram
-
-```
-DictusKeyboard (Extension)
-+------------------------------------------------------+
-| KeyboardViewController                                |
-|   +-- DictusKeyboardBridge                            |
-|   |     handleInputKey: clear lastAutocorrect  <- FIX #67
-|   |     handleSpace: correction via engine            |
-|   +-- GiellaKeyboardView (UIKit)                      |
-|   +-- KeyboardRootView (SwiftUI)                      |
-|         +-- SuggestionBarView (4 modes)               |
-|         +-- ToolbarView                               |
-|                                                       |
-| TextPrediction/                                       |
-|   +-- SuggestionState (@Published)                    |
-|   |     mode: .idle / .completions / .accents         |
-|   |           / .nextWord  <- NEW MODE                |
-|   |     lastAutocorrect: cleared on any input <- FIX  |
-|   |                                                   |
-|   +-- TextPredictionEngine (orchestrator)             |
-|   |     +-- UITextChecker (completions -- kept)       |
-|   |     +-- FrequencyDictionary (ranking -- kept)     |
-|   |     +-- SymSpellEngine (spell correction) <- NEW  |
-|   |     +-- NgramPredictor (next-word) <- NEW         |
-|   |                                                   |
-|   +-- SymSpellEngine.swift <- NEW                     |
-|   |     Uses: SymSpellSwift SPM package               |
-|   |     Data: {lang}_symspell.txt                     |
-|   |                                                   |
-|   +-- NgramPredictor.swift <- NEW                     |
-|   |     Uses: NgramTrie (custom Swift struct)         |
-|   |     Data: {lang}_trigram.bin                      |
-|   |                                                   |
-|   +-- NgramTrie.swift <- NEW                          |
-|         Flat sorted array, binary search, mmap        |
-|                                                       |
-| Resources/                                            |
-|   +-- fr_frequency.json (kept)                        |
-|   +-- en_frequency.json (kept)                        |
-|   +-- fr_symspell.txt <- NEW (~2-3MB)                 |
-|   +-- en_symspell.txt <- NEW (~2-3MB)                 |
-|   +-- fr_trigram.bin <- NEW (~5-10MB)                 |
-|   +-- en_trigram.bin <- NEW (~5-10MB)                 |
-+------------------------------------------------------+
-```
-
-### Memory Budget
-
-| Component | Current | After Upgrade | Notes |
-|-----------|---------|---------------|-------|
-| UITextChecker | 0 MB (system) | 0 MB (system) | Shared system resource, zero extension cost |
-| FrequencyDictionary | ~0.3 MB | ~0.3 MB | Kept for UITextChecker completion ranking |
-| SymSpell dictionary (1 lang) | -- | ~3-5 MB | Symmetric delete index in RAM |
-| N-gram model (1 lang) | -- | ~5-10 MB | Trigram trie, single language loaded |
-| Keyboard UI + giellakbd | ~15 MB | ~15 MB | Unchanged |
-| **Total** | ~15 MB | ~25-30 MB | Well within 50 MB limit |
-
-**Critical constraint:** Load only ONE language at a time. Switch on `SharedKeys.language` change in `viewWillAppear`. This is the existing FrequencyDictionary pattern -- SymSpell and n-gram must follow it exactly.
-
-## New Component Designs
-
-### Component 1: SymSpellEngine (Spell Correction)
-
-**What it replaces:** `UITextChecker.rangeOfMisspelledWord()` + `guesses()` for spell correction.
-**What it does NOT replace:** `UITextChecker.completions()` for word completions (kept -- zero memory cost, good French morphology coverage).
+**ProStatus struct (DictusCore):**
 
 ```swift
-// DictusKeyboard/TextPrediction/SymSpellEngine.swift
-
-import SymSpellSwift  // SPM dependency: github.com/gdetari/SymSpellSwift
-
-/// Wraps SymSpellSwift for fast probabilistic spell correction.
-///
-/// WHY SymSpell over UITextChecker for correction:
-/// UITextChecker returns corrections ranked by edit distance only.
-/// SymSpell pre-computes deletion variants and ranks by word frequency,
-/// so "helo" -> "hello" (common word) instead of "helo" -> "helons" (rare).
-class SymSpellEngine {
-    private var symSpell: SymSpell?
-    private var currentLanguage: String = ""
-
-    func load(language: String) {
-        guard language != currentLanguage else { return }
-        currentLanguage = language
-
-        let ss = SymSpell(
-            maxDictionaryEditDistance: 2,
-            prefixLength: 7  // Balance: speed vs memory. 7 = good default.
-        )
-
-        if let path = Bundle.main.path(
-            forResource: "\(language)_symspell", ofType: "txt"
-        ) {
-            ss.loadDictionary(from: path, termIndex: 0, countIndex: 1)
+public struct ProStatus: Codable {
+    public let isPro: Bool
+    public let expiresAt: Date?
+    public let source: Source
+    
+    public enum Source: String, Codable {
+        case storekit   // Real StoreKit 2 entitlement
+        case beta       // TestFlight/debug override
+    }
+    
+    public static func load() -> ProStatus {
+        guard let data = AppGroup.defaults.data(forKey: SharedKeys.proStatus),
+              let status = try? JSONDecoder().decode(ProStatus.self, from: data)
+        else {
+            return ProStatus(isPro: false, expiresAt: nil, source: .storekit)
         }
-        symSpell = ss
-    }
-
-    /// Returns the best correction, or nil if word is correct/unknown.
-    func correct(_ word: String) -> String? {
-        guard let ss = symSpell else { return nil }
-        let results = ss.lookup(
-            word,
-            verbosity: .closest,
-            maxEditDistance: word.count < 3 ? 1 : 2
-        )
-        guard let best = results.first,
-              best.term.lowercased() != word.lowercased() else {
-            return nil
+        // Defend against stale cache: reject if expired
+        if let expiry = status.expiresAt, expiry < Date() {
+            return ProStatus(isPro: false, expiresAt: nil, source: .storekit)
         }
-        return best.term
+        return status
     }
 }
 ```
 
-**Key design decisions:**
-- Edit distance adapts to word length: 1 for short words (<3 chars), 2 for longer words. Short words with edit distance 2 produce too many irrelevant matches.
-- Prefix length 7 provides 90%+ memory reduction per SymSpell documentation while maintaining fast lookups.
-
-### Component 2: NgramPredictor (Next-Word Prediction)
-
-**Recommendation: Pure Swift trigram trie** over KenLM C++ because:
-1. No Objective-C++ bridging header complexity
-2. MIT-compatible (KenLM is LGPL -- copyleft concern for MIT project)
-3. Easier to debug for a Swift learner
-4. 5-10 MB binary trie is sufficient for keyboard-grade prediction quality
+**FeatureGate (DictusCore):**
 
 ```swift
-// DictusKeyboard/TextPrediction/NgramPredictor.swift
+public enum ProFeature {
+    case smartMode
+    case historySearch
+    case historyExport
+    case customVocabulary
+    case unlimitedHistory
+}
 
-/// Trigram-based next-word predictor using a compact binary trie.
-///
-/// Given context words [W1, W2], returns probable next words sorted by frequency.
-/// Uses backoff: tries trigram P(W3|W1,W2) first, falls back to bigram P(W3|W2),
-/// then unigram P(W3). Same approach as Gboard and SwiftKey.
-class NgramPredictor {
-    private var trie: NgramTrie?
-    private var currentLanguage: String = ""
+public enum FeatureGate {
+    public static func canUse(_ feature: ProFeature) -> Bool {
+        return ProStatus.load().isPro
+    }
+}
+```
 
-    func load(language: String) {
-        guard language != currentLanguage else { return }
-        currentLanguage = language
-        guard let url = Bundle.main.url(
-            forResource: "\(language)_trigram", withExtension: "bin"
-        ) else {
-            trie = nil; return
+**Beta override:** During TestFlight, `SharedKeys.betaProOverride = true` from a debug menu in Settings. `ProStatus.load()` checks this flag first, returns `isPro: true` when set. Avoids needing sandbox StoreKit environment for every test. This follows the same pattern as the existing `SharedKeys.modelReady` flag.
+
+**When does the keyboard learn about status changes?**
+- New Darwin notification `proStatusChanged` posted by SubscriptionManager after writing ProStatus
+- Keyboard observes this and refreshes its UI (show/hide Pro feature toggles)
+- Also: keyboard reads ProStatus on every `viewWillAppear` (covers app restart, iOS killing the extension)
+
+### 2. Transcription History
+
+```
+DictusApp                           DictusCore                        DictusKeyboard
+  HistoryListView                   TranscriptionEntry (@Model)       (NO history access)
+  - list (free: 10, Pro: all)       TranscriptionStore                (reads lastTranscription
+  - search (Pro)                    - ModelContainer at                 via SharedKeys only,
+  - export (Pro)                      AppGroup.containerURL/            as today)
+  - swipe-to-delete                   transcriptions.store
+  DictationCoordinator              - save(), fetchRecent(limit:),
+  - calls store.save()               search(query:), export()
+    after each transcription
+```
+
+**Why SwiftData over Core Data:** SwiftData is the modern replacement (iOS 17+, matches minimum target). Uses `@Model` macro, integrates with SwiftUI via `@Query`, supports App Group shared containers natively. Less boilerplate than Core Data.
+
+**Why NOT in the keyboard extension:** The keyboard only needs `SharedKeys.lastTranscription` (one string) to insert text. Adding a SwiftData ModelContainer in the keyboard would cost 2-5MB RAM overhead for zero user benefit. History is viewed and searched exclusively in DictusApp.
+
+**SwiftData model (DictusCore):**
+
+```swift
+@Model
+public class TranscriptionEntry {
+    public var text: String
+    public var date: Date
+    public var duration: TimeInterval
+    public var modelUsed: String
+    public var smartModeTemplate: String?   // nil if raw, or template name
+    public var originalText: String?        // Pre-Smart-Mode text, if reformulated
+    
+    public init(text: String, date: Date, duration: TimeInterval, modelUsed: String) {
+        self.text = text
+        self.date = date
+        self.duration = duration
+        self.modelUsed = modelUsed
+    }
+}
+```
+
+**Container setup (DictusApp only):**
+
+```swift
+let schema = Schema([TranscriptionEntry.self])
+let config = ModelConfiguration(
+    schema: schema,
+    url: AppGroup.containerURL!.appendingPathComponent("transcriptions.store"),
+    cloudKitDatabase: .none  // 100% local, no iCloud
+)
+let container = try ModelContainer(for: schema, configurations: [config])
+```
+
+**Free vs Pro tier logic:**
+- `TranscriptionStore.fetchRecent(limit:)` -- free passes 10, Pro passes nil (unlimited)
+- Search and export methods check `FeatureGate.canUse(.historySearch)` before executing
+- All transcriptions are saved regardless of tier (data is there when user upgrades)
+
+### 3. Smart Mode LLM
+
+```
+DictusApp                           DictusCore                        DictusKeyboard
+  SmartModeService                  SmartModeTemplate (enum)          ToolbarView
+  - Apple Foundation Models           .email, .sms, .notes, .summary  - Smart Mode toggle
+    (iOS 26 + Apple Intelligence)     prompt strings per template       (gated: FeatureGate)
+  - MLX Swift fallback                                                - Template picker
+    (SmolLM2 1.7B 4-bit)           SmartModeResult (struct)            (stored in App Group)
+  DictationCoordinator                .original, .reformulated
+  - post-transcription hook                                           NO LLM runs here.
+  - reads smartModeEnabled                                            Keyboard only sets
+    + template from App Group                                         flags in App Group.
+```
+
+**Two-tier LLM strategy:**
+
+| Tier | Engine | Devices | RAM | Latency | Storage |
+|------|--------|---------|-----|---------|---------|
+| Primary | Apple Foundation Models | iPhone 15 Pro+, iOS 26+, Apple Intelligence enabled | ~0 (system-managed) | <1s | 0 (system model) |
+| Fallback | MLX Swift + SmolLM2-1.7B-Instruct 4-bit | iPhone 12+, iOS 17+ | ~1-2GB | 2-5s | ~800MB-1.2GB download |
+
+**Why Apple Foundation Models first:** Zero model management, zero storage cost, native Swift API with `@Generable` macro for structured output. The on-device ~3B parameter model is the same one powering Apple Intelligence Writing Tools -- it handles text reformulation natively. Availability check: `SystemLanguageModel.default.isAvailable` (returns false on incompatible devices or when AI is disabled).
+
+**Why MLX fallback:** Apple Foundation Models requires iPhone 15 Pro+ AND iOS 26 AND Apple Intelligence enabled. Dictus targets iOS 17+ and iPhone 12+. A significant user segment (iPhone 12-15 standard) needs a fallback. MLX Swift is Apple's official open-source ML framework (MIT license), runs on CPU+GPU+Neural Engine, and supports quantized models. SmolLM2-1.7B-Instruct at 4-bit quantization fits in ~800MB-1GB and handles text reformulation adequately.
+
+**SmartModeService pattern:**
+
+```swift
+@MainActor
+class SmartModeService {
+    func reformulate(text: String, template: SmartModeTemplate) async throws -> String {
+        if #available(iOS 26, *), isFoundationModelsAvailable() {
+            return try await reformulateWithFoundationModels(text: text, template: template)
         }
-        trie = NgramTrie.load(from: url)
-    }
-
-    /// Returns up to `max` next-word predictions given 1-2 context words.
-    func predict(context: [String], max: Int = 3) -> [String] {
-        guard let trie = trie else { return [] }
-
-        // Try trigram first (2 context words)
-        if context.count >= 2 {
-            let predictions = trie.query(
-                w1: context[context.count - 2],
-                w2: context[context.count - 1],
-                limit: max
-            )
-            if !predictions.isEmpty { return predictions }
-        }
-
-        // Backoff to bigram (1 context word)
-        if let lastWord = context.last {
-            return trie.query(w2: lastWord, limit: max)
-        }
-        return []
+        return try await reformulateWithMLX(text: text, template: template)
     }
 }
 ```
 
-### Component 3: NgramTrie (Data Structure)
+**Keyboard interaction -- no new IPC needed:**
+1. User taps Smart Mode toggle in keyboard toolbar (Pro-gated)
+2. User selects template; keyboard writes `SharedKeys.smartModeEnabled = true` + `SharedKeys.smartModeTemplate = "email"` to App Group
+3. Normal dictation flow: keyboard triggers recording via Darwin/URL, app records and transcribes
+4. After transcription, `DictationCoordinator.stopDictation()` reads `smartModeEnabled` + template from App Group
+5. If enabled: passes text through `SmartModeService.reformulate()` before writing to `SharedKeys.lastTranscription`
+6. Keyboard receives reformulated text via existing `transcriptionReady` Darwin notification
+7. History saves both `originalText` and reformulated `text`
+
+Smart Mode is transparent to the keyboard -- it just receives better text through the existing channel.
+
+**MLX model download:** Same UX pattern as existing WhisperKit model download in ModelManager. Add a "Smart Mode model" card in Settings. Download is Pro-only. Store in App Group containerURL for persistence across app updates.
+
+### 4. Custom Vocabulary
+
+```
+DictusApp                           DictusCore                        DictusKeyboard
+  VocabularyEditorView              CustomVocabulary                  (NO direct access)
+  - add/remove/edit terms           - terms: [String]                 (vocabulary used by
+  - import from contacts?           - stored in App Group defaults      WhisperKit in app
+                                    - toInitialPrompt() -> String       process only)
+  DictationCoordinator
+  - reads CustomVocabulary.shared
+    before each transcription
+  - passes toInitialPrompt()
+    to WhisperKit DecodingOptions
+```
+
+**How it works:** WhisperKit's `DecodingOptions` accepts an `initialPrompt` parameter. This is the standard Whisper technique for context biasing -- providing contextual sentences containing target vocabulary terms biases the model toward recognizing those words during transcription. Research confirms this approach improves domain-specific recognition without fine-tuning.
+
+**CustomVocabulary (DictusCore):**
 
 ```swift
-// DictusKeyboard/TextPrediction/NgramTrie.swift
-
-/// Compact trigram trie stored as a flat sorted array for cache-friendly access.
-///
-/// Binary format (generated offline by a build tool):
-/// Header: [vocabSize: UInt32, trigramCount: UInt32, bigramCount: UInt32]
-/// Vocab:  [word1\0, word2\0, ...] (null-terminated UTF-8 strings)
-/// Trigram entries: sorted by (w1_idx, w2_idx), each 16 bytes:
-///   [w1_idx: UInt32, w2_idx: UInt32, w3_idx: UInt32, freq: UInt32]
-/// Bigram entries: sorted by w1_idx, each 12 bytes:
-///   [w1_idx: UInt32, w2_idx: UInt32, freq: UInt32]
-///
-/// WHY flat array over nested Dictionary:
-/// Swift Dictionary has ~80 bytes overhead per entry.
-/// A flat sorted array with binary search uses 16 bytes per trigram entry.
-/// For 500K trigrams: ~8MB flat vs ~40MB nested Dictionary.
-struct NgramTrie {
-    private let vocab: [String]
-    private let vocabIndex: [String: UInt32]
-    private let trigrams: UnsafeBufferPointer<TrigramEntry>  // mmap'd
-    private let bigrams: UnsafeBufferPointer<BigramEntry>    // mmap'd
-
-    struct TrigramEntry {
-        let w1: UInt32; let w2: UInt32; let w3: UInt32; let freq: UInt32
+public final class CustomVocabulary {
+    public static let shared = CustomVocabulary()
+    private static let storageKey = "dictus.customVocabulary"
+    private static let maxTerms = 500  // Cap to prevent initialPrompt from being too long
+    
+    public var terms: [String] {
+        didSet { save() }
     }
-    struct BigramEntry {
-        let w1: UInt32; let w2: UInt32; let freq: UInt32
+    
+    public func toInitialPrompt() -> String? {
+        guard !terms.isEmpty else { return nil }
+        return "Termes importants: \(terms.joined(separator: ", "))."
     }
-
-    static func load(from url: URL) -> NgramTrie? {
-        // Memory-map the file for lazy loading
-        // Parse header -> build vocab table -> reference entry arrays
-        // Implementation in build phase
+    
+    private init() {
+        terms = AppGroup.defaults.stringArray(forKey: Self.storageKey) ?? []
     }
-
-    func query(w1: String, w2: String, limit: Int) -> [String] {
-        // Binary search for (w1_idx, w2_idx) prefix in trigrams
-        // Collect top-N by freq, map w3_idx to vocab string
-    }
-
-    func query(w2: String, limit: Int) -> [String] {
-        // Binary search for w1_idx in bigrams (bigram backoff)
+    
+    private func save() {
+        AppGroup.defaults.set(terms, forKey: Self.storageKey)
+        AppGroup.defaults.synchronize()
     }
 }
 ```
 
-### Component 4: TextPredictionEngine (Modified Orchestrator)
+**Integration in DictationCoordinator (3 lines):**
 
 ```swift
-// Changes to TextPredictionEngine.swift
-
-class TextPredictionEngine {
-    private let textChecker = UITextChecker()        // KEPT: word completions
-    private var frequencyDict = FrequencyDictionary() // KEPT: completion ranking
-    private let symSpell = SymSpellEngine()           // NEW: spell correction
-    private let ngram = NgramPredictor()              // NEW: next-word prediction
-    private var language: String = "fr"
-
-    func setLanguage(_ lang: String) {
-        language = lang
-        frequencyDict.load(language: lang)
-        symSpell.load(language: lang)    // NEW
-        ngram.load(language: lang)       // NEW
-    }
-
-    // suggestions(for:) -- UNCHANGED
-    // Still uses UITextChecker.completions() + FrequencyDictionary ranking
-    func suggestions(for partialWord: String) -> [String] { /* unchanged */ }
-
-    // spellCheck -- CHANGED: SymSpell with UITextChecker fallback
-    func spellCheck(_ word: String) -> String? {
-        if let correction = symSpell.correct(word) { return correction }
-        return fallbackSpellCheck(word)  // UITextChecker as fallback
-    }
-
-    // NEW: next-word predictions from context
-    func nextWordPredictions(context: [String]) -> [String] {
-        return ngram.predict(context: context, max: 3)
-    }
-
-    // accentSuggestions -- UNCHANGED
-    func accentSuggestions(for partialWord: String) -> [String]? { /* unchanged */ }
-
-    // Fallback: original UITextChecker spell check (for graceful degradation)
-    private func fallbackSpellCheck(_ word: String) -> String? {
-        let nsString = word as NSString
-        let range = NSRange(location: 0, length: nsString.length)
-        let misspelled = textChecker.rangeOfMisspelledWord(
-            in: word, range: range, startingAt: 0, wrap: false, language: language
-        )
-        guard misspelled.location != NSNotFound else { return nil }
-        guard let guesses = textChecker.guesses(
-            forWordRange: misspelled, in: word, language: language
-        ), !guesses.isEmpty else { return nil }
-        let ranked = guesses.sorted { frequencyDict.rank(of: $0) < frequencyDict.rank(of: $1) }
-        return ranked.first
-    }
-}
+// In stopDictation(), before transcription:
+let customPrompt = CustomVocabulary.shared.toInitialPrompt()
+// Pass customPrompt to WhisperKit DecodingOptions.initialPrompt
 ```
 
-### Component 5: SuggestionState (Modified)
+This follows the same singleton + App Group pattern as the existing `UserDictionary` class.
+
+### 5. Paywall & Upgrade Prompts
+
+```
+DictusApp                                    DictusKeyboard
+  PaywallView (SwiftUI)                      UpgradePrompt (UIKit)
+  - SubscriptionStoreView (StoreKit 2)       - "Dictus Pro -- Tap to open app"
+  - Pro benefits showcase                    - Opens dictus://upgrade URL
+  - Restore purchases                        - Minimal: UILabel + UIButton
+  - Handles dictus://upgrade URL             - Memory cost: <1KB
+```
+
+**Why SubscriptionStoreView:** StoreKit 2 provides a built-in SwiftUI view that handles the entire purchase flow -- pricing, terms, restore, loading states. One line of SwiftUI. No custom payment UI needed. Fewer App Store review issues.
+
+**Keyboard upgrade prompt:** When user taps a Pro feature and `FeatureGate.canUse()` returns false, show a minimal UIKit banner. Tapping opens `dictus://upgrade` via the existing URL scheme pattern (same as `dictus://dictate` for cold start). DictusApp handles this URL by presenting PaywallView.
+
+---
+
+## New SharedKeys
 
 ```swift
-// Changes to SuggestionState.swift
-
-enum SuggestionMode {
-    case idle
-    case completions
-    case accents
-    case nextWord    // NEW: showing next-word predictions after space
-}
-
-// In updateAsync(context:):
-// Current behavior when context ends with space/newline: clear() -> .idle
-// NEW behavior: extract last 2 words, query nextWordPredictions
-//   If predictions available -> mode = .nextWord, suggestions = predictions
-//   If no predictions -> mode = .idle (unchanged fallback)
-
-// Context word extraction helper:
-private func extractContextWords(from text: String, max: Int = 2) -> [String] {
-    var words: [String] = []
-    text.enumerateSubstrings(in: text.startIndex..., options: .byWords) { word, _, _, _ in
-        if let word = word { words.append(word) }
-    }
-    return Array(words.suffix(max))
-}
+// Add to DictusCore/Sources/DictusCore/SharedKeys.swift
+public static let proStatus = "dictus.proStatus"              // JSON-encoded ProStatus
+public static let betaProOverride = "dictus.betaProOverride"  // Bool, TestFlight debug
+public static let smartModeEnabled = "dictus.smartModeEnabled" // Bool
+public static let smartModeTemplate = "dictus.smartModeTemplate" // String (template rawValue)
+public static let customVocabulary = "dictus.customVocabulary" // [String] array
 ```
 
-### Component 6: Autocorrect Undo Fix (#67)
-
-**Root cause:** `lastAutocorrect` is never cleared when the user types new characters after a correction. The undo fires on any future backspace, corrupting text.
-
-**Fix location:** `DictusKeyboardBridge.handleInputKey()` -- add one line:
+## New Darwin Notifications
 
 ```swift
-private func handleInputKey(_ character: String) {
-    suggestionState?.lastAutocorrect = nil  // FIX #67: clear undo on new input
-    AudioServicesPlaySystemSound(KeySound.letter)
-    // ... rest unchanged
-}
+// Add to DictusCore/Sources/DictusCore/DarwinNotifications.swift
+/// Posted by DictusApp when Pro status changes (purchase, expiry, restore).
+public static let proStatusChanged = "com.pivi.dictus.proStatusChanged" as CFString
 ```
 
-Also clear in `handleReturn()` and `handleAdaptiveAccentKey()` for completeness -- any non-backspace input should invalidate the undo state.
+Only one new Darwin notification. Smart Mode and Custom Vocabulary do not need notifications because they are consumed by DictusApp (same process). The keyboard only sets flags in App Group for the app to read.
 
-## Data Flow Changes
-
-### New Flow: Spell Correction via SymSpell
-
-```
-User taps space
-  -> DictusKeyboardBridge.handleSpace()
-  -> SuggestionState.performSpellCheck(currentWord)
-    -> TextPredictionEngine.spellCheck()
-      -> SymSpellEngine.correct(word)  <- CHANGED (was UITextChecker)
-        -> SymSpell.lookup(word, verbosity: .closest, maxEditDistance: 1 or 2)
-        -> Return best match ranked by corpus frequency
-      -> If SymSpell returns nil: fallbackSpellCheck via UITextChecker
-  -> If correction differs: replace word, store undo state (unchanged)
-```
-
-### New Flow: Next-Word Prediction After Space
-
-```
-After space insertion (word spelled correctly or after correction):
-  -> Instead of SuggestionState going to .idle:
-  -> Extract last 2 completed words from documentContextBeforeInput
-  -> TextPredictionEngine.nextWordPredictions(context: [word1, word2])
-    -> NgramPredictor.predict(context:)
-    -> Trigram lookup: binary search (w1, w2) -> collect top-3 by freq
-    -> If no trigram match: bigram backoff with last word only
-  -> If predictions available:
-    -> suggestions = predictions, mode = .nextWord
-  -> If no predictions:
-    -> suggestions = [], mode = .idle
-```
-
-### New Flow: Tapping a Next-Word Prediction
-
-```
-User taps suggestion in .nextWord mode
-  -> KeyboardRootView.onSuggestionTap(index:)
-  -> proxy.insertText(selectedWord + " ")
-  -> Re-query next-word predictions with updated context
-  -> Enables chained predictions:
-    "Je" -> [suis, vais, peux]
-    tap "suis" -> "Je suis " -> [un, en, le]
-    tap "un" -> "Je suis un " -> [homme, bon, peu]
-```
-
-### Cold Start Auto-Return Analysis
-
-```
-CURRENT (working):
-  Keyboard mic tap
-  -> Darwin notification (warm start) OR URL scheme (cold start)
-  -> DictusApp opens, starts recording
-  -> User manually swipes back (guided by SwipeBackOverlayView)
-  -> Keyboard shows recording overlay, waveform, stop/cancel buttons
-
-PROPOSED AUTO-RETURN:
-  The keyboard would detect the source app -> write to App Group
-  -> App reads source app scheme after transcription
-  -> openURL(sourceScheme://) to return automatically
-```
-
-**Research findings (LOW confidence):**
-
-Based on research including the [Swift Forums discussion on auto-return techniques](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988), there is NO reliable public API to accomplish this:
-
-| Approach | Status | Problem |
-|----------|--------|---------|
-| `_hostBundleID` | Blocked | Private API, blocked in iOS 18+ |
-| `LSApplicationWorkspace` | Rejected | Private API, confirmed App Store rejection |
-| `UIApplication.suspend()` | Wrong behavior | Goes to home screen, not previous app |
-| `canOpenURL` iteration | Wrong target | Opens first installed app, not source app |
-| `x-callback-url` | Impractical | Requires cooperation from every host app |
-| Accessibility APIs | Risky | Undocumented, App Store review risk |
-
-**Wispr Flow** appears to achieve auto-return but the mechanism is undocumented. It may rely on a private API that Apple permits for specific apps, or a timing-based trick that is not publicly documented.
-
-**Recommendation:** Defer auto-return (#23) to a standalone research spike. The swipe-back overlay works 100% of the time for all apps and is already polished (branded animation, bilingual text). Invest engineering effort in prediction quality -- it has vastly higher user impact per engineering hour.
+---
 
 ## Patterns to Follow
 
-### Pattern 1: Single-Language Loading
-**What:** Load SymSpell dictionary and n-gram model for only one language at a time.
-**When:** On `viewWillAppear` language refresh and on `setLanguage()` calls.
-**Why:** Two languages loaded simultaneously = ~25-30 MB, leaving no headroom.
-**Precedent:** FrequencyDictionary already follows this exact pattern.
+### Pattern 1: App Group Cache for Cross-Process State
+**What:** DictusApp owns the source of truth, writes serialized cache to App Group. Keyboard reads the cache.
+**When:** Subscription state, dictation status, waveform energy, transcription results.
+**Why:** This is the established IPC pattern in Dictus. Darwin notifications ping, App Group carries data. Keep cached values small (<1KB) and call `synchronize()` after writes.
+**Existing precedent:** `DictationStatus`, `lastTranscription`, `waveformEnergy` all follow this pattern.
 
-### Pattern 2: Background Queue Reuse
-**What:** Run SymSpell and n-gram queries on the existing `suggestionQueue` serial DispatchQueue.
-**When:** On every keystroke (completions) and after every space (next-word).
-**Why:** The async coalescing with `DispatchWorkItem` cancellation prevents stale results. Same queue = same guarantees, no new threading.
+### Pattern 2: Feature Gating at the UI Layer
+**What:** Check `FeatureGate.canUse(.feature)` at the point where the user interacts, not inside business logic.
+**When:** Every Pro-only UI element in keyboard and app.
+**Why:** Prevents half-executed Pro flows. User sees a clear upgrade message. Business logic stays clean of subscription checks. If the user upgrades mid-session, features unlock immediately on next `viewWillAppear`.
 
-### Pattern 3: Async Load with Graceful Degradation
-**What:** Load SymSpell/n-gram data asynchronously. Fall back to UITextChecker until loaded.
-**When:** Extension launch, language change.
-**Why:** SymSpell dictionary pre-computation takes ~500ms. Keyboard must be responsive immediately. UITextChecker is available instantly as the system framework.
-```swift
-func spellCheck(_ word: String) -> String? {
-    if let correction = symSpell.correct(word) { return correction }
-    return fallbackSpellCheck(word)  // UITextChecker until SymSpell loads
-}
-```
+### Pattern 3: Same-Process LLM (No Cross-Process LLM)
+**What:** Smart Mode LLM runs only in DictusApp process. Keyboard sets flags, receives results.
+**When:** Always. Apple Foundation Models and MLX both require 1-2GB+ RAM.
+**Why:** Keyboard has ~35MB free. Even Apple Foundation Models runs in the host app process, not in extensions. The keyboard's role is limited to: set `smartModeEnabled` + `smartModeTemplate` in App Group, then receive reformulated text through the existing `lastTranscription` channel.
 
-### Pattern 4: Offline Trie Generation
-**What:** Build trigram binary trie offline (macOS CLI tool or script), bundle the `.bin` file.
-**When:** During development, before each release. Not at runtime.
-**Why:** Parsing corpus text takes seconds-to-minutes. Keyboard loads pre-built binary in milliseconds.
-**Tool:** Swift command-line target in Xcode project or standalone script.
+### Pattern 4: Singleton + App Group for Shared Domain Objects
+**What:** Classes like `CustomVocabulary`, `UserDictionary` use `static let shared` with App Group storage.
+**When:** Domain objects that both processes might read (even if only one writes).
+**Why:** Established pattern in the codebase (`UserDictionary.shared`). Simple, predictable, low memory. The singleton loads from App Group on init, saves on mutation.
 
-### Pattern 5: Edit Distance Adaptation
-**What:** Use edit distance 1 for short words (<3 chars), edit distance 2 for longer words.
-**When:** Every SymSpell lookup call.
-**Why:** "ab" with edit distance 2 matches nearly everything. Restricting to 1 for short inputs prevents noise.
+---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Replacing UITextChecker for Completions
-**What:** Using SymSpell instead of UITextChecker for partial word completions.
-**Why bad:** UITextChecker.completions() has zero memory cost (system dictionary), handles French conjugations/morphology for 100K+ words. SymSpell is designed for CORRECTION (finding the closest known word to a misspelled input), not for COMPLETION (finding all words starting with a prefix). Using SymSpell for completions would require a separate prefix-search index.
-**Instead:** Keep UITextChecker for completions, use SymSpell for corrections only.
+### Anti-Pattern 1: StoreKit 2 in Keyboard Extension
+**What:** Calling `Transaction.currentEntitlements` or `Product.products(for:)` from DictusKeyboard.
+**Why bad:** Keyboard extensions run in a restricted sandbox. StoreKit 2 APIs may return empty results or fail silently. Apple docs do not guarantee StoreKit works in extensions.
+**Instead:** Cache `ProStatus` to App Group from DictusApp. Keyboard reads the cached struct (<1ms).
 
-### Anti-Pattern 2: KenLM C++ Bridging
-**What:** Using KenLM via Objective-C++ bridging header.
-**Why bad:** Adds build complexity, LGPL license (copyleft concern for MIT project), harder to debug, and a pure Swift trigram trie is sufficient for keyboard-grade quality.
-**Instead:** Pure Swift trigram trie with offline binary format.
+### Anti-Pattern 2: SwiftData ModelContainer in Keyboard
+**What:** Opening a SwiftData container in DictusKeyboard for history access.
+**Why bad:** ModelContainer init costs 2-5MB RAM + I/O. The keyboard never displays history. Wasting memory for zero benefit.
+**Instead:** Keyboard reads `SharedKeys.lastTranscription` (one string). History lives in DictusApp only.
 
-### Anti-Pattern 3: Loading Both Languages
-**What:** Pre-loading FR + EN SymSpell + n-gram data.
-**Why bad:** ~25-30 MB for two languages + ~15 MB existing = 40-45 MB. iOS kills extensions at ~50 MB without warning.
-**Instead:** Single language loaded. 200-500ms reload on language switch is fine (rare event).
+### Anti-Pattern 3: Downloading LLM Models from Keyboard
+**What:** Triggering MLX model download from the keyboard process.
+**Why bad:** Keyboard extensions have no reliable background execution. iOS kills them aggressively. Model files are 800MB-1.2GB.
+**Instead:** Model download in DictusApp (same pattern as WhisperKit model download). Keyboard just toggles flags.
 
-### Anti-Pattern 4: Nested Swift Dictionaries for N-grams
-**What:** Storing trigrams as `[String: [String: [String: Int]]]`.
-**Why bad:** Swift Dictionary overhead is ~80 bytes per entry. 500K trigrams = ~40 MB.
-**Instead:** Flat sorted array with binary search at 16 bytes/entry = ~8 MB.
+### Anti-Pattern 4: Real-Time Subscription Validation in Keyboard
+**What:** Checking StoreKit receipt or calling Apple servers from keyboard on every key press.
+**Why bad:** Adds latency, requires network (keyboard may not have), wastes battery.
+**Instead:** Cached `ProStatus` with expiry date. DictusApp refreshes on launch and via `Transaction.updates` stream. Keyboard trusts the cache. Worst case: user keeps Pro for hours after lapse (acceptable tradeoff).
 
-### Anti-Pattern 5: N-gram Queries on Partial Words
-**What:** Sending partial input ("bon") to the n-gram predictor during typing.
-**Why bad:** N-grams predict NEXT words, not completions. "bon" as a bigram key returns words that follow "bon" in sentences ("jour", "appétit"), not words that start with "bon" ("bonjour", "bonheur").
-**Instead:** Only query n-gram predictor after a word boundary (space/punctuation). Use UITextChecker for partial word completion.
+### Anti-Pattern 5: Putting Smart Mode Logic in DictusCore
+**What:** Making DictusCore depend on Foundation Models or MLX frameworks.
+**Why bad:** DictusCore is linked by DictusKeyboard. Foundation Models framework is only available on iOS 26+. MLX is ~100MB+ framework. Either would bloat the keyboard extension or cause link errors on iOS 17-25.
+**Instead:** Smart Mode service lives only in DictusApp. DictusCore only has the `SmartModeTemplate` enum (plain Swift, no framework dependency).
 
-### Anti-Pattern 6: Synchronous Dictionary Loading
-**What:** Calling `symSpell.loadDictionary()` on main thread in `init()` or `viewDidLoad()`.
-**Why bad:** Blocks keyboard appearance for 500ms-2s. User sees frozen keyboard.
-**Instead:** Load async on background queue. UITextChecker covers the first few keystrokes.
+---
+
+## Suggested Build Order (Dependency-Based)
+
+### Phase 1: Subscription Infrastructure
+1. `ProStatus` + `FeatureGate` in DictusCore
+2. `SubscriptionManager` in DictusApp (StoreKit 2 Transaction.updates + Product.subscription)
+3. New `SharedKeys` for proStatus, betaProOverride
+4. `proStatusChanged` Darwin notification
+5. Beta override flag for TestFlight testing
+
+**Rationale:** Every other Pro feature depends on `FeatureGate.canUse()`. Build and validate first. With beta override, all subsequent features can be developed and tested without a real subscription or StoreKit sandbox.
+
+### Phase 2: Paywall UI
+1. `PaywallView` in DictusApp wrapping SubscriptionStoreView
+2. `UpgradePrompt` in DictusKeyboard (UIKit banner, <1KB memory)
+3. `dictus://upgrade` URL scheme handler in DictusApp
+4. Restore purchases flow
+5. Pro benefits showcase
+
+**Rationale:** Users need a way to purchase before Pro features become visible. Paywall depends only on Phase 1.
+
+### Phase 3: Transcription History
+1. `TranscriptionEntry` SwiftData model in DictusCore
+2. `TranscriptionStore` with App Group container path
+3. Save hook in `DictationCoordinator.stopDictation()`
+4. `HistoryListView` in DictusApp
+5. Free tier limit (10) vs Pro (unlimited) via FeatureGate
+6. Search (Pro) + export (Pro)
+
+**Rationale:** Self-contained feature with high perceived value. No new IPC, no keyboard changes beyond what Phase 1 already provides. Depends on Phase 1 for gating.
+
+### Phase 4: Custom Vocabulary
+1. `CustomVocabulary` class in DictusCore (follows UserDictionary pattern)
+2. `VocabularyEditorView` in DictusApp
+3. Integration: `DictationCoordinator` reads `toInitialPrompt()` before WhisperKit transcription
+4. Feature gate for Pro
+
+**Rationale:** Simple data model (string array), single integration point (3 lines in DictationCoordinator). Depends on Phase 1 for gating. Can validate vocabulary impact by comparing transcription accuracy with and without terms.
+
+### Phase 5: Smart Mode LLM
+1. `SmartModeTemplate` enum in DictusCore (plain Swift)
+2. Apple Foundation Models integration (iOS 26 code path)
+3. MLX Swift fallback: model download flow, inference pipeline
+4. `SmartModeService` orchestrator in DictusApp
+5. Integration: post-transcription hook in `DictationCoordinator`
+6. Smart Mode toggle + template picker in keyboard ToolbarView (gated)
+7. History integration: save originalText + reformulated text
+8. Model download UI in Settings (MLX fallback, Pro-only)
+
+**Rationale:** Most complex feature with most unknowns: Apple Foundation Models device availability, MLX model performance on iPhone, RAM usage on older devices. Build last. Benefits from Phase 1 (gating), Phase 3 (history stores original + reformulated), Phase 4 (vocabulary improves base transcription before reformulation).
+
+### Build Order Dependency Graph
+
+```
+Phase 1: Subscription   (foundation -- everything depends on this)
+    |
+    +-> Phase 2: Paywall   (purchase mechanism)
+    |
+    +-> Phase 3: History   (independent of 2, needs 1 for gating)
+    |
+    +-> Phase 4: Vocabulary (independent of 2/3, needs 1 for gating)
+    |
+    +-> Phase 5: Smart Mode (benefits from 3+4, needs 1 for gating)
+```
+
+Phases 2, 3, 4 can run in parallel after Phase 1 is complete. Phase 5 should be last.
+
+---
+
+## Modified Existing Files Summary
+
+| File | Change | Lines Est. |
+|------|--------|-----------|
+| `DictusCore/SharedKeys.swift` | +5 new keys | +10 |
+| `DictusCore/DarwinNotifications.swift` | +1 notification name | +4 |
+| `DictusApp/DictationCoordinator.swift` | Post-transcription: save history, read Smart Mode flags, read custom vocabulary, apply reformulation | +40-60 |
+| `DictusApp/DictusApp.swift` | `dictus://upgrade` URL handler, ModelContainer injection, start SubscriptionManager | +30 |
+| `DictusKeyboard/Views/ToolbarView.swift` | Smart Mode toggle (gated), template picker | +30-50 |
+| `DictusCore/Package.swift` | No change (SwiftData is system framework) | 0 |
+
+---
 
 ## Scalability Considerations
 
-| Concern | Current (v1.3) | After Upgrade (v1.4) | Future (v2+) |
-|---------|----------------|----------------------|--------------|
-| Languages | FR + EN (1 loaded) | FR + EN (1 loaded, richer data) | Add languages by adding dict + trie files |
-| Vocabulary | ~1.2K frequency + system dict | ~80K SymSpell + ~50K trigram vocab | Scale trie vocab, same architecture |
-| Prediction | Current-word only | Current-word + next-word | User-learned words, personalized n-grams |
-| Memory | ~15 MB | ~25-30 MB | Approaching limit -- careful growth |
-| Latency | <5ms per keystroke | <10ms target per keystroke | Profile on oldest device (iPhone 12) |
-| Personalization | None | None | Append user bigrams to trie at runtime |
+| Concern | At launch | At 10K users | At 100K users |
+|---------|-----------|--------------|---------------|
+| Subscription validation | StoreKit 2 local only | Same | Same (Apple handles scale) |
+| History storage | SwiftData local, ~1MB | ~10MB per user | Consider auto-prune >1 year |
+| Custom vocabulary | App Group defaults, <10KB | Same | Same (500-term cap) |
+| Smart Mode model | On-device, no server | Same | Same |
+| Paywall | SubscriptionStoreView | Same | Same |
 
-## Build Order (Dependency-Driven)
+No server infrastructure needed. Everything runs 100% on-device. Scales to any user count at zero marginal cost, consistent with Dictus's privacy-first identity.
 
-```
-Phase 1: Autocorrect undo fix (#67)
-  Dependencies: None
-  Risk: Minimal (single-line fix in 1 file + same in 2 others)
-  Files changed: DictusKeyboardBridge.swift
-  Validation: Type after autocorrect, backspace = normal delete (not undo)
-
-Phase 2: SymSpell integration (#68 part 1)
-  Dependencies: SymSpellSwift SPM package + dictionary files
-  Risk: Medium (memory profiling needed on real device)
-  New files: SymSpellEngine.swift
-  Modified: TextPredictionEngine.swift (spellCheck method)
-  New resources: fr_symspell.txt (~2-3MB), en_symspell.txt (~2-3MB)
-  Validation: "helo" -> "hello" (not "helons"), "caf" -> "cafe"
-
-Phase 3: N-gram trie data structure + offline builder
-  Dependencies: Corpus data (French Wikipedia or OpenSubtitles)
-  Risk: Medium (binary format design, corpus sourcing)
-  New files: NgramTrie.swift, trigram build tool (macOS CLI target or script)
-  New resources: fr_trigram.bin (~5-10MB), en_trigram.bin (~5-10MB)
-  Validation: Trie loads from binary, returns trigram query results correctly
-
-Phase 4: N-gram predictor integration (#68 part 2)
-  Dependencies: Phase 3 (trie data structure must exist first)
-  Risk: Low (follows same wrapper pattern as SymSpellEngine)
-  New files: NgramPredictor.swift
-  Modified: TextPredictionEngine.swift (add nextWordPredictions method)
-  Validation: After "je suis", predictions = [un, en, le] or similar
-
-Phase 5: SuggestionState next-word mode + UI
-  Dependencies: Phase 4 (predictor must produce results)
-  Risk: Low (UI extension of existing mode pattern)
-  Modified: SuggestionState.swift (.nextWord mode + context extraction)
-             SuggestionBarView.swift (next-word mode styling)
-             KeyboardRootView.swift (tap handler for next-word insertion)
-  Validation: Suggestion bar shows next-word after space,
-              tapping inserts word + refreshes to new predictions
-
-Phase 6: Cold start auto-return (#23)
-  Dependencies: None (independent track)
-  Risk: HIGH (no known public API solution)
-  Recommendation: DEFER -- swipe-back overlay already works for all apps
-  If researched: standalone spike, do not block milestone
-
-Phase 7: License update (#63)
-  Dependencies: None
-  Risk: Minimal
-  Files: SettingsView.swift, LICENSE file
-```
-
-**Ordering rationale:**
-- Bug fix first (#67): instant user value, zero risk, unblocks QA testing.
-- SymSpell before n-gram: biggest quality improvement ("helo -> hello" is the most visible failure). Users feel the difference immediately.
-- Trie data structure before predictor: the binary format and load mechanism must exist before the predictor wrapper can use it.
-- Next-word UI last in prediction work: needs all backends working first.
-- Cold start auto-return is highest risk with lowest success probability. Do not block the milestone on it.
+---
 
 ## Sources
 
 ### HIGH Confidence
-- Existing codebase: TextPredictionEngine.swift, SuggestionState.swift, DictusKeyboardBridge.swift, FrequencyDictionary.swift, KeyboardViewController.swift (direct code analysis)
-- [SymSpellSwift](https://github.com/gdetari/SymSpellSwift) -- MIT license, SPM, v0.1.4 (Aug 2025), Swift implementation
-- [SymSpell algorithm](https://github.com/wolfgarbe/SymSpell) -- symmetric delete documentation, prefix indexing for 90%+ memory reduction
-- GitHub issues [#67](https://github.com/getdictus/dictus-ios/issues/67) (autocorrect undo bug), [#68](https://github.com/getdictus/dictus-ios/issues/68) (prediction upgrade), [#23](https://github.com/getdictus/dictus-ios/issues/23) (auto-return)
-- Phase 8 research (08-RESEARCH.md) -- original prediction architecture, UITextChecker analysis
+- Codebase analysis: AppGroup.swift, SharedKeys.swift, DarwinNotifications.swift, DictationCoordinator.swift, UserDictionary.swift, DictationStatus.swift, Package.swift
+- [Apple Foundation Models documentation](https://developer.apple.com/documentation/FoundationModels) -- official framework reference, iOS 26+
+- [StoreKit 2 currentEntitlements](https://developer.apple.com/documentation/storekit/transaction/currententitlements) -- Apple official docs
+- [MLX Swift on GitHub](https://github.com/ml-explore/mlx-swift) -- Apple's official ML framework, MIT license
+- [WWDC25: Explore LLM on Apple silicon with MLX](https://developer.apple.com/videos/play/wwdc2025/298/) -- MLX on iOS reference
 
 ### MEDIUM Confidence
-- [KenLM](https://github.com/kpu/kenlm) -- n-gram toolkit, C++, LGPL (researched, not recommended)
-- [AOSP dictionaries](https://codeberg.org/Helium314/aosp-dictionaries) -- pre-built language models, corpus sourcing reference
-- SymSpell memory estimate: 3-5 MB per language for 80K dictionary at edit distance 2 with prefix length 7 (based on algorithm analysis, not empirically verified on iOS)
-- N-gram trie size estimate: 5-10 MB for 500K trigrams at 16 bytes/entry (needs real-device profiling)
-- [Swift Package Index: SymSpellSwift](https://swiftpackageindex.com/gdetari/SymSpellSwift) -- package metadata
+- [SwiftData App Group shared container setup](https://developer.apple.com/forums/thread/732986) -- Apple Developer Forums, confirmed approach for extensions
+- [StoreKit 2 subscription sharing with extensions via App Group](https://medium.com/@aisultanios/implement-inn-app-subscriptions-using-swift-and-storekit2-serverless-and-share-active-purchases-7d50f9ecdc09) -- community pattern, consistent with Apple's recommended approach
+- [Foundation Models code-along](https://developer.apple.com/events/resources/code-along-205/) -- Apple's reference implementation
+- [AnyLanguageModel Swift package](https://huggingface.co/blog/anylanguagemodel) -- drop-in Foundation Models API replacement for older devices
+- [LocalLLMClient Swift package](https://dev.to/tattn/localllmclient-a-swift-package-for-local-llms-using-llamacpp-and-mlx-1bcp) -- unified llama.cpp + MLX Swift API
 
 ### LOW Confidence
-- [Swift Forums: auto-return techniques](https://forums.swift.org/t/how-do-voice-dictation-keyboard-apps-like-wispr-flow-return-users-to-the-previous-app-automatically/83988) -- no public API solution found, Wispr Flow mechanism undocumented
-- Cold start auto-return feasibility: no evidence of App Store-safe technique
-- SymSpellSwift in iOS keyboard extension: untested in 50MB constrained environment, needs memory profiling
+- [Contextual biasing for Whisper via initialPrompt](https://arxiv.org/html/2410.18363v1) -- research validates the technique, but WhisperKit-specific behavior with French initialPrompt needs on-device testing
+- MLX model RAM on iPhone (~1-2GB for 1.7B 4-bit quantized) -- based on desktop benchmarks, iPhone profiling required
+- Apple Foundation Models French quality -- model is optimized for English, French reformulation quality unknown until tested

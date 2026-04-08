@@ -1,374 +1,433 @@
 # Domain Pitfalls
 
-**Domain:** iOS keyboard extension — probability-based text prediction upgrade + cold start auto-return + stability fixes
-**Researched:** 2026-04-01
-**Confidence:** HIGH (based on SymSpell documentation, Apple DTS responses, issue #23 research report, issue #67/68 analysis, Dictus codebase audit, community reports)
+**Domain:** iOS keyboard app premium tier -- StoreKit 2 subscriptions, on-device LLM, transcription history, custom vocabulary (Open Core model)
+**Researched:** 2026-04-08
+**Confidence:** HIGH (StoreKit 2, SwiftData, App Store Review), MEDIUM (Apple Foundation Models -- iOS 26 not yet GA, extension support unconfirmed), MEDIUM (WhisperKit initialPrompt -- 224-token limit documented but workarounds untested in Dictus context)
 
-**Context:** Dictus v1.4 adds SymSpell-based spell correction, n-gram/trigram next-word prediction, fixes autocorrect undo state bug (#67), and researches cold start auto-return (#23). All changes target the existing keyboard extension with a 50MB memory limit, offline-only constraint, and must not degrade typing fluidity (<10ms per prediction).
+**Context:** Dictus v1.5 adds a premium tier to an existing MIT-licensed iOS keyboard app. All Pro features run 100% on-device. The keyboard extension has a ~50MB RAM limit and runs in a separate process. Data sharing is via App Group (`group.solutions.pivi.dictus`). The app is currently in public TestFlight beta, and the beta period grants all Pro features for free.
 
 ---
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, keyboard crashes, or multi-day stalls.
+Mistakes that cause App Store rejection, data loss, rewrites, or fundamental architecture failures.
 
-### Pitfall 1: SymSpell Dictionary Pre-computation Blows Memory Budget at Load Time
+### Pitfall 1: Attempting StoreKit Purchase Inside Keyboard Extension Crashes or Silently Fails
 
 **What goes wrong:**
-SymSpell's speed comes from pre-computing all deletion variants of dictionary words at startup. For a 82K-word dictionary with max edit distance 2, this generates ~25 delete variants per word = ~2M dictionary entries stored in a hash map. The C# reference implementation reports "significantly" higher memory when the dictionary is loaded all at once.
+StoreKit 2's `Product.purchase()` requires a valid window scene context to present the Apple payment sheet. Keyboard extensions run as a separate process with no `UIApplication.shared` and no `UIWindowScene`. Calling `purchase()` from the keyboard extension either throws an error (no scene available), silently fails, or crashes. Developers who prototype in the Simulator may not see this because the Simulator sometimes has a looser sandbox.
 
-In the keyboard extension's 50MB budget, you have roughly 15-20MB available after the keyboard UI, toolbar, and system overhead. Loading a 100K-word French frequency dictionary into SymSpell can easily consume 15-30MB of RAM during pre-computation (the in-memory hash map of all delete variants plus the original entries). On 4GB RAM devices (iPhone 12, SE 3), iOS may terminate the extension mid-load with no crash log — the keyboard simply disappears.
-
-The SymSpellSwift library (v0.1.4, August 2025) calls `loadDictionary()` synchronously, blocking the thread until all entries are processed. If loaded on the main thread or early in `viewDidLoad`, the keyboard takes 1-3 seconds to appear, triggering iOS's watchdog timer which kills extensions that don't present within ~6 seconds.
+Even the iOS 18.2+ workaround `confirmIn(viewController:)` is designed for share extensions with `UIHostingController`, not keyboard extensions which have a fundamentally different view hierarchy (`UIInputViewController`).
 
 **Why it happens:**
-SymSpell trades memory for speed. The algorithm pre-computes deletions so lookups are O(1), but the pre-computation requires holding all variants in memory simultaneously. Most SymSpell usage is in server-side applications with gigabytes of RAM, not 50MB iOS extensions.
+The natural impulse is to show a paywall when the user taps a Pro feature in the keyboard. But keyboard extensions are the most restricted extension type in iOS -- no access to `UIApplication`, no scene, limited API surface.
 
-**Consequences:**
-Keyboard killed silently during dictionary load. Users see system keyboard appear instead of Dictus. On slower devices, keyboard appears blank for 1-3 seconds before keys render.
-
-**Prevention:**
-1. **Limit dictionary size to 30K-50K words maximum**: The top 30K French words cover ~99% of daily usage. Pre-compute on a Mac, measure RAM with Instruments on device, and reduce until comfortably under 10MB resident
-2. **Use max edit distance 1, not 2**: Edit distance 1 generates ~5 deletes per word vs ~25 for distance 2. This cuts memory by ~5x. For a keyboard where context disambiguates, edit distance 1 catches most typos (adjacent key errors, missing/extra letter)
-3. **Load dictionary on a background queue, never main thread**: Use `DispatchQueue(label:qos:)` with `.utility` priority. Show basic UITextChecker-based suggestions until SymSpell is ready (progressive enhancement)
-4. **Pre-serialize the SymSpell data structure**: Instead of loading a text dictionary and computing deletions at runtime, serialize the fully-computed hash map to a binary file during development. Load the binary via `mmap` at runtime for near-instant startup with minimal memory overhead (only pages accessed are loaded)
-5. **Profile on iPhone SE or iPhone 12 (4GB RAM)**: These devices have the tightest memory and are the canary for extension crashes. Test with Instruments > Allocations attached to the keyboard extension process
+**How to avoid:**
+1. **Never call StoreKit purchase APIs from the keyboard extension.** All purchases happen in the main DictusApp only
+2. **Keyboard detects "not subscribed" and shows a teaser/CTA** that opens DictusApp via URL scheme (`dictus://upgrade`), where the actual paywall lives
+3. **Subscription status is read-only in the keyboard extension.** Use `Transaction.currentEntitlements` or a cached boolean in App Group `UserDefaults` to check entitlement. StoreKit 2's `Transaction.currentEntitlements` should work in extensions (read-only, no purchase flow), but verify on device
+4. **Test the full flow on a physical device** with StoreKit Configuration disabled (real sandbox) -- Simulator + StoreKit Config files bypass many extension restrictions
 
 **Warning signs:**
-Keyboard disappears after switching languages. Keyboard takes >1 second to appear. Instruments shows >15MB spike during startup.
+`Product.purchase()` call anywhere in the DictusKeyboard target. Import of `StoreKit` in keyboard extension files beyond `Transaction` for entitlement checking. Payment sheet never appears during keyboard testing.
 
 **Phase to address:**
-Prediction engine upgrade phase. Must be resolved before any n-gram model is added (SymSpell + n-gram together will be even tighter).
+SubscriptionManager infrastructure phase. Decide the architecture (main app only for purchase, extension for read-only check) before writing any StoreKit code.
 
 ---
 
-### Pitfall 2: N-gram Model Too Large or Too Slow Without mmap
+### Pitfall 2: Apple Foundation Models Unavailable in Keyboard Extension or Under 50MB Memory Limit
 
 **What goes wrong:**
-A trigram language model trained on French Wikipedia/OpenSubtitles can easily reach 50-500MB as a raw text file. Even pruned to top-frequency trigrams, a usable French model is 5-20MB. If loaded entirely into RAM as a Swift `Dictionary<String, [String: Float]>`, the overhead of Swift's reference-counted objects, hash table buckets, and String allocations inflates the on-disk size by 3-5x in memory. A 10MB on-disk trigram file becomes 30-50MB in RAM — enough to kill the extension by itself.
+Apple Foundation Models (AFM) uses a 3B-parameter on-device model with 4-bit quantization. Even quantized, inference requires significant memory -- Apple's Unified Memory Architecture helps, but the model is loaded into the shared memory pool. In a keyboard extension with a ~50MB budget, loading the AFM may push memory past the limit and cause iOS to kill the extension silently.
 
-Additionally, if using KenLM (C++ library), the model files use a custom binary format designed for `mmap`. KenLM's entire performance story relies on memory-mapped files — the OS loads pages on demand, and the resident memory is only the pages actually queried. But `mmap` in a keyboard extension has a subtlety: the file must be in the extension's bundle or in the shared App Group container. If the model file is in the main app bundle (not the extension bundle), `mmap` returns `MAP_FAILED` because the extension cannot access the main app's sandbox.
+Additionally, AFM availability in app extensions is **unconfirmed** as of April 2026. The framework requires iOS 26+, Apple Intelligence enabled, and iPhone 15 Pro+ (A17 Pro or later). Apple's documentation does not explicitly state whether `FoundationModels` framework works in keyboard extensions. The MessageFilter extension community has been requesting AFM support, suggesting it may not be universally available in all extension types.
+
+Even if AFM works in extensions, the 4096-token context window is small. A reformulation task ("rewrite this dictation as a professional email") needs: system prompt + user instruction + transcribed text + output -- easily exceeding 4096 tokens for longer dictations.
 
 **Why it happens:**
-Language models are designed for machines with abundant RAM. iOS keyboard extensions are among the most memory-constrained environments in mobile computing. Developers who prototype on the Simulator (which has the Mac's full RAM) never see the crash — it only appears on physical devices.
+AFM is designed for app-level intelligence features (Writing Tools, Siri). Keyboard extensions are the most memory-constrained environment in iOS. Apple may not have optimized or even tested AFM in this context.
 
-**Consequences:**
-Extension crashes on first prediction query. Or: extension loads but crashes when user types a 3rd word (triggering the first trigram lookup that touches cold pages). Model works on Simulator but fails on every physical device.
-
-**Prevention:**
-1. **Use mmap from the start, not Dictionary in RAM**: Build a custom binary trie or use KenLM's binary format. Memory-map the file so only queried pages are resident. Target <2MB resident memory for the n-gram component
-2. **Store model file in the keyboard extension bundle, not the app bundle**: In Xcode, add the model file's Target Membership to DictusKeyboard, not DictusApp. Or store in the App Group container (writable, accessible by both targets)
-3. **Pure Swift trigram engine over KenLM unless C++ bridging is already needed**: KenLM is fast but adds C++ compilation complexity to the keyboard extension target (see Pitfall 3). A custom binary trie in pure Swift with `mmap` via `Data(contentsOf:options:.mappedIfSafe)` achieves the same result without bridging headers
-4. **Prune aggressively**: Keep only trigrams that appear >5 times in the training corpus. For French, this typically reduces a 500MB model to 5-10MB while retaining 95%+ of prediction quality
-5. **Single language loaded at a time**: Never load both French and English models simultaneously. Load on language switch, unmap the previous model. Current architecture already does this for FrequencyDictionary
+**How to avoid:**
+1. **Run ALL LLM inference in the main DictusApp, never in the keyboard extension.** The keyboard sends text to DictusApp via App Group or URL scheme, DictusApp runs AFM inference, writes result back to App Group, keyboard reads result
+2. **Architecture: keyboard is a thin client for Smart Mode.** Keyboard shows "Processing..." state, DictusApp does the heavy lifting in background
+3. **Test AFM in keyboard extension early** -- if it works, great (simplifies architecture). If it crashes or is unavailable, the two-process architecture handles it. This must be validated in the first phase, not discovered mid-implementation
+4. **For the open-source fallback models (Gemma 3 1B, Phi-4 Mini):** these are 1-3GB on disk and need 1-4GB RAM at inference. They absolutely cannot run in the keyboard extension. Main app only
+5. **Handle the 4096-token context window:** truncate input text to ~2000 tokens, leaving room for system prompt and output. Show a warning for very long dictations
 
 **Warning signs:**
-Extension works in Simulator but crashes on device. Memory climbs steadily as user types. `os_proc_available_memory()` returns <5MB after model load.
+`import FoundationModels` in any DictusKeyboard file. LLM model loading code in the keyboard extension target. Memory spikes >30MB during Smart Mode in keyboard process.
 
 **Phase to address:**
-Prediction engine upgrade phase (n-gram sub-task). Must test on physical device after every model size change.
+Smart Mode LLM phase. Must validate AFM extension availability as the very first task. Architecture decision (main app inference vs. extension inference) blocks all other Smart Mode work.
 
 ---
 
-### Pitfall 3: C++ Bridging Header in Keyboard Extension Breaks Build or Blocks APIs
+### Pitfall 3: SwiftData Database Corruption from Simultaneous Access by App and Extension
 
 **What goes wrong:**
-If using KenLM (C++ library) for the n-gram model, the keyboard extension target needs either:
-- A bridging header (traditional approach: Obj-C++ wrapper around C++ code)
-- Swift-C++ interop enabled (Xcode 15+: set "C++ and Objective-C Interoperability" to "C/C++")
+SwiftData (backed by Core Data/SQLite) stores the transcription history database in the App Group container, shared between DictusApp and DictusKeyboard. SQLite supports concurrent readers but only one writer at a time. If both the app and keyboard extension write simultaneously (e.g., keyboard saves a new transcription while user deletes one in the app), SQLite returns `SQLITE_BUSY` or `SQLITE_LOCKED`. SwiftData may throw, silently drop the write, or corrupt the WAL (Write-Ahead Log).
 
-Both approaches have pitfalls in extension targets:
-
-**Bridging header approach:**
-- Keyboard extensions set `APPLICATION_EXTENSION_API_ONLY = YES` automatically. If KenLM or its dependencies use any UIKit API or `UIApplication.shared`, the build fails with "API unavailable for app extensions"
-- KenLM uses `<iostream>`, `<unordered_map>`, `<string>` — standard C++ headers. These compile fine. But if KenLM's build configuration pulls in `pthread` or `mmap` POSIX APIs in ways that conflict with the extension sandbox, you get runtime crashes, not compile errors
-- The bridging header affects ALL Swift files in the target. If it includes C++ headers that define macros conflicting with Swift keywords (e.g., `#define assert(...)` in a C++ header vs Swift's `assert()`), you get cryptic compile errors across unrelated files
-
-**Swift-C++ interop approach:**
-- This is newer (stable since Xcode 15/Swift 5.9). Not all C++ patterns are supported — KenLM uses templates, exceptions, and custom allocators that may not bridge cleanly
-- The build setting applies to the entire target. If any existing ObjC code in the keyboard target doesn't compile under C++ interop mode, everything breaks
+Worse: the `0xdead10cc` crash. If the keyboard extension holds a SQLite lock when iOS suspends it (user switches apps), iOS terminates the extension with termination code `0xdead10cc` ("dead lock"). This is a common crash in extensions using Core Data/SwiftData that developers discover only after App Store release from crash reports.
 
 **Why it happens:**
-KenLM was designed for Linux/server environments. It has never been tested in an iOS app extension sandbox. The documentation doesn't mention iOS at all.
+SwiftData's high-level API abstracts away SQLite's locking behavior. The `.modelContainer` modifier and `ModelContext` make it feel like a simple object graph. Developers don't realize two separate processes (app + extension) hitting the same SQLite file need coordination that SwiftData does not provide automatically.
 
-**Consequences:**
-Build fails with 50+ errors after adding KenLM. Hours spent chasing linker errors. Or: builds but crashes at runtime when KenLM calls a POSIX function restricted in the extension sandbox.
-
-**Prevention:**
-1. **Strongly prefer a pure Swift n-gram engine over KenLM**: Write a custom binary trie reader in Swift. The query logic is simple: given W1 and W2, look up P(W3|W1,W2) and return top-3 candidates. This avoids all C++ complexity
-2. **If KenLM is chosen, wrap it in a static XCFramework**: Build KenLM as a static library (.a) on macOS with the iOS SDK, wrap it in an ObjC++ interface that exposes only `-(NSArray<NSString*>*)predictNext:(NSString*)context`, and import the framework. This isolates C++ from Swift
-3. **Test the build on a clean checkout before adding any feature code**: Add the C++ files, verify `xcodebuild -target DictusKeyboard` succeeds, commit. Then add feature code. This prevents conflating C++ build issues with logic bugs
-4. **Check KenLM does not call `fork()`, `exec()`, or `dlopen()`**: These are prohibited in app extensions. Grep KenLM source for these calls before integrating
+**How to avoid:**
+1. **Make the keyboard extension write-only for new transcriptions, and DictusApp read/write for everything else.** Minimize concurrent write paths
+2. **Use `NSFileCoordination` for all database writes from the extension.** This is already used in Dictus for log file coordination -- apply the same pattern to SwiftData writes
+3. **Configure SwiftData with WAL mode explicitly** (this is the default, but verify): `ModelConfiguration(groupContainer: .identifier("group.solutions.pivi.dictus"))`. WAL mode allows concurrent reads with a single writer
+4. **Handle `0xdead10cc`:** Release the `ModelContext` and close the database connection in `viewWillDisappear` of the keyboard extension, before iOS suspends it. Alternatively, use a lightweight write mechanism (append to a JSON file in App Group) instead of direct SwiftData access from the extension, and have DictusApp import pending entries on launch
+5. **Test the concurrent scenario:** Open DictusApp to history view, switch to Messages, dictate (keyboard writes transcription), switch back to DictusApp. Repeat 20 times. Check for crashes in Console.app with `0xdead10cc`
 
 **Warning signs:**
-`Undefined symbols for architecture arm64` errors. `Use of undeclared identifier 'UIApplication'` in KenLM wrapper. Build succeeds but extension crashes on launch with `EXC_CRASH (SIGKILL)`.
+Transcriptions disappear after being saved. App crashes on launch after keyboard was used. Console shows `0xdead10cc` termination. `SQLITE_BUSY` errors in logs.
 
 **Phase to address:**
-Prediction engine upgrade phase. Decision must be made BEFORE implementation starts: pure Swift or C++ bridge. Do not defer this decision.
+Transcription history phase. Database architecture (who writes, who reads, how to coordinate) must be decided before any SwiftData code is written. Consider the "extension writes JSON, app imports to SwiftData" pattern as the safest approach.
 
 ---
 
-### Pitfall 4: Cold Start Auto-Return is Fundamentally Impossible via Public API
+### Pitfall 4: Open Core Feature Gating Bypassed by Anyone Reading the MIT Source Code
 
 **What goes wrong:**
-The team spends days or weeks researching and prototyping auto-return approaches that have already been proven impossible. Issue #23 documents three failed approaches:
-1. **KnownAppSchemes iteration with canOpenURL**: Always opens the first installed app (WhatsApp), not the source app. `canOpenURL` only checks if an app is installed, not if it's the most recent
-2. **Host bundle ID detection from keyboard extension**: `_hostBundleID` is a private API — fragile and App Store rejection risk. No public API exposes the host app's identity
-3. **Programmatic swipe-back simulation**: No public API for gesture simulation. Private APIs = guaranteed rejection
+Dictus is MIT-licensed with all code (including Pro features) in the public repository. Feature gating is a boolean check: `if SubscriptionManager.shared.isProUser { showSmartMode() }`. Anyone can:
+1. Fork the repo, change `isProUser` to always return `true`, build and sideload via Xcode
+2. On a jailbroken device, modify the App Group `UserDefaults` to set the cached entitlement flag to `true`
+3. Use a tool like FLEX or iGameGuardian to flip the boolean at runtime
 
-An Apple DTS engineer confirmed in January 2026: "There is no API for the containing app to bring the host app back to the foreground." The system back arrow (top-left) is the officially supported mechanism.
+This is **expected and acceptable** for an Open Core model -- the code is intentionally public. But the pitfall is spending engineering time trying to prevent bypass (DRM, obfuscation, server verification) when the MIT license philosophically accepts it.
 
 **Why it happens:**
-Competitors like Wispr Flow appear to do auto-return, creating an expectation. In reality, their "return" is user-assisted (system back arrow + UX guidance), not programmatic. The illusion comes from fast session activation + clear UX instruction.
+Developer instinct is to "protect" paid features. But in an Open Core model with no server, any client-side protection is trivially bypassable. The real protection is the App Store distribution (most users install from the App Store, not sideloading) and the inconvenience of building from source.
 
-**Consequences:**
-Wasted development time on impossible approaches. Risk of implementing private API usage that causes App Store rejection. Frustration cycle of "it almost works" with each new hack.
-
-**Prevention:**
-1. **Accept the constraint**: There is no auto-return API. Period. Apple DTS confirmed this. Do not re-research
-2. **Optimize the existing swipe-back overlay UX instead**: The overlay (implemented in Phase 13) works 100% of the time for all apps. Invest in making it faster, clearer, and more polished:
-   - Show the overlay within 200ms of cold start URL open
-   - Auto-dismiss when `sceneDidEnterBackground` fires (user swiped back)
-   - Optional: add the swipe-back instruction as a Dynamic Island Live Activity for even clearer guidance
-3. **Explore `sourceApplication` as a refinement, not a solution**: When the keyboard opens DictusApp via URL scheme, `UIApplication.OpenURLOptionsKey.sourceApplication` in `application(_:open:options:)` MAY contain the host app's bundle ID. If it does, you could display "Swipe back to [App Name]" instead of generic text. But this is a UX polish, not auto-return
-4. **Consider session-based model (Wispr Flow pattern)**: Keep the audio engine alive in background between recordings so cold starts are rare. This is already partially implemented via `collectSamples()` pattern. The real fix for cold start is preventing cold starts, not auto-returning from them
+**How to avoid:**
+1. **Accept bypass as a feature, not a bug.** The MIT license guarantees this right. Users who build from source are developers, not your target market
+2. **Use StoreKit 2's JWS-signed transactions as the source of truth, not UserDefaults.** `Transaction.currentEntitlements` returns cryptographically signed receipts that cannot be forged without Apple's private key. Check this on app launch and cache the result
+3. **Cache entitlement in App Group `UserDefaults` for the keyboard extension** (which may not have reliable network/StoreKit access), but re-verify from `Transaction.currentEntitlements` every time DictusApp opens
+4. **Do NOT add server-side receipt validation.** This contradicts the "100% offline, no server" identity. The App Store handles fraud prevention for you
+5. **Do NOT obfuscate the feature gate code.** It's MIT-licensed and public. Obfuscation adds complexity, breaks debugging, and provides zero real security against a determined bypass
+6. **Document the Open Core model clearly** in the repo README: "Pro features are gated by StoreKit subscription. If you build from source, you can unlock them -- that's by design"
 
 **Warning signs:**
-Spending >4 hours researching auto-return approaches. Considering `_hostBundleID`. Testing `LSApplicationWorkspace` (already in Out of Scope).
+Time spent on "anti-piracy" measures. Server-side validation code being written. Obfuscation tools being considered. Feature gate checks scattered across 20+ files instead of centralized.
 
 **Phase to address:**
-Cold start phase. Timebox research to 2 hours maximum. If no new public API has appeared since January 2026, move to UX refinement of existing overlay.
+SubscriptionManager phase. Establish the philosophy (accept bypass) and the architecture (StoreKit JWS as truth, UserDefaults as cache) in the first PR. Do not revisit.
 
 ---
 
-### Pitfall 5: Autocorrect State Corruption from Race Between Async Suggestions and User Input
+### Pitfall 5: App Store Rejection for Subscription That Doesn't Provide "Ongoing Value"
 
 **What goes wrong:**
-Issue #67 exposes a specific race condition: `lastAutocorrect` state persists indefinitely after a correction, causing undo to fire on backspace even after the user has typed new characters. But the proposed fix (clear `lastAutocorrect` on any new character) introduces a subtler race when combined with the async prediction pipeline:
+App Store Review Guideline 3.1.2 requires auto-renewable subscriptions to provide "dynamic, ongoing value" over time. Dictus Pro's features (Smart Mode LLM, history search, custom vocabulary) are all local processing features that don't inherently improve over time -- they work the same on day 1 as day 365. Apple may reject the subscription arguing these should be a one-time purchase, not a subscription.
 
-1. User types "helo" + space → autocorrect fires, sets `lastAutocorrect`
-2. User immediately types "t" (fast typist, <100ms after space)
-3. The space-triggered autocorrect runs on the suggestion queue (async). It sets `lastAutocorrect` AFTER the "t" character handler has already cleared it
-4. Result: `lastAutocorrect` is set again despite new input, and the next backspace corrupts text
-
-This race exists because `SuggestionState.updateAsync()` dispatches to `suggestionQueue` and publishes back to main thread. If autocorrect happens inside this async pipeline, the state mutation ordering depends on GCD scheduling, not user input ordering.
-
-With SymSpell replacing UITextChecker, the race window may widen: SymSpell lookups are faster (<1ms vs UITextChecker's 5-20ms), but the dictionary load is async, so the first few keystrokes may use UITextChecker while SymSpell loads, then switch mid-word — creating inconsistent correction behavior.
+Additionally, common paywall rejection reasons:
+- Price and subscription duration not prominently displayed
+- Missing "Restore Purchases" button
+- Missing links to Terms of Service and Privacy Policy
+- Free trial terms not clearly stated
+- Beta labeling ("beta" in app name or description)
 
 **Why it happens:**
-The current architecture has a synchronous path (`update(proxy:)` for delete/undo) and an asynchronous path (`updateAsync(context:)` for character input). Autocorrect state (`lastAutocorrect`) is mutated from both paths without synchronization. The DispatchWorkItem cancellation only prevents publishing stale suggestions, not stale autocorrect state.
+Apple's reviewers apply Guideline 3.1.2 inconsistently, but keyboard apps with subscriptions are scrutinized because the "ongoing value" argument is harder to make for offline tools. Apps that successfully use subscriptions (Grammarly, SwiftKey) either have cloud services or clearly communicate ongoing improvements.
 
-**Consequences:**
-Text corruption: words mangled by stale undo operations. User types "corriger test", backspace produces "CorrCorrigerr" (documented in issue #67). With SymSpell, this may manifest as double-corrections (SymSpell corrects a word that UITextChecker already corrected during the load transition).
-
-**Prevention:**
-1. **Fix issue #67 first, before any prediction engine changes**: The state management bug is independent of SymSpell. Fix the easy bug in isolation so you can verify the fix works with the current engine before adding complexity
-2. **Clear `lastAutocorrect` synchronously on main thread in the key handler, before dispatching async work**: The character input handler in `DictusKeyboardBridge` runs on main. Clear `lastAutocorrect = nil` there immediately, not inside the async suggestion callback
-3. **Make autocorrect a synchronous operation, not part of the async suggestion pipeline**: Autocorrect (replace word on space) should be a synchronous check on main thread — it's user-facing and must be deterministic. Only the suggestion bar population (showing 3 candidates) should be async
-4. **Add a generation counter to prevent stale autocorrect**: Increment a counter on every keystroke. The autocorrect callback checks if the counter matches — if not, the autocorrect result is stale and should be discarded
-5. **Test with rapid typing (>5 chars/second)**: Use `XCTestCase.measure {}` or a UI test that simulates fast typing to reproduce the race. The bug is invisible at normal typing speed
+**How to avoid:**
+1. **Frame the subscription as "Dictus Pro with ongoing model updates":** The value proposition includes future LLM model improvements, new reformulation templates, expanded vocabulary packs, and new language support. This is genuine ongoing value you plan to deliver
+2. **Include a "What's New in Pro" section** in the app that highlights recent additions -- even during beta, list planned features with dates
+3. **Paywall compliance checklist** (Apple will reject if any are missing):
+   - [ ] `product.displayPrice` used (never hardcode prices)
+   - [ ] Subscription duration clearly shown ("4.99 EUR/month")
+   - [ ] Auto-renewal terms displayed
+   - [ ] "Restore Purchases" button visible and functional
+   - [ ] Link to Privacy Policy (URL, not just text)
+   - [ ] Link to Terms of Service (URL, not just text)
+   - [ ] Free trial terms if applicable ("7-day free trial, then 4.99 EUR/month")
+   - [ ] Cancel instructions or link to Apple subscription management
+4. **Do NOT use the word "beta" in the app name or primary description** during App Store review -- it triggers rejection. "Early access" is acceptable, or simply don't mention it
+5. **Consider offering a one-time purchase alternative** alongside the subscription if Apple pushes back. Some developers report success with a "lifetime" option at 10x monthly price
 
 **Warning signs:**
-Backspace produces garbled text. Autocorrect fires on a word the user already corrected manually. Different corrections appear for the same misspelling on consecutive attempts.
+Rejection with Guideline 3.1.2 citation. Paywall missing any of the checklist items. Hardcoded prices in UI. No Restore Purchases flow.
 
 **Phase to address:**
-Bug fix phase (issue #67) MUST complete before prediction engine upgrade. The race condition will be harder to debug with two correction engines (UITextChecker during load + SymSpell after load).
+Paywall UI phase. The paywall must be compliance-complete before the first TestFlight build that includes subscription products.
+
+---
+
+### Pitfall 6: Beta Period "All Features Free" Creates Entitlement State Chaos at Launch
+
+**What goes wrong:**
+During TestFlight beta, all Pro features are free (no subscription required). At launch, you flip the switch and features become gated. The pitfall is in the transition:
+1. **Users who used Pro features during beta lose access** with no warning, causing 1-star reviews and support requests
+2. **Beta testers' local data (transcription history, custom vocabulary) was created with Pro features.** If you gate history search behind Pro after launch, their existing searches/exports stop working
+3. **The `isProUser` logic during beta is a hardcoded override** (`isBeta ? true : isSubscribed`). If this override leaks into production (forgot to flip the flag, wrong build configuration), all users get Pro for free permanently
+4. **StoreKit sandbox testing during beta is unreliable.** TestFlight uses the sandbox environment, but sandbox subscriptions auto-renew at accelerated rates (monthly = 5 minutes) and expire. Beta testers who also test purchasing will have confusing subscription states
+
+**Why it happens:**
+The beta override is a temporary hack that touches the same code path as the real entitlement check. Without clean separation, the beta behavior bleeds into production.
+
+**How to avoid:**
+1. **Use a compile-time flag, not a runtime flag, for beta override:** `#if BETA_OVERRIDE` in the SubscriptionManager. The App Store build configuration strips this flag automatically. No risk of it leaking
+2. **Alternatively, use StoreKit Configuration file for TestFlight:** Grant a free subscription via StoreKit sandbox configuration rather than bypassing the entitlement check. This tests the real code path
+3. **Grandfather beta testers:** Give all users who installed before the launch date a 30-day free Pro trial via a promotional offer. This prevents the "features disappeared" shock
+4. **Separate "feature available" from "feature gated":** History base features (view recent transcriptions) are always free. Only Pro features (search, export, unlimited history) are gated. Users never lose functionality they had
+5. **Test the transition explicitly:** Build a release config locally, verify Pro features are locked, verify the upgrade flow works, verify beta data is still accessible in free tier
+
+**Warning signs:**
+`isProUser` returning `true` in a release build without a subscription. Beta testers reporting features disappeared. Runtime boolean for beta override instead of compile-time.
+
+**Phase to address:**
+SubscriptionManager phase. The beta override mechanism must be designed alongside the entitlement system, not bolted on afterward.
 
 ---
 
 ## Moderate Pitfalls
 
-Issues that cause days of debugging or subtle UX regressions.
+Issues that cause days of debugging, subtle UX problems, or performance regressions.
 
-### Pitfall 6: SymSpell French Dictionary Quality — Garbage In, Garbage Out
-
-**What goes wrong:**
-SymSpell is only as good as its frequency dictionary. The current `fr_frequency.json` has ~1.3K words — far too small. Issue #68 proposes replacing it. The risk is choosing a bad source dictionary:
-
-- **Raw Wikipedia word frequencies** include proper nouns (place names, people), technical terms, and foreign words that pollute suggestions. "Paris" appears 50,000 times in French Wikipedia but is rarely what someone means when typing "par"
-- **OpenSubtitles frequencies** are better for conversational French but include slang, movie-specific terms, and English loanwords at inflated frequencies
-- **Frequency lists without lemmatization** treat "mange", "manges", "mangeons", "mangez", "mangent" as separate entries, wasting dictionary space on conjugations that SymSpell should derive from the root
-
-A bad dictionary makes SymSpell worse than UITextChecker, which at least uses Apple's curated system dictionary.
-
-**Prevention:**
-1. **Use a curated frequency list**: The [Lexique 3](http://www.lexique.org/) database is the gold standard for French word frequencies — used by French NLP researchers, covers 140K lemmas with frequency data from books and subtitles
-2. **Filter aggressively**: Remove proper nouns, words with frequency < 0.1 per million, words shorter than 2 characters. Target 30K-50K entries
-3. **Include common French contractions and elisions**: "l'homme", "j'ai", "c'est", "qu'il" must be in the dictionary or SymSpell will flag them as misspelled
-4. **Test with real French text samples**: Run SymSpell against 100 real French sentences and compare suggestions to UITextChecker. If SymSpell is worse, the dictionary needs work
-5. **Build an English dictionary from the same methodology**: Don't ship French-only. English speakers who switch languages will get zero corrections
-
-**Phase to address:**
-Prediction engine upgrade phase. Dictionary curation is a prerequisite — do not start coding SymSpell integration until the dictionary is validated.
-
----
-
-### Pitfall 7: N-gram Model Ignores French Morphology (Elision, Contractions, Gender)
+### Pitfall 7: WhisperKit initialPrompt 224-Token Limit Makes Custom Vocabulary Useless for Large Dictionaries
 
 **What goes wrong:**
-French text has elisions ("l'eau" not "le eau"), contractions ("du" = "de le"), gendered articles ("le/la/les"), and verb conjugations that English n-gram approaches handle poorly:
+Whisper's `initialPrompt` (which WhisperKit exposes) is limited to 224 tokens. Each word is roughly 1-3 tokens. A user's custom vocabulary of 50+ terms (proper nouns, technical jargon, brand names) easily exceeds 224 tokens. When the prompt exceeds the limit, only the **last** 224 tokens are kept -- all earlier words are silently discarded. The user adds words thinking they'll be recognized, but they aren't.
 
-- A trigram model trained naively treats "l'" as a separate token, breaking the context chain: "je bois l'" gives no prediction because "l'" is not a word boundary
-- The apostrophe in "l'eau" confuses `extractLastWord()` which uses `.byWords` enumeration — Swift may treat "l" and "eau" as separate words, or "l'eau" as one word, depending on locale
-- Gender agreement: after "la", the model should predict feminine nouns. After "le", masculine. Without gender-aware training, the model suggests the most frequent word regardless of gender
+Worse, the attention mechanism assigns higher weight to tokens at the end of the prompt. Words at the beginning of a long prompt get less "attention" even if within the 224-token window. This creates inconsistent recognition -- some custom words work, others don't, seemingly at random.
 
-**Prevention:**
-1. **Tokenize French text with apostrophe-aware rules**: Treat `[word]'[word]` as two tokens where the first includes the apostrophe: ["l'", "eau"]. This preserves the elision context for n-gram lookup
-2. **Train n-gram model on properly tokenized French corpus**: Use a tokenizer that handles French-specific patterns (elision, hyphenated compounds like "peut-etre", "c'est-a-dire")
-3. **Test `extractLastWord()` with French edge cases**: Verify what Swift's `.byWords` enumeration returns for: "l'homme", "aujourd'hui", "peut-etre", "c'est", "qu'est-ce". If the results are wrong, implement a custom French tokenizer
-4. **Consider HeliBoard's AOSP dictionary approach**: These dictionaries are pre-trained for specific languages including French and handle morphology natively. The binary format would need a Swift reader, but the linguistic quality is pre-validated
+**Why it happens:**
+Whisper's prompt mechanism was designed for short contextual hints ("The following is a meeting about quantum physics"), not as a vocabulary injection system. Using it as a custom dictionary is a hack, not a supported feature.
 
-**Phase to address:**
-Prediction engine upgrade phase (n-gram sub-task). French tokenization must be tested before model training.
-
----
-
-### Pitfall 8: Prediction Engine Swap Breaks Suggestion Bar Timing Contract
-
-**What goes wrong:**
-The current `SuggestionState.updateAsync()` has a carefully tuned flow: read `documentContextBeforeInput` on main thread, dispatch computation to background, publish results back to main. This ensures suggestions appear within 1-2 frames (~16-33ms) of a keystroke.
-
-Replacing `UITextChecker.completions()` with SymSpell changes the timing profile:
-- **SymSpell lookup**: <1ms (faster) — but only after dictionary is loaded
-- **SymSpell dictionary load**: 500ms-3s (blocking at startup)
-- **N-gram lookup**: 1-10ms depending on model size and cache warmth
-
-If the new engine isn't ready when the first keystroke arrives, `suggestions(for:)` returns empty. The suggestion bar shows nothing. The user types 3-4 characters with no suggestions, then suddenly gets suggestions when SymSpell finishes loading. This "suggestion pop-in" feels broken.
-
-Additionally, if n-gram prediction runs after SymSpell correction (two sequential async operations), the total latency may exceed the 16ms frame budget, causing suggestion bar updates to lag behind typing.
-
-**Prevention:**
-1. **Progressive enhancement**: Start with UITextChecker (already loaded by iOS). When SymSpell finishes loading, swap the engine atomically. The suggestion bar should never show "nothing" — it should always show at least UITextChecker results
-2. **Single async dispatch for both correction + prediction**: Don't chain two async operations. In one `DispatchWorkItem`, call SymSpell for correction AND n-gram for next-word, then publish both results to main thread in a single callback
-3. **Pre-load SymSpell dictionary in `viewDidLoad`**: Start loading immediately when the keyboard extension launches, not on first keystroke. Use the 1-2 seconds before the user starts typing
-4. **Measure end-to-end latency on device**: Use `OSSignposter` or `CFAbsoluteTimeGetCurrent()` to measure keystroke-to-suggestion-update latency. If >16ms consistently, the engine needs optimization
+**How to avoid:**
+1. **Limit custom vocabulary to 30-40 terms maximum** and communicate this limit clearly in the UI. "Add your most important words" not "Add your entire dictionary"
+2. **Format as contextual sentences, not word lists:** Instead of "Jean-Pierre, Sorbonne, CNRS, hematologie", write: "Jean-Pierre travaille a la Sorbonne et au CNRS en hematologie." Contextual sentences give Whisper better signal with fewer tokens
+3. **Prioritize and rotate vocabulary based on context:** If the user has 100 terms, select the 30 most relevant based on recent usage or category. Implement a "vocabulary profile" system (work, medical, personal) that loads different prompt sets
+4. **Place highest-priority terms at the END of the prompt** (where attention is strongest)
+5. **Set expectations in the UI:** "Custom vocabulary improves recognition of unusual names and terms. It works best with 10-30 specific words." Do not promise perfect recognition
+6. **Test with real French proper nouns:** Names like "Thierry", "Guillaume", "Montpellier" that Whisper's base model may already know. Only add words Whisper genuinely struggles with
 
 **Warning signs:**
-Suggestion bar is empty for the first 2-3 words. Suggestions appear with visible delay after fast typing. Suggestion bar "flickers" (shows UITextChecker results then immediately replaces with SymSpell results).
+Users report custom vocabulary "doesn't work." Token count exceeds 224 silently. Vocabulary list shows 100+ entries. UI promises "perfect recognition of all your words."
 
 **Phase to address:**
-Prediction engine upgrade phase. Progressive enhancement pattern must be implemented from the start, not bolted on after.
+Custom vocabulary phase. Token budget management and contextual formatting are core design decisions, not implementation details.
 
 ---
 
-### Pitfall 9: Two Prediction Engines Running Simultaneously Doubles Memory
+### Pitfall 8: LLM Reformulation Quality is Terrible for French Without Careful Prompting
 
 **What goes wrong:**
-During the transition period (SymSpell loading), both UITextChecker and SymSpell's hash map may be in memory. UITextChecker is loaded by iOS on demand and uses system memory, but its `completions()` and `guesses()` methods allocate temporary arrays. If SymSpell's 10-15MB hash map coexists with UITextChecker's allocations plus the n-gram model, the extension approaches the memory limit.
+Apple Foundation Models (3B parameters) and small open-source models (Gemma 3 1B, Phi-4 Mini 3.8B) produce mediocre French text. Common failures:
+- **Gender/agreement errors:** "Le lettre est envoye" instead of "La lettre est envoyee"
+- **Awkward phrasing:** Literal English-pattern translations ("je suis excite de" instead of "j'ai hate de")
+- **Hallucinated content:** Adding information not in the original dictation
+- **Losing the user's voice:** Over-formalizing casual dictation or casualizing formal text
+- **Truncated output:** 4096-token context window means long dictations produce incomplete reformulations
 
-Even after SymSpell is fully loaded, if the code still holds a reference to the UITextChecker instance (the current `TextPredictionEngine` creates one in `init()`), it stays in memory.
+AFM's 3B model is optimized for English-first tasks. French is a secondary language that received less training attention. The small open-source models have even worse French quality.
 
-**Prevention:**
-1. **Release UITextChecker after SymSpell is ready**: Set `textChecker = nil` (make it optional) once SymSpell confirms successful load. This frees the system dictionary cache
-2. **Never load both language dictionaries simultaneously**: Current code loads one language at a time — preserve this behavior. When switching FR<>EN, unload SymSpell FR completely before loading SymSpell EN
-3. **Monitor memory at runtime**: Call `os_proc_available_memory()` after SymSpell loads. If <10MB remaining, disable n-gram model and fall back to SymSpell-only mode
-4. **Budget**: SymSpell dict (~8MB) + n-gram model mmap'd (~2MB resident) + keyboard UI (~5MB) + system overhead (~15MB) = ~30MB. Leaves ~20MB headroom. This is tight but workable only if UITextChecker is released
+**Why it happens:**
+Small models struggle with low-resource language nuances. French grammar (gendered nouns, complex conjugation, subjunctive mood) requires more parameters than English to handle well. Developers test with simple English examples and assume French works equally well.
+
+**How to avoid:**
+1. **Test every reformulation template with 20+ real French dictation samples** before shipping. Include: formal letters, casual messages, medical notes, technical descriptions, slang-heavy SMS
+2. **System prompts must be in French** for French reformulation. "Tu es un assistant qui reformule des textes dictes en francais" not "You are a reformulation assistant"
+3. **Constrained output with Guided Generation:** Use AFM's `@Generable` macro to constrain output structure (e.g., force output to be a single paragraph, or an email with subject/body). This reduces hallucination
+4. **Show the original alongside the reformulation** so users can compare and choose. Never auto-replace the original text
+5. **Add a quality threshold:** If the model's output is shorter than 50% or longer than 200% of the input, flag it as potentially bad and show a warning
+6. **Template-specific prompts:** "Rewrite as professional email" needs a different system prompt than "Summarize this." One generic prompt will produce bad results for all templates
+7. **Measure latency on target devices:** A 3B model on iPhone 15 Pro may take 3-10 seconds for a paragraph. If >5 seconds, show a progress indicator with the option to cancel
+
+**Warning signs:**
+French output with English word order. Gender errors in first test. Reformulation adds content not in original. Users reporting "Smart Mode makes my text worse."
 
 **Phase to address:**
-Prediction engine upgrade phase. Memory profiling after each component integration.
+Smart Mode LLM phase. French quality testing is a gating requirement before any reformulation template ships. Budget 2-3 days specifically for prompt engineering and quality evaluation.
 
 ---
 
-### Pitfall 10: SymSpellSwift Library is Minimally Maintained (16 Commits, Single Author)
+### Pitfall 9: Transcription History Database Grows Unbounded and Kills Extension Memory
 
 **What goes wrong:**
-SymSpellSwift (github.com/gdetari/SymSpellSwift) has 16 commits, one contributor, and was last updated August 2025. It is a direct port of the C# reference implementation. Risks:
-- No community review of the Swift code (potential memory leaks, retain cycles, or inefficient Swift patterns)
-- May not handle Swift String's Unicode complexity correctly (French accented characters, emoji in text)
-- If a bug is found, there's no guarantee the maintainer will respond
-- No test suite visible in the repository
+Every dictation saves a transcription to the SwiftData database in the App Group container. A regular user might dictate 10-50 times per day. After a month: 300-1500 entries. After a year: 3600-18000 entries. Each entry contains: text (variable, 50-5000 chars), timestamp, duration, model used, word count.
 
-If the library has a subtle bug (e.g., crashes on words with combining diacritical marks like "e\u0301" vs "e-acute"), debugging it requires understanding both SymSpell's algorithm AND the library's Swift implementation.
+When the keyboard extension opens the database to save a new entry, SwiftData may load the model container metadata, which grows with the number of entries. On a database with 10000+ entries, the initial `ModelContainer` creation may allocate several MB just for the schema and index structures.
 
-**Prevention:**
-1. **Vendor the source code, do not use as SPM dependency**: Copy the Swift files into `DictusKeyboard/TextPrediction/SymSpell/`. This allows fixing bugs directly without waiting for upstream
-2. **Write integration tests for French-specific cases**: Test with: accented characters (e, e-acute, e-grave, e-circumflex), elisions (l'homme), compound words (peut-etre), Unicode normalization (NFC vs NFD)
-3. **Audit the source for obvious issues**: Check how it handles String iteration (should use `Character`, not `UInt8`). Check for `force try` or `fatalError` calls. Check dictionary loading for error handling
-4. **Consider writing a minimal SymSpell from scratch**: The core algorithm is ~200 lines. Given the library's minimal maintenance, implementing the symmetric delete lookup directly may be more reliable than depending on an unmaintained port
+Free-tier users have limited history (e.g., last 10 entries). But if the database still contains all entries (just hidden in UI), the storage and memory impact is the same.
+
+**Why it happens:**
+Developers test with 10-50 entries. The database works perfectly. Six months later, users have thousands of entries and the extension starts crashing.
+
+**How to avoid:**
+1. **Implement a retention policy from day one:** Free tier keeps last 10 entries and auto-deletes older ones from the database (not just hides them). Pro tier keeps everything but with a configurable limit (default: 1 year)
+2. **Keyboard extension writes to a lightweight staging area** (JSON file or single-row SQLite table in App Group), not the full history database. DictusApp imports staged entries on launch. This keeps the keyboard extension's database interaction minimal
+3. **Lazy-load history in DictusApp:** Use SwiftData's `@Query` with a `fetchLimit` and pagination. Never load all entries into memory
+4. **Add a "Storage used" indicator** in settings showing database size. Users with 500MB of transcription history need to know
+5. **Test with a synthetic database of 10,000 entries** before shipping. Measure keyboard extension launch time and memory usage
+
+**Warning signs:**
+Keyboard extension launch slows over weeks of use. App Group container grows beyond 100MB. `ModelContainer` init takes >500ms.
 
 **Phase to address:**
-Prediction engine upgrade phase (first step — evaluate library or rewrite).
+Transcription history phase. Retention policy and the staging pattern must be in the initial design, not added after users report problems.
 
 ---
 
-## Minor Pitfalls
-
-Issues that cause hours of confusion but are quickly fixable once identified.
-
-### Pitfall 11: `extractLastWord()` Apostrophe Handling Differs Between iOS Versions
+### Pitfall 10: StoreKit Transaction Listener Not Started at App Launch Causes Missing Purchases
 
 **What goes wrong:**
-The current `extractLastWord()` uses `enumerateSubstrings(options: .byWords)` to find the last word. This relies on iOS's ICU word boundary detection, which handles apostrophes inconsistently:
-- iOS 17: "l'homme" may be split as ["l", "homme"] or kept as ["l'homme"] depending on locale
-- iOS 18+: Word boundary detection may have changed (Apple ships ICU updates with each iOS version)
+StoreKit 2 requires calling `Transaction.updates` at app launch to process pending transactions. If this listener isn't started immediately (e.g., it's started only when the paywall screen appears), several scenarios break:
+- User purchases a subscription, kills the app before the transaction completes, relaunches -- purchase is lost
+- User subscribes on another device (Family Sharing), opens Dictus -- subscription not recognized until they visit the paywall
+- Apple processes a refund -- the app doesn't revoke Pro access because it never heard about the transaction update
+- User's subscription auto-renews -- if the app wasn't listening, the renewal transaction is queued but not processed
 
-If `extractLastWord` returns "homme" for "l'homme", the prediction engine looks up "homme" in isolation, losing the context that the user was typing an elision. The suggestion "homme" would be wrong — "hommage" or "hommes" would make more sense.
+**Why it happens:**
+Developers focus on the purchase flow (user taps buy, payment sheet appears, handle result) and forget that StoreKit transactions can arrive at any time -- app launch, background refresh, after app update.
 
-**Prevention:**
-1. **Implement a custom French-aware word extractor**: Don't rely solely on `.byWords`. After extracting the last word, check if the character before it is an apostrophe and include the prefix: "l'" + "homme" = "l'homme"
-2. **Test on both iOS 17 and iOS 18**: Word boundary behavior may differ. Pin expected behavior in unit tests
+**How to avoid:**
+1. **Start `Transaction.updates` listener in the App Delegate or SwiftUI `App.init`**, before any UI renders. Process every transaction immediately
+2. **Also iterate `Transaction.currentEntitlements` at every app launch** to sync the entitlement state. This catches transactions that arrived while the app was killed
+3. **Persist entitlement state to App Group `UserDefaults`** after every transaction update, so the keyboard extension has current status without needing to call StoreKit itself
+4. **Handle `Transaction.updates` for revocations and expirations**, not just purchases. When a subscription expires, flip `isProUser` to `false` immediately and update the App Group cache
+5. **Test with sandbox subscription lifecycle:** Purchase -> verify -> wait for expiration (5 min in sandbox) -> verify revocation -> re-purchase -> verify restoration
+
+**Warning signs:**
+Users report purchasing but features not unlocking. Pro features still work after subscription expires. `Transaction.updates` started anywhere other than app initialization.
 
 **Phase to address:**
-Prediction engine upgrade phase (tokenization sub-task).
+SubscriptionManager phase. Transaction listener must be the first piece of StoreKit code written.
 
 ---
 
-### Pitfall 12: N-gram Training Corpus Contains English Bleeding Into French Predictions
+## Technical Debt Patterns
 
-**What goes wrong:**
-French Wikipedia articles often contain English words (brand names, technical terms, anglicisms). If the training corpus isn't filtered, the French trigram model will suggest English words in French context: "je vais" → "to" (from code-switched Wikipedia sentences).
+Shortcuts that seem reasonable but create long-term problems.
 
-**Prevention:**
-1. **Use a monolingual French corpus**: French OpenSubtitles or French literature corpora are cleaner than Wikipedia for conversational prediction
-2. **Filter training data**: Remove sentences containing >20% non-French words (detected by character set or dictionary membership)
-3. **Keep French and English models completely separate**: Never train a bilingual model. Load the active language's model exclusively
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Hardcode product IDs | Fast implementation | Breaks when adding tiers | Never -- use a ProductID enum from day 1 |
+| UserDefaults as sole entitlement source | Works without StoreKit | Trivially bypassable, no renewal handling | Never -- always verify with `Transaction.currentEntitlements` |
+| Skip SwiftData migration versioning | Faster initial development | Database crashes when schema changes in v1.6 | Never -- add `VersionedSchema` from day 1 |
+| One generic LLM prompt for all templates | Ship faster | Poor quality across all reformulation types | MVP only -- replace with template-specific prompts within 2 weeks |
+| Store entire transcription text in UserDefaults | No SwiftData needed | UserDefaults has ~1MB practical limit, corrupts at scale | Never -- use proper database or file storage |
+| Run LLM inference synchronously on main thread | Simpler code | UI freezes for 3-10 seconds during reformulation | Never -- always async with cancellation support |
 
-**Phase to address:**
-Prediction engine upgrade phase (model training sub-task).
+## Integration Gotchas
 
----
+Common mistakes when connecting these features together.
 
-### Pitfall 13: Autocorrect Undo Fix (#67) Breaks Accent Suggestion Flow
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| StoreKit 2 + Keyboard Extension | Calling `purchase()` from extension | Purchase in main app only, cache entitlement in App Group UserDefaults |
+| SwiftData + App Group | Both app and extension write simultaneously | Extension writes to staging file, app imports to SwiftData |
+| AFM + Keyboard Extension | Loading model in extension process | Run inference in main app, pass results via App Group |
+| WhisperKit + Custom Vocabulary | Dumping all words into initialPrompt | Contextual sentences, 30-40 term limit, priority rotation |
+| Beta Override + Production | Runtime boolean for beta check | Compile-time `#if BETA_OVERRIDE` stripped from release builds |
+| StoreKit + App Group | Extension checks StoreKit directly | App writes entitlement to App Group, extension reads cached value |
+| SwiftData + Schema Evolution | No versioning in initial schema | `VersionedSchema` with `SchemaMigrationPlan` from first model definition |
 
-**What goes wrong:**
-The proposed fix for issue #67 is: clear `lastAutocorrect` on every new character. But the accent suggestion flow has a special case: user types "e" → suggestion bar shows ["e", "e-acute", "e-grave"]. If the user taps "e-acute", the suggestion handler replaces "e" with "e-acute" — this is functionally an autocorrect operation. If `lastAutocorrect` is set for this replacement, the next backspace undoes it (expected behavior for accents). But if the fix clears `lastAutocorrect` on the next character, accent undo still works correctly.
+## Performance Traps
 
-The subtle issue: if accent suggestion triggers `lastAutocorrect`, and the user types a space (triggering spell-check autocorrect on the SAME word), the state gets confused — which correction should undo restore? The original unaccented character, or the pre-autocorrect word?
+Patterns that work at small scale but fail as usage grows.
 
-**Prevention:**
-1. **Separate autocorrect state from accent state**: Use two optional states: `lastAutocorrect` for spell corrections, `lastAccentReplace` for accent selections. Backspace checks both, with accent replacement taking priority (it happened more recently)
-2. **Test the sequence: type vowel → tap accent → type more → space (autocorrect) → backspace**: Verify the undo produces the correct result at each step
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Unbounded history database | Extension launch slows, crashes | Retention policy + fetch limits | >1000 entries (~1-3 months of regular use) |
+| Loading all history for search | Memory spike, UI freeze | SwiftData `@Query` with `FetchDescriptor` predicate, not in-memory filter | >500 entries |
+| LLM inference blocking main thread | UI frozen during Smart Mode | Async with `Task`, show progress, support cancellation | Always (3-10s inference time) |
+| Large custom vocabulary in initialPrompt | Silent truncation, inconsistent recognition | 30-40 term limit, contextual sentence format | >50 terms (~150+ tokens) |
+| Checking `Transaction.currentEntitlements` on every keystroke | Perceptible typing lag | Check on app launch, cache in memory, update on `Transaction.updates` | Always (StoreKit queries have latency) |
 
-**Phase to address:**
-Bug fix phase (issue #67). Must be tested before prediction engine changes.
+## Security Considerations
 
----
+Domain-specific security issues for an Open Core offline app.
 
-## Phase-Specific Warnings
+| Consideration | Risk | Approach |
+|---------|------|------------|
+| UserDefaults entitlement cache tampered | Jailbreak users get free Pro | Accept: MIT license, offline app, no server. StoreKit JWS is the real check in DictusApp |
+| Transcription history contains sensitive data | Privacy breach if device compromised | Use SwiftData with file protection (NSFileProtectionComplete), no cloud sync, no export without user action |
+| LLM output may contain hallucinated PII | User sends reformulated text with wrong names/numbers | Always show original alongside reformulation, never auto-send |
+| Custom vocabulary stored in App Group | Other extensions in same group could read user's vocabulary | App Group is app-private (same team ID only), acceptable risk |
+| Source code reveals Pro feature implementation | Competitors copy features | Accept: MIT license, features are the competitive moat, not the code |
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Bug fix #67 (autocorrect undo) | State corruption from async race (#5), accent flow interaction (#13) | Fix synchronously on main thread, separate accent state from autocorrect state |
-| SymSpell integration | Memory blow-up at load (#1), dictionary quality (#6), library quality (#10) | 30K word limit, edit distance 1, vendor source, curate dictionary first |
-| N-gram model | Memory without mmap (#2), C++ bridging (#3), French morphology (#7), English bleed (#12) | Pure Swift binary trie with mmap, French-aware tokenizer, monolingual corpus |
-| Prediction engine swap | Timing regression (#8), double memory (#9) | Progressive enhancement, release UITextChecker after swap, single async dispatch |
-| Cold start auto-return | Impossible via public API (#4) | Accept constraint, polish swipe-back overlay, explore sourceApplication for UX text only |
-| French tokenization | Apostrophe handling (#11), elision context (#7) | Custom French tokenizer, test on multiple iOS versions |
+## UX Pitfalls
+
+Common user experience mistakes when adding premium features to a free app.
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Showing paywall on first keyboard use | Users feel baited, uninstall | Let users discover Pro features naturally, show upgrade prompt only when they try a Pro feature |
+| Locking previously free features behind Pro | Betrayal, 1-star reviews | Never. All v1.4 features remain free forever. Only new features are Pro |
+| Smart Mode replaces original text silently | Users lose their dictation | Show original + reformulation side by side, user explicitly chooses |
+| No way to dismiss paywall from keyboard | User trapped, force-quit needed | Always have a clear "Not now" / "X" dismiss, return to keyboard immediately |
+| Pro badge everywhere in free tier | Feels like adware | Subtle Pro indicators only on Pro features, no persistent upgrade banners |
+| Custom vocabulary has no feedback | User adds words, doesn't know if they work | Show a "test pronunciation" or highlight custom words in transcriptions |
+
+## "Looks Done But Isn't" Checklist
+
+Things that appear complete but are missing critical pieces.
+
+- [ ] **StoreKit Subscription:** Often missing `Transaction.updates` listener at app launch -- verify transactions process even when paywall is not visible
+- [ ] **StoreKit Subscription:** Often missing restore purchases flow -- verify a user on a new device can restore without re-purchasing
+- [ ] **Paywall UI:** Often missing Terms of Service and Privacy Policy links -- Apple rejects without them
+- [ ] **Paywall UI:** Often missing subscription auto-renewal disclosure -- "Auto-renews at [price]/[period] until cancelled"
+- [ ] **SwiftData History:** Often missing schema versioning -- verify `VersionedSchema` is set up before first release, because v1.6 schema changes will crash
+- [ ] **SwiftData History:** Often missing `0xdead10cc` handling -- verify database connection is released when extension is suspended
+- [ ] **LLM Smart Mode:** Often missing cancellation support -- verify user can abort a slow reformulation
+- [ ] **LLM Smart Mode:** Often missing device capability check -- verify graceful fallback when device doesn't support AFM (pre-iPhone 15 Pro, Apple Intelligence disabled)
+- [ ] **Custom Vocabulary:** Often missing token count validation -- verify the UI prevents adding more words than the 224-token budget allows
+- [ ] **Beta Override:** Often missing production verification -- verify a release build without `BETA_OVERRIDE` actually gates Pro features
+
+## Recovery Strategies
+
+When pitfalls occur despite prevention, how to recover.
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| StoreKit purchase in extension crashes | LOW | Move purchase code to main app, add URL scheme handler. 1-2 day refactor |
+| SwiftData corruption from concurrent access | HIGH | Export surviving data, redesign to staging pattern, re-import. 3-5 day recovery |
+| AFM unavailable in keyboard extension | MEDIUM | Already have two-process architecture for dictation. Add Smart Mode to same flow. 2-3 days |
+| App Store rejection for 3.1.2 | LOW | Update paywall copy, resubmit. Add "ongoing model updates" framing. 1-2 days |
+| LLM quality too poor for French | HIGH | Extensive prompt engineering, possibly switch models, may need to delay Smart Mode launch. 1-2 weeks |
+| Beta override leaks to production | MEDIUM | Emergency build with compile-time flag fixed, expedited review. 1-2 days |
+| History database too large | MEDIUM | Add retention policy retroactively, write migration to prune old entries. 2-3 days |
+| Custom vocabulary exceeds token limit | LOW | Add UI validation, truncate with warning. 1 day |
+
+## Pitfall-to-Phase Mapping
+
+How roadmap phases should address these pitfalls.
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| #1 StoreKit in extension | SubscriptionManager | `purchase()` never called from DictusKeyboard target. Grep verification |
+| #2 AFM in extension / memory | Smart Mode (first task) | Test `import FoundationModels` in keyboard extension on device. Pass/fail in first 2 hours |
+| #3 SwiftData concurrent access | Transcription History (architecture) | Stress test: 20 rapid app/extension switches with writes on both sides |
+| #4 Open Core bypass | SubscriptionManager (philosophy) | No obfuscation code, no server validation, documented in README |
+| #5 App Store 3.1.2 rejection | Paywall UI | Paywall compliance checklist 100% before first submission |
+| #6 Beta override chaos | SubscriptionManager | `#if BETA_OVERRIDE` in code, release build tested without flag |
+| #7 initialPrompt token limit | Custom Vocabulary (design) | UI shows token count, prevents exceeding 200 tokens |
+| #8 LLM French quality | Smart Mode (prompt engineering) | 20+ French samples tested per template, quality metrics defined |
+| #9 Unbounded history | Transcription History (design) | Retention policy active, test with 10K synthetic entries |
+| #10 Transaction listener missing | SubscriptionManager (first task) | `Transaction.updates` started in App.init, verified with sandbox lifecycle test |
 
 ## Sources
 
-- [SymSpell algorithm documentation](https://github.com/wolfgarbe/SymSpell) — pre-computation strategy, memory characteristics (HIGH confidence)
-- [SymSpellSwift library](https://github.com/gdetari/SymSpellSwift) — Swift port, v0.1.4, 16 commits (HIGH confidence, source code reviewed)
-- [SymSpell dictionary loading optimization issue #16](https://github.com/wolfgarbe/SymSpell/issues/16) — loading time, memory optimization techniques (HIGH confidence)
-- [Apple DTS response on auto-return (January 2026)](https://github.com/getdictus/dictus-ios/issues/23#issuecomment-4117827144) — "No API exists" confirmation (HIGH confidence)
-- [Dictus issue #23 research report](https://github.com/getdictus/dictus-ios/blob/99300f9/assets/reference/issue-23-report.md) — failed auto-return approaches documented (HIGH confidence)
-- [Dictus issue #67](https://github.com/getdictus/dictus-ios/issues/67) — autocorrect undo state bug, root cause analysis (HIGH confidence)
-- [Dictus issue #68](https://github.com/getdictus/dictus-ios/issues/68) — prediction upgrade proposal with SymSpell + n-gram architecture (HIGH confidence)
-- [Swift-C++ interop project setup](https://www.swift.org/documentation/cxx-interop/project-build-setup/) — bridging header requirements, extension limitations not documented (MEDIUM confidence)
-- [Apple: Custom Keyboard programming guide](https://developer.apple.com/library/archive/documentation/General/Conceptual/ExtensibilityPG/CustomKeyboard.html) — extension memory limits, API restrictions (HIGH confidence)
-- [iOS keyboard extension memory limits](https://developer.apple.com/forums/thread/85478) — 30-50MB experimentally determined, device-dependent (MEDIUM confidence)
-- [Dealing with memory limits in iOS app extensions](https://blog.kulman.sk/dealing-with-memory-limits-in-app-extensions/) — practical memory management strategies (MEDIUM confidence)
-- [HeliBoard / AOSP dictionaries](https://codeberg.org/Helium314/aosp-dictionaries) — pre-trained language models for 80+ languages (HIGH confidence)
-- [KenLM paper](https://kheafield.com/papers/avenue/kenlm.pdf) — mmap-based data structures for language models (HIGH confidence)
-- [sourceApplication API documentation](https://developer.apple.com/documentation/uikit/uiapplication/openurloptionskey/sourceapplication) — bundle ID of requesting app (HIGH confidence)
-- Dictus codebase: `TextPredictionEngine.swift`, `SuggestionState.swift`, `DictusKeyboardBridge.swift` — current architecture audit (HIGH confidence)
+- [StoreKit 2 and app extensions -- sharing purchases with extensions](https://medium.com/@aisultanios/implement-inn-app-subscriptions-using-swift-and-storekit2-serverless-and-share-active-purchases-7d50f9ecdc09) (MEDIUM confidence)
+- [App Store Review Guidelines -- Guideline 3.1.2 Subscriptions](https://developer.apple.com/app-store/review/guidelines/) (HIGH confidence)
+- [Common iOS paywall rejections and fixes](https://revenueflo.com/blog/common-ios-paywall-rejections-and-the-fixes-that-work) (MEDIUM confidence)
+- [Apple Foundation Models framework documentation](https://developer.apple.com/documentation/FoundationModels) (HIGH confidence, but extension support unconfirmed)
+- [Apple Foundation Models 2025 updates -- 3B model, 4-bit quantization](https://machinelearning.apple.com/research/apple-foundation-models-2025-updates) (HIGH confidence)
+- [Apple Foundation Models context window improvements (iOS 26.4)](https://www.infoq.com/news/2026/03/apple-foundation-models-context/) (MEDIUM confidence)
+- [SwiftData concurrent programming pitfalls](https://fatbobman.com/en/posts/concurret-programming-in-swiftdata/) (HIGH confidence)
+- [0xdead10cc crash from SwiftData in extensions](https://scottdriggers.com/blog/0xdead10cc-crash-caused-by-swiftdata-modelcontainer/) (HIGH confidence)
+- [SwiftData App Group configuration](https://developer.apple.com/forums/thread/732986) (HIGH confidence)
+- [Whisper initial_prompt 224-token limit](https://github.com/openai/whisper/discussions/1824) (HIGH confidence)
+- [Whisper prompting guide -- OpenAI Cookbook](https://developers.openai.com/cookbook/examples/whisper_prompting_guide) (HIGH confidence)
+- [Contextual biasing for Whisper custom vocabulary (academic paper)](https://arxiv.org/html/2410.18363v1) (HIGH confidence)
+- [WhisperKit feature request for custom prompt](https://github.com/argmaxinc/WhisperKit/issues/53) (HIGH confidence)
+- [RevenueCat -- ultimate guide to subscription testing on iOS](https://www.revenuecat.com/blog/engineering/the-ultimate-guide-to-subscription-testing-on-ios/) (HIGH confidence)
+- [Wrong ways to persist in-app purchase status](https://medium.com/@Faisalbin/all-the-wrong-ways-to-persist-in-app-purchase-status-in-your-macos-app-ce6eb9bcb0c3) (MEDIUM confidence)
+- [Key considerations before using SwiftData](https://fatbobman.com/en/posts/key-considerations-before-using-swiftdata/) (HIGH confidence)
+
+---
+*Pitfalls research for: Dictus Pro premium tier (StoreKit 2 + on-device LLM + transcription history + custom vocabulary)*
+*Researched: 2026-04-08*
