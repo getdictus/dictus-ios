@@ -20,8 +20,8 @@ struct ToolbarView: View {
     var suggestionMode: SuggestionMode = .idle
     var onSuggestionTap: ((Int) -> Void)? = nil
 
-    /// Icon size scales with Dynamic Type.
-    @ScaledMetric private var gearIconSize: CGFloat = 16
+    /// Callback when the user cycles the language via the toolbar switcher.
+    var onLanguageChanged: ((SupportedLanguage) -> Void)? = nil
 
     var body: some View {
         // WHY ZStack: ensures the banner text is centered horizontally across the
@@ -42,12 +42,7 @@ struct ToolbarView: View {
                             .lineLimit(1)
                             .frame(maxWidth: .infinity)
                     } else if suggestions.isEmpty {
-                        Link(destination: URL(string: "dictus://")!) {
-                            Image(systemName: "gearshape.fill")
-                                .font(.system(size: gearIconSize, weight: .medium))
-                                .foregroundColor(Color(.systemGray))
-                                .frame(width: 32, height: 32)
-                        }
+                        LanguageSwitcherView(onLanguageChanged: onLanguageChanged)
 
                         Spacer()
                     } else {
