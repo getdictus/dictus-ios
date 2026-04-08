@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Public Beta
-status: completed
-stopped_at: Completed 22-02-PLAN.md (Phase 22 fully complete -- public TestFlight live)
-last_updated: "2026-04-07T21:05:46.294Z"
-last_activity: 2026-04-07 -- Completed 22-02-PLAN.md (public TestFlight submission, README update, GitHub Release)
+milestone: v1.4
+milestone_name: Prediction & Stability
+status: in_progress
+stopped_at: v1.3 archived, v1.4 phases 23-27 all complete, COLD-03 and BETA-01 remaining
+last_updated: "2026-04-07T23:30:00.000Z"
+last_activity: 2026-04-07 -- Archived v1.3 milestone, transitioned to v1.4
 progress:
   total_phases: 7
   completed_phases: 7
@@ -21,16 +21,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-01)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 22 -- Public TestFlight (all plans complete). Phase 27 also complete.
+**Current focus:** v1.4 milestone nearing completion — COLD-03 and BETA-01 remaining.
 
 ## Current Position
 
-Phase: 27 of 27 (Critical Audio Bugs & Autocorrect Fix)
-Plan: 2 of 2 in current phase (PHASE COMPLETE)
-Status: Phase Complete
-Last activity: 2026-04-07 -- Completed 22-02-PLAN.md (public TestFlight submission, README update, GitHub Release)
+Milestone: v1.4 Prediction & Stability
+Phases: 23-27 (all plans complete, 2 requirements remaining: COLD-03, BETA-01)
+Last activity: 2026-04-07 -- Archived v1.3 milestone
 
-Progress: [██████████] 100% (v1.4 milestone: 15/15 plans + Phase 22 complete)
+Progress: [█████████░] 90% (v1.4: 15/15 plans complete, 2 requirements pending)
 
 ## Performance Metrics
 

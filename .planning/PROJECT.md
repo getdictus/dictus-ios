@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Dictus is a free, open-source iOS keyboard app for on-device French speech-to-text dictation. Users speak into any iOS app and get accurate French transcription auto-inserted at the cursor — no subscription, no cloud, no account. Built with WhisperKit and Parakeet (FluidAudio) for multi-engine speech recognition, featuring full AZERTY/QWERTY keyboard with text prediction, spacebar trackpad, haptic feedback, iOS 26 Liquid Glass design, and cold start Audio Bridge for seamless dictation even when iOS kills the app. Currently in private TestFlight beta (v1.2).
+Dictus is a free, open-source iOS keyboard app for on-device French speech-to-text dictation. Users speak into any iOS app and get accurate French transcription auto-inserted at the cursor — no subscription, no cloud, no account. Built with WhisperKit and Parakeet (FluidAudio) for multi-engine speech recognition, featuring full AZERTY/QWERTY UIKit keyboard (giellakbd-ios) with AOSP trie spell correction, n-gram next-word prediction, spacebar trackpad, haptic feedback, iOS 26 Liquid Glass design, and cold start Audio Bridge for seamless dictation even when iOS kills the app. Currently in public TestFlight beta (v1.3).
 
 ## Core Value
 
@@ -53,25 +53,32 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 - ✓ Professional developer signing + Privacy Manifests — v1.2
 - ✓ TestFlight private beta distributed — v1.2
 - ✓ Open-source docs (README, CONTRIBUTING, issue templates) — v1.2
+- ✓ UIKit keyboard rebuild with giellakbd-ios UICollectionView (zero dead zones) — v1.3
+- ✓ Advanced touch: delete repeat, spacebar trackpad, accent long-press, adaptive accent key — v1.3
+- ✓ Feature reintegration on UIKit keyboard (dictation, prediction, emoji, autocorrect) — v1.3
+- ✓ Memory-safe emoji picker via category pagination (139 MiB -> <50 MiB) — v1.3
+- ✓ Public TestFlight beta with privacy manifests and Full Access justification — v1.3
 
 ### Active
 
-- [ ] Upgrade text prediction with probability-based suggestions (SymSpell + n-gram) — issue #68
-- [ ] Fix autocorrect undo triggers after typing new characters — issue #67
-- [ ] Update licenses repo link + add Parakeet/NVIDIA attribution — issue #63
-- [ ] Auto-return to source app after cold start dictation — issue #23
-- [ ] Bug fixes from public beta user feedback (TBD)
+- [ ] Cold start auto-return to source app — confirmed no public iOS API exists (issue #23)
+- [ ] Swipe-back overlay UX polish (COLD-03)
+- [ ] Bug fixes from public beta user feedback (BETA-01)
 
-## Current Milestone: v1.4 Prediction & Stability
+## Current Milestone: v1.4 Prediction & Stability (nearing completion)
 
 **Goal:** Upgrade the text prediction engine with probability-based suggestions, fix known bugs, and stabilize based on beta feedback.
 
-**Target features:**
-- Upgrade prediction engine: SymSpell + n-gram model for smarter suggestions (#68)
-- Fix autocorrect undo triggering after new characters (#67)
-- Update licenses & Parakeet attribution in Settings (#63)
-- Research & implement cold start auto-return to source app (#23)
-- Bug fixes from public beta user feedback (TBD)
+**Shipped features (phases 23-27):**
+- AOSP-style compressed trie spell correction (C++ with ObjC++ bridge, ~0.4 MiB/language)
+- N-gram next-word prediction (trigram with Stupid Backoff, mmap binary format)
+- App localization audit (String Catalogs, EN source + FR translations)
+- Bug fixes: autocorrect undo race, license attribution, phone call crash, AirPods session conflicts, numeric token guard
+- Cold start auto-return investigated (2h timebox) — confirmed no public API exists
+
+**Remaining:**
+- COLD-03: Swipe-back overlay UX polish
+- BETA-01: Public beta feedback triage
 
 ### Out of Scope
 
@@ -89,18 +96,20 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 
 ## Context
 
-Shipped v1.2 with 16,495 LOC Swift across ~333 files in 24 days total (v1.0 + v1.1 + v1.2).
-Tech stack: Swift 5.9+ / SwiftUI / WhisperKit 0.16.0+ / FluidAudio (Parakeet) via SPM.
+Shipped v1.3 public beta with ~51K LOC Swift across ~558 files in 35 days total (v1.0 through v1.3).
+Tech stack: Swift 5.9+ / SwiftUI / WhisperKit 0.16.0+ / FluidAudio (Parakeet) via SPM / C++ AOSP trie (ObjC++ bridge).
 Architecture: Two-process (keyboard extension + main app via Darwin notifications + URL scheme + Audio Bridge for cold start).
-App Group: `group.solutions.pivi.dictus` (migrated from group.com.pivi.dictus in v1.2).
+Keyboard: giellakbd-ios UICollectionView with DictusKeyboardBridge delegate adapter.
+App Group: `group.solutions.pivi.dictus`.
 Minimum target: iOS 17.0.
-Keyboard extension memory limit: ~50MB.
-Distribution: Private TestFlight beta (build 1.2(1)), Apple Developer Team 9B8B36C2FA.
+Keyboard extension memory limit: ~50MB (verified on device).
+Distribution: Public TestFlight beta (v1.3 build 5), Apple Developer Team 9B8B36C2FA.
+Public link: https://testflight.apple.com/join/b55atKYX
 
 Known remaining issues:
-- Keyboard dead zones partially unsolved (Phase 15.4 research documented, needs architecture rework)
-- Text prediction memory budget needs real-device profiling (5MB limit)
-- Public TestFlight link deferred until keyboard rework complete
+- Cold start auto-return has no viable solution (Apple DTS confirmed no public API)
+- COLD-03 swipe-back overlay UX needs polish
+- Beta feedback triage pending (BETA-01)
 
 ## Constraints
 
@@ -141,9 +150,9 @@ Known remaining issues:
 | AudioServicesPlaySystemSound for key sounds | Respects silent switch natively, no AVAudioPlayer conflict | ✓ Good — works with WhisperKit session |
 | touchDown haptic/audio (not touchUp) | Match Apple keyboard feel — feedback on press, character on release | ✓ Good — native feel achieved |
 | 3 device classes for key dimensions | Screen height breakpoints 667/852pt for compact/standard/large | ✓ Good — adaptive across iPhone lineup |
-| DragGesture over UIViewRepresentable | UIViewRepresentable caused edge clipping issues | ⚠️ Revisit — dead zones remain partially |
-| Private beta only (no public link) | Pierre wants keyboard rework before public exposure | — Pending |
+| DragGesture over UIViewRepresentable | UIViewRepresentable caused edge clipping issues | ✓ Good — replaced by giellakbd-ios UICollectionView in v1.3 |
+| Public TestFlight beta | Keyboard rework complete, ready for public exposure | ✓ Good — public beta live in v1.3 |
 | App Group migration to group.solutions.pivi.dictus | Old ID claimed by personal team, professional team needed new ID | ✓ Good — clean separation |
 
 ---
-*Last updated: 2026-04-01 after v1.4 milestone start*
+*Last updated: 2026-04-07 after v1.3 milestone completion*

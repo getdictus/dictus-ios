@@ -1,5 +1,25 @@
 # Milestones
 
+## v1.3 Public Beta (Shipped: 2026-04-07)
+
+**Phases completed:** 6 phases, 14 plans
+**Timeline:** 11 days (2026-03-27 -> 2026-04-07)
+**Files:** 225 modified | **LOC:** +35,046 / -3,395
+
+**Delivered:** Complete UIKit keyboard rebuild with giellakbd-ios, advanced touch interactions, feature reintegration, memory-safe emoji picker, and first public TestFlight beta.
+
+**Key accomplishments:**
+1. UIKit keyboard rebuild — replaced SwiftUI keyboard with giellakbd-ios UICollectionView architecture, eliminating dead zones
+2. Advanced touch interactions — delete repeat with acceleration, spacebar trackpad, French accent long-press, adaptive accent key
+3. Feature reintegration — dictation, text prediction, autocorrect, emoji picker wired onto new UIKit keyboard
+4. Memory optimization — emoji picker reduced from 139 MiB to under 50 MiB via category pagination
+5. Public TestFlight — privacy manifests, Beta App Review passed, public link live
+6. Bug fixes — Dynamic Island watchdog, export logs optimization, 7-day retention
+
+**Git range:** `feat(17-01)` -> `docs(phase-22)`
+
+---
+
 ## v1.2 Beta Ready (Shipped: 2026-03-27)
 
 **Phases completed:** 9 phases, 35 plans
