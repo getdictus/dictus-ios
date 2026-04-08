@@ -166,7 +166,7 @@ struct RecordingOverlay: View {
                 .frame(height: timerFontSize)
                 .padding(.bottom, 4)
 
-            Text("Démarrage...")
+            Text("Starting...")
                 .font(.dictusCaption)
                 .foregroundColor(secondaryForeground)
                 .padding(.bottom, 8)
@@ -177,7 +177,7 @@ struct RecordingOverlay: View {
                 .frame(height: timerFontSize)
                 .padding(.bottom, 4)
 
-            Text("Transcription...")
+            Text("Transcribing...")
                 .font(.dictusCaption)
                 .foregroundColor(secondaryForeground)
                 .padding(.bottom, 8)
@@ -188,7 +188,7 @@ struct RecordingOverlay: View {
                 .foregroundColor(foregroundColor)
                 .padding(.bottom, 4)
 
-            Text("En écoute...")
+            Text("Listening...")
                 .font(.dictusCaption)
                 .foregroundColor(secondaryForeground)
                 .padding(.bottom, 8)

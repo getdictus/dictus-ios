@@ -178,6 +178,15 @@ final class DictusKeyboardBridge: NSObject,
     /// then rechecks autocapitalization (e.g., typing "." may prepare shift for next char).
     /// NOTE: Haptic fires in GiellaKeyboardView.touchesBegan() for ALL keys on touchDown.
     private func handleInputKey(_ character: String) {
+        // Invalidate autocorrect undo -- any new character input means the user
+        // accepted the correction. Only immediate backspace should undo.
+        suggestionState?.lastAutocorrect = nil
+
+        // Clear rejected words when starting a new word
+        if suggestionState?.currentWord.isEmpty == true {
+            suggestionState?.rejectedWords.removeAll()
+        }
+
         AudioServicesPlaySystemSound(KeySound.letter)
 
         // Insert the character. When on shifted/capslock page, the key definition
@@ -223,7 +232,19 @@ final class DictusKeyboardBridge: NSObject,
                 proxy?.deleteBackward()
             }
             proxy?.insertText(autocorrect.originalWord)
+            // Mark this word as rejected so it won't be re-corrected on next space
+            suggestionState?.rejectedWords.insert(autocorrect.originalWord.lowercased())
             suggestionState?.lastAutocorrect = nil
+
+            // Record rejection as a usage signal — NOT immediate learning.
+            // A single rejection might mean "wrong correction, let me retype"
+            // (e.g., user typed "doee" meaning to type "dieu", correction was wrong,
+            // user undoes but doesn't actually want "doee" learned).
+            // After 2 rejections of the same word, it's learned (user really means it).
+            // This matches iOS native / Gboard / SwiftKey behavior.
+            if UserDictionary.shared.recordUsage(autocorrect.originalWord) {
+                suggestionState?.learnWord(autocorrect.originalWord)
+            }
             lastInsertedCharacter = autocorrect.originalWord.last.map(String.init)
             secondToLastInsertedCharacter = nil
             updateCapitalization()
@@ -302,32 +323,99 @@ final class DictusKeyboardBridge: NSObject,
         AudioServicesPlaySystemSound(KeySound.modifier)
         secondToLastInsertedCharacter = lastInsertedCharacter
 
+        // Read the current word directly from the text field (synchronous, main thread).
+        // WHY not use state.currentWord: it's updated by an async background queue.
+        // If the user types fast and hits space before the async update completes,
+        // state.currentWord can be stale (missing last characters). Using the stale
+        // count for deleteBackward would leave orphan characters (first-letter duplication).
+        let freshWord: String = {
+            guard let context = controller?.textDocumentProxy.documentContextBeforeInput,
+                  !context.isEmpty,
+                  let lastChar = context.last,
+                  !lastChar.isWhitespace, !lastChar.isNewline else { return "" }
+            var word = ""
+            context.enumerateSubstrings(in: context.startIndex..., options: .byWords) { sub, _, _, _ in
+                if let s = sub { word = s }
+            }
+            return word
+        }()
+
+        // Guard: never autocorrect tokens containing digits (#74).
+        // WHY CharacterSet.decimalDigits: covers all Unicode digits (0-9 plus other scripts).
+        // Tokens like "test123", "h2o", "3pm" should be inserted as-is.
+        let containsDigit = freshWord.unicodeScalars.contains {
+            CharacterSet.decimalDigits.contains($0)
+        }
+        if containsDigit {
+            // Skip autocorrect — insert space normally
+            controller?.textDocumentProxy.insertText(" ")
+            lastInsertedCharacter = " "
+            // Clear autocorrect state but still trigger predictions
+            suggestionState?.lastAutocorrect = nil
+            suggestionState?.clear()
+            suggestionState?.rejectedWords.removeAll()
+            let ctx = controller?.textDocumentProxy.documentContextBeforeInput
+            suggestionState?.updatePredictions(context: ctx)
+            updateCapitalization()
+            updateAccentKeyDisplay()
+            return
+        }
+
         // Autocorrect check before space insertion.
-        // Only trigger if autocorrect is enabled, there's a current word, and the
-        // spell checker offers a different correction.
+        // Only trigger if autocorrect is enabled, there's a current word, the word
+        // was not previously rejected by the user, and the spell checker offers a
+        // different correction.
+        // Extract previous word for n-gram context boost
+        let previousWord: String? = {
+            guard let ctx = controller?.textDocumentProxy.documentContextBeforeInput else { return nil }
+            var words: [String] = []
+            ctx.enumerateSubstrings(in: ctx.startIndex..., options: .byWords) { sub, _, _, _ in
+                if let s = sub { words.append(s) }
+            }
+            // Last word in context is freshWord; the one before is previousWord
+            guard words.count >= 2 else { return nil }
+            return words[words.count - 2]
+        }()
+
         if let state = suggestionState, state.autocorrectEnabled,
-           !state.currentWord.isEmpty,
-           let correction = state.performSpellCheck(state.currentWord),
-           correction.lowercased() != state.currentWord.lowercased() {
+           !freshWord.isEmpty,
+           !state.rejectedWords.contains(freshWord.lowercased()),
+           let result = state.performSpellCheck(freshWord, previousWord: previousWord),
+           result.correction.lowercased() != freshWord.lowercased() {
             // Replace the misspelled word with the correction
             let proxy = controller?.textDocumentProxy
-            for _ in 0..<state.currentWord.count {
+            for _ in 0..<freshWord.count {
                 proxy?.deleteBackward()
             }
-            proxy?.insertText(correction)
+            proxy?.insertText(result.correction)
             proxy?.insertText(" ")
             lastInsertedCharacter = " "
 
             // Store autocorrect state so backspace can undo it
             state.lastAutocorrect = AutocorrectState(
-                originalWord: state.currentWord,
-                correctedWord: correction,
+                originalWord: freshWord,
+                correctedWord: result.correction,
                 insertedSpace: true
             )
+            // Trigger n-gram predictions after autocorrection too.
+            // The corrected word + space is now in the proxy — predict what comes next.
             state.clear()
+            state.rejectedWords.removeAll()
+            let correctedContext = controller?.textDocumentProxy.documentContextBeforeInput
+            state.updatePredictions(context: correctedContext)
             updateCapitalization()
             updateAccentKeyDisplay()
             return
+        }
+
+        // Repetition learning: word was NOT corrected (user typed it as-is).
+        // Track usage — after 2 occurrences of an unknown word, learn it.
+        if let state = suggestionState, !freshWord.isEmpty {
+            let word = freshWord
+            if UserDictionary.shared.recordUsage(word) {
+                // Word just crossed the learning threshold — notify prediction engine
+                state.learnWord(word)
+            }
         }
 
         // Normal space handling with double-space period detection
@@ -335,13 +423,22 @@ final class DictusKeyboardBridge: NSObject,
             controller?.textDocumentProxy.insertText(" ")
             lastInsertedCharacter = " "
         } else {
+            // Auto-full-stop changed the text (". " instead of "  ").
+            // Invalidate any pending autocorrect undo — the text no longer matches
+            // what the undo expects, so backspace should not try to restore.
+            suggestionState?.lastAutocorrect = nil
             lastInsertedCharacter = " "
         }
 
-        // After space, clear current word and update suggestions for new context.
+        // After space, clear current word and trigger n-gram predictions.
+        // WHY updatePredictions instead of updateAsync: After finishing a word,
+        // the user wants to see predicted next words (n-gram), not completions
+        // for a partial word (which doesn't exist yet after a space).
+        // Also clear rejected words -- the user has moved on to a new word.
         suggestionState?.clear()
+        suggestionState?.rejectedWords.removeAll()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
-        suggestionState?.updateAsync(context: context)
+        suggestionState?.updatePredictions(context: context)
 
         // After space (or period+space), recheck autocap.
         updateCapitalization()
@@ -357,6 +454,28 @@ final class DictusKeyboardBridge: NSObject,
         secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = "\n"
         suggestionState?.clear()
+        updateCapitalization()
+        updateAccentKeyDisplay()
+    }
+
+    /// Insert a predicted word and trigger chained prediction.
+    /// Called from KeyboardRootView when user taps a prediction in the suggestion bar.
+    ///
+    /// WHY separate from handleSpace: prediction tap must bypass autocorrect.
+    /// The predicted word is already correct (it comes from the n-gram model).
+    /// Going through handleSpace() would trigger autocorrect which might
+    /// "correct" a perfectly valid prediction.
+    func handlePredictionTap(word: String) {
+        let proxy = controller?.textDocumentProxy
+        proxy?.insertText(word + " ")
+        lastInsertedCharacter = " "
+        secondToLastInsertedCharacter = nil
+
+        // Chain predictions: query n-gram engine for what comes after this word
+        suggestionState?.lastAutocorrect = nil
+        let context = proxy?.documentContextBeforeInput
+        suggestionState?.updatePredictions(context: context)
+
         updateCapitalization()
         updateAccentKeyDisplay()
     }

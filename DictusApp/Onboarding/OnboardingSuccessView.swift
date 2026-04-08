@@ -43,11 +43,11 @@ struct OnboardingSuccessView: View {
 
                 // Title and subtitle (fade in after checkmark)
                 VStack(spacing: 12) {
-                    Text("C'est prêt !")
+                    Text("You're all set!")
                         .font(.dictusHeading)
                         .foregroundStyle(.primary)
 
-                    Text("Dictus est configuré et prêt à l'emploi")
+                    Text("Dictus is set up and ready to use")
                         .font(.dictusBody)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -59,7 +59,7 @@ struct OnboardingSuccessView: View {
 
                 // Commencer button (same style as other onboarding pages)
                 Button(action: onComplete) {
-                    Text("Commencer")
+                    Text("Get started")
                         .font(.dictusSubheading)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)

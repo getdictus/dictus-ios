@@ -87,7 +87,7 @@ class KeyboardViewController: UIInputViewController {
         self.giellaKeyboard = keyboard
 
         // --- 3. Create SwiftUI hosting for toolbar + recording overlay ONLY ---
-        let rootView = KeyboardRootView(controller: self, controllerID: controllerID, suggestionState: suggestionState)
+        let rootView = KeyboardRootView(controller: self, controllerID: controllerID, suggestionState: suggestionState, bridge: keyBridge)
         let hosting = UIHostingController(rootView: rootView)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
@@ -335,6 +335,8 @@ class KeyboardViewController: UIInputViewController {
 
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
+        // Invalidate autocorrect undo on external text changes (paste, cursor tap, host autocorrect).
+        bridge?.suggestionState?.lastAutocorrect = nil
         // When text changes externally (paste, cursor move, autocorrect by host app),
         // recheck autocapitalization. This ensures shift state stays correct even when
         // the user moves the cursor to a different position in the text.

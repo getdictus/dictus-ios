@@ -34,11 +34,19 @@ struct SuggestionBarView: View {
                     Button {
                         onTap(index)
                     } label: {
-                        Text(suggestion)
+                        // In correction mode:
+                        //   index 0 = original word in quotes (tapping keeps it as-is)
+                        //   index 1 = bold correction (auto-applied on space)
+                        //   index 2 = alternative correction
+                        // In completion mode:
+                        //   index 1 = bold (best completion)
+                        //   others = regular weight
+                        // In prediction mode:
+                        //   All equal weight -- no "auto-applied" word, all are suggestions
+                        // This matches standard iOS keyboard suggestion bar behavior.
+                        Text(displayText(suggestion, at: index))
                             .font(.system(size: 15))
-                            // Central slot (index 0 for 3 items) is bold to
-                            // indicate the "best" suggestion, matching Apple's style.
-                            .fontWeight(index == 0 ? .semibold : .regular)
+                            .fontWeight(mode == .predictions ? .regular : (index == 1 ? .semibold : .regular))
                             .foregroundColor(Color(.label))
                             .frame(maxWidth: .infinity)
                             .frame(height: 36)
@@ -50,5 +58,15 @@ struct SuggestionBarView: View {
             .transition(.opacity)
             .animation(.easeInOut(duration: 0.15), value: suggestions)
         }
+    }
+
+    /// In correction mode, the original word (index 0) is shown in quotes
+    /// to indicate it's the "as-typed" option. Matches iOS native behavior
+    /// where the unquoted bold center word is the one that gets auto-applied.
+    private func displayText(_ suggestion: String, at index: Int) -> String {
+        if mode == .corrections && index == 0 {
+            return "\u{201C}\(suggestion)\u{201D}"
+        }
+        return suggestion
     }
 }

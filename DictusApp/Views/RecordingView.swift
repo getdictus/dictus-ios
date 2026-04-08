@@ -7,7 +7,7 @@ import DictusCore
 ///
 /// WHY a mode enum instead of separate views:
 /// The recording experience should feel identical whether the user reaches it
-/// from onboarding or from HomeView's "Nouvelle dictee" button.
+/// from onboarding or from HomeView's "New dictation" button.
 /// The only difference is what happens when the user finishes:
 /// - onboarding: calls onComplete to advance onboarding
 /// - standalone: user taps mic again for new recording, or X to dismiss
@@ -126,7 +126,7 @@ struct RecordingView: View {
                                 .padding(.horizontal, 32)
 
                             if mode == .onboarding {
-                                Button("Réessayer") {
+                                Button("Retry") {
                                     errorMessage = nil
                                     showError = false
                                     showResult = false
@@ -198,15 +198,15 @@ struct RecordingView: View {
                 .font(.system(size: 20, weight: .light, design: .monospaced))
                 .foregroundStyle(.secondary)
         } else if coordinator.status == .transcribing {
-            Text("Transcription en cours...")
+            Text("Transcribing...")
                 .font(.dictusCaption)
                 .foregroundStyle(.secondary)
         } else if showCopiedFeedback {
-            Text("Copié !")
+            Text("Copied!")
                 .font(.dictusCaption)
                 .foregroundStyle(Color.dictusSuccess)
         } else if showResult {
-            Text("Touchez le texte pour copier")
+            Text("Tap text to copy")
                 .font(.dictusCaption)
                 .foregroundStyle(.secondary.opacity(0.6))
         } else {
@@ -241,7 +241,7 @@ struct RecordingView: View {
                 }
             }
             .buttonStyle(GlassPressStyle(pressedScale: 0.88))
-            .accessibilityLabel("Arrêter l'enregistrement")
+            .accessibilityLabel("Stop recording")
         } else if coordinator.status == .transcribing {
             // Shimmer mic during processing (disabled)
             AnimatedMicButton(status: .transcribing) {}
@@ -297,7 +297,7 @@ struct RecordingView: View {
             }
         case .failed:
             showError = true
-            errorMessage = coordinator.lastResult ?? "La transcription a échoué. Vérifiez que le modèle est téléchargé."
+            errorMessage = coordinator.lastResult ?? String(localized: "Transcription failed. Check that the model is downloaded.")
         default:
             break
         }

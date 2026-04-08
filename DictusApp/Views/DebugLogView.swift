@@ -55,7 +55,7 @@ struct DebugLogView: View {
     var body: some View {
         Group {
             if entries.isEmpty {
-                Text("Aucun log disponible")
+                Text("No logs available")
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -88,13 +88,13 @@ struct DebugLogView: View {
                         PersistentLog.clear()
                         reloadLogs()
                     } label: {
-                        Label("Effacer", systemImage: "trash")
+                        Label("Clear", systemImage: "trash")
                     }
 
                     Button {
                         UIPasteboard.general.string = logContent
                     } label: {
-                        Label("Copier", systemImage: "doc.on.doc")
+                        Label("Copy", systemImage: "doc.on.doc")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")

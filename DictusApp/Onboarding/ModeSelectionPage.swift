@@ -16,12 +16,12 @@ struct ModeSelectionPage: View {
         VStack(spacing: 24) {
             Spacer()
 
-            Text("Choisissez votre clavier")
+            Text("Choose your keyboard")
                 .font(.title2.bold())
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
 
-            Text("ABC est selectionne par defaut. Changez si vous preferez ouvrir sur les chiffres.")
+            Text("ABC is selected by default. Change if you prefer to open on numbers.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -33,7 +33,7 @@ struct ModeSelectionPage: View {
             Spacer()
 
             Button(action: onNext) {
-                Text("Continuer")
+                Text("Continue")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)

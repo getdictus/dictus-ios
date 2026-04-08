@@ -186,7 +186,7 @@ struct EmojiPickerView: View {
         // Emoji row: recents when empty, results when searching.
         let emojiRow = searchModeEmojis
         if emojiRow.isEmpty {
-            Text("Aucun résultat")
+            Text("No results")
                 .foregroundColor(.secondary)
                 .font(.system(size: 14))
                 .frame(height: 38)
@@ -244,7 +244,7 @@ struct EmojiPickerView: View {
             // Cursor at the start, then text or placeholder
             if searchText.isEmpty {
                 blinkingCursor
-                Text("Rechercher des Emoji")
+                Text("Search Emoji")
                     .foregroundColor(.secondary)
             } else {
                 Text(searchText)
@@ -422,7 +422,7 @@ private struct MiniSearchKeyboard: View, Equatable {
                 AudioServicesPlaySystemSound(1156)
                 onSpace()
             } label: {
-                Text("espace")
+                Text("space")
                     .font(.system(size: 16))
                     .frame(maxWidth: .infinity)
                     .frame(height: keyHeight)

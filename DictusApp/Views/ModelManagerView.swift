@@ -6,8 +6,8 @@ import SwiftUI
 import DictusCore
 
 /// Displays WhisperKit models organized in two sections:
-/// - "Téléchargés" (downloaded) — models on device, including deprecated ones
-/// - "Disponibles" (available) — models available for download, excludes deprecated
+/// - "Downloaded" — models on device, including deprecated ones
+/// - "Available" — models available for download, excludes deprecated
 ///
 /// WHY two sections instead of a flat list:
 /// Users need to quickly see what's on their device vs. what they can download.
@@ -81,7 +81,7 @@ struct ModelManagerView: View {
             if !downloadedModels.isEmpty {
                 Section {
                     // Inline section header — scrolls with content (not sticky)
-                    Text("Téléchargés")
+                    Text("Downloaded")
                         .font(.dictusSubheading)
                         .foregroundStyle(.secondary)
                         .listRowBackground(Color.clear)
@@ -103,7 +103,7 @@ struct ModelManagerView: View {
                                     modelToDelete = model
                                     showDeleteAlert = true
                                 } label: {
-                                    Label("Supprimer", systemImage: "trash")
+                                    Label("Delete", systemImage: "trash")
                                         .frame(maxHeight: .infinity)
                                 }
                                 .tint(.red)
@@ -120,7 +120,7 @@ struct ModelManagerView: View {
             if !availableModels.isEmpty {
                 Section {
                     // Inline section header — scrolls with content (not sticky)
-                    Text("Disponibles")
+                    Text("Available")
                         .font(.dictusSubheading)
                         .foregroundStyle(.secondary)
                         .listRowBackground(Color.clear)
@@ -152,11 +152,11 @@ struct ModelManagerView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     engineParagraph(
                         icon: "waveform",
-                        text: "WhisperKit — moteur de transcription développé par Argmax, optimisé pour les puces Apple. Modèles entraînés sur OpenAI Whisper."
+                        text: "WhisperKit — transcription engine developed by Argmax, optimized for Apple chips. Models trained on OpenAI Whisper."
                     )
                     engineParagraph(
                         icon: "bolt",
-                        text: "Parakeet — moteur de transcription développé par NVIDIA, optimisé pour la vitesse. Modèles Parakeet TDT."
+                        text: "Parakeet — transcription engine developed by NVIDIA, optimized for speed. Parakeet TDT models."
                     )
                 }
                 .listRowBackground(Color.clear)
@@ -166,7 +166,7 @@ struct ModelManagerView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
-        .navigationTitle("Modèles")
+        .navigationTitle("Models")
         .background(Color.dictusBackground.ignoresSafeArea())
         // Sync state from onboarding's separate ModelManager instance (Bug #25 fix).
         // WHY onAppear loadState:
@@ -178,9 +178,9 @@ struct ModelManagerView: View {
             modelManager.loadState()
         }
         // Delete confirmation alert
-        .alert("Supprimer le modèle ?", isPresented: $showDeleteAlert, presenting: modelToDelete) { model in
-            Button("Annuler", role: .cancel) { }
-            Button("Supprimer", role: .destructive) {
+        .alert("Delete model?", isPresented: $showDeleteAlert, presenting: modelToDelete) { model in
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
                 do {
                     try modelManager.deleteModel(model.identifier)
                 } catch {
@@ -189,10 +189,10 @@ struct ModelManagerView: View {
                 }
             }
         } message: { model in
-            Text("Supprimer \(model.displayName) ? Le modèle sera supprimé de votre appareil.")
+            Text("Delete \(model.displayName)? The model will be removed from your device.")
         }
         // Error alert
-        .alert("Erreur", isPresented: $showErrorAlert) {
+        .alert("Error", isPresented: $showErrorAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             if let error = downloadError {

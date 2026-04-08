@@ -42,7 +42,7 @@ struct KeyboardSetupPage: View {
                     .padding(.bottom, 24)
 
                 // Title
-                Text("Ajouter le clavier")
+                Text("Add keyboard")
                     .font(.dictusHeading)
                     .foregroundStyle(.primary)
                     .padding(.bottom, 28)
@@ -54,14 +54,14 @@ struct KeyboardSetupPage: View {
 
                 // Open Settings link — plain text, no card wrapper
                 Button(action: openSettings) {
-                    Label("Ouvrir les Réglages", systemImage: "arrow.up.right")
+                    Label("Open Settings", systemImage: "arrow.up.right")
                         .font(.dictusBody)
                         .foregroundColor(.dictusAccent)
                 }
                 .padding(.bottom, 20)
 
                 // Auto-detection helper text
-                Text("Le clavier sera détecté automatiquement")
+                Text("The keyboard will be detected automatically")
                     .font(.dictusCaption)
                     .foregroundStyle(.secondary)
                     .padding(.bottom, 16)
@@ -69,12 +69,12 @@ struct KeyboardSetupPage: View {
                 // Detection feedback + continue button
                 if keyboardDetected {
                     VStack(spacing: 16) {
-                        Label("Clavier détecté", systemImage: "checkmark.circle.fill")
+                        Label("Keyboard detected", systemImage: "checkmark.circle.fill")
                             .font(.dictusBody)
                             .foregroundColor(.dictusSuccess)
 
                         Button(action: onNext) {
-                            Text("Continuer")
+                            Text("Continue")
                                 .font(.dictusSubheading)
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
@@ -169,7 +169,7 @@ struct KeyboardSetupPage: View {
                 Image(systemName: "gearshape.fill")
                     .foregroundStyle(.secondary)
                     .font(.footnote)
-                Text("Réglages > Dictus")
+                Text("Settings > Dictus")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 Spacer()
@@ -190,7 +190,7 @@ struct KeyboardSetupPage: View {
                     .opacity(0.3)
                     .padding(.leading, 16)
 
-                Toggle("Autoriser l'acces complet", isOn: $fullAccessToggleOn)
+                Toggle("Allow full access", isOn: $fullAccessToggleOn)
                     .animation(.spring(response: 0.3, dampingFraction: 0.7), value: fullAccessToggleOn)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)

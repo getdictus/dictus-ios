@@ -17,7 +17,7 @@ public enum CatalogVisibility {
 ///
 /// Each model has a WhisperKit identifier (matching the argmaxinc/whisperkit-coreml
 /// repository naming), a human-readable display name, numeric gauge scores for
-/// accuracy and speed (0.0-1.0), and a French description.
+/// accuracy and speed (0.0-1.0), and a short English description.
 public struct ModelInfo: Identifiable {
     /// Identifiable conformance uses `identifier` as the unique ID.
     /// WHY Identifiable: SwiftUI's ForEach requires elements to be Identifiable
@@ -38,7 +38,7 @@ public struct ModelInfo: Identifiable {
     /// Speed score from 0.0 (slowest) to 1.0 (fastest), used for gauge display.
     public let speedScore: Double
 
-    /// Short French description for the model selection UI.
+    /// Short English description for the model selection UI.
     public let description: String
 
     /// Whether this model is shown in the download catalog or only kept for backward compat.
@@ -97,7 +97,7 @@ public struct ModelInfo: Identifiable {
             engine: .whisperKit,
             accuracyScore: 0.3,
             speedScore: 1.0,
-            description: "Rapide mais imprecis",
+            description: "Fast but inaccurate",
             visibility: .deprecated
         ),
         ModelInfo(
@@ -108,7 +108,7 @@ public struct ModelInfo: Identifiable {
             engine: .whisperKit,
             accuracyScore: 0.4,
             speedScore: 0.9,
-            description: "Rapide mais imprecis",
+            description: "Fast but inaccurate",
             visibility: .deprecated
         ),
         ModelInfo(
@@ -119,7 +119,7 @@ public struct ModelInfo: Identifiable {
             engine: .whisperKit,
             accuracyScore: 0.6,
             speedScore: 0.7,
-            description: "Precis et equilibre",
+            description: "Accurate and balanced",
             visibility: .available
         ),
         ModelInfo(
@@ -130,7 +130,7 @@ public struct ModelInfo: Identifiable {
             engine: .whisperKit,
             accuracyScore: 0.55,
             speedScore: 0.75,
-            description: "Compact et rapide",
+            description: "Compact and fast",
             visibility: .available
         ),
         ModelInfo(
@@ -141,7 +141,7 @@ public struct ModelInfo: Identifiable {
             engine: .whisperKit,
             accuracyScore: 0.8,
             speedScore: 0.4,
-            description: "Meilleure precision",
+            description: "Best accuracy",
             visibility: .available
         ),
         ModelInfo(
@@ -152,7 +152,7 @@ public struct ModelInfo: Identifiable {
             engine: .parakeet,
             accuracyScore: 0.85,
             speedScore: 0.9,
-            description: "Rapide et precis (NVIDIA)",
+            description: "Fast and accurate (NVIDIA)",
             visibility: .available
         ),
     ]

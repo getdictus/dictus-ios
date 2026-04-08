@@ -87,7 +87,7 @@ struct HomeView: View {
                 HStack {
                     let info = ModelInfo.forIdentifier(modelName)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Modèle actif")
+                        Text("Active model")
                             .font(.dictusCaption)
                             .foregroundColor(.secondary)
                         Text(info?.displayName ?? modelName)
@@ -111,10 +111,10 @@ struct HomeView: View {
                     Image(systemName: "arrow.down.circle.fill")
                         .font(.system(size: 40))
                         .foregroundColor(.dictusAccent)
-                    Text("Télécharger un modèle pour commencer")
+                    Text("Download a model to get started")
                         .font(.dictusSubheading)
                         .multilineTextAlignment(.center)
-                    Text("Allez dans l'onglet Modèles pour télécharger votre premier modèle de transcription.")
+                    Text("Go to the Models tab to download your first transcription model.")
                         .font(.dictusCaption)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -140,7 +140,7 @@ struct HomeView: View {
         } label: {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text(showCopiedFeedback ? "Copié !" : "Dernière transcription")
+                    Text(showCopiedFeedback ? "Copied!" : "Last transcription")
                         .font(.dictusCaption)
                         .foregroundColor(showCopiedFeedback ? .dictusSuccess : .secondary)
                         .animation(.easeOut(duration: 0.2), value: showCopiedFeedback)
@@ -178,7 +178,7 @@ struct HomeView: View {
         } label: {
             HStack {
                 Image(systemName: "waveform")
-                Text("Nouvelle dictée")
+                Text("New dictation")
                     .font(.dictusBody)
             }
             .frame(maxWidth: .infinity)

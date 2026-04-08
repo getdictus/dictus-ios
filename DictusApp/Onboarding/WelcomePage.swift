@@ -31,7 +31,7 @@ struct WelcomePage: View {
                 .padding(.bottom, 12)
 
             // Tagline
-            Text("Dictation vocale, 100% offline")
+            Text("Voice dictation, 100% offline")
                 .font(.dictusBody)
                 .foregroundStyle(.secondary)
 
@@ -39,7 +39,7 @@ struct WelcomePage: View {
 
             // "Commencer" button
             Button(action: onNext) {
-                Text("Commencer")
+                Text("Get started")
                     .font(.dictusSubheading)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)

@@ -34,7 +34,7 @@ struct MicPermissionPage: View {
                 .padding(.bottom, 16)
 
             // Explanation
-            Text("Dictus a besoin du microphone pour transcrire votre voix. Vos enregistrements restent sur votre appareil.")
+            Text("Dictus needs the microphone to transcribe your voice. Your recordings stay on your device.")
                 .font(.dictusBody)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -45,12 +45,12 @@ struct MicPermissionPage: View {
             // Permission result feedback
             if let granted = permissionGranted {
                 if granted {
-                    Label("Microphone autorisé", systemImage: "checkmark.circle.fill")
+                    Label("Microphone authorized", systemImage: "checkmark.circle.fill")
                         .font(.dictusBody)
                         .foregroundColor(.dictusSuccess)
                         .padding(.bottom, 16)
                 } else {
-                    Text("Vous pouvez activer le micro plus tard dans Réglages")
+                    Text("You can enable the microphone later in Settings")
                         .font(.dictusCaption)
                         .foregroundColor(.orange)
                         .multilineTextAlignment(.center)
@@ -63,7 +63,7 @@ struct MicPermissionPage: View {
             if permissionGranted == nil {
                 // Request permission button
                 Button(action: requestPermission) {
-                    Text("Autoriser le micro")
+                    Text("Allow microphone")
                         .font(.dictusSubheading)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -79,7 +79,7 @@ struct MicPermissionPage: View {
             } else {
                 // Next button (visible after permission response)
                 Button(action: onNext) {
-                    Text("Continuer")
+                    Text("Continue")
                         .font(.dictusSubheading)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)

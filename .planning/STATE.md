@@ -1,36 +1,35 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Public Beta
-status: executing
-stopped_at: Completed 22-01-PLAN.md
-last_updated: "2026-03-31T18:16:11.545Z"
-last_activity: "2026-03-31 - Completed 22-01: emoji picker memory fix (134 MiB -> 32.67 MiB)"
+milestone: null
+milestone_name: null
+status: between_milestones
+stopped_at: v1.4 shipped, ready for v1.5 planning
+last_updated: "2026-04-08T08:45:00.000Z"
+last_activity: 2026-04-08 -- Shipped v1.4 Prediction & Stability
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 14
-  completed_plans: 13
-  percent: 93
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-27)
+See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Phase 22 in progress -- Public TestFlight (emoji picker memory fixed, pending submission)
+**Current focus:** Between milestones — v1.4 shipped, planning v1.5
 
 ## Current Position
 
-Phase: 22 of 22 (Public TestFlight)
-Plan: 1 of 2 complete in current phase
-Status: Phase 22 in progress
-Last activity: 2026-03-31 - Completed 22-01: emoji picker memory fix (134 MiB -> 32.67 MiB)
+Last shipped: v1.4 Prediction & Stability (2026-04-08)
+Next milestone: v1.5 (not yet planned)
+Last activity: 2026-04-08 -- Shipped v1.4
 
-Progress: [█████████░] 93% (v1.3 milestone)
+Progress: [██████████] 100% (v1.4 complete)
 
 ## Performance Metrics
 
@@ -38,82 +37,33 @@ Progress: [█████████░] 93% (v1.3 milestone)
 - v1.0: 18 plans in 4 days
 - v1.1: 29 plans in 5 days
 - v1.2: 35 plans in 17 days
-- Total: 82 plans across 3 milestones, 24 days
+- v1.3: 14 plans in 11 days
+- v1.4: 15 plans in 7 days
+- Total: 111 plans across 5 milestones in 35 days
 
 ## Accumulated Context
 
 ### Decisions
 
 All prior decisions logged in PROJECT.md Key Decisions table.
-Recent decisions for v1.3:
-
-- Rebuild keyboard from giellakbd-ios (UICollectionView) — 16 SwiftUI approaches failed
-- Vendor ~10 source files directly, no CocoaPods
-- DeviceKit 5.8.x as sole new SPM dependency
-- UIKit keys + SwiftUI chrome (toolbar, overlay stay SwiftUI)
-- Fix bugs before architecture change (debug in known codebase)
-- Incremental feature addition with dead zone validation after each phase
-- LiveActivityStateMachine: extracted pure logic from @MainActor singleton into DictusCore struct for unit testing
-- Post-recording watchdog: arm after stop/cancel/error, cancel on new recording, forcePhase for recovery sync
-- PersistentLog: O(1) size-based trim (200KB) replaces O(n) line-counting; 7-day retention prunes before export only
-- Vendored KeyboardView renamed to GiellaKeyboardView to avoid type collision with existing SwiftUI view
-- Added programmatic KeyboardDefinition init for constructing French layouts without JSON
-- LegacyCompat.swift provides stubs (KeyMetrics, DeviceClass, KeySound) during UIKit keyboard migration
-- [Phase 18]: Vendored KeyboardView renamed to GiellaKeyboardView to avoid Swift type collision
-- [Phase 18]: DictusKeyboardBridge as separate delegate class for single responsibility and testability
-- [Phase 18]: Hybrid UIKit keyboard + SwiftUI toolbar architecture -- UIKit subview for keys, SwiftUI hosting for chrome
-- [Phase 18]: Combine subscription to @Published dictationStatus for recording state sync between UIKit and SwiftUI
-- [Phase 18]: Haptic feedback on touchDown (GiellaKeyboardView.touchesBegan) not touchUp (delegate callback) for Apple-matching feel
-- [Phase 18]: iPhone keyboard heights 216-226pt (reduced from 262-272pt) to match Apple keyboard proportions
-- [Phase 18]: QWERTY row 2 needs 0.5-unit spacers for centering 9 keys in 10-unit grid
-
-- [Phase 19]: Case-insensitive longpress lookup via key.lowercased() instead of duplicating uppercase entries
-- [Phase 19]: nearestIndexPath maxDistance = 1 key width to prevent phantom hits on distant keys
-- [Phase 19]: hapticFeedback.prepare() in init for zero-latency first touch
-- [Phase 19]: wordModeThreshold=10 chars before word-level delete, stage 3 at 0.05s
-- [Phase 19]: Trackpad dead zone 8pt (down from 20pt), baseDelta 12pt, 60Hz rate limit
-- [Phase 19]: UIWindow gesture delay was root cause of edge key sluggishness since Phase 18 -- override delaysContentTouches on window
-- [Phase 19]: Point clamping replaces nearestIndexPath for simpler and more reliable edge touch resolution
-- [Phase 19]: preferredScreenEdgesDeferringSystemGestures = .all to prevent iOS intercepting edge key taps
-
-- [Phase 20]: SuggestionState owned by KeyboardViewController, injected into bridge (weak) and SwiftUI (@ObservedObject)
-- [Phase 20]: Autocorrect-on-space matches iOS native behavior, undo via AutocorrectState on next backspace
-- [Phase 20]: Emoji key uses .input with alternate="emoji" routed through bridge callback
-- [Phase 20]: Default layer set in viewWillAppear for immediate setting changes
-- [Phase 20]: Emoji key identified by glyph character, not alternate label, for clean rendering
-- [Phase 20]: UIHostingController.safeAreaRegions disabled for full-width SwiftUI in keyboard extension
-- [Phase 20]: Sound feedback default false to match first-install behavior
-- [Phase 21]: Extracted DeviceClass, KeyMetrics, KeySound, KeyPopup from LegacyCompat into permanent KeyboardMetrics.swift
-- [Phase 21]: Emoji picker 139 MiB is critical blocker for public beta -- needs optimization before release
-- [Phase 22]: Category pagination over NSCache eviction -- eliminates root cause (unbounded glyph rendering) instead of managing cache symptoms
-- [Phase 22]: .id(selectedCategoryID) forces SwiftUI grid rebuild on category switch to release CoreText glyph caches
-- [Phase 22]: Search results capped at 30 with LazyHStack to prevent memory spike during search
-- [Phase 22]: Category pagination over NSCache eviction -- eliminates root cause (unbounded glyph rendering)
 
 ### Pending Todos
 
-None.
+- Adaptive accent key shows apostrophe after "qu" (UI todo)
 
-### Quick Tasks Completed
+### Known Issues for v1.5
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260330-e6i | Adaptive accent key shows apostrophe after qu | 2026-03-30 | 5abb2a7 | [260330-e6i-adaptive-accent-key-shows-apostrophe-aft](./quick/260330-e6i-adaptive-accent-key-shows-apostrophe-aft/) |
-| Phase 20 P02 | 27min | 2 tasks | 6 files |
-| Phase 21 P01 | 3min | 2 tasks | 7 files |
-| Phase 21 P02 | 5min | 2 tasks | 1 files |
-| Phase 22 P01 | 130min | 2 tasks | 3 files |
+- BUG-71: Crash when starting dictation during phone call (reverted in v1.4)
+- BUG-72: AirPods/media apps not resuming after recording (reverted in v1.4)
 
 ### Blockers/Concerns
 
-- Spacebar trackpad gesture arbitration with UICollectionView (HIGH risk, Phase 20)
-- Liquid Glass in UIKit cells needs UIVisualEffectView or CALayer approach (Phase 19)
-- Beta App Review first external submission — rejection risk (Phase 23)
+None.
 
 ## Session Continuity
 
-Last session: 2026-03-31T18:15:56.327Z
-Stopped at: Completed 22-01-PLAN.md
+Last session: 2026-04-08
+Stopped at: v1.4 milestone completed and archived
 Resume file: None
 
 ---
@@ -121,4 +71,5 @@ Resume file: None
 *v1.0 shipped: 2026-03-07*
 *v1.1 shipped: 2026-03-11*
 *v1.2 shipped: 2026-03-27*
-*v1.3 roadmap: 2026-03-27*
+*v1.3 shipped: 2026-04-07*
+*v1.4 shipped: 2026-04-08*

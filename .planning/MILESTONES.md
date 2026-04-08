@@ -1,5 +1,49 @@
 # Milestones
 
+## v1.4 Prediction & Stability (Shipped: 2026-04-08)
+
+**Phases completed:** 7 phases, 15 plans
+**Timeline:** 7 days (2026-04-01 -> 2026-04-07)
+**Commits:** ~121 | **LOC:** 21K Swift + 1.7K C++ + 1.3K Python
+
+**Delivered:** Production-grade text prediction engine with AOSP compressed trie spell correction (C++) and n-gram next-word prediction, full app localization, cold start UX polish, and beta bug fixes.
+
+**Key accomplishments:**
+1. AOSP trie spell correction — compressed patricia trie (C++ with ObjC++ bridge), mmap-based, edit distance 2, keyboard proximity scoring, accent-aware costs (~0.4 MiB/language)
+2. N-gram next-word prediction — trigram engine (C++ with mmap), Stupid Backoff scoring, context-boosted spell corrections, prediction tap chaining
+3. App localization — iOS String Catalogs (EN source + FR translations) for both DictusApp and DictusKeyboard targets, developmentRegion=en
+4. Cold start investigation — 5 approaches tested for auto-return, all rejected (no public iOS API), ADR documented, Wispr Flow-style overlay redesign
+5. Bug fixes — autocorrect undo race condition, license URL + NVIDIA attribution, numeric token autocorrect guard
+6. SymSpell → AOSP trie migration — complete replacement with better quality, lower memory, and proximity scoring
+
+**Git range:** `fix(23)` -> `revert(27)`
+
+### Known Gaps
+- **BUG-71**: Crash during phone call — CallStateMonitor reverted (caused cold start regressions), deferred to v1.5
+- **BUG-72**: AirPods media not resuming after recording — deactivateAndIdle reverted alongside BUG-71, deferred to v1.5
+
+---
+
+## v1.3 Public Beta (Shipped: 2026-04-07)
+
+**Phases completed:** 6 phases, 14 plans
+**Timeline:** 11 days (2026-03-27 -> 2026-04-07)
+**Files:** 225 modified | **LOC:** +35,046 / -3,395
+
+**Delivered:** Complete UIKit keyboard rebuild with giellakbd-ios, advanced touch interactions, feature reintegration, memory-safe emoji picker, and first public TestFlight beta.
+
+**Key accomplishments:**
+1. UIKit keyboard rebuild — replaced SwiftUI keyboard with giellakbd-ios UICollectionView architecture, eliminating dead zones
+2. Advanced touch interactions — delete repeat with acceleration, spacebar trackpad, French accent long-press, adaptive accent key
+3. Feature reintegration — dictation, text prediction, autocorrect, emoji picker wired onto new UIKit keyboard
+4. Memory optimization — emoji picker reduced from 139 MiB to under 50 MiB via category pagination
+5. Public TestFlight — privacy manifests, Beta App Review passed, public link live
+6. Bug fixes — Dynamic Island watchdog, export logs optimization, 7-day retention
+
+**Git range:** `feat(17-01)` -> `docs(phase-22)`
+
+---
+
 ## v1.2 Beta Ready (Shipped: 2026-03-27)
 
 **Phases completed:** 9 phases, 35 plans

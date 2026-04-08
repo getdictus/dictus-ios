@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Dictus is a free, open-source iOS keyboard app for on-device French speech-to-text dictation. Users speak into any iOS app and get accurate French transcription auto-inserted at the cursor — no subscription, no cloud, no account. Built with WhisperKit and Parakeet (FluidAudio) for multi-engine speech recognition, featuring full AZERTY/QWERTY keyboard with text prediction, spacebar trackpad, haptic feedback, iOS 26 Liquid Glass design, and cold start Audio Bridge for seamless dictation even when iOS kills the app. Currently in private TestFlight beta (v1.2).
+Dictus is a free, open-source iOS keyboard app for on-device French speech-to-text dictation. Users speak into any iOS app and get accurate French transcription auto-inserted at the cursor — no subscription, no cloud, no account. Built with WhisperKit and Parakeet (FluidAudio) for multi-engine speech recognition, featuring full AZERTY/QWERTY UIKit keyboard (giellakbd-ios) with AOSP compressed trie spell correction (C++), n-gram next-word prediction (trigram with Stupid Backoff), spacebar trackpad, haptic feedback, iOS 26 Liquid Glass design, and cold start Audio Bridge for seamless dictation even when iOS kills the app. Currently in public TestFlight beta (v1.4).
 
 ## Core Value
 
@@ -53,28 +53,25 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 - ✓ Professional developer signing + Privacy Manifests — v1.2
 - ✓ TestFlight private beta distributed — v1.2
 - ✓ Open-source docs (README, CONTRIBUTING, issue templates) — v1.2
+- ✓ UIKit keyboard rebuild with giellakbd-ios UICollectionView (zero dead zones) — v1.3
+- ✓ Advanced touch: delete repeat, spacebar trackpad, accent long-press, adaptive accent key — v1.3
+- ✓ Feature reintegration on UIKit keyboard (dictation, prediction, emoji, autocorrect) — v1.3
+- ✓ Memory-safe emoji picker via category pagination (139 MiB -> <50 MiB) — v1.3
+- ✓ Public TestFlight beta with privacy manifests and Full Access justification — v1.3
+- ✓ AOSP compressed trie spell correction (C++ with ObjC++ bridge, proximity scoring, accent-aware) — v1.4
+- ✓ N-gram next-word prediction (trigram with Stupid Backoff, context-boosted corrections) — v1.4
+- ✓ App localization via iOS String Catalogs (EN source + FR translations) — v1.4
+- ✓ Cold start auto-return investigated (5 approaches, all rejected — no public iOS API) — v1.4
+- ✓ Wispr Flow-style swipe-back overlay redesign — v1.4
+- ✓ Autocorrect undo race condition fix — v1.4
+- ✓ License attribution complete (FluidAudio/DeviceKit/giellakbd-ios) — v1.4
+- ✓ Numeric token autocorrect guard — v1.4
 
 ### Active
 
-- [ ] Keyboard rebuild from giellakbd-ios (UICollectionView, zero dead zones) — issue #62
-- [ ] Reintegrate Dictus features on new keyboard (toolbar mic, overlay, emoji, prediction, accents)
-- [ ] Fix Dynamic Island stuck on REC (state desync) — issue #60
-- [ ] Fix export logs slow with no spinner — issue #61
-- [ ] Additional bug fixes from v1.2 internal beta testing
-- [ ] Public TestFlight beta (Beta App Review, external testing group, public link)
-- [ ] README update with public TestFlight link
-
-## Current Milestone: v1.3 Public Beta
-
-**Goal:** Rebuild the keyboard from scratch using giellakbd-ios (Divvun) for zero dead zones, fix beta bugs, and open public TestFlight.
-
-**Target features:**
-- Keyboard rebuild from giellakbd-ios (100% UIKit, UICollectionView)
-- AZERTY/QWERTY French adaptation on new keyboard base
-- Reintegrate all Dictus keyboard features (mic toolbar, recording overlay, emoji picker, text prediction, accents)
-- Fix Dynamic Island REC state desync (#60)
-- Fix export logs performance + spinner (#61)
-- Submit for Beta App Review and open public TestFlight link
+- [ ] BUG-71: Crash when starting dictation during phone call (CXCallObserver guard needed)
+- [ ] BUG-72: AirPods/media apps not resuming after recording (.notifyOthersOnDeactivation)
+- [ ] Cold start auto-return UX improvement (beyond current swipe-back overlay)
 
 ### Out of Scope
 
@@ -92,18 +89,19 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 
 ## Context
 
-Shipped v1.2 with 16,495 LOC Swift across ~333 files in 24 days total (v1.0 + v1.1 + v1.2).
-Tech stack: Swift 5.9+ / SwiftUI / WhisperKit 0.16.0+ / FluidAudio (Parakeet) via SPM.
+Shipped v1.4 with ~21K LOC Swift + 1.7K C++ + 1.3K Python across 5 milestones in 35 days.
+Tech stack: Swift 5.9+ / SwiftUI / WhisperKit 0.16.0+ / FluidAudio (Parakeet) via SPM / C++ AOSP trie + N-gram engine (ObjC++ bridge).
 Architecture: Two-process (keyboard extension + main app via Darwin notifications + URL scheme + Audio Bridge for cold start).
-App Group: `group.solutions.pivi.dictus` (migrated from group.com.pivi.dictus in v1.2).
+Keyboard: giellakbd-ios UICollectionView with DictusKeyboardBridge delegate adapter.
+App Group: `group.solutions.pivi.dictus`.
 Minimum target: iOS 17.0.
-Keyboard extension memory limit: ~50MB.
-Distribution: Private TestFlight beta (build 1.2(1)), Apple Developer Team 9B8B36C2FA.
+Keyboard extension memory limit: ~50MB (verified on device).
+Distribution: Public TestFlight beta (v1.4 build 6), Apple Developer Team 9B8B36C2FA.
+Public link: https://testflight.apple.com/join/b55atKYX
 
 Known remaining issues:
-- Keyboard dead zones partially unsolved (Phase 15.4 research documented, needs architecture rework)
-- Text prediction memory budget needs real-device profiling (5MB limit)
-- Public TestFlight link deferred until keyboard rework complete
+- BUG-71: Crash when starting dictation during active phone call (reverted fix, deferred to v1.5)
+- BUG-72: AirPods/media apps not resuming after recording (reverted fix, deferred to v1.5)
 
 ## Constraints
 
@@ -130,23 +128,12 @@ Known remaining issues:
 | Design consolidated into DictusCore | Eliminated 6-file duplication between targets | ✓ Good — single source of truth |
 | Pre-allocated haptic generators | Static instances eliminate 2-5ms per-tap latency | ✓ Good — native-feel haptics |
 | Canvas waveform over per-bar gradient | Single-pass rendering for 60fps performance | ✓ Good — smooth animation |
-| UITextChecker + FrequencyDictionary | System spell-check + custom ranking, no ML model needed | ✓ Good — low memory, good quality |
-| 3-mode system simplified to 2 layers | UAT showed 3 modes over-engineered, 2 default layers cleaner | ✓ Good — simpler UX |
-| Parakeet via FluidAudio SDK | Multi-engine future-proofing, alternative to WhisperKit | ✓ Good — works, French quality TBD |
-| iOS 17 minimum (raised from 16) | Required for FluidAudio/Parakeet support | ✓ Good — 95%+ device coverage |
-| collectSamples() for cancel | Keeps audio engine alive between recordings | ✓ Good — no cold restart |
-| NotificationCenter for mode refresh | viewWillAppear bridge avoids stale @State in SwiftUI | ✓ Good — reliable sync |
-| Privacy-by-construction LogEvent enum | No free-text public logging API — typed parameters only | ✓ Good — no transcription leaks possible |
-| Audio Bridge for cold start | Keyboard captures audio directly, app only activates session | ✓ Good — seamless cold start dictation |
-| Auto-return removed | attemptAutoReturn() always opened first installed app, not source app | ✓ Good — swipe-back overlay is correct UX |
-| Audio-thread waveform writes | Write from installTap callback, not main-thread timer | ✓ Good — bypasses iOS background throttling |
-| Large Turbo v3 removed from catalog | Crashes on 4GB RAM devices during CoreML compilation | ✓ Good — no more compilation crashes |
-| AudioServicesPlaySystemSound for key sounds | Respects silent switch natively, no AVAudioPlayer conflict | ✓ Good — works with WhisperKit session |
-| touchDown haptic/audio (not touchUp) | Match Apple keyboard feel — feedback on press, character on release | ✓ Good — native feel achieved |
-| 3 device classes for key dimensions | Screen height breakpoints 667/852pt for compact/standard/large | ✓ Good — adaptive across iPhone lineup |
-| DragGesture over UIViewRepresentable | UIViewRepresentable caused edge clipping issues | ⚠️ Revisit — dead zones remain partially |
-| Private beta only (no public link) | Pierre wants keyboard rework before public exposure | — Pending |
+| AOSP trie over SymSpell | Proximity scoring, accent-aware costs, lower memory (~0.4 MiB vs ~8 MiB) | ✓ Good — production-grade quality |
+| N-gram mmap binary format | C++ engine with FNV-1a hashing, O(log n) binary search, 57KB/language | ✓ Good — fast, minimal memory |
+| Auto-return REJECTED | All 5 approaches fail, no public iOS API for keyboard host detection | ✓ Good — documented in ADR |
+| BUG-71/72 revert | CallStateMonitor caused cold start regressions and post-call crashes | ⚠️ Revisit — need different approach in v1.5 |
+| Public TestFlight beta | Keyboard rework complete, ready for public exposure | ✓ Good — public beta live in v1.3 |
 | App Group migration to group.solutions.pivi.dictus | Old ID claimed by personal team, professional team needed new ID | ✓ Good — clean separation |
 
 ---
-*Last updated: 2026-03-27 after v1.3 milestone start*
+*Last updated: 2026-04-08 after v1.4 milestone*

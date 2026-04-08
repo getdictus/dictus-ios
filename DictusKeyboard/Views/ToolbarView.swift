@@ -60,7 +60,7 @@ struct ToolbarView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
 
-                    Text("Acces complet requis")
+                    Text("Full access required")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

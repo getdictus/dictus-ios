@@ -2,8 +2,28 @@
 import SwiftUI
 import DictusCore
 
+// MARK: - AppDelegate (sourceApplication diagnostic)
+// Temporary diagnostic: UIApplicationDelegateAdaptor captures sourceApplication
+// from the legacy application(_:open:options:) callback, which SwiftUI's onOpenURL
+// does not expose. This lets us empirically confirm that sourceApplication returns nil
+// for cross-team apps (e.g., WhatsApp opening DictusApp via dictus:// URL).
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ app: UIApplication, open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        let source = options[.sourceApplication] as? String
+        PersistentLog.log(.diagnosticProbe(
+            component: "sourceApp", instanceID: "0",
+            action: "delegateSourceApp",
+            details: "source=\(source ?? "nil") url=\(url.absoluteString)"
+        ))
+        // Return false so SwiftUI onOpenURL still handles the URL
+        return false
+    }
+}
+
 @main
 struct DictusApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var coordinator = DictationCoordinator.shared
 
     /// Onboarding completion flag stored in App Group for cross-process access.
@@ -33,6 +53,11 @@ struct DictusApp: App {
         DictusLogger.app.info(
             "AppGroup diagnostic: healthy=\(result.isHealthy, privacy: .public)"
         )
+
+        // Read n-gram diagnostic written by keyboard extension
+        if let ngramDiag = UserDefaults(suiteName: AppGroup.identifier)?.string(forKey: "ngramDiagnostic") {
+            DictusLogger.app.info("ngramDiagnostic: \(ngramDiag, privacy: .public)")
+        }
 
         // Persist language default so TranscriptionService always reads "fr"
         // even before user visits Settings. @AppStorage defaults are in-memory only
@@ -119,6 +144,17 @@ struct DictusApp: App {
 
     private func handleIncomingURL(_ url: URL) {
         guard url.scheme == "dictus" else { return }
+
+        // Temporary diagnostic: log all URL components for cold start investigation.
+        // This captures what information IS available from the URL itself (host, query params).
+        // Combined with AppDelegate.sourceApplication logging, this lets us confirm empirically
+        // that iOS provides no way to identify the keyboard's host app from a URL open.
+        let diagComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        PersistentLog.log(.diagnosticProbe(
+            component: "sourceApp", instanceID: "0",
+            action: "urlComponents",
+            details: "host=\(url.host ?? "nil") query=\(diagComponents?.queryItems?.map { "\($0.name)=\($0.value ?? "nil")" }.joined(separator: ",") ?? "none")"
+        ))
 
         switch url.host {
         case "dictate":

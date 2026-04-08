@@ -41,13 +41,13 @@ struct ModelDownloadPage: View {
                 .padding(.bottom, 24)
 
             // Title
-            Text("Modèle vocal")
+            Text("Voice model")
                 .font(.dictusHeading)
                 .foregroundStyle(.primary)
                 .padding(.bottom, 12)
 
             // Explanatory text
-            Text("Pour transcrire votre voix, Dictus a besoin d'un modèle vocal. Le téléchargement peut prendre quelques minutes.")
+            Text("To transcribe your voice, Dictus needs a voice model. The download may take a few minutes.")
                 .font(.dictusBody)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -78,7 +78,7 @@ struct ModelDownloadPage: View {
                 VStack(spacing: 8) {
                     ProgressView()
                         .tint(.dictusAccent)
-                    Text("Optimisation en cours...")
+                    Text("Optimizing...")
                         .font(.dictusCaption)
                         .foregroundStyle(.secondary)
                 }
@@ -100,7 +100,7 @@ struct ModelDownloadPage: View {
             // Action button
             if downloadComplete {
                 Button(action: onNext) {
-                    Text("Continuer")
+                    Text("Continue")
                         .font(.dictusSubheading)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
@@ -115,7 +115,7 @@ struct ModelDownloadPage: View {
             } else if !isDownloading {
                 VStack(spacing: 16) {
                     Button(action: startDownload) {
-                        Text("Installer le modèle")
+                        Text("Install model")
                             .font(.dictusSubheading)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -149,7 +149,7 @@ struct ModelDownloadPage: View {
     private var modelCard: some View {
         let info = ModelInfo.forIdentifier(recommendedModel)
         return VStack(alignment: .leading, spacing: 12) {
-            Text(info?.displayName ?? "Modèle vocal")
+            Text(info?.displayName ?? "Voice model")
                 .font(.dictusSubheading)
                 .foregroundStyle(.primary)
 
@@ -158,12 +158,12 @@ struct ModelDownloadPage: View {
                     .font(.dictusCaption)
                     .foregroundStyle(.secondary)
 
-                Label(info?.description ?? "Précis et équilibré", systemImage: "waveform")
+                Label(info?.description ?? "Accurate and balanced", systemImage: "waveform")
                     .font(.dictusCaption)
                     .foregroundStyle(.secondary)
             }
 
-            Text("Recommandé pour votre iPhone")
+            Text("Recommended for your iPhone")
                 .font(.dictusCaption)
                 .foregroundColor(.dictusAccent)
         }
