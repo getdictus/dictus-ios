@@ -100,54 +100,54 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SUB-01 | TBD | Pending |
-| SUB-02 | TBD | Pending |
-| SUB-03 | TBD | Pending |
-| SUB-04 | TBD | Pending |
-| SUB-05 | TBD | Pending |
-| SUB-06 | TBD | Pending |
-| PAY-01 | TBD | Pending |
-| PAY-02 | TBD | Pending |
-| PAY-03 | TBD | Pending |
-| PAY-04 | TBD | Pending |
-| PAY-05 | TBD | Pending |
-| PAY-06 | TBD | Pending |
-| HIST-01 | TBD | Pending |
-| HIST-02 | TBD | Pending |
-| HIST-03 | TBD | Pending |
-| HIST-04 | TBD | Pending |
-| HIST-05 | TBD | Pending |
-| HIST-06 | TBD | Pending |
-| HIST-07 | TBD | Pending |
-| HIST-08 | TBD | Pending |
-| HIST-09 | TBD | Pending |
-| HIST-10 | TBD | Pending |
-| HIST-11 | TBD | Pending |
-| SMART-01 | TBD | Pending |
-| SMART-02 | TBD | Pending |
-| SMART-03 | TBD | Pending |
-| SMART-04 | TBD | Pending |
-| SMART-05 | TBD | Pending |
-| SMART-06 | TBD | Pending |
-| SMART-07 | TBD | Pending |
-| SMART-08 | TBD | Pending |
-| SMART-09 | TBD | Pending |
-| SMART-10 | TBD | Pending |
-| SMART-11 | TBD | Pending |
-| VOCAB-01 | TBD | Pending |
-| VOCAB-02 | TBD | Pending |
-| VOCAB-03 | TBD | Pending |
-| VOCAB-04 | TBD | Pending |
-| VOCAB-05 | TBD | Pending |
-| VOCAB-06 | TBD | Pending |
-| VOCAB-07 | TBD | Pending |
-| VOCAB-08 | TBD | Pending |
+| SUB-01 | Phase 30 | Pending |
+| SUB-02 | Phase 30 | Pending |
+| SUB-03 | Phase 30 | Pending |
+| SUB-04 | Phase 30 | Pending |
+| SUB-05 | Phase 30 | Pending |
+| SUB-06 | Phase 30 | Pending |
+| PAY-01 | Phase 30 | Pending |
+| PAY-02 | Phase 30 | Pending |
+| PAY-03 | Phase 30 | Pending |
+| PAY-04 | Phase 30 | Pending |
+| PAY-05 | Phase 30 | Pending |
+| PAY-06 | Phase 30 | Pending |
+| HIST-01 | Phase 31 | Pending |
+| HIST-02 | Phase 31 | Pending |
+| HIST-03 | Phase 31 | Pending |
+| HIST-04 | Phase 31 | Pending |
+| HIST-05 | Phase 31 | Pending |
+| HIST-06 | Phase 31 | Pending |
+| HIST-07 | Phase 31 | Pending |
+| HIST-08 | Phase 31 | Pending |
+| HIST-09 | Phase 31 | Pending |
+| HIST-10 | Phase 31 | Pending |
+| HIST-11 | Phase 31 | Pending |
+| SMART-01 | Phase 33 | Pending |
+| SMART-02 | Phase 33 | Pending |
+| SMART-03 | Phase 33 | Pending |
+| SMART-04 | Phase 33 | Pending |
+| SMART-05 | Phase 33 | Pending |
+| SMART-06 | Phase 33 | Pending |
+| SMART-07 | Phase 33 | Pending |
+| SMART-08 | Phase 33 | Pending |
+| SMART-09 | Phase 33 | Pending |
+| SMART-10 | Phase 33 | Pending |
+| SMART-11 | Phase 33 | Pending |
+| VOCAB-01 | Phase 32 | Pending |
+| VOCAB-02 | Phase 32 | Pending |
+| VOCAB-03 | Phase 32 | Pending |
+| VOCAB-04 | Phase 32 | Pending |
+| VOCAB-05 | Phase 32 | Pending |
+| VOCAB-06 | Phase 32 | Pending |
+| VOCAB-07 | Phase 32 | Pending |
+| VOCAB-08 | Phase 32 | Pending |
 
 **Coverage:**
-- v1.5 requirements: 39 total
-- Mapped to phases: 0
-- Unmapped: 39 ⚠️
+- v1.5 requirements: 42 total
+- Mapped to phases: 42/42
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-08*
-*Last updated: 2026-04-08 after research synthesis*
+*Last updated: 2026-04-08 — traceability completed after roadmap creation*

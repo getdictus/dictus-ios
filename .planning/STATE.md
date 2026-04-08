@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Dictus Pro
-status: defining_requirements
+status: ready_to_plan
 stopped_at: null
-last_updated: "2026-04-08T14:00:00.000Z"
-last_activity: 2026-04-08 -- Milestone v1.5 started
+last_updated: "2026-04-08T23:30:00.000Z"
+last_activity: 2026-04-08 -- Roadmap created for v1.5 (4 phases, 42 requirements mapped)
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,15 +20,15 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-08)
 
-**Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no cloud, no account.
-**Current focus:** v1.5 Dictus Pro — premium tier with Smart Mode, history, custom vocabulary
+**Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no cloud, no account. Pro adds intelligent reformulation, history, and custom vocabulary -- all 100% on-device.
+**Current focus:** Phase 30 — Subscription + Paywall
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-08 — Milestone v1.5 started
+Phase: 30 of 33 (Subscription + Paywall)
+Plan: --
+Status: Ready to plan
+Last activity: 2026-04-08 — Roadmap created for v1.5
 
 Progress: ░░░░░░░░░░ 0%
 
@@ -47,12 +47,18 @@ Progress: ░░░░░░░░░░ 0%
 ### Decisions
 
 All prior decisions logged in PROJECT.md Key Decisions table.
+v1.5 decisions pending:
+- Open Core model: all code public (MIT), Pro gated by StoreKit 2
+- Single Pro tier at launch (~4-5 EUR/month)
+- GRDB + FTS5 for history (not SwiftData -- avoids 0xdead10cc, native FTS)
+- Apple Foundation Models primary LLM, mlx-swift fallback for older devices
+- WhisperKit initialPrompt for vocabulary injection (224 token limit)
 
 ### Pending Todos
 
-- Adaptive accent key shows apostrophe after "qu" (UI todo)
+- Adaptive accent key shows apostrophe after "qu" (UI todo from v1.4)
 
-### Known Issues for v1.5
+### Known Issues
 
 - BUG-71: Crash when starting dictation during phone call (reverted in v1.4)
 - BUG-72: AirPods/media apps not resuming after recording (reverted in v1.4)
@@ -64,13 +70,11 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-08
-Stopped at: v1.4 milestone completed and archived
+Stopped at: Roadmap created for v1.5 Dictus Pro (4 phases, 42 requirements)
 Resume file: None
+Next step: `/gsd:plan-phase 30`
 
 ---
 *State initialized: 2026-03-04*
-*v1.0 shipped: 2026-03-07*
-*v1.1 shipped: 2026-03-11*
-*v1.2 shipped: 2026-03-27*
-*v1.3 shipped: 2026-04-07*
 *v1.4 shipped: 2026-04-08*
+*v1.5 roadmap created: 2026-04-08*
