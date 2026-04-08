@@ -104,6 +104,7 @@ struct KeyboardRootView: View {
                                 showingEmoji = false
                                 state.startRecording()
                             },
+                            statusMessage: state.statusMessage,
                             suggestions: [],
                             suggestionMode: .idle,
                             onSuggestionTap: { _ in }
@@ -137,6 +138,7 @@ struct KeyboardRootView: View {
                     hasFullAccess: controller.hasFullAccess,
                     dictationStatus: state.dictationStatus,
                     onMicTap: { state.startRecording() },
+                    statusMessage: state.statusMessage,
                     suggestions: suggestionState.suggestions,
                     suggestionMode: suggestionState.mode,
                     onSuggestionTap: { index in

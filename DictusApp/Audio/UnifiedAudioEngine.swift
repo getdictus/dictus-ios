@@ -10,6 +10,7 @@ import DictusCore
 enum AudioEngineError: Error, LocalizedError {
     case permissionDenied
     case permissionUndetermined
+    case phoneCallActive
 
     var errorDescription: String? {
         switch self {
@@ -17,6 +18,8 @@ enum AudioEngineError: Error, LocalizedError {
             return "Microphone permission denied"
         case .permissionUndetermined:
             return "Microphone permission not yet requested"
+        case .phoneCallActive:
+            return "Micro indisponible pendant un appel"
         }
     }
 }
@@ -268,6 +271,22 @@ class UnifiedAudioEngine: ObservableObject {
 
         let inputNode = engine.inputNode
         let hwFormat = inputNode.outputFormat(forBus: 0)
+
+        // Guard: zero-channel format means hardware is unavailable (phone call active)
+        guard hwFormat.channelCount > 0 else {
+            throw AudioEngineError.phoneCallActive
+        }
+
+        // Guard: detect telephony audio route (phone call in progress)
+        let currentRoute = AVAudioSession.sharedInstance().currentRoute
+        let hasTelephony = currentRoute.outputs.contains {
+            $0.portType == .builtInReceiver
+        } || currentRoute.inputs.contains {
+            $0.portType.rawValue.lowercased().contains("telephony")
+        }
+        if hasTelephony {
+            throw AudioEngineError.phoneCallActive
+        }
 
         // Create converter from hardware format to 16kHz mono
         guard let conv = AVAudioConverter(from: hwFormat, to: targetFormat) else {
