@@ -52,8 +52,16 @@ struct SettingsView: View {
             // Section 1: Transcription
             Section {
                 Picker("Transcription language", selection: $language) {
-                    Text("Français").tag("fr")
+                    Text("Fran\u{00E7}ais").tag("fr")
                     Text("English").tag("en")
+                    Text("Espa\u{00F1}ol").tag("es")
+                }
+                .onChange(of: language) { _, newLang in
+                    // Auto-switch keyboard layout to the language's default.
+                    // French -> AZERTY, English/Spanish -> QWERTY.
+                    if let lang = SupportedLanguage(rawValue: newLang) {
+                        keyboardLayout = lang.defaultLayout.rawValue
+                    }
                 }
                 if isParakeetActive {
                     Text("Parakeet automatically detects the spoken language. This setting only applies to Whisper models.")

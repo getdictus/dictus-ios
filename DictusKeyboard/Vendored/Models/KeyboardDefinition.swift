@@ -275,7 +275,7 @@ public struct KeyboardDefinition: Codable {
         currentDeviceLayout!.symbols2.platformize(page: .symbols2, spaceName: spaceName, returnName: returnName, traits: traits)
     }
 
-    /// Programmatic initializer for constructing layouts without JSON (used by FrenchKeyboardLayouts)
+    /// Programmatic initializer for constructing layouts without JSON (used by KeyboardLayouts)
     init(
         name: String,
         locale: String,

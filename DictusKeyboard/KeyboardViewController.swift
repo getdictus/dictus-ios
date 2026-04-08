@@ -69,7 +69,7 @@ class KeyboardViewController: UIInputViewController {
         // causes the view to collapse to zero width.
 
         // --- 1. Create the giellakbd-ios UIKit keyboard ---
-        let definition = FrenchKeyboardLayouts.current()
+        let definition = KeyboardLayouts.current()
         let theme = Theme.current(for: traitCollection)
         let keyboard = GiellaKeyboardView(definition: definition, theme: theme)
         keyboard.translatesAutoresizingMaskIntoConstraints = false
@@ -87,7 +87,15 @@ class KeyboardViewController: UIInputViewController {
         self.giellaKeyboard = keyboard
 
         // --- 3. Create SwiftUI hosting for toolbar + recording overlay ONLY ---
-        let rootView = KeyboardRootView(controller: self, controllerID: controllerID, suggestionState: suggestionState, bridge: keyBridge)
+        let rootView = KeyboardRootView(
+            controller: self,
+            controllerID: controllerID,
+            suggestionState: suggestionState,
+            bridge: keyBridge,
+            onLanguageChanged: { [weak self] newLang in
+                self?.handleLanguageChange(newLang)
+            }
+        )
         let hosting = UIHostingController(rootView: rootView)
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
@@ -376,6 +384,74 @@ class KeyboardViewController: UIInputViewController {
             recognizer.delaysTouchesBegan = true
         }
         disabledGestureHashes.removeAll()
+    }
+
+    // MARK: - Language Change
+
+    /// Handles a language cycle from the toolbar's LanguageSwitcherView.
+    ///
+    /// WHY full rebuild: GiellaKeyboardView (UICollectionView) does not support
+    /// hot-swapping its KeyboardDefinition. The cleanest approach is to remove the
+    /// old view and create a new one with the updated definition. The ~200ms rebuild
+    /// is masked by the language code animation in the toolbar.
+    private func handleLanguageChange(_ newLang: SupportedLanguage) {
+        // 1. Reload suggestion/autocorrect dictionaries for the new language
+        suggestionState.setLanguage(newLang.rawValue)
+
+        // 2. Rebuild the keyboard grid with the new layout
+        reloadKeyboardLayout()
+
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "languageChanged",
+            details: "lang=\(newLang.rawValue) layout=\(LayoutType.active.rawValue)"
+        ))
+    }
+
+    /// Destroys the current GiellaKeyboardView and creates a new one
+    /// with the current language and layout preferences from App Group.
+    private func reloadKeyboardLayout() {
+        guard let kbInputView = inputView else { return }
+
+        // Remove old keyboard
+        giellaKeyboard?.removeFromSuperview()
+
+        // Create new keyboard with updated definition
+        let definition = KeyboardLayouts.current()
+        let theme = Theme.current(for: traitCollection)
+        let keyboard = GiellaKeyboardView(definition: definition, theme: theme)
+        keyboard.translatesAutoresizingMaskIntoConstraints = false
+
+        // Re-wire the bridge
+        bridge?.keyboardView = keyboard
+        keyboard.delegate = bridge
+
+        // Add to view hierarchy below the hosting view
+        kbInputView.addSubview(keyboard)
+
+        // Re-create constraints
+        if let hostingView = hostingController?.view {
+            NSLayoutConstraint.activate([
+                keyboard.topAnchor.constraint(equalTo: hostingView.bottomAnchor),
+                keyboard.leadingAnchor.constraint(equalTo: kbInputView.leadingAnchor),
+                keyboard.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor),
+                keyboard.bottomAnchor.constraint(equalTo: kbInputView.bottomAnchor),
+            ])
+        }
+
+        self.giellaKeyboard = keyboard
+
+        // Force height recalculation — the new GiellaKeyboardView may have different
+        // intrinsic content size during initial layout. Without this, iOS keeps the
+        // stale height constraint from before the rebuild, causing a visible gap
+        // between the toolbar and the key grid.
+        heightConstraint?.constant = computeKeyboardHeight()
+        kbInputView.setNeedsLayout()
+        kbInputView.layoutIfNeeded()
+
+        // Apply current shift state
+        bridge?.updateCapitalization()
     }
 
     // MARK: - Emoji Picker
