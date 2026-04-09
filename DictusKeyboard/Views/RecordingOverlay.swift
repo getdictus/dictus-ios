@@ -51,20 +51,24 @@ struct RecordingOverlay: View {
             // Top bar: varies by state but has consistent height
             topBar
 
-            GeometryReader { geo in
-                VStack(spacing: 8) {
-                    Spacer(minLength: 0)
+            // Waveform area fills remaining space between topBar and footer.
+            // WHY no GeometryReader: On the first frame, the hosting view may still be
+            // at toolbar height (52pt) before expanding to full keyboard height.
+            // GeometryReader would measure the old frame, rendering the waveform
+            // compressed at the top for ~1 frame before re-measuring. Using a fixed
+            // maxHeight + Spacers ensures the waveform is centered from the first frame.
+            VStack(spacing: 8) {
+                Spacer(minLength: 0)
 
-                    KeyboardWaveformView(
-                        maxHeight: geo.size.height * 0.7,
-                        driver: waveformDriver
-                    )
-                    .padding(.horizontal, 2)
+                KeyboardWaveformView(
+                    maxHeight: 120,
+                    driver: waveformDriver
+                )
+                .padding(.horizontal, 2)
 
-                    Spacer(minLength: 0)
-                }
-                .frame(width: geo.size.width, height: geo.size.height)
+                Spacer(minLength: 0)
             }
+            .frame(maxHeight: .infinity)
 
             // Footer: varies by state
             footer
