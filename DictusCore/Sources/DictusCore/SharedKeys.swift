@@ -83,4 +83,9 @@ public enum SharedKeys {
     public static let historyEnabled = "dictus.historyEnabled"
     /// Whether Vocabulary feature is enabled by user, default true
     public static let vocabularyEnabled = "dictus.vocabularyEnabled"
+
+    // MARK: - Debug
+    /// DEBUG only: force free tier to test paywall/lock UI even when isBeta is true.
+    /// Stripped by compiler in Release/TestFlight builds.
+    public static let debugForceFreeTier = "dictus.debug.forceFreeTier"
 }

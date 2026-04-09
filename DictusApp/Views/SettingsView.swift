@@ -214,6 +214,23 @@ struct SettingsView: View {
                     }
                 }
                 .disabled(isExporting)
+
+                #if DEBUG
+                Toggle(isOn: Binding(
+                    get: { AppGroup.defaults.bool(forKey: SharedKeys.debugForceFreeTier) },
+                    set: { newValue in
+                        AppGroup.defaults.set(newValue, forKey: SharedKeys.debugForceFreeTier)
+                        // Re-evaluate Pro status immediately so all UI updates
+                        proStatus.setProActive(AppGroup.defaults.bool(forKey: SharedKeys.proActive))
+                    }
+                )) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "ladybug")
+                            .foregroundColor(.orange)
+                        Text("Force Free Tier")
+                    }
+                }
+                #endif
             }
         }
         .scrollContentBackground(.hidden)

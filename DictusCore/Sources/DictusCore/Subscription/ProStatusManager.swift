@@ -31,6 +31,13 @@ public final class ProStatusManager: ObservableObject {
         ])
 
         // During beta, always return true -- all features unlocked
+        // UNLESS the debug "Force Free Tier" toggle is on (DEBUG builds only).
+        #if DEBUG
+        if AppGroup.defaults.bool(forKey: SharedKeys.debugForceFreeTier) {
+            self.isProActive = AppGroup.defaults.bool(forKey: SharedKeys.proActive)
+            return
+        }
+        #endif
         if ProConfig.isBeta {
             self.isProActive = true
             return
@@ -46,6 +53,12 @@ public final class ProStatusManager: ObservableObject {
     public func setProActive(_ active: Bool) {
         AppGroup.defaults.set(active, forKey: SharedKeys.proActive)
         AppGroup.defaults.synchronize()
+        #if DEBUG
+        if AppGroup.defaults.bool(forKey: SharedKeys.debugForceFreeTier) {
+            isProActive = active
+            return
+        }
+        #endif
         isProActive = active || ProConfig.isBeta
     }
 
@@ -55,6 +68,11 @@ public final class ProStatusManager: ObservableObject {
     /// it reads Pro status once at viewDidLoad/viewWillAppear. A static method
     /// avoids instantiating an ObservableObject in the memory-constrained extension.
     nonisolated public static var isProActiveStatic: Bool {
-        ProConfig.isBeta || AppGroup.defaults.bool(forKey: SharedKeys.proActive)
+        #if DEBUG
+        if AppGroup.defaults.bool(forKey: SharedKeys.debugForceFreeTier) {
+            return AppGroup.defaults.bool(forKey: SharedKeys.proActive)
+        }
+        #endif
+        return ProConfig.isBeta || AppGroup.defaults.bool(forKey: SharedKeys.proActive)
     }
 }
