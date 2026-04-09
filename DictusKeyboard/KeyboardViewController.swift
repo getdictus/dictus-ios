@@ -39,6 +39,14 @@ class KeyboardViewController: UIInputViewController {
     /// Fixed toolbar height matching ToolbarView (52pt: 48pt content + 4pt top padding).
     private let toolbarHeight: CGFloat = 52
 
+    /// Whether viewWillAppear has fired at least once. Guards the Combine handler
+    /// from changing hosting height before the controller is registered with KeyboardState.
+    /// WHY: During cold start, the Combine subscription fires in viewDidLoad with .recording
+    /// status, but SwiftUI's showsOverlay is still false (activeControllerID doesn't match).
+    /// Expanding the hosting view at this point shows the toolbar in a full-height area,
+    /// displacing it to the middle of the screen.
+    private var hasAppeared = false
+
     override func viewDidLoad() {
         super.viewDidLoad()
         PersistentLog.source = "KBD"
@@ -119,6 +127,12 @@ class KeyboardViewController: UIInputViewController {
         addChild(hosting)
         hosting.view.translatesAutoresizingMaskIntoConstraints = false
         hosting.view.backgroundColor = .clear
+        // Hide hosting view until viewWillAppear has applied the correct state.
+        // During cold start, there's a gap between viewDidLoad (hosting created with
+        // toolbar content) and viewWillAppear (constraint + SwiftUI state synchronized).
+        // Without this, the toolbar briefly renders in an expanded hosting view,
+        // displacing FR/mic to the middle of the screen.
+        hosting.view.isHidden = true
 
         // --- 4. Add both views to kbInputView ---
         // Order matters: hosting (toolbar) at top, keyboard below
@@ -129,8 +143,20 @@ class KeyboardViewController: UIInputViewController {
         // --- 5. Set up Auto Layout constraints ---
         // Hosting view (toolbar): pinned to top, leading, trailing. Height = toolbarHeight.
         let hostingHeight = hosting.view.heightAnchor.constraint(equalToConstant: toolbarHeight)
-        hostingHeight.priority = .defaultHigh
+        // Priority 999 (just below .required): ensures our explicit height always wins over
+        // UIHostingController's intrinsic content size (compression resistance = 750).
+        // At .defaultHigh (750), the constraint was ambiguous with SwiftUI's own sizing,
+        // causing the hosting view to get stuck at wrong heights after recording overlay dismiss.
+        hostingHeight.priority = UILayoutPriority(999)
         self.hostingHeightConstraint = hostingHeight
+
+        // Prevent SwiftUI content from fighting the height constraint.
+        // WHY: UIHostingController sets compression resistance at .defaultHigh (750).
+        // When content switches from RecordingOverlay (full height) to ToolbarView (52pt),
+        // the stale intrinsic size can compete with our constraint at equal priority.
+        // NOTE: Only lower compression resistance, NOT content hugging — the hosting view
+        // must be able to EXPAND to full height during recording overlay.
+        hosting.view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
 
         NSLayoutConstraint.activate([
             // Toolbar (SwiftUI hosting) at top
@@ -194,11 +220,29 @@ class KeyboardViewController: UIInputViewController {
         ))
         PersistentLog.log(.keyboardDidAppear)
         KeyboardState.shared.registerControllerAppearance(controllerID: controllerID)
+        hasAppeared = true
 
         // Force height recalculation when keyboard reappears (e.g., after app switch).
         // Without this, the inputView may retain a stale height from before the switch.
         heightConstraint?.constant = computeKeyboardHeight()
+
+        // Apply current dictation state to hosting height now that we're registered.
+        // During cold start, handleDictationStatusChange was skipped (hasAppeared was false).
+        // Now that activeControllerID matches, SwiftUI's showsOverlay will be correct,
+        // so the constraint and SwiftUI content change happen together — no displaced toolbar.
+        handleDictationStatusChange(KeyboardState.shared.dictationStatus)
+
         inputView?.setNeedsLayout()
+        inputView?.layoutIfNeeded()  // Force synchronous layout to reduce loading flicker (#92)
+
+        // Show hosting view now that constraints and SwiftUI state are synchronized.
+        // Was hidden in viewDidLoad to prevent cold start flash (toolbar in full-height hosting).
+        hostingController?.view.isHidden = false
+
+        // Force synchronous layout AFTER unhiding (#99). During cold start, the status
+        // can transition .recording → .idle between handleDictationStatusChange and this
+        // unhide. The constraint is updated but the visual frame is stale without this.
+        inputView?.layoutIfNeeded()
 
         // Update theme when keyboard reappears (dark/light mode may have changed)
         if let keyboard = giellaKeyboard {
@@ -311,13 +355,25 @@ class KeyboardViewController: UIInputViewController {
     /// gives us direct observation without adding manual notification posts.
     private func observeRecordingState() {
         dictationStatusCancellable = KeyboardState.shared.$dictationStatus
-            .receive(on: DispatchQueue.main)
+            // No .receive(on: .main) — dictationStatus is always set on the main thread
+            // (Darwin observer dispatches to main, mic button is UI action).
+            // Removing the async dispatch ensures the constraint change happens SYNCHRONOUSLY
+            // with the @Published change, BEFORE SwiftUI re-evaluates its body.
+            // Without this, there's a 1-frame delay where the overlay renders at 52pt (toolbar
+            // height) before the hosting view expands to full height — causing the waveform
+            // to flash at the top then drop to center.
             .sink { [weak self] status in
                 self?.handleDictationStatusChange(status)
             }
     }
 
     private func handleDictationStatusChange(_ status: DictationStatus) {
+        // Don't change hosting height until the controller is registered with KeyboardState.
+        // During cold start, this fires in viewDidLoad before viewWillAppear — SwiftUI's
+        // showsOverlay is still false, so expanding now would show the toolbar displaced
+        // in a full-height hosting view. viewWillAppear calls this manually after registering.
+        guard hasAppeared else { return }
+
         let isRecording = status == .requested || status == .recording || status == .transcribing
 
         // Dismiss emoji picker if recording starts
@@ -337,6 +393,7 @@ class KeyboardViewController: UIInputViewController {
         }
 
         inputView?.setNeedsLayout()
+        inputView?.layoutIfNeeded()
     }
 
     // MARK: - Text Change
@@ -441,6 +498,11 @@ class KeyboardViewController: UIInputViewController {
         }
 
         self.giellaKeyboard = keyboard
+
+        // Ensure hosting view is at toolbar-only height. If a previous recording
+        // left it at full height, the keyboard grid would be squashed below a large
+        // empty hosting area — causing the key shrinking bug on language switch.
+        hostingHeightConstraint?.constant = toolbarHeight
 
         // Force height recalculation — the new GiellaKeyboardView may have different
         // intrinsic content size during initial layout. Without this, iOS keeps the
