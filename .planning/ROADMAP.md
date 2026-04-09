@@ -109,11 +109,11 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
   3. Keyboard extension reads Pro status from App Group and gates features accordingly (no network needed)
   4. During beta period, all Pro features are unlocked for free with visible "beta" messaging on the paywall
   5. User can restore a previous purchase from the paywall screen
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 30-01: TBD
-- [ ] 30-02: TBD
+- [ ] 30-01-PLAN.md — DictusCore subscription foundation (SharedKeys, ProConfig, ProFeature, FeatureGate, ProStatusManager)
+- [ ] 30-02-PLAN.md — SubscriptionManager + PaywallView + Settings/Home integration
 
 ### Phase 31: Transcription History
 **Goal**: Users have a persistent, searchable journal of all their dictations accessible from the home screen
@@ -171,7 +171,7 @@ Plans:
 | 11-16 | v1.2 | 35/35 | Complete | 2026-03-27 |
 | 17-22 | v1.3 | 14/14 | Complete | 2026-04-07 |
 | 23-27 | v1.4 | 15/15 | Complete | 2026-04-08 |
-| 30. Subscription + Paywall | v1.5 | 0/? | Not started | - |
+| 30. Subscription + Paywall | v1.5 | 0/2 | Planning complete | - |
 | 31. Transcription History | v1.5 | 0/? | Not started | - |
 | 32. Custom Vocabulary | v1.5 | 0/? | Not started | - |
 | 33. Smart Mode LLM | v1.5 | 0/? | Not started | - |
