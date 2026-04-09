@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: Dictus Pro
 status: planning
-stopped_at: Phase 30 context gathered
-last_updated: "2026-04-09T11:46:58.004Z"
+stopped_at: Phase 30 UI-SPEC approved
+last_updated: "2026-04-09T12:20:21.424Z"
 last_activity: 2026-04-08 — Roadmap created for v1.5
 progress:
   total_phases: 4
@@ -69,9 +69,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-09T11:46:57.996Z
-Stopped at: Phase 30 context gathered
-Resume file: .planning/phases/30-subscription-paywall/30-CONTEXT.md
+Last session: 2026-04-09T12:20:21.416Z
+Stopped at: Phase 30 UI-SPEC approved
+Resume file: .planning/phases/30-subscription-paywall/30-UI-SPEC.md
 Next step: `/gsd:plan-phase 30`
 
 ---
