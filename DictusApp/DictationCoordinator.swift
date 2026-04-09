@@ -331,9 +331,11 @@ class DictationCoordinator: ObservableObject {
     /// No more branching between AudioRecorder and RawAudioCapture.
 
     /// Minimum audio duration required for transcription (in seconds).
-    /// WHY 1.0s: Parakeet requires at least 1 second of 16kHz audio.
-    /// WhisperKit also produces garbage on very short clips.
-    private let minimumRecordingDuration: TimeInterval = 1.0
+    /// WHY 0.5s: WhisperKit handles clips ≥0.5s reliably for short words (oui, non, ok).
+    /// Below 0.5s, it tends to hallucinate (invent words not spoken).
+    /// Previous value was 1.0s (Parakeet requirement), but Parakeet is no longer used
+    /// in the dictation pipeline — only WhisperKit via keyboard.
+    private let minimumRecordingDuration: TimeInterval = 0.5
 
     func stopDictation() {
         dictationTask?.cancel()
