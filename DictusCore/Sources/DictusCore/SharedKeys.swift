@@ -46,6 +46,10 @@ public enum SharedKeys {
     /// Whether autocorrect is enabled, default true
     public static let autocorrectEnabled = "dictus.autocorrectEnabled"
 
+    // Live Activity preference
+    /// Whether Live Activity (Dynamic Island + Lock Screen) is enabled, default true
+    public static let liveActivityEnabled = "dictus.liveActivityEnabled"
+
     // Audio heartbeat (added for background waveform reliability)
     /// Double (timeIntervalSince1970): written directly from the audio thread at ~1Hz
     /// during active recording. The keyboard watchdog reads this as a fallback

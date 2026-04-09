@@ -68,6 +68,12 @@ struct DictusApp: App {
         if defaults?.string(forKey: SharedKeys.language) == nil {
             defaults?.set("fr", forKey: SharedKeys.language)
         }
+        // Register liveActivityEnabled default as true for existing users.
+        // WHY: UserDefaults.bool(forKey:) returns false for missing keys.
+        // Without this, existing users upgrading would see Live Activity disabled.
+        if defaults?.object(forKey: SharedKeys.liveActivityEnabled) == nil {
+            defaults?.set(true, forKey: SharedKeys.liveActivityEnabled)
+        }
     }
 
     @Environment(\.scenePhase) private var scenePhase
