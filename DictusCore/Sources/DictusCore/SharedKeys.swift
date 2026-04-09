@@ -73,4 +73,14 @@ public enum SharedKeys {
     public static let recordCancelSoundName = "dictus.recordCancelSoundName"
     /// Sound volume from 0.0 to 1.0, default 0.5
     public static let soundVolume = "dictus.soundVolume"
+
+    // MARK: - Pro / Subscription
+    /// Whether the user has an active Pro subscription, default false
+    public static let proActive = "dictus.proActive"
+    /// Whether Smart Mode feature is enabled by user, default true
+    public static let smartModeEnabled = "dictus.smartModeEnabled"
+    /// Whether History feature is enabled by user, default true
+    public static let historyEnabled = "dictus.historyEnabled"
+    /// Whether Vocabulary feature is enabled by user, default true
+    public static let vocabularyEnabled = "dictus.vocabularyEnabled"
 }
