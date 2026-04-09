@@ -44,6 +44,7 @@ OPENSUBS_BASE_URL = "https://raw.githubusercontent.com/orgtre/top-open-subtitles
 LANG_MAP = {
     "fr": "french",
     "en": "english",
+    "es": "spanish",
 }
 
 # Common French function words for synthetic bigram generation
@@ -70,6 +71,20 @@ EN_FUNCTION_WORDS = [
     "her", "its", "our", "their", "me", "him", "us", "them",
     "what", "how", "when", "where", "why", "if", "so", "very",
     "just", "also", "more", "most", "than", "then", "now",
+]
+
+ES_FUNCTION_WORDS = [
+    "yo", "tú", "él", "ella", "usted", "nosotros", "vosotros", "ellos", "ellas",
+    "de", "la", "el", "los", "las", "un", "una", "unos", "unas", "del", "al",
+    "y", "o", "pero", "que", "quien", "en", "por", "para", "con", "sin",
+    "sobre", "entre", "hacia", "desde", "hasta", "como", "más", "muy",
+    "es", "son", "está", "están", "hay", "tiene", "tienen", "hace", "va",
+    "puede", "debe", "quiere", "sabe", "dice", "ha", "he", "has",
+    "mi", "tu", "su", "mis", "tus", "sus", "nuestro", "nuestra",
+    "me", "te", "le", "se", "nos", "les", "lo", "esto", "eso",
+    "este", "esta", "ese", "esa", "no", "sí", "si", "ya", "bien",
+    "ser", "estar", "tener", "hacer", "ir", "ver", "dar", "decir",
+    "todo", "todos", "toda", "todas", "otro", "otra", "mucho", "poco",
 ]
 
 
@@ -255,7 +270,8 @@ def generate_fallback_bigrams(freq_json_path: str, lang: str) -> dict[str, list[
     top_words = sorted(freq_data.items(), key=lambda x: x[1], reverse=True)[:5000]
     top_word_set = {w.lower() for w, _ in top_words}
 
-    func_words = FR_FUNCTION_WORDS if lang == "fr" else EN_FUNCTION_WORDS
+    func_words_map = {"fr": FR_FUNCTION_WORDS, "en": EN_FUNCTION_WORDS, "es": ES_FUNCTION_WORDS}
+    func_words = func_words_map.get(lang, EN_FUNCTION_WORDS)
     result: dict[str, list[tuple[str, int]]] = defaultdict(list)
 
     # For each function word, pair with top words to create synthetic bigrams
@@ -611,8 +627,8 @@ def main() -> None:
         description="Build NGRM binary dictionaries for Dictus next-word prediction."
     )
     parser.add_argument(
-        "--lang", required=True, choices=["fr", "en"],
-        help="Language code (fr or en)"
+        "--lang", required=True, choices=["fr", "en", "es"],
+        help="Language code (fr, en, or es)"
     )
     parser.add_argument(
         "--output", required=True,

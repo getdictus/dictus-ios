@@ -23,12 +23,18 @@ final class AOSPTrieEngine {
     /// True while a background load is in progress.
     private(set) var isLoading: Bool = false
 
-    /// Hard-coded French corrections that the trie can't infer from edit distance alone.
-    /// "ca" is never a valid French word -- it's always the unaccented form of "ca".
+    /// The currently loaded language code ("fr", "en", "es").
+    /// Set by load(language:) so overrides and apostrophe handling can be language-aware.
+    private var currentLanguage: String = "fr"
+
+    /// Per-language hard-coded corrections that the trie can't infer from edit distance alone.
+    /// French: "ca" is never valid -- always the unaccented form of "ça".
     /// Short words (<=2 chars) are too ambiguous for generic spell correction
-    /// (e.g., "ou"/"ou", "a"/"a" depend on grammar), so we only correct known cases.
-    private static let frenchOverrides: [String: String] = [
-        "ca": "\u{00E7}a"  // "ca" -> "ca"
+    /// (e.g., "ou"/"où", "a"/"à" depend on grammar), so we only correct known cases.
+    private static let languageOverrides: [String: [String: String]] = [
+        "fr": ["ca": "\u{00E7}a"],  // "ca" -> "ça"
+        "en": [:],
+        "es": [:]
     ]
 
     /// Loads binary .dict file for the given language.
@@ -38,6 +44,7 @@ final class AOSPTrieEngine {
     /// The keyboard appears instantly; spell correction becomes available after mmap load.
     func load(language: String, bundle: Bundle = .main) {
         isLoading = true
+        currentLanguage = language
         bridge.unloadDictionary()
         wordCount = 0
 
@@ -81,29 +88,31 @@ final class AOSPTrieEngine {
         }
     }
 
-    /// Check French overrides only (no trie lookup). Returns nil if no override applies.
+    /// Check language-specific overrides only (no trie lookup). Returns nil if no override applies.
     /// Used by TextPredictionEngine to check overrides BEFORE UserDictionary,
     /// since words like "ca" must always correct to "ça" even if "ca" was learned.
-    func frenchOverride(for word: String) -> (correction: String, alternatives: [String])? {
+    func languageOverride(for word: String) -> (correction: String, alternatives: [String])? {
         let lowered = word.lowercased()
-        guard let override = Self.frenchOverrides[lowered] else { return nil }
+        guard let overrides = Self.languageOverrides[currentLanguage],
+              let override = overrides[lowered] else { return nil }
         let isCapitalized = word.first?.isUppercase == true
         return (isCapitalized ? override.capitalized : override, [])
     }
 
     /// Returns best correction and alternatives, or nil if word is correct.
-    /// Preserves SymSpellEngine behavior: French overrides, apostrophe handling, case restoration.
+    /// Handles language-specific overrides, apostrophe splitting, and case restoration.
     ///
     /// Rules:
-    /// 1. French overrides checked first ("ca" -> "ca") regardless of word length.
+    /// 1. Language overrides checked first (e.g., French "ca" -> "ça").
     /// 2. Apostrophe words: only the part after the last apostrophe is checked
     ///    ("qu'il" -> checks "il", not the whole string).
     /// 3. Case restoration: if input starts with uppercase, correction is capitalized.
     func spellCheck(_ word: String) -> (correction: String, alternatives: [String])? {
         let lowered = word.lowercased()
 
-        // Check French overrides first (works even before dictionary loads)
-        if let override = Self.frenchOverrides[lowered] {
+        // Check language-specific overrides first (works even before dictionary loads)
+        if let overrides = Self.languageOverrides[currentLanguage],
+           let override = overrides[lowered] {
             let isCapitalized = word.first?.isUppercase == true
             return (isCapitalized ? override.capitalized : override, [])
         }

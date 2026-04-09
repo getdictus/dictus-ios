@@ -45,6 +45,10 @@ struct KeyboardRootView: View {
     /// new predictions. The bridge owns textDocumentProxy access and state management.
     var bridge: DictusKeyboardBridge?
 
+    /// Callback when the user cycles language via the toolbar switcher.
+    /// The controller uses this to reload the GiellaKeyboardView with the new layout.
+    var onLanguageChanged: ((SupportedLanguage) -> Void)?
+
     /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
     /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
     /// openURL environment action works because it goes through the responder
@@ -104,9 +108,11 @@ struct KeyboardRootView: View {
                                 showingEmoji = false
                                 state.startRecording()
                             },
+                            statusMessage: state.statusMessage,
                             suggestions: [],
                             suggestionMode: .idle,
-                            onSuggestionTap: { _ in }
+                            onSuggestionTap: { _ in },
+                            onLanguageChanged: onLanguageChanged
                         )
                         .frame(height: 52)
                         // Emoji picker uses exact measured dimensions
@@ -137,11 +143,13 @@ struct KeyboardRootView: View {
                     hasFullAccess: controller.hasFullAccess,
                     dictationStatus: state.dictationStatus,
                     onMicTap: { state.startRecording() },
+                    statusMessage: state.statusMessage,
                     suggestions: suggestionState.suggestions,
                     suggestionMode: suggestionState.mode,
                     onSuggestionTap: { index in
                         handleSuggestionTap(index: index)
-                    }
+                    },
+                    onLanguageChanged: onLanguageChanged
                 )
                 // No KeyboardView here -- it's UIKit, added directly by KeyboardViewController
                 // No bottom spacer -- the UIKit keyboard handles its own height

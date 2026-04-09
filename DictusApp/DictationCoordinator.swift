@@ -279,6 +279,7 @@ class DictationCoordinator: ObservableObject {
                     LiveActivityManager.shared.transitionToRecording()
                     try audioEngine.startRecording()
                     PersistentLog.log(.audioEngineStarted)
+                    await verifyAudioFlow()
                 } catch {
                     PersistentLog.log(.dictationFailed(error: "Warm start: \(error.localizedDescription)"))
                     handleError(error.localizedDescription)
@@ -309,6 +310,7 @@ class DictationCoordinator: ObservableObject {
                     updateStatus(.recording)
                     LiveActivityManager.shared.transitionToRecording()
                     PersistentLog.log(.audioEngineStarted)
+                    await verifyAudioFlow()
 
                     // Load the transcription model in parallel while recording
                     try await ensureEngineReady()
@@ -676,6 +678,44 @@ class DictationCoordinator: ObservableObject {
         }
 
         DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
+    }
+
+    /// Verify audio samples are actually being captured after startRecording.
+    /// Detects "zombie engine" state where engine.isRunning but tap receives no buffers.
+    /// If 0 samples after 2s, force-restarts the engine and retries once.
+    private func verifyAudioFlow() async {
+        do {
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+        } catch { return } // Task cancelled (user stopped recording)
+
+        guard status == .recording else { return }
+
+        let sampleCount = audioEngine.currentSampleCount
+        if sampleCount > 0 { return } // Healthy — samples flowing
+
+        PersistentLog.log(.dictationFailed(error: "Zombie engine: 0 samples after 2s, force-restarting"))
+
+        // Force restart: stop engine, reconfigure, restart
+        audioEngine.forceRestart()
+        do {
+            try audioEngine.startRecording()
+        } catch {
+            handleError("Micro indisponible. Relancez l'application.")
+            return
+        }
+
+        // Check again after restart
+        do {
+            try await Task.sleep(nanoseconds: 2_000_000_000)
+        } catch { return }
+
+        guard status == .recording else { return }
+
+        if audioEngine.currentSampleCount == 0 {
+            handleError("Micro indisponible. Relancez l'application.")
+        } else {
+            PersistentLog.log(.engineWarmUpSuccess(context: "zombie-recovery"))
+        }
     }
 
     /// Handle errors by updating status and writing error to App Group.

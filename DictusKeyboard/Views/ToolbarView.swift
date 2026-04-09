@@ -15,12 +15,13 @@ struct ToolbarView: View {
     var onMicTap: () -> Void
 
     // Suggestion bar integration parameters (default to idle/empty)
+    var statusMessage: String? = nil
     var suggestions: [String] = []
     var suggestionMode: SuggestionMode = .idle
     var onSuggestionTap: ((Int) -> Void)? = nil
 
-    /// Icon size scales with Dynamic Type.
-    @ScaledMetric private var gearIconSize: CGFloat = 16
+    /// Callback when the user cycles the language via the toolbar switcher.
+    var onLanguageChanged: ((SupportedLanguage) -> Void)? = nil
 
     var body: some View {
         // WHY ZStack: ensures the banner text is centered horizontally across the
@@ -34,13 +35,14 @@ struct ToolbarView: View {
                 // The gear icon is rarely needed during active typing, and users can
                 // access settings between typing sessions when the bar reverts to idle.
                 HStack {
-                    if suggestions.isEmpty {
-                        Link(destination: URL(string: "dictus://")!) {
-                            Image(systemName: "gearshape.fill")
-                                .font(.system(size: gearIconSize, weight: .medium))
-                                .foregroundColor(Color(.systemGray))
-                                .frame(width: 32, height: 32)
-                        }
+                    if let message = statusMessage {
+                        Text(message)
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity)
+                    } else if suggestions.isEmpty {
+                        LanguageSwitcherView(onLanguageChanged: onLanguageChanged)
 
                         Spacer()
                     } else {

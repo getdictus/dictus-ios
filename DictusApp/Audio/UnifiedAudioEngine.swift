@@ -10,6 +10,7 @@ import DictusCore
 enum AudioEngineError: Error, LocalizedError {
     case permissionDenied
     case permissionUndetermined
+    case phoneCallActive
 
     var errorDescription: String? {
         switch self {
@@ -17,6 +18,8 @@ enum AudioEngineError: Error, LocalizedError {
             return "Microphone permission denied"
         case .permissionUndetermined:
             return "Microphone permission not yet requested"
+        case .phoneCallActive:
+            return "Micro indisponible pendant un appel"
         }
     }
 }
@@ -53,6 +56,9 @@ class UnifiedAudioEngine: ObservableObject {
     /// Whether the underlying AVAudioEngine is currently running.
     /// COMPUTED from engine.isRunning — always accurate, fixes #38.
     var isEngineRunning: Bool { engine.isRunning }
+
+    /// Current accumulated sample count (for zombie engine health check).
+    var currentSampleCount: Int { audioSamples.count }
 
     // MARK: - Private
 
@@ -120,10 +126,15 @@ class UnifiedAudioEngine: ObservableObject {
 
     /// Configure the audio session. Must be called from foreground.
     ///
-    /// WHY these specific options:
-    /// .playAndRecord + [.defaultToSpeaker, .allowBluetooth] matches what WhisperKit uses
-    /// internally in startRecordingLive(). Using the same options ensures WhisperKit's
-    /// transcribe() doesn't conflict with our session config.
+    /// WHY .duckOthers:
+    /// Automatically lowers other apps' volume (~60%) while Dictus's engine is active.
+    /// Matches Wispr Flow behavior — music dips slightly during dictation.
+    /// Note: both .duckOthers and .mixWithOthers hijack AirPods controls (tracked in #85).
+    /// Since AirPods are hijacked either way, .duckOthers gives better volume UX.
+    ///
+    /// WHY no .defaultToSpeaker:
+    /// .defaultToSpeaker routes playback to the loudspeaker, which boosts perceived volume
+    /// when mixed with music. Without it, audio routes normally (earpiece/AirPods).
     ///
     /// WHY setActive every time (no sessionConfigured guard for setActive):
     /// iOS interrupts the audio session when the app goes to background. Even if the
@@ -131,7 +142,7 @@ class UnifiedAudioEngine: ObservableObject {
     func configureAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         if !sessionConfigured {
-            try session.setCategory(.playAndRecord, options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers])
+            try session.setCategory(.playAndRecord, options: [.allowBluetooth, .duckOthers])
         }
         try session.setActive(true)
         try? session.setAllowHapticsAndSystemSoundsDuringRecording(true)
@@ -254,6 +265,23 @@ class UnifiedAudioEngine: ObservableObject {
         bufferSeconds = 0
     }
 
+    /// Force restart the engine (stop + removeTap + reconfigure + start).
+    /// Used to recover from zombie engine state where isRunning == true but tap receives no buffers.
+    func forceRestart() {
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+        sessionConfigured = false
+        PersistentLog.log(.audioEngineStopped)
+
+        do {
+            try configureAudioSession()
+            try startEngine()
+            PersistentLog.log(.engineWarmUpSuccess(context: "forceRestart"))
+        } catch {
+            PersistentLog.log(.engineWarmUpFailed(context: "forceRestart", error: error.localizedDescription))
+        }
+    }
+
     // MARK: - Private Helpers
 
     /// Start the AVAudioEngine with a tap on the input node.
@@ -268,6 +296,23 @@ class UnifiedAudioEngine: ObservableObject {
 
         let inputNode = engine.inputNode
         let hwFormat = inputNode.outputFormat(forBus: 0)
+
+        // Guard: zero-channel format means hardware is unavailable (phone call active)
+        guard hwFormat.channelCount > 0 else {
+            throw AudioEngineError.phoneCallActive
+        }
+
+        // Guard: detect telephony audio route (phone call in progress)
+        // WHY only check inputs for "telephony" (not builtInReceiver on outputs):
+        // Without .defaultToSpeaker, iOS routes output to builtInReceiver by default.
+        // That's normal operation, not a phone call indicator.
+        let currentRoute = AVAudioSession.sharedInstance().currentRoute
+        let hasTelephony = currentRoute.inputs.contains {
+            $0.portType.rawValue.lowercased().contains("telephony")
+        }
+        if hasTelephony {
+            throw AudioEngineError.phoneCallActive
+        }
 
         // Create converter from hardware format to 16kHz mono
         guard let conv = AVAudioConverter(from: hwFormat, to: targetFormat) else {
