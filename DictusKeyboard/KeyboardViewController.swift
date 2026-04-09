@@ -199,6 +199,7 @@ class KeyboardViewController: UIInputViewController {
         // Without this, the inputView may retain a stale height from before the switch.
         heightConstraint?.constant = computeKeyboardHeight()
         inputView?.setNeedsLayout()
+        inputView?.layoutIfNeeded()  // Force synchronous layout to reduce loading flicker (#92)
 
         // Update theme when keyboard reappears (dark/light mode may have changed)
         if let keyboard = giellaKeyboard {
@@ -441,6 +442,11 @@ class KeyboardViewController: UIInputViewController {
         }
 
         self.giellaKeyboard = keyboard
+
+        // Ensure hosting view is at toolbar-only height. If a previous recording
+        // left it at full height, the keyboard grid would be squashed below a large
+        // empty hosting area — causing the key shrinking bug on language switch.
+        hostingHeightConstraint?.constant = toolbarHeight
 
         // Force height recalculation — the new GiellaKeyboardView may have different
         // intrinsic content size during initial layout. Without this, iOS keeps the

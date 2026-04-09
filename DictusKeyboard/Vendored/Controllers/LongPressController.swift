@@ -284,7 +284,8 @@ class LongPressOverlayController: NSObject,
         cell.configure(theme: theme)
         let key = longpressValues[indexPath.row + Int(ceil(Double(longpressValues.count) / 2.0)) * indexPath.section]
 
-        cell.label.font = labelFont
+        // Font scaled to match the reduced longpressKeySize height (#69).
+        cell.label.font = labelFont.withSize(labelFont.pointSize * 0.8)
 
         func setupKeyboardModeCell(imageName: String) {
             // Use Bundle.main instead of Bundle.top (Divvun-specific)

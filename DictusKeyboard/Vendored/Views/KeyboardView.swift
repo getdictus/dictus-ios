@@ -223,9 +223,9 @@ final internal class GiellaKeyboardView: UIView,
             constant: theme.popupCornerRadius * 2)
             .enable(priority: .required)
 
-        overlay.topAnchor
-            .constraint(greaterThanOrEqualTo: superview.topAnchor)
-            .enable(priority: .defaultLow)
+        // REMOVED (#69): topAnchor constraint caused Auto Layout to shrink keyboard
+        // keys when top-row popups extended above bounds. The overlay renders above
+        // bounds safely because clipsToBounds = false on all ancestor views.
 
         let offset: CGFloat = 0.5
         overlay.bottomAnchor.constraint(equalTo: ghostKeyView.contentView.bottomAnchor, constant: offset)
@@ -430,8 +430,9 @@ final internal class GiellaKeyboardView: UIView,
         }
 
         let width = bounds.size.width / CGFloat(currentPage.first?.count ?? 10)
-        var height = (bounds.size.height / CGFloat(currentPage.count)) - theme.popupCornerRadius * 2
-        height = max(32.0, height)
+        // Reduce height to 60% so first-row popups stay within keyboard bounds (#69).
+        var height = ((bounds.size.height / CGFloat(currentPage.count)) - theme.popupCornerRadius * 2) * 0.6
+        height = max(24.0, height)
         return CGSize(
             width: width,
             height: height
