@@ -21,4 +21,16 @@ public enum ProConfig {
     /// Change to `false` for App Store release to enable the purchase flow.
     public static let isBeta = true
     #endif
+
+    /// Effective beta state — respects the debug "Force Free Tier" toggle.
+    /// Use this instead of `isBeta` in UI code to allow testing the paid flow.
+    /// In Release builds, this is identical to `isBeta` (the #if DEBUG block is stripped).
+    public static var effectiveBeta: Bool {
+        #if DEBUG
+        if AppGroup.defaults.bool(forKey: SharedKeys.debugForceFreeTier) {
+            return false
+        }
+        #endif
+        return isBeta
+    }
 }

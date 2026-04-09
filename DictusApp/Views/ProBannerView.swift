@@ -44,6 +44,7 @@ struct ProBannerView: View {
                         startPoint: .leading,
                         endPoint: .trailing
                     )
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                 )
                 .dictusGlass()
             }

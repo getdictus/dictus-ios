@@ -25,7 +25,7 @@ struct PaywallView: View {
                     }
                 }
 
-                if ProConfig.isBeta {
+                if ProConfig.effectiveBeta {
                     // Beta banner replaces purchase flow
                     betaBanner
                 } else if proStatus.isProActive {
@@ -76,9 +76,9 @@ struct PaywallView: View {
                 .frame(width: 32)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(feature.displayName)
+                Text(LocalizedStringKey(feature.displayName))
                     .font(.dictusSubheading)
-                Text(feature.paywallDescription)
+                Text(LocalizedStringKey(feature.paywallDescription))
                     .font(.dictusBody)
                     .foregroundColor(.secondary)
                     .lineLimit(2)
@@ -173,7 +173,7 @@ struct PaywallView: View {
 
     private var bottomLinks: some View {
         VStack(spacing: 8) {
-            if !ProConfig.isBeta {
+            if !ProConfig.effectiveBeta {
                 Button("Restore purchases") {
                     Task { await subscriptionManager.restorePurchases() }
                 }

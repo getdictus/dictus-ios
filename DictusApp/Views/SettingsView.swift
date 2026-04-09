@@ -61,7 +61,7 @@ struct SettingsView: View {
                             .foregroundColor(.dictusAccent)
                         Text("Dictus Pro")
                         Spacer()
-                        if ProConfig.isBeta {
+                        if ProConfig.effectiveBeta {
                             Text("BETA")
                                 .font(.dictusCaption)
                                 .fontWeight(.bold)
@@ -125,7 +125,7 @@ struct SettingsView: View {
             // Section 3: Pro Features
             Section("Pro Features") {
                 ForEach(ProFeature.allCases, id: \.self) { feature in
-                    if proStatus.isProActive || ProConfig.isBeta {
+                    if proStatus.isProActive || ProConfig.effectiveBeta {
                         // Unlocked: show toggle
                         Toggle(isOn: Binding(
                             get: { AppGroup.defaults.bool(forKey: feature.settingsKey) },
@@ -134,7 +134,7 @@ struct SettingsView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: feature.icon)
                                     .foregroundColor(.dictusAccent)
-                                Text(feature.displayName)
+                                Text(LocalizedStringKey(feature.displayName))
                             }
                         }
                     } else {
@@ -145,7 +145,7 @@ struct SettingsView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: feature.icon)
                                     .foregroundColor(.secondary)
-                                Text(feature.displayName)
+                                Text(LocalizedStringKey(feature.displayName))
                                     .foregroundColor(.primary)
                                 Spacer()
                                 Image(systemName: "lock.fill")
