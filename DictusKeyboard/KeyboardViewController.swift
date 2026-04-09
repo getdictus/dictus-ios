@@ -239,6 +239,11 @@ class KeyboardViewController: UIInputViewController {
         // Was hidden in viewDidLoad to prevent cold start flash (toolbar in full-height hosting).
         hostingController?.view.isHidden = false
 
+        // Force synchronous layout AFTER unhiding (#99). During cold start, the status
+        // can transition .recording → .idle between handleDictationStatusChange and this
+        // unhide. The constraint is updated but the visual frame is stale without this.
+        inputView?.layoutIfNeeded()
+
         // Update theme when keyboard reappears (dark/light mode may have changed)
         if let keyboard = giellaKeyboard {
             keyboard.updateTheme(theme: Theme.current(for: traitCollection))
