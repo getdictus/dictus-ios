@@ -34,13 +34,13 @@ Declared values (must be multiples of 4):
 | Token | Value | Usage |
 |-------|-------|-------|
 | xs | 4pt | Icon-label gaps, inline padding |
-| sm | 8pt | Inner card spacing (label to text), compact element spacing |
+| sm | 8pt | Inner card spacing (label to text), compact element spacing, bottom links vertical spacing |
 | md | 16pt | Default element padding, card internal padding, corner radius |
 | lg | 24pt | VStack section spacing (established pattern in HomeView) |
 | xl | 32pt | Top/bottom page padding |
 | 2xl | 48pt | Hero section vertical breathing room |
 
-Exceptions: 12pt used for bottom links vertical spacing (restore + ToS/Privacy cluster)
+No exceptions.
 
 ---
 
@@ -49,14 +49,16 @@ Exceptions: 12pt used for bottom links vertical spacing (restore + ToS/Privacy c
 | Role | Font | Size | Weight | Line Height | SwiftUI Token |
 |------|------|------|--------|-------------|---------------|
 | Display | SF Pro Rounded | .largeTitle | .bold | 1.2 | `.system(.largeTitle, design: .rounded, weight: .bold)` |
-| Heading | SF Pro Rounded | .title | .bold | 1.2 | `.dictusHeading` |
-| Subheading | SF Pro Rounded | .title3 | .semibold | 1.3 | `.dictusSubheading` |
+| Subheading | SF Pro Rounded | .title3 | .bold | 1.3 | `.dictusSubheading` |
 | Body | SF Pro Text | .body | .regular | 1.5 | `.dictusBody` |
 | Caption | SF Pro Text | .caption | .regular | 1.4 | `.dictusCaption` |
 
+Weights used in this phase: `.bold` (600) and `.regular` (400).
+
+Note: `.dictusHeading` (`.title` size) exists as a design system token but is not used in this phase.
+
 Usage in this phase:
 - **Display**: Paywall hero title "Dictus Pro" (only instance of .largeTitle in phase)
-- **Heading**: Not used in paywall (reserved for other screens)
 - **Subheading**: Feature card titles, CTA button label, Pro banner title
 - **Body**: Feature card descriptions, beta banner text
 - **Caption**: "Cancel anytime" text, restore link, ToS/Privacy links, Settings Pro row subtitle, BETA pill label
@@ -97,7 +99,7 @@ Accent reserved for:
 | Feature cards | 3 cards in VStack(spacing: 16) — each `.dictusGlass()` |
 | CTA button | Full-width, 12pt corner radius, `Color.dictusAccent` background, white text |
 | Cancel text | `.dictusCaption`, `.secondary` color, centered below CTA |
-| Bottom links | VStack(spacing: 12) — restore button + HStack(spacing: 16) for ToS/Privacy |
+| Bottom links | VStack(spacing: 8) — restore button + HStack(spacing: 16) for ToS/Privacy |
 | Beta variant | CTA + cancel text replaced by beta banner |
 
 ### 2. Feature Card (repeated x3)
@@ -106,7 +108,7 @@ Accent reserved for:
 |---------|------|
 | Container | HStack, 16pt internal padding, `.dictusGlass()` |
 | Icon | SF Symbol, `.title2` size, tinted per feature color |
-| Title | `.dictusSubheading` weight semibold |
+| Title | `.dictusSubheading` weight bold |
 | Description | `.dictusBody`, `.secondary` color, single line |
 
 Feature card content:
@@ -150,7 +152,7 @@ Feature card content:
 | Position | First section in Settings List, before "Transcription" |
 | Icon | `crown.fill` tinted `Color.dictusAccent` |
 | Label | "Dictus Pro" in default List row style |
-| Badge (beta) | "BETA" pill — `Text("BETA")` in `.dictusCaption` weight `.semibold`, white text on `Color.dictusAccent` background, 4pt vertical / 8pt horizontal padding, Capsule clip shape |
+| Badge (beta) | "BETA" pill — `Text("BETA")` in `.dictusCaption` weight `.bold`, white text on `Color.dictusAccent` background, 4pt vertical / 8pt horizontal padding, Capsule clip shape |
 | Badge (free) | Disclosure indicator (default NavigationLink behavior) |
 | Badge (pro active) | `checkmark.circle.fill` in `Color.dictusSuccess` |
 | Tap action | NavigationLink pushing PaywallView |
