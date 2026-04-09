@@ -4,8 +4,7 @@ import DictusCore
 
 /// Compact language code label in the keyboard toolbar.
 ///
-/// - Tap: cycles through FR → EN → ES → FR and triggers keyboard reload.
-/// - Long-press: opens the Dictus app (replaces the old gear icon behavior).
+/// - Tap (touchDown): cycles through FR → EN → ES → FR and triggers keyboard reload.
 ///
 /// WHY plain text instead of a pill button:
 /// The mic button on the right is a large pill with glow effects. Adding a second,
@@ -16,7 +15,8 @@ struct LanguageSwitcherView: View {
     @State private var language: SupportedLanguage = .active
     var onLanguageChanged: ((SupportedLanguage) -> Void)?
 
-    @Environment(\.openURL) private var openURL
+    /// Prevents double-fire from rapid taps while the keyboard rebuilds.
+    @State private var isSwitching = false
 
     var body: some View {
         Text(language.shortCode)
@@ -24,15 +24,20 @@ struct LanguageSwitcherView: View {
             .foregroundColor(Color(.systemGray))
             .frame(width: 32, height: 32)
             .contentShape(Rectangle())
-            .onTapGesture {
-                cycleLanguage()
-            }
-            .onLongPressGesture(minimumDuration: 0.4) {
-                HapticFeedback.keyTapped()
-                if let url = URL(string: "dictus://") {
-                    openURL(url)
-                }
-            }
+            // Fire on touchDown for immediate response (better UX than onTapGesture
+            // which waits for touchUp). DragGesture(minimumDistance: 0) fires .onChanged
+            // as soon as the finger touches the view.
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        guard !isSwitching else { return }
+                        isSwitching = true
+                        cycleLanguage()
+                    }
+                    .onEnded { _ in
+                        isSwitching = false
+                    }
+            )
     }
 
     private func cycleLanguage() {

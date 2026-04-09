@@ -92,6 +92,15 @@ class DictationCoordinator: ObservableObject {
         // Observe keyboard-initiated stop/cancel signals via Darwin notifications.
         observeKeyboardSignals()
 
+        // Clear stale transcription left over from a previous crash or missed pickup.
+        // 5-minute threshold: if the keyboard didn't read it by now, it never will.
+        if let ts = defaults.object(forKey: SharedKeys.lastTranscriptionTimestamp) as? Double,
+           Date().timeIntervalSince1970 - ts > 300 {
+            defaults.removeObject(forKey: SharedKeys.lastTranscription)
+            defaults.removeObject(forKey: SharedKeys.lastTranscriptionTimestamp)
+            defaults.synchronize()
+        }
+
         // Pre-load WhisperKit + audio session eagerly on app launch.
         // WHY: The first recording via URL scheme takes 4-5s if we load lazily.
         // By loading in init(), the model is ready when the keyboard triggers dictation.
@@ -331,9 +340,11 @@ class DictationCoordinator: ObservableObject {
     /// No more branching between AudioRecorder and RawAudioCapture.
 
     /// Minimum audio duration required for transcription (in seconds).
-    /// WHY 1.0s: Parakeet requires at least 1 second of 16kHz audio.
-    /// WhisperKit also produces garbage on very short clips.
-    private let minimumRecordingDuration: TimeInterval = 1.0
+    /// WHY 0.5s: WhisperKit handles clips ≥0.5s reliably for short words (oui, non, ok).
+    /// Below 0.5s, it tends to hallucinate (invent words not spoken).
+    /// Previous value was 1.0s (Parakeet requirement), but Parakeet is no longer used
+    /// in the dictation pipeline — only WhisperKit via keyboard.
+    private let minimumRecordingDuration: TimeInterval = 0.5
 
     func stopDictation() {
         dictationTask?.cancel()
@@ -390,7 +401,7 @@ class DictationCoordinator: ObservableObject {
                 LiveActivityManager.shared.endWithResult(preview: finalText)
 
                 if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Transcription complete: \(finalText, privacy: .public)")
+                    DictusLogger.app.info("Transcription complete: \(finalText, privacy: .private)")
                 }
 
                 cleanupRecordingKeys()
@@ -497,6 +508,10 @@ class DictationCoordinator: ObservableObject {
 
     /// Clean up recording-related App Group keys after recording completes or is cancelled.
     private func cleanupRecordingKeys() {
+        // NOTE: Do NOT clear lastTranscription here — the keyboard extension reads it
+        // asynchronously via Darwin notification. Clearing it here would race with the
+        // keyboard and delete the transcription before it can be inserted.
+        // Stale transcriptions are cleaned up on app launch (5-min threshold in init).
         defaults.removeObject(forKey: SharedKeys.waveformEnergy)
         defaults.removeObject(forKey: SharedKeys.recordingElapsedSeconds)
         defaults.removeObject(forKey: SharedKeys.recordingHeartbeat)

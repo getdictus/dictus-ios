@@ -113,6 +113,17 @@ class LiveActivityManager {
     /// Timestamp of last waveform update. Used to throttle to 1Hz.
     private var lastWaveformUpdate = Date.distantPast
 
+    /// iOS auto-removes the activity if no update arrives within this interval.
+    /// 30s clears ghosts after force-quit. Waveform updates (1Hz) and phase
+    /// transitions keep refreshing it during normal use.
+    private let staleInterval: TimeInterval = 30
+
+    /// Whether the user has enabled Live Activity in Settings.
+    /// WHY UserDefaults read (not @AppStorage): LiveActivityManager is not a SwiftUI view.
+    private var isEnabled: Bool {
+        UserDefaults(suiteName: AppGroup.identifier)?.bool(forKey: SharedKeys.liveActivityEnabled) ?? true
+    }
+
     /// Task for auto-dismiss after result/failure display.
     private var autoDismissTask: Task<Void, Never>?
 
@@ -145,6 +156,11 @@ class LiveActivityManager {
     /// Synchronous execution ensures the activity is created during the transition.
     /// Zombie cleanup is handled separately by cleanupStaleActivities() at app init.
     func startStandbyActivity() {
+        guard isEnabled else {
+            DictusLogger.app.info("Live Activity disabled by user preference -- skipping")
+            return
+        }
+
         // Allow transition from idle->standby or if already standby (no-op)
         // WHY: Prevents creating duplicate activities when app re-enters background
         if currentPhase == .standby && currentActivity != nil {
@@ -200,9 +216,9 @@ class LiveActivityManager {
 
         let attributes = DictusLiveActivityAttributes()
         let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
-        // staleDate: if app is killed without willTerminate firing, iOS dims the DI
-        // after 15 minutes and the user knows something is wrong.
-        let staleDate = Date().addingTimeInterval(15 * 60)
+        // staleDate: if app is killed without willTerminate firing, iOS auto-removes
+        // the DI after this interval. 30s is short enough to clear ghosts quickly (#84).
+        let staleDate = Date().addingTimeInterval(staleInterval)
 
         do {
             let activity = try Activity.request(
@@ -248,6 +264,8 @@ class LiveActivityManager {
     /// Transition from standby to recording.
     /// Called when DictationCoordinator starts recording.
     func transitionToRecording() {
+        guard isEnabled else { return }
+
         // Cancel any stale watchdog from a previous recording cycle.
         // WHY at the very start: If the user starts a new recording while a watchdog
         // from the previous cycle is still ticking, the watchdog must NOT fire mid-recording.
@@ -303,7 +321,7 @@ class LiveActivityManager {
                 recordingStartDate: Date(),
                 waveformLevels: [0.3, 0.5, 0.7, 0.5, 0.3]
             )
-            await activity.update(.init(state: state, staleDate: nil))
+            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
             DictusLogger.app.info("Live Activity -> recording")
         }
     }
@@ -316,7 +334,7 @@ class LiveActivityManager {
             recordingStartDate: Date(),
             waveformLevels: [0.3, 0.5, 0.7, 0.5, 0.3]
         )
-        await activity.update(.init(state: state, staleDate: nil))
+        await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(staleInterval)))
         // currentPhase already set to .recording by caller before Task (#49)
         DictusLogger.app.info("Live Activity -> recording (delayed)")
     }
@@ -353,7 +371,7 @@ class LiveActivityManager {
                 recordingStartDate: activity.content.state.recordingStartDate,
                 waveformLevels: downsampled
             )
-            await activity.update(.init(state: state, staleDate: nil))
+            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
         }
     }
 
@@ -361,6 +379,8 @@ class LiveActivityManager {
 
     /// Transition from recording to transcribing.
     func transitionToTranscribing() {
+        guard isEnabled else { return }
+
         // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
         guard validateTransition(to: .transcribing) else { return }
 
@@ -373,7 +393,7 @@ class LiveActivityManager {
                 phase: .transcribing,
                 waveformLevels: [0.3, 0.5, 0.4, 0.5, 0.3]
             )
-            await activity.update(.init(state: state, staleDate: nil))
+            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
             DictusLogger.app.info("Live Activity -> transcribing")
         }
     }
@@ -385,6 +405,8 @@ class LiveActivityManager {
     /// After showing the result briefly, we go back to the "On" standby state
     /// so they can start another recording from the Dynamic Island.
     func endWithResult(preview: String?) {
+        guard isEnabled else { return }
+
         // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
         guard validateTransition(to: .ready) else { return }
 
@@ -400,7 +422,7 @@ class LiveActivityManager {
                 phase: .ready,
                 transcriptionPreview: truncatedPreview
             )
-            await activity.update(.init(state: state, staleDate: nil))
+            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
             DictusLogger.app.info("Live Activity -> ready")
         }
 
@@ -421,6 +443,8 @@ class LiveActivityManager {
 
     /// Show failure state, then return to standby after 3 seconds.
     func endWithFailure() {
+        guard isEnabled else { return }
+
         // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
         guard validateTransition(to: .failed) else { return }
 
@@ -432,7 +456,7 @@ class LiveActivityManager {
         currentPhase = .failed  // Update BEFORE async work to prevent races (#49)
         Task {
             let state = DictusLiveActivityAttributes.ContentState(phase: .failed)
-            await activity.update(.init(state: state, staleDate: nil))
+            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
             DictusLogger.app.info("Live Activity -> failed")
         }
 
@@ -457,6 +481,8 @@ class LiveActivityManager {
     /// WHY: After cold start, Activity.request() silently fails from background.
     /// Calling this on didBecomeActive retries from the foreground where it succeeds.
     func ensureActivityAlive() {
+        guard isEnabled else { return }
+
         // Detect externally-ended activities (e.g., StopStandbyIntent bypasses manager).
         // WHY: The intent ends the activity via activity.end() but can't call stopStandbyActivity()
         // because LiveActivityManager is DictusApp-only. If DictationCoordinator's observer also
@@ -519,8 +545,8 @@ class LiveActivityManager {
         currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
         syncStateMachine(to: .standby)
         let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
-        // Refresh staleDate on each return to standby (15 min from now)
-        let staleDate = Date().addingTimeInterval(15 * 60)
+        // Refresh staleDate on each return to standby (#84: 30s clears ghosts after force-quit)
+        let staleDate = Date().addingTimeInterval(staleInterval)
         await activity.update(.init(state: state, staleDate: staleDate))
         DictusLogger.app.info("Live Activity -> standby (auto-return)")
     }
@@ -561,11 +587,18 @@ class LiveActivityManager {
         }
     }
 
-    /// Synchronously end all Live Activities. Called from willTerminate which has
-    /// very limited time -- cannot use async/await reliably.
+    /// End all Live Activities during app termination (force-quit).
+    /// WHY RunLoop spin: activity.end() is async, but willTerminate gives very limited
+    /// time before iOS kills the process. Spawning Task { await } alone doesn't work —
+    /// the tasks never execute before the process dies. Running the RunLoop for 500ms
+    /// lets the main thread process pending async work, giving the end() calls a chance
+    /// to complete. This is the standard pattern for async cleanup during termination.
     private func endAllActivitiesSync() {
-        for activity in Activity<DictusLiveActivityAttributes>.activities {
-            let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
+        let activities = Activity<DictusLiveActivityAttributes>.activities
+        guard !activities.isEmpty else { return }
+
+        let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
+        for activity in activities {
             Task {
                 await activity.end(
                     .init(state: state, staleDate: nil),
@@ -573,6 +606,9 @@ class LiveActivityManager {
                 )
             }
         }
+        // Give async tasks time to complete before the process is killed
+        RunLoop.current.run(until: Date().addingTimeInterval(0.5))
+
         currentActivity = nil
         currentPhase = .idle
         syncStateMachine(to: .idle)

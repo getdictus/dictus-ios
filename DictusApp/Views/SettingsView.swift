@@ -37,6 +37,9 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.autocorrectEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var autocorrectEnabled = true
 
+    @AppStorage(SharedKeys.liveActivityEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var liveActivityEnabled = true
+
     /// Whether the currently active model uses the Parakeet engine (CTC/TDT).
     /// Parakeet auto-detects language — the language picker has no effect on it.
     private var isParakeetActive: Bool {
@@ -105,7 +108,7 @@ struct SettingsView: View {
 
             // Section 2: Clavier
             // All toggles are always visible — there's only one keyboard type now.
-            Section("Keyboard") {
+            Section {
                 DefaultLayerPicker()
 
                 Picker("Layout", selection: $keyboardLayout) {
@@ -120,6 +123,19 @@ struct SettingsView: View {
                 }
 
                 Toggle("Autocorrect", isOn: $autocorrectEnabled)
+
+                Toggle("Live Activity", isOn: $liveActivityEnabled)
+                    .onChange(of: liveActivityEnabled) { _, enabled in
+                        if !enabled {
+                            LiveActivityManager.shared.stopStandbyActivity()
+                        }
+                    }
+            } header: {
+                Text("Keyboard")
+            } footer: {
+                if !liveActivityEnabled {
+                    Text("Dynamic Island and Lock Screen notification are disabled.")
+                }
             }
 
             // Section 3: Pro Features

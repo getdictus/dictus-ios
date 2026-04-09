@@ -126,15 +126,20 @@ class UnifiedAudioEngine: ObservableObject {
 
     /// Configure the audio session. Must be called from foreground.
     ///
+    /// WHY .allowBluetoothA2DP (not .allowBluetooth) — fix #85:
+    /// .allowBluetooth enables HFP (Hands-Free Profile) which hijacks AirPods AVRCP
+    /// controls — single-tap play/pause stops working for Music app during recording.
+    /// .allowBluetoothA2DP keeps A2DP output on AirPods without activating HFP:
+    /// built-in mic is used for recording, AirPods controls stay with media apps.
+    /// Confirmed via WhisperFlow reverse-engineering (same NoBluetooth approach).
+    ///
     /// WHY .duckOthers:
     /// Automatically lowers other apps' volume (~60%) while Dictus's engine is active.
-    /// Matches Wispr Flow behavior — music dips slightly during dictation.
-    /// Note: both .duckOthers and .mixWithOthers hijack AirPods controls (tracked in #85).
-    /// Since AirPods are hijacked either way, .duckOthers gives better volume UX.
+    /// The AirPods hijack was caused by HFP (.allowBluetooth), not ducking.
     ///
-    /// WHY no .defaultToSpeaker:
-    /// .defaultToSpeaker routes playback to the loudspeaker, which boosts perceived volume
-    /// when mixed with music. Without it, audio routes normally (earpiece/AirPods).
+    /// WHY .defaultToSpeaker:
+    /// Without it, .playAndRecord routes output to the earpiece by default — nearly
+    /// inaudible without headphones. .defaultToSpeaker sends audio to the loudspeaker.
     ///
     /// WHY setActive every time (no sessionConfigured guard for setActive):
     /// iOS interrupts the audio session when the app goes to background. Even if the
@@ -142,7 +147,7 @@ class UnifiedAudioEngine: ObservableObject {
     func configureAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         if !sessionConfigured {
-            try session.setCategory(.playAndRecord, options: [.allowBluetooth, .duckOthers])
+            try session.setCategory(.playAndRecord, options: [.allowBluetoothA2DP, .defaultToSpeaker, .duckOthers])
         }
         try session.setActive(true)
         try? session.setAllowHapticsAndSystemSoundsDuringRecording(true)
