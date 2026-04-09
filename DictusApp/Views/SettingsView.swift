@@ -16,6 +16,8 @@ import DictusCore
 /// grouped rows with section headers and footers.
 struct SettingsView: View {
 
+    @EnvironmentObject var proStatus: ProStatusManager
+
     // MARK: - Preferences (App Group persisted)
 
     @AppStorage(SharedKeys.language, store: UserDefaults(suiteName: AppGroup.identifier))
@@ -49,6 +51,35 @@ struct SettingsView: View {
 
     var body: some View {
         List {
+            // Section 0: Dictus Pro — always first
+            Section {
+                NavigationLink {
+                    PaywallView()
+                } label: {
+                    HStack {
+                        Image(systemName: "crown.fill")
+                            .foregroundColor(.dictusAccent)
+                        Text("Dictus Pro")
+                        Spacer()
+                        if ProConfig.isBeta {
+                            Text("BETA")
+                                .font(.dictusCaption)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .padding(.vertical, 4)
+                                .padding(.horizontal, 8)
+                                .background(Color.dictusAccent)
+                                .clipShape(Capsule())
+                                .accessibilityLabel("Beta — all features free")
+                        } else if proStatus.isProActive {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.dictusSuccess)
+                                .accessibilityLabel("Pro active")
+                        }
+                    }
+                }
+            }
+
             // Section 1: Transcription
             Section {
                 Picker("Transcription language", selection: $language) {
@@ -91,7 +122,51 @@ struct SettingsView: View {
                 Toggle("Autocorrect", isOn: $autocorrectEnabled)
             }
 
-            // Section 3: A propos
+            // Section 3: Pro Features
+            Section("Pro Features") {
+                ForEach(ProFeature.allCases, id: \.self) { feature in
+                    if proStatus.isProActive || ProConfig.isBeta {
+                        // Unlocked: show toggle
+                        Toggle(isOn: Binding(
+                            get: { AppGroup.defaults.bool(forKey: feature.settingsKey) },
+                            set: { AppGroup.defaults.set($0, forKey: feature.settingsKey) }
+                        )) {
+                            HStack(spacing: 8) {
+                                Image(systemName: feature.icon)
+                                    .foregroundColor(.dictusAccent)
+                                Text(feature.displayName)
+                            }
+                        }
+                    } else {
+                        // Locked: show lock + PRO pill, tap opens paywall
+                        NavigationLink {
+                            PaywallView()
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: feature.icon)
+                                    .foregroundColor(.secondary)
+                                Text(feature.displayName)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "lock.fill")
+                                    .font(.caption)
+                                    .foregroundColor(.dictusAccent)
+                                    .accessibilityHidden(true)
+                                Text("PRO")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .padding(.vertical, 2)
+                                    .padding(.horizontal, 6)
+                                    .background(Color.dictusAccent)
+                                    .clipShape(Capsule())
+                                    .accessibilityLabel("Pro feature")
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Section 4: A propos
             Section("About") {
                 LabeledContent("Version", value: appVersion)
 
