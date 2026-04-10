@@ -49,10 +49,12 @@ struct GlobeKeyTutorialPage: View {
                 // Title — changes based on state
                 Group {
                     if !dictusKeyboardActive {
+                        // WHY two separate Text views instead of concatenation:
+                        // Text("A") + Text(Image(...)) doesn't go through String Catalogs
+                        // because each fragment is a separate key. Using two localized
+                        // lines is cleaner and translates correctly.
                         VStack(spacing: 4) {
-                            (Text("Tap and hold ")
-                                + Text(Image(systemName: "globe"))
-                                + Text(", then"))
+                            Text("Tap and hold \(Image(systemName: "globe")), then")
                             Text("switch to the Dictus keyboard")
                         }
                     } else {

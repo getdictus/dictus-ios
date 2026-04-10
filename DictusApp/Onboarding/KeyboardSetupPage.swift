@@ -219,56 +219,88 @@ struct KeyboardSetupPage: View {
 
     /// Phase 1: Fake "Dictus" settings page with Keyboards row + placeholder rows.
     /// The "Keyboards" row gets a highlight overlay to show the user where to tap.
+    ///
+    /// WHY iOS Settings-style icons:
+    /// The real Dictus page in iOS Settings shows rows with colored square icons
+    /// (keyboard icon on gray, globe on blue, etc.). Matching this visual pattern
+    /// helps the user recognize the screen when they open the real Settings.
     private var dictusSettingsPhase: some View {
         VStack(spacing: 0) {
             // "Keyboards" row — the one the user needs to tap
-            HStack {
-                Text("Keyboards")
-                    .font(.body)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            settingsRow(
+                icon: "keyboard",
+                iconColor: .gray,
+                label: "Keyboards",
+                showChevron: true
+            )
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.dictusAccent.opacity(keyboardsRowHighlighted ? 0.15 : 0))
                     .padding(.horizontal, 4)
             )
 
-            Divider().opacity(0.3).padding(.leading, 16)
+            Divider().opacity(0.3).padding(.leading, 52)
 
             // Placeholder rows for realism — makes it look like a real Settings page
-            HStack {
-                Text("Notifications")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.footnote)
-                    .foregroundStyle(.tertiary)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            settingsRow(
+                icon: "bell.badge.fill",
+                iconColor: .red,
+                label: "Notifications",
+                showChevron: true,
+                dimmed: true
+            )
 
-            Divider().opacity(0.3).padding(.leading, 16)
+            Divider().opacity(0.3).padding(.leading, 52)
 
-            HStack {
-                Text("Siri & Search")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.footnote)
-                    .foregroundStyle(.tertiary)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            settingsRow(
+                icon: "globe",
+                iconColor: .blue,
+                label: "Siri & Search",
+                showChevron: true,
+                dimmed: true
+            )
         }
         .allowsHitTesting(false)
         .padding(.vertical, 4)
+    }
+
+    /// A single row matching the iOS Settings visual style: colored icon square + label + chevron.
+    ///
+    /// WHY a reusable helper: The three rows in Phase 1 share the same layout
+    /// (icon + label + chevron). Extracting it avoids repeating the same HStack/ZStack
+    /// structure three times and makes it easy to adjust the visual style in one place.
+    private func settingsRow(
+        icon: String,
+        iconColor: Color,
+        label: LocalizedStringKey,
+        showChevron: Bool,
+        dimmed: Bool = false
+    ) -> some View {
+        HStack(spacing: 12) {
+            // Colored square icon — matches iOS Settings style
+            ZStack {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(iconColor)
+                    .frame(width: 28, height: 28)
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                    .foregroundColor(.white)
+            }
+
+            Text(label)
+                .font(.body)
+                .foregroundStyle(dimmed ? .secondary : .primary)
+
+            Spacer()
+
+            if showChevron {
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
     }
 
     /// Phase 2: Keyboards toggles page — the existing Dictus + Full Access toggles.
