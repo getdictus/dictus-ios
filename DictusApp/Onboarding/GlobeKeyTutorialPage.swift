@@ -28,6 +28,12 @@ struct GlobeKeyTutorialPage: View {
     /// Guard against multiple auto-advance triggers.
     @State private var hasAutoAdvanced = false
 
+    /// Minimum text length to trigger auto-advance.
+    /// WHY 3 characters: A single keystroke shouldn't trigger success.
+    /// Dictation typically produces multiple words. 3 chars filters accidental
+    /// key taps while still allowing short dictation ("oui", "non", "ok").
+    private let minTextLength = 3
+
     var body: some View {
         ZStack {
             Color.dictusBackground
@@ -62,8 +68,7 @@ struct GlobeKeyTutorialPage: View {
                 .padding(.bottom, 12)
 
                 if dictusKeyboardActive {
-                    // State 2: Text field with keyboard open, no mic hint bar
-                    // The text field auto-focuses to keep the Dictus keyboard visible.
+                    // State 2: Text field with keyboard open
                     KeyboardDetectingTextField(
                         text: $textFieldContent,
                         placeholder: String(localized: "Say something!"),
@@ -81,14 +86,13 @@ struct GlobeKeyTutorialPage: View {
 
                     // 4-frame animation showing the globe key flow
                     KeyboardSwitchAnimation()
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 8)
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
-                    // Hidden text field to bring up the real keyboard for interaction.
-                    // WHY hidden but present: The user needs the real system keyboard
-                    // visible so they can long-press the globe key. The text field is
-                    // invisible — only the keyboard matters at this stage.
+                    // Hidden text field to bring up the real keyboard immediately.
+                    // WHY hidden: The user needs the real system keyboard visible so
+                    // they can long-press the globe key. Only the keyboard matters.
                     KeyboardDetectingTextField(
                         text: $textFieldContent,
                         placeholder: "",
@@ -109,7 +113,7 @@ struct GlobeKeyTutorialPage: View {
                 Spacer(minLength: 0)
             }
 
-            // Success overlay — dismisses keyboard before appearing
+            // Success overlay — keyboard dismissed before appearing
             if showSuccess {
                 OnboardingSuccessView(onComplete: onComplete)
                     .transition(.opacity)
@@ -118,8 +122,11 @@ struct GlobeKeyTutorialPage: View {
         .animation(.easeInOut(duration: 0.3), value: dictusKeyboardActive)
         .animation(.easeInOut(duration: 0.3), value: showSuccess)
         .onChange(of: textFieldContent) { newValue in
-            // Auto-advance when the user has dictated text
-            if dictusKeyboardActive && !newValue.isEmpty && !hasAutoAdvanced {
+            // Auto-advance when the user has dictated enough text.
+            // WHY minTextLength: Prevents a single accidental keystroke from
+            // triggering success. Dictation produces multiple characters at once.
+            let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            if dictusKeyboardActive && trimmed.count >= minTextLength && !hasAutoAdvanced {
                 hasAutoAdvanced = true
                 PersistentLog.log(.onboardingGlobeTutorialTextDetected)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
@@ -153,36 +160,38 @@ struct GlobeKeyTutorialPage: View {
 
 /// Animated 4-frame illustration showing the globe key → keyboard picker → Dictus flow.
 ///
-/// WHY an animated illustration instead of a static mockup:
-/// Wispr Flow uses this exact pattern — a looping animation that shows:
-/// 1. Normal iOS keyboard
-/// 2. Globe pressed → picker appears with system keyboard selected
-/// 3. Picker → Dictus selected (highlighted)
-/// 4. Dictus keyboard active
+/// WHY real SwiftUI elements instead of simplified rectangles:
+/// The previous version used abstract rectangles for keys which didn't look like iOS.
+/// This version uses real text labels for AZERTY keys, proper spacing, and native
+/// materials — matching the approach used in KeyboardSetupPage (Animation A) where
+/// real Toggle components made the fake Settings card convincing.
 ///
-/// The animation loops so the user sees the complete flow before doing it themselves
-/// on the real keyboard below.
+/// The animation loops through 4 states:
+/// Frame 0: Normal AZERTY keyboard
+/// Frame 1: Picker appears, "Français" highlighted (current keyboard)
+/// Frame 2: Picker, "Dictus" highlighted (user's target)
+/// Frame 3: Dictus keyboard visible (with branding on spacebar)
 private struct KeyboardSwitchAnimation: View {
-    /// Current frame of the 4-step animation (0-3).
     @State private var animationFrame = 0
     @State private var animationTimer: Timer?
 
-    /// Animation timing:
-    /// Frame 0: 1.5s — Normal keyboard visible
-    /// Frame 1: 1.5s — Picker appears, system keyboard highlighted
-    /// Frame 2: 1.5s — Picker, Dictus highlighted
-    /// Frame 3: 2.0s — Dictus keyboard visible
-    /// Total: ~6.5s per cycle
     private let frameDurations: [TimeInterval] = [1.5, 1.5, 1.5, 2.0]
 
+    // AZERTY layout rows
+    private let row0 = ["A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P"]
+    private let row1 = ["Q", "S", "D", "F", "G", "H", "J", "K", "L", "M"]
+    private let row2 = ["W", "X", "C", "V", "B", "N", "'"]
+
     var body: some View {
-        ZStack {
-            // Base: simplified keyboard illustration
-            miniKeyboardBase(isDictus: animationFrame == 3)
+        ZStack(alignment: .bottomLeading) {
+            // Base keyboard illustration
+            fakeKeyboard(isDictus: animationFrame == 3)
 
             // Picker overlay for frames 1-2
             if animationFrame == 1 || animationFrame == 2 {
-                miniKeyboardPicker(dictusHighlighted: animationFrame == 2)
+                fakeKeyboardPicker(dictusHighlighted: animationFrame == 2)
+                    .padding(.leading, 8)
+                    .padding(.bottom, 44)
                     .transition(.opacity.combined(with: .scale(scale: 0.9, anchor: .bottomLeading)))
             }
         }
@@ -194,101 +203,168 @@ private struct KeyboardSwitchAnimation: View {
         }
     }
 
-    /// Simplified iOS keyboard illustration — just enough to be recognizable.
-    ///
-    /// WHY simplified and not pixel-perfect: We're showing a miniature illustration
-    /// (not a real keyboard). The goal is recognition, not replication. Users see
-    /// the real keyboard below this illustration.
-    private func miniKeyboardBase(isDictus: Bool) -> some View {
-        VStack(spacing: 6) {
-            // 4 rows of key placeholders
-            ForEach(0..<4, id: \.self) { row in
-                HStack(spacing: 4) {
-                    let keyCount = row == 0 ? 10 : (row == 1 ? 9 : (row == 2 ? 7 : 3))
-                    ForEach(0..<keyCount, id: \.self) { _ in
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.primary.opacity(0.08))
-                            .frame(height: 28)
-                    }
+    // MARK: - Fake Keyboard
+
+    /// Realistic AZERTY keyboard using actual SwiftUI text labels.
+    /// Non-interactive (allowsHitTesting(false)).
+    private func fakeKeyboard(isDictus: Bool) -> some View {
+        VStack(spacing: 5) {
+            // Row 0: A Z E R T Y U I O P
+            HStack(spacing: 4) {
+                ForEach(row0, id: \.self) { key in
+                    keyCell(key)
                 }
             }
 
-            // Bottom row: globe + space + return
+            // Row 1: Q S D F G H J K L M
             HStack(spacing: 4) {
-                // Globe key
-                Image(systemName: "globe")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 28, height: 28)
-                    .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Color.primary.opacity(0.08))
-                    )
+                ForEach(row1, id: \.self) { key in
+                    keyCell(key)
+                }
+            }
 
-                // Space bar — shows "Dictus" branding in frame 3
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.primary.opacity(0.06))
-                    .frame(height: 28)
-                    .overlay {
-                        if isDictus {
-                            Text("Dictus")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+            // Row 2: shift + W X C V B N ' + delete
+            HStack(spacing: 4) {
+                // Shift key
+                Image(systemName: "shift")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .frame(width: 36, height: 36)
+                    .background(keyCapsule(dark: true))
+
+                ForEach(row2, id: \.self) { key in
+                    keyCell(key)
+                }
+
+                // Delete key
+                Image(systemName: "delete.left")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.primary)
+                    .frame(width: 36, height: 36)
+                    .background(keyCapsule(dark: true))
+            }
+
+            // Row 3: 123 + emoji + space + return
+            HStack(spacing: 4) {
+                // 123 key
+                Text("123")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.primary)
+                    .frame(width: 36, height: 36)
+                    .background(keyCapsule(dark: true))
+
+                // Emoji key
+                Text("😊")
+                    .font(.system(size: 16))
+                    .frame(width: 36, height: 36)
+                    .background(keyCapsule(dark: true))
+
+                // Space bar
+                Text(isDictus ? "Dictus" : "espace")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 36)
+                    .background(keyCapsule(dark: false))
 
                 // Return key
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.primary.opacity(0.08))
-                    .frame(width: 48, height: 28)
-                    .overlay {
-                        Image(systemName: "return")
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
-                    }
+                Image(systemName: "return")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.primary)
+                    .frame(width: 64, height: 36)
+                    .background(keyCapsule(dark: true))
             }
+
+            // Bottom row: globe + mic (outside the key area, like real iOS)
+            HStack {
+                Image(systemName: "globe")
+                    .font(.system(size: 16))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if isDictus {
+                    // Dictus mic button
+                    Image(systemName: "mic.fill")
+                        .font(.system(size: 16))
+                        .foregroundColor(.dictusAccent)
+                } else {
+                    Image(systemName: "mic")
+                        .font(.system(size: 16))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.top, 2)
         }
-        .padding(12)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(.ultraThinMaterial)
         )
+        .allowsHitTesting(false)
     }
 
-    /// Mini keyboard picker popup — matches the iOS picker style.
-    private func miniKeyboardPicker(dictusHighlighted: Bool) -> some View {
+    /// A single keyboard key cell.
+    private func keyCell(_ letter: String) -> some View {
+        Text(letter)
+            .font(.system(size: 16, weight: .regular))
+            .foregroundStyle(.primary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 36)
+            .background(keyCapsule(dark: false))
+    }
+
+    /// Key background capsule — light for letter keys, darker for function keys.
+    private func keyCapsule(dark: Bool) -> some View {
+        RoundedRectangle(cornerRadius: 5)
+            .fill(Color.primary.opacity(dark ? 0.08 : 0.05))
+            .shadow(color: .black.opacity(0.08), radius: 0.5, y: 1)
+    }
+
+    // MARK: - Fake Keyboard Picker
+
+    /// Keyboard picker popup matching iOS style.
+    private func fakeKeyboardPicker(dictusHighlighted: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            pickerRow(text: "Keyboard Settings...", dimmed: true, highlighted: false)
+            pickerRow("Keyboard Settings...", dimmed: true)
             Divider().opacity(0.2)
-            pickerRow(text: "Français", dimmed: false, highlighted: !dictusHighlighted)
+            pickerRow("Français", highlighted: !dictusHighlighted)
             Divider().opacity(0.2)
-            pickerRow(text: "Emoji", dimmed: false, highlighted: false)
+            pickerRow("Emoji")
             Divider().opacity(0.2)
-            pickerRow(text: "Dictus", dimmed: false, highlighted: dictusHighlighted, accent: dictusHighlighted)
+            pickerRow("Dictus", highlighted: dictusHighlighted, accent: dictusHighlighted)
+
+            // Keyboard type icons (dock/split/full)
+            HStack(spacing: 12) {
+                ForEach(["keyboard.onehanded.left", "keyboard", "keyboard.onehanded.right"], id: \.self) { icon in
+                    Image(systemName: icon)
+                        .font(.system(size: 14))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
         }
-        .frame(width: 180)
+        .frame(width: 200)
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(.ultraThickMaterial)
-                .shadow(color: .black.opacity(0.2), radius: 8, y: 2)
+                .shadow(color: .black.opacity(0.2), radius: 10, y: 2)
         )
-        // Position: bottom-left of the keyboard illustration (near the globe key)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-        .padding(.leading, 12)
-        .padding(.bottom, 48)
     }
 
-    private func pickerRow(text: String, dimmed: Bool, highlighted: Bool, accent: Bool = false) -> some View {
+    private func pickerRow(_ text: String, dimmed: Bool = false, highlighted: Bool = false, accent: Bool = false) -> some View {
         Text(text)
             .font(.callout)
             .foregroundColor(accent ? .dictusAccent : (dimmed ? .secondary : .primary))
+            .fontWeight(highlighted || accent ? .medium : .regular)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.vertical, 9)
             .background(
-                highlighted
-                    ? Color.primary.opacity(0.08)
-                    : (accent ? Color.dictusAccent.opacity(0.1) : Color.clear)
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(highlighted ? Color.primary.opacity(0.1) : (accent ? Color.dictusAccent.opacity(0.12) : Color.clear))
+                    .padding(.horizontal, 4)
             )
     }
 
@@ -334,7 +410,6 @@ private struct KeyboardDetectingTextField: UIViewRepresentable {
         textField.delegate = context.coordinator
         textField.returnKeyType = .done
         textField.backgroundColor = .clear
-        // Placeholder top-left alignment (default for UITextField)
         textField.contentVerticalAlignment = .top
 
         // Listen for keyboard switches
@@ -345,9 +420,12 @@ private struct KeyboardDetectingTextField: UIViewRepresentable {
             object: nil
         )
 
-        // Auto-focus to bring up the keyboard immediately
+        // Auto-focus immediately to bring up the keyboard without delay.
+        // WHY no delay: The previous 0.3s delay caused the keyboard to appear
+        // late, leaving the animation floating without a keyboard below it.
+        // Immediate focus on the next run loop tick is fast enough.
         if autoFocus {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            DispatchQueue.main.async {
                 textField.becomeFirstResponder()
             }
         }
