@@ -113,6 +113,9 @@ public enum LogEvent: Sendable {
     case onboardingKeyboardNotFound(modeCount: Int)
     case onboardingKeyboardCheckSkipped(reason: String)
     case onboardingKeyboardRetry
+    case onboardingDictusKeyboardActivated
+    case onboardingGlobeTutorialTextDetected
+    case onboardingGlobeTutorialSkipped
 
     // MARK: Live Activity
     case liveActivityStarted(id: String)
@@ -165,7 +168,9 @@ public enum LogEvent: Sendable {
             return .audio
         case .onboardingScenePhaseChanged, .onboardingKeyboardCheckStarted,
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
-             .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry:
+             .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
+             .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
+             .onboardingGlobeTutorialSkipped:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback:
             return .lifecycle
@@ -198,6 +203,8 @@ public enum LogEvent: Sendable {
 
         // Info (normal operations: starts, completes, selections, configs)
         case .onboardingKeyboardDetected,
+             .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
+             .onboardingGlobeTutorialSkipped,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
              .transcriptionStarted, .transcriptionCompleted,
@@ -270,6 +277,9 @@ public enum LogEvent: Sendable {
         case .onboardingKeyboardNotFound: return "onboardingKeyboardNotFound"
         case .onboardingKeyboardCheckSkipped: return "onboardingKeyboardCheckSkipped"
         case .onboardingKeyboardRetry: return "onboardingKeyboardRetry"
+        case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
+        case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
+        case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
         case .liveActivityStarted: return "liveActivityStarted"
         case .liveActivityTransition: return "liveActivityTransition"
         case .liveActivityFailed: return "liveActivityFailed"
@@ -389,6 +399,9 @@ public enum LogEvent: Sendable {
         case .onboardingKeyboardCheckSkipped(let reason):
             return "reason=\(reason)"
         case .onboardingKeyboardRetry:
+            return ""
+        case .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
+             .onboardingGlobeTutorialSkipped:
             return ""
 
         // Live Activity

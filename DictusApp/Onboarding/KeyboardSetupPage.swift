@@ -25,7 +25,12 @@ struct KeyboardSetupPage: View {
     /// when accessing UITextInputMode.activeInputModes.
     @State private var isCheckingKeyboard = false
 
-    // Animation state for the fake toggles
+    // Animation state for the two-phase fake Settings card
+    /// WHY two phases: The real iOS flow requires tapping "Keyboards" row first,
+    /// then toggling the switches. The animation shows both steps so the user
+    /// knows to look for the "Keyboards" row (the most common point of confusion).
+    @State private var showKeyboardsScreen = false   // false = Dictus settings page, true = Keyboards toggles page
+    @State private var keyboardsRowHighlighted = false // tap highlight on the "Keyboards" row
     @State private var dictusToggleOn = false
     @State private var fullAccessToggleOn = false
     @State private var animationTimer: Timer?
@@ -147,8 +152,10 @@ struct KeyboardSetupPage: View {
                 // Stop animation loop once detected
                 animationTimer?.invalidate()
                 animationTimer = nil
-                // Show both toggles ON
+                // Show the toggles page with both toggles ON (final success state)
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    showKeyboardsScreen = true
+                    keyboardsRowHighlighted = false
                     dictusToggleOn = true
                     fullAccessToggleOn = true
                 }
@@ -160,67 +167,166 @@ struct KeyboardSetupPage: View {
     // MARK: - Fake Settings Card
 
     /// Simulates the iOS Settings screen for Dictus keyboard configuration.
-    /// Uses real SwiftUI Toggle components (non-interactive) so they automatically
-    /// adopt the native Liquid Glass style on iOS 26.
+    ///
+    /// WHY two phases:
+    /// Phase 1 shows the Dictus settings page with a "Keyboards" row — the user
+    /// needs to know they must tap this row first (this is where most users get stuck).
+    /// Phase 2 shows the toggles screen (existing animation). Both phases loop
+    /// in sequence so the user sees the complete flow before opening Settings.
     private var fakeSettingsCard: some View {
         VStack(spacing: 0) {
-            // Header
+            // Header — changes to show navigation breadcrumb
             HStack {
                 Image(systemName: "gearshape.fill")
                     .foregroundStyle(.secondary)
                     .font(.footnote)
-                Text("Settings > Dictus")
+                Text(showKeyboardsScreen ? "Settings > Dictus > Keyboards" : "Settings > Dictus")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                    .animation(.none, value: showKeyboardsScreen)
                 Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
 
-            // Toggle rows using native SwiftUI Toggle for Liquid Glass styling.
-            // allowsHitTesting(false) prevents user interaction — toggles are
-            // driven programmatically by the animation timer.
-            VStack(spacing: 0) {
-                Toggle("Dictus", isOn: $dictusToggleOn)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: dictusToggleOn)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-
-                Divider()
-                    .opacity(0.3)
-                    .padding(.leading, 16)
-
-                Toggle("Allow full access", isOn: $fullAccessToggleOn)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: fullAccessToggleOn)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+            // Two-phase content area with slide transition
+            // WHY clipped: Without clipping, the outgoing phase slides visibly
+            // outside the card bounds during the transition. Clipping keeps the
+            // animation contained within the glass card.
+            ZStack {
+                if !showKeyboardsScreen {
+                    // Phase 1: Dictus settings page — shows "Keyboards" row to tap
+                    dictusSettingsPhase
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .leading).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
+                } else {
+                    // Phase 2: Keyboards toggles page — shows Dictus + Full Access toggles
+                    keyboardsTogglesPhase
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                            removal: .move(edge: .trailing).combined(with: .opacity)
+                        ))
+                }
             }
-            .allowsHitTesting(false)
-            .padding(.vertical, 4)
+            .clipped()
+            .animation(.easeInOut(duration: 0.3), value: showKeyboardsScreen)
         }
         .padding(.bottom, 4)
         .dictusGlass(in: RoundedRectangle(cornerRadius: 16))
     }
 
+    /// Phase 1: Fake "Dictus" settings page with Keyboards row + placeholder rows.
+    /// The "Keyboards" row gets a highlight overlay to show the user where to tap.
+    private var dictusSettingsPhase: some View {
+        VStack(spacing: 0) {
+            // "Keyboards" row — the one the user needs to tap
+            HStack {
+                Text("Keyboards")
+                    .font(.body)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.dictusAccent.opacity(keyboardsRowHighlighted ? 0.15 : 0))
+                    .padding(.horizontal, 4)
+            )
+
+            Divider().opacity(0.3).padding(.leading, 16)
+
+            // Placeholder rows for realism — makes it look like a real Settings page
+            HStack {
+                Text("Notifications")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+
+            Divider().opacity(0.3).padding(.leading, 16)
+
+            HStack {
+                Text("Siri & Search")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.footnote)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+        .allowsHitTesting(false)
+        .padding(.vertical, 4)
+    }
+
+    /// Phase 2: Keyboards toggles page — the existing Dictus + Full Access toggles.
+    /// Uses real SwiftUI Toggle components (non-interactive) so they automatically
+    /// adopt the native Liquid Glass style on iOS 26.
+    private var keyboardsTogglesPhase: some View {
+        VStack(spacing: 0) {
+            Toggle("Dictus", isOn: $dictusToggleOn)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: dictusToggleOn)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+
+            Divider()
+                .opacity(0.3)
+                .padding(.leading, 16)
+
+            Toggle("Allow full access", isOn: $fullAccessToggleOn)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: fullAccessToggleOn)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+        }
+        .allowsHitTesting(false)
+        .padding(.vertical, 4)
+    }
+
     // MARK: - Toggle Animation Loop
 
-    /// Starts a repeating animation cycle:
-    /// 0.0s → reset both OFF
-    /// 1.0s → toggle 1 ON (Dictus)
-    /// 2.0s → toggle 2 ON (Full Access)
-    /// 4.0s → restart cycle
+    /// Starts a repeating two-phase animation cycle (~7s per loop):
+    ///
+    /// 0.0s → Reset: show Dictus settings page, all OFF
+    /// 1.0s → Highlight "Keyboards" row (spring)
+    /// 1.8s → Transition to toggles page (slide)
+    /// 2.8s → Dictus toggle ON
+    /// 3.8s → Full Access toggle ON
+    /// 5.5s → Hold for user to absorb
+    /// 7.0s → Restart cycle
+    ///
+    /// WHY 7s instead of 4s: The animation now has two phases (settings page + toggles),
+    /// so it needs more time. 7s gives enough time to see each step clearly without
+    /// feeling slow. The 1.7s hold at the end lets the user absorb the final state.
     private func startToggleAnimation() {
-        // Reset state
+        // Reset all state
+        showKeyboardsScreen = false
+        keyboardsRowHighlighted = false
         dictusToggleOn = false
         fullAccessToggleOn = false
 
         // Run first cycle
         runAnimationCycle()
 
-        // Repeat every 4 seconds
-        animationTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: true) { _ in
+        // Repeat every 7 seconds
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 7.0, repeats: true) { _ in
+            // Reset to phase 1 (no animation — instant reset before new cycle)
+            showKeyboardsScreen = false
+            keyboardsRowHighlighted = false
             dictusToggleOn = false
             fullAccessToggleOn = false
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 runAnimationCycle()
             }
@@ -228,10 +334,26 @@ struct KeyboardSetupPage: View {
     }
 
     private func runAnimationCycle() {
+        // Step 1: Highlight the "Keyboards" row
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                keyboardsRowHighlighted = true
+            }
+        }
+
+        // Step 2: Transition to toggles screen (simulates tapping "Keyboards")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+            keyboardsRowHighlighted = false
+            showKeyboardsScreen = true
+        }
+
+        // Step 3: Dictus toggle ON
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) {
             dictusToggleOn = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+
+        // Step 4: Full Access toggle ON
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.8) {
             fullAccessToggleOn = true
         }
     }

@@ -55,7 +55,7 @@ struct OnboardingView: View {
                     case 4:
                         ModelDownloadPage(onNext: { advanceToPage(5) })
                     case 5:
-                        TestRecordingPage(onComplete: {
+                        GlobeKeyTutorialPage(onComplete: {
                             isComplete = true
                         })
                     default:
