@@ -25,6 +25,13 @@ struct KeyboardSetupPage: View {
     /// when accessing UITextInputMode.activeInputModes.
     @State private var isCheckingKeyboard = false
 
+    /// Cancellable task for the delayed keyboard check.
+    /// WHY @State Task?:
+    /// The previous code spawned a `Task { ... }` without storing it, so the
+    /// task kept running even after the view disappeared. Storing the task lets
+    /// us cancel it on .onDisappear to avoid UI updates against a dead view.
+    @State private var keyboardCheckTask: Task<Void, Never>?
+
     // Animation state for the two-phase fake Settings card
     /// WHY two phases: The real iOS flow requires tapping "Keyboards" row first,
     /// then toggling the switches. The animation shows both steps so the user
@@ -36,67 +43,76 @@ struct KeyboardSetupPage: View {
     @State private var animationTimer: Timer?
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                Spacer(minLength: 40)
+        // WHY VStack(spacing:0) at root instead of ScrollView:
+        // The Continue button should always sit at the bottom of the screen
+        // (consistent with the other onboarding pages). Using a top VStack
+        // with Spacer() pushes it down. The content above is short enough
+        // to never need scrolling.
+        VStack(spacing: 0) {
+            Spacer(minLength: 40)
 
-                // Keyboard icon
-                Image(systemName: "keyboard")
-                    .font(.system(size: 64))
+            // Keyboard icon
+            Image(systemName: "keyboard")
+                .font(.system(size: 64))
+                .foregroundColor(.dictusAccent)
+                .padding(.bottom, 24)
+
+            // Title
+            Text("Add keyboard")
+                .font(.dictusHeading)
+                .foregroundStyle(.primary)
+                .padding(.bottom, 28)
+
+            // Fake Settings card
+            fakeSettingsCard
+                .padding(.horizontal, 32)
+                .padding(.bottom, 24)
+
+            // Open Settings link — plain text, no card wrapper
+            Button(action: openSettings) {
+                Label("Open Settings", systemImage: "arrow.up.right")
+                    .font(.dictusBody)
                     .foregroundColor(.dictusAccent)
-                    .padding(.bottom, 24)
+            }
+            .padding(.bottom, 20)
 
-                // Title
-                Text("Add keyboard")
-                    .font(.dictusHeading)
-                    .foregroundStyle(.primary)
-                    .padding(.bottom, 28)
+            // Auto-detection helper text
+            Text("The keyboard will be detected automatically")
+                .font(.dictusCaption)
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 16)
 
-                // Fake Settings card
-                fakeSettingsCard
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 24)
-
-                // Open Settings link — plain text, no card wrapper
-                Button(action: openSettings) {
-                    Label("Open Settings", systemImage: "arrow.up.right")
-                        .font(.dictusBody)
-                        .foregroundColor(.dictusAccent)
-                }
-                .padding(.bottom, 20)
-
-                // Auto-detection helper text
-                Text("The keyboard will be detected automatically")
-                    .font(.dictusCaption)
-                    .foregroundStyle(.secondary)
-                    .padding(.bottom, 16)
-
-                // Detection feedback + continue button
-                if keyboardDetected {
-                    VStack(spacing: 16) {
-                        Label("Keyboard detected", systemImage: "checkmark.circle.fill")
-                            .font(.dictusBody)
-                            .foregroundColor(.dictusSuccess)
-
-                        Button(action: onNext) {
-                            Text("Continue")
-                                .font(.dictusSubheading)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .fill(Color.dictusAccent)
-                                )
-                        }
-                        .padding(.horizontal, 32)
-                    }
+            // Detection feedback (green checkmark) stays just above the content
+            if keyboardDetected {
+                Label("Keyboard detected", systemImage: "checkmark.circle.fill")
+                    .font(.dictusBody)
+                    .foregroundColor(.dictusSuccess)
                     .padding(.bottom, 16)
                     .transition(.opacity)
-                }
-
-                Spacer(minLength: 48)
             }
+
+            // Spacer pushes the Continue button to the bottom of the screen
+            Spacer()
+
+            // Continue button — fixed at the bottom, matching other onboarding pages.
+            // Hidden until the keyboard is detected (opacity 0), but the layout
+            // space is reserved so the screen doesn't jump when it appears.
+            Button(action: onNext) {
+                Text("Continue")
+                    .font(.dictusSubheading)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.dictusAccent)
+                    )
+            }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 16)
+            .opacity(keyboardDetected ? 1 : 0)
+            .allowsHitTesting(keyboardDetected)
+            .animation(.easeInOut(duration: 0.3), value: keyboardDetected)
         }
         .onAppear {
             checkKeyboardInstalled()
@@ -105,41 +121,61 @@ struct KeyboardSetupPage: View {
         .onDisappear {
             animationTimer?.invalidate()
             animationTimer = nil
+            // Cancel any pending keyboard check task to prevent UI updates
+            // after the view has disappeared (potential crash source).
+            keyboardCheckTask?.cancel()
+            keyboardCheckTask = nil
         }
         .onChange(of: scenePhase) { newPhase in
-            // WHY debounced check with 800ms delay (increased from 500ms):
+            // WHY debounced check with 800ms delay:
             // When returning from iOS Settings, scenePhase fires .active before
             // UITextInputMode.activeInputModes has updated. The 800ms delay gives
             // iOS more time to register the newly-enabled keyboard. A second retry
-            // at 2s catches slow Settings sync. The isCheckingKeyboard guard
-            // prevents concurrent checks from rapid phase transitions.
+            // at 2s catches slow Settings sync.
             PersistentLog.log(.onboardingScenePhaseChanged(phase: "\(newPhase)"))
 
-            if newPhase == .active {
-                guard !isCheckingKeyboard else {
-                    PersistentLog.log(.onboardingKeyboardCheckSkipped(reason: "alreadyChecking"))
-                    return
-                }
-                isCheckingKeyboard = true
-                Task {
-                    // First check at 800ms (increased from 500ms for stability)
-                    try? await Task.sleep(for: .milliseconds(800))
-                    await MainActor.run {
-                        checkKeyboardInstalled()
-                    }
+            // WHY cancel on inactive: Scene transitions during Settings return
+            // can fire rapidly (active → inactive → active). Cancel any in-flight
+            // check when we go inactive to avoid stale tasks mutating state
+            // after the view has been torn down or re-entered.
+            if newPhase != .active {
+                keyboardCheckTask?.cancel()
+                keyboardCheckTask = nil
+                isCheckingKeyboard = false
+                return
+            }
 
-                    // If not detected, retry at 2s (covers slow Settings sync)
-                    if !keyboardDetected {
-                        try? await Task.sleep(for: .milliseconds(1200))
-                        await MainActor.run {
-                            PersistentLog.log(.onboardingKeyboardRetry)
-                            checkKeyboardInstalled()
-                            isCheckingKeyboard = false
-                        }
-                    } else {
-                        await MainActor.run {
-                            isCheckingKeyboard = false
-                        }
+            guard !isCheckingKeyboard else {
+                PersistentLog.log(.onboardingKeyboardCheckSkipped(reason: "alreadyChecking"))
+                return
+            }
+            isCheckingKeyboard = true
+
+            // Cancel any previous task before starting a new one
+            keyboardCheckTask?.cancel()
+            keyboardCheckTask = Task {
+                // First check at 800ms
+                try? await Task.sleep(for: .milliseconds(800))
+                // Bail out if the task was cancelled (view disappeared or phase changed)
+                if Task.isCancelled { return }
+                await MainActor.run {
+                    guard !Task.isCancelled else { return }
+                    checkKeyboardInstalled()
+                }
+
+                // If not detected, retry at 2s (covers slow Settings sync)
+                if !keyboardDetected && !Task.isCancelled {
+                    try? await Task.sleep(for: .milliseconds(1200))
+                    if Task.isCancelled { return }
+                    await MainActor.run {
+                        guard !Task.isCancelled else { return }
+                        PersistentLog.log(.onboardingKeyboardRetry)
+                        checkKeyboardInstalled()
+                        isCheckingKeyboard = false
+                    }
+                } else {
+                    await MainActor.run {
+                        isCheckingKeyboard = false
                     }
                 }
             }
