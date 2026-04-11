@@ -25,73 +25,106 @@ struct KeyboardSetupPage: View {
     /// when accessing UITextInputMode.activeInputModes.
     @State private var isCheckingKeyboard = false
 
-    // Animation state for the fake toggles
+    /// Cancellable task for the delayed keyboard check.
+    /// WHY @State Task?:
+    /// The previous code spawned a `Task { ... }` without storing it, so the
+    /// task kept running even after the view disappeared. Storing the task lets
+    /// us cancel it on .onDisappear to avoid UI updates against a dead view.
+    @State private var keyboardCheckTask: Task<Void, Never>?
+
+    // Animation state for the two-phase fake Settings card
+    /// WHY two phases: The real iOS flow requires tapping "Keyboards" row first,
+    /// then toggling the switches. The animation shows both steps so the user
+    /// knows to look for the "Keyboards" row (the most common point of confusion).
+    @State private var showKeyboardsScreen = false   // false = Dictus settings page, true = Keyboards toggles page
+    @State private var keyboardsRowHighlighted = false // tap highlight on the "Keyboards" row
     @State private var dictusToggleOn = false
     @State private var fullAccessToggleOn = false
     @State private var animationTimer: Timer?
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                Spacer(minLength: 40)
+        // WHY VStack(spacing:0) at root instead of ScrollView:
+        // The Continue button should always sit at the bottom of the screen
+        // (consistent with the other onboarding pages). Using a top VStack
+        // with Spacer() pushes it down. The content above is short enough
+        // to never need scrolling.
+        VStack(spacing: 0) {
+            Spacer(minLength: 40)
 
-                // Keyboard icon
-                Image(systemName: "keyboard")
-                    .font(.system(size: 64))
+            // Keyboard icon
+            Image(systemName: "keyboard")
+                .font(.system(size: 64))
+                .foregroundColor(.dictusAccent)
+                .padding(.bottom, 24)
+
+            // Title
+            Text("Add keyboard")
+                .font(.dictusHeading)
+                .foregroundStyle(.primary)
+                .padding(.bottom, 28)
+
+            // Fake Settings card
+            fakeSettingsCard
+                .padding(.horizontal, 32)
+                .padding(.bottom, 24)
+
+            // Open Settings link — plain text, no card wrapper
+            Button(action: openSettings) {
+                Label("Open Settings", systemImage: "arrow.up.right")
+                    .font(.dictusBody)
                     .foregroundColor(.dictusAccent)
-                    .padding(.bottom, 24)
+            }
+            .padding(.bottom, 20)
 
-                // Title
-                Text("Add keyboard")
-                    .font(.dictusHeading)
-                    .foregroundStyle(.primary)
-                    .padding(.bottom, 28)
+            // Auto-detection helper text
+            Text("The keyboard will be detected automatically")
+                .font(.dictusCaption)
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 8)
 
-                // Fake Settings card
-                fakeSettingsCard
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 24)
+            // Reassuring note about the TCC-triggered app restart.
+            // WHY this text: When the user enables "Allow Full Access" in iOS
+            // Settings, iOS's TCC daemon forcibly terminates Dictus to enforce
+            // the new permission. This can look like a crash. Telling the user
+            // it's expected prevents support tickets and reduces anxiety.
+            Text("Dictus may restart automatically — this is normal")
+                .font(.dictusCaption)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 16)
 
-                // Open Settings link — plain text, no card wrapper
-                Button(action: openSettings) {
-                    Label("Open Settings", systemImage: "arrow.up.right")
-                        .font(.dictusBody)
-                        .foregroundColor(.dictusAccent)
-                }
-                .padding(.bottom, 20)
-
-                // Auto-detection helper text
-                Text("The keyboard will be detected automatically")
-                    .font(.dictusCaption)
-                    .foregroundStyle(.secondary)
-                    .padding(.bottom, 16)
-
-                // Detection feedback + continue button
-                if keyboardDetected {
-                    VStack(spacing: 16) {
-                        Label("Keyboard detected", systemImage: "checkmark.circle.fill")
-                            .font(.dictusBody)
-                            .foregroundColor(.dictusSuccess)
-
-                        Button(action: onNext) {
-                            Text("Continue")
-                                .font(.dictusSubheading)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .fill(Color.dictusAccent)
-                                )
-                        }
-                        .padding(.horizontal, 32)
-                    }
+            // Detection feedback (green checkmark) stays just above the content
+            if keyboardDetected {
+                Label("Keyboard detected", systemImage: "checkmark.circle.fill")
+                    .font(.dictusBody)
+                    .foregroundColor(.dictusSuccess)
                     .padding(.bottom, 16)
                     .transition(.opacity)
-                }
-
-                Spacer(minLength: 48)
             }
+
+            // Spacer pushes the Continue button to the bottom of the screen
+            Spacer()
+
+            // Continue button — fixed at the bottom, matching other onboarding pages.
+            // Hidden until the keyboard is detected (opacity 0), but the layout
+            // space is reserved so the screen doesn't jump when it appears.
+            Button(action: onNext) {
+                Text("Continue")
+                    .font(.dictusSubheading)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.dictusAccent)
+                    )
+            }
+            .padding(.horizontal, 32)
+            .padding(.bottom, 16)
+            .opacity(keyboardDetected ? 1 : 0)
+            .allowsHitTesting(keyboardDetected)
+            .animation(.easeInOut(duration: 0.3), value: keyboardDetected)
         }
         .onAppear {
             checkKeyboardInstalled()
@@ -100,41 +133,61 @@ struct KeyboardSetupPage: View {
         .onDisappear {
             animationTimer?.invalidate()
             animationTimer = nil
+            // Cancel any pending keyboard check task to prevent UI updates
+            // after the view has disappeared (potential crash source).
+            keyboardCheckTask?.cancel()
+            keyboardCheckTask = nil
         }
         .onChange(of: scenePhase) { newPhase in
-            // WHY debounced check with 800ms delay (increased from 500ms):
+            // WHY debounced check with 800ms delay:
             // When returning from iOS Settings, scenePhase fires .active before
             // UITextInputMode.activeInputModes has updated. The 800ms delay gives
             // iOS more time to register the newly-enabled keyboard. A second retry
-            // at 2s catches slow Settings sync. The isCheckingKeyboard guard
-            // prevents concurrent checks from rapid phase transitions.
+            // at 2s catches slow Settings sync.
             PersistentLog.log(.onboardingScenePhaseChanged(phase: "\(newPhase)"))
 
-            if newPhase == .active {
-                guard !isCheckingKeyboard else {
-                    PersistentLog.log(.onboardingKeyboardCheckSkipped(reason: "alreadyChecking"))
-                    return
-                }
-                isCheckingKeyboard = true
-                Task {
-                    // First check at 800ms (increased from 500ms for stability)
-                    try? await Task.sleep(for: .milliseconds(800))
-                    await MainActor.run {
-                        checkKeyboardInstalled()
-                    }
+            // WHY cancel on inactive: Scene transitions during Settings return
+            // can fire rapidly (active → inactive → active). Cancel any in-flight
+            // check when we go inactive to avoid stale tasks mutating state
+            // after the view has been torn down or re-entered.
+            if newPhase != .active {
+                keyboardCheckTask?.cancel()
+                keyboardCheckTask = nil
+                isCheckingKeyboard = false
+                return
+            }
 
-                    // If not detected, retry at 2s (covers slow Settings sync)
-                    if !keyboardDetected {
-                        try? await Task.sleep(for: .milliseconds(1200))
-                        await MainActor.run {
-                            PersistentLog.log(.onboardingKeyboardRetry)
-                            checkKeyboardInstalled()
-                            isCheckingKeyboard = false
-                        }
-                    } else {
-                        await MainActor.run {
-                            isCheckingKeyboard = false
-                        }
+            guard !isCheckingKeyboard else {
+                PersistentLog.log(.onboardingKeyboardCheckSkipped(reason: "alreadyChecking"))
+                return
+            }
+            isCheckingKeyboard = true
+
+            // Cancel any previous task before starting a new one
+            keyboardCheckTask?.cancel()
+            keyboardCheckTask = Task {
+                // First check at 800ms
+                try? await Task.sleep(for: .milliseconds(800))
+                // Bail out if the task was cancelled (view disappeared or phase changed)
+                if Task.isCancelled { return }
+                await MainActor.run {
+                    guard !Task.isCancelled else { return }
+                    checkKeyboardInstalled()
+                }
+
+                // If not detected, retry at 2s (covers slow Settings sync)
+                if !keyboardDetected && !Task.isCancelled {
+                    try? await Task.sleep(for: .milliseconds(1200))
+                    if Task.isCancelled { return }
+                    await MainActor.run {
+                        guard !Task.isCancelled else { return }
+                        PersistentLog.log(.onboardingKeyboardRetry)
+                        checkKeyboardInstalled()
+                        isCheckingKeyboard = false
+                    }
+                } else {
+                    await MainActor.run {
+                        isCheckingKeyboard = false
                     }
                 }
             }
@@ -147,8 +200,10 @@ struct KeyboardSetupPage: View {
                 // Stop animation loop once detected
                 animationTimer?.invalidate()
                 animationTimer = nil
-                // Show both toggles ON
+                // Show the toggles page with both toggles ON (final success state)
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    showKeyboardsScreen = true
+                    keyboardsRowHighlighted = false
                     dictusToggleOn = true
                     fullAccessToggleOn = true
                 }
@@ -160,67 +215,198 @@ struct KeyboardSetupPage: View {
     // MARK: - Fake Settings Card
 
     /// Simulates the iOS Settings screen for Dictus keyboard configuration.
-    /// Uses real SwiftUI Toggle components (non-interactive) so they automatically
-    /// adopt the native Liquid Glass style on iOS 26.
+    ///
+    /// WHY two phases:
+    /// Phase 1 shows the Dictus settings page with a "Keyboards" row — the user
+    /// needs to know they must tap this row first (this is where most users get stuck).
+    /// Phase 2 shows the toggles screen (existing animation). Both phases loop
+    /// in sequence so the user sees the complete flow before opening Settings.
     private var fakeSettingsCard: some View {
         VStack(spacing: 0) {
-            // Header
+            // Header — changes to show navigation breadcrumb
             HStack {
                 Image(systemName: "gearshape.fill")
                     .foregroundStyle(.secondary)
                     .font(.footnote)
-                Text("Settings > Dictus")
+                Text(showKeyboardsScreen ? "Settings > Dictus > Keyboards" : "Settings > Dictus")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                    .animation(.none, value: showKeyboardsScreen)
                 Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
 
-            // Toggle rows using native SwiftUI Toggle for Liquid Glass styling.
-            // allowsHitTesting(false) prevents user interaction — toggles are
-            // driven programmatically by the animation timer.
-            VStack(spacing: 0) {
-                Toggle("Dictus", isOn: $dictusToggleOn)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: dictusToggleOn)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-
-                Divider()
-                    .opacity(0.3)
-                    .padding(.leading, 16)
-
-                Toggle("Allow full access", isOn: $fullAccessToggleOn)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: fullAccessToggleOn)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
+            // Two-phase content area with slide transition
+            // WHY clipped: Without clipping, the outgoing phase slides visibly
+            // outside the card bounds during the transition. Clipping keeps the
+            // animation contained within the glass card.
+            ZStack {
+                if !showKeyboardsScreen {
+                    // Phase 1: Dictus settings page — shows "Keyboards" row to tap
+                    dictusSettingsPhase
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .leading).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        ))
+                } else {
+                    // Phase 2: Keyboards toggles page — shows Dictus + Full Access toggles
+                    keyboardsTogglesPhase
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                            removal: .move(edge: .trailing).combined(with: .opacity)
+                        ))
+                }
             }
-            .allowsHitTesting(false)
-            .padding(.vertical, 4)
+            .clipped()
+            .animation(.easeInOut(duration: 0.3), value: showKeyboardsScreen)
         }
         .padding(.bottom, 4)
         .dictusGlass(in: RoundedRectangle(cornerRadius: 16))
     }
 
+    /// Phase 1: Fake "Dictus" settings page with Keyboards row + placeholder rows.
+    /// The "Keyboards" row gets a highlight overlay to show the user where to tap.
+    ///
+    /// WHY iOS Settings-style icons:
+    /// The real Dictus page in iOS Settings shows rows with colored square icons
+    /// (keyboard icon on gray, globe on blue, etc.). Matching this visual pattern
+    /// helps the user recognize the screen when they open the real Settings.
+    private var dictusSettingsPhase: some View {
+        VStack(spacing: 0) {
+            // "Keyboards" row — the one the user needs to tap
+            settingsRow(
+                icon: "keyboard",
+                iconColor: .gray,
+                label: "Keyboards",
+                showChevron: true
+            )
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.dictusAccent.opacity(keyboardsRowHighlighted ? 0.15 : 0))
+                    .padding(.horizontal, 4)
+            )
+
+            Divider().opacity(0.3).padding(.leading, 52)
+
+            // Placeholder rows for realism — makes it look like a real Settings page
+            settingsRow(
+                icon: "bell.badge.fill",
+                iconColor: .red,
+                label: "Notifications",
+                showChevron: true,
+                dimmed: true
+            )
+
+            Divider().opacity(0.3).padding(.leading, 52)
+
+            settingsRow(
+                icon: "globe",
+                iconColor: .blue,
+                label: "Siri & Search",
+                showChevron: true,
+                dimmed: true
+            )
+        }
+        .allowsHitTesting(false)
+        .padding(.vertical, 4)
+    }
+
+    /// A single row matching the iOS Settings visual style: colored icon square + label + chevron.
+    ///
+    /// WHY a reusable helper: The three rows in Phase 1 share the same layout
+    /// (icon + label + chevron). Extracting it avoids repeating the same HStack/ZStack
+    /// structure three times and makes it easy to adjust the visual style in one place.
+    private func settingsRow(
+        icon: String,
+        iconColor: Color,
+        label: LocalizedStringKey,
+        showChevron: Bool,
+        dimmed: Bool = false
+    ) -> some View {
+        HStack(spacing: 12) {
+            // Colored square icon — matches iOS Settings style
+            ZStack {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(iconColor)
+                    .frame(width: 28, height: 28)
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                    .foregroundColor(.white)
+            }
+
+            Text(label)
+                .font(.body)
+                .foregroundStyle(dimmed ? .secondary : .primary)
+
+            Spacer()
+
+            if showChevron {
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+    }
+
+    /// Phase 2: Keyboards toggles page — the existing Dictus + Full Access toggles.
+    /// Uses real SwiftUI Toggle components (non-interactive) so they automatically
+    /// adopt the native Liquid Glass style on iOS 26.
+    private var keyboardsTogglesPhase: some View {
+        VStack(spacing: 0) {
+            Toggle("Dictus", isOn: $dictusToggleOn)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: dictusToggleOn)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+
+            Divider()
+                .opacity(0.3)
+                .padding(.leading, 16)
+
+            Toggle("Allow full access", isOn: $fullAccessToggleOn)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: fullAccessToggleOn)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+        }
+        .allowsHitTesting(false)
+        .padding(.vertical, 4)
+    }
+
     // MARK: - Toggle Animation Loop
 
-    /// Starts a repeating animation cycle:
-    /// 0.0s → reset both OFF
-    /// 1.0s → toggle 1 ON (Dictus)
-    /// 2.0s → toggle 2 ON (Full Access)
-    /// 4.0s → restart cycle
+    /// Starts a repeating two-phase animation cycle (~7s per loop):
+    ///
+    /// 0.0s → Reset: show Dictus settings page, all OFF
+    /// 1.0s → Highlight "Keyboards" row (spring)
+    /// 1.8s → Transition to toggles page (slide)
+    /// 2.8s → Dictus toggle ON
+    /// 3.8s → Full Access toggle ON
+    /// 5.5s → Hold for user to absorb
+    /// 7.0s → Restart cycle
+    ///
+    /// WHY 7s instead of 4s: The animation now has two phases (settings page + toggles),
+    /// so it needs more time. 7s gives enough time to see each step clearly without
+    /// feeling slow. The 1.7s hold at the end lets the user absorb the final state.
     private func startToggleAnimation() {
-        // Reset state
+        // Reset all state
+        showKeyboardsScreen = false
+        keyboardsRowHighlighted = false
         dictusToggleOn = false
         fullAccessToggleOn = false
 
         // Run first cycle
         runAnimationCycle()
 
-        // Repeat every 4 seconds
-        animationTimer = Timer.scheduledTimer(withTimeInterval: 4.0, repeats: true) { _ in
+        // Repeat every 7 seconds
+        animationTimer = Timer.scheduledTimer(withTimeInterval: 7.0, repeats: true) { _ in
+            // Reset to phase 1 (no animation — instant reset before new cycle)
+            showKeyboardsScreen = false
+            keyboardsRowHighlighted = false
             dictusToggleOn = false
             fullAccessToggleOn = false
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 runAnimationCycle()
             }
@@ -228,10 +414,26 @@ struct KeyboardSetupPage: View {
     }
 
     private func runAnimationCycle() {
+        // Step 1: Highlight the "Keyboards" row
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                keyboardsRowHighlighted = true
+            }
+        }
+
+        // Step 2: Transition to toggles screen (simulates tapping "Keyboards")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
+            keyboardsRowHighlighted = false
+            showKeyboardsScreen = true
+        }
+
+        // Step 3: Dictus toggle ON
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) {
             dictusToggleOn = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+
+        // Step 4: Full Access toggle ON
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.8) {
             fullAccessToggleOn = true
         }
     }
