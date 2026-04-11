@@ -203,14 +203,19 @@ private struct KeyboardSwitchAnimation: View {
 
     private let frameDurations: [TimeInterval] = [1.5, 1.5, 1.5, 2.0]
 
-    /// Whether the user's language is French (drives AZERTY vs QWERTY layout).
-    /// WHY read from AppGroup at init: The language preference is stable during
-    /// the animation; no need to observe for changes.
+    /// Whether the iOS system language is French (drives AZERTY vs QWERTY layout).
+    /// WHY read from Locale.preferredLanguages, NOT SharedKeys.language:
+    /// SharedKeys.language is the Dictus *transcription* preference (which model
+    /// language to feed Whisper) — it's independent from the iOS keyboard layout
+    /// the user actually sees when they press the globe. The animation must match
+    /// what the user will observe in their real iOS picker, which follows the
+    /// system language set in iOS Settings → General → Language & Region.
+    /// Locale.preferredLanguages.first returns tags like "en-US" or "fr-FR".
     private let isFrench: Bool
 
     init() {
-        let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
-        self.isFrench = (lang == "fr")
+        let preferred = Locale.preferredLanguages.first ?? "en"
+        self.isFrench = preferred.hasPrefix("fr")
     }
 
     // Keyboard layout rows — AZERTY for FR, QWERTY for others
