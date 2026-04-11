@@ -21,6 +21,13 @@ import DictusCore
 struct GlobeKeyTutorialPage: View {
     let onComplete: () -> Void
 
+    /// WHY @EnvironmentObject coordinator:
+    /// The user may dictate during this tutorial via the Dictus keyboard, which
+    /// goes through DictationCoordinator. If we don't reset the coordinator before
+    /// completing onboarding, HomeView will show the "last transcription card"
+    /// from this test dictation — which is not the desired landing screen.
+    @EnvironmentObject var coordinator: DictationCoordinator
+
     @State private var dictusKeyboardActive = false
     @State private var textFieldContent = ""
     @State private var showSuccess = false
@@ -115,7 +122,7 @@ struct GlobeKeyTutorialPage: View {
 
             // Success overlay — keyboard dismissed before appearing
             if showSuccess {
-                OnboardingSuccessView(onComplete: onComplete)
+                OnboardingSuccessView(onComplete: finishOnboarding)
                     .transition(.opacity)
             }
         }
@@ -152,6 +159,19 @@ struct GlobeKeyTutorialPage: View {
     private func skipTutorial() {
         PersistentLog.log(.onboardingGlobeTutorialSkipped)
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        finishOnboarding()
+    }
+
+    /// Final cleanup before dismissing onboarding.
+    ///
+    /// WHY reset the coordinator here:
+    /// If the user dictated during the globe key tutorial, the DictationCoordinator
+    /// holds the last transcription in `lastResult`. Without clearing it, HomeView
+    /// displays a "last transcription card" as soon as the user lands on the main
+    /// screen — which is not the expected fresh Home state.
+    private func finishOnboarding() {
+        coordinator.lastResult = nil
+        coordinator.resetStatus()
         onComplete()
     }
 }
@@ -173,14 +193,47 @@ struct GlobeKeyTutorialPage: View {
 /// Frame 3: Dictus keyboard visible (with branding on spacebar)
 private struct KeyboardSwitchAnimation: View {
     @State private var animationFrame = 0
+    @State private var globePressed = false
     @State private var animationTimer: Timer?
 
     private let frameDurations: [TimeInterval] = [1.5, 1.5, 1.5, 2.0]
 
-    // AZERTY layout rows
-    private let row0 = ["A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P"]
-    private let row1 = ["Q", "S", "D", "F", "G", "H", "J", "K", "L", "M"]
-    private let row2 = ["W", "X", "C", "V", "B", "N", "'"]
+    /// Whether the user's language is French (drives AZERTY vs QWERTY layout).
+    /// WHY read from AppGroup at init: The language preference is stable during
+    /// the animation; no need to observe for changes.
+    private let isFrench: Bool
+
+    init() {
+        let lang = AppGroup.defaults.string(forKey: SharedKeys.language) ?? "fr"
+        self.isFrench = (lang == "fr")
+    }
+
+    // Keyboard layout rows — AZERTY for FR, QWERTY for others
+    private var row0: [String] {
+        isFrench
+            ? ["A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P"]
+            : ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"]
+    }
+    private var row1: [String] {
+        isFrench
+            ? ["Q", "S", "D", "F", "G", "H", "J", "K", "L", "M"]
+            : ["A", "S", "D", "F", "G", "H", "J", "K", "L"]
+    }
+    private var row2: [String] {
+        isFrench
+            ? ["W", "X", "C", "V", "B", "N", "'"]
+            : ["Z", "X", "C", "V", "B", "N", "M"]
+    }
+
+    /// Display name for the system keyboard in the picker.
+    private var systemKeyboardName: String {
+        isFrench ? "Français" : "English (US)"
+    }
+
+    /// Display name for the space bar in non-Dictus frames.
+    private var spaceLabel: String {
+        isFrench ? "espace" : "space"
+    }
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
@@ -196,6 +249,7 @@ private struct KeyboardSwitchAnimation: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: animationFrame)
+        .animation(.easeInOut(duration: 0.15), value: globePressed)
         .onAppear { startAnimation() }
         .onDisappear {
             animationTimer?.invalidate()
@@ -205,27 +259,36 @@ private struct KeyboardSwitchAnimation: View {
 
     // MARK: - Fake Keyboard
 
-    /// Realistic AZERTY keyboard using actual SwiftUI text labels.
+    /// Realistic keyboard using actual SwiftUI text labels.
     /// Non-interactive (allowsHitTesting(false)).
+    /// WHY isDictus branches the layout:
+    /// - isDictus == false: native iOS keyboard with standard globe/mic at bottom
+    /// - isDictus == true: Dictus keyboard with toolbar (FR/EN label + blue mic pill)
+    ///   replicating the real Dictus keyboard design
     private func fakeKeyboard(isDictus: Bool) -> some View {
         VStack(spacing: 5) {
-            // Row 0: A Z E R T Y U I O P
+            // Dictus keyboard has a toolbar at the top (FR label + blue mic pill)
+            if isDictus {
+                dictusToolbar
+                    .padding(.bottom, 2)
+            }
+
+            // Row 0: A Z E R T Y U I O P (or Q W E R T Y U I O P)
             HStack(spacing: 4) {
                 ForEach(row0, id: \.self) { key in
                     keyCell(key)
                 }
             }
 
-            // Row 1: Q S D F G H J K L M
+            // Row 1
             HStack(spacing: 4) {
                 ForEach(row1, id: \.self) { key in
                     keyCell(key)
                 }
             }
 
-            // Row 2: shift + W X C V B N ' + delete
+            // Row 2: shift + letters + delete
             HStack(spacing: 4) {
-                // Shift key
                 Image(systemName: "shift")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.primary)
@@ -236,7 +299,6 @@ private struct KeyboardSwitchAnimation: View {
                     keyCell(key)
                 }
 
-                // Delete key
                 Image(systemName: "delete.left")
                     .font(.system(size: 13))
                     .foregroundStyle(.primary)
@@ -246,28 +308,25 @@ private struct KeyboardSwitchAnimation: View {
 
             // Row 3: 123 + emoji + space + return
             HStack(spacing: 4) {
-                // 123 key
                 Text("123")
                     .font(.system(size: 13))
                     .foregroundStyle(.primary)
                     .frame(width: 36, height: 36)
                     .background(keyCapsule(dark: true))
 
-                // Emoji key
                 Text("😊")
                     .font(.system(size: 16))
                     .frame(width: 36, height: 36)
                     .background(keyCapsule(dark: true))
 
                 // Space bar
-                Text(isDictus ? "Dictus" : "espace")
+                Text(spaceLabel)
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
                     .frame(height: 36)
                     .background(keyCapsule(dark: false))
 
-                // Return key
                 Image(systemName: "return")
                     .font(.system(size: 13))
                     .foregroundStyle(.primary)
@@ -275,25 +334,29 @@ private struct KeyboardSwitchAnimation: View {
                     .background(keyCapsule(dark: true))
             }
 
-            // Bottom row: globe + mic (outside the key area, like real iOS)
-            HStack {
-                Image(systemName: "globe")
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                Spacer()
-                if isDictus {
-                    // Dictus mic button
-                    Image(systemName: "mic.fill")
+            // Bottom row: globe + mic (only shown on the native keyboard, not on Dictus)
+            // WHY hidden on Dictus: Dictus has its own toolbar at the top with the mic pill.
+            if !isDictus {
+                HStack {
+                    // Globe icon — highlighted when "pressed" during the animation transition
+                    Image(systemName: "globe")
                         .font(.system(size: 16))
-                        .foregroundColor(.dictusAccent)
-                } else {
+                        .foregroundStyle(globePressed ? Color.primary : Color.secondary)
+                        .padding(6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(Color.primary.opacity(globePressed ? 0.18 : 0))
+                        )
+
+                    Spacer()
+
                     Image(systemName: "mic")
                         .font(.system(size: 16))
                         .foregroundStyle(.secondary)
                 }
+                .padding(.horizontal, 4)
+                .padding(.top, 2)
             }
-            .padding(.horizontal, 8)
-            .padding(.top, 2)
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 8)
@@ -302,6 +365,31 @@ private struct KeyboardSwitchAnimation: View {
                 .fill(.ultraThinMaterial)
         )
         .allowsHitTesting(false)
+    }
+
+    /// Dictus keyboard toolbar: language indicator on the left + blue mic pill on the right.
+    /// Matches the real Dictus keyboard design.
+    private var dictusToolbar: some View {
+        HStack {
+            // Language label (FR/EN)
+            Text(isFrench ? "FR" : "EN")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            // Blue mic pill — matches real Dictus mic button
+            Image(systemName: "mic.fill")
+                .font(.system(size: 14))
+                .foregroundColor(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(Color.dictusAccent)
+                )
+        }
+        .padding(.horizontal, 8)
     }
 
     /// A single keyboard key cell.
@@ -328,7 +416,7 @@ private struct KeyboardSwitchAnimation: View {
         VStack(alignment: .leading, spacing: 0) {
             pickerRow("Keyboard Settings...", dimmed: true)
             Divider().opacity(0.2)
-            pickerRow("Français", highlighted: !dictusHighlighted)
+            pickerRow(systemKeyboardName, highlighted: !dictusHighlighted)
             Divider().opacity(0.2)
             pickerRow("Emoji")
             Divider().opacity(0.2)
@@ -372,13 +460,32 @@ private struct KeyboardSwitchAnimation: View {
 
     private func startAnimation() {
         animationFrame = 0
+        globePressed = false
         scheduleNextFrame()
     }
 
     private func scheduleNextFrame() {
         let duration = frameDurations[animationFrame]
+
+        // WHY globe press timing:
+        // During frame 0 (normal keyboard), press the globe ~0.3s before
+        // the picker appears, so the user sees the "click" happening before
+        // the picker opens. The globe stays pressed while the picker is shown
+        // (frames 1-2) and releases when we return to frame 3 (Dictus active).
+        if animationFrame == 0 {
+            // Schedule globe press ~0.3s before picker appears
+            DispatchQueue.main.asyncAfter(deadline: .now() + duration - 0.3) {
+                globePressed = true
+            }
+        }
+
         animationTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { _ in
             animationFrame = (animationFrame + 1) % 4
+            // Release globe press when we transition to frame 3 (Dictus keyboard)
+            // and also ensure it's false when we loop back to frame 0
+            if animationFrame == 3 || animationFrame == 0 {
+                globePressed = false
+            }
             scheduleNextFrame()
         }
     }
