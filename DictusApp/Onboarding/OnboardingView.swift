@@ -19,12 +19,16 @@ import DictusCore
 struct OnboardingView: View {
     @Binding var isComplete: Bool
 
-    /// WHY @SceneStorage instead of @State:
-    /// @SceneStorage persists the value across scene phase changes (background/foreground).
-    /// Without this, returning from iOS Settings (e.g., after adding the keyboard) would
-    /// reset the onboarding to step 1 because the view gets recreated. @SceneStorage
-    /// remembers which page the user was on.
-    @SceneStorage("onboarding_currentPage") private var currentPage: Int = 0
+    /// WHY @AppStorage instead of @SceneStorage:
+    /// @SceneStorage relies on iOS scene restoration which can fail when the
+    /// process is forcibly terminated. When the user enables "Allow Full Access"
+    /// in iOS Settings, iOS's TCC daemon kills the main app because the
+    /// kTCCServiceKeyboardNetwork permission changes. We need the onboarding
+    /// step to survive this termination so the user resumes at the right step.
+    /// @AppStorage writes to UserDefaults (App Group) which is always persisted
+    /// across any app termination.
+    @AppStorage(SharedKeys.onboardingCurrentPage, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var currentPage: Int = 0
 
     /// Track which steps have been completed to show in the step indicator.
     @State private var completedSteps: Set<Int> = []
@@ -56,6 +60,10 @@ struct OnboardingView: View {
                         ModelDownloadPage(onNext: { advanceToPage(5) })
                     case 5:
                         GlobeKeyTutorialPage(onComplete: {
+                            // Reset currentPage to 0 on completion so a future
+                            // onboarding reset (e.g., via Settings → Reset) starts
+                            // cleanly from the first step instead of resuming here.
+                            currentPage = 0
                             isComplete = true
                         })
                     default:

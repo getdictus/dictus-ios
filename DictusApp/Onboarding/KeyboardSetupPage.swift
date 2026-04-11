@@ -80,6 +80,18 @@ struct KeyboardSetupPage: View {
             Text("The keyboard will be detected automatically")
                 .font(.dictusCaption)
                 .foregroundStyle(.secondary)
+                .padding(.bottom, 8)
+
+            // Reassuring note about the TCC-triggered app restart.
+            // WHY this text: When the user enables "Allow Full Access" in iOS
+            // Settings, iOS's TCC daemon forcibly terminates Dictus to enforce
+            // the new permission. This can look like a crash. Telling the user
+            // it's expected prevents support tickets and reduces anxiety.
+            Text("Dictus may restart automatically — this is normal")
+                .font(.dictusCaption)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
                 .padding(.bottom, 16)
 
             // Detection feedback (green checkmark) stays just above the content
