@@ -76,13 +76,18 @@ struct GlobeKeyTutorialPage: View {
 
                 if dictusKeyboardActive {
                     // State 2: Text field with keyboard open
+                    // WHY frame minHeight + maxHeight: The UITextView is multi-line
+                    // and needs a bounded frame so SwiftUI can lay it out correctly.
+                    // minHeight 140 gives room for ~5 lines of text, and the text view
+                    // scrolls internally if the dictation is longer than that.
                     KeyboardDetectingTextField(
                         text: $textFieldContent,
                         placeholder: String(localized: "Say something!"),
                         autoFocus: true,
                         onKeyboardChange: { _ in }
                     )
-                    .padding(12)
+                    .frame(minHeight: 140, maxHeight: 220)
+                    .padding(14)
                     .dictusGlass(in: RoundedRectangle(cornerRadius: 16))
                     .padding(.horizontal, 24)
                     .transition(.opacity)
@@ -119,15 +124,17 @@ struct GlobeKeyTutorialPage: View {
 
                 Spacer(minLength: 0)
             }
-
-            // Success overlay — keyboard dismissed before appearing
-            if showSuccess {
-                OnboardingSuccessView(onComplete: finishOnboarding)
-                    .transition(.opacity)
-            }
+        }
+        .fullScreenCover(isPresented: $showSuccess) {
+            // WHY fullScreenCover instead of ZStack overlay:
+            // When OnboardingSuccessView was overlaid inside this page's ZStack,
+            // it inherited the constrained layout from OnboardingView's VStack
+            // (which reserves space for the step indicator at the bottom). This
+            // made the success button's horizontal padding not render correctly.
+            // Using fullScreenCover guarantees a proper full-screen context.
+            OnboardingSuccessView(onComplete: finishOnboarding)
         }
         .animation(.easeInOut(duration: 0.3), value: dictusKeyboardActive)
-        .animation(.easeInOut(duration: 0.3), value: showSuccess)
         .onChange(of: textFieldContent) { newValue in
             // Auto-advance when the user has dictated enough text.
             // WHY minTextLength: Prevents a single accidental keystroke from
@@ -150,9 +157,7 @@ struct GlobeKeyTutorialPage: View {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            withAnimation(.easeOut(duration: 0.3)) {
-                showSuccess = true
-            }
+            showSuccess = true
         }
     }
 
@@ -493,15 +498,19 @@ private struct KeyboardSwitchAnimation: View {
 
 // MARK: - KeyboardDetectingTextField
 
-/// UIKit text field wrapper that detects keyboard input mode changes.
+/// UIKit text view wrapper that detects keyboard input mode changes.
 ///
-/// WHY UIViewRepresentable instead of SwiftUI TextField:
-/// SwiftUI's TextField doesn't expose the UITextInputMode of the underlying
-/// UITextField. To detect when the user switches to the Dictus keyboard
-/// (via long-press globe), we need access to the UITextField's textInputMode
-/// property. This wrapper:
+/// WHY UITextView (not UITextField):
+/// UITextField is single-line only — long dictated text overflows horizontally
+/// and gets clipped. UITextView supports multi-line editing with automatic
+/// wrapping, which matches user expectations for dictation output.
+///
+/// WHY UIViewRepresentable instead of SwiftUI TextEditor:
+/// We need access to the UITextView's `textInputMode` property to detect when
+/// the user switches to the Dictus keyboard (via long-press globe). SwiftUI's
+/// TextEditor doesn't expose this. This wrapper:
 /// 1. Observes UITextInputMode.currentInputModeDidChangeNotification
-/// 2. Reads the UITextField's textInputMode.identifier
+/// 2. Reads the UITextView's textInputMode.identifier
 /// 3. Calls onKeyboardChange(isDictus:) when the active keyboard changes
 private struct KeyboardDetectingTextField: UIViewRepresentable {
     @Binding var text: String
@@ -509,15 +518,19 @@ private struct KeyboardDetectingTextField: UIViewRepresentable {
     var autoFocus: Bool = false
     let onKeyboardChange: (Bool) -> Void
 
-    func makeUIView(context: Context) -> UITextField {
-        let textField = UITextField()
-        textField.placeholder = placeholder
-        textField.font = UIFont.preferredFont(forTextStyle: .body)
-        textField.textColor = .label
-        textField.delegate = context.coordinator
-        textField.returnKeyType = .done
-        textField.backgroundColor = .clear
-        textField.contentVerticalAlignment = .top
+    func makeUIView(context: Context) -> PlaceholderTextView {
+        let textView = PlaceholderTextView()
+        textView.placeholder = placeholder
+        textView.font = UIFont.preferredFont(forTextStyle: .body)
+        textView.textColor = .label
+        textView.delegate = context.coordinator
+        textView.backgroundColor = .clear
+        textView.isScrollEnabled = true
+        // Remove default inner padding so text aligns to the top-left
+        textView.textContainerInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        textView.textContainer.lineFragmentPadding = 0
+        textView.autocorrectionType = .default
+        textView.autocapitalizationType = .sentences
 
         // Listen for keyboard switches
         NotificationCenter.default.addObserver(
@@ -528,25 +541,23 @@ private struct KeyboardDetectingTextField: UIViewRepresentable {
         )
 
         // Auto-focus immediately to bring up the keyboard without delay.
-        // WHY no delay: The previous 0.3s delay caused the keyboard to appear
-        // late, leaving the animation floating without a keyboard below it.
-        // Immediate focus on the next run loop tick is fast enough.
         if autoFocus {
             DispatchQueue.main.async {
-                textField.becomeFirstResponder()
+                textView.becomeFirstResponder()
             }
         }
 
-        return textField
+        return textView
     }
 
-    func updateUIView(_ textField: UITextField, context: Context) {
-        if textField.text != text {
-            textField.text = text
+    func updateUIView(_ textView: PlaceholderTextView, context: Context) {
+        if textView.text != text {
+            textView.text = text
+            textView.refreshPlaceholder()
         }
     }
 
-    static func dismantleUIView(_ textField: UITextField, coordinator: Coordinator) {
+    static func dismantleUIView(_ textView: PlaceholderTextView, coordinator: Coordinator) {
         NotificationCenter.default.removeObserver(coordinator)
     }
 
@@ -554,43 +565,31 @@ private struct KeyboardDetectingTextField: UIViewRepresentable {
         Coordinator(self)
     }
 
-    class Coordinator: NSObject, UITextFieldDelegate {
+    class Coordinator: NSObject, UITextViewDelegate {
         var parent: KeyboardDetectingTextField
-        weak var textField: UITextField?
+        weak var textView: PlaceholderTextView?
 
         init(_ parent: KeyboardDetectingTextField) {
             self.parent = parent
         }
 
-        func textFieldDidBeginEditing(_ textField: UITextField) {
-            self.textField = textField
-            checkInputMode(for: textField)
+        func textViewDidBeginEditing(_ textView: UITextView) {
+            self.textView = textView as? PlaceholderTextView
+            checkInputMode(for: textView)
         }
 
-        func textField(
-            _ textField: UITextField,
-            shouldChangeCharactersIn range: NSRange,
-            replacementString string: String
-        ) -> Bool {
-            let current = textField.text ?? ""
-            if let textRange = Range(range, in: current) {
-                parent.text = current.replacingCharacters(in: textRange, with: string)
-            }
-            return true
-        }
-
-        func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-            textField.resignFirstResponder()
-            return true
+        func textViewDidChange(_ textView: UITextView) {
+            parent.text = textView.text
+            (textView as? PlaceholderTextView)?.refreshPlaceholder()
         }
 
         @objc func inputModeDidChange(_ notification: Notification) {
-            guard let textField = textField else { return }
-            checkInputMode(for: textField)
+            guard let textView = textView else { return }
+            checkInputMode(for: textView)
         }
 
-        private func checkInputMode(for textField: UITextField) {
-            guard let inputMode = textField.textInputMode,
+        private func checkInputMode(for textView: UITextView) {
+            guard let inputMode = textView.textInputMode,
                   let identifier = inputMode.value(forKey: "identifier") as? String else {
                 return
             }
@@ -600,5 +599,47 @@ private struct KeyboardDetectingTextField: UIViewRepresentable {
                 self.parent.onKeyboardChange(isDictus)
             }
         }
+    }
+}
+
+/// UITextView subclass that shows a placeholder when empty.
+///
+/// WHY a subclass: UITextView has no built-in placeholder (unlike UITextField).
+/// We overlay a UILabel that shows/hides based on whether the text view is empty.
+private class PlaceholderTextView: UITextView {
+    var placeholder: String = "" {
+        didSet { placeholderLabel.text = placeholder; refreshPlaceholder() }
+    }
+
+    private let placeholderLabel: UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.textColor = .placeholderText
+        label.font = UIFont.preferredFont(forTextStyle: .body)
+        return label
+    }()
+
+    override init(frame: CGRect, textContainer: NSTextContainer?) {
+        super.init(frame: frame, textContainer: textContainer)
+        setupPlaceholder()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupPlaceholder()
+    }
+
+    private func setupPlaceholder() {
+        addSubview(placeholderLabel)
+        placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            placeholderLabel.topAnchor.constraint(equalTo: topAnchor),
+            placeholderLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
+            placeholderLabel.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+    }
+
+    func refreshPlaceholder() {
+        placeholderLabel.isHidden = !text.isEmpty
     }
 }
