@@ -178,10 +178,6 @@ final class DictusKeyboardBridge: NSObject,
     /// then rechecks autocapitalization (e.g., typing "." may prepare shift for next char).
     /// NOTE: Haptic fires in GiellaKeyboardView.touchesBegan() for ALL keys on touchDown.
     private func handleInputKey(_ character: String) {
-        // Invalidate autocorrect undo -- any new character input means the user
-        // accepted the correction. Only immediate backspace should undo.
-        suggestionState?.lastAutocorrect = nil
-
         // Clear rejected words when starting a new word
         if suggestionState?.currentWord.isEmpty == true {
             suggestionState?.rejectedWords.removeAll()
@@ -213,52 +209,25 @@ final class DictusKeyboardBridge: NSObject,
         suggestionState?.updateAsync(context: context)
     }
 
-    /// Handle backspace/delete key with autocorrect undo support.
-    ///
-    /// If the user presses backspace immediately after an autocorrection,
-    /// undo the correction: delete the corrected word + trailing space,
-    /// then re-insert the original word. This matches iOS native behavior
-    /// where backspace after autocorrect restores what the user actually typed.
+    /// Handle backspace/delete key. Always deletes one character.
+    /// Autocorrect undo is handled by tapping the suggestion bar, not backspace.
     private func handleBackspace() {
         AudioServicesPlaySystemSound(KeySound.delete)
 
-        // Check for autocorrect undo: if the last action was an autocorrection,
-        // pressing backspace undoes it instead of deleting a single character.
-        if let autocorrect = suggestionState?.lastAutocorrect {
-            let proxy = controller?.textDocumentProxy
-            // Delete the correction + the trailing space that was auto-inserted
-            let deleteCount = autocorrect.correctedWord.count + (autocorrect.insertedSpace ? 1 : 0)
-            for _ in 0..<deleteCount {
-                proxy?.deleteBackward()
-            }
-            proxy?.insertText(autocorrect.originalWord)
-            // Mark this word as rejected so it won't be re-corrected on next space
-            suggestionState?.rejectedWords.insert(autocorrect.originalWord.lowercased())
-            suggestionState?.lastAutocorrect = nil
-
-            // Record rejection as a usage signal — NOT immediate learning.
-            // A single rejection might mean "wrong correction, let me retype"
-            // (e.g., user typed "doee" meaning to type "dieu", correction was wrong,
-            // user undoes but doesn't actually want "doee" learned).
-            // After 2 rejections of the same word, it's learned (user really means it).
-            // This matches iOS native / Gboard / SwiftKey behavior.
-            if UserDictionary.shared.recordUsage(autocorrect.originalWord) {
-                suggestionState?.learnWord(autocorrect.originalWord)
-            }
-            lastInsertedCharacter = autocorrect.originalWord.last.map(String.init)
-            secondToLastInsertedCharacter = nil
-            updateCapitalization()
-            updateAccentKeyDisplay()
-            // Update suggestions for the restored original word
-            let context = proxy?.documentContextBeforeInput
-            suggestionState?.updateAsync(context: context)
-            return
-        }
-
-        // Normal backspace: delete one character
         controller?.textDocumentProxy.deleteBackward()
         secondToLastInsertedCharacter = nil
         lastInsertedCharacter = nil
+
+        // Check if the corrected word is still intact in the text after deletion.
+        // Keep undo alive if either "correctedWord " or "correctedWord" (without space) is found.
+        // This allows undo even after deleting just the trailing space.
+        if let undo = suggestionState?.pendingUndo {
+            let context = controller?.textDocumentProxy.documentContextBeforeInput ?? ""
+            if !context.contains(undo.correctedWord) {
+                suggestionState?.pendingUndo = nil
+            }
+        }
+
         updateCapitalization()
         updateAccentKeyDisplay()
         let context = controller?.textDocumentProxy.documentContextBeforeInput
@@ -275,6 +244,7 @@ final class DictusKeyboardBridge: NSObject,
     /// delete everything from cursor back to that boundary.
     private func handleWordDelete() {
         AudioServicesPlaySystemSound(KeySound.delete)
+        suggestionState?.pendingUndo = nil
         guard let proxy = controller?.textDocumentProxy,
               let before = proxy.documentContextBeforeInput, !before.isEmpty else {
             // Fallback: single character delete if no text context
@@ -323,6 +293,9 @@ final class DictusKeyboardBridge: NSObject,
         AudioServicesPlaySystemSound(KeySound.modifier)
         secondToLastInsertedCharacter = lastInsertedCharacter
 
+        // Next space after autocorrect = undo window closes
+        suggestionState?.pendingUndo = nil
+
         // Read the current word directly from the text field (synchronous, main thread).
         // WHY not use state.currentWord: it's updated by an async background queue.
         // If the user types fast and hits space before the async update completes,
@@ -350,8 +323,6 @@ final class DictusKeyboardBridge: NSObject,
             // Skip autocorrect — insert space normally
             controller?.textDocumentProxy.insertText(" ")
             lastInsertedCharacter = " "
-            // Clear autocorrect state but still trigger predictions
-            suggestionState?.lastAutocorrect = nil
             suggestionState?.clear()
             suggestionState?.rejectedWords.removeAll()
             let ctx = controller?.textDocumentProxy.documentContextBeforeInput
@@ -391,12 +362,13 @@ final class DictusKeyboardBridge: NSObject,
             proxy?.insertText(" ")
             lastInsertedCharacter = " "
 
-            // Store autocorrect state so backspace can undo it
-            state.lastAutocorrect = AutocorrectState(
+            // Store undo state — user can tap suggestion bar to revert
+            state.pendingUndo = AutocorrectState(
                 originalWord: freshWord,
                 correctedWord: result.correction,
                 insertedSpace: true
             )
+            HapticFeedback.autocorrectApplied()
             // Trigger n-gram predictions after autocorrection too.
             // The corrected word + space is now in the proxy — predict what comes next.
             state.clear()
@@ -426,7 +398,7 @@ final class DictusKeyboardBridge: NSObject,
             // Auto-full-stop changed the text (". " instead of "  ").
             // Invalidate any pending autocorrect undo — the text no longer matches
             // what the undo expects, so backspace should not try to restore.
-            suggestionState?.lastAutocorrect = nil
+            suggestionState?.pendingUndo = nil
             lastInsertedCharacter = " "
         }
 
@@ -450,6 +422,7 @@ final class DictusKeyboardBridge: NSObject,
     /// .sentences autocap which should capitalize after a newline.
     private func handleReturn() {
         AudioServicesPlaySystemSound(KeySound.modifier)
+        suggestionState?.pendingUndo = nil
         controller?.textDocumentProxy.insertText("\n")
         secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = "\n"
@@ -472,7 +445,7 @@ final class DictusKeyboardBridge: NSObject,
         secondToLastInsertedCharacter = nil
 
         // Chain predictions: query n-gram engine for what comes after this word
-        suggestionState?.lastAutocorrect = nil
+        suggestionState?.pendingUndo = nil
         let context = proxy?.documentContextBeforeInput
         suggestionState?.updatePredictions(context: context)
 

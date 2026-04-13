@@ -261,14 +261,25 @@ struct KeyboardRootView: View {
             return
         }
 
+        // Undo mode: tap index 0 = revert autocorrect, tap 1-2 = accept completion/prediction
+        if suggestionState.mode == .undoAvailable {
+            if index == 0, let undo = suggestionState.pendingUndo {
+                performUndo(undo: undo, proxy: proxy)
+                suggestionState.pendingUndo = nil
+                suggestionState.clear()
+            } else {
+                suggestionState.pendingUndo = nil
+                bridge?.handlePredictionTap(word: suggestion)
+            }
+            HapticFeedback.keyTapped()
+            return
+        }
+
         if suggestionState.mode == .corrections {
-            // Tapping the original word (index 0) = user rejects the correction
             if index == 0 {
                 suggestionState.rejectedWords.insert(suggestion.lowercased())
-                // Insert space after original word (user accepted it as-is)
                 proxy.insertText(" ")
             } else {
-                // Apply the correction or alternative
                 replaceCurrentWord(
                     proxy: proxy,
                     currentWord: suggestionState.currentWord,
@@ -276,7 +287,7 @@ struct KeyboardRootView: View {
                     addSpace: true
                 )
             }
-            suggestionState.lastAutocorrect = nil
+            suggestionState.pendingUndo = nil
             suggestionState.clear()
             HapticFeedback.keyTapped()
             return
@@ -290,9 +301,50 @@ struct KeyboardRootView: View {
             addSpace: addSpace
         )
 
-        suggestionState.lastAutocorrect = nil
+        suggestionState.pendingUndo = nil
         suggestionState.clear()
         HapticFeedback.keyTapped()
+    }
+
+    /// Reverts an autocorrection, preserving any characters typed after the correction.
+    private func performUndo(undo: AutocorrectState, proxy: UITextDocumentProxy) {
+        guard let context = proxy.documentContextBeforeInput else { return }
+
+        // Try to find the corrected word with trailing space first, then without
+        // (user may have deleted the space but the word is still intact).
+        let correctedWithSpace = undo.correctedWord + " "
+        let range: Range<String.Index>
+        let matchedWithSpace: Bool
+
+        if undo.insertedSpace, let r = context.range(of: correctedWithSpace, options: .backwards) {
+            range = r
+            matchedWithSpace = true
+        } else if let r = context.range(of: undo.correctedWord, options: .backwards) {
+            range = r
+            matchedWithSpace = false
+        } else {
+            return
+        }
+
+        let afterCorrection = String(context[range.upperBound...])
+        let matchLength = matchedWithSpace ? correctedWithSpace.count : undo.correctedWord.count
+        let deleteCount = matchLength + afterCorrection.count
+
+        for _ in 0..<deleteCount {
+            proxy.deleteBackward()
+        }
+
+        proxy.insertText(undo.originalWord)
+        if matchedWithSpace {
+            proxy.insertText(" ")
+        }
+        proxy.insertText(afterCorrection)
+
+        suggestionState.rejectedWords.insert(undo.originalWord.lowercased())
+
+        if UserDictionary.shared.recordUsage(undo.originalWord) {
+            suggestionState.learnWord(undo.originalWord)
+        }
     }
 
     /// Replaces the word currently being typed with a replacement string.

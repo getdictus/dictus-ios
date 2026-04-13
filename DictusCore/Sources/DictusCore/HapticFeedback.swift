@@ -89,7 +89,7 @@ public enum HapticFeedback {
     /// Calling prepare() on every touchDown ensures the engine is ready for
     /// the NEXT tap even during rapid typing (>6 taps/second).
     public static func prepareForNextTap() {
-        lightGenerator.prepare()
+        selectionGenerator.prepare()
     }
     #endif
 
@@ -133,16 +133,23 @@ public enum HapticFeedback {
         #endif
     }
 
-    /// Light impact feedback for keyboard key taps.
+    /// Selection feedback for keyboard key taps.
     ///
-    /// WHY .light style: Matches the native iOS keyboard tactile feel.
-    /// Users expect key taps to be subtle -- heavier feedback would feel wrong
-    /// compared to the system keyboard they're used to.
-    ///
-    /// WHY .prepare() after impactOccurred():
-    /// Calling prepare() immediately after firing re-primes the Taptic Engine
-    /// for the next tap. This keeps latency at ~0ms for rapid typing.
+    /// WHY selectionGenerator instead of lightGenerator:
+    /// UIImpactFeedbackGenerator(.light) feels noticeably heavier than Apple's
+    /// native keyboard. UISelectionFeedbackGenerator produces the subtle "tick"
+    /// Apple uses for pickers — closer to the native keyboard feel.
     public static func keyTapped() {
+        #if canImport(UIKit) && !os(macOS)
+        guard isEnabled() else { return }
+        selectionGenerator.selectionChanged()
+        selectionGenerator.prepare()
+        #endif
+    }
+
+    /// Light impact feedback when autocorrect changes a word.
+    /// Slightly stronger than a normal key tap to signal "something changed".
+    public static func autocorrectApplied() {
         #if canImport(UIKit) && !os(macOS)
         guard isEnabled() else { return }
         lightGenerator.impactOccurred()

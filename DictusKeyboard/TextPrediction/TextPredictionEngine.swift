@@ -114,7 +114,29 @@ class TextPredictionEngine {
             return nil  // User-learned word: no correction needed
         }
 
-        // Pass 2: trie spell check (proximity-weighted, accent-aware)
+        // Accent expansion runs BEFORE wordExists check.
+        // "tres" may exist in the trie as a low-frequency word, but "très" is far
+        // more common. The accent expansion uses frequency comparison to decide.
+        // "deja" → "déjà", "apres" → "après", "tres" → "très"
+        if let accented = aospTrieEngine.accentExpansion(wordToCheck) {
+            let isCapitalized = word.first?.isUppercase == true
+            return (isCapitalized ? accented.capitalized : accented, [])
+        }
+
+        // Valid word guard: if the word exists in the trie dictionary, it's correct.
+        // This prevents aggressive corrections like "fais" → "vais".
+        // Runs AFTER accent expansion so "tres" → "très" still works.
+        if aospTrieEngine.wordExists(wordToCheck) {
+            return nil
+        }
+
+        // Contraction expansion: "Cest" → "C'est", "jai" → "j'ai"
+        if let expanded = aospTrieEngine.contractionExpansion(word) {
+            let isCapitalized = word.first?.isUppercase == true
+            return (isCapitalized ? expanded.capitalized : expanded, [])
+        }
+
+        // Pass 4: trie spell check (proximity-weighted, accent-aware)
         return aospTrieEngine.spellCheck(word)
     }
 
@@ -214,30 +236,9 @@ class TextPredictionEngine {
             return (newCorrection, Array(newAlternatives.prefix(2)))
         }
 
-        // Word is valid (spellCheck returned nil). Check if any n-gram prediction
-        // is close to the typed word. Example: "je sui" → prediction "suis" at
-        // edit distance 1, with high bigram score → suggest as correction.
-        guard !closePredictions.isEmpty else { return nil }
-
-        let inputScore = aospTrieEngine.bigramScore(for: wordToCheck, after: prevLower)
-
-        guard let best = closePredictions.max(by: { $0.1 < $1.1 }), best.1 > inputScore else {
-            return nil
-        }
-
-        let isCapitalized = word.first?.isUppercase == true
-        let fullCorrection = prefix != nil ? (prefix! + best.0) : best.0
-        let correction = isCapitalized ? fullCorrection.capitalized : fullCorrection
-
-        let alternatives = closePredictions.filter { $0.0 != best.0 }
-            .sorted { $0.1 > $1.1 }
-            .prefix(2)
-            .map { candidate -> String in
-                let full = prefix != nil ? (prefix! + candidate.0) : candidate.0
-                return isCapitalized ? full.capitalized : full
-            }
-
-        return (correction, Array(alternatives))
+        // Word is valid (spellCheck returned nil) — do not override with n-gram
+        // predictions. This prevents "je fais" → "je vais" when "fais" is valid.
+        return nil
     }
 
     /// Levenshtein edit distance between two strings. O(n*m) but strings are
