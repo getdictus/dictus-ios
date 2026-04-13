@@ -32,9 +32,10 @@ public final class UserDictionary {
     /// Stored as [String: Int] where key = lowercase word, value = times typed.
     private static let pendingKey = "dictus.userDictionary.pending"
 
-    /// Number of times an unknown word must be typed before it's learned.
-    /// 2 is the sweet spot: first time could be a typo, second time is intentional.
-    public static let repetitionThreshold = 2
+    /// Number of times an unknown word must be typed/rejected before it's learned.
+    /// 1 = learn immediately. Safe now that autocorrect undo requires an intentional
+    /// tap in the suggestion bar (no more accidental backspace-undo learning).
+    public static let repetitionThreshold = 1
 
     /// Maximum number of learned words. When exceeded, the least-used words
     /// are dropped. 1000 words ≈ 30 KB in UserDefaults — negligible for memory.
