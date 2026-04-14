@@ -97,6 +97,37 @@ public enum AutocorrectDebugLog {
             + "\"\(before)\"(\(beforeScore)) → \"\(after)\"(\(afterScore))")
     }
 
+    /// Trie candidates returned by the spell check engine for a given word.
+    /// Logged when the trie produces corrections, so we can see the full candidate
+    /// list (not just the winner) and diagnose cases where the trie picks the
+    /// "wrong" candidate (e.g., ckavier → clapier when clavier exists).
+    public static func trieCandidates(word: String, correction: String,
+                                      correctionFreq: UInt16,
+                                      alternatives: [(String, UInt16)]) {
+        guard enabled else { return }
+        let alts = alternatives
+            .map { "\"\($0.0)\"(freq=\($0.1))" }
+            .joined(separator: ", ")
+        write("TRIE-CANDIDATES word=\"\(word)\" winner=\"\(correction)\"(freq=\(correctionFreq)) alts=[\(alts)]")
+    }
+
+    /// The autocorrect decision was actually applied to the text document
+    /// (user pressed space and the word was replaced). Distinct from
+    /// autocorrectDecision which also fires for suggestion-bar previews.
+    public static func autocorrectApplied(original: String, corrected: String, prevWord: String?) {
+        guard enabled else { return }
+        let prev = prevWord.map { "\"\($0)\"" } ?? "nil"
+        write("APPLIED orig=\"\(original)\" → \"\(corrected)\" prev=\(prev)")
+    }
+
+    /// The user rejected an autocorrection by tapping the "undo" slot in the
+    /// suggestion bar. Critical for discovering which corrections feel wrong
+    /// to users in real usage.
+    public static func autocorrectUndone(original: String, rejected: String) {
+        guard enabled else { return }
+        write("UNDO orig=\"\(original)\" rejected=\"\(rejected)\"")
+    }
+
     /// Free-form note (use sparingly — prefer typed events above).
     public static func note(_ message: String) {
         guard enabled else { return }

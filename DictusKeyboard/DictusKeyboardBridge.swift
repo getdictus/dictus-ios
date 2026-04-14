@@ -362,6 +362,14 @@ final class DictusKeyboardBridge: NSObject,
             proxy?.insertText(" ")
             lastInsertedCharacter = " "
 
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectApplied(
+                original: freshWord,
+                corrected: result.correction,
+                prevWord: previousWord
+            )
+            #endif
+
             // Store undo state — user can tap suggestion bar to revert
             state.pendingUndo = AutocorrectState(
                 originalWord: freshWord,

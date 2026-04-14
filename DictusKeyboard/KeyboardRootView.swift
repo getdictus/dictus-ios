@@ -340,6 +340,12 @@ struct KeyboardRootView: View {
         }
         proxy.insertText(afterCorrection)
 
+        #if DEBUG
+        AutocorrectDebugLog.autocorrectUndone(
+            original: undo.originalWord, rejected: undo.correctedWord
+        )
+        #endif
+
         suggestionState.rejectedWords.insert(undo.originalWord.lowercased())
 
         if UserDictionary.shared.recordUsage(undo.originalWord) {

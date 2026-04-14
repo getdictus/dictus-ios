@@ -235,6 +235,14 @@ class TextPredictionEngine {
         let trieResult = aospTrieEngine.spellCheck(word)
         #if DEBUG
         if let r = trieResult {
+            let corrFreq = aospTrieEngine.wordFrequency(r.correction.lowercased())
+            let altsWithFreq = r.alternatives.map { alt in
+                (alt, aospTrieEngine.wordFrequency(alt.lowercased()))
+            }
+            AutocorrectDebugLog.trieCandidates(
+                word: word, correction: r.correction,
+                correctionFreq: corrFreq, alternatives: altsWithFreq
+            )
             AutocorrectDebugLog.autocorrectDecision(
                 original: word, corrected: r.correction, branch: "trie", prevWord: nil
             )
@@ -335,6 +343,20 @@ class TextPredictionEngine {
                 }
             }
 
+            // CRITICAL: if no candidate has ANY bigram evidence (all scores = 0),
+            // the rerank becomes a random pick based on Dictionary iteration order.
+            // This corrupted good trie corrections like "main" → "mais" with no
+            // real justification. In this case, keep the trie's original result.
+            let hasAnyBigramEvidence = candidateSet.values.contains { $0 > 0 }
+            guard hasAnyBigramEvidence else {
+                #if DEBUG
+                AutocorrectDebugLog.note(
+                    "bigram-rerank skipped (no evidence) for \"\(word)\" prev=\"\(prev)\", keeping \"\(result.correction)\""
+                )
+                #endif
+                return result
+            }
+
             let reranked = candidateSet.sorted { $0.value > $1.value }
             let newCorrection = reranked[0].key
             let newAlternatives = reranked.dropFirst().map { $0.key }
@@ -390,10 +412,13 @@ class TextPredictionEngine {
 
     /// Keys adjacent to the spacebar on each keyboard layout.
     /// When the user presses one of these instead of space, two words get fused.
-    /// On AZERTY: bottom row ends with N before the spacebar area, with B and V nearby.
-    /// On QWERTY: N, B, V, C, X border the spacebar.
-    private static let azertySpacebarNeighbors: Set<Character> = ["n", "b", "v", ","]
-    private static let qwertySpacebarNeighbors: Set<Character> = ["n", "b", "v", "c", "x"]
+    /// On AZERTY: bottom row is W-X-C-V-B-N — only N (rightmost, next to space/comma)
+    /// and B are truly adjacent to the spacebar. V was previously included but is
+    /// 3 keys from space, causing false splits like "calvier" → "cal hier".
+    /// On QWERTY: bottom row is Z-X-C-V-B-N-M — M is rightmost (next to space),
+    /// N and B are close enough to count.
+    private static let azertySpacebarNeighbors: Set<Character> = ["n", "b", ","]
+    private static let qwertySpacebarNeighbors: Set<Character> = ["n", "b", "m"]
 
     // MARK: - Apostrophe Prefix Correction
 
@@ -461,7 +486,13 @@ class TextPredictionEngine {
     /// how strongly to weight the split vs a single-word correction.
     private func trySplitWithSignal(_ word: String) -> (split: String?, hasBoundarySignal: Bool) {
         let chars = Array(word)
-        guard chars.count >= 4 else { return (nil, false) }
+        // Minimum part length 3: prevents spurious splits like "honne" → "ho ne",
+        // "fingue" → "fi tue", "calvier" → "cal hier". Two-char French words like
+        // "ho", "ne", "fi", "tu" are all valid and match too easily. Requiring 3+
+        // chars per part kills the false-positive explosion seen in debug logs
+        // without losing legitimate splits ("pas mal", "merci beaucoup" still work).
+        let minPartLength = 3
+        guard chars.count >= minPartLength * 2 else { return (nil, false) }
 
         let spacebarNeighbors = LayoutType.active == .azerty
             ? Self.azertySpacebarNeighbors
@@ -471,8 +502,6 @@ class TextPredictionEngine {
         var bestBoundaryScore: UInt32 = 0
         var bestBigramSplit: String?
         var bestBigramScore: UInt32 = 0
-
-        let minPartLength = 2
         for splitPos in minPartLength...(chars.count - minPartLength) {
             let left = String(chars[0..<splitPos])
             let right = String(chars[splitPos...])
