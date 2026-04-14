@@ -136,7 +136,21 @@ class TextPredictionEngine {
             return (isCapitalized ? expanded.capitalized : expanded, [])
         }
 
-        // Pass 4: trie spell check (proximity-weighted, accent-aware)
+        // Word splitting: "pasnmal" → "pas mal" (missed space detection).
+        // Runs AFTER contractions (which handle "jai" → "j'ai") and BEFORE generic
+        // trie spell check (which would suggest "pascal" for "pasnmal").
+        // A valid two-word split is almost always correct — higher confidence than
+        // a single-word correction at edit distance 2+.
+        if let split = trySplit(wordToCheck) {
+            let isCapitalized = word.first?.isUppercase == true
+            // Only capitalize the first character, not every word.
+            // Swift's .capitalized capitalizes ALL words ("mais pourquoi" → "Mais Pourquoi"),
+            // but we want "Mais pourquoi" (only the first letter matches the original casing).
+            let result = isCapitalized ? (split.prefix(1).uppercased() + split.dropFirst()) : split
+            return (result, [])
+        }
+
+        // Pass 5: trie spell check (proximity-weighted, accent-aware)
         return aospTrieEngine.spellCheck(word)
     }
 
@@ -268,5 +282,134 @@ class TextPredictionEngine {
     /// The mmap'd trie is read-only; user words live in UserDictionary (App Group).
     func injectUserWord(_ word: String) {
         // No-op: UserDictionary.shared is checked before trie in spellCheck()
+    }
+
+    // MARK: - Word Splitting
+
+    /// Keys adjacent to the spacebar on each keyboard layout.
+    /// When the user presses one of these instead of space, two words get fused.
+    /// On AZERTY: bottom row ends with N before the spacebar area, with B and V nearby.
+    /// On QWERTY: N, B, V, C, X border the spacebar.
+    private static let azertySpacebarNeighbors: Set<Character> = ["n", "b", "v", ","]
+    private static let qwertySpacebarNeighbors: Set<Character> = ["n", "b", "v", "c", "x"]
+
+    /// Try splitting a fused word into two valid words, using n-gram evidence and
+    /// spacebar-neighbor signals to reject spurious splits.
+    ///
+    /// WHY this exists:
+    /// On AZERTY, the N key is right next to the spacebar. Users frequently hit N
+    /// instead of space, fusing two words ("pas" + N + "mal" = "pasnmal").
+    ///
+    /// HOW IT WORKS — 3 strategies, ordered by confidence:
+    ///
+    /// 1. **Boundary-char removal at spacebar neighbor** (strongest signal):
+    ///    The user hit N/B/V/comma instead of space. We skip that character and
+    ///    check if both halves are valid words ("pasnmal" → "pas" + "mal" with 'n'
+    ///    removed). If the right half needs spell correction (e.g., "beauvouo"),
+    ///    we allow it since the spacebar-neighbor gives strong evidence.
+    ///
+    /// 2. **Direct split with bigram evidence** (medium signal):
+    ///    Both halves are valid words AND the pair appears in our n-gram model
+    ///    ("pasmal" → "pas mal" accepted because bigramScore("pas", "mal") > 0).
+    ///    Required bigram presence rejects nonsensical pairs like "honnête lent"
+    ///    that would otherwise win over single-word corrections like "honnêtement".
+    ///
+    /// 3. **Direct split without bigram evidence**: rejected.
+    ///    Too many false positives (e.g., "Honnetelent" → "Honnête lent").
+    ///    The single-word spell correction pipeline will handle these cases.
+    ///
+    /// WHY not aggressive split+correct without spacebar signal:
+    /// We previously tried spell-correcting any non-matching half, but that caused
+    /// "pzrle" → "par le" instead of "parlé". Without a spacebar-neighbor signal,
+    /// we have no evidence the user was trying to type two words, so single-word
+    /// correction should win.
+    ///
+    /// PERFORMANCE: N-1 positions × constant-time lookups. Sub-millisecond total.
+    private func trySplit(_ word: String, minPartLength: Int = 2) -> String? {
+        let chars = Array(word)
+        guard chars.count >= minPartLength * 2 else { return nil }
+
+        let spacebarNeighbors = LayoutType.active == .azerty
+            ? Self.azertySpacebarNeighbors
+            : Self.qwertySpacebarNeighbors
+
+        // Track two candidate tiers separately:
+        // - boundarySplit: boundary-char removal at spacebar neighbor (highest confidence)
+        // - bigramSplit: direct split validated by bigram evidence (medium confidence)
+        var bestBoundarySplit: String?
+        var bestBoundaryScore: UInt32 = 0
+        var bestBigramSplit: String?
+        var bestBigramScore: UInt32 = 0
+
+        for splitPos in minPartLength...(chars.count - minPartLength) {
+            let left = String(chars[0..<splitPos])
+            let right = String(chars[splitPos...])
+
+            let leftExists = aospTrieEngine.wordExists(left)
+            let rightExists = aospTrieEngine.wordExists(right)
+
+            // --- Strategy 1: Boundary-char removal at spacebar neighbor ---
+            // Strongest signal: the user pressed N/B/V/comma instead of space.
+            if splitPos < chars.count,
+               spacebarNeighbors.contains(chars[splitPos]) {
+                let rightAfterBoundary = String(chars[(splitPos + 1)...])
+                if rightAfterBoundary.count >= minPartLength {
+                    let rightAfterExists = aospTrieEngine.wordExists(rightAfterBoundary)
+
+                    // 1a: Both halves valid after removing boundary char
+                    if leftExists && rightAfterExists {
+                        let score = UInt32(aospTrieEngine.wordFrequency(left))
+                                  * UInt32(aospTrieEngine.wordFrequency(rightAfterBoundary))
+                        if score > bestBoundaryScore {
+                            bestBoundaryScore = score
+                            bestBoundarySplit = "\(left) \(rightAfterBoundary)"
+                        }
+                    }
+
+                    // 1b: Left valid, right needs correction (still high confidence
+                    // because of spacebar-neighbor signal)
+                    // "mercinbeauvouo" → "merci" + spellCheck("beauvouo") → "beaucoup"
+                    if leftExists && !rightAfterExists && rightAfterBoundary.count >= 3 {
+                        if let correction = aospTrieEngine.spellCheck(rightAfterBoundary) {
+                            let corrFreq = aospTrieEngine.wordFrequency(correction.correction)
+                            let score = UInt32(aospTrieEngine.wordFrequency(left))
+                                      * UInt32(corrFreq)
+                            if score > bestBoundaryScore {
+                                bestBoundaryScore = score
+                                bestBoundarySplit = "\(left) \(correction.correction)"
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- Strategy 2: Direct split with bigram evidence ---
+            // Both halves exist AND the pair appears in our n-gram corpus.
+            // Bigram requirement prevents "honnête lent" from beating "honnêtement".
+            if leftExists && rightExists {
+                let bigramScore = aospTrieEngine.bigramScore(for: right, after: left)
+                if bigramScore > 0 {
+                    // Combine word frequency with bigram score so very common pairs
+                    // (e.g., "pas mal", "de la") get highest priority.
+                    let freqProduct = UInt32(aospTrieEngine.wordFrequency(left))
+                                    * UInt32(aospTrieEngine.wordFrequency(right))
+                    let score = freqProduct + UInt32(bigramScore) * 1000
+                    if score > bestBigramScore {
+                        bestBigramScore = score
+                        bestBigramSplit = "\(left) \(right)"
+                    }
+                }
+            }
+        }
+
+        // Boundary-signal splits win over bigram-only splits (higher confidence
+        // due to the spacebar-neighbor key evidence).
+        if let boundary = bestBoundarySplit {
+            return boundary
+        }
+        if let bigram = bestBigramSplit {
+            return bigram
+        }
+        return nil
     }
 }

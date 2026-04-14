@@ -255,6 +255,135 @@ def extract_bigrams_from_sentences(lang: str) -> dict[str, list[tuple[str, int]]
     return dict(result)
 
 
+def extract_bigrams_from_wikipedia(
+    lang: str, max_articles: int = 50000
+) -> tuple[dict[str, list[tuple[str, int]]], dict[str, list[tuple[str, int]]]]:
+    """
+    Download and process Wikipedia CirrusSearch dump for bigram+trigram extraction.
+
+    WHY Wikipedia: OpenSubtitles yields ~7K bigrams (conversational), Google Books ~5K
+    (literary). Neither reaches the 50K target needed for verb conjugation disambiguation.
+    Wikipedia covers formal, technical, and everyday vocabulary — providing the volume
+    needed for meaningful contextual correction ("pas corrigé" vs "pas corrige").
+
+    Returns (bigrams_dict, trigrams_dict) in the standard format:
+      key -> [(predicted_word, frequency), ...]
+    Bigram key = single word, trigram key = "word1\\0word2".
+
+    Uses Wikimedia CirrusSearch JSON-lines dumps (pre-extracted article text, no
+    wikitext parsing needed). Downloaded as gzipped stream to avoid loading the
+    full dump (~2-3 GB compressed for French) into memory.
+    """
+    # CirrusSearch dumps: one JSON object per line, with "text" field containing article text.
+    # Format documented at https://www.mediawiki.org/wiki/Help:CirrusSearch
+    # The dumps live under /other/cirrussearch/{date}/, not under /latest/.
+    # We use multiple smaller Wikimedia projects (wikinews, wikibooks, wikiquote,
+    # wikivoyage) instead of the main 15 GB frwiki dump. Together they're ~215 MB
+    # compressed and provide diverse vocabulary: news, textbooks, quotes, travel.
+    CIRRUSSEARCH_DATE = "20251229"
+    wiki_projects = [
+        f"{lang}wikinews",
+        f"{lang}wikiquote",
+        f"{lang}wikibooks",
+        f"{lang}wikivoyage",
+    ]
+    dump_urls = [
+        f"https://dumps.wikimedia.org/other/cirrussearch/{CIRRUSSEARCH_DATE}/"
+        f"{proj}-{CIRRUSSEARCH_DATE}-cirrussearch-content.json.gz"
+        for proj in wiki_projects
+    ]
+    dump_url = dump_urls[0]  # for logging
+    print(f"  Downloading Wikipedia CirrusSearch dumps for '{lang}'...")
+    print(f"  Sources: {', '.join(wiki_projects)}")
+    print(f"  Max articles total: {max_articles}")
+
+    import gzip
+
+    word_pattern = re.compile(r"[a-zA-ZÀ-ÿœŒ'']+(?:[-'][a-zA-ZÀ-ÿœŒ'']+)*")
+
+    bigrams: dict[tuple[str, str], int] = defaultdict(int)
+    trigrams: dict[tuple[str, str, str], int] = defaultdict(int)
+    articles_processed = 0
+
+    for url in dump_urls:
+        if articles_processed >= max_articles:
+            break
+
+        proj_name = url.split("/")[-1].split("-")[0]
+        print(f"  Fetching {proj_name}...")
+
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Dictus/1.0"})
+            with urllib.request.urlopen(req, timeout=300) as resp:
+                with gzip.GzipFile(fileobj=resp) as gz:
+                    for raw_line in gz:
+                        if articles_processed >= max_articles:
+                            break
+
+                        try:
+                            line = raw_line.decode("utf-8", errors="replace").strip()
+                            if not line:
+                                continue
+
+                            obj = json.loads(line)
+
+                            # CirrusSearch format: index lines have no "text" field
+                            text = obj.get("text")
+                            if not text:
+                                continue
+
+                            articles_processed += 1
+                            if articles_processed % 10000 == 0:
+                                print(f"  ... processed {articles_processed} articles")
+
+                            # Tokenize and extract n-grams sentence by sentence
+                            # Split on sentence-ending punctuation to avoid cross-sentence bigrams
+                            sentences = re.split(r'[.!?;:\n]+', text)
+                            for sentence in sentences:
+                                words = word_pattern.findall(sentence)
+                                words = [normalize_token(w) for w in words]
+                                words = [w for w in words if is_valid_token(w)]
+
+                                for i in range(len(words) - 1):
+                                    bigrams[(words[i], words[i + 1])] += 1
+
+                                for i in range(len(words) - 2):
+                                    trigrams[(words[i], words[i + 1], words[i + 2])] += 1
+
+                        except (json.JSONDecodeError, UnicodeDecodeError):
+                            continue
+
+            print(f"  {proj_name}: done ({articles_processed} total articles so far)")
+
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError) as e:
+            print(f"  {proj_name} download failed: {e} (continuing with other sources)")
+            continue
+
+    if articles_processed == 0:
+        print("  WARNING: No Wikipedia articles processed from any source")
+        return {}, {}
+
+    # Group bigrams by context word
+    bi_result: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    for (w1, w2), freq in bigrams.items():
+        if freq >= 2:  # Skip hapax bigrams (noise from Wikipedia formatting)
+            bi_result[w1].append((w2, freq))
+
+    # Group trigrams by "word1\0word2" key
+    tri_result: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    for (w1, w2, w3), freq in trigrams.items():
+        if freq >= 2:
+            tri_result[w1 + "\0" + w2].append((w3, freq))
+
+    bi_total = sum(len(v) for v in bi_result.values())
+    tri_total = sum(len(v) for v in tri_result.values())
+    print(f"  Wikipedia: {articles_processed} articles → "
+          f"{bi_total} bigrams ({len(bi_result)} keys), "
+          f"{tri_total} trigrams ({len(tri_result)} keys)")
+
+    return dict(bi_result), dict(tri_result)
+
+
 def generate_fallback_bigrams(freq_json_path: str, lang: str) -> dict[str, list[tuple[str, int]]]:
     """
     Generate synthetic bigrams from frequency dictionary when download fails.
@@ -509,6 +638,8 @@ def build_ngrams(
     max_bigrams: Optional[int] = None,
     max_trigrams: Optional[int] = None,
     fallback_json: Optional[str] = None,
+    wiki_max_articles: int = 50000,
+    no_wiki: bool = False,
 ) -> None:
     """Full pipeline: download/load -> process -> serialize -> write."""
     print(f"\n=== Building n-gram dictionary for '{lang}' ===\n")
@@ -536,14 +667,26 @@ def build_ngrams(
         else:
             print("  Google Books download failed (continuing with OpenSubtitles only)")
 
-        # --- Merge sources ---
+        # --- Source 3: Wikipedia (broad vocabulary for conjugation coverage) ---
+        # WHY Wikipedia: OpenSubtitles + Google Books top out at ~12K bigrams.
+        # Wikipedia provides 50K+ unique bigrams covering verb conjugations,
+        # technical vocabulary, and everyday phrases needed to distinguish
+        # "pas corrigé" from "pas corrige" in the n-gram model.
+        wiki_bigrams: dict[str, list[tuple[str, int]]] = {}
+        wiki_trigrams: dict[str, list[tuple[str, int]]] = {}
+        if not no_wiki:
+            print("\nLoading Wikipedia bigrams+trigrams (encyclopedic)...")
+            wiki_bigrams, wiki_trigrams = extract_bigrams_from_wikipedia(
+                lang, max_articles=wiki_max_articles
+            )
+        else:
+            print("\nSkipping Wikipedia (--no-wiki)")
+
+        # --- Merge bigram sources ---
         print("\nMerging bigram sources...")
-        if opensubs_bigrams and books_bigrams:
-            bigram_data = merge_ngram_sources(opensubs_bigrams, books_bigrams)
-        elif opensubs_bigrams:
-            bigram_data = opensubs_bigrams
-        elif books_bigrams:
-            bigram_data = books_bigrams
+        bigram_sources = [s for s in [opensubs_bigrams, books_bigrams, wiki_bigrams] if s]
+        if bigram_sources:
+            bigram_data = merge_ngram_sources(*bigram_sources)
         else:
             # Last resort: synthetic bigrams from frequency JSON
             fallback_path = f"DictusKeyboard/Resources/{lang}_frequency.json"
@@ -554,13 +697,21 @@ def build_ngrams(
                 print(f"  ERROR: No data source available for {lang} bigrams")
                 sys.exit(1)
 
-        # --- Trigrams (Google Books only, OpenSubtitles sentences too short for trigrams) ---
+        # --- Trigrams (Google Books + Wikipedia) ---
         print("\nLoading trigram data...")
+        books_trigrams: dict[str, list[tuple[str, int]]] = {}
         trigram_csv = download_ngram_csv(lang, 3)
         if trigram_csv:
-            trigram_data = parse_ngram_csv(trigram_csv, 3, min_freq)
+            books_trigrams = parse_ngram_csv(trigram_csv, 3, min_freq)
         else:
-            print("  No trigram data available (download failed)")
+            print("  Google Books trigram download failed")
+
+        # Merge trigram sources
+        trigram_sources = [s for s in [books_trigrams, wiki_trigrams] if s]
+        if trigram_sources:
+            trigram_data = merge_ngram_sources(*trigram_sources)
+        else:
+            print("  No trigram data available")
             trigram_data = {}
 
     # --- Process ---
@@ -639,16 +790,24 @@ def main() -> None:
         help="Minimum n-gram frequency threshold (default: 2)"
     )
     parser.add_argument(
-        "--max-bigrams", type=int, default=None,
-        help="Maximum number of bigram entries"
+        "--max-bigrams", type=int, default=50000,
+        help="Maximum number of bigram entries (default: 50000)"
     )
     parser.add_argument(
-        "--max-trigrams", type=int, default=None,
-        help="Maximum number of trigram entries"
+        "--max-trigrams", type=int, default=30000,
+        help="Maximum number of trigram entries (default: 30000)"
     )
     parser.add_argument(
         "--fallback-json", type=str, default=None,
         help="Path to frequency JSON for fallback bigram generation"
+    )
+    parser.add_argument(
+        "--wiki-max-articles", type=int, default=50000,
+        help="Max Wikipedia articles to process (default: 50000)"
+    )
+    parser.add_argument(
+        "--no-wiki", action="store_true",
+        help="Skip Wikipedia source (faster, for testing)"
     )
 
     args = parser.parse_args()
@@ -665,6 +824,8 @@ def main() -> None:
         max_bigrams=args.max_bigrams,
         max_trigrams=args.max_trigrams,
         fallback_json=args.fallback_json,
+        wiki_max_articles=args.wiki_max_articles,
+        no_wiki=args.no_wiki,
     )
 
 
