@@ -50,6 +50,12 @@ public enum SharedKeys {
     /// Whether autocorrect is enabled, default true
     public static let autocorrectEnabled = "dictus.autocorrectEnabled"
 
+    // Autocorrect debug logging (DEBUG builds only - see AutocorrectDebugLog).
+    /// Bool: when true, logs autocorrect decisions with the typed word + correction
+    /// to the App Group persistent log for debugging. CONTAINS USER TEXT — never
+    /// active in Release builds (code is compile-time excluded via #if DEBUG).
+    public static let autocorrectDebugLogging = "dictus.autocorrectDebugLogging"
+
     // Live Activity preference
     /// Whether Live Activity (Dynamic Island + Lock Screen) is enabled, default true
     public static let liveActivityEnabled = "dictus.liveActivityEnabled"
