@@ -360,9 +360,25 @@ final class AOSPTrieEngine {
             }
         }
 
-        // Only return if an accented version was found with higher frequency than input.
+        // Only return if an accented version is found AND clearly beats the input.
+        // If the unaccented form is itself a valid word (inputFreq > 0), require
+        // the accented form to be significantly more frequent (5x) to override —
+        // prevents "publie" (valid, "je publie") from auto-correcting to "publié".
+        // When the unaccented form is invalid (inputFreq == 0), any accented
+        // match wins since the user's input is clearly wrong either way.
         let inputFreq = Int(bridge.getFrequency(lowered))
-        if let match = bestMatch, bestFreq > inputFreq {
+        guard let match = bestMatch else { return nil }
+
+        if inputFreq == 0 {
+            // Unaccented form is not a real word — accented version is the fix.
+            return match
+        }
+
+        // Both forms valid: require strong frequency dominance (5x) to override.
+        // WHY 5x: typical French accent pairs have wildly different frequencies
+        // ("très" vs "tres" is >100x), so 5x is a conservative floor that rejects
+        // weak cases while keeping strong ones.
+        if bestFreq > inputFreq * 5 {
             return match
         }
         return nil

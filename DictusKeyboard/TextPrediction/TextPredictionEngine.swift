@@ -97,7 +97,32 @@ class TextPredictionEngine {
         // Must check before UserDictionary, otherwise typing "ca" twice
         // would "learn" it and block the ça correction permanently.
         if let result = aospTrieEngine.languageOverride(for: word) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: result.correction,
+                branch: "language-override", prevWord: nil
+            )
+            #endif
             return result
+        }
+
+        // Apostrophe prefix fix (FR): when the user types an apostrophe after an
+        // invalid contraction prefix ("v'est"), correct the prefix via keyboard
+        // proximity. Valid FR contraction prefixes are {j,n,s,m,t,d,c,l,qu}.
+        // Examples: "v'est" → "c'est", "b'est" → "c'est", "x'ai" → "j'ai".
+        //
+        // WHY before everything else:
+        // Our downstream apostrophe split only validates the part AFTER the
+        // apostrophe — "v'est" → checks "est" (valid) → returns nil (no correction).
+        // We need to intercept wrong prefixes explicitly.
+        if language == "fr",
+           let corrected = correctApostrophePrefix(word) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected, branch: "apostrophe-prefix", prevWord: nil
+            )
+            #endif
+            return (corrected, [])
         }
 
         // Two-pass lookup: user dictionary first (learned words are always "correct").
@@ -111,6 +136,9 @@ class TextPredictionEngine {
             wordToCheck = lowered
         }
         if UserDictionary.shared.isLearned(wordToCheck) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "user-learned")
+            #endif
             return nil  // User-learned word: no correction needed
         }
 
@@ -120,38 +148,101 @@ class TextPredictionEngine {
         // "deja" → "déjà", "apres" → "après", "tres" → "très"
         if let accented = aospTrieEngine.accentExpansion(wordToCheck) {
             let isCapitalized = word.first?.isUppercase == true
-            return (isCapitalized ? accented.capitalized : accented, [])
+            let corrected = isCapitalized ? accented.capitalized : accented
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected, branch: "accent", prevWord: nil
+            )
+            #endif
+            return (corrected, [])
         }
 
         // Valid word guard: if the word exists in the trie dictionary, it's correct.
         // This prevents aggressive corrections like "fais" → "vais".
         // Runs AFTER accent expansion so "tres" → "très" still works.
         if aospTrieEngine.wordExists(wordToCheck) {
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "already-valid")
+            #endif
             return nil
         }
 
         // Contraction expansion: "Cest" → "C'est", "jai" → "j'ai"
         if let expanded = aospTrieEngine.contractionExpansion(word) {
             let isCapitalized = word.first?.isUppercase == true
-            return (isCapitalized ? expanded.capitalized : expanded, [])
+            let corrected = isCapitalized ? expanded.capitalized : expanded
+            #if DEBUG
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: corrected, branch: "contraction", prevWord: nil
+            )
+            #endif
+            return (corrected, [])
         }
 
-        // Word splitting: "pasnmal" → "pas mal" (missed space detection).
-        // Runs AFTER contractions (which handle "jai" → "j'ai") and BEFORE generic
-        // trie spell check (which would suggest "pascal" for "pasnmal").
-        // A valid two-word split is almost always correct — higher confidence than
-        // a single-word correction at edit distance 2+.
-        if let split = trySplit(wordToCheck) {
-            let isCapitalized = word.first?.isUppercase == true
-            // Only capitalize the first character, not every word.
-            // Swift's .capitalized capitalizes ALL words ("mais pourquoi" → "Mais Pourquoi"),
-            // but we want "Mais pourquoi" (only the first letter matches the original casing).
-            let result = isCapitalized ? (split.prefix(1).uppercased() + split.dropFirst()) : split
-            return (result, [])
+        // Word splitting + single-word correction comparison.
+        //
+        // WHY compare both: trySplit() with pure bigram evidence (no spacebar-
+        // neighbor signal) can produce false positives like "Honnetelent" →
+        // "Honnête lent" when both halves are valid words and happen to co-occur
+        // in our corpus once. The single-word correction "honnêtement" is clearly
+        // better but was skipped entirely. By computing both candidates and
+        // preferring single-word when the split has weak evidence, we avoid
+        // surprising the user.
+        //
+        // DECISION RULE:
+        // 1. Split with boundary-char evidence (spacebar neighbor) → ALWAYS wins
+        //    (strong physical signal of a missed space).
+        // 2. Split with only bigram evidence vs single-word correction:
+        //    - If single-word exists at edit distance ≤ 2 AND is a common word
+        //      (freq ≥ 1000) → single-word wins.
+        //    - Otherwise → split wins.
+        // 3. No split found → fall through to trie single-word correction.
+        let (splitResult, splitHasBoundarySignal) = trySplitWithSignal(wordToCheck)
+        if let split = splitResult {
+            let useSplit: Bool
+            if splitHasBoundarySignal {
+                useSplit = true  // Strong signal, always prefer split
+            } else if let single = aospTrieEngine.spellCheck(word) {
+                // Both candidates exist — compare them
+                let singleLower = single.correction.lowercased().replacingOccurrences(of: " ", with: "")
+                let singleDistance = Self.editDistance(wordToCheck, singleLower)
+                let singleFreq = aospTrieEngine.wordFrequency(single.correction.lowercased())
+                let singleIsStrong = singleDistance <= 2 && singleFreq >= 1000
+                useSplit = !singleIsStrong
+            } else {
+                // No single-word alternative, split wins
+                useSplit = true
+            }
+
+            if useSplit {
+                let isCapitalized = word.first?.isUppercase == true
+                let result = isCapitalized ? (split.prefix(1).uppercased() + split.dropFirst()) : split
+                #if DEBUG
+                AutocorrectDebugLog.autocorrectDecision(
+                    original: word, corrected: result,
+                    branch: splitHasBoundarySignal ? "split-boundary" : "split-bigram",
+                    prevWord: nil
+                )
+                #endif
+                return (result, [])
+            }
+            #if DEBUG
+            AutocorrectDebugLog.note("split \"\(split)\" rejected in favor of single-word correction")
+            #endif
         }
 
         // Pass 5: trie spell check (proximity-weighted, accent-aware)
-        return aospTrieEngine.spellCheck(word)
+        let trieResult = aospTrieEngine.spellCheck(word)
+        #if DEBUG
+        if let r = trieResult {
+            AutocorrectDebugLog.autocorrectDecision(
+                original: word, corrected: r.correction, branch: "trie", prevWord: nil
+            )
+        } else {
+            AutocorrectDebugLog.autocorrectSkipped(word: word, reason: "no-trie-candidate")
+        }
+        #endif
+        return trieResult
     }
 
     /// Predict next words based on context (1-2 previous words).
@@ -247,6 +338,17 @@ class TextPredictionEngine {
             let reranked = candidateSet.sorted { $0.value > $1.value }
             let newCorrection = reranked[0].key
             let newAlternatives = reranked.dropFirst().map { $0.key }
+            #if DEBUG
+            if newCorrection != result.correction {
+                let beforeScore = candidateSet[result.correction] ?? 0
+                let afterScore = reranked[0].value
+                AutocorrectDebugLog.bigramRerank(
+                    word: word, prevWord: prev,
+                    before: result.correction, after: newCorrection,
+                    beforeScore: beforeScore, afterScore: afterScore
+                )
+            }
+            #endif
             return (newCorrection, Array(newAlternatives.prefix(2)))
         }
 
@@ -293,107 +395,122 @@ class TextPredictionEngine {
     private static let azertySpacebarNeighbors: Set<Character> = ["n", "b", "v", ","]
     private static let qwertySpacebarNeighbors: Set<Character> = ["n", "b", "v", "c", "x"]
 
-    /// Try splitting a fused word into two valid words, using n-gram evidence and
-    /// spacebar-neighbor signals to reject spurious splits.
-    ///
-    /// WHY this exists:
-    /// On AZERTY, the N key is right next to the spacebar. Users frequently hit N
-    /// instead of space, fusing two words ("pas" + N + "mal" = "pasnmal").
-    ///
-    /// HOW IT WORKS — 3 strategies, ordered by confidence:
-    ///
-    /// 1. **Boundary-char removal at spacebar neighbor** (strongest signal):
-    ///    The user hit N/B/V/comma instead of space. We skip that character and
-    ///    check if both halves are valid words ("pasnmal" → "pas" + "mal" with 'n'
-    ///    removed). If the right half needs spell correction (e.g., "beauvouo"),
-    ///    we allow it since the spacebar-neighbor gives strong evidence.
-    ///
-    /// 2. **Direct split with bigram evidence** (medium signal):
-    ///    Both halves are valid words AND the pair appears in our n-gram model
-    ///    ("pasmal" → "pas mal" accepted because bigramScore("pas", "mal") > 0).
-    ///    Required bigram presence rejects nonsensical pairs like "honnête lent"
-    ///    that would otherwise win over single-word corrections like "honnêtement".
-    ///
-    /// 3. **Direct split without bigram evidence**: rejected.
-    ///    Too many false positives (e.g., "Honnetelent" → "Honnête lent").
-    ///    The single-word spell correction pipeline will handle these cases.
-    ///
-    /// WHY not aggressive split+correct without spacebar signal:
-    /// We previously tried spell-correcting any non-matching half, but that caused
-    /// "pzrle" → "par le" instead of "parlé". Without a spacebar-neighbor signal,
-    /// we have no evidence the user was trying to type two words, so single-word
-    /// correction should win.
-    ///
-    /// PERFORMANCE: N-1 positions × constant-time lookups. Sub-millisecond total.
-    private func trySplit(_ word: String, minPartLength: Int = 2) -> String? {
+    // MARK: - Apostrophe Prefix Correction
+
+    /// Valid single-char contraction prefixes in French.
+    /// "qu'" is handled separately since it's 2 chars.
+    private static let validFrenchApostrophePrefixes: Set<Character> =
+        ["j", "n", "s", "m", "t", "d", "c", "l"]
+
+    /// Proximity groups for AZERTY — each key maps to the valid apostrophe prefix
+    /// it likely substitutes when typed by mistake. Built from AZERTY bottom/middle
+    /// row adjacency:
+    /// - V is next to C → v'est → c'est
+    /// - B is next to N → b'est → n'est (less common but possible)
+    /// - G, H are next to J → g'ai/h'ai → j'ai
+    private static let azertyApostrophePrefixFix: [Character: Character] = [
+        "v": "c",  // v'est → c'est
+        "x": "c",  // x'est → c'est (x is left of c on AZERTY)
+        "f": "d",  // f'est → d'est (not a real contraction, skip?)
+        "g": "j",  // g'ai → j'ai (g is left of h which is left of j)
+        "h": "j",  // h'ai → j'ai
+        "k": "j",  // k'ai → j'ai
+        "b": "n",  // b'est → n'est
+        "y": "t",  // y'es → t'es (adjacent on AZERTY top row)
+        "r": "t",  // r'es → t'es
+        "u": "t",  // u'es → t'es
+    ]
+
+    /// Correct a word with invalid apostrophe prefix via keyboard proximity.
+    /// "v'est" → "c'est", "b'a" → "n'a", etc.
+    /// Returns nil if no fix applies.
+    private func correctApostrophePrefix(_ word: String) -> String? {
+        let lower = word.lowercased()
+        guard let apoIdx = lower.firstIndex(of: "'") else { return nil }
+
+        // Only 1-char prefix is handled here (qu' is 2-char and handled elsewhere).
+        let prefixDistance = lower.distance(from: lower.startIndex, to: apoIdx)
+        guard prefixDistance == 1 else { return nil }
+
+        let prefixChar = lower[lower.startIndex]
+        let suffix = String(lower[lower.index(after: apoIdx)...])
+        guard !suffix.isEmpty else { return nil }
+
+        // Prefix is already valid — let the normal pipeline handle it.
+        if Self.validFrenchApostrophePrefixes.contains(prefixChar) {
+            return nil
+        }
+
+        // Look up the proximity fix for this prefix character.
+        guard let fixedPrefix = Self.azertyApostrophePrefixFix[prefixChar] else {
+            return nil
+        }
+
+        // Verify the suffix is a real word (avoids correcting random typos like
+        // "v'azxy" where the suffix is garbage).
+        guard aospTrieEngine.wordExists(suffix) else { return nil }
+
+        // Reassemble with the corrected prefix and original casing.
+        let isCapitalized = word.first?.isUppercase == true
+        let corrected = "\(fixedPrefix)'\(suffix)"
+        return isCapitalized ? (corrected.prefix(1).uppercased() + corrected.dropFirst()) : corrected
+    }
+
+    /// Wrapper around trySplit that also reports whether the chosen split had
+    /// a boundary-char (spacebar-neighbor) signal. Used by the caller to decide
+    /// how strongly to weight the split vs a single-word correction.
+    private func trySplitWithSignal(_ word: String) -> (split: String?, hasBoundarySignal: Bool) {
         let chars = Array(word)
-        guard chars.count >= minPartLength * 2 else { return nil }
+        guard chars.count >= 4 else { return (nil, false) }
 
         let spacebarNeighbors = LayoutType.active == .azerty
             ? Self.azertySpacebarNeighbors
             : Self.qwertySpacebarNeighbors
 
-        // Track two candidate tiers separately:
-        // - boundarySplit: boundary-char removal at spacebar neighbor (highest confidence)
-        // - bigramSplit: direct split validated by bigram evidence (medium confidence)
         var bestBoundarySplit: String?
         var bestBoundaryScore: UInt32 = 0
         var bestBigramSplit: String?
         var bestBigramScore: UInt32 = 0
 
+        let minPartLength = 2
         for splitPos in minPartLength...(chars.count - minPartLength) {
             let left = String(chars[0..<splitPos])
             let right = String(chars[splitPos...])
-
             let leftExists = aospTrieEngine.wordExists(left)
             let rightExists = aospTrieEngine.wordExists(right)
 
-            // --- Strategy 1: Boundary-char removal at spacebar neighbor ---
-            // Strongest signal: the user pressed N/B/V/comma instead of space.
-            if splitPos < chars.count,
-               spacebarNeighbors.contains(chars[splitPos]) {
-                let rightAfterBoundary = String(chars[(splitPos + 1)...])
-                if rightAfterBoundary.count >= minPartLength {
-                    let rightAfterExists = aospTrieEngine.wordExists(rightAfterBoundary)
-
-                    // 1a: Both halves valid after removing boundary char
-                    if leftExists && rightAfterExists {
+            // Boundary-char removal at spacebar neighbor
+            if splitPos < chars.count, spacebarNeighbors.contains(chars[splitPos]) {
+                let rightAfter = String(chars[(splitPos + 1)...])
+                if rightAfter.count >= minPartLength {
+                    if leftExists && aospTrieEngine.wordExists(rightAfter) {
                         let score = UInt32(aospTrieEngine.wordFrequency(left))
-                                  * UInt32(aospTrieEngine.wordFrequency(rightAfterBoundary))
+                                  * UInt32(aospTrieEngine.wordFrequency(rightAfter))
                         if score > bestBoundaryScore {
                             bestBoundaryScore = score
-                            bestBoundarySplit = "\(left) \(rightAfterBoundary)"
+                            bestBoundarySplit = "\(left) \(rightAfter)"
                         }
                     }
-
-                    // 1b: Left valid, right needs correction (still high confidence
-                    // because of spacebar-neighbor signal)
-                    // "mercinbeauvouo" → "merci" + spellCheck("beauvouo") → "beaucoup"
-                    if leftExists && !rightAfterExists && rightAfterBoundary.count >= 3 {
-                        if let correction = aospTrieEngine.spellCheck(rightAfterBoundary) {
-                            let corrFreq = aospTrieEngine.wordFrequency(correction.correction)
+                    if leftExists && !aospTrieEngine.wordExists(rightAfter) && rightAfter.count >= 3 {
+                        if let c = aospTrieEngine.spellCheck(rightAfter) {
                             let score = UInt32(aospTrieEngine.wordFrequency(left))
-                                      * UInt32(corrFreq)
+                                      * UInt32(aospTrieEngine.wordFrequency(c.correction))
                             if score > bestBoundaryScore {
                                 bestBoundaryScore = score
-                                bestBoundarySplit = "\(left) \(correction.correction)"
+                                bestBoundarySplit = "\(left) \(c.correction)"
                             }
                         }
                     }
                 }
             }
 
-            // --- Strategy 2: Direct split with bigram evidence ---
-            // Both halves exist AND the pair appears in our n-gram corpus.
-            // Bigram requirement prevents "honnête lent" from beating "honnêtement".
+            // Direct split with bigram evidence
             if leftExists && rightExists {
-                let bigramScore = aospTrieEngine.bigramScore(for: right, after: left)
-                if bigramScore > 0 {
-                    // Combine word frequency with bigram score so very common pairs
-                    // (e.g., "pas mal", "de la") get highest priority.
-                    let freqProduct = UInt32(aospTrieEngine.wordFrequency(left))
-                                    * UInt32(aospTrieEngine.wordFrequency(right))
-                    let score = freqProduct + UInt32(bigramScore) * 1000
+                let bigram = aospTrieEngine.bigramScore(for: right, after: left)
+                if bigram > 0 {
+                    let score = UInt32(aospTrieEngine.wordFrequency(left))
+                              * UInt32(aospTrieEngine.wordFrequency(right))
+                              + UInt32(bigram) * 1000
                     if score > bestBigramScore {
                         bestBigramScore = score
                         bestBigramSplit = "\(left) \(right)"
@@ -402,14 +519,17 @@ class TextPredictionEngine {
             }
         }
 
-        // Boundary-signal splits win over bigram-only splits (higher confidence
-        // due to the spacebar-neighbor key evidence).
-        if let boundary = bestBoundarySplit {
-            return boundary
+        let winner = bestBoundarySplit ?? bestBigramSplit
+        let hasBoundary = bestBoundarySplit != nil
+        #if DEBUG
+        if winner != nil {
+            AutocorrectDebugLog.splitEvaluation(
+                word: word, boundaryBest: bestBoundarySplit,
+                bigramBest: bestBigramSplit, winner: winner
+            )
         }
-        if let bigram = bestBigramSplit {
-            return bigram
-        }
-        return nil
+        #endif
+        return (winner, hasBoundary)
     }
+
 }
