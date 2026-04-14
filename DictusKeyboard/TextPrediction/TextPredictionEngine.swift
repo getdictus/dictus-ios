@@ -502,49 +502,55 @@ class TextPredictionEngine {
         var bestBoundaryScore: UInt32 = 0
         var bestBigramSplit: String?
         var bestBigramScore: UInt32 = 0
+
+        // CRITICAL: every split candidate must have bigram evidence. Without this,
+        // French words with 'n' in the middle (fonctionnalités, payantes, etc.)
+        // get wrongly split because both halves happen to be valid words. Bigram
+        // gating is the AOSP LatinIME standard — only pairs that actually occur
+        // in real French text are accepted as split candidates.
+        func bigramValidatedScore(left: String, right: String) -> UInt32? {
+            let bigram = aospTrieEngine.bigramScore(for: right, after: left)
+            guard bigram > 0 else { return nil }
+            let freqProduct = UInt32(aospTrieEngine.wordFrequency(left))
+                            * UInt32(aospTrieEngine.wordFrequency(right))
+            return freqProduct + UInt32(bigram) * 1000
+        }
+
         for splitPos in minPartLength...(chars.count - minPartLength) {
             let left = String(chars[0..<splitPos])
             let right = String(chars[splitPos...])
             let leftExists = aospTrieEngine.wordExists(left)
             let rightExists = aospTrieEngine.wordExists(right)
 
-            // Boundary-char removal at spacebar neighbor
+            // Boundary-char removal at spacebar neighbor (requires bigram evidence)
             if splitPos < chars.count, spacebarNeighbors.contains(chars[splitPos]) {
                 let rightAfter = String(chars[(splitPos + 1)...])
                 if rightAfter.count >= minPartLength {
-                    if leftExists && aospTrieEngine.wordExists(rightAfter) {
-                        let score = UInt32(aospTrieEngine.wordFrequency(left))
-                                  * UInt32(aospTrieEngine.wordFrequency(rightAfter))
-                        if score > bestBoundaryScore {
-                            bestBoundaryScore = score
-                            bestBoundarySplit = "\(left) \(rightAfter)"
-                        }
+                    // Case A: both halves valid as-is
+                    if leftExists && aospTrieEngine.wordExists(rightAfter),
+                       let s = bigramValidatedScore(left: left, right: rightAfter),
+                       s > bestBoundaryScore {
+                        bestBoundaryScore = s
+                        bestBoundarySplit = "\(left) \(rightAfter)"
                     }
-                    if leftExists && !aospTrieEngine.wordExists(rightAfter) && rightAfter.count >= 3 {
-                        if let c = aospTrieEngine.spellCheck(rightAfter) {
-                            let score = UInt32(aospTrieEngine.wordFrequency(left))
-                                      * UInt32(aospTrieEngine.wordFrequency(c.correction))
-                            if score > bestBoundaryScore {
-                                bestBoundaryScore = score
-                                bestBoundarySplit = "\(left) \(c.correction)"
-                            }
-                        }
+                    // Case B: right half needs spell correction
+                    // ("mercinbeauvouo" → "merci" + spellCheck("beauvouo") → "beaucoup")
+                    if leftExists && !aospTrieEngine.wordExists(rightAfter) && rightAfter.count >= 3,
+                       let c = aospTrieEngine.spellCheck(rightAfter),
+                       let s = bigramValidatedScore(left: left, right: c.correction),
+                       s > bestBoundaryScore {
+                        bestBoundaryScore = s
+                        bestBoundarySplit = "\(left) \(c.correction)"
                     }
                 }
             }
 
             // Direct split with bigram evidence
-            if leftExists && rightExists {
-                let bigram = aospTrieEngine.bigramScore(for: right, after: left)
-                if bigram > 0 {
-                    let score = UInt32(aospTrieEngine.wordFrequency(left))
-                              * UInt32(aospTrieEngine.wordFrequency(right))
-                              + UInt32(bigram) * 1000
-                    if score > bestBigramScore {
-                        bestBigramScore = score
-                        bestBigramSplit = "\(left) \(right)"
-                    }
-                }
+            if leftExists && rightExists,
+               let s = bigramValidatedScore(left: left, right: right),
+               s > bestBigramScore {
+                bestBigramScore = s
+                bestBigramSplit = "\(left) \(right)"
             }
         }
 
