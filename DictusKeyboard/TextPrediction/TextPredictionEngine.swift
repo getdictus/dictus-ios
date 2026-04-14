@@ -181,37 +181,48 @@ class TextPredictionEngine {
 
         // Word splitting + single-word correction comparison.
         //
-        // WHY compare both: trySplit() with pure bigram evidence (no spacebar-
-        // neighbor signal) can produce false positives like "Honnetelent" →
-        // "Honnête lent" when both halves are valid words and happen to co-occur
-        // in our corpus once. The single-word correction "honnêtement" is clearly
-        // better but was skipped entirely. By computing both candidates and
-        // preferring single-word when the split has weak evidence, we avoid
-        // surprising the user.
+        // Strategy (informed by real user feedback + debug log analysis):
         //
-        // DECISION RULE:
-        // 1. Split with boundary-char evidence (spacebar neighbor) → ALWAYS wins
-        //    (strong physical signal of a missed space).
-        // 2. Split with only bigram evidence vs single-word correction:
-        //    - If single-word exists at edit distance ≤ 2 AND is a common word
-        //      (freq ≥ 1000) → single-word wins.
-        //    - Otherwise → split wins.
-        // 3. No split found → fall through to trie single-word correction.
-        let (splitResult, splitHasBoundarySignal) = trySplitWithSignal(wordToCheck)
+        // 1. Split with bigram evidence (any strategy) → accept. The n-gram
+        //    model confirms this is a real phrase pattern.
+        //
+        // 2. Split with boundary signal but NO bigram evidence → compare ED.
+        //    Our Wikipedia corpus misses colloquial phrases like "pas mal"
+        //    (bigram score 0) but the spacebar-neighbor key proves a missed
+        //    space. Accept the split only when it fits the input noticeably
+        //    better than the trie's single-word correction (split ED + 1 ≤
+        //    single ED). This rejects "fonction agités" cases where single-
+        //    word correction is at ED 0 or 1 but keeps "pas mal" cases
+        //    where single-word "Pascal" is at ED 2 and split ED is 1.
+        //
+        // 3. No split → fall through to trie single-word correction.
+        let (splitResult, splitHasBoundary, splitHasBigram) = trySplitWithSignal(wordToCheck)
         if let split = splitResult {
             let useSplit: Bool
-            if splitHasBoundarySignal {
-                useSplit = true  // Strong signal, always prefer split
-            } else if let single = aospTrieEngine.spellCheck(word) {
-                // Both candidates exist — compare them
-                let singleLower = single.correction.lowercased().replacingOccurrences(of: " ", with: "")
-                let singleDistance = Self.editDistance(wordToCheck, singleLower)
-                let singleFreq = aospTrieEngine.wordFrequency(single.correction.lowercased())
-                let singleIsStrong = singleDistance <= 2 && singleFreq >= 1000
-                useSplit = !singleIsStrong
+            if splitHasBigram {
+                useSplit = true  // bigram confirmed, accept
+            } else if splitHasBoundary {
+                // Boundary-only (no bigram): compare with single-word correction via ED
+                if let single = aospTrieEngine.spellCheck(word) {
+                    let splitJoined = split.replacingOccurrences(of: " ", with: "").lowercased()
+                    let splitED = Self.editDistance(wordToCheck, splitJoined)
+                    let singleLower = single.correction.lowercased()
+                    let singleWordPart: String
+                    if let idx = singleLower.lastIndex(of: "'") {
+                        singleWordPart = String(singleLower[singleLower.index(after: idx)...])
+                    } else {
+                        singleWordPart = singleLower
+                    }
+                    let singleED = Self.editDistance(wordToCheck, singleWordPart)
+                    // Accept split only if strictly better fit (split + 1 ≤ single).
+                    // "pasnmal": split "pasmal" ED 1, single "pascal" ED 2 → 1+1=2 ≤ 2 ✓
+                    // "fonctionnalités": split "fonctionagités" ED ~3, single ED 0/1 → reject ✓
+                    useSplit = (splitED + 1) <= singleED
+                } else {
+                    useSplit = true  // no single-word alternative, accept split
+                }
             } else {
-                // No single-word alternative, split wins
-                useSplit = true
+                useSplit = false  // direct split rejected without bigram (prevented by trySplit)
             }
 
             if useSplit {
@@ -220,14 +231,14 @@ class TextPredictionEngine {
                 #if DEBUG
                 AutocorrectDebugLog.autocorrectDecision(
                     original: word, corrected: result,
-                    branch: splitHasBoundarySignal ? "split-boundary" : "split-bigram",
+                    branch: splitHasBoundary ? "split-boundary" : "split-bigram",
                     prevWord: nil
                 )
                 #endif
                 return (result, [])
             }
             #if DEBUG
-            AutocorrectDebugLog.note("split \"\(split)\" rejected in favor of single-word correction")
+            AutocorrectDebugLog.note("split \"\(split)\" rejected (ED comparison favored single-word)")
             #endif
         }
 
@@ -357,7 +368,42 @@ class TextPredictionEngine {
                 return result
             }
 
-            let reranked = candidateSet.sorted { $0.value > $1.value }
+            // CRITICAL: the rerank must not pick a candidate that's FARTHER from
+            // the typed input than the original trie winner. Example from debug
+            // logs: pejx → trie chose "peux" (ED 1), but bigram("veux" after "tu")
+            // = 49828 while bigram("peux" after "tu") = 0 (data gap, our corpus
+            // lacks common colloquial phrases). Rerank promoted "veux" (ED 2)
+            // over "peux" (ED 1), forcing the user to undo.
+            //
+            // Fix: filter candidates to those at ED ≤ original winner's ED. The
+            // rerank may still reorder within this set, but can never move to a
+            // less-proximal candidate. Prevents bigram data gaps from overriding
+            // the trie's proximity scoring.
+            let originalWordPart: String = {
+                let ol = result.correction.lowercased()
+                if let idx = ol.lastIndex(of: "'") {
+                    return String(ol[ol.index(after: idx)...])
+                } else {
+                    return ol
+                }
+            }()
+            let originalED = Self.editDistance(wordToCheck, originalWordPart)
+
+            let eligible = candidateSet.filter { candidate, _ in
+                let cl = candidate.lowercased()
+                let cWordPart: String
+                if let idx = cl.lastIndex(of: "'") {
+                    cWordPart = String(cl[cl.index(after: idx)...])
+                } else {
+                    cWordPart = cl
+                }
+                return Self.editDistance(wordToCheck, cWordPart) <= originalED
+            }
+            // Safety: if filter removed everything (shouldn't happen — original is always eligible),
+            // fall back to full set.
+            let candidates = eligible.isEmpty ? candidateSet : eligible
+
+            let reranked = candidates.sorted { $0.value > $1.value }
             let newCorrection = reranked[0].key
             let newAlternatives = reranked.dropFirst().map { $0.key }
             #if DEBUG
@@ -481,39 +527,48 @@ class TextPredictionEngine {
         return isCapitalized ? (corrected.prefix(1).uppercased() + corrected.dropFirst()) : corrected
     }
 
-    /// Wrapper around trySplit that also reports whether the chosen split had
-    /// a boundary-char (spacebar-neighbor) signal. Used by the caller to decide
-    /// how strongly to weight the split vs a single-word correction.
-    private func trySplitWithSignal(_ word: String) -> (split: String?, hasBoundarySignal: Bool) {
+    /// Wrapper around trySplit that returns the winning split plus flags
+    /// describing the evidence backing it. Caller decides whether to accept.
+    ///
+    /// Evidence sources:
+    /// - boundarySignal: split used a spacebar-neighbor char — strong physical evidence
+    /// - bigramEvidence: pair (left, right) has bigram score > 0 — linguistic evidence
+    ///
+    /// Rules for returning a candidate:
+    /// - Direct split (no boundary): REQUIRES bigram. Prevents "honnête lent".
+    /// - Boundary split: allowed WITHOUT bigram (our n-gram corpus misses
+    ///   colloquial phrases like "pas mal"). Caller applies an ED comparison
+    ///   with the single-word correction to decide.
+    ///
+    /// Boundary splits with bigram evidence win over those without.
+    private func trySplitWithSignal(_ word: String)
+        -> (split: String?, hasBoundarySignal: Bool, hasBigramEvidence: Bool)
+    {
         let chars = Array(word)
-        // Minimum part length 3: prevents spurious splits like "honne" → "ho ne",
-        // "fingue" → "fi tue", "calvier" → "cal hier". Two-char French words like
-        // "ho", "ne", "fi", "tu" are all valid and match too easily. Requiring 3+
-        // chars per part kills the false-positive explosion seen in debug logs
-        // without losing legitimate splits ("pas mal", "merci beaucoup" still work).
+        // Minimum part length 3: prevents "honne" → "ho ne", "fingue" → "fi tue".
+        // Two-char French words match too easily. "pas mal" has 3-char halves.
         let minPartLength = 3
-        guard chars.count >= minPartLength * 2 else { return (nil, false) }
+        guard chars.count >= minPartLength * 2 else { return (nil, false, false) }
 
         let spacebarNeighbors = LayoutType.active == .azerty
             ? Self.azertySpacebarNeighbors
             : Self.qwertySpacebarNeighbors
 
-        var bestBoundarySplit: String?
-        var bestBoundaryScore: UInt32 = 0
-        var bestBigramSplit: String?
-        var bestBigramScore: UInt32 = 0
+        var bestBoundary: (split: String, score: UInt32, hasBigram: Bool)?
+        var bestBigram: (split: String, score: UInt32)?
 
-        // CRITICAL: every split candidate must have bigram evidence. Without this,
-        // French words with 'n' in the middle (fonctionnalités, payantes, etc.)
-        // get wrongly split because both halves happen to be valid words. Bigram
-        // gating is the AOSP LatinIME standard — only pairs that actually occur
-        // in real French text are accepted as split candidates.
-        func bigramValidatedScore(left: String, right: String) -> UInt32? {
+        /// Score a candidate pair. Returns (score, hasBigram).
+        /// Candidates with bigram get a large bonus (1000×bigram), making them
+        /// strictly win over non-bigram candidates at the same freq product.
+        func scorePair(left: String, right: String) -> (UInt32, Bool) {
             let bigram = aospTrieEngine.bigramScore(for: right, after: left)
-            guard bigram > 0 else { return nil }
             let freqProduct = UInt32(aospTrieEngine.wordFrequency(left))
                             * UInt32(aospTrieEngine.wordFrequency(right))
-            return freqProduct + UInt32(bigram) * 1000
+            if bigram > 0 {
+                return (freqProduct + UInt32(bigram) * 1000, true)
+            } else {
+                return (freqProduct, false)
+            }
         }
 
         for splitPos in minPartLength...(chars.count - minPartLength) {
@@ -522,49 +577,64 @@ class TextPredictionEngine {
             let leftExists = aospTrieEngine.wordExists(left)
             let rightExists = aospTrieEngine.wordExists(right)
 
-            // Boundary-char removal at spacebar neighbor (requires bigram evidence)
+            // Boundary-char removal at spacebar neighbor (bigram OPTIONAL)
             if splitPos < chars.count, spacebarNeighbors.contains(chars[splitPos]) {
                 let rightAfter = String(chars[(splitPos + 1)...])
                 if rightAfter.count >= minPartLength {
                     // Case A: both halves valid as-is
-                    if leftExists && aospTrieEngine.wordExists(rightAfter),
-                       let s = bigramValidatedScore(left: left, right: rightAfter),
-                       s > bestBoundaryScore {
-                        bestBoundaryScore = s
-                        bestBoundarySplit = "\(left) \(rightAfter)"
+                    if leftExists && aospTrieEngine.wordExists(rightAfter) {
+                        let (s, hasBi) = scorePair(left: left, right: rightAfter)
+                        if bestBoundary == nil || s > bestBoundary!.score {
+                            bestBoundary = ("\(left) \(rightAfter)", s, hasBi)
+                        }
                     }
                     // Case B: right half needs spell correction
-                    // ("mercinbeauvouo" → "merci" + spellCheck("beauvouo") → "beaucoup")
                     if leftExists && !aospTrieEngine.wordExists(rightAfter) && rightAfter.count >= 3,
-                       let c = aospTrieEngine.spellCheck(rightAfter),
-                       let s = bigramValidatedScore(left: left, right: c.correction),
-                       s > bestBoundaryScore {
-                        bestBoundaryScore = s
-                        bestBoundarySplit = "\(left) \(c.correction)"
+                       let c = aospTrieEngine.spellCheck(rightAfter) {
+                        let (s, hasBi) = scorePair(left: left, right: c.correction)
+                        if bestBoundary == nil || s > bestBoundary!.score {
+                            bestBoundary = ("\(left) \(c.correction)", s, hasBi)
+                        }
                     }
                 }
             }
 
-            // Direct split with bigram evidence
-            if leftExists && rightExists,
-               let s = bigramValidatedScore(left: left, right: right),
-               s > bestBigramScore {
-                bestBigramScore = s
-                bestBigramSplit = "\(left) \(right)"
+            // Direct split — REQUIRES bigram evidence (no boundary signal to fall back on)
+            if leftExists && rightExists {
+                let (s, hasBi) = scorePair(left: left, right: right)
+                if hasBi, bestBigram == nil || s > bestBigram!.score {
+                    bestBigram = ("\(left) \(right)", s)
+                }
             }
         }
 
-        let winner = bestBoundarySplit ?? bestBigramSplit
-        let hasBoundary = bestBoundarySplit != nil
+        // Priority: boundary > direct bigram (boundary has stronger physical signal)
+        let winner: String?
+        let hasBoundary: Bool
+        let hasBigramEv: Bool
+        if let b = bestBoundary {
+            winner = b.split
+            hasBoundary = true
+            hasBigramEv = b.hasBigram
+        } else if let bg = bestBigram {
+            winner = bg.split
+            hasBoundary = false
+            hasBigramEv = true
+        } else {
+            winner = nil
+            hasBoundary = false
+            hasBigramEv = false
+        }
+
         #if DEBUG
         if winner != nil {
             AutocorrectDebugLog.splitEvaluation(
-                word: word, boundaryBest: bestBoundarySplit,
-                bigramBest: bestBigramSplit, winner: winner
+                word: word, boundaryBest: bestBoundary?.split,
+                bigramBest: bestBigram?.split, winner: winner
             )
         }
         #endif
-        return (winner, hasBoundary)
+        return (winner, hasBoundary, hasBigramEv)
     }
 
 }
