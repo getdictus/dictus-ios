@@ -466,6 +466,23 @@ class TextPredictionEngine {
     private static let azertySpacebarNeighbors: Set<Character> = ["n", "b", ","]
     private static let qwertySpacebarNeighbors: Set<Character> = ["n", "b", "m"]
 
+    /// Short French words (2 chars) that are allowed to appear as split parts.
+    /// Standard split requires ≥3 chars per part to avoid noise like "ho ne",
+    /// but French has many 2-char pronouns/articles/connectives that commonly
+    /// start missed-space compounds (e.g., "tuboeux" should split as "tu peux",
+    /// "jepense" as "je pense"). This whitelist restricts the 2-char relaxation
+    /// to words that are structurally plausible as a left/right split half.
+    private static let shortSplitWhitelist: Set<String> = [
+        "je", "tu", "il", "on", "me", "te", "se", "ne",
+        "le", "la", "un", "du", "au", "en",
+        "et", "ou", "ni", "si", "ça", "où", "ce"
+    ]
+
+    /// Whether a split part is long enough or belongs to the short-word whitelist.
+    private static func isValidSplitPart(_ part: String) -> Bool {
+        return part.count >= 3 || (part.count == 2 && shortSplitWhitelist.contains(part))
+    }
+
     // MARK: - Apostrophe Prefix Correction
 
     /// Valid single-char contraction prefixes in French.
@@ -545,10 +562,12 @@ class TextPredictionEngine {
         -> (split: String?, hasBoundarySignal: Bool, hasBigramEvidence: Bool)
     {
         let chars = Array(word)
-        // Minimum part length 3: prevents "honne" → "ho ne", "fingue" → "fi tue".
-        // Two-char French words match too easily. "pas mal" has 3-char halves.
-        let minPartLength = 3
-        guard chars.count >= minPartLength * 2 else { return (nil, false, false) }
+        // Minimum absolute part length 2; each part must also pass isValidSplitPart
+        // which requires either ≥3 chars or membership in the short-word whitelist.
+        // This lets "tu peux" split from "tuboeux" while still blocking "ho ne"
+        // from "honne" (since "ho" is not whitelisted).
+        let minPartLength = 2
+        guard chars.count >= 4 else { return (nil, false, false) }
 
         let spacebarNeighbors = LayoutType.active == .azerty
             ? Self.azertySpacebarNeighbors
@@ -574,13 +593,17 @@ class TextPredictionEngine {
         for splitPos in minPartLength...(chars.count - minPartLength) {
             let left = String(chars[0..<splitPos])
             let right = String(chars[splitPos...])
+
+            // Both parts must meet the length/whitelist requirement.
+            guard Self.isValidSplitPart(left) else { continue }
+
             let leftExists = aospTrieEngine.wordExists(left)
             let rightExists = aospTrieEngine.wordExists(right)
 
             // Boundary-char removal at spacebar neighbor (bigram OPTIONAL)
             if splitPos < chars.count, spacebarNeighbors.contains(chars[splitPos]) {
                 let rightAfter = String(chars[(splitPos + 1)...])
-                if rightAfter.count >= minPartLength {
+                if Self.isValidSplitPart(rightAfter) {
                     // Case A: both halves valid as-is
                     if leftExists && aospTrieEngine.wordExists(rightAfter) {
                         let (s, hasBi) = scorePair(left: left, right: rightAfter)
@@ -588,7 +611,8 @@ class TextPredictionEngine {
                             bestBoundary = ("\(left) \(rightAfter)", s, hasBi)
                         }
                     }
-                    // Case B: right half needs spell correction
+                    // Case B: right half needs spell correction (min 3 chars to avoid
+                    // correcting short garbage into arbitrary words).
                     if leftExists && !aospTrieEngine.wordExists(rightAfter) && rightAfter.count >= 3,
                        let c = aospTrieEngine.spellCheck(rightAfter) {
                         let (s, hasBi) = scorePair(left: left, right: c.correction)
@@ -600,6 +624,7 @@ class TextPredictionEngine {
             }
 
             // Direct split — REQUIRES bigram evidence (no boundary signal to fall back on)
+            guard Self.isValidSplitPart(right) else { continue }
             if leftExists && rightExists {
                 let (s, hasBi) = scorePair(left: left, right: right)
                 if hasBi, bestBigram == nil || s > bestBigram!.score {

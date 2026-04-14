@@ -13,7 +13,13 @@ static constexpr char NGRM_MAGIC[4] = {'N', 'G', 'R', 'M'};
 static constexpr uint16_t NGRM_VERSION = 1;
 
 /// Maximum number of prediction results stored per n-gram key.
-static constexpr uint8_t NGRM_MAX_RESULTS = 8;
+/// Increased from 8 to 16 to accommodate both formal Wikipedia pairs and
+/// colloquial seed bigrams (e.g., "pas" has ~8 formal pairs from Wikipedia
+/// plus ~13 colloquial seeds — "pas mal", "pas du", etc. — that need to
+/// survive the cap to unlock split validation in the keyboard).
+/// File size grows ~50% per key (from max 8×6=48 bytes to max 16×6=96 bytes
+/// per entry), but overall .dict files remain under 6 MiB per language.
+static constexpr uint8_t NGRM_MAX_RESULTS = 16;
 
 /// Header size in bytes.
 static constexpr uint32_t NGRM_HEADER_SIZE = 32;

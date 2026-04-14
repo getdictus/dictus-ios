@@ -33,7 +33,7 @@ from typing import Optional
 NGRM_MAGIC = b"NGRM"
 NGRM_VERSION = 1
 NGRM_HEADER_SIZE = 32
-NGRM_MAX_RESULTS = 8
+NGRM_MAX_RESULTS = 16  # Must match C++ dictus_ngram_format.h exactly
 
 # Google Books Ngram frequency data (CSV: ngram,frequency)
 NGRAM_BASE_URL = "https://raw.githubusercontent.com/orgtre/google-books-ngram-frequency/main/ngrams"
@@ -86,6 +86,194 @@ ES_FUNCTION_WORDS = [
     "ser", "estar", "tener", "hacer", "ir", "ver", "dar", "decir",
     "todo", "todos", "toda", "todas", "otro", "otra", "mucho", "poco",
 ]
+
+
+# --- Colloquial seed bigrams ---
+# These pairs are common in SPOKEN/INFORMAL usage but underrepresented in our
+# encyclopedic corpus (Wikipedia sources). Without them, the keyboard cannot
+# split missed-space compounds like "pasmal" → "pas mal" because the bigram
+# gating sees no evidence.
+#
+# Seeds are merged into the bigram data with a moderate synthetic frequency
+# (500), which after log-normalization produces a non-zero uint16 score
+# sufficient to unlock split validation. Real corpus frequencies still
+# dominate the ranking when both sources agree.
+
+FR_SEED_BIGRAMS = [
+    # "pas X" negation constructions
+    ("pas", "mal"), ("pas", "du"), ("pas", "grand"), ("pas", "trop"),
+    ("pas", "loin"), ("pas", "encore"), ("pas", "vraiment"),
+    ("pas", "seulement"), ("pas", "possible"), ("pas", "bien"),
+    ("pas", "tout"), ("pas", "assez"), ("pas", "forcément"),
+    # Contractions + common oral
+    ("du", "tout"), ("du", "coup"), ("du", "mal"),
+    ("ça", "va"), ("ça", "marche"), ("ça", "fait"), ("ça", "ira"),
+    ("en", "fait"), ("en", "plus"), ("en", "gros"), ("en", "tout"),
+    ("en", "effet"), ("en", "cours"), ("en", "train"),
+    ("bien", "sûr"), ("bien", "aimé"), ("bien", "fait"), ("bien", "entendu"),
+    ("tout", "de"), ("tout", "à"), ("tout", "ce"), ("tout", "le"),
+    ("au", "revoir"), ("au", "fait"), ("au", "moins"), ("au", "cas"),
+    ("peut", "être"),
+    ("merci", "beaucoup"), ("merci", "bien"), ("merci", "de"),
+    ("n'importe", "quoi"), ("n'importe", "où"), ("n'importe", "qui"),
+    # Pronoun + common verbs (critical for splits like "jepense" → "je pense")
+    ("je", "vais"), ("je", "peux"), ("je", "veux"), ("je", "sais"),
+    ("je", "pense"), ("je", "suis"), ("je", "crois"), ("je", "dois"),
+    ("tu", "peux"), ("tu", "veux"), ("tu", "sais"), ("tu", "fais"),
+    ("tu", "penses"), ("tu", "es"), ("tu", "as"), ("tu", "dois"),
+    ("il", "faut"), ("il", "fait"), ("il", "va"), ("il", "y"),
+    ("il", "est"), ("il", "a"),
+    ("elle", "est"), ("elle", "a"), ("elle", "va"),
+    ("on", "est"), ("on", "a"), ("on", "va"), ("on", "peut"),
+    ("y", "a"),
+    # Politeness
+    ("s'il", "te"), ("s'il", "vous"),
+    ("te", "plaît"), ("vous", "plaît"),
+    # Intensifiers
+    ("très", "bien"), ("très", "peu"), ("très", "bon"),
+    ("trop", "bien"), ("trop", "tard"), ("trop", "peu"),
+    ("plus", "tard"), ("plus", "tôt"), ("plus", "ou"),
+    ("plus", "jamais"), ("plus", "rien"),
+    ("ou", "moins"), ("ou", "alors"),
+    ("quand", "même"), ("quand", "tu"), ("quand", "on"),
+]
+
+EN_SEED_BIGRAMS = [
+    # Common phrases
+    ("not", "bad"), ("not", "really"), ("not", "sure"), ("not", "enough"),
+    ("of", "course"), ("of", "the"), ("of", "a"),
+    ("a", "lot"), ("a", "bit"), ("a", "little"),
+    ("in", "fact"), ("in", "the"), ("in", "a"),
+    # Pronoun + common verbs
+    ("i", "think"), ("i", "know"), ("i", "can"), ("i", "will"),
+    ("i", "have"), ("i", "want"), ("i", "need"), ("i", "am"),
+    ("you", "know"), ("you", "can"), ("you", "have"), ("you", "are"),
+    ("you", "should"), ("you", "want"),
+    ("he", "is"), ("she", "is"), ("it", "is"), ("they", "are"),
+    ("we", "are"), ("we", "have"), ("we", "can"),
+    ("kind", "of"), ("sort", "of"),
+]
+
+ES_SEED_BIGRAMS = [
+    ("no", "sé"), ("no", "puedo"), ("no", "quiero"), ("no", "es"),
+    ("no", "tengo"), ("no", "hay"), ("no", "está"),
+    ("por", "favor"), ("por", "fin"), ("por", "ejemplo"), ("por", "qué"),
+    ("más", "o"), ("o", "menos"),
+    ("muy", "bien"), ("muy", "mal"), ("muy", "poco"),
+    ("sí", "claro"),
+    ("yo", "soy"), ("yo", "tengo"), ("yo", "puedo"), ("yo", "sé"),
+    ("yo", "quiero"), ("yo", "creo"),
+    ("tú", "eres"), ("tú", "tienes"), ("tú", "puedes"),
+    ("lo", "que"), ("lo", "sé"),
+]
+
+SEED_BIGRAMS_BY_LANG = {
+    "fr": FR_SEED_BIGRAMS,
+    "en": EN_SEED_BIGRAMS,
+    "es": ES_SEED_BIGRAMS,
+}
+
+# Synthetic frequency for seed bigrams. Needs to be high enough to survive
+# the per-key top-N cap against formal Wikipedia pairs. Empirically the 16th
+# entry for popular keys like "pas" has raw frequency ~57000 in our merged
+# corpus (all sources combined); seeds need to be at or above this floor.
+# Setting to 100000 guarantees survival while keeping the #1-ranked real
+# pair (often >400000 freq) safely above seed-injected entries.
+SEED_BIGRAM_FREQ = 100000
+
+
+def inject_seed_bigrams(
+    bigram_data: dict[str, list[tuple[str, int]]], lang: str
+) -> dict[str, list[tuple[str, int]]]:
+    """
+    Boost colloquial seed bigrams in the merged data. Runs BEFORE capping so
+    that seeds rank within the per-key top-N when possible. Some seeds (e.g.,
+    "pas mal") still cannot compete with Google Books pairs at 10M+ frequency
+    — for those, force_insert_seeds_post_cap guarantees presence after the cap.
+    """
+    seeds = SEED_BIGRAMS_BY_LANG.get(lang)
+    if not seeds:
+        return bigram_data
+
+    boosted = 0
+    added = 0
+    for left, right in seeds:
+        l, r = left.lower(), right.lower()
+        existing = bigram_data.get(l, [])
+        found_idx: Optional[int] = None
+        for i, (w, _) in enumerate(existing):
+            if w == r:
+                found_idx = i
+                break
+        if found_idx is not None:
+            w, f = existing[found_idx]
+            existing[found_idx] = (w, max(f, SEED_BIGRAM_FREQ))
+            if f < SEED_BIGRAM_FREQ:
+                boosted += 1
+        else:
+            existing.append((r, SEED_BIGRAM_FREQ))
+            added += 1
+        bigram_data[l] = existing
+
+    print(f"  Seed bigrams for '{lang}': {added} added, {boosted} boosted "
+          f"(total seeds: {len(seeds)})")
+    return bigram_data
+
+
+def force_insert_seeds_post_cap(
+    bigram_data: dict[str, list[tuple[str, int]]], lang: str
+) -> dict[str, list[tuple[str, int]]]:
+    """
+    After per-key capping, guarantee seed pairs are present by reserving up
+    to MAX_FORCE_PER_KEY slots at the tail of each key's results for missing
+    seeds. Displaces the lowest-freq originals to make room.
+    """
+    seeds = SEED_BIGRAMS_BY_LANG.get(lang)
+    if not seeds:
+        return bigram_data
+
+    # Cap: at most 4 force-inserted seeds per key. Prevents displacing too
+    # many legitimate predictions when a popular left word like "pas" has
+    # many missing seeds. 4 covers the most-used colloquial pairs per key.
+    MAX_FORCE_PER_KEY = 4
+    # Freq 100 will log-normalize to a small but non-zero uint16 score —
+    # enough to unlock split validation without dominating real predictions.
+    FORCE_FREQ = 100
+
+    # Group seed rights by left-word so we process each key atomically.
+    seeds_by_left: dict[str, list[str]] = {}
+    for left, right in seeds:
+        seeds_by_left.setdefault(left.lower(), []).append(right.lower())
+
+    forced_total = 0
+    for left, seed_rights in seeds_by_left.items():
+        existing = bigram_data.get(left, [])
+        existing_words = {w for w, _ in existing}
+        missing = [r for r in seed_rights if r not in existing_words]
+        if not missing:
+            continue
+        to_add = missing[:MAX_FORCE_PER_KEY]
+
+        # Separate existing entries into "is-a-seed" vs "not-a-seed" so we can
+        # preserve seeds that already made it into top-N (e.g., "pas du" must
+        # stay even when we inject "pas mal", "pas grand", etc.).
+        seed_set = set(seed_rights)
+        existing_sorted = sorted(existing, key=lambda x: x[1], reverse=True)
+        existing_seeds = [(w, s) for w, s in existing_sorted if w in seed_set]
+        existing_nonseeds = [(w, s) for w, s in existing_sorted if w not in seed_set]
+
+        # Compose final list: all existing seeds + newly inserted seeds,
+        # then fill remaining slots with top non-seed originals.
+        seed_entries = existing_seeds + [(r, FORCE_FREQ) for r in to_add]
+        nonseed_slots = max(0, NGRM_MAX_RESULTS - len(seed_entries))
+        combined = existing_nonseeds[:nonseed_slots] + seed_entries
+        # Re-sort so the output is ordered by score desc (reader preserves order).
+        combined.sort(key=lambda x: x[1], reverse=True)
+        bigram_data[left] = combined[:NGRM_MAX_RESULTS]
+        forced_total += len(to_add)
+
+    print(f"  Force-inserted {forced_total} seed pairs post-cap for '{lang}'")
+    return bigram_data
 
 
 # --- FNV-1a 32-bit hash (must match C++ exactly) ---
@@ -687,6 +875,9 @@ def build_ngrams(
         bigram_sources = [s for s in [opensubs_bigrams, books_bigrams, wiki_bigrams] if s]
         if bigram_sources:
             bigram_data = merge_ngram_sources(*bigram_sources)
+            # Inject colloquial seed bigrams to cover oral phrases missing from
+            # our encyclopedic corpus (e.g., "pas mal" is absent from Wikipedia).
+            bigram_data = inject_seed_bigrams(bigram_data, lang)
         else:
             # Last resort: synthetic bigrams from frequency JSON
             fallback_path = f"DictusKeyboard/Resources/{lang}_frequency.json"
@@ -720,6 +911,13 @@ def build_ngrams(
     # Cap results per key
     bigram_data = cap_and_sort_results(bigram_data)
     trigram_data = cap_and_sort_results(trigram_data)
+
+    # Force-insert seed bigrams that couldn't survive the cap against
+    # Google Books millions-of-occurrences pairs (e.g., "pas mal" must be
+    # present for the keyboard's split validation to work, even if "pas de"
+    # at 13M freq dominates the top N).
+    if not fallback_json:
+        bigram_data = force_insert_seeds_post_cap(bigram_data, lang)
 
     # Optionally limit total entries
     if max_bigrams and len(bigram_data) > max_bigrams:
