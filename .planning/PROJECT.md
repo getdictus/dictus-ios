@@ -69,6 +69,20 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 
 ### Active
 
+**Milestone v1.7 — Stability, Polish & i18n**
+
+**Goal:** Fix remaining critical bugs post-v1.6, align keyboard geometry with Apple system keyboard, and establish a reusable i18n foundation with German as first new language.
+
+**Target features:**
+- Fix silent transcription insertion bug (intermittent, app-visible failure)
+- Keyboard layout glitch residual in v1.6.0-beta.1
+- Audit and align keyboard key geometry with Apple system keyboard
+- Autocorrect v2 — align with AOSP LatinIME (personal LM + richer n-grams + unified scoring)
+- Re-test Whisper Turbo and add device compatibility gating
+- Build reusable language onboarding/automation process
+- Add German language support (first use case of i18n process)
+
+**Carried from v1.4 (deferred):**
 - [ ] BUG-71: Crash when starting dictation during phone call (CXCallObserver guard needed)
 - [ ] BUG-72: AirPods/media apps not resuming after recording (.notifyOthersOnDeactivation)
 - [ ] Cold start auto-return UX improvement (beyond current swipe-back overlay)
@@ -136,4 +150,4 @@ Known remaining issues:
 | App Group migration to group.solutions.pivi.dictus | Old ID claimed by personal team, professional team needed new ID | ✓ Good — clean separation |
 
 ---
-*Last updated: 2026-04-08 after v1.4 milestone*
+*Last updated: 2026-04-15 after v1.7 milestone start*
