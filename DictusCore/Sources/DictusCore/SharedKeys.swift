@@ -41,10 +41,20 @@ public enum SharedKeys {
     public static let hapticsEnabled = "dictus.hapticsEnabled"
     /// Whether the user has completed onboarding, default false
     public static let hasCompletedOnboarding = "dictus.hasCompletedOnboarding"
+    /// Current onboarding step index (0-5). Persisted to UserDefaults so the user
+    /// resumes at the right step even after iOS TCC-triggered terminations
+    /// (e.g., when "Allow Full Access" is toggled during keyboard setup).
+    public static let onboardingCurrentPage = "dictus.onboardingCurrentPage"
 
     // Text prediction preferences (added for Phase 08)
     /// Whether autocorrect is enabled, default true
     public static let autocorrectEnabled = "dictus.autocorrectEnabled"
+
+    // Autocorrect debug logging (DEBUG builds only - see AutocorrectDebugLog).
+    /// Bool: when true, logs autocorrect decisions with the typed word + correction
+    /// to the App Group persistent log for debugging. CONTAINS USER TEXT — never
+    /// active in Release builds (code is compile-time excluded via #if DEBUG).
+    public static let autocorrectDebugLogging = "dictus.autocorrectDebugLogging"
 
     // Live Activity preference
     /// Whether Live Activity (Dynamic Island + Lock Screen) is enabled, default true

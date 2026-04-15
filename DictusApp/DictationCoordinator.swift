@@ -256,7 +256,11 @@ class DictationCoordinator: ObservableObject {
 
         PersistentLog.log(.dictationStarted(fromURL: fromURL, appState: "\(appState.rawValue)", engineRunning: audioEngine.isEngineRunning))
 
-        // Check if a model is downloaded and ready
+        // Check if a model is downloaded and ready.
+        // Force a cross-process sync before reading — right after a URL-scheme wake
+        // the App Group defaults can return a stale `false`, producing a bogus
+        // "no model downloaded" error on the first attempt (observed in #102).
+        defaults.synchronize()
         let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
         guard modelReady else {
             PersistentLog.log(.dictationFailed(error: "No model downloaded"))

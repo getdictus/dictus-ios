@@ -32,15 +32,21 @@ struct ModeSelectionPage: View {
 
             Spacer()
 
+            // Continue button — matches the style used by other onboarding pages
+            // (custom RoundedRectangle instead of .borderedProminent which renders
+            // as a capsule pill on iOS 26 Liquid Glass).
             Button(action: onNext) {
                 Text("Continue")
-                    .font(.headline)
+                    .font(.dictusSubheading)
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(Color.dictusAccent)
+                    )
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.dictusAccent)
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 32)
             .padding(.bottom, 16)
         }
     }
