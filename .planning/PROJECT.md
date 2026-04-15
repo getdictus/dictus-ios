@@ -66,6 +66,9 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 - ✓ Autocorrect undo race condition fix — v1.4
 - ✓ License attribution complete (FluidAudio/DeviceKit/giellakbd-ios) — v1.4
 - ✓ Numeric token autocorrect guard — v1.4
+- ✓ BUG-71 fix: prevent SIGABRT crash when recording during phone call — PR #81
+- ✓ BUG-72 fix: audio session conflicts — volume fix + zombie engine recovery — PR #86
+- ✓ BUG-85 fix: AirPods hijack — .allowBluetoothA2DP instead of .allowBluetooth — PR #98
 
 ### Active
 
@@ -83,8 +86,6 @@ A user can dictate text in French in any iOS app and correct it immediately on t
 - Add German language support (first use case of i18n process)
 
 **Carried from v1.4 (deferred):**
-- [ ] BUG-71: Crash when starting dictation during phone call (CXCallObserver guard needed)
-- [ ] BUG-72: AirPods/media apps not resuming after recording (.notifyOthersOnDeactivation)
 - [ ] Cold start auto-return UX improvement (beyond current swipe-back overlay)
 
 ### Out of Scope

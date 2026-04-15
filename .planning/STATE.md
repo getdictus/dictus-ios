@@ -54,8 +54,7 @@ All prior decisions logged in PROJECT.md Key Decisions table.
 
 ### Known Issues Carried to v1.7
 
-- BUG-71: Crash when starting dictation during phone call (reverted in v1.4)
-- BUG-72: AirPods/media apps not resuming after recording (reverted in v1.4)
+None — BUG-71 fixed via PR #81, BUG-72 fixed via PR #86.
 
 ### Parallel Milestone
 

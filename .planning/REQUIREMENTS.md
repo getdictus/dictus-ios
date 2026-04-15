@@ -29,7 +29,7 @@ Requirements for this milestone. Each maps to roadmap phases (34-39).
 ### Internationalization
 
 - [ ] **I18N-01**: A documented, reusable process exists for adding a new language to Dictus — covers Whisper model wiring, keyboard layout, UI strings, autocorrect dictionary, n-gram data, onboarding (issue #110)
-- [ ] **I18N-02**: German is fully supported as a transcription + keyboard language — first validation of the I18N-01 process (issue #109)
+- [ ] **I18N-02**: German is fully integrated — QWERTZ keyboard layout, WhisperKit German transcription (multilingual model), German autocorrect dictionary + n-gram data, German UI strings, onboarding in German. First end-to-end validation of the I18N-01 process (issue #109)
 
 ## Out of Scope
 
@@ -42,7 +42,6 @@ Explicitly excluded from this milestone. Documented to prevent scope creep.
 | Keyboard settings button shortcuts (#31) | Deferred — nice-to-have, not blocking |
 | Transcription history (#70) | Moved to premium/Pro scope |
 | iCloud dictionary sync (#103) | v2+ feature |
-| BUG-71/72 (phone call, AirPods resume) | Carried forward but not a hard gate for v1.7 — will address if time permits |
 | Real-time streaming transcription | v2+ feature |
 | iPad support | v2+, iPhone-first |
 
