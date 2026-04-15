@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Stability, Polish & i18n
-status: defining_requirements
-stopped_at: Milestone v1.7 started — defining requirements
-last_updated: "2026-04-15T10:51:00.000Z"
-last_activity: 2026-04-15 -- Milestone v1.7 started
+status: roadmap_defined
+stopped_at: Roadmap defined for v1.7 (Phases 34-39) — ready for phase planning
+last_updated: "2026-04-15T11:10:00.000Z"
+last_activity: 2026-04-15 -- v1.7 roadmap defined (6 phases, 9 requirements mapped)
 progress:
-  total_phases: 0
+  total_phases: 6
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Milestone v1.7 — Stability, Polish & i18n (defining requirements)
+**Current focus:** Milestone v1.7 — Stability, Polish & i18n (roadmap defined, ready for Phase 34 planning)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 34 (Silent Insertion Fix) — not yet planned
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-15 — Milestone v1.7 started
+Status: Roadmap defined, awaiting phase planning
+Last activity: 2026-04-15 — v1.7 roadmap defined
 
-Progress: ░░░░░░░░░░ 0%
+Progress: ░░░░░░░░░░ 0% (0/6 phases)
 
 ## Performance Metrics
 
@@ -47,6 +47,13 @@ Progress: ░░░░░░░░░░ 0%
 ### Decisions
 
 All prior decisions logged in PROJECT.md Key Decisions table.
+
+**v1.7 roadmap decisions:**
+- Phase numbering starts at 34 to avoid collision with v1.5 Dictus Pro premium worktree (phases 30-33).
+- STAB-01 isolated in Phase 34 so the silent insertion bug can ship as a hotfix independent of heavier keyboard/autocorrect/i18n work.
+- KBD-01 + KBD-02 bundled in Phase 35 because both target keyboard geometry and the audit (KBD-01) drives the glitch fix (KBD-02).
+- AUTO-01 + AUTO-02 + AUTO-03 bundled in Phase 36 — AOSP LatinIME alignment is a single coherent architectural change, splitting would cause rework.
+- I18N-01 (Phase 38) scheduled before I18N-02 (Phase 39) — German is the first validation of the i18n process, not an independent feature.
 
 ### Pending Todos
 
@@ -68,10 +75,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-15T10:51:00.000Z
-Stopped at: Milestone v1.7 started — defining requirements
+Last session: 2026-04-15T11:10:00.000Z
+Stopped at: Roadmap defined for v1.7 (Phases 34-39) — ready for phase planning
 Resume file: None
-Next step: Requirements definition, then roadmap
+Next step: `/gsd:plan-phase 34` to plan the silent insertion fix
 
 ---
 *State initialized: 2026-03-04*
@@ -81,3 +88,4 @@ Next step: Requirements definition, then roadmap
 *v1.3 shipped: 2026-04-07*
 *v1.4 shipped: 2026-04-08*
 *v1.7 milestone started: 2026-04-15*
+*v1.7 roadmap defined: 2026-04-15*
