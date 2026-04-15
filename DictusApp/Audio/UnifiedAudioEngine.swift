@@ -11,6 +11,8 @@ enum AudioEngineError: Error, LocalizedError {
     case permissionDenied
     case permissionUndetermined
     case phoneCallActive
+    case audioHardwareUnavailable
+    case installTapFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -20,6 +22,10 @@ enum AudioEngineError: Error, LocalizedError {
             return "Microphone permission not yet requested"
         case .phoneCallActive:
             return "Micro indisponible pendant un appel"
+        case .audioHardwareUnavailable:
+            return "Micro indisponible, réessayez dans un instant"
+        case .installTapFailed(let reason):
+            return "Micro indisponible (\(reason))"
         }
     }
 }
@@ -300,11 +306,28 @@ class UnifiedAudioEngine: ObservableObject {
         lastWaveformDiagnosticsWrite = 0
 
         let inputNode = engine.inputNode
-        let hwFormat = inputNode.outputFormat(forBus: 0)
+        var hwFormat = inputNode.outputFormat(forBus: 0)
 
         // Guard: zero-channel format means hardware is unavailable (phone call active)
         guard hwFormat.channelCount > 0 else {
             throw AudioEngineError.phoneCallActive
+        }
+
+        // B.2 — One-shot retry when hardware reports a valid channel count but
+        // sampleRate == 0. Seen on wake-from-URL-scheme: setActive(true) returns
+        // success but the input node hasn't finished negotiating the format.
+        // installTap throws `IsFormatSampleRateAndChannelCountValid` NSException
+        // in that window, causing SIGABRT (#102).
+        if hwFormat.sampleRate == 0 {
+            usleep(50_000)
+            hwFormat = inputNode.outputFormat(forBus: 0)
+        }
+
+        guard hwFormat.sampleRate > 0, hwFormat.channelCount > 0 else {
+            PersistentLog.log(.dictationFailed(
+                error: "invalid hwFormat: sr=\(hwFormat.sampleRate) ch=\(hwFormat.channelCount)"
+            ))
+            throw AudioEngineError.audioHardwareUnavailable
         }
 
         // Guard: detect telephony audio route (phone call in progress)
@@ -332,15 +355,43 @@ class UnifiedAudioEngine: ObservableObject {
         // but the engine isn't running. The next call crashes on installTap.
         inputNode.removeTap(onBus: 0)
 
-        inputNode.installTap(onBus: 0, bufferSize: 4096, format: hwFormat) { [weak self] buffer, _ in
-            self?.processBuffer(buffer)
+        // Wrap installTap in an Objective-C @try/@catch. AVFoundation raises an
+        // NSException (uncatchable in Swift) when the format is invalid in ways
+        // our pre-flight guards don't cover (#71, #102). Without this shim the
+        // process aborts with SIGABRT. Swift imports the Objective-C
+        // `tryBlock:error:` as a throwing method.
+        do {
+            try ObjCExceptionCatcher.catchException {
+                inputNode.installTap(onBus: 0, bufferSize: 4096, format: hwFormat) { [weak self] buffer, _ in
+                    self?.processBuffer(buffer)
+                }
+            }
+        } catch {
+            let reason = (error as NSError).localizedDescription
+            PersistentLog.log(.dictationFailed(error: "installTap NSException: \(reason)"))
+            throw AudioEngineError.installTapFailed(reason)
         }
 
+        // engine.start() can throw both Swift errors (AUIOClient_StartIO) and
+        // Objective-C NSExceptions. Wrap in both ObjCExceptionCatcher AND Swift do/catch.
+        var swiftStartError: Error?
         do {
-            try engine.start()
+            try ObjCExceptionCatcher.catchException {
+                do {
+                    try self.engine.start()
+                } catch {
+                    swiftStartError = error
+                }
+            }
         } catch {
             inputNode.removeTap(onBus: 0)
-            throw error
+            let reason = (error as NSError).localizedDescription
+            PersistentLog.log(.dictationFailed(error: "engine.start NSException: \(reason)"))
+            throw AudioEngineError.installTapFailed(reason)
+        }
+        if let swiftStartError {
+            inputNode.removeTap(onBus: 0)
+            throw swiftStartError
         }
 
         if #available(iOS 14.0, *) {

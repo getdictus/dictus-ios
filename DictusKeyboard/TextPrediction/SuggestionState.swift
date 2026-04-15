@@ -15,7 +15,8 @@ enum SuggestionMode {
     case idle
     case completions
     case corrections
-    case predictions  // After space: showing n-gram predicted next words
+    case predictions      // After space: showing n-gram predicted next words
+    case undoAvailable    // After autocorrect: showing undo option for previous correction
 }
 
 /// Tracks the last autocorrection so the user can undo it.
@@ -47,8 +48,9 @@ class SuggestionState: ObservableObject {
     @Published var mode: SuggestionMode = .idle
     @Published var currentWord: String = ""
 
-    /// Tracks the last autocorrection for undo support.
-    var lastAutocorrect: AutocorrectState?
+    /// Tracks an autocorrection that can be undone by tapping the suggestion bar.
+    /// Set when autocorrect fires on space, cleared on next space or undo tap.
+    @Published var pendingUndo: AutocorrectState?
 
     /// Words the user has rejected autocorrection for (undo'd).
     /// After undo, the same word should not be re-corrected on the next space.
@@ -176,7 +178,7 @@ class SuggestionState: ObservableObject {
         // triggered updatePredictions(), and clearing here would race with the
         // async prediction result. Predictions are the correct state after space.
         if let lastChar = context.last, lastChar.isWhitespace || lastChar.isNewline {
-            if mode != .predictions {
+            if mode != .predictions && mode != .undoAvailable {
                 clear()
             }
             return
@@ -232,9 +234,15 @@ class SuggestionState: ObservableObject {
 
                 self.currentWord = partial
 
-                // Spell correction takes priority (standard mobile layout)
-                if let result = spellResult,
+                // Undo available: show original word as first slot, fill remaining with completions
+                if let undo = self.pendingUndo {
+                    var undoSuggestions = [undo.originalWord]
+                    undoSuggestions.append(contentsOf: completions.prefix(2))
+                    self.suggestions = undoSuggestions
+                    self.mode = .undoAvailable
+                } else if let result = spellResult,
                    result.correction.lowercased() != partial.lowercased() {
+                    // Spell correction (standard mobile layout)
                     var correctionSuggestions = [partial, result.correction]
                     if let firstAlt = result.alternatives.first {
                         correctionSuggestions.append(firstAlt)
@@ -319,8 +327,12 @@ class SuggestionState: ObservableObject {
                 guard let self = self else { return }
                 guard !(self.currentSuggestionWork?.isCancelled ?? true) else { return }
 
-                if predictions.isEmpty {
-                    // No predictions available -- stay idle (don't show stale completions)
+                if let undo = self.pendingUndo {
+                    var undoSuggestions = [undo.originalWord]
+                    undoSuggestions.append(contentsOf: predictions.prefix(2))
+                    self.suggestions = undoSuggestions
+                    self.mode = .undoAvailable
+                } else if predictions.isEmpty {
                     self.suggestions = []
                     self.mode = .idle
                 } else {

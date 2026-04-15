@@ -46,7 +46,7 @@ struct SuggestionBarView: View {
                         // This matches standard iOS keyboard suggestion bar behavior.
                         Text(displayText(suggestion, at: index))
                             .font(.system(size: 15))
-                            .fontWeight(mode == .predictions ? .regular : (index == 1 ? .semibold : .regular))
+                            .fontWeight(fontWeight(at: index))
                             .foregroundColor(Color(.label))
                             .frame(maxWidth: .infinity)
                             .frame(height: 36)
@@ -63,9 +63,23 @@ struct SuggestionBarView: View {
     /// In correction mode, the original word (index 0) is shown in quotes
     /// to indicate it's the "as-typed" option. Matches iOS native behavior
     /// where the unquoted bold center word is the one that gets auto-applied.
+    private func fontWeight(at index: Int) -> Font.Weight {
+        switch mode {
+        case .predictions:
+            return .regular
+        case .undoAvailable:
+            return index == 0 ? .semibold : .regular
+        default:
+            return index == 1 ? .semibold : .regular
+        }
+    }
+
     private func displayText(_ suggestion: String, at index: Int) -> String {
         if mode == .corrections && index == 0 {
             return "\u{201C}\(suggestion)\u{201D}"
+        }
+        if mode == .undoAvailable && index == 0 {
+            return suggestion + " \u{21A9}"
         }
         return suggestion
     }
