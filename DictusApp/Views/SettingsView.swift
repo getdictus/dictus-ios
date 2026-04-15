@@ -230,14 +230,14 @@ struct SettingsView: View {
         }
     }
 
-    /// App version string from Info.plist.
+    /// App version string from Info.plist — marketing version + build number.
     ///
-    /// WHY Bundle.main.infoDictionary:
-    /// This reads CFBundleShortVersionString (marketing version like "1.0")
-    /// directly from the compiled Info.plist. It updates automatically when
-    /// the version is bumped in Xcode project settings.
+    /// Format: "1.6.0 (10)" — lets testers report bugs against a specific build,
+    /// since TestFlight ships multiple builds under the same marketing version.
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let marketing = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        return "\(marketing) (\(build))"
     }
 
     /// Diagnostic detail view showing App Group health.
