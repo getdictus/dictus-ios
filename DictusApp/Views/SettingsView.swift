@@ -40,6 +40,14 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.liveActivityEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var liveActivityEnabled = true
 
+    #if DEBUG
+    /// Debug-only: logs autocorrect decisions with user text to the debug log.
+    /// This toggle only exists in DEBUG builds — the Release binary doesn't contain
+    /// either this @AppStorage or the AutocorrectDebugLog code that reads it.
+    @AppStorage(SharedKeys.autocorrectDebugLogging, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var autocorrectDebugLogging = false
+    #endif
+
     /// Whether the currently active model uses the Parakeet engine (CTC/TDT).
     /// Parakeet auto-detects language — the language picker has no effect on it.
     private var isParakeetActive: Bool {
@@ -182,6 +190,24 @@ struct SettingsView: View {
                 }
             }
 
+            #if DEBUG
+            // Section: Developer (visible ONLY in Debug builds — not in Release/TestFlight/App Store).
+            // WHY #if DEBUG: Code inside is compile-time excluded from production builds.
+            // Impossible to accidentally ship a toggle that logs user text.
+            Section {
+                Toggle("Autocorrect debug logs", isOn: $autocorrectDebugLogging)
+            } header: {
+                Text("Developer")
+            } footer: {
+                if autocorrectDebugLogging {
+                    Text("Warning: logs contain typed words and corrections. Debug builds only.")
+                        .foregroundColor(.orange)
+                } else {
+                    Text("Logs autocorrect decisions for debugging. Off by default.")
+                }
+            }
+            #endif
+
             // Section 4: A propos
             Section("About") {
                 LabeledContent("Version", value: appVersion)
@@ -296,14 +322,14 @@ struct SettingsView: View {
         }
     }
 
-    /// App version string from Info.plist.
+    /// App version string from Info.plist — marketing version + build number.
     ///
-    /// WHY Bundle.main.infoDictionary:
-    /// This reads CFBundleShortVersionString (marketing version like "1.0")
-    /// directly from the compiled Info.plist. It updates automatically when
-    /// the version is bumped in Xcode project settings.
+    /// Format: "1.6.0 (10)" — lets testers report bugs against a specific build,
+    /// since TestFlight ships multiple builds under the same marketing version.
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let marketing = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        return "\(marketing) (\(build))"
     }
 
     /// Diagnostic detail view showing App Group health.
