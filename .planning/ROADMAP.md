@@ -136,8 +136,8 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
 
 Plans:
 - [x] 34.1-01 InsertionClassifier rewrite (success-first priority) — completed 2026-04-16
-- [ ] 34.1-02 Remove retry loop from InsertTranscriptionHelper (TBD)
-- [ ] 34.1-03 Remove user-facing escalation (banner / haptic / LiveActivity `.failed`) (TBD)
+- [x] 34.1-02 Simplify InsertTranscriptionHelper to single-shot + remove banner/haptic/escalation — completed 2026-04-16
+- [ ] 34.1-03 On-device verification test matrix (TBD)
 
 ### Phase 35: Keyboard Geometry Polish
 **Goal**: The Dictus keyboard matches the visual dimensions and proportions of the Apple system keyboard, and renders correctly on every launch.

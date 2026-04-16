@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Stability, Polish & i18n
 status: executing
-stopped_at: Completed 34.1-01-PLAN.md (InsertionClassifier rewrite with success-first priority)
-last_updated: "2026-04-16T11:24:05Z"
-last_activity: 2026-04-16 — Plan 34.1-01 executed (InsertionClassifier rewrite: 17/17 tests pass, 3 real-device false-positive categories eliminated)
+stopped_at: Completed 34.1-02-PLAN.md (simplified InsertTranscriptionHelper to single-shot; removed banner/haptic/escalation from KeyboardState)
+last_updated: "2026-04-16T11:31:42Z"
+last_activity: 2026-04-16 — Plan 34.1-02 executed (single-shot helper + telemetry-only failure handling; Plan 34-02 recovery contract preserved; 17/17 classifier tests still pass)
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 24
-  completed_plans: 4
-  percent: 17
+  completed_plans: 5
+  percent: 21
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Milestone v1.7 — Stability, Polish & i18n (Phase 34.1 gap-closure for STAB-01 in progress: 1/3 plans complete)
+**Current focus:** Milestone v1.7 — Stability, Polish & i18n (Phase 34.1 gap-closure for STAB-01 in progress: 2/3 plans complete)
 
 ## Current Position
 
 Phase: 34.1 (Simplify Insertion Detection) — executing
-Plan: 34.1-01 complete; next: 34.1-02 (remove retry loop from InsertTranscriptionHelper)
-Status: Plan 34.1-01 executed — InsertionClassifier rewritten with success-first priority, never emits `.proxyDead`/`.deltaMismatch`, 17/17 classifier tests pass
-Last activity: 2026-04-16 — Plan 34.1-01 executed (eliminates 3 real-device false-positive categories that caused retries → duplicate insertions)
+Plan: 34.1-02 complete; next: 34.1-03 (device verification test matrix)
+Status: Plan 34.1-02 executed — InsertTranscriptionHelper rewritten as single-shot (zero retries, one physical insertText call), KeyboardState failure branch reduced to telemetry-only (no banner, no insertionFailed haptic, no LiveActivity escalation), Plan 34-02 App Group recovery contract preserved, DictusKeyboard builds clean, 17/17 InsertionClassifierTests still pass
+Last activity: 2026-04-16 — Plan 34.1-02 executed (simplifies insertion helper + drops user-facing failure UX per user feedback: "il faut quand même simplifier largement le fix")
 
-Progress: [█░░░░░░░░░] 17% (4/24 plans across 7 phases; 1/3 in Phase 34.1)
+Progress: [██░░░░░░░░] 21% (5/24 plans across 7 phases; 2/3 in Phase 34.1)
 
 ## Performance Metrics
 
@@ -78,6 +78,15 @@ All prior decisions logged in PROJECT.md Key Decisions table.
 - **Verification command change:** DictusCore scheme at project root no longer has a working `TestAction` (the `Dictus.xcodeproj/xcshareddata/xcschemes/` directory is currently untracked). Fix: created `DictusCore/.swiftpm/xcode/xcshareddata/xcschemes/DictusCore-Package.xcscheme` and run tests via `cd DictusCore && xcodebuild test -scheme DictusCore-Package -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DictusCoreTests/InsertionClassifierTests`. Plans 34.1-02/03 must use this command.
 - Pre-existing 10 failures in `AccentedCharacterTests` + `FrequencyDictionaryTests` remain — deferred per `.planning/phases/34-silent-insertion-fix/deferred-items.md`, out of STAB-01 scope.
 
+**Phase 34.1 execution decisions (Plan 34.1-02):**
+- `InsertTranscriptionHelper` rewritten as single-shot: validate → insert → classify → log → route outcome, all synchronous, zero retries. 189 → 155 lines. Exactly one physical `proxy.insertText` call per invocation. `scheduleNextOrFail` + nested `attempt(_ index:)` + `DispatchQueue.main.asyncAfter` backoff loop all deleted.
+- `InsertionFailureReason` trimmed from 6 cases to 4 (dropped `.deltaMismatch` + `.proxyDead`). Classifier never emits the corresponding outcomes per Plan 34.1-01, so exposing them in the failure enum was misleading. Helper's outcome switch still pattern-matches `.deltaMismatch, .proxyDead` as a defensive fallback to `.success` (benefit-of-doubt policy — if a future classifier regression reintroduces those outcomes, degradation mode is "missing telemetry" not "false user-visible failure").
+- `InsertTranscriptionResult.success` dropped `attempts: Int` (always 1 under single-shot; misleading signal). `keyboardInsertProbe` LogEvent still carries `attempt: 0` hardcoded for log-parser compatibility.
+- `KeyboardState.dispatchInsertion` failure branch reduced to telemetry-only: dropped `statusMessage` banner write, dropped `HapticFeedback.insertionFailed()` call, dropped `escalateInsertionFailure` helper entirely (function deleted, not just call site). Plan 34-02 recovery contract preserved: `.failed` still re-writes `SharedKeys.lastTranscription` + timestamp so HomeView recoverableTranscription surfaces lost text.
+- No `LiveActivityManager` references found in `KeyboardState.swift`. Plan listed LiveActivity `.failed` transition as one of three side-effects to remove — already satisfied (none existed in this file).
+- 100ms App Group propagation retry in `handleTranscriptionReady` kept (distinct concern from insertion retry — polls UserDefaults for transcription value that may lag ~100ms post-synchronize on-device).
+- **Git note:** commits `42b8454` (helper) and `9a1a81c` (call site) are semantically inseparable but split for review clarity. Intermediate state between them does not compile because `InsertTranscriptionResult` associated-value signatures changed. Final state builds clean.
+
 ### Roadmap Evolution
 
 - Phase 34.1 inserted after Phase 34 (2026-04-16): **Simplify insertion detection — telemetry-only, no retries, no UI escalation.** Real-device testing revealed Plan 34-03 introduced 3 observable regressions: (1) false-positive failures from classifier treating nil `documentContextBeforeInput` as `.proxyDead` when `hasText` had transitioned false→true (genuine empty-field success); (2) false-positive failures from negative-delta readings when iOS truncates `documentContextBeforeInput` window on long host fields; (3) retries blindly re-inserting on false failures, causing duplicate text insertion; (4) UX bug: red banner visually truncated in ToolbarView. User reported base rate of real #118 silent failures is ~1-in-hundreds, net UX regression. Simplification path: fix classifier, drop retries, drop banner+haptic+LiveActivity `.failed`, keep probe telemetry (privacy-audited zero-leak) + App Group preservation-on-failure for HomeView recovery surface.
@@ -108,10 +117,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T11:24:05Z
-Stopped at: Completed 34.1-01-PLAN.md (InsertionClassifier rewrite with success-first priority)
-Resume file: .planning/phases/34.1-simplify-insertion-detection/34.1-01-SUMMARY.md
-Next step: `/gsd:execute-phase 34.1` to continue with Plan 34.1-02 (remove retry loop from InsertTranscriptionHelper + drop user-facing escalation)
+Last session: 2026-04-16T11:31:42Z
+Stopped at: Completed 34.1-02-PLAN.md (single-shot InsertTranscriptionHelper + telemetry-only KeyboardState failure branch)
+Resume file: .planning/phases/34.1-simplify-insertion-detection/34.1-02-SUMMARY.md
+Next step: `/gsd:execute-phase 34.1` to continue with Plan 34.1-03 (on-device verification test matrix)
 
 ---
 *State initialized: 2026-03-04*

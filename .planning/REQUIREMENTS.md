@@ -9,7 +9,7 @@ Requirements for this milestone. Each maps to roadmap phases (34-39).
 
 ### Stability (Bug fixes)
 
-- [ ] **STAB-01**: Transcription text is always inserted into the target app when dictation completes (fixes silent insertion failure, issue #118)
+- [x] **STAB-01**: Transcription text is always inserted into the target app when dictation completes (fixes silent insertion failure, issue #118)
 
 ### Keyboard Polish
 
