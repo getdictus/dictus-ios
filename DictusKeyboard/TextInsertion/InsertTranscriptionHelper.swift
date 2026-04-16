@@ -1,12 +1,11 @@
 // DictusKeyboard/TextInsertion/InsertTranscriptionHelper.swift
-// Phase 34 STAB-01: single point of truth for transcription insertion.
+// Phase 34.1 simplified: single-shot insert + classify + log + preserve-or-clear.
 //
-// Pattern: validate -> insert -> verify -> retry -> escalate.
-// Wraps the SOLE insertText(transcription) call site in the keyboard
-// (KeyboardState.handleTranscriptionReady lines 341 + 370). Cold start
-// Audio Bridge re-enters this same helper via the Darwin notification
-// that triggers handleTranscriptionReady — no second physical call site
-// exists in the codebase (confirmed by research in 34-RESEARCH.md).
+// Rationale (.planning/phases/34.1-simplify-insertion-detection/34.1-CONTEXT.md):
+// Plan 34-03's retry loop caused 3x-4x duplicate insertions on iOS context-window
+// truncation false-positives. At a measured real-failure base rate of ~1-in-hundreds,
+// retries are net negative UX. The classifier now errs toward success (success-first
+// priority, benefit-of-doubt default) so this helper can trust the first classification.
 //
 // Probe emits privacy-safe structured LogEvents on every attempt. No raw
 // transcription text or document context strings are logged.
@@ -21,29 +20,26 @@ public enum InsertionPath: String {
 
 public enum InsertionFailureReason: String {
     case proxyNil           // controller is nil (deallocated mid-transcription)
-    case noFullAccess       // hasFullAccess == false (terminal — skip retries)
-    case contextUnavailable // documentContextBeforeInput is nil AND keyboard not visible
-    case silentDrop         // classifier returned .silentDrop
-    case deltaMismatch      // classifier returned .deltaMismatch
-    case proxyDead          // classifier returned .proxyDead after insert
+    case noFullAccess       // hasFullAccess == false
+    case contextUnavailable // documentContextBeforeInput nil AND keyboard not visible
+    case silentDrop         // classifier returned .silentDrop (narrow true failure)
 }
 
 public enum InsertTranscriptionResult {
-    case success(attempts: Int, outcome: InsertionOutcome)
-    case failed(lastReason: InsertionFailureReason, attempts: Int)
+    case success(outcome: InsertionOutcome)
+    case failed(lastReason: InsertionFailureReason)
 }
 
 public struct InsertTranscriptionHelper {
 
-    /// Call sites: KeyboardState.handleTranscriptionReady primary path and 100ms retry path.
-    ///
-    /// Runs the first attempt synchronously. If it fails, schedules retries on the main queue
-    /// at +50ms, +150ms, +350ms (cumulative) via DispatchQueue.main.asyncAfter. Total worst
-    /// case: ~350 ms. Calls onComplete once on first success OR after all retries exhausted.
+    /// Single-shot insert + classify + log + preserve-or-clear App Group.
+    /// No retries. Calls `onComplete` exactly once on the same run-loop tick
+    /// as the underlying insertText call (or immediately on validation
+    /// failure before insertText is attempted).
     ///
     /// - Parameters:
     ///   - transcription: the text to insert (read once by caller from App Group)
-    ///   - controller: weak reference from KeyboardState (may become nil mid-retry)
+    ///   - controller: weak reference from KeyboardState (may be nil)
     ///   - isKeyboardVisible: current KeyboardState.isKeyboardVisible
     ///   - sessionID: KeyboardState.activeSessionID for log correlation ("" acceptable)
     ///   - darwinNotificationTimestamp: Date when handleTranscriptionReady was entered
@@ -59,131 +55,112 @@ public struct InsertTranscriptionHelper {
         path: InsertionPath,
         onComplete: @escaping (InsertTranscriptionResult) -> Void
     ) {
-        let backoffs: [TimeInterval] = [0.050, 0.100, 0.200]  // locked by CONTEXT.md
         let transcriptionUtf16 = transcription.utf16.count
+        let elapsedMs = Int(Date().timeIntervalSince(darwinNotificationTimestamp) * 1000)
 
-        func attempt(_ index: Int) {
-            let elapsedMs = Int(Date().timeIntervalSince(darwinNotificationTimestamp) * 1000)
-
-            // --- Validate controller ---
-            guard let ctrl = controller else {
-                PersistentLog.log(.keyboardInsertRetry(
-                    path: path.rawValue,
-                    sessionID: sessionID,
-                    attempt: index,
-                    reason: InsertionFailureReason.proxyNil.rawValue
-                ))
-                scheduleNextOrFail(.proxyNil, attemptIndex: index)
-                return
-            }
-
-            // --- Validate Full Access (terminal — skip retries) ---
-            if !ctrl.hasFullAccess {
-                PersistentLog.log(.keyboardInsertFailed(
-                    path: path.rawValue,
-                    sessionID: sessionID,
-                    totalAttempts: index + 1,
-                    finalReason: InsertionFailureReason.noFullAccess.rawValue
-                ))
-                onComplete(.failed(lastReason: .noFullAccess, attempts: index + 1))
-                return
-            }
-
-            let proxy = ctrl.textDocumentProxy
-            // UITextDocumentProxy conforms to UIKeyInput — hasText reflects whether
-            // the host field currently contains any text (not just context window).
-            let hasTextBefore = proxy.hasText
-
-            // --- Snapshot before ---
-            let beforeText = proxy.documentContextBeforeInput
-            let beforeCount = beforeText?.utf16.count ?? -1
-
-            // If proxy context is nil and keyboard isn't visible, we have no active session.
-            if beforeCount < 0 && !isKeyboardVisible {
-                PersistentLog.log(.keyboardInsertRetry(
-                    path: path.rawValue,
-                    sessionID: sessionID,
-                    attempt: index,
-                    reason: InsertionFailureReason.contextUnavailable.rawValue
-                ))
-                scheduleNextOrFail(.contextUnavailable, attemptIndex: index)
-                return
-            }
-
-            // --- Insert ---
-            proxy.insertText(transcription)
-
-            // --- Snapshot after ---
-            let afterText = proxy.documentContextBeforeInput
-            let afterCount = afterText?.utf16.count ?? -1
-            let hasTextAfter = proxy.hasText
-
-            // --- Probe (privacy-safe: counts/bools/timing only) ---
-            PersistentLog.log(.keyboardInsertProbe(
+        // --- Validate controller ---
+        guard let ctrl = controller else {
+            PersistentLog.log(.keyboardInsertFailed(
                 path: path.rawValue,
                 sessionID: sessionID,
-                attempt: index,
-                transcriptionCount: transcriptionUtf16,
-                hasFullAccess: ctrl.hasFullAccess,
-                hasTextBefore: hasTextBefore,
-                hasTextAfter: hasTextAfter,
-                beforeCount: beforeCount,
-                afterCount: afterCount,
-                keyboardVisible: isKeyboardVisible,
-                darwinToInsertMs: elapsedMs
+                totalAttempts: 1,
+                finalReason: InsertionFailureReason.proxyNil.rawValue
             ))
-
-            // --- Classify ---
-            let outcome = InsertionClassifier.classify(
-                beforeCount: beforeCount,
-                afterCount: afterCount,
-                transcriptionUtf16Count: transcriptionUtf16,
-                hasTextBefore: hasTextBefore,
-                hasTextAfter: hasTextAfter
-            )
-
-            switch outcome {
-            case .success, .windowedSuccess, .emptyFieldSuccess:
-                onComplete(.success(attempts: index + 1, outcome: outcome))
-            case .silentDrop:
-                PersistentLog.log(.keyboardInsertRetry(
-                    path: path.rawValue, sessionID: sessionID,
-                    attempt: index, reason: InsertionFailureReason.silentDrop.rawValue
-                ))
-                scheduleNextOrFail(.silentDrop, attemptIndex: index)
-            case .deltaMismatch:
-                PersistentLog.log(.keyboardInsertRetry(
-                    path: path.rawValue, sessionID: sessionID,
-                    attempt: index, reason: InsertionFailureReason.deltaMismatch.rawValue
-                ))
-                scheduleNextOrFail(.deltaMismatch, attemptIndex: index)
-            case .proxyDead:
-                PersistentLog.log(.keyboardInsertRetry(
-                    path: path.rawValue, sessionID: sessionID,
-                    attempt: index, reason: InsertionFailureReason.proxyDead.rawValue
-                ))
-                scheduleNextOrFail(.proxyDead, attemptIndex: index)
-            }
+            onComplete(.failed(lastReason: .proxyNil))
+            return
         }
 
-        func scheduleNextOrFail(_ reason: InsertionFailureReason, attemptIndex: Int) {
-            let nextIndex = attemptIndex + 1
-            if nextIndex <= backoffs.count {
-                let delay = backoffs[nextIndex - 1]
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                    attempt(nextIndex)
-                }
-            } else {
-                PersistentLog.log(.keyboardInsertFailed(
-                    path: path.rawValue,
-                    sessionID: sessionID,
-                    totalAttempts: nextIndex,
-                    finalReason: reason.rawValue
-                ))
-                onComplete(.failed(lastReason: reason, attempts: nextIndex))
-            }
+        // --- Validate Full Access ---
+        if !ctrl.hasFullAccess {
+            PersistentLog.log(.keyboardInsertFailed(
+                path: path.rawValue,
+                sessionID: sessionID,
+                totalAttempts: 1,
+                finalReason: InsertionFailureReason.noFullAccess.rawValue
+            ))
+            onComplete(.failed(lastReason: .noFullAccess))
+            return
         }
 
-        attempt(0)
+        let proxy = ctrl.textDocumentProxy
+        // UITextDocumentProxy conforms to UIKeyInput — hasText reflects whether
+        // the host field currently contains any text (not just context window).
+        let hasTextBefore = proxy.hasText
+
+        // --- Snapshot before ---
+        let beforeText = proxy.documentContextBeforeInput
+        let beforeCount = beforeText?.utf16.count ?? -1
+
+        // If proxy context is nil and keyboard isn't visible, we have no active session.
+        if beforeCount < 0 && !isKeyboardVisible {
+            PersistentLog.log(.keyboardInsertFailed(
+                path: path.rawValue,
+                sessionID: sessionID,
+                totalAttempts: 1,
+                finalReason: InsertionFailureReason.contextUnavailable.rawValue
+            ))
+            onComplete(.failed(lastReason: .contextUnavailable))
+            return
+        }
+
+        // --- Insert ---
+        proxy.insertText(transcription)
+
+        // --- Snapshot after ---
+        let afterText = proxy.documentContextBeforeInput
+        let afterCount = afterText?.utf16.count ?? -1
+        let hasTextAfter = proxy.hasText
+
+        // --- Probe (privacy-safe: counts/bools/timing only) ---
+        // attempt is hardcoded to 0 (only one attempt per invocation); the field
+        // is retained in the LogEvent for telemetry compatibility with existing
+        // log parsers and future re-introduction of retries if production data
+        // justifies it.
+        PersistentLog.log(.keyboardInsertProbe(
+            path: path.rawValue,
+            sessionID: sessionID,
+            attempt: 0,
+            transcriptionCount: transcriptionUtf16,
+            hasFullAccess: ctrl.hasFullAccess,
+            hasTextBefore: hasTextBefore,
+            hasTextAfter: hasTextAfter,
+            beforeCount: beforeCount,
+            afterCount: afterCount,
+            keyboardVisible: isKeyboardVisible,
+            darwinToInsertMs: elapsedMs
+        ))
+
+        // --- Classify ---
+        let outcome = InsertionClassifier.classify(
+            beforeCount: beforeCount,
+            afterCount: afterCount,
+            transcriptionUtf16Count: transcriptionUtf16,
+            hasTextBefore: hasTextBefore,
+            hasTextAfter: hasTextAfter
+        )
+
+        switch outcome {
+        case .success, .windowedSuccess, .emptyFieldSuccess:
+            // App Group clearing is performed by the caller (KeyboardState) —
+            // keep this helper pure with respect to shared state beyond logging.
+            onComplete(.success(outcome: outcome))
+
+        case .silentDrop:
+            // Narrow true-failure case. Log for telemetry. Caller preserves
+            // App Group key so HomeView recoverableTranscription can surface
+            // the lost text.
+            PersistentLog.log(.keyboardInsertFailed(
+                path: path.rawValue,
+                sessionID: sessionID,
+                totalAttempts: 1,
+                finalReason: InsertionFailureReason.silentDrop.rawValue
+            ))
+            onComplete(.failed(lastReason: .silentDrop))
+
+        case .deltaMismatch, .proxyDead:
+            // The new classifier (Plan 34.1-01) never returns these. Defensive
+            // fallback: treat as success (benefit of doubt) rather than failing.
+            onComplete(.success(outcome: outcome))
+        }
     }
 }
