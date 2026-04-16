@@ -136,6 +136,36 @@ final class LiveActivityStateMachineTests: XCTestCase {
         XCTAssertEqual(sm.currentPhase, .recording)
     }
 
+    // MARK: - Phase 34 STAB-01 insertion-failure transitions
+
+    func test_transition_standbyToFailed_isAllowed() {
+        var sm = LiveActivityStateMachine()
+        sm.forcePhase(.standby)
+        XCTAssertTrue(sm.transition(to: .failed))
+        XCTAssertEqual(sm.currentPhase, .failed)
+    }
+
+    func test_transition_readyToFailed_isAllowed() {
+        var sm = LiveActivityStateMachine()
+        sm.forcePhase(.ready)
+        XCTAssertTrue(sm.transition(to: .failed))
+        XCTAssertEqual(sm.currentPhase, .failed)
+    }
+
+    func test_transition_idleToFailed_isStillRejected() {
+        var sm = LiveActivityStateMachine()
+        // default phase is .idle
+        XCTAssertFalse(sm.transition(to: .failed))
+        XCTAssertEqual(sm.currentPhase, .idle)
+    }
+
+    func test_transition_recordingToFailed_isStillRejected() {
+        var sm = LiveActivityStateMachine()
+        sm.forcePhase(.recording)
+        XCTAssertFalse(sm.transition(to: .failed))
+        XCTAssertEqual(sm.currentPhase, .recording)
+    }
+
     // MARK: - Watchdog Flag
 
     func testNeedsWatchdogTrueOnlyWhenRecording() {
