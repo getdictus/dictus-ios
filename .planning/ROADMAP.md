@@ -116,6 +116,27 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
   4. When insertion fails for any reason, the failure is surfaced in logs with enough context (path taken, target doc state, error) to diagnose, instead of failing silently.
 **Plans**: TBD
 
+### Phase 34.1: Simplify Insertion Detection (INSERTED)
+
+**Goal**: The keyboard never shows false-positive failure UX and never duplicates transcriptions from retries. Detection runs once per insertion, logs the outcome privacy-safely, and preserves the App Group key on true failures so HomeView recovery surface can still surface lost text.
+**Depends on**: Phase 34
+**Requirements**: STAB-01 (extends Phase 34 — same REQ, corrective execution)
+**Milestone**: v1.7
+**Linked regressions**: false-positive failure UX from Plan 34-03 real-device testing 2026-04-16
+**Success Criteria** (what must be TRUE):
+  1. `InsertionClassifier` does not return `.proxyDead` when `hasText` transitioned false→true — empty-field success is authoritative even with nil `documentContextBeforeInput`.
+  2. `InsertionClassifier` does not return `.deltaMismatch` on negative delta when `hasTextAfter = true` — this is iOS context-window truncation, classified as `.windowedSuccess`.
+  3. `InsertTranscriptionHelper` never re-inserts text after the first `proxy.insertText` call — no retry loop, no duplicate insertions.
+  4. No red banner, no `insertionFailed` haptic, no LiveActivity `.failed` transition from the keyboard insertion path — user-facing escalation is removed; recovery relies on HomeView's existing transcription card.
+  5. `keyboardInsertProbe` telemetry is preserved, privacy-audited (zero raw text), and emitted exactly once per insertion attempt.
+  6. On classifier-detected true failure (narrow definition: delta=0 + beforeCount in non-truncated range + no hasText transition), App Group `SharedKeys.lastTranscription` is preserved (not cleared), so HomeView's `recoverableTranscription` can surface the lost text.
+  7. On success, App Group is cleared (existing duplicate-prevention behavior preserved).
+  8. Real-device dictation in Notes/Messages/Safari: zero false-positive failures across ≥15 consecutive insertions including at least one long-document scenario that would have triggered window-truncation false-positive under Plan 34-03.
+**Plans**: TBD
+
+Plans:
+- [ ] 34.1-01 TBD (run /gsd:plan-phase 34.1 to break down)
+
 ### Phase 35: Keyboard Geometry Polish
 **Goal**: The Dictus keyboard matches the visual dimensions and proportions of the Apple system keyboard, and renders correctly on every launch.
 **Depends on**: Phase 34 (ship STAB-01 hotfix first so this phase does not block a critical reliability bug)
