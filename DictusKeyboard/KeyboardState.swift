@@ -325,9 +325,20 @@ class KeyboardState: ObservableObject {
     /// Phase 3 behavior: instead of displaying transcription in a banner,
     /// insert it directly into the text field via textDocumentProxy.insertText().
     /// This matches the standard iOS dictation UX — user speaks, text appears at cursor.
+    ///
+    /// Phase 34 STAB-01: insertion now flows through InsertTranscriptionHelper which
+    /// validates proxy health, inserts, verifies via InsertionClassifier, retries up
+    /// to 3x with 50/100/200ms backoff, and escalates to loud-fail on exhaustion.
     private func handleTranscriptionReady() {
         logProbe("handleTranscriptionReady", details: sessionDetails())
         refreshFromDefaults()
+
+        let darwinTimestamp = Date()
+        // Path discrimination for probe logs — cold start re-enters this same
+        // handleTranscriptionReady via the Darwin notification fired after URL-scheme wake.
+        let currentPath: InsertionPath = defaults.bool(forKey: SharedKeys.coldStartActive)
+            ? .coldStartBridge
+            : .warmDarwin
 
         if let transcription = defaults.string(forKey: SharedKeys.lastTranscription),
            !transcription.isEmpty {
@@ -335,31 +346,24 @@ class KeyboardState: ObservableObject {
             // Darwin notifications can be delivered multiple times (extension lifecycle,
             // multiple statusChanged posts). By clearing first, subsequent calls find
             // nothing to insert.
+            //
+            // NOTE (Plan 34-02 contract): the failure path must preserve SharedKeys.lastTranscription
+            // so HomeView can surface the recovery card. Since we clear BEFORE the helper runs, we
+            // re-write it back on terminal failure inside dispatchInsertion's .failed branch.
             defaults.removeObject(forKey: SharedKeys.lastTranscription)
             defaults.synchronize()
 
-            controller?.textDocumentProxy.insertText(transcription)
-            PersistentLog.log(.keyboardTextInserted)
-            HapticFeedback.textInserted()
-            onTranscriptionInserted?()
-
-            // Reset state to idle.
-            // WHY explicit stopWatchdog: refreshFromDefaults() above may have read
-            // .transcribing from App Group (before .ready propagated), starting the
-            // watchdog. Setting dictationStatus = .idle here bypasses refreshFromDefaults
-            // so the watchdog wouldn't self-stop until its next 1s tick. Stopping
-            // explicitly prevents false-positive watchdog resets.
-            stopWatchdog()
-            dictationStatus = .idle
-            waveformEnergy = []
-            recordingElapsed = 0
-            statusMessage = nil
-            lastTranscription = nil
-            activeSessionID = nil
+            dispatchInsertion(
+                transcription: transcription,
+                path: currentPath,
+                darwinTimestamp: darwinTimestamp
+            )
         } else {
             // Retry after 100ms — mitigates UserDefaults race condition.
             // Darwin notifications are posted immediately after synchronize(),
             // but cross-App-Group propagation can lag on-device.
+            // PRESERVED per Phase 34 CONTEXT.md — solves a different problem than the
+            // helper's proxy-disconnect retries: App Group UserDefaults propagation lag.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
                 guard let self = self else { return }
                 if let transcription = self.defaults.string(forKey: SharedKeys.lastTranscription),
@@ -367,19 +371,93 @@ class KeyboardState: ObservableObject {
                     self.defaults.removeObject(forKey: SharedKeys.lastTranscription)
                     self.defaults.synchronize()
 
-                    self.controller?.textDocumentProxy.insertText(transcription)
-                    PersistentLog.log(.keyboardTextInserted)
-                    HapticFeedback.textInserted()
-                    self.onTranscriptionInserted?()
-
-                    self.stopWatchdog()
-                    self.dictationStatus = .idle
-                    self.waveformEnergy = []
-                    self.recordingElapsed = 0
-                    self.statusMessage = nil
-                    self.lastTranscription = nil
-                    self.activeSessionID = nil
+                    self.dispatchInsertion(
+                        transcription: transcription,
+                        path: currentPath,
+                        darwinTimestamp: darwinTimestamp
+                    )
                 }
+            }
+        }
+    }
+
+    /// Shared helper invocation — both primary and 100ms-retry paths reach here.
+    ///
+    /// On success: log, fire success haptic, notify suggestion bar, reset to idle,
+    /// and clear any lingering statusMessage banner.
+    ///
+    /// On terminal failure (all retries exhausted): fire error haptic, re-publish
+    /// the transcription to SharedKeys.lastTranscription (Plan 34-02 recovery contract),
+    /// set the FR/EN banner with 4s auto-clear, and reset dictation state to idle.
+    private func dispatchInsertion(
+        transcription: String,
+        path: InsertionPath,
+        darwinTimestamp: Date
+    ) {
+        InsertTranscriptionHelper.insertTranscription(
+            transcription,
+            controller: self.controller,
+            isKeyboardVisible: self.isKeyboardVisible,
+            sessionID: self.activeSessionID ?? "",
+            darwinNotificationTimestamp: darwinTimestamp,
+            path: path
+        ) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success:
+                PersistentLog.log(.keyboardTextInserted)
+                HapticFeedback.textInserted()
+                self.statusMessage = nil       // clear any stale banner on success
+                self.onTranscriptionInserted?()
+                self.resetToIdleAfterInsertion()
+            case .failed(let reason, let attempts):
+                // CRITICAL Plan 34-02 contract: on terminal failure, preserve the App
+                // Group value so HomeView's recoverableTranscription surface can render
+                // the recovery card. handleTranscriptionReady cleared the key before
+                // calling the helper — we put it back here.
+                self.defaults.set(transcription, forKey: SharedKeys.lastTranscription)
+                self.defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
+                self.defaults.synchronize()
+
+                HapticFeedback.insertionFailed()
+                self.escalateInsertionFailure(reason: reason, attempts: attempts)
+                self.resetToIdleAfterInsertion()
+            }
+        }
+    }
+
+    /// Reset dictation state to idle after either success or terminal failure.
+    /// Extracted so both success and failure branches share the same state teardown.
+    /// Does NOT clear statusMessage — success path clears it explicitly, failure path
+    /// relies on escalateInsertionFailure's 4s auto-clear.
+    private func resetToIdleAfterInsertion() {
+        stopWatchdog()
+        dictationStatus = .idle
+        waveformEnergy = []
+        recordingElapsed = 0
+        lastTranscription = nil
+        activeSessionID = nil
+    }
+
+    /// Loud-fail escalation: set localized banner, schedule 4s auto-clear.
+    /// Haptic is fired by caller so it's audible at the same moment the banner appears.
+    private func escalateInsertionFailure(reason: InsertionFailureReason, attempts: Int) {
+        // Localized banner copy — FR primary, EN fallback (per CONTEXT.md locked decision).
+        let lang = defaults.string(forKey: SharedKeys.language) ?? "fr"
+        let message: String
+        switch lang {
+        case "en":
+            message = "Couldn't insert. Find your transcription in Dictus."
+        default:
+            message = "Insertion impossible. Retrouvez votre transcription dans Dictus."
+        }
+        statusMessage = message
+
+        // 4-second auto-clear (bumped from 3s for dictation errors — per CONTEXT.md).
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
+            // Only clear if this banner is still our message — don't stomp a newer one.
+            if self?.statusMessage == message {
+                self?.statusMessage = nil
             }
         }
     }
