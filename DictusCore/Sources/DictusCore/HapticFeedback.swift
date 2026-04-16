@@ -133,6 +133,17 @@ public enum HapticFeedback {
         #endif
     }
 
+    /// Error notification feedback when transcription insertion fails.
+    /// Uses the same pre-allocated notificationGenerator as textInserted()
+    /// to avoid the 2-5 ms generator-creation overhead.
+    public static func insertionFailed() {
+        #if canImport(UIKit) && !os(macOS)
+        guard isEnabled() else { return }
+        notificationGenerator.notificationOccurred(.error)
+        notificationGenerator.prepare()
+        #endif
+    }
+
     /// Selection feedback for keyboard key taps.
     ///
     /// WHY selectionGenerator instead of lightGenerator:

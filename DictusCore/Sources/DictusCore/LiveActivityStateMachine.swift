@@ -29,12 +29,16 @@ public struct LiveActivityStateMachine {
     /// Allowed transitions for each phase.
     /// WHY a stored property (not computed): The map is constant and small (6 entries).
     /// Storing it avoids re-creating the dictionary on every transition call.
+    ///
+    /// Phase 34 STAB-01: .standby -> .failed and .ready -> .failed permit the
+    /// keyboard's insertion-failure signaling to re-enter .failed after
+    /// DictationCoordinator already transitioned through .transcribing -> .ready -> .standby.
     private let validTransitions: [Phase: Set<Phase>] = [
         .idle: [.standby],
-        .standby: [.recording, .idle],
+        .standby: [.recording, .idle, .failed],
         .recording: [.transcribing, .standby],
         .transcribing: [.ready, .failed],
-        .ready: [.standby, .recording],
+        .ready: [.standby, .recording, .failed],
         .failed: [.standby, .recording, .idle]
     ]
 
