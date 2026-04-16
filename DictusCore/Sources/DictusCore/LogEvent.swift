@@ -75,6 +75,36 @@ public enum LogEvent: Sendable {
     case keyboardMicTapped
     case keyboardTextInserted  // No content parameter -- privacy by design
 
+    /// Phase 34 STAB-01 — always-on probe for every insertText() attempt.
+    /// Privacy: counts / booleans / identifiers / durations only. No raw text.
+    case keyboardInsertProbe(
+        path: String,               // "warmDarwin" | "coldStartBridge"
+        sessionID: String,
+        attempt: Int,               // 0 = first try, 1-3 = retries
+        transcriptionCount: Int,    // utf16 count of transcription
+        hasFullAccess: Bool,
+        hasTextBefore: Bool,
+        hasTextAfter: Bool,
+        beforeCount: Int,           // documentContextBeforeInput.utf16.count or -1 if nil
+        afterCount: Int,            // documentContextBeforeInput.utf16.count or -1 if nil
+        keyboardVisible: Bool,
+        darwinToInsertMs: Int       // ms between Darwin notification and insertText call
+    )
+    /// Phase 34 STAB-01 — retry notification after a probe detected a failure.
+    case keyboardInsertRetry(
+        path: String,
+        sessionID: String,
+        attempt: Int,
+        reason: String              // InsertionFailureReason rawValue
+    )
+    /// Phase 34 STAB-01 — terminal failure after all retries exhausted.
+    case keyboardInsertFailed(
+        path: String,
+        sessionID: String,
+        totalAttempts: Int,
+        finalReason: String
+    )
+
     // MARK: Animation
     case overlayShown(status: String)
     case overlayHidden(status: String)
@@ -155,6 +185,7 @@ public enum LogEvent: Sendable {
              .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
+             .keyboardInsertProbe, .keyboardInsertRetry, .keyboardInsertFailed,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .waveformAppeared, .waveformDisappeared, .waveformHeartbeat, .waveformStall,
              .waveformRefreshIDChanged, .waveformEnergyTransition, .waveformTimelineNotFiring,
@@ -192,13 +223,13 @@ public enum LogEvent: Sendable {
         // Errors
         case .dictationFailed, .audioSessionFailed, .transcriptionFailed,
              .modelDownloadFailed, .modelDeleteFailed,
-             .liveActivityFailed:
+             .liveActivityFailed, .keyboardInsertFailed:
             return .error
 
         // Warnings
         case .dictationDeferred, .watchdogReset, .engineWarmUpFailed, .recordingTooShort,
              .waveformStall, .waveformTimelineNotFiring,
-             .coldStartDarwinFallback:
+             .coldStartDarwinFallback, .keyboardInsertRetry:
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
@@ -225,7 +256,7 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardNotFound, .onboardingKeyboardCheckSkipped,
              .onboardingKeyboardRetry,
              .audioEngineStopped,
-             .keyboardDidDisappear, .keyboardTextInserted,
+             .keyboardDidDisappear, .keyboardTextInserted, .keyboardInsertProbe,
              .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground,
              .rapidTapRejected,
              .engineWarmUpAttempt, .engineWarmUpSuccess,
@@ -265,6 +296,9 @@ public enum LogEvent: Sendable {
         case .keyboardDidDisappear: return "keyboardDidDisappear"
         case .keyboardMicTapped: return "keyboardMicTapped"
         case .keyboardTextInserted: return "keyboardTextInserted"
+        case .keyboardInsertProbe: return "keyboardInsertProbe"
+        case .keyboardInsertRetry: return "keyboardInsertRetry"
+        case .keyboardInsertFailed: return "keyboardInsertFailed"
         case .engineWarmUpAttempt: return "engineWarmUpAttempt"
         case .engineWarmUpSuccess: return "engineWarmUpSuccess"
         case .engineWarmUpFailed: return "engineWarmUpFailed"
@@ -372,6 +406,17 @@ public enum LogEvent: Sendable {
         case .keyboardDidAppear, .keyboardDidDisappear,
              .keyboardMicTapped, .keyboardTextInserted:
             return ""
+
+        // Keyboard insertion probes (Phase 34 STAB-01) — counts/bools only, no raw text
+        case .keyboardInsertProbe(let path, let sessionID, let attempt, let transcriptionCount,
+                                  let hasFullAccess, let hasTextBefore, let hasTextAfter,
+                                  let beforeCount, let afterCount, let keyboardVisible,
+                                  let darwinToInsertMs):
+            return "path=\(path) sessionID=\(sessionID) attempt=\(attempt) transcriptionCount=\(transcriptionCount) hasFullAccess=\(hasFullAccess) hasTextBefore=\(hasTextBefore) hasTextAfter=\(hasTextAfter) beforeCount=\(beforeCount) afterCount=\(afterCount) keyboardVisible=\(keyboardVisible) darwinToInsertMs=\(darwinToInsertMs)"
+        case .keyboardInsertRetry(let path, let sessionID, let attempt, let reason):
+            return "path=\(path) sessionID=\(sessionID) attempt=\(attempt) reason=\(reason)"
+        case .keyboardInsertFailed(let path, let sessionID, let totalAttempts, let finalReason):
+            return "path=\(path) sessionID=\(sessionID) totalAttempts=\(totalAttempts) finalReason=\(finalReason)"
 
         // Engine Diagnostics
         case .engineWarmUpAttempt(let context):
