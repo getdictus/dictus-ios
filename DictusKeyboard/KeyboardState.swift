@@ -383,12 +383,19 @@ class KeyboardState: ObservableObject {
 
     /// Shared helper invocation — both primary and 100ms-retry paths reach here.
     ///
+    /// Phase 34.1 (single-shot helper): the helper now performs a single insert +
+    /// classify + log with no retries, no UI escalation. The classifier (Plan
+    /// 34.1-01) emits success-family outcomes for every ambiguous iOS proxy
+    /// reading — reaching the `.failed` branch is the narrow true-silentDrop case.
+    ///
     /// On success: log, fire success haptic, notify suggestion bar, reset to idle,
     /// and clear any lingering statusMessage banner.
     ///
-    /// On terminal failure (all retries exhausted): fire error haptic, re-publish
-    /// the transcription to SharedKeys.lastTranscription (Plan 34-02 recovery contract),
-    /// set the FR/EN banner with 4s auto-clear, and reset dictation state to idle.
+    /// On failure (narrow silentDrop / proxyNil / noFullAccess / contextUnavailable):
+    /// re-publish the transcription to SharedKeys.lastTranscription (Plan 34-02
+    /// recovery contract) so HomeView's recoverableTranscription surface renders
+    /// the recovery card, then reset dictation state to idle. No banner, no haptic,
+    /// no LiveActivity `.failed` escalation — telemetry only.
     private func dispatchInsertion(
         transcription: String,
         path: InsertionPath,
@@ -410,17 +417,19 @@ class KeyboardState: ObservableObject {
                 self.statusMessage = nil       // clear any stale banner on success
                 self.onTranscriptionInserted?()
                 self.resetToIdleAfterInsertion()
-            case .failed(let reason, let attempts):
-                // CRITICAL Plan 34-02 contract: on terminal failure, preserve the App
-                // Group value so HomeView's recoverableTranscription surface can render
-                // the recovery card. handleTranscriptionReady cleared the key before
-                // calling the helper — we put it back here.
+            case .failed:
+                // Plan 34.1: no banner / haptic / LiveActivity escalation. The classifier
+                // classifies almost every ambiguous case as windowedSuccess, so reaching
+                // here is the narrow true-silentDrop case — preserve App Group so HomeView
+                // recoverableTranscription surfaces the lost text.
+                //
+                // CRITICAL Plan 34-02 contract: handleTranscriptionReady cleared the App
+                // Group value before calling the helper — we put it back here so the
+                // recovery card can render.
                 self.defaults.set(transcription, forKey: SharedKeys.lastTranscription)
                 self.defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
                 self.defaults.synchronize()
 
-                HapticFeedback.insertionFailed()
-                self.escalateInsertionFailure(reason: reason, attempts: attempts)
                 self.resetToIdleAfterInsertion()
             }
         }
@@ -428,8 +437,7 @@ class KeyboardState: ObservableObject {
 
     /// Reset dictation state to idle after either success or terminal failure.
     /// Extracted so both success and failure branches share the same state teardown.
-    /// Does NOT clear statusMessage — success path clears it explicitly, failure path
-    /// relies on escalateInsertionFailure's 4s auto-clear.
+    /// Does NOT clear statusMessage — success path clears it explicitly.
     private func resetToIdleAfterInsertion() {
         stopWatchdog()
         dictationStatus = .idle
@@ -437,29 +445,6 @@ class KeyboardState: ObservableObject {
         recordingElapsed = 0
         lastTranscription = nil
         activeSessionID = nil
-    }
-
-    /// Loud-fail escalation: set localized banner, schedule 4s auto-clear.
-    /// Haptic is fired by caller so it's audible at the same moment the banner appears.
-    private func escalateInsertionFailure(reason: InsertionFailureReason, attempts: Int) {
-        // Localized banner copy — FR primary, EN fallback (per CONTEXT.md locked decision).
-        let lang = defaults.string(forKey: SharedKeys.language) ?? "fr"
-        let message: String
-        switch lang {
-        case "en":
-            message = "Couldn't insert. Find your transcription in Dictus."
-        default:
-            message = "Insertion impossible. Retrouvez votre transcription dans Dictus."
-        }
-        statusMessage = message
-
-        // 4-second auto-clear (bumped from 3s for dictation errors — per CONTEXT.md).
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
-            // Only clear if this banner is still our message — don't stomp a newer one.
-            if self?.statusMessage == message {
-                self?.statusMessage = nil
-            }
-        }
     }
 
     // MARK: - Keyboard visibility tracking
