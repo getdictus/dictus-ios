@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: Dictus Pro
-status: planning
-stopped_at: Phase 34 context gathered
-last_updated: "2026-04-15T21:01:09.272Z"
-last_activity: 2026-04-15 — v1.7 roadmap defined
+milestone: v1.7
+milestone_name: Stability, Polish & i18n
+status: executing
+stopped_at: Completed 34-01-PLAN.md (DictusCore foundations for insertion fix)
+last_updated: "2026-04-16T05:35:59.641Z"
+last_activity: 2026-04-16 — Plan 34-01 executed (LogEvent probe cases, HapticFeedback, state machine edges, InsertionClassifier)
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 4
+  completed_plans: 1
+  percent: 4
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 
 ## Current Position
 
-Phase: 34 (Silent Insertion Fix) — not yet planned
-Plan: —
-Status: Roadmap defined, awaiting phase planning
-Last activity: 2026-04-15 — v1.7 roadmap defined
+Phase: 34 (Silent Insertion Fix) — executing
+Plan: 34-01 complete; next: 34-02 (HomeView App Group recovery fallback)
+Status: Plan 34-01 executed — DictusCore foundations shipped (log events, haptic, state machine edges, InsertionClassifier)
+Last activity: 2026-04-16 — Plan 34-01 executed
 
-Progress: ░░░░░░░░░░ 0% (0/6 phases)
+Progress: [█░░░░░░░░░] 4% (1/24 plans across 6 phases; 1/4 in Phase 34)
 
 ## Performance Metrics
 
@@ -55,6 +55,11 @@ All prior decisions logged in PROJECT.md Key Decisions table.
 - AUTO-01 + AUTO-02 + AUTO-03 bundled in Phase 36 — AOSP LatinIME alignment is a single coherent architectural change, splitting would cause rework.
 - I18N-01 (Phase 38) scheduled before I18N-02 (Phase 39) — German is the first validation of the i18n process, not an independent feature.
 
+**Phase 34 execution decisions (Plan 34-01):**
+- Use `xcodebuild test -scheme DictusCore -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` for DictusCore tests, NOT `swift test --package-path DictusCore` — the package is iOS-only (UIKit, ActivityKit, iOS 26 SwiftUI APIs) and does not compile for macOS. Plans 34-02/03/04 should use the same command.
+- Pre-existing `AccentedCharacterTests` + `FrequencyDictionaryTests` failures on `develop` documented in `.planning/phases/34-silent-insertion-fix/deferred-items.md` and deferred to a future cleanup issue — out of STAB-01 scope.
+- `InsertionClassifier` shipped as an `enum` (static-function namespace) — pure policy, no stored state, no allocator churn when called per-insertion-attempt.
+
 ### Pending Todos
 
 - Adaptive accent key shows apostrophe after "qu" (UI todo from v1.4)
@@ -75,10 +80,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-15T21:01:09.270Z
-Stopped at: Phase 34 context gathered
-Resume file: .planning/phases/34-silent-insertion-fix/34-CONTEXT.md
-Next step: `/gsd:plan-phase 34` to plan the silent insertion fix
+Last session: 2026-04-16T05:34:07Z
+Stopped at: Completed 34-01-PLAN.md (DictusCore foundations for insertion fix)
+Resume file: .planning/phases/34-silent-insertion-fix/34-01-SUMMARY.md
+Next step: `/gsd:execute-phase 34` to continue with Plan 34-02 (HomeView App Group recovery fallback)
 
 ---
 *State initialized: 2026-03-04*
