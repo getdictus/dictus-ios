@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Stability, Polish & i18n
 status: executing
-stopped_at: Completed 34-03-PLAN.md (InsertTranscriptionHelper with validate/verify/retry/escalate)
-last_updated: "2026-04-16T07:50:00Z"
-last_activity: 2026-04-16 — Plan 34-03 executed (InsertTranscriptionHelper, privacy-audit passed on real-device logs)
+stopped_at: Completed 34.1-01-PLAN.md (InsertionClassifier rewrite with success-first priority)
+last_updated: "2026-04-16T11:24:05Z"
+last_activity: 2026-04-16 — Plan 34.1-01 executed (InsertionClassifier rewrite: 17/17 tests pass, 3 real-device false-positive categories eliminated)
 progress:
-  total_phases: 6
+  total_phases: 7
   completed_phases: 0
-  total_plans: 4
-  completed_plans: 3
-  percent: 12
+  total_plans: 24
+  completed_plans: 4
+  percent: 17
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Milestone v1.7 — Stability, Polish & i18n (roadmap defined, ready for Phase 34 planning)
+**Current focus:** Milestone v1.7 — Stability, Polish & i18n (Phase 34.1 gap-closure for STAB-01 in progress: 1/3 plans complete)
 
 ## Current Position
 
-Phase: 34 (Silent Insertion Fix) — executing
-Plan: 34-03 complete; next: 34-04 (manual verification test matrix closing STAB-01)
-Status: Plan 34-03 executed — InsertTranscriptionHelper shipped (validate/verify/retry/escalate, privacy-safe probes, failure path preserves App Group for HomeView recovery)
-Last activity: 2026-04-16 — Plan 34-03 executed (9 real-device insertions, 0 retries, 0 failures, privacy audit PASS)
+Phase: 34.1 (Simplify Insertion Detection) — executing
+Plan: 34.1-01 complete; next: 34.1-02 (remove retry loop from InsertTranscriptionHelper)
+Status: Plan 34.1-01 executed — InsertionClassifier rewritten with success-first priority, never emits `.proxyDead`/`.deltaMismatch`, 17/17 classifier tests pass
+Last activity: 2026-04-16 — Plan 34.1-01 executed (eliminates 3 real-device false-positive categories that caused retries → duplicate insertions)
 
-Progress: [█░░░░░░░░░] 12% (3/24 plans across 6 phases; 3/4 in Phase 34)
+Progress: [█░░░░░░░░░] 17% (4/24 plans across 7 phases; 1/3 in Phase 34.1)
 
 ## Performance Metrics
 
@@ -72,6 +72,12 @@ All prior decisions logged in PROJECT.md Key Decisions table.
 - Privacy-safe telemetry: `keyboardInsertProbe` / `keyboardInsertRetry` / `keyboardInsertFailed` contain only integers (counts, timings), booleans (hasFullAccess, hasText*), and labels (path=warmDarwin|coldStartBridge). Real-device log audit (9 insertions, 892-line log): zero raw transcription text in any probe — **privacy audit PASS**.
 - Delta math verified: across 9 real-device insertions, `beforeCount + transcriptionCount = afterCount` exactly on every probe — classifier correctly returns `.success`.
 
+**Phase 34.1 execution decisions (Plan 34.1-01):**
+- `InsertionClassifier.classify` rewritten with 7-rule success-first priority per CONTEXT D1. Rule 1 (hasTextBefore=false && hasTextAfter=true → `.emptyFieldSuccess`) is authoritative regardless of nil context; Rule 4 treats negative delta with hasTextAfter=true as `.windowedSuccess` (iOS window truncation); Rule 6 narrows `.silentDrop` to `delta==0 && 0<beforeCount<400 && hasText unchanged`. Default (Rule 7) falls through to `.windowedSuccess` — no more ambiguous `.deltaMismatch`.
+- `.proxyDead` and `.deltaMismatch` enum cases retained as dead-but-unreachable (source-compat only) — avoids cascading exhaustive-switch refactor across `InsertTranscriptionHelper` and `LogEvent` that properly belongs to Plan 34.1-02 (retry loop removal). Tests prove classifier never returns them.
+- **Verification command change:** DictusCore scheme at project root no longer has a working `TestAction` (the `Dictus.xcodeproj/xcshareddata/xcschemes/` directory is currently untracked). Fix: created `DictusCore/.swiftpm/xcode/xcshareddata/xcschemes/DictusCore-Package.xcscheme` and run tests via `cd DictusCore && xcodebuild test -scheme DictusCore-Package -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DictusCoreTests/InsertionClassifierTests`. Plans 34.1-02/03 must use this command.
+- Pre-existing 10 failures in `AccentedCharacterTests` + `FrequencyDictionaryTests` remain — deferred per `.planning/phases/34-silent-insertion-fix/deferred-items.md`, out of STAB-01 scope.
+
 ### Roadmap Evolution
 
 - Phase 34.1 inserted after Phase 34 (2026-04-16): **Simplify insertion detection — telemetry-only, no retries, no UI escalation.** Real-device testing revealed Plan 34-03 introduced 3 observable regressions: (1) false-positive failures from classifier treating nil `documentContextBeforeInput` as `.proxyDead` when `hasText` had transitioned false→true (genuine empty-field success); (2) false-positive failures from negative-delta readings when iOS truncates `documentContextBeforeInput` window on long host fields; (3) retries blindly re-inserting on false failures, causing duplicate text insertion; (4) UX bug: red banner visually truncated in ToolbarView. User reported base rate of real #118 silent failures is ~1-in-hundreds, net UX regression. Simplification path: fix classifier, drop retries, drop banner+haptic+LiveActivity `.failed`, keep probe telemetry (privacy-audited zero-leak) + App Group preservation-on-failure for HomeView recovery surface.
@@ -102,10 +108,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T07:50:00Z
-Stopped at: Completed 34-03-PLAN.md (InsertTranscriptionHelper with privacy-audited probes)
-Resume file: .planning/phases/34-silent-insertion-fix/34-03-SUMMARY.md
-Next step: `/gsd:execute-phase 34` to continue with Plan 34-04 (manual verification test matrix closing STAB-01)
+Last session: 2026-04-16T11:24:05Z
+Stopped at: Completed 34.1-01-PLAN.md (InsertionClassifier rewrite with success-first priority)
+Resume file: .planning/phases/34.1-simplify-insertion-detection/34.1-01-SUMMARY.md
+Next step: `/gsd:execute-phase 34.1` to continue with Plan 34.1-02 (remove retry loop from InsertTranscriptionHelper + drop user-facing escalation)
 
 ---
 *State initialized: 2026-03-04*

@@ -51,7 +51,7 @@ Populated by roadmapper during Step 10 of new-milestone workflow.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STAB-01 | Phase 34 | In Progress (1/4 plans complete) |
+| STAB-01 | Phase 34 + 34.1 | In Progress (4/7 plans complete across Phase 34 + 34.1 gap-closure) |
 | KBD-01 | Phase 35 | Pending |
 | KBD-02 | Phase 35 | Pending |
 | AUTO-01 | Phase 36 | Pending |
