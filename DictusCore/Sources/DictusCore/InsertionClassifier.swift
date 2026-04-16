@@ -5,6 +5,13 @@
 // WHY extracted: The delta-interpretation rules are policy that must survive
 // Apple's opaque documentContextBeforeInput windowing behavior. Isolating the
 // logic in DictusCore lets us unit-test every branch without a real proxy.
+//
+// Phase 34.1 rewrite (2026-04-16): rule ordering is now success-first.
+// Real-device logs showed the previous proxy-dead-first ordering produced
+// false-positive failures (empty field with nil before-context, window
+// truncation with negative delta) that triggered retries → duplicate text
+// insertion. The new ordering trusts the `hasText` transition and defaults
+// ambiguous cases to `.windowedSuccess`, eliminating false-positive retries.
 
 import Foundation
 
@@ -25,14 +32,32 @@ public enum InsertionOutcome: Equatable, Sendable {
     case silentDrop
     /// Delta exists but is inconsistent with transcription length (e.g. negative,
     /// or implausibly large). Retry candidate.
+    ///
+    /// NOTE (Phase 34.1): no longer emitted by `classify`. The enum case is
+    /// retained for source-compatibility with existing callers that pattern-
+    /// match on it; new code should not rely on this outcome.
     case deltaMismatch
     /// One or both counts are -1 (documentContextBeforeInput was nil) — proxy
     /// disconnected or secure field. Retry candidate; will escalate if persists.
+    ///
+    /// NOTE (Phase 34.1): no longer emitted by `classify`. The enum case is
+    /// retained for source-compatibility with existing callers that pattern-
+    /// match on it; new code should not rely on this outcome.
     case proxyDead
 }
 
 public enum InsertionClassifier {
     /// Classify the result of a single insertText attempt.
+    ///
+    /// Rule ordering is success-first: hasText transition is authoritative over
+    /// nil-context readings because iOS returns nil `documentContextBeforeInput`
+    /// in several legitimate success cases (empty fields, truncated long fields,
+    /// secure fields).
+    ///
+    /// Ambiguous cases default to `.windowedSuccess` (benefit of the doubt) rather
+    /// than `.deltaMismatch` because retries cause duplicate insertions — never
+    /// penalize the user for iOS oddness when hasText evidence doesn't clearly
+    /// indicate failure.
     ///
     /// - Parameters:
     ///   - beforeCount: documentContextBeforeInput.utf16.count immediately before
@@ -50,40 +75,53 @@ public enum InsertionClassifier {
         hasTextBefore: Bool,
         hasTextAfter: Bool
     ) -> InsertionOutcome {
-        // Proxy dead: nil context on either side signals disconnected proxy.
-        if beforeCount < 0 || afterCount < 0 {
-            return .proxyDead
-        }
-
-        let delta = afterCount - beforeCount
-
-        // Exact-match success.
-        if delta == transcriptionUtf16Count {
-            return .success
-        }
-
-        // Empty-field success: before context was empty and hasText flipped
-        // false -> true. Delta could be 0 (proxy clipped the reading) or
-        // anything else — the hasText transition is authoritative.
-        if beforeCount == 0 && hasTextBefore == false && hasTextAfter == true {
+        // Rule 1: hasText transition is authoritative for empty-field success.
+        // The proxy may return nil `documentContextBeforeInput` for an empty field
+        // even when insertion succeeds — the hasText flip is the ground truth.
+        if hasTextBefore == false && hasTextAfter == true {
             return .emptyFieldSuccess
         }
 
-        // Silent drop: no change at all, non-empty field.
-        if delta == 0 && beforeCount > 0 && hasTextBefore == hasTextAfter {
-            return .silentDrop
+        // Rules 2-4 require both context counts to be readable.
+        if beforeCount >= 0 && afterCount >= 0 {
+            let delta = afterCount - beforeCount
+
+            // Rule 2: exact match — definitive success.
+            if delta == transcriptionUtf16Count {
+                return .success
+            }
+
+            // Rule 3: partial positive delta — window clipped the reading but
+            // insertion happened. Do not retry.
+            if delta > 0 && delta < transcriptionUtf16Count {
+                return .windowedSuccess
+            }
+
+            // Rule 4: negative delta with hasTextAfter — iOS truncated its
+            // documentContextBeforeInput window after insertion (long fields).
+            // Insertion succeeded; the window we can see just shrunk.
+            if delta < 0 && hasTextAfter == true {
+                return .windowedSuccess
+            }
+
+            // Rule 6: narrow true silent drop. Field was non-empty and below the
+            // known iOS truncation cap (~500-1000 chars), no growth, no hasText
+            // transition. This is the only outcome that triggers App Group
+            // preservation for HomeView recovery.
+            if delta == 0 && beforeCount > 0 && beforeCount < 400 && hasTextBefore == hasTextAfter {
+                return .silentDrop
+            }
         }
 
-        // Windowed success: partial delta in the "more than zero but less than
-        // requested" range. Apple's documentContextBeforeInput window is
-        // bounded (~1000 chars in practice); a long pre-cursor field can
-        // legitimately show this.
-        if delta > 0 && delta < transcriptionUtf16Count {
+        // Rule 5: post-context readable, hasTextAfter true, but pre-context was nil.
+        // Benefit of the doubt — treat as windowed success rather than retry.
+        if afterCount >= 0 && hasTextAfter == true && beforeCount < 0 {
             return .windowedSuccess
         }
 
-        // Anything else (negative delta, delta much larger than requested,
-        // partial with inconsistent hasText) is deltaMismatch.
-        return .deltaMismatch
+        // Rule 7: default. Ambiguous or unreadable context without a clear failure
+        // signature — benefit of the doubt. Do not retry, do not escalate. The
+        // insertion might have succeeded and iOS is just being opaque.
+        return .windowedSuccess
     }
 }
