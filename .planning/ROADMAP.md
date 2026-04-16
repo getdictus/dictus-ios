@@ -214,7 +214,7 @@ Plans:
 | 17-22 | v1.3 | 14/14 | Complete | 2026-04-07 |
 | 23-27 | v1.4 | 15/15 | Complete | 2026-04-08 |
 | 34 | v1.7 | 3/4 | In Progress | - |
-| 34.1 | v1.7 | 3/3 | Complete | 2026-04-16 |
+| 34.1 | v1.7 | Complete    | 2026-04-16 | 2026-04-16 |
 | 35 | v1.7 | 0/? | Not started | - |
 | 36 | v1.7 | 0/? | Not started | - |
 | 37 | v1.7 | 0/? | Not started | - |
