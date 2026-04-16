@@ -137,7 +137,7 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
 Plans:
 - [x] 34.1-01 InsertionClassifier rewrite (success-first priority) — completed 2026-04-16
 - [x] 34.1-02 Simplify InsertTranscriptionHelper to single-shot + remove banner/haptic/escalation — completed 2026-04-16
-- [ ] 34.1-03 On-device verification test matrix (TBD)
+- [x] 34.1-03 On-device verification (13 probes, 0 failures, privacy audit PASS) — completed 2026-04-16
 
 ### Phase 35: Keyboard Geometry Polish
 **Goal**: The Dictus keyboard matches the visual dimensions and proportions of the Apple system keyboard, and renders correctly on every launch.
@@ -214,6 +214,7 @@ Plans:
 | 17-22 | v1.3 | 14/14 | Complete | 2026-04-07 |
 | 23-27 | v1.4 | 15/15 | Complete | 2026-04-08 |
 | 34 | v1.7 | 3/4 | In Progress | - |
+| 34.1 | v1.7 | 3/3 | Complete | 2026-04-16 |
 | 35 | v1.7 | 0/? | Not started | - |
 | 36 | v1.7 | 0/? | Not started | - |
 | 37 | v1.7 | 0/? | Not started | - |
