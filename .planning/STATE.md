@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Stability, Polish & i18n
 status: executing
-stopped_at: Completed 34-02-PLAN.md (HomeView App Group recovery fallback)
-last_updated: "2026-04-16T07:29:09Z"
-last_activity: 2026-04-16 — Plan 34-02 executed (HomeView recoverableTranscription + scene-active refresh, user-verified on device)
+stopped_at: Completed 34-03-PLAN.md (InsertTranscriptionHelper with validate/verify/retry/escalate)
+last_updated: "2026-04-16T07:50:00Z"
+last_activity: 2026-04-16 — Plan 34-03 executed (InsertTranscriptionHelper, privacy-audit passed on real-device logs)
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
-  percent: 8
+  completed_plans: 3
+  percent: 12
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 ## Current Position
 
 Phase: 34 (Silent Insertion Fix) — executing
-Plan: 34-02 complete; next: 34-03 (DictusKeyboard insertion helper with loud-fail escalation)
-Status: Plan 34-02 executed — HomeView recovery surface shipped (recoverableTranscription computed property + scene-active refresh via didBecomeActiveNotification)
-Last activity: 2026-04-16 — Plan 34-02 executed (user-verified on device)
+Plan: 34-03 complete; next: 34-04 (manual verification test matrix closing STAB-01)
+Status: Plan 34-03 executed — InsertTranscriptionHelper shipped (validate/verify/retry/escalate, privacy-safe probes, failure path preserves App Group for HomeView recovery)
+Last activity: 2026-04-16 — Plan 34-03 executed (9 real-device insertions, 0 retries, 0 failures, privacy audit PASS)
 
-Progress: [█░░░░░░░░░] 8% (2/24 plans across 6 phases; 2/4 in Phase 34)
+Progress: [█░░░░░░░░░] 12% (3/24 plans across 6 phases; 3/4 in Phase 34)
 
 ## Performance Metrics
 
@@ -65,6 +65,19 @@ All prior decisions logged in PROJECT.md Key Decisions table.
 - Scene-active refresh uses `@State Int` bump + `_ = appGroupRefreshTrigger` read pattern to force SwiftUI to re-evaluate the computed property on scene activation without wrapping the App Group read in a full ObservableObject.
 - **Contract for Plan 34-03:** the failed-insertion escalation path MUST NOT call `defaults.removeObject(forKey: SharedKeys.lastTranscription)` — current clear at `DictusKeyboard/KeyboardState.swift:338` is correct for success path only. Preserving the App Group key on failure is what lets HomeView's recovery surface (Plan 34-02) surface the lost text.
 
+**Phase 34 execution decisions (Plan 34-03):**
+- `InsertTranscriptionHelper` is the single wrapper for every `textDocumentProxy.insertText` call originating from transcription ready. Validates controller / hasFullAccess / document context; inserts; verifies via `InsertionClassifier` (utf16 delta + `proxy.hasText` transition); retries up to 3× with 50/100/200ms backoff; escalates on terminal failure.
+- Failure contract honored: terminal-failure path **re-writes** `SharedKeys.lastTranscription` so HomeView's recovery surface (Plan 34-02) can show the card. Success path still clears (existing duplicate-prevention behavior preserved).
+- Loud-fail UX: FR/EN red banner in ToolbarView with 4s auto-clear + `HapticFeedback.insertionFailed()` + `keyboardInsertFailed` log. Banner does not stomp newer messages.
+- Privacy-safe telemetry: `keyboardInsertProbe` / `keyboardInsertRetry` / `keyboardInsertFailed` contain only integers (counts, timings), booleans (hasFullAccess, hasText*), and labels (path=warmDarwin|coldStartBridge). Real-device log audit (9 insertions, 892-line log): zero raw transcription text in any probe — **privacy audit PASS**.
+- Delta math verified: across 9 real-device insertions, `beforeCount + transcriptionCount = afterCount` exactly on every probe — classifier correctly returns `.success`.
+
+### Known Gaps (non-blocking for Phase 34)
+
+- **LiveActivity state machine — missing `.recording → .failed` edge.** Plan 34-01 added `.standby → .failed` and `.ready → .failed` but not `.recording → .failed`. Real-device logs showed one `liveActivityFailed context=rejectedTransition error=recording->failed` at 07:43:48 on a very short recording (sampleCount=6404 ≈ 0.15s). State machine self-recovered via `recording → standby`. Not blocking STAB-01. Consider adding in a future polish plan.
+- **Cold-start insertion path (`path=coldStartBridge`):** not separately observed in Plan 34-03 device session (all probes were `warmDarwin`). Coverage gap for Plan 34-04 manual test matrix to close.
+- **Force-fail / #118 reproduction:** bug is intermittent and rare — user could not reproduce during testing. Plan 34-03 ships the capture + recovery infrastructure (probe/retry/failed logs + red banner + App Group preservation + HomeView recovery card). Deferred to long-term monitoring — if bug resurfaces after ship, telemetry + recovery surface are in place.
+
 ### Pending Todos
 
 - Adaptive accent key shows apostrophe after "qu" (UI todo from v1.4)
@@ -85,10 +98,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T07:29:09Z
-Stopped at: Completed 34-02-PLAN.md (HomeView App Group recovery fallback)
-Resume file: .planning/phases/34-silent-insertion-fix/34-02-SUMMARY.md
-Next step: `/gsd:execute-phase 34` to continue with Plan 34-03 (DictusKeyboard insertion helper)
+Last session: 2026-04-16T07:50:00Z
+Stopped at: Completed 34-03-PLAN.md (InsertTranscriptionHelper with privacy-audited probes)
+Resume file: .planning/phases/34-silent-insertion-fix/34-03-SUMMARY.md
+Next step: `/gsd:execute-phase 34` to continue with Plan 34-04 (manual verification test matrix closing STAB-01)
 
 ---
 *State initialized: 2026-03-04*
