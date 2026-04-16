@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Stability, Polish & i18n
 status: executing
-stopped_at: Completed 34-01-PLAN.md (DictusCore foundations for insertion fix)
-last_updated: "2026-04-16T05:35:59.641Z"
-last_activity: 2026-04-16 — Plan 34-01 executed (LogEvent probe cases, HapticFeedback, state machine edges, InsertionClassifier)
+stopped_at: Completed 34-02-PLAN.md (HomeView App Group recovery fallback)
+last_updated: "2026-04-16T07:29:09Z"
+last_activity: 2026-04-16 — Plan 34-02 executed (HomeView recoverableTranscription + scene-active refresh, user-verified on device)
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
-  percent: 4
+  completed_plans: 2
+  percent: 8
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 ## Current Position
 
 Phase: 34 (Silent Insertion Fix) — executing
-Plan: 34-01 complete; next: 34-02 (HomeView App Group recovery fallback)
-Status: Plan 34-01 executed — DictusCore foundations shipped (log events, haptic, state machine edges, InsertionClassifier)
-Last activity: 2026-04-16 — Plan 34-01 executed
+Plan: 34-02 complete; next: 34-03 (DictusKeyboard insertion helper with loud-fail escalation)
+Status: Plan 34-02 executed — HomeView recovery surface shipped (recoverableTranscription computed property + scene-active refresh via didBecomeActiveNotification)
+Last activity: 2026-04-16 — Plan 34-02 executed (user-verified on device)
 
-Progress: [█░░░░░░░░░] 4% (1/24 plans across 6 phases; 1/4 in Phase 34)
+Progress: [█░░░░░░░░░] 8% (2/24 plans across 6 phases; 2/4 in Phase 34)
 
 ## Performance Metrics
 
@@ -60,6 +60,11 @@ All prior decisions logged in PROJECT.md Key Decisions table.
 - Pre-existing `AccentedCharacterTests` + `FrequencyDictionaryTests` failures on `develop` documented in `.planning/phases/34-silent-insertion-fix/deferred-items.md` and deferred to a future cleanup issue — out of STAB-01 scope.
 - `InsertionClassifier` shipped as an `enum` (static-function namespace) — pure policy, no stored state, no allocator churn when called per-insertion-attempt.
 
+**Phase 34 execution decisions (Plan 34-02):**
+- HomeView `recoverableTranscription` uses 300s staleness window reusing DictationCoordinator.swift:97-102 cutoff — single-sourced contract for "fresh transcription".
+- Scene-active refresh uses `@State Int` bump + `_ = appGroupRefreshTrigger` read pattern to force SwiftUI to re-evaluate the computed property on scene activation without wrapping the App Group read in a full ObservableObject.
+- **Contract for Plan 34-03:** the failed-insertion escalation path MUST NOT call `defaults.removeObject(forKey: SharedKeys.lastTranscription)` — current clear at `DictusKeyboard/KeyboardState.swift:338` is correct for success path only. Preserving the App Group key on failure is what lets HomeView's recovery surface (Plan 34-02) surface the lost text.
+
 ### Pending Todos
 
 - Adaptive accent key shows apostrophe after "qu" (UI todo from v1.4)
@@ -80,10 +85,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T05:34:07Z
-Stopped at: Completed 34-01-PLAN.md (DictusCore foundations for insertion fix)
-Resume file: .planning/phases/34-silent-insertion-fix/34-01-SUMMARY.md
-Next step: `/gsd:execute-phase 34` to continue with Plan 34-02 (HomeView App Group recovery fallback)
+Last session: 2026-04-16T07:29:09Z
+Stopped at: Completed 34-02-PLAN.md (HomeView App Group recovery fallback)
+Resume file: .planning/phases/34-silent-insertion-fix/34-02-SUMMARY.md
+Next step: `/gsd:execute-phase 34` to continue with Plan 34-03 (DictusKeyboard insertion helper)
 
 ---
 *State initialized: 2026-03-04*
