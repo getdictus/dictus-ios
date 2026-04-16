@@ -29,6 +29,31 @@ final class LogPrivacyTests: XCTestCase {
             .keyboardDidDisappear,
             .keyboardMicTapped,
             .keyboardTextInserted,
+            .keyboardInsertProbe(
+                path: "warmDarwin",
+                sessionID: "S1",
+                attempt: 0,
+                transcriptionCount: 42,
+                hasFullAccess: true,
+                hasTextBefore: false,
+                hasTextAfter: true,
+                beforeCount: 0,
+                afterCount: 42,
+                keyboardVisible: true,
+                darwinToInsertMs: 12
+            ),
+            .keyboardInsertRetry(
+                path: "warmDarwin",
+                sessionID: "S1",
+                attempt: 1,
+                reason: "noDelta"
+            ),
+            .keyboardInsertFailed(
+                path: "coldStartBridge",
+                sessionID: "S1",
+                totalAttempts: 4,
+                finalReason: "proxyNil"
+            ),
             .appLaunched(version: "1.2"),
             .appDidBecomeActive,
             .appWillResignActive,

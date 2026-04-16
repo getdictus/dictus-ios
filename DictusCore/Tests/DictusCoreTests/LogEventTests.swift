@@ -177,6 +177,60 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.subsystem, .keyboard)
     }
 
+    // MARK: - Phase 34 insertion probe events
+
+    func test_keyboardInsertProbe_formatsAllFields() {
+        let event = LogEvent.keyboardInsertProbe(
+            path: "warmDarwin",
+            sessionID: "abc123",
+            attempt: 0,
+            transcriptionCount: 42,
+            hasFullAccess: true,
+            hasTextBefore: false,
+            hasTextAfter: true,
+            beforeCount: 0,
+            afterCount: 42,
+            keyboardVisible: true,
+            darwinToInsertMs: 12
+        )
+        XCTAssertEqual(event.level, .debug)
+        XCTAssertEqual(event.subsystem, .keyboard)
+        XCTAssertEqual(
+            event.message,
+            "path=warmDarwin sessionID=abc123 attempt=0 transcriptionCount=42 hasFullAccess=true hasTextBefore=false hasTextAfter=true beforeCount=0 afterCount=42 keyboardVisible=true darwinToInsertMs=12"
+        )
+    }
+
+    func test_keyboardInsertRetry_formatsAllFields() {
+        let event = LogEvent.keyboardInsertRetry(
+            path: "warmDarwin",
+            sessionID: "abc123",
+            attempt: 1,
+            reason: "silentDrop"
+        )
+        XCTAssertEqual(event.level, .warning)
+        XCTAssertEqual(event.subsystem, .keyboard)
+        XCTAssertEqual(
+            event.message,
+            "path=warmDarwin sessionID=abc123 attempt=1 reason=silentDrop"
+        )
+    }
+
+    func test_keyboardInsertFailed_formatsAllFields() {
+        let event = LogEvent.keyboardInsertFailed(
+            path: "coldStartBridge",
+            sessionID: "abc123",
+            totalAttempts: 4,
+            finalReason: "proxyDead"
+        )
+        XCTAssertEqual(event.level, .error)
+        XCTAssertEqual(event.subsystem, .keyboard)
+        XCTAssertEqual(
+            event.message,
+            "path=coldStartBridge sessionID=abc123 totalAttempts=4 finalReason=proxyDead"
+        )
+    }
+
     // MARK: - Lifecycle events
 
     func testAppLaunchedIsInfoLifecycle() {
