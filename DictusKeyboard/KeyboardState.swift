@@ -326,19 +326,15 @@ class KeyboardState: ObservableObject {
     /// insert it directly into the text field via textDocumentProxy.insertText().
     /// This matches the standard iOS dictation UX — user speaks, text appears at cursor.
     ///
-    /// Phase 34 STAB-01: insertion now flows through InsertTranscriptionHelper which
-    /// validates proxy health, inserts, verifies via InsertionClassifier, retries up
-    /// to 3x with 50/100/200ms backoff, and escalates to loud-fail on exhaustion.
+    /// Post-insert diagnostic probe (issue #118): read proxy state AFTER insertText only.
+    /// Pre-insert RPC reads were removed because they added ~20-100ms of host↔extension
+    /// IPC latency that widened the race window for proxy-disconnect (regression from
+    /// Phase 34.1 helper, rolled back on develop).
     private func handleTranscriptionReady() {
         logProbe("handleTranscriptionReady", details: sessionDetails())
         refreshFromDefaults()
 
         let darwinTimestamp = Date()
-        // Path discrimination for probe logs — cold start re-enters this same
-        // handleTranscriptionReady via the Darwin notification fired after URL-scheme wake.
-        let currentPath: InsertionPath = defaults.bool(forKey: SharedKeys.coldStartActive)
-            ? .coldStartBridge
-            : .warmDarwin
 
         if let transcription = defaults.string(forKey: SharedKeys.lastTranscription),
            !transcription.isEmpty {
@@ -346,24 +342,14 @@ class KeyboardState: ObservableObject {
             // Darwin notifications can be delivered multiple times (extension lifecycle,
             // multiple statusChanged posts). By clearing first, subsequent calls find
             // nothing to insert.
-            //
-            // NOTE (Plan 34-02 contract): the failure path must preserve SharedKeys.lastTranscription
-            // so HomeView can surface the recovery card. Since we clear BEFORE the helper runs, we
-            // re-write it back on terminal failure inside dispatchInsertion's .failed branch.
             defaults.removeObject(forKey: SharedKeys.lastTranscription)
             defaults.synchronize()
 
-            dispatchInsertion(
-                transcription: transcription,
-                path: currentPath,
-                darwinTimestamp: darwinTimestamp
-            )
+            insertAndReset(transcription: transcription, darwinTimestamp: darwinTimestamp)
         } else {
             // Retry after 100ms — mitigates UserDefaults race condition.
             // Darwin notifications are posted immediately after synchronize(),
             // but cross-App-Group propagation can lag on-device.
-            // PRESERVED per Phase 34 CONTEXT.md — solves a different problem than the
-            // helper's proxy-disconnect retries: App Group UserDefaults propagation lag.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
                 guard let self = self else { return }
                 if let transcription = self.defaults.string(forKey: SharedKeys.lastTranscription),
@@ -371,78 +357,49 @@ class KeyboardState: ObservableObject {
                     self.defaults.removeObject(forKey: SharedKeys.lastTranscription)
                     self.defaults.synchronize()
 
-                    self.dispatchInsertion(
-                        transcription: transcription,
-                        path: currentPath,
-                        darwinTimestamp: darwinTimestamp
-                    )
+                    self.insertAndReset(transcription: transcription, darwinTimestamp: darwinTimestamp)
                 }
             }
         }
     }
 
-    /// Shared helper invocation — both primary and 100ms-retry paths reach here.
-    ///
-    /// Phase 34.1 (single-shot helper): the helper now performs a single insert +
-    /// classify + log with no retries, no UI escalation. The classifier (Plan
-    /// 34.1-01) emits success-family outcomes for every ambiguous iOS proxy
-    /// reading — reaching the `.failed` branch is the narrow true-silentDrop case.
-    ///
-    /// On success: log, fire success haptic, notify suggestion bar, reset to idle,
-    /// and clear any lingering statusMessage banner.
-    ///
-    /// On failure (narrow silentDrop / proxyNil / noFullAccess / contextUnavailable):
-    /// re-publish the transcription to SharedKeys.lastTranscription (Plan 34-02
-    /// recovery contract) so HomeView's recoverableTranscription surface renders
-    /// the recovery card, then reset dictation state to idle. No banner, no haptic,
-    /// no LiveActivity `.failed` escalation — telemetry only.
-    private func dispatchInsertion(
-        transcription: String,
-        path: InsertionPath,
-        darwinTimestamp: Date
-    ) {
-        InsertTranscriptionHelper.insertTranscription(
-            transcription,
-            controller: self.controller,
-            isKeyboardVisible: self.isKeyboardVisible,
-            sessionID: self.activeSessionID ?? "",
-            darwinNotificationTimestamp: darwinTimestamp,
-            path: path
-        ) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success:
-                PersistentLog.log(.keyboardTextInserted)
-                HapticFeedback.textInserted()
-                self.statusMessage = nil       // clear any stale banner on success
-                self.onTranscriptionInserted?()
-                self.resetToIdleAfterInsertion()
-            case .failed:
-                // Plan 34.1: no banner / haptic / LiveActivity escalation. The classifier
-                // classifies almost every ambiguous case as windowedSuccess, so reaching
-                // here is the narrow true-silentDrop case — preserve App Group so HomeView
-                // recoverableTranscription surfaces the lost text.
-                //
-                // CRITICAL Plan 34-02 contract: handleTranscriptionReady cleared the App
-                // Group value before calling the helper — we put it back here so the
-                // recovery card can render.
-                self.defaults.set(transcription, forKey: SharedKeys.lastTranscription)
-                self.defaults.set(Date().timeIntervalSince1970, forKey: SharedKeys.lastTranscriptionTimestamp)
-                self.defaults.synchronize()
+    /// Insert transcription then reset to idle. Direct proxy call with no pre-insert
+    /// RPC reads (issue #118). A single post-insert probe captures diagnostic state
+    /// for future investigations without being on the critical path.
+    private func insertAndReset(transcription: String, darwinTimestamp: Date) {
+        let proxy = controller?.textDocumentProxy
+        proxy?.insertText(transcription)
+        PersistentLog.log(.keyboardTextInserted)
 
-                self.resetToIdleAfterInsertion()
-            }
-        }
-    }
+        // Post-insert diagnostic probe. No pre-insert counts — we skipped those
+        // RPCs to match pre-Phase 34 behavior. hasTextBefore/beforeCount carry
+        // sentinel values (false / -1) so downstream log parsers see "unmeasured".
+        let path: String = defaults.bool(forKey: SharedKeys.coldStartActive)
+            ? "coldStartBridge"
+            : "warmDarwin"
+        let elapsedMs = Int(Date().timeIntervalSince(darwinTimestamp) * 1000)
+        PersistentLog.log(.keyboardInsertProbe(
+            path: path,
+            sessionID: activeSessionID ?? "",
+            attempt: 0,
+            transcriptionCount: transcription.utf16.count,
+            hasFullAccess: controller?.hasFullAccess ?? false,
+            hasTextBefore: false,
+            hasTextAfter: proxy?.hasText ?? false,
+            beforeCount: -1,
+            afterCount: proxy?.documentContextBeforeInput?.utf16.count ?? -1,
+            keyboardVisible: isKeyboardVisible,
+            darwinToInsertMs: elapsedMs
+        ))
 
-    /// Reset dictation state to idle after either success or terminal failure.
-    /// Extracted so both success and failure branches share the same state teardown.
-    /// Does NOT clear statusMessage — success path clears it explicitly.
-    private func resetToIdleAfterInsertion() {
+        HapticFeedback.textInserted()
+        onTranscriptionInserted?()
+
         stopWatchdog()
         dictationStatus = .idle
         waveformEnergy = []
         recordingElapsed = 0
+        statusMessage = nil
         lastTranscription = nil
         activeSessionID = nil
     }
