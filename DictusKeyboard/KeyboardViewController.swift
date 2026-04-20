@@ -340,7 +340,11 @@ class KeyboardViewController: UIInputViewController {
             for: deviceContext,
             traitCollection: traitCollection
         )
-        let bottomPadding: CGFloat = 8
+        // bottomPadding was previously 8pt but had no real effect — keyboard view's
+        // bottomAnchor is pinned to kbInputView.bottomAnchor, so the extra height got
+        // divided across 4 row cells (+2pt per row), making each visible key 2.3pt
+        // taller than Apple's. Setting to 0 restores Apple-matched cell height (#117).
+        let bottomPadding: CGFloat = 0
         return keyGridHeight + toolbarHeight + bottomPadding
     }
 
