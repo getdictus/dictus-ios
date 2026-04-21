@@ -30,6 +30,13 @@ public enum PersistentLog {
     /// unreliable in keyboard extensions (can return the host app's ID).
     public static var source: String = "?"
 
+    /// Human-readable code revision marker. Baked into the log export header so a
+    /// device log can be matched to the source tree that produced it even when
+    /// CFBundleVersion hasn't been bumped (we only bump on TestFlight upload).
+    /// Update this string whenever code changes land that should be traceable
+    /// from a device log. Keep short; format suggestion: `<scope>-<shortSHA>`.
+    public static let codeRevision: String = "fix116-1c20ba1"
+
     // MARK: - Constants
 
     /// Maximum log file size in bytes (~200KB = ~1300 lines at ~150 bytes/line).
@@ -137,7 +144,8 @@ public enum PersistentLog {
             appVersion: appVersion,
             buildNumber: buildNumber,
             deviceModel: deviceModel,
-            activeModel: activeModel
+            activeModel: activeModel,
+            codeRevision: codeRevision
         )
         return header + read()
     }
@@ -149,9 +157,10 @@ public enum PersistentLog {
         appVersion: String,
         buildNumber: String,
         deviceModel: String,
-        activeModel: String
+        activeModel: String,
+        codeRevision: String = PersistentLog.codeRevision
     ) -> String {
-        "Dictus Debug Log\niOS \(iosVersion) | App \(appVersion) (\(buildNumber)) | \(deviceModel) | Model: \(activeModel)\n---\n"
+        "Dictus Debug Log\niOS \(iosVersion) | App \(appVersion) (\(buildNumber)) | rev \(codeRevision) | \(deviceModel) | Model: \(activeModel)\n---\n"
     }
 
     // MARK: - Legacy API (Deprecated)
