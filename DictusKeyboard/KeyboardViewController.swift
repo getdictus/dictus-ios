@@ -437,11 +437,12 @@ class KeyboardViewController: UIInputViewController {
     private func handleDictationStatusChange(_ status: DictationStatus) {
         // Issue #116 diagnostic: entry log (fires even when guard trips).
         let oldHosting = hostingHeightConstraint?.constant ?? -1
+        let activeID = KeyboardState.shared.activeControllerID ?? "none"
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
             action: "dictStatusChange_enter",
-            details: "status=\(status.rawValue) hasAppeared=\(hasAppeared) oldHosting=\(oldHosting) isShowingEmoji=\(isShowingEmoji)"
+            details: "status=\(status.rawValue) hasAppeared=\(hasAppeared) oldHosting=\(oldHosting) isShowingEmoji=\(isShowingEmoji) activeID=\(activeID)"
         ))
 
         // Don't change hosting height until the controller is registered with KeyboardState.
@@ -449,6 +450,23 @@ class KeyboardViewController: UIInputViewController {
         // showsOverlay is still false, so expanding now would show the toolbar displaced
         // in a full-height hosting view. viewWillAppear calls this manually after registering.
         guard hasAppeared else { return }
+
+        // Defense-in-depth for #128: iOS caches UIInputViewController and does not
+        // reliably fire viewDidDisappear on stale instances (observed: controllers
+        // responding to Darwin status changes for minutes after losing window
+        // attachment, no viewDidDisappear event logged). The subscription-cancel
+        // path in viewDidDisappear covers the well-behaved case; this guard
+        // short-circuits stale controllers that iOS forgot to notify. Only the
+        // controller currently owning the keyboard window mutates layout.
+        guard KeyboardState.shared.activeControllerID == controllerID else {
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardViewController",
+                instanceID: controllerID,
+                action: "dictStatusChange_skippedInactive",
+                details: "status=\(status.rawValue) activeID=\(activeID)"
+            ))
+            return
+        }
 
         let isRecording = status == .requested || status == .recording || status == .transcribing
 
