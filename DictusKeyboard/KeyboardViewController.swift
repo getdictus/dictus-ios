@@ -341,6 +341,27 @@ class KeyboardViewController: UIInputViewController {
         // Issue #116 diagnostic: snapshot final frames after layout settles.
         // We log both sizes and constraint constants so we can detect priority mismatches
         // where iOS imposed a different height than we asked for.
+        logLayoutSnapshot(action: "viewDidAppear_settled")
+
+        // Issue #129 investigation: viewDidAppear fires BEFORE iOS finishes the
+        // keyboard entry animation, so bounds captured here may still be
+        // transient. Schedule deferred snapshots to confirm whether 504pt is
+        // actually the final, user-visible size — or just a mid-animation value
+        // that iOS later resolves to our requested 276pt constraint.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.logLayoutSnapshot(action: "layoutSnapshot_500ms")
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.logLayoutSnapshot(action: "layoutSnapshot_1000ms")
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.logLayoutSnapshot(action: "layoutSnapshot_2000ms")
+        }
+    }
+
+    /// Emits the same layout snapshot we log in `viewDidAppear_settled`,
+    /// reusable from deferred blocks to compare mid- vs post-animation sizes.
+    private func logLayoutSnapshot(action: String) {
         let inputBounds = inputView?.bounds.size ?? .zero
         let keyboardFrame = giellaKeyboard?.frame.size ?? .zero
         let hostingFrame = hostingController?.view.frame.size ?? .zero
@@ -348,7 +369,7 @@ class KeyboardViewController: UIInputViewController {
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
-            action: "viewDidAppear_settled",
+            action: action,
             details: "inputBounds=\(Int(inputBounds.width))x\(Int(inputBounds.height)) viewBounds=\(Int(viewBounds.width))x\(Int(viewBounds.height)) keyboardFrame=\(Int(keyboardFrame.width))x\(Int(keyboardFrame.height)) hostingFrame=\(Int(hostingFrame.width))x\(Int(hostingFrame.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) viewHeightConst=\(viewHeightConstraint?.constant ?? -1) status=\(KeyboardState.shared.dictationStatus.rawValue)"
         ))
     }
