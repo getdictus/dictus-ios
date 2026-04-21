@@ -191,10 +191,7 @@ class KeyboardViewController: UIInputViewController {
         // Assign as the controller's inputView -- this activates audio feedback
         self.inputView = kbInputView
 
-        // --- 7. Observe recording state to show/hide keyboard ---
-        observeRecordingState()
-
-        // --- 8. Wire post-transcription suggestion refresh ---
+        // --- 7. Wire post-transcription suggestion refresh ---
         // After dictation inserts text, update the suggestion bar with completions
         // for the last word of the transcription.
         KeyboardState.shared.onTranscriptionInserted = { [weak self] in
@@ -230,6 +227,15 @@ class KeyboardViewController: UIInputViewController {
         PersistentLog.log(.keyboardDidAppear)
         KeyboardState.shared.registerControllerAppearance(controllerID: controllerID)
         hasAppeared = true
+
+        // (Re)subscribe to dictation status here, not in viewDidLoad.
+        // WHY: iOS caches UIInputViewController instances across app-switches and
+        // rarely deallocates them, so stale controllers would keep mutating
+        // hostingHeightConstraint on every status change (issue #128). By subscribing
+        // in viewWillAppear and cancelling in viewDidDisappear, only the currently
+        // visible controller is reactive. Assignment is idempotent — the previous
+        // AnyCancellable is released on reassignment, which cancels its subscription.
+        observeRecordingState()
 
         // Force height recalculation when keyboard reappears (e.g., after app switch).
         // Without this, the inputView may retain a stale height from before the switch.
@@ -350,6 +356,15 @@ class KeyboardViewController: UIInputViewController {
             action: "registeredDisappearance",
             details: ""
         ))
+
+        // Tear down the dictation status subscription so this (now-detached)
+        // controller no longer reacts when KeyboardState publishes. iOS caches
+        // UIInputViewController and rarely releases it, so without this cleanup
+        // 10+ stale controllers race on hostingHeightConstraint (issue #128).
+        // viewWillAppear re-subscribes on reattach.
+        dictationStatusCancellable?.cancel()
+        dictationStatusCancellable = nil
+
         // Darwin observers cleaned up by KeyboardState deinit
     }
 
