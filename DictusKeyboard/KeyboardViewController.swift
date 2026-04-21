@@ -32,6 +32,13 @@ class KeyboardViewController: UIInputViewController {
     /// keyboard row (globe, mic) bleeds through and the recording overlay gets compressed.
     private var heightConstraint: NSLayoutConstraint?
 
+    /// Height constraint on self.view, the container UIInputViewController presents
+    /// to the host app's keyboard window. iOS derives the keyboard frame from this
+    /// view, not from inputView. Without this constraint, iOS imposes 452/504/932pt
+    /// heights during app-switch transitions regardless of inputView's own constraint.
+    /// See issue #129.
+    private var viewHeightConstraint: NSLayoutConstraint?
+
     /// Height constraint for the SwiftUI hosting view (toolbar + recording overlay).
     /// Changes from toolbarHeight (52pt) to full height when recording overlay is active.
     private var hostingHeightConstraint: NSLayoutConstraint?
@@ -172,16 +179,24 @@ class KeyboardViewController: UIInputViewController {
             keyboard.bottomAnchor.constraint(equalTo: kbInputView.bottomAnchor),
         ])
 
-        // --- 6. Set explicit height constraint on inputView ---
+        // --- 6. Set explicit height constraint on inputView AND self.view ---
+        // WHY both: iOS sizes the keyboard window from self.view (the controller's
+        // container view), not from inputView. Logs from #129 round 1 confirmed
+        // that an inputView constraint at priority 999 still loses — iOS imposes
+        // 452/504/932/1188pt. Constraining self.view at priority 999 is the path
+        // Apple documents for custom keyboards. We keep the inputView constraint
+        // as a secondary anchor so the UIInputView sizes consistently with the
+        // container when iOS honours the self.view height.
         let height = computeKeyboardHeight()
         let constraint = kbInputView.heightAnchor.constraint(equalToConstant: height)
-        // Priority 999 (just below .required) wins against iOS's transition-time
-        // inputView sizing that otherwise imposes 504/932/960pt during app-switch,
-        // while still breakable in genuinely unrecoverable situations (split-screen).
-        // Matches hostingHeightConstraint pattern (L150). See issue #129.
         constraint.priority = UILayoutPriority(999)
         constraint.isActive = true
         self.heightConstraint = constraint
+
+        let viewConstraint = view.heightAnchor.constraint(equalToConstant: height)
+        viewConstraint.priority = UILayoutPriority(999)
+        viewConstraint.isActive = true
+        self.viewHeightConstraint = viewConstraint
 
         // Attempt to prevent top-row key popup clipping. iOS may re-enforce
         // clipsToBounds -- if so, this is a known limitation of third-party keyboard extensions.
@@ -242,6 +257,7 @@ class KeyboardViewController: UIInputViewController {
         let oldHeight = heightConstraint?.constant ?? -1
         let newHeight = computeKeyboardHeight()
         heightConstraint?.constant = newHeight
+        viewHeightConstraint?.constant = newHeight
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
@@ -328,11 +344,12 @@ class KeyboardViewController: UIInputViewController {
         let inputBounds = inputView?.bounds.size ?? .zero
         let keyboardFrame = giellaKeyboard?.frame.size ?? .zero
         let hostingFrame = hostingController?.view.frame.size ?? .zero
+        let viewBounds = view.bounds.size
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
             action: "viewDidAppear_settled",
-            details: "inputBounds=\(Int(inputBounds.width))x\(Int(inputBounds.height)) keyboardFrame=\(Int(keyboardFrame.width))x\(Int(keyboardFrame.height)) hostingFrame=\(Int(hostingFrame.width))x\(Int(hostingFrame.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) status=\(KeyboardState.shared.dictationStatus.rawValue)"
+            details: "inputBounds=\(Int(inputBounds.width))x\(Int(inputBounds.height)) viewBounds=\(Int(viewBounds.width))x\(Int(viewBounds.height)) keyboardFrame=\(Int(keyboardFrame.width))x\(Int(keyboardFrame.height)) hostingFrame=\(Int(hostingFrame.width))x\(Int(hostingFrame.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) viewHeightConst=\(viewHeightConstraint?.constant ?? -1) status=\(KeyboardState.shared.dictationStatus.rawValue)"
         ))
     }
 
@@ -631,6 +648,7 @@ class KeyboardViewController: UIInputViewController {
         let oldHeightRL = heightConstraint?.constant ?? -1
         let newHeightRL = computeKeyboardHeight()
         heightConstraint?.constant = newHeightRL
+        viewHeightConstraint?.constant = newHeightRL
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
