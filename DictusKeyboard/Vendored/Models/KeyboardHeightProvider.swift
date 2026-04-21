@@ -3,18 +3,36 @@
 // Stripped: import Sentry, SentrySDK.capture calls
 
 import UIKit
+import DictusCore
 
 typealias KeyboardHeight = (portrait: CGFloat, landscape: CGFloat)
 
 struct KeyboardHeightProvider {
+    // Issue #116 diagnostic: static-let evaluates once. If first access lands during
+    // an app-switch transition when UIScreen.main.bounds is transient, the cached
+    // value sticks for the rest of the process lifetime. Log on first evaluation.
     private static let portraitDeviceHeight: CGFloat = {
         let size = UIScreen.main.bounds.size
-        return max(size.height, size.width)
+        let value = max(size.height, size.width)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardHeightProvider",
+            instanceID: "",
+            action: "portraitCache_eval",
+            details: "screen=\(Int(size.width))x\(Int(size.height)) cached=\(value)"
+        ))
+        return value
     }()
 
     private static let landscapeDeviceHeight: CGFloat = {
         let size = UIScreen.main.bounds.size
-        return min(size.height, size.width)
+        let value = min(size.height, size.width)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardHeightProvider",
+            instanceID: "",
+            action: "landscapeCache_eval",
+            details: "screen=\(Int(size.width))x\(Int(size.height)) cached=\(value)"
+        ))
+        return value
     }()
 
     /// Returns keyboard height for a given device and orientation, optionally adjusted for custom row counts

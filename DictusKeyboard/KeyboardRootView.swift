@@ -157,11 +157,12 @@ struct KeyboardRootView: View {
         }
         .background(Color.clear)
         .onChange(of: showsOverlay) { _, isShowing in
+            let usedFallback = isShowing && state.activeControllerID == nil
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardRootView",
                 instanceID: instanceID,
                 action: "showsOverlayChanged",
-                details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
+                details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID) usedFallback=\(usedFallback)"
             ))
             // Dismiss emoji picker when recording starts
             if isShowing {
