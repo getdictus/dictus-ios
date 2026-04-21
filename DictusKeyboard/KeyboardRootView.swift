@@ -63,21 +63,13 @@ struct KeyboardRootView: View {
             || state.dictationStatus == .transcribing
         guard isActiveStatus else { return false }
 
-        // Normal path: this controller is the registered active one
-        if state.activeControllerID == controllerID && state.isKeyboardVisible {
-            return true
-        }
-
-        // Fallback: active recording but no controller registered yet.
-        // During cold start app transitions, iOS can rapidly create/destroy
-        // keyboard controllers. viewWillAppear may not have fired on the
-        // current controller, leaving activeControllerID == nil.
-        // Show overlay anyway -- only one controller is visible on screen.
-        if state.activeControllerID == nil {
-            return true
-        }
-
-        return false
+        // Only the registered active controller shows the overlay.
+        // The legacy `activeControllerID == nil` fallback existed to mask the
+        // controller leak from #128: stale KeyboardRootView instances rendered
+        // RecordingOverlay in parallel with the visible one, producing the
+        // duplicate grey overlay observed in issue #116. With #128 fixed,
+        // stale controllers are dormant and this fallback is unnecessary.
+        return state.activeControllerID == controllerID && state.isKeyboardVisible
     }
 
     var body: some View {
@@ -157,11 +149,12 @@ struct KeyboardRootView: View {
         }
         .background(Color.clear)
         .onChange(of: showsOverlay) { _, isShowing in
+            let usedFallback = isShowing && state.activeControllerID == nil
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardRootView",
                 instanceID: instanceID,
                 action: "showsOverlayChanged",
-                details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
+                details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID) usedFallback=\(usedFallback)"
             ))
             // Dismiss emoji picker when recording starts
             if isShowing {

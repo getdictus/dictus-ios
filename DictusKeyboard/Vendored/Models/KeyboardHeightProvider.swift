@@ -3,18 +3,36 @@
 // Stripped: import Sentry, SentrySDK.capture calls
 
 import UIKit
+import DictusCore
 
 typealias KeyboardHeight = (portrait: CGFloat, landscape: CGFloat)
 
 struct KeyboardHeightProvider {
+    // Issue #116 diagnostic: static-let evaluates once. If first access lands during
+    // an app-switch transition when UIScreen.main.bounds is transient, the cached
+    // value sticks for the rest of the process lifetime. Log on first evaluation.
     private static let portraitDeviceHeight: CGFloat = {
         let size = UIScreen.main.bounds.size
-        return max(size.height, size.width)
+        let value = max(size.height, size.width)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardHeightProvider",
+            instanceID: "",
+            action: "portraitCache_eval",
+            details: "screen=\(Int(size.width))x\(Int(size.height)) cached=\(value)"
+        ))
+        return value
     }()
 
     private static let landscapeDeviceHeight: CGFloat = {
         let size = UIScreen.main.bounds.size
-        return min(size.height, size.width)
+        let value = min(size.height, size.width)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardHeightProvider",
+            instanceID: "",
+            action: "landscapeCache_eval",
+            details: "screen=\(Int(size.width))x\(Int(size.height)) cached=\(value)"
+        ))
+        return value
     }()
 
     /// Returns keyboard height for a given device and orientation, optionally adjusted for custom row counts
@@ -118,7 +136,10 @@ struct KeyboardHeightProvider {
         case .size6_1, .size6_3, .size6_5:
             return (portrait: 216, landscape: 175)
         case .size6_7, .size6_9:
-            return (portrait: 226, landscape: 175)
+            // Empirical measurement vs Apple system keyboard on iPhone 15 Pro Max
+            // (issue #117): Apple visible row height = 45pt. With keyVerticalMargin
+            // 5.5pt × 2 = 11pt cell padding, target cell = 56pt → grid = 224pt.
+            return (portrait: 224, landscape: 175)
         case .size7_9, .size8_3, .size9_7, .size10_2, .size10_5, .size11_0:
             return (portrait: 318, landscape: 404)
         case .size10_9:

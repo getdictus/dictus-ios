@@ -56,6 +56,12 @@ struct LanguageSwitcherView: View {
             language = next
         }
 
+        PersistentLog.log(.diagnosticProbe(
+            component: "LanguageSwitcherView",
+            instanceID: "",
+            action: "onLanguageChanged_fire",
+            details: "next=\(next.rawValue)"
+        ))
         onLanguageChanged?(next)
     }
 }

@@ -173,9 +173,15 @@ class KeyboardViewController: UIInputViewController {
         ])
 
         // --- 6. Set explicit height constraint on inputView ---
+        // Priority 999 (just below .required) wins against iOS's transition-time
+        // inputView sizing while staying breakable in genuinely unrecoverable
+        // situations. iOS settles to our 276pt value ~500ms after viewDidAppear
+        // (verified by deferred layoutSnapshot probes). Constraint on self.view
+        // was tried and reverted — it did not improve settlement behaviour and
+        // added an unnecessary layer of negotiation.
         let height = computeKeyboardHeight()
         let constraint = kbInputView.heightAnchor.constraint(equalToConstant: height)
-        constraint.priority = .defaultHigh  // don't fight iOS if it needs to adjust
+        constraint.priority = UILayoutPriority(999)
         constraint.isActive = true
         self.heightConstraint = constraint
 
@@ -187,10 +193,7 @@ class KeyboardViewController: UIInputViewController {
         // Assign as the controller's inputView -- this activates audio feedback
         self.inputView = kbInputView
 
-        // --- 7. Observe recording state to show/hide keyboard ---
-        observeRecordingState()
-
-        // --- 8. Wire post-transcription suggestion refresh ---
+        // --- 7. Wire post-transcription suggestion refresh ---
         // After dictation inserts text, update the suggestion bar with completions
         // for the last word of the transcription.
         KeyboardState.shared.onTranscriptionInserted = { [weak self] in
@@ -212,25 +215,54 @@ class KeyboardViewController: UIInputViewController {
         // The original giellakbd-ios uses this exact same technique.
         disableWindowGestureDelay()
 
+        // Issue #116 diagnostic: snapshot state at entry BEFORE any mutation.
+        let entryStatus = KeyboardState.shared.dictationStatus.rawValue
+        let entryStoredStatus = AppGroup.defaults.string(forKey: SharedKeys.dictationStatus) ?? "nil"
+        let entryColdStart = AppGroup.defaults.bool(forKey: SharedKeys.coldStartActive)
+        let entryBounds = inputView?.bounds.size ?? .zero
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
-            action: "viewWillAppear",
-            details: "animated=\(animated)"
+            action: "viewWillAppear_entry",
+            details: "animated=\(animated) status=\(entryStatus) storedStatus=\(entryStoredStatus) coldStart=\(entryColdStart) inputBounds=\(Int(entryBounds.width))x\(Int(entryBounds.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1)"
         ))
         PersistentLog.log(.keyboardDidAppear)
         KeyboardState.shared.registerControllerAppearance(controllerID: controllerID)
         hasAppeared = true
 
+        // (Re)subscribe to dictation status here, not in viewDidLoad.
+        // WHY: iOS caches UIInputViewController instances across app-switches and
+        // rarely deallocates them, so stale controllers would keep mutating
+        // hostingHeightConstraint on every status change (issue #128). By subscribing
+        // in viewWillAppear and cancelling in viewDidDisappear, only the currently
+        // visible controller is reactive. Assignment is idempotent — the previous
+        // AnyCancellable is released on reassignment, which cancels its subscription.
+        observeRecordingState()
+
         // Force height recalculation when keyboard reappears (e.g., after app switch).
         // Without this, the inputView may retain a stale height from before the switch.
-        heightConstraint?.constant = computeKeyboardHeight()
+        let oldHeight = heightConstraint?.constant ?? -1
+        let newHeight = computeKeyboardHeight()
+        heightConstraint?.constant = newHeight
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "heightRecalc_viewWillAppear",
+            details: "old=\(oldHeight) new=\(newHeight) hSizeClass=\(traitCollection.horizontalSizeClass.rawValue) vSizeClass=\(traitCollection.verticalSizeClass.rawValue)"
+        ))
 
         // Apply current dictation state to hosting height now that we're registered.
         // During cold start, handleDictationStatusChange was skipped (hasAppeared was false).
         // Now that activeControllerID matches, SwiftUI's showsOverlay will be correct,
         // so the constraint and SwiftUI content change happen together — no displaced toolbar.
+        let statusBeforeHandle = KeyboardState.shared.dictationStatus.rawValue
         handleDictationStatusChange(KeyboardState.shared.dictationStatus)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "viewWillAppear_afterHandle",
+            details: "statusBefore=\(statusBeforeHandle) statusAfter=\(KeyboardState.shared.dictationStatus.rawValue) hostingConst=\(hostingHeightConstraint?.constant ?? -1)"
+        ))
 
         inputView?.setNeedsLayout()
         inputView?.layoutIfNeeded()  // Force synchronous layout to reduce loading flicker (#92)
@@ -290,6 +322,44 @@ class KeyboardViewController: UIInputViewController {
         #endif
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Issue #116 diagnostic: snapshot final frames after layout settles.
+        // We log both sizes and constraint constants so we can detect priority mismatches
+        // where iOS imposed a different height than we asked for.
+        logLayoutSnapshot(action: "viewDidAppear_settled")
+
+        // Issue #129 investigation: viewDidAppear fires BEFORE iOS finishes the
+        // keyboard entry animation, so bounds captured here may still be
+        // transient. Schedule deferred snapshots to confirm whether 504pt is
+        // actually the final, user-visible size — or just a mid-animation value
+        // that iOS later resolves to our requested 276pt constraint.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.logLayoutSnapshot(action: "layoutSnapshot_500ms")
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.logLayoutSnapshot(action: "layoutSnapshot_1000ms")
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.logLayoutSnapshot(action: "layoutSnapshot_2000ms")
+        }
+    }
+
+    /// Emits the same layout snapshot we log in `viewDidAppear_settled`,
+    /// reusable from deferred blocks to compare mid- vs post-animation sizes.
+    private func logLayoutSnapshot(action: String) {
+        let inputBounds = inputView?.bounds.size ?? .zero
+        let keyboardFrame = giellaKeyboard?.frame.size ?? .zero
+        let hostingFrame = hostingController?.view.frame.size ?? .zero
+        let viewBounds = view.bounds.size
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: action,
+            details: "inputBounds=\(Int(inputBounds.width))x\(Int(inputBounds.height)) viewBounds=\(Int(viewBounds.width))x\(Int(viewBounds.height)) keyboardFrame=\(Int(keyboardFrame.width))x\(Int(keyboardFrame.height)) hostingFrame=\(Int(hostingFrame.width))x\(Int(hostingFrame.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) status=\(KeyboardState.shared.dictationStatus.rawValue)"
+        ))
+    }
+
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
@@ -310,6 +380,15 @@ class KeyboardViewController: UIInputViewController {
             action: "registeredDisappearance",
             details: ""
         ))
+
+        // Tear down the dictation status subscription so this (now-detached)
+        // controller no longer reacts when KeyboardState publishes. iOS caches
+        // UIInputViewController and rarely releases it, so without this cleanup
+        // 10+ stale controllers race on hostingHeightConstraint (issue #128).
+        // viewWillAppear re-subscribes on reattach.
+        dictationStatusCancellable?.cancel()
+        dictationStatusCancellable = nil
+
         // Darwin observers cleaned up by KeyboardState deinit
     }
 
@@ -340,8 +419,20 @@ class KeyboardViewController: UIInputViewController {
             for: deviceContext,
             traitCollection: traitCollection
         )
-        let bottomPadding: CGFloat = 8
-        return keyGridHeight + toolbarHeight + bottomPadding
+        // bottomPadding was previously 8pt but had no real effect — keyboard view's
+        // bottomAnchor is pinned to kbInputView.bottomAnchor, so the extra height got
+        // divided across 4 row cells (+2pt per row), making each visible key 2.3pt
+        // taller than Apple's. Setting to 0 restores Apple-matched cell height (#117).
+        let bottomPadding: CGFloat = 0
+        let total = keyGridHeight + toolbarHeight + bottomPadding
+        let screen = UIScreen.main.bounds.size
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "computeKbHeight",
+            details: "grid=\(keyGridHeight) total=\(total) screen=\(Int(screen.width))x\(Int(screen.height)) landscape=\(deviceContext.isLandscape)"
+        ))
+        return total
     }
 
     // MARK: - Recording State Observation
@@ -368,11 +459,38 @@ class KeyboardViewController: UIInputViewController {
     }
 
     private func handleDictationStatusChange(_ status: DictationStatus) {
+        // Issue #116 diagnostic: entry log (fires even when guard trips).
+        let oldHosting = hostingHeightConstraint?.constant ?? -1
+        let activeID = KeyboardState.shared.activeControllerID ?? "none"
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "dictStatusChange_enter",
+            details: "status=\(status.rawValue) hasAppeared=\(hasAppeared) oldHosting=\(oldHosting) isShowingEmoji=\(isShowingEmoji) activeID=\(activeID)"
+        ))
+
         // Don't change hosting height until the controller is registered with KeyboardState.
         // During cold start, this fires in viewDidLoad before viewWillAppear — SwiftUI's
         // showsOverlay is still false, so expanding now would show the toolbar displaced
         // in a full-height hosting view. viewWillAppear calls this manually after registering.
         guard hasAppeared else { return }
+
+        // Defense-in-depth for #128: iOS caches UIInputViewController and does not
+        // reliably fire viewDidDisappear on stale instances (observed: controllers
+        // responding to Darwin status changes for minutes after losing window
+        // attachment, no viewDidDisappear event logged). The subscription-cancel
+        // path in viewDidDisappear covers the well-behaved case; this guard
+        // short-circuits stale controllers that iOS forgot to notify. Only the
+        // controller currently owning the keyboard window mutates layout.
+        guard KeyboardState.shared.activeControllerID == controllerID else {
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardViewController",
+                instanceID: controllerID,
+                action: "dictStatusChange_skippedInactive",
+                details: "status=\(status.rawValue) activeID=\(activeID)"
+            ))
+            return
+        }
 
         let isRecording = status == .requested || status == .recording || status == .transcribing
 
@@ -387,9 +505,21 @@ class KeyboardViewController: UIInputViewController {
             // Expand hosting view to fill the full keyboard area for the recording overlay
             let fullHeight = computeKeyboardHeight()
             hostingHeightConstraint?.constant = fullHeight
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardViewController",
+                instanceID: controllerID,
+                action: "hostingSet_recording",
+                details: "old=\(oldHosting) new=\(fullHeight) status=\(status.rawValue)"
+            ))
         } else if !isShowingEmoji {
             // Restore toolbar-only height (unless emoji picker is open)
             hostingHeightConstraint?.constant = toolbarHeight
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardViewController",
+                instanceID: controllerID,
+                action: "hostingSet_idle",
+                details: "old=\(oldHosting) new=\(toolbarHeight) status=\(status.rawValue)"
+            ))
         }
 
         inputView?.setNeedsLayout()
@@ -471,6 +601,13 @@ class KeyboardViewController: UIInputViewController {
     private func reloadKeyboardLayout() {
         guard let kbInputView = inputView else { return }
 
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "reloadLayout_begin",
+            details: "status=\(KeyboardState.shared.dictationStatus.rawValue) oldHosting=\(hostingHeightConstraint?.constant ?? -1) oldHeight=\(heightConstraint?.constant ?? -1) inputBounds=\(Int(kbInputView.bounds.width))x\(Int(kbInputView.bounds.height))"
+        ))
+
         // Remove old keyboard
         giellaKeyboard?.removeFromSuperview()
 
@@ -502,15 +639,36 @@ class KeyboardViewController: UIInputViewController {
         // Ensure hosting view is at toolbar-only height. If a previous recording
         // left it at full height, the keyboard grid would be squashed below a large
         // empty hosting area — causing the key shrinking bug on language switch.
+        let oldHostingRL = hostingHeightConstraint?.constant ?? -1
         hostingHeightConstraint?.constant = toolbarHeight
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "reloadLayout_hostingReset",
+            details: "old=\(oldHostingRL) new=\(toolbarHeight)"
+        ))
 
         // Force height recalculation — the new GiellaKeyboardView may have different
         // intrinsic content size during initial layout. Without this, iOS keeps the
         // stale height constraint from before the rebuild, causing a visible gap
         // between the toolbar and the key grid.
-        heightConstraint?.constant = computeKeyboardHeight()
+        let oldHeightRL = heightConstraint?.constant ?? -1
+        let newHeightRL = computeKeyboardHeight()
+        heightConstraint?.constant = newHeightRL
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "reloadLayout_heightRecalc",
+            details: "old=\(oldHeightRL) new=\(newHeightRL)"
+        ))
         kbInputView.setNeedsLayout()
         kbInputView.layoutIfNeeded()
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "reloadLayout_end",
+            details: "inputBounds=\(Int(kbInputView.bounds.width))x\(Int(kbInputView.bounds.height)) keyboardFrame=\(Int(keyboard.frame.width))x\(Int(keyboard.frame.height)) hostingFrame=\(Int(hostingController?.view.frame.width ?? 0))x\(Int(hostingController?.view.frame.height ?? 0))"
+        ))
 
         // Apply current shift state
         bridge?.updateCapitalization()
@@ -530,11 +688,25 @@ class KeyboardViewController: UIInputViewController {
         isShowingEmoji.toggle()
         giellaKeyboard?.isHidden = isShowingEmoji
 
+        let oldHostingEmoji = hostingHeightConstraint?.constant ?? -1
         if isShowingEmoji {
             // Expand hosting to cover keyboard area for emoji picker
-            hostingHeightConstraint?.constant = computeKeyboardHeight()
+            let fullHeight = computeKeyboardHeight()
+            hostingHeightConstraint?.constant = fullHeight
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardViewController",
+                instanceID: controllerID,
+                action: "hostingSet_emojiOpen",
+                details: "old=\(oldHostingEmoji) new=\(fullHeight)"
+            ))
         } else {
             hostingHeightConstraint?.constant = toolbarHeight
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardViewController",
+                instanceID: controllerID,
+                action: "hostingSet_emojiClose",
+                details: "old=\(oldHostingEmoji) new=\(toolbarHeight)"
+            ))
         }
         inputView?.setNeedsLayout()
 

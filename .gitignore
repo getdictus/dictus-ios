@@ -49,3 +49,14 @@ Thumbs.db
 # DictusKeyboard/Models/ contains Swift source files and must be tracked
 /Models/
 Library/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Local logs + crash dumps
+crash-logs.log
+assets/reference/logs/**/*.log
+
+# Design sandbox
+designs/
