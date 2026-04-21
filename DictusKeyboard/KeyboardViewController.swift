@@ -175,7 +175,11 @@ class KeyboardViewController: UIInputViewController {
         // --- 6. Set explicit height constraint on inputView ---
         let height = computeKeyboardHeight()
         let constraint = kbInputView.heightAnchor.constraint(equalToConstant: height)
-        constraint.priority = .defaultHigh  // don't fight iOS if it needs to adjust
+        // Priority 999 (just below .required) wins against iOS's transition-time
+        // inputView sizing that otherwise imposes 504/932/960pt during app-switch,
+        // while still breakable in genuinely unrecoverable situations (split-screen).
+        // Matches hostingHeightConstraint pattern (L150). See issue #129.
+        constraint.priority = UILayoutPriority(999)
         constraint.isActive = true
         self.heightConstraint = constraint
 
