@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/brand/dictus-icon-512.png" alt="Dictus" width="120" height="120" />
+  <img src="assets/brand/appicon-light.svg" alt="Dictus" width="120" height="120" />
 </p>
 
 <h1 align="center">Dictus</h1>
