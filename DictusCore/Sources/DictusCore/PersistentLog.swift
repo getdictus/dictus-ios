@@ -35,7 +35,7 @@ public enum PersistentLog {
     /// CFBundleVersion hasn't been bumped (we only bump on TestFlight upload).
     /// Update this string whenever code changes land that should be traceable
     /// from a device log. Keep short; format suggestion: `<scope>-<shortSHA>`.
-    public static let codeRevision: String = "fix116-1c20ba1"
+    public static let codeRevision: String = "fix116-round2-d2b9024"
 
     // MARK: - Constants
 
