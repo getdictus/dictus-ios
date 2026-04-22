@@ -51,8 +51,13 @@ struct ModelManagerView: View {
 
     /// Available models — excludes downloaded, downloading, and prewarming models.
     /// Users won't see Tiny/Base here since they're deprecated.
+    ///
+    /// Phase 37 (issue #104): uses `ModelInfo.available(on:)` so per-device gated
+    /// models (e.g. Whisper Turbo on low-RAM devices) are completely hidden rather
+    /// than shown disabled. The "Downloaded" section above stays ungated so a user
+    /// who obtained a gated model under a permissive build can still manage/delete it.
     private var availableModels: [ModelInfo] {
-        ModelInfo.all.filter { model in
+        ModelInfo.available(on: DeviceCapabilities.current()).filter { model in
             let state = modelManager.modelStates[model.identifier] ?? .notDownloaded
             switch state {
             case .downloading, .prewarming, .ready, .error:

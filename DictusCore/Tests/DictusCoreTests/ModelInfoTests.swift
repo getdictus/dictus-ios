@@ -7,25 +7,28 @@ final class ModelInfoTests: XCTestCase {
     // MARK: - Catalog visibility
 
     func testAllContainsOnlyAvailableModels() {
-        // ModelInfo.all should contain 4 available models (3 WhisperKit + 1 Parakeet)
-        XCTAssertEqual(ModelInfo.all.count, 4)
+        // ModelInfo.all should contain 5 available models (4 WhisperKit + 1 Parakeet).
+        // Phase 37 (issue #104) re-introduced Whisper Turbo to the catalog with per-device
+        // gating — it is present here regardless of device; UI filtering happens via
+        // `available(on:)` using `isSupported(on:)` in the view layer.
+        XCTAssertEqual(ModelInfo.all.count, 5)
         let ids = Set(ModelInfo.all.map(\.identifier))
         XCTAssertTrue(ids.contains("openai_whisper-small"))
         XCTAssertTrue(ids.contains("openai_whisper-small_216MB"))
         XCTAssertTrue(ids.contains("openai_whisper-medium"))
         XCTAssertTrue(ids.contains("parakeet-tdt-0.6b-v3"))
+        XCTAssertTrue(ids.contains("openai_whisper-large-v3_turbo"))
         XCTAssertFalse(ids.contains("openai_whisper-tiny"))
         XCTAssertFalse(ids.contains("openai_whisper-base"))
-        XCTAssertFalse(ids.contains("openai_whisper-large-v3_turbo"))
     }
 
     func testAllIncludingDeprecatedContainsEight() {
-        // allIncludingDeprecated should contain all 6 models (2 deprecated + 4 available)
-        XCTAssertEqual(ModelInfo.allIncludingDeprecated.count, 6)
+        // allIncludingDeprecated should contain all 7 models (2 deprecated + 5 available).
+        XCTAssertEqual(ModelInfo.allIncludingDeprecated.count, 7)
         let deprecated = ModelInfo.allIncludingDeprecated.filter { $0.visibility == .deprecated }
         XCTAssertEqual(deprecated.count, 2)
         let available = ModelInfo.allIncludingDeprecated.filter { $0.visibility == .available }
-        XCTAssertEqual(available.count, 4)
+        XCTAssertEqual(available.count, 5)
     }
 
     func testDeprecatedModelStillResolvable() {
@@ -67,9 +70,86 @@ final class ModelInfoTests: XCTestCase {
     func testEngineAssignment() {
         let whisperKitModels = ModelInfo.allIncludingDeprecated.filter { $0.engine == .whisperKit }
         let parakeetModels = ModelInfo.allIncludingDeprecated.filter { $0.engine == .parakeet }
-        XCTAssertEqual(whisperKitModels.count, 5, "Should have 5 WhisperKit models")
+        XCTAssertEqual(whisperKitModels.count, 6, "Should have 6 WhisperKit models (incl. Turbo)")
         XCTAssertEqual(parakeetModels.count, 1, "Should have 1 Parakeet model")
         XCTAssertEqual(parakeetModels.first?.identifier, "parakeet-tdt-0.6b-v3")
+    }
+
+    // MARK: - Phase 37: per-device gating (issue #104)
+
+    /// Helper to build a synthetic capability snapshot for gating tests.
+    /// Values other than `physicalMemoryGB` are not currently consulted by the gating
+    /// rule but are supplied with plausible defaults so future rule extensions do not
+    /// force this helper to be updated everywhere at once.
+    private func makeCapabilities(
+        ramGB: Int,
+        availableMB: Int = 3000,
+        model: String = "iPhoneTest,1",
+        thermal: ProcessInfo.ThermalState = .nominal
+    ) -> DeviceCapabilities {
+        DeviceCapabilities(
+            physicalMemoryGB: ramGB,
+            availableMemoryMB: availableMB,
+            deviceModelIdentifier: model,
+            thermalState: thermal
+        )
+    }
+
+    func testTurboGatedOutOnLowRamDevices() {
+        // iPhone 12 / iPhone SE tier: 4 GB RAM — Turbo must not be offered.
+        let iphone12 = makeCapabilities(ramGB: 4, model: "iPhone13,2")
+        let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3_turbo")
+        XCTAssertNotNil(turbo)
+        XCTAssertFalse(turbo!.isSupported(on: iphone12))
+        XCTAssertFalse(ModelInfo.available(on: iphone12).map(\.identifier).contains("openai_whisper-large-v3_turbo"))
+    }
+
+    func testTurboGatedOutOnSixGBDevices() {
+        // iPhone 15 / iPhone 14 Pro tier: 6 GB — still below the 8 GB Turbo bar.
+        let iphone15 = makeCapabilities(ramGB: 6, model: "iPhone15,4")
+        let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3_turbo")!
+        XCTAssertFalse(turbo.isSupported(on: iphone15))
+    }
+
+    func testTurboAvailableOnHighRamDevices() {
+        // iPhone 15 Pro Max / iPhone 16 / 17 Pro: 8 GB+ — Turbo passes the gate.
+        let iphone15ProMax = makeCapabilities(ramGB: 8, model: "iPhone16,2")
+        let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3_turbo")!
+        XCTAssertTrue(turbo.isSupported(on: iphone15ProMax))
+        XCTAssertTrue(ModelInfo.available(on: iphone15ProMax).map(\.identifier).contains("openai_whisper-large-v3_turbo"))
+
+        let iphone17Pro = makeCapabilities(ramGB: 12, model: "iPhone18,1")
+        XCTAssertTrue(turbo.isSupported(on: iphone17Pro))
+    }
+
+    func testNonTurboModelsNotGated() {
+        // Every non-Turbo model must remain visible regardless of RAM tier — Phase 37
+        // must not silently shrink the catalog for existing users.
+        let lowRam = makeCapabilities(ramGB: 4)
+        for model in ModelInfo.all where model.identifier != "openai_whisper-large-v3_turbo" {
+            XCTAssertTrue(model.isSupported(on: lowRam),
+                          "\(model.identifier) must not be gated on low-RAM devices")
+        }
+    }
+
+    func testRecommendedIdentifierNeverReturnsTurbo() {
+        // Turbo is intentionally never recommended by default during Phase 37.
+        // Verify across the full RAM spectrum to catch any future rule drift.
+        for ram in [4, 6, 8, 12, 16] {
+            let caps = makeCapabilities(ramGB: ram)
+            XCTAssertNotEqual(ModelInfo.recommendedIdentifier(for: caps),
+                              "openai_whisper-large-v3_turbo",
+                              "Turbo must not be recommended at \(ram) GB")
+        }
+    }
+
+    func testRecommendedIdentifierRespectsRamThreshold() {
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4)),
+                       "openai_whisper-small")
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 6)),
+                       "parakeet-tdt-0.6b-v3")
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 8)),
+                       "parakeet-tdt-0.6b-v3")
     }
 
     // MARK: - Supported identifiers
