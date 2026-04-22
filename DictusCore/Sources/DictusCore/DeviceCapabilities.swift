@@ -55,13 +55,22 @@ public struct DeviceCapabilities: Sendable, Equatable {
     // MARK: - Private readers
 
     private static func readPhysicalMemoryGB() -> Int {
-        // Round to nearest GB. An 8 GB iPhone typically reports ~7.8-7.95 GB of
-        // physical memory because the kernel and secure enclave reserve some —
-        // integer truncation would misclassify it as a 7 GB device and gate Turbo
-        // off. Rounding reflects the marketed hardware tier instead of kernel
-        // accounting noise.
+        // Use ceiling, not nearest-rounding, to report the marketed RAM tier.
+        //
+        // Real-device observation on iPhone 15 Pro Max (8 GB marketed):
+        // ProcessInfo.physicalMemory returns ~7.47 GB because the kernel and
+        // secure enclave reserve ~530 MB. Nearest-rounding gives 7, floor
+        // gives 7, only ceiling produces the 8 that Turbo gating relies on.
+        //
+        // Safe across the iPhone lineup because Apple's RAM tiers are spaced
+        // by whole GB (4/6/8/12) — ceiling can only push a reading up to the
+        // next integer, never past the next marketed tier:
+        //   - 3.8 GB (iPhone 12 mini, 4 GB marketed) → ceil = 4 ✓
+        //   - 5.9 GB (iPhone 13 Pro, 6 GB marketed) → ceil = 6 ✓
+        //   - 7.47 GB (iPhone 15 Pro Max, 8 GB marketed) → ceil = 8 ✓
+        //   - 11.3 GB (iPhone 17 Pro, 12 GB marketed) → ceil = 12 ✓
         let bytes = Double(ProcessInfo.processInfo.physicalMemory)
-        return Int((bytes / 1_073_741_824.0).rounded())
+        return Int((bytes / 1_073_741_824.0).rounded(.up))
     }
 
     private static func readAvailableMemoryMB() -> Int {
