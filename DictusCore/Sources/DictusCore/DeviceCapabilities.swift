@@ -55,7 +55,13 @@ public struct DeviceCapabilities: Sendable, Equatable {
     // MARK: - Private readers
 
     private static func readPhysicalMemoryGB() -> Int {
-        Int(ProcessInfo.processInfo.physicalMemory / 1_073_741_824)
+        // Round to nearest GB. An 8 GB iPhone typically reports ~7.8-7.95 GB of
+        // physical memory because the kernel and secure enclave reserve some —
+        // integer truncation would misclassify it as a 7 GB device and gate Turbo
+        // off. Rounding reflects the marketed hardware tier instead of kernel
+        // accounting noise.
+        let bytes = Double(ProcessInfo.processInfo.physicalMemory)
+        return Int((bytes / 1_073_741_824.0).rounded())
     }
 
     private static func readAvailableMemoryMB() -> Int {
