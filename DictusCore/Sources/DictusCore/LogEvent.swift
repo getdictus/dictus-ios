@@ -56,6 +56,7 @@ public enum LogEvent: Sendable {
     case transcriptionCompleted(durationMs: Int, wordCount: Int)
     case transcriptionFailed(error: String)
     case recordingTooShort(durationMs: Int)
+    case transcriptionPerformance(modelName: String, audioDurationMs: Int, transcriptionDurationMs: Int, peakMemoryMB: Int)
 
     // MARK: Model
     case modelDownloadStarted(name: String, sizeMB: Int)
@@ -68,6 +69,7 @@ public enum LogEvent: Sendable {
     case modelDeleteFailed(name: String, error: String)
     case modelPrewarmStarted(name: String)
     case modelCleanupPerformed(name: String, reason: String)
+    case modelPrewarmPeakMemory(modelName: String, peakMB: Int)
 
     // MARK: Keyboard
     case keyboardDidAppear
@@ -138,6 +140,7 @@ public enum LogEvent: Sendable {
     case appWillResignActive
     case appDidEnterBackground
     case appWhisperKitLoaded(modelName: String)
+    case deviceCapabilitySnapshot(model: String, ramGB: Int, availableMemoryMB: Int, thermalState: String)
 
     // MARK: - Computed Properties
 
@@ -148,11 +151,13 @@ public enum LogEvent: Sendable {
             return .dictation
         case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed:
             return .audio
-        case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort:
+        case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort,
+             .transcriptionPerformance:
             return .transcription
         case .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadFailed,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
-             .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed:
+             .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed,
+             .modelPrewarmPeakMemory:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .overlayShown, .overlayHidden, .rapidTapRejected,
@@ -179,7 +184,7 @@ public enum LogEvent: Sendable {
         case .liveActivityStarted, .liveActivityTransition, .liveActivityFailed, .liveActivityEnded:
             return .lifecycle
         case .appLaunched, .appDidBecomeActive, .appWillResignActive,
-             .appDidEnterBackground, .appWhisperKitLoaded:
+             .appDidEnterBackground, .appWhisperKitLoaded, .deviceCapabilitySnapshot:
             return .lifecycle
         }
     }
@@ -211,8 +216,10 @@ public enum LogEvent: Sendable {
              .modelDownloadStarted, .modelDownloadCompleted,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
              .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
+             .modelPrewarmPeakMemory, .transcriptionPerformance,
              .keyboardDidAppear, .keyboardMicTapped,
              .appLaunched, .appWhisperKitLoaded, .logExportCompleted,
+             .deviceCapabilitySnapshot,
              .liveActivityStarted, .liveActivityTransition, .liveActivityEnded,
              .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry,
              .overlayShown, .overlayHidden, .statusChanged,
@@ -311,6 +318,9 @@ public enum LogEvent: Sendable {
         case .coldStartRetry: return "coldStartRetry"
         case .coldStartDarwinFallback: return "coldStartDarwinFallback"
         case .logExportCompleted: return "logExportCompleted"
+        case .transcriptionPerformance: return "transcriptionPerformance"
+        case .modelPrewarmPeakMemory: return "modelPrewarmPeakMemory"
+        case .deviceCapabilitySnapshot: return "deviceCapabilitySnapshot"
         }
     }
 
@@ -473,6 +483,14 @@ public enum LogEvent: Sendable {
         // Log Management
         case .logExportCompleted(let durationMs, let sizeBytes):
             return "duration=\(durationMs)ms size=\(sizeBytes)bytes"
+
+        // Phase 37 — Turbo retest & device gating telemetry
+        case .transcriptionPerformance(let modelName, let audioDurationMs, let transcriptionDurationMs, let peakMemoryMB):
+            return "model=\(modelName) audioMs=\(audioDurationMs) transcribeMs=\(transcriptionDurationMs) peakMB=\(peakMemoryMB)"
+        case .modelPrewarmPeakMemory(let modelName, let peakMB):
+            return "model=\(modelName) peakMB=\(peakMB)"
+        case .deviceCapabilitySnapshot(let model, let ramGB, let availableMemoryMB, let thermalState):
+            return "model=\(model) ramGB=\(ramGB) availableMB=\(availableMemoryMB) thermal=\(thermalState)"
         }
     }
 

@@ -180,6 +180,14 @@ class ModelManager: ObservableObject {
 
             PersistentLog.log(.modelCompilationStarted(name: identifier))
 
+            // Phase 37 instrumentation: capture timing + jetsam-headroom delta across prewarm.
+            // `peakMB` in the log event stores the delta of available memory (in MB) between
+            // pre- and post-prewarm. Positive delta ≈ steady-state memory footprint the model
+            // retains after CoreML compilation finishes, which is the signal that matters for
+            // per-device gating decisions on memory-constrained devices (e.g. iPhone 15 Pro Max).
+            let prewarmStart = Date()
+            let availableBeforeMB = DeviceCapabilities.current().availableMemoryMB
+
             let config = WhisperKitConfig(
                 model: identifier,
                 modelFolder: modelFolder.path,
@@ -189,6 +197,10 @@ class ModelManager: ObservableObject {
                 download: false
             )
             _ = try await WhisperKit(config)
+
+            let prewarmDurationMs = Int(Date().timeIntervalSince(prewarmStart) * 1000)
+            let availableAfterMB = DeviceCapabilities.current().availableMemoryMB
+            let consumedMB = max(0, availableBeforeMB - availableAfterMB)
 
             // Update state
             if !downloadedModels.contains(identifier) {
@@ -203,7 +215,8 @@ class ModelManager: ObservableObject {
             modelStates[identifier] = .ready
             persistState()
 
-            PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: 0))
+            PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: prewarmDurationMs))
+            PersistentLog.log(.modelPrewarmPeakMemory(modelName: identifier, peakMB: consumedMB))
         } catch {
             modelStates[identifier] = .error(error.localizedDescription)
             downloadProgress.removeValue(forKey: identifier)
@@ -266,8 +279,19 @@ class ModelManager: ObservableObject {
             // Step 4: Load and compile CoreML models.
             // ParakeetEngine.prepare() calls AsrModels.downloadAndLoad() which will find
             // the already-downloaded files and skip straight to compilation.
+            //
+            // Phase 37 instrumentation mirrors the WhisperKit path: measure prewarm
+            // duration + jetsam-headroom delta so both engines produce comparable
+            // gating signals.
+            let prewarmStart = Date()
+            let availableBeforeMB = DeviceCapabilities.current().availableMemoryMB
+
             let parakeetEngine = ParakeetEngine()
             try await parakeetEngine.prepare(modelIdentifier: identifier)
+
+            let prewarmDurationMs = Int(Date().timeIntervalSince(prewarmStart) * 1000)
+            let availableAfterMB = DeviceCapabilities.current().availableMemoryMB
+            let consumedMB = max(0, availableBeforeMB - availableAfterMB)
 
             // Update state
             if !downloadedModels.contains(identifier) {
@@ -281,6 +305,8 @@ class ModelManager: ObservableObject {
             modelStates[identifier] = .ready
             persistState()
 
+            PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: prewarmDurationMs))
+            PersistentLog.log(.modelPrewarmPeakMemory(modelName: identifier, peakMB: consumedMB))
             PersistentLog.log(.modelDownloadCompleted(name: identifier))
         } catch {
             modelStates[identifier] = .error(error.localizedDescription)
