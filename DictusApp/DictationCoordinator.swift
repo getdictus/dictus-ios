@@ -101,6 +101,16 @@ class DictationCoordinator: ObservableObject {
             defaults.synchronize()
         }
 
+        // Phase 37 instrumentation: snapshot device capabilities once per app launch
+        // so the log stream has a stable anchor for per-device gating analysis.
+        let snapshot = DeviceCapabilities.current()
+        PersistentLog.log(.deviceCapabilitySnapshot(
+            model: snapshot.deviceModelIdentifier,
+            ramGB: snapshot.physicalMemoryGB,
+            availableMemoryMB: snapshot.availableMemoryMB,
+            thermalState: snapshot.thermalState.logLabel
+        ))
+
         // Pre-load WhisperKit + audio session eagerly on app launch.
         // WHY: The first recording via URL scheme takes 4-5s if we load lazily.
         // By loading in init(), the model is ready when the keyboard triggers dictation.

@@ -90,14 +90,14 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
 </details>
 
 <details open>
-<summary>🚧 v1.7 Stability, Polish & i18n (Phases 34-39) — IN PROGRESS</summary>
+<summary>🚧 v1.7 Stability, Polish & i18n (Phases 34-39) — IN PROGRESS (manual mode, GSD paused)</summary>
 
-- [ ] **Phase 34: Silent Insertion Fix** — Transcription text always reaches the target app (STAB-01)
-- [ ] **Phase 35: Keyboard Geometry Polish** — Key geometry matches Apple system keyboard, glitch residual eliminated (KBD-01, KBD-02)
-- [ ] **Phase 36: Autocorrect v2** — AOSP-aligned unified scoring + personal LM + higher-order n-grams (AUTO-01, AUTO-02, AUTO-03)
-- [ ] **Phase 37: Whisper Turbo Retest & Device Gating** — Turbo re-validated and gated per device (STT-01)
-- [ ] **Phase 38: i18n Foundation** — Reusable documented process for adding a new language (I18N-01)
-- [ ] **Phase 39: German Language Support** — QWERTZ + German STT + German UI, end-to-end validation of i18n process (I18N-02)
+- [x] ~~**Phase 34: Silent Insertion Fix**~~ — **REVERTED 2026-04-20** (PR #127). Fix worsened #118 ~20×. Issue #118 remains OPEN and deprioritized.
+- [x] **Phase 35: Keyboard Geometry Polish** — **CLOSED 2026-04-22** (manual mode). Shipped via PRs #117, #116, #128, #129, #130.
+- [ ] **Phase 36: Autocorrect v2** — AOSP-aligned unified scoring + personal LM + higher-order n-grams (#114)
+- [ ] **Phase 37: Whisper Turbo Retest & Device Gating** — Turbo re-validated and gated per device (#104)
+- [ ] **Phase 38: i18n Foundation** — Reusable documented process for adding a new language (#110)
+- [ ] **Phase 39: German Language Support** — QWERTZ + German STT + German UI (#109)
 
 </details>
 
@@ -213,13 +213,12 @@ Plans:
 | 11-16 | v1.2 | 35/35 | Complete | 2026-03-27 |
 | 17-22 | v1.3 | 14/14 | Complete | 2026-04-07 |
 | 23-27 | v1.4 | 15/15 | Complete | 2026-04-08 |
-| 34 | v1.7 | 3/4 | In Progress | - |
-| 34.1 | v1.7 | Complete    | 2026-04-16 | 2026-04-16 |
-| 35 | v1.7 | 0/? | Not started | - |
-| 36 | v1.7 | 0/? | Not started | - |
-| 37 | v1.7 | 0/? | Not started | - |
-| 38 | v1.7 | 0/? | Not started | - |
-| 39 | v1.7 | 0/? | Not started | - |
+| 34 / 34.1 | v1.7 | Reverted | Reverted 2026-04-20 (PR #127) | - |
+| 35 | v1.7 | Manual | Closed 2026-04-22 | 2026-04-22 |
+| 36 | v1.7 | - | Not started | - |
+| 37 | v1.7 | - | Not started | - |
+| 38 | v1.7 | - | Not started | - |
+| 39 | v1.7 | - | Not started | - |
 
 **Total: 111 plans across 5 shipped milestones + v1.7 in progress**
 
