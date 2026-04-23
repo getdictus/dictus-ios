@@ -70,6 +70,7 @@ public enum LogEvent: Sendable {
     case modelPrewarmStarted(name: String)
     case modelCleanupPerformed(name: String, reason: String)
     case modelPrewarmPeakMemory(modelName: String, peakMB: Int)
+    case modelPrewarmTimeout(name: String, timeoutSeconds: Int)
 
     // MARK: Keyboard
     case keyboardDidAppear
@@ -157,7 +158,7 @@ public enum LogEvent: Sendable {
         case .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadFailed,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
              .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed,
-             .modelPrewarmPeakMemory:
+             .modelPrewarmPeakMemory, .modelPrewarmTimeout:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .overlayShown, .overlayHidden, .rapidTapRejected,
@@ -203,7 +204,7 @@ public enum LogEvent: Sendable {
         // Warnings
         case .dictationDeferred, .watchdogReset, .engineWarmUpFailed, .recordingTooShort,
              .waveformStall, .waveformTimelineNotFiring,
-             .coldStartDarwinFallback:
+             .coldStartDarwinFallback, .modelPrewarmTimeout:
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
@@ -320,6 +321,7 @@ public enum LogEvent: Sendable {
         case .logExportCompleted: return "logExportCompleted"
         case .transcriptionPerformance: return "transcriptionPerformance"
         case .modelPrewarmPeakMemory: return "modelPrewarmPeakMemory"
+        case .modelPrewarmTimeout: return "modelPrewarmTimeout"
         case .deviceCapabilitySnapshot: return "deviceCapabilitySnapshot"
         }
     }
@@ -489,6 +491,8 @@ public enum LogEvent: Sendable {
             return "model=\(modelName) audioMs=\(audioDurationMs) transcribeMs=\(transcriptionDurationMs) peakMB=\(peakMemoryMB)"
         case .modelPrewarmPeakMemory(let modelName, let peakMB):
             return "model=\(modelName) peakMB=\(peakMB)"
+        case .modelPrewarmTimeout(let name, let timeoutSeconds):
+            return "name=\(name) timeout=\(timeoutSeconds)s"
         case .deviceCapabilitySnapshot(let model, let ramGB, let availableMemoryMB, let thermalState):
             return "model=\(model) ramGB=\(ramGB) availableMB=\(availableMemoryMB) thermal=\(thermalState)"
         }

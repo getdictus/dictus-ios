@@ -17,7 +17,7 @@ final class ModelInfoTests: XCTestCase {
         XCTAssertTrue(ids.contains("openai_whisper-small_216MB"))
         XCTAssertTrue(ids.contains("openai_whisper-medium"))
         XCTAssertTrue(ids.contains("parakeet-tdt-0.6b-v3"))
-        XCTAssertTrue(ids.contains("openai_whisper-large-v3_turbo"))
+        XCTAssertTrue(ids.contains("openai_whisper-large-v3_turbo_954MB"))
         XCTAssertFalse(ids.contains("openai_whisper-tiny"))
         XCTAssertFalse(ids.contains("openai_whisper-base"))
     }
@@ -98,25 +98,26 @@ final class ModelInfoTests: XCTestCase {
     func testTurboGatedOutOnLowRamDevices() {
         // iPhone 12 / iPhone SE tier: 4 GB RAM — Turbo must not be offered.
         let iphone12 = makeCapabilities(ramGB: 4, model: "iPhone13,2")
-        let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3_turbo")
+        let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3_turbo_954MB")
         XCTAssertNotNil(turbo)
         XCTAssertFalse(turbo!.isSupported(on: iphone12))
-        XCTAssertFalse(ModelInfo.available(on: iphone12).map(\.identifier).contains("openai_whisper-large-v3_turbo"))
+        XCTAssertFalse(ModelInfo.available(on: iphone12).map(\.identifier).contains("openai_whisper-large-v3_turbo_954MB"))
     }
 
-    func testTurboGatedOutOnSixGBDevices() {
-        // iPhone 15 / iPhone 14 Pro tier: 6 GB — still below the 8 GB Turbo bar.
+    func testTurboAvailableOnSixGBPlusDevices() {
+        // iPhone 14 Pro / iPhone 15 tier: 6 GB — passes the quantized Turbo gate.
+        // Argmax lists iPhone14/15/16/17 families as supported for `_954MB`.
         let iphone15 = makeCapabilities(ramGB: 6, model: "iPhone15,4")
-        let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3_turbo")!
-        XCTAssertFalse(turbo.isSupported(on: iphone15))
+        let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3_turbo_954MB")!
+        XCTAssertTrue(turbo.isSupported(on: iphone15))
     }
 
-    func testTurboAvailableOnHighRamDevices() {
-        // iPhone 15 Pro Max / iPhone 16 / 17 Pro: 8 GB+ — Turbo passes the gate.
+    func testTurboAvailableOnEightGBDevices() {
+        // iPhone 15 Pro Max / iPhone 16: 8 GB — well above the bar.
         let iphone15ProMax = makeCapabilities(ramGB: 8, model: "iPhone16,2")
-        let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3_turbo")!
+        let turbo = ModelInfo.forIdentifier("openai_whisper-large-v3_turbo_954MB")!
         XCTAssertTrue(turbo.isSupported(on: iphone15ProMax))
-        XCTAssertTrue(ModelInfo.available(on: iphone15ProMax).map(\.identifier).contains("openai_whisper-large-v3_turbo"))
+        XCTAssertTrue(ModelInfo.available(on: iphone15ProMax).map(\.identifier).contains("openai_whisper-large-v3_turbo_954MB"))
 
         let iphone17Pro = makeCapabilities(ramGB: 12, model: "iPhone18,1")
         XCTAssertTrue(turbo.isSupported(on: iphone17Pro))
@@ -126,7 +127,7 @@ final class ModelInfoTests: XCTestCase {
         // Every non-Turbo model must remain visible regardless of RAM tier — Phase 37
         // must not silently shrink the catalog for existing users.
         let lowRam = makeCapabilities(ramGB: 4)
-        for model in ModelInfo.all where model.identifier != "openai_whisper-large-v3_turbo" {
+        for model in ModelInfo.all where model.identifier != "openai_whisper-large-v3_turbo_954MB" {
             XCTAssertTrue(model.isSupported(on: lowRam),
                           "\(model.identifier) must not be gated on low-RAM devices")
         }
@@ -138,7 +139,7 @@ final class ModelInfoTests: XCTestCase {
         for ram in [4, 6, 8, 12, 16] {
             let caps = makeCapabilities(ramGB: ram)
             XCTAssertNotEqual(ModelInfo.recommendedIdentifier(for: caps),
-                              "openai_whisper-large-v3_turbo",
+                              "openai_whisper-large-v3_turbo_954MB",
                               "Turbo must not be recommended at \(ram) GB")
         }
     }

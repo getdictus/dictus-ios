@@ -155,20 +155,28 @@ public struct ModelInfo: Identifiable {
             description: "Fast and accurate (NVIDIA)",
             visibility: .available
         ),
-        // Phase 37 (issue #104): Whisper Turbo re-introduced with per-device gating.
-        // Historically removed on 2026-03-12 (commit d70d62a) after four attempts
-        // that hit E5 CoreML bundle errors at prewarm and OOM on low-RAM devices.
-        // Visibility `.available` means it appears in `all`, but `isSupported(on:)`
-        // filters it out at the UI layer for devices that do not meet the RAM bar.
+        // Phase 37 (issue #104): Whisper Turbo re-introduced using Argmax's
+        // iPhone-supported quantized variant `openai_whisper-large-v3_turbo_954MB`.
+        //
+        // The previous non-quantized `openai_whisper-large-v3_turbo` identifier was
+        // the root cause of the historical failures (2026-03 removals + 2026-04-22
+        // retest on iPhone 15 Pro Max): that build is M-series-only and triggers
+        // `ANE model load has failed ... Must re-compile the E5 bundle` on iPhone
+        // ANE regardless of chip generation, because the non-quantized TextDecoder
+        // exceeds the mobile ANE's memory budget.
+        //
+        // Source of truth: https://huggingface.co/argmaxinc/whisperkit-coreml/blob/main/config.json
+        // iPhone 14/15/16/17 families (identifiers iPhone15,iPhone16,iPhone17,iPhone18)
+        // list this `_954MB` variant as supported.
         ModelInfo(
-            identifier: "openai_whisper-large-v3_turbo",
+            identifier: "openai_whisper-large-v3_turbo_954MB",
             displayName: "Turbo",
-            sizeLabel: "~950 MB",
+            sizeLabel: "~954 MB",
             sizeBytes: 954_000_000,
             engine: .whisperKit,
             accuracyScore: 0.9,
             speedScore: 0.6,
-            description: "Highest accuracy — requires a high-RAM iPhone",
+            description: "Highest accuracy — larger download",
             visibility: .available
         ),
     ]
@@ -222,8 +230,10 @@ public struct ModelInfo: Identifiable {
 
     /// Whether this model is safe to expose on a device with the given capabilities.
     ///
-    /// For Whisper Turbo: requires ≥ 8 GB RAM. Below that bar Turbo either crashes
-    /// at CoreML prewarm (historical E5 bundle errors) or OOMs during transcription.
+    /// For the quantized Whisper Turbo (`_954MB`): requires ≥ 6 GB RAM. This matches
+    /// Argmax's published compatibility matrix: all iPhone 14/15/16/17 families
+    /// (iPhone15,X through iPhone18,X in Apple identifier nomenclature) list this
+    /// variant as supported, and those devices ship with 6 GB+ RAM.
     /// For every other model: returns true — existing catalog entries have already
     /// been validated on the minimum supported device class.
     ///
@@ -233,8 +243,8 @@ public struct ModelInfo: Identifiable {
     /// Turbo under a more permissive build can still manage it.
     public func isSupported(on capabilities: DeviceCapabilities) -> Bool {
         switch identifier {
-        case "openai_whisper-large-v3_turbo":
-            return capabilities.physicalMemoryGB >= 8
+        case "openai_whisper-large-v3_turbo_954MB":
+            return capabilities.physicalMemoryGB >= 6
         default:
             return true
         }
