@@ -76,15 +76,23 @@ The ANE on Apple's mobile chips (A17 Pro included) cannot load the non-quantized
 
 ---
 
-## Pending re-validation
+## Re-validation — rev `9f7abe5` (2026-04-23)
 
-After rebuilding from `a2b7a91` onward, re-run the 3-stage protocol on iPhone 15 Pro Max:
+User confirmation on iPhone 15 Pro Max after rebuild with the `_954MB` identifier, 6 GB gate, and 120 s prewarm timeout:
 
-- Stage 1 — download of `..._954MB` (expected PASS, similar ~100 s timing).
-- Stage 2 — prewarm (**expected PASS** per Argmax compatibility matrix). If it hangs again, the 120 s timeout fires and we know definitively that the compatibility matrix is lying for this device.
-- Stage 3 — 10 consecutive 10–30 s dictations (memory, thermal, latency).
+- Stage 1 — download of `openai_whisper-large-v3_turbo_954MB`: **PASS**.
+- Stage 2 — prewarm / CoreML init: **PASS** (no E5 bundle error, no timeout fired).
+- Stage 3 — transcription runtime: **PASS** (user successfully dictated with Turbo as the active engine).
 
-Document outcome in a follow-up section of this file.
+**Verdict:** Turbo is safe to expose on iPhone 15 Pro Max with the current gate. Argmax's compatibility matrix proved authoritative — the 2026-03 historical failures and the 2026-04-22 retest were both triggered by pointing at the M-series-only identifier, not by any device-level limitation.
+
+## What we still cannot answer without more devices
+
+- Whether the `_954MB` variant behaves acceptably on 6 GB RAM devices (iPhone 14 Pro / 15 / 15 Plus). Argmax lists them as supported; no in-house device to verify.
+- Long-session thermal behaviour on any iPhone tier.
+- Observed prewarm duration and transcription latency were not yet captured from the successful session — if/when logs are exported with the new `modelCompilationCompleted durationMs=...` and `transcriptionPerformance` events, drop them into this file for the baseline.
+
+These remain open for TestFlight-driven observation.
 
 ---
 
