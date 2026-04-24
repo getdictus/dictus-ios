@@ -95,13 +95,20 @@ class KeyboardViewController: UIInputViewController {
         self.giellaKeyboard = keyboard
 
         // --- 3. Create SwiftUI hosting for toolbar + recording overlay ONLY ---
+        // NOTE: do NOT pass `self` into KeyboardRootView. Storing the controller on
+        // the View struct creates a strong ref cycle through UIHostingController that
+        // prevents stale controllers from deiniting across app-switches (#134).
+        // The view accesses the controller through KeyboardState.shared.controller
+        // (weak), which is set in viewWillAppear below.
         let rootView = KeyboardRootView(
-            controller: self,
             controllerID: controllerID,
             suggestionState: suggestionState,
             bridge: keyBridge,
             onLanguageChanged: { [weak self] newLang in
                 self?.handleLanguageChange(newLang)
+            },
+            onEmojiDismiss: { [weak self] in
+                self?.toggleEmojiPicker()
             }
         )
         let hosting = UIHostingController(rootView: rootView)
@@ -228,6 +235,10 @@ class KeyboardViewController: UIInputViewController {
         ))
         PersistentLog.log(.keyboardDidAppear)
         KeyboardState.shared.registerControllerAppearance(controllerID: controllerID)
+        // Point KeyboardState's weak controller ref at the currently-visible controller
+        // so call sites in KeyboardRootView and KeyboardState can access textDocumentProxy.
+        // Previously set from KeyboardRootView.onAppear, which held a strong ref → #134.
+        KeyboardState.shared.controller = self
         hasAppeared = true
 
         // (Re)subscribe to dictation status here, not in viewDidLoad.
