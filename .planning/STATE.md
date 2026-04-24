@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: Dictus Pro
-status: verifying
-stopped_at: "Completed 34.1-03-PLAN.md (on-device verification: 13 probes, 0 failures, privacy audit PASS). Phase 34.1 CLOSED."
-last_updated: "2026-04-16T15:08:23.919Z"
-last_activity: "2026-04-16 — Plan 34.1-03 executed (on-device verification session 12:22-12:25Z: 13 keyboardInsertProbe lines, 0 keyboardInsertFailed events; Phase 34.1 STAB-01 gap closure complete)"
+milestone: v1.7
+milestone_name: Stability, Polish & i18n
+status: manual-mode
+stopped_at: "GSD process paused — milestone continues with manual issue-by-issue workflow on develop. Phase 34/34.1 reverted (fix worsened #118). Phase 35 shipped manually via PRs #116/#117/#128/#129/#130."
+last_updated: "2026-04-22"
+last_activity: "2026-04-22 — Project check-in: confirmed GSD paused, Phase 35 closed manually, next focus TBD"
 progress:
-  total_phases: 7
+  total_phases: 6
   completed_phases: 1
-  total_plans: 7
-  completed_plans: 6
-  percent: 25
+  total_plans: 0
+  completed_plans: 0
+  percent: 17
 ---
 
 # Project State
@@ -21,16 +21,30 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** A user can dictate text in French in any iOS app and correct it immediately on the same keyboard -- no subscription, no cloud, no account.
-**Current focus:** Milestone v1.7 — Stability, Polish & i18n (Phase 34.1 STAB-01 gap closure COMPLETE: 3/3 plans; next phase 35 Keyboard Geometry Polish)
+**Current focus:** Milestone v1.7 — Stability, Polish & i18n. GSD process paused; milestone continues manually issue-by-issue on `develop`.
+
+## Process Status: GSD PAUSED (manual mode)
+
+**Why:** GSD process broke more than it shipped on Phase 34 (see Phase 34 revert below) and consumed too many tokens for the result quality. User prefers the phase structure as a mental model but executes issues directly via PRs against `develop`, without PLAN/RESEARCH/VERIFICATION artifacts.
+
+**How work is tracked now:**
+- GitHub issues = source of truth for what needs doing
+- Phases in ROADMAP.md = coarse grouping only, closed manually when their issues are closed
+- No new phase directories under `.planning/phases/` unless the work is genuinely multi-plan
 
 ## Current Position
 
-Phase: 34.1 (Simplify Insertion Detection) — COMPLETE
-Plan: 34.1-03 complete; Phase 34.1 CLOSED; next phase: 35 (Keyboard Geometry Polish — KBD-01, KBD-02)
-Status: Phase 34.1 delivered — classifier rewritten (success-first 7-rule ordering, 17/17 tests), helper simplified (single-shot, zero retries), UX escalation removed (no banner/haptic/LiveActivity .failed), on-device verification PASS (13 probes, 0 failures, privacy audit 0/7 hits, full regression-category coverage, user signed off "C'est tout bon, j'ai pas eu de soucis particuliers"). Ready for TestFlight build bump + upload.
-Last activity: 2026-04-16 — Plan 34.1-03 executed (on-device verification session 12:22-12:25Z: 13 keyboardInsertProbe lines, 0 keyboardInsertFailed events; Phase 34.1 STAB-01 gap closure complete)
+Milestone: v1.7 (in progress, manual mode)
 
-Progress: [███░░░░░░░] 25% (6/24 plans across 7 phases; Phase 34.1 3/3 complete)
+Phases in v1.7:
+- ❌ Phase 34 / 34.1 — Silent Insertion Fix — **REVERTED 2026-04-20** (PR #127). Fix made #118 ~20× worse (1/200 → 1/10). Issue #118 remains OPEN and deprioritized; future retry must start diagnostic-only.
+- ✅ Phase 35 — Keyboard Geometry Polish — **CLOSED manually 2026-04-22**. Shipped via PRs #117 (align row height/position), #116 (remove KeyboardRootView fallback path, layout glitch fix), #128 (status handler controller gating), #129 (inputView height constraint), #130 (keyboard layout glitch merged).
+- ⏳ Phase 36 — Autocorrect v2 (#114) — not started
+- ⏳ Phase 37 — Whisper Turbo retest (#104) — not started
+- ⏳ Phase 38 — i18n Foundation (#110) — not started
+- ⏳ Phase 39 — German Support (#109) — not started
+
+Last activity: 2026-04-22 — Project check-in, GSD state reconciled with reality.
 
 ## Performance Metrics
 
@@ -125,10 +139,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-16T12:30:00Z
-Stopped at: Completed 34.1-03-PLAN.md (on-device verification: 13 probes, 0 failures, privacy audit PASS). Phase 34.1 CLOSED.
-Resume file: .planning/phases/34.1-simplify-insertion-detection/34.1-03-SUMMARY.md
-Next step: Bump CFBundleVersion (build 10 → 11) and upload to TestFlight to ship Phase 34 + 34.1 STAB-01 hotfix. Then `/gsd:plan-phase 35` to kick off Keyboard Geometry Polish (KBD-01, KBD-02).
+Last session: 2026-04-22
+Stopped at: GSD paused — manual mode. Phase 35 closed. Next v1.7 target TBD (candidates: Phase 36 Autocorrect v2, Phase 37 Whisper Turbo, Phase 38 i18n).
+Resume file: n/a (manual mode — work tracked via GitHub issues)
+Next step: User decides next issue to tackle from open list.
 
 ---
 *State initialized: 2026-03-04*

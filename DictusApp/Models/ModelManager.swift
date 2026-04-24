@@ -180,6 +180,14 @@ class ModelManager: ObservableObject {
 
             PersistentLog.log(.modelCompilationStarted(name: identifier))
 
+            // Phase 37 instrumentation: capture timing + jetsam-headroom delta across prewarm.
+            // `peakMB` in the log event stores the delta of available memory (in MB) between
+            // pre- and post-prewarm. Positive delta ≈ steady-state memory footprint the model
+            // retains after CoreML compilation finishes, which is the signal that matters for
+            // per-device gating decisions on memory-constrained devices (e.g. iPhone 15 Pro Max).
+            let prewarmStart = Date()
+            let availableBeforeMB = DeviceCapabilities.current().availableMemoryMB
+
             let config = WhisperKitConfig(
                 model: identifier,
                 modelFolder: modelFolder.path,
@@ -188,7 +196,28 @@ class ModelManager: ObservableObject {
                 load: true,
                 download: false
             )
-            _ = try await WhisperKit(config)
+
+            // Phase 37: guard the CoreML prewarm against indefinite hangs.
+            // On iPhone ANE, some WhisperKit model variants fail to compile and the
+            // async init never returns (E5 bundle load failure — issue #104,
+            // 2026-04-22 iPhone 15 Pro Max). 120s is well above the observed normal
+            // worst case (~17s for Parakeet Encoder on this device) so we don't
+            // false-positive on legitimately long prewarms.
+            let prewarmTimeoutSeconds = 120
+            do {
+                _ = try await withPrewarmTimeout(seconds: prewarmTimeoutSeconds) {
+                    try await WhisperKit(config)
+                }
+            } catch let err as ModelManagerError {
+                if case .prewarmTimeout(let s) = err {
+                    PersistentLog.log(.modelPrewarmTimeout(name: identifier, timeoutSeconds: s))
+                }
+                throw err
+            }
+
+            let prewarmDurationMs = Int(Date().timeIntervalSince(prewarmStart) * 1000)
+            let availableAfterMB = DeviceCapabilities.current().availableMemoryMB
+            let consumedMB = max(0, availableBeforeMB - availableAfterMB)
 
             // Update state
             if !downloadedModels.contains(identifier) {
@@ -203,7 +232,8 @@ class ModelManager: ObservableObject {
             modelStates[identifier] = .ready
             persistState()
 
-            PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: 0))
+            PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: prewarmDurationMs))
+            PersistentLog.log(.modelPrewarmPeakMemory(modelName: identifier, peakMB: consumedMB))
         } catch {
             modelStates[identifier] = .error(error.localizedDescription)
             downloadProgress.removeValue(forKey: identifier)
@@ -266,8 +296,19 @@ class ModelManager: ObservableObject {
             // Step 4: Load and compile CoreML models.
             // ParakeetEngine.prepare() calls AsrModels.downloadAndLoad() which will find
             // the already-downloaded files and skip straight to compilation.
+            //
+            // Phase 37 instrumentation mirrors the WhisperKit path: measure prewarm
+            // duration + jetsam-headroom delta so both engines produce comparable
+            // gating signals.
+            let prewarmStart = Date()
+            let availableBeforeMB = DeviceCapabilities.current().availableMemoryMB
+
             let parakeetEngine = ParakeetEngine()
             try await parakeetEngine.prepare(modelIdentifier: identifier)
+
+            let prewarmDurationMs = Int(Date().timeIntervalSince(prewarmStart) * 1000)
+            let availableAfterMB = DeviceCapabilities.current().availableMemoryMB
+            let consumedMB = max(0, availableBeforeMB - availableAfterMB)
 
             // Update state
             if !downloadedModels.contains(identifier) {
@@ -281,6 +322,8 @@ class ModelManager: ObservableObject {
             modelStates[identifier] = .ready
             persistState()
 
+            PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: prewarmDurationMs))
+            PersistentLog.log(.modelPrewarmPeakMemory(modelName: identifier, peakMB: consumedMB))
             PersistentLog.log(.modelDownloadCompleted(name: identifier))
         } catch {
             modelStates[identifier] = .error(error.localizedDescription)
@@ -427,6 +470,7 @@ enum ModelManagerError: Error, LocalizedError {
     case cannotDeleteLastModel
     case noContainer
     case parakeetUnavailable
+    case prewarmTimeout(seconds: Int)
 
     var errorDescription: String? {
         switch self {
@@ -436,6 +480,35 @@ enum ModelManagerError: Error, LocalizedError {
             return "App Group container not available"
         case .parakeetUnavailable:
             return "Parakeet requires iOS 17+ or FluidAudio is not linked"
+        case .prewarmTimeout(let seconds):
+            return "Model optimization did not complete within \(seconds)s"
         }
+    }
+}
+
+/// Races an async operation against a timeout. Cancels the operation and throws
+/// `.prewarmTimeout` if the deadline expires first.
+///
+/// WHY: WhisperKit's async init for certain model variants on iPhone ANE can hang
+/// indefinitely when CoreML fails to compile the model (see issue #104,
+/// 2026-04-22 on-device test: `ANE model load has failed … Must re-compile the E5
+/// bundle` followed by `await WhisperKit(config)` never returning). Without a
+/// timeout, ModelManager stays stuck in `.prewarming` forever and the Settings
+/// UI shows the optimization spinner indefinitely, forcing the user to force-quit.
+@MainActor
+func withPrewarmTimeout<T: Sendable>(
+    seconds: Int,
+    _ operation: @escaping @Sendable () async throws -> T
+) async throws -> T {
+    try await withThrowingTaskGroup(of: T.self) { group in
+        group.addTask { try await operation() }
+        group.addTask {
+            try await Task.sleep(nanoseconds: UInt64(seconds) * 1_000_000_000)
+            throw ModelManagerError.prewarmTimeout(seconds: seconds)
+        }
+        // First to finish wins. Cancel the other before returning.
+        let result = try await group.next()!
+        group.cancelAll()
+        return result
     }
 }

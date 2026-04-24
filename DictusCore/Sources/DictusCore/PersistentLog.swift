@@ -30,12 +30,24 @@ public enum PersistentLog {
     /// unreliable in keyboard extensions (can return the host app's ID).
     public static var source: String = "?"
 
-    /// Human-readable code revision marker. Baked into the log export header so a
-    /// device log can be matched to the source tree that produced it even when
-    /// CFBundleVersion hasn't been bumped (we only bump on TestFlight upload).
-    /// Update this string whenever code changes land that should be traceable
-    /// from a device log. Keep short; format suggestion: `<scope>-<shortSHA>`.
-    public static let codeRevision: String = "fix116-final"
+    /// Human-readable code revision marker, auto-injected at build time.
+    ///
+    /// The "Inject Git SHA into Info.plist" Xcode build phase writes `GitCommitSHA`
+    /// (and `GitBranch`) into every target's built Info.plist on each build. This
+    /// computed property reads that value at runtime, so every log export carries
+    /// the exact commit the binary was built from with zero manual discipline.
+    ///
+    /// Fallbacks: returns "unknown" in environments where the Info.plist keys are
+    /// missing (unit tests linking DictusCore standalone, Swift Package previews,
+    /// or a build done outside the Xcode build phase).
+    public static var codeRevision: String {
+        let info = Bundle.main.infoDictionary
+        let sha = info?["GitCommitSHA"] as? String ?? "unknown"
+        if let branch = info?["GitBranch"] as? String, !branch.isEmpty, branch != "unknown" {
+            return "\(sha)@\(branch)"
+        }
+        return sha
+    }
 
     // MARK: - Constants
 
