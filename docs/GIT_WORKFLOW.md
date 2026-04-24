@@ -70,21 +70,7 @@ main (production)              <- App Store + TestFlight public
 
 ## Version numbering
 
-We follow [Semantic Versioning](https://semver.org/):
-
-```
-MAJOR.MINOR.PATCH
-
-1.0.0  — First App Store release
-1.1.0  — New feature added (e.g., custom vocabulary)
-1.1.1  — Bug fix on 1.1.0
-2.0.0  — Major breaking change (rare for mobile apps)
-```
-
-**Xcode specifics:**
-- `CFBundleShortVersionString` = marketing version (1.2.0) — shown to users
-- `CFBundleVersion` = build number (1, 2, 3...) — must increment for every TestFlight upload
-- Build number resets are allowed per marketing version but keeping it incrementing is simpler
+See **[VERSIONING.md](VERSIONING.md)** for the full policy — when to bump MAJOR vs MINOR vs PATCH, why we dropped `-beta.N` suffixes, historical tags, and the release checklist.
 
 ## TestFlight distribution
 
