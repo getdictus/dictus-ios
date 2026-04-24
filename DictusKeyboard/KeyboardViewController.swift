@@ -50,11 +50,14 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         PersistentLog.source = "KBD"
+        // Memory footprint at entry — baseline BEFORE this controller's allocations.
+        // Lets us measure how much each rebuild costs vs how much stays resident.
+        let memEntry = MemoryFootprint.residentMB()
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
             action: "viewDidLoad",
-            details: "controllerClass=\(String(describing: type(of: self)))"
+            details: "controllerClass=\(String(describing: type(of: self))) memMB=\(memEntry)"
         ))
 
         #if DEBUG
@@ -209,6 +212,17 @@ class KeyboardViewController: UIInputViewController {
             self.suggestionState.updateAsync(context: context)
             self.bridge?.updateCapitalization()
         }
+
+        // Memory after all viewDidLoad allocations — delta vs entry tells us
+        // per-controller allocation cost (UIHostingController + GiellaKeyboardView
+        // + SuggestionState + DictusKeyboardBridge + constraints).
+        let memExit = MemoryFootprint.residentMB()
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "viewDidLoad_exit",
+            details: "memMB=\(memExit) delta=\(memExit - memEntry)"
+        ))
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -231,7 +245,7 @@ class KeyboardViewController: UIInputViewController {
             component: "KeyboardViewController",
             instanceID: controllerID,
             action: "viewWillAppear_entry",
-            details: "animated=\(animated) status=\(entryStatus) storedStatus=\(entryStoredStatus) coldStart=\(entryColdStart) inputBounds=\(Int(entryBounds.width))x\(Int(entryBounds.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1)"
+            details: "animated=\(animated) status=\(entryStatus) storedStatus=\(entryStoredStatus) coldStart=\(entryColdStart) inputBounds=\(Int(entryBounds.width))x\(Int(entryBounds.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) memMB=\(MemoryFootprint.residentMB())"
         ))
         PersistentLog.log(.keyboardDidAppear)
         KeyboardState.shared.registerControllerAppearance(controllerID: controllerID)
@@ -367,7 +381,7 @@ class KeyboardViewController: UIInputViewController {
             component: "KeyboardViewController",
             instanceID: controllerID,
             action: action,
-            details: "inputBounds=\(Int(inputBounds.width))x\(Int(inputBounds.height)) viewBounds=\(Int(viewBounds.width))x\(Int(viewBounds.height)) keyboardFrame=\(Int(keyboardFrame.width))x\(Int(keyboardFrame.height)) hostingFrame=\(Int(hostingFrame.width))x\(Int(hostingFrame.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) status=\(KeyboardState.shared.dictationStatus.rawValue)"
+            details: "inputBounds=\(Int(inputBounds.width))x\(Int(inputBounds.height)) viewBounds=\(Int(viewBounds.width))x\(Int(viewBounds.height)) keyboardFrame=\(Int(keyboardFrame.width))x\(Int(keyboardFrame.height)) hostingFrame=\(Int(hostingFrame.width))x\(Int(hostingFrame.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) status=\(KeyboardState.shared.dictationStatus.rawValue) memMB=\(MemoryFootprint.residentMB())"
         ))
     }
 
@@ -381,7 +395,7 @@ class KeyboardViewController: UIInputViewController {
             component: "KeyboardViewController",
             instanceID: controllerID,
             action: "viewDidDisappear",
-            details: "animated=\(animated)"
+            details: "animated=\(animated) memMB=\(MemoryFootprint.residentMB())"
         ))
         PersistentLog.log(.keyboardDidDisappear)
         KeyboardState.shared.registerControllerDisappearance(controllerID: controllerID)
@@ -403,6 +417,19 @@ class KeyboardViewController: UIInputViewController {
         // Darwin observers cleaned up by KeyboardState deinit
     }
 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // iOS sends this shortly before it's willing to jetsam the extension.
+        // Logging it proves whether the grey-overlay freeze correlates with
+        // a memory-pressure signal iOS actually gave us vs an out-of-the-blue kill.
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "didReceiveMemoryWarning",
+            details: "memMB=\(MemoryFootprint.residentMB())"
+        ))
+    }
+
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         // Update keyboard theme when dark/light mode changes while keyboard is visible.
@@ -416,7 +443,7 @@ class KeyboardViewController: UIInputViewController {
             component: "KeyboardViewController",
             instanceID: controllerID,
             action: "deinit",
-            details: ""
+            details: "memMB=\(MemoryFootprint.residentMB())"
         ))
     }
 
