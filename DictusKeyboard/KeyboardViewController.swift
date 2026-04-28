@@ -168,6 +168,17 @@ class KeyboardViewController: UIInputViewController {
         // must be able to EXPAND to full height during recording overlay.
         hosting.view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
 
+        // Pin keyboard grid to a fixed height (key grid only) instead of stretching
+        // to kbInputView.bottomAnchor. WHY: during iOS's keyboard entry animation,
+        // kbInputView transiently has height ~504pt before settling to our 276pt
+        // constraint. With a bottom-anchor pin the giellaKeyboard would stretch to
+        // ~452pt → visible "double-size keys" flash. With a fixed heightAnchor the
+        // grid stays at keyGridHeight regardless; iOS's transient extra space shows
+        // up as kbInputView's plain background below the grid (much less jarring).
+        let keyGridHeight = computeKeyboardHeight() - toolbarHeight
+        let keyboardHeight = keyboard.heightAnchor.constraint(equalToConstant: keyGridHeight)
+        keyboardHeight.priority = UILayoutPriority(999)
+
         NSLayoutConstraint.activate([
             // Toolbar (SwiftUI hosting) at top
             hosting.view.topAnchor.constraint(equalTo: kbInputView.topAnchor),
@@ -175,11 +186,11 @@ class KeyboardViewController: UIInputViewController {
             hosting.view.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor),
             hostingHeight,
 
-            // UIKit keyboard below toolbar
+            // UIKit keyboard below toolbar with FIXED height (no bottomAnchor pin)
             keyboard.topAnchor.constraint(equalTo: hosting.view.bottomAnchor),
             keyboard.leadingAnchor.constraint(equalTo: kbInputView.leadingAnchor),
             keyboard.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor),
-            keyboard.bottomAnchor.constraint(equalTo: kbInputView.bottomAnchor),
+            keyboardHeight,
         ])
 
         // --- 6. Set explicit height constraint on inputView ---
@@ -662,13 +673,17 @@ class KeyboardViewController: UIInputViewController {
         // Add to view hierarchy below the hosting view
         kbInputView.addSubview(keyboard)
 
-        // Re-create constraints
+        // Re-create constraints. Same heightAnchor approach as viewDidLoad — fixed
+        // 224pt height instead of bottomAnchor pin to prevent layout-transition flash.
         if let hostingView = hostingController?.view {
+            let keyGridHeight = computeKeyboardHeight() - toolbarHeight
+            let keyboardHeight = keyboard.heightAnchor.constraint(equalToConstant: keyGridHeight)
+            keyboardHeight.priority = UILayoutPriority(999)
             NSLayoutConstraint.activate([
                 keyboard.topAnchor.constraint(equalTo: hostingView.bottomAnchor),
                 keyboard.leadingAnchor.constraint(equalTo: kbInputView.leadingAnchor),
                 keyboard.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor),
-                keyboard.bottomAnchor.constraint(equalTo: kbInputView.bottomAnchor),
+                keyboardHeight,
             ])
         }
 
