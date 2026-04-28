@@ -17,12 +17,19 @@ import DictusCore
 /// rank results by word frequency (most common words first).
 class TextPredictionEngine {
 
+    /// Shared instance — engines are heavy (~3 MiB FrequencyDictionary + AOSP trie mmap).
+    /// Per-controller instances were leaking via SwiftUI @ObservedObject zombies that
+    /// survive their owning KeyboardViewController.deinit (KeyboardRootView struct held
+    /// alive by KeyboardState.shared.objectWillChange subscription). Sharing the heavy
+    /// resources means the leak no longer multiplies memory per app-switch cycle.
+    static let shared = TextPredictionEngine()
+
     private let textChecker = UITextChecker()
     private var frequencyDict = FrequencyDictionary()
     private let aospTrieEngine = AOSPTrieEngine()
     private var language: String = "fr"
 
-    init() {
+    private init() {
         // Verify language is available in UITextChecker
         let available = UITextChecker.availableLanguages
         if !available.contains(where: { $0.hasPrefix(language) }) {

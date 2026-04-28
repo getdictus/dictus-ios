@@ -25,7 +25,6 @@ extension DefaultKeyboardLayer {
 /// zero-latency touch handling. The key grid needs UICollectionView's proven touch
 /// pipeline for zero dead zones. Mixing UIKit keys + SwiftUI chrome gives us both.
 struct KeyboardRootView: View {
-    let controller: UIInputViewController
     let controllerID: String
     @ObservedObject private var state = KeyboardState.shared
     @ObservedObject private var waveformDriver = KeyboardWaveformDriver.shared
@@ -48,6 +47,11 @@ struct KeyboardRootView: View {
     /// Callback when the user cycles language via the toolbar switcher.
     /// The controller uses this to reload the GiellaKeyboardView with the new layout.
     var onLanguageChanged: ((SupportedLanguage) -> Void)?
+
+    /// Invoked when the user taps the emoji picker's dismiss button.
+    /// Supplied by KeyboardViewController with [weak self] capture so we don't
+    /// retain the controller through the hosting view (issue #134).
+    var onEmojiDismiss: (() -> Void)?
 
     /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
     /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
@@ -94,7 +98,7 @@ struct KeyboardRootView: View {
                     VStack(spacing: 0) {
                         // Toolbar stays visible during emoji browsing
                         ToolbarView(
-                            hasFullAccess: controller.hasFullAccess,
+                            hasFullAccess: state.controller?.hasFullAccess ?? false,
                             dictationStatus: state.dictationStatus,
                             onMicTap: {
                                 showingEmoji = false
@@ -110,19 +114,19 @@ struct KeyboardRootView: View {
                         // Emoji picker uses exact measured dimensions
                         EmojiPickerView(
                             onEmojiInsert: { emoji in
-                                controller.textDocumentProxy.insertText(emoji)
+                                state.controller?.textDocumentProxy.insertText(emoji)
                                 HapticFeedback.keyTapped()
                             },
                             onDelete: {
-                                controller.textDocumentProxy.deleteBackward()
+                                state.controller?.textDocumentProxy.deleteBackward()
                                 HapticFeedback.keyTapped()
                             },
                             onDismiss: {
-                                // Call toggleEmojiPicker() on the controller which handles:
-                                // hiding emoji, showing giellaKeyboard, shrinking hosting,
-                                // and posting .dictusToggleEmoji (which .onReceive picks up
-                                // to set showingEmoji = false).
-                                (controller as? KeyboardViewController)?.toggleEmojiPicker()
+                                // Invokes KeyboardViewController.toggleEmojiPicker() via
+                                // [weak self] closure injected at viewDidLoad time.
+                                // Avoids the (controller as? KeyboardViewController) cast
+                                // that used to require a strong controller ref (#134).
+                                onEmojiDismiss?()
                             },
                             availableWidth: geo.size.width,
                             availableHeight: geo.size.height - 52
@@ -132,7 +136,7 @@ struct KeyboardRootView: View {
             } else {
                 // Toolbar only -- the keyboard grid is UIKit, managed by KeyboardViewController
                 ToolbarView(
-                    hasFullAccess: controller.hasFullAccess,
+                    hasFullAccess: state.controller?.hasFullAccess ?? false,
                     dictationStatus: state.dictationStatus,
                     onMicTap: { state.startRecording() },
                     statusMessage: state.statusMessage,
@@ -193,8 +197,9 @@ struct KeyboardRootView: View {
                 action: "onAppear",
                 details: "status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
             ))
-            // Provide controller reference to KeyboardState for auto-insert.
-            state.controller = controller
+            // state.controller is set by KeyboardViewController.viewWillAppear to avoid
+            // a strong ref cycle through the hosting view (#134). openURL must stay
+            // here — it's a SwiftUI @Environment value, only capturable from a View.
             state.openURL = { url in openURL(url) }
 
             // Pre-allocate haptic generators so the first key tap has zero latency.
@@ -245,7 +250,7 @@ struct KeyboardRootView: View {
     private func handleSuggestionTap(index: Int) {
         guard index < suggestionState.suggestions.count else { return }
         let suggestion = suggestionState.suggestions[index]
-        let proxy = controller.textDocumentProxy
+        guard let proxy = state.controller?.textDocumentProxy else { return }
 
         // Prediction mode: insert word + trailing space, bypass autocorrect, chain predictions.
         if suggestionState.mode == .predictions {
