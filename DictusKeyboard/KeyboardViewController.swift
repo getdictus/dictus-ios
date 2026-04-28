@@ -10,11 +10,10 @@ class KeyboardViewController: UIInputViewController {
     private var hostingController: UIHostingController<KeyboardRootView>?
     private var dictationStatusCancellable: AnyCancellable?
 
-    /// Central SuggestionState owned by the controller and injected into both
-    /// the bridge (for keystroke-driven updates) and the SwiftUI root view (for display).
-    /// WHY here: Single ownership avoids duplicate instances and ensures bridge updates
-    /// are reflected in the suggestion bar without additional synchronization.
-    private let suggestionState = SuggestionState()
+    /// Process-wide SuggestionState (see SuggestionState.shared). Per-controller
+    /// instances leaked via SwiftUI @ObservedObject backing storage that survives
+    /// KeyboardViewController.deinit; the singleton makes the leak benign.
+    private let suggestionState = SuggestionState.shared
 
     /// The giellakbd-ios UICollectionView keyboard, added as a direct UIKit subview.
     /// WHY not wrapped in UIViewRepresentable: SwiftUI recreates representable views
@@ -50,8 +49,6 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         PersistentLog.source = "KBD"
-        // Memory footprint at entry — baseline BEFORE this controller's allocations.
-        // Lets us measure how much each rebuild costs vs how much stays resident.
         let memEntry = MemoryFootprint.residentMB()
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
@@ -443,13 +440,36 @@ class KeyboardViewController: UIInputViewController {
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
+        let hadColorChange = traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection)
+        PersistentLog.log(.diagnosticProbe(
+            component: "KeyboardViewController",
+            instanceID: controllerID,
+            action: "traitCollectionDidChange",
+            details: "prevStyle=\(previousTraitCollection?.userInterfaceStyle.rawValue ?? -1) newStyle=\(traitCollection.userInterfaceStyle.rawValue) hadColorChange=\(hadColorChange)"
+        ))
         // Update keyboard theme when dark/light mode changes while keyboard is visible.
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            giellaKeyboard?.updateTheme(theme: Theme.current(for: traitCollection))
+        if hadColorChange {
+            let newTheme = Theme.current(for: traitCollection)
+            giellaKeyboard?.updateTheme(theme: newTheme)
         }
     }
 
     deinit {
+        // Symmetric tear-down for the addChild()/didMove(toParent:) we did in viewDidLoad.
+        // Without this, UIKit holds the hosting controller in `children` and SwiftUI may
+        // keep its observation graph alive past our own deinit, perpetuating the
+        // KeyboardRootView zombies seen receiving activeControllerChanged broadcasts in
+        // logs (#134). Same reasoning applies to giellaKeyboard's superview membership.
+        hostingController?.willMove(toParent: nil)
+        hostingController?.view.removeFromSuperview()
+        hostingController?.removeFromParent()
+        hostingController = nil
+
+        giellaKeyboard?.removeFromSuperview()
+        giellaKeyboard = nil
+
+        bridge = nil
+
         PersistentLog.log(.diagnosticProbe(
             component: "KeyboardViewController",
             instanceID: controllerID,
