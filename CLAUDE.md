@@ -69,3 +69,17 @@ Barre centrale = dégradé #6BA3FF → #2563EB
 Barres latérales = blanc à 45% et 65% d'opacité
 Fond icône = dégradé #0D2040 → #071020 à 135°
 Border radius barres = 4.5pt
+
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs live as GitHub issues in `getdictus/dictus-ios`, managed via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — `CONTEXT.md` + `docs/adr/` at the repo root (created lazily by `/grill-with-docs`). See `docs/agents/domain.md`.
