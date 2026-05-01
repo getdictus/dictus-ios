@@ -122,6 +122,18 @@ class UnifiedAudioEngine: ObservableObject {
     /// know the audio layer is degraded (issue #106).
     private var isInterrupted = false
 
+    /// Re-entry guard for the interruption handler. Prevents a second `.began` /
+    /// `.ended` arriving while we're still mutating engine state from a previous
+    /// event (Siri → ringing call back-to-back), which would leave a dangling tap.
+    private var isHandlingInterruption = false
+
+    /// Generation counter for the underlying AVAudioEngine instance. Bumped on
+    /// `handleMediaServicesReset` when we replace the engine. The audio tap closure
+    /// captures the generation it was installed under — if a buffer arrives after
+    /// the engine has been replaced, the closure bails out instead of writing into
+    /// shared `nonisolated(unsafe)` state and racing with the new engine's tap.
+    private nonisolated(unsafe) var engineGeneration: UInt64 = 0
+
     /// Tokens for the AVAudioSession lifecycle observers, retained so we can
     /// remove them in `deinit` and avoid leaking notifications across hot reloads
     /// or future re-instantiation.
@@ -183,6 +195,11 @@ class UnifiedAudioEngine: ObservableObject {
     /// notification immediately when the OS interrupts us, even if we haven't yet
     /// activated the session. Registering early means we never miss one. Observers
     /// are cheap when the session isn't active.
+    ///
+    /// WHY no `queue: .main` + `Task { @MainActor }` double hop: each Task adds a
+    /// runloop tick of latency between AVAudioSession posting the notification and
+    /// us mutating `isInterrupted`. Since this class is @MainActor, dispatching
+    /// the closure to MainActor.assumeIsolated handles isolation directly.
     private func registerInterruptionObservers() {
         let center = NotificationCenter.default
 
@@ -191,9 +208,7 @@ class UnifiedAudioEngine: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] note in
-            Task { @MainActor in
-                self?.handleInterruption(note)
-            }
+            MainActor.assumeIsolated { self?.handleInterruption(note) }
         }
 
         let routeChangeToken = center.addObserver(
@@ -201,9 +216,7 @@ class UnifiedAudioEngine: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] note in
-            Task { @MainActor in
-                self?.handleRouteChange(note)
-            }
+            MainActor.assumeIsolated { self?.handleRouteChange(note) }
         }
 
         let mediaResetToken = center.addObserver(
@@ -211,9 +224,7 @@ class UnifiedAudioEngine: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
-                self?.handleMediaServicesReset()
-            }
+            MainActor.assumeIsolated { self?.handleMediaServicesReset() }
         }
 
         notificationObservers = [interruptionToken, routeChangeToken, mediaResetToken]
@@ -229,6 +240,20 @@ class UnifiedAudioEngine: ObservableObject {
     /// fails (rare — usually means the OS still holds the audio resource), we leave
     /// the engine cold and accept that the next dictation pays the cold-start cost.
     private func handleInterruption(_ note: Notification) {
+        // Re-entry guard: a second interruption arriving before we finish handling
+        // the previous one (Siri → ringing call back-to-back) would leave a dangling
+        // tap. The MainActor isolation already serialises calls, so the flag only
+        // needs to cover async work inside this method (warmUp on .ended).
+        guard !isHandlingInterruption else {
+            PersistentLog.log(.engineWarmUpFailed(
+                context: "interruption",
+                error: "reentrant interruption ignored"
+            ))
+            return
+        }
+        isHandlingInterruption = true
+        defer { isHandlingInterruption = false }
+
         guard let userInfo = note.userInfo,
               let typeRaw = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
               let type = AVAudioSession.InterruptionType(rawValue: typeRaw) else {
@@ -270,10 +295,14 @@ class UnifiedAudioEngine: ObservableObject {
 
             var restored = false
             if shouldResume {
+                // configureAudioSession + warmUp may legitimately fail if the app is
+                // still backgrounded (iOS forbids setActive(true) from background).
+                // The catch leaves isInterrupted=true; didBecomeActive will retry via
+                // its own warmUp path, and `startEngine()` clears `isInterrupted` on
+                // success — so we don't need to flip the flag here on the failure path.
                 do {
                     try configureAudioSession()
                     try warmUp()
-                    isInterrupted = false
                     restored = true
                     PersistentLog.log(.warmStateRestored(context: "interruptionEnded"))
                 } catch {
@@ -322,6 +351,10 @@ class UnifiedAudioEngine: ObservableObject {
 
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
+        // Bump generation BEFORE replacing the engine so any in-flight tap callbacks
+        // from the old engine see a stale generation and bail out instead of writing
+        // into shared audio-thread state and racing with the new engine's tap.
+        engineGeneration &+= 1
         engine = AVAudioEngine()
         converter = nil
         sessionConfigured = false
@@ -565,10 +598,18 @@ class UnifiedAudioEngine: ObservableObject {
         // our pre-flight guards don't cover (#71, #102). Without this shim the
         // process aborts with SIGABRT. Swift imports the Objective-C
         // `tryBlock:error:` as a throwing method.
+        // Capture the engine generation at install time. Buffers arriving after a
+        // mediaServicesWereReset has bumped the generation (and replaced the engine)
+        // belong to the dead engine and must be discarded — otherwise they race
+        // with the new engine's tap on shared `nonisolated(unsafe)` audio-thread
+        // state (issue #106 review).
+        let installedGeneration = engineGeneration
         do {
             try ObjCExceptionCatcher.catchException {
                 inputNode.installTap(onBus: 0, bufferSize: 4096, format: hwFormat) { [weak self] buffer, _ in
-                    self?.processBuffer(buffer)
+                    guard let self else { return }
+                    guard installedGeneration == self.engineGeneration else { return }
+                    self.processBuffer(buffer)
                 }
             }
         } catch {
@@ -598,6 +639,13 @@ class UnifiedAudioEngine: ObservableObject {
             inputNode.removeTap(onBus: 0)
             throw swiftStartError
         }
+
+        // Engine is healthy again — clear any interruption flag set by a previous
+        // .began handler. Centralising the clear here means every successful start
+        // path (warmUp, startRecording, didBecomeActive recovery, forceRestart,
+        // .ended interruption resume) ends up healthy without each caller having
+        // to remember to flip the flag.
+        isInterrupted = false
 
         if #available(iOS 14.0, *) {
             DictusLogger.app.info("UnifiedAudioEngine started (hw: \(hwFormat.sampleRate, privacy: .public)Hz -> 16kHz)")

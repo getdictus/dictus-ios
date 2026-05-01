@@ -499,12 +499,8 @@ class DictationCoordinator: ObservableObject {
         bufferSeconds = 0
         cleanupRecordingKeys()
 
-        // Surface the failure to the keyboard via App Group + Darwin notification
-        // so the overlay collapses instead of timing out via the watchdog.
-        defaults.set(DictationStatus.failed.rawValue, forKey: SharedKeys.dictationStatus)
-        defaults.synchronize()
-        DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
-
+        // updateStatus(.failed) handles both the App Group write and the Darwin
+        // statusChanged post — no manual duplication needed (issue #106 review).
         updateStatus(.failed)
 
         if #available(iOS 14.0, *) {
