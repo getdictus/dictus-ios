@@ -139,6 +139,25 @@ class UnifiedAudioEngine: ObservableObject {
     /// or future re-instantiation.
     private var notificationObservers: [NSObjectProtocol] = []
 
+    /// Pending idle-release work item (issue #106 Phase B). Armed at the end of
+    /// every recording (`collectSamples`) and cancelled at the start of any new
+    /// recording or warm-up. If it ever fires, `releaseWarmState()` tears down
+    /// the engine + session so the device stops paying for `UIBackgroundModes:audio`.
+    private var idleReleaseWorkItem: DispatchWorkItem?
+
+    /// Time at which the most recent recording session ended (`collectSamples`
+    /// or `cancelDictation` path). Used to compute how long the engine sat idle
+    /// before being released — emitted in the `warmStateReleased(idleSeconds:)`
+    /// log event for tuning the timeout.
+    private var lastIdleStartTime: Date?
+
+    /// Idle window after which the warm engine + session are released. Hardcoded
+    /// for this iteration; a user-facing setting will land as a follow-up
+    /// (issue #106 out-of-scope). 10 minutes balances UX (warm starts feel
+    /// instant within a normal "back-and-forth dictation session") against
+    /// battery drain (3.3%/h baseline drops to ~0%/h after release).
+    private let idleReleaseInterval: TimeInterval = 10 * 60
+
     /// Sample gating flag read from the audio thread.
     /// WHY nonisolated(unsafe): Read from audio callback thread (single reader pattern).
     /// Written from main thread via startRecording()/collectSamples()/stopEngine().
@@ -182,6 +201,7 @@ class UnifiedAudioEngine: ObservableObject {
     }
 
     deinit {
+        idleReleaseWorkItem?.cancel()
         for token in notificationObservers {
             NotificationCenter.default.removeObserver(token)
         }
@@ -273,6 +293,7 @@ class UnifiedAudioEngine: ObservableObject {
             isInterrupted = true
             isRecording = false
             isRecordingFlag = false
+            cancelIdleRelease()
 
             // Stop the engine so the next start() reinstalls the tap with a fresh
             // hardware format. Don't deactivate the session — iOS will do that for us
@@ -349,6 +370,7 @@ class UnifiedAudioEngine: ObservableObject {
     private func handleMediaServicesReset() {
         PersistentLog.log(.audioMediaServicesReset)
 
+        cancelIdleRelease()
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
         // Bump generation BEFORE replacing the engine so any in-flight tap callbacks
@@ -426,6 +448,9 @@ class UnifiedAudioEngine: ObservableObject {
     /// Start the engine in idle mode (running but not recording).
     /// Keeps the app alive in background via UIBackgroundModes:audio.
     func warmUp() throws {
+        // Cancel any pending idle release — we're explicitly going back warm.
+        cancelIdleRelease()
+
         guard !engine.isRunning else {
             PersistentLog.log(.engineWarmUpSuccess(context: "already running"))
             return
@@ -437,6 +462,9 @@ class UnifiedAudioEngine: ObservableObject {
     /// Begin recording: purge idle audio and start accumulating samples.
     /// If the engine isn't running yet, starts it first (<100ms).
     func startRecording() throws {
+        // Cancel any pending idle release — recording activity resets the timer.
+        cancelIdleRelease()
+
         if !engine.isRunning {
             try startEngine()
         }
@@ -471,6 +499,10 @@ class UnifiedAudioEngine: ObservableObject {
         bufferEnergy = []
         bufferSeconds = 0
 
+        // Arm the idle-release timer (issue #106 Phase B). If the user starts a
+        // new recording or warms up before the timer fires, it gets cancelled.
+        scheduleIdleRelease()
+
         return samples
     }
 
@@ -479,6 +511,7 @@ class UnifiedAudioEngine: ObservableObject {
     ///
     /// - Returns: Audio samples ready for transcription.
     func stopEngine() -> [Float] {
+        cancelIdleRelease()
         isRecording = false
         isRecordingFlag = false
 
@@ -501,6 +534,7 @@ class UnifiedAudioEngine: ObservableObject {
     /// Fully deactivate audio: stop engine + deactivate AVAudioSession.
     /// Call when user explicitly stops all audio (e.g., Power button in Dynamic Island).
     func deactivateSession() {
+        cancelIdleRelease()
         isRecording = false
         isRecordingFlag = false
         engine.inputNode.removeTap(onBus: 0)
@@ -517,6 +551,7 @@ class UnifiedAudioEngine: ObservableObject {
     /// Force restart the engine (stop + removeTap + reconfigure + start).
     /// Used to recover from zombie engine state where isRunning == true but tap receives no buffers.
     func forceRestart() {
+        cancelIdleRelease()
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
         sessionConfigured = false
@@ -529,6 +564,78 @@ class UnifiedAudioEngine: ObservableObject {
         } catch {
             PersistentLog.log(.engineWarmUpFailed(context: "forceRestart", error: error.localizedDescription))
         }
+    }
+
+    // MARK: - Idle Release (issue #106 Phase B)
+
+    /// Arm the idle-release work item. Idempotent: cancels any prior timer first.
+    /// The work runs on the main queue after `idleReleaseInterval` elapses with
+    /// no recording activity. Must be called from MainActor context.
+    private func scheduleIdleRelease() {
+        cancelIdleRelease()
+        lastIdleStartTime = Date()
+
+        let work = DispatchWorkItem { [weak self] in
+            MainActor.assumeIsolated {
+                self?.releaseWarmState(reason: "idleTimeout")
+            }
+        }
+        idleReleaseWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + idleReleaseInterval, execute: work)
+    }
+
+    /// Cancel a pending idle release. Safe to call when none is armed.
+    private func cancelIdleRelease() {
+        idleReleaseWorkItem?.cancel()
+        idleReleaseWorkItem = nil
+    }
+
+    /// Tear down the warm-state engine and deactivate the AVAudioSession.
+    ///
+    /// Called by the idle timer (`scheduleIdleRelease`). Public so the
+    /// scenePhase.active path can call it explicitly if needed (currently
+    /// unused — re-warm goes through `warmUp` which trumps the timer). After
+    /// release, the next dictation will pay the cold-start cost (~100ms engine
+    /// boot + cached WhisperKit init).
+    ///
+    /// Posts both an in-process notification (Live Activity dismisses) and a
+    /// Darwin notification (cross-process consumers can react). Issue #106.
+    func releaseWarmState(reason: String) {
+        // No-op if already released. Prevents double-deactivation logs and
+        // redundant Darwin posts when called from multiple paths.
+        guard engine.isRunning || sessionConfigured else { return }
+
+        let idleSeconds: Int = {
+            guard let started = lastIdleStartTime else { return 0 }
+            return Int(Date().timeIntervalSince(started))
+        }()
+
+        isRecording = false
+        isRecordingFlag = false
+
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+
+        // Bump generation so any in-flight tap callback bails out before mutating
+        // shared audio-thread state (matches the mediaServicesWereReset pattern).
+        engineGeneration &+= 1
+
+        try? AVAudioSession.sharedInstance().setActive(
+            false,
+            options: .notifyOthersOnDeactivation
+        )
+        sessionConfigured = false
+        converter = nil
+        lastIdleStartTime = nil
+        idleReleaseWorkItem = nil
+
+        PersistentLog.log(.warmStateReleased(idleSeconds: idleSeconds))
+        if #available(iOS 14.0, *) {
+            DictusLogger.app.info("Warm state released after \(idleSeconds, privacy: .public)s idle (reason: \(reason, privacy: .public))")
+        }
+
+        NotificationCenter.default.post(name: .dictusWarmStateReleased, object: nil)
+        DarwinNotificationCenter.post(DarwinNotificationName.warmStateReleased)
     }
 
     // MARK: - Private Helpers
