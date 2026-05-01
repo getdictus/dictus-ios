@@ -198,6 +198,15 @@ class DictationCoordinator: ObservableObject {
                     context: "didBecomeActive"
                 ))
 
+                // Wall-clock backstop for Phase B's idle-release timer (issue #106).
+                // If iOS suspended the main queue while we were backgrounded, the
+                // asyncAfter scheduled in scheduleIdleRelease may fire late. On
+                // foreground transition we have a reliable runloop again — this
+                // call releases the warm state if the idle interval already
+                // expired during the suspension. Must happen BEFORE warmUp below,
+                // otherwise we'd warm an engine that should be released.
+                self.audioEngine.enforceIdleReleaseIfDue()
+
                 // Recover DI if it was lost (Activity.request fails from background on cold start).
                 // Must happen BEFORE pendingColdStartDictation so transitionToRecording finds an activity.
                 LiveActivityManager.shared.ensureActivityAlive()

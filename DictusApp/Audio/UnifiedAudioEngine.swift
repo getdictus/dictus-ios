@@ -590,6 +590,19 @@ class UnifiedAudioEngine: ObservableObject {
         idleReleaseWorkItem = nil
     }
 
+    /// Wall-clock backstop for the asyncAfter timer. If iOS suspended the main
+    /// queue while we were backgrounded, `scheduleIdleRelease`'s `asyncAfter`
+    /// can fire late or get coalesced. The DictationCoordinator's
+    /// `didBecomeActive` handler calls this to verify: if we have been idle
+    /// past the threshold without the timer firing, release now (the engine is
+    /// burning battery for nothing). Issue #106 Phase B.
+    func enforceIdleReleaseIfDue() {
+        guard let started = lastIdleStartTime else { return }
+        let idle = Date().timeIntervalSince(started)
+        guard idle >= idleReleaseInterval else { return }
+        releaseWarmState(reason: "wallClockBackstop")
+    }
+
     /// Tear down the warm-state engine and deactivate the AVAudioSession.
     ///
     /// Called by the idle timer (`scheduleIdleRelease`). Public so the
