@@ -164,6 +164,21 @@ class DictationCoordinator: ObservableObject {
             }
         }
 
+        // Cancel any in-flight dictation when the audio session is interrupted
+        // (phone call, Siri, etc.) or media services are reset. UnifiedAudioEngine
+        // already tore down the engine; we just need to clean up the dictation
+        // pipeline state and notify the keyboard that the recording failed
+        // (issue #106).
+        NotificationCenter.default.addObserver(
+            forName: .dictusAudioSessionInterrupted,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.handleAudioInterruptionDuringDictation()
+            }
+        }
+
         // WHY observe didBecomeActive (not willEnterForeground):
         // willEnterForeground fires while the audio session is still interrupted.
         // didBecomeActive fires AFTER the app is fully active and the audio session
@@ -458,6 +473,43 @@ class DictationCoordinator: ObservableObject {
     func resetStatus() {
         updateStatus(.idle)
         // Keep lastResult so HomeView can display the last transcription card.
+    }
+
+    /// Handle an audio session interruption that fired while dictation was active.
+    ///
+    /// UnifiedAudioEngine has already stopped the engine and posted the in-process
+    /// notification. We only need to clean up the dictation pipeline: cancel the
+    /// in-flight task, drop accumulated samples, write a "failed" status to App
+    /// Group so the keyboard's overlay closes, and notify the user via the Live
+    /// Activity (LiveActivityManager handles its own end via the same notification).
+    /// Issue #106.
+    private func handleAudioInterruptionDuringDictation() {
+        let wasActive = (status == .recording || status == .requested || status == .transcribing)
+        guard wasActive else {
+            // Engine died while idle — nothing to roll back. The standby DI is
+            // dismissed by LiveActivityManager via the same notification.
+            return
+        }
+
+        dictationTask?.cancel()
+        dictationTask = nil
+        stopTranscriptionWatchdog()
+
+        bufferEnergy = []
+        bufferSeconds = 0
+        cleanupRecordingKeys()
+
+        // Surface the failure to the keyboard via App Group + Darwin notification
+        // so the overlay collapses instead of timing out via the watchdog.
+        defaults.set(DictationStatus.failed.rawValue, forKey: SharedKeys.dictationStatus)
+        defaults.synchronize()
+        DarwinNotificationCenter.post(DarwinNotificationName.statusChanged)
+
+        updateStatus(.failed)
+
+        if #available(iOS 14.0, *) {
+            DictusLogger.app.warning("Dictation cancelled by audio session interruption")
+        }
     }
 
     // MARK: - Private Helpers

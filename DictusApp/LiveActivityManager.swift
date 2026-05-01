@@ -138,6 +138,94 @@ class LiveActivityManager {
         ) { [weak self] _ in
             self?.endAllActivitiesSync()
         }
+
+        // End the Live Activity when the audio session is interrupted (phone call,
+        // Siri, etc.) or media services were reset. The DI must NOT keep showing
+        // a "ready to dictate" indicator while the underlying audio engine is dead;
+        // the user perceives this as broken — they tap and get a cold start instead
+        // of the warm dictation the DI implied (issue #106).
+        NotificationCenter.default.addObserver(
+            forName: .dictusAudioSessionInterrupted,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.endActivityForAudioInterruption()
+            }
+        }
+
+        // Dismiss the standby DI when the warm-state engine is released after the
+        // idle timeout (issue #106 Phase B). A standby pill suggests the next
+        // dictation is instant — but the engine is asleep, so it would be a cold
+        // start. End the activity so the UI matches reality.
+        NotificationCenter.default.addObserver(
+            forName: .dictusWarmStateReleased,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.endActivityForWarmStateRelease()
+            }
+        }
+    }
+
+    /// Tear down the Live Activity because the audio session was interrupted.
+    /// Force-syncs internal state before issuing the async `activity.end` so a
+    /// concurrent `transitionToRecording` can't resurrect the dead activity.
+    func endActivityForAudioInterruption() {
+        guard let activity = currentActivity else {
+            // No activity to end, but reset state in case it was leaked.
+            currentPhase = .idle
+            syncStateMachine(to: .idle)
+            return
+        }
+
+        autoDismissTask?.cancel()
+        autoDismissTask = nil
+        cancelRecordingWatchdog()
+
+        currentActivity = nil
+        currentPhase = .idle
+        syncStateMachine(to: .idle)
+        PersistentLog.log(.liveActivityEnded(reason: "audioInterrupted"))
+
+        Task {
+            let finalState = DictusLiveActivityAttributes.ContentState(phase: .failed)
+            await activity.end(
+                .init(state: finalState, staleDate: nil),
+                dismissalPolicy: .immediate
+            )
+            DictusLogger.app.info("Live Activity ended -- audio session interrupted")
+        }
+    }
+
+    /// Tear down the Live Activity because the warm-state engine was released.
+    /// The DI is dismissed gracefully (.standby final state, not .failed) since
+    /// nothing actually went wrong — the app simply went idle (issue #106).
+    func endActivityForWarmStateRelease() {
+        guard let activity = currentActivity else {
+            currentPhase = .idle
+            syncStateMachine(to: .idle)
+            return
+        }
+
+        autoDismissTask?.cancel()
+        autoDismissTask = nil
+        cancelRecordingWatchdog()
+
+        currentActivity = nil
+        currentPhase = .idle
+        syncStateMachine(to: .idle)
+        PersistentLog.log(.liveActivityEnded(reason: "warmStateReleased"))
+
+        Task {
+            let finalState = DictusLiveActivityAttributes.ContentState(phase: .standby)
+            await activity.end(
+                .init(state: finalState, staleDate: nil),
+                dismissalPolicy: .immediate
+            )
+            DictusLogger.app.info("Live Activity ended -- warm state released after idle timeout")
+        }
     }
 
     // MARK: - Standby Mode

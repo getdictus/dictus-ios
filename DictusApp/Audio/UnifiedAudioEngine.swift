@@ -6,6 +6,19 @@ import Foundation
 @preconcurrency import AVFoundation
 import DictusCore
 
+extension Notification.Name {
+    /// In-process signal that the AVAudioSession was interrupted or the media
+    /// services stack was reset. Consumers (LiveActivityManager, DictationCoordinator)
+    /// must treat the audio engine as dead until a successful `warmUp()` returns.
+    /// Mirrors the cross-process Darwin notification of the same name (issue #106).
+    static let dictusAudioSessionInterrupted = Notification.Name("DictusAudioSessionInterrupted")
+
+    /// In-process signal that the warm-state engine was released after the idle
+    /// timeout. Consumers should dismiss the Dynamic Island standby indicator —
+    /// the next dictation will be a cold start (issue #106 Phase B).
+    static let dictusWarmStateReleased = Notification.Name("DictusWarmStateReleased")
+}
+
 /// Errors that can occur during audio engine operations.
 enum AudioEngineError: Error, LocalizedError {
     case permissionDenied
@@ -63,12 +76,20 @@ class UnifiedAudioEngine: ObservableObject {
     /// COMPUTED from engine.isRunning — always accurate, fixes #38.
     var isEngineRunning: Bool { engine.isRunning }
 
+    /// Whether the engine is in a healthy state for warm-start recording.
+    ///
+    /// WHY both gates: `engine.isRunning` returns true even after an interruption
+    /// began, until we explicitly stop it. `isInterrupted` reflects whether the
+    /// AVAudioSession is actually usable. The Live Activity layer queries this to
+    /// avoid showing "ready to dictate" while the audio system is dead (issue #106).
+    var isHealthy: Bool { engine.isRunning && !isInterrupted }
+
     /// Current accumulated sample count (for zombie engine health check).
     var currentSampleCount: Int { audioSamples.count }
 
     // MARK: - Private
 
-    private let engine = AVAudioEngine()
+    private var engine = AVAudioEngine()
 
     /// Accumulated audio samples in 16kHz mono Float32 (WhisperKit/Parakeet expected format).
     private var audioSamples: [Float] = []
@@ -91,6 +112,20 @@ class UnifiedAudioEngine: ObservableObject {
     /// WHY: iOS forbids changing AVAudioSession category from background.
     /// We configure once and keep the category set forever.
     private var sessionConfigured = false
+
+    /// True when an AVAudioSession interruption is currently in flight.
+    ///
+    /// WHY tracked separately from `engine.isRunning`: When an interruption begins,
+    /// iOS deactivates the session under us; the engine may still report `isRunning`
+    /// momentarily, but the next `installTap`/`start` will fail. Routing decisions
+    /// (Live Activity, transitionToRecording guard) need a fast in-process flag to
+    /// know the audio layer is degraded (issue #106).
+    private var isInterrupted = false
+
+    /// Tokens for the AVAudioSession lifecycle observers, retained so we can
+    /// remove them in `deinit` and avoid leaking notifications across hot reloads
+    /// or future re-instantiation.
+    private var notificationObservers: [NSObjectProtocol] = []
 
     /// Sample gating flag read from the audio thread.
     /// WHY nonisolated(unsafe): Read from audio callback thread (single reader pattern).
@@ -127,6 +162,176 @@ class UnifiedAudioEngine: ObservableObject {
     private nonisolated(unsafe) var audioThreadSampleCount: Int = 0
 
     private let waveformBarCount = 30
+
+    // MARK: - Init / Deinit
+
+    init() {
+        registerInterruptionObservers()
+    }
+
+    deinit {
+        for token in notificationObservers {
+            NotificationCenter.default.removeObserver(token)
+        }
+    }
+
+    /// Register observers for AVAudioSession lifecycle events that can break the
+    /// engine without our knowledge — phone calls, Siri, route loss, media services
+    /// reset (issue #106).
+    ///
+    /// WHY in init (not after first start): Apple delivers the .began interruption
+    /// notification immediately when the OS interrupts us, even if we haven't yet
+    /// activated the session. Registering early means we never miss one. Observers
+    /// are cheap when the session isn't active.
+    private func registerInterruptionObservers() {
+        let center = NotificationCenter.default
+
+        let interruptionToken = center.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            Task { @MainActor in
+                self?.handleInterruption(note)
+            }
+        }
+
+        let routeChangeToken = center.addObserver(
+            forName: AVAudioSession.routeChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            Task { @MainActor in
+                self?.handleRouteChange(note)
+            }
+        }
+
+        let mediaResetToken = center.addObserver(
+            forName: AVAudioSession.mediaServicesWereResetNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.handleMediaServicesReset()
+            }
+        }
+
+        notificationObservers = [interruptionToken, routeChangeToken, mediaResetToken]
+    }
+
+    /// AVAudioSession interruption handler.
+    ///
+    /// On `.began`: tear down the engine and mark the session unhealthy. The Live
+    /// Activity must dismiss because a dead session means the next dictation will
+    /// be a cold start, not a warm start (issue #106).
+    ///
+    /// On `.ended` with `.shouldResume`: try to reactivate and re-warm. If recovery
+    /// fails (rare — usually means the OS still holds the audio resource), we leave
+    /// the engine cold and accept that the next dictation pays the cold-start cost.
+    private func handleInterruption(_ note: Notification) {
+        guard let userInfo = note.userInfo,
+              let typeRaw = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeRaw) else {
+            return
+        }
+
+        switch type {
+        case .began:
+            let reason = userInfo[AVAudioSessionInterruptionReasonKey].flatMap { value -> String in
+                if let raw = value as? UInt,
+                   let parsed = AVAudioSession.InterruptionReason(rawValue: raw) {
+                    return "\(parsed)"
+                }
+                return "\(value)"
+            } ?? "unknown"
+
+            isInterrupted = true
+            isRecording = false
+            isRecordingFlag = false
+
+            // Stop the engine so the next start() reinstalls the tap with a fresh
+            // hardware format. Don't deactivate the session — iOS will do that for us
+            // and re-asks ownership when the interruption ends.
+            engine.inputNode.removeTap(onBus: 0)
+            engine.stop()
+
+            PersistentLog.log(.audioInterruptionBegan(reason: reason))
+
+            // Notify in-process listeners (LiveActivityManager, DictationCoordinator)
+            // immediately. Darwin notification mirrors for cross-process consumers
+            // (keyboard ext) so they can stop trusting the warm-state contract.
+            NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
+            DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
+
+        case .ended:
+            let optionsRaw = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt ?? 0
+            let options = AVAudioSession.InterruptionOptions(rawValue: optionsRaw)
+            let shouldResume = options.contains(.shouldResume)
+
+            var restored = false
+            if shouldResume {
+                do {
+                    try configureAudioSession()
+                    try warmUp()
+                    isInterrupted = false
+                    restored = true
+                    PersistentLog.log(.warmStateRestored(context: "interruptionEnded"))
+                } catch {
+                    PersistentLog.log(.engineWarmUpFailed(
+                        context: "interruptionEnded",
+                        error: error.localizedDescription
+                    ))
+                }
+            }
+            PersistentLog.log(.audioInterruptionEnded(shouldResume: shouldResume, restored: restored))
+
+        @unknown default:
+            return
+        }
+    }
+
+    /// Audio route change handler. Logs only — most route changes (headphones
+    /// plugged/unplugged) are handled transparently by AVAudioEngine. We do NOT
+    /// tear down the engine here; that path is reserved for explicit interruptions.
+    /// If the input route disappears entirely, the next recording attempt fails
+    /// gracefully via the hwFormat guards in `startEngine()`.
+    private func handleRouteChange(_ note: Notification) {
+        guard let userInfo = note.userInfo,
+              let raw = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue: raw) else {
+            return
+        }
+
+        let inputs = AVAudioSession.sharedInstance()
+            .currentRoute.inputs
+            .map { $0.portType.rawValue }
+            .joined(separator: ",")
+
+        PersistentLog.log(.audioRouteChanged(
+            reason: "\(reason)",
+            details: "inputs=\(inputs.isEmpty ? "none" : inputs)"
+        ))
+    }
+
+    /// AVAudioSession.mediaServicesWereReset handler. This is rare but brutal:
+    /// the entire audio stack is reset by the OS and ALL existing AVAudioEngine
+    /// instances are invalid. We must allocate a fresh engine and reconfigure
+    /// before any future start() call.
+    private func handleMediaServicesReset() {
+        PersistentLog.log(.audioMediaServicesReset)
+
+        engine.inputNode.removeTap(onBus: 0)
+        engine.stop()
+        engine = AVAudioEngine()
+        converter = nil
+        sessionConfigured = false
+        isInterrupted = true
+        isRecording = false
+        isRecordingFlag = false
+
+        NotificationCenter.default.post(name: .dictusAudioSessionInterrupted, object: nil)
+        DarwinNotificationCenter.post(DarwinNotificationName.audioSessionInterrupted)
+    }
 
     // MARK: - Session & Permissions (ported from AudioRecorder)
 
