@@ -792,7 +792,27 @@ class UnifiedAudioEngine: ObservableObject {
     /// SAMPLE GATING: Samples only accumulate when isRecordingFlag is true. When idle,
     /// the engine still processes buffers for heartbeat + waveform (keeps background alive)
     /// but discards audio data. This prevents the 64M idle sample accumulation bug (#38).
+    ///
+    /// IDLE FAST PATH (issue #106 Phase C): When `isRecordingFlag` is false, we skip the
+    /// converter, waveform compute, energy buffer maintenance, and the main-thread
+    /// dispatch — none of those outputs are consumed when no one is dictating. We only
+    /// emit a sparse heartbeat (every 10s instead of 1s) so the keyboard's watchdog
+    /// can still see the app is alive when a future dictation starts. The watchdog
+    /// itself is gated to active dictation states (KeyboardState.startWatchdog), so a
+    /// stale heartbeat during pure idle never triggers a reset.
     private nonisolated func processBuffer(_ buffer: AVAudioPCMBuffer) {
+        let now = Date().timeIntervalSince1970
+
+        // Idle fast path — sparse heartbeat only.
+        if !isRecordingFlag {
+            let idleHeartbeatThrottle: TimeInterval = 10.0
+            if now - lastHeartbeatWrite >= idleHeartbeatThrottle {
+                lastHeartbeatWrite = now
+                AppGroup.defaults.set(now, forKey: SharedKeys.recordingHeartbeat)
+            }
+            return
+        }
+
         guard let converter else { return }
 
         // Calculate output frame count: input frames * (target rate / source rate) + 1
@@ -848,16 +868,14 @@ class UnifiedAudioEngine: ObservableObject {
             audioThreadWaveformBins.removeFirst(audioThreadWaveformBins.count - waveformBarCount)
         }
 
-        let now = Date().timeIntervalSince1970
-
-        // Write heartbeat (~1Hz) — always, even when idle (keeps background alive)
+        // Write heartbeat (~1Hz) during recording
         if now - lastHeartbeatWrite >= 1.0 {
             lastHeartbeatWrite = now
             AppGroup.defaults.set(now, forKey: SharedKeys.recordingHeartbeat)
         }
 
-        // Write waveform data + elapsed time to App Group (~5Hz) — only when recording
-        if isRecordingFlag, now - lastWaveformWrite >= 0.2 {
+        // Write waveform data + elapsed time to App Group (~5Hz)
+        if now - lastWaveformWrite >= 0.2 {
             lastWaveformWrite = now
             audioThreadSampleCount += 0 // count is updated in main thread dispatch below
             let snapshot = makeWaveformSnapshot()
@@ -880,9 +898,7 @@ class UnifiedAudioEngine: ObservableObject {
         }
 
         // Track sample count on audio thread (needed for elapsed time in App Group writes)
-        if isRecordingFlag {
-            audioThreadSampleCount += samples.count
-        }
+        audioThreadSampleCount += samples.count
 
         // === Main thread dispatch (for in-app UI: RecordingView, SwiftUI) ===
 
