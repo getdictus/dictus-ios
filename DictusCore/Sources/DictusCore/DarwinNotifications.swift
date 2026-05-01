@@ -24,6 +24,18 @@ public enum DarwinNotificationName {
     /// Used when the app is already running in background — avoids opening the app via URL.
     /// Fallback: if app doesn't respond within 500ms, keyboard opens dictus://dictate URL.
     public static let startRecording = "com.pivi.dictus.startRecording" as CFString
+
+    /// Posted by DictusApp when AVAudioSession is interrupted (phone call, Siri, etc.)
+    /// or when media services were reset by the OS. Consumers tear down dependent
+    /// state — Live Activity ends, in-flight transcription is cancelled, the keyboard
+    /// can show a "session interrupted" indicator if desired (issue #106).
+    public static let audioSessionInterrupted = "com.pivi.dictus.audioSessionInterrupted" as CFString
+
+    /// Posted by DictusApp when the warm-state engine is released after the idle
+    /// timeout (issue #106 Phase B). Consumers should treat the next dictation
+    /// request as a cold start. Used to dismiss the Dynamic Island standby indicator
+    /// so the UI no longer suggests "ready to dictate" when the engine is asleep.
+    public static let warmStateReleased = "com.pivi.dictus.warmStateReleased" as CFString
 }
 
 /// Global callback registry for Darwin notifications.

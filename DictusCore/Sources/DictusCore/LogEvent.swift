@@ -50,6 +50,12 @@ public enum LogEvent: Sendable {
     case audioEngineStopped
     case audioSessionConfigured(category: String)
     case audioSessionFailed(error: String)
+    case audioInterruptionBegan(reason: String)
+    case audioInterruptionEnded(shouldResume: Bool, restored: Bool)
+    case audioRouteChanged(reason: String, details: String)
+    case audioMediaServicesReset
+    case warmStateReleased(idleSeconds: Int)
+    case warmStateRestored(context: String)
 
     // MARK: Transcription
     case transcriptionStarted(modelName: String)
@@ -150,7 +156,9 @@ public enum LogEvent: Sendable {
         switch self {
         case .dictationStarted, .dictationCompleted, .dictationFailed, .dictationDeferred:
             return .dictation
-        case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed:
+        case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed,
+             .audioInterruptionBegan, .audioInterruptionEnded, .audioRouteChanged,
+             .audioMediaServicesReset, .warmStateReleased, .warmStateRestored:
             return .audio
         case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort,
              .transcriptionPerformance:
@@ -204,7 +212,8 @@ public enum LogEvent: Sendable {
         // Warnings
         case .dictationDeferred, .watchdogReset, .engineWarmUpFailed, .recordingTooShort,
              .waveformStall, .waveformTimelineNotFiring,
-             .coldStartDarwinFallback, .modelPrewarmTimeout:
+             .coldStartDarwinFallback, .modelPrewarmTimeout,
+             .audioInterruptionBegan, .audioMediaServicesReset:
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
@@ -225,7 +234,9 @@ public enum LogEvent: Sendable {
              .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry,
              .overlayShown, .overlayHidden, .statusChanged,
              .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
-             .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated:
+             .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated,
+             .audioInterruptionEnded, .audioRouteChanged,
+             .warmStateReleased, .warmStateRestored:
             return .info
 
         // Debug (internal state transitions)
@@ -255,6 +266,12 @@ public enum LogEvent: Sendable {
         case .audioEngineStopped: return "audioEngineStopped"
         case .audioSessionConfigured: return "audioSessionConfigured"
         case .audioSessionFailed: return "audioSessionFailed"
+        case .audioInterruptionBegan: return "audioInterruptionBegan"
+        case .audioInterruptionEnded: return "audioInterruptionEnded"
+        case .audioRouteChanged: return "audioRouteChanged"
+        case .audioMediaServicesReset: return "audioMediaServicesReset"
+        case .warmStateReleased: return "warmStateReleased"
+        case .warmStateRestored: return "warmStateRestored"
         case .transcriptionStarted: return "transcriptionStarted"
         case .transcriptionCompleted: return "transcriptionCompleted"
         case .transcriptionFailed: return "transcriptionFailed"
@@ -347,6 +364,18 @@ public enum LogEvent: Sendable {
             return "category=\(category)"
         case .audioSessionFailed(let error):
             return "error=\(error)"
+        case .audioInterruptionBegan(let reason):
+            return "reason=\(reason)"
+        case .audioInterruptionEnded(let shouldResume, let restored):
+            return "shouldResume=\(shouldResume) restored=\(restored)"
+        case .audioRouteChanged(let reason, let details):
+            return "reason=\(reason) details=\(details)"
+        case .audioMediaServicesReset:
+            return ""
+        case .warmStateReleased(let idleSeconds):
+            return "idleSeconds=\(idleSeconds)"
+        case .warmStateRestored(let context):
+            return "context=\(context)"
 
         // Transcription
         case .transcriptionStarted(let modelName):
