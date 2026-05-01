@@ -796,16 +796,21 @@ class UnifiedAudioEngine: ObservableObject {
     /// IDLE FAST PATH (issue #106 Phase C): When `isRecordingFlag` is false, we skip the
     /// converter, waveform compute, energy buffer maintenance, and the main-thread
     /// dispatch — none of those outputs are consumed when no one is dictating. We only
-    /// emit a sparse heartbeat (every 10s instead of 1s) so the keyboard's watchdog
-    /// can still see the app is alive when a future dictation starts. The watchdog
-    /// itself is gated to active dictation states (KeyboardState.startWatchdog), so a
-    /// stale heartbeat during pure idle never triggers a reset.
+    /// emit a sparse heartbeat (every 3s instead of 1s) so the keyboard's watchdog
+    /// can still see the app is alive when a future dictation starts.
+    ///
+    /// WHY 3s (not 10s): `isRecordingFlag` is false during `.transcribing` too —
+    /// `collectSamples()` flips it to false before transcription begins. The keyboard
+    /// watchdog falls back to the heartbeat with a 5s threshold during active dictation.
+    /// A 10s throttle let transcriptions longer than 5s falsely trip the watchdog.
+    /// 3s keeps us safely below the threshold; the per-buffer drain reduction comes
+    /// from skipping conversion + waveform compute, not from the heartbeat cadence.
     private nonisolated func processBuffer(_ buffer: AVAudioPCMBuffer) {
         let now = Date().timeIntervalSince1970
 
         // Idle fast path — sparse heartbeat only.
         if !isRecordingFlag {
-            let idleHeartbeatThrottle: TimeInterval = 10.0
+            let idleHeartbeatThrottle: TimeInterval = 3.0
             if now - lastHeartbeatWrite >= idleHeartbeatThrottle {
                 lastHeartbeatWrite = now
                 AppGroup.defaults.set(now, forKey: SharedKeys.recordingHeartbeat)
