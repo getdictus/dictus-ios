@@ -35,6 +35,18 @@ class KeyboardViewController: UIInputViewController {
     /// Changes from toolbarHeight (52pt) to full height when recording overlay is active.
     private var hostingHeightConstraint: NSLayoutConstraint?
 
+    /// Idle-state bottom anchor: hosting sits directly above the keyboard.
+    /// Active when not recording / emoji. Deactivated when expanding to fill
+    /// the full keyboard area, where we instead pin hosting's bottom to
+    /// kbInputView's bottom so the overlay fills the entire keyboard.
+    private var hostingBottomToKeyboardTop: NSLayoutConstraint?
+
+    /// Expanded-state bottom anchor: hosting's bottom == kbInputView's bottom.
+    /// Active during recording overlay or emoji picker (when keyboard is
+    /// hidden). With this active + height=276, hosting fills the whole
+    /// keyboard area without leaving stripes off-screen.
+    private var hostingBottomToInputBottom: NSLayoutConstraint?
+
     /// Fixed toolbar height matching ToolbarView (52pt: 48pt content + 4pt top padding).
     private let toolbarHeight: CGFloat = 52
 
@@ -75,6 +87,18 @@ class KeyboardViewController: UIInputViewController {
         // Do NOT set translatesAutoresizingMaskIntoConstraints = false on the inputView.
         // iOS manages the inputView's frame via autoresizing masks -- disabling them
         // causes the view to collapse to zero width.
+
+        // #92 fix: kbInputView is opaque by default (UIInputView base) and with
+        // backgroundColor=nil it paints a default grey in any region not covered
+        // by a subview. During iOS's keyboard entry animation, iOS forces the
+        // inputView to ~504pt at constraint priority 1000 (we cannot win against
+        // it). Our content fills only 276pt — without these two lines, the
+        // remaining 228pt rendered as a visible grey rectangle. Forcing the view
+        // truly transparent + non-opaque makes that uncovered area composite
+        // with whatever sits behind the keyboard window (the host app),
+        // matching what Apple's own keyboards do.
+        kbInputView.backgroundColor = .clear
+        kbInputView.isOpaque = false
 
         // --- 1. Create the giellakbd-ios UIKit keyboard ---
         let definition = KeyboardLayouts.current()
@@ -165,43 +189,57 @@ class KeyboardViewController: UIInputViewController {
         // must be able to EXPAND to full height during recording overlay.
         hosting.view.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
 
-        // Pin keyboard grid to a fixed height (key grid only) instead of stretching
-        // to kbInputView.bottomAnchor. WHY: during iOS's keyboard entry animation,
-        // kbInputView transiently has height ~504pt before settling to our 276pt
-        // constraint. With a bottom-anchor pin the giellaKeyboard would stretch to
-        // ~452pt → visible "double-size keys" flash. With a fixed heightAnchor the
-        // grid stays at keyGridHeight regardless; iOS's transient extra space shows
-        // up as kbInputView's plain background below the grid (much less jarring).
+        // Pin keyboard grid to a fixed height (key grid only) so it never stretches
+        // beyond its natural 224pt — even when iOS forces the inputView to 504pt
+        // during the entry animation. With a bottom-anchor pin the giellaKeyboard
+        // would stretch to ~452pt → "double-size keys" flash (#116 / ba12a69).
         let keyGridHeight = computeKeyboardHeight() - toolbarHeight
         let keyboardHeight = keyboard.heightAnchor.constraint(equalToConstant: keyGridHeight)
         keyboardHeight.priority = UILayoutPriority(999)
 
-        NSLayoutConstraint.activate([
-            // Toolbar (SwiftUI hosting) at top
-            hosting.view.topAnchor.constraint(equalTo: kbInputView.topAnchor),
-            hosting.view.leadingAnchor.constraint(equalTo: kbInputView.leadingAnchor),
-            hosting.view.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor),
-            hostingHeight,
+        // #92 fix: bottom-anchor the content stack inside kbInputView (matches
+        // upstream giellakbd-ios). Combined with kbInputView.backgroundColor =
+        // .clear, this makes the 228pt empty zone appear at the TOP of the
+        // expanded inputView during the entry animation transient — i.e. in
+        // the host-app-content region right above the toolbar — instead of at
+        // the bottom (between keys and screen edge), which was extremely
+        // visible. With the inputView transparent the host app shows through,
+        // matching what Apple's own keyboards render in that area.
+        let hostingBottomIdle = hosting.view.bottomAnchor.constraint(equalTo: keyboard.topAnchor)
+        let hostingBottomExpanded = hosting.view.bottomAnchor.constraint(equalTo: kbInputView.bottomAnchor)
+        hostingBottomIdle.isActive = true
+        hostingBottomExpanded.isActive = false
+        self.hostingBottomToKeyboardTop = hostingBottomIdle
+        self.hostingBottomToInputBottom = hostingBottomExpanded
 
-            // UIKit keyboard below toolbar with FIXED height (no bottomAnchor pin)
-            keyboard.topAnchor.constraint(equalTo: hosting.view.bottomAnchor),
+        NSLayoutConstraint.activate([
+            // UIKit keyboard pinned to the bottom of the inputView
+            keyboard.bottomAnchor.constraint(equalTo: kbInputView.bottomAnchor),
             keyboard.leadingAnchor.constraint(equalTo: kbInputView.leadingAnchor),
             keyboard.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor),
             keyboardHeight,
+
+            // Toolbar (SwiftUI hosting) — bottom anchor swapped at runtime
+            // (see hostingBottomToKeyboardTop / hostingBottomToInputBottom)
+            hosting.view.leadingAnchor.constraint(equalTo: kbInputView.leadingAnchor),
+            hosting.view.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor),
+            hostingHeight,
         ])
 
-        // --- 6. Set explicit height constraint on inputView ---
-        // Priority 999 (just below .required) wins against iOS's transition-time
-        // inputView sizing while staying breakable in genuinely unrecoverable
-        // situations. iOS settles to our 276pt value ~500ms after viewDidAppear
-        // (verified by deferred layoutSnapshot probes). Constraint on self.view
-        // was tried and reverted — it did not improve settlement behaviour and
-        // added an unnecessary layer of negotiation.
-        let height = computeKeyboardHeight()
-        let constraint = kbInputView.heightAnchor.constraint(equalToConstant: height)
-        constraint.priority = UILayoutPriority(999)
-        constraint.isActive = true
-        self.heightConstraint = constraint
+        // --- 6. Defer the height constraint to viewDidLayoutSubviews first run ---
+        // #92: installing this constraint in viewDidLoad fights iOS's
+        // priority-1000 UIView-Encapsulated-Layout-Height during the entry
+        // animation, producing a visible "keyboard grows then shrinks"
+        // transient (956 → 504 → 276 over ~150ms).
+        //
+        // Upstream giellakbd-ios installs its height constraint in
+        // viewDidLayoutSubviews first run, dispatched async to the main queue,
+        // with the comment: "If this is removed, iPhone 5s glitches before
+        // finding the correct height." Adding the constraint AFTER iOS has
+        // completed its initial layout pass lets our 999-priority constraint
+        // win without fighting the encapsulated-layout-height directly.
+        //
+        // Constraint creation moved to installInputViewHeightConstraint().
 
         // Attempt to prevent top-row key popup clipping. iOS may re-enforce
         // clipsToBounds -- if so, this is a known limitation of third-party keyboard extensions.
@@ -357,6 +395,7 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+
         // Issue #116 diagnostic: snapshot final frames after layout settles.
         // We log both sizes and constraint constants so we can detect priority mismatches
         // where iOS imposed a different height than we asked for.
@@ -375,6 +414,58 @@ class KeyboardViewController: UIInputViewController {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
             self?.logLayoutSnapshot(action: "layoutSnapshot_2000ms")
+        }
+    }
+
+    /// First-run flag for viewDidLayoutSubviews. Used by upstream
+    /// giellakbd-ios pattern (#92): install the input view height constraint
+    /// after iOS finishes its initial layout pass, not in viewDidLoad.
+    private var isFirstLayoutPass = true
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if isFirstLayoutPass {
+            isFirstLayoutPass = false
+            // Defer constraint installation to the next runloop turn so we
+            // don't mutate constraints inside iOS's own layout pass. Upstream
+            // comment: "If this is removed, iPhone 5s glitches before finding
+            // the correct height."
+            DispatchQueue.main.async { [weak self] in
+                self?.installInputViewHeightConstraint()
+            }
+        }
+    }
+
+    /// Installs the 999-priority height constraint on kbInputView. Called once
+    /// (lazy) from the first viewDidLayoutSubviews via async dispatch. Adding
+    /// the constraint here, AFTER iOS has completed its initial layout pass,
+    /// lets us win against the encapsulated-layout-height (priority 1000)
+    /// without the entry animation flashing at 504pt.
+    private func installInputViewHeightConstraint() {
+        guard heightConstraint == nil, let kbInputView = inputView else { return }
+        let height = computeKeyboardHeight()
+        let constraint = kbInputView.heightAnchor.constraint(equalToConstant: height)
+        constraint.priority = UILayoutPriority(999)
+        constraint.isActive = true
+        self.heightConstraint = constraint
+    }
+
+    /// Swap hosting view's bottom anchor between idle and expanded positions.
+    /// - Idle: hosting.bottom = keyboard.top (sits above the keys at 52pt).
+    /// - Expanded: hosting.bottom = kbInputView.bottom (fills the full
+    ///   keyboard area, used when the recording overlay or emoji picker is
+    ///   shown and the keyboard view is hidden).
+    ///
+    /// Without this swap, expanding the hosting height alone (with the idle
+    /// bottom anchor still active) pushes hosting.top above kbInputView,
+    /// leaving the overlay stuck off-screen — the bug in #92 follow-up.
+    private func setHostingExpanded(_ expanded: Bool) {
+        if expanded {
+            hostingBottomToKeyboardTop?.isActive = false
+            hostingBottomToInputBottom?.isActive = true
+        } else {
+            hostingBottomToInputBottom?.isActive = false
+            hostingBottomToKeyboardTop?.isActive = true
         }
     }
 
@@ -574,6 +665,7 @@ class KeyboardViewController: UIInputViewController {
             // Expand hosting view to fill the full keyboard area for the recording overlay
             let fullHeight = computeKeyboardHeight()
             hostingHeightConstraint?.constant = fullHeight
+            setHostingExpanded(true)
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardViewController",
                 instanceID: controllerID,
@@ -583,6 +675,7 @@ class KeyboardViewController: UIInputViewController {
         } else if !isShowingEmoji {
             // Restore toolbar-only height (unless emoji picker is open)
             hostingHeightConstraint?.constant = toolbarHeight
+            setHostingExpanded(false)
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardViewController",
                 instanceID: controllerID,
@@ -693,19 +786,32 @@ class KeyboardViewController: UIInputViewController {
         // Add to view hierarchy below the hosting view
         kbInputView.addSubview(keyboard)
 
-        // Re-create constraints. Same heightAnchor approach as viewDidLoad — fixed
-        // 224pt height instead of bottomAnchor pin to prevent layout-transition flash.
+        // Re-create constraints. Mirrors the bottom-anchor layout from viewDidLoad
+        // (#92 fix): keyboard pinned to kbInputView.bottomAnchor with a fixed
+        // height, hosting view sits directly above it.
+        //
+        // Note: the old hostingBottomToKeyboardTop pointed at the previous
+        // keyboard view (about to be deallocated) — we deactivate it and
+        // create a new one referencing the new keyboard.
+        hostingBottomToKeyboardTop?.isActive = false
         if let hostingView = hostingController?.view {
             let keyGridHeight = computeKeyboardHeight() - toolbarHeight
             let keyboardHeight = keyboard.heightAnchor.constraint(equalToConstant: keyGridHeight)
             keyboardHeight.priority = UILayoutPriority(999)
+            let newHostingBottomIdle = hostingView.bottomAnchor.constraint(equalTo: keyboard.topAnchor)
             NSLayoutConstraint.activate([
-                keyboard.topAnchor.constraint(equalTo: hostingView.bottomAnchor),
+                keyboard.bottomAnchor.constraint(equalTo: kbInputView.bottomAnchor),
                 keyboard.leadingAnchor.constraint(equalTo: kbInputView.leadingAnchor),
                 keyboard.trailingAnchor.constraint(equalTo: kbInputView.trailingAnchor),
                 keyboardHeight,
+                newHostingBottomIdle,
             ])
+            self.hostingBottomToKeyboardTop = newHostingBottomIdle
         }
+        // reloadKeyboardLayout always returns the layout to idle (the height
+        // is reset to toolbarHeight just below). Make sure the expanded bottom
+        // anchor isn't lingering active from a previous recording/emoji state.
+        hostingBottomToInputBottom?.isActive = false
 
         self.giellaKeyboard = keyboard
 
@@ -766,6 +872,7 @@ class KeyboardViewController: UIInputViewController {
             // Expand hosting to cover keyboard area for emoji picker
             let fullHeight = computeKeyboardHeight()
             hostingHeightConstraint?.constant = fullHeight
+            setHostingExpanded(true)
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardViewController",
                 instanceID: controllerID,
@@ -774,6 +881,7 @@ class KeyboardViewController: UIInputViewController {
             ))
         } else {
             hostingHeightConstraint?.constant = toolbarHeight
+            setHostingExpanded(false)
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardViewController",
                 instanceID: controllerID,
