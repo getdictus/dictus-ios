@@ -314,26 +314,23 @@ class UnifiedAudioEngine: ObservableObject {
             let options = AVAudioSession.InterruptionOptions(rawValue: optionsRaw)
             let shouldResume = options.contains(.shouldResume)
 
-            var restored = false
-            if shouldResume {
-                // configureAudioSession + warmUp may legitimately fail if the app is
-                // still backgrounded (iOS forbids setActive(true) from background).
-                // The catch leaves isInterrupted=true; didBecomeActive will retry via
-                // its own warmUp path, and `startEngine()` clears `isInterrupted` on
-                // success — so we don't need to flip the flag here on the failure path.
-                do {
-                    try configureAudioSession()
-                    try warmUp()
-                    restored = true
-                    PersistentLog.log(.warmStateRestored(context: "interruptionEnded"))
-                } catch {
-                    PersistentLog.log(.engineWarmUpFailed(
-                        context: "interruptionEnded",
-                        error: error.localizedDescription
-                    ))
-                }
-            }
-            PersistentLog.log(.audioInterruptionEnded(shouldResume: shouldResume, restored: restored))
+            // We deliberately do NOT auto-resume here even when shouldResume is true.
+            //
+            // WHY: the user just finished a phone call (or whatever interruption);
+            // they have not asked to dictate. Eagerly re-warming the engine
+            // re-activates AVAudioSession, which iOS surfaces as the orange mic
+            // indicator in its Dynamic Island — but our Live Activity is already
+            // dismissed (Phase A correctly tears it down on .began). The combination
+            // is the worst of both: audio resources held + no Dictus UX visible.
+            //
+            // Instead, leave the engine cold and rely on the natural re-warm paths:
+            //  - if user reopens the app, DictationCoordinator's didBecomeActive
+            //    observer calls warmUp.
+            //  - if user taps the keyboard mic, the cold-start dictation path
+            //    starts the engine fresh.
+            // Either way, the warm-state contract matches reality and the orange
+            // mic only appears when the user actually wants to record (issue #106).
+            PersistentLog.log(.audioInterruptionEnded(shouldResume: shouldResume, restored: false))
 
         @unknown default:
             return
