@@ -497,13 +497,6 @@ class KeyboardViewController: UIInputViewController {
             details: "animated=\(animated) memMB=\(MemoryFootprint.residentMB())"
         ))
         PersistentLog.log(.keyboardDidDisappear)
-        KeyboardState.shared.registerControllerDisappearance(controllerID: controllerID)
-        PersistentLog.log(.diagnosticProbe(
-            component: "KeyboardViewController",
-            instanceID: controllerID,
-            action: "registeredDisappearance",
-            details: ""
-        ))
 
         // Tear down the dictation status subscription so this (now-detached)
         // controller no longer reacts when KeyboardState publishes. iOS caches
@@ -512,6 +505,41 @@ class KeyboardViewController: UIInputViewController {
         // viewWillAppear re-subscribes on reattach.
         dictationStatusCancellable?.cancel()
         dictationStatusCancellable = nil
+
+        // Issue #142: skip registerControllerDisappearance during an active
+        // dictation session. iOS calls viewDidDisappear on the keyboard right
+        // before bringing DictusApp foreground for cold-start; an immediate
+        // unregister would flip activeControllerID→nil and isKeyboardVisible
+        // →false, making KeyboardRootView.showsOverlay recompute to false and
+        // SwiftUI swap RecordingOverlay→ToolbarView while hostingConst is still
+        // 276pt. iOS's keyboard-down animation snapshot then captures that
+        // inconsistent layout (toolbar centred in expanded hosting), freezing
+        // it on screen for the duration of the transition.
+        //
+        // The successor controller's registerControllerAppearance overwrites
+        // activeControllerID, so a clean handoff happens automatically. If
+        // the keyboard is truly dismissed during recording (no successor), the
+        // synchronous deinit safety net below catches it.
+        let status = KeyboardState.shared.dictationStatus
+        let isActiveSession = status == .requested
+            || status == .recording
+            || status == .transcribing
+        if isActiveSession {
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardViewController",
+                instanceID: controllerID,
+                action: "skippedUnregister_activeSession",
+                details: "status=\(status.rawValue) activeID=\(KeyboardState.shared.activeControllerID ?? "none")"
+            ))
+        } else {
+            KeyboardState.shared.registerControllerDisappearance(controllerID: controllerID)
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardViewController",
+                instanceID: controllerID,
+                action: "registeredDisappearance",
+                details: ""
+            ))
+        }
 
         // Darwin observers cleaned up by KeyboardState deinit
     }
@@ -546,6 +574,17 @@ class KeyboardViewController: UIInputViewController {
     }
 
     deinit {
+        // Issue #142 safety net: viewDidDisappear skips unregistration during
+        // an active dictation session to avoid a SwiftUI race that produces a
+        // centred-toolbar visual artefact during cold-start handoff. If iOS
+        // deallocates us while we still own activeControllerID (no successor
+        // controller registered, e.g. a truly dismissed keyboard during
+        // recording), unregister now — synchronous deinit is past any SwiftUI
+        // race window so it's safe.
+        if KeyboardState.shared.activeControllerID == controllerID {
+            KeyboardState.shared.registerControllerDisappearance(controllerID: controllerID)
+        }
+
         // Symmetric tear-down for the addChild()/didMove(toParent:) we did in viewDidLoad.
         // Without this, UIKit holds the hosting controller in `children` and SwiftUI may
         // keep its observation graph alive past our own deinit, perpetuating the

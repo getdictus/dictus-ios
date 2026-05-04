@@ -151,6 +151,13 @@ struct KeyboardRootView: View {
                 // No bottom spacer -- the UIKit keyboard handles its own height
             }
         }
+        // Issue #142: force the body to fill its hosting frame top-aligned.
+        // Without this, when the hosting view expands from 52→276pt on mic
+        // tap but SwiftUI hasn't yet re-rendered ToolbarView→RecordingOverlay
+        // (1-frame async lag), UIHostingController centres the 52pt toolbar
+        // intrinsic content inside its 276pt frame — and iOS's keyboard-down
+        // animation snapshot freezes that centred-toolbar layout on screen.
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.clear)
         .onChange(of: showsOverlay) { _, isShowing in
             let usedFallback = isShowing && state.activeControllerID == nil
