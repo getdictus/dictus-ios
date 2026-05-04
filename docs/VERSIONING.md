@@ -81,6 +81,7 @@ When `develop` is ready to ship:
 8. Archive in Xcode, upload to App Store Connect.
 9. Once accepted for TestFlight: `gh release create vX.Y.Z --title "..." --notes "..."` (use `--prerelease` only if the build is not intended for external TestFlight / App Store).
 10. Merge `main → develop` to keep branches in sync.
+11. **Sync `main` into `feature/premium`** — open a `sync/main-to-premium-vX.Y.Z` branch from `feature/premium`, `git merge origin/main --no-ff`, resolve any `.planning/` conflicts in favour of premium (`--ours`), open a PR into `feature/premium`, merge with `--merge` (never squash). Required as long as `feature/premium` is an active long-lived branch — drop this step if/when premium is retired or merged.
 
 ## Release-notes naming (GitHub + TestFlight)
 
