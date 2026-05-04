@@ -164,6 +164,21 @@ class DictationCoordinator: ObservableObject {
             }
         }
 
+        // Cancel any in-flight dictation when the audio session is interrupted
+        // (phone call, Siri, etc.) or media services are reset. UnifiedAudioEngine
+        // already tore down the engine; we just need to clean up the dictation
+        // pipeline state and notify the keyboard that the recording failed
+        // (issue #106).
+        NotificationCenter.default.addObserver(
+            forName: .dictusAudioSessionInterrupted,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.handleAudioInterruptionDuringDictation()
+            }
+        }
+
         // WHY observe didBecomeActive (not willEnterForeground):
         // willEnterForeground fires while the audio session is still interrupted.
         // didBecomeActive fires AFTER the app is fully active and the audio session
@@ -182,6 +197,15 @@ class DictationCoordinator: ObservableObject {
                     sessionConfigured: true,
                     context: "didBecomeActive"
                 ))
+
+                // Wall-clock backstop for Phase B's idle-release timer (issue #106).
+                // If iOS suspended the main queue while we were backgrounded, the
+                // asyncAfter scheduled in scheduleIdleRelease may fire late. On
+                // foreground transition we have a reliable runloop again — this
+                // call releases the warm state if the idle interval already
+                // expired during the suspension. Must happen BEFORE warmUp below,
+                // otherwise we'd warm an engine that should be released.
+                self.audioEngine.enforceIdleReleaseIfDue()
 
                 // Recover DI if it was lost (Activity.request fails from background on cold start).
                 // Must happen BEFORE pendingColdStartDictation so transitionToRecording finds an activity.
@@ -458,6 +482,39 @@ class DictationCoordinator: ObservableObject {
     func resetStatus() {
         updateStatus(.idle)
         // Keep lastResult so HomeView can display the last transcription card.
+    }
+
+    /// Handle an audio session interruption that fired while dictation was active.
+    ///
+    /// UnifiedAudioEngine has already stopped the engine and posted the in-process
+    /// notification. We only need to clean up the dictation pipeline: cancel the
+    /// in-flight task, drop accumulated samples, write a "failed" status to App
+    /// Group so the keyboard's overlay closes, and notify the user via the Live
+    /// Activity (LiveActivityManager handles its own end via the same notification).
+    /// Issue #106.
+    private func handleAudioInterruptionDuringDictation() {
+        let wasActive = (status == .recording || status == .requested || status == .transcribing)
+        guard wasActive else {
+            // Engine died while idle — nothing to roll back. The standby DI is
+            // dismissed by LiveActivityManager via the same notification.
+            return
+        }
+
+        dictationTask?.cancel()
+        dictationTask = nil
+        stopTranscriptionWatchdog()
+
+        bufferEnergy = []
+        bufferSeconds = 0
+        cleanupRecordingKeys()
+
+        // updateStatus(.failed) handles both the App Group write and the Darwin
+        // statusChanged post — no manual duplication needed (issue #106 review).
+        updateStatus(.failed)
+
+        if #available(iOS 14.0, *) {
+            DictusLogger.app.warning("Dictation cancelled by audio session interruption")
+        }
     }
 
     // MARK: - Private Helpers
