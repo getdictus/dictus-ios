@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/brand/dictus-icon-512.png" alt="Dictus" width="120" height="120" />
+  <img src="assets/brand/appicon-light.svg" alt="Dictus" width="120" height="120" />
 </p>
 
 <h1 align="center">Dictus</h1>
@@ -9,6 +9,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/getdictus/dictus-ios/actions/workflows/ci.yml"><img src="https://github.com/getdictus/dictus-ios/actions/workflows/ci.yml/badge.svg?branch=develop" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" /></a>
   <img src="https://img.shields.io/badge/platform-iOS%2017%2B-lightgrey.svg" alt="Platform: iOS 17+" />
   <img src="https://img.shields.io/badge/swift-5.9%2B-orange.svg" alt="Swift 5.9+" />

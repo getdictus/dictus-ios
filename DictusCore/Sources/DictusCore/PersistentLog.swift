@@ -30,6 +30,25 @@ public enum PersistentLog {
     /// unreliable in keyboard extensions (can return the host app's ID).
     public static var source: String = "?"
 
+    /// Human-readable code revision marker, auto-injected at build time.
+    ///
+    /// The "Inject Git SHA into Info.plist" Xcode build phase writes `GitCommitSHA`
+    /// (and `GitBranch`) into every target's built Info.plist on each build. This
+    /// computed property reads that value at runtime, so every log export carries
+    /// the exact commit the binary was built from with zero manual discipline.
+    ///
+    /// Fallbacks: returns "unknown" in environments where the Info.plist keys are
+    /// missing (unit tests linking DictusCore standalone, Swift Package previews,
+    /// or a build done outside the Xcode build phase).
+    public static var codeRevision: String {
+        let info = Bundle.main.infoDictionary
+        let sha = info?["GitCommitSHA"] as? String ?? "unknown"
+        if let branch = info?["GitBranch"] as? String, !branch.isEmpty, branch != "unknown" {
+            return "\(sha)@\(branch)"
+        }
+        return sha
+    }
+
     // MARK: - Constants
 
     /// Maximum log file size in bytes (~200KB = ~1300 lines at ~150 bytes/line).
@@ -137,7 +156,8 @@ public enum PersistentLog {
             appVersion: appVersion,
             buildNumber: buildNumber,
             deviceModel: deviceModel,
-            activeModel: activeModel
+            activeModel: activeModel,
+            codeRevision: codeRevision
         )
         return header + read()
     }
@@ -149,9 +169,10 @@ public enum PersistentLog {
         appVersion: String,
         buildNumber: String,
         deviceModel: String,
-        activeModel: String
+        activeModel: String,
+        codeRevision: String = PersistentLog.codeRevision
     ) -> String {
-        "Dictus Debug Log\niOS \(iosVersion) | App \(appVersion) (\(buildNumber)) | \(deviceModel) | Model: \(activeModel)\n---\n"
+        "Dictus Debug Log\niOS \(iosVersion) | App \(appVersion) (\(buildNumber)) | rev \(codeRevision) | \(deviceModel) | Model: \(activeModel)\n---\n"
     }
 
     // MARK: - Legacy API (Deprecated)

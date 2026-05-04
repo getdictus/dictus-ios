@@ -44,12 +44,29 @@ cd DictusCore
 swift test
 ```
 
+## Continuous Integration
+
+Every pull request runs through GitHub Actions. Two checks must pass before a PR can be merged:
+
+- **SwiftLint** -- enforces style rules defined in `.swiftlint.yml`. Runs on Linux, completes in under a minute.
+- **Build** -- compiles the `DictusApp` scheme (which embeds `DictusKeyboard`, `DictusWidgets`, and depends on `DictusCore`) for iOS Simulator. Runs on macOS, takes 5-10 minutes.
+
+To check locally before pushing:
+
+```bash
+brew install swiftlint
+swiftlint lint
+```
+
+The CI does **not** sign builds, run tests, or upload to TestFlight. Its only job is to catch broken compilations and obvious style regressions.
+
 ## Pull Request Guidelines
 
 - Use a **descriptive title** (e.g., "Fix waveform animation on cold start").
 - **Explain what and why** in the PR description, not just what changed.
 - Keep PRs **focused** -- one feature or fix per PR.
 - Make sure the project builds without warnings before submitting.
+- Verify CI is green before requesting review.
 
 ## No CLA Required
 

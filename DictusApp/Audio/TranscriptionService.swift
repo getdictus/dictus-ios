@@ -115,6 +115,7 @@ class TranscriptionService {
                 let durationMs = Int(Date().timeIntervalSince(transcriptionStart) * 1000)
                 let wordCount = result.split(separator: " ").count
                 PersistentLog.log(.transcriptionCompleted(durationMs: durationMs, wordCount: wordCount))
+                logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
                 return result
             } catch {
                 PersistentLog.log(.transcriptionFailed(error: error.localizedDescription))
@@ -161,6 +162,7 @@ class TranscriptionService {
             let durationMs = Int(Date().timeIntervalSince(transcriptionStart) * 1000)
             let wordCount = trimmed.split(separator: " ").count
             PersistentLog.log(.transcriptionCompleted(durationMs: durationMs, wordCount: wordCount))
+            logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
             return trimmed
         } catch let error as TranscriptionError {
             PersistentLog.log(.transcriptionFailed(error: error.localizedDescription ?? "unknown"))
@@ -169,5 +171,26 @@ class TranscriptionService {
             PersistentLog.log(.transcriptionFailed(error: error.localizedDescription))
             throw TranscriptionError.transcriptionFailed(error.localizedDescription)
         }
+    }
+
+    /// Phase 37 instrumentation: emits `transcriptionPerformance` alongside the existing
+    /// `transcriptionCompleted` event. Kept as a small helper so both the multi-engine
+    /// path and the legacy WhisperKit path log identical schema.
+    ///
+    /// `peakMemoryMB` here is a point-in-time reading of remaining jetsam headroom right
+    /// after transcription, not a true peak. Paired with the prewarm delta in
+    /// `modelPrewarmPeakMemory`, it gives a coarse-but-useful signal for per-device gating.
+    private func logPerformance(modelName: String, audioSamples: [Float], transcriptionDurationMs: Int) {
+        // WhisperKit and FluidAudio both consume audio at 16 kHz. Hardcoded to stay
+        // consistent with the sample-rate assumption everywhere else in the pipeline.
+        let sampleRateHz = 16_000
+        let audioDurationMs = audioSamples.isEmpty ? 0 : (audioSamples.count * 1000) / sampleRateHz
+        let peakMemoryMB = DeviceCapabilities.current().availableMemoryMB
+        PersistentLog.log(.transcriptionPerformance(
+            modelName: modelName,
+            audioDurationMs: audioDurationMs,
+            transcriptionDurationMs: transcriptionDurationMs,
+            peakMemoryMB: peakMemoryMB
+        ))
     }
 }

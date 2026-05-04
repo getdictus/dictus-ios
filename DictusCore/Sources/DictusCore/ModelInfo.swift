@@ -155,6 +155,30 @@ public struct ModelInfo: Identifiable {
             description: "Fast and accurate (NVIDIA)",
             visibility: .available
         ),
+        // Phase 37 (issue #104): Whisper Turbo re-introduced using Argmax's
+        // iPhone-supported quantized variant `openai_whisper-large-v3_turbo_954MB`.
+        //
+        // The previous non-quantized `openai_whisper-large-v3_turbo` identifier was
+        // the root cause of the historical failures (2026-03 removals + 2026-04-22
+        // retest on iPhone 15 Pro Max): that build is M-series-only and triggers
+        // `ANE model load has failed ... Must re-compile the E5 bundle` on iPhone
+        // ANE regardless of chip generation, because the non-quantized TextDecoder
+        // exceeds the mobile ANE's memory budget.
+        //
+        // Source of truth: https://huggingface.co/argmaxinc/whisperkit-coreml/blob/main/config.json
+        // iPhone 14/15/16/17 families (identifiers iPhone15,iPhone16,iPhone17,iPhone18)
+        // list this `_954MB` variant as supported.
+        ModelInfo(
+            identifier: "openai_whisper-large-v3_turbo_954MB",
+            displayName: "Turbo",
+            sizeLabel: "~954 MB",
+            sizeBytes: 954_000_000,
+            engine: .whisperKit,
+            accuracyScore: 0.9,
+            speedScore: 0.6,
+            description: "Highest accuracy — larger download",
+            visibility: .available
+        ),
     ]
 
     /// Set of all supported model identifiers for quick lookup.
@@ -183,22 +207,52 @@ public struct ModelInfo: Identifiable {
     /// This is catalog-level logic — which model fits this device. It doesn't
     /// depend on download state or any @Published properties. Accessible from
     /// both ModelManager and onboarding without passing an ObservableObject.
-    /// Cached result — computed once per process since device RAM doesn't change.
-    private static let _recommendedIdentifier: String = {
-        let ramGB = ProcessInfo.processInfo.physicalMemory / 1_073_741_824
-        let model = ramGB >= 6 ? "parakeet-tdt-0.6b-v3" : "openai_whisper-small"
-        #if DEBUG
-        print("[ModelInfo] Device RAM: \(ramGB) GB, recommending: \(model)")
-        #endif
-        return model
-    }()
+    ///
+    /// WHY a function taking `DeviceCapabilities` instead of a cached static let:
+    /// Phase 37 introduces per-device gating that needs deterministic inputs for
+    /// unit testing. The caller-less overload still exists for convenience — it
+    /// reads the current device, same behaviour as before.
+    /// Turbo is intentionally never recommended by default during Phase 37.
+    public static func recommendedIdentifier(for capabilities: DeviceCapabilities) -> String {
+        capabilities.physicalMemoryGB >= 6 ? "parakeet-tdt-0.6b-v3" : "openai_whisper-small"
+    }
 
     public static func recommendedIdentifier() -> String {
-        return _recommendedIdentifier
+        recommendedIdentifier(for: DeviceCapabilities.current())
     }
 
     /// Whether the given model identifier matches the device-recommended model.
     public static func isRecommended(_ identifier: String) -> Bool {
         identifier == recommendedIdentifier()
+    }
+
+    // MARK: - Per-device gating (Phase 37, issue #104)
+
+    /// Whether this model is safe to expose on a device with the given capabilities.
+    ///
+    /// For the quantized Whisper Turbo (`_954MB`): requires ≥ 6 GB RAM. This matches
+    /// Argmax's published compatibility matrix: all iPhone 14/15/16/17 families
+    /// (iPhone15,X through iPhone18,X in Apple identifier nomenclature) list this
+    /// variant as supported, and those devices ship with 6 GB+ RAM.
+    /// For every other model: returns true — existing catalog entries have already
+    /// been validated on the minimum supported device class.
+    ///
+    /// Called from the Settings UI to decide whether the Turbo row appears in the
+    /// "Available" section. Backend paths (ModelManager download/delete, already-
+    /// downloaded list) intentionally do NOT filter by this, so a user who obtained
+    /// Turbo under a more permissive build can still manage it.
+    public func isSupported(on capabilities: DeviceCapabilities) -> Bool {
+        switch identifier {
+        case "openai_whisper-large-v3_turbo_954MB":
+            return capabilities.physicalMemoryGB >= 6
+        default:
+            return true
+        }
+    }
+
+    /// The subset of `all` that is both catalog-available and gated-in for this device.
+    /// This is the list the Settings "Available" section should render.
+    public static func available(on capabilities: DeviceCapabilities) -> [ModelInfo] {
+        all.filter { $0.isSupported(on: capabilities) }
     }
 }

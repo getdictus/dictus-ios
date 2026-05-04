@@ -25,7 +25,6 @@ extension DefaultKeyboardLayer {
 /// zero-latency touch handling. The key grid needs UICollectionView's proven touch
 /// pipeline for zero dead zones. Mixing UIKit keys + SwiftUI chrome gives us both.
 struct KeyboardRootView: View {
-    let controller: UIInputViewController
     let controllerID: String
     @ObservedObject private var state = KeyboardState.shared
     @ObservedObject private var waveformDriver = KeyboardWaveformDriver.shared
@@ -49,6 +48,11 @@ struct KeyboardRootView: View {
     /// The controller uses this to reload the GiellaKeyboardView with the new layout.
     var onLanguageChanged: ((SupportedLanguage) -> Void)?
 
+    /// Invoked when the user taps the emoji picker's dismiss button.
+    /// Supplied by KeyboardViewController with [weak self] capture so we don't
+    /// retain the controller through the hosting view (issue #134).
+    var onEmojiDismiss: (() -> Void)?
+
     /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
     /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
     /// openURL environment action works because it goes through the responder
@@ -63,21 +67,13 @@ struct KeyboardRootView: View {
             || state.dictationStatus == .transcribing
         guard isActiveStatus else { return false }
 
-        // Normal path: this controller is the registered active one
-        if state.activeControllerID == controllerID && state.isKeyboardVisible {
-            return true
-        }
-
-        // Fallback: active recording but no controller registered yet.
-        // During cold start app transitions, iOS can rapidly create/destroy
-        // keyboard controllers. viewWillAppear may not have fired on the
-        // current controller, leaving activeControllerID == nil.
-        // Show overlay anyway -- only one controller is visible on screen.
-        if state.activeControllerID == nil {
-            return true
-        }
-
-        return false
+        // Only the registered active controller shows the overlay.
+        // The legacy `activeControllerID == nil` fallback existed to mask the
+        // controller leak from #128: stale KeyboardRootView instances rendered
+        // RecordingOverlay in parallel with the visible one, producing the
+        // duplicate grey overlay observed in issue #116. With #128 fixed,
+        // stale controllers are dormant and this fallback is unnecessary.
+        return state.activeControllerID == controllerID && state.isKeyboardVisible
     }
 
     var body: some View {
@@ -102,7 +98,7 @@ struct KeyboardRootView: View {
                     VStack(spacing: 0) {
                         // Toolbar stays visible during emoji browsing
                         ToolbarView(
-                            hasFullAccess: controller.hasFullAccess,
+                            hasFullAccess: state.controller?.hasFullAccess ?? false,
                             dictationStatus: state.dictationStatus,
                             onMicTap: {
                                 showingEmoji = false
@@ -118,19 +114,19 @@ struct KeyboardRootView: View {
                         // Emoji picker uses exact measured dimensions
                         EmojiPickerView(
                             onEmojiInsert: { emoji in
-                                controller.textDocumentProxy.insertText(emoji)
+                                state.controller?.textDocumentProxy.insertText(emoji)
                                 HapticFeedback.keyTapped()
                             },
                             onDelete: {
-                                controller.textDocumentProxy.deleteBackward()
+                                state.controller?.textDocumentProxy.deleteBackward()
                                 HapticFeedback.keyTapped()
                             },
                             onDismiss: {
-                                // Call toggleEmojiPicker() on the controller which handles:
-                                // hiding emoji, showing giellaKeyboard, shrinking hosting,
-                                // and posting .dictusToggleEmoji (which .onReceive picks up
-                                // to set showingEmoji = false).
-                                (controller as? KeyboardViewController)?.toggleEmojiPicker()
+                                // Invokes KeyboardViewController.toggleEmojiPicker() via
+                                // [weak self] closure injected at viewDidLoad time.
+                                // Avoids the (controller as? KeyboardViewController) cast
+                                // that used to require a strong controller ref (#134).
+                                onEmojiDismiss?()
                             },
                             availableWidth: geo.size.width,
                             availableHeight: geo.size.height - 52
@@ -140,7 +136,7 @@ struct KeyboardRootView: View {
             } else {
                 // Toolbar only -- the keyboard grid is UIKit, managed by KeyboardViewController
                 ToolbarView(
-                    hasFullAccess: controller.hasFullAccess,
+                    hasFullAccess: state.controller?.hasFullAccess ?? false,
                     dictationStatus: state.dictationStatus,
                     onMicTap: { state.startRecording() },
                     statusMessage: state.statusMessage,
@@ -155,13 +151,21 @@ struct KeyboardRootView: View {
                 // No bottom spacer -- the UIKit keyboard handles its own height
             }
         }
+        // Issue #142: force the body to fill its hosting frame top-aligned.
+        // Without this, when the hosting view expands from 52→276pt on mic
+        // tap but SwiftUI hasn't yet re-rendered ToolbarView→RecordingOverlay
+        // (1-frame async lag), UIHostingController centres the 52pt toolbar
+        // intrinsic content inside its 276pt frame — and iOS's keyboard-down
+        // animation snapshot freezes that centred-toolbar layout on screen.
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.clear)
         .onChange(of: showsOverlay) { _, isShowing in
+            let usedFallback = isShowing && state.activeControllerID == nil
             PersistentLog.log(.diagnosticProbe(
                 component: "KeyboardRootView",
                 instanceID: instanceID,
                 action: "showsOverlayChanged",
-                details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
+                details: "isShowing=\(isShowing) status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID) usedFallback=\(usedFallback)"
             ))
             // Dismiss emoji picker when recording starts
             if isShowing {
@@ -200,8 +204,9 @@ struct KeyboardRootView: View {
                 action: "onAppear",
                 details: "status=\(state.dictationStatus.rawValue) visible=\(state.isKeyboardVisible) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID)"
             ))
-            // Provide controller reference to KeyboardState for auto-insert.
-            state.controller = controller
+            // state.controller is set by KeyboardViewController.viewWillAppear to avoid
+            // a strong ref cycle through the hosting view (#134). openURL must stay
+            // here — it's a SwiftUI @Environment value, only capturable from a View.
             state.openURL = { url in openURL(url) }
 
             // Pre-allocate haptic generators so the first key tap has zero latency.
@@ -252,7 +257,7 @@ struct KeyboardRootView: View {
     private func handleSuggestionTap(index: Int) {
         guard index < suggestionState.suggestions.count else { return }
         let suggestion = suggestionState.suggestions[index]
-        let proxy = controller.textDocumentProxy
+        guard let proxy = state.controller?.textDocumentProxy else { return }
 
         // Prediction mode: insert word + trailing space, bypass autocorrect, chain predictions.
         if suggestionState.mode == .predictions {
