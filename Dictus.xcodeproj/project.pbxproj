@@ -649,6 +649,7 @@
 				AA300001 /* Frameworks */,
 				AA600003 /* Resources */,
 				AA060001 /* Embed App Extensions */,
+				AA060010 /* Inject Git SHA into Info.plist */,
 			);
 			buildRules = (
 			);
@@ -673,6 +674,7 @@
 				AA600002 /* Sources */,
 				AA300002 /* Frameworks */,
 				AA600004 /* Resources */,
+				AA060011 /* Inject Git SHA into Info.plist */,
 			);
 			buildRules = (
 			);
@@ -694,6 +696,7 @@
 				BB600001 /* Sources */,
 				BB300001 /* Frameworks */,
 				BB600002 /* Resources */,
+				AA060012 /* Inject Git SHA into Info.plist */,
 			);
 			buildRules = (
 			);
@@ -794,6 +797,66 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		AA060010 /* Inject Git SHA into Info.plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Inject Git SHA into Info.plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Inject the current git commit short SHA + branch into the built Info.plist\n# so that PersistentLog can expose them at runtime without any manual discipline.\n# We write to the COPY of Info.plist in TARGET_BUILD_DIR, not the source file,\n# so `git status` stays clean.\nset -e\nGIT_COMMIT=$(cd \"$SRCROOT\" && git rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nGIT_BRANCH=$(cd \"$SRCROOT\" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"unknown\")\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\nif [ ! -f \"$PLIST\" ]; then\n  echo \"warning: Info.plist not found at $PLIST — skipping git SHA injection\"\n  exit 0\nfi\n/usr/libexec/PlistBuddy -c \"Set :GitCommitSHA $GIT_COMMIT\" \"$PLIST\" 2>/dev/null || \\\n  /usr/libexec/PlistBuddy -c \"Add :GitCommitSHA string $GIT_COMMIT\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Set :GitBranch $GIT_BRANCH\" \"$PLIST\" 2>/dev/null || \\\n  /usr/libexec/PlistBuddy -c \"Add :GitBranch string $GIT_BRANCH\" \"$PLIST\"\n";
+		};
+		AA060011 /* Inject Git SHA into Info.plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Inject Git SHA into Info.plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Inject git commit short SHA + branch into the built Info.plist (keyboard extension).\nset -e\nGIT_COMMIT=$(cd \"$SRCROOT\" && git rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nGIT_BRANCH=$(cd \"$SRCROOT\" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"unknown\")\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\nif [ ! -f \"$PLIST\" ]; then\n  echo \"warning: Info.plist not found at $PLIST — skipping git SHA injection\"\n  exit 0\nfi\n/usr/libexec/PlistBuddy -c \"Set :GitCommitSHA $GIT_COMMIT\" \"$PLIST\" 2>/dev/null || \\\n  /usr/libexec/PlistBuddy -c \"Add :GitCommitSHA string $GIT_COMMIT\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Set :GitBranch $GIT_BRANCH\" \"$PLIST\" 2>/dev/null || \\\n  /usr/libexec/PlistBuddy -c \"Add :GitBranch string $GIT_BRANCH\" \"$PLIST\"\n";
+		};
+		AA060012 /* Inject Git SHA into Info.plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Inject Git SHA into Info.plist";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Inject git commit short SHA + branch into the built Info.plist (widgets extension).\nset -e\nGIT_COMMIT=$(cd \"$SRCROOT\" && git rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nGIT_BRANCH=$(cd \"$SRCROOT\" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"unknown\")\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\nif [ ! -f \"$PLIST\" ]; then\n  echo \"warning: Info.plist not found at $PLIST — skipping git SHA injection\"\n  exit 0\nfi\n/usr/libexec/PlistBuddy -c \"Set :GitCommitSHA $GIT_COMMIT\" \"$PLIST\" 2>/dev/null || \\\n  /usr/libexec/PlistBuddy -c \"Add :GitCommitSHA string $GIT_COMMIT\" \"$PLIST\"\n/usr/libexec/PlistBuddy -c \"Set :GitBranch $GIT_BRANCH\" \"$PLIST\" 2>/dev/null || \\\n  /usr/libexec/PlistBuddy -c \"Add :GitBranch string $GIT_BRANCH\" \"$PLIST\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AA600001 /* Sources */ = {

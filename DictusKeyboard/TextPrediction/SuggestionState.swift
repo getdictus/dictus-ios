@@ -44,6 +44,13 @@ struct AutocorrectState {
 /// handles UITextDocumentProxy interaction.
 class SuggestionState: ObservableObject {
 
+    /// Process-wide shared instance.
+    /// Per-controller instances were being retained by SwiftUI's @ObservedObject backing
+    /// store past their owning KeyboardViewController.deinit (#134). Sharing makes the
+    /// leak no-op since all observers point to the same instance — only one keyboard
+    /// is visible at a time.
+    static let shared = SuggestionState()
+
     @Published var suggestions: [String] = []
     @Published var mode: SuggestionMode = .idle
     @Published var currentWord: String = ""
@@ -57,7 +64,11 @@ class SuggestionState: ObservableObject {
     /// Cleared when the user starts typing a new word.
     var rejectedWords: Set<String> = []
 
-    private let engine = TextPredictionEngine()
+    /// Shared engine — heavy resources (frequency dict, trie) are process-wide singletons
+    /// to avoid the per-controller leak documented in #134.
+    private let engine = TextPredictionEngine.shared
+
+    private init() {}
 
     /// Serial background queue for suggestion computation.
     /// WHY serial: Ensures suggestion computations don't race each other.

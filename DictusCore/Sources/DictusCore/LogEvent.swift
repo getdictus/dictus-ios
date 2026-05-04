@@ -50,12 +50,19 @@ public enum LogEvent: Sendable {
     case audioEngineStopped
     case audioSessionConfigured(category: String)
     case audioSessionFailed(error: String)
+    case audioInterruptionBegan(reason: String)
+    case audioInterruptionEnded(shouldResume: Bool, restored: Bool)
+    case audioRouteChanged(reason: String, details: String)
+    case audioMediaServicesReset
+    case warmStateReleased(idleSeconds: Int)
+    case warmStateRestored(context: String)
 
     // MARK: Transcription
     case transcriptionStarted(modelName: String)
     case transcriptionCompleted(durationMs: Int, wordCount: Int)
     case transcriptionFailed(error: String)
     case recordingTooShort(durationMs: Int)
+    case transcriptionPerformance(modelName: String, audioDurationMs: Int, transcriptionDurationMs: Int, peakMemoryMB: Int)
 
     // MARK: Model
     case modelDownloadStarted(name: String, sizeMB: Int)
@@ -68,6 +75,8 @@ public enum LogEvent: Sendable {
     case modelDeleteFailed(name: String, error: String)
     case modelPrewarmStarted(name: String)
     case modelCleanupPerformed(name: String, reason: String)
+    case modelPrewarmPeakMemory(modelName: String, peakMB: Int)
+    case modelPrewarmTimeout(name: String, timeoutSeconds: Int)
 
     // MARK: Keyboard
     case keyboardDidAppear
@@ -141,6 +150,7 @@ public enum LogEvent: Sendable {
     case appWillResignActive
     case appDidEnterBackground
     case appWhisperKitLoaded(modelName: String)
+    case deviceCapabilitySnapshot(model: String, ramGB: Int, availableMemoryMB: Int, thermalState: String)
 
     // MARK: - Computed Properties
 
@@ -149,13 +159,17 @@ public enum LogEvent: Sendable {
         switch self {
         case .dictationStarted, .dictationCompleted, .dictationFailed, .dictationDeferred:
             return .dictation
-        case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed:
+        case .audioEngineStarted, .audioEngineStopped, .audioSessionConfigured, .audioSessionFailed,
+             .audioInterruptionBegan, .audioInterruptionEnded, .audioRouteChanged,
+             .audioMediaServicesReset, .warmStateReleased, .warmStateRestored:
             return .audio
-        case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort:
+        case .transcriptionStarted, .transcriptionCompleted, .transcriptionFailed, .recordingTooShort,
+             .transcriptionPerformance:
             return .transcription
         case .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadFailed,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
-             .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed:
+             .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed,
+             .modelPrewarmPeakMemory, .modelPrewarmTimeout:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .overlayShown, .overlayHidden, .rapidTapRejected,
@@ -184,7 +198,7 @@ public enum LogEvent: Sendable {
         case .liveActivityStarted, .liveActivityTransition, .liveActivityFailed, .liveActivityEnded:
             return .lifecycle
         case .appLaunched, .appDidBecomeActive, .appWillResignActive,
-             .appDidEnterBackground, .appWhisperKitLoaded:
+             .appDidEnterBackground, .appWhisperKitLoaded, .deviceCapabilitySnapshot:
             return .lifecycle
         }
     }
@@ -203,7 +217,8 @@ public enum LogEvent: Sendable {
         // Warnings
         case .dictationDeferred, .watchdogReset, .engineWarmUpFailed, .recordingTooShort,
              .waveformStall, .waveformTimelineNotFiring,
-             .coldStartDarwinFallback:
+             .coldStartDarwinFallback, .modelPrewarmTimeout,
+             .audioInterruptionBegan, .audioMediaServicesReset:
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
@@ -216,13 +231,17 @@ public enum LogEvent: Sendable {
              .modelDownloadStarted, .modelDownloadCompleted,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
              .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
+             .modelPrewarmPeakMemory, .transcriptionPerformance,
              .keyboardDidAppear, .keyboardMicTapped,
              .appLaunched, .appWhisperKitLoaded, .logExportCompleted,
+             .deviceCapabilitySnapshot,
              .liveActivityStarted, .liveActivityTransition, .liveActivityEnded,
              .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry,
              .overlayShown, .overlayHidden, .statusChanged,
              .waveformAppeared, .waveformDisappeared, .waveformRefreshIDChanged,
-             .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated:
+             .waveformEnergyTransition, .overlayBodyEvaluated, .overlayRecreated,
+             .audioInterruptionEnded, .audioRouteChanged,
+             .warmStateReleased, .warmStateRestored:
             return .info
 
         // Debug (internal state transitions)
@@ -252,6 +271,12 @@ public enum LogEvent: Sendable {
         case .audioEngineStopped: return "audioEngineStopped"
         case .audioSessionConfigured: return "audioSessionConfigured"
         case .audioSessionFailed: return "audioSessionFailed"
+        case .audioInterruptionBegan: return "audioInterruptionBegan"
+        case .audioInterruptionEnded: return "audioInterruptionEnded"
+        case .audioRouteChanged: return "audioRouteChanged"
+        case .audioMediaServicesReset: return "audioMediaServicesReset"
+        case .warmStateReleased: return "warmStateReleased"
+        case .warmStateRestored: return "warmStateRestored"
         case .transcriptionStarted: return "transcriptionStarted"
         case .transcriptionCompleted: return "transcriptionCompleted"
         case .transcriptionFailed: return "transcriptionFailed"
@@ -317,6 +342,10 @@ public enum LogEvent: Sendable {
         case .coldStartDarwinFallback: return "coldStartDarwinFallback"
         case .subscriptionError: return "subscriptionError"
         case .logExportCompleted: return "logExportCompleted"
+        case .transcriptionPerformance: return "transcriptionPerformance"
+        case .modelPrewarmPeakMemory: return "modelPrewarmPeakMemory"
+        case .modelPrewarmTimeout: return "modelPrewarmTimeout"
+        case .deviceCapabilitySnapshot: return "deviceCapabilitySnapshot"
         }
     }
 
@@ -341,6 +370,18 @@ public enum LogEvent: Sendable {
             return "category=\(category)"
         case .audioSessionFailed(let error):
             return "error=\(error)"
+        case .audioInterruptionBegan(let reason):
+            return "reason=\(reason)"
+        case .audioInterruptionEnded(let shouldResume, let restored):
+            return "shouldResume=\(shouldResume) restored=\(restored)"
+        case .audioRouteChanged(let reason, let details):
+            return "reason=\(reason) details=\(details)"
+        case .audioMediaServicesReset:
+            return ""
+        case .warmStateReleased(let idleSeconds):
+            return "idleSeconds=\(idleSeconds)"
+        case .warmStateRestored(let context):
+            return "context=\(context)"
 
         // Transcription
         case .transcriptionStarted(let modelName):
@@ -483,6 +524,16 @@ public enum LogEvent: Sendable {
         // Log Management
         case .logExportCompleted(let durationMs, let sizeBytes):
             return "duration=\(durationMs)ms size=\(sizeBytes)bytes"
+
+        // Phase 37 — Turbo retest & device gating telemetry
+        case .transcriptionPerformance(let modelName, let audioDurationMs, let transcriptionDurationMs, let peakMemoryMB):
+            return "model=\(modelName) audioMs=\(audioDurationMs) transcribeMs=\(transcriptionDurationMs) peakMB=\(peakMemoryMB)"
+        case .modelPrewarmPeakMemory(let modelName, let peakMB):
+            return "model=\(modelName) peakMB=\(peakMB)"
+        case .modelPrewarmTimeout(let name, let timeoutSeconds):
+            return "name=\(name) timeout=\(timeoutSeconds)s"
+        case .deviceCapabilitySnapshot(let model, let ramGB, let availableMemoryMB, let thermalState):
+            return "model=\(model) ramGB=\(ramGB) availableMB=\(availableMemoryMB) thermal=\(thermalState)"
         }
     }
 
