@@ -12,11 +12,12 @@ final class AccentedCharacterTests: XCTestCase {
         XCTAssertEqual(accents, ["\u{00E9}", "\u{00E8}", "\u{00EA}", "\u{00EB}"])
     }
 
-    func testAMapsTo3AccentedVariants() {
+    func testAMapsToFourAccentedVariants() {
+        // Includes Spanish á (added in #82/#83 alongside Spanish support).
         let accents = AccentedCharacters.accents(for: "a")
         XCTAssertNotNil(accents)
-        XCTAssertEqual(accents?.count, 3)
-        XCTAssertEqual(accents, ["\u{00E0}", "\u{00E2}", "\u{00E4}"])
+        XCTAssertEqual(accents?.count, 4)
+        XCTAssertEqual(accents, ["\u{00E0}", "\u{00E2}", "\u{00E4}", "\u{00E1}"])
     }
 
     func testCMapsTo1Variant() {
@@ -37,25 +38,28 @@ final class AccentedCharacterTests: XCTestCase {
         XCTAssertEqual(lowercaseResult, uppercaseResult)
     }
 
-    func testUMapsTo3Variants() {
+    func testUMapsToFourVariants() {
+        // Includes Spanish ú (added in #82/#83).
         let accents = AccentedCharacters.accents(for: "u")
         XCTAssertNotNil(accents)
-        XCTAssertEqual(accents?.count, 3)
-        XCTAssertEqual(accents, ["\u{00F9}", "\u{00FB}", "\u{00FC}"])
+        XCTAssertEqual(accents?.count, 4)
+        XCTAssertEqual(accents, ["\u{00F9}", "\u{00FB}", "\u{00FC}", "\u{00FA}"])
     }
 
-    func testIMapsTo2Variants() {
+    func testIMapsToThreeVariants() {
+        // Includes Spanish í (added in #82/#83).
         let accents = AccentedCharacters.accents(for: "i")
         XCTAssertNotNil(accents)
-        XCTAssertEqual(accents?.count, 2)
-        XCTAssertEqual(accents, ["\u{00EE}", "\u{00EF}"])
+        XCTAssertEqual(accents?.count, 3)
+        XCTAssertEqual(accents, ["\u{00EE}", "\u{00EF}", "\u{00ED}"])
     }
 
-    func testOMapsTo2Variants() {
+    func testOMapsToThreeVariants() {
+        // Includes Spanish ó (added in #82/#83).
         let accents = AccentedCharacters.accents(for: "o")
         XCTAssertNotNil(accents)
-        XCTAssertEqual(accents?.count, 2)
-        XCTAssertEqual(accents, ["\u{00F4}", "\u{00F6}"])
+        XCTAssertEqual(accents?.count, 3)
+        XCTAssertEqual(accents, ["\u{00F4}", "\u{00F6}", "\u{00F3}"])
     }
 
     func testYMapsTo1Variant() {

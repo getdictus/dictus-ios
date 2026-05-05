@@ -27,73 +27,13 @@ final class AOSPTrieEngine {
     /// Set by load(language:) so overrides and apostrophe handling can be language-aware.
     private var currentLanguage: String = "fr"
 
-    /// Per-language hard-coded corrections that the trie can't infer from edit distance alone.
-    /// French: "ca" is never valid -- always the unaccented form of "ça".
-    /// English: common contractions typed without apostrophe ("im" → "I'm", "dont" → "don't").
-    /// Short words (<=2 chars) are too ambiguous for generic spell correction
-    /// (e.g., "ou"/"où", "a"/"à" depend on grammar), so we only correct known cases.
-    private static let languageOverrides: [String: [String: String]] = [
-        // Common unambiguous accent-missing words. These are NOT valid French without accents.
-        // Excluded: "a"/"à" (both valid), "ou"/"où" (both valid), "meme" (could be English)
-        "fr": [
-            "ca": "\u{00E7}a",            // ca -> ça
-            "tres": "tr\u{00E8}s",        // tres -> très
-            "apres": "apr\u{00E8}s",      // apres -> après
-            "deja": "d\u{00E9}j\u{00E0}", // deja -> déjà
-            "ete": "\u{00E9}t\u{00E9}",   // ete -> été
-            "etre": "\u{00EA}tre",         // etre -> être
-            "voila": "voil\u{00E0}",       // voila -> voilà
-            "bientot": "bient\u{00F4}t",   // bientot -> bientôt
-            "plutot": "plut\u{00F4}t",     // plutot -> plutôt
-            "probleme": "probl\u{00E8}me", // probleme -> problème
-            "systeme": "syst\u{00E8}me",   // systeme -> système
-            "etait": "\u{00E9}tait",       // etait -> était
-            "etaient": "\u{00E9}taient",   // etaient -> étaient
-            "evenement": "\u{00E9}v\u{00E9}nement", // evenement -> événement
-        ],
-        // Only unambiguous contractions — words that are NOT valid English on their own.
-        // Excluded: "were" (we're), "well" (we'll), "wed" (we'd), "ill" (I'll),
-        // "id" (I'd), "hell" (he'll), "hed" (he'd), "shed" (she'd), "shell" (she'll),
-        // "its" (it's), "lets" (let's), "wont" (won't) — all valid standalone words.
-        "en": [
-            "im": "i'm",
-            "ive": "i've",
-            "dont": "don't",
-            "doesnt": "doesn't",
-            "didnt": "didn't",
-            "cant": "can't",
-            "couldnt": "couldn't",
-            "wouldnt": "wouldn't",
-            "shouldnt": "shouldn't",
-            "wasnt": "wasn't",
-            "isnt": "isn't",
-            "arent": "aren't",
-            "werent": "weren't",
-            "hasnt": "hasn't",
-            "havent": "haven't",
-            "hadnt": "hadn't",
-            "youre": "you're",
-            "youve": "you've",
-            "youll": "you'll",
-            "youd": "you'd",
-            "theyre": "they're",
-            "theyve": "they've",
-            "theyll": "they'll",
-            "theyd": "they'd",
-            "weve": "we've",
-            "hes": "he's",
-            "shes": "she's",
-            "itll": "it'll",
-            "thats": "that's",
-            "thatll": "that'll",
-            "whats": "what's",
-            "whos": "who's",
-            "wholl": "who'll",
-            "theres": "there's",
-            "heres": "here's",
-        ],
-        "es": [:]
-    ]
+    /// The active language's data profile, or nil if `currentLanguage` is not a
+    /// registered `SupportedLanguage`. All per-language data (overrides, accentMap,
+    /// contractionPrefixes) is read from here so adding a language is a matter of
+    /// authoring `Languages/<Lang>.swift` in DictusCore.
+    private var currentProfile: LanguageProfile? {
+        SupportedLanguage(rawValue: currentLanguage)?.profile
+    }
 
     /// Loads binary .dict file for the given language.
     /// Replaces any previously loaded dictionary.
@@ -150,11 +90,9 @@ final class AOSPTrieEngine {
     /// Used by TextPredictionEngine to check overrides BEFORE UserDictionary,
     /// since words like "ca" must always correct to "ça" even if "ca" was learned.
     func languageOverride(for word: String) -> (correction: String, alternatives: [String])? {
-        let lowered = word.lowercased()
-        guard let overrides = Self.languageOverrides[currentLanguage],
-              let override = overrides[lowered] else { return nil }
-        let isCapitalized = word.first?.isUppercase == true
-        return (isCapitalized ? override.capitalized : override, [])
+        guard let profile = currentProfile,
+              let corrected = applyOverride(profile: profile, word: word) else { return nil }
+        return (corrected, [])
     }
 
     /// Returns best correction and alternatives, or nil if word is correct.
@@ -169,10 +107,9 @@ final class AOSPTrieEngine {
         let lowered = word.lowercased()
 
         // Check language-specific overrides first (works even before dictionary loads)
-        if let overrides = Self.languageOverrides[currentLanguage],
-           let override = overrides[lowered] {
-            let isCapitalized = word.first?.isUppercase == true
-            return (isCapitalized ? override.capitalized : override, [])
+        if let profile = currentProfile,
+           let corrected = applyOverride(profile: profile, word: word) {
+            return (corrected, [])
         }
 
         guard bridge.isLoaded(), !word.isEmpty else { return nil }
@@ -233,155 +170,22 @@ final class AOSPTrieEngine {
         return UInt16(bridge.getFrequency(word))
     }
 
-    /// Try to expand a word into a French contraction with apostrophe.
-    /// "Cest" → "c'est", "lhomme" → "l'homme", "jai" → "j'ai"
+    /// Try to expand a word into an apostrophe contraction for the active language.
+    /// French: "Cest" → "c'est", "lhomme" → "l'homme", "jai" → "j'ai".
+    /// Returns nil for languages whose `LanguageProfile.contractionPrefixes` is empty.
     func contractionExpansion(_ word: String) -> String? {
-        guard bridge.isLoaded() else { return nil }
-        let lowered = word.lowercased()
-        guard lowered.count >= 2 else { return nil }
-
-        let knownPrefixes = ["l'", "d'", "c'", "j'", "n'", "s'", "m'", "t'"]
-        // Try 1-char prefix (l', d', c', j', n', s', m', t')
-        let oneCharPrefix = String(lowered.prefix(1)) + "'"
-        let oneCharSuffix = String(lowered.dropFirst(1))
-        if knownPrefixes.contains(oneCharPrefix),
-           !oneCharSuffix.isEmpty,
-           bridge.wordExists(oneCharSuffix) {
-            return oneCharPrefix + oneCharSuffix
-        }
-
-        // Try 2-char prefix (qu')
-        if lowered.count >= 3 {
-            let twoCharPrefix = String(lowered.prefix(2)) + "'"
-            let twoCharSuffix = String(lowered.dropFirst(2))
-            if twoCharPrefix == "qu'",
-               !twoCharSuffix.isEmpty,
-               bridge.wordExists(twoCharSuffix) {
-                return twoCharPrefix + twoCharSuffix
-            }
-        }
-
-        return nil
+        guard let profile = currentProfile else { return nil }
+        return expandContractions(profile: profile, word: word, provider: self)
     }
 
     /// Try adding accents to an unaccented word and check if the result exists.
-    /// "deja" → "déjà", "apres" → "après", "ete" → "été", "tres" → "très"
+    /// French: "deja" → "déjà", "apres" → "après", "tres" → "très".
+    /// Spanish: "espanol" → "español".
     ///
-    /// Users commonly type without accents expecting autocorrect to add them.
-    /// This method generates accent variants and picks the highest-frequency match
-    /// to avoid selecting rare words (e.g., "âpres" over "après").
+    /// Returns nil for languages whose `LanguageProfile.accentMap` is empty (English).
     func accentExpansion(_ word: String) -> String? {
-        guard bridge.isLoaded() else { return nil }
-        let lowered = word.lowercased()
-        guard lowered.count >= 2 else { return nil }
-
-        let accentMap: [Character: [Character]]
-        if currentLanguage == "fr" {
-            accentMap = [
-                "e": ["é", "è", "ê", "ë"],
-                "a": ["à", "â"],
-                "i": ["î", "ï"],
-                "o": ["ô"],
-                "u": ["ù", "û", "ü"],
-                "c": ["ç"],
-            ]
-        } else if currentLanguage == "es" {
-            accentMap = [
-                "a": ["á"],
-                "e": ["é"],
-                "i": ["í"],
-                "o": ["ó"],
-                "u": ["ú", "ü"],
-                "n": ["ñ"],
-            ]
-        } else if currentLanguage == "de" {
-            accentMap = [
-                "a": ["ä"],
-                "o": ["ö"],
-                "u": ["ü"],
-                "s": ["ß"],
-            ]
-        } else {
-            return nil
-        }
-
-        var accentablePositions: [(Int, [Character])] = []
-        let chars = Array(lowered)
-        for (i, ch) in chars.enumerated() {
-            if let accents = accentMap[ch] {
-                accentablePositions.append((i, accents))
-            }
-        }
-
-        guard !accentablePositions.isEmpty else { return nil }
-
-        // Collect ALL valid matches with their frequency, then pick the best.
-        // This prevents "apres" → "âpres" (rare) when "après" (common) exists.
-        // Uses getFrequency as primary ranking, wordExists as fallback.
-        var bestMatch: String?
-        var bestFreq: Int = -1
-
-        func checkCandidate(_ candidateWord: String) {
-            let freq = Int(bridge.getFrequency(candidateWord))
-            if freq > 0 && freq > bestFreq {
-                bestMatch = candidateWord
-                bestFreq = freq
-            } else if freq == 0 && bestFreq < 0 && bridge.wordExists(candidateWord) {
-                // Fallback: word exists but getFrequency returns 0 (edge case)
-                bestMatch = candidateWord
-                bestFreq = 0
-            }
-        }
-
-        // Single substitutions
-        for (pos, accents) in accentablePositions {
-            for accent in accents {
-                var candidate = chars
-                candidate[pos] = accent
-                checkCandidate(String(candidate))
-            }
-        }
-
-        // Double substitutions (déjà, après, éléphant, etc.)
-        if accentablePositions.count >= 2 {
-            for i in 0..<accentablePositions.count {
-                for j in (i + 1)..<accentablePositions.count {
-                    let (pos1, accents1) = accentablePositions[i]
-                    let (pos2, accents2) = accentablePositions[j]
-                    for a1 in accents1 {
-                        for a2 in accents2 {
-                            var candidate = chars
-                            candidate[pos1] = a1
-                            candidate[pos2] = a2
-                            checkCandidate(String(candidate))
-                        }
-                    }
-                }
-            }
-        }
-
-        // Only return if an accented version is found AND clearly beats the input.
-        // If the unaccented form is itself a valid word (inputFreq > 0), require
-        // the accented form to be significantly more frequent (5x) to override —
-        // prevents "publie" (valid, "je publie") from auto-correcting to "publié".
-        // When the unaccented form is invalid (inputFreq == 0), any accented
-        // match wins since the user's input is clearly wrong either way.
-        let inputFreq = Int(bridge.getFrequency(lowered))
-        guard let match = bestMatch else { return nil }
-
-        if inputFreq == 0 {
-            // Unaccented form is not a real word — accented version is the fix.
-            return match
-        }
-
-        // Both forms valid: require strong frequency dominance (5x) to override.
-        // WHY 5x: typical French accent pairs have wildly different frequencies
-        // ("très" vs "tres" is >100x), so 5x is a conservative floor that rejects
-        // weak cases while keeping strong ones.
-        if bestFreq > inputFreq * 5 {
-            return match
-        }
-        return nil
+        guard let profile = currentProfile else { return nil }
+        return expandAccents(profile: profile, word: word, provider: self)
     }
 
     // MARK: - N-gram prediction
@@ -450,4 +254,14 @@ final class AOSPTrieEngine {
 
     /// Whether n-gram data is loaded and ready for predictions.
     var ngramsLoaded: Bool { bridge.ngramsLoaded() }
+}
+
+// MARK: - FrequencyProvider conformance
+//
+// Lets DictusCore autocorrect helpers (`expandAccents`, `expandContractions`)
+// query the trie via the protocol without importing the bridge. `wordExists(_:)`
+// is already defined on the class and matches the protocol signature.
+extension AOSPTrieEngine: FrequencyProvider {
+    var isReady: Bool { isLoaded }
+    func frequency(of word: String) -> UInt16 { wordFrequency(word) }
 }

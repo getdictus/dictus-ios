@@ -12,11 +12,13 @@ final class FrequencyDictionaryTests: XCTestCase {
         XCTAssertEqual(dict.rank(of: "bonjour"), 500)
     }
 
-    func testRankReturnsIntMaxForUnknownWord() {
+    func testRankReturnsZeroForUnknownWord() {
+        // `rank(of:)` returns the raw frequency count (higher = more common),
+        // and 0 when the word is not in the dictionary.
         var dict = FrequencyDictionary()
         let json = #"{"de": 1}"#
         dict.load(from: json.data(using: .utf8)!)
-        XCTAssertEqual(dict.rank(of: "xylophone"), Int.max)
+        XCTAssertEqual(dict.rank(of: "xylophone"), 0)
     }
 
     func testRankIsCaseInsensitive() {
@@ -30,7 +32,8 @@ final class FrequencyDictionaryTests: XCTestCase {
     func testLoadFromInvalidDataProducesEmptyDict() {
         var dict = FrequencyDictionary()
         dict.load(from: "not json".data(using: .utf8)!)
-        XCTAssertEqual(dict.rank(of: "de"), Int.max)
+        // Empty dict → unknown words return 0.
+        XCTAssertEqual(dict.rank(of: "de"), 0)
     }
 
     func testCommonWordsRankHigherThanUncommon() {
