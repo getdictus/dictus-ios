@@ -94,9 +94,11 @@ struct SettingsView: View {
             // Section 1: Transcription
             Section {
                 Picker("Transcription language", selection: $language) {
-                    Text("Fran\u{00E7}ais").tag("fr")
-                    Text("English").tag("en")
-                    Text("Espa\u{00F1}ol").tag("es")
+                    // Iterate over SupportedLanguage so adding a new language
+                    // (German PR2, future onboardings) only requires the enum case.
+                    ForEach(SupportedLanguage.allCases, id: \.rawValue) { lang in
+                        Text(lang.displayName).tag(lang.rawValue)
+                    }
                 }
                 .onChange(of: language) { _, newLang in
                     // Auto-switch keyboard layout to the language's default.

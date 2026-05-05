@@ -8,7 +8,7 @@ import Foundation
 /// Both the main app (settings UI) and the keyboard extension need to read/write the
 /// layout preference. Putting the enum and its persistence logic in the shared framework
 /// prevents each target from defining its own incompatible version.
-public enum LayoutType: String, Codable {
+public enum LayoutType: String, Codable, Sendable {
     case azerty
     case qwerty
 
