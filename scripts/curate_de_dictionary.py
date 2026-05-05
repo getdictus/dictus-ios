@@ -9,6 +9,17 @@ WHY HermitDave: Same source family used implicitly by ngram_builder.py
 (OpenSubtitles via orgtre's top sentences). Stable, well-known, conversational
 register that matches the keyboard's typical use case.
 
+WHY the umlaut-deduplication filter: HermitDave's OpenSubtitles 2018 leaks
+unaccented variants of common umlaut words (e.g., `uber` 463 vs `über` 196855,
+`madchen` 160 vs `mädchen` 72685). These are mostly English brand mentions,
+romanized proper nouns, or transcription errors. If both forms land in the
+dict, the AccentExpander's 5x-dominance rule can't correct `uber → über`
+because `uber` is already "valid". We drop the unaccented form when an umlaut
+variant exists with high dominance, so the user always gets the umlauted
+correction. Native words like `schon` (442 343) → `schön` (106 669) are
+preserved because the unaccented form is itself dominant — both are real
+German words in that direction.
+
 Per ADR 0001 (non-native maintainer launch), no curated additions
 (SMS abbreviations, proper nouns) are layered in for first ship —
 populated post-launch from feedback on issue #109.
@@ -21,6 +32,75 @@ import urllib.request
 HERMITDAVE_URL = "https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/de/de_50k.txt"
 TXT_FILE = "de_50k.txt"
 OUTPUT = os.path.join(os.path.dirname(__file__), "..", "DictusKeyboard", "Resources", "de_frequency.json")
+
+# Minimum frequency multiplier of an umlaut variant over the unaccented input
+# required to drop the unaccented form. 5x mirrors AccentExpander's dominance
+# rule: any pair below this ratio represents a genuine native pair where both
+# forms are real (e.g., `schon` "already" / `schön` "beautiful"), so we keep both.
+UMLAUT_DEDUP_MIN_RATIO = 5
+
+# Per-letter substitutions used to enumerate accented variants of an ASCII word.
+# Length-changing collapses (`ss → ß`) handled separately because they shorten
+# the word; single-codepoint substitutions are tried position-by-position.
+GERMAN_SINGLE_ACCENTS = {
+    "a": "ä",  # ä
+    "o": "ö",  # ö
+    "u": "ü",  # ü
+}
+
+
+def _umlaut_variants(word: str) -> list[str]:
+    """All accent variants of `word` we want to compare against.
+
+    Single-substitution at any position (a→ä, o→ö, u→ü), and the German
+    `ss → ß` collapse anywhere in the word. Empty list if the input has no
+    candidate positions, so callers can short-circuit.
+    """
+    variants: set[str] = set()
+    chars = list(word)
+    for i, ch in enumerate(chars):
+        if ch in GERMAN_SINGLE_ACCENTS:
+            variant = chars[:]
+            variant[i] = GERMAN_SINGLE_ACCENTS[ch]
+            variants.add("".join(variant))
+    # ss → ß collapses (every adjacent ss in the word, one at a time).
+    for i in range(len(word) - 1):
+        if word[i:i+2] == "ss":
+            variants.add(word[:i] + "ß" + word[i+2:])
+    return sorted(variants)
+
+
+def drop_ascii_duplicates_of_umlaut_words(freq_dict: dict[str, int]) -> dict[str, int]:
+    """Remove `uber` if `über` exists with ≥ UMLAUT_DEDUP_MIN_RATIO higher freq.
+
+    Operates only on ASCII-only inputs whose accent variants are present in the
+    dict. Native ambiguous pairs (`schon`/`schön`) survive because the
+    unaccented form dominates the umlaut form in real German usage.
+    """
+    dropped: list[tuple[str, int, str, int]] = []
+    result: dict[str, int] = {}
+    for word, count in freq_dict.items():
+        if word.isascii():
+            best_variant: tuple[str, int] | None = None
+            for variant in _umlaut_variants(word):
+                v_count = freq_dict.get(variant)
+                if v_count is None:
+                    continue
+                if best_variant is None or v_count > best_variant[1]:
+                    best_variant = (variant, v_count)
+            if best_variant and best_variant[1] >= count * UMLAUT_DEDUP_MIN_RATIO:
+                dropped.append((word, count, best_variant[0], best_variant[1]))
+                continue
+        result[word] = count
+
+    if dropped:
+        print(f"[INFO] Dropped {len(dropped)} unaccented duplicates of umlaut words "
+              f"(ratio threshold: {UMLAUT_DEDUP_MIN_RATIO}x)")
+        for word, c, variant, vc in dropped[:8]:
+            print(f"       - {word!r} ({c}) << {variant!r} ({vc}) [{vc//max(c,1)}x]")
+        if len(dropped) > 8:
+            print(f"       ... and {len(dropped) - 8} more")
+    return result
 
 
 def download_hermitdave():
@@ -51,6 +131,11 @@ def main():
                     freq_dict[word] = count
 
     print(f"[INFO] Parsed {len(freq_dict)} words from de_50k.txt")
+
+    # Drop ASCII-only false-friends of umlaut words BEFORE the 40K cap so the
+    # cap fills with real entries instead of noise. See the module docstring
+    # for the full rationale (autocorrect 5x-dominance interaction).
+    freq_dict = drop_ascii_duplicates_of_umlaut_words(freq_dict)
 
     # Sort by count descending, take top 40,000
     sorted_words = sorted(freq_dict.items(), key=lambda x: -x[1])[:40000]
