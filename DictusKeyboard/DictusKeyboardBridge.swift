@@ -472,12 +472,12 @@ final class DictusKeyboardBridge: NSObject,
     private func handleAdaptiveAccentKey() {
         AudioServicesPlaySystemSound(KeySound.letter)
 
-        let label = AccentedCharacters.adaptiveKeyLabel(
+        let label = FrenchAdaptiveKey.label(
             afterTyping: lastInsertedCharacter,
             precedingChar: secondToLastInsertedCharacter
         )
 
-        if AccentedCharacters.shouldReplace(afterTyping: lastInsertedCharacter, precedingChar: secondToLastInsertedCharacter) {
+        if FrenchAdaptiveKey.shouldReplace(afterTyping: lastInsertedCharacter, precedingChar: secondToLastInsertedCharacter) {
             // Replace previous vowel with accented version
             controller?.textDocumentProxy.deleteBackward()
             controller?.textDocumentProxy.insertText(label)
@@ -512,7 +512,7 @@ final class DictusKeyboardBridge: NSObject,
     /// Called after every keystroke so the accent key always shows the correct symbol:
     /// an accent character after a vowel, or apostrophe otherwise.
     private func updateAccentKeyDisplay() {
-        let label = AccentedCharacters.adaptiveKeyLabel(
+        let label = FrenchAdaptiveKey.label(
             afterTyping: lastInsertedCharacter,
             precedingChar: secondToLastInsertedCharacter
         )

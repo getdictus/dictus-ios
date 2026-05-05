@@ -29,6 +29,13 @@ class TextPredictionEngine {
     private let aospTrieEngine = AOSPTrieEngine()
     private var language: String = "fr"
 
+    /// The active language's data profile, or nil if `language` is not a registered
+    /// `SupportedLanguage`. Used to gate language-specific pipeline stages by
+    /// reading profile data instead of hardcoded language string comparisons.
+    private var profile: LanguageProfile? {
+        SupportedLanguage(rawValue: language)?.profile
+    }
+
     private init() {
         // Verify language is available in UITextChecker
         let available = UITextChecker.availableLanguages
@@ -113,16 +120,17 @@ class TextPredictionEngine {
             return result
         }
 
-        // Apostrophe prefix fix (FR): when the user types an apostrophe after an
+        // Apostrophe prefix fix: when the user types an apostrophe after an
         // invalid contraction prefix ("v'est"), correct the prefix via keyboard
-        // proximity. Valid FR contraction prefixes are {j,n,s,m,t,d,c,l,qu}.
+        // proximity. Gated on the language having any contraction prefixes —
+        // currently only French qualifies. Valid FR prefixes are {j,n,s,m,t,d,c,l,qu}.
         // Examples: "v'est" → "c'est", "b'est" → "c'est", "x'ai" → "j'ai".
         //
         // WHY before everything else:
         // Our downstream apostrophe split only validates the part AFTER the
         // apostrophe — "v'est" → checks "est" (valid) → returns nil (no correction).
         // We need to intercept wrong prefixes explicitly.
-        if language == "fr",
+        if let profile = profile, !profile.contractionPrefixes.isEmpty,
            let corrected = correctApostrophePrefix(word) {
             #if DEBUG
             AutocorrectDebugLog.autocorrectDecision(
