@@ -79,6 +79,7 @@ extension SupportedLanguage {
         case .french: return frenchProfile
         case .english: return englishProfile
         case .spanish: return spanishProfile
+        case .german: return germanProfile
         }
     }
 }
