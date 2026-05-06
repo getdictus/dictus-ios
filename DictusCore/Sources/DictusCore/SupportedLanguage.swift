@@ -13,6 +13,7 @@ public enum SupportedLanguage: String, CaseIterable, Codable {
     case french = "fr"
     case english = "en"
     case spanish = "es"
+    case german = "de"
 
     /// Localized display name for settings UI.
     public var displayName: String {
@@ -20,6 +21,7 @@ public enum SupportedLanguage: String, CaseIterable, Codable {
         case .french: return "Fran\u{00E7}ais"
         case .english: return "English"
         case .spanish: return "Espa\u{00F1}ol"
+        case .german: return "Deutsch"
         }
     }
 
@@ -27,11 +29,12 @@ public enum SupportedLanguage: String, CaseIterable, Codable {
     public var shortCode: String { rawValue.uppercased() }
 
     /// Default keyboard layout for this language.
-    /// French defaults to AZERTY; English and Spanish default to QWERTY.
+    /// French defaults to AZERTY; English, Spanish, and German default to QWERTY.
+    /// (German QWERTZ is deferred to follow-up issue #151.)
     public var defaultLayout: LayoutType {
         switch self {
         case .french: return .azerty
-        case .english, .spanish: return .qwerty
+        case .english, .spanish, .german: return .qwerty
         }
     }
 
@@ -41,6 +44,7 @@ public enum SupportedLanguage: String, CaseIterable, Codable {
         case .french: return "espace"
         case .english: return "space"
         case .spanish: return "espacio"
+        case .german: return "Leertaste"
         }
     }
 
@@ -50,6 +54,7 @@ public enum SupportedLanguage: String, CaseIterable, Codable {
         case .french: return "retour"
         case .english: return "return"
         case .spanish: return "intro"
+        case .german: return "Eingabe"
         }
     }
 
