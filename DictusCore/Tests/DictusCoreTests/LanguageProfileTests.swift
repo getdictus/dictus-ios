@@ -190,4 +190,18 @@ final class LanguageProfileTests: XCTestCase {
     func test_spanishProfile_hasNoContractionPrefixes() {
         XCTAssertTrue(spanishProfile.contractionPrefixes.isEmpty)
     }
+
+    // MARK: - Collapse rules (length-changing substring substitutions)
+
+    func test_frenchProfile_hasNoCollapseRules() {
+        XCTAssertTrue(frenchProfile.collapseRules.isEmpty)
+    }
+
+    func test_englishProfile_hasNoCollapseRules() {
+        XCTAssertTrue(englishProfile.collapseRules.isEmpty)
+    }
+
+    func test_spanishProfile_hasNoCollapseRules() {
+        XCTAssertTrue(spanishProfile.collapseRules.isEmpty)
+    }
 }

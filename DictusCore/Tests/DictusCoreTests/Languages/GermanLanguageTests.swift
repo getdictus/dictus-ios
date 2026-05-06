@@ -53,12 +53,19 @@ final class GermanLanguageTests: XCTestCase {
     // MARK: - Accent map (ä, ö, ü, ß)
 
     func test_germanProfile_accentMapMatchesSpec() {
+        // ß intentionally absent from accentMap (single-char substitution can't
+        // model `ss → ß`). It's handled via collapseRules below.
         XCTAssertEqual(germanProfile.accentMap, [
             "a": ["\u{00E4}"],   // ä
             "o": ["\u{00F6}"],   // ö
             "u": ["\u{00FC}"],   // ü
-            "s": ["\u{00DF}"],   // ß
         ])
+    }
+
+    func test_germanProfile_collapseRulesContainsSsToEszett() {
+        XCTAssertEqual(germanProfile.collapseRules.count, 1)
+        XCTAssertEqual(germanProfile.collapseRules.first?.from, "ss")
+        XCTAssertEqual(germanProfile.collapseRules.first?.to, "\u{00DF}")
     }
 
     func test_german_expandAccents_uberCorrectsToUmlaut() {
@@ -92,18 +99,56 @@ final class GermanLanguageTests: XCTestCase {
         )
     }
 
-    func test_german_expandAccents_strasseDoesNotMergeSsToEszett() {
-        // Documents a known limitation of AccentExpander on launch: the algorithm
-        // does only single-character substitutions (o → ö, a → ä, u → ü). The
-        // German `ss → ß` collapse needs to merge two characters into one, which
-        // the algorithm does not handle. So `strasse` stays as `strasse` here
-        // even when `straße` is in the dictionary. ADR 0001 accepts this trade-off
-        // for first ship; user can long-press `s` to insert `ß` directly. Future
-        // work may add substring-substitution support (tracked in issue #152).
+    func test_german_expandAccents_strasseCollapsesToEszett() {
+        // German `ss → ß` is implemented via collapseRules: the algorithm finds
+        // each `ss` occurrence and tries the substitution. `strasse` has one
+        // `ss` at position 4-5; substituting yields `straße`, which matches
+        // the dictionary at high frequency.
         let provider = MockFrequencyProvider(frequencies: [
-            "stra\u{00DF}e": 40_000   // straße is in dict
+            "stra\u{00DF}e": 40_000   // straße
         ])
-        XCTAssertNil(expandAccents(profile: germanProfile, word: "strasse", provider: provider))
+        XCTAssertEqual(
+            expandAccents(profile: germanProfile, word: "strasse", provider: provider),
+            "stra\u{00DF}e"
+        )
+    }
+
+    func test_german_expandAccents_weissCollapsesToWeiss() {
+        let provider = MockFrequencyProvider(frequencies: [
+            "wei\u{00DF}": 60_000   // weiß
+        ])
+        XCTAssertEqual(
+            expandAccents(profile: germanProfile, word: "weiss", provider: provider),
+            "wei\u{00DF}"
+        )
+    }
+
+    func test_german_expandAccents_grossCollapsesToGross() {
+        let provider = MockFrequencyProvider(frequencies: [
+            "gro\u{00DF}": 50_000   // groß
+        ])
+        XCTAssertEqual(
+            expandAccents(profile: germanProfile, word: "gross", provider: provider),
+            "gro\u{00DF}"
+        )
+    }
+
+    func test_german_expandAccents_5xDominanceProtectsValidUnaccentedSsWord() {
+        // `muss` (1st/3rd-person singular of "müssen") is a valid German word
+        // post-1996 spelling reform. The pre-reform `muß` may be in old corpora
+        // but `muss` dominates in modern text — the 5x rule keeps `muss` intact.
+        let provider = MockFrequencyProvider(frequencies: [
+            "muss": 60_000,
+            "mu\u{00DF}": 9_000,   // muß (pre-reform), 0.15x — well below 5x threshold
+        ])
+        XCTAssertNil(expandAccents(profile: germanProfile, word: "muss", provider: provider),
+                     "5x dominance must protect modern `muss` against archaic `muß`.")
+    }
+
+    func test_german_expandAccents_returnsNilWhenCollapseTargetAbsent() {
+        // No `weiß` in dict → `weiss` stays as-is.
+        let provider = MockFrequencyProvider(frequencies: [:])
+        XCTAssertNil(expandAccents(profile: germanProfile, word: "weiss", provider: provider))
     }
 
     func test_german_expandAccents_5xDominanceProtectsValidUnaccentedWords() {

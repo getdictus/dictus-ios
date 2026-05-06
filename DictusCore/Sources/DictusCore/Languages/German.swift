@@ -21,7 +21,18 @@ public let germanProfile = LanguageProfile(
         "a": ["\u{00E4}"],          // ä  (a-umlaut)
         "o": ["\u{00F6}"],          // ö  (o-umlaut)
         "u": ["\u{00FC}"],          // ü  (u-umlaut)
-        "s": ["\u{00DF}"],          // ß  (eszett / sharp s)
+        // ß is reached via the collapseRules ss→ß below, not single-char
+        // substitution — it would require deleting a position, which the
+        // single-char accent substitution algorithm doesn't model. Long-press
+        // on `s` is still wired via AccentedCharacters.mappings.
     ],
-    contractionPrefixes: []
+    contractionPrefixes: [],
+    collapseRules: [
+        // German `ss → ß` collapse. Lets users on QWERTY (no dedicated ß key)
+        // get `straße`, `weiß`, `groß`, `Spaß`, `heißen`, `müssen → muss`,
+        // etc. Same 5x dominance protection as single-char accent expansion:
+        // `muss` (valid 1st/3rd-person verb form) won't be over-corrected to
+        // `muß` because both are valid and the dominance check rejects it.
+        ("ss", "\u{00DF}"),
+    ]
 )
