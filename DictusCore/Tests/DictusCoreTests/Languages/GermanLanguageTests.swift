@@ -62,10 +62,59 @@ final class GermanLanguageTests: XCTestCase {
         ])
     }
 
-    func test_germanProfile_collapseRulesContainsSsToEszett() {
-        XCTAssertEqual(germanProfile.collapseRules.count, 1)
-        XCTAssertEqual(germanProfile.collapseRules.first?.from, "ss")
-        XCTAssertEqual(germanProfile.collapseRules.first?.to, "\u{00DF}")
+    func test_germanProfile_collapseRulesIncludeUmlautersatzAndEszett() {
+        // Order matters for diagnostics, not for algorithm correctness — the
+        // expander tries each rule independently. Rule set kept small and
+        // well-documented because false positives are silent regressions.
+        let rules = germanProfile.collapseRules.map { ($0.from, $0.to) }
+        XCTAssertEqual(rules.count, 4)
+        XCTAssertTrue(rules.contains(where: { $0 == ("ae", "\u{00E4}") }))
+        XCTAssertTrue(rules.contains(where: { $0 == ("oe", "\u{00F6}") }))
+        XCTAssertTrue(rules.contains(where: { $0 == ("ue", "\u{00FC}") }))
+        XCTAssertTrue(rules.contains(where: { $0 == ("ss", "\u{00DF}") }))
+    }
+
+    func test_german_expandAccents_tuerCollapsesToTuer() {
+        // The motivating case: without the `ue → ü` rule, the trie's
+        // edit-distance fallback returns `tier` (animal). With the rule,
+        // `tuer` correctly collapses to `tür`.
+        let provider = MockFrequencyProvider(frequencies: [
+            "t\u{00FC}r": 30_000   // tür
+        ])
+        XCTAssertEqual(
+            expandAccents(profile: germanProfile, word: "tuer", provider: provider),
+            "t\u{00FC}r"
+        )
+    }
+
+    func test_german_expandAccents_aeCollapsesForMaedchen() {
+        let provider = MockFrequencyProvider(frequencies: [
+            "m\u{00E4}dchen": 47_058   // mädchen
+        ])
+        XCTAssertEqual(
+            expandAccents(profile: germanProfile, word: "maedchen", provider: provider),
+            "m\u{00E4}dchen"
+        )
+    }
+
+    func test_german_expandAccents_oeCollapsesForKoennen() {
+        let provider = MockFrequencyProvider(frequencies: [
+            "k\u{00F6}nnen": 60_000   // können
+        ])
+        XCTAssertEqual(
+            expandAccents(profile: germanProfile, word: "koennen", provider: provider),
+            "k\u{00F6}nnen"
+        )
+    }
+
+    func test_german_expandAccents_ueDoesNotFalsePositiveOnBauer() {
+        // `bauer` (farmer) contains `ue` but is itself a valid German word.
+        // No `baür` exists, so no incorrect correction can fire.
+        let provider = MockFrequencyProvider(frequencies: [
+            "bauer": 5_000,   // valid German word
+            // No "baür" entry — confirms the substitution candidate isn't real.
+        ])
+        XCTAssertNil(expandAccents(profile: germanProfile, word: "bauer", provider: provider))
     }
 
     func test_german_expandAccents_uberCorrectsToUmlaut() {

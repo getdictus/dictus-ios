@@ -28,11 +28,21 @@ public let germanProfile = LanguageProfile(
     ],
     contractionPrefixes: [],
     collapseRules: [
-        // German `ss → ß` collapse. Lets users on QWERTY (no dedicated ß key)
-        // get `straße`, `weiß`, `groß`, `Spaß`, `heißen`, `müssen → muss`,
-        // etc. Same 5x dominance protection as single-char accent expansion:
-        // `muss` (valid 1st/3rd-person verb form) won't be over-corrected to
-        // `muß` because both are valid and the dominance check rejects it.
+        // German Umlautersatz: standard ASCII transliterations Germans use on
+        // keyboards without umlaut keys (URLs, filenames, emails — and our
+        // QWERTY layout). Each rule converts the 2-char ASCII sequence to its
+        // single-char umlaut counterpart. Same 5x-dominance protection as
+        // single-char accent expansion guards against false positives like
+        // `bauer` (farmer) → `baür` (not a word, no false correction).
+        //
+        // Without these rules, `tuer` → `tier` (animal, edit-distance 1) via
+        // the trie's spell-check fallback instead of `Tür` (door).
+        ("ae", "\u{00E4}"),         // ae → ä   (Mädchen, Bäume, Universität)
+        ("oe", "\u{00F6}"),         // oe → ö   (können, schön, möchte)
+        ("ue", "\u{00FC}"),         // ue → ü   (Tür, müssen, fünf, früh)
+        // German ß: lets users get `straße`, `weiß`, `groß`, `Spaß`, `heißen`.
+        // `muss` (valid post-1996-reform 1st/3rd-person form) is protected by
+        // the 5x dominance rule against archaic `muß`.
         ("ss", "\u{00DF}"),
     ]
 )
