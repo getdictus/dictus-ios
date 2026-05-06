@@ -8,6 +8,7 @@ processes it, and generates compact binary files for mmap-based lookup on iOS.
 Usage:
     python3 tools/ngram_builder.py --lang fr --output DictusKeyboard/Resources/fr_ngrams.dict
     python3 tools/ngram_builder.py --lang en --output DictusKeyboard/Resources/en_ngrams.dict
+    python3 tools/ngram_builder.py --lang de --output DictusKeyboard/Resources/de_ngrams.dict
 
 Options:
     --min-freq N        Minimum n-gram frequency to include (default: 2)
@@ -45,6 +46,7 @@ LANG_MAP = {
     "fr": "french",
     "en": "english",
     "es": "spanish",
+    "de": "german",
 }
 
 # Common French function words for synthetic bigram generation
@@ -171,6 +173,10 @@ SEED_BIGRAMS_BY_LANG = {
     "fr": FR_SEED_BIGRAMS,
     "en": EN_SEED_BIGRAMS,
     "es": ES_SEED_BIGRAMS,
+    # German intentionally omitted: per ADR 0001 the maintainer is non-native,
+    # so seed bigrams ship empty on first launch (Wikipedia + OpenSubtitles +
+    # Google Books carry the corpus alone). Populated post-launch from
+    # native-speaker contributions on issue #109.
 }
 
 # Synthetic frequency for seed bigrams. Needs to be high enough to survive
@@ -976,8 +982,8 @@ def main() -> None:
         description="Build NGRM binary dictionaries for Dictus next-word prediction."
     )
     parser.add_argument(
-        "--lang", required=True, choices=["fr", "en", "es"],
-        help="Language code (fr, en, or es)"
+        "--lang", required=True, choices=["fr", "en", "es", "de"],
+        help="Language code (fr, en, es, or de)"
     )
     parser.add_argument(
         "--output", required=True,

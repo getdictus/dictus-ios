@@ -1,0 +1,127 @@
+# Language onboarding
+
+How to add a new transcription language to Dictus end-to-end. Written after onboarding German (issue #109) — the workflow below is what actually shipped, not what was planned.
+
+The split between automated and curated work is deliberate: the maintainer authors a few small data files, and `tools/onboard_language.py` handles the mechanical Swift / Xcode / pipeline plumbing.
+
+## TL;DR
+
+```bash
+# 1. Scaffold Swift skeletons + register the case
+python3 tools/onboard_language.py scaffold it \
+    --display-name "Italiano" --short-code IT --layout qwerty
+
+# 2. Manually fill the gaps the scaffold reported (see "Curated decisions")
+
+# 3. Author scripts/curate_<code>_dictionary.py, then build the binaries
+python3 tools/onboard_language.py build-dicts it
+
+# 4. Wire the resources into Xcode and verify the project still builds
+python3 tools/onboard_language.py wire-xcode it
+python3 tools/onboard_language.py verify it
+
+# 5. Smoke-test on simulator, ship to TestFlight, tag the requesting user
+```
+
+## Pieces involved
+
+- **`SupportedLanguage`** (`DictusCore/Sources/DictusCore/SupportedLanguage.swift`) — the type-safe enum. Adding a case unlocks settings picker, keyboard cycle, and the autocorrect pipeline.
+- **`LanguageProfile`** (`DictusCore/Sources/DictusCore/Languages/LanguageProfile.swift`) — pure-data struct. One file per language under `Languages/<Lang>.swift`. Holds: `code`, `displayName`, `shortCode`, `defaultLayout`, `spaceName`, `returnName`, `overrides`, `accentMap`, `contractionPrefixes`. Algorithms read the profile; they don't switch on language code.
+- **Per-language tests** under `DictusCore/Tests/DictusCoreTests/Languages/<Lang>LanguageTests.swift`. One file per language.
+- **Frequency JSON** at `DictusKeyboard/Resources/<code>_frequency.json` — top ~40K word→count entries. Authored by `scripts/curate_<code>_dictionary.py`.
+- **Spellcheck binary** at `DictusKeyboard/Resources/<code>_spellcheck.dict` — built by `tools/dict_builder.py` from the frequency JSON.
+- **N-gram binary** at `DictusKeyboard/Resources/<code>_ngrams.dict` — built by `tools/ngram_builder.py` from OpenSubtitles + Google Books + Wikipedia CirrusSearch dumps.
+- **Xcode wiring** in `Dictus.xcodeproj/project.pbxproj` — three resources added to the `DictusKeyboard` target's `PBXResourcesBuildPhase`. Mechanical; the script handles it.
+
+## The four phases
+
+### 1. `scaffold`
+
+Generates `Languages/<Lang>.swift` and `Tests/Languages/<Lang>LanguageTests.swift` from templates, then patches `SupportedLanguage.swift` and `LanguageProfile.swift` to register the case and map it to the new profile.
+
+The script scaffolds **only the data structures**. It explicitly does NOT generate `accentMap`, `overrides`, `contractionPrefixes`, `spaceName`, or `returnName` — those are language-specific and need a curated answer (see below). The scaffold leaves `TODO` markers in the new files; running `xcodebuild` will fail until they're populated.
+
+The script also does NOT auto-update the per-arm switches in `SupportedLanguage.swift` (`displayName`, `defaultLayout`, `spaceName`, `returnName`). It prints a reminder to add them by hand. We chose this over auto-edits because the switches are already exhaustive — the compiler will yell if you miss one, which is the right behavior.
+
+### 2. `build-dicts`
+
+Runs three Python scripts in order:
+
+1. `scripts/curate_<code>_dictionary.py` — language-specific. **You must author this** before running the phase. Output: `DictusKeyboard/Resources/<code>_frequency.json` (top ~40K word→count entries).
+2. `tools/dict_builder.py` — corpus-agnostic. Reads the frequency JSON, builds a compressed patricia trie at `<code>_spellcheck.dict` (typically 0.4–0.5 MiB).
+3. `tools/ngram_builder.py --lang <code>` — pulls OpenSubtitles top sentences, Google Books German n-grams, and 50 000 articles across `<code>wikinews/wikiquote/wikibooks/wikivoyage` CirrusSearch dumps. Outputs `<code>_ngrams.dict` (~6–7 MiB after the 50K bigram + 30K trigram cap). Wikipedia parsing dominates run time (~3–5 minutes for German).
+
+For `ngram_builder.py` to recognize the new language you must also extend two constants in that file:
+
+- `LANG_MAP[<code>] = "<orgtre name>"` — maps the BCP-47 code to the directory name used by the orgtre repos (`german`, `french`, etc.).
+- `--lang` argparse `choices` — add the code so the CLI accepts it.
+
+`SEED_BIGRAMS_BY_LANG` is **deliberately left empty for non-native launches** (see ADR 0001). Do not invent seed bigrams from a phrasebook; they require native intuition for spoken-form usage.
+
+### 3. `wire-xcode`
+
+Edits `Dictus.xcodeproj/project.pbxproj` directly to add three resources to the `DictusKeyboard` target's resource build phase:
+
+- `<code>_frequency.json`
+- `<code>_spellcheck.dict`
+- `<code>_ngrams.dict`
+
+Four sections of the pbxproj need updates: `PBXBuildFile`, `PBXFileReference`, `PBXGroup` children (Resources group), and `PBXResourcesBuildPhase`. The script generates stable IDs from the language code so re-runs are idempotent.
+
+### 4. `verify`
+
+Runs:
+
+```
+xcodebuild test -scheme DictusCore-Package -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2'
+xcodebuild build -project Dictus.xcodeproj -scheme DictusApp -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' -configuration Debug
+```
+
+`swift test` doesn't work on the DictusCore package because the package targets iOS 17 (some types pull in `SwiftUI` symbols not available on macOS). Use the iOS simulator destination.
+
+## Curated decisions (no automation can guess these)
+
+- **`displayName`** — the language's name in its own language. `Français`, `English`, `Español`, `Deutsch`. No anglicized "French / German".
+- **`shortCode`** — the two-letter uppercase code shown on the keyboard toolbar switcher. Always equal to `code.uppercased()`.
+- **`defaultLayout`** — `.azerty` (French only) or `.qwerty` (everything else, including German on launch). Per-language layout selection (e.g. QWERTZ for German) is tracked in issue #52 / #151.
+- **`spaceName` / `returnName`** — local convention. `espace / retour` (fr), `space / return` (en), `espacio / intro` (es), `Leertaste / Eingabe` (de). Look up the local convention; do not translate "space" word-for-word.
+- **`accentMap`** — generative, doesn't require fluency. List each base letter and the accent variants the algorithm should try. German example: `"a": ["ä"], "o": ["ö"], "u": ["ü"], "s": ["ß"]`. Note: `AccentExpander` does single-character substitution only — German `ss → ß` (length-changing) does not work today; user reaches `ß` via long-press on `s`.
+- **`overrides`** — **empty on first ship for non-native launches** (ADR 0001). The override map forces a correction unconditionally, so populating it from a phrasebook produces silent regressions when a "must-correct" turns out to be a valid alternative. Populate post-launch from real user feedback.
+- **`contractionPrefixes`** — language-specific. French has nine (`l'`, `d'`, `c'`, ..., `qu'`); English handles contractions via the override map; Spanish and German leave this empty.
+
+## Choosing a frequency corpus
+
+`scripts/curate_<code>_dictionary.py` is the smallest piece of new code per language and the most language-dependent. Look at the three existing curate scripts for the patterns we have:
+
+- `curate_en_dictionary.py` — Norvig's `count_1w.txt` (Google Trillion Word Corpus, lemmatized). Best when a high-quality unigram frequency table is published.
+- `curate_fr_dictionary.py` — Lexique 3.83 (academic French linguistic database, weighted 70% films + 30% books). Adds curated SMS abbreviations and proper nouns. Best when the upstream is research-grade.
+- `curate_de_dictionary.py` — HermitDave's FrequencyWords 2018 (OpenSubtitles top 50K). Best when you want the same conversational register the n-gram pipeline already pulls (`orgtre/top-open-subtitles-sentences`).
+
+Pick one of those three patterns. **Don't** layer in SMS abbreviations or proper-noun curation on a non-native launch (ADR 0001 — same reasoning as `overrides`).
+
+## What we deliberately don't automate
+
+- Deciding the corpus source.
+- Filling `accentMap`. Generative but language-knowledge-dependent.
+- Adding `case` arms to the per-language switches in `SupportedLanguage.swift`. The compiler enforces exhaustiveness; the loud failure on missing-arm is intended.
+- Localizing UI strings (`Localizable.xcstrings`). Tracked separately in issue #52.
+- Translating the user-facing onboarding flow (`GlobeKeyTutorialPage` etc.). Tracked separately.
+
+## Smoke testing on the simulator
+
+After `verify` passes, install the build on the iPhone 17 Pro simulator. The runbook for German (PR2) was:
+
+1. Open Settings, change language to Deutsch.
+2. Confirm spacebar reads `Leertaste`, return key reads `Eingabe`, layout stays QWERTY.
+3. Type `uber`, `schon`, `madchen` → expect `über`, `schön`, `mädchen` (single-substitution accent expansion).
+4. Type `strasse` → expect `strasse` to stay as-is (acknowledged ss → ß limitation).
+5. Switch to French, English, Spanish in turn — verify the six pre-existing autocorrect cases from PR1 still pass.
+
+If a smoke test surfaces a quality gap (missing override, missing seed bigram), file it on the language's GitHub issue. **Don't** add it to the launch PR — the post-launch playbook (issue #152) handles iterative improvements driven by real usage.
+
+## Reference
+
+- ADR 0001 — empty overrides and seed bigrams for non-native language launches: `docs/adr/0001-empty-overrides-and-seeds-for-non-native-language-launches.md`
+- Domain glossary: `CONTEXT.md` (sections "Language onboarding", "Language profile", "Override map", "Accent map", "Seed bigrams")
+- The German launch (issue #109): the worked example. PR2 commits show every file touched.
+- Follow-ups: #151 (QWERTZ layout for German), #152 (post-launch quality playbook).

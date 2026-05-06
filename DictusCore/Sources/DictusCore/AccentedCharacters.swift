@@ -25,7 +25,8 @@ public enum AccentedCharacters {
         "o": ["\u{00F4}", "\u{00F6}", "\u{00F3}"],                      // o circumflex, diaeresis, acute
         "c": ["\u{00E7}"],                                              // c cedilla
         "y": ["\u{00FF}"],                                              // y diaeresis
-        "n": ["\u{00F1}"]                                               // n tilde
+        "n": ["\u{00F1}"],                                              // n tilde
+        "s": ["\u{00DF}"]                                               // ß (German eszett, added with #109)
     ]
 
     /// Returns accented variants for a given key, or nil if no accents exist.
