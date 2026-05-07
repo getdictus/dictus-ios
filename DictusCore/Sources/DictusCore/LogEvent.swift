@@ -77,6 +77,7 @@ public enum LogEvent: Sendable {
     case modelCleanupPerformed(name: String, reason: String)
     case modelPrewarmPeakMemory(modelName: String, peakMB: Int)
     case modelPrewarmTimeout(name: String, timeoutSeconds: Int)
+    case modelLoadStateChanged(from: String, to: String, reason: String)
 
     // MARK: Keyboard
     case keyboardDidAppear
@@ -166,7 +167,7 @@ public enum LogEvent: Sendable {
         case .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadFailed,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
              .modelDeleted, .modelDeleteFailed, .modelPrewarmStarted, .modelCleanupPerformed,
-             .modelPrewarmPeakMemory, .modelPrewarmTimeout:
+             .modelPrewarmPeakMemory, .modelPrewarmTimeout, .modelLoadStateChanged:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .overlayShown, .overlayHidden, .rapidTapRejected,
@@ -226,7 +227,7 @@ public enum LogEvent: Sendable {
              .modelDownloadStarted, .modelDownloadCompleted,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
              .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
-             .modelPrewarmPeakMemory, .transcriptionPerformance,
+             .modelPrewarmPeakMemory, .modelLoadStateChanged, .transcriptionPerformance,
              .keyboardDidAppear, .keyboardMicTapped,
              .appLaunched, .appWhisperKitLoaded, .logExportCompleted,
              .deviceCapabilitySnapshot,
@@ -340,6 +341,7 @@ public enum LogEvent: Sendable {
         case .modelPrewarmPeakMemory: return "modelPrewarmPeakMemory"
         case .modelPrewarmTimeout: return "modelPrewarmTimeout"
         case .deviceCapabilitySnapshot: return "deviceCapabilitySnapshot"
+        case .modelLoadStateChanged: return "modelLoadStateChanged"
         }
     }
 
@@ -408,6 +410,8 @@ public enum LogEvent: Sendable {
             return "name=\(name)"
         case .modelCleanupPerformed(let name, let reason):
             return "name=\(name) reason=\(reason)"
+        case .modelLoadStateChanged(let from, let to, let reason):
+            return "from=\(from) to=\(to) reason=\(reason)"
 
         // Keyboard (no content parameters -- privacy)
         case .keyboardDidAppear, .keyboardDidDisappear,

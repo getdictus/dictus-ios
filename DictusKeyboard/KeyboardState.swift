@@ -443,6 +443,21 @@ class KeyboardState: ObservableObject {
             return
         }
         lastMicTapDate = now
+
+        // Issue #144: refuse mic taps while the app is mid-load (e.g. swapping to
+        // the turbo model). Without this gate the user can pile up dispatches that
+        // collapse into a Swift.CancellationError storm when the load finishes.
+        // We synchronize defaults first because cross-process writes from DictusApp
+        // can lag a few ms behind the actual state change.
+        defaults.synchronize()
+        let loadStateRaw = defaults.string(forKey: SharedKeys.modelLoadState) ?? ModelLoadState.idle.rawValue
+        if loadStateRaw == ModelLoadState.loading.rawValue {
+            PersistentLog.log(.dictationDeferred(reason: "keyboard refused — model load in flight"))
+            statusMessage = String(localized: "Model is loading. Please open Dictus.")
+            HapticFeedback.actionRefused()
+            return
+        }
+
         activeSessionID = String(UUID().uuidString.prefix(8))
         logProbe("startRecording", details: sessionDetails())
 

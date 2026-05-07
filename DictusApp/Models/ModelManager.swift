@@ -46,9 +46,15 @@ class ModelManager: ObservableObject {
     /// Per-model lifecycle state. Updated as models move through download/prewarm/ready.
     @Published var modelStates: [String: ModelState] = [:]
 
+    /// Current load state of the active model in the coordinator (issue #144).
+    /// Mirrors `DictationCoordinator.modelLoadState` via App Group + NotificationCenter
+    /// so SwiftUI can drive the loading overlay reactively.
+    @Published var modelLoadState: ModelLoadState = .idle
+
     // MARK: - Private
 
     private let defaults = AppGroup.defaults
+    private var loadStateObserver: NSObjectProtocol?
 
     /// Serial prewarm lock — only one CoreML compilation at a time.
     /// The Neural Engine cannot handle multiple models compiling simultaneously
@@ -74,6 +80,28 @@ class ModelManager: ObservableObject {
             } else {
                 modelStates[model.identifier] = .notDownloaded
             }
+        }
+        // Mirror the coordinator's load state so SwiftUI can react (issue #144).
+        // We read the persisted value once for cold-start consistency, then subscribe
+        // to subsequent changes posted by `DictationCoordinator.setModelLoadState`.
+        if let raw = defaults.string(forKey: SharedKeys.modelLoadState),
+           let state = ModelLoadState(rawValue: raw) {
+            modelLoadState = state
+        }
+        loadStateObserver = NotificationCenter.default.addObserver(
+            forName: .dictusModelLoadStateChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            guard let raw = note.userInfo?["state"] as? String,
+                  let state = ModelLoadState(rawValue: raw) else { return }
+            self?.modelLoadState = state
+        }
+    }
+
+    deinit {
+        if let observer = loadStateObserver {
+            NotificationCenter.default.removeObserver(observer)
         }
     }
 
@@ -234,6 +262,14 @@ class ModelManager: ObservableObject {
 
             PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: prewarmDurationMs))
             PersistentLog.log(.modelPrewarmPeakMemory(modelName: identifier, peakMB: consumedMB))
+
+            // Issue #144: if this download just made the model active (first download
+            // or user re-downloaded the active variant), eagerly load it into the
+            // coordinator's RAM-resident WhisperKit instance. The compile above used
+            // a throwaway WhisperKit just to populate the Core ML cache.
+            if activeModel == identifier {
+                DictationCoordinator.shared.preloadActiveModel()
+            }
         } catch {
             modelStates[identifier] = .error(error.localizedDescription)
             downloadProgress.removeValue(forKey: identifier)
@@ -325,6 +361,11 @@ class ModelManager: ObservableObject {
             PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: prewarmDurationMs))
             PersistentLog.log(.modelPrewarmPeakMemory(modelName: identifier, peakMB: consumedMB))
             PersistentLog.log(.modelDownloadCompleted(name: identifier))
+
+            // Issue #144: same proactive load as the WhisperKit path — see comment there.
+            if activeModel == identifier {
+                DictationCoordinator.shared.preloadActiveModel()
+            }
         } catch {
             modelStates[identifier] = .error(error.localizedDescription)
             downloadProgress.removeValue(forKey: identifier)
@@ -334,12 +375,26 @@ class ModelManager: ObservableObject {
         }
     }
 
-    /// Sets the active model for transcription.
+    /// Sets the active model for transcription and eagerly loads it into RAM.
+    ///
+    /// Issue #144: Before this proactive load, `selectModel` only wrote `activeModel`
+    /// to App Group. The actual WhisperKit/Parakeet swap was deferred to the next
+    /// `ensureEngineReady` call (triggered by the user tapping the mic). For large
+    /// models like Whisper turbo, the swap took 1-3 minutes — and any mic taps
+    /// during that window cascaded into concurrent `transcribe()` calls that
+    /// cancelled each other with `Swift.CancellationError`.
+    ///
+    /// We now flip `modelLoadState` to `.loading` immediately and trigger the load
+    /// up front. The keyboard reads `modelLoadState` and refuses mic taps while a
+    /// load is in flight, and `ModelLoadingOverlay` covers the app to surface the
+    /// wait to the user.
     func selectModel(_ identifier: String) {
         guard downloadedModels.contains(identifier) else { return }
         activeModel = identifier
         persistState()
         PersistentLog.log(.modelSelected(name: identifier))
+        // Trigger an eager load so the model is in RAM before the next mic tap.
+        DictationCoordinator.shared.preloadActiveModel()
     }
 
     /// Deletes a model from disk and updates state.
