@@ -33,6 +33,13 @@ struct ModelManagerView: View {
     @State private var downloadError: String?
     @State private var showErrorAlert = false
 
+    /// Issue #144: the model identifier currently being prepared (downloading,
+    /// compiling, or loading into RAM). When non-nil the full-screen overlay
+    /// blocks the manager UI until prep completes. Driven by the @State below
+    /// rather than the computed value because we want the overlay to keep its
+    /// "ready" celebration moment after the model state flips back to .ready.
+    @State private var preparingModelID: String?
+
     // MARK: - Computed model lists
 
     /// Downloaded models — includes deprecated (Tiny/Base) if user has them on device,
@@ -66,6 +73,32 @@ struct ModelManagerView: View {
                 return !modelManager.downloadedModels.contains(model.identifier)
             }
         }
+    }
+
+    /// First model identifier currently in a user-facing prep phase.
+    /// Priority: active load > prewarming > downloading.
+    private var liveActivePrepModel: String? {
+        if modelManager.modelLoadState == .loading,
+           let active = modelManager.activeModel {
+            return active
+        }
+        for model in ModelInfo.allIncludingDeprecated {
+            switch modelManager.modelStates[model.identifier] ?? .notDownloaded {
+            case .prewarming:
+                return model.identifier
+            default:
+                continue
+            }
+        }
+        for model in ModelInfo.allIncludingDeprecated {
+            switch modelManager.modelStates[model.identifier] ?? .notDownloaded {
+            case .downloading:
+                return model.identifier
+            default:
+                continue
+            }
+        }
+        return nil
     }
 
     /// Whether a given model can be deleted (not active, not the last one).
@@ -204,6 +237,37 @@ struct ModelManagerView: View {
                 Text(error)
             }
         }
+        // Issue #144: full-screen overlay during model download / compile / RAM-load.
+        // We watch the live computed property and lift it into a @State binding the
+        // overlay can flip back to nil when it's ready to dismiss.
+        .onChange(of: liveActivePrepModel) { _, newValue in
+            if let id = newValue, preparingModelID == nil {
+                preparingModelID = id
+            }
+        }
+        .onAppear {
+            if preparingModelID == nil, let id = liveActivePrepModel {
+                preparingModelID = id
+            }
+        }
+        .fullScreenCover(item: Binding<PreparingModelItem?>(
+            get: { preparingModelID.map(PreparingModelItem.init) },
+            set: { preparingModelID = $0?.id }
+        )) { item in
+            ModelLoadingOverlay(
+                modelManager: modelManager,
+                modelIdentifier: item.id,
+                isPresented: Binding(
+                    get: { preparingModelID != nil },
+                    set: { if !$0 { preparingModelID = nil } }
+                )
+            )
+        }
+    }
+
+    /// Wrapper so we can use `.fullScreenCover(item:)` with a plain String.
+    private struct PreparingModelItem: Identifiable {
+        let id: String
     }
 
     // MARK: - Engine descriptions

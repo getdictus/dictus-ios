@@ -13,6 +13,12 @@ public enum SharedKeys {
     public static let activeModel = "dictus.activeModel"
     public static let modelReady = "dictus.modelReady"
     public static let downloadedModels = "dictus.downloadedModels"
+    /// Tri-state model lifecycle: "idle" / "loading" / "ready".
+    /// "idle" = no active load in flight, but `modelReady` may still be true.
+    /// "loading" = WhisperKit/Parakeet is being loaded into RAM (or compiling/downloading).
+    /// "ready" = active model is loaded in RAM and `transcribe()` calls will succeed.
+    /// The keyboard reads this to refuse mic taps during load (issue #144).
+    public static let modelLoadState = "dictus.modelLoadState"
 
     // Keyboard-App cross-process contracts (added for Plan 3.1)
     /// Current keyboard layout type stored as String ("azerty" or "qwerty")

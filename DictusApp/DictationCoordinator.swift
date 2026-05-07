@@ -61,6 +61,11 @@ class DictationCoordinator: ObservableObject {
     /// a concurrency lock — the first caller creates it, subsequent callers await it.
     private var initTask: Task<Void, Error>?
 
+    /// Re-entry flag for stopDictation. Prevents the 3+ concurrent transcribe()
+    /// calls observed in #144 when a user taps stop multiple times during a model
+    /// swap (turbo load). Set synchronously on entry, cleared in the Task's defer.
+    private var isTranscribingInFlight = false
+
     /// Timestamp of last waveform write to App Group.
     /// Used to throttle writes to ~5Hz (every 200ms) to avoid overwhelming UserDefaults
     /// with high-frequency updates from the audio engine's energy callback.
@@ -123,15 +128,21 @@ class DictationCoordinator: ObservableObject {
 
         Task {
             let modelReady = defaults.bool(forKey: SharedKeys.modelReady)
-            guard modelReady else { return }
+            guard modelReady else {
+                self.setModelLoadState(.idle, reason: "init-preload-no-model")
+                return
+            }
 
+            self.setModelLoadState(.loading, reason: "init-preload")
             do {
                 try await ensureEngineReady()
                 PersistentLog.log(.engineWarmUpAttempt(context: "init-preload"))
                 try audioEngine.warmUp()
                 PersistentLog.log(.appWhisperKitLoaded(modelName: self.currentModelName ?? "unknown"))
+                self.setModelLoadState(.ready, reason: "init-preload-success")
             } catch {
                 PersistentLog.log(.engineWarmUpFailed(context: "init-preload", error: error.localizedDescription))
+                self.setModelLoadState(.idle, reason: "init-preload-failed")
             }
         }
 
@@ -239,11 +250,14 @@ class DictationCoordinator: ObservableObject {
                 do {
                     try self.audioEngine.configureAudioSession()
                     PersistentLog.log(.engineWarmUpAttempt(context: "didBecomeActive"))
+                    self.setModelLoadState(.loading, reason: "didBecomeActive-warmup")
                     try await self.ensureEngineReady()
                     try self.audioEngine.warmUp()
                     PersistentLog.log(.engineWarmUpSuccess(context: "didBecomeActive"))
+                    self.setModelLoadState(.ready, reason: "didBecomeActive-success")
                 } catch {
                     PersistentLog.log(.engineWarmUpFailed(context: "didBecomeActive", error: error.localizedDescription))
+                    self.setModelLoadState(.idle, reason: "didBecomeActive-failed")
                 }
             }
         }
@@ -299,6 +313,18 @@ class DictationCoordinator: ObservableObject {
         guard modelReady else {
             PersistentLog.log(.dictationFailed(error: "No model downloaded"))
             handleError("No model downloaded. Open Dictus to download a model.")
+            return
+        }
+
+        // Refuse new dictation if an explicit model swap is in flight.
+        // Issue #144: tapping the mic during a turbo load caused the keyboard to
+        // queue dispatches that all collapsed into 3+ concurrent transcribe()
+        // calls when the load resolved. Reading the App Group state lets us short-
+        // circuit cleanly — the keyboard's overlay UI surfaces the wait to the user.
+        let currentLoadState = defaults.string(forKey: SharedKeys.modelLoadState) ?? ModelLoadState.idle.rawValue
+        if currentLoadState == ModelLoadState.loading.rawValue {
+            PersistentLog.log(.dictationDeferred(reason: "model load in flight (state=loading)"))
+            handleError(String(localized: "Model is loading. Please wait."))
             return
         }
 
@@ -360,11 +386,14 @@ class DictationCoordinator: ObservableObject {
                     await verifyAudioFlow()
 
                     // Load the transcription model in parallel while recording
+                    self.setModelLoadState(.loading, reason: "cold-start-load")
                     try await ensureEngineReady()
                     let loadedName = self.currentModelName ?? "unknown"
                     PersistentLog.log(.appWhisperKitLoaded(modelName: loadedName))
+                    self.setModelLoadState(.ready, reason: "cold-start-success")
                 } catch {
                     PersistentLog.log(.dictationFailed(error: "Cold start engine load: \(error.localizedDescription)"))
+                    self.setModelLoadState(.idle, reason: "cold-start-failed")
                     self.handleError(error.localizedDescription)
                 }
             }
@@ -385,9 +414,21 @@ class DictationCoordinator: ObservableObject {
     private let minimumRecordingDuration: TimeInterval = 0.5
 
     func stopDictation() {
+        // Issue #144 re-entry guard: refuse if a transcription is already in flight.
+        // Without this, tapping stop multiple times during a long model swap (e.g.
+        // turbo load) spawned 3+ concurrent transcribe() calls that cancelled each
+        // other with Swift.CancellationError. The flag is set synchronously here
+        // (before the async Task) so a second stopDictation() can never slip past.
+        guard !isTranscribingInFlight else {
+            PersistentLog.log(.dictationDeferred(reason: "stop ignored — transcription already in flight"))
+            return
+        }
+        isTranscribingInFlight = true
+
         dictationTask?.cancel()
 
         dictationTask = Task {
+            defer { self.isTranscribingInFlight = false }
             do {
                 let samples = audioEngine.collectSamples()
 
@@ -457,6 +498,8 @@ class DictationCoordinator: ObservableObject {
     func cancelDictation() {
         dictationTask?.cancel()
         dictationTask = nil
+        // Reset the transcribe re-entry flag so the next stop/cancel cycle can proceed.
+        isTranscribingInFlight = false
         stopTranscriptionWatchdog()
 
         // Discard samples but keep engine alive for next recording
@@ -502,6 +545,7 @@ class DictationCoordinator: ObservableObject {
 
         dictationTask?.cancel()
         dictationTask = nil
+        isTranscribingInFlight = false
         stopTranscriptionWatchdog()
 
         bufferEnergy = []
@@ -815,4 +859,60 @@ class DictationCoordinator: ObservableObject {
         // Arm watchdog: safety net if endWithFailure's transition guard rejects.
         LiveActivityManager.shared.startRecordingWatchdog()
     }
+
+    // MARK: - Model load orchestration (issue #144)
+
+    /// Read the current persisted model load state from the App Group.
+    /// SwiftUI views read this through NotificationCenter posts emitted by
+    /// `setModelLoadState` (see `Notification.Name.dictusModelLoadStateChanged`).
+    var modelLoadState: ModelLoadState {
+        let raw = defaults.string(forKey: SharedKeys.modelLoadState) ?? ModelLoadState.idle.rawValue
+        return ModelLoadState(rawValue: raw) ?? .idle
+    }
+
+    /// Update the tri-state load flag, persist it to the App Group so the keyboard
+    /// can gate mic taps, and broadcast a notification so any in-app overlay can react.
+    /// Must be called on the main actor (the class is @MainActor).
+    func setModelLoadState(_ newState: ModelLoadState, reason: String) {
+        let oldRaw = defaults.string(forKey: SharedKeys.modelLoadState) ?? ModelLoadState.idle.rawValue
+        guard oldRaw != newState.rawValue else { return }
+        defaults.set(newState.rawValue, forKey: SharedKeys.modelLoadState)
+        defaults.synchronize()
+        PersistentLog.log(.modelLoadStateChanged(from: oldRaw, to: newState.rawValue, reason: reason))
+        NotificationCenter.default.post(
+            name: .dictusModelLoadStateChanged,
+            object: nil,
+            userInfo: ["state": newState.rawValue, "reason": reason]
+        )
+    }
+
+    /// Eagerly load the active model into RAM. Called from `ModelManager.selectModel`
+    /// after a model swap so the user does not have to wait for the first mic tap to
+    /// trigger the lazy load (issue #144 — turbo swap took 1-3 minutes which collapsed
+    /// into a cancellation storm without this proactive path).
+    ///
+    /// Safe to call repeatedly: the underlying `initTask` lock dedupes concurrent loads.
+    func preloadActiveModel() {
+        Task {
+            self.setModelLoadState(.loading, reason: "selectModel-proactive")
+            do {
+                try await ensureEngineReady()
+                PersistentLog.log(.appWhisperKitLoaded(modelName: self.currentModelName ?? "unknown"))
+                self.setModelLoadState(.ready, reason: "selectModel-proactive-success")
+            } catch {
+                PersistentLog.log(.engineWarmUpFailed(
+                    context: "selectModel-proactive",
+                    error: error.localizedDescription
+                ))
+                self.setModelLoadState(.idle, reason: "selectModel-proactive-failed")
+            }
+        }
+    }
+}
+
+extension Notification.Name {
+    /// Posted by `DictationCoordinator.setModelLoadState` whenever the persisted
+    /// `SharedKeys.modelLoadState` changes. UI overlays observe this to dismiss
+    /// themselves once the model is `.ready` (issue #144).
+    static let dictusModelLoadStateChanged = Notification.Name("DictusModelLoadStateChanged")
 }
