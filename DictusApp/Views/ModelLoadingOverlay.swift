@@ -30,6 +30,13 @@ struct ModelLoadingOverlay: View {
 
     @State private var showCompletion = false
 
+    /// Tracks whether we have ever observed an active prep phase (downloading,
+    /// compiling, or loading). Without this, the overlay would auto-dismiss
+    /// when presented synchronously by the parent before `downloadModel`
+    /// has had a chance to flip `modelStates[id]` from `.notDownloaded` to
+    /// `.downloading` — the onboarding race that surfaced after f5ba7ab.
+    @State private var hasSeenWorkPhase = false
+
     private enum Phase {
         case downloading
         case compiling
@@ -166,6 +173,18 @@ struct ModelLoadingOverlay: View {
     }
 
     private var currentPhase: Phase {
+        let raw = rawPhase
+        // While we have not yet seen a real work phase, treat `.ready` as the
+        // initial download phase so the copy doesn't briefly flash "ready"
+        // before the parent's async download Task starts. This is the seam
+        // that fixes the onboarding presentation race (commit f5ba7ab follow-up).
+        if !hasSeenWorkPhase && raw == .ready {
+            return .downloading
+        }
+        return raw
+    }
+
+    private var rawPhase: Phase {
         switch currentModelState {
         case .downloading:
             return .downloading
@@ -237,8 +256,19 @@ struct ModelLoadingOverlay: View {
     }
 
     private func checkForCompletion() {
+        // Latch the work-phase flag the first time we observe real activity.
+        // We read `rawPhase` here (not the user-facing `currentPhase`) because
+        // the latter masquerades the initial `.ready` state as `.downloading`
+        // until this flag flips, which would cause an infinite loop.
+        if rawPhase != .ready {
+            hasSeenWorkPhase = true
+            return
+        }
+        // The model is ready, but if we have never seen any actual work happen
+        // yet, the parent likely just opened the overlay and the state will
+        // imminently flip to `.downloading`. Keep the cover up.
+        guard hasSeenWorkPhase else { return }
         guard !showCompletion else { return }
-        guard currentPhase == .ready else { return }
 
         withAnimation(.easeInOut(duration: 0.35)) {
             showCompletion = true
