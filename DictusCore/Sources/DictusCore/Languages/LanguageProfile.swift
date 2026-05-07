@@ -48,6 +48,14 @@ public struct LanguageProfile: Sendable {
     /// apostrophe. Empty for languages without contractions (English, Spanish).
     public let contractionPrefixes: [String]
 
+    /// Length-changing substring substitutions tried by `AccentExpander` when a
+    /// typed word isn't a stronger match in the dictionary. Each rule is
+    /// `(from, to)` where `from` is the substring to find and `to` is its
+    /// replacement. The German `("ss", "ß")` rule lets users typing on a US
+    /// keyboard still reach `straße`/`weiß`/`groß` without long-pressing `s`.
+    /// Empty for languages without length-changing collapses.
+    public let collapseRules: [(from: String, to: String)]
+
     public init(
         code: String,
         displayName: String,
@@ -57,7 +65,8 @@ public struct LanguageProfile: Sendable {
         returnName: String,
         overrides: [String: String],
         accentMap: [Character: [Character]],
-        contractionPrefixes: [String]
+        contractionPrefixes: [String],
+        collapseRules: [(from: String, to: String)] = []
     ) {
         self.code = code
         self.displayName = displayName
@@ -68,6 +77,7 @@ public struct LanguageProfile: Sendable {
         self.overrides = overrides
         self.accentMap = accentMap
         self.contractionPrefixes = contractionPrefixes
+        self.collapseRules = collapseRules
     }
 }
 
@@ -79,6 +89,7 @@ extension SupportedLanguage {
         case .french: return frenchProfile
         case .english: return englishProfile
         case .spanish: return spanishProfile
+        case .german: return germanProfile
         }
     }
 }

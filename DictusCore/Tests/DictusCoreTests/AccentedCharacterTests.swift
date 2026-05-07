@@ -73,4 +73,11 @@ final class AccentedCharacterTests: XCTestCase {
         XCTAssertNotNil(accents)
         XCTAssertEqual(accents, ["\u{00F1}"])
     }
+
+    func testSMapsToEszettForGerman() {
+        // Long-press `s` exposes ß so German users can override autocorrect
+        // (surnames `Weiss`/`Strauss`, Swiss spelling, code-switching).
+        let accents = AccentedCharacters.accents(for: "s")
+        XCTAssertEqual(accents, ["\u{00DF}"])
+    }
 }

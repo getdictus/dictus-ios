@@ -34,6 +34,13 @@ public let accentExpansionDominanceMultiplier: Int = 5
 /// Empirically, "déjà", "après", "éléphant" — all double; nothing in our corpora
 /// requires triple substitution.
 ///
+/// WHY collapse rules are tried separately:
+/// Single/double character substitutions preserve word length. Some accents
+/// (German `ß`, replacing `ss`) require deleting a position, so they're
+/// modeled as substring substitutions in `profile.collapseRules`. Each
+/// collapse occurrence is tried independently against the dictionary,
+/// subject to the same 5x-dominance check.
+///
 /// - Parameters:
 ///   - profile: The active language's profile.
 ///   - word: The input word (any case).
@@ -49,7 +56,8 @@ public func expandAccents(
     guard lowered.count >= 2 else { return nil }
 
     let accentMap = profile.accentMap
-    guard !accentMap.isEmpty else { return nil }
+    let collapseRules = profile.collapseRules
+    guard !accentMap.isEmpty || !collapseRules.isEmpty else { return nil }
 
     var accentablePositions: [(Int, [Character])] = []
     let chars = Array(lowered)
@@ -58,7 +66,6 @@ public func expandAccents(
             accentablePositions.append((i, accents))
         }
     }
-    guard !accentablePositions.isEmpty else { return nil }
 
     var bestMatch: String?
     var bestFreq: Int = -1
@@ -99,6 +106,24 @@ public func expandAccents(
                     }
                 }
             }
+        }
+    }
+
+    // Length-changing collapses (German `ss → ß`).
+    // For each rule, find every occurrence of the `from` substring in the
+    // input and try substituting that single occurrence with `to`. We try one
+    // occurrence at a time rather than all combinations because German words
+    // with multiple `ss → ß` collapses in the same word are exceedingly rare
+    // (and the 5x-dominance check would reject ambiguous cases anyway).
+    for rule in collapseRules {
+        let from = rule.from
+        let to = rule.to
+        guard !from.isEmpty, lowered.count >= from.count else { continue }
+        var searchStart = lowered.startIndex
+        while let range = lowered.range(of: from, range: searchStart..<lowered.endIndex) {
+            let candidate = lowered.replacingCharacters(in: range, with: to)
+            checkCandidate(candidate)
+            searchStart = lowered.index(after: range.lowerBound)
         }
     }
 
