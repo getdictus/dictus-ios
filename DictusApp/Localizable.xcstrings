@@ -184,6 +184,16 @@
         }
       }
     },
+    "Most accurate but slowest" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le plus précis, mais le plus lent"
+          }
+        }
+      }
+    },
     "Aligning model weights to memory…" : {
       "comment" : "Cycling phrase shown during model compilation (issue #144).",
       "localizations" : {

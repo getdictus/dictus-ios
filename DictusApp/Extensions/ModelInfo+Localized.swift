@@ -18,6 +18,8 @@ extension ModelInfo {
             return String(localized: "Best accuracy")
         case "parakeet-tdt-0.6b-v3":
             return String(localized: "Fast and accurate (NVIDIA)")
+        case "openai_whisper-large-v3_turbo_954MB":
+            return String(localized: "Most accurate but slowest")
         default:
             return description
         }
