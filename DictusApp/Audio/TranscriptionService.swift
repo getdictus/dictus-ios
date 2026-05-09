@@ -132,6 +132,8 @@ class TranscriptionService {
             throw TranscriptionError.emptyAudio
         }
 
+        // Default DecodingOptions — see SpeechModelProtocol.swift for rationale
+        // on the rollback of earlier turbo-targeted tuning (issue #163).
         let options = DecodingOptions(
             task: .transcribe,
             language: language,
@@ -146,6 +148,17 @@ class TranscriptionService {
                 audioArray: audioSamples,
                 decodeOptions: options
             )
+
+            let totalSegments = results.reduce(0) { $0 + $1.segments.count }
+            let totalCharCount = results.reduce(0) { $0 + $1.text.count }
+            let lastSegmentEnd = results.flatMap { $0.segments }.map { $0.end }.max() ?? 0
+            let audioDurationSec = Float(audioSamples.count) / 16_000.0
+            PersistentLog.log(.diagnosticProbe(
+                component: "TranscriptionService",
+                instanceID: "transcribeLegacy",
+                action: "segmentsReturned",
+                details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
+            ))
 
             // Join all segment texts into a single string.
             // Whisper may produce multiple segments for longer audio.

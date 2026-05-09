@@ -52,6 +52,31 @@ public struct DeviceCapabilities: Sendable, Equatable {
         )
     }
 
+    /// Number of concurrent decoding workers WhisperKit should use for parallel
+    /// chunk processing. Scales with physical RAM tier and de-rates under thermal
+    /// pressure. Tiers match Apple's marketed iPhone RAM lineup (6/8/12 GB).
+    ///
+    /// Used as `DecodingOptions.concurrentWorkerCount` — higher = more parallelism
+    /// but more peak memory + heat. Conservative on low-RAM devices and when the
+    /// SoC is already throttling.
+    public var recommendedConcurrentWorkerCount: Int {
+        let base: Int
+        switch physicalMemoryGB {
+        case 12...:
+            base = 8   // iPhone 17 Pro / 18 Pro and beyond
+        case 8...:
+            base = 6   // iPhone 15 Pro / 16 Pro / Pro Max class
+        default:
+            base = 4   // 6 GB devices (turbo gating floor) and older
+        }
+        switch thermalState {
+        case .serious, .critical:
+            return max(2, base / 2)
+        default:
+            return base
+        }
+    }
+
     // MARK: - Private readers
 
     private static func readPhysicalMemoryGB() -> Int {
