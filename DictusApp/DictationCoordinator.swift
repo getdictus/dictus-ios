@@ -321,8 +321,14 @@ class DictationCoordinator: ObservableObject {
         // queue dispatches that all collapsed into 3+ concurrent transcribe()
         // calls when the load resolved. Reading the App Group state lets us short-
         // circuit cleanly — the keyboard's overlay UI surfaces the wait to the user.
+        //
+        // Issue #167: URL-scheme cold-start launches arrive while the init-preload
+        // is still loading the model. Failing here would route first-use dictation
+        // into `failed` state. Skip the guard for fromURL=true and let the existing
+        // cold-start defer at line ~368 park the request as `pendingColdStartDictation`
+        // — the retry's `ensureEngineReady` awaits the in-flight initTask via its lock.
         let currentLoadState = defaults.string(forKey: SharedKeys.modelLoadState) ?? ModelLoadState.idle.rawValue
-        if currentLoadState == ModelLoadState.loading.rawValue {
+        if currentLoadState == ModelLoadState.loading.rawValue && !fromURL {
             PersistentLog.log(.dictationDeferred(reason: "model load in flight (state=loading)"))
             handleError(String(localized: "Model is loading. Please wait."))
             return
