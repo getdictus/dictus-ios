@@ -132,15 +132,17 @@ class TranscriptionService {
             throw TranscriptionError.emptyAudio
         }
 
-        // Default DecodingOptions — see SpeechModelProtocol.swift for rationale
-        // on the rollback of earlier turbo-targeted tuning (issue #163).
+        // Variant A — `.vad` only. Mirrors the change in SpeechModelProtocol.swift
+        // so the legacy fallback path stays consistent with the active engine path.
+        // See SpeechModelProtocol.swift for rationale.
         let options = DecodingOptions(
             task: .transcribe,
             language: language,
             temperature: 0.0,
             usePrefillPrompt: true,
             usePrefillCache: true,
-            skipSpecialTokens: true
+            skipSpecialTokens: true,
+            chunkingStrategy: .vad
         )
 
         do {

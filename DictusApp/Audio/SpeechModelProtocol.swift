@@ -87,17 +87,18 @@ class WhisperKitEngine: SpeechModelProtocol {
             throw TranscriptionError.emptyAudio
         }
 
-        // Default DecodingOptions — earlier tuning attempts (chunkingStrategy=.vad,
-        // temperature fallback tweaks, threshold tightening) regressed long-form
-        // turbo to empty output and didn't improve speed. See docs/WHISPERKIT_TUNING.md
-        // for the investigation and what was tried.
+        // Variant A — `.vad` only. Issue #168 audit found WhisperAX canonical
+        // defaults to chunkingStrategy = .vad. Earlier attempts on #163 combined
+        // .vad with threshold tweaks (noSpeechThreshold, logProbThreshold) which
+        // regressed long-form turbo. Testing .vad in isolation here.
         let options = DecodingOptions(
             task: .transcribe,
             language: language,
             temperature: 0.0,
             usePrefillPrompt: true,
             usePrefillCache: true,
-            skipSpecialTokens: true
+            skipSpecialTokens: true,
+            chunkingStrategy: .vad
         )
 
         let results: [TranscriptionResult] = try await whisperKit.transcribe(

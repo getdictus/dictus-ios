@@ -1,6 +1,8 @@
 # WhisperKit Investigation Notes
 
-Working knowledge base for Dictus' WhisperKit integration. **This is investigation in progress — not a prescriptive config guide.** Captures what we know, what we tried, what failed, and the open questions for the audit kicked off by issue #163.
+Working knowledge base for Dictus' WhisperKit integration. Captures what we know, what we tried, what failed, what worked, and the questions still open after the audit kicked off by issue #163.
+
+**Status**: #163 resolved (turbo no longer truncates long audio). Wider audit #168 partially complete — see Section 9.
 
 Pinned version: WhisperKit **0.16.0** (`Package.resolved`).
 Local source checkout: `~/Library/Developer/Xcode/DerivedData/Dictus-*/SourcePackages/checkouts/WhisperKit/Sources/WhisperKit/Core/`.
@@ -219,38 +221,79 @@ Configured to target ANE (`.cpuAndNeuralEngine`), but the runtime may fall back 
 
 ---
 
-## 7. What the audit should cover (proposed scope)
+## 7. Audit findings (issue #168) and resolution of #163
 
-When we restart from a clean context to do this properly:
+The audit launched parallel research on four axes. Results below.
 
-### Read the canonical Argmax integration
-- `Examples/WhisperAX/` in the WhisperKit repo. How does it construct `WhisperKit`, what `DecodingOptions` does it pass, what's its threading model.
-- The Argmax paper's actual configuration (ICML 2025 — `arxiv.org/html/2507.10860v1`). Identify what they measured and how.
-- Argmax's benchmark page methodology — batch vs streaming, audio characteristics, device state.
+### Codebase audit
+Our integration was **minimal** — `WhisperKitConfig(prewarm:true, load:true, download:true)` one-shot, and `DecodingOptions` with only six explicit fields (`task`, `language`, `temperature=0`, `usePrefillPrompt=true`, `usePrefillCache=true`, `skipSpecialTokens=true`). All other parameters (chunkingStrategy, sampleLength, thresholds, concurrentWorkerCount, ...) were left to SDK defaults.
 
-### Audit our integration against the canonical
-- Compare `DictationCoordinator` + `WhisperKitEngine` + `TranscriptionService` against WhisperAX's flow.
-- List every divergence and its rationale (or lack thereof).
+### WhisperAX canonical audit (v0.16.0 + main HEAD)
+Two clones in `/tmp/whisperkit-016/` and `/tmp/whisperkit-latest/`. Key finding: **WhisperAX's AppStorage default for `chunkingStrategy` is `.vad`** (`Examples/WhisperAX/WhisperAX/Views/ContentView.swift:57`), explicitly passed into every `DecodingOptions`. The SDK default is `nil`, so callers who omit it (us) fall through to `TranscribeTask`'s seek loop **without** VAD-aware boundaries. WhisperAX has **zero turbo-specific branches** anywhere — turbo is just a model-name string.
 
-### Per-model status
-- Validate small / medium / parakeet are actually working well (user reports them as "OK", but never benchmarked rigorously). Out-of-scope tweaks could affect them too.
-- Measure batch wall-clock for each on a known audio.
+Result merging: WhisperAX uses `TranscriptionUtilities.mergeTranscriptionResults`. **For text output, the algorithm is identical** to our `.map(.text).joined(" ")` (`TranscriptionUtilities.swift:81`). Not a load-bearing divergence.
 
-### Version question
-- Check `Package.resolved` history: when was 0.16 pinned, and why (commit message / PR).
-- Read 0.17 / 0.18 / 1.0 changelogs for items relevant to turbo, long-form, or perf.
-- If upgrade is desirable, plan migration: regression-test all four models, watch for `usePrefillCache` removal impact, package rename.
+### Version audit (0.16.0 → 1.0.0)
+Reviewed every release between March 2025 (0.16.0) and May 2026 (1.0.0). **Zero PRs touch the transcription / decoder / long-form / turbo path.** All four releases ship adjacent features (TTSKit, SpeakerKit, Swift 6 concurrency) or breaking cleanup. **Upgrading does not fix #163.** Recommendation: stay on 0.16.0 for now, schedule v1.0.0 migration as a separate task (package URL change, `supressTokens` typo fix, `MLTensor.asXArray` → `await toXArray()`, `usePrefillCache` removal — none affecting our use case).
 
-### Decide
-- Does turbo on iOS via WhisperKit batch mode have a viable path, or do we accept it as a permanent limitation?
-- If permanent: how do we surface to users (cap audio at 28s? show a warning? remove turbo from the catalog on iOS-only?).
-- If viable: which hypothesis above do we attack first?
+### External audit (paper + Argmax issues)
+- ICML 2025 paper benchmarks are **streaming-only on M3 Max desktop**, not batch on iPhone. The "5×–7× realtime" marketing claim does not appear in the paper itself. Our batch RTF on iPhone is structurally outside Argmax's optimization envelope.
+- Maintainer ZachNagengast (Argmax) confirms in [issue #372](https://github.com/argmaxinc/argmax-oss-swift/issues/372) that distilled turbo "**does not hold up as well for various features**". Issues [#167](https://github.com/argmaxinc/argmax-oss-swift/issues/167), [#285](https://github.com/argmaxinc/argmax-oss-swift/issues/285), [#109](https://github.com/argmaxinc/argmax-oss-swift/issues/109) document recurring patterns of empty / truncated / looped outputs on turbo. Argmax's only suggested workaround is tuning `DecodingOptions` thresholds.
+
+### Variant A — `chunkingStrategy: .vad` in isolation
+
+Earlier #163 attempts (Section 5) combined `.vad` with threshold tweaks (`noSpeechThreshold`, `logProbThreshold`, `temperatureFallbackCount`) and regressed. The hypothesis was that the threshold tweaks, not `.vad`, caused the regression. Validated by isolating `.vad`:
+
+```swift
+DecodingOptions(
+    task: .transcribe,
+    language: language,
+    temperature: 0.0,
+    usePrefillPrompt: true,
+    usePrefillCache: true,
+    skipSpecialTokens: true,
+    chunkingStrategy: .vad   // ← only change vs baseline
+)
+```
+
+**Validation on iPhone 15 Pro Max** (Variant A, 2026-05-09):
+
+| Model | Audio | Wall clock | RTF | lastSegEnd / audioSec | Verdict |
+|---|---|---|---|---|---|
+| small | 35.02 s | 2.03 s | 17.3× | 34.54 / 35.02 | ✓ complete |
+| medium | 4.40 s | 1.83 s | 2.40× | 4.24 / 4.40 | ✓ complete |
+| medium | 23.51 s | 5.26 s | 4.47× | 23.20 / 23.51 | ✓ complete |
+| medium | 33.62 s | 8.08 s | 4.16× | 33.40 / 33.62 | ✓ complete |
+| turbo | 5.20 s | 2.19 s | 2.38× | 5.20 / 5.20 | ✓ complete |
+| turbo | 25.72 s | 8.91 s | 2.88× | 25.70 / 25.72 | ✓ complete |
+| turbo | 33.52 s | 12.40 s | 2.70× | 33.52 / 33.52 | ✓ **complete (was: 71 words / 8 words)** |
+
+Compared to the pre-#163 logs: turbo 33.4 s went from 71 words (last sentence missing) to **106 words complete**, and turbo 31.9 s from 8 words (catastrophic) to consistent full transcription.
+
+**Bonus**: turbo wall-clock improved ~2× vs the earlier `.vad`+thresholds attempt. Likely because the threshold tweaks were triggering temperature-fallback cascades (full re-decodes), which are no longer firing.
+
+**No regression** on small / medium. No errors / fallbacks / cancels in the run logs.
+
+Per-model decoding architecture (axis C of #168) is **not needed** — `.vad` works for all four Whisper variants. The single shared `WhisperKitEngine` stays as-is.
 
 ---
 
-## 8. References
+## 8. Open questions still live after #163
 
-- Issue #163 (this branch's reason for existing): https://github.com/getdictus/dictus-ios/issues/163
+The audit answered most of #168, but two threads remain:
+
+### Q1 — Turbo's absolute slowness on iPhone
+Variant A confirms turbo at **2.7× RTF** while small runs at **17×** on the same device. Turbo is *slower* than medium in batch mode despite the distilled decoder. Likely structural (large encoder + ANE specialization slowness — see Argmax [#301](https://github.com/argmaxinc/argmax-oss-swift/issues/301), [#304](https://github.com/argmaxinc/argmax-oss-swift/issues/304)), not a Dictus bug. Tracked as a separate issue with concrete next steps: test alternative quantizations (`large-v3-v20240930_turbo_632MB`, `distil-whisper_distil-large-v3_turbo_600MB`), confirm ANE-utilisation via Instruments, and surface "slow but accurate" UX cues in the model picker.
+
+### Q2 — WhisperKit upgrade as standalone hygiene
+v1.0.0 brings package URL change + Swift 6 + minor breaking renames. None of it helps any current bug, but staying on the supported branch is good housekeeping. To be planned as its own issue when bandwidth allows.
+
+---
+
+## 9. References
+
+- Issue #163 (resolved by Variant A): https://github.com/getdictus/dictus-ios/issues/163
+- Issue #168 (the wider audit, this document's home): https://github.com/getdictus/dictus-ios/issues/168
 - Issue #144 (related, fixed in PR #164): https://github.com/getdictus/dictus-ios/issues/144
 - WhisperKit source 0.16.0: https://github.com/argmaxinc/WhisperKit/tree/v0.16.0
 - WhisperKit paper (ICML 2025): https://arxiv.org/html/2507.10860v1
