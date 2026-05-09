@@ -30,6 +30,12 @@ struct ModelDownloadPage: View {
     @State private var downloadComplete = false
     @State private var errorMessage: String?
 
+    /// Issue #144: identifier currently being prepared. Drives a full-screen
+    /// `ModelLoadingOverlay` while the model goes through download → compile →
+    /// RAM load, so the onboarding shares the same wait UX as the in-app
+    /// model manager.
+    @State private var preparingModelID: String?
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -138,6 +144,48 @@ struct ModelDownloadPage: View {
             if modelManager.downloadedModels.contains(recommendedModel) {
                 downloadComplete = true
             }
+            // If the user backgrounded the app mid-prep, surface the overlay again.
+            if preparingModelID == nil, let id = liveActivePrepModel {
+                preparingModelID = id
+            }
+        }
+        .onChange(of: liveActivePrepModel) { _, newValue in
+            if let id = newValue, preparingModelID == nil {
+                preparingModelID = id
+            }
+        }
+        .fullScreenCover(item: Binding<PreparingItem?>(
+            get: { preparingModelID.map(PreparingItem.init) },
+            set: { preparingModelID = $0?.id }
+        )) { item in
+            ModelLoadingOverlay(
+                modelManager: modelManager,
+                modelIdentifier: item.id,
+                isPresented: Binding(
+                    get: { preparingModelID != nil },
+                    set: { if !$0 { preparingModelID = nil } }
+                )
+            )
+        }
+    }
+
+    /// Wrapper so `.fullScreenCover(item:)` works with a plain String identifier.
+    private struct PreparingItem: Identifiable {
+        let id: String
+    }
+
+    /// First identifier currently in a user-facing prep phase. Mirrors the same
+    /// computation as `ModelManagerView` so the overlay behavior is identical.
+    private var liveActivePrepModel: String? {
+        if modelManager.modelLoadState == .loading,
+           let active = modelManager.activeModel {
+            return active
+        }
+        switch modelManager.modelStates[recommendedModel] ?? .notDownloaded {
+        case .prewarming, .downloading:
+            return recommendedModel
+        default:
+            return nil
         }
     }
 
@@ -177,15 +225,21 @@ struct ModelDownloadPage: View {
     private func startDownload() {
         isDownloading = true
         errorMessage = nil
+        // Surface the full-screen overlay immediately so the user sees feedback
+        // even before the first download progress callback fires.
+        preparingModelID = recommendedModel
 
         Task {
             do {
                 try await modelManager.downloadModel(recommendedModel)
                 downloadComplete = true
                 isDownloading = false
+                // The overlay closes itself once preloadActiveModel reaches .ready;
+                // we don't flip preparingModelID here.
             } catch {
                 errorMessage = error.localizedDescription
                 isDownloading = false
+                preparingModelID = nil
             }
         }
     }

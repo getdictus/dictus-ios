@@ -87,19 +87,35 @@ class WhisperKitEngine: SpeechModelProtocol {
             throw TranscriptionError.emptyAudio
         }
 
+        // Variant A — `.vad` only. Issue #168 audit found WhisperAX canonical
+        // defaults to chunkingStrategy = .vad. Earlier attempts on #163 combined
+        // .vad with threshold tweaks (noSpeechThreshold, logProbThreshold) which
+        // regressed long-form turbo. Testing .vad in isolation here.
         let options = DecodingOptions(
             task: .transcribe,
             language: language,
             temperature: 0.0,
             usePrefillPrompt: true,
             usePrefillCache: true,
-            skipSpecialTokens: true
+            skipSpecialTokens: true,
+            chunkingStrategy: .vad
         )
 
         let results: [TranscriptionResult] = try await whisperKit.transcribe(
             audioArray: audioSamples,
             decodeOptions: options
         )
+
+        let totalSegments = results.reduce(0) { $0 + $1.segments.count }
+        let totalCharCount = results.reduce(0) { $0 + $1.text.count }
+        let lastSegmentEnd = results.flatMap { $0.segments }.map { $0.end }.max() ?? 0
+        let audioDurationSec = Float(audioSamples.count) / 16_000.0
+        PersistentLog.log(.diagnosticProbe(
+            component: "WhisperKitEngine",
+            instanceID: "transcribe",
+            action: "segmentsReturned",
+            details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
+        ))
 
         let text = results.map { $0.text }.joined(separator: " ")
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)

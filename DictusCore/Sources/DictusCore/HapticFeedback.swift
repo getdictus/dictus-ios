@@ -133,6 +133,15 @@ public enum HapticFeedback {
         #endif
     }
 
+    /// Error notification feedback when an action is refused (e.g. mic tap during a model load).
+    public static func actionRefused() {
+        #if canImport(UIKit) && !os(macOS)
+        guard isEnabled() else { return }
+        notificationGenerator.notificationOccurred(.error)
+        notificationGenerator.prepare()
+        #endif
+    }
+
     /// Selection feedback for keyboard key taps.
     ///
     /// WHY selectionGenerator instead of lightGenerator:

@@ -111,6 +111,10 @@ public struct ModelInfo: Identifiable {
             description: "Fast but inaccurate",
             visibility: .deprecated
         ),
+        // Speed scores recalibrated 2026-05-09 from measured RTF on iPhone 15 Pro Max
+        // (issue #168 audit / PR #170): small ~17×, medium ~4×, turbo ~2.7×.
+        // The pre-recalibration scores ranked turbo above medium for speed, which
+        // contradicted measurement and misled users at model selection.
         ModelInfo(
             identifier: "openai_whisper-small",
             displayName: "Small",
@@ -118,7 +122,7 @@ public struct ModelInfo: Identifiable {
             sizeBytes: 250_000_000,
             engine: .whisperKit,
             accuracyScore: 0.6,
-            speedScore: 0.7,
+            speedScore: 0.95,
             description: "Accurate and balanced",
             visibility: .available
         ),
@@ -129,7 +133,7 @@ public struct ModelInfo: Identifiable {
             sizeBytes: 216_000_000,
             engine: .whisperKit,
             accuracyScore: 0.55,
-            speedScore: 0.75,
+            speedScore: 0.95,
             description: "Compact and fast",
             visibility: .available
         ),
@@ -140,7 +144,7 @@ public struct ModelInfo: Identifiable {
             sizeBytes: 750_000_000,
             engine: .whisperKit,
             accuracyScore: 0.8,
-            speedScore: 0.4,
+            speedScore: 0.55,
             description: "Best accuracy",
             visibility: .available
         ),
@@ -151,7 +155,7 @@ public struct ModelInfo: Identifiable {
             sizeBytes: 800_000_000,
             engine: .parakeet,
             accuracyScore: 0.85,
-            speedScore: 0.9,
+            speedScore: 0.85,
             description: "Fast and accurate (NVIDIA)",
             visibility: .available
         ),
@@ -175,8 +179,8 @@ public struct ModelInfo: Identifiable {
             sizeBytes: 954_000_000,
             engine: .whisperKit,
             accuracyScore: 0.9,
-            speedScore: 0.6,
-            description: "Highest accuracy — larger download",
+            speedScore: 0.2,
+            description: "Most accurate but slowest",
             visibility: .available
         ),
     ]
