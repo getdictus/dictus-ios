@@ -87,6 +87,10 @@ class WhisperKitEngine: SpeechModelProtocol {
             throw TranscriptionError.emptyAudio
         }
 
+        // Default DecodingOptions — earlier tuning attempts (chunkingStrategy=.vad,
+        // temperature fallback tweaks, threshold tightening) regressed long-form
+        // turbo to empty output and didn't improve speed. See docs/WHISPERKIT_TUNING.md
+        // for the investigation and what was tried.
         let options = DecodingOptions(
             task: .transcribe,
             language: language,
@@ -100,6 +104,17 @@ class WhisperKitEngine: SpeechModelProtocol {
             audioArray: audioSamples,
             decodeOptions: options
         )
+
+        let totalSegments = results.reduce(0) { $0 + $1.segments.count }
+        let totalCharCount = results.reduce(0) { $0 + $1.text.count }
+        let lastSegmentEnd = results.flatMap { $0.segments }.map { $0.end }.max() ?? 0
+        let audioDurationSec = Float(audioSamples.count) / 16_000.0
+        PersistentLog.log(.diagnosticProbe(
+            component: "WhisperKitEngine",
+            instanceID: "transcribe",
+            action: "segmentsReturned",
+            details: "results=\(results.count) segments=\(totalSegments) chars=\(totalCharCount) audioSec=\(String(format: "%.2f", audioDurationSec)) lastSegmentEndSec=\(String(format: "%.2f", lastSegmentEnd))"
+        ))
 
         let text = results.map { $0.text }.joined(separator: " ")
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
