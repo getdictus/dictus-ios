@@ -60,6 +60,14 @@ enum HostAppProbe {
     /// Class-level accessor for the arbiter singleton.
     private static let sharedClientSelectorName = "automaticSharedArbiterClient"
 
+    /// The class-level switch that decides whether the arbiter runs at all.
+    ///
+    /// Spelled in clear here. KeyboardKit assembles the same seven characters from four
+    /// `movk` immediates as a Swift small string, which is precisely why the earlier
+    /// strings-based analysis of their binary recovered every other name in this feature
+    /// and missed this one — it had to be disassembled out of `+0x2028a4`.
+    private static let enabledSelectorName = "enabled"
+
     // MARK: - Series configuration
 
     /// How many one-second readings follow each appearance of the keyboard.
@@ -70,6 +78,19 @@ enum HostAppProbe {
     /// correct. A series that stopped before 8 s would reproduce their conclusion by
     /// construction instead of testing it.
     private static let seriesTickCount = 10
+
+    /// Sub-second offsets, in milliseconds, sampled before the one-second grid starts.
+    ///
+    /// Added in round 2 because the grid turned out to be too coarse for the question it
+    /// was asked. With the arbiter activated, the first simulator capture read
+    /// `clientState=nil` at 1 ms and the correct bundle ID at 1003 ms — which settles
+    /// that `viewWillAppear` alone is not enough, and says nothing about how long a
+    /// resolve would actually have to wait. Phase 1 has to bound that wait, and a bound
+    /// of "somewhere under a second" is a guess with extra steps.
+    ///
+    /// Five samples, not fifty: each one is a line in a log budgeted at 1 MB, and the
+    /// decision they feed needs an order of magnitude, not a millisecond.
+    private static let earlySampleOffsetsMs = [100, 200, 300, 500, 750]
 
     // MARK: - State
 
@@ -87,10 +108,20 @@ enum HostAppProbe {
     /// diagnostic is the last place that trap belongs.
     private static var seriesTimer: Timer?
 
+    /// Which appearance the queued sub-second samples belong to. Bumped on every start
+    /// and every stop, so a sample that fires late finds its ticket stale and says
+    /// nothing. See `scheduleEarlySamples`.
+    private static var earlySampleGeneration = 0
+
     /// Whether this process has already stated its iOS version. Once is enough: the
     /// version cannot change inside a process, and repeating it on 12 lines per
     /// appearance would spend a 1 MB budgeted log on a constant.
     private static var hasLoggedSystemVersion = false
+
+    /// What happened the first time this process tried to install the activation
+    /// swizzle, or nil if it has not tried yet. Doubles as the idempotency latch: a
+    /// second call returns `already(...)` rather than stacking another IMP.
+    private static var activationOutcome: String?
 
     /// The controller that last appeared, for the `_hostProcessIdentifier` cross-check.
     ///
@@ -108,7 +139,10 @@ enum HostAppProbe {
     static func keyboardDidAppear(_ controller: UIInputViewController) {
         appearedController = controller
         appearedAt = Date()
-        emit(moment: "viewWillAppear")
+        // Activation first, so even the elapsedMs=0 reading is taken with the arbiter
+        // switched on. Everything after this is a plain read.
+        let activation = activateArbiter()
+        emit(moment: "viewWillAppear", activation: activation)
     }
 
     /// Takes a reading at the mic tap — the moment phase 1 would actually need the
@@ -123,6 +157,7 @@ enum HostAppProbe {
     /// measurement, and each switch brings the keyboard up again.
     static func startAppearanceSeries() {
         stopAppearanceSeries()
+        scheduleEarlySamples()
         var tick = 0
         seriesTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
             tick += 1
@@ -140,12 +175,39 @@ enum HostAppProbe {
     static func stopAppearanceSeries() {
         seriesTimer?.invalidate()
         seriesTimer = nil
+        earlySampleGeneration &+= 1
+    }
+
+    /// Queues the sub-second readings that bracket the population delay.
+    ///
+    /// `asyncAfter` rather than more timers: five one-shot waits are simpler than five
+    /// `Timer`s to invalidate, and the generation counter is what cancels them — a
+    /// dispatch work item cannot be un-queued once it is on the main queue, so the ticket
+    /// it captured is checked when it runs instead. A keyboard dismissed at 150 ms
+    /// therefore writes no line at 750 ms, and a second appearance cannot interleave its
+    /// samples with the first's.
+    private static func scheduleEarlySamples() {
+        earlySampleGeneration &+= 1
+        let ticket = earlySampleGeneration
+        for offset in earlySampleOffsetsMs {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(offset)) {
+                guard earlySampleGeneration == ticket else { return }
+                emit(moment: "early\(String(format: "%04d", offset))")
+            }
+        }
     }
 
     // MARK: - Emission
 
-    private static func emit(moment: String) {
+    private static func emit(moment: String, activation: String? = nil) {
         var details = read()
+        if let activation {
+            // Only on the appearance lines, not on the ten series ticks that follow: the
+            // value cannot change within an appearance, and one line per appearance is
+            // what makes the idempotency visible — the first says `installed`, every
+            // later one says `already(installed)`.
+            details = "swizzle=\(activation) " + details
+        }
         if !hasLoggedSystemVersion {
             hasLoggedSystemVersion = true
             // Prepended, not appended: this API can be withdrawn in any iOS release, so
@@ -158,6 +220,75 @@ enum HostAppProbe {
             elapsedMs: Int(Date().timeIntervalSince(appearedAt) * 1000),
             details: details
         ))
+    }
+
+    // MARK: - Activation
+
+    /// Switches the keyboard arbiter on, by making `+[_UIKeyboardArbiterClient enabled]`
+    /// answer `true`. Runs at most once per keyboard process.
+    ///
+    /// ## Why a swizzle at all
+    ///
+    /// Round 1 of this probe read the arbiter chain on a physical iPhone 85 times across
+    /// eight changes of host app and got `sharedClient=nil` every single time, while the
+    /// class itself resolved and its accessor responded. The mechanism is not withdrawn;
+    /// it is switched off. Disassembling the KeyboardKit binary — rather than only
+    /// reading its strings, which is where the first analysis stopped — shows it doing
+    /// exactly this: `NSClassFromString` → `NSSelectorFromString("enabled")` →
+    /// `class_getClassMethod` → `imp_implementationWithBlock` → `method_setImplementation`,
+    /// with a replacement block that returns a `Bool`.
+    ///
+    /// That the swizzle is what *causes* `automaticSharedArbiterClient` to stop returning
+    /// nil is an inference, not an observation. This function exists to settle it in one
+    /// device pass, and the `swizzle=` field on the appearance lines is what makes the
+    /// answer readable: a nil after a failed install and a nil despite a successful one
+    /// are two different results.
+    ///
+    /// ## What it costs, stated plainly
+    ///
+    /// This is the most invasive line in the repository, and a reader from outside the
+    /// project should understand it in ten seconds: **it replaces the implementation of a
+    /// private UIKit class method, for the whole process, for the rest of its life.**
+    ///
+    /// Reading a private property is passive — Apple removes it, the read returns nil,
+    /// and the feature degrades to the manual swipe-back overlay that ships today.
+    /// Swizzling is not passive. If Apple changes this method's signature or its meaning,
+    /// the failure is not a nil: it is a keyboard extension that behaves differently, or
+    /// does not start. It is also far more visible to static analysis than a KVC read.
+    ///
+    /// Two App Store apps ship this technique. That makes it documented, not safe.
+    /// Whether Dictus ships it is a decision that has not been taken; this file is the
+    /// measurement that decision is waiting on, and nothing here reaches a user.
+    ///
+    /// ## Why it cannot double-install
+    ///
+    /// `method_setImplementation` overwrites rather than chains, so a second call would
+    /// not leak an IMP — but it would allocate a second trampoline and make the log lie
+    /// about how many times this ran. `activationOutcome` latches on the first attempt,
+    /// including the failing attempts: a class that is not there will not appear later.
+    ///
+    /// Returns `installed`, `<no-class>`, `<no-method>`, or `already(...)`.
+    private static func activateArbiter() -> String {
+        if let outcome = activationOutcome { return "already(\(outcome))" }
+
+        guard let (_, arbiterClass) = resolveArbiterClass() else {
+            activationOutcome = "<no-class>"
+            return "<no-class>"
+        }
+        guard let method = class_getClassMethod(arbiterClass, NSSelectorFromString(enabledSelectorName)) else {
+            // A result, not a failure to recover from: it says Apple has taken the
+            // switch away, which is the one outcome that closes this line of enquiry.
+            activationOutcome = "<no-method>"
+            return "<no-method>"
+        }
+
+        // A class method's block takes the class object as its receiver and no `_cmd`.
+        // `ObjCBool` rather than `Bool` so the return type is the Objective-C `BOOL`
+        // by name and not by the coincidence that the two agree on arm64.
+        let replacement: @convention(block) (AnyObject) -> ObjCBool = { _ in ObjCBool(true) }
+        _ = method_setImplementation(method, imp_implementationWithBlock(replacement))
+        activationOutcome = "installed"
+        return "installed"
     }
 
     // MARK: - The read
