@@ -4,17 +4,24 @@ import Foundation
 
 /// A canonical spelling plus zero or more variants the engine writes in its place.
 ///
-/// ### What an entry does, and why the variants are optional (#80 decisions 4 and 7)
+/// ### What an entry does (#80 decision 4, amended by #536)
 ///
-/// 1. **Each variant triggers a replacement** to `term` on the raw transcript. That
-///    works for every user, every engine and every language, because it is text and
-///    not acoustics — see `VocabularyReplacer`.
-/// 2. **`term` joins the polish glossary**, so a term with no variant at all is not
-///    inert: the polish prompt is told to spell it exactly as written.
+/// **Each variant triggers a replacement** to `term` on the raw transcript. That
+/// works for every user, every engine and every language, because it is text and not
+/// acoustics — see `VocabularyReplacer`. It is the whole of what an entry does, and
+/// it is what keeps the paywall sentence honest.
 ///
-/// The second point is what keeps the paywall sentence honest. "Teach Dictus your
-/// technical terms" has to mean something for a user who types `Kubernetes` and
-/// cannot yet say what the engine mangles it into.
+/// It used to be half. #80 decision 7 also put `term` in the polish prompt, which is
+/// what let an entry with no variants claim to protect a spelling; #536 measured that
+/// claim false on device and withdrew the decision. The prompt no longer carries a
+/// term list at all, so **an entry with no variants changes nothing** — see
+/// `hasEffect`, which the add sheet uses to refuse one.
+///
+/// ### Why `variants` can still be empty
+///
+/// Entries stored before #536 have none, and the file is the user's data. `init?` and
+/// `isValid` deliberately keep accepting them, so nothing already on disk is dropped
+/// at load; the requirement lives at the point of entry instead.
 ///
 /// ### Why there is no language tag (#80 decision 9)
 ///
@@ -39,10 +46,11 @@ public struct VocabularyEntry: Codable, Identifiable, Equatable, Sendable {
 
     public let id: UUID
 
-    /// The canonical spelling. What replacements emit, and what the glossary carries.
+    /// The canonical spelling. What replacements emit.
     public let term: String
 
-    /// What the engine produces instead. May be empty.
+    /// What the engine produces instead. May be empty, and an entry whose variants
+    /// are empty does nothing — see `hasEffect`.
     public let variants: [String]
 
     /// The per-entry switch (#80 decision 8). The replacement is silent, so this and
@@ -109,6 +117,18 @@ public struct VocabularyEntry: Codable, Identifiable, Equatable, Sendable {
             term: term, variants: variants, isEnabled: isEnabled, id: id, dateAdded: dateAdded
         )
         return rebuilt == self
+    }
+
+    /// Whether this entry can change a transcript at all (#536).
+    ///
+    /// Separate from `isValid` on purpose, and the separation is the whole design:
+    /// `isValid` decides what may be **stored**, and the store filters on it at load,
+    /// so folding this rule into it would silently delete every variant-less entry
+    /// written before #536. This decides what is **worth storing**, and only the add
+    /// sheet asks — a stored entry that answers `false` is kept, listed, and flagged
+    /// on screen with the one action that fixes it.
+    public var hasEffect: Bool {
+        !variants.isEmpty
     }
 
     /// The same entry with its switch flipped. Used by the list's per-row toggle.

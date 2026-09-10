@@ -1,14 +1,13 @@
 // DictusCore/Sources/DictusCore/Vocabulary/CustomVocabulary.swift
-// Who may use the vocabulary, and the two things it does with it (#80).
+// Who may use the vocabulary, and the one thing it does with it (#80).
 import Foundation
 
 /// The entitlement policy for custom vocabulary (#80).
 ///
-/// A type rather than two `if`s at the call sites, for the reason
+/// A type rather than an `if` at the call site, for the reason
 /// `HistoryAvailability` gives: an entitlement answered inline, in whichever
 /// consumer happens to need it, is an entitlement the next consumer will answer
-/// differently. There are already two — the replacement pass in DictusApp and the
-/// glossary in whichever process is polishing.
+/// differently.
 public enum VocabularyAvailability {
 
     /// Whether the user is paying for the vocabulary **and** has it switched on.
@@ -18,18 +17,26 @@ public enum VocabularyAvailability {
     /// `true` by `ProStatusManager.seedFeatureTogglesIfNeeded`, and a subscriber who
     /// switched it off in Settings has said what they want.
     ///
-    /// Turning it off stops the replacements and the glossary contribution. It does
-    /// not delete anything — see `VocabularyStore`, where removal is ungated.
+    /// Turning it off stops the replacements. It does not delete anything — see
+    /// `VocabularyStore`, where removal is ungated.
     public static var isEntitled: Bool {
         FeatureGate.isAvailable(.vocabulary)
     }
 }
 
-/// The two things the vocabulary does, behind one gate.
+/// What the vocabulary does, behind one gate.
 ///
-/// Both consumers go through here rather than reading the store directly, so the
+/// The consumer goes through here rather than reading the store directly, so the
 /// entitlement is checked in one place and the "nothing stored" path is one
-/// expression instead of two.
+/// expression.
+///
+/// **It used to do two things.** The canonical term also joined the polish prompt
+/// (#80 decision 7), which is what let an entry with no variants claim to protect a
+/// spelling. #536 measured that on device — the correct spelling sat in the prompt
+/// and Apple FM wrote `dictés` for `dictus` and left `Parakit V3` alone, while
+/// `whisperflow`, in nobody's list, was corrected by the model's own priors — and a
+/// competitor asking for phonetic repair in a tagged block scored 0/5 on the same
+/// device. The term list is gone; a replacement is what an entry does.
 public enum CustomVocabulary {
 
     /// Rewrite the engine's variants into the user's spellings.
@@ -67,26 +74,5 @@ public enum CustomVocabulary {
     /// log exists to keep readable.
     public static func corrected(_ text: String, entries: [VocabularyEntry]) -> String {
         VocabularyReplacer.apply(text, entries: entries)
-    }
-
-    /// The user's canonical terms, for the polish glossary (#80 decision 7).
-    ///
-    /// This is what makes an entry with no variants useful: the prompt is told to
-    /// spell the term exactly as written. It only reaches users with Apple
-    /// Intelligence, which is why the issue calls it a silent bonus rather than
-    /// something the paywall promises.
-    public static func glossaryTerms() -> [String] {
-        activeEntries().map(\.term)
-    }
-
-    /// The enabled entries, or none at all when the feature is not the user's.
-    ///
-    /// Read from disk on every call rather than cached. A dictation is the unit
-    /// here: one read of at most 200 short records per transcription, in a process
-    /// that has just finished running a speech model, against a cache that would
-    /// have to be invalidated across two processes to stay correct.
-    static func activeEntries() -> [VocabularyEntry] {
-        guard VocabularyAvailability.isEntitled else { return [] }
-        return VocabularyStore.loadEntries().filter(\.isEnabled)
     }
 }

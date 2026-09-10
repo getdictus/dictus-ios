@@ -134,6 +134,22 @@ final class VocabularyStoreTests: XCTestCase {
         XCTAssertEqual(makeStore().entries.map(\.term), ["Kubernetes"])
     }
 
+    /// **#536's no-data-destroyed clause, executable.** The add sheet now refuses an
+    /// entry with no variant. Every entry saved before that has none, and this is
+    /// what says they are not quietly dropped the next time the file is read: the
+    /// requirement is enforced at the point of entry, never at load.
+    func testAnEntryStoredWithoutVariantsStillLoadsAndStillLists() {
+        let json = """
+        [{"id":"\(UUID().uuidString)","term":"Systeko","variants":[],\
+        "isEnabled":true,"dateAdded":"2026-09-07T10:00:00Z"}]
+        """
+        try? Data(json.utf8).write(to: fileURL)
+        let store = makeStore()
+        XCTAssertEqual(store.entries.map(\.term), ["Systeko"])
+        XCTAssertEqual(store.entries.first?.hasEffect, false,
+                       "it must load, and it must still say it does nothing")
+    }
+
     func testTheStoreLivesInTheAppGroupContainerBesideTheHistory() {
         // The reason is #428: shared `UserDefaults` survives a reinstall with no way
         // out, and a corrupted vocabulary would too. A file has Reset vocabulary.

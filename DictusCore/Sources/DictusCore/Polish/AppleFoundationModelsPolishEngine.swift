@@ -246,8 +246,6 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
     /// a prompt file, and nothing here moves.
     public static func instructions(for task: PolishTask,
                                     language: SupportedLanguage) -> String {
-        // The user's own terms ride along with the curated ones (#80 decision 7).
-        let glossary = PolishGlossary.activePromptBlock
         if let smartMode = task.smartMode {
             return smartMode.prompt.instructions
         }
@@ -255,23 +253,23 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
         // `smartMode` and `polishMode` are the two halves of the same enum.
         switch (task.polishMode ?? .natural, language) {
         case (.auto, _):
-            return PolishAutoPrompt.instructions(glossary: glossary)
+            return PolishAutoPrompt.instructions()
         case (.natural, .french):
-            return PolishNaturalPromptFR.instructions(glossary: glossary)
+            return PolishNaturalPromptFR.instructions()
         case (.natural, .english):
-            return PolishNaturalPromptEN.instructions(glossary: glossary)
+            return PolishNaturalPromptEN.instructions()
         case (.natural, .spanish):
-            return PolishNaturalPromptES.instructions(glossary: glossary)
+            return PolishNaturalPromptES.instructions()
         case (.natural, .german):
-            return PolishNaturalPromptDE.instructions(glossary: glossary)
+            return PolishNaturalPromptDE.instructions()
         case (.repair, .french):
-            return PolishRepairPromptFR.instructions(glossary: glossary)
+            return PolishRepairPromptFR.instructions()
         case (.repair, .english):
-            return PolishRepairPromptEN.instructions(glossary: glossary)
+            return PolishRepairPromptEN.instructions()
         case (.repair, .spanish):
-            return PolishRepairPromptES.instructions(glossary: glossary)
+            return PolishRepairPromptES.instructions()
         case (.repair, .german):
-            return PolishRepairPromptDE.instructions(glossary: glossary)
+            return PolishRepairPromptDE.instructions()
         }
     }
 }

@@ -174,7 +174,7 @@
   "source": "constructed-2026-09-07",
   "fixture": "V8-term-without-variants-is-inert-here",
   "origin": "constructed",
-  "note": "Decision 7 seen from the replacement side: a term with no variants changes nothing in the transcript. Its work happens in the polish glossary, which this harness does not measure.",
+  "note": "A term with no variants changes nothing in the transcript. Decision 7 claimed its work happened in the polish glossary instead; #536 measured that as nothing at all and removed the glossary, so the add sheet now requires a variant. Entries stored before that still load, and still behave exactly like this case.",
   "covers": [
    "no variants",
    "identity"
