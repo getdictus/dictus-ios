@@ -22,7 +22,7 @@ extension DictationCoordinator {
 
     /// A dictation started inside DictusApp: polish here, exactly as every dictation
     /// did before #361, and show the result in the app.
-    func finishInApp(rawText: String,
+    func finishInApp(transcript: DictationTranscript,
                      languagePolicy: TranscriptionLanguagePolicy,
                      smartMode: SmartMode?,
                      audioDuration: TimeInterval,
@@ -36,10 +36,12 @@ extension DictationCoordinator {
         // label and a new animation for a single frame. `onEngineWillRun`
         // fires only once an engine worth waiting for is about to run.
         let outcome = await PolishCoordinator.shared.polish(
-            raw: rawText,
+            raw: transcript.text,
             languagePolicy: languagePolicy,
             smartMode: smartMode,
             recordingDuration: audioDuration,
+            // Recorded, never polished on (#80): see `DictationTranscript`.
+            engineRaw: transcript.engineRaw,
             // Gated like every other write this task makes: the callback
             // fires from inside `polish`, which a cancel does not interrupt,
             // so an abandoned dictation would otherwise reopen the keyboard
@@ -154,6 +156,9 @@ extension DictationCoordinator {
         // merely not written, because the previous dictation's blob could still be
         // lying here if no keyboard ever claimed it.
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionPolicy)
+        // Same reason, and the same "cleared rather than not written": a previous
+        // hand-off's engine text could still be lying here (#80).
+        defaults.removeObject(forKey: SharedKeys.lastTranscriptionEngineRaw)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionDuration)
         // Same reasoning one key up: cleared rather than merely not written, because
         // a previous hand-off's mode could still be lying here if no keyboard ever
@@ -193,11 +198,14 @@ extension DictationCoordinator {
     /// (#423): a dictation either runs the armed mode or owes the user a sentence about
     /// why it did not, the two are mutually exclusive, and passing them separately
     /// would let a caller write one without the other.
-    func handOffToKeyboard(rawText: String,
+    func handOffToKeyboard(transcript: DictationTranscript,
                            languagePolicy: TranscriptionLanguagePolicy,
                            smartMode: SmartModeResolution,
                            audioDuration: TimeInterval,
                            session: Int) {
+        // The text the keyboard will type: the corrected one, not the engine's.
+        // `transcript.engineRaw` travels beside it purely to be recorded (#80).
+        let rawText = transcript.text
         // The last transcription the user sees in the app, until the keyboard reports
         // what it actually typed. Raw rather than nothing: if the keyboard never gets
         // back to us, the card should still show the dictation that happened.
@@ -217,6 +225,14 @@ extension DictationCoordinator {
         ))?.id
         status = .ready
         defaults.set(rawText, forKey: SharedKeys.lastTranscription)
+        // Only when the vocabulary pass actually changed something (#80). Absent is
+        // the normal case and reads as "identical to the text above", so nothing is
+        // written for a user who has stored no terms.
+        if let engineRaw = transcript.engineRaw {
+            defaults.set(engineRaw, forKey: SharedKeys.lastTranscriptionEngineRaw)
+        } else {
+            defaults.removeObject(forKey: SharedKeys.lastTranscriptionEngineRaw)
+        }
         if let policyData = try? JSONEncoder().encode(languagePolicy) {
             defaults.set(policyData, forKey: SharedKeys.lastTranscriptionPolicy)
         } else {
@@ -227,6 +243,8 @@ extension DictationCoordinator {
             // language while polishing in another is the bug the snapshot exists to
             // prevent.
             defaults.removeObject(forKey: SharedKeys.lastTranscriptionPolicy)
+            // The hand-off is off; nothing may be left behind to describe the next one.
+            defaults.removeObject(forKey: SharedKeys.lastTranscriptionEngineRaw)
             PersistentLog.log(.dictationFailed(error: "language policy did not encode for hand-off"))
         }
         defaults.set(audioDuration, forKey: SharedKeys.lastTranscriptionDuration)

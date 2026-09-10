@@ -87,6 +87,8 @@ final class KeyboardPolishCoordinator {
         let duration = defaults.double(forKey: SharedKeys.lastTranscriptionDuration)
         let pending = PendingDictation(
             raw: raw,
+            // Absent unless the vocabulary pass changed something in the app (#80).
+            engineRaw: defaults.string(forKey: SharedKeys.lastTranscriptionEngineRaw),
             policy: policy,
             smartMode: storedSmartMode(),
             skippedSmartMode: storedSkippedSmartMode(),
@@ -96,6 +98,7 @@ final class KeyboardPolishCoordinator {
         PendingDictationChannel.store(pending)
         handoffToken = defaults.string(forKey: SharedKeys.handoffToken)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionPolicy)
+        defaults.removeObject(forKey: SharedKeys.lastTranscriptionEngineRaw)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionDuration)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionSmartMode)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionSmartModeSkipped)
@@ -238,6 +241,8 @@ final class KeyboardPolishCoordinator {
             languagePolicy: pending.policy,
             smartMode: pending.smartMode,
             recordingDuration: pending.recordingDuration,
+            // Recorded, never polished on (#80).
+            engineRaw: pending.engineRaw,
             onEngineWillRun: { [weak self] in
                 self?.announceProcessingStage()
             }
