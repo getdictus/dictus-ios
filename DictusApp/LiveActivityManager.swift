@@ -377,6 +377,23 @@ class LiveActivityManager {
             syncStateMachine(to: currentPhase)
             DictusLogger.app.info("Recovered orphaned Live Activity: \(existing.id, privacy: .public)")
             PersistentLog.log(.liveActivityStarted(id: "orphan-recovered:\(existing.id)"))
+            // An adopted pill keeps the content it was left with, which for a standby one
+            // means the bottom region of whatever process died holding it -- so the last
+            // transcript would be missing from a pill that merely outlived the app, and
+            // present on one that did not (#531). That is exactly the "sometimes there,
+            // sometimes not, for no reason the user can see" state decision 2 rules out, so
+            // the adopted content is brought up to date here.
+            //
+            // WHY only `.standby`: any other phase is a dictation in flight, and stamping
+            // standby over it is #42.
+            if currentPhase == .standby {
+                let refreshed = standbyContent()
+                Task {
+                    await existing.update(
+                        .init(state: refreshed, staleDate: Date().addingTimeInterval(self.staleInterval))
+                    )
+                }
+            }
             // End any extras beyond the first (shouldn't happen, but defense in depth)
             for activity in systemActivities.dropFirst() {
                 Task {
