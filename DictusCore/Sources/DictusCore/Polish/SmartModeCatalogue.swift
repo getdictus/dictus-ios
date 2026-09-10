@@ -67,7 +67,7 @@ public enum SmartModeCatalogue {
         displayName: "List",
         icon: "list.bullet",
         prompt: SmartModePrompt(
-            instructions: SmartModeNotesPrompt.instructions(glossary: PolishGlossary.promptBlock),
+            instructions: SmartModeNotesPrompt.instructions(),
             userInstruction: SmartModeNotesPrompt.userInstruction,
             outputMarker: SmartModeNotesPrompt.outputMarker
         ),
@@ -111,9 +111,7 @@ public enum SmartModeCatalogue {
             // → ES, and pinning both is the whole point of pinning three modes.
             badge: .text(target.shortCode),
             prompt: SmartModePrompt(
-                instructions: SmartModeTranslatePrompt.instructions(
-                    target: target, glossary: PolishGlossary.promptBlock
-                ),
+                instructions: SmartModeTranslatePrompt.instructions(target: target),
                 userInstruction: SmartModeTranslatePrompt.userInstruction(target: target),
                 outputMarker: SmartModeTranslatePrompt.outputMarker
             ),

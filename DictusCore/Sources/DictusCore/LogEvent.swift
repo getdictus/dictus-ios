@@ -347,6 +347,21 @@ public enum LogEvent: Sendable {
     case polishInputLanguageRefused(engine: String, mode: String,
                                     detected: String, mix: String)
 
+    /// Issue #80: the custom-vocabulary pass ran on a transcript.
+    ///
+    /// Emitted on **every** dictation, including when the feature is off, because
+    /// the question this answers at diagnosis time is "did a correction happen?" —
+    /// and a pass that says nothing is indistinguishable from a pass that was never
+    /// wired in. #80's device test cost three round trips and an inspection of the
+    /// App Group container from the Mac to establish that it was running.
+    ///
+    /// `enabled` is the entitlement and the toggle together, so "switched off" and
+    /// "on but the vocabulary is empty" read differently. **Counters only, never a
+    /// term and never a fragment of the transcript**: the persistent log ships in
+    /// Release, which is the whole reason `autocorrectDebugLogging` is a separate
+    /// DEBUG-only surface.
+    case vocabularyApplied(enabled: Bool, entries: Int, replacements: Int, chars: Int)
+
     /// Issue #315: polish stopped calling its engine for the rest of this process,
     /// after `consecutiveRefusals` `rateLimited` results in a row.
     ///
@@ -482,7 +497,7 @@ public enum LogEvent: Sendable {
         case .polishEngineFailed, .polishEngineUnavailable, .polishHandoff,
              .polishInputLanguageRefused,
              .polishInsertionRefused, .polishCallSuperseded,
-             .smartModeRefused, .smartModeSkipped:
+             .smartModeRefused, .smartModeSkipped, .vocabularyApplied:
             return .transcription
         }
     }
@@ -581,9 +596,11 @@ public enum LogEvent: Sendable {
         // the refusal is the guard doing its job rather than something going wrong.
         // A superseded call is likewise the documented behaviour of decision 15.
         // The pre-flight refusal joins them (#490): the check declining a call the
-        // backend was going to refuse anyway is the guard working, not a fault.
+        // backend was going to refuse anyway is the guard working, not a fault. So
+        // does the vocabulary pass (#80), which reports on every dictation whether
+        // or not it had anything to do.
         case .polishHandoff, .polishInsertionRefused, .polishCallSuperseded,
-             .polishInputLanguageRefused:
+             .polishInputLanguageRefused, .vocabularyApplied:
             return .info
 
         // Warning: a Smart Mode that refused its own output cost the user a
@@ -705,6 +722,7 @@ public enum LogEvent: Sendable {
         case .modelDownloadSessionRestored: return "modelDownloadSessionRestored"
         case .modelDownloadOffline: return "modelDownloadOffline"
         case .polishEngineFailed: return "polishEngineFailed"
+        case .vocabularyApplied: return "vocabularyApplied"
         case .polishEngineUnavailable: return "polishEngineUnavailable"
         case .polishInputLanguageRefused: return "polishInputLanguageRefused"
         case .polishHandoff: return "polishHandoff"
@@ -973,6 +991,9 @@ public enum LogEvent: Sendable {
         case .polishEngineFailed(let reason, let engine, let mode, let engineMs, let detected, let mix):
             return "reason=\(reason) engine=\(engine) mode=\(mode) engineMs=\(engineMs) "
                 + "detected=\(detected) mix=\(mix)"
+        case .vocabularyApplied(let enabled, let entries, let replacements, let chars):
+            return "enabled=\(enabled ? "yes" : "no") entries=\(entries) "
+                + "replacements=\(replacements) chars=\(chars)"
         case .polishHandoff(let step, let outcome, let chars):
             return "step=\(step) outcome=\(outcome) chars=\(chars)"
         case .polishInsertionRefused(let reason, let ageMs):

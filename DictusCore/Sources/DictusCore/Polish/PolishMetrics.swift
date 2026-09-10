@@ -228,6 +228,16 @@ public struct PolishMetrics: Sendable, Codable {
     /// never "unknown".
     public let languageResolution: LanguageResolution?
 
+    /// Characters in **the text the polish judged**, which is what the length band
+    /// divides `polishedCharCount` by.
+    ///
+    /// Since #80 that is not always the same string as `PolishDebugEntry.raw`: when
+    /// the custom-vocabulary pass rewrote the transcript, `raw` carries the engine's
+    /// own words and the polish ran on `vocabularyCorrected` beside it. This counts
+    /// the latter, because changing it to the engine's length would falsify the
+    /// guardrail arithmetic the export exists to explain. The engine text's own
+    /// length is exported as `engineRawCharCount`, so no field in the export is left
+    /// without a count that matches it.
     public let rawCharCount: Int
     public let polishedCharCount: Int      // equals rawCharCount when not polished
     public let latencyMs: Int

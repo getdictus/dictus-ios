@@ -11,7 +11,22 @@ import Foundation
 public struct PolishDebugEntry: Identifiable, Sendable, Codable {
     public let id: UUID
     public let timestamp: Date
+    /// **The speech engine's own output**, before anything in this app touched it.
+    ///
+    /// Not the polish's input since #80: the custom-vocabulary pass rewrites the
+    /// transcript before the polish sees it, and for a while this field carried the
+    /// rewritten text. That mattered beyond readability — #80's corpus has to be
+    /// mined from these exports, so the more the feature was used the less the
+    /// export said about what the engines actually produce. A feature must not
+    /// corrupt the record its own validation depends on.
     public let raw: String
+
+    /// What the polish actually ran on, when the vocabulary pass changed something
+    /// (#80). Nil when it changed nothing, which is every event written before that
+    /// feature and every dictation by a user who has stored no terms — so an export
+    /// with no vocabulary in play is byte-identical to what it always was.
+    public let vocabularyCorrected: String?
+
     public let polished: String?
     public let metrics: PolishMetrics
 
@@ -40,12 +55,14 @@ public struct PolishDebugEntry: Identifiable, Sendable, Codable {
     public static var currentWriter: String { "<\(PersistentLog.source)>" }
 
     public init(raw: String,
+                vocabularyCorrected: String? = nil,
                 polished: String?,
                 metrics: PolishMetrics,
                 writer: String = PolishDebugEntry.currentWriter) {
         self.id = UUID()
         self.timestamp = Date()
         self.raw = raw
+        self.vocabularyCorrected = vocabularyCorrected
         self.polished = polished
         self.metrics = metrics
         self.writer = writer

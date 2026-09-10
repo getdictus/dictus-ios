@@ -9,7 +9,7 @@ import Foundation
 /// adapted (German noun capitalization, umlauts, eszett `ß`, German
 /// filler list, spoken-form contractions).
 enum PolishNaturalPromptDE {
-    static func instructions(glossary: String) -> String {
+    static func instructions() -> String {
         """
         You are a TEXT TRANSFORMATION FUNCTION. You polish German speech-to-text output for written messages.
 
@@ -47,9 +47,6 @@ enum PolishNaturalPromptDE {
         - Do NOT reorder words.
         - Do NOT translate.
         - Do NOT add `<<NL>>` markers where none existed. Do NOT split or alter existing markers.
-
-        Domain vocabulary — preserve canonical spelling:
-        \(glossary)
 
         Examples:
 

@@ -129,9 +129,24 @@ struct PolishDebugExport: Codable {
         let preprocessMs: Int?
         let engineMs: Int?
         let postprocessMs: Int?
+        /// Characters in the text the polish judged — `vocabularyCorrected` when
+        /// present, `raw` otherwise. See `PolishMetrics.rawCharCount`.
         let rawCharCount: Int
+        /// Characters in `raw`, present only when it differs from the text the
+        /// polish judged (#80). Without it a reader comparing `raw` against
+        /// `rawCharCount` would find them contradicting each other.
+        let engineRawCharCount: Int?
         let polishedCharCount: Int
+        /// **The speech engine's own output.** Not the polish's input when a custom
+        /// vocabulary is in play — see `vocabularyCorrected` below and #80.
         let raw: String
+        /// What the polish ran on, when #80's pass rewrote the transcript first;
+        /// absent when it changed nothing, which is the ordinary case.
+        ///
+        /// This export is where #80's own corpus is mined from, so `raw` above has
+        /// to keep meaning "what the engine produced" however much the vocabulary is
+        /// used. The pair is what says which terms the feature is already covering.
+        let vocabularyCorrected: String?
         let polished: String?
         let sttEngine: String?
         let sttModelID: String?
@@ -209,8 +224,10 @@ enum PolishDebugExporter {
                 engineMs: entry.metrics.timings?.engineMs,
                 postprocessMs: entry.metrics.timings?.postprocessMs,
                 rawCharCount: entry.metrics.rawCharCount,
+                engineRawCharCount: entry.vocabularyCorrected == nil ? nil : entry.raw.count,
                 polishedCharCount: entry.metrics.polishedCharCount,
                 raw: entry.raw,
+                vocabularyCorrected: entry.vocabularyCorrected,
                 polished: entry.polished,
                 sttEngine: entry.metrics.sttEngine,
                 sttModelID: entry.metrics.sttModelID

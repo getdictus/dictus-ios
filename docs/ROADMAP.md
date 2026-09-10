@@ -6,17 +6,20 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-08.
+Last reviewed: 2026-09-10.
 
-## The three lanes, in order
+## The lanes, in order
 
 | Lane | What it is | Runs |
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Now** |
-| **C** | The keyboard session | After the `paywallVisible` flip |
+| **A′** | 1.8.3 — #23 auto-return, #531 last transcription | After B. #23's probe starts today; #531's is already answered. |
+| **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
+
+**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project has treated as settled since April turned out to be false, and its head item, #23, is the only one in any lane that a one-hour measurement can cancel outright. Its second item, #531, was added on 2026-09-10 and does not share that gate.
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -53,7 +56,7 @@ The device test of that PR surfaced **#515**, which shipped in the same PR: the 
 | --- | --- |
 | `smartMode` | Built — #79 blocks B and C merged and device-validated |
 | `history` | Built — `History/TranscriptionHistoryStore.swift`, `HistoryView.swift`, gated by `HistoryAvailability` |
-| `vocabulary` | **Missing.** The paywall promises "Teach Dictus your technical terms" and nothing delivers it. This is #80. |
+| `vocabulary` | Built — #80 shipped in PR #525, device-validated in the app and the keyboard. Its glossary half was cut, not fixed, in #536. |
 
 So the launch scope is not a question of how many features to build. It is one hole to fill, plus making the two existing ones keep their promise.
 
@@ -95,13 +98,31 @@ His verdict was that Normal polish is not at the level and wants work before the
 
 **What could not be validated by hand, and why that is the expected shape.** The fabrication did not reproduce against the live model in 10 device attempts. It was measured at 8 occurrences in 30 invocations, so its absence in 10 says nothing either way — which is why the corpus replay is the gate here and the device is only the regression check.
 
+**#80 shipped on 2026-09-10** in PR #525, device-validated in **both** processes: an entry `pomme` ← `banane`, dictated in the app and again from the keyboard, corrected in each; and a **Reset** that leaves the next dictation untouched (`vocabularyApplied enabled=yes entries=0 replacements=0`, against `entries=3` on the thirteen dictations before it). The third Pro feature exists. 1791 tests, 0 failures; `swiftlint --strict` 0 violations across 263 files.
+
+**What the device session changed in the shipped design, and it is the reusable part.** Three defects that no test could have found. The pass **logged nothing**, so establishing whether it had even run cost three diagnostic round-trips and an App Group container dump from the Mac — it now emits one counters-only line per dictation. The pass **poisoned its own validation source**: `raw` in the polish export was post-vocabulary while this issue's corpus criterion harvests from those exports, so `raw` is the engine's own words again with `vocabularyCorrected` beside it. And **nothing labelled the two fields** — the maintainer, who wrote the spec, hesitated twice over which one takes the correct spelling.
+
+**One measurement worth carrying forward.** Parakeet rendered `Claude Code` **five different ways** across six French dictations. Manual variant entry has a real ceiling, and that is the strongest argument #288 and #512 have ever had — #288 in particular is not "separate and free", it is the missing half that makes #512 possible, because the typed side is the only place the canonical spelling exists.
+
+**What did not ship as promised: the glossary.** Decision 7 said a term with no variants still earns its keep by joining the polish prompt. Two device measurements say it has no effect — `dictus` polished into `dictés`, `Parakit V3` left alone, both with the correct spelling sitting in the glossary — while `whisperflow`, which is *not* in the glossary, was corrected by the model's own priors. That is now **#536**, and it blocks #279 rather than #80: the deterministic pass works and does not depend on it.
+
+**#536 shipped on 2026-09-10** in PR #540, merged as `7d03520` and device-validated on `dc04542`. The pre-registered experiment ran first and returned **outcome B**: VivaDicta, same iPhone, same iOS, its AI processing set to Apple Foundation Models, failed to correct `Claude Code` in **5 of 5** dictations — with a prompt that already asks for phonetic repair, in a tagged `<CUSTOM_VOCABULARY>` block, alongside a `<CLIPBOARD_CONTEXT>` second source. Every axis the issue proposed to change, they had already changed. So the glossary was **cut, not reworded**.
+
+**The cut went further than the issue's own framing suggested, and the reason is worth keeping.** The issue treated the curated list as a separate question from the user's. It is not: both device captures that falsify the glossary are on *curated* terms — `Dictus` polished into `dictés`, `Parakeet v3` left as `Parakit V3`. `PolishGlossary` is deleted entirely, the eleven prompt builders lost their `glossary:` parameter, and `PolishPromptInventoryTests` now walks all fourteen prompt strings the build can send and refuses the reappearance of a term list. That is the guardrail against someone re-adding one as a wording experiment.
+
+**What the device session proved, and it was not the obvious thing.** That polish still runs was never seriously in doubt. The real risk was that the replacement pass runs *upstream* of Apple FM, so the model might re-mangle a corrected term once the prompt stopped asking it not to. It did not: `Tictus` → `Dictus` and `Cloud Code` → `Claude Code` in the app, `cloud code` → `Claude Code` from the keyboard, and all of them survive into `polished`. Three dictations, three `success`, no guardrail rejection.
+
+**#80's decisions 6 and 7 are amended on that issue.** Decision 7 — a term joins the polish glossary — is withdrawn as measured to do nothing. Decision 6 — the variants field is optional — is reversed: the add sheet now requires a variant, and the paywall sentence rests on the replacement pass alone. `VocabularyEntry.hasEffect` carries that rule and is deliberately kept out of `isValid`, on which the store filters at every load; merging them would have silently deleted every variant-less entry already on disk at the next launch.
+
+**One gap ships knowingly.** Lowercase `dictus` stays lowercase — the very gap the glossary claimed to close and was measured not to close. The remedy is a variant, and matching is case-insensitive, so one covers every capitalisation.
+
 1. **#530** — a selection delete desyncs the text proxy and the next autocorrect merges two words. The chain is measured at eight applies deep and every repair attempt arms another. Root cause identified and written on the issue; the open question is the fix shape, not the diagnosis.
-2. **#80** — Vocabulary. The third feature, and the largest piece in this lane. Its body is wrong on the mechanism: WhisperKit 0.16.0 has no public `initialPrompt`, and Parakeet — the default engine at ≥6 GB — has a purpose-built boosting API whose CTC judge is **English-only** (`FluidInference/parakeet-ctc-110m-coreml`, `language: ["en"]`) while our TDT speaks 25. The only stage that treats French and English alike is a post-transcription text replacement. Grill it before planning: #512 declares itself a hard dependency of #80 and assumes six deliverables its body never mentions.
-3. **#439** — the Natural contract broken three ways: rule 8 never fires, the register is rewritten, dictated content is deleted. In the lane because **#437 cannot start without it**: the two edit the same prompt and #437's own sequencing says #439 lands and is measured first, so the fidelity baseline underneath is the one that ships. One calibration round, six fixtures, bars already declared on the issue.
-4. **#437** — lift the `<<NL>>` ban at discourse boundaries so long dictations get paragraphs. **Not blocked on anything, and it ships the fix** — rescoped on 2026-09-07 from a benchmark that stopped at a recommendation. Its diagnostic half was done on 2026-08-27: six paired Dictus/Typeless fixtures, baseline measured at 0 line breaks in 6 of 6, contract decided (*may add whitespace, may never remove words or change their grammar*), bars declared per fixture. The machinery is not missing either — the `<<NL>>` round-trip works and every prompt bans the model from emitting one. **What is left is one clause, the harness round, and merging it if it holds.** A candidate that fails is a legitimate outcome, recorded with its numbers. Its `Current status` section claimed it was still waiting for data until 2026-09-07; it was eight days stale.
-5. **#523** — a Smart Mode for the long vocal: paragraphs, and an output allowed to be shorter than the speech. The transformative counterpart of #437, and the two must not be built in the same round. The first Dictus contract that may drop a dictated clause, so it needs its own never-drop classes and its own guardrail band (`PolishGuardrail` refuses below a 0.5 length ratio today, which a real condensation blows straight through). First acceptance step is the paired-output comparison against `List`.
-6. **#494** — offer Pro after the first successful dictation in onboarding.
-7. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
+2. **#439** — the Natural contract broken three ways: rule 8 never fires, the register is rewritten, dictated content is deleted. In the lane because **#437 cannot start without it**: the two edit the same prompt and #437's own sequencing says #439 lands and is measured first, so the fidelity baseline underneath is the one that ships. One calibration round, six fixtures, bars already declared on the issue.
+3. **#437** — lift the `<<NL>>` ban at discourse boundaries so long dictations get paragraphs. **Not blocked on anything, and it ships the fix** — rescoped on 2026-09-07 from a benchmark that stopped at a recommendation. Its diagnostic half was done on 2026-08-27: six paired Dictus/Typeless fixtures, baseline measured at 0 line breaks in 6 of 6, contract decided (*may add whitespace, may never remove words or change their grammar*), bars declared per fixture. The machinery is not missing either — the `<<NL>>` round-trip works and every prompt bans the model from emitting one. **What is left is one clause, the harness round, and merging it if it holds.** A candidate that fails is a legitimate outcome, recorded with its numbers. Its `Current status` section claimed it was still waiting for data until 2026-09-07; it was eight days stale.
+4. **#523** — a Smart Mode for the long vocal: paragraphs, and an output allowed to be shorter than the speech. The transformative counterpart of #437, and the two must not be built in the same round. The first Dictus contract that may drop a dictated clause, so it needs its own never-drop classes and its own guardrail band (`PolishGuardrail` refuses below a 0.5 length ratio today, which a real condensation blows straight through). First acceptance step is the paired-output comparison against `List`.
+5. **#494** — offer Pro after the first successful dictation in onboarding.
+6. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
+7. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
 8. **#279** — flip `PremiumFlags.paywallVisible`, in the same PR as the first reachable Pro feature. Walk all four entry points; the flag is compile-time, so a site that was never wired to it stays silently hidden.
 
 ### What was deliberately cut from this lane
@@ -110,9 +131,31 @@ His verdict was that Normal polish is not at the level and wants work before the
 
 **#216, the Pro hub.** Deferred on 2026-08-24: the hub's content *is* the feature list, so building it before the features exist means building it three times.
 
+## Lane A′ — 1.8.3, auto-return
+
+**Item 1: #23, auto-return to the source app after a cold-start dictation.** Milestone `1.8.3 — auto-return`, `priority:high`, `ready-for-agent`. The number is provisional — if 2.0.0 cuts first this becomes a 2.0.x; [VERSIONING.md](VERSIONING.md) decides, not this file.
+
+It is out of band because its blocking premise was falsified. The April 2026 ADR concluded that no API lets a keyboard extension identify its host app, closed the question, and the swipe-back overlay has been the answer ever since. On 2026-09-10 the API was found in an open-source competitor, [`n0an/VivaDicta`](https://github.com/n0an/VivaDicta), and read out of the shipped binary it links: the bundle ID is not on the input view controller — where all thirteen 2026-04 probes looked — but on `UIKeyboardArbiterClient`, a UIKit singleton outside the view controller graph. The second historic blocker dissolves with it: `open()` needs no `LSApplicationQueriesSchemes` declaration, only `canOpenURL` does, and nothing here needs `canOpenURL`. The full mechanism, the evidence, the failure taxonomy and a four-phase plan are the [2026-09-10 comment on #23](https://github.com/getdictus/dictus-ios/issues/23#issuecomment-5619601818); the issue body carries a banner saying it is superseded.
+
+**The lane is gated on a measurement, and that is what keeps it from swallowing Lane B.** Phase 0 is a device probe: diagnostic code only, no product change, roughly an hour, and it answers whether the arbiter returns a correct bundle ID on current iOS and how long it lags a change of host. **It starts today, in parallel with Lane B** — like #215 it has external latency, in this case an API Apple can remove in any release, and it is the only thing that can cancel the lane. Everything after it waits for the flip.
+
+**If the probe fails, the lane closes empty and #23 goes back to Someday.** That is a real outcome, not a formality: the technique is private API reached by runtime string lookup, and it is exactly the kind of thing that returns `nil` one iOS release later. The swipe-back overlay stays as the floor in every case — resolved-with-no-scheme, unresolved, and probe-failed all land on it.
+
+**Two things a reader will otherwise rediscover the hard way.** VivaDicta measured their resolver naming an app that had been terminated for three seconds, 1.3 s after the keyboard changed host, and the app duly relaunched it; resolutions taken ≥8 s after the host appeared were correct. So the host is resolved **at the tap**, bounded at 2 s, and a timeout falls through to the overlay rather than to a cached answer — opening the wrong app is worse than opening none. And `SharedKeys.sourceAppScheme`, sitting in the repo since Phase 13 and looking exactly like the right key, is the wrong shape: a value persisted to the App Group outlives the keyboard process and teleports the user into last session's app. Delete it.
+
+**One decision is the maintainer's and is not an agent's to take:** whether Dictus ships private API at all. The probe does not need that answer — it changes nothing a user can reach. Phase 1 does.
+
+**Item 2: #531, recover the last transcription from the expanded Dynamic Island** — added 2026-09-10, `ready-for-agent`. Long press the island in standby, the last transcript is there with a Copy button; power and mic keep their place, and the lock-screen banner never carries the text.
+
+**It shares this lane because it answers the same failure and it is not gated on the probe.** #23 is about a dictation whose *user* ends up in the wrong place; #531 is about a dictation whose *text* does. Both are "the words were captured and did not arrive", which is what makes 1.8.3 a cycle rather than a bag. The dependency structure is the opposite of #23's, though: **#531 has already cleared its own blocking measurement.** A `LiveActivityIntent` was shown writing to `UIPasteboard` with DictusApp backgrounded, on the iPhone 17 Pro simulator, 2026-09-08 — the sentinel-to-marker capture is [on the issue](https://github.com/getdictus/dictus-ios/issues/531#issuecomment-5587827086). Nothing about it waits on the arbiter probe.
+
+**Which is also its second reason to be here: it gives 1.8.3 a body that survives the probe.** If the arbiter measurement fails, #23 goes back to Someday and this lane still has something to cut. The milestone keeps the name `1.8.3 — auto-return` for now; if the probe does fail, rename it then rather than pre-emptively on a hypothesis.
+
+**Its own carry-forward, so it is not rediscovered:** a force-quit removes the Live Activity outright, so there is no killed-app case to design for; the island is only long-pressable while standby runs, which makes this the last dictation of the session and not a history — the archive is `HistoryView` and it is Pro; and what the simulator could not answer is a long suspension, which stays on the device list.
+
 ## Lane C — the keyboard session
 
-After the flip. **Its preparation step is done: the ideas are written down.** On 2026-09-05 Pierre listed what he wants improved, and it became eight new issues plus six existing ones, gathered in the `Keyboard session` milestone — 14 in total, reachable with `gh issue list --milestone "Keyboard session"`.
+After Lane A′. **Its preparation step is done: the ideas are written down.** On 2026-09-05 Pierre listed what he wants improved, and it became eight new issues plus six existing ones, gathered in the `Keyboard session` milestone — 14 in total, reachable with `gh issue list --milestone "Keyboard session"`.
 
 Three themes came out of it, and they are not equal in size:
 
@@ -124,9 +167,9 @@ Two things the lane must not re-litigate: **#138 is `wontfix`** — a keyboard e
 
 ## Someday
 
-A GitHub milestone holding 29 issues, all `priority:low`. Not refused, not scheduled, and deliberately out of the default view — the open count went from 80 to 36 on 2026-09-05 by moving them there, and that number is the point.
+A GitHub milestone holding 23 issues, all `priority:low`. Not refused, not scheduled, and deliberately out of the default view — the open count went from 80 to 36 on 2026-09-05 by moving them there, and that number is the point.
 
-Review it at each version cut. Anything that has become urgent leaves; anything that has been there through three cuts is a `wontfix` waiting to be admitted.
+Review it at each version cut. Anything that has become urgent leaves — **#23 left it on 2026-09-10**, after six months of being the right call and one afternoon of not being; anything that has been there through three cuts is a `wontfix` waiting to be admitted.
 
 ## What this file is not
 

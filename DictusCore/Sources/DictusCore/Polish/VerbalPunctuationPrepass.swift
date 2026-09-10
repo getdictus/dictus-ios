@@ -12,7 +12,7 @@ import Foundation
 /// Since verbal punctuation is a deterministic transformation anyway (no
 /// language understanding required), doing it in regex bypasses Apple FM
 /// entirely for this concern. Apple FM still handles the rest of Light:
-/// capitalisation, typographic spacing, accents, glossary spelling.
+/// capitalisation, typographic spacing, accents.
 ///
 /// Scope at round 1: French and English. Spanish/German added in step 7.
 ///

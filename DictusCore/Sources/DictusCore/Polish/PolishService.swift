@@ -183,6 +183,7 @@ public final class PolishService {
                        languagePolicy: TranscriptionLanguagePolicy,
                        smartMode: SmartMode? = nil,
                        recordingDuration: TimeInterval,
+                       engineRaw: String? = nil,
                        onEngineWillRun: (() -> Void)? = nil) async -> PolishOutcome {
         let task = smartMode.map(PolishTask.smart)
         guard PolishGatePolicy.runsDespiteToggle(
@@ -221,6 +222,7 @@ public final class PolishService {
         // anything else is `nil` to it and falls through to its skip gate.
         let request = Request(
             raw: raw,
+            engineRaw: engineRaw,
             languagePolicy: languagePolicy,
             smartMode: smartMode,
             recordingDuration: recordingDuration,
@@ -257,6 +259,19 @@ public final class PolishService {
     /// the resolved target — stay separate arguments.
     private struct Request {
         let raw: String
+        /// The engine's own output, before the custom-vocabulary pass rewrote it
+        /// (#80), or nil when that pass changed nothing — which is every dictation
+        /// by a user who has stored no terms.
+        ///
+        /// It travels only to be recorded. `raw` above is what the polish runs on
+        /// and what the deterministic floor falls back to, and both must stay the
+        /// corrected text: the user asked for `Kubernetes` and inserting
+        /// `cubernetes` because the model refused would undo the correction they
+        /// paid for. What this fixes is the **export**, whose `raw` had silently
+        /// become post-vocabulary — and #80's own corpus has to be mined from those
+        /// exports, so the feature was corrupting the record its validation depends
+        /// on.
+        let engineRaw: String?
         let languagePolicy: TranscriptionLanguagePolicy
         /// The armed Smart Mode for this dictation, from the snapshot (#79).
         let smartMode: SmartMode?
@@ -409,7 +424,7 @@ public final class PolishService {
                 timings: PolishTimings(preprocessMs: preprocessMs, engineMs: 0, postprocessMs: postMs),
                 languageResolution: resolution
             )
-            await emit(m, raw: raw, polished: finalShort)
+            await emit(m, raw: raw, engineRaw: request.engineRaw, polished: finalShort)
             return PolishOutcome(text: finalShort)
         }
 
@@ -454,7 +469,7 @@ public final class PolishService {
                 timings: PolishTimings(preprocessMs: preprocessMs, engineMs: 0, postprocessMs: postMs),
                 languageResolution: resolution
             )
-            await emit(m, raw: raw, polished: nil)
+            await emit(m, raw: raw, engineRaw: request.engineRaw, polished: nil)
             return PolishOutcome(text: fallback)
         }
 
@@ -524,7 +539,7 @@ public final class PolishService {
             guardrailCheck: bundle.rejectedCheck,
             languageResolution: resolution
         )
-        await emit(m, raw: raw, polished: bundle.engineOutput)
+        await emit(m, raw: raw, engineRaw: request.engineRaw, polished: bundle.engineOutput)
 
         return finalOutcome(
             returned: returned, bundle: bundle, job: job, raw: raw,
@@ -584,7 +599,7 @@ public final class PolishService {
                 detectedLanguage: request.detectedCode, latencyMs: detectMs,
                 timings: PolishTimings(preprocessMs: detectMs, engineMs: 0, postprocessMs: 0)
             )
-            await emit(m, raw: raw, polished: nil)
+            await emit(m, raw: raw, engineRaw: request.engineRaw, polished: nil)
             return PolishOutcome(text: preprocessed)
         }
 
@@ -603,7 +618,7 @@ public final class PolishService {
                 latencyMs: detectMs,
                 timings: PolishTimings(preprocessMs: detectMs, engineMs: 0, postprocessMs: 0)
             )
-            await emit(m, raw: raw, polished: nil)
+            await emit(m, raw: raw, engineRaw: request.engineRaw, polished: nil)
             return PolishOutcome(text: raw)
         }
 
@@ -646,7 +661,7 @@ public final class PolishService {
             failureReason: bundle.failureReason,
             guardrailCheck: bundle.rejectedCheck
         )
-        await emit(m, raw: raw, polished: bundle.engineOutput)
+        await emit(m, raw: raw, engineRaw: request.engineRaw, polished: bundle.engineOutput)
         return finalOutcome(
             returned: returned, bundle: bundle, job: job, raw: raw,
             detectedLanguage: request.languageMix.dominantCode ?? request.detectedCode
@@ -780,7 +795,10 @@ public final class PolishService {
     }
 
     /// Log one metrics event and hand it to whichever sink this process owns.
-    private func emit(_ m: PolishMetrics, raw: String, polished: String?) async {
+    private func emit(_ m: PolishMetrics,
+                      raw: String,
+                      engineRaw: String?,
+                      polished: String?) async {
         PolishMetrics.log(m)
         // An engine failure also goes to the persistent log (#315), where it can
         // be read against the dictation timeline around it. Keyed on the
@@ -813,7 +831,15 @@ public final class PolishService {
                 mix: m.languageResolution?.mixDescription ?? "-"
             ))
         }
-        await sink.record(PolishDebugEntry(raw: raw, polished: polished, metrics: m))
+        // `raw` on the entry is the ENGINE's output. When the vocabulary pass
+        // rewrote something, the text the polish actually saw goes beside it rather
+        // than over it (#80).
+        await sink.record(PolishDebugEntry(
+            raw: engineRaw ?? raw,
+            vocabularyCorrected: engineRaw == nil ? nil : raw,
+            polished: polished,
+            metrics: m
+        ))
     }
 
 }

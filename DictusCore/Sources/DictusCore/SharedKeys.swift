@@ -142,6 +142,19 @@ public enum SharedKeys {
     /// cannot measure this — it never saw the audio — and the polish duration gate
     /// (#141) is decided on it.
     public static let lastTranscriptionDuration = "dictus.lastTranscriptionDuration"
+    /// String: the speech engine's own output for the transcription sitting in
+    /// `lastTranscription`, written **only** when the custom-vocabulary pass (#80)
+    /// rewrote something and therefore the two differ.
+    ///
+    /// It exists so the keyboard's polish export records what the engine produced
+    /// rather than what the vocabulary made of it. #80's corpus has to be mined from
+    /// those exports, and a feature that quietly rewrites the record its own
+    /// validation depends on is a design fault rather than a logging detail.
+    ///
+    /// Absent is the normal case and means "identical to `lastTranscription`", so
+    /// nothing is written and nothing is read for the users who never touch the
+    /// feature. Claimed and cleared with the rest of the hand-off keys.
+    public static let lastTranscriptionEngineRaw = "dictus.lastTranscriptionEngineRaw"
     /// Data: the JSON-encoded `PendingDictation` the keyboard has claimed and not
     /// yet typed. Read and written only through `PendingDictationChannel`, which is
     /// where the rule about who clears it lives.
