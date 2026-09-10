@@ -11,13 +11,17 @@ import DictusCore
 /// replacements" would ask the user to hold a distinction the data does not make.
 /// The list edits both; the add sheet asks two questions.
 ///
-/// ### Why the second field is optional
+/// ### Why the second field is required (#536, amending #80 decision 6)
 ///
-/// A term alone is not inert: it joins the polish glossary, which tells the model to
-/// spell it exactly as written (`PolishGlossary.activePromptBlock`). That is what
-/// makes the paywall sentence — "Teach Dictus your technical terms" — true for
-/// someone who knows the spelling they want but not yet the shape the engine
-/// produces instead.
+/// It used to be optional, because a term alone still joined the polish prompt. #536
+/// measured that on device and the prompt was ignored, so a term alone now changes
+/// nothing at all — and the paywall sentence, "Teach Dictus your technical terms",
+/// rests entirely on the replacement pass. The sheet therefore refuses to save an
+/// entry with no variant, which is the one state that would make the sentence false.
+///
+/// **Entries stored before that are kept.** Nothing migrates, nothing is deleted, and
+/// no edit is forced at load: a variant-less entry loads, lists, and says on its own
+/// row what it needs (`VocabularyEntry.hasEffect`).
 struct VocabularyListView: View {
 
     @StateObject private var store = VocabularyStore.shared
@@ -51,13 +55,12 @@ struct VocabularyListView: View {
             } header: {
                 Text("Your terms")
             } footer: {
-                // Deliberately narrow. The previous sentence said Dictus "corrects
-                // these in your transcriptions", which is false for an entry with no
-                // variants: nothing is replaced, and the only thing that entry does
-                // is reach the polish prompt. #536 is measuring whether that even
-                // works — two device captures show Apple FM ignoring the glossary
-                // outright — so until it is settled the screen claims only what is
-                // proven, and claims nothing about the glossary at all.
+                // Deliberately narrow, and now exactly the whole truth. The sentence
+                // before it said Dictus "corrects these in your transcriptions",
+                // which was false for an entry with no variants; the sentence after
+                // it named the polish prompt, which #536 measured as doing nothing.
+                // A replacement is what the feature does, so it is what the footer
+                // describes.
                 if writeFailed {
                     Text("Could not save. Your device may be out of storage.")
                         .foregroundColor(.red)
@@ -128,10 +131,21 @@ struct VocabularyListView: View {
                     // and the person who wrote this feature's spec hesitated in
                     // front of it twice. One word carries the direction, and the
                     // second line was already there so the row does not grow.
-                    if !entry.variants.isEmpty {
+                    //
+                    // The other branch is #536's: an entry saved before the second
+                    // field became required does nothing, and the row is where that
+                    // is visible. Orange, the app's warning tint, and never red —
+                    // nothing is broken and no data is at risk, there is one thing
+                    // left to type. The sentence names it rather than saying "no
+                    // variants", which describes the field and not the fix.
+                    if entry.hasEffect {
                         Text("Replaces: \(entry.variantsLine)")
                             .font(.dictusCaption)
                             .foregroundColor(.secondary)
+                    } else {
+                        Text("Does nothing yet. Add what Dictus writes instead.")
+                            .font(.dictusCaption)
+                            .foregroundColor(.orange)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -211,8 +225,21 @@ struct VocabularyEditorView: View {
         && store.contains(term: term, excluding: subject.entry?.id)
     }
 
+    /// Whether the second field is still empty, on a sheet the user has started
+    /// filling. It drives the explanation under that field, so it stays false on an
+    /// untouched new-term sheet: telling someone what is missing before they have
+    /// typed anything is scolding, not helping.
+    private var variantsMissing: Bool {
+        candidate?.hasEffect == false
+    }
+
     private var canSave: Bool {
-        candidate != nil && !duplicatesAnotherTerm
+        guard let candidate else { return false }
+        // `hasEffect` and not `variants.isEmpty` (#536): the rule is "this entry
+        // would change a transcript", the model owns it, and a unit test can reach
+        // it. A line of nothing but commas is refused here for the same reason —
+        // `VocabularyEntry` cleans it away to no variants at all.
+        return candidate.hasEffect && !duplicatesAnotherTerm
     }
 
     var body: some View {
@@ -243,11 +270,18 @@ struct VocabularyEditorView: View {
             } header: {
                 Text("What Dictus writes instead")
             } footer: {
+                // Three states, in the order they can occur. The middle one is #536's
+                // and it is why Save is greyed out: without it the button refuses
+                // with no reason on screen, which is the failure this feature's own
+                // device test already produced once.
                 if saveFailed {
                     Text("Could not save. Your device may be out of storage.")
                         .foregroundColor(.red)
+                } else if variantsMissing {
+                    Text("Add at least one. A term on its own changes nothing Dictus writes.")
+                        .foregroundColor(.orange)
                 } else {
-                    Text("Optional, separated by commas. Leave it empty if you do not know yet.")
+                    Text("Separated by commas. Dictus replaces each of them with your spelling.")
                 }
             }
         }

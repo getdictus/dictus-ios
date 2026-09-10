@@ -258,6 +258,17 @@
         }
       }
     },
+    "Add at least one. A term on its own changes nothing Dictus writes." : {
+      "comment" : "Footer under the vocabulary variants field while it is empty; the field became required in #536.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoutez-en au moins une. Un terme seul ne change rien à ce que Dictus écrit."
+          }
+        }
+      }
+    },
     "Add keyboard" : {
       "localizations" : {
         "fr" : {
@@ -817,6 +828,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictus prépare votre modèle de transcription pour la dictée hors ligne."
+          }
+        }
+      }
+    },
+    "Does nothing yet. Add what Dictus writes instead." : {
+      "comment" : "Subtitle of a vocabulary row stored before variants became required (#536): it has no variant, so it replaces nothing.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans effet pour l’instant. Ajoutez ce que Dictus écrit à la place."
           }
         }
       }
@@ -1796,17 +1818,6 @@
         }
       }
     },
-    "Optional, separated by commas. Leave it empty if you do not know yet." : {
-      "comment" : "Footer under the vocabulary variants field.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Facultatif, séparé par des virgules. Laissez vide si vous ne savez pas encore."
-          }
-        }
-      }
-    },
     "Other modes" : {
       "comment" : "Header of the section listing Smart Modes that are not pinned.",
       "localizations" : {
@@ -2318,6 +2329,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sélectionnez un autre modèle pour supprimer celui-ci"
+          }
+        }
+      }
+    },
+    "Separated by commas. Dictus replaces each of them with your spelling." : {
+      "comment" : "Footer under the vocabulary variants field once it is filled.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séparées par des virgules. Dictus remplace chacune par votre orthographe."
           }
         }
       }
@@ -3098,7 +3120,7 @@
       }
     },
     "When Dictus writes one of these variants, it is replaced by your spelling." : {
-      "comment" : "Footer of the vocabulary list. Deliberately says only what is proven: variants are replaced. Says nothing about the polish glossary while #536 is open.",
+      "comment" : "Footer of the vocabulary list. Says only what a replacement does: #536 removed the term list that was the other half.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
