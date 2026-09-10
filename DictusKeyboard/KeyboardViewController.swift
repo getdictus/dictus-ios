@@ -366,9 +366,15 @@ class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        // #530: a new appearance is a new input context — iOS builds the proxy's
+        // mirror afresh, so whatever it was lying about is gone. This is the ONLY
+        // release the fix ships, because it is the only one the capture supports:
+        // nothing reconverged in 58 probe lines, and the two cheaper releases that
+        // were proposed are falsified (see MirrorSyncState.release).
+        bridge?.mirrorSync.release(reason: "viewWillAppear")
+
         #if DEBUG
-        // #530: a new appearance is a new field as far as the keyboard knows, so
-        // the prediction starts without a baseline and adopts on its first probe.
+        // The prediction starts without a baseline and adopts on its first probe.
         MirrorProbe.shared.reset()
         #endif
 

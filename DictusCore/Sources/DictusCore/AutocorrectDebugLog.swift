@@ -158,6 +158,46 @@ public enum AutocorrectDebugLog {
         write("AUTOCORRECT-APPLY-AFTER-INSERT ctx=\"\(contextTail)\"")
     }
 
+    /// The measured cost of the arming check's proxy read (#530 criterion 6).
+    /// Two of these bracket every keyboard edit, so per-keystroke overhead is
+    /// roughly twice `meanUs` — minus the reads the handler already made.
+    public static func mirrorReadCost(samples: Int, meanMicros: Double, maxMicros: Double) {
+        guard enabled else { return }
+        write(String(
+            format: "MIRROR-READ-COST samples=%d meanUs=%.1f maxUs=%.1f",
+            samples, meanMicros, maxMicros
+        ))
+    }
+
+    // MARK: - Mirror suppression (#530 fix)
+
+    /// The mirror kept characters one of the keyboard's own edits does not account
+    /// for. Everything that counts characters off it is now refused until release.
+    public static func mirrorArmed(surplus: Int, before: Int, after: Int) {
+        guard enabled else { return }
+        write("MIRROR-ARMED surplus=+\(surplus) before=\(before) after=\(after)")
+    }
+
+    /// One automatic site refused to act. `site` is "autocorrect" or "full-stop".
+    public static func mirrorSuppressed(site: String, word: String) {
+        guard enabled else { return }
+        write("MIRROR-SUPPRESSED site=\(site) word=\"\(word)\"")
+    }
+
+    /// The suppression ended. These are the numbers that say what the default
+    /// release cost the user, and #530 asks for them before anyone calls it right:
+    /// how long the keyboard stayed armed and how many spacebar presses it covered.
+    public static func mirrorReleased(
+        reason: String,
+        durationMs: Int,
+        spaces: Int,
+        suppressed: (corrections: Int, fullStops: Int)
+    ) {
+        guard enabled else { return }
+        write("MIRROR-RELEASED reason=\(reason) durationMs=\(durationMs) spaces=\(spaces) "
+            + "corrections=\(suppressed.corrections) fullStops=\(suppressed.fullStops)")
+    }
+
     // MARK: - Mirror divergence probe (#530)
     //
     // Three events, all greppable on the "MIRROR-" prefix, all carrying `seq` so a
