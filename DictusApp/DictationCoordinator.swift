@@ -1193,7 +1193,6 @@ class DictationCoordinator: ObservableObject {
         defaults.set(false, forKey: SharedKeys.stopRequested)
         defaults.set(false, forKey: SharedKeys.cancelRequested)
         defaults.set(false, forKey: SharedKeys.coldStartActive)
-        defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
         defaults.synchronize()
     }
 
@@ -1401,7 +1400,6 @@ class DictationCoordinator: ObservableObject {
     func handleError(_ message: String) {
         DictationErrorChannel.record(message)
         defaults.set(false, forKey: SharedKeys.coldStartActive)
-        defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
         defaults.synchronize()
         updateStatus(.failed)
         LiveActivityManager.shared.endWithFailure()

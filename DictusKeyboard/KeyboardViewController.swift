@@ -387,12 +387,17 @@ class KeyboardViewController: UIInputViewController {
         ))
         PersistentLog.log(.keyboardDidAppear)
 
-        // #23 phase 0, diagnostic only. One reading now, then one a second for ten
-        // seconds — the series is what measures how long the arbiter takes to name the
-        // host we just moved to. Restarted on every appearance because a change of host
-        // app is exactly what brings the keyboard up again.
-        HostAppProbe.keyboardDidAppear(self)
-        HostAppProbe.startAppearanceSeries()
+        // #23. Switch the keyboard arbiter on once per extension process, then harvest
+        // whatever pid → bundle pairing it is holding. Neither call reads the host: they
+        // only fill the table that `currentHostId` looks the host up in at the mic tap.
+        // Both are no-ops if the private API is gone.
+        let activation = HostAppResolver.activateArbiter()
+        if activation == "installed" || activation.hasPrefix("<") {
+            // Once per process, and on every failure. A successful install is worth one
+            // line; `already(...)` on all 15 later appearances is not.
+            PersistentLog.log(.hostReturn(hostId: "none", outcome: "arbiter-\(activation)"))
+        }
+        HostAppResolver.harvest()
         // Point KeyboardState's weak controller ref at the currently-visible controller
         // so call sites in KeyboardRootView and KeyboardState can access textDocumentProxy.
         // Previously set from KeyboardRootView.onAppear, which held a strong ref → #134.
@@ -689,10 +694,6 @@ class KeyboardViewController: UIInputViewController {
         // A finger held on backspace when iOS takes the keyboard away never produces a
         // touchesEnded, and the repeat timer was cleared by nothing else (#390).
         giellaKeyboard?.cancelKeyRepeat(reason: "viewDidDisappear")
-
-        // Same argument for the #23 probe's series: a keyboard dismissed after two
-        // seconds must not go on reporting a host it has stopped serving.
-        HostAppProbe.stopAppearanceSeries()
 
         // Restore system gesture recognizer delay (be a good citizen)
         restoreWindowGestureDelay()

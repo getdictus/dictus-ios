@@ -321,6 +321,15 @@ class KeyboardState: ObservableObject {
     /// a retain cycle: controller -> view -> state -> controller.
     weak var controller: UIInputViewController?
 
+    /// The host app resolved at the most recent mic tap, consumed when the cold-start
+    /// URL is built (#23).
+    ///
+    /// **Never persisted, and never written to the App Group.** A host that outlives the
+    /// keyboard process teleports the user into the app they were in *last* time, and
+    /// `SharedKeys.sourceAppScheme` was deleted rather than reused for exactly that
+    /// reason. In memory, for one hand-off, consumed on read.
+    private var pendingHostId: String?
+
     /// Closure to open a URL from the keyboard extension.
     /// WHY a closure: KeyboardState is not a SwiftUI View, so it cannot use
     /// @Environment(\.openURL). KeyboardRootView captures its own openURL
@@ -1367,11 +1376,17 @@ class KeyboardState: ObservableObject {
         }
         lastMicTapDate = now
 
-        // #23 phase 0, diagnostic only: the tap is the moment an auto-return would
-        // actually need to know the host app, so it is the reading whose accuracy
-        // decides anything. Placed after the debounce so a rejected rapid tap does not
-        // produce a line. Nothing reads it. See `HostAppProbe`.
-        HostAppProbe.micTapped()
+        // #23: resolve the host app now, at the tap, and never later.
+        //
+        // At the tap and not at `viewWillAppear` because the value the keyboard holds
+        // from an earlier appearance is the least trustworthy one it has — that is
+        // VivaDicta's measured failure, an app terminated three seconds earlier being
+        // reopened. And never from a cache: `pendingHostId` is consumed when the URL is
+        // built, so a resolution belonging to one tap cannot be reused by the next.
+        //
+        // Placed after the debounce so a rejected rapid tap does not disturb it. Nil is
+        // the normal, safe outcome — it costs the auto-return and nothing else.
+        pendingHostId = controller.flatMap(HostAppResolver.currentHostId(for:))
 
         // A new dictation ends the previous one's undo offer, whatever comes of it.
         invalidateDictationUndo(reason: "new-dictation")
@@ -1432,11 +1447,16 @@ class KeyboardState: ObservableObject {
                 ))
                 self.logProbe("fallbackOpenURL", details: self.sessionDetails())
                 // App didn't respond — not running. Open URL to launch it.
-                // Force unwrap: the argument is a compile-time literal and a
-                // well-formed absolute URL, so the failable initializer cannot
-                // return nil. Nothing at runtime can change this string.
-                // swiftlint:disable:next force_unwrapping
-                let url = URL(string: "dictus://dictate?source=keyboard")!
+                //
+                // The host resolved at the tap rides along as `&hostId=` (#23), and is
+                // consumed here so it cannot be reused by a later hand-off. A nil host
+                // simply omits the parameter and the app shows the swipe-back overlay,
+                // which is what it does today.
+                let hostId = self.pendingHostId
+                self.pendingHostId = nil
+                guard let url = KeyboardDictationURL.dictationURL(intent: .record, hostId: hostId) else {
+                    return
+                }
                 self.openDictusURL(url)
             }
         }
@@ -1445,7 +1465,10 @@ class KeyboardState: ObservableObject {
     /// Open Dictus without creating a recording request. The user explicitly
     /// starts dictation with a second tap once preparation has completed (#262).
     private func openModelPreparation() {
-        guard let url = URL(string: "dictus://dictate?source=keyboard&intent=prepare") else {
+        // No `hostId`: this path opens Dictus for the user to watch a model load, and
+        // nothing is handed back. Built through the same builder so the two URLs cannot
+        // drift apart in their query vocabulary.
+        guard let url = KeyboardDictationURL.dictationURL(intent: .prepare) else {
             return
         }
         openDictusURL(url)

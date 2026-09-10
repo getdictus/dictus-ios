@@ -169,22 +169,23 @@ public enum LogEvent: Sendable {
     case keyboardMicTapped
     case keyboardTextInserted  // No content parameter -- privacy by design
 
-    // MARK: Host app probe (#23)
-    /// One reading of the private keyboard arbiter, which is where UIKit keeps the
-    /// bundle ID of the app the keyboard is serving. See `HostAppProbe`.
+    // MARK: Auto-return to the host app (#23)
+    /// The outcome of one cold-start hand-off's attempt to send the user back to the app
+    /// they were typing in.
     ///
-    /// Diagnostic only: nothing reads this to make a decision, and the probe exists
-    /// to answer whether the arbiter is readable at all on current iOS and how long
-    /// it lags a change of host app.
+    /// `hostId` is the resolved bundle identifier, or `unknown` when the keyboard could
+    /// not name the host at all. `outcome` is one of `returned`, `table-miss`,
+    /// `no-scheme`, `open-failed`.
     ///
-    /// `moment` says which of the three call sites produced the line
-    /// (`viewWillAppear`, `micTap`, `series01`…`series10`) and `elapsedMs` how long
-    /// after the keyboard appeared it was taken — together they are the lag curve.
-    /// `details` carries the hop-by-hop outcome in the shared key=value format.
+    /// `notice` and not `info`, and this is the case the level was added for: the app is
+    /// usually terminated moments after a hand-off — that is what a hand-off *is* — and
+    /// an `info` line in the os.log mirror dies with it. This line is the only account of
+    /// why a user did or did not land back where they were.
     ///
-    /// No content parameter: a bundle identifier names an app, never what was typed
-    /// into it.
-    case hostAppProbe(moment: String, elapsedMs: Int, details: String)
+    /// A bundle identifier names an app, never what was typed into it. `no-scheme` is
+    /// also the project's only channel for "this host has no mapping": there is no
+    /// analytics here, the debug log is it, and its reader is an agent (#255).
+    case hostReturn(hostId: String, outcome: String)
 
     // MARK: Key auto-repeat (#390)
     // Neither case carries a key or a character. Only backspace auto-repeats, so
@@ -482,7 +483,7 @@ public enum LogEvent: Sendable {
              .modelDownloadOffline:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
-             .hostAppProbe,
+             .hostReturn,
              .keyRepeatStarted, .keyRepeatStopped,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
@@ -547,7 +548,7 @@ public enum LogEvent: Sendable {
 
         // Notice: an observation whose whole point is to be read after the process
         // that made it is gone (#23). Never a normal operation, never a problem.
-        case .hostAppProbe:
+        case .hostReturn:
             return .notice
 
         // Warnings
@@ -682,7 +683,7 @@ public enum LogEvent: Sendable {
         case .keyboardDidAppear: return "keyboardDidAppear"
         case .keyboardDidDisappear: return "keyboardDidDisappear"
         case .keyboardMicTapped: return "keyboardMicTapped"
-        case .hostAppProbe: return "hostAppProbe"
+        case .hostReturn: return "hostReturn"
         case .dictationMessageSet: return "dictationMessageSet"
         case .dictationMessageDisplayed: return "dictationMessageDisplayed"
         case .dictationMessageCleared: return "dictationMessageCleared"
@@ -872,8 +873,8 @@ public enum LogEvent: Sendable {
         case .keyboardDidAppear, .keyboardDidDisappear,
              .keyboardMicTapped, .keyboardTextInserted:
             return ""
-        case .hostAppProbe(let moment, let elapsedMs, let details):
-            return "moment=\(moment) elapsedMs=\(elapsedMs) \(details)"
+        case .hostReturn(let hostId, let outcome):
+            return "hostId=\(hostId) outcome=\(outcome)"
         case .keyRepeatStarted:
             return ""
         case .keyRepeatStopped(let ticks, let reason):

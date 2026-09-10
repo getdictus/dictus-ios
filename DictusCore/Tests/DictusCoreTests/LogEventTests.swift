@@ -328,19 +328,16 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.subsystem, .keyboard)
     }
 
-    /// #23 phase 0. `notice` and not `info` is the whole point of the case: the
-    /// os.log mirror drops `info` when the extension dies, and this probe is only
-    /// ever read after the fact.
-    func testHostAppProbeIsNoticeKeyboard() {
-        let event = LogEvent.hostAppProbe(
-            moment: "viewWillAppear",
-            elapsedMs: 0,
-            details: "arbiterClass=UIKeyboardArbiterClient sourceBundleIdentifier=com.apple.mobilenotes"
-        )
+    /// #23. `notice` and not `info` is the point of the case: the app is usually
+    /// terminated moments after a hand-off — that is what a hand-off is — and an `info`
+    /// line in the os.log mirror dies with it, taking the only account of why the user
+    /// did or did not land back where they were.
+    func testHostReturnIsNoticeKeyboard() {
+        let event = LogEvent.hostReturn(hostId: "com.apple.mobilenotes", outcome: "returned")
         XCTAssertEqual(event.level, .notice)
         XCTAssertEqual(event.subsystem, .keyboard)
-        XCTAssertEqual(event.name, "hostAppProbe")
-        XCTAssertTrue(event.payload().contains("moment=viewWillAppear elapsedMs=0"))
+        XCTAssertEqual(event.name, "hostReturn")
+        XCTAssertTrue(event.payload().hasSuffix("hostId=com.apple.mobilenotes outcome=returned"))
     }
 
     func testKeyboardTextInsertedIsDebugKeyboard() {

@@ -260,9 +260,6 @@ public enum SharedKeys {
     /// Set by handleIncomingURL when source=keyboard query parameter is present.
     /// Cleared when the app enters background.
     public static let coldStartActive = "dictus.coldStartActive"
-    /// String: URL scheme of the source app (e.g., "whatsapp") or "unknown".
-    /// Used by auto-return logic to navigate back to the correct app after dictation.
-    public static let sourceAppScheme = "dictus.sourceAppScheme"
 
     // Keyboard teardown diagnostics (issue #281)
     /// String: DictusApp's last reported scene phase, one of `AppScenePhaseMarker`.

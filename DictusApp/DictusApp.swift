@@ -297,7 +297,6 @@ struct DictusApp: App {
                         // DictationCoordinator.cleanupRecordingKeys() when the recording finishes.
                         if !isRecordingActive {
                             AppGroup.defaults.set(false, forKey: SharedKeys.coldStartActive)
-                            AppGroup.defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
                             AppGroup.defaults.synchronize()
                             PersistentLog.log(.coldStartFlagSet(active: false, context: "background-cleanup"))
                         }
@@ -341,6 +340,46 @@ struct DictusApp: App {
     /// WHY static: @State/@StateObject reset on view recreation, but a static var persists
     /// for the entire process lifetime — exactly matching "app was killed vs still in memory".
     private static var hasBeenActive = false
+
+    /// Reopens the app the keyboard was serving, if it can be named and has a way back.
+    ///
+    /// Runs inside the ~300 ms window in which a freshly foregrounded app is still
+    /// allowed to call `open()`. Past it, iOS refuses with "Application is neither
+    /// visible nor entitled" — which is why the 200 ms wait is a wait and not a retry
+    /// loop: there is no second chance to schedule.
+    ///
+    /// WHY 200 ms at all: the recording needs to have actually started before the
+    /// foreground changes hands. It is the same figure VivaDicta settled on, and it sits
+    /// comfortably inside the window.
+    ///
+    /// Every branch that does not open something logs why, at `notice`. The app is
+    /// usually terminated moments after this runs, so an `info` line would not survive
+    /// to explain itself, and `no-scheme` is this project's only report channel for a
+    /// host nobody has mapped — there is no analytics, the debug log is it (#255).
+    private func returnToHostApp(hostId: String?) {
+        guard let hostId else {
+            PersistentLog.log(.hostReturn(hostId: "unknown", outcome: "table-miss"))
+            return
+        }
+        guard let target = KnownAppSchemes.returnURL(forHostId: hostId) else {
+            // `isWorthReporting` keeps the system pseudo-hosts — the in-app browser, the
+            // share-sheet composer, Spotlight — out of the log. They are dead ends, not
+            // gaps in the catalogue, and reporting them at every triage pass costs
+            // attention forever.
+            let outcome = KnownAppSchemes.isWorthReporting(hostId) ? "no-scheme" : "no-scheme-known"
+            PersistentLog.log(.hostReturn(hostId: hostId, outcome: outcome))
+            return
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            UIApplication.shared.open(target, options: [:]) { opened in
+                PersistentLog.log(.hostReturn(
+                    hostId: hostId,
+                    outcome: opened ? "returned" : "open-failed"
+                ))
+            }
+        }
+    }
 
     private func handleIncomingURL(_ url: URL) {
         guard url.scheme == "dictus" else { return }
@@ -408,10 +447,24 @@ struct DictusApp: App {
                 origin: isFromKeyboard ? .keyboard : .app
             )
 
-            // On cold start, the swipe-back overlay (Plan 02) guides the user back.
-            // Auto-return was removed because there's no public API to detect which app
-            // the keyboard is serving — iterating KnownAppSchemes always opened the first
-            // installed app (e.g., WhatsApp) regardless of where the user actually was.
+            // #23: send the user back to the app they were typing in.
+            //
+            // Only on a cold start. A warm start never took the foreground away, so
+            // there is nothing to give back, and opening the host app then would yank a
+            // user who is deliberately looking at Dictus.
+            //
+            // Ordered after `startDictation` on purpose: recording has to be running
+            // before the foreground goes away, because the user arrives back in the host
+            // app expecting to already be recording, and `open()` only reports failure
+            // once it has already tried. Waiting for its answer would cost the head of
+            // the recording for no information.
+            //
+            // Every failure below falls through to `SwipeBackOverlayView`, which is
+            // already on screen at this point and stays the floor: unresolved host, host
+            // with no known scheme, and `open()` returning false all land there.
+            if isColdStart, isFromKeyboard {
+                returnToHostApp(hostId: KeyboardDictationURL.hostId(from: url))
+            }
         case "stop":
             // Stop recording from Dynamic Island expanded view button.
             coordinator.stopDictation()
