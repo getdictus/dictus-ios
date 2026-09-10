@@ -8,6 +8,15 @@ public enum SharedKeys {
     public static let lastTranscription = "dictus.lastTranscription"
     public static let lastTranscriptionTimestamp = "dictus.lastTranscriptionTimestamp"
     public static let lastError = "dictus.lastError"
+    /// String: the full text of the last dictation, kept so the user can get it back from
+    /// the expanded Dynamic Island (#531).
+    ///
+    /// **Not a hand-off, which is what separates it from `lastTranscription` above.** That key
+    /// is claimed by the keyboard and cleared by DictusApp on the next hand-off, so its absence
+    /// is an ordinary state. This one is only ever replaced by the next dictation — decision 2
+    /// of #531, "no expiry window", is exactly that sentence. Read and written only through
+    /// `LastTranscriptRecall`, which is where the rule about a blank dictation lives.
+    public static let lastTranscriptRecall = "dictus.lastTranscriptRecall"
 
     // Model management keys (added for Plan 2.3 transcription pipeline)
     public static let activeModel = "dictus.activeModel"
