@@ -398,7 +398,7 @@ class LiveActivityManager {
         }
 
         let attributes = DictusLiveActivityAttributes()
-        let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
+        let state = standbyContent()
         // staleDate: if app is killed without willTerminate firing, iOS auto-removes
         // the DI after this interval. 30s is short enough to clear ghosts quickly (#84).
         let staleDate = Date().addingTimeInterval(staleInterval)
@@ -628,6 +628,13 @@ class LiveActivityManager {
     /// After showing the result briefly, we go back to the "On" standby state
     /// so they can start another recording from the Dynamic Island.
     func endWithResult(preview: String?) {
+        // Written before every guard below, deliberately. The store is what the expanded
+        // island offers back (#531), and it must not depend on the Live Activity being
+        // enabled, on the pill still existing, or on the state machine accepting the
+        // transition -- the dictation happened either way, and #42's desync is exactly the
+        // kind of moment where the user needs the text back.
+        LastTranscriptRecall.record(preview)
+
         guard isEnabled else { return }
 
         // WHY: State machine guard prevents DI desync from concurrent transitions (#42)
@@ -644,7 +651,11 @@ class LiveActivityManager {
         PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "ready"))
         currentPhase = .ready  // Update BEFORE async work to prevent races (#49)
         Task {
-            let truncatedPreview = preview.map { String($0.prefix(100)) }
+            // Through the shared derivation since #531, so the transcript the user reads
+            // during this one second and the one the standby row keeps afterwards are cut
+            // the same way -- there is one definition of "the preview" and it lives beside
+            // the full text it is derived from.
+            let truncatedPreview = preview.map { LastTranscriptRecall.preview(of: $0) }
             let state = DictusLiveActivityAttributes.ContentState(
                 phase: .ready,
                 transcriptionPreview: truncatedPreview
@@ -884,6 +895,25 @@ class LiveActivityManager {
 
     // MARK: - Utilities
 
+    /// The standby content, carrying the last dictation's preview (#531).
+    ///
+    /// WHY one helper rather than a preview argument on three call sites: standby is built in
+    /// three places that are visible to the user -- the initial `Activity.request`, the
+    /// auto-return after a result, and the recovery from an abandoned stage -- and a fourth
+    /// that forgot the transcript would show an empty bottom region for a reason the user
+    /// cannot see. Decision 2 is that the transcript stays until the next dictation replaces
+    /// it, and reading it from the store on every standby build is what makes that true
+    /// without any of these sites having to remember.
+    ///
+    /// The `.standby` states handed to `activity.end(dismissalPolicy: .immediate)` deliberately
+    /// do NOT come through here: that content is never drawn.
+    private func standbyContent() -> DictusLiveActivityAttributes.ContentState {
+        DictusLiveActivityAttributes.ContentState(
+            phase: .standby,
+            lastTranscriptPreview: LastTranscriptRecall.preview()
+        )
+    }
+
     /// Return to standby state. Called after result/failure auto-dismiss,
     /// and also when a recording is cancelled from the keyboard.
     func returnToStandby() async {
@@ -899,7 +929,7 @@ class LiveActivityManager {
         PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "standby"))
         currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
         syncStateMachine(to: .standby)
-        let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
+        let state = standbyContent()
         // Refresh staleDate on each return to standby (#84: 30s clears ghosts after force-quit)
         let staleDate = Date().addingTimeInterval(staleInterval)
         await activity.update(.init(state: state, staleDate: staleDate))
@@ -947,7 +977,7 @@ class LiveActivityManager {
         PersistentLog.log(.liveActivityTransition(from: abandoned.rawValue, to: "standby-abandoned"))
         currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
         Task {
-            let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
+            let state = self.standbyContent()
             await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
             DictusLogger.app.info("Live Activity -> standby (abandoned \(abandoned.rawValue, privacy: .public))")
         }
