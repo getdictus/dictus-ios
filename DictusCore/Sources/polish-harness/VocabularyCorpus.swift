@@ -80,7 +80,17 @@ enum VocabularyCorpus {
 /// shipped behaviour have to be re-runnable by anyone, on any Mac, without Apple
 /// Intelligence.
 func runVocabulary() {
-    let paths = CommandLine.arguments.dropFirst(2).filter { !$0.hasPrefix("--") }
+    let arguments = Array(CommandLine.arguments.dropFirst(2))
+    // This command takes no options, so an unrecognised one is refused rather than
+    // dropped: filtering `--` out silently left `--engine local` handing `local` to
+    // the loader as a corpus path, and the error a reader then saw named a file
+    // nobody had asked for.
+    if let flag = arguments.first(where: { $0.hasPrefix("--") }) {
+        print("error: `vocabulary` takes no options, and does not understand \(flag).")
+        print("usage: swift run polish-harness vocabulary <corpus.json> [more.json ...]")
+        exit(1)
+    }
+    let paths = arguments
     guard !paths.isEmpty else {
         print("usage: swift run polish-harness vocabulary <corpus.json> [more.json ...]")
         exit(1)

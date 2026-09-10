@@ -24,7 +24,7 @@ final class VocabularyCorpusReplayTests: XCTestCase {
         let corpus = try load()
         var wrong: [String] = []
         for item in corpus {
-            let produced = VocabularyReplacer.apply(item.raw, entries: item.vocabulary)
+            let produced = VocabularyReplacer.apply(item.raw, entries: vocabulary(for: item))
             if produced != item.expected { wrong.append(item.label) }
         }
         XCTAssertEqual(wrong, [], "a case whose output changed is either a regression or a decision to record")
@@ -36,8 +36,9 @@ final class VocabularyCorpusReplayTests: XCTestCase {
     /// rule builder refuses to construct.
     func testTheCorpusIsIdempotent() throws {
         let notIdempotent = try load().filter { item in
-            let once = VocabularyReplacer.apply(item.raw, entries: item.vocabulary)
-            return VocabularyReplacer.apply(once, entries: item.vocabulary) != once
+            let entries = vocabulary(for: item)
+            let once = VocabularyReplacer.apply(item.raw, entries: entries)
+            return VocabularyReplacer.apply(once, entries: entries) != once
         }
         XCTAssertEqual(notIdempotent.map(\.label), [])
     }
@@ -104,24 +105,54 @@ final class VocabularyCorpusReplayTests: XCTestCase {
 
         var label: String { "\(source):\(fixture)" }
 
-        /// The entries as the replacer receives them in production. An entry the
-        /// model refuses to build would silently shrink the case to fewer rules than
-        /// it declares, so it is a failure rather than a skip.
-        var vocabulary: [VocabularyEntry] {
+        /// The entries as the replacer receives them in production, or nil for any
+        /// the model refuses. Never a sentinel and never a force unwrap: the caller
+        /// has to handle the refusal, which is the point of it.
+        var vocabulary: [VocabularyEntry?] {
             entries.map {
                 VocabularyEntry(term: $0.term, variants: $0.variants, isEnabled: $0.isEnabled ?? true)
-                    ?? VocabularyEntry(term: "!invalid-entry-in-corpus")! // swiftlint:disable:this force_unwrapping
             }
         }
+    }
+
+    /// The witness the whole suite rests on.
+    ///
+    /// `VocabularyEntry.init?` **cleans as well as refuses** — it trims, drops an
+    /// over-long or duplicated variant, and drops one identical to its own term. A
+    /// corpus case that tripped any of those would replay fewer rules than its JSON
+    /// declares and still pass every assertion below, which is a green suite
+    /// measuring something other than what the file says. So the declared shape and
+    /// the built shape are compared before anything is replayed.
+    private func vocabulary(
+        for item: Case, file: StaticString = #filePath, line: UInt = #line
+    ) -> [VocabularyEntry] {
+        var built: [VocabularyEntry] = []
+        for (declared, entry) in zip(item.entries, item.vocabulary) {
+            guard let entry else {
+                XCTFail("\(item.label): the model refuses the entry \(declared.term)", file: file, line: line)
+                continue
+            }
+            XCTAssertEqual(
+                entry.term, declared.term.trimmingCharacters(in: .whitespacesAndNewlines),
+                "\(item.label): the term is not stored as the corpus writes it", file: file, line: line
+            )
+            XCTAssertEqual(
+                entry.variants.count, declared.variants.count,
+                "\(item.label): \(declared.variants.count - entry.variants.count) of "
+                    + "\(declared.term)'s variants were dropped, so this case replays "
+                    + "fewer rules than it declares",
+                file: file, line: line
+            )
+            built.append(entry)
+        }
+        return built
     }
 
     private func load(file: StaticString = #filePath, line: UInt = #line) throws -> [Case] {
         let url = repoRoot().appendingPathComponent("docs/research/80-vocabulary/corpus.json")
         let corpus = try JSONDecoder().decode([Case].self, from: Data(contentsOf: url))
         XCTAssertFalse(corpus.isEmpty, "no corpus found at \(url.path)", file: file, line: line)
-        for item in corpus where item.vocabulary.contains(where: { $0.term.hasPrefix("!invalid") }) {
-            XCTFail("\(item.label) declares an entry the model refuses", file: file, line: line)
-        }
+        for item in corpus { _ = vocabulary(for: item, file: file, line: line) }
         return corpus
     }
 
