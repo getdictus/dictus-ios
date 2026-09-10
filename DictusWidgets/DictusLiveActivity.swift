@@ -255,6 +255,13 @@ struct DictusLiveActivity: Widget {
         switch context.state.phase {
         case .recording:
             EmptyView()
+        case .standby:
+            // The dictation that just happened, offered back (#531). Nil until a first one
+            // has happened, and that nil is the screen exactly as it was before: an empty
+            // bottom region with power and mic untouched above it.
+            if let preview = context.state.lastTranscriptPreview {
+                lastTranscriptRow(preview: preview, copied: context.state.hasCopiedLastTranscript)
+            }
         case .ready:
             if let preview = context.state.transcriptionPreview {
                 Text(preview)
@@ -266,6 +273,38 @@ struct DictusLiveActivity: Widget {
         default:
             EmptyView()
         }
+    }
+
+    /// The standby row: the last transcript, and one tap to get all of it (#531).
+    ///
+    /// WHY the button carries an icon and no label: DictusWidgets has no string catalogue --
+    /// every string in this file is hardcoded English -- so a "Copy" label would be the one
+    /// new string in the project that no French user can read. The two buttons it sits under
+    /// are icons for the same reason, and a glyph needs no translation.
+    ///
+    /// WHY the confirmation is a swapped glyph: a Live Activity re-renders from its
+    /// ContentState and runs no animation of its own, so the confirmation has to be a state
+    /// the intent writes back (#531 decision 5).
+    private func lastTranscriptRow(preview: String, copied: Bool) -> some View {
+        HStack(spacing: 10) {
+            Text(preview)
+                .font(.system(size: 13))
+                .foregroundColor(.white.opacity(0.8))
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button(intent: CopyLastTranscriptIntent()) {
+                Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(copied ? Color(hex: 0x22C55E) : .white)
+                    .frame(width: 32, height: 32)
+                    .background(copied ? Color.white.opacity(0.15) : Color(hex: 0x3D7EFF))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 8)
     }
 
     // MARK: - Lock Screen Banner
@@ -289,6 +328,11 @@ struct DictusLiveActivity: Widget {
 
                 switch context.state.phase {
                 case .standby:
+                    // Deliberately still just "On" (#531 decision 4). The state now carries
+                    // the last transcript, and this banner is the one surface that must not
+                    // render it: a lock screen banner cannot be expanded, so there is no
+                    // gesture to reveal it behind -- it would simply be the user's last
+                    // dictation, legible on a locked phone.
                     Text("On")
                         .font(.system(size: 13))
                         .foregroundColor(.white.opacity(0.6))
