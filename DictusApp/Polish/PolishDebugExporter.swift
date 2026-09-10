@@ -129,7 +129,13 @@ struct PolishDebugExport: Codable {
         let preprocessMs: Int?
         let engineMs: Int?
         let postprocessMs: Int?
+        /// Characters in the text the polish judged — `vocabularyCorrected` when
+        /// present, `raw` otherwise. See `PolishMetrics.rawCharCount`.
         let rawCharCount: Int
+        /// Characters in `raw`, present only when it differs from the text the
+        /// polish judged (#80). Without it a reader comparing `raw` against
+        /// `rawCharCount` would find them contradicting each other.
+        let engineRawCharCount: Int?
         let polishedCharCount: Int
         /// **The speech engine's own output.** Not the polish's input when a custom
         /// vocabulary is in play — see `vocabularyCorrected` below and #80.
@@ -218,6 +224,7 @@ enum PolishDebugExporter {
                 engineMs: entry.metrics.timings?.engineMs,
                 postprocessMs: entry.metrics.timings?.postprocessMs,
                 rawCharCount: entry.metrics.rawCharCount,
+                engineRawCharCount: entry.vocabularyCorrected == nil ? nil : entry.raw.count,
                 polishedCharCount: entry.metrics.polishedCharCount,
                 raw: entry.raw,
                 vocabularyCorrected: entry.vocabularyCorrected,
