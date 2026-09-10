@@ -6,17 +6,20 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-08.
+Last reviewed: 2026-09-10.
 
-## The three lanes, in order
+## The lanes, in order
 
 | Lane | What it is | Runs |
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Now** |
-| **C** | The keyboard session | After the `paywallVisible` flip |
+| **A′** | 1.8.3, auto-return — #23 | After B. Its probe starts today. |
+| **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
+
+**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project has treated as settled since April turned out to be false, and it is the only lane that can be cancelled by a one-hour measurement.
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -118,9 +121,23 @@ His verdict was that Normal polish is not at the level and wants work before the
 
 **#216, the Pro hub.** Deferred on 2026-08-24: the hub's content *is* the feature list, so building it before the features exist means building it three times.
 
+## Lane A′ — 1.8.3, auto-return
+
+One issue: **#23, auto-return to the source app after a cold-start dictation.** Milestone `1.8.3 — auto-return`, `priority:high`, `ready-for-agent`. The number is provisional — if 2.0.0 cuts first this becomes a 2.0.x; [VERSIONING.md](VERSIONING.md) decides, not this file.
+
+It is out of band because its blocking premise was falsified. The April 2026 ADR concluded that no API lets a keyboard extension identify its host app, closed the question, and the swipe-back overlay has been the answer ever since. On 2026-09-10 the API was found in an open-source competitor, [`n0an/VivaDicta`](https://github.com/n0an/VivaDicta), and read out of the shipped binary it links: the bundle ID is not on the input view controller — where all thirteen 2026-04 probes looked — but on `UIKeyboardArbiterClient`, a UIKit singleton outside the view controller graph. The second historic blocker dissolves with it: `open()` needs no `LSApplicationQueriesSchemes` declaration, only `canOpenURL` does, and nothing here needs `canOpenURL`. The full mechanism, the evidence, the failure taxonomy and a four-phase plan are the [2026-09-10 comment on #23](https://github.com/getdictus/dictus-ios/issues/23#issuecomment-5619601818); the issue body carries a banner saying it is superseded.
+
+**The lane is gated on a measurement, and that is what keeps it from swallowing Lane B.** Phase 0 is a device probe: diagnostic code only, no product change, roughly an hour, and it answers whether the arbiter returns a correct bundle ID on current iOS and how long it lags a change of host. **It starts today, in parallel with Lane B** — like #215 it has external latency, in this case an API Apple can remove in any release, and it is the only thing that can cancel the lane. Everything after it waits for the flip.
+
+**If the probe fails, the lane closes empty and #23 goes back to Someday.** That is a real outcome, not a formality: the technique is private API reached by runtime string lookup, and it is exactly the kind of thing that returns `nil` one iOS release later. The swipe-back overlay stays as the floor in every case — resolved-with-no-scheme, unresolved, and probe-failed all land on it.
+
+**Two things a reader will otherwise rediscover the hard way.** VivaDicta measured their resolver naming an app that had been terminated for three seconds, 1.3 s after the keyboard changed host, and the app duly relaunched it; resolutions taken ≥8 s after the host appeared were correct. So the host is resolved **at the tap**, bounded at 2 s, and a timeout falls through to the overlay rather than to a cached answer — opening the wrong app is worse than opening none. And `SharedKeys.sourceAppScheme`, sitting in the repo since Phase 13 and looking exactly like the right key, is the wrong shape: a value persisted to the App Group outlives the keyboard process and teleports the user into last session's app. Delete it.
+
+**One decision is the maintainer's and is not an agent's to take:** whether Dictus ships private API at all. The probe does not need that answer — it changes nothing a user can reach. Phase 1 does.
+
 ## Lane C — the keyboard session
 
-After the flip. **Its preparation step is done: the ideas are written down.** On 2026-09-05 Pierre listed what he wants improved, and it became eight new issues plus six existing ones, gathered in the `Keyboard session` milestone — 14 in total, reachable with `gh issue list --milestone "Keyboard session"`.
+After Lane A′. **Its preparation step is done: the ideas are written down.** On 2026-09-05 Pierre listed what he wants improved, and it became eight new issues plus six existing ones, gathered in the `Keyboard session` milestone — 14 in total, reachable with `gh issue list --milestone "Keyboard session"`.
 
 Three themes came out of it, and they are not equal in size:
 
@@ -132,9 +149,9 @@ Two things the lane must not re-litigate: **#138 is `wontfix`** — a keyboard e
 
 ## Someday
 
-A GitHub milestone holding 29 issues, all `priority:low`. Not refused, not scheduled, and deliberately out of the default view — the open count went from 80 to 36 on 2026-09-05 by moving them there, and that number is the point.
+A GitHub milestone holding 23 issues, all `priority:low`. Not refused, not scheduled, and deliberately out of the default view — the open count went from 80 to 36 on 2026-09-05 by moving them there, and that number is the point.
 
-Review it at each version cut. Anything that has become urgent leaves; anything that has been there through three cuts is a `wontfix` waiting to be admitted.
+Review it at each version cut. Anything that has become urgent leaves — **#23 left it on 2026-09-10**, after six months of being the right call and one afternoon of not being; anything that has been there through three cuts is a `wontfix` waiting to be admitted.
 
 ## What this file is not
 
