@@ -8,7 +8,13 @@ final class VocabularyReplacerTests: XCTestCase {
     private func entry(_ term: String, _ variants: [String], enabled: Bool = true) -> VocabularyEntry {
         guard let entry = VocabularyEntry(term: term, variants: variants, isEnabled: enabled) else {
             XCTFail("entry \(term) should be constructible")
-            return VocabularyEntry(term: "fallback")! // swiftlint:disable:this force_unwrapping
+            // The test has already failed above; this only keeps the signature
+            // non-optional so every call site stays readable. Force unwrap justified:
+            // `init?` refuses on an empty term or one over 100 characters, and this
+            // literal is neither — it cannot return nil, and a `guard` here would be
+            // an unreachable branch pretending to be a recovery.
+            // swiftlint:disable:next force_unwrapping
+            return VocabularyEntry(term: "fallback")!
         }
         return entry
     }
@@ -188,6 +194,40 @@ final class VocabularyReplacerTests: XCTestCase {
         let raw = "cloud code puis cubernetes, et とうきょう, encore clode code."
         let once = VocabularyReplacer.apply(raw, entries: entries)
         XCTAssertEqual(VocabularyReplacer.apply(once, entries: entries), once)
+    }
+
+    /// CodeRabbit's counter-example, verified against the shipping matcher on
+    /// 2026-09-10. It is in a **spaced** script, which is what an earlier version of
+    /// this feature's documentation got wrong: `foo bar` appears only once `foo` has
+    /// replaced `fuu` next to the text that followed it, so no inspection of the
+    /// rules in isolation finds it. A single scan produced `foo bar` then `baz`.
+    func testRulesThatChainAcrossAJoinSettleInOneCall() {
+        let entries = [entry("foo", ["fuu"]), entry("baz", ["foo bar"])]
+        let once = VocabularyReplacer.apply("fuu bar", entries: entries)
+        XCTAssertEqual(once, "baz", "chained rules compose rather than stopping half way")
+        XCTAssertEqual(VocabularyReplacer.apply(once, entries: entries), once)
+    }
+
+    func testTheChainStillFiresWhenTheJoinIsNotAtTheStart() {
+        let entries = [entry("foo", ["fuu"]), entry("baz", ["foo bar"])]
+        let once = VocabularyReplacer.apply("dis fuu bar maintenant", entries: entries)
+        XCTAssertEqual(once, "dis baz maintenant")
+        XCTAssertEqual(VocabularyReplacer.apply(once, entries: entries), once)
+    }
+
+    /// A text the pass cannot settle is returned untouched, which is what keeps
+    /// idempotence total rather than nearly-total. Refusing to rewrite is the
+    /// conservative failure: the user keeps their own words.
+    func testATextThatDoesNotSettleIsReturnedUntouched() {
+        // A chain long enough to outrun the pass budget: a → b → c → d → e.
+        let entries = [
+            entry("b x", ["a x"]), entry("c x", ["b x"]), entry("d x", ["c x"]),
+            entry("e x", ["d x"]), entry("f x", ["e x"])
+        ]
+        let raw = "a x"
+        let once = VocabularyReplacer.apply(raw, entries: entries)
+        XCTAssertEqual(VocabularyReplacer.apply(once, entries: entries), once,
+                       "settled or refused, the result must be stable either way")
     }
 
     func testAVariantThatWouldReappearInsideItsOwnTermIsDropped() {

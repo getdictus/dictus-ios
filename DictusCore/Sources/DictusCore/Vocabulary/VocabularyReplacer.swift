@@ -53,6 +53,14 @@ public enum VocabularyReplacer {
         }
     }
 
+    /// How many scans one call may make before it gives up.
+    ///
+    /// Reached only by rules that chain — see `outcome`. Four is far beyond anything
+    /// a user writes by hand and cheap on a transcript of a few hundred characters:
+    /// the ordinary case costs two scans, one that changes something and one that
+    /// confirms nothing is left.
+    static let maximumPasses = 4
+
     /// Apply the user's vocabulary to a transcript.
     ///
     /// Returns `text` untouched when there is nothing to do, which is the state
@@ -64,11 +72,49 @@ public enum VocabularyReplacer {
     }
 
     /// The same pass, with the number of replacements it made.
+    ///
+    /// ### Why this scans to a fixed point rather than once
+    ///
+    /// **A single scan is not idempotent, and the issue requires that it is.** The
+    /// counter-example is CodeRabbit's, verified here on 2026-09-10, and it is in a
+    /// *spaced* script — which is what an earlier version of this comment got wrong:
+    /// with `fuu → foo` and `foo bar → baz`, the input `fuu bar` becomes `foo bar` on
+    /// the first application and `baz` on the second.
+    ///
+    /// The rule-build filter below cannot see it. It refuses a needle that occurs
+    /// inside a canonical *term*, and `foo bar` occurs inside neither `foo` nor
+    /// `baz`. It appears only once `foo` has been emitted **next to the text that
+    /// followed it**, and no inspection of the rules in isolation reaches that.
+    ///
+    /// So the pass scans until the text stops changing, which makes its result a
+    /// fixed point and therefore idempotent by construction. The observable
+    /// consequence is that chained rules now compose: the user gets `baz`, which is
+    /// what their two rules say together.
+    ///
+    /// ### And when it does not settle
+    ///
+    /// **The transcript is returned untouched.** That keeps idempotence total rather
+    /// than nearly-total — a text this refuses to rewrite is returned unchanged
+    /// again on the next call — and refusing to rewrite is the conservative failure:
+    /// the user keeps their own words, which is the same floor the polish guardrail
+    /// falls back to. The filters below make a genuine loop hard to construct; this
+    /// is what makes "hard" unnecessary to rely on.
     public static func outcome(_ text: String, entries: [VocabularyEntry]) -> Outcome {
         guard !text.isEmpty else { return .unchanged(text) }
         let rules = rules(from: entries)
         guard !rules.isEmpty else { return .unchanged(text) }
-        return apply(text, rules: rules)
+
+        var current = text
+        var replacements = 0
+        for _ in 0..<maximumPasses {
+            let pass = apply(current, rules: rules)
+            guard pass.text != current else {
+                return Outcome(text: current, replacements: replacements)
+            }
+            current = pass.text
+            replacements += pass.replacements
+        }
+        return .unchanged(text)
     }
 
     // MARK: - Rules
@@ -129,12 +175,11 @@ public enum VocabularyReplacer {
     /// dropped, the image of the map meets its domain only at fixed points, so a
     /// second application changes nothing.
     ///
-    /// The one residue this does not cover is a variant that straddles the join
-    /// between an emitted term and the text that follows it — reachable only in a
-    /// non-spaced script, where there is no boundary to stop it, and only with a
-    /// variant deliberately built to span that join. It is left standing rather than
-    /// papered over: closing it means re-scanning emitted text, which is a bigger
-    /// hole than the one it fills.
+    /// **What these filters do not cover** is a needle that straddles the join
+    /// between an emitted term and the text that follows it — `foo bar` appearing
+    /// only once `foo` has replaced `fuu`. No inspection of the rules in isolation
+    /// finds it, in any script. `outcome` closes it by scanning to a fixed point;
+    /// see the reasoning there.
     static func rules(from entries: [VocabularyEntry]) -> [Rule] {
         let enabled = entries.filter { $0.isEnabled && $0.isValid }
         guard !enabled.isEmpty else { return [] }
