@@ -7,10 +7,18 @@ import Foundation
 // MARK: - LogLevel
 
 /// Log severity levels for structured logging.
-/// 4 levels: debug (internal details), info (normal operations),
-/// warning (recoverable issues), error (failures).
+/// 5 levels: debug (internal details), info (normal operations),
+/// notice (an observation that must survive the process), warning (recoverable
+/// issues), error (failures).
+///
+/// WHY `notice` exists (#23). The persistent file log keeps every level, so on
+/// disk this changes nothing. The `os.log` mirror is where it matters: `info`
+/// entries there are memory-backed and die with the process, and the keyboard
+/// extension is killed routinely — a diagnostic read whose only purpose is to be
+/// read afterwards has to land on a level the unified log persists. `notice` is
+/// the lowest one that does.
 public enum LogLevel: String, CaseIterable, Sendable {
-    case debug, info, warning, error
+    case debug, info, notice, warning, error
 
     /// Level name padded to 7 characters for aligned log output.
     public var paddedName: String {
@@ -160,6 +168,23 @@ public enum LogEvent: Sendable {
     case keyboardDidDisappear
     case keyboardMicTapped
     case keyboardTextInserted  // No content parameter -- privacy by design
+
+    // MARK: Host app probe (#23)
+    /// One reading of the private keyboard arbiter, which is where UIKit keeps the
+    /// bundle ID of the app the keyboard is serving. See `HostAppProbe`.
+    ///
+    /// Diagnostic only: nothing reads this to make a decision, and the probe exists
+    /// to answer whether the arbiter is readable at all on current iOS and how long
+    /// it lags a change of host app.
+    ///
+    /// `moment` says which of the three call sites produced the line
+    /// (`viewWillAppear`, `micTap`, `series01`…`series10`) and `elapsedMs` how long
+    /// after the keyboard appeared it was taken — together they are the lag curve.
+    /// `details` carries the hop-by-hop outcome in the shared key=value format.
+    ///
+    /// No content parameter: a bundle identifier names an app, never what was typed
+    /// into it.
+    case hostAppProbe(moment: String, elapsedMs: Int, details: String)
 
     // MARK: Key auto-repeat (#390)
     // Neither case carries a key or a character. Only backspace auto-repeats, so
@@ -457,6 +482,7 @@ public enum LogEvent: Sendable {
              .modelDownloadOffline:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
+             .hostAppProbe,
              .keyRepeatStarted, .keyRepeatStopped,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
@@ -518,6 +544,11 @@ public enum LogEvent: Sendable {
              .liveActivityFailed, .subscriptionError, .idleInvariantViolation,
              .modelDownloadIntegrityFailed:
             return .error
+
+        // Notice: an observation whose whole point is to be read after the process
+        // that made it is gone (#23). Never a normal operation, never a problem.
+        case .hostAppProbe:
+            return .notice
 
         // Warnings
         case .dictationDeferred, .dictationStateReconciled,
@@ -651,6 +682,7 @@ public enum LogEvent: Sendable {
         case .keyboardDidAppear: return "keyboardDidAppear"
         case .keyboardDidDisappear: return "keyboardDidDisappear"
         case .keyboardMicTapped: return "keyboardMicTapped"
+        case .hostAppProbe: return "hostAppProbe"
         case .dictationMessageSet: return "dictationMessageSet"
         case .dictationMessageDisplayed: return "dictationMessageDisplayed"
         case .dictationMessageCleared: return "dictationMessageCleared"
@@ -840,6 +872,8 @@ public enum LogEvent: Sendable {
         case .keyboardDidAppear, .keyboardDidDisappear,
              .keyboardMicTapped, .keyboardTextInserted:
             return ""
+        case .hostAppProbe(let moment, let elapsedMs, let details):
+            return "moment=\(moment) elapsedMs=\(elapsedMs) \(details)"
         case .keyRepeatStarted:
             return ""
         case .keyRepeatStopped(let ticks, let reason):

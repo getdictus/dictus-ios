@@ -7,13 +7,14 @@ final class LogEventTests: XCTestCase {
 
     // MARK: - LogLevel cases
 
-    func testLogLevelHasExactly4Cases() {
-        XCTAssertEqual(LogLevel.allCases.count, 4)
+    func testLogLevelHasExactly5Cases() {
+        XCTAssertEqual(LogLevel.allCases.count, 5)
     }
 
     func testLogLevelRawValues() {
         XCTAssertEqual(LogLevel.debug.rawValue, "debug")
         XCTAssertEqual(LogLevel.info.rawValue, "info")
+        XCTAssertEqual(LogLevel.notice.rawValue, "notice")
         XCTAssertEqual(LogLevel.warning.rawValue, "warning")
         XCTAssertEqual(LogLevel.error.rawValue, "error")
     }
@@ -22,6 +23,7 @@ final class LogEventTests: XCTestCase {
         // All padded names should be 7 chars for alignment
         XCTAssertEqual(LogLevel.debug.paddedName, "DEBUG  ")
         XCTAssertEqual(LogLevel.info.paddedName, "INFO   ")
+        XCTAssertEqual(LogLevel.notice.paddedName, "NOTICE ")
         XCTAssertEqual(LogLevel.warning.paddedName, "WARNING")
         XCTAssertEqual(LogLevel.error.paddedName, "ERROR  ")
     }
@@ -324,6 +326,21 @@ final class LogEventTests: XCTestCase {
         let event = LogEvent.keyboardMicTapped
         XCTAssertEqual(event.level, .info)
         XCTAssertEqual(event.subsystem, .keyboard)
+    }
+
+    /// #23 phase 0. `notice` and not `info` is the whole point of the case: the
+    /// os.log mirror drops `info` when the extension dies, and this probe is only
+    /// ever read after the fact.
+    func testHostAppProbeIsNoticeKeyboard() {
+        let event = LogEvent.hostAppProbe(
+            moment: "viewWillAppear",
+            elapsedMs: 0,
+            details: "arbiterClass=UIKeyboardArbiterClient sourceBundleIdentifier=com.apple.mobilenotes"
+        )
+        XCTAssertEqual(event.level, .notice)
+        XCTAssertEqual(event.subsystem, .keyboard)
+        XCTAssertEqual(event.name, "hostAppProbe")
+        XCTAssertTrue(event.payload().contains("moment=viewWillAppear elapsedMs=0"))
     }
 
     func testKeyboardTextInsertedIsDebugKeyboard() {
