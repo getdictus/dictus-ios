@@ -391,7 +391,7 @@ class KeyboardViewController: UIInputViewController {
         // seconds — the series is what measures how long the arbiter takes to name the
         // host we just moved to. Restarted on every appearance because a change of host
         // app is exactly what brings the keyboard up again.
-        HostAppProbe.keyboardDidAppear()
+        HostAppProbe.keyboardDidAppear(self)
         HostAppProbe.startAppearanceSeries()
         // Point KeyboardState's weak controller ref at the currently-visible controller
         // so call sites in KeyboardRootView and KeyboardState can access textDocumentProxy.

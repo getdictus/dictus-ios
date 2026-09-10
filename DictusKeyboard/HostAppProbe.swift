@@ -1,5 +1,6 @@
 // DictusKeyboard/HostAppProbe.swift
 import UIKit
+import ObjectiveC
 import DictusCore
 
 /// Reads the private keyboard arbiter for the bundle ID of the app this keyboard is
@@ -91,11 +92,21 @@ enum HostAppProbe {
     /// appearance would spend a 1 MB budgeted log on a constant.
     private static var hasLoggedSystemVersion = false
 
+    /// The controller that last appeared, for the `_hostProcessIdentifier` cross-check.
+    ///
+    /// Held here rather than read from `KeyboardState.shared.controller` alone because
+    /// `viewWillAppear` takes its reading *before* that reference is repointed, and the
+    /// first line of a capture is the one that reports the moment the keyboard arrived
+    /// in a new host — the least useful line to have blank. Weak, for the same reason
+    /// `KeyboardState` holds it weakly: the controller owns the view that owns the state.
+    private static weak var appearedController: UIInputViewController?
+
     // MARK: - Call sites
 
     /// Anchors the elapsed clock and takes the first reading. Called from
-    /// `viewWillAppear`.
-    static func keyboardDidAppear() {
+    /// `viewWillAppear`, which passes itself.
+    static func keyboardDidAppear(_ controller: UIInputViewController) {
+        appearedController = controller
         appearedAt = Date()
         emit(moment: "viewWillAppear")
     }
@@ -171,6 +182,7 @@ enum HostAppProbe {
 
         guard let client = sharedArbiterClient(of: arbiterClass) else {
             out.append("sharedClient=\(describeMissing(arbiterClass as AnyObject, selector: sharedClientSelectorName))")
+            out.append(classAccessorInventory(of: arbiterClass))
             return (out + [hostPidDetails()]).joined(separator: " ")
         }
         out.append("sharedClient=ok")
@@ -196,7 +208,9 @@ enum HostAppProbe {
     /// and got 0. Carried on every line even when the arbiter chain fails, because if the
     /// arbiter is gone but this survives, the pid is the route worth pursuing.
     private static func hostPidDetails() -> String {
-        guard let controller = KeyboardState.shared.controller else { return "hostPid=<no-controller>" }
+        guard let controller = appearedController ?? KeyboardState.shared.controller else {
+            return "hostPid=<no-controller>"
+        }
         let pid = (read("_hostProcessIdentifier", from: controller) as? NSNumber)?.intValue
         return "hostPid=\(pid.map(String.init) ?? describeMissing(controller, selector: "_hostProcessIdentifier"))"
     }
@@ -232,6 +246,30 @@ enum HostAppProbe {
     private static func read(_ key: String, from object: NSObject) -> Any? {
         guard object.responds(to: NSSelectorFromString(key)) else { return nil }
         return object.value(forKey: key)
+    }
+
+    /// The class methods this class exposes that could plausibly hand out an instance.
+    ///
+    /// Emitted only when `automaticSharedArbiterClient` yields nothing, and it is what
+    /// makes that outcome actionable instead of terminal. `sharedClient=nil` on its own
+    /// says "the accessor exists and is empty" and leaves the next step to guesswork —
+    /// which on a physical device costs another build, another install and another
+    /// capture. The inventory names the accessors that do exist, so the next attempt is
+    /// a read rather than a guess.
+    ///
+    /// Filtered and capped: the point is the handful of names that look like vendors of
+    /// an instance, not a full method dump in a log budgeted at 1 MB.
+    private static func classAccessorInventory(of arbiterClass: NSObject.Type) -> String {
+        var count: UInt32 = 0
+        guard let methods = class_copyMethodList(object_getClass(arbiterClass), &count) else {
+            return "classMethods=none"
+        }
+        defer { free(methods) }
+        let names = (0..<Int(count)).map { String(cString: sel_getName(method_getName(methods[$0]))) }
+        let interesting = names
+            .filter { $0.contains("hared") || $0.contains("lient") || $0.contains("rbiter") }
+            .prefix(12)
+        return "classMethods=\(count) vendors=[\(interesting.joined(separator: ","))]"
     }
 
     /// Why a hop produced nothing: the selector is gone, or it answered with nil.
