@@ -118,6 +118,11 @@ enum HostAppProbe {
     /// appearance would spend a 1 MB budgeted log on a constant.
     private static var hasLoggedSystemVersion = false
 
+    /// Whether this appearance has already carried the arbiter inventory. Reset on every
+    /// appearance so a host change gets its own reading, which is the comparison the
+    /// pointers exist for.
+    private static var hasInventoriedThisAppearance = false
+
     /// What happened the first time this process tried to install the activation
     /// swizzle, or nil if it has not tried yet. Doubles as the idempotency latch: a
     /// second call returns `already(...)` rather than stacking another IMP.
@@ -142,6 +147,7 @@ enum HostAppProbe {
         // Activation first, so even the elapsedMs=0 reading is taken with the arbiter
         // switched on. Everything after this is a plain read.
         let activation = activateArbiter()
+        hasInventoriedThisAppearance = false
         emit(moment: "viewWillAppear", activation: activation)
     }
 
@@ -323,11 +329,41 @@ enum HostAppProbe {
             return (out + [hostPidDetails()]).joined(separator: " ")
         }
         out.append("clientStateClass=\(type(of: state))")
+        // The inventory rides the first line of each appearance that actually has a
+        // client state — not `viewWillAppear`, where it would be blank every time: the
+        // state does not exist yet at elapsedMs=0, that is the population delay this
+        // probe measures. One line per appearance, always carrying data.
+        if !hasInventoriedThisAppearance {
+            hasInventoriedThisAppearance = true
+            out.append(inventory(client: client, state: state))
+        }
 
         let bundleId = read("sourceBundleIdentifier", from: state) as? String
         let pid = (read("processIdentifier", from: state) as? NSNumber)?.intValue
         out.append("sourceBundleIdentifier=\(bundleId ?? describeMissing(state, selector: "sourceBundleIdentifier"))")
         out.append("processIdentifier=\(pid.map(String.init) ?? describeMissing(state, selector: "processIdentifier"))")
+
+        // The *other* pair the client state carries. The inventory above is what found
+        // them: `_UIKeyboardChangedInformation` declares `hostBundleIdentifier` and
+        // `hostProcessIdentifier` next to the `source*` pair this probe was built around,
+        // and nothing in the KeyboardKit analysis mentions them.
+        //
+        // Worth reading because the simulator showed the `source*` pair freezing at the
+        // value it had when the arbiter was activated while the real host kept changing.
+        // If `host*` tracks where `source*` sticks, the freeze is us reading the wrong
+        // field rather than anything being stale — which is the cheapest possible fix and
+        // the sort of difference the control experiment says to look for.
+        let hostBundleId = read("hostBundleIdentifier", from: state) as? String
+        let hostStatePid = (read("hostProcessIdentifier", from: state) as? NSNumber)?.intValue
+        out.append("hostBundleIdentifier=\(hostBundleId ?? describeMissing(state, selector: "hostBundleIdentifier"))")
+        out.append("hostProcessIdentifier=\(hostStatePid.map(String.init) ?? describeMissing(state, selector: "hostProcessIdentifier"))")
+
+        // The scene identity the state was built for. Pairs with the class method the
+        // round-1 inventory turned up, `keyboardClientFBSSceneIdentityStringOrIdentifierFromScene:`
+        // — if this ever disagrees with the host we are actually serving, it names which
+        // scene the stale reading belongs to.
+        let sceneIdentity = read("sourceSceneIdentityString", from: state) as? String
+        out.append("sourceScene=\(sceneIdentity ?? describeMissing(state, selector: "sourceSceneIdentityString"))")
 
         return (out + [hostPidDetails()]).joined(separator: " ")
     }
@@ -344,6 +380,55 @@ enum HostAppProbe {
         }
         let pid = (read("_hostProcessIdentifier", from: controller) as? NSNumber)?.intValue
         return "hostPid=\(pid.map(String.init) ?? describeMissing(controller, selector: "_hostProcessIdentifier"))"
+    }
+
+    /// What our own process can see around the arbiter, once per appearance.
+    ///
+    /// ## Why these fields exist (the control of 2026-09-10)
+    ///
+    /// VivaDicta, installed from the App Store, teleports back to the host app on the
+    /// same iPhone and the same iOS that this probe runs on. So Apple has not closed the
+    /// path and the API is alive today. **Anything we cannot read is therefore a
+    /// difference between our input view controller and theirs, not a limit of iOS** —
+    /// which turns every blank or stale field here from a dead end into a lead.
+    ///
+    /// The immediate lead is the one the simulator produced: after the client state is
+    /// first populated it stops tracking changes of host, while `hostPid` keeps up. Two
+    /// of these fields separate the candidate explanations directly.
+    ///
+    /// - `clientPtr` / `statePtr`: whether the arbiter hands back the *same objects* on
+    ///   every appearance. A stable `statePtr` across two different hosts means the state
+    ///   is cached and never rebuilt; a fresh pointer carrying stale contents means the
+    ///   source it is built from is what has gone stale. Those want different fixes.
+    /// - `stateProps`: the property names on the client state's class. If one of them is
+    ///   a timestamp, the staleness stops being an inference; if one of them carries a
+    ///   scene identity, that is a second route to a fresh value.
+    ///
+    /// Reads only, capped, and on one line in sixteen. Nothing here is acted on.
+    private static func inventory(client: NSObject, state: NSObject) -> String {
+        "clientPtr=\(address(of: client)) statePtr=\(address(of: state))"
+            + " stateProps=[\(propertyNames(of: type(of: state)).joined(separator: ","))]"
+    }
+
+    /// An object's address, so two readings can be compared for identity in a log that
+    /// has no other way to say "the same instance came back".
+    ///
+    /// The real pointer, not a hash of it: a hash would compare equal just as well, but
+    /// it would print as something that looks like an address and is not, and the next
+    /// reader would waste time trying to correlate it with one.
+    private static func address(of object: AnyObject) -> String {
+        "0x" + String(UInt(bitPattern: Unmanaged.passUnretained(object).toOpaque()), radix: 16)
+    }
+
+    /// The declared property names of `cls`, capped so one line cannot run away.
+    private static func propertyNames(of cls: AnyClass) -> [String] {
+        var count: UInt32 = 0
+        guard let list = class_copyPropertyList(cls, &count) else { return [] }
+        defer { free(list) }
+        return (0..<Int(count))
+            .map { String(cString: property_getName(list[$0])) }
+            .prefix(16)
+            .map { $0 }
     }
 
     // MARK: - Runtime plumbing
