@@ -131,7 +131,16 @@ struct PolishDebugExport: Codable {
         let postprocessMs: Int?
         let rawCharCount: Int
         let polishedCharCount: Int
+        /// **The speech engine's own output.** Not the polish's input when a custom
+        /// vocabulary is in play — see `vocabularyCorrected` below and #80.
         let raw: String
+        /// What the polish ran on, when #80's pass rewrote the transcript first;
+        /// absent when it changed nothing, which is the ordinary case.
+        ///
+        /// This export is where #80's own corpus is mined from, so `raw` above has
+        /// to keep meaning "what the engine produced" however much the vocabulary is
+        /// used. The pair is what says which terms the feature is already covering.
+        let vocabularyCorrected: String?
         let polished: String?
         let sttEngine: String?
         let sttModelID: String?
@@ -211,6 +220,7 @@ enum PolishDebugExporter {
                 rawCharCount: entry.metrics.rawCharCount,
                 polishedCharCount: entry.metrics.polishedCharCount,
                 raw: entry.raw,
+                vocabularyCorrected: entry.vocabularyCorrected,
                 polished: entry.polished,
                 sttEngine: entry.metrics.sttEngine,
                 sttModelID: entry.metrics.sttModelID

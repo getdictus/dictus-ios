@@ -320,6 +320,7 @@ class DictationCoordinator: ObservableObject {
             defaults.removeObject(forKey: SharedKeys.lastTranscription)
             defaults.removeObject(forKey: SharedKeys.lastTranscriptionTimestamp)
             defaults.removeObject(forKey: SharedKeys.lastTranscriptionPolicy)
+            defaults.removeObject(forKey: SharedKeys.lastTranscriptionEngineRaw)
             defaults.removeObject(forKey: SharedKeys.lastTranscriptionDuration)
             // Through the channel since #495: the polished text and the flag saying
             // whether it was typed are one answer, and a sweep that took only half of
@@ -885,10 +886,9 @@ class DictationCoordinator: ObservableObject {
                 // the back door #414 and #466 closed. With an empty vocabulary the
                 // transcript is handed straight back, which is why this wraps the
                 // call instead of adding a step of its own.
-                let rawText = CustomVocabulary.corrected(try await transcriptionService.transcribe(
-                    audioSamples: samples,
-                    languagePolicy: languagePolicy
-                ))
+                let transcript = DictationTranscript.corrected(
+                    try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: languagePolicy)
+                )
 
                 // Where the tail of the dictation happens, since #361.
                 //
@@ -907,7 +907,7 @@ class DictationCoordinator: ObservableObject {
                     // Showing it in the keyboard, which runs the overwhelming
                     // majority of dictations, is #423's scope.
                     await finishInApp(
-                        rawText: rawText,
+                        transcript: transcript,
                         languagePolicy: languagePolicy,
                         smartMode: smartMode.mode,
                         audioDuration: audioDuration,
@@ -922,7 +922,7 @@ class DictationCoordinator: ObservableObject {
                     // (#267).
                     guard mayReport(session, "transcription result") else { return }
                     handOffToKeyboard(
-                        rawText: rawText,
+                        transcript: transcript,
                         languagePolicy: languagePolicy,
                         smartMode: smartMode,
                         audioDuration: audioDuration,

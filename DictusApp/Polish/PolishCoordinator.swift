@@ -58,12 +58,14 @@ public final class PolishCoordinator {
                        languagePolicy: TranscriptionLanguagePolicy,
                        smartMode: SmartMode?,
                        recordingDuration: TimeInterval,
+                       engineRaw: String? = nil,
                        onEngineWillRun: (() -> Void)? = nil) async -> PolishOutcome {
         await service.polish(
             raw: raw,
             languagePolicy: languagePolicy,
             smartMode: smartMode,
             recordingDuration: recordingDuration,
+            engineRaw: engineRaw,
             onEngineWillRun: onEngineWillRun
         )
     }

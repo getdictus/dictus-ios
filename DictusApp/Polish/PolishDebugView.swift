@@ -220,6 +220,11 @@ private struct EntryDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 metaRow
                 section("Raw STT output", text: entry.raw)
+                // Only when #80's pass rewrote something. The two side by side are
+                // what say which terms the vocabulary is already covering.
+                if let corrected = entry.vocabularyCorrected {
+                    section("After custom vocabulary", text: corrected)
+                }
                 section("Engine output",
                         text: entry.polished ?? "(engine did not run successfully)")
             }
