@@ -19,6 +19,7 @@ final class LogCoverageTests: XCTestCase {
             .transcriptionStarted(modelName: "base"),
             .transcriptionCompleted(durationMs: 2500, wordCount: 42),
             .transcriptionFailed(error: "modelNotLoaded"),
+            .vocabularyApplied(enabled: true, entries: 3, replacements: 1, chars: 58),
             .modelDownloadStarted(name: "large-v3", sizeMB: 1500),
             .modelDownloadCompleted(name: "large-v3"),
             .modelDownloadFailed(name: "large-v3", error: "networkTimeout"),

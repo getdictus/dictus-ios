@@ -42,11 +42,31 @@ public enum CustomVocabulary {
     /// Returns its input, unchanged and un-copied, for every user who is not
     /// entitled or has stored nothing. That identity is the issue's pre-registered
     /// bar.
-    public static func corrected(_ text: String,
-                                 entries: [VocabularyEntry]? = nil) -> String {
-        let entries = entries ?? activeEntries()
-        guard !entries.isEmpty else { return text }
-        return VocabularyReplacer.apply(text, entries: entries)
+    ///
+    /// **This overload writes one line to the persistent log, always** — including
+    /// when the feature is off, and including when nothing matched. The line carries
+    /// counters and no text; see `LogEvent.vocabularyApplied` for why it is
+    /// unconditional and why it can never carry a term.
+    public static func corrected(_ text: String) -> String {
+        let isEntitled = VocabularyAvailability.isEntitled
+        let entries = isEntitled ? VocabularyStore.loadEntries().filter(\.isEnabled) : []
+        let outcome = VocabularyReplacer.outcome(text, entries: entries)
+        PersistentLog.log(.vocabularyApplied(
+            enabled: isEntitled,
+            entries: entries.count,
+            replacements: outcome.replacements,
+            chars: text.count
+        ))
+        return outcome.text
+    }
+
+    /// The same pass with the vocabulary supplied, and **no logging**.
+    ///
+    /// What the tests and the replay harness call: a suite that wrote to the App
+    /// Group's debug log on every assertion would put noise into the artefact the
+    /// log exists to keep readable.
+    public static func corrected(_ text: String, entries: [VocabularyEntry]) -> String {
+        VocabularyReplacer.apply(text, entries: entries)
     }
 
     /// The user's canonical terms, for the polish glossary (#80 decision 7).

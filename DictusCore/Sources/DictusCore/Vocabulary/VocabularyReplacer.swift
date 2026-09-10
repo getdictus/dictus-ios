@@ -36,6 +36,23 @@ public enum VocabularyReplacer {
 
     // MARK: - Entry point
 
+    /// What one run of the pass did.
+    ///
+    /// The count exists for the persistent log. A pass that writes nothing down is
+    /// indistinguishable from a pass that is not wired in at all — which cost three
+    /// round trips and an inspection of the App Group container during #80's device
+    /// test before anyone could say whether it had run. The log records counters and
+    /// never text: `autocorrectDebugLogging` exists precisely so that nothing which
+    /// logs the user's words can reach a Release build by accident.
+    public struct Outcome: Equatable, Sendable {
+        public let text: String
+        public let replacements: Int
+
+        static func unchanged(_ text: String) -> Outcome {
+            Outcome(text: text, replacements: 0)
+        }
+    }
+
     /// Apply the user's vocabulary to a transcript.
     ///
     /// Returns `text` untouched when there is nothing to do, which is the state
@@ -43,9 +60,14 @@ public enum VocabularyReplacer {
     /// pre-registered bar: with an empty vocabulary nothing downstream may be able
     /// to tell the feature shipped.
     public static func apply(_ text: String, entries: [VocabularyEntry]) -> String {
-        guard !text.isEmpty else { return text }
+        outcome(text, entries: entries).text
+    }
+
+    /// The same pass, with the number of replacements it made.
+    public static func outcome(_ text: String, entries: [VocabularyEntry]) -> Outcome {
+        guard !text.isEmpty else { return .unchanged(text) }
         let rules = rules(from: entries)
-        guard !rules.isEmpty else { return text }
+        guard !rules.isEmpty else { return .unchanged(text) }
         return apply(text, rules: rules)
     }
 
@@ -164,7 +186,7 @@ public enum VocabularyReplacer {
     /// One left-to-right pass. On a hit the canonical term is emitted and the cursor
     /// advances **past the variant**, so text this pass wrote is never re-examined
     /// by it.
-    private static func apply(_ text: String, rules: [Rule]) -> String {
+    private static func apply(_ text: String, rules: [Rule]) -> Outcome {
         let characters = Array(text)
         let lowered = characters.map { $0.lowercased() }
 
@@ -178,6 +200,7 @@ public enum VocabularyReplacer {
 
         var output = String()
         output.reserveCapacity(text.count)
+        var replacements = 0
         var index = 0
         while index < characters.count {
             var matched = false
@@ -185,6 +208,7 @@ public enum VocabularyReplacer {
                 for rule in bucket where matches(rule, in: characters, lowered: lowered, at: index) {
                     output.append(rule.replacement)
                     index += rule.needle.count
+                    replacements += 1
                     matched = true
                     break
                 }
@@ -194,7 +218,7 @@ public enum VocabularyReplacer {
                 index += 1
             }
         }
-        return output
+        return Outcome(text: output, replacements: replacements)
     }
 
     /// Whether `rule` matches at `index`, boundaries included.

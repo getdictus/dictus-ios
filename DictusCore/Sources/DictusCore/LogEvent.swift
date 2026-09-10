@@ -319,6 +319,21 @@ public enum LogEvent: Sendable {
     /// insertion — and only this log has all of them on one page.
     case polishEngineFailed(reason: String, engine: String, mode: String, engineMs: Int)
 
+    /// Issue #80: the custom-vocabulary pass ran on a transcript.
+    ///
+    /// Emitted on **every** dictation, including when the feature is off, because
+    /// the question this answers at diagnosis time is "did a correction happen?" —
+    /// and a pass that says nothing is indistinguishable from a pass that was never
+    /// wired in. #80's device test cost three round trips and an inspection of the
+    /// App Group container from the Mac to establish that it was running.
+    ///
+    /// `enabled` is the entitlement and the toggle together, so "switched off" and
+    /// "on but the vocabulary is empty" read differently. **Counters only, never a
+    /// term and never a fragment of the transcript**: the persistent log ships in
+    /// Release, which is the whole reason `autocorrectDebugLogging` is a separate
+    /// DEBUG-only surface.
+    case vocabularyApplied(enabled: Bool, entries: Int, replacements: Int, chars: Int)
+
     /// Issue #315: polish stopped calling its engine for the rest of this process,
     /// after `consecutiveRefusals` `rateLimited` results in a row.
     ///
@@ -453,7 +468,7 @@ public enum LogEvent: Sendable {
         // subsystem of its own (#315).
         case .polishEngineFailed, .polishEngineUnavailable, .polishHandoff,
              .polishInsertionRefused, .polishCallSuperseded,
-             .smartModeRefused, .smartModeSkipped:
+             .smartModeRefused, .smartModeSkipped, .vocabularyApplied:
             return .transcription
         }
     }
@@ -551,7 +566,8 @@ public enum LogEvent: Sendable {
         // Info: the hand-off steps describe a dictation working as designed, and
         // the refusal is the guard doing its job rather than something going wrong.
         // A superseded call is likewise the documented behaviour of decision 15.
-        case .polishHandoff, .polishInsertionRefused, .polishCallSuperseded:
+        case .polishHandoff, .polishInsertionRefused, .polishCallSuperseded,
+             .vocabularyApplied:
             return .info
 
         // Warning: a Smart Mode that refused its own output cost the user a
@@ -673,6 +689,7 @@ public enum LogEvent: Sendable {
         case .modelDownloadSessionRestored: return "modelDownloadSessionRestored"
         case .modelDownloadOffline: return "modelDownloadOffline"
         case .polishEngineFailed: return "polishEngineFailed"
+        case .vocabularyApplied: return "vocabularyApplied"
         case .polishEngineUnavailable: return "polishEngineUnavailable"
         case .polishHandoff: return "polishHandoff"
         case .polishInsertionRefused: return "polishInsertionRefused"
@@ -939,6 +956,9 @@ public enum LogEvent: Sendable {
         // Polish (#315)
         case .polishEngineFailed(let reason, let engine, let mode, let engineMs):
             return "reason=\(reason) engine=\(engine) mode=\(mode) engineMs=\(engineMs)"
+        case .vocabularyApplied(let enabled, let entries, let replacements, let chars):
+            return "enabled=\(enabled ? "yes" : "no") entries=\(entries) "
+                + "replacements=\(replacements) chars=\(chars)"
         case .polishHandoff(let step, let outcome, let chars):
             return "step=\(step) outcome=\(outcome) chars=\(chars)"
         case .polishInsertionRefused(let reason, let ageMs):
