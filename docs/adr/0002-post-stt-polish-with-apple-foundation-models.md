@@ -19,7 +19,7 @@ When `NLLanguageRecognizer` returns no language with usable confidence, polish i
 
 Runtime is wrapped by a **length-ratio guardrail**: polished output is rejected (raw written instead, event logged) when its character-length ratio to raw falls outside `[0.5, 2.0]` in Light mode or `[0.3, 3.0]` in Repair mode.
 
-A static **PolishGlossary** of ~20-30 domain terms is injected into every prompt as context.
+A static **PolishGlossary** of ~20-30 domain terms is injected into every prompt as context. *(Removed on 2026-09-10 — see the #536 update at the end of this file.)*
 
 Languages wired at round 1: French, English, Spanish, German (subset of `SupportedLanguage` ∩ Apple FM supported languages).
 
@@ -76,20 +76,19 @@ No latency cap at round 1: full distribution is measured before any time-based a
 - Baseline-device users (iPhone 12-14, non-Pro iPhone 15, older iPad) see nothing related to polish until round 2 ships an OSS path. This is by design but is a user-visible gap.
 - Repair mode introduces a real hallucination risk on the worst-quality inputs. The skip-on-gibberish heuristic and the length-ratio guardrail are first lines of defense; they will leak subtle cases that show up only in logs.
 - Per-language prompt tuning is sequential work. Spanish and German ship at round 1 with prompts that have not been validated against native-speaker output. Quality there will be reactive to community feedback (cf. #109 dynamics).
-- The PolishGlossary is a maintainer-curated artefact that competes with `LanguageProfile.overrides` and #80 custom vocab for the same conceptual space. The three-mechanism distinction is documented but is a learning curve for new contributors.
+- The PolishGlossary is a maintainer-curated artefact that competes with `LanguageProfile.overrides` and #80 custom vocab for the same conceptual space. The three-mechanism distinction is documented but is a learning curve for new contributors. *(Resolved by removal in #536: there are two mechanisms now.)*
 
 **Reversibility.**
 The whole layer is reversible: a single feature flag in App Group preferences turns it off globally. The protocol abstraction means swapping Apple FM for an OSS backend is a per-implementation change, not a layer-wide rewrite. The faithful contract shift (Mode B's intent-bridged stance) is harder to walk back once users rely on Mode B behavior, but is gated behind language-detection differences and is invisible to users who never trigger Parakeet hallucinations.
 
 ## Implementation notes
 
-- Protocol and shared types in `DictusCore/Polish/`: `PolishEngineProtocol`, `PolishMode`, `PolishGlossary`, `PolishGuardrail`, `PolishMetrics`.
+- Protocol and shared types in `DictusCore/Polish/`: `PolishEngineProtocol`, `PolishMode`, `PolishGlossary` (deleted in #536), `PolishGuardrail`, `PolishMetrics`.
 - Implementation in `DictusApp/Polish/`: `AppleFoundationModelsPolishEngine`, `PolishPromptBuilder` (per mode × language), `PolishCoordinator` (orchestration), `PolishDebugView`.
 - Toggle persisted in App Group via a new `SharedKeys` entry. Read at runtime by `PolishCoordinator`. Toggle UI lives in DictusApp Settings under the existing transcription section, label "Polir la transcription" / "Polish transcription". Hidden if `SystemLanguageModel.default.availability != .available`. Debug override flag (build setting or hidden gesture) shows the toggle on dev devices regardless.
 - `PolishCoordinator` orchestrates: receive raw text + target language + engine identity → `NLLanguageRecognizer` on raw → choose mode (skip if gibberish) → fetch or create cached session → call engine → apply guardrail → emit metrics → return polished or raw.
 - Sessions cached in a `[PolishMode × SupportedLanguage: LanguageModelSession]` dictionary in `AppleFoundationModelsPolishEngine`. Created lazily on first use of each combo. Prewarm called on the `(light, currentTargetLanguage)` session at app launch.
 - Cancellation: `PolishCoordinator` holds a reference to the in-flight `Task`; a new dictation starting in DictusApp calls `task.cancel()` on the previous polish before the new one begins. Apple FM session `respond(to:)` is cancellable via Swift task cancellation.
-- Glossary content evolves by PR; initial seed list to be determined at first-implementation time, sourced from terms observed mistranscribed during development.
 - Round 2 trigger: after enough on-device A/B usage to characterize p50/p95 latency, Mode B trigger rate, and rejection rate by guardrail. Threshold for "enough" is not pre-defined; reviewer judgement based on log volume.
 
 ## Update — 2026-06-08: ES/DE Repair prompts added
@@ -99,3 +98,15 @@ Round 1 shipped Repair prompts for FR/EN only; ES and DE fell back to the Englis
 - **ES Repair works** (verified via `polish-harness` on Apple FM: clean French → faithful Spanish, `success`).
 - **DE Repair has a known Apple FM limitation**: cross-lingual reconstruction INTO German from a Romance-language input reproducibly leaks Polish, regardless of the OUTPUT LANGUAGE lock (not promptable away — confirmed across multiple runs and an explicit "never Polish" reinforcement). The guardrail catches it → raw fallback, so the user never sees the leak. German→German (Natural mode) is unaffected. Net for DE Repair: same user-visible behaviour as before (raw fallback), now correctly routed; the real fix is the round-2 third-party local LLM.
 - These ES/DE prompts are on-paper, pending native-speaker validation (same status as the Natural ES/DE prompts).
+
+## Update — 2026-09-10: the glossary is removed (#536)
+
+The decision above injects a static **PolishGlossary** of domain terms into every prompt, and #80 later appended the user's own canonical terms to it. That mechanism is deleted. It was never measured when it shipped, and when it finally was, it did nothing:
+
+- `Dictus` sat in the glossary and Apple FM polished `dictus` into `dictés`; `Parakeet v3` sat in it and `Parakit V3` came back untouched. Both on an iPhone 15 Pro Max, iOS 26.6.1, French, Natural mode.
+- In the same session `whisperflow` — in nobody's glossary — was corrected to `WhisperFlow` by the model's own priors. Apple FM fixes what it already knows and does not act on a supplied list.
+- The wording escape route is closed too. `n0an/VivaDicta` ships the same two layers and asks for **phonetic repair** from a tagged `<CUSTOM_VOCABULARY>` block — the three axes a rewrite would have changed — and corrected `Claude Code` in **0 of 5** dictations on the same device, with its own log showing Apple FM ran every time. This is #439's ceiling in a second implementation.
+
+Gone with it: `PolishGlossary` in full, the `glossary:` parameter on all eleven prompt builders, and `CustomVocabulary.glossaryTerms()`. The three-mechanism confusion listed under Consequences is down to two — `LanguageProfile.overrides` for keyboard autocorrect, and #80's deterministic replacement pass for the user's own terms, which is validated on device and untouched.
+
+The branch not taken, recorded so it is not silently retried: rewriting the block along VivaDicta's axes. Reopen #536 only with a measurement that moves the number.
