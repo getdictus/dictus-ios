@@ -14,12 +14,12 @@ Last reviewed: 2026-09-10.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Now** |
-| **A′** | 1.8.3, auto-return — #23 | After B. Its probe starts today. |
+| **A′** | 1.8.3 — #23 auto-return, #531 last transcription | After B. #23's probe starts today; #531's is already answered. |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
 
-**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project has treated as settled since April turned out to be false, and it is the only lane that can be cancelled by a one-hour measurement.
+**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project has treated as settled since April turned out to be false, and its head item, #23, is the only one in any lane that a one-hour measurement can cancel outright. Its second item, #531, was added on 2026-09-10 and does not share that gate.
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -123,7 +123,7 @@ His verdict was that Normal polish is not at the level and wants work before the
 
 ## Lane A′ — 1.8.3, auto-return
 
-One issue: **#23, auto-return to the source app after a cold-start dictation.** Milestone `1.8.3 — auto-return`, `priority:high`, `ready-for-agent`. The number is provisional — if 2.0.0 cuts first this becomes a 2.0.x; [VERSIONING.md](VERSIONING.md) decides, not this file.
+**Item 1: #23, auto-return to the source app after a cold-start dictation.** Milestone `1.8.3 — auto-return`, `priority:high`, `ready-for-agent`. The number is provisional — if 2.0.0 cuts first this becomes a 2.0.x; [VERSIONING.md](VERSIONING.md) decides, not this file.
 
 It is out of band because its blocking premise was falsified. The April 2026 ADR concluded that no API lets a keyboard extension identify its host app, closed the question, and the swipe-back overlay has been the answer ever since. On 2026-09-10 the API was found in an open-source competitor, [`n0an/VivaDicta`](https://github.com/n0an/VivaDicta), and read out of the shipped binary it links: the bundle ID is not on the input view controller — where all thirteen 2026-04 probes looked — but on `UIKeyboardArbiterClient`, a UIKit singleton outside the view controller graph. The second historic blocker dissolves with it: `open()` needs no `LSApplicationQueriesSchemes` declaration, only `canOpenURL` does, and nothing here needs `canOpenURL`. The full mechanism, the evidence, the failure taxonomy and a four-phase plan are the [2026-09-10 comment on #23](https://github.com/getdictus/dictus-ios/issues/23#issuecomment-5619601818); the issue body carries a banner saying it is superseded.
 
@@ -134,6 +134,14 @@ It is out of band because its blocking premise was falsified. The April 2026 ADR
 **Two things a reader will otherwise rediscover the hard way.** VivaDicta measured their resolver naming an app that had been terminated for three seconds, 1.3 s after the keyboard changed host, and the app duly relaunched it; resolutions taken ≥8 s after the host appeared were correct. So the host is resolved **at the tap**, bounded at 2 s, and a timeout falls through to the overlay rather than to a cached answer — opening the wrong app is worse than opening none. And `SharedKeys.sourceAppScheme`, sitting in the repo since Phase 13 and looking exactly like the right key, is the wrong shape: a value persisted to the App Group outlives the keyboard process and teleports the user into last session's app. Delete it.
 
 **One decision is the maintainer's and is not an agent's to take:** whether Dictus ships private API at all. The probe does not need that answer — it changes nothing a user can reach. Phase 1 does.
+
+**Item 2: #531, recover the last transcription from the expanded Dynamic Island** — added 2026-09-10, `ready-for-agent`. Long press the island in standby, the last transcript is there with a Copy button; power and mic keep their place, and the lock-screen banner never carries the text.
+
+**It shares this lane because it answers the same failure and it is not gated on the probe.** #23 is about a dictation whose *user* ends up in the wrong place; #531 is about a dictation whose *text* does. Both are "the words were captured and did not arrive", which is what makes 1.8.3 a cycle rather than a bag. The dependency structure is the opposite of #23's, though: **#531 has already cleared its own blocking measurement.** A `LiveActivityIntent` was shown writing to `UIPasteboard` with DictusApp backgrounded, on the iPhone 17 Pro simulator, 2026-09-08 — the sentinel-to-marker capture is [on the issue](https://github.com/getdictus/dictus-ios/issues/531#issuecomment-5587827086). Nothing about it waits on the arbiter probe.
+
+**Which is also its second reason to be here: it gives 1.8.3 a body that survives the probe.** If the arbiter measurement fails, #23 goes back to Someday and this lane still has something to cut. The milestone keeps the name `1.8.3 — auto-return` for now; if the probe does fail, rename it then rather than pre-emptively on a hypothesis.
+
+**Its own carry-forward, so it is not rediscovered:** a force-quit removes the Live Activity outright, so there is no killed-app case to design for; the island is only long-pressable while standby runs, which makes this the last dictation of the session and not a history — the archive is `HistoryView` and it is Pro; and what the simulator could not answer is a long suspension, which stays on the device list.
 
 ## Lane C — the keyboard session
 
