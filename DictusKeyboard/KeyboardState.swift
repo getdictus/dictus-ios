@@ -1367,6 +1367,12 @@ class KeyboardState: ObservableObject {
         }
         lastMicTapDate = now
 
+        // #23 phase 0, diagnostic only: the tap is the moment an auto-return would
+        // actually need to know the host app, so it is the reading whose accuracy
+        // decides anything. Placed after the debounce so a rejected rapid tap does not
+        // produce a line. Nothing reads it. See `HostAppProbe`.
+        HostAppProbe.micTapped()
+
         // A new dictation ends the previous one's undo offer, whatever comes of it.
         invalidateDictationUndo(reason: "new-dictation")
 

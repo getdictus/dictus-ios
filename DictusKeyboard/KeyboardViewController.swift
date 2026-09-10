@@ -386,6 +386,13 @@ class KeyboardViewController: UIInputViewController {
             details: "animated=\(animated) status=\(entryStatus) storedStatus=\(entryStoredStatus) coldStart=\(entryColdStart) inputBounds=\(Int(entryBounds.width))x\(Int(entryBounds.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) memMB=\(MemoryFootprint.residentMB())"
         ))
         PersistentLog.log(.keyboardDidAppear)
+
+        // #23 phase 0, diagnostic only. One reading now, then one a second for ten
+        // seconds — the series is what measures how long the arbiter takes to name the
+        // host we just moved to. Restarted on every appearance because a change of host
+        // app is exactly what brings the keyboard up again.
+        HostAppProbe.keyboardDidAppear()
+        HostAppProbe.startAppearanceSeries()
         // Point KeyboardState's weak controller ref at the currently-visible controller
         // so call sites in KeyboardRootView and KeyboardState can access textDocumentProxy.
         // Previously set from KeyboardRootView.onAppear, which held a strong ref → #134.
@@ -682,6 +689,10 @@ class KeyboardViewController: UIInputViewController {
         // A finger held on backspace when iOS takes the keyboard away never produces a
         // touchesEnded, and the repeat timer was cleared by nothing else (#390).
         giellaKeyboard?.cancelKeyRepeat(reason: "viewDidDisappear")
+
+        // Same argument for the #23 probe's series: a keyboard dismissed after two
+        // seconds must not go on reporting a host it has stopped serving.
+        HostAppProbe.stopAppearanceSeries()
 
         // Restore system gesture recognizer delay (be a good citizen)
         restoreWindowGestureDelay()
