@@ -10,7 +10,7 @@ import XCTest
 final class PolishNaturalPromptFRTests: XCTestCase {
 
     private var prompt: String {
-        PolishNaturalPromptFR.instructions(glossary: PolishGlossary.promptBlock)
+        PolishNaturalPromptFR.instructions()
     }
 
     /// Rule 8 stays exactly as ADR 0003 shipped it. #439 measured that widening
@@ -64,12 +64,6 @@ final class PolishNaturalPromptFRTests: XCTestCase {
                         "Apple Store", "en calcul", "déborder"] {
             XCTAssertFalse(prompt.contains(segment),
                            "\(segment) is a #439 fixture segment and must stay out of the prompt")
-        }
-    }
-
-    func testPromptEmbedsGlossary() {
-        for term in PolishGlossary.terms {
-            XCTAssertTrue(prompt.contains(term), "glossary term \(term) missing from the FR prompt")
         }
     }
 }

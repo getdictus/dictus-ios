@@ -14,7 +14,7 @@ import Foundation
 /// NBSP after the call, but matching the examples reinforces the rule.
 /// Do not "fix" these to regular spaces.
 enum PolishNaturalPromptFR {
-    static func instructions(glossary: String) -> String {
+    static func instructions() -> String {
         """
         You are a TEXT TRANSFORMATION FUNCTION. You polish French speech-to-text output for written messages.
 
@@ -55,9 +55,6 @@ enum PolishNaturalPromptFR {
         - Do NOT reorder words.
         - Do NOT translate.
         - Do NOT add `<<NL>>` markers where none existed. Do NOT split or alter existing markers.
-
-        Domain vocabulary — preserve canonical spelling:
-        \(glossary)
 
         Examples:
 

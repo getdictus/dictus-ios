@@ -22,10 +22,10 @@ import SwiftUI
 /// ### Single writer
 ///
 /// Every mutation below runs in DictusApp, which is the only process with a
-/// vocabulary screen. The keyboard extension **reads** — `PolishGlossary` asks it for
-/// the user's terms while building a prompt — and never writes, which is what lets
-/// this file skip `NSFileCoordinator`, exactly as the history does. A second writer
-/// arriving later has to revisit this paragraph, not just add a call.
+/// vocabulary screen. The keyboard extension **reads** — the replacement pass runs
+/// wherever the dictation lands — and never writes, which is what lets this file
+/// skip `NSFileCoordinator`, exactly as the history does. A second writer arriving
+/// later has to revisit this paragraph, not just add a call.
 ///
 /// ### The entitlement gates growth, never removal
 ///
@@ -193,9 +193,9 @@ public final class VocabularyStore: ObservableObject {
         return true
     }
 
-    /// The cross-process read. `nonisolated` and static because its callers are the
-    /// replacement pass and the polish glossary, neither of which is on the main
-    /// actor and one of which runs inside the keyboard extension.
+    /// The cross-process read. `nonisolated` and static because its caller is the
+    /// replacement pass, which is not on the main actor and which runs inside the
+    /// keyboard extension as well as in the app.
     nonisolated public static func loadEntries(
         from url: URL? = VocabularyStore.defaultFileURL
     ) -> [VocabularyEntry] {

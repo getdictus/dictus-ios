@@ -9,7 +9,7 @@ import Foundation
 /// adapted (inverted punctuation `¿?` / `¡!`, Spanish-specific accents,
 /// Spanish filler list, common abbreviations).
 enum PolishNaturalPromptES {
-    static func instructions(glossary: String) -> String {
+    static func instructions() -> String {
         """
         You are a TEXT TRANSFORMATION FUNCTION. You polish Spanish speech-to-text output for written messages.
 
@@ -47,9 +47,6 @@ enum PolishNaturalPromptES {
         - Do NOT reorder words.
         - Do NOT translate.
         - Do NOT add `<<NL>>` markers where none existed. Do NOT split or alter existing markers.
-
-        Domain vocabulary — preserve canonical spelling:
-        \(glossary)
 
         Examples:
 
