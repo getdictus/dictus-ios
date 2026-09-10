@@ -94,11 +94,21 @@ public struct VocabularyEntry: Codable, Identifiable, Equatable, Sendable {
     /// Whether an entry that came off disk still satisfies what `init?` enforces.
     ///
     /// `Codable` synthesises its own initialiser and cannot be routed through the
-    /// failable one, so the file is the one place an invalid entry can enter. The
-    /// store filters on this at load; nothing else has to remember to.
+    /// failable one, so the file is the one place an invalid entry can enter — and
+    /// that file lives in a container anyone with the device can edit. The store
+    /// filters on this at load; nothing else has to remember to.
+    ///
+    /// **Rebuilt and compared rather than re-checked.** A second list of conditions
+    /// beside `init?` is a list that drifts from it, and it already had: a term of
+    /// three spaces passed, so did an empty variant, a duplicate differing only in
+    /// case, and a variant byte-identical to its own term. Routing through the real
+    /// initialiser makes the two impossible to disagree — whatever `init?` cleans or
+    /// refuses, this refuses.
     public var isValid: Bool {
-        guard !term.isEmpty, term.count <= Self.maxFieldLength else { return false }
-        return variants.allSatisfy { !$0.isEmpty && $0.count <= Self.maxFieldLength }
+        let rebuilt = VocabularyEntry(
+            term: term, variants: variants, isEnabled: isEnabled, id: id, dateAdded: dateAdded
+        )
+        return rebuilt == self
     }
 
     /// The same entry with its switch flipped. Used by the list's per-row toggle.

@@ -88,6 +88,39 @@ final class VocabularyEntryTests: XCTestCase {
         XCTAssertEqual(decoded?.first?.isValid, false)
     }
 
+    /// The five shapes a hand-edited file could carry that `isValid` used to accept
+    /// while `init?` refused or cleaned them. The store trusts this property at load,
+    /// so each one was a rule the file could walk straight past.
+    func testIsValidRefusesWhatTheInitialiserWouldHaveCleanedOrRefused() {
+        XCTAssertEqual(decoded(term: "   ", variants: [])?.isValid, false, "a blank term")
+        XCTAssertEqual(decoded(term: " Kubernetes ", variants: [])?.isValid, false, "an untrimmed term")
+        XCTAssertEqual(decoded(term: "Kubernetes", variants: ["  "])?.isValid, false, "a blank variant")
+        XCTAssertEqual(
+            decoded(term: "Kubernetes", variants: ["cubernetes", "CUBERNETES"])?.isValid, false,
+            "a duplicate differing only in case"
+        )
+        XCTAssertEqual(
+            decoded(term: "Ampli", variants: ["Ampli"])?.isValid, false,
+            "a variant identical to its own term"
+        )
+        XCTAssertEqual(
+            decoded(term: "Kubernetes", variants: ["cubernetes"])?.isValid, true,
+            "and a well-formed entry still passes"
+        )
+    }
+
+    /// An entry as it arrives off disk: through `Codable`, which cannot be routed
+    /// through the failable initialiser and is therefore the one door that matters.
+    private func decoded(term: String, variants: [String]) -> VocabularyEntry? {
+        let variantList = variants.map { "\"\($0)\"" }.joined(separator: ",")
+        let json = Data(
+            ("{\"id\":\"\(UUID().uuidString)\",\"term\":\"\(term)\","
+             + "\"variants\":[\(variantList)],"
+             + "\"isEnabled\":true,\"dateAdded\":\"2026-09-07T10:00:00Z\"}").utf8
+        )
+        return try? VocabularyStore.decoder.decode(VocabularyEntry.self, from: json)
+    }
+
     func testAWellFormedEntryRoundTripsThroughJSON() {
         // A whole second: the ISO-8601 strategy the store shares between its encoder
         // and its decoder has no sub-second field, so a `Date()` would not compare

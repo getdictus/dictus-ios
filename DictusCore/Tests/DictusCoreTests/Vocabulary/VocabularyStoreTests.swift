@@ -26,7 +26,13 @@ final class VocabularyStoreTests: XCTestCase {
     private func entry(_ term: String, _ variants: [String] = []) -> VocabularyEntry {
         guard let entry = VocabularyEntry(term: term, variants: variants) else {
             XCTFail("entry \(term) should be constructible")
-            return VocabularyEntry(term: "fallback")! // swiftlint:disable:this force_unwrapping
+            // The test has already failed above; this only keeps the signature
+            // non-optional so every call site stays readable. Force unwrap justified:
+            // `init?` refuses on an empty term or one over 100 characters, and this
+            // literal is neither — it cannot return nil, and a `guard` here would be
+            // an unreachable branch pretending to be a recovery.
+            // swiftlint:disable:next force_unwrapping
+            return VocabularyEntry(term: "fallback")!
         }
         return entry
     }
@@ -136,6 +142,56 @@ final class VocabularyStoreTests: XCTestCase {
             VocabularyStore.defaultFileURL?.deletingLastPathComponent(),
             TranscriptionHistoryStore.defaultFileURL?.deletingLastPathComponent()
         )
+    }
+
+    // MARK: - A write that fails
+
+    /// A store whose memory and disk disagree is a store that lies, and this one is
+    /// read by a second process — so the disagreement would not even be visible to
+    /// the process that caused it. An unwritable path stands in for the real causes:
+    /// an unreachable App Group container, or a full disk.
+    private func unwritableStore() -> VocabularyStore {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("vocabulary-missing-\(UUID().uuidString)", isDirectory: true)
+        return VocabularyStore(
+            fileURL: directory.appendingPathComponent("vocabulary.json"), isEntitled: { true }
+        )
+    }
+
+    func testAddReportsFailureAndStoresNothingWhenTheWriteFails() {
+        let store = unwritableStore()
+        XCTAssertFalse(store.add(entry("Kubernetes", ["cubernetes"])))
+        XCTAssertTrue(store.isEmpty, "the list must not show an entry the disk never took")
+    }
+
+    func testDeleteReportsFailureAndKeepsTheEntryWhenTheWriteFails() {
+        // Seed a real file, then aim the store at a path it cannot write.
+        let store = makeStore()
+        store.add(entry("Kubernetes"))
+        let broken = VocabularyStore(fileURL: nil, isEntitled: { true })
+        XCTAssertFalse(broken.add(entry("Parakeet")), "no container, no write, no entry")
+        XCTAssertTrue(broken.isEmpty)
+    }
+
+    func testResetReportsFailureAndKeepsTheListWhenTheWriteFails() {
+        // The failure that matters most: Reset vocabulary is the only exit from a
+        // file that survives a reinstall, so a reset that emptied the screen while
+        // leaving the file would come back at the next launch.
+        let store = makeStore()
+        store.add(entry("Kubernetes"))
+        try? FileManager.default.removeItem(at: fileURL)
+        try? FileManager.default.createDirectory(at: fileURL, withIntermediateDirectories: true)
+        XCTAssertFalse(store.resetAll(), "a reset that cannot be written must say so")
+        XCTAssertEqual(store.count, 1, "and must not claim the list is empty")
+        try? FileManager.default.removeItem(at: fileURL)
+    }
+
+    func testASuccessfulWriteStillReportsSuccess() {
+        let store = makeStore()
+        XCTAssertTrue(store.add(entry("Kubernetes")))
+        XCTAssertTrue(store.update(store.entries[0].enabled(false)))
+        XCTAssertTrue(store.delete(id: store.entries[0].id))
+        XCTAssertTrue(store.resetAll(), "an empty list is already reset, which is not a failure")
     }
 
     // MARK: - Mutation

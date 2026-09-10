@@ -28,6 +28,11 @@ struct VocabularyListView: View {
     /// Confirmation for the destructive reset, on the model of "Reset learned words".
     @State private var showResetConfirmation = false
 
+    /// Set when the store refused a write. It publishes nothing it could not put on
+    /// disk, so the row simply stays — and a row that snaps back with no explanation
+    /// is the second-worst outcome after one that disappears and returns tomorrow.
+    @State private var writeFailed = false
+
     var body: some View {
         List {
             Section {
@@ -39,12 +44,26 @@ struct VocabularyListView: View {
                     ForEach(store.entries) { entry in
                         row(entry)
                     }
-                    .onDelete(perform: store.delete(atOffsets:))
+                    .onDelete { offsets in
+                        writeFailed = !store.delete(atOffsets: offsets)
+                    }
                 }
             } header: {
                 Text("Your terms")
             } footer: {
-                Text("Dictus rewrites these in your transcriptions, before anything else reads them.")
+                // Deliberately narrow. The previous sentence said Dictus "corrects
+                // these in your transcriptions", which is false for an entry with no
+                // variants: nothing is replaced, and the only thing that entry does
+                // is reach the polish prompt. #536 is measuring whether that even
+                // works — two device captures show Apple FM ignoring the glossary
+                // outright — so until it is settled the screen claims only what is
+                // proven, and claims nothing about the glossary at all.
+                if writeFailed {
+                    Text("Could not save. Your device may be out of storage.")
+                        .foregroundColor(.red)
+                } else {
+                    Text("When Dictus writes one of these variants, it is replaced by your spelling.")
+                }
             }
 
             Section {
@@ -86,7 +105,7 @@ struct VocabularyListView: View {
             titleVisibility: .visible
         ) {
             Button("Forget \(store.count) terms", role: .destructive) {
-                store.resetAll()
+                writeFailed = !store.resetAll()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
@@ -122,7 +141,7 @@ struct VocabularyListView: View {
 
             Toggle("", isOn: Binding(
                 get: { entry.isEnabled },
-                set: { store.update(entry.enabled($0)) }
+                set: { writeFailed = !store.update(entry.enabled($0)) }
             ))
             .labelsHidden()
             .accessibilityLabel(Text(entry.term))
@@ -162,6 +181,11 @@ struct VocabularyEditorView: View {
 
     @State private var term: String
     @State private var variantsLine: String
+
+    /// Set when the store refused to write. The sheet then stays open rather than
+    /// dismissing over a term that was never stored — losing what the user typed is
+    /// the one outcome worse than telling them it failed.
+    @State private var saveFailed = false
 
     init(subject: VocabularyEditorSubject) {
         self.subject = subject
@@ -219,7 +243,12 @@ struct VocabularyEditorView: View {
             } header: {
                 Text("What Dictus writes instead")
             } footer: {
-                Text("Optional, separated by commas. Leave it empty if you do not know yet.")
+                if saveFailed {
+                    Text("Could not save. Your device may be out of storage.")
+                        .foregroundColor(.red)
+                } else {
+                    Text("Optional, separated by commas. Leave it empty if you do not know yet.")
+                }
             }
         }
         .navigationTitle(subject.entry == nil ? "New term" : "Edit term")
@@ -237,10 +266,13 @@ struct VocabularyEditorView: View {
 
     private func save() {
         guard let candidate else { return }
-        if subject.entry == nil {
-            store.add(candidate)
-        } else {
-            store.update(candidate)
+        let stored = subject.entry == nil ? store.add(candidate) : store.update(candidate)
+        // The store only publishes what it managed to write (#80 review). A refusal
+        // here means the file was not updated, so dismissing would show a list that
+        // disagrees with the disk and lose the entry at the next launch.
+        guard stored else {
+            saveFailed = true
+            return
         }
         dismiss()
     }

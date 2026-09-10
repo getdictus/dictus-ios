@@ -105,9 +105,9 @@ public final class VocabularyStore: ObservableObject {
     public func add(_ entry: VocabularyEntry) -> Bool {
         guard isEntitled(), !isFull else { return false }
         guard !contains(term: entry.term) else { return false }
-        entries.insert(entry, at: 0)
-        persist()
-        return true
+        var candidate = entries
+        candidate.insert(entry, at: 0)
+        return commit(candidate)
     }
 
     /// Whether a canonical spelling is already stored, ignoring case.
@@ -119,34 +119,38 @@ public final class VocabularyStore: ObservableObject {
 
     /// Replace an entry in place, keeping its position and its `dateAdded`.
     /// Ungated: it cannot grow the file.
-    public func update(_ entry: VocabularyEntry) {
-        guard let index = entries.firstIndex(where: { $0.id == entry.id }) else { return }
-        guard entries[index] != entry else { return }
-        entries[index] = entry
-        persist()
+    @discardableResult
+    public func update(_ entry: VocabularyEntry) -> Bool {
+        guard let index = entries.firstIndex(where: { $0.id == entry.id }) else { return false }
+        guard entries[index] != entry else { return true }
+        var candidate = entries
+        candidate[index] = entry
+        return commit(candidate)
     }
 
-    public func delete(id: UUID) {
+    @discardableResult
+    public func delete(id: UUID) -> Bool {
         let remaining = entries.filter { $0.id != id }
-        guard remaining.count != entries.count else { return }
-        entries = remaining
-        persist()
+        guard remaining.count != entries.count else { return false }
+        return commit(remaining)
     }
 
     /// Delete by row offsets, for `List`'s own swipe-to-delete.
-    public func delete(atOffsets offsets: IndexSet) {
-        guard !offsets.isEmpty else { return }
-        entries.remove(atOffsets: offsets)
-        persist()
+    @discardableResult
+    public func delete(atOffsets offsets: IndexSet) -> Bool {
+        guard !offsets.isEmpty else { return false }
+        var candidate = entries
+        candidate.remove(atOffsets: offsets)
+        return commit(candidate)
     }
 
     /// **Reset vocabulary** (#80 decision 10), on the model of #287's "Reset learned
     /// words": the one action that empties the list, and the exit from a file that
     /// would otherwise survive a reinstall.
-    public func resetAll() {
-        guard !entries.isEmpty else { return }
-        entries = []
-        persist()
+    @discardableResult
+    public func resetAll() -> Bool {
+        guard !entries.isEmpty else { return true }
+        return commit([])
     }
 
     /// Re-read the file. The app's own screen is the only writer, so this exists for
@@ -158,8 +162,35 @@ public final class VocabularyStore: ObservableObject {
 
     // MARK: - Disk
 
-    private func persist() {
-        Self.write(entries, to: fileURL)
+    /// Write first, publish second. **Every mutation goes through here**, and that
+    /// ordering is the whole point of the method.
+    ///
+    /// `write` used to be a `try?` whose failure nobody read, with the in-memory list
+    /// already mutated by the time it ran: an unreachable App Group container or a
+    /// full disk produced a screen showing entries that would be gone at the next
+    /// launch, and an `add` that returned `true` while storing nothing. A store whose
+    /// memory and disk can disagree is a store that lies, and this one is read by a
+    /// second process — so the disagreement would not even be visible to the process
+    /// that caused it.
+    ///
+    /// Applying it to removal as well as to growth is deliberate. A delete that
+    /// vanished from the list and stayed on disk would come back at the next launch,
+    /// which for **Reset vocabulary** — the only exit from a file that survives a
+    /// reinstall — is the failure that matters most.
+    ///
+    /// Returns whether the write succeeded, and publishes nothing when it did not.
+    private func commit(_ candidate: [VocabularyEntry]) -> Bool {
+        guard Self.write(candidate, to: fileURL) else {
+            PersistentLog.log(.diagnosticProbe(
+                component: "VocabularyStore",
+                instanceID: "commit",
+                action: "writeFailed",
+                details: "entries=\(candidate.count) hasURL=\(fileURL != nil ? "yes" : "no")"
+            ))
+            return false
+        }
+        entries = candidate
+        return true
     }
 
     /// The cross-process read. `nonisolated` and static because its callers are the
@@ -181,9 +212,16 @@ public final class VocabularyStore: ObservableObject {
         return decoded.filter { $0.isValid }
     }
 
-    nonisolated static func write(_ entries: [VocabularyEntry], to url: URL?) {
-        guard let url, let data = try? encoder.encode(entries) else { return }
-        try? data.write(to: url, options: .atomic)
+    /// Returns whether the file now holds `entries`. The caller publishes only then.
+    @discardableResult
+    nonisolated static func write(_ entries: [VocabularyEntry], to url: URL?) -> Bool {
+        guard let url, let data = try? encoder.encode(entries) else { return false }
+        do {
+            try data.write(to: url, options: .atomic)
+            return true
+        } catch {
+            return false
+        }
     }
 
     /// Shared so the writer and the reader cannot drift on the date strategy, which
