@@ -104,8 +104,13 @@ struct VocabularyListView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(entry.term)
                         .foregroundColor(.primary)
+                    // "Replaces:" and not the bare list. The row used to read
+                    // `pomme` over `banane` with nothing saying which was which,
+                    // and the person who wrote this feature's spec hesitated in
+                    // front of it twice. One word carries the direction, and the
+                    // second line was already there so the row does not grow.
                     if !entry.variants.isEmpty {
-                        Text(entry.variantsLine)
+                        Text("Replaces: \(entry.variantsLine)")
                             .font(.dictusCaption)
                             .foregroundColor(.secondary)
                     }
@@ -188,10 +193,16 @@ struct VocabularyEditorView: View {
 
     var body: some View {
         Form {
+            // Both sections carry a header as well as a placeholder, and that is the
+            // point: a placeholder disappears the moment the field has text, so once
+            // both are filled nothing on screen says which one holds the correct
+            // spelling. A header stays.
             Section {
                 TextField("Which term?", text: $term)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
+            } header: {
+                Text("The correct spelling")
             } footer: {
                 if duplicatesAnotherTerm {
                     Text("This term is already in your vocabulary.")
@@ -205,6 +216,8 @@ struct VocabularyEditorView: View {
                 TextField("How does Dictus write it instead?", text: $variantsLine)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
+            } header: {
+                Text("What Dictus writes instead")
             } footer: {
                 Text("Optional, separated by commas. Leave it empty if you do not know yet.")
             }
