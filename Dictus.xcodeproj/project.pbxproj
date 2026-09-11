@@ -52,6 +52,7 @@
 		AA000045 /* UnifiedAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100045 /* UnifiedAudioEngine.swift */; };
 		AA000200 /* ObjCExceptionCatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = AA100200 /* ObjCExceptionCatcher.m */; };
 		AA361002 /* TextProxyIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = AA361001 /* TextProxyIdentity.m */; };
+		AA023004 /* HostArbiterActivation.m in Sources */ = {isa = PBXBuildFile; fileRef = AA023003 /* HostArbiterActivation.m */; };
 		AA361004 /* KeyboardPolishCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361003 /* KeyboardPolishCoordinator.swift */; };
 		AA361008 /* KeyboardPolishStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361007 /* KeyboardPolishStage.swift */; };
 		AA361010 /* KeyboardSmartModeFan.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361009 /* KeyboardSmartModeFan.swift */; };
@@ -227,7 +228,9 @@
 		AA100045 /* UnifiedAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedAudioEngine.swift; sourceTree = "<group>"; };
 		AA100200 /* ObjCExceptionCatcher.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCExceptionCatcher.m; sourceTree = "<group>"; };
 		AA361001 /* TextProxyIdentity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextProxyIdentity.m; sourceTree = "<group>"; };
+		AA023003 /* HostArbiterActivation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HostArbiterActivation.m; sourceTree = "<group>"; };
 		AA361005 /* TextProxyIdentity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextProxyIdentity.h; sourceTree = "<group>"; };
+		AA023005 /* HostArbiterActivation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HostArbiterActivation.h; sourceTree = "<group>"; };
 		AA361003 /* KeyboardPolishCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPolishCoordinator.swift; sourceTree = "<group>"; };
 		AA361007 /* KeyboardPolishStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPolishStage.swift; sourceTree = "<group>"; };
 		AA361009 /* KeyboardSmartModeFan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSmartModeFan.swift; sourceTree = "<group>"; };
@@ -447,7 +450,9 @@
 				AA361009 /* KeyboardSmartModeFan.swift */,
 				AA423001 /* SmartModeDisplayName.swift */,
 				AA361005 /* TextProxyIdentity.h */,
+				AA023005 /* HostArbiterActivation.h */,
 				AA361001 /* TextProxyIdentity.m */,
+				AA023003 /* HostArbiterActivation.m */,
 				AA100030 /* InputView.swift */,
 				CC100030 /* KeyboardMetrics.swift */,
 				CC100050 /* KeySoundPolicy.swift */,
@@ -1083,6 +1088,7 @@
 				AA361010 /* KeyboardSmartModeFan.swift in Sources */,
 				AA423002 /* SmartModeDisplayName.swift in Sources */,
 				AA361002 /* TextProxyIdentity.m in Sources */,
+				AA023004 /* HostArbiterActivation.m in Sources */,
 				AA000008 /* MicButtonDisabled.swift in Sources */,
 				AA000030 /* InputView.swift in Sources */,
 				AA000035 /* FullAccessBanner.swift in Sources */,

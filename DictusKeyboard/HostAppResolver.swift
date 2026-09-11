@@ -69,9 +69,6 @@ enum HostAppResolver {
     /// Class-level accessor for the arbiter singleton.
     private static let sharedClientSelectorName = "automaticSharedArbiterClient"
 
-    /// The class-level switch that decides whether the arbiter runs at all.
-    private static let enabledSelectorName = "enabled"
-
     // MARK: - Process-local state
 
     /// pid → bundle identifier, learned from the arbiter and **never persisted**. See the
@@ -89,10 +86,6 @@ enum HostAppResolver {
     /// The most entries the table keeps. Oldest evicted first; the current host is by
     /// definition the newest, so eviction cannot lose the answer that is about to be used.
     private static let maxTableEntries = 64
-
-    /// What happened the first time this process tried to install the activation swizzle,
-    /// or nil if it has not tried. Doubles as the idempotency latch.
-    private static var activationOutcome: String?
 
     // MARK: - Public surface
 
@@ -136,11 +129,18 @@ enum HostAppResolver {
         }
 
         /// A log-safe reason, for the one `notice` line per hand-off.
+        ///
+        /// A miss carries the state of every hop, because `known=0` alone says the table
+        /// is empty and not which link broke — and the four candidates want four
+        /// different fixes. That gap cost a device round trip: a whole session of
+        /// `known=0` that could not say whether the swizzle had failed to install or had
+        /// installed and woken nothing.
         var reason: String {
             switch self {
             case .resolved: return "resolved"
-            case .noHostPid: return "no-host-pid"
-            case .tableMiss(let pid): return "table-miss(pid=\(pid),known=\(HostAppResolver.tableSize))"
+            case .noHostPid: return "no-host-pid \(HostAppResolver.hopDiagnostics)"
+            case .tableMiss(let pid):
+                return "table-miss(pid=\(pid),known=\(HostAppResolver.tableSize)) \(HostAppResolver.hopDiagnostics)"
             }
         }
     }
@@ -149,6 +149,29 @@ enum HostAppResolver {
     /// line above: `table-miss(known=0)` is an arbiter that never answered, and
     /// `known=3` is an arbiter that answered about other apps but never this one.
     static var tableSize: Int { bundleIdsByPid.count }
+
+    /// The state of every hop between us and the host's bundle identifier.
+    ///
+    /// Four facts, each of which fails differently:
+    ///
+    /// - `swizzle=` what the load-time constructor did, and `retry=` what a fresh attempt
+    ///   does now — `no-class` on both means the private class is simply not there;
+    /// - `arbiterClass=` whether the class resolves at this instant;
+    /// - `sharedSel=` whether the singleton accessor still responds;
+    /// - `sharedClient=` whether it actually hands one back, which is the hop that was
+    ///   silently nil for a whole device session.
+    static var hopDiagnostics: String {
+        let arbiterClass = resolveArbiterClass()
+        let respondsToShared = arbiterClass.map {
+            ($0 as AnyObject).responds(to: NSSelectorFromString(sharedClientSelectorName))
+        }
+        let client = arbiterClass.flatMap(sharedArbiterClient(of:))
+        return "swizzle=\(loadTimeActivation) retry=\(activateArbiter())"
+            + " arbiterClass=\(arbiterClass != nil)"
+            + " sharedSel=\(respondsToShared.map(String.init) ?? "n/a")"
+            + " sharedClient=\(client != nil)"
+            + " clientState=\(client.flatMap { read("currentClientState", from: $0) } != nil)"
+    }
 
     /// Resolves the app `controller` is serving.
     ///
@@ -161,30 +184,28 @@ enum HostAppResolver {
         return .resolved(bundleId)
     }
 
-    /// Installs the activation swizzle once per process. Safe to call repeatedly.
+    /// Ensures the arbiter is switched on, and reports what happened.
     ///
-    /// Returns `installed`, `<no-class>`, `<no-method>` or `already(...)`, which the
-    /// caller logs.
+    /// The swizzle itself is installed by a load-time constructor in
+    /// `HostArbiterActivation.m` — before `main`, before any controller exists. This is
+    /// the retry and the reporter, not the installer.
+    ///
+    /// WHY a retry exists at all: a failure is deliberately **not** remembered. The first
+    /// version of this latched every outcome, including the failures, so a swizzle that
+    /// could not find its class at one moment was never attempted again for the life of
+    /// the process — and the log then said `already(<no-class>)` forever. Only success is
+    /// sticky now; `no-class` and `no-method` are retried on every appearance, because a
+    /// class that is not loaded at constructor time can be loaded a second later.
+    ///
+    /// Returns `installed`, `already`, `no-class` or `no-method`.
     @discardableResult
     static func activateArbiter() -> String {
-        if let outcome = activationOutcome { return "already(\(outcome))" }
+        DictusHostArbiterActivation.activate()
+    }
 
-        guard let arbiterClass = resolveArbiterClass() else {
-            activationOutcome = "<no-class>"
-            return "<no-class>"
-        }
-        guard let method = class_getClassMethod(arbiterClass, NSSelectorFromString(enabledSelectorName)) else {
-            activationOutcome = "<no-method>"
-            return "<no-method>"
-        }
-
-        // A class method's block takes the class object as its receiver and no `_cmd`.
-        // `ObjCBool` rather than `Bool` so the return type is Objective-C's `BOOL` by name
-        // and not by the coincidence that the two agree on arm64.
-        let replacement: @convention(block) (AnyObject) -> ObjCBool = { _ in ObjCBool(true) }
-        _ = method_setImplementation(method, imp_implementationWithBlock(replacement))
-        activationOutcome = "installed"
-        return "installed"
+    /// What the load-time constructor produced, for the one line that reports it.
+    static var loadTimeActivation: String {
+        DictusHostArbiterActivation.loadTimeOutcome()
     }
 
     // MARK: - The swizzle, and what it costs

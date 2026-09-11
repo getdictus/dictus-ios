@@ -131,6 +131,13 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         PersistentLog.source = "KBD"
+        // #23. The swizzle is installed before `main` by a load-time constructor. This is
+        // a retry for the case where the private class was not yet loaded then, and it
+        // runs here rather than at `viewWillAppear` because the surviving explanation for
+        // a whole session of `known=0` is that UIKit decides once, early, whether the
+        // arbiter client exists — so every callback earlier than the first appearance is
+        // worth taking.
+        HostAppResolver.activateArbiter()
         let memEntry = MemoryFootprint.residentMB()
         // live= is the #281 headline probe: healthy cold starts peak at 2 live
         // controllers, both #281 occurrences peak at 3. See KeyboardLifecycleProbe.
@@ -387,16 +394,22 @@ class KeyboardViewController: UIInputViewController {
         ))
         PersistentLog.log(.keyboardDidAppear)
 
-        // #23. Switch the keyboard arbiter on once per extension process, then harvest
-        // whatever pid → bundle pairing it is holding. Neither call reads the host: they
-        // only fill the table that `currentHostId` looks the host up in at the mic tap.
-        // Both are no-ops if the private API is gone.
+        // #23. The arbiter is switched on by a load-time constructor (see
+        // `HostArbiterActivation.m`); this retries it if that failed and reports both
+        // outcomes, then harvests whatever pid → bundle pairing it is holding. Neither
+        // call reads the host: they fill the table that the mic tap looks the host up in.
+        //
+        // WHY the report is unconditional. The first version only logged when the outcome
+        // was `installed` or began with `<`, which silently excluded `already(<no-class>)`
+        // — a swizzle that had failed once and was never mentioned again. A whole device
+        // session then produced `known=0` with no way to tell whether the swizzle had not
+        // installed or had installed and woken nothing. One line per appearance is a
+        // price worth paying to never be blind there again.
         let activation = HostAppResolver.activateArbiter()
-        if activation == "installed" || activation.hasPrefix("<") {
-            // Once per process, and on every failure. A successful install is worth one
-            // line; `already(...)` on all 15 later appearances is not.
-            PersistentLog.log(.hostReturn(hostId: "none", outcome: "arbiter-\(activation)"))
-        }
+        PersistentLog.log(.hostReturn(
+            hostId: "none",
+            outcome: "arbiter-\(activation) atLoad-\(HostAppResolver.loadTimeActivation)"
+        ))
         HostAppResolver.harvest()
         // Point KeyboardState's weak controller ref at the currently-visible controller
         // so call sites in KeyboardRootView and KeyboardState can access textDocumentProxy.
