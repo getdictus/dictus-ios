@@ -62,18 +62,25 @@ public enum KnownAppSchemes {
     ///
     /// ## Audit state, so nobody mistakes inherited for verified
     ///
-    /// **Verified to resume:** `net.whatsapp.WhatsApp` (device), `com.apple.reminders`
-    /// and `com.apple.MobileSMS` (simulator). **Rejected by measurement:**
+    /// **Verified to resume:** `com.apple.mobilenotes`, `com.apple.MobileSMS`,
+    /// `net.whatsapp.WhatsApp`, `com.apple.mobilemail`, `com.github.stormbreaker.prod`,
+    /// `com.openai.chat`, `com.anthropic.claude` (all on device, 2026-09-11), plus
+    /// `com.apple.reminders` on a simulator. **Rejected by measurement:**
     /// `com.apple.mobilesafari`, now in `knownNoSchemeHosts`.
+    ///
+    /// Four of those were inherited entries nobody had checked, and all four worked
+    /// first time — which is mild evidence that the upstream catalogue is sound, and no
+    /// evidence at all about the entries still unverified.
     ///
     /// **Everything else is inherited, not verified** — the only Apple apps a simulator
     /// runtime ships are Messages, Safari and Reminders, and none of the third-party
     /// apps can be installed on one. Two groups deserve suspicion before the rest:
     ///
-    /// - **Action-shaped names.** `com.apple.mobilemail` → `message://` is the top
-    ///   suspect: it is the scheme for opening *a specific message*, which is `sms://`'s
-    ///   mistake exactly. `com.tinyspeck.chatlyio` → `slack://open` and
+    /// - **Action-shaped names.** `com.tinyspeck.chatlyio` → `slack://open` and
     ///   `com.newin.nplayer.basic` → `nplayer-http://` carry a verb and a transport.
+    ///   Mail's `message://` was the top suspect on this reading and it is **wrong**:
+    ///   measured twice on device, it resumes correctly. The name-shape heuristic finds
+    ///   candidates to measure; it does not settle them.
     /// - **The universal-link group below.** A root URL is a navigation *by
     ///   construction*: it opens the app at that page, not where the user was. They fail
     ///   the resume test on paper. They are kept because landing on an app's home is
@@ -89,6 +96,7 @@ public enum KnownAppSchemes {
     public static let schemesByBundleId: [String: String] = [
         // Verified against the app's own Info.plist, official documentation, or the
         // shipping binary.
+        // Verified on device: lands back in the note the user was editing.
         "com.apple.mobilenotes": "mobilenotes://",
         // `ichat://`, and this one is measured rather than inherited. Messages declares
         // several schemes and most of them *act* instead of resuming: `sms://`,
@@ -98,9 +106,10 @@ public enum KnownAppSchemes {
         // Verified twice on iOS 26.5, and the upstream catalogue has `sms://` here with
         // the compose bug intact. Do not "fix" this to the obvious scheme.
         "com.apple.MobileSMS": "ichat://",
-        // Untested, and the top suspect after Messages: `message://` is the scheme for
-        // opening *a specific message*, which is exactly the mistake `sms://` made. Mail
-        // ships on no simulator runtime, so this needs a device to settle.
+        // Verified on device, twice. It was the top suspect on name shape — `message://`
+        // reads like "open a specific message", which is `sms://`'s mistake — and the
+        // suspicion was wrong. Kept as a note because the next reader will have the same
+        // doubt.
         "com.apple.mobilemail": "message://",
         "com.apple.Pages": "pages://",
         "com.apple.Numbers": "numbers://",
@@ -143,8 +152,10 @@ public enum KnownAppSchemes {
         "com.spotify.client.L32G8C83V9": "spotify://",
         "com.getdropbox.Dropbox": "dbapi-1://",
         "com.linkedin.LinkedIn": "linkedin://",
+        // Verified on device.
         "com.openai.chat": "com.openai.chat://",
         "ai.perplexity.app": "perplexity-app://",
+        // Verified on device.
         "com.anthropic.claude": "claude://",
         "ai.x.GrokApp": "grok://",
         "md.obsidian": "obsidian://",
@@ -157,6 +168,7 @@ public enum KnownAppSchemes {
         "co.fluder.mobile.FSNotes-iOS": "fsnotes://",
         "ch.threema.iapp": "threema://",
         "com.briansunter.logseq-dev": "logseq://",
+        // Verified on device.
         "com.github.stormbreaker.prod": "github://",
         "com.appliedphasor.secure-shellfish": "shellfish://",
         "com.crystalnix.ServerAuditor": "termius://",

@@ -1,6 +1,7 @@
 // DictusKeyboard/HostAppResolver.swift
 import UIKit
 import ObjectiveC
+import Darwin
 import DictusCore
 
 /// Names the app this keyboard is typing into, so a cold-start dictation can send the
@@ -118,13 +119,13 @@ enum HostAppResolver {
     /// into nil, as the first version of this did, cost a round of device testing that
     /// could not tell them apart.
     enum Resolution {
-        case resolved(String)
+        case resolved(String, pid: Int)
         case noHostPid
         case tableMiss(pid: Int)
 
         /// The bundle identifier, or nil. The only accessor that may drive behaviour.
         var hostId: String? {
-            if case .resolved(let id) = self { return id }
+            if case .resolved(let id, _) = self { return id }
             return nil
         }
 
@@ -137,10 +138,15 @@ enum HostAppResolver {
         /// installed and woken nothing.
         var reason: String {
             switch self {
-            case .resolved: return "resolved"
+            case .resolved(_, let pid):
+                // Probed on the hits too, and that is the point: a route that answers
+                // only when the answer is already known proves nothing. Comparing it
+                // against a host the arbiter *did* name is what says whether it is right.
+                return "resolved \(HostAppResolver.pidIdentityProbe(pid: Int32(pid)))"
             case .noHostPid: return "no-host-pid \(HostAppResolver.hopDiagnostics)"
             case .tableMiss(let pid):
                 return "table-miss(pid=\(pid),known=\(HostAppResolver.tableSize)) \(HostAppResolver.hopDiagnostics)"
+                    + " \(HostAppResolver.pidIdentityProbe(pid: Int32(pid)))"
             }
         }
     }
@@ -181,7 +187,7 @@ enum HostAppResolver {
         harvest()
         guard let pid = hostProcessIdentifier(of: controller) else { return .noHostPid }
         guard let bundleId = bundleIdsByPid[pid] else { return .tableMiss(pid: pid) }
-        return .resolved(bundleId)
+        return .resolved(bundleId, pid: pid)
     }
 
     /// Ensures the arbiter is switched on, and reports what happened.
@@ -291,6 +297,91 @@ enum HostAppResolver {
     private static func read(_ key: String, from object: NSObject) -> Any? {
         guard object.responds(to: NSSelectorFromString(key)) else { return nil }
         return object.value(forKey: key)
+    }
+
+    // MARK: - Candidate B: naming a pid without the arbiter (diagnostic only)
+
+    /// Asks the kernel what process `pid` is, by two routes that do not involve the
+    /// arbiter at all. **Nothing branches on the result.**
+    ///
+    /// ## Why this is worth measuring
+    ///
+    /// One failure mode is left: the first dictation from an app launched moments
+    /// earlier. The arbiter is awake and populated — it simply names a *different* app,
+    /// and the current host's pid has never been seen. Waiting does not fix it;
+    /// `clientState=true` says it is not mid-population, and stale stretches of over ten
+    /// seconds were measured. But `_hostProcessIdentifier` is correct at `elapsedMs=0`,
+    /// every time. So if a pid can be turned into a bundle identifier directly, the
+    /// harvested table stops being a necessity and becomes a cache, and this failure mode
+    /// disappears.
+    ///
+    /// ## The two routes
+    ///
+    /// `proc_pidpath` gives an executable path. The bundle *name* in it is not the bundle
+    /// *identifier* — `WhatsApp.app` is not `net.whatsapp.WhatsApp` — so the path has to
+    /// be walked up to the `.app` and its `Info.plist` read, and that read is where an
+    /// extension's sandbox is most likely to refuse.
+    ///
+    /// `sysctl(KERN_PROC_PID)` gives `p_comm`, a process name truncated to 16 characters.
+    /// Never a bundle identifier, but possibly enough to disambiguate if the first route
+    /// is denied.
+    ///
+    /// The expected answer is that both are refused, and that is a result worth having on
+    /// the record — it closes a question that would otherwise be reopened in six months.
+    /// Every failure carries its `errno`, because "denied" and "no such process" are
+    /// different answers.
+    static func pidIdentityProbe(pid: Int32) -> String {
+        var out: [String] = []
+
+        var pathBuffer = [CChar](repeating: 0, count: Int(MAXPATHLEN))
+        let written = proc_pidpath(pid, &pathBuffer, UInt32(pathBuffer.count))
+        if written <= 0 {
+            out.append("procPath=errno(\(errno))")
+        } else {
+            let path = String(cString: pathBuffer)
+            // Only the bundle's own name is logged, never the whole path: the path
+            // carries a per-install container UUID, and the name is all that is useful.
+            let bundleName = path.range(of: ".app")
+                .map { ((String(path[path.startIndex..<$0.upperBound])) as NSString).lastPathComponent }
+                ?? "none"
+            out.append("procPath=ok bundleName=\(bundleName)")
+            out.append("plistBundleId=\(bundleIdentifier(fromExecutablePath: path))")
+        }
+
+        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, pid]
+        var info = kinfo_proc()
+        var size = MemoryLayout<kinfo_proc>.stride
+        if sysctl(&mib, UInt32(mib.count), &info, &size, nil, 0) != 0 {
+            out.append("comm=errno(\(errno))")
+        } else {
+            let comm = withUnsafePointer(to: &info.kp_proc.p_comm) {
+                $0.withMemoryRebound(to: CChar.self, capacity: Int(MAXCOMLEN) + 1) { String(cString: $0) }
+            }
+            out.append("comm=\(comm.isEmpty ? "empty" : comm)")
+        }
+
+        return out.joined(separator: " ")
+    }
+
+    /// The `CFBundleIdentifier` of the app bundle containing `executablePath`.
+    ///
+    /// Returns a reason rather than nil, because *why* it failed is the measurement: a
+    /// sandbox denial and a missing key are different facts.
+    private static func bundleIdentifier(fromExecutablePath executablePath: String) -> String {
+        guard let appRange = executablePath.range(of: ".app") else { return "no-app-dir" }
+        let appPath = String(executablePath[executablePath.startIndex..<appRange.upperBound])
+        let plistPath = (appPath as NSString).appendingPathComponent("Info.plist")
+        guard FileManager.default.isReadableFile(atPath: plistPath) else {
+            return "unreadable(errno=\(errno))"
+        }
+        guard let data = FileManager.default.contents(atPath: plistPath),
+              let plist = try? PropertyListSerialization.propertyList(from: data, format: nil),
+              let info = plist as? [String: Any],
+              let bundleId = info["CFBundleIdentifier"] as? String
+        else {
+            return "no-key"
+        }
+        return bundleId
     }
 
     // MARK: - The table
