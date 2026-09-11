@@ -78,6 +78,15 @@ enum HostAppResolver {
     /// plain dictionary is unsafe, are in `HostPidTable`.
     private static var table = HostPidTable()
 
+    /// The last arbiter claim written to the log, so `harvest()` stays silent while
+    /// nothing moves.
+    ///
+    /// WHY the filter: `harvest()` runs on every keyboard appearance, every keystroke and
+    /// every caret move. Writing a line per call would add thousands of identical entries
+    /// to a session and push the interesting ones out of the export window. A claim that
+    /// has not changed carries nothing the previous line did not already carry.
+    private static var lastLoggedClaim: String?
+
     // MARK: - Public surface
 
     /// Reads the arbiter and records what it saw. Called on every keyboard appearance and
@@ -90,7 +99,9 @@ enum HostAppResolver {
     /// otherwise meet an empty table. Harvesting again at the tap costs one read and
     /// closes exactly that gap.
     static func harvest() {
-        guard let state = currentClientState() else { return }
+        let state = currentClientState()
+        noteHarvestClaim(arbiterClaim(state: state))
+        guard let state else { return }
         guard let bundleId = read("sourceBundleIdentifier", from: state) as? String,
               let pid = (read("processIdentifier", from: state) as? NSNumber)?.intValue,
               !bundleId.isEmpty, pid > 0
@@ -155,6 +166,28 @@ enum HostAppResolver {
     /// can change the host, so it is the event that expires the old evidence.
     static func noteKeyboardAppeared() {
         table.noteAppearance()
+        // Forget what was last logged, so every appearance opens with the arbiter's claim
+        // at that moment even when it repeats the value the previous appearance ended on.
+        // That repetition is the symptom under investigation in #543 — an arbiter still
+        // naming a host the user left minutes ago — and a filter that hid it would hide
+        // the evidence.
+        lastLoggedClaim = nil
+    }
+
+    /// Writes one line when the arbiter's claim changes, and nothing when it does not.
+    ///
+    /// WHY this exists (#543): the arbiter used to be logged only at the mic tap, which is
+    /// the instant of failure and nothing before it. A miss could not say whether the
+    /// arbiter had named the correct host earlier in that appearance and then gone stale,
+    /// or had never named it at all — two different defects wanting two different fixes.
+    /// Recording every change turns an appearance into a trace instead of a snapshot.
+    ///
+    /// `hostId` is `none` because this line is an observation about the arbiter, not a
+    /// hand-off outcome; only the tap-time lines carry a resolution.
+    private static func noteHarvestClaim(_ claim: String) {
+        guard claim != lastLoggedClaim else { return }
+        lastLoggedClaim = claim
+        PersistentLog.log(.hostReturn(hostId: "none", outcome: "harvest \(claim)"))
     }
 
     /// The state of every hop between us and the host's bundle identifier.
