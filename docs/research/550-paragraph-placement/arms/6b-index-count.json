@@ -1,0 +1,7 @@
+{
+  "id": "6b-index-count",
+  "kind": "index",
+  "note": "Arm 6 plus the count. The two variables the round exists to separate: the shape of the output, and whether the model is told how many breaks to place.",
+  "instructions": "On te donne un texte découpé en phrases numérotées, une par ligne.\n\nIndique les numéros des exactement {{N}} phrase(s) qui devraient commencer un nouveau paragraphe.\n\nRéponds uniquement avec ces numéros, séparés par des virgules. Rien d'autre, aucun mot. La phrase 1 commence le premier paragraphe et ne compte pas.",
+  "framing": "{{SENTENCES}}"
+}

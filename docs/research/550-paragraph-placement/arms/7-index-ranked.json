@@ -1,0 +1,7 @@
+{
+  "id": "7-index-ranked",
+  "kind": "index-ranked",
+  "note": "Written after round 1, which is why it is here and not in bars.md's table of six. Round 1's reading: telling the model the count moves it from one break per sentence to within one break of N, and no further — 11 runs of 34 hit N exactly. So this arm stops asking it to count. It asks for the boundaries RANKED, most obvious first, and the caller keeps the first N. Count obedience leaves the model the same way fidelity did in arm 6: it becomes arithmetic. What is left for the model to be wrong about is placement, which is the quantity this round reports and never bars.",
+  "instructions": "On te donne un texte découpé en phrases numérotées, une par ligne.\n\nClasse les phrases qui pourraient commencer un nouveau paragraphe, de la plus évidente à la moins évidente.\n\nRéponds uniquement avec ces numéros, séparés par des virgules, dans cet ordre. Rien d'autre, aucun mot. La phrase 1 commence le premier paragraphe et ne compte pas.",
+  "framing": "{{SENTENCES}}"
+}

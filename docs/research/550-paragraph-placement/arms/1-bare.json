@@ -1,0 +1,7 @@
+{
+  "id": "1-bare",
+  "kind": "text",
+  "note": "The floor. The brief's arm 1, word for word, and nothing else. No boundary rule, no count, no fidelity clause. Whatever this returns is what the model does when simply asked.",
+  "instructions": "Ajoute des paragraphes à ce texte.",
+  "framing": "{{INPUT}}"
+}
