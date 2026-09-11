@@ -1,0 +1,5 @@
+Polish this text and break it into paragraphs. Output only the polished version, nothing else.
+
+{{INPUT}}
+
+Polished output:

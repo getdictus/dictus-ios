@@ -172,3 +172,46 @@ acceptance contract via `PolishAcceptanceContract`, and the Natural bans do not 
 This is recorded because #466's guardrail is scoped by exactly that boundary: the
 prefix-alignment check runs on Natural, Auto and Repair, and is inert for Liste and
 Traduction, whose transformations legitimately destroy alignment.
+
+## Amendment — 2026-09-11 (#437)
+
+**Nothing in this contract changes, and that is the result.** #437 asked whether the
+Forbidden list's *"Adding `<<NL>>` markers where none existed"* could be lifted at a
+change of subject, so a long dictation stops coming back as one block. The answer is
+measured rather than argued, over 372 outputs on six French dictations and both prompt
+routes: **it cannot, with the engine this build ships.**
+
+The contract the round was written against is worth recording even though it did not
+land, because it is the one a future attempt starts from:
+
+> **Normal polish may add whitespace. It may never remove words or change their
+> grammar.**
+
+That is why a paragraph break was in scope — it inserts one `\n` and deletes nothing —
+and why a list was not, including for a speaker-announced enumeration: `La première
+c'est la capture` cannot become `1. La capture` without deleting words this document
+already protects. Decided on the issue on 2026-08-27, on product, commercial and
+contractual grounds.
+
+**What is measured and rejected: lifting the ban.** The licence was written as a
+permission, as an imperative, with worked examples, restated in the GOAL line, and
+asking for an ordinary newline instead of the pipeline's marker. Every one of those
+returned **zero line breaks** — 144 outputs. Moved into the user turn it fires in about
+one output in eight, unstably, and three of its twenty-one firing outputs break after
+every sentence rather than at a section. `PolishPromptParityTests.testEveryFreePolishPromptStillBansAddingMarkers`
+pins the ban so the next round has to be deliberate.
+
+**The limit is not fidelity and not the marker.** Handed already-polished text with the
+single job of adding breaks, Apple FM returns output whose whitespace-stripped form is
+byte-identical to its input, 30 times out of 30, with no list syntax anywhere. It
+simply puts the breaks in the wrong places — one per sentence on a three-section
+explanation, and two or three inside a single idea. **Discourse-boundary detection is
+the missing capability**, the way homophone repair was in the amendment above, and it
+has a standing probe of its own now:
+`docs/research/437-longform-breaks/harness/probe-second-pass.json`.
+
+One risk this round did **not** find: no output in 432 carried a list marker, under any
+prompt, including the ones that told the model it could structure. The Forbidden list's
+existing bans held throughout.
+
+Full numbers: `docs/research/437-longform-breaks/findings.md`.
