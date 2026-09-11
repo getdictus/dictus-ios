@@ -116,16 +116,49 @@ enum HostAppResolver {
         record(bundleId: bundleId, forPid: pid)
     }
 
-    /// The bundle identifier of the app `controller` is serving, or nil.
+    /// What a resolution attempt produced, and why when it produced nothing.
     ///
-    /// Nil whenever anything is missing: no swizzle, no arbiter, no host pid, or a host
-    /// pid the table has never seen. Every one of those means the same thing to the
-    /// caller — no auto-return, show the overlay — and none of them may be turned into a
-    /// guess.
-    static func currentHostId(for controller: UIInputViewController) -> String? {
+    /// The distinction is not academic. `noHostPid` means the private surface is gone or
+    /// the controller is detached — nothing about the table would help. `tableMiss` means
+    /// the host is real and known but the arbiter never named it while we were reading,
+    /// which is a harvest-coverage problem and the thing to widen next. Collapsing both
+    /// into nil, as the first version of this did, cost a round of device testing that
+    /// could not tell them apart.
+    enum Resolution {
+        case resolved(String)
+        case noHostPid
+        case tableMiss(pid: Int)
+
+        /// The bundle identifier, or nil. The only accessor that may drive behaviour.
+        var hostId: String? {
+            if case .resolved(let id) = self { return id }
+            return nil
+        }
+
+        /// A log-safe reason, for the one `notice` line per hand-off.
+        var reason: String {
+            switch self {
+            case .resolved: return "resolved"
+            case .noHostPid: return "no-host-pid"
+            case .tableMiss(let pid): return "table-miss(pid=\(pid),known=\(HostAppResolver.tableSize))"
+            }
+        }
+    }
+
+    /// How many pid → bundle pairings this process has learned. Read only for the log
+    /// line above: `table-miss(known=0)` is an arbiter that never answered, and
+    /// `known=3` is an arbiter that answered about other apps but never this one.
+    static var tableSize: Int { bundleIdsByPid.count }
+
+    /// Resolves the app `controller` is serving.
+    ///
+    /// Anything other than `.resolved` means the same thing to the caller — no
+    /// auto-return, show the overlay — and none of them may be turned into a guess.
+    static func currentHost(for controller: UIInputViewController) -> Resolution {
         harvest()
-        guard let pid = hostProcessIdentifier(of: controller) else { return nil }
-        return bundleIdsByPid[pid]
+        guard let pid = hostProcessIdentifier(of: controller) else { return .noHostPid }
+        guard let bundleId = bundleIdsByPid[pid] else { return .tableMiss(pid: pid) }
+        return .resolved(bundleId)
     }
 
     /// Installs the activation swizzle once per process. Safe to call repeatedly.

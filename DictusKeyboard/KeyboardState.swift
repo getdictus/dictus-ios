@@ -1386,7 +1386,16 @@ class KeyboardState: ObservableObject {
         //
         // Placed after the debounce so a rejected rapid tap does not disturb it. Nil is
         // the normal, safe outcome — it costs the auto-return and nothing else.
-        pendingHostId = controller.flatMap(HostAppResolver.currentHostId(for:))
+        let resolution = controller.map(HostAppResolver.currentHost(for:))
+        pendingHostId = resolution?.hostId
+        // One line per tap, and it is the line that says which kind of failure this was.
+        // `no-host-pid` is the private surface being gone; `table-miss` is the arbiter
+        // never having named this host while we were reading, which is a coverage problem
+        // and a different fix entirely.
+        PersistentLog.log(.hostReturn(
+            hostId: pendingHostId ?? "unknown",
+            outcome: "tap-\(resolution?.reason ?? "no-controller")"
+        ))
 
         // A new dictation ends the previous one's undo offer, whatever comes of it.
         invalidateDictationUndo(reason: "new-dictation")

@@ -69,6 +69,25 @@ final class KnownAppSchemesTests: XCTestCase {
         XCTAssertEqual(KnownAppSchemes.schemesByBundleId["com.codality.NotationalFlow"], "simplenote://")
     }
 
+    /// Measured on iOS 26.5: `sms://`, `messages://`, `imessage://` and `im://` all open
+    /// the compose sheet. Only `ichat://` resumes the conversation. The upstream
+    /// catalogue this was ported from still has `sms://`, so the obvious-looking "fix"
+    /// is a regression waiting to happen.
+    func testMessagesUsesTheSchemeThatResumesRatherThanComposes() {
+        XCTAssertEqual(KnownAppSchemes.schemesByBundleId["com.apple.MobileSMS"], "ichat://")
+        for composing in ["sms://", "messages://", "imessage://", "im://"] {
+            XCTAssertNotEqual(KnownAppSchemes.schemesByBundleId["com.apple.MobileSMS"], composing)
+        }
+    }
+
+    /// Safari has schemes that open it and none that resume it — `x-web-search://` opens
+    /// an empty search, `x-safari-https://` a blank tab, both discarding the page. The
+    /// overlay leaves the page alone, so it is the better floor.
+    func testSafariHasNoWayBackRatherThanABadOne() {
+        XCTAssertNil(KnownAppSchemes.returnURL(forHostId: "com.apple.mobilesafari"))
+        XCTAssertFalse(KnownAppSchemes.isWorthReporting("com.apple.mobilesafari"))
+    }
+
     // MARK: - The three hosts the acceptance criteria name
 
     func testTheAcceptanceHostsAreAllMapped() {

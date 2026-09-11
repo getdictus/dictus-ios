@@ -574,6 +574,12 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
+        // #23. `viewWillAppear` harvests at 0 ms, and on the first appearance of a fresh
+        // extension process the arbiter's client state does not exist until roughly
+        // 200 ms after activation. This second reading, after layout has settled, costs
+        // one guarded KVC call and often lands on the other side of that gap.
+        HostAppResolver.harvest()
+
         // Issue #116 diagnostic: snapshot final frames after layout settles.
         // We log both sizes and constraint constants so we can detect priority mismatches
         // where iOS imposed a different height than we asked for.
@@ -1152,6 +1158,16 @@ class KeyboardViewController: UIInputViewController {
 
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
+        // #23. Every keystroke is a free chance to catch the arbiter while it is fresh.
+        // The device capture showed it stale for stretches of more than ten seconds, so a
+        // harvest that only ran at the appearance and at the tap could miss both times —
+        // which is what made the *first* dictation from a never-visited app fall back to
+        // the overlay. This is a guarded KVC read, and it happens on a callback iOS is
+        // already sending us, so it holds no timer and retains nothing. **Do not replace
+        // this with a `Timer` or a `CADisplayLink`**: one with `target: self` outlives the
+        // keyboard and goes on firing (#390 measured 15 real deletions after the finger
+        // had left the key, and #416 is a second, still-unfixed instance).
+        HostAppResolver.harvest()
         // Re-check the dictation undo offer against the changed document (#266).
         // Deliberately a re-check and not a clear: the keyboard's own insertion is
         // itself a text change, so clearing here would cancel the offer at the
@@ -1170,6 +1186,9 @@ class KeyboardViewController: UIInputViewController {
 
     override func selectionDidChange(_ textInput: UITextInput?) {
         super.selectionDidChange(textInput)
+        // #23, same argument as `textDidChange`: a caret move is another free reading, and
+        // some hosts emit this without a text change when focus moves between fields.
+        HostAppResolver.harvest()
         // A caret the user moved is a caret the insertion is no longer behind (#266).
         KeyboardState.shared.revalidateDictationUndo()
         // Some hosts move focus between fields without emitting textDidChange.

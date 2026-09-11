@@ -36,6 +36,22 @@ public enum KnownAppSchemes {
 
     /// Bundle identifier → the URL that reopens that app.
     ///
+    /// ## The bar an entry has to clear
+    ///
+    /// Not "does this scheme open the app" but **"does it bring the app back where the
+    /// user was, without navigating"**. Those are different questions and the difference
+    /// is invisible until someone tests it: `sms://` opens Messages *on a new-message
+    /// sheet*, which reads as a bug to the user even though the host detection worked
+    /// perfectly. Any entry can be checked headlessly —
+    ///
+    /// ```
+    /// open the app, go somewhere specific inside it, background it,
+    /// xcrun simctl openurl <udid> "<scheme>://"
+    /// xcrun simctl io <udid> screenshot -
+    /// ```
+    ///
+    /// — and a scheme that lands anywhere other than where you left is rejected.
+    ///
     /// Most values are custom schemes. A few apps register none but claim a universal
     /// link in their `apple-app-site-association`, which works here only because the host
     /// app is installed *by definition* — it is the app the keyboard was just typing
@@ -45,11 +61,15 @@ public enum KnownAppSchemes {
         // Verified against the app's own Info.plist, official documentation, or the
         // shipping binary.
         "com.apple.mobilenotes": "mobilenotes://",
-        "com.apple.MobileSMS": "sms://",
+        // `ichat://`, and this one is measured rather than inherited. Messages declares
+        // several schemes and most of them *act* instead of resuming: `sms://`,
+        // `messages://`, `imessage://` and `im://` all land the user on the **"New
+        // message"** compose sheet, not in the conversation they were typing in.
+        // `ichat://` is the only one that brings Messages back exactly where it was.
+        // Verified twice on iOS 26.5, and the upstream catalogue has `sms://` here with
+        // the compose bug intact. Do not "fix" this to the obvious scheme.
+        "com.apple.MobileSMS": "ichat://",
         "com.apple.mobilemail": "message://",
-        // Safari registers no scheme that reopens it at its current page; this is the
-        // system search handler, which Safari claims.
-        "com.apple.mobilesafari": "x-web-search://",
         "com.apple.Pages": "pages://",
         "com.apple.Numbers": "numbers://",
         "com.apple.Keynote": "keynote://",
@@ -173,6 +193,14 @@ public enum KnownAppSchemes {
         // Ours. The keyboard can be its own host — a text field in DictusApp — and
         // returning the user to the app they are already in would be a no-op at best.
         "com.pivi.dictus",
+
+        // Safari, deliberately. It is not that no scheme opens it — several do — but that
+        // every one of them *acts*: `x-web-search://` opens an empty search and
+        // `x-safari-https://` a blank tab, and both discard the page the user was reading.
+        // Measured on iOS 26.5. Landing someone on a blank tab is worse than the
+        // swipe-back overlay, which leaves their page where it was, so Safari is listed
+        // as having no way back rather than a bad one.
+        "com.apple.mobilesafari",
 
         // Apple view services and system apps that register no URL types.
         "com.apple.SafariViewService",
