@@ -32,6 +32,10 @@ import Foundation
 /// an entry they could not verify against a shipping binary may well be wrong, and the
 /// cost of a wrong entry is bounded — `open()` returns false and the user gets the
 /// swipe-back overlay they would have got anyway.
+///
+/// Their copyright notice and the full MIT text ship with the app, in `LicensesView`.
+/// That is the licence's condition for redistributing this table, not a courtesy, and
+/// this comment does not discharge it on its own.
 public enum KnownAppSchemes {
 
     /// Bundle identifier → the URL that reopens that app.

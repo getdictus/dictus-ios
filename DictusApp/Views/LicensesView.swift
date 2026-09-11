@@ -10,8 +10,16 @@ import DictusCore
 /// Placing them in Settings > A propos > Licences follows the standard iOS
 /// convention (e.g., Settings > General > Legal & Regulatory).
 ///
-/// All 5 dependencies are listed alphabetically: DeviceKit, Dictus, FluidAudio,
-/// giellakbd-ios, WhisperKit. FluidAudio uses Apache 2.0; all others use MIT.
+/// All 6 dependencies are listed alphabetically: DeviceKit, Dictus, FluidAudio,
+/// giellakbd-ios, VivaDicta, WhisperKit. FluidAudio uses Apache 2.0; all others use MIT.
+///
+/// "Dependency" is the loose sense here, and two entries are not packages at all.
+/// giellakbd-ios is vendored source, and VivaDicta is a ported data table — the host-app
+/// return catalogue in `KnownAppSchemes.swift`, copied with its annotations (#23). Both
+/// are redistribution of MIT-licensed work, and MIT requires the copyright notice and the
+/// licence text to travel with it, so both belong on this screen exactly like a linked
+/// package. A provenance comment in the source file is honest but does not discharge the
+/// condition.
 struct LicensesView: View {
     var body: some View {
         ScrollView {
@@ -43,6 +51,13 @@ struct LicensesView: View {
                     author: "UiT The Arctic University of Norway",
                     url: "https://github.com/divvun/giellakbd-ios",
                     license: mitLicense(copyright: "Copyright (c) 2019 UiT The Arctic University of Norway, Samediggi")
+                )
+
+                licenseBlock(
+                    name: "VivaDicta",
+                    author: "Anton Novoselov",
+                    url: "https://github.com/n0an/VivaDicta",
+                    license: mitLicense(copyright: "Copyright (c) 2026 Anton Novoselov")
                 )
 
                 licenseBlock(
