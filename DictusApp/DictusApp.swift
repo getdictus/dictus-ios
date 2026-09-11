@@ -412,25 +412,32 @@ struct DictusApp: App {
 
         let startedAt = Date()
         var readyCancellable: AnyCancellable?
+        var observedCancellable: AnyCancellable?
         var hasOpened = false
 
         // Both paths funnel here, and the first one to arrive wins. Whichever it is, the
         // subscription is torn down — which is also what breaks the reference cycle that
         // keeps it alive in the meantime, since nothing else holds it.
-        func openNow() {
+        func openNow(trigger: String) {
             guard !hasOpened else { return }
             hasOpened = true
             readyCancellable?.cancel()
             readyCancellable = nil
 
+            // Emitted **before** the open, not in its completion handler, and that
+            // matters for reading a log. The outcome line below can only be written once
+            // iOS calls back — after the open, after the app has begun backgrounding —
+            // so a `statusChanged to=recording` landing in between appears *earlier* in
+            // the file than a `recState=idle` that was sampled before it. That ordering
+            // read as a contradiction in a device capture and cost a round of diagnosis.
+            // Sampling and reporting in the same breath removes the illusion.
             let waitedMs = Int(Date().timeIntervalSince(startedAt) * 1000)
-            let stateAtOpen = coordinator.status.rawValue
+            PersistentLog.log(.hostReturn(
+                hostId: hostId,
+                outcome: "opening via=\(trigger) recState=\(coordinator.status.rawValue) waitedMs=\(waitedMs)"
+            ))
             UIApplication.shared.open(target, options: [:]) { opened in
-                PersistentLog.log(.hostReturn(
-                    hostId: hostId,
-                    outcome: (opened ? "returned" : "open-failed")
-                        + " recState=\(stateAtOpen) waitedMs=\(waitedMs)"
-                ))
+                PersistentLog.log(.hostReturn(hostId: hostId, outcome: opened ? "returned" : "open-failed"))
             }
         }
 
@@ -443,11 +450,33 @@ struct DictusApp: App {
         readyCancellable = coordinator.$status
             .first { $0 == .recording }
             .receive(on: DispatchQueue.main)
-            .sink { _ in openNow() }
+            .sink { _ in openNow(trigger: "recording") }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Self.recordingWaitCeilingMs)) {
-            openNow()
+            openNow(trigger: "ceiling")
         }
+
+        // Independently of who opens, record *when* recording actually begins. This is
+        // the number the ceiling has to be judged against, and nothing else in the log
+        // carries it: the coordinator's own `statusChanged` line has one-second
+        // resolution and no origin to measure from. `via=ceiling` with a
+        // `recordingObserved` that never appears means the engine did not start at all;
+        // `via=ceiling` followed by `recordingObserved waitedMs=800` means it started,
+        // far too late for any ceiling that fits inside the foreground window — and that
+        // is the measurement that says to delete the wait rather than tune it.
+        observedCancellable = coordinator.$status
+            .first { $0 == .recording }
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                let waitedMs = Int(Date().timeIntervalSince(startedAt) * 1000)
+                PersistentLog.log(.hostReturn(hostId: hostId, outcome: "recordingObserved waitedMs=\(waitedMs)"))
+                // Reading it before clearing is what keeps the subscription alive until
+                // it fires: nothing else holds this cancellable, so the closure's own
+                // capture of it is the retain, and the compiler only sees that as a use
+                // if it is read rather than merely assigned.
+                observedCancellable?.cancel()
+                observedCancellable = nil
+            }
     }
 
     private func handleIncomingURL(_ url: URL) {
