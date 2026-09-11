@@ -8,6 +8,7 @@
 // and the init lock, so moving it out did not mean opening up the coordinator's
 // private state wholesale.
 import Foundation
+import UIKit
 import DictusCore
 import WhisperKit
 
@@ -54,7 +55,11 @@ extension DictationCoordinator {
         RecordTapRouting.decide(
             dictationStatus: status,
             isModelDownloaded: defaults.bool(forKey: SharedKeys.modelReady),
-            loadState: modelLoadState
+            loadState: modelLoadState,
+            isModelWarm: ModelWarmth.isActiveModelWarm(
+                defaults: defaults,
+                systemVersion: UIDevice.current.systemVersion
+            )
         )
     }
 
@@ -615,11 +620,24 @@ extension DictationCoordinator {
         let start = Date()
         do {
             try await engine.runWarmInference()
+            // This line is also where the model stops being cold for this install (#542).
+            // A completed warm inference is the first proof anything in this process has
+            // that the model can produce a RESULT rather than merely be resident — which is
+            // exactly the distinction the readiness gate was missing. Written here and
+            // nowhere else, so the claim can never outrun the evidence for it.
+            ModelWarmth.markWarm(
+                modelName,
+                identity: ModelWarmth.installIdentity(
+                    bundlePathComponents: Bundle.main.bundleURL.pathComponents,
+                    systemVersion: UIDevice.current.systemVersion
+                ),
+                defaults: defaults
+            )
             PersistentLog.log(.diagnosticProbe(
                 component: "WarmInference",
                 instanceID: modelName,
                 action: "completed",
-                details: "ms=\(Int(Date().timeIntervalSince(start) * 1000)) engine=\(engine.engineName) samples=\(WarmInferenceAudio.sampleCount)"
+                details: "ms=\(Int(Date().timeIntervalSince(start) * 1000)) engine=\(engine.engineName) samples=\(WarmInferenceAudio.sampleCount) warmthRecorded=true"
             ))
         } catch {
             // Not warm after all, so do not remember it as warm: the next load of this

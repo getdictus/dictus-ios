@@ -307,6 +307,14 @@ struct ModelLoadingOverlay: View {
     /// belongs to the network rather than to the model, so a sentence about the
     /// model's preparation shown there would be read as a claim about the download.
     ///
+    /// WHAT IT NO LONGER SAYS, AND WHY (issue #542): these three sentences used to end
+    /// "It happens only once". That is false, and it is false in the direction that costs
+    /// the most trust — iOS discards the compiled Core ML artefacts at every install, every
+    /// app update and every OS update, so the user who read "once" meets the same
+    /// multi-minute wait the next time Dictus updates. One wording for all of it, not a
+    /// first-install and an update variant: that nuance would cost two more translated
+    /// strings for a distinction nobody verifies.
+    ///
     /// WHY both of the other two, which took reading `rawPhase` to see: a
     /// download-then-prepare spends the compile in `.compiling`, but a launch that
     /// finds the model already on disk spends it in `.loading` — and that second case
@@ -318,13 +326,13 @@ struct ModelLoadingOverlay: View {
         guard currentPhase == .compiling || currentPhase == .loading else { return nil }
         switch ModelPreparationWait.forModel(modelIdentifier) {
         case .minutes(let minutes):
-            return String(localized: "The first preparation of this model takes about \(minutes) minutes. It happens only once, and later ones take a few seconds.")
+            return String(localized: "After each update, the first preparation of this model takes about \(minutes) minutes. Later ones take a few seconds.")
         case .brief:
-            return String(localized: "The first preparation of this model takes under a minute. It happens only once, and later ones take a few seconds.")
+            return String(localized: "After each update, the first preparation of this model takes under a minute. Later ones take a few seconds.")
         case .unmeasured:
             // No number is invented for a model nobody has timed. The half of the
             // message that matters most is true of every model and is still said.
-            return String(localized: "This preparation happens only once for this model. Later ones take a few seconds.")
+            return String(localized: "This preparation runs again after each update. Later ones take a few seconds.")
         }
     }
 

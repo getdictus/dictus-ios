@@ -1,7 +1,7 @@
 // DictusCore/Sources/DictusCore/RecordTapRouting.swift
 import Foundation
 
-/// What a record button *inside DictusApp* should do with a tap (#484).
+/// What a record button should do with a tap — in DictusApp (#484) and in the keyboard (#542).
 ///
 /// WHY THIS EXISTS: `startDictation` refuses a non-URL start while
 /// `modelLoadState == .loading` and returns `Void`, so the caller cannot learn that it was
@@ -19,6 +19,14 @@ import Foundation
 /// then `modelReady`, then the load state. Ask them in any other order and a tap that the
 /// coordinator would have answered with "No model downloaded" gets a preparation screen for a
 /// model that is not on the device.
+///
+/// THE KEYBOARD ASKS THE SAME QUESTION NOW (#542). It used to keep its own copy —
+/// `isModelLoading()`, one line, reading the same `modelLoadState` — and both copies were
+/// blind to the same thing: a model whose file is on disk and whose Core ML cache is cold. A
+/// cold model is minutes away from transcribing and the load state says `ready`, because the
+/// compile has not started yet. It starts when the app launches, which is the same instant
+/// the keyboard is handing off. The keyboard asked the right question and got an answer that
+/// was true and useless, and a user lost a dictation to it in silence.
 public enum RecordTapRouting {
 
     /// What the button does with this tap.
@@ -34,10 +42,13 @@ public enum RecordTapRouting {
     ///   - dictationStatus: the coordinator's published status at the instant of the tap.
     ///   - isModelDownloaded: `SharedKeys.modelReady`, i.e. is there a model on disk at all.
     ///   - loadState: `SharedKeys.modelLoadState`, the flag the guard reads.
+    ///   - isModelWarm: `ModelWarmth.isActiveModelWarm`, i.e. has this model ever produced an
+    ///     inference in this installation. The one input the other three cannot stand in for.
     public static func decide(
         dictationStatus: DictationStatus,
         isModelDownloaded: Bool,
-        loadState: ModelLoadState
+        loadState: ModelLoadState,
+        isModelWarm: Bool
     ) -> Decision {
         // WHY `canStartNewDictation` AND NOT `ModelPreparationGate.dictationOwnsTheDisplay`,
         // which is #458's rule and is `status != .idle`:
@@ -69,7 +80,22 @@ public enum RecordTapRouting {
         case .loading:
             return .presentPreparation
         case .idle, .ready:
-            return .startDictation
+            // NO THRESHOLD AND NO PER-MODEL TABLE (#542). No record for this install means
+            // refuse, whatever the model. Every measured model is over the 30s stage
+            // watchdog on a cold backgrounded cache — Parakeet 48s and unfinished, Medium
+            // 32s, Turbo 632MB 236s — so a duration threshold would separate nothing. And a
+            // keyboard dictation is a backgrounded app by construction, so the slow number
+            // is the only one this gate ever faces.
+            //
+            // THE ACCEPTED COST: tiny, base and small are unmeasured. If one of them
+            // compiles in five seconds, its user pays one preparation screen and one extra
+            // tap, once per install. That is cheaper than a table with two guessed entries.
+            //
+            // WHAT THIS MUST NOT TOUCH is the ordinary cold start — a dead app process with
+            // a warm cache, which is most of the time iOS has killed us. That case is
+            // `isModelWarm == true` and goes through here untouched: the app opens, the
+            // recording runs, the user is sent back to their app.
+            return isModelWarm ? .startDictation : .presentPreparation
         }
     }
 }

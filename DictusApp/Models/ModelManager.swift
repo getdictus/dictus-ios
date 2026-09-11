@@ -471,6 +471,13 @@ class ModelManager: ObservableObject {
     /// sequence around it, and in particular the Core ML prewarm, which never runs
     /// anywhere but the foreground.
     func downloadModel(_ identifier: String) async throws {
+        // A fresh download starts from a fresh Core ML cache, so whatever this install had
+        // recorded about this model's warmth is no longer a claim it can back (#542). Cleared
+        // at the START of the transfer, not at the end: the moment the files begin to change,
+        // the old compiled artefacts stop describing what is on disk, and an interrupted
+        // download must not leave a warmth record standing over a half-written model.
+        ModelWarmth.clear(identifier, defaults: defaults)
+
         // Check if this is a Parakeet model and route accordingly
         let modelInfo = ModelInfo.forIdentifier(identifier)
         if modelInfo?.engine == .parakeet {
