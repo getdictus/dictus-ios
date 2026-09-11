@@ -123,7 +123,7 @@ final class CountingSiteReplayTests: XCTestCase {
 
     // MARK: - 1. A word the user never touched is merged
 
-    func testAWordTheUserNeverTouchedIsNeverMerged() {
+    func testWhileTheMirrorIsSuspectTheWordIsLeftAloneRatherThanMerged() {
         // Capture 1, "Une fois ton" -> "Une foiston". The mirror reports "tonn" for a
         // document holding "ton", so the boundary check hands out 4. Deleting 4
         // removes n, o, t AND the space before the word, and "fois" — which the user
@@ -142,19 +142,27 @@ final class CountingSiteReplayTests: XCTestCase {
             editor: doc, word: "tonn", correction: "ton", mirror: state
         )
 
-        XCTAssertEqual(doc.document, "Une fois ton ")
-        XCTAssertTrue(doc.document.hasPrefix("Une fois "), "the preceding word and its space survive")
+        // Capture 3's trajectory leaves the mirror suspect at the apply: the space at
+        // seq=42 settled it, then the backspaces at seq=43/44 took the mirror below
+        // that boundary and revived it. So the site refuses and touches nothing.
+        //
+        // The word is LEFT ALONE, not corrected. That is the design, decided on
+        // 2026-09-12: the magnitude of the mirror's error is not computable, so the
+        // only honest options are "act as develop does" or "do not act", and while the
+        // mirror is suspect acting as develop does is what merges the words.
+        XCTAssertEqual(doc.document, "Une fois ton", "untouched — no delete, no insert")
+        XCTAssertFalse(doc.document.contains("foiston"), "the merge does not happen")
     }
 
     func testWithNoAccountingAtAllTheMergeIsUnavoidable() {
         // Characterisation of `develop`, kept so the cost of having no accounting is
         // written down rather than remembered. With `.trusted` the only reader is the
         // mirror, and the mirror says "tonn" — there is no second signal, so nothing
-        // inside the extension can prevent this. It is the reason the fix needs the
-        // surplus at all, and it is NOT a target: no in-process change makes it pass.
+        // inside the extension can prevent this. It is the reason suspicion has to be
+        // detected at all, and it is NOT a target: no in-process change makes it pass.
         let doc = FakeDocument(document: "Une fois ton", mirrorPhantomSuffix: "n")
         let state = MirrorSyncState()
-        XCTAssertEqual(state.trust, .trusted)
+        XCTAssertFalse(state.isSuspect)
 
         AutocorrectCountingSite.apply(
             editor: doc, word: "tonn", correction: "ton", mirror: state
@@ -190,24 +198,23 @@ final class CountingSiteReplayTests: XCTestCase {
                 editor: doc, word: typed, correction: corrected, mirror: state
             )
 
-            // Two distinct failures, and the test names both. Refusal is capture 4's:
-            // autocorrect dark. A wrong result is capture 5's successor to it: the
-            // stale surplus makes every later correction one character short, so the
-            // same words come out damaged instead of uncorrected.
+            // Capture 4's failure was autocorrect going dark for a whole session.
+            // The boundaries in the recorded trajectory end the suspicion long before
+            // these words, so each one is corrected normally — and in full.
             XCTAssertNotEqual(
-                outcome, .refused(reason: MirrorGatedReplacement.unknownReason),
+                outcome, .refused(reason: MirrorGatedReplacement.suspectReason),
                 "\(typed) was refused — autocorrect has gone dark (capture 4)"
             )
             XCTAssertEqual(
                 doc.document, "le \(corrected) ",
-                "\(typed) was corrected, but not to the right text (capture 5's stale surplus)"
+                "\(typed) was corrected, but not to the right text"
             )
         }
     }
 
     // MARK: - 3. The stale surplus leaves a correction one character short
 
-    func testAStaleSurplusDoesNotLeaveTheWordOneCharacterShort() {
+    func testAfterABoundarySettlesItACorrectionIsMadeInFull() {
         // Capture 5, build c47f944: MIRROR-CORRECTED word="probkeme" planned=8
         // deleted=7 surplus=1, eight times in 26 seconds, each one short.
         //
@@ -229,9 +236,53 @@ final class CountingSiteReplayTests: XCTestCase {
             editor: doc, word: "probkeme", correction: "problème", mirror: state
         )
 
+        // seq=681's space settles the suspicion, and the eight key-inserts after it
+        // never take the mirror back below that boundary. So the mirror is NOT suspect
+        // by the time the correction fires, and it is made in full.
         XCTAssertEqual(doc.document, "le  problème ")
         XCTAssertFalse(doc.document.contains("pproblème"), "the correction was one character short")
-        XCTAssertEqual(outcome, .applied(deleted: 8, correctedBy: 0))
+        XCTAssertEqual(outcome, .applied(deleted: 8))
+    }
+
+    // MARK: - 4. The spurious surplus: the word is left alone, not damaged
+
+    /// Capture 6 (`6-MaMais-spurious-surplus.txt`), seq 274-284, verbatim.
+    ///
+    /// A host-side textDidChange takes the mirror 83 -> 71, which revives an earlier
+    /// suspicion; the keyboard's next delete at seq=275 is not reflected, 71 -> 71.
+    /// Then seven deletes the mirror does follow, and two inserts. NO boundary is
+    /// written anywhere in here, so the suspicion is still live at the correction.
+    private static let capture6Maois: [RecordedEdit] = [
+        RecordedEdit(event: "key-delete", before: 71, after: 71, deleted: 1, inserted: 0)
+    ] + (0..<7).map { index in
+        RecordedEdit(event: "key-delete", before: 71 - index, after: 70 - index,
+                     deleted: 1, inserted: 0)
+    } + [
+        RecordedEdit(event: "key-insert", before: 64, after: 65, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 65, after: 66, deleted: 0, inserted: 1)
+    ]
+
+    func testASpuriousSuspicionLeavesTheWordUntouchedInsteadOfDamagingIt() {
+        // The device produced three of these in 26 seconds:
+        //   MIRROR-CORRECTED word="Maois" planned=5 deleted=3 surplus=2  -> "MaMais"
+        // Pierre had typed "Maois" in full. There was no phantom in it; the surplus
+        // was spurious, and subtracting it ate two real characters' worth of word.
+        //
+        // The magnitude was never knowable — see MirrorSurplusUnknowabilityTests — so
+        // the site no longer uses one. It refuses while suspect, and the word stands.
+        let state = MirrorSyncState()
+        replay(Self.capture6Maois, into: state)
+        XCTAssertTrue(state.isSuspect, "no boundary is written anywhere in this trajectory")
+
+        let doc = FakeDocument(document: "Maois")
+        let outcome = AutocorrectCountingSite.apply(
+            editor: doc, word: "Maois", correction: "Mais", mirror: state
+        )
+
+        XCTAssertEqual(outcome, .refused(reason: MirrorGatedReplacement.suspectReason))
+        XCTAssertEqual(doc.document, "Maois", "left alone — the user's word stands")
+        XCTAssertFalse(doc.document.contains("MaMais"), "the reported damage")
+        XCTAssertEqual(doc.deleteCalls, 0)
     }
 
     // MARK: - The seam itself

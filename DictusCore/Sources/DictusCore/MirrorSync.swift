@@ -72,101 +72,36 @@ public enum MirrorSync {
             : .mirrorBehind(by: expected - observed)
     }
 
-    /// What a counting site must actually delete.
-    public enum CountAdjustment: Equatable {
-        /// The mirror is trustworthy: spend the count as given.
-        case exact(deleteCount: Int)
-        /// The mirror over-reports by `surplus`, so delete that much less.
-        case corrected(deleteCount: Int, surplus: Int)
-        /// The count cannot be corrected. Refuse rather than guess.
-        case refuse(reason: String)
-    }
-
-    /// Corrects a delete count for what the mirror is known to be over-reporting.
-    ///
-    /// THE SAFETY PROPERTY, and it is the whole argument for doing this rather than
-    /// refusing: the returned count is NEVER larger than the one handed in. `surplus`
-    /// is non-negative by construction, so this can only ever delete fewer characters
-    /// than today's code does. It therefore cannot destroy text that `develop` would
-    /// have kept — the worst it can do is stop short and leave a stray character,
-    /// which one backspace clears.
-    ///
-    /// WHY IT CAN CORRECT A COUNT BUT NOT A CHARACTER:
-    /// The surplus is a LENGTH, not a position. The phantom is not necessarily at the
-    /// tail — a document "to" whose mirror kept "tox" and then took an insert of "y"
-    /// reads "toxy" for a document holding "toy", and dropping the last character
-    /// gives "tox", which is wrong. The length is still right, which is all a delete
-    /// count needs. Decisions that ask what a specific character IS — the auto-period
-    /// asking whether the tail is a space — cannot be repaired this way and must
-    /// still refuse. See `AutoFullStop`.
-    public static func adjust(deleteCount: Int, trust: MirrorTrust) -> CountAdjustment {
-        switch trust {
-        case .trusted:
-            return .exact(deleteCount: deleteCount)
-        case .unknown:
-            return .refuse(reason: MirrorGatedReplacement.unknownReason)
-        case .surplus(let surplus):
-            let corrected = deleteCount - surplus
-            // The surplus claims the whole word, or more, is phantom. Deleting
-            // nothing and inserting the correction would duplicate the word
-            // ("ton" -> "tonton"), so this is the accounting saying it has lost track.
-            guard corrected > 0 else {
-                return .refuse(reason: MirrorGatedReplacement.surplusExceedsWordReason)
-            }
-            return .corrected(deleteCount: corrected, surplus: surplus)
-        }
-    }
 }
 
-/// How much the mirror can be trusted to count characters against.
-public enum MirrorTrust: Equatable {
-    /// The mirror has reflected every edit the keyboard made. Counts are exact.
-    case trusted
-    /// The mirror holds this many characters the document does not. A delete count
-    /// taken off it is too large by exactly this much.
-    case surplus(Int)
-    /// The accounting is no longer usable. The count cannot be corrected, so the
-    /// site must refuse instead of guessing.
-    case unknown
-}
-
-/// The gate the automatic replacement site asks before counting characters.
+/// The gate the automatic counting sites ask before counting characters.
 public enum MirrorGatedReplacement {
 
-    /// Slugs a refusal carries into `handleSpace`'s existing `.failed` fall-through.
-    public static let unknownReason = "mirror-desync-unknown"
-    public static let surplusExceedsWordReason = "mirror-surplus-exceeds-word"
+    /// The slug a refusal carries into `handleSpace`'s existing `.failed`
+    /// fall-through: keep the user's word, insert a plain space, learn nothing.
+    public static let suspectReason = "mirror-desync"
 
-    /// Validates a pending replacement and corrects its delete count.
+    /// Validates a pending replacement, refusing outright while the mirror is suspect.
     ///
-    /// REVISED 2026-09-11. The first version refused outright while the mirror was
-    /// suspect, and the device test killed it: armed once, released never, ten
-    /// suppressions in 25 seconds, seven of them real misspellings. Autocorrect went
-    /// dark for the rest of the session.
+    /// DECIDED 2026-09-12, after three rounds spent trying to correct the count rather
+    /// than abandon it. The magnitude of the mirror's error is NOT COMPUTABLE from
+    /// anything a keyboard extension can observe — two documents measured on device
+    /// produce an identical observable trace and need different delete counts, so no
+    /// rule can serve both. See `MirrorSurplusUnknowabilityTests`; it is a proof, not
+    /// a caveat, and it is why there is no arithmetic here any more.
     ///
-    /// The surplus is already known — it is what arming is computed from — so the
-    /// count can be corrected rather than abandoned. Both field captures land exactly:
-    /// `tonn`(4) with surplus 1 deletes 3 and gives `Une fois ton `; `vaiss`(5) with
-    /// surplus 1 deletes 4 and gives `Ok je vais `.
-    ///
-    /// The result is still an `AutocorrectReplacement.CheckResult` so the caller keeps
-    /// one skip path rather than two.
+    /// What IS answerable is "might the mirror be lying right now?", and the detector
+    /// answers it reliably: it never fires on healthy typing, device-confirmed twice.
+    /// So this refuses on suspicion and counts normally otherwise. The cost is a
+    /// correction skipped for about a word; the alternative damaged the text three
+    /// times out of three.
     public static func check(
-        trust: MirrorTrust,
+        mirrorSuspect: Bool,
         context: String?,
         word: String
     ) -> AutocorrectReplacement.CheckResult {
-        switch AutocorrectReplacement.check(context: context, word: word) {
-        case .failed(let reason):
-            return .failed(reason: reason)
-        case .ok(let deleteCount):
-            switch MirrorSync.adjust(deleteCount: deleteCount, trust: trust) {
-            case .exact(let count), .corrected(let count, _):
-                return .ok(deleteCount: count)
-            case .refuse(let reason):
-                return .failed(reason: reason)
-            }
-        }
+        guard !mirrorSuspect else { return .failed(reason: suspectReason) }
+        return AutocorrectReplacement.check(context: context, word: word)
     }
 }
 
@@ -178,16 +113,13 @@ public enum MirrorGatedReplacement {
 /// live in the same process.
 public final class MirrorSyncState {
 
-    /// The largest surplus the accounting will carry before declaring itself lost.
-    /// One phantom character is what both field captures produced; a run of them
-    /// means the bookkeeping has drifted and a corrected count would be a guess.
-    private static let surplusCeiling = 8
-
-    /// How much the mirror can currently be trusted to count characters against.
-    public private(set) var trust: MirrorTrust = .trusted
-
-    /// Characters the mirror is holding that the keyboard's own edits do not account
-    /// for. Accumulates across successive desyncs and never goes below zero.
+    /// Characters the mirror is holding that this keyboard's own edits do not account
+    /// for.
+    ///
+    /// DIAGNOSTIC ONLY. It decides WHETHER the mirror is suspect and it is reported in
+    /// the log; it is never subtracted from a delete count. Three rounds were spent
+    /// trying to use its magnitude and it cannot be used — see
+    /// `MirrorGatedReplacement.check` and `MirrorSurplusUnknowabilityTests`.
     private var surplus = 0
 
     /// A surplus that a boundary put behind the cursor, and the mirror length at that
@@ -195,50 +127,42 @@ public final class MirrorSyncState {
     private var dormantSurplus = 0
     private var settledAtLength: Int?
 
-    /// True while counts taken off the mirror cannot be spent as given. Kept for the
-    /// sites that can only refuse, and for the counters.
-    public var isSuspect: Bool { trust != .trusted }
+    /// True while the mirror has been caught holding characters this keyboard's own
+    /// edits do not account for. Every automatic counting site refuses while it is set.
+    public var isSuspect: Bool { surplus > 0 }
 
-    /// When the current suspect period began, for the DEBUG cost report.
+    /// When the current suspect period began. The DEBUG report of how long suspicion
+    /// lasts is what makes refusal acceptable rather than the session-long blackout of
+    /// the first attempt — the captures measure it at 0.4 to 2.9 seconds.
     private var suspectSince: Date?
     private(set) var spacesWhileSuspect = 0
     private(set) var suppressedCorrections = 0
     private(set) var suppressedFullStops = 0
-    /// Replacements that went ahead on a corrected count — the ones the revised
-    /// reaction saves, and the number that says whether it was worth it.
-    private(set) var correctedReplacements = 0
 
     public init() {}
 
-    /// Reports one keyboard edit and updates the surplus.
+    /// Reports one keyboard edit.
     ///
-    /// `.mirrorAhead` adds to the surplus: the mirror kept characters this edit
-    /// should have removed. `.mirrorBehind` subtracts: the mirror gave up more than
-    /// it was asked for, which pays the surplus back down. The floor at zero is
-    /// load-bearing — a negative surplus would mean adding deletions, and adding
-    /// deletions is exactly the thing that destroys text.
-    ///
-    /// Once `.unknown`, it stays there until `release`: a lost accounting cannot be
-    /// re-derived from later edits.
+    /// `.mirrorAhead` adds to the surplus: the mirror kept characters this edit should
+    /// have removed. `.mirrorBehind` subtracts: the mirror gave up more than it was
+    /// asked for, which pays the surplus back down. The floor at zero keeps the
+    /// suspicion from being negative, which would mean nothing.
     @discardableResult
     public func observe(before: Int, after: Int, deleted: Int, inserted: Int) -> MirrorSync.Verdict {
         let verdict = MirrorSync.verdict(
             before: before, after: after, deleted: deleted, inserted: inserted
         )
-        guard trust != .unknown else { return verdict }
 
         // A settle only holds while the cursor stays at or beyond the boundary that
         // produced it. Backspacing past it puts the phantom back inside reach, and
-        // capture 3 does exactly that: a space at seq=42 settled the surplus, then
+        // capture 3 does exactly that: a space at seq=42 settled the suspicion, then
         // two backspaces at seq=43/44 took the mirror from 50 to 48 and the next
-        // correction merged two words anyway. Without this the boundary rule is
-        // falsified by the very capture it was built from.
+        // correction merged two words anyway.
         if let boundary = settledAtLength, after < boundary {
             surplus = dormantSurplus
             dormantSurplus = 0
             settledAtLength = nil
             if surplus > 0 {
-                trust = .surplus(surplus)
                 suspectSince = suspectSince ?? Date()
                 #if DEBUG
                 AutocorrectDebugLog.mirrorUnsettled(boundary: boundary, length: after, surplus: surplus)
@@ -256,20 +180,11 @@ public final class MirrorSyncState {
             surplus = max(0, surplus - by)
         }
 
-        guard surplus <= Self.surplusCeiling else {
-            // The only way into `.unknown` that ships. A host-side edit could also
-            // invalidate the accounting in principle, but the keyboard cannot tell
-            // its own textDidChange from the host's — the capture measured ONE
-            // selection delete arriving as TWO of them — so counting them would
-            // misattribute far more often than it would catch anything. Not tracking
-            // them is safe for a different reason: the corrected count is never
-            // larger than the uncorrected one, so an unseen host change can only make
-            // this delete less than develop already does, never more.
-            markUnknown(reason: "surplus-ceiling")
-            return verdict
-        }
-        trust = surplus > 0 ? .surplus(surplus) : .trusted
-
+        // Host-side edits are deliberately not tracked: the keyboard cannot tell its
+        // own textDidChange from the host's — the capture measured ONE selection
+        // delete arriving as TWO of them — so counting them would misattribute far
+        // more often than it would catch anything. Nothing is invented by missing one:
+        // a suspicion not raised costs a correction made exactly as develop makes it.
         if !wasSuspect, isSuspect {
             suspectSince = Date()
             #if DEBUG
@@ -279,42 +194,17 @@ public final class MirrorSyncState {
         return verdict
     }
 
-    /// Declares the accounting lost. The counting sites then refuse, which is the
-    /// fallback and not the behaviour: it is what happens when the surplus is not
-    /// known, never what happens when it is.
-    public func markUnknown(reason: String) {
-        guard trust != .unknown else { return }
-        let wasSuspect = isSuspect
-        trust = .unknown
-        if !wasSuspect { suspectSince = Date() }
-        #if DEBUG
-        AutocorrectDebugLog.mirrorUnknown(reason: reason, surplus: surplus)
-        #endif
-    }
-
     /// The keyboard has inserted a word boundary — a space, a newline, ". ", or a
-    /// correction's trailing space. Any outstanding surplus is cleared.
+    /// correction's trailing space. Suspicion ends here.
     ///
-    /// WHY A BOUNDARY SETTLES IT, and this is the fix for the "pproblème" round:
-    /// a surplus is POSITIONAL, not just a magnitude. Every delete count a counting
-    /// site computes is the length of the CURRENT word, and the current word begins
-    /// after the last boundary. Once the keyboard has written one, the phantom lies
-    /// behind it, so every character of every later word was typed and observed after
-    /// the divergence — the word's length in the mirror equals its length in the
-    /// document, and subtracting anything from it deletes one character too few.
+    /// WHY A BOUNDARY ENDS IT: a counting site only ever asks about the CURRENT word,
+    /// and the current word begins after the last boundary. Once the keyboard has
+    /// written one, whatever the mirror is over-reporting lies behind it and cannot be
+    /// inside anything that will be counted. Not a claim that the mirror resynced — it
+    /// almost certainly has not, the diagnostic capture recorded zero reconvergences.
     ///
-    /// That is exactly what shipped and failed: capture 5 armed on a key-delete and
-    /// the very next event was a space, yet the surplus stayed latched and eight
-    /// consecutive corrections came out one character short ("pproblème"). The
-    /// magnitude was never re-derived because `observe` only ever sees deltas. This
-    /// re-derives RELEVANCE instead, which needs no absolute reading of anything.
-    ///
-    /// `.unknown` clears too: it means the accounting lost track of a magnitude, and
-    /// a magnitude behind a boundary is no longer being asked about.
-    ///
-    /// NOT a claim that the mirror has resynced. It almost certainly has not — the
-    /// diagnostic capture recorded zero reconvergences. The phantom stays in the
-    /// mirror; it simply stops being inside anything this keyboard counts.
+    /// The surplus goes dormant rather than being discarded, with the mirror length at
+    /// this boundary, because the cursor can come back past it.
     public func noteBoundaryInserted(reason: String, atLength: Int) {
         guard isSuspect else { return }
         dormantSurplus = surplus
@@ -322,11 +212,9 @@ public final class MirrorSyncState {
         #if DEBUG
         AutocorrectDebugLog.mirrorSettled(
             reason: reason,
-            durationMs: suspectSince.map { Int(Date().timeIntervalSince($0) * 1000) } ?? 0,
-            corrected: correctedReplacements
+            durationMs: suspectSince.map { Int(Date().timeIntervalSince($0) * 1000) } ?? 0
         )
         #endif
-        trust = .trusted
         surplus = 0
         suspectSince = nil
     }
@@ -343,41 +231,31 @@ public final class MirrorSyncState {
     /// Counts one refused auto-period.
     public func noteSuppressedFullStop() { suppressedFullStops += 1 }
 
-    /// Counts one replacement that went ahead on a corrected count.
-    public func noteCorrectedReplacement() { correctedReplacements += 1 }
-
-    /// Clears the accounting. The keyboard's own teardown, where iOS builds the
-    /// mirror afresh.
+    /// Clears everything. The keyboard's own teardown, where iOS builds the mirror
+    /// afresh.
     ///
-    /// This is no longer the thing that makes the fix usable — correcting the count
-    /// is — but it stays as the reset, and the two cheaper releases stay closed:
-    ///
-    /// - "release on the next word boundary": the damage landed at 20:03:55, four
-    ///   seconds and several keystrokes past the divergence at 20:03:51.
-    /// - "release once the mirror tracks our edits again": from seq=43 every probe
-    ///   read off=0 while the mirror still reported "vaiss" for a document holding
-    ///   "vais". Tracking again is not being truthful.
+    /// This was once the ONLY release, and that is why the first attempt failed on
+    /// device: the keyboard lives as long as the user types in one field, so
+    /// suspicion lasted a session and autocorrect went dark. The boundary rule above
+    /// is what bounds it now; this is just the reset.
     public func release(reason: String) {
-        dormantSurplus = 0
-        settledAtLength = nil
         #if DEBUG
         if isSuspect {
             AutocorrectDebugLog.mirrorReleased(
                 reason: reason,
                 durationMs: suspectSince.map { Int(Date().timeIntervalSince($0) * 1000) } ?? 0,
                 spaces: spacesWhileSuspect,
-                suppressed: (corrections: suppressedCorrections, fullStops: suppressedFullStops),
-                corrected: correctedReplacements
+                suppressed: (corrections: suppressedCorrections, fullStops: suppressedFullStops)
             )
         }
         #endif
-        trust = .trusted
         surplus = 0
+        dormantSurplus = 0
+        settledAtLength = nil
         suspectSince = nil
         spacesWhileSuspect = 0
         suppressedCorrections = 0
         suppressedFullStops = 0
-        correctedReplacements = 0
     }
 }
 

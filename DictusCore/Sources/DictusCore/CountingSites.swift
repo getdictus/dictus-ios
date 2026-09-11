@@ -18,9 +18,8 @@ public enum AutocorrectCountingSite {
 
     /// What one attempt did.
     public enum Outcome: Equatable {
-        /// The replacement ran. `deleted` is the number of `deleteBackward()` calls
-        /// issued; `correctedBy` is how many the surplus took off the planned count.
-        case applied(deleted: Int, correctedBy: Int)
+        /// The replacement ran, issuing `deleted` deleteBackward() calls.
+        case applied(deleted: Int)
         /// Nothing was touched. `reason` is the slug the caller turns into its
         /// existing no-correction fall-through.
         case refused(reason: String)
@@ -52,7 +51,7 @@ public enum AutocorrectCountingSite {
         let liveContext = editor.contextBeforeInput
 
         switch MirrorGatedReplacement.check(
-            trust: mirror.trust, context: liveContext, word: word
+            mirrorSuspect: suspect, context: liveContext, word: word
         ) {
         case .failed(let reason):
             if suspect {
@@ -64,16 +63,6 @@ public enum AutocorrectCountingSite {
             return .refused(reason: reason)
 
         case .ok(let deleteCount):
-            let correctedBy = word.count - deleteCount
-            if suspect {
-                mirror.noteCorrectedReplacement()
-                #if DEBUG
-                AutocorrectDebugLog.mirrorCorrected(
-                    word: word, planned: word.count, deleted: deleteCount, surplus: correctedBy
-                )
-                #endif
-            }
-
             #if DEBUG
             AutocorrectDebugLog.applyBefore(
                 word: word,
@@ -114,7 +103,7 @@ public enum AutocorrectCountingSite {
             )
             #endif
 
-            return .applied(deleted: deleteCount, correctedBy: correctedBy)
+            return .applied(deleted: deleteCount)
         }
     }
 

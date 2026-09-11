@@ -186,19 +186,12 @@ public enum AutocorrectDebugLog {
         write("MIRROR-SUPPRESSED site=\(site) word=\"\(word)\" reason=\(reason)")
     }
 
-    /// A replacement went ahead on a count corrected for the mirror's surplus —
-    /// the line that says the revised reaction did its job instead of going dark.
-    public static func mirrorCorrected(word: String, planned: Int, deleted: Int, surplus: Int) {
-        guard enabled else { return }
-        write("MIRROR-CORRECTED word=\"\(word)\" planned=\(planned) deleted=\(deleted) surplus=\(surplus)")
-    }
-
     /// A keyboard-inserted word boundary put the surplus behind it, so it can no
     /// longer be inside anything the keyboard counts. The suspicion ends here —
     /// this is the line that says how long it lasted and what it changed.
-    public static func mirrorSettled(reason: String, durationMs: Int, corrected: Int) {
+    public static func mirrorSettled(reason: String, durationMs: Int) {
         guard enabled else { return }
-        write("MIRROR-SETTLED reason=\(reason) durationMs=\(durationMs) corrected=\(corrected)")
+        write("MIRROR-SETTLED reason=\(reason) durationMs=\(durationMs)")
     }
 
     /// The cursor went back past the boundary that settled a surplus, so the
@@ -208,12 +201,6 @@ public enum AutocorrectDebugLog {
         write("MIRROR-UNSETTLED boundary=\(boundary) length=\(length) surplus=+\(surplus)")
     }
 
-    /// The surplus accounting declared itself lost; counting sites now refuse.
-    public static func mirrorUnknown(reason: String, surplus: Int) {
-        guard enabled else { return }
-        write("MIRROR-UNKNOWN reason=\(reason) surplus=\(surplus)")
-    }
-
     /// The suppression ended. These are the numbers that say what the default
     /// release cost the user, and #530 asks for them before anyone calls it right:
     /// how long the keyboard stayed armed and how many spacebar presses it covered.
@@ -221,13 +208,11 @@ public enum AutocorrectDebugLog {
         reason: String,
         durationMs: Int,
         spaces: Int,
-        suppressed: (corrections: Int, fullStops: Int),
-        corrected: Int
+        suppressed: (corrections: Int, fullStops: Int)
     ) {
         guard enabled else { return }
         write("MIRROR-RELEASED reason=\(reason) durationMs=\(durationMs) spaces=\(spaces) "
-            + "corrections=\(suppressed.corrections) fullStops=\(suppressed.fullStops) "
-            + "corrected=\(corrected)")
+            + "corrections=\(suppressed.corrections) fullStops=\(suppressed.fullStops)")
     }
 
     // MARK: - Mirror divergence probe (#530)

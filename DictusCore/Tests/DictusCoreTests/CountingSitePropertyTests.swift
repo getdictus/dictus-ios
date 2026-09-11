@@ -59,45 +59,47 @@ final class CountingSitePropertyTests: XCTestCase {
 
     private static let iterations = 400
 
-    // MARK: - 1 & 2. The preceding text survives, and the correction is not short
+    // MARK: - 1 & 2. The preceding text survives, and a correction is never partial
 
-    func testAReplacementNeverDamagesTextBeforeTheWordAndIsNeverShort() {
+    func testAReplacementEitherHappensInFullOrNotAtAll() {
+        // The invariant that replaces the old "never short" one. There are exactly two
+        // acceptable outcomes now, and a partial delete is neither of them:
+        //   - the mirror is not suspect: the whole word is replaced, as develop does;
+        //   - the mirror is suspect: nothing is touched at all.
+        // Anything in between is the class of defect that produced "pproblème" and
+        // "MaMais", so the property forbids it outright.
         for seed in 0..<UInt64(Self.iterations) {
             var rng = Rng(seed: seed)
 
-            // A prefix the user is not touching, then a boundary, then the word.
             let prefixWordCount = 1 + rng.next(3)
             let prefix = (0..<prefixWordCount)
                 .map { _ in rng.word(length: 2 + rng.next(6)) }
                 .joined(separator: " ")
             let realWord = rng.word(length: 2 + rng.next(8))
             let correction = rng.word(length: 1 + rng.next(9))
-            let phantomCount = rng.next(4)                  // 0...3
-            let phantomIsInsideTheWord = rng.next(2) == 0
+            let phantomCount = rng.next(4)
+            // The two are not independent, and pretending otherwise builds a world
+            // that cannot happen: a boundary written AFTER the divergence is exactly
+            // what puts the phantom behind it, so "phantom still inside the current
+            // word" and "a boundary has been written since" are mutually exclusive.
+            let boundaryWritten = phantomCount > 0 && rng.next(2) == 0
 
             let document = prefix + " " + realWord
             let state = MirrorSyncState()
-
-            // The mirror's word is longer than the document's only when the phantom
-            // landed inside it. A phantom that landed earlier sits in the prefix.
             let phantomText = String(repeating: "x", count: phantomCount)
             let mirror: String
             if phantomCount == 0 {
                 mirror = document
-            } else if phantomIsInsideTheWord {
-                // Divergence while typing this word: nothing has written a boundary
-                // since, so the accounting is still carrying it.
-                mirror = prefix + " " + realWord + phantomText
-                for _ in 0..<phantomCount {
-                    state.observe(before: 40, after: 40, deleted: 1, inserted: 0)
-                }
-            } else {
-                // Divergence earlier: a boundary has been written since, which is how
-                // the phantom ended up behind one.
+            } else if boundaryWritten {
                 mirror = prefix + phantomText + " " + realWord
-                for _ in 0..<phantomCount {
-                    state.observe(before: 40, after: 40, deleted: 1, inserted: 0)
-                }
+            } else {
+                mirror = prefix + " " + realWord + phantomText
+            }
+
+            for _ in 0..<phantomCount {
+                state.observe(before: 40, after: 40, deleted: 1, inserted: 0)
+            }
+            if boundaryWritten {
                 state.noteBoundaryInserted(reason: "space", atLength: mirror.count)
             }
 
@@ -106,34 +108,24 @@ final class CountingSitePropertyTests: XCTestCase {
             mirror.enumerateSubstrings(in: mirror.startIndex..., options: .byWords) { sub, _, _, _ in
                 if let sub = sub { mirrorWord = sub }
             }
+            let wasSuspect = state.isSuspect
             let outcome = AutocorrectCountingSite.apply(
                 editor: doc, word: mirrorWord, correction: correction, mirror: state
             )
-            guard case .applied = outcome else { continue }
 
-            XCTAssertEqual(
-                doc.document, prefix + " " + correction + " ",
-                "seed \(seed): prefix=\(prefix) word=\(realWord) phantom=\(phantomCount) "
-                + "insideWord=\(phantomIsInsideTheWord)"
-            )
-        }
-    }
-
-    // MARK: - 3. Never larger than the uncorrected count
-
-    func testTheCorrectedCountIsNeverLargerThanThePlannedOne() {
-        for seed in 0..<UInt64(Self.iterations) {
-            var rng = Rng(seed: seed &+ 10_000)
-            let planned = 1 + rng.next(24)
-            let surplus = rng.next(24)
-            let trust: MirrorTrust = surplus == 0 ? .trusted : .surplus(surplus)
-
-            switch MirrorSync.adjust(deleteCount: planned, trust: trust) {
-            case .exact(let count), .corrected(let count, _):
-                XCTAssertLessThanOrEqual(count, planned, "seed \(seed)")
-                XCTAssertGreaterThan(count, 0, "seed \(seed)")
-            case .refuse:
-                break   // deletes nothing, which is also never larger
+            let context = "seed \(seed): phantom=\(phantomCount) boundary=\(boundaryWritten)"
+            if wasSuspect {
+                guard case .refused = outcome else {
+                    XCTFail("\(context): a suspect mirror must refuse"); continue
+                }
+                XCTAssertEqual(doc.document, document, "\(context): nothing may be touched")
+            } else {
+                guard case .applied(let deleted) = outcome else { continue }
+                XCTAssertEqual(deleted, mirrorWord.count, "\(context): partial delete")
+                XCTAssertEqual(
+                    doc.document, prefix + " " + correction + " ",
+                    "\(context): the preceding text must survive intact"
+                )
             }
         }
     }
@@ -157,7 +149,7 @@ final class CountingSitePropertyTests: XCTestCase {
                 state.observe(before: length, after: length + 1, deleted: 0, inserted: 1)
                 length += 1
             }
-            XCTAssertEqual(state.trust, .trusted, "seed \(seed): healthy typing must never arm")
+            XCTAssertFalse(state.isSuspect, "seed \(seed): healthy typing must never arm")
 
             let document = prefix + " " + word
             let doc = FakeDocument(document: document, mirror: document)
@@ -165,7 +157,7 @@ final class CountingSitePropertyTests: XCTestCase {
                 editor: doc, word: word, correction: correction, mirror: state
             )
 
-            XCTAssertEqual(outcome, .applied(deleted: word.count, correctedBy: 0), "seed \(seed)")
+            XCTAssertEqual(outcome, .applied(deleted: word.count), "seed \(seed)")
             XCTAssertEqual(doc.document, prefix + " " + correction + " ", "seed \(seed)")
         }
     }
@@ -186,11 +178,11 @@ final class CountingSitePropertyTests: XCTestCase {
             for _ in 0..<surplus {
                 state.observe(before: boundaryLength, after: boundaryLength, deleted: 1, inserted: 0)
             }
-            XCTAssertEqual(state.trust, .surplus(surplus), "seed \(seed)")
+            XCTAssertTrue(state.isSuspect, "seed \(seed)")
 
             state.observe(before: boundaryLength, after: boundaryLength + 1, deleted: 0, inserted: 1)
             state.noteBoundaryInserted(reason: "space", atLength: boundaryLength + 1)
-            XCTAssertEqual(state.trust, .trusted, "seed \(seed): the boundary settles it")
+            XCTAssertFalse(state.isSuspect, "seed \(seed): the boundary settles it")
 
             // Typing forward keeps it settled, however far.
             var length = boundaryLength + 1
@@ -198,15 +190,15 @@ final class CountingSitePropertyTests: XCTestCase {
                 state.observe(before: length, after: length + 1, deleted: 0, inserted: 1)
                 length += 1
             }
-            XCTAssertEqual(state.trust, .trusted, "seed \(seed): forward typing must not revive it")
+            XCTAssertFalse(state.isSuspect, "seed \(seed): forward typing must not revive it")
 
             // Backspacing past the boundary brings it back.
             while length > boundaryLength {
                 state.observe(before: length, after: length - 1, deleted: 1, inserted: 0)
                 length -= 1
             }
-            XCTAssertEqual(
-                state.trust, .surplus(surplus),
+            XCTAssertTrue(
+                state.isSuspect,
                 "seed \(seed): the cursor is back inside the phantom's reach"
             )
         }
@@ -222,7 +214,7 @@ final class CountingSitePropertyTests: XCTestCase {
 
             // deleteBackward() with nothing left moves neither document nor mirror.
             state.observe(before: available, after: 0, deleted: available + 1 + rng.next(3), inserted: 0)
-            XCTAssertEqual(state.trust, .trusted, "seed \(seed): available=\(available)")
+            XCTAssertFalse(state.isSuspect, "seed \(seed): available=\(available)")
         }
     }
 }

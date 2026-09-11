@@ -51,48 +51,79 @@ final class MirrorSurplusUnknowabilityTests: XCTestCase {
         state.observe(before: mirrorLength, after: mirrorLength, deleted: 1, inserted: 0)
     }
 
-    func testOneObservableTraceHasTwoDifferentCorrectAnswers() {
-        // Same mirror text, same lengths, same edit history. Different documents.
+    func testNoDeleteCountCanBeRightForBothDocuments() {
+        // The proof, and it holds for EVERY possible rule rather than for the one that
+        // was deleted. Both documents present the same mirror, so any rule — however
+        // it is written, whatever history it keeps — must hand the site one number.
+        // This sweeps every number it could possibly choose and shows each one damages
+        // at least one of the two documents.
         let mirrorText = "le Maois"
+        let word = "Maois"
 
-        // A: the mirror's "Maois" carries a phantom; the document holds "Maos".
+        for candidate in 0...word.count {
+            let scenarioA = FakeDocument(document: "le Maos", mirror: mirrorText)  // phantom "i"
+            let scenarioB = FakeDocument(document: "le Maois", mirror: mirrorText) // no phantom
+
+            for doc in [scenarioA, scenarioB] {
+                for _ in 0..<candidate { doc.deleteBackward() }
+                doc.insertText("Mais ")
+            }
+
+            let bothRight = scenarioA.document == "le Mais " && scenarioB.document == "le Mais "
+            XCTAssertFalse(
+                bothRight,
+                "a count of \(candidate) satisfied both documents — the scenarios were "
+                + "not actually indistinguishable, and the proof would be void"
+            )
+        }
+
+        // And the two counts that ARE each individually right differ by exactly one,
+        // which is the whole difficulty: 4 replaces "Maos", 5 replaces "Maois".
+        let onlyA = FakeDocument(document: "le Maos", mirror: mirrorText)
+        for _ in 0..<4 { onlyA.deleteBackward() }
+        onlyA.insertText("Mais ")
+        XCTAssertEqual(onlyA.document, "le Mais ")
+
+        let onlyB = FakeDocument(document: "le Maois", mirror: mirrorText)
+        for _ in 0..<5 { onlyB.deleteBackward() }
+        onlyB.insertText("Mais ")
+        XCTAssertEqual(onlyB.document, "le Mais ")
+    }
+
+    func testBothScenariosProduceAnIdenticalObservableTrace() {
+        // The premise of the proof above: everything the extension can read is the
+        // same in both. If this ever fails, something distinguishes them and the
+        // magnitude might be recoverable after all — so it is worth a test of its own.
+        let mirrorText = "le Maois"
         let scenarioA = FakeDocument(document: "le Maos", mirror: mirrorText)
-        let stateA = MirrorSyncState()
-        replayTheAmbiguousDelete(into: stateA, mirrorLength: mirrorText.count)
-
-        // B: no phantom anywhere; the document holds "Maois" in full.
         let scenarioB = FakeDocument(document: "le Maois", mirror: mirrorText)
+
+        let stateA = MirrorSyncState()
         let stateB = MirrorSyncState()
+        replayTheAmbiguousDelete(into: stateA, mirrorLength: mirrorText.count)
         replayTheAmbiguousDelete(into: stateB, mirrorLength: mirrorText.count)
 
-        XCTAssertEqual(stateA.trust, stateB.trust, "the traces are indistinguishable")
         XCTAssertEqual(scenarioA.contextBeforeInput, scenarioB.contextBeforeInput)
+        XCTAssertEqual(stateA.isSuspect, stateB.isSuspect)
+        XCTAssertTrue(stateA.isSuspect, "and both are suspect, which is the correct answer")
+    }
 
-        AutocorrectCountingSite.apply(
-            editor: scenarioA, word: "Maois", correction: "Mais", mirror: stateA
-        )
-        AutocorrectCountingSite.apply(
-            editor: scenarioB, word: "Maois", correction: "Mais", mirror: stateB
-        )
+    func testWhileSuspectTheSiteRefusesBothRatherThanDamagingOne() {
+        // What the decision does with that impossibility: refuse. Neither document is
+        // touched, so neither is damaged. The cost is that the misspelling stands.
+        let mirrorText = "le Maois"
+        for document in ["le Maos", "le Maois"] {
+            let doc = FakeDocument(document: document, mirror: mirrorText)
+            let state = MirrorSyncState()
+            replayTheAmbiguousDelete(into: state, mirrorLength: mirrorText.count)
 
-        // Exactly one of these can be right, whatever number the site chooses.
-        let correctA = scenarioA.document == "le Mais "
-        let correctB = scenarioB.document == "le Mais "
-        XCTAssertFalse(
-            correctA && correctB,
-            "if both are right the scenarios were not actually indistinguishable"
-        )
-        XCTAssertTrue(
-            correctA || correctB,
-            "one of them must be right — the site does pick a number"
-        )
+            let outcome = AutocorrectCountingSite.apply(
+                editor: doc, word: "Maois", correction: "Mais", mirror: state
+            )
 
-        // And the one it gets wrong is wrong in the way the user reported: a leading
-        // fragment of the typed word survives in front of the correction. Capture 6
-        // had a surplus of 2 and produced "MaMais"; this minimal trace carries a
-        // surplus of 1 and produces "MMais". Same defect, one character smaller.
-        XCTAssertTrue(correctA, "the phantom scenario is the one the surplus is tuned for")
-        XCTAssertEqual(scenarioB.document, "le MMais ", "the no-phantom document is damaged")
+            XCTAssertEqual(outcome, .refused(reason: MirrorGatedReplacement.suspectReason))
+            XCTAssertEqual(doc.document, document, "untouched")
+        }
     }
 
     func testTheDetectorIsSoundEvenThoughTheMagnitudeIsNot() {
@@ -105,10 +136,10 @@ final class MirrorSurplusUnknowabilityTests: XCTestCase {
         for length in 0..<40 {
             healthy.observe(before: length, after: length + 1, deleted: 0, inserted: 1)
         }
-        XCTAssertEqual(healthy.trust, .trusted, "healthy typing must never raise suspicion")
+        XCTAssertFalse(healthy.isSuspect, "healthy typing must never raise suspicion")
 
         let suspect = MirrorSyncState()
         replayTheAmbiguousDelete(into: suspect, mirrorLength: 40)
-        XCTAssertNotEqual(suspect.trust, .trusted, "an unreflected edit must raise it")
+        XCTAssertTrue(suspect.isSuspect, "an unreflected edit must raise it")
     }
 }

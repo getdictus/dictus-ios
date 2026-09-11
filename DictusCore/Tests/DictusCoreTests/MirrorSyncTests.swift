@@ -171,12 +171,12 @@ final class MirrorSyncTests: XCTestCase {
     }
 
 
-    // MARK: - The revised reaction: correct the count, do not refuse
+    // MARK: - Refusal, not arithmetic
 
-    func testTheCapturedDesyncCorrectsToTheExactWord() {
-        // Field capture 2: the mirror reports "vaiss" for a document holding "vais",
-        // so the boundary check hands out 5. Deleting 5 removes s, i, a, v AND the
-        // space: "Ok jevais ". Deleting 5 - 1 removes exactly "vais".
+    func testASuspectMirrorRefusesOutright() {
+        // The mirror reports "vaiss" for a document holding "vais", so the boundary
+        // check would hand out 5 and the replacement would eat the space. While the
+        // mirror is suspect no count is produced at all.
         let proxy = FakeProxy(document: "Ok je vais", phantom: "s")
         XCTAssertEqual(
             AutocorrectReplacement.check(context: proxy.contextBeforeInput, word: "vaiss"),
@@ -184,186 +184,67 @@ final class MirrorSyncTests: XCTestCase {
             "precondition: the boundary check cannot see the desync"
         )
 
-        let gated = MirrorGatedReplacement.check(
-            trust: .surplus(1), context: proxy.contextBeforeInput, word: "vaiss"
+        XCTAssertEqual(
+            MirrorGatedReplacement.check(
+                mirrorSuspect: true, context: proxy.contextBeforeInput, word: "vaiss"
+            ),
+            .failed(reason: MirrorGatedReplacement.suspectReason)
         )
-        XCTAssertEqual(gated, .ok(deleteCount: 4))
-
-        guard case .ok(let count) = gated else { return XCTFail("expected a corrected count") }
-        for _ in 0..<count { proxy.deleteBackward() }
-        proxy.insertText("vais ")
-        XCTAssertEqual(proxy.document, "Ok je vais ")
-    }
-
-    func testTheFirstFieldCaptureAlsoLandsExactly() {
-        // "tonn"(4) with surplus 1 -> delete 3 -> "Une fois " + "ton " = "Une fois ton ".
-        let proxy = FakeProxy(document: "Une fois ton", phantom: "n")
-        let gated = MirrorGatedReplacement.check(
-            trust: .surplus(1), context: proxy.contextBeforeInput, word: "tonn"
-        )
-        XCTAssertEqual(gated, .ok(deleteCount: 3))
-
-        guard case .ok(let count) = gated else { return XCTFail("expected a corrected count") }
-        for _ in 0..<count { proxy.deleteBackward() }
-        proxy.insertText("ton ")
-        XCTAssertEqual(proxy.document, "Une fois ton ")
+        XCTAssertEqual(proxy.deleteCalls, 0)
+        XCTAssertEqual(proxy.document, "Ok je vais", "untouched")
     }
 
     func testATrustedMirrorSpendsTheCountUnchanged() {
         XCTAssertEqual(
-            MirrorGatedReplacement.check(trust: .trusted, context: "je pense quee", word: "quee"),
+            MirrorGatedReplacement.check(
+                mirrorSuspect: false, context: "je pense quee", word: "quee"
+            ),
             .ok(deleteCount: 4)
         )
     }
 
-    // MARK: - Question 1: does the surplus stay correct across successive desyncs?
+    // MARK: - What the surplus still does: decide suspicion, and nothing else
 
-    func testSuccessiveDesyncsAccumulateTheSurplus() {
+    func testSuccessiveDesyncsKeepTheMirrorSuspect() {
         let proxy = FakeProxy(document: "Ok je vais")
         let state = MirrorSyncState()
 
         proxy.mirrorIgnoresDeletes = true
-        edit(proxy, state: state, deleted: 1) { proxy.deleteBackward() }
-        XCTAssertEqual(state.trust, .surplus(1))
-        edit(proxy, state: state, deleted: 1) { proxy.deleteBackward() }
-        XCTAssertEqual(state.trust, .surplus(2))
-        edit(proxy, state: state, deleted: 1) { proxy.deleteBackward() }
-
-        // Three ignored deletes, three phantoms. The mirror is now three characters
-        // longer than the document, and a count taken off it is too big by three.
-        XCTAssertEqual(state.trust, .surplus(3))
+        for _ in 0..<3 {
+            edit(proxy, state: state, deleted: 1) { proxy.deleteBackward() }
+            XCTAssertTrue(state.isSuspect)
+        }
         XCTAssertEqual(proxy.mirror.count - proxy.document.count, 3)
     }
 
-    func testAMirrorThatGivesBackMorePaysTheSurplusDown() {
+    func testAMirrorThatGivesBackMoreEndsTheSuspicion() {
         let proxy = FakeProxy(document: "Ok je vais")
         let state = MirrorSyncState()
 
         proxy.mirrorIgnoresDeletes = true
         edit(proxy, state: state, deleted: 1) { proxy.deleteBackward() }
-        XCTAssertEqual(state.trust, .surplus(1))
+        XCTAssertTrue(state.isSuspect)
 
         // The mirror drops two graphemes on a one-character delete: the phantom and
-        // the real one. The accounting must follow it back down, not stay armed
-        // forever on a debt that has been repaid.
+        // the real one. The debt is repaid, so the suspicion ends.
         state.observe(before: 10, after: 8, deleted: 1, inserted: 0)
-        XCTAssertEqual(state.trust, .trusted)
+        XCTAssertFalse(state.isSuspect)
     }
 
-    func testTheSurplusNeverGoesNegative() {
-        // A negative surplus would mean ADDING deletions, which is the one thing that
-        // destroys text. The floor at zero is the invariant that forbids it.
+    func testSuspicionNeverGoesNegative() {
         let state = MirrorSyncState()
         state.observe(before: 20, after: 15, deleted: 1, inserted: 0)
-        XCTAssertEqual(state.trust, .trusted)
-        XCTAssertEqual(
-            MirrorSync.adjust(deleteCount: 4, trust: state.trust),
-            .exact(deleteCount: 4)
-        )
+        XCTAssertFalse(state.isSuspect)
     }
 
-    // MARK: - Question 2: what happens when the accounting is unattributable
+    // MARK: - The auto-period, which could never use a magnitude anyway
 
-    func testAnAccumulationBeyondTheCeilingFallsBackToRefusal() {
-        let state = MirrorSyncState()
-        for _ in 0..<9 {
-            state.observe(before: 40, after: 40, deleted: 1, inserted: 0)
-        }
-        XCTAssertEqual(state.trust, .unknown)
-        XCTAssertEqual(
-            MirrorGatedReplacement.check(trust: .unknown, context: "Ok je vais", word: "vais"),
-            .failed(reason: MirrorGatedReplacement.unknownReason)
-        )
-    }
-
-    func testUnknownIsStickyUntilRelease() {
-        // A lost accounting cannot be re-derived from later edits: an edit the mirror
-        // reflects perfectly says nothing about a surplus that was already there.
-        let state = MirrorSyncState()
-        state.markUnknown(reason: "test")
-        state.observe(before: 10, after: 11, deleted: 0, inserted: 1)
-        XCTAssertEqual(state.trust, .unknown)
-
-        state.release(reason: "viewWillAppear")
-        XCTAssertEqual(state.trust, .trusted)
-    }
-
-    func testASurplusClaimingTheWholeWordRefusesRatherThanDuplicatingIt() {
-        // Deleting 0 and inserting the correction would give "tonton". Refusing is
-        // the only sane answer, and it is the fallback rather than the behaviour.
-        XCTAssertEqual(
-            MirrorSync.adjust(deleteCount: 3, trust: .surplus(3)),
-            .refuse(reason: MirrorGatedReplacement.surplusExceedsWordReason)
-        )
-        XCTAssertEqual(
-            MirrorSync.adjust(deleteCount: 3, trust: .surplus(4)),
-            .refuse(reason: MirrorGatedReplacement.surplusExceedsWordReason)
-        )
-    }
-
-    // MARK: - Question 3: can correcting be worse than refusing?
-
-    func testTheCorrectedCountIsNeverLargerThanTheUncorrectedOne() {
-        // THE safety property. The corrected count can only ever be smaller, so this
-        // fix cannot destroy text that develop would have kept — the worst it can do
-        // is stop short and leave a stray character.
-        for deleteCount in 1...12 {
-            for surplus in 0...12 {
-                let trust: MirrorTrust = surplus == 0 ? .trusted : .surplus(surplus)
-                switch MirrorSync.adjust(deleteCount: deleteCount, trust: trust) {
-                case .exact(let count), .corrected(let count, _):
-                    XCTAssertLessThanOrEqual(count, deleteCount)
-                    XCTAssertGreaterThan(count, 0)
-                case .refuse:
-                    break   // refusing deletes nothing, which is also never larger
-                }
-            }
-        }
-    }
-
-    func testAnOverEstimatedSurplusUnderDeletesAndLeavesAStrayCharacter() {
-        // The acceptable failure, proven to be the one that occurs. The mirror is
-        // honest here but the accounting thinks it is holding two phantoms, so the
-        // replacement stops short. The result is a visible typo, recoverable with one
-        // backspace — never a merged word.
-        let proxy = FakeProxy(document: "je pense quee")
-        let gated = MirrorGatedReplacement.check(
-            trust: .surplus(2), context: proxy.contextBeforeInput, word: "quee"
-        )
-        XCTAssertEqual(gated, .ok(deleteCount: 2))
-
-        guard case .ok(let count) = gated else { return XCTFail("expected a corrected count") }
-        for _ in 0..<count { proxy.deleteBackward() }
-        proxy.insertText("que ")
-
-        XCTAssertEqual(proxy.document, "je pense quque ")
-        XCTAssertTrue(proxy.document.contains("pense "), "the preceding word and its space survive")
-    }
-
-    func testAPhantomNotAtTheTailStillCorrectsTheLengthSafely() {
-        // The surplus is a length, not a position: the mirror holds "toxy" where the
-        // document holds "toy", so dropping the LAST character would be wrong. The
-        // count is still right, which is all a delete needs.
-        let proxy = FakeProxy(document: "a toy")
-        proxy.forceMirror("a toxy")
-        let gated = MirrorGatedReplacement.check(
-            trust: .surplus(1), context: proxy.contextBeforeInput, word: "toxy"
-        )
-        XCTAssertEqual(gated, .ok(deleteCount: 3))
-
-        guard case .ok(let count) = gated else { return XCTFail("expected a corrected count") }
-        for _ in 0..<count { proxy.deleteBackward() }
-        XCTAssertEqual(proxy.document, "a ", "exactly the real word was removed, space intact")
-    }
-
-    // MARK: - Criterion 2: the auto-period still refuses, and why
-
-    func testASuspectMirrorStopsTheAutoPeriodEvenWhenTheSurplusIsKnown() {
-        // Unlike the replacement path, this asks what a character IS, and the surplus
-        // cannot answer that. The capture caught it writing ". " over a space that was
-        // not there, turning "Ok je vais" into "Ok je vai." on one press.
+    func testASuspectMirrorStopsTheAutoPeriod() {
         let context = "Ok je vais "
-        XCTAssertTrue(AutoFullStop.shouldSubstitute(context: context, mirrorSuspect: false))
+        XCTAssertTrue(
+            AutoFullStop.shouldSubstitute(context: context, mirrorSuspect: false),
+            "precondition: this context is a genuine double-space substitution"
+        )
         XCTAssertFalse(AutoFullStop.shouldSubstitute(context: context, mirrorSuspect: true))
     }
 
@@ -383,45 +264,43 @@ final class MirrorSyncTests: XCTestCase {
         // word out of UserDictionary. Pinned so a refusal cannot quietly become a
         // different, learnable outcome.
         guard case .failed(let reason) = MirrorGatedReplacement.check(
-            trust: .unknown, context: "Ok je vais", word: "vais"
-        ) else { return XCTFail("unknown must refuse") }
-        XCTAssertEqual(reason, "mirror-desync-unknown")
+            mirrorSuspect: true, context: "Ok je vais", word: "vais"
+        ) else { return XCTFail("a suspect mirror must refuse") }
+        XCTAssertEqual(reason, "mirror-desync")
     }
 
     // MARK: - Release
 
-    func testReleaseClearsTheAccountingAndTheCounters() {
+    func testReleaseClearsTheSuspicionAndTheCounters() {
         let state = MirrorSyncState()
         state.observe(before: 49, after: 49, deleted: 1, inserted: 0)
         state.noteSpaceWhileSuspect()
         state.noteSuppressedCorrection()
-        state.noteCorrectedReplacement()
-        XCTAssertEqual(state.trust, .surplus(1))
+        XCTAssertTrue(state.isSuspect)
+        XCTAssertEqual(state.spacesWhileSuspect, 1)
 
         state.release(reason: "viewWillAppear")
 
-        XCTAssertEqual(state.trust, .trusted)
+        XCTAssertFalse(state.isSuspect)
         XCTAssertEqual(state.spacesWhileSuspect, 0)
         XCTAssertEqual(state.suppressedCorrections, 0)
-        XCTAssertEqual(state.correctedReplacements, 0)
     }
 
-    func testNeitherFalsifiedReleaseExists() {
-        // A word boundary and a run of correctly-reflected edits must both leave the
-        // surplus in place: "tracking again" is not "truthful again" — from seq=43 the
-        // mirror tracked every edit while still reporting "vaiss" for "vais".
+    func testForwardTypingAloneNeverEndsTheSuspicion() {
+        // Both cheaper releases stay falsified: "tracking again" is not "truthful
+        // again". Only a boundary the keyboard writes ends it.
         let proxy = FakeProxy(document: "Ok je vais")
         let state = MirrorSyncState()
         proxy.mirrorIgnoresDeletes = true
         edit(proxy, state: state, deleted: 1) { proxy.deleteBackward() }
         proxy.mirrorIgnoresDeletes = false
 
-        for character in " faire un test " {
+        for character in "faireuntest" {
             edit(proxy, state: state, insert: String(character)) {
                 proxy.insertText(String(character))
             }
         }
 
-        XCTAssertEqual(state.trust, .surplus(1), "no release condition was observed; do not invent one")
+        XCTAssertTrue(state.isSuspect, "no release condition was observed; do not invent one")
     }
 }
