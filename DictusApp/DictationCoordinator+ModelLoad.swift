@@ -360,6 +360,22 @@ extension DictationCoordinator {
     /// a lock of its own while this one was parked. Going straight to the compile after
     /// a single wait would be the double compile this exists to prevent.
     ///
+    /// THIS WAIT ALSO DEFERS THE STAGE WATCHDOG (issue #542). The deferral used to be
+    /// raised only inside `acquireNeuralEngine`'s queue wait, and a dictation started
+    /// while the app process was dead never reaches that wait: it parks here, on the
+    /// launch preload's `initTask`, and the 30s transcription watchdog cancelled it. That
+    /// is not a belt-and-braces addition — parking on this lock is the normal path of
+    /// every cold-start dictation, and it survived on margin alone. Two measured
+    /// survivals on a warm cache, 7s and 3s parked against a 30s budget; a cold backgrounded
+    /// compile is 48s for Parakeet and 236s for Turbo.
+    ///
+    /// SAME STRICT RULE AS `acquireNeuralEngine`: defer only while the in-flight init
+    /// belongs to somebody else. Being inside this loop *is* that condition — the task was
+    /// installed before this caller arrived, so it is never this dictation's own work — and
+    /// the flag comes down on every exit. Deferring around a caller's own compile is what
+    /// turns a recoverable failure into an unbounded hang, which is the trade
+    /// `waitingForNeuralEngine` documents at length.
+    ///
     /// - Returns: `true` when the caller can return immediately because the load that
     ///   just finished was the one it wanted.
     func awaitInFlightEngineInit(
@@ -367,7 +383,23 @@ extension DictationCoordinator {
         component: String,
         isAlreadyLoaded: () -> Bool
     ) async throws -> Bool {
+        // Raised lazily rather than before the loop: a caller that finds no lock installed
+        // waits for nothing and must not lower a deferral it never raised. `defer` covers
+        // the `return true` in the middle as well as the two normal exits.
+        var deferralIsOurs = false
+        defer { if deferralIsOurs { isWaitingForNeuralEngine = false } }
+
         while let inFlight = initTask {
+            if isInsideEngineLoadForDictation, !deferralIsOurs {
+                deferralIsOurs = true
+                isWaitingForNeuralEngine = true
+                PersistentLog.log(.diagnosticProbe(
+                    component: "NeuralEngine",
+                    instanceID: modelName,
+                    action: "queuedBehindEngineInit",
+                    details: "caller=\(component) watchdogDeferred=true"
+                ))
+            }
             let isCurrentGeneration = initTaskEpoch == modelLoadEpoch
             if #available(iOS 14.0, *) {
                 DictusLogger.app.info("Engine init already in progress — awaiting existing task")
@@ -477,8 +509,9 @@ extension DictationCoordinator {
     ///
     /// The rule the watchdog needs is narrower: **defer only while ANOTHER holder owns
     /// the gate.** The moment this caller takes it, the work is its own and the watchdog
-    /// must be allowed to do its job. So the deferral is raised inside the queue wait
-    /// (see `acquireNeuralEngine`) and comes down the instant the gate is taken.
+    /// must be allowed to do its job. So the deferral is raised inside the waits
+    /// themselves — `acquireNeuralEngine`'s queue wait and `awaitInFlightEngineInit`'s
+    /// wait on the init lock (issue #542) — and comes down the instant either ends.
     func waitingForNeuralEngine<T>(_ work: () async throws -> T) async rethrows -> T {
         isInsideEngineLoadForDictation = true
         defer { isInsideEngineLoadForDictation = false }
@@ -496,6 +529,10 @@ extension DictationCoordinator {
     /// hardware itself is responsible for its own progress again, and if its compile
     /// hangs the watchdog must be free to act — otherwise deferring here turns a
     /// recoverable failure into an unbounded one, which is what this branch is about.
+    ///
+    /// "THE GATE" IS EITHER OF TWO WAITS since issue #542 — the Neural Engine queue and
+    /// the engine-init lock. The predicate is the same for both and it is not "a load is
+    /// running" but "somebody else's load is running".
     func shouldDeferStageWatchdog(for status: DictationStatus) -> Bool {
         guard isWaitingForNeuralEngine else { return false }
         PersistentLog.log(.diagnosticProbe(

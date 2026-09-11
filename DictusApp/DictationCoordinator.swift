@@ -192,6 +192,16 @@ class DictationCoordinator: ObservableObject {
     /// The watchdog exists to catch a stage that will never hand over. A stage waiting
     /// for hardware WILL hand over, so this tells the two apart rather than shortening
     /// the wait or removing the guard.
+    ///
+    /// TWO WAITS RAISE IT, and the second one is the common one (issue #542):
+    /// `acquireNeuralEngine`'s queue wait, and `awaitInFlightEngineInit`'s wait on the
+    /// init lock. A dictation started while the app process was dead parks on the second
+    /// and never reaches the first, so for a year the deferral covered the rarer of the
+    /// two paths. Both raise it only while the work being waited on belongs to somebody
+    /// else, and both lower it the moment this caller becomes responsible for its own
+    /// progress. A Bool rather than a counter because `isInsideEngineLoadForDictation`
+    /// has exactly one writer and there is at most one dictation, so the two waits can
+    /// never be raised by different callers at the same time.
     var isWaitingForNeuralEngine = false
 
     /// Who holds the Neural Engine for a Core ML compile right now, or nil if it is free.
