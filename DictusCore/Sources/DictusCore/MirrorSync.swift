@@ -268,6 +268,43 @@ public final class MirrorSyncState {
         #endif
     }
 
+    /// The keyboard has inserted a word boundary — a space, a newline, ". ", or a
+    /// correction's trailing space. Any outstanding surplus is cleared.
+    ///
+    /// WHY A BOUNDARY SETTLES IT, and this is the fix for the "pproblème" round:
+    /// a surplus is POSITIONAL, not just a magnitude. Every delete count a counting
+    /// site computes is the length of the CURRENT word, and the current word begins
+    /// after the last boundary. Once the keyboard has written one, the phantom lies
+    /// behind it, so every character of every later word was typed and observed after
+    /// the divergence — the word's length in the mirror equals its length in the
+    /// document, and subtracting anything from it deletes one character too few.
+    ///
+    /// That is exactly what shipped and failed: capture 5 armed on a key-delete and
+    /// the very next event was a space, yet the surplus stayed latched and eight
+    /// consecutive corrections came out one character short ("pproblème"). The
+    /// magnitude was never re-derived because `observe` only ever sees deltas. This
+    /// re-derives RELEVANCE instead, which needs no absolute reading of anything.
+    ///
+    /// `.unknown` clears too: it means the accounting lost track of a magnitude, and
+    /// a magnitude behind a boundary is no longer being asked about.
+    ///
+    /// NOT a claim that the mirror has resynced. It almost certainly has not — the
+    /// diagnostic capture recorded zero reconvergences. The phantom stays in the
+    /// mirror; it simply stops being inside anything this keyboard counts.
+    public func noteBoundaryInserted(reason: String) {
+        guard isSuspect else { return }
+        #if DEBUG
+        AutocorrectDebugLog.mirrorSettled(
+            reason: reason,
+            durationMs: suspectSince.map { Int(Date().timeIntervalSince($0) * 1000) } ?? 0,
+            corrected: correctedReplacements
+        )
+        #endif
+        trust = .trusted
+        surplus = 0
+        suspectSince = nil
+    }
+
     /// Counts a spacebar press that happened while the mirror was suspect.
     public func noteSpaceWhileSuspect() {
         guard isSuspect else { return }

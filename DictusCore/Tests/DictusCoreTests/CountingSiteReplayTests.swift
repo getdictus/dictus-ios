@@ -79,10 +79,16 @@ final class CountingSiteReplayTests: XCTestCase {
         // removes n, o, t AND the space before the word, and "fois" — which the user
         // never touched — is swallowed by the insert.
         //
-        // `.trusted` is develop's state: no accounting, so nothing corrects the count.
+        // The arming edit is replayed first, the way the device reaches this moment:
+        // capture 3's `MIRROR-PROBE seq=41 ev=key-delete`, before=49 after=49, the
+        // keyboard's own backspace that the mirror did not register. No boundary is
+        // inserted between that and the space, so the phantom is still inside the
+        // word about to be replaced.
         let doc = FakeDocument(document: "Une fois ton", mirrorPhantomSuffix: "n")
         let state = MirrorSyncState()
-        XCTAssertEqual(state.trust, .trusted, "develop has no surplus accounting")
+        replay([RecordedEdit(event: "key-delete", before: 49, after: 49, deleted: 1, inserted: 0)],
+               into: state)
+        XCTAssertEqual(state.trust, .surplus(1))
 
         AutocorrectCountingSite.apply(
             editor: doc, word: "tonn", correction: "ton", mirror: state
@@ -92,20 +98,21 @@ final class CountingSiteReplayTests: XCTestCase {
         XCTAssertTrue(doc.document.hasPrefix("Une fois "), "the preceding word and its space survive")
     }
 
-    func testTheSameReplacementIsCorrectOnceTheDesyncHasBeenObserved() {
-        // The same document, reached the way the device reaches it: the arming event
-        // is replayed first, so the accounting knows the mirror is one character long.
+    func testWithNoAccountingAtAllTheMergeIsUnavoidable() {
+        // Characterisation of `develop`, kept so the cost of having no accounting is
+        // written down rather than remembered. With `.trusted` the only reader is the
+        // mirror, and the mirror says "tonn" — there is no second signal, so nothing
+        // inside the extension can prevent this. It is the reason the fix needs the
+        // surplus at all, and it is NOT a target: no in-process change makes it pass.
         let doc = FakeDocument(document: "Une fois ton", mirrorPhantomSuffix: "n")
         let state = MirrorSyncState()
-        replay([RecordedEdit(event: "key-delete", before: 13, after: 13, deleted: 1, inserted: 0)],
-               into: state)
-        XCTAssertEqual(state.trust, .surplus(1))
+        XCTAssertEqual(state.trust, .trusted)
 
         AutocorrectCountingSite.apply(
             editor: doc, word: "tonn", correction: "ton", mirror: state
         )
 
-        XCTAssertEqual(doc.document, "Une fois ton ")
+        XCTAssertEqual(doc.document, "Une foiston ", "develop merges the untouched word")
     }
 
     // MARK: - 2. Suppression, once armed, never releases
@@ -118,18 +125,20 @@ final class CountingSiteReplayTests: XCTestCase {
         // The trajectory is the recorded one: the arming edit, then ordinary typing
         // that the mirror reflects perfectly. Nothing in it releases anything, which
         // is the point — the fix must keep correcting rather than wait for a release.
+        // RECONSTRUCTED, not replayed verbatim: the raw capture is no longer on this
+        // machine, and what survives of it is the arming line
+        // (`MIRROR-ARMED surplus=+1 before=82 after=82`) and the ten MIRROR-SUPPRESSED
+        // lines. The shape in between is forced by those: each suppression fired on a
+        // spacebar press, so the user typed a word and pressed space, repeatedly.
         let state = MirrorSyncState()
-        var trajectory = [RecordedEdit(event: "key-delete", before: 82, after: 82, deleted: 1, inserted: 0)]
-        for index in 0..<20 {
-            trajectory.append(RecordedEdit(
-                event: "key-insert", before: 82 + index, after: 83 + index, deleted: 0, inserted: 1
-            ))
-        }
-        replay(trajectory, into: state)
-        XCTAssertEqual(state.trust, .surplus(1), "nothing observed releases the desync")
+        state.observe(before: 82, after: 82, deleted: 1, inserted: 0)
+        XCTAssertEqual(state.trust, .surplus(1), "the keyboard's own delete was not reflected")
 
-        // Every one of these is a word capture 4 refused to correct.
+        // Every one of these is a word capture 4 refused to correct. Each is reached
+        // the way the user reached it: a space before the word, which the keyboard
+        // itself inserted.
         for (typed, corrected) in [("oense", "pense"), ("contee", "contre"), ("ca", "ça")] {
+            state.noteBoundaryInserted(reason: "space")
             let doc = FakeDocument(document: "le \(typed)")
             let outcome = AutocorrectCountingSite.apply(
                 editor: doc, word: typed, correction: corrected, mirror: state
@@ -163,16 +172,17 @@ final class CountingSiteReplayTests: XCTestCase {
         // surplus of 1 is stale, so subtracting it deletes one character too few and
         // the leading "p" of "probkeme" survives into "pproblème".
         let state = MirrorSyncState()
-        var trajectory = [
-            RecordedEdit(event: "key-delete", before: 62, after: 62, deleted: 1, inserted: 0),
-            RecordedEdit(event: "space", before: 62, after: 63, deleted: 0, inserted: 1)
-        ]
-        for index in 0..<7 {
-            trajectory.append(RecordedEdit(
-                event: "key-insert", before: 64 + index, after: 65 + index, deleted: 0, inserted: 1
-            ))
-        }
-        replay(trajectory, into: state)
+        replay([RecordedEdit(event: "key-delete", before: 62, after: 62, deleted: 1, inserted: 0)],
+               into: state)
+        XCTAssertEqual(state.trust, .surplus(1), "seq=680 arms it")
+
+        // seq=681 is a SPACE, and it is the keyboard's own. That is the event the
+        // shipped build ignored: it left the surplus latched for the next 26 seconds.
+        state.noteBoundaryInserted(reason: "space")
+        replay((0..<7).map { index in
+            RecordedEdit(event: "key-insert", before: 64 + index, after: 65 + index,
+                         deleted: 0, inserted: 1)
+        }, into: state)
 
         // The double space is from the capture: the user's space landed while the
         // mirror was already reporting one.

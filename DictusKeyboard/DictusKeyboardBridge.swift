@@ -567,6 +567,7 @@ final class DictusKeyboardBridge: NSObject,
             let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.insertText(" ")
             observeMirror(before: mirrorBefore, inserted: 1)
+            mirrorSync.noteBoundaryInserted(reason: "space-digit-skip")
             lastInsertedCharacter = " "
             #if DEBUG
             MirrorProbe.shared.record(.insert(" "))
@@ -716,6 +717,7 @@ final class DictusKeyboardBridge: NSObject,
             let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.insertText(" ")
             observeMirror(before: mirrorBefore, inserted: 1)
+            mirrorSync.noteBoundaryInserted(reason: "space")
             lastInsertedCharacter = " "
             #if DEBUG
             MirrorProbe.shared.record(.insert(" "))
@@ -760,6 +762,7 @@ final class DictusKeyboardBridge: NSObject,
         let mirrorBefore = mirrorLength()
         controller?.textDocumentProxy.insertText("\n")
         observeMirror(before: mirrorBefore, inserted: 1)
+        mirrorSync.noteBoundaryInserted(reason: "return")
         #if DEBUG
         MirrorProbe.shared.record(.insert("\n"))
         MirrorProbe.shared.probe(
@@ -784,6 +787,7 @@ final class DictusKeyboardBridge: NSObject,
     func handlePredictionTap(word: String) {
         let proxy = controller?.textDocumentProxy
         proxy?.insertText(word + " ")
+        mirrorSync.noteBoundaryInserted(reason: "prediction-tap-space")
         lastInsertedCharacter = " "
         #if DEBUG
         MirrorProbe.shared.record(.insert(word + " "))

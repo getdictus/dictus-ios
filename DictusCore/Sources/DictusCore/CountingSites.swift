@@ -101,6 +101,9 @@ public enum AutocorrectCountingSite {
                 deleted: deleteCount,
                 inserted: correction.count + 1
             )
+            // The trailing space is a boundary this keyboard wrote, so anything the
+            // mirror is still over-reporting now lies behind it (#530).
+            mirror.noteBoundaryInserted(reason: "autocorrect-space")
 
             #if DEBUG
             MirrorProbe.shared.record(.insert(correction + " "))
@@ -152,6 +155,7 @@ public enum AutoFullStopCountingSite {
         editor.deleteBackward()
         editor.insertText(". ")
         mirror.observe(before: mirrorBefore, after: editor.contextLength, deleted: 1, inserted: 2)
+        mirror.noteBoundaryInserted(reason: "full-stop-space")
         #if DEBUG
         MirrorProbe.shared.record(.replace(deleted: 1, inserted: ". "))
         #endif

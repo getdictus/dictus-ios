@@ -193,6 +193,14 @@ public enum AutocorrectDebugLog {
         write("MIRROR-CORRECTED word=\"\(word)\" planned=\(planned) deleted=\(deleted) surplus=\(surplus)")
     }
 
+    /// A keyboard-inserted word boundary put the surplus behind it, so it can no
+    /// longer be inside anything the keyboard counts. The suspicion ends here —
+    /// this is the line that says how long it lasted and what it changed.
+    public static func mirrorSettled(reason: String, durationMs: Int, corrected: Int) {
+        guard enabled else { return }
+        write("MIRROR-SETTLED reason=\(reason) durationMs=\(durationMs) corrected=\(corrected)")
+    }
+
     /// The surplus accounting declared itself lost; counting sites now refuse.
     public static func mirrorUnknown(reason: String, surplus: Int) {
         guard enabled else { return }
