@@ -14,12 +14,12 @@ Last reviewed: 2026-09-11.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Now** |
-| **A′** | 1.8.3 — #23 shipped; #542, #543 remain | After B |
+| **A′** | 1.8.3 — #23 and #542 shipped; #543 remains | After B |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
 
-**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**; what remains are the two defects shipping it exposed — #542 and #543. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement.
+**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**, followed by **#542 the same day**; what remains is #543. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement.
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -149,9 +149,15 @@ It is out of band because its blocking premise was falsified. The April 2026 ADR
 
 **Three things a reader will otherwise rediscover the hard way.** The pid cross-check is not a complication to simplify away — trusting `sourceBundleIdentifier` directly was measured at 0 for 9, and would have teleported the user into Spotlight nine times. `sms://` composes a message rather than resuming Messages; `ichat://` is the one that resumes, and four obvious-looking alternatives were measured wrong. And shipping private API was a deliberate decision taken on 2026-09-10 with the risk written down, not an oversight.
 
-**Item 2: #542, a cold-start dictation is silently lost while the model compiles** — opened 2026-09-11, `priority:high`. First, because it is the only item in this lane where a user loses words. Measured on device: with Turbo on a cold Core ML cache, a dictation started from the keyboard recorded, went to `transcribing`, returned to `idle` after 30 s with no text and no history entry, and the transcription finally ran 3 min 40 later and was cancelled.
+**Item 2: #542, a cold-start dictation is silently lost while the model compiles. SHIPPED on 2026-09-11** in PR #544, merged as `d9c547d`. Opened and closed the same day, first in this lane because it was the only item where a user loses words. Measured on device: with Turbo on a cold Core ML cache, a dictation started from the keyboard recorded, went to `transcribing`, returned to `idle` after 30 s with no text and no history entry, and the transcription finally ran 3 min 40 later and was cancelled.
 
 **Grilled on 2026-09-11, ten decisions locked, and the issue body is now the spec — `ready-for-agent`.** A second capture that morning held both sides of the race in one file: at 12:13 the gate read a stale `ready`, let the dictation through and got away with it because the cache was warm; at 12:38 it read `loading` and refused correctly, but only because the app had been launched by hand 49 seconds earlier. Two things the spec rests on and that nobody should rediscover: a backgrounded compile is the slow one and it is the only one this gate ever faces (Parakeet unfinished after 48 s backgrounded, then 16 s once foregrounded), so routing the user into the app shortens the wait rather than merely explaining it; and parking on the init lock is the ordinary path of any dictation started app-dead, measured surviving twice at 7 s and 3 s against a 30 s watchdog, which is why the watchdog half is not optional.
+
+**What shipped, and what it is worth.** `RecordTapRouting` now asks whether this install has ever seen the model produce a result, keyed on (bundle-container identity, iOS version, model identifier), and routes a cold one to the preparation screen instead of recording into a compile. The keyboard calls that rule rather than keeping its own copy. Device-validated on the point that mattered: on a container installed and never launched, a mic tap logged `dictationDeferred … (cold-cache)` with the app process still dead, and nothing was recorded.
+
+**Three gaps are shipped knowingly and are written on the issue.** Turbo 632MB was not re-tested, being the same code path and slower to stage. Decision 9, clearing the record when a model is re-downloaded, rests on a unit test and on reading its single call site, because re-downloading re-warms the model before a keyboard tap can observe it. And the watchdog half — decision 3 — has neither a test nor a device capture: its flags live on `DictationCoordinator` in DictusApp, which `swift test` does not reach. CodeRabbit found a real defect in exactly that half during review, fixed in `ed2f0f5`: a prewarm could lower a deferral a parked dictation was still relying on, so the marker became a `@TaskLocal` and the flag a depth counter.
+
+**One behaviour a later reader needs.** The warmth check answers `true` when the install identity cannot be read. That is fail-open on purpose, a lockout loop being worse than the pre-#542 behaviour, but it means the gate can silently decline to apply rather than misfire. Any report of this recurring starts there.
 
 The `CancellationError` half is #144. What belongs to this lane is that **nothing stopped the dictation from starting**: the keyboard's readiness gate reads the App Group, which says `ready` because the model *file* is on disk, while the compile has not begun. `ready` means "downloaded", not "can transcribe now", and those diverge for minutes after any install. #23 did not cause this and it made it invisible — the preparation screen that used to explain it is still presented, to an app the user has already been teleported out of.
 
