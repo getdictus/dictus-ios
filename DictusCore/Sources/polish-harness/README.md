@@ -174,6 +174,14 @@ are the fixture set for both #437 (structure) and #439 (fidelity); the
 expectations currently in the file are #439's bars, declared in
 `docs/research/439-natural-contract/bars.md` before the first model call.
 
+#437's round ran on the same six and **failed**: the `<<NL>>` ban stays, and the
+expectations in the file stay #439's. Its arms are reusable and worth knowing about
+before writing another one — `docs/research/437-longform-breaks/prompts/` holds five
+system-prompt variants that all returned zero line breaks, `framings/` the user-turn
+overrides that are the only lever that produced any, and `harness/probe-second-pass.json`
+is a standing capability probe for discourse-boundary detection. `harness/extract-prompt.py`
+there dumps `PolishAutoPrompt`'s bytes, which the `prompt` command cannot.
+
 ## Caveats
 
 - **Not deterministic.** Apple FM samples — re-run (`--runs`) to gauge variance;

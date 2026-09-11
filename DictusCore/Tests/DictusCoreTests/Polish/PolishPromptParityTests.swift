@@ -95,6 +95,30 @@ final class PolishPromptParityTests: XCTestCase {
         }
     }
 
+    /// #437, measured and rejected: the `<<NL>>` ban stays, on all five free-polish
+    /// prompts.
+    ///
+    /// The ban is what makes a long dictation come back as one block, and #437 exists
+    /// to lift it at a change of subject. The licence was written five ways — as a
+    /// permission, as an imperative, with three worked examples, restated in the GOAL
+    /// line at the top, and asking for an ordinary newline instead of the marker — and
+    /// produced **not one line break in 132 outputs** across both prompt routes. The
+    /// same instruction moved into the user turn fires in roughly one output in four,
+    /// unstably, and twice in fifteen it breaks after every sentence rather than at a
+    /// section. Numbers in `docs/research/437-longform-breaks/findings.md`.
+    ///
+    /// So the ban is a measurement now, not an oversight — the footing
+    /// `testAutoPromptDoesNotCarryASRRepair` put rule 8's absence on. A future round is
+    /// welcome to lift it; this is what makes that a decision rather than a drift.
+    func testEveryFreePolishPromptStillBansAddingMarkers() {
+        for (name, prompt) in naturalPrompts + [("auto", PolishAutoPrompt.instructions())] {
+            XCTAssertTrue(prompt.contains("Do NOT add `<<NL>>` markers where none existed"),
+                          "\(name) no longer bans the model from adding a line break (#437)")
+            XCTAssertTrue(prompt.contains("Do NOT split or alter existing markers"),
+                          "\(name) no longer protects the markers the speaker dictated")
+        }
+    }
+
     /// The English read-across of the measurement above (#439 Part 2). The question was
     /// put in French, where `point` is a common noun; `period` is the same shape in
     /// English (`a period of time`, `period drama`) and `PolishNaturalPromptEN` is the
