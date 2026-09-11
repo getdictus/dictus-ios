@@ -265,3 +265,35 @@ Either outcome is a legitimate result and gets written up in `findings.md`.
 - **Arm B removes a clause rather than adding one**, so it is the shorter prompt. Any
   difference in favour of B is therefore free of the headroom cost (#270) that decided the
   short-vs-full edit in Part 1.
+
+## 9. Two amendments, made after pass 1 and declared as such
+
+Unlike §4.1, these were made **after reading a result**. Both are recorded here in full,
+because an amendment made after the numbers are in is only defensible if it is visible.
+
+**One is mechanical.** `N2-point-de-vue` never reached the model: Apple's own safety
+guardrail refused it **10 times out of 10** in arm A and 9 of 10 in arm B, on a sentence
+about a delivery slipping (`reason=guardrailViolation`, which is Apple refusing, not
+`PolishGuardrail`). It produces no scored output at all, which would have left the noun
+class with four carriers instead of five. `N6-point-de-vue-bis` carries the same shape in
+different words. N2 stays in the file rather than being deleted, because the refusal is
+itself worth having on record.
+
+**One makes the bar harder, and that is why it is allowed.** Pass 1 came back clean on the
+noun class — 0 losses in 40 scored outputs under the kept clause. A clean first pass is
+exactly when a fixture set should be pushed, not when it should be accepted, so
+`N7-noun-at-a-boundary` was added: `point` as a noun sitting **exactly where a sentence
+boundary belongs** (`on a réglé le dernier point on peut passer à la suite`). It is the
+single most plausible mistake rule 4 could make, and the first set did not contain it.
+
+**No threshold moved.** P1 is still 0-tolerance and still the decision rule. Pass 1's
+captures are committed alongside pass 2's rather than replaced.
+
+**One predicate was a bug and is fixed against the bar, not the other way round.** P3 was
+first implemented as "a terminal mark appears anywhere in the output", which scores 10/10
+on everything and means nothing — the model ends every output with a period regardless.
+The bar as declared says *at the boundary*, so each command fixture now names the opening
+words of its second clause and the predicate asks whether a terminal mark precedes them.
+No model call was repeated; the same committed captures were re-scored. §8's claim that P3
+is uninformative on both Parakeet-punctuated fixtures is **too broad**: it holds for C4,
+whose raw already carries the mark, and not for C5, whose raw carries commas.

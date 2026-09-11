@@ -11,6 +11,12 @@
   { "id": "N5-deux-points-nommes", "lang": "fr", "sttEngine": "PK",
     "_note": "Two occurrences in one fixture, one of them at a clause boundary where a mark would read as plausible.",
     "raw": "il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push" },
+  { "id": "N6-point-de-vue-bis", "lang": "fr", "sttEngine": "PK",
+    "_note": "Added at the pass-1 amendment (bars.md §9): N2 is refused by Apple's own safety guardrail 19 times in 20 and produces no scored output, so the `point de vue` shape needs a second carrier.",
+    "raw": "son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite" },
+  { "id": "N7-noun-at-a-boundary", "lang": "fr", "sttEngine": "PK",
+    "_note": "Added at the pass-1 amendment. The adversarial case the whole question is about: `point` is a noun sitting exactly where a sentence boundary belongs, so applying rule 4 here is the single most plausible mistake available.",
+    "raw": "on a réglé le dernier point on peut passer à la suite et je te renvoie le compte rendu ce soir" },
 
   { "id": "C1-bare-boundary", "lang": "fr", "sttEngine": "PK",
     "_note": "Command class, bare shape: the word alone between two clauses, no mark around it.",

@@ -95,6 +95,19 @@ final class PolishPromptParityTests: XCTestCase {
         }
     }
 
+    /// The English read-across of the measurement above (#439 Part 2). The question was
+    /// put in French, where `point` is a common noun; `period` is the same shape in
+    /// English (`a period of time`, `period drama`) and `PolishNaturalPromptEN` is the
+    /// only other prompt teaching it. The French result was clean, so it stays — and if
+    /// a future round ever removes it from French, this test is what stops English
+    /// keeping it by inattention. `full stop` is a separate case and unambiguous: the
+    /// pre-pass already substitutes it in code.
+    func testEnglishNaturalRuleFourKeepsThePeriodWordAlongsideFrench() {
+        XCTAssertEqual(PolishNaturalPromptEN.instructions().contains("`period`/`full stop` → `.`"),
+                       PolishNaturalPromptFR.instructions().contains("`point` → `.`"),
+                       "FR and EN must make the same call on the bare period word (#185, #439)")
+    }
+
     // MARK: - Repair
 
     /// ADR 0002's controlled exception. English had the first sentence and not the

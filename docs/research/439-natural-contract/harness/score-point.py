@@ -28,11 +28,31 @@ FIXTURES = {f["id"]: f for f in json.loads(
 # same ambiguity.
 WORD = re.compile(r"\bpoints?\b", re.IGNORECASE)
 
-# A terminal mark where the command word stood. The command-class fixtures put
-# the boundary in one known place, so "was a sentence boundary produced at all"
-# is read off the output as a whole: the raw carries no terminal mark except in
-# the two Parakeet-punctuated fixtures, which carry theirs already.
-TERMINAL = re.compile(r"[.!?…]")
+# A terminal mark AT THE BOUNDARY the command word stood on — not anywhere in the
+# output. The looser reading scores 10/10 on everything and means nothing, because
+# the model ends every output with a period regardless. So each command fixture
+# names the first words of its second clause, and the predicate asks whether a
+# terminal mark precedes them, with at most the leftover `point` in between.
+#
+# C4 is excluded: its raw already carries the boundary mark, which bars.md §8
+# declared. C5 is NOT excluded — its raw carries commas, not a terminal mark, so
+# the question is live there. bars.md §8 lumps C4 and C5 together and is too broad
+# on C5; the bar itself ("terminal mark present at the boundary") is what is scored.
+SECOND_CLAUSE = {
+    "C1-bare-boundary": "on se voit",
+    "C2-bare-boundary": "il reste juste",
+    "C3-bare-boundary": "on peut lancer",
+    "C5-parakeet-punctuated": "je préviens",
+}
+
+
+def boundary_mark(fixture, polished):
+    """True when a terminal mark closes the clause before `fixture`'s second clause."""
+    opener = SECOND_CLAUSE.get(fixture)
+    if opener is None:
+        return None
+    pattern = r"[.!?…][\s\"«]*(?:[Pp]oint\s*[,.;:]?\s*)?" + re.escape(opener)
+    return re.search(pattern, polished, re.IGNORECASE) is not None
 
 
 def parse(path):
@@ -67,7 +87,8 @@ def parse(path):
 def score(path):
     print(f"\n══ {path}")
     noun_losses, noun_scored, noun_skipped = [], 0, 0
-    command = defaultdict(lambda: {"word_removed": 0, "mark": 0, "scored": 0, "skipped": 0})
+    command = defaultdict(
+        lambda: {"word_removed": 0, "mark": 0, "mark_scored": 0, "scored": 0, "skipped": 0})
 
     for fixture, run, raw, polished, outcome in parse(path):
         klass = fixture[0]
@@ -92,8 +113,10 @@ def score(path):
             c["scored"] += 1
             if got < want:
                 c["word_removed"] += 1
-            if TERMINAL.search(polished):
-                c["mark"] += 1
+            mark = boundary_mark(fixture, polished)
+            if mark is not None:
+                c["mark_scored"] += 1
+                c["mark"] += 1 if mark else 0
 
     print(f"\n  ── BAR P1/P2 · noun class: {len(noun_losses)} losses in {noun_scored} "
           f"scored outputs ({noun_skipped} non-success excluded)")
@@ -108,14 +131,17 @@ def score(path):
         if not n:
             print(f"      [{fixture}] no scored output ({c['skipped']} non-success)")
             continue
-        print(f"      [{fixture}] word removed {c['word_removed']}/{n} · "
-              f"terminal mark present {c['mark']}/{n}"
+        mark = (f"boundary mark {c['mark']}/{c['mark_scored']}"
+                if c["mark_scored"] else "boundary mark n/a (already in the raw)")
+        print(f"      [{fixture}] word removed {c['word_removed']}/{n} · {mark}"
               + (f" · {c['skipped']} non-success" if c["skipped"] else ""))
     total = sum(c["scored"] for c in command.values())
     removed = sum(c["word_removed"] for c in command.values())
     marked = sum(c["mark"] for c in command.values())
+    mark_total = sum(c["mark_scored"] for c in command.values())
     if total:
-        print(f"      TOTAL  word removed {removed}/{total} · terminal mark {marked}/{total}")
+        print(f"      TOTAL  word removed {removed}/{total} · "
+              f"boundary mark {marked}/{mark_total}")
 
 
 for arg in sys.argv[1:]:
