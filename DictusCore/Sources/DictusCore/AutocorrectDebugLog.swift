@@ -201,6 +201,13 @@ public enum AutocorrectDebugLog {
         write("MIRROR-SETTLED reason=\(reason) durationMs=\(durationMs) corrected=\(corrected)")
     }
 
+    /// The cursor went back past the boundary that settled a surplus, so the
+    /// phantom is inside reach again and the surplus is live once more.
+    public static func mirrorUnsettled(boundary: Int, length: Int, surplus: Int) {
+        guard enabled else { return }
+        write("MIRROR-UNSETTLED boundary=\(boundary) length=\(length) surplus=+\(surplus)")
+    }
+
     /// The surplus accounting declared itself lost; counting sites now refuse.
     public static func mirrorUnknown(reason: String, surplus: Int) {
         guard enabled else { return }

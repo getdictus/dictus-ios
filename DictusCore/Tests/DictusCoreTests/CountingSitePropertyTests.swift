@@ -98,7 +98,7 @@ final class CountingSitePropertyTests: XCTestCase {
                 for _ in 0..<phantomCount {
                     state.observe(before: 40, after: 40, deleted: 1, inserted: 0)
                 }
-                state.noteBoundaryInserted(reason: "space")
+                state.noteBoundaryInserted(reason: "space", atLength: mirror.count)
             }
 
             let doc = FakeDocument(document: document, mirror: mirror)
@@ -167,6 +167,48 @@ final class CountingSitePropertyTests: XCTestCase {
 
             XCTAssertEqual(outcome, .applied(deleted: word.count, correctedBy: 0), "seed \(seed)")
             XCTAssertEqual(doc.document, prefix + " " + correction + " ", "seed \(seed)")
+        }
+    }
+
+    // MARK: - Crossing back past a settling boundary revives the surplus
+
+    func testGoingBackPastTheSettlingBoundaryMakesTheSurplusLiveAgain() {
+        // Capture 3 in property form. A boundary puts the phantom behind the cursor,
+        // but the cursor can come back: a space at seq=42 settled the surplus and two
+        // backspaces at seq=43/44 took the mirror from 50 to 48. Without this, the
+        // boundary rule is falsified by the very capture it was built from.
+        for seed in 0..<UInt64(Self.iterations) {
+            var rng = Rng(seed: seed &+ 40_000)
+            let surplus = 1 + rng.next(3)
+            let boundaryLength = 20 + rng.next(60)
+            let state = MirrorSyncState()
+
+            for _ in 0..<surplus {
+                state.observe(before: boundaryLength, after: boundaryLength, deleted: 1, inserted: 0)
+            }
+            XCTAssertEqual(state.trust, .surplus(surplus), "seed \(seed)")
+
+            state.observe(before: boundaryLength, after: boundaryLength + 1, deleted: 0, inserted: 1)
+            state.noteBoundaryInserted(reason: "space", atLength: boundaryLength + 1)
+            XCTAssertEqual(state.trust, .trusted, "seed \(seed): the boundary settles it")
+
+            // Typing forward keeps it settled, however far.
+            var length = boundaryLength + 1
+            for _ in 0..<rng.next(6) {
+                state.observe(before: length, after: length + 1, deleted: 0, inserted: 1)
+                length += 1
+            }
+            XCTAssertEqual(state.trust, .trusted, "seed \(seed): forward typing must not revive it")
+
+            // Backspacing past the boundary brings it back.
+            while length > boundaryLength {
+                state.observe(before: length, after: length - 1, deleted: 1, inserted: 0)
+                length -= 1
+            }
+            XCTAssertEqual(
+                state.trust, .surplus(surplus),
+                "seed \(seed): the cursor is back inside the phantom's reach"
+            )
         }
     }
 

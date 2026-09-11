@@ -59,7 +59,9 @@ final class CountingSiteReplayTests: XCTestCase {
         let inserted: Int
     }
 
-    /// Feeds a recorded trajectory through the REAL arming code.
+    /// Feeds a recorded trajectory through the REAL arming code, including the
+    /// boundary notifications the bridge raises — a `space` or `return` event is a
+    /// boundary this keyboard wrote, and the production path tells the accounting so.
     private func replay(_ edits: [RecordedEdit], into state: MirrorSyncState) {
         for edit in edits {
             state.observe(
@@ -68,7 +70,55 @@ final class CountingSiteReplayTests: XCTestCase {
                 deleted: edit.deleted,
                 inserted: edit.inserted
             )
+            if edit.event == "space" || edit.event == "return" {
+                state.noteBoundaryInserted(reason: edit.event, atLength: edit.after)
+            }
         }
+    }
+
+    /// Capture 3 (`3-diagnostic-jevais.txt`), seq 41-45, verbatim. `before` is the
+    /// previous line's `mlen`, `after` is this one's.
+    ///
+    /// seq=42 is a SPACE and seq=43/44 are two backspaces that take the cursor back
+    /// past it — the shape that matters, and the one a truncated fixture hid.
+    private static let capture3JeVais: [RecordedEdit] = [
+        RecordedEdit(event: "key-delete", before: 49, after: 49, deleted: 1, inserted: 0),
+        RecordedEdit(event: "space", before: 49, after: 50, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-delete", before: 50, after: 49, deleted: 1, inserted: 0),
+        RecordedEdit(event: "key-delete", before: 49, after: 48, deleted: 1, inserted: 0),
+        RecordedEdit(event: "key-insert", before: 48, after: 49, deleted: 0, inserted: 1)
+    ]
+
+    /// Capture 4 (`4-suppression-went-dark.txt`), seq 316-335, verbatim.
+    private static let capture4BeforeOense: [RecordedEdit] = [
+        RecordedEdit(event: "key-delete", before: 82, after: 82, deleted: 1, inserted: 0),
+        RecordedEdit(event: "space", before: 82, after: 83, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-delete", before: 83, after: 82, deleted: 1, inserted: 0),
+        RecordedEdit(event: "space", before: 82, after: 83, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-delete", before: 83, after: 82, deleted: 1, inserted: 0),
+        // seq 321-322 are host-side; the keyboard observes none of its own edits there.
+        RecordedEdit(event: "return", before: 94, after: 95, deleted: 0, inserted: 1),
+        RecordedEdit(event: "return", before: 95, after: 96, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 96, after: 97, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 97, after: 98, deleted: 0, inserted: 1),
+        RecordedEdit(event: "space", before: 98, after: 99, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 99, after: 100, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 100, after: 101, deleted: 0, inserted: 1),
+        RecordedEdit(event: "space", before: 101, after: 102, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 102, after: 103, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 103, after: 104, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 104, after: 105, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 105, after: 106, deleted: 0, inserted: 1),
+        RecordedEdit(event: "key-insert", before: 106, after: 107, deleted: 0, inserted: 1)
+    ]
+
+    /// Capture 5 (`5-pproblème-stale-surplus.txt`), seq 680-689, verbatim.
+    private static let capture5Probkeme: [RecordedEdit] = [
+        RecordedEdit(event: "key-delete", before: 62, after: 62, deleted: 1, inserted: 0),
+        RecordedEdit(event: "space", before: 62, after: 63, deleted: 0, inserted: 1)
+    ] + (0..<8).map { index in
+        RecordedEdit(event: "key-insert", before: 63 + index, after: 64 + index,
+                     deleted: 0, inserted: 1)
     }
 
     // MARK: - 1. A word the user never touched is merged
@@ -86,9 +136,7 @@ final class CountingSiteReplayTests: XCTestCase {
         // word about to be replaced.
         let doc = FakeDocument(document: "Une fois ton", mirrorPhantomSuffix: "n")
         let state = MirrorSyncState()
-        replay([RecordedEdit(event: "key-delete", before: 49, after: 49, deleted: 1, inserted: 0)],
-               into: state)
-        XCTAssertEqual(state.trust, .surplus(1))
+        replay(Self.capture3JeVais, into: state)
 
         AutocorrectCountingSite.apply(
             editor: doc, word: "tonn", correction: "ton", mirror: state
@@ -131,14 +179,12 @@ final class CountingSiteReplayTests: XCTestCase {
         // lines. The shape in between is forced by those: each suppression fired on a
         // spacebar press, so the user typed a word and pressed space, repeatedly.
         let state = MirrorSyncState()
-        state.observe(before: 82, after: 82, deleted: 1, inserted: 0)
-        XCTAssertEqual(state.trust, .surplus(1), "the keyboard's own delete was not reflected")
+        replay(Self.capture4BeforeOense, into: state)
 
         // Every one of these is a word capture 4 refused to correct. Each is reached
         // the way the user reached it: a space before the word, which the keyboard
         // itself inserted.
         for (typed, corrected) in [("oense", "pense"), ("contee", "contre"), ("ca", "ça")] {
-            state.noteBoundaryInserted(reason: "space")
             let doc = FakeDocument(document: "le \(typed)")
             let outcome = AutocorrectCountingSite.apply(
                 editor: doc, word: typed, correction: corrected, mirror: state
@@ -171,18 +217,10 @@ final class CountingSiteReplayTests: XCTestCase {
         // By the time the correction fires, the mirror and document agree; the
         // surplus of 1 is stale, so subtracting it deletes one character too few and
         // the leading "p" of "probkeme" survives into "pproblème".
-        let state = MirrorSyncState()
-        replay([RecordedEdit(event: "key-delete", before: 62, after: 62, deleted: 1, inserted: 0)],
-               into: state)
-        XCTAssertEqual(state.trust, .surplus(1), "seq=680 arms it")
-
         // seq=681 is a SPACE, and it is the keyboard's own. That is the event the
         // shipped build ignored: it left the surplus latched for the next 26 seconds.
-        state.noteBoundaryInserted(reason: "space")
-        replay((0..<7).map { index in
-            RecordedEdit(event: "key-insert", before: 64 + index, after: 65 + index,
-                         deleted: 0, inserted: 1)
-        }, into: state)
+        let state = MirrorSyncState()
+        replay(Self.capture5Probkeme, into: state)
 
         // The double space is from the capture: the user's space landed while the
         // mirror was already reporting one.

@@ -190,6 +190,11 @@ public final class MirrorSyncState {
     /// for. Accumulates across successive desyncs and never goes below zero.
     private var surplus = 0
 
+    /// A surplus that a boundary put behind the cursor, and the mirror length at that
+    /// boundary. Dormant rather than discarded: the cursor can come back.
+    private var dormantSurplus = 0
+    private var settledAtLength: Int?
+
     /// True while counts taken off the mirror cannot be spent as given. Kept for the
     /// sites that can only refuse, and for the counters.
     public var isSuspect: Bool { trust != .trusted }
@@ -221,6 +226,25 @@ public final class MirrorSyncState {
             before: before, after: after, deleted: deleted, inserted: inserted
         )
         guard trust != .unknown else { return verdict }
+
+        // A settle only holds while the cursor stays at or beyond the boundary that
+        // produced it. Backspacing past it puts the phantom back inside reach, and
+        // capture 3 does exactly that: a space at seq=42 settled the surplus, then
+        // two backspaces at seq=43/44 took the mirror from 50 to 48 and the next
+        // correction merged two words anyway. Without this the boundary rule is
+        // falsified by the very capture it was built from.
+        if let boundary = settledAtLength, after < boundary {
+            surplus = dormantSurplus
+            dormantSurplus = 0
+            settledAtLength = nil
+            if surplus > 0 {
+                trust = .surplus(surplus)
+                suspectSince = suspectSince ?? Date()
+                #if DEBUG
+                AutocorrectDebugLog.mirrorUnsettled(boundary: boundary, length: after, surplus: surplus)
+                #endif
+            }
+        }
 
         let wasSuspect = isSuspect
         switch verdict {
@@ -291,8 +315,10 @@ public final class MirrorSyncState {
     /// NOT a claim that the mirror has resynced. It almost certainly has not — the
     /// diagnostic capture recorded zero reconvergences. The phantom stays in the
     /// mirror; it simply stops being inside anything this keyboard counts.
-    public func noteBoundaryInserted(reason: String) {
+    public func noteBoundaryInserted(reason: String, atLength: Int) {
         guard isSuspect else { return }
+        dormantSurplus = surplus
+        settledAtLength = atLength
         #if DEBUG
         AutocorrectDebugLog.mirrorSettled(
             reason: reason,
@@ -332,6 +358,8 @@ public final class MirrorSyncState {
     ///   read off=0 while the mirror still reported "vaiss" for a document holding
     ///   "vais". Tracking again is not being truthful.
     public func release(reason: String) {
+        dormantSurplus = 0
+        settledAtLength = nil
         #if DEBUG
         if isSuspect {
             AutocorrectDebugLog.mirrorReleased(
