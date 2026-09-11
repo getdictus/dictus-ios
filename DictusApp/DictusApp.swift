@@ -1,6 +1,7 @@
 // DictusApp/DictusApp.swift
 import SwiftUI
 import StoreKit
+import Combine
 import DictusCore
 
 // MARK: - AppDelegate (sourceApplication diagnostic)
@@ -352,22 +353,49 @@ struct DictusApp: App {
     /// foreground changes hands. It is the same figure VivaDicta settled on, and it sits
     /// comfortably inside the window.
     ///
-    /// WHY it is a fixed wait and not a wait *for* the recording. `startDictation`
-    /// returns before its recording task has run, so 200 ms is a bet that the task wins
-    /// the race — and a review flagged that a lost bet costs the head of the dictation.
-    /// Waiting for the state instead would be better only if it stays inside the ~300 ms
-    /// foreground window; past that iOS refuses the open with "Application is neither
-    /// visible nor entitled" and the user gets no return at all, which is the worse
-    /// failure. Rather than trade one defect for another on reasoning, the line below
-    /// records the recording state **at the instant of the open**, so a device log
-    /// settles it: `recState=recording` means the bet is being won and the fixed wait
-    /// stays; anything else is the measurement that justifies changing it.
+    /// WHY it waits for the recording rather than a fixed delay. `startDictation` returns
+    /// before its recording task has run, so the previous fixed 200 ms was a bet that the
+    /// task wins the race. A device capture settled it: `recState=idle`, 7 times out of 7
+    /// — the bet was lost every time, and the user lost the head of the dictation while
+    /// the engine started underneath a backgrounding app.
+    ///
+    /// So this now waits for `.recording` and opens anyway at `recordingWaitCeilingMs`.
+    /// **The property that matters is that it can only gain, never lose**: if the engine
+    /// is ready early the user arrives already recording, and if it is not, the open
+    /// happens exactly as it did before. Waiting *without* a ceiling would have been the
+    /// obvious reading of the review and is the one thing that must not be done — it
+    /// trades a partial loss for a total one.
+    ///
+    /// `recState=` stays on the line, with `waitedMs=`, because they are what will say
+    /// whether the ceiling is calibrated and whether a later change to the audio pipeline
+    /// has pushed the start out again.
     ///
     /// Every branch that does not open something logs why, at `notice`. The app is
     /// usually terminated moments after this runs, so an `info` line would not survive
     /// to explain itself, and `no-scheme` is this project's only report channel for a
     /// host nobody has mapped — there is no analytics, the debug log is it (#255).
-    private func returnToHostApp(hostId: String?, recordingState: @escaping () -> String) {
+    /// How long the return may wait for recording to have actually started.
+    ///
+    /// **A ceiling, not a wait.** It is bounded by the window in which a freshly
+    /// foregrounded app may still call `open()` — about 300 ms, past which iOS refuses
+    /// with "Application is neither visible nor entitled" and the user gets *no* return
+    /// at all. 250 ms keeps margin under that.
+    ///
+    /// Do not raise it to "make the wait more reliable": every millisecond added is
+    /// borrowed from the only thing that makes the feature work, and a return that never
+    /// happens is a worse failure than a dictation missing its first syllable. If a
+    /// capture keeps showing `recState=idle waitedMs=250`, the answer is not a longer
+    /// ceiling — it is that the engine cannot start inside the window at all, and the fix
+    /// moves to starting it sooner rather than waiting for it longer.
+    ///
+    /// Note the ceiling is not the elapsed time: `asyncAfter` is a floor, not a deadline,
+    /// and a simulator under load turned 250 into a measured `waitedMs=305`. The return
+    /// still succeeded at 305 ms, which is mild evidence the foreground window is more
+    /// forgiving than the ~300 ms figure — but not evidence to spend, and `waitedMs=` is
+    /// on the line precisely so the real distribution can be read instead of assumed.
+    private static let recordingWaitCeilingMs = 250
+
+    private func returnToHostApp(hostId: String?, coordinator: DictationCoordinator) {
         guard let hostId else {
             PersistentLog.log(.hostReturn(hostId: "unknown", outcome: "table-miss"))
             return
@@ -382,14 +410,43 @@ struct DictusApp: App {
             return
         }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            let stateAtOpen = recordingState()
+        let startedAt = Date()
+        var readyCancellable: AnyCancellable?
+        var hasOpened = false
+
+        // Both paths funnel here, and the first one to arrive wins. Whichever it is, the
+        // subscription is torn down — which is also what breaks the reference cycle that
+        // keeps it alive in the meantime, since nothing else holds it.
+        func openNow() {
+            guard !hasOpened else { return }
+            hasOpened = true
+            readyCancellable?.cancel()
+            readyCancellable = nil
+
+            let waitedMs = Int(Date().timeIntervalSince(startedAt) * 1000)
+            let stateAtOpen = coordinator.status.rawValue
             UIApplication.shared.open(target, options: [:]) { opened in
                 PersistentLog.log(.hostReturn(
                     hostId: hostId,
-                    outcome: (opened ? "returned" : "open-failed") + " recState=\(stateAtOpen)"
+                    outcome: (opened ? "returned" : "open-failed")
+                        + " recState=\(stateAtOpen) waitedMs=\(waitedMs)"
                 ))
             }
+        }
+
+        // The coordinator already publishes its status, so the wait rides that rather
+        // than a timer. Deliberate: a run-loop `Timer` with `target: self` outlives what
+        // scheduled it and goes on firing, which is how #390 deleted text after the
+        // finger had left the key and what #416 still does. `@Published` replays its
+        // current value on subscribe, so a recording that is already running opens
+        // immediately instead of waiting for a transition that has been and gone.
+        readyCancellable = coordinator.$status
+            .first { $0 == .recording }
+            .receive(on: DispatchQueue.main)
+            .sink { _ in openNow() }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Self.recordingWaitCeilingMs)) {
+            openNow()
         }
     }
 
@@ -475,10 +532,7 @@ struct DictusApp: App {
             // already on screen at this point and stays the floor: unresolved host, host
             // with no known scheme, and `open()` returning false all land there.
             if isColdStart, isFromKeyboard {
-                returnToHostApp(
-                    hostId: KeyboardDictationURL.hostId(from: url),
-                    recordingState: { coordinator.status.rawValue }
-                )
+                returnToHostApp(hostId: KeyboardDictationURL.hostId(from: url), coordinator: coordinator)
             }
         case "stop":
             // Stop recording from Dynamic Island expanded view button.
