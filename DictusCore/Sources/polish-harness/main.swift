@@ -112,7 +112,7 @@ func corpusPaths(in args: [String], valuedOptions: Set<String> = []) -> [String]
 }
 
 let args = Array(CommandLine.arguments.dropFirst())
-guard let command = args.first, ["show", "eval", "ab", "prompt", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
+guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
     print("""
     polish-harness — off-device polish eval (macOS + Apple Intelligence)
 
@@ -120,6 +120,7 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "guardrail", "t
       eval   <fixtures.json> [--instructions <prompt.txt>] [--framing <framing.txt>] [--mode <id>]
       ab     <fixtures.json> [--a <promptA.txt>] [--b <promptB.txt>] [--mode <id>] [--mode-a <id>] [--mode-b <id>]
       prompt <fixtures.json> [--id <fixtureID>] [--out <dir>] [--mode <id>]
+      paragraph <fixtures.json> --arm <arm.json> [--arm <arm.json> …] [--runs N] [--json <out.json>]
       guardrail <corpus.json> [<corpus.json> …] [--segments] [--sweep] [--anchors]
       target    <corpus.json> [<corpus.json> …] [--sweep] [--floor N]
       vocabulary <corpus.json> [<corpus.json> …]
@@ -132,6 +133,13 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "guardrail", "t
     user-turn framing and its OWN acceptance contract are what run. On `ab`,
     --mode-a / --mode-b arm one side each; a side with no mode is the free polish,
     so `ab --mode-b notes` is the mode against free polish.
+
+    paragraph (#550) drives Apple FM on light, committed prompt ARMS whose only job
+    is to split an already-polished text into paragraphs, and scores the four bars in
+    docs/research/550-paragraph-placement/bars.md. It does NOT run PolishPipeline:
+    two of the arms return integers rather than text, which every acceptance band
+    necessarily rejects, and a guardrail refusal and a model failure are different
+    findings. Arms live in docs/research/550-paragraph-placement/arms/.
 
     guardrail (#413, #414, #466) scores the four output-inspection checks against
     committed, hand-labelled outputs. It drives NO model and needs no Apple
@@ -180,6 +188,14 @@ let framingFile = optionValue("--framing", in: args)
 // one per side and falls back to `--mode` for both, so a single flag A/Bs two prompt
 // candidates on one mode while `--mode-b` alone A/Bs a mode against the free polish.
 let modeIdentifier = optionValue("--mode", in: args)
+// #550. Repeatable: `paragraph` runs every arm given, in order, over every fixture,
+// so one invocation produces one comparable capture instead of seven that have to be
+// stitched together. `optionValue` returns the first match only, hence the collector.
+let armPaths: [String] = args.indices.compactMap { index in
+    guard args[index] == "--arm", index + 1 < args.count else { return nil }
+    return args[index + 1]
+}
+let paragraphJSONOut = optionValue("--json", in: args)
 // #439. Overrides every fixture's `lang`. See `Fixture.routed(through:)`.
 let langOverride = optionValue("--lang", in: args)
 let modeAIdentifier = optionValue("--mode-a", in: args) ?? modeIdentifier
@@ -679,6 +695,9 @@ func runTargetElection() {
 @available(macOS 26.0, *)
 func runHarness() async {
     switch command {
+    case "paragraph":
+        await runParagraphRound(fixtures: fixtures, armPaths: armPaths,
+                                runs: runs, jsonOut: paragraphJSONOut)
     case "show":
         let mode = loadSmartMode(modeIdentifier)
         let engine = makeEngine(loadInstructions(instructionsFile))
