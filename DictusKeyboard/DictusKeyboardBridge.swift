@@ -7,6 +7,44 @@
 import UIKit
 import DictusCore
 
+/// Adapts `UITextDocumentProxy` to DictusCore's `TextDocumentEditing` seam (#530).
+///
+/// An adapter rather than an extension because `UITextDocumentProxy` is itself a
+/// protocol, and Swift does not allow a protocol to be given a retroactive
+/// conformance to another one. It lives in this file rather than its own so that
+/// adding the seam needs no change to the Xcode project.
+///
+/// Holds the controller weakly, as the bridge does, and reads `textDocumentProxy`
+/// through it on every call: the proxy is only valid for the current input context,
+/// so caching it would outlive the field it belongs to.
+final class ProxyDocumentEditor: TextDocumentEditing {
+
+    private weak var controller: UIInputViewController?
+
+    init(controller: UIInputViewController?) {
+        self.controller = controller
+    }
+
+    var contextBeforeInput: String? {
+        #if DEBUG
+        // The counting sites read through this adapter, so the #530 cost instrument
+        // has to sample here too — otherwise moving them behind the seam would have
+        // silently stopped measuring the reads that matter most.
+        let start = DispatchTime.now().uptimeNanoseconds
+        defer { MirrorReadCost.sample(nanos: DispatchTime.now().uptimeNanoseconds - start) }
+        #endif
+        return controller?.textDocumentProxy.documentContextBeforeInput
+    }
+
+    func deleteBackward() {
+        controller?.textDocumentProxy.deleteBackward()
+    }
+
+    func insertText(_ text: String) {
+        controller?.textDocumentProxy.insertText(text)
+    }
+}
+
 /// Adapts GiellaKeyboardView delegate callbacks into Dictus keyboard actions.
 ///
 /// WHY a separate bridge class (not making KeyboardViewController the delegate):
@@ -71,6 +109,45 @@ final class DictusKeyboardBridge: NSObject,
     /// When the user types "qu", lastInsertedCharacter="u" and secondToLastInsertedCharacter="q",
     /// allowing AccentedCharacters to detect the bigram and show apostrophe instead of u-grave.
     private var secondToLastInsertedCharacter: String?
+
+    // MARK: - Mirror trust (#530)
+
+    /// Whether the proxy's mirror is still reflecting this keyboard's own edits.
+    ///
+    /// Per instance, not shared: only the visible keyboard edits a document, and
+    /// several instances live in this process.
+    let mirrorSync = MirrorSyncState()
+
+    /// The document, behind the seam the counting sites are tested through (#530).
+    /// Rebuilt on demand because `controller` is weak and may be swapped out.
+    var documentEditor: TextDocumentEditing { ProxyDocumentEditor(controller: controller) }
+
+    /// The mirror's current length, as it reports it.
+    ///
+    /// Grapheme count, matching what a delete count is expressed in: one
+    /// deleteBackward() removes one grapheme, so the two are the same unit.
+    private func mirrorLength() -> Int {
+        #if DEBUG
+        let start = DispatchTime.now().uptimeNanoseconds
+        defer { MirrorReadCost.sample(nanos: DispatchTime.now().uptimeNanoseconds - start) }
+        #endif
+        return controller?.textDocumentProxy.documentContextBeforeInput?.count ?? 0
+    }
+
+    /// Checks that the mirror moved by exactly what the edit just issued implies,
+    /// and arms the suppression if it did not (#530).
+    ///
+    /// `before` must be read immediately before the edit and this called immediately
+    /// after it, with nothing in between that yields the run loop: that is what makes
+    /// a discrepancy attributable to the mirror rather than to a host callback.
+    private func observeMirror(before: Int, deleted: Int = 0, inserted: Int = 0) {
+        mirrorSync.observe(
+            before: before,
+            after: mirrorLength(),
+            deleted: deleted,
+            inserted: inserted
+        )
+    }
 
     // MARK: - GiellaKeyboardViewDelegate
 
@@ -313,9 +390,21 @@ final class DictusKeyboardBridge: NSObject,
 
         // Insert the character. When on shifted/capslock page, the key definition
         // already contains the uppercase character, so we insert as-is.
+        let mirrorBefore = mirrorLength()
         controller?.textDocumentProxy.insertText(character)
+        observeMirror(before: mirrorBefore, inserted: character.count)
         secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = character
+
+        #if DEBUG
+        // #530 probe: our own insert, measured immediately. If the mirror does not
+        // grow by exactly this character, the divergence starts here.
+        MirrorProbe.shared.record(.insert(character))
+        MirrorProbe.shared.probe(
+            event: "key-insert",
+            mirror: controller?.textDocumentProxy.documentContextBeforeInput
+        )
+        #endif
 
         // Auto-unshift after one character (unless caps locked).
         // This matches iOS native behavior: shift is "one-shot" unless locked.
@@ -338,9 +427,27 @@ final class DictusKeyboardBridge: NSObject,
     /// Handle backspace/delete key. Always deletes one character.
     /// Autocorrect undo is handled by tapping the suggestion bar, not backspace.
     private func handleBackspace() {
+        // #530: THE measured trigger. In the 2026-09-10 capture this deleteBackward()
+        // never reached the mirror — the keyboard's prediction went 54 to 53 while the
+        // mirror stayed at 49 — and every character count taken off the mirror after
+        // that over-counted. Bracketing the call is what catches it.
+        let mirrorBefore = mirrorLength()
         controller?.textDocumentProxy.deleteBackward()
+        observeMirror(before: mirrorBefore, deleted: 1)
         secondToLastInsertedCharacter = nil
         lastInsertedCharacter = nil
+
+        #if DEBUG
+        // #530 probe: THE suspect event. The issue's hypothesis is that this
+        // deleteBackward() is not reflected in the mirror before the next insert,
+        // so the mirror keeps "ton" and the next keystroke appends "n" to it.
+        // If that is right, `off` becomes +1 on this line or the one after it.
+        MirrorProbe.shared.record(.deleteBackward)
+        MirrorProbe.shared.probe(
+            event: "key-delete",
+            mirror: controller?.textDocumentProxy.documentContextBeforeInput
+        )
+        #endif
 
         // Check if the corrected word is still intact in the text after deletion.
         // Keep undo alive if either "correctedWord " or "correctedWord" (without space) is found.
@@ -372,6 +479,13 @@ final class DictusKeyboardBridge: NSObject,
               let before = proxy.documentContextBeforeInput, !before.isEmpty else {
             // Fallback: single character delete if no text context
             controller?.textDocumentProxy.deleteBackward()
+            #if DEBUG
+            MirrorProbe.shared.record(.deleteBackward)
+            MirrorProbe.shared.probe(
+                event: "word-delete-fallback",
+                mirror: controller?.textDocumentProxy.documentContextBeforeInput
+            )
+            #endif
             return
         }
 
@@ -396,6 +510,13 @@ final class DictusKeyboardBridge: NSObject,
         for _ in 0..<max(1, total) {
             proxy.deleteBackward()
         }
+        #if DEBUG
+        MirrorProbe.shared.record(.replace(deleted: max(1, total), inserted: ""))
+        MirrorProbe.shared.probe(
+            event: "word-delete",
+            mirror: proxy.documentContextBeforeInput
+        )
+        #endif
         secondToLastInsertedCharacter = nil
         lastInsertedCharacter = nil
         updateCapitalization()
@@ -443,8 +564,18 @@ final class DictusKeyboardBridge: NSObject,
         }
         if containsDigit {
             // Skip autocorrect — insert space normally
+            let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.insertText(" ")
+            observeMirror(before: mirrorBefore, inserted: 1)
+            mirrorSync.noteBoundaryInserted(reason: "space-digit-skip", atLength: mirrorLength())
             lastInsertedCharacter = " "
+            #if DEBUG
+            MirrorProbe.shared.record(.insert(" "))
+            MirrorProbe.shared.probe(
+                event: "space-digit-skip",
+                mirror: controller?.textDocumentProxy.documentContextBeforeInput
+            )
+            #endif
             suggestionState?.clear()
             suggestionState?.rejectedWords.removeAll()
             let ctx = controller?.textDocumentProxy.documentContextBeforeInput
@@ -500,6 +631,21 @@ final class DictusKeyboardBridge: NSObject,
             return state.autocorrectEnabled && state.hostPolicy.autocorrectAllowed
         }()
 
+        // #530: the mirror has been caught holding characters this keyboard's own
+        // edits do not account for, so nothing may count characters off it until the
+        // keyboard gets a fresh input context.
+        //
+        // Learning is blocked here rather than only in the `.failed` branch below: a
+        // word the pipeline finds nothing wrong with never reaches that branch, and
+        // it would be learned off a document we cannot read correctly. A learned word
+        // bypasses autocorrect everywhere afterwards, which is far more expensive to
+        // undo than a skipped correction.
+        let mirrorSuspect = mirrorSync.isSuspect
+        if mirrorSuspect {
+            wordWasEvaluated = false
+            mirrorSync.noteSpaceWhileSuspect()
+        }
+
         if let state = suggestionState, state.autocorrectEnabled,
            state.hostPolicy.autocorrectAllowed,
            !freshWord.isEmpty,
@@ -517,29 +663,31 @@ final class DictusKeyboardBridge: NSObject,
             // disagree with the document — a blind count-based delete would eat
             // the preceding space ("pense quee" -> "penseque"). On failure we
             // skip the correction and fall through to a normal space.
-            let liveContext = controller?.textDocumentProxy.documentContextBeforeInput
-            switch AutocorrectReplacement.check(context: liveContext, word: freshWord) {
-            case .ok(let deleteCount):
-                applyAutocorrect(
-                    state: state,
-                    freshWord: freshWord,
-                    correction: result.correction,
-                    previousWord: previousWord,
-                    deleteCount: deleteCount
-                )
+            // The gate and the delete both live in AutocorrectCountingSite now
+            // (#530), so the code that can destroy the user's text is reachable from
+            // `swift test`. It corrects the delete count for whatever the mirror is
+            // known to be over-reporting, and refuses only when it cannot.
+            switch applyAutocorrect(
+                state: state,
+                freshWord: freshWord,
+                correction: result.correction,
+                previousWord: previousWord
+            ) {
+            case .applied:
                 return
 
-            case .failed(let reason):
-                // Proxy desync detected — do NOT correct, do NOT delete.
-                // Fall through to the normal space path below so the user
-                // keeps their typed word and still gets a space. The word may
-                // be a phantom ("quee") — don't learn it either.
+            case .refused(let reason):
+                // Do NOT correct, do NOT delete. Fall through to the normal space
+                // path below so the user keeps their typed word and still gets a
+                // space. The word may be a phantom ("quee") — don't learn it either.
                 wordWasEvaluated = false
                 #if DEBUG
                 AutocorrectDebugLog.replacementAborted(
                     word: freshWord,
                     reason: reason,
-                    contextTail: Self.contextTail(liveContext)
+                    contextTail: Self.contextTail(
+                        controller?.textDocumentProxy.documentContextBeforeInput
+                    )
                 )
                 #endif
             }
@@ -566,8 +714,14 @@ final class DictusKeyboardBridge: NSObject,
 
         // Normal space handling with double-space period detection
         if !handleAutoFullStop() {
+            let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.insertText(" ")
+            observeMirror(before: mirrorBefore, inserted: 1)
+            mirrorSync.noteBoundaryInserted(reason: "space", atLength: mirrorLength())
             lastInsertedCharacter = " "
+            #if DEBUG
+            MirrorProbe.shared.record(.insert(" "))
+            #endif
         } else {
             // Auto-full-stop changed the text (". " instead of "  ").
             // Invalidate any pending autocorrect undo — the text no longer matches
@@ -575,6 +729,15 @@ final class DictusKeyboardBridge: NSObject,
             suggestionState?.pendingUndo = nil
             lastInsertedCharacter = " "
         }
+        #if DEBUG
+        // #530 criterion 1 asks for a reading at every spacebar press, including the
+        // ones that do not correct anything. `handleAutoFullStop` records its own
+        // replacement, so by here the prediction is up to date on both branches.
+        MirrorProbe.shared.probe(
+            event: "space",
+            mirror: controller?.textDocumentProxy.documentContextBeforeInput
+        )
+        #endif
 
         // After space, clear current word and trigger n-gram predictions.
         // WHY updatePredictions instead of updateAsync: After finishing a word,
@@ -596,7 +759,17 @@ final class DictusKeyboardBridge: NSObject,
     /// .sentences autocap which should capitalize after a newline.
     private func handleReturn() {
         suggestionState?.pendingUndo = nil
+        let mirrorBefore = mirrorLength()
         controller?.textDocumentProxy.insertText("\n")
+        observeMirror(before: mirrorBefore, inserted: 1)
+        mirrorSync.noteBoundaryInserted(reason: "return", atLength: mirrorLength())
+        #if DEBUG
+        MirrorProbe.shared.record(.insert("\n"))
+        MirrorProbe.shared.probe(
+            event: "return",
+            mirror: controller?.textDocumentProxy.documentContextBeforeInput
+        )
+        #endif
         secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = "\n"
         suggestionState?.clear()
@@ -614,7 +787,12 @@ final class DictusKeyboardBridge: NSObject,
     func handlePredictionTap(word: String) {
         let proxy = controller?.textDocumentProxy
         proxy?.insertText(word + " ")
+        mirrorSync.noteBoundaryInserted(reason: "prediction-tap-space", atLength: mirrorLength())
         lastInsertedCharacter = " "
+        #if DEBUG
+        MirrorProbe.shared.record(.insert(word + " "))
+        MirrorProbe.shared.probe(event: "prediction-tap", mirror: proxy?.documentContextBeforeInput)
+        #endif
         secondToLastInsertedCharacter = nil
 
         // Chain predictions: query n-gram engine for what comes after this word
@@ -642,12 +820,28 @@ final class DictusKeyboardBridge: NSObject,
 
         if FrenchAdaptiveKey.shouldReplace(afterTyping: lastInsertedCharacter, precedingChar: secondToLastInsertedCharacter) {
             // Replace previous vowel with accented version
+            let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.deleteBackward()
             controller?.textDocumentProxy.insertText(label)
+            observeMirror(before: mirrorBefore, deleted: 1, inserted: label.count)
+            #if DEBUG
+            MirrorProbe.shared.record(.replace(deleted: 1, inserted: label))
+            #endif
         } else {
             // Insert apostrophe (or apostrophe after "qu" bigram)
+            let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.insertText(label)
+            observeMirror(before: mirrorBefore, inserted: label.count)
+            #if DEBUG
+            MirrorProbe.shared.record(.insert(label))
+            #endif
         }
+        #if DEBUG
+        MirrorProbe.shared.probe(
+            event: "accent-key",
+            mirror: controller?.textDocumentProxy.documentContextBeforeInput
+        )
+        #endif
 
         secondToLastInsertedCharacter = lastInsertedCharacter
         lastInsertedCharacter = label
@@ -753,47 +947,31 @@ final class DictusKeyboardBridge: NSObject,
     /// correction + trailing space, stores undo state and refreshes predictions.
     /// Only called after AutocorrectReplacement.check confirmed the live context
     /// ends with `freshWord` (#191) — `deleteCount` comes from that check.
+    ///
+    /// That check can be satisfied by a proxy that is lying, which is what #530
+    /// measured and what destroys the user's text here. The delete below is still
+    /// the blind loop, deliberately: #530's diagnostic round must not perturb what
+    /// it measures. See `MirrorProbe` and `WordBoundaryDelete` for what has already
+    /// been ruled out.
     private func applyAutocorrect(
         state: SuggestionState,
         freshWord: String,
         correction: String,
-        previousWord: String?,
-        deleteCount: Int
-    ) {
-        let proxy = controller?.textDocumentProxy
-
-        #if DEBUG
-        AutocorrectDebugLog.applyBefore(
+        previousWord: String?
+    ) -> AutocorrectCountingSite.Outcome {
+        // Decision and execution both live in DictusCore now (#530), so the code
+        // that actually deletes the user's text is reachable from `swift test`.
+        // What stays here is what the site does not need: undo state, the suggestion
+        // bar, predictions and capitalisation.
+        let outcome = AutocorrectCountingSite.apply(
+            editor: documentEditor,
             word: freshWord,
             correction: correction,
-            prevWord: previousWord,
-            contextTail: Self.contextTail(proxy?.documentContextBeforeInput)
+            previousWord: previousWord,
+            mirror: mirrorSync
         )
-        #endif
-
-        for _ in 0..<deleteCount {
-            proxy?.deleteBackward()
-        }
-        #if DEBUG
-        AutocorrectDebugLog.applyAfterDelete(
-            contextTail: Self.contextTail(proxy?.documentContextBeforeInput)
-        )
-        #endif
-
-        proxy?.insertText(correction)
-        proxy?.insertText(" ")
+        guard case .applied = outcome else { return outcome }
         lastInsertedCharacter = " "
-
-        #if DEBUG
-        AutocorrectDebugLog.applyAfterInsert(
-            contextTail: Self.contextTail(proxy?.documentContextBeforeInput)
-        )
-        AutocorrectDebugLog.autocorrectApplied(
-            original: freshWord,
-            corrected: correction,
-            prevWord: previousWord
-        )
-        #endif
 
         // Store undo state — user can tap suggestion bar to revert
         state.pendingUndo = AutocorrectState(
@@ -815,6 +993,7 @@ final class DictusKeyboardBridge: NSObject,
         state.updatePredictions(context: correctedContext)
         updateCapitalization()
         updateAccentKeyDisplay()
+        return outcome
     }
 
     /// Last ~30 characters of a context string, for DEBUG replacement logs.
@@ -839,20 +1018,10 @@ final class DictusKeyboardBridge: NSObject,
     /// to insert an additional space.
     @discardableResult
     private func handleAutoFullStop() -> Bool {
-        guard let proxy = controller?.textDocumentProxy,
-              let text = proxy.documentContextBeforeInput,
-              text.count >= 2 else { return false }
-
-        // Called BEFORE inserting second space. Buffer has: [char][space]
-        // Check: last char is space, char before space is not space and not period
-        guard text.hasSuffix(" ") else { return false }
-        let beforeSpace = text[text.index(text.endIndex, offsetBy: -2)]
-        guard beforeSpace != " " && beforeSpace != "." else { return false }
-
-        // Replace trailing space with ". "
-        proxy.deleteBackward()
-        proxy.insertText(". ")
-        return true
+        // #530 damage site 2, now behind the same seam as autocorrect. The capture
+        // caught it writing ". " over a space the document did not have, turning
+        // "Ok je vais" into "Ok je vai." on a single press.
+        AutoFullStopCountingSite.apply(editor: documentEditor, mirror: mirrorSync)
     }
 
     // MARK: - Autocapitalization

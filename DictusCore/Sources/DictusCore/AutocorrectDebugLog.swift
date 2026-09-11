@@ -158,6 +158,121 @@ public enum AutocorrectDebugLog {
         write("AUTOCORRECT-APPLY-AFTER-INSERT ctx=\"\(contextTail)\"")
     }
 
+    /// The measured cost of the arming check's proxy read (#530 criterion 6).
+    /// Two of these bracket every keyboard edit, so per-keystroke overhead is
+    /// roughly twice `meanUs` — minus the reads the handler already made.
+    public static func mirrorReadCost(samples: Int, meanMicros: Double, maxMicros: Double) {
+        guard enabled else { return }
+        write(String(
+            format: "MIRROR-READ-COST samples=%d meanUs=%.1f maxUs=%.1f",
+            samples, meanMicros, maxMicros
+        ))
+    }
+
+    // MARK: - Mirror suppression (#530 fix)
+
+    /// The mirror kept characters one of the keyboard's own edits does not account
+    /// for. Counting sites now correct their delete counts by `surplus`; only the
+    /// auto-period, which asks what a character is rather than how many there are,
+    /// refuses outright.
+    public static func mirrorSuspect(surplus: Int, before: Int, after: Int) {
+        guard enabled else { return }
+        write("MIRROR-SUSPECT surplus=+\(surplus) before=\(before) after=\(after)")
+    }
+
+    /// One automatic site refused to act. `site` is "autocorrect" or "full-stop".
+    public static func mirrorSuppressed(site: String, word: String, reason: String) {
+        guard enabled else { return }
+        write("MIRROR-SUPPRESSED site=\(site) word=\"\(word)\" reason=\(reason)")
+    }
+
+    /// A keyboard-inserted word boundary put the surplus behind it, so it can no
+    /// longer be inside anything the keyboard counts. The suspicion ends here —
+    /// this is the line that says how long it lasted and what it changed.
+    public static func mirrorSettled(reason: String, durationMs: Int) {
+        guard enabled else { return }
+        write("MIRROR-SETTLED reason=\(reason) durationMs=\(durationMs)")
+    }
+
+    /// The cursor went back past the boundary that settled a surplus, so the
+    /// phantom is inside reach again and the surplus is live once more.
+    public static func mirrorUnsettled(boundary: Int, length: Int, surplus: Int) {
+        guard enabled else { return }
+        write("MIRROR-UNSETTLED boundary=\(boundary) length=\(length) surplus=+\(surplus)")
+    }
+
+    /// The suppression ended. These are the numbers that say what the default
+    /// release cost the user, and #530 asks for them before anyone calls it right:
+    /// how long the keyboard stayed armed and how many spacebar presses it covered.
+    public static func mirrorReleased(
+        reason: String,
+        durationMs: Int,
+        spaces: Int,
+        suppressed: (corrections: Int, fullStops: Int)
+    ) {
+        guard enabled else { return }
+        write("MIRROR-RELEASED reason=\(reason) durationMs=\(durationMs) spaces=\(spaces) "
+            + "corrections=\(suppressed.corrections) fullStops=\(suppressed.fullStops)")
+    }
+
+    // MARK: - Mirror divergence probe (#530)
+    //
+    // Three events, all greppable on the "MIRROR-" prefix, all carrying `seq` so a
+    // capture orders unambiguously even if two keyboard instances interleave.
+    // `off` is the whole measurement: how many characters the proxy's mirror holds
+    // that the keyboard's own edit history does not account for. off=0 is agreement.
+
+    /// One comparison of the keyboard's predicted tail against the proxy's mirror.
+    /// `off=+N` means the mirror carries N characters the keyboard never wrote —
+    /// #530's phantom. `off=?` means no alignment within ±6: an edit the keyboard
+    /// did not make, and the last trustworthy line is the one above.
+    ///
+    /// WHY tail and length travel as pairs: each is one fact read at one instant,
+    /// never used apart, and pairing them keeps the signature at five parameters —
+    /// the same reason `bigramRerank` above pairs its candidates with their scores.
+    public static func mirrorProbe(
+        seq: Int,
+        event: String,
+        mirror: (tail: String, length: Int),
+        shadow: (tail: String, length: Int),
+        offset: Int?
+    ) {
+        guard enabled else { return }
+        let off = offset.map { $0 > 0 ? "+\($0)" : "\($0)" } ?? "?"
+        write("MIRROR-PROBE seq=\(seq) ev=\(event) off=\(off) "
+            + "mir=\"\(mirror.tail)\" mlen=\(mirror.length) "
+            + "pred=\"\(shadow.tail)\" plen=\(shadow.length)")
+    }
+
+    /// The prediction was re-baselined on the mirror. Never silent: everything
+    /// after this line is measured against a new baseline, so a divergence that
+    /// predates it is no longer visible.
+    public static func mirrorAdopted(
+        seq: Int,
+        event: String,
+        reason: String,
+        tail: String,
+        length: Int
+    ) {
+        guard enabled else { return }
+        write("MIRROR-ADOPT seq=\(seq) ev=\(event) reason=\(reason) "
+            + "tail=\"\(tail)\" len=\(length)")
+    }
+
+    /// A non-zero offset returned to zero — the mirror and the keyboard agree again.
+    /// `after` names the event that preceded the recovery, which is the answer to
+    /// "does anything ever clear the desync, and what".
+    public static func mirrorReconverged(
+        seq: Int,
+        previousOffset: Int,
+        previousEvent: String,
+        event: String
+    ) {
+        guard enabled else { return }
+        let prev = previousOffset > 0 ? "+\(previousOffset)" : "\(previousOffset)"
+        write("MIRROR-RECONVERGE seq=\(seq) was=\(prev) after=\(previousEvent) ev=\(event)")
+    }
+
     /// The host field's input traits changed the autocorrect/suggestions policy (#200).
     /// Logged once per policy change (not per keystroke).
     public static func hostPolicy(

@@ -206,10 +206,16 @@ struct KeyboardRootView: View {
                 EmojiPickerView(
                     onEmojiInsert: { emoji in
                         state.controller?.textDocumentProxy.insertText(emoji)
+                        #if DEBUG
+                        MirrorProbe.shared.record(.insert(emoji))
+                        #endif
                         HapticFeedback.keyTapped()
                     },
                     onDelete: {
                         state.controller?.textDocumentProxy.deleteBackward()
+                        #if DEBUG
+                        MirrorProbe.shared.record(.deleteBackward)
+                        #endif
                         HapticFeedback.keyTapped()
                     },
                     onDismiss: { state.presentAreaMode(.keys) },
@@ -566,6 +572,11 @@ struct KeyboardRootView: View {
         proxy.insertText(afterCorrection)
 
         #if DEBUG
+        MirrorProbe.shared.record(.replace(
+            deleted: deleteCount,
+            inserted: undo.originalWord + (matchedWithSpace ? " " : "") + afterCorrection
+        ))
+        MirrorProbe.shared.probe(event: "bar-undo", mirror: proxy.documentContextBeforeInput)
         AutocorrectDebugLog.autocorrectUndone(
             original: undo.originalWord, rejected: undo.correctedWord
         )
@@ -615,6 +626,13 @@ struct KeyboardRootView: View {
 
     /// Executes a validated replacement: deletes exactly `deleteCount` graphemes,
     /// then inserts. Only ever called with a count that a boundary check produced.
+    ///
+    /// Still a blind loop, deliberately (#530). The count comes from
+    /// AutocorrectReplacement.check, which reads the proxy — the only source of
+    /// truth an extension has, and so unable to catch itself lying. Clamping the
+    /// loop on a word boundary was tried and is dead code by construction; see
+    /// `WordBoundaryDelete`. #530's diagnostic round must not perturb what it
+    /// measures, so this site behaves exactly as it does on develop.
     private func applyReplacement(
         proxy: UITextDocumentProxy,
         deleteCount: Int,
@@ -628,6 +646,12 @@ struct KeyboardRootView: View {
         if addSpace {
             proxy.insertText(" ")
         }
+        #if DEBUG
+        MirrorProbe.shared.record(
+            .replace(deleted: deleteCount, inserted: replacement + (addSpace ? " " : ""))
+        )
+        MirrorProbe.shared.probe(event: "bar-replace", mirror: proxy.documentContextBeforeInput)
+        #endif
     }
 
     /// Logs a replacement the boundary check refused (#191). Debug builds only.
