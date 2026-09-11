@@ -164,3 +164,104 @@ that are not deletions, and the classification is corrected rather than the thre
 **No threshold moved, and nothing was relaxed** — bar 2 gained two checks and bar 3
 lost three false positives. The fixture `expect` blocks are untouched, so `eval` keeps
 reporting `contains "11h"` and `contains "14h"` as the failures they are.
+
+---
+
+# Part 2 — the bare `point` clause in Natural rule 4
+
+**Date:** 2026-09-11
+**Fixtures:** `harness/point-fr.json` (10 French sentences, written for this round)
+**Scorer:** `harness/score-point.py`
+
+> **Everything in §5–§8 was written and committed BEFORE the first model call on
+> `point-fr.json`.** Same discipline as §1–§4, same reason. §9 is written after.
+
+## 5. The question
+
+FR Natural rule 4 teaches bare `point` → `.`. EN Natural rule 4 teaches
+`period` / `full stop` → `.`. `VerbalPunctuationPrepass` excludes the bare period word
+on purpose (#185) and `PolishAutoPrompt` omits it on purpose.
+
+**This is not the contradiction it looks like.** #185 ruled the substitution too dangerous
+for a *regex*, which has no context, and its doc comment ends with *"Revisit once the LLM
+owns punctuation contextually"*. The prompt rule is that revisit.
+
+**What is at risk.** `point` is an extremely common French noun: `un point de vue`,
+`faire le point`, `à quel point`, `un point final`. Applying rule 4 to one of those deletes
+a content word and produces a broken sentence — which is the exact class the FORBIDDEN
+block now bans, and rule 4 is named in that ban as one of only three licences to remove a
+word. The clause is a licensed exception sitting on an ambiguous common noun.
+
+There is a second cost the #185 comment does not mention. If the clause is removed, the
+model has no licence to delete the word `point` at all: the deletion ban forbids it, and
+rules 6 and 7 cover only stutters and fillers. The prepass comment's claim — *"the LLM
+already supplies the terminal period at natural sentence boundaries on its own (observed
+on device)"* — addresses the **mark**, never the **leftover word**. Both are counted here.
+
+## 6. The bars
+
+Two arms on `(.natural, fr)`, 10 fixtures × **10 runs** each, 100 outputs per arm:
+
+- **Arm A** — the shipping prompt, dumped byte-for-byte with `polish-harness prompt`.
+- **Arm B** — arm A with the six characters `` `point` → `.`, `` removed from rule 4, and
+  nothing else. Committed as `prompts/` files so the diff is inspectable.
+
+The French verbal-punctuation pre-pass runs before the engine in both arms, so by the time
+the model sees the text every other rule-4 command has already been substituted in code.
+**Bare `point` is the only live rule-4 clause on the French path**, which is what makes
+this A/B clean.
+
+| # | Bar | Threshold |
+|---|---|---|
+| P1 | **Noun class, arm A**: a `point` noun lost from the output | **0 occurrences.** Any occurrence at all decides the question against keeping the clause |
+| P2 | **Noun class, arm B**: same count | reported, no threshold — the control that attributes any P1 loss to the clause |
+| P3 | **Command class, both arms**: terminal mark present at the boundary | reported, no threshold — this is the prepass's uncounted claim, counted |
+| P4 | **Command class, both arms**: the command word `point` removed | reported, no threshold — this is what the clause actually buys |
+| P5 | **Health**: non-success outcomes | reported. A non-success is **excluded from P1–P4's denominator**: the free polish then inserts the deterministic floor, which still carries `point`, so scoring it would count a guardrail rejection as a clean run |
+
+P1 is a **0-tolerance bar and it is the decision rule**, stated in the issue and repeated
+here: the failure it catches is a silent content deletion the user cannot see, because the
+output reads as a grammatical French sentence with one word missing.
+
+### Fixture classes
+
+**Noun class (5).** `point` as an ordinary noun, in shapes a person actually dictates.
+`N1-point-final` is the worst case the prepass doc-comment names by hand.
+`N5-deux-points-nommes` carries the word twice, once at a clause boundary where a mark
+would read as plausible.
+
+**Command class (5).** `point` dictated as a punctuation command at a natural sentence
+boundary, in the **two shapes the device produces**:
+
+- *bare* (C1–C3): the word alone between two clauses, no mark around it.
+- *Parakeet-punctuated* (C4–C5): the STT surrounded the keyword with its own punctuation,
+  which is the shape `VerbalPunctuationPrepass.normalize` exists for. Here the mark is
+  already present and only the word is left to remove, so P3 is uninformative on these
+  two and P4 is the whole measurement.
+
+The fixtures are 85–115 characters so `NLLanguageRecognizer` is confident and the
+gibberish gate does not skip them. None of them is in either prompt.
+
+## 7. The decision rule, declared before the numbers
+
+- **Noun class clean under arm A (P1 = 0)** → keep the clause in FR and EN Natural. Record
+  P3 and P4 as the first count of the prepass's claim.
+- **Noun class not clean (P1 > 0)** → remove the clause from FR Natural (`point`) and EN
+  Natural (bare `period`; `full stop` stays, it is unambiguous and the pre-pass already
+  does it in code). Record the numbers, which closes #185's open revisit with a
+  measurement instead of a judgement.
+
+Either outcome is a legitimate result and gets written up in `findings.md`.
+
+## 8. Risks
+
+- **Ten fixtures is a small set.** It is sized for a 0-tolerance bar, where one occurrence
+  decides, not for estimating a rate. P3 and P4 are reported with their denominators and
+  are not claimed as precise rates.
+- **Mac ≈ iPhone, not identical** — the same caveat every round here carries. A device
+  confirmation is on the manual list whichever way this goes.
+- **The command class conflates two things on C4–C5.** Declared above rather than averaged
+  away: on those two the mark is in the input, so only P4 measures anything.
+- **Arm B removes a clause rather than adding one**, so it is the shorter prompt. Any
+  difference in favour of B is therefore free of the headroom cost (#270) that decided the
+  short-vs-full edit in Part 1.
