@@ -14,12 +14,12 @@ Last reviewed: 2026-09-11.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Now** |
-| **A′** | 1.8.3 — #23 shipped; #542, #543, #531 remain | After B |
+| **A′** | 1.8.3 — #23 shipped; #542, #543 remain | After B |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
 
-**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**; what remains are the two defects shipping it exposed — #542 and #543 — plus #531, which never shared that gate.
+**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**; what remains are the two defects shipping it exposed — #542 and #543. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement.
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -149,13 +149,9 @@ The `CancellationError` half is #144. What belongs to this lane is that **nothin
 
 What is measured: on a failure the arbiter is stuck on a stale host — nine consecutive misses all reading the same frozen `com.apple.Spotlight@pid46487` across four minutes and nine separate host launches — while `_hostProcessIdentifier` is correct on every line. **Two theories are already dead**: the pid cross-check is not at fault (0/9), and "Spotlight poisons it" is falsified, because VivaDicta returns correctly through Spotlight too. The live lead is the maintainer's: failures track how long the host's splash screen stays up, i.e. a true cold launch with a new pid rather than a fast resume. The next instrument is a **paired capture** — the same scripted actions run against both apps, both debug logs exported — which for the first time makes the comparison observable instead of inferred.
 
-**Item 2: #531, recover the last transcription from the expanded Dynamic Island** — added 2026-09-10, `ready-for-agent`. Long press the island in standby, the last transcript is there with a Copy button; power and mic keep their place, and the lock-screen banner never carries the text.
+**#531 was closed `not_planned` on 2026-09-11, after its PR was built and tested on device.** It was to put the last transcript under the island's long press with a Copy button. The copy is impossible: **iOS silently refuses a `UIPasteboard` write from a backgrounded process** — `wrote=36 readBack=-1 hasStrings=false`, with `host=app` proving `perform()` ran in the app and not the widget extension, so there was no wrong-sandbox to fix. Seven of nine manual steps passed; the display half worked entirely.
 
-**It shares this lane because it answers the same failure and it is not gated on the probe.** #23 is about a dictation whose *user* ends up in the wrong place; #531 is about a dictation whose *text* does. Both are "the words were captured and did not arrive", which is what makes 1.8.3 a cycle rather than a bag. The dependency structure is the opposite of #23's, though: **#531 has already cleared its own blocking measurement.** A `LiveActivityIntent` was shown writing to `UIPasteboard` with DictusApp backgrounded, on the iPhone 17 Pro simulator, 2026-09-08 — the sentinel-to-marker capture is [on the issue](https://github.com/getdictus/dictus-ios/issues/531#issuecomment-5587827086). Nothing about it waits on the arbiter probe.
-
-**Which is also its second reason to be here: it gives 1.8.3 a body that survives the probe.** If the arbiter measurement fails, #23 goes back to Someday and this lane still has something to cut. The milestone keeps the name `1.8.3 — auto-return` for now; if the probe does fail, rename it then rather than pre-emptively on a hypothesis.
-
-**Its own carry-forward, so it is not rediscovered:** a force-quit removes the Live Activity outright, so there is no killed-app case to design for; the island is only long-pressable while standby runs, which makes this the last dictation of the session and not a history — the archive is `HistoryView` and it is Pro; and what the simulator could not answer is a long suspension, which stays on the device list.
+**Two things not to rediscover.** A `UIPasteboard` write measured on a **simulator says nothing about a device** — the simulator does not enforce this, and that is exactly how the issue got cleared to be built. And nothing in a Live Activity can announce that a gesture exists: iOS owns the island's size and its expansion, so "the island grows to signal the transcript is there" is not implementable, and any future attempt at this needs an answer to discoverability before it needs code.
 
 ## Lane C — the keyboard session
 
