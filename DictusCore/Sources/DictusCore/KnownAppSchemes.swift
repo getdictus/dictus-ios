@@ -52,6 +52,35 @@ public enum KnownAppSchemes {
     ///
     /// — and a scheme that lands anywhere other than where you left is rejected.
     ///
+    /// ## What separates a good entry from a bad one
+    ///
+    /// A scheme that **names the app** resumes it; a scheme that **names an action**
+    /// performs it. `whatsapp-consumer://` names the app and comes back to the
+    /// conversation (verified on device). `sms://` names an action and opens the compose
+    /// sheet. That is the whole pattern, and it is the first thing to check on any entry
+    /// that has never been measured.
+    ///
+    /// ## Audit state, so nobody mistakes inherited for verified
+    ///
+    /// **Verified to resume:** `net.whatsapp.WhatsApp` (device), `com.apple.reminders`
+    /// and `com.apple.MobileSMS` (simulator). **Rejected by measurement:**
+    /// `com.apple.mobilesafari`, now in `knownNoSchemeHosts`.
+    ///
+    /// **Everything else is inherited, not verified** — the only Apple apps a simulator
+    /// runtime ships are Messages, Safari and Reminders, and none of the third-party
+    /// apps can be installed on one. Two groups deserve suspicion before the rest:
+    ///
+    /// - **Action-shaped names.** `com.apple.mobilemail` → `message://` is the top
+    ///   suspect: it is the scheme for opening *a specific message*, which is `sms://`'s
+    ///   mistake exactly. `com.tinyspeck.chatlyio` → `slack://open` and
+    ///   `com.newin.nplayer.basic` → `nplayer-http://` carry a verb and a transport.
+    /// - **The universal-link group below.** A root URL is a navigation *by
+    ///   construction*: it opens the app at that page, not where the user was. They fail
+    ///   the resume test on paper. They are kept because landing on an app's home is
+    ///   still better than no return at all for a shopping or media app, and because
+    ///   removing ten entries on reasoning rather than measurement would be trading one
+    ///   unverified claim for another — but do not read them as verified.
+    ///
     /// Most values are custom schemes. A few apps register none but claim a universal
     /// link in their `apple-app-site-association`, which works here only because the host
     /// app is installed *by definition* — it is the app the keyboard was just typing
@@ -69,20 +98,27 @@ public enum KnownAppSchemes {
         // Verified twice on iOS 26.5, and the upstream catalogue has `sms://` here with
         // the compose bug intact. Do not "fix" this to the obvious scheme.
         "com.apple.MobileSMS": "ichat://",
+        // Untested, and the top suspect after Messages: `message://` is the scheme for
+        // opening *a specific message*, which is exactly the mistake `sms://` made. Mail
+        // ships on no simulator runtime, so this needs a device to settle.
         "com.apple.mobilemail": "message://",
         "com.apple.Pages": "pages://",
         "com.apple.Numbers": "numbers://",
         "com.apple.Keynote": "keynote://",
         // NOT `x-apple-reminder://`, which is unregistered.
         "com.apple.reminders": "x-apple-reminderkit://",
-        // NOT `whatsapp://` — that one belongs to the SMB build below.
+        // NOT `whatsapp://` — that one belongs to the SMB build below. Verified on device
+        // to come back to the conversation the user was in, which makes it the reference
+        // for what a good entry looks like: it names the app, not an action.
         "net.whatsapp.WhatsApp": "whatsapp-consumer://",
         "net.whatsapp.WhatsAppSMB": "whatsapp://",
         "com.telegram.telegram-ios": "tg://",
         "ph.telegra.Telegraph": "tg://",
         // NOT `tg://`, which is shared with official Telegram — iOS would pick between them.
         "app.swiftgram.ios": "sg://",
-        // This bundle identifier is Slack.
+        // This bundle identifier is Slack. `://open` carries a verb, which is the shape
+        // that turned out wrong for Messages — untested, and worth measuring first if
+        // someone reports landing on the wrong screen.
         "com.tinyspeck.chatlyio": "slack://open",
         // This bundle identifier is Simplenote.
         "com.codality.NotationalFlow": "simplenote://",
@@ -159,7 +195,9 @@ public enum KnownAppSchemes {
         "com.vk.vkme": "vkme://",
 
         // No custom scheme; a universal link confirmed in the app's AASA file. See the
-        // trade-off in this property's doc comment.
+        // trade-off in this property's doc comment, and the audit note above: a root URL
+        // is a navigation by construction, so none of these can resume the app where the
+        // user left it. Untested, and suspect on the resume criterion.
         "com.google.ios.ytcreator": "https://studio.youtube.com/",
         "com.amazon.Amazon": "https://www.amazon.com/",
         "com.amazon.AmazonDE": "https://www.amazon.de/",
