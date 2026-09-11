@@ -597,10 +597,10 @@ final class DictusKeyboardBridge: NSObject,
         // it would be learned off a document we cannot read correctly. A learned word
         // bypasses autocorrect everywhere afterwards, which is far more expensive to
         // undo than a skipped correction.
-        let mirrorArmed = mirrorSync.isArmed
-        if mirrorArmed {
+        let mirrorSuspect = mirrorSync.isSuspect
+        if mirrorSuspect {
             wordWasEvaluated = false
-            mirrorSync.noteSpaceWhileArmed()
+            mirrorSync.noteSpaceWhileSuspect()
         }
 
         if let state = suggestionState, state.autocorrectEnabled,
@@ -621,16 +621,32 @@ final class DictusKeyboardBridge: NSObject,
             // the preceding space ("pense quee" -> "penseque"). On failure we
             // skip the correction and fall through to a normal space.
             let liveContext = controller?.textDocumentProxy.documentContextBeforeInput
-            // While armed the answer is refusal, whatever the context says (#530).
-            // The gate returns a `.failed` so it takes the fall-through that already
-            // exists below — normal space, no delete, no learning — rather than a
-            // second, subtly different skip path.
+            // The gate corrects the delete count for whatever the mirror is known to
+            // be over-reporting, and only refuses when it cannot (#530). A refusal
+            // comes back as `.failed` so it takes the fall-through that already exists
+            // below — normal space, no delete, no learning — rather than a second,
+            // subtly different skip path.
             switch MirrorGatedReplacement.check(
-                mirrorArmed: mirrorArmed,
+                trust: mirrorSync.trust,
                 context: liveContext,
                 word: freshWord
             ) {
             case .ok(let deleteCount):
+                if mirrorSuspect {
+                    // The revised reaction (#530): the replacement goes ahead on a
+                    // count corrected for the surplus, instead of being refused.
+                    // `freshWord.count` is what the boundary check would have handed
+                    // out, so the difference is exactly what the correction saved.
+                    mirrorSync.noteCorrectedReplacement()
+                    #if DEBUG
+                    AutocorrectDebugLog.mirrorCorrected(
+                        word: freshWord,
+                        planned: freshWord.count,
+                        deleted: deleteCount,
+                        surplus: freshWord.count - deleteCount
+                    )
+                    #endif
+                }
                 applyAutocorrect(
                     state: state,
                     freshWord: freshWord,
@@ -646,10 +662,12 @@ final class DictusKeyboardBridge: NSObject,
                 // keeps their typed word and still gets a space. The word may
                 // be a phantom ("quee") — don't learn it either.
                 wordWasEvaluated = false
-                if mirrorArmed {
+                if mirrorSuspect {
                     mirrorSync.noteSuppressedCorrection()
                     #if DEBUG
-                    AutocorrectDebugLog.mirrorSuppressed(site: "autocorrect", word: freshWord)
+                    AutocorrectDebugLog.mirrorSuppressed(
+                        site: "autocorrect", word: freshWord, reason: reason
+                    )
                     #endif
                 }
                 #if DEBUG
@@ -1027,15 +1045,19 @@ final class DictusKeyboardBridge: NSObject,
         // #530 damage site 2. The rule lives in AutoFullStop so the mirror gate can
         // be tested; the capture caught this writing ". " over a space the document
         // did not have, turning "Ok je vais" into "Ok je vai." on a single press.
-        guard AutoFullStop.shouldSubstitute(context: context, mirrorArmed: mirrorSync.isArmed) else {
+        guard AutoFullStop.shouldSubstitute(
+            context: context, mirrorSuspect: mirrorSync.isSuspect
+        ) else {
             // Count only a real suppression: a press that WOULD have substituted had
             // the mirror been trustworthy. Asking the same question with the gate
             // open is what tells those apart from the ordinary "not a double space".
-            if mirrorSync.isArmed,
-               AutoFullStop.shouldSubstitute(context: context, mirrorArmed: false) {
+            if mirrorSync.isSuspect,
+               AutoFullStop.shouldSubstitute(context: context, mirrorSuspect: false) {
                 mirrorSync.noteSuppressedFullStop()
                 #if DEBUG
-                AutocorrectDebugLog.mirrorSuppressed(site: "full-stop", word: "")
+                AutocorrectDebugLog.mirrorSuppressed(
+                    site: "full-stop", word: "", reason: "surplus-is-a-length-not-a-position"
+                )
                 #endif
             }
             return false

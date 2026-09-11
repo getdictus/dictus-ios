@@ -374,10 +374,11 @@ class KeyboardViewController: UIInputViewController {
         super.viewWillAppear(animated)
 
         // #530: a new appearance is a new input context — iOS builds the proxy's
-        // mirror afresh, so whatever it was lying about is gone. This is the ONLY
-        // release the fix ships, because it is the only one the capture supports:
-        // nothing reconverged in 58 probe lines, and the two cheaper releases that
-        // were proposed are falsified (see MirrorSyncState.release).
+        // mirror afresh, so whatever it was over-reporting is gone and the surplus
+        // accounting starts from zero. This is a reset, not the thing that makes the
+        // fix usable: correcting the delete count by the known surplus is. A
+        // teardown-only RELEASE was tried and failed on device — armed once, released
+        // never, autocorrect dark for the rest of the session.
         bridge?.mirrorSync.release(reason: "viewWillAppear")
 
         #if DEBUG

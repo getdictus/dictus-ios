@@ -21,12 +21,21 @@ public enum AutoFullStop {
     /// - Parameters:
     ///   - context: the live `documentContextBeforeInput`, read BEFORE the second
     ///     space is inserted — the buffer still ends `[char][space]`.
-    ///   - mirrorArmed: `MirrorSyncState.isArmed`. While the mirror has been caught
-    ///     holding characters the keyboard's own edits do not account for, this is
-    ///     always false: the substitution deletes a character it counted off that
-    ///     mirror, so it cannot be allowed to count.
-    public static func shouldSubstitute(context: String?, mirrorArmed: Bool) -> Bool {
-        guard !mirrorArmed else { return false }
+    ///   - mirrorSuspect: `MirrorSyncState.isSuspect`. While the mirror holds
+    ///     characters the keyboard's own edits do not account for, this is always
+    ///     false.
+    ///
+    /// WHY THIS ONE STILL REFUSES WHEN THE REPLACEMENT PATH NO LONGER DOES:
+    /// #530's revised reaction corrects a delete COUNT by the known surplus, because
+    /// a count only needs a length. This decision does not ask a length — it asks
+    /// what the last two characters ARE. The surplus cannot answer that: the phantom
+    /// is not necessarily at the tail, so the mirror's final space may be real or
+    /// invented and nothing in the accounting distinguishes them. A wrong answer here
+    /// deletes a real character and writes a period over it, which is how one
+    /// spacebar press turned "Ok je vais" into "Ok je vai.". Refusal is the only
+    /// correct reaction, and it costs a double space staying two spaces.
+    public static func shouldSubstitute(context: String?, mirrorSuspect: Bool) -> Bool {
+        guard !mirrorSuspect else { return false }
         guard let text = context, text.count >= 2 else { return false }
         // Last char is a space, and the one before it is neither a space nor a
         // period — otherwise ". " would double a period or fire on triple spaces.

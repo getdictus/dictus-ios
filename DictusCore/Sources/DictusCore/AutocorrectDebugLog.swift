@@ -172,16 +172,31 @@ public enum AutocorrectDebugLog {
     // MARK: - Mirror suppression (#530 fix)
 
     /// The mirror kept characters one of the keyboard's own edits does not account
-    /// for. Everything that counts characters off it is now refused until release.
-    public static func mirrorArmed(surplus: Int, before: Int, after: Int) {
+    /// for. Counting sites now correct their delete counts by `surplus`; only the
+    /// auto-period, which asks what a character is rather than how many there are,
+    /// refuses outright.
+    public static func mirrorSuspect(surplus: Int, before: Int, after: Int) {
         guard enabled else { return }
-        write("MIRROR-ARMED surplus=+\(surplus) before=\(before) after=\(after)")
+        write("MIRROR-SUSPECT surplus=+\(surplus) before=\(before) after=\(after)")
     }
 
     /// One automatic site refused to act. `site` is "autocorrect" or "full-stop".
-    public static func mirrorSuppressed(site: String, word: String) {
+    public static func mirrorSuppressed(site: String, word: String, reason: String) {
         guard enabled else { return }
-        write("MIRROR-SUPPRESSED site=\(site) word=\"\(word)\"")
+        write("MIRROR-SUPPRESSED site=\(site) word=\"\(word)\" reason=\(reason)")
+    }
+
+    /// A replacement went ahead on a count corrected for the mirror's surplus —
+    /// the line that says the revised reaction did its job instead of going dark.
+    public static func mirrorCorrected(word: String, planned: Int, deleted: Int, surplus: Int) {
+        guard enabled else { return }
+        write("MIRROR-CORRECTED word=\"\(word)\" planned=\(planned) deleted=\(deleted) surplus=\(surplus)")
+    }
+
+    /// The surplus accounting declared itself lost; counting sites now refuse.
+    public static func mirrorUnknown(reason: String, surplus: Int) {
+        guard enabled else { return }
+        write("MIRROR-UNKNOWN reason=\(reason) surplus=\(surplus)")
     }
 
     /// The suppression ended. These are the numbers that say what the default
@@ -191,11 +206,13 @@ public enum AutocorrectDebugLog {
         reason: String,
         durationMs: Int,
         spaces: Int,
-        suppressed: (corrections: Int, fullStops: Int)
+        suppressed: (corrections: Int, fullStops: Int),
+        corrected: Int
     ) {
         guard enabled else { return }
         write("MIRROR-RELEASED reason=\(reason) durationMs=\(durationMs) spaces=\(spaces) "
-            + "corrections=\(suppressed.corrections) fullStops=\(suppressed.fullStops)")
+            + "corrections=\(suppressed.corrections) fullStops=\(suppressed.fullStops) "
+            + "corrected=\(corrected)")
     }
 
     // MARK: - Mirror divergence probe (#530)
