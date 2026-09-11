@@ -491,6 +491,9 @@ public enum PersistentLog {
         switch event.level {
         case .debug: logger.debug("\(msg, privacy: .public)")
         case .info: logger.info("\(msg, privacy: .public)")
+        // `notice` is the lowest os.log level the unified log writes to disk, which
+        // is the entire reason the level exists here — see `LogLevel.notice`.
+        case .notice: logger.notice("\(msg, privacy: .public)")
         case .warning: logger.warning("\(msg, privacy: .public)")
         case .error: logger.error("\(msg, privacy: .public)")
         }

@@ -7,13 +7,14 @@ final class LogEventTests: XCTestCase {
 
     // MARK: - LogLevel cases
 
-    func testLogLevelHasExactly4Cases() {
-        XCTAssertEqual(LogLevel.allCases.count, 4)
+    func testLogLevelHasExactly5Cases() {
+        XCTAssertEqual(LogLevel.allCases.count, 5)
     }
 
     func testLogLevelRawValues() {
         XCTAssertEqual(LogLevel.debug.rawValue, "debug")
         XCTAssertEqual(LogLevel.info.rawValue, "info")
+        XCTAssertEqual(LogLevel.notice.rawValue, "notice")
         XCTAssertEqual(LogLevel.warning.rawValue, "warning")
         XCTAssertEqual(LogLevel.error.rawValue, "error")
     }
@@ -22,6 +23,7 @@ final class LogEventTests: XCTestCase {
         // All padded names should be 7 chars for alignment
         XCTAssertEqual(LogLevel.debug.paddedName, "DEBUG  ")
         XCTAssertEqual(LogLevel.info.paddedName, "INFO   ")
+        XCTAssertEqual(LogLevel.notice.paddedName, "NOTICE ")
         XCTAssertEqual(LogLevel.warning.paddedName, "WARNING")
         XCTAssertEqual(LogLevel.error.paddedName, "ERROR  ")
     }
@@ -324,6 +326,33 @@ final class LogEventTests: XCTestCase {
         let event = LogEvent.keyboardMicTapped
         XCTAssertEqual(event.level, .info)
         XCTAssertEqual(event.subsystem, .keyboard)
+    }
+
+    /// #23. `notice` and not `info` is the point of the case: the app is usually
+    /// terminated moments after a hand-off — that is what a hand-off is — and an `info`
+    /// line in the os.log mirror dies with it, taking the only account of why the user
+    /// did or did not land back where they were.
+    func testHostReturnIsNoticeKeyboard() {
+        let event = LogEvent.hostReturn(hostId: "com.apple.mobilenotes", outcome: "returned")
+        XCTAssertEqual(event.level, .notice)
+        XCTAssertEqual(event.subsystem, .keyboard)
+        XCTAssertEqual(event.name, "hostReturn")
+        XCTAssertTrue(event.payload().hasSuffix("hostId=com.apple.mobilenotes outcome=returned"))
+    }
+
+    /// Every outcome the two processes actually emit, so the documented contract and the
+    /// call sites cannot drift. `no-scheme-known` was emitted for a whole device session
+    /// before it was written down.
+    func testEveryHostReturnOutcomeRendersIntact() {
+        let outcomes = ["returned", "open-failed", "no-scheme", "no-scheme-known", "table-miss"]
+        for outcome in outcomes {
+            let event = LogEvent.hostReturn(hostId: "com.apple.Spotlight", outcome: outcome)
+            XCTAssertEqual(event.level, .notice)
+            XCTAssertTrue(
+                event.payload().hasSuffix("hostId=com.apple.Spotlight outcome=\(outcome)"),
+                "outcome \(outcome) did not survive rendering"
+            )
+        }
     }
 
     func testKeyboardTextInsertedIsDebugKeyboard() {

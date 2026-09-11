@@ -7,10 +7,18 @@ import Foundation
 // MARK: - LogLevel
 
 /// Log severity levels for structured logging.
-/// 4 levels: debug (internal details), info (normal operations),
-/// warning (recoverable issues), error (failures).
+/// 5 levels: debug (internal details), info (normal operations),
+/// notice (an observation that must survive the process), warning (recoverable
+/// issues), error (failures).
+///
+/// WHY `notice` exists (#23). The persistent file log keeps every level, so on
+/// disk this changes nothing. The `os.log` mirror is where it matters: `info`
+/// entries there are memory-backed and die with the process, and the keyboard
+/// extension is killed routinely — a diagnostic read whose only purpose is to be
+/// read afterwards has to land on a level the unified log persists. `notice` is
+/// the lowest one that does.
 public enum LogLevel: String, CaseIterable, Sendable {
-    case debug, info, warning, error
+    case debug, info, notice, warning, error
 
     /// Level name padded to 7 characters for aligned log output.
     public var paddedName: String {
@@ -160,6 +168,36 @@ public enum LogEvent: Sendable {
     case keyboardDidDisappear
     case keyboardMicTapped
     case keyboardTextInserted  // No content parameter -- privacy by design
+
+    // MARK: Auto-return to the host app (#23)
+    /// The outcome of one cold-start hand-off's attempt to send the user back to the app
+    /// they were typing in.
+    ///
+    /// `hostId` is the resolved bundle identifier, or `unknown` when the keyboard could
+    /// not name the host at all. `outcome` is one of:
+    ///
+    /// - `returned` — the user was sent back;
+    /// - `open-failed` — the scheme was known and iOS refused to open it;
+    /// - `no-scheme` — a real host with no catalogue entry. **The one worth acting on**:
+    ///   this is the project's only report channel for a gap, and the catalogue grows
+    ///   from these lines;
+    /// - `no-scheme-known` — a host already checked by hand and found to have no way
+    ///   back, such as the in-app browser or the share-sheet composer. Logged so the
+    ///   hand-off is still accounted for, and kept distinct so it is not mistaken for a
+    ///   gap at every triage pass;
+    /// - `table-miss` — the host could not be named;
+    /// - `tap-…` and `arbiter-…` — the keyboard-side lines, which carry their own
+    ///   diagnostics rather than a decision.
+    ///
+    /// `notice` and not `info`, and this is the case the level was added for: the app is
+    /// usually terminated moments after a hand-off — that is what a hand-off *is* — and
+    /// an `info` line in the os.log mirror dies with it. This line is the only account of
+    /// why a user did or did not land back where they were.
+    ///
+    /// A bundle identifier names an app, never what was typed into it. `no-scheme` is
+    /// also the project's only channel for "this host has no mapping": there is no
+    /// analytics here, the debug log is it, and its reader is an agent (#255).
+    case hostReturn(hostId: String, outcome: String)
 
     // MARK: Key auto-repeat (#390)
     // Neither case carries a key or a character. Only backspace auto-repeats, so
@@ -457,6 +495,7 @@ public enum LogEvent: Sendable {
              .modelDownloadOffline:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
+             .hostReturn,
              .keyRepeatStarted, .keyRepeatStopped,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
@@ -518,6 +557,11 @@ public enum LogEvent: Sendable {
              .liveActivityFailed, .subscriptionError, .idleInvariantViolation,
              .modelDownloadIntegrityFailed:
             return .error
+
+        // Notice: an observation whose whole point is to be read after the process
+        // that made it is gone (#23). Never a normal operation, never a problem.
+        case .hostReturn:
+            return .notice
 
         // Warnings
         case .dictationDeferred, .dictationStateReconciled,
@@ -651,6 +695,7 @@ public enum LogEvent: Sendable {
         case .keyboardDidAppear: return "keyboardDidAppear"
         case .keyboardDidDisappear: return "keyboardDidDisappear"
         case .keyboardMicTapped: return "keyboardMicTapped"
+        case .hostReturn: return "hostReturn"
         case .dictationMessageSet: return "dictationMessageSet"
         case .dictationMessageDisplayed: return "dictationMessageDisplayed"
         case .dictationMessageCleared: return "dictationMessageCleared"
@@ -840,6 +885,8 @@ public enum LogEvent: Sendable {
         case .keyboardDidAppear, .keyboardDidDisappear,
              .keyboardMicTapped, .keyboardTextInserted:
             return ""
+        case .hostReturn(let hostId, let outcome):
+            return "hostId=\(hostId) outcome=\(outcome)"
         case .keyRepeatStarted:
             return ""
         case .keyRepeatStopped(let ticks, let reason):

@@ -131,6 +131,13 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         PersistentLog.source = "KBD"
+        // #23. The swizzle is installed before `main` by a load-time constructor. This is
+        // a retry for the case where the private class was not yet loaded then, and it
+        // runs here rather than at `viewWillAppear` because the surviving explanation for
+        // a whole session of `known=0` is that UIKit decides once, early, whether the
+        // arbiter client exists — so every callback earlier than the first appearance is
+        // worth taking.
+        HostAppResolver.activateArbiter()
         let memEntry = MemoryFootprint.residentMB()
         // live= is the #281 headline probe: healthy cold starts peak at 2 live
         // controllers, both #281 occurrences peak at 3. See KeyboardLifecycleProbe.
@@ -398,6 +405,28 @@ class KeyboardViewController: UIInputViewController {
             details: "animated=\(animated) status=\(entryStatus) storedStatus=\(entryStoredStatus) coldStart=\(entryColdStart) inputBounds=\(Int(entryBounds.width))x\(Int(entryBounds.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) memMB=\(MemoryFootprint.residentMB())"
         ))
         PersistentLog.log(.keyboardDidAppear)
+
+        // #23. The arbiter is switched on by a load-time constructor (see
+        // `HostArbiterActivation.m`); this retries it if that failed and reports both
+        // outcomes, then harvests whatever pid → bundle pairing it is holding. Neither
+        // call reads the host: they fill the table that the mic tap looks the host up in.
+        //
+        // WHY the report is unconditional. The first version only logged when the outcome
+        // was `installed` or began with `<`, which silently excluded `already(<no-class>)`
+        // — a swizzle that had failed once and was never mentioned again. A whole device
+        // session then produced `known=0` with no way to tell whether the swizzle had not
+        // installed or had installed and woken nothing. One line per appearance is a
+        // price worth paying to never be blind there again.
+        // Retire the previous appearance's pid evidence before harvesting this one's. The
+        // keyboard appearing is what can change the host, and an entry from an earlier
+        // appearance is exactly the one a recycled pid would make wrong.
+        HostAppResolver.noteKeyboardAppeared()
+        let activation = HostAppResolver.activateArbiter()
+        PersistentLog.log(.hostReturn(
+            hostId: "none",
+            outcome: "arbiter-\(activation) atLoad-\(HostAppResolver.loadTimeActivation)"
+        ))
+        HostAppResolver.harvest()
         // Point KeyboardState's weak controller ref at the currently-visible controller
         // so call sites in KeyboardRootView and KeyboardState can access textDocumentProxy.
         // Previously set from KeyboardRootView.onAppear, which held a strong ref → #134.
@@ -573,6 +602,12 @@ class KeyboardViewController: UIInputViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+
+        // #23. `viewWillAppear` harvests at 0 ms, and on the first appearance of a fresh
+        // extension process the arbiter's client state does not exist until roughly
+        // 200 ms after activation. This second reading, after layout has settled, costs
+        // one guarded KVC call and often lands on the other side of that gap.
+        HostAppResolver.harvest()
 
         // Issue #116 diagnostic: snapshot final frames after layout settles.
         // We log both sizes and constraint constants so we can detect priority mismatches
@@ -1180,6 +1215,16 @@ class KeyboardViewController: UIInputViewController {
 
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
+        // #23. Every keystroke is a free chance to catch the arbiter while it is fresh.
+        // The device capture showed it stale for stretches of more than ten seconds, so a
+        // harvest that only ran at the appearance and at the tap could miss both times —
+        // which is what made the *first* dictation from a never-visited app fall back to
+        // the overlay. This is a guarded KVC read, and it happens on a callback iOS is
+        // already sending us, so it holds no timer and retains nothing. **Do not replace
+        // this with a `Timer` or a `CADisplayLink`**: one with `target: self` outlives the
+        // keyboard and goes on firing (#390 measured 15 real deletions after the finger
+        // had left the key, and #416 is a second, still-unfixed instance).
+        HostAppResolver.harvest()
         #if DEBUG
         MirrorProbe.shared.probe(
             event: "textDidChange",
@@ -1204,6 +1249,9 @@ class KeyboardViewController: UIInputViewController {
 
     override func selectionDidChange(_ textInput: UITextInput?) {
         super.selectionDidChange(textInput)
+        // #23, same argument as `textDidChange`: a caret move is another free reading, and
+        // some hosts emit this without a text change when focus moves between fields.
+        HostAppResolver.harvest()
         #if DEBUG
         MirrorProbe.shared.probe(
             event: "selectionDidChange",
