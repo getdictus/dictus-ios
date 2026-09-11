@@ -304,9 +304,9 @@ extension DictationCoordinator {
         // fourth-review finding 2). It is raised only when somebody else already holds
         // the gate, and it comes down when this loop ends — which is the moment the
         // caller takes the hardware and starts being responsible for its own progress.
-        let deferralIsOurs = isInsideEngineLoadForDictation && neuralEngineHolder != nil
-        if deferralIsOurs { isWaitingForNeuralEngine = true }
-        defer { if deferralIsOurs { isWaitingForNeuralEngine = false } }
+        let deferralIsOurs = Self.isInsideEngineLoadForDictation && neuralEngineHolder != nil
+        if deferralIsOurs { enterNeuralEngineWait() }
+        defer { if deferralIsOurs { leaveNeuralEngineWait() } }
 
         while neuralEngineHolder != nil {
             try await Task.sleep(nanoseconds: 500_000_000)
@@ -392,12 +392,12 @@ extension DictationCoordinator {
         // waits for nothing and must not lower a deferral it never raised. `defer` covers
         // the `return true` in the middle as well as the two normal exits.
         var deferralIsOurs = false
-        defer { if deferralIsOurs { isWaitingForNeuralEngine = false } }
+        defer { if deferralIsOurs { leaveNeuralEngineWait() } }
 
         while let inFlight = initTask {
-            if isInsideEngineLoadForDictation, !deferralIsOurs {
+            if Self.isInsideEngineLoadForDictation, !deferralIsOurs {
                 deferralIsOurs = true
-                isWaitingForNeuralEngine = true
+                enterNeuralEngineWait()
                 PersistentLog.log(.diagnosticProbe(
                     component: "NeuralEngine",
                     instanceID: modelName,
@@ -517,10 +517,16 @@ extension DictationCoordinator {
     /// must be allowed to do its job. So the deferral is raised inside the waits
     /// themselves — `acquireNeuralEngine`'s queue wait and `awaitInFlightEngineInit`'s
     /// wait on the init lock (issue #542) — and comes down the instant either ends.
+    ///
+    /// A TASK-LOCAL BINDING, so the marker travels with this call and not with the
+    /// coordinator: `ModelManager`'s prewarms run concurrently, call
+    /// `acquireNeuralEngine` themselves, and must read `false` rather than inheriting a
+    /// dictation's marker and raising a deferral that is neither theirs to raise nor
+    /// theirs to lower. See `isInsideEngineLoadForDictation` for what that cost.
     func waitingForNeuralEngine<T>(_ work: () async throws -> T) async rethrows -> T {
-        isInsideEngineLoadForDictation = true
-        defer { isInsideEngineLoadForDictation = false }
-        return try await work()
+        try await Self.$isInsideEngineLoadForDictation.withValue(true) {
+            try await work()
+        }
     }
 
     /// Whether a fired stage watchdog should be deferred rather than acted on.
