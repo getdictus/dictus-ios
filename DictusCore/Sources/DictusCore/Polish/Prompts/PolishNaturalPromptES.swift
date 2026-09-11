@@ -39,11 +39,12 @@ enum PolishNaturalPromptES {
 
         - Familiar register: informal contractions like `pa'` (for `para`), `na'` (for `nada`), `to'` (for `todo`) stay if used. Casual abbreviations stay. Number formats like `19h`, `25€` stay. Do NOT expand to formal forms.
         - Code-switching / tech anglicisms: `today`, `ship`, `commit`, `push`, `pull`, `merge`, `PR`, `deploy`, `feature`, `bug`, `release`, `build`, `debug`, `fix`, `refactor`, `lint`, `sync`, `sprint`, `demo`, `review`, `daily`, `weekly`, `weekend`, `meeting`, `mail`, `slack` stay in English. Do NOT translate them.
-        - Word choice: do NOT substitute synonyms. `currar` stays `currar` (NOT `trabajar`), `tío`/`tía` stays (NOT `hombre`/`mujer`), `guay` stays `guay` (NOT `genial`).
+        - Word choice: do NOT substitute synonyms. `currar` stays `currar` (NOT `trabajar`), `tío`/`tía` stays (NOT `hombre`/`mujer`), `guay` stays `guay` (NOT `genial`). Placeholder words are word choice too: `chisme`, `cacharro`, `coso` are NOT typos for `cosa`.
         - Tone and register: familiar stays familiar, formal stays formal. Do NOT shift up or down.
 
         FORBIDDEN:
         - Do NOT add words or content that weren't in the input. No inventing endings, no inserting context, no completing cut-off sentences with imagined words.
+        - Do NOT delete words that carry meaning. Every noun, verb, adjective, number, name and complement the speaker DICTATED appears in the output. Rules 4, 6 and 7 are the only licence to remove a word — rule 4 removes a spoken punctuation command because the mark replaces it, rules 6 and 7 remove stutters and fillers — and rule 8 the only licence to change one. A phrase that sounds clumsy is still what the speaker said.
         - Do NOT reorder words.
         - Do NOT translate.
         - Do NOT add `<<NL>>` markers where none existed. Do NOT split or alter existing markers.

@@ -1,0 +1,282 @@
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'polish-harness' complete! (0.15s)
+
+━━ [N1-point-final] lang=fr stt=PK
+  raw:      je te propose qu'on mette un point final à cette discussion parce que là on tourne en rond depuis vingt minutes
+  polished #1: Je te propose qu'on mette un point final à cette discussion parce que là on tourne en rond depuis vingt minutes.
+            (success, 1706ms, detected=fr→natural)
+  polished #2: Je te propose qu'on mette un point final à cette discussion parce que là on tourne en rond depuis vingt minutes.
+            (success, 1668ms, detected=fr→natural)
+  polished #3: Je te propose qu'on mette un point final à cette discussion parce que là on tourne en rond depuis vingt minutes.
+            (success, 1654ms, detected=fr→natural)
+  polished #4: Je te propose qu'on mette un point final à cette discussion parce que là on tourne en rond depuis vingt minutes.
+            (success, 1668ms, detected=fr→natural)
+  polished #5: Je te propose qu'on mette un point final à cette discussion parce que là on tourne en rond depuis vingt minutes.
+            (success, 1666ms, detected=fr→natural)
+  polished #6: Je te propose de mettre un point final à cette discussion, car on tourne en rond depuis vingt minutes.
+            (success, 1738ms, detected=fr→natural)
+  polished #7: Je te propose qu'on mette un point final à cette discussion, parce que là on tourne en rond depuis vingt minutes.
+            (success, 1657ms, detected=fr→natural)
+  polished #8: Je te propose qu'on mette un point final à cette discussion, parce que là on tourne en rond depuis vingt minutes.
+            (success, 1661ms, detected=fr→natural)
+  polished #9: Je te propose qu'on mette un point final à cette discussion, parce que là on tourne en rond depuis vingt minutes.
+            (success, 1656ms, detected=fr→natural)
+  polished #10: Je te propose qu'on mette un point final à cette discussion parce que là on tourne en rond depuis vingt minutes.
+            (success, 1662ms, detected=fr→natural)
+
+━━ [N2-point-de-vue] lang=fr stt=PK
+  raw:      de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+  polished #1: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1745ms, detected=fr→natural, reason=guardrailViolation)
+  polished #2: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1744ms, detected=fr→natural, reason=guardrailViolation)
+  polished #3: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1725ms, detected=fr→natural, reason=guardrailViolation)
+  polished #4: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1794ms, detected=fr→natural, reason=guardrailViolation)
+  polished #5: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1716ms, detected=fr→natural, reason=guardrailViolation)
+  polished #6: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1719ms, detected=fr→natural, reason=guardrailViolation)
+  polished #7: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1762ms, detected=fr→natural, reason=guardrailViolation)
+  polished #8: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1745ms, detected=fr→natural, reason=guardrailViolation)
+  polished #9: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1782ms, detected=fr→natural, reason=guardrailViolation)
+  polished #10: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (engineFailed, 1756ms, detected=fr→natural, reason=guardrailViolation)
+
+━━ [N3-faire-le-point] lang=fr stt=PK
+  raw:      on peut faire le point demain matin avant le daily comme ça j'aurai le temps de relire tes chiffres tranquillement
+  polished #1: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1692ms, detected=fr→natural)
+  polished #2: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1688ms, detected=fr→natural)
+  polished #3: On peut faire le point demain matin avant le daily. Comme ça, j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1722ms, detected=fr→natural)
+  polished #4: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1701ms, detected=fr→natural)
+  polished #5: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1709ms, detected=fr→natural)
+  polished #6: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1679ms, detected=fr→natural)
+  polished #7: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1691ms, detected=fr→natural)
+  polished #8: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1725ms, detected=fr→natural)
+  polished #9: On peut faire le point demain matin avant le daily. Comme ça, j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1744ms, detected=fr→natural)
+  polished #10: On peut faire le point demain matin avant le daily, comme ça, j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1694ms, detected=fr→natural)
+
+━━ [N4-a-quel-point] lang=fr stt=PK
+  raw:      tu sais à quel point ça m'énerve quand on change les specs la veille de la démo franchement c'est pénible
+  polished #1: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo. Franchement, c'est pénible.
+            (success, 1799ms, detected=fr→natural)
+  polished #2: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo. Franchement, c'est pénible.
+            (success, 1814ms, detected=fr→natural)
+  polished #3: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo. Franchement, c'est pénible.
+            (success, 1830ms, detected=fr→natural)
+  polished #4: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo. Franchement, c'est pénible.
+            (success, 1817ms, detected=fr→natural)
+  polished #5: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo. Franchement, c'est pénible.
+            (success, 1811ms, detected=fr→natural)
+  polished #6: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo, franchement, c'est pénible.
+            (success, 1827ms, detected=fr→natural)
+  polished #7: Tu sais à quel point ça m'énerve quand on change les spécifications la veille de la démo. Franchement, c'est pénible.
+            (success, 1780ms, detected=fr→natural)
+  polished #8: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo. Franchement, c'est pénible.
+            (success, 1793ms, detected=fr→natural)
+  polished #9: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo, franchement c'est pénible.
+            (success, 1795ms, detected=fr→natural)
+  polished #10: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo. Franchement, c'est pénible.
+            (success, 1828ms, detected=fr→natural)
+
+━━ [N5-deux-points-nommes] lang=fr stt=PK
+  raw:      il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push
+  polished #1: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1647ms, detected=fr→natural)
+  polished #2: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1631ms, detected=fr→natural)
+  polished #3: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1642ms, detected=fr→natural)
+  polished #4: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1631ms, detected=fr→natural)
+  polished #5: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1639ms, detected=fr→natural)
+  polished #6: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1614ms, detected=fr→natural)
+  polished #7: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1641ms, detected=fr→natural)
+  polished #8: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1663ms, detected=fr→natural)
+  polished #9: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1659ms, detected=fr→natural)
+  polished #10: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1635ms, detected=fr→natural)
+
+━━ [N6-point-de-vue-bis] lang=fr stt=PK
+  raw:      son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite
+  polished #1: Son point de vue a changé depuis la réunion de lundi, et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1693ms, detected=fr→natural)
+  polished #2: son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite
+            (engineFailed, 1688ms, detected=fr→natural, reason=guardrailViolation)
+  polished #3: Son point de vue a changé depuis la réunion de lundi, et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1703ms, detected=fr→natural)
+  polished #4: son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite
+            (engineFailed, 1695ms, detected=fr→natural, reason=guardrailViolation)
+  polished #5: Son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1717ms, detected=fr→natural)
+  polished #6: Son point de vue a changé depuis la réunion de lundi, et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1704ms, detected=fr→natural)
+  polished #7: Son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1685ms, detected=fr→natural)
+  polished #8: Son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1713ms, detected=fr→natural)
+  polished #9: Son point de vue a changé depuis la réunion de lundi, et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1707ms, detected=fr→natural)
+  polished #10: Son point de vue a changé depuis la réunion de lundi, et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1692ms, detected=fr→natural)
+
+━━ [N7-noun-at-a-boundary] lang=fr stt=PK
+  raw:      on a réglé le dernier point on peut passer à la suite et je te renvoie le compte rendu ce soir
+  polished #1: On a réglé le dernier point. On peut passer à la suite, et je te renvoie le compte rendu ce soir.
+            (success, 1763ms, detected=fr→natural)
+  polished #2: On a réglé le dernier point. On peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1726ms, detected=fr→natural)
+  polished #3: On a réglé le dernier point. On peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1733ms, detected=fr→natural)
+  polished #4: On a réglé le dernier point. On peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1728ms, detected=fr→natural)
+  polished #5: On a réglé le dernier point. On peut passer à la suite, et je te renvoie le compte rendu ce soir.
+            (success, 1745ms, detected=fr→natural)
+  polished #6: On a réglé le dernier point. On peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1732ms, detected=fr→natural)
+  polished #7: On a réglé le dernier point. On peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1721ms, detected=fr→natural)
+  polished #8: On a réglé le dernier point. On peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1720ms, detected=fr→natural)
+  polished #9: On a réglé le dernier point. On peut passer à la suite. Je te renvoie le compte rendu ce soir.
+            (success, 1734ms, detected=fr→natural)
+  polished #10: On a réglé le dernier point, on peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1674ms, detected=fr→natural)
+
+━━ [C1-bare-boundary] lang=fr stt=PK
+  raw:      je passe au bureau demain matin vers 9h point on se voit directement en salle de réunion
+  polished #1: Je passe au bureau demain matin vers 9 heures. Point, on se voit directement en salle de réunion.
+            (success, 1689ms, detected=fr→natural)
+  polished #2: Je passe au bureau demain matin vers 9h. Point, on se voit directement en salle de réunion.
+            (success, 1684ms, detected=fr→natural)
+  polished #3: Je passe au bureau demain matin vers 9h. Point on se voit directement en salle de réunion.
+            (success, 1648ms, detected=fr→natural)
+  polished #4: Je passe au bureau demain matin vers 9h. Point, on se voit directement en salle de réunion.
+            (success, 1677ms, detected=fr→natural)
+  polished #5: Je passe au bureau demain matin vers 9h. Point, on se voit directement en salle de réunion.
+            (success, 1686ms, detected=fr→natural)
+  polished #6: Je passe au bureau demain matin vers 9h. On se voit directement en salle de réunion.
+            (success, 1644ms, detected=fr→natural)
+  polished #7: Je passe au bureau demain matin vers 9 heures. Point on se voit directement en salle de réunion.
+            (success, 1669ms, detected=fr→natural)
+  polished #8: Je passe au bureau demain matin vers 9 h. Point, on se voit directement en salle de réunion.
+            (success, 1695ms, detected=fr→natural)
+  polished #9: Je passe au bureau demain matin vers 9 h. Point on se voit directement en salle de réunion.
+            (success, 1647ms, detected=fr→natural)
+  polished #10: Je passe au bureau demain matin vers 9 h. Point, on se voit directement en salle de réunion.
+            (success, 1698ms, detected=fr→natural)
+
+━━ [C2-bare-boundary] lang=fr stt=PK
+  raw:      j'ai fini la relecture du document point il reste juste deux coquilles à corriger page trois
+  polished #1: J'ai fini la rélecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1699ms, detected=fr→natural)
+  polished #2: J'ai fini la rélecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1753ms, detected=fr→natural)
+  polished #3: J'ai fini la relecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1724ms, detected=fr→natural)
+  polished #4: J'ai fini la relecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1712ms, detected=fr→natural)
+  polished #5: J'ai fini la rélecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1679ms, detected=fr→natural)
+  polished #6: J'ai fini la rélecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1697ms, detected=fr→natural)
+  polished #7: J'ai fini la rélecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1705ms, detected=fr→natural)
+  polished #8: J'ai fini la rélecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1823ms, detected=fr→natural)
+  polished #9: J'ai terminé la rélecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1736ms, detected=fr→natural)
+  polished #10: J'ai fini la rélecture du document. Il reste juste deux coquilles à corriger, page trois.
+            (success, 1698ms, detected=fr→natural)
+
+━━ [C3-bare-boundary] lang=fr stt=PK
+  raw:      le client a validé le devis hier soir point on peut lancer la production dès lundi matin
+  polished #1: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+            (success, 1862ms, detected=fr→natural)
+  polished #2: Le client a validé le devis hier soir, donc on peut lancer la production dès lundi matin.
+            (success, 2031ms, detected=fr→natural)
+  polished #3: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+            (success, 1592ms, detected=fr→natural)
+  polished #4: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+            (success, 1591ms, detected=fr→natural)
+  polished #5: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+            (success, 1596ms, detected=fr→natural)
+  polished #6: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+            (success, 1599ms, detected=fr→natural)
+  polished #7: Le client a validé le devis hier soir, donc on peut lancer la production dès lundi matin.
+            (success, 1622ms, detected=fr→natural)
+  polished #8: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+            (success, 1589ms, detected=fr→natural)
+  polished #9: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+            (success, 1602ms, detected=fr→natural)
+  polished #10: Le client a validé le devis hier soir, donc on peut lancer la production dès lundi matin.
+            (success, 1635ms, detected=fr→natural)
+
+━━ [C4-parakeet-punctuated] lang=fr stt=PK
+  raw:      J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+  polished #1: J'ai envoyé le mail à Sarah. Elle devrait répondre avant la fin de la journée.
+            (success, 1587ms, detected=fr→natural)
+  polished #2: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+            (success, 1588ms, detected=fr→natural)
+  polished #3: J'ai envoyé le mail à Sarah. Elle devrait répondre avant la fin de la journée.
+            (success, 1613ms, detected=fr→natural)
+  polished #4: J'ai envoyé le mail à Sarah. Elle devrait répondre avant la fin de la journée.
+            (success, 1598ms, detected=fr→natural)
+  polished #5: J'ai envoyé le mail à Sarah. Elle devrait répondre avant la fin de la journée.
+            (success, 1607ms, detected=fr→natural)
+  polished #6: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+            (success, 1594ms, detected=fr→natural)
+  polished #7: J'ai envoyé le mail à Sarah. Elle devrait répondre avant la fin de la journée.
+            (success, 1593ms, detected=fr→natural)
+  polished #8: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+            (success, 1599ms, detected=fr→natural)
+  polished #9: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+            (success, 1614ms, detected=fr→natural)
+  polished #10: J'ai envoyé le mail à Sarah. Elle devrait répondre avant la fin de la journée.
+            (success, 1579ms, detected=fr→natural)
+
+━━ [C5-parakeet-punctuated] lang=fr stt=PK
+  raw:      On décale la réunion de lancement à jeudi, point, je préviens Thomas et Sarah de mon côté.
+  polished #1: On décalera la réunion de lancement à jeudi. Je préviens Thomas et Sarah de mon côté.
+            (success, 1689ms, detected=fr→natural)
+  polished #2: On décalera la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+            (success, 1762ms, detected=fr→natural)
+  polished #3: On décale la réunion de lancement à jeudi. Je préviens Thomas et Sarah de mon côté.
+            (success, 1635ms, detected=fr→natural)
+  polished #4: On décalera la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+            (success, 1735ms, detected=fr→natural)
+  polished #5: On décalera la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+            (success, 1719ms, detected=fr→natural)
+  polished #6: On décalera la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+            (success, 1732ms, detected=fr→natural)
+  polished #7: On décalera la réunion de lancement à jeudi, point, je préviens Thomas et Sarah de mon côté.
+            (success, 1707ms, detected=fr→natural)
+  polished #8: On décalera la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+            (success, 1716ms, detected=fr→natural)
+  polished #9: On décalera la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+            (success, 1804ms, detected=fr→natural)
+  polished #10: On décalera la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+            (success, 1763ms, detected=fr→natural)
+
+── outcomes: 108/120 success
+   engineFailed: 12/120 — N2-point-de-vue×10, N6-point-de-vue-bis×2

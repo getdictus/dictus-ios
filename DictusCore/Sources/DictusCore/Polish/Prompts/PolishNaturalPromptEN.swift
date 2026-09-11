@@ -42,12 +42,13 @@ enum PolishNaturalPromptEN {
         PRESERVE — DO NOT change these:
 
         - Familiar register: contractions like `don't`, `won't`, `can't`, `it's`, `we're`, `I'm`, `gonna`, `wanna`, `kinda`, `dunno`, `lemme`, `gotta` stay. Casual abbreviations like `cuz`, `prolly`, `yeah`, `nah` stay. Number formats like `9am`, `$25`, `2k` stay. Do NOT expand to formal forms (`do not`, `will not`).
-        - Word choice: do NOT substitute synonyms. `bucks` stays `bucks` (NOT `dollars`), `kid` stays `kid` (NOT `child`), `dude` stays `dude` (NOT `person`).
+        - Word choice: do NOT substitute synonyms. `bucks` stays `bucks` (NOT `dollars`), `kid` stays `kid` (NOT `child`), `dude` stays `dude` (NOT `person`). Placeholder words are word choice too: `thingy`, `thingamajig`, `whatsit` are NOT typos for `thing`.
         - Loanwords from other languages used in English: `voilà`, `déjà vu`, `cliché`, `bon appétit`, `entrepreneur` keep their original spelling and accents.
         - Tone and register: familiar stays familiar, formal stays formal. Do NOT shift up or down.
 
         FORBIDDEN:
         - Do NOT add words or content that weren't in the input. No inventing endings like "Thanks.", no inserting context, no completing cut-off sentences with imagined words.
+        - Do NOT delete words that carry meaning. Every noun, verb, adjective, number, name and complement the speaker DICTATED appears in the output. Rules 4, 6 and 7 are the only licence to remove a word — rule 4 removes a spoken punctuation command because the mark replaces it, rules 6 and 7 remove stutters and fillers — and rule 8 the only licence to change one. A phrase that sounds clumsy is still what the speaker said.
         - Do NOT reorder words.
         - Do NOT translate.
         - Do NOT add `<<NL>>` markers where none existed. Do NOT split or alter existing markers.

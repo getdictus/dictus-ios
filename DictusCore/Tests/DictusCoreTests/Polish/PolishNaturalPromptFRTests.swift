@@ -56,6 +56,22 @@ final class PolishNaturalPromptFRTests: XCTestCase {
         XCTAssertTrue(prompt.contains("Do NOT add `\(PolishPostpass.newlineMarker)` markers where none existed"))
     }
 
+    /// Rule 4 keeps the bare `point` → `.` entry, and that is now a measured decision
+    /// rather than an inherited one (#439 Part 2, #185).
+    ///
+    /// `VerbalPunctuationPrepass` excludes the bare period word because a regex has no
+    /// context to tell `un point final` from a dictated command, and its doc comment
+    /// leaves the question open for a model that does have context. Measured: two arms
+    /// differing by this one clause, 10 runs over 7 French fixtures carrying `point` as
+    /// an ordinary noun, `un point final` and a noun sitting exactly on a sentence
+    /// boundary included. **Not one conversion in 96 outputs under the clause.** The
+    /// clause is safe, and it is also inert — the command word is removed 66 times in
+    /// 100 with it and 66 times in 100 without it. Kept because it states the contract,
+    /// not because it was shown to help. `docs/research/439-natural-contract/findings.md`.
+    func testRuleFourKeepsTheBarePeriodWord() {
+        XCTAssertTrue(prompt.contains("`point` → `.`"))
+    }
+
     /// The six segments #439 scores are held out of the prompt on purpose: an
     /// example that names one of them would make its measurement worthless.
     func testTheMeasuredRepairsAreNotTaughtByExample() {
