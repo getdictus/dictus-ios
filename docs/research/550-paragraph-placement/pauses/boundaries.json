@@ -1,0 +1,68 @@
+{
+  "_comment": "Every sentence boundary of the five fixtures, the silence measured on it, and the reference. Silences come from detect.py plus segment-by-segment transcription; a boundary falling inside a speech segment carries 0.0. The reference was collected from the numbered polished text, before any measurement was shown to the speaker.",
+  "collected": "2026-09-12",
+  "speaker": "maintainer, single voice",
+  "fixtures": {
+    "A": {
+      "register": "read aloud",
+      "audioSeconds": 19.69,
+      "polishedChars": 245,
+      "reference": [2],
+      "boundaries": [
+        {"after": 1, "silence": 1.29},
+        {"after": 2, "silence": 1.15},
+        {"after": 3, "silence": 1.35}
+      ],
+      "longMidSentenceSilences": []
+    },
+    "B": {
+      "register": "read aloud",
+      "audioSeconds": 17.39,
+      "polishedChars": 315,
+      "reference": [1],
+      "boundaries": [
+        {"after": 1, "silence": 0.86}
+      ],
+      "longMidSentenceSilences": [1.04]
+    },
+    "C": {
+      "register": "spontaneous",
+      "audioSeconds": 25.58,
+      "polishedChars": 262,
+      "reference": [2],
+      "boundaries": [
+        {"after": 1, "silence": 0.0},
+        {"after": 2, "silence": 1.96},
+        {"after": 3, "silence": 0.0}
+      ],
+      "longMidSentenceSilences": [1.01]
+    },
+    "D": {
+      "register": "spontaneous",
+      "audioSeconds": 59.97,
+      "polishedChars": 644,
+      "reference": [1, 5],
+      "boundaries": [
+        {"after": 1, "silence": 2.0},
+        {"after": 2, "silence": 0.3},
+        {"after": 3, "silence": 0.54},
+        {"after": 4, "silence": 0.91},
+        {"after": 5, "silence": 1.44},
+        {"after": 6, "silence": 0.86}
+      ],
+      "longMidSentenceSilences": [2.59, 1.47]
+    },
+    "E": {
+      "register": "spontaneous",
+      "audioSeconds": 48.11,
+      "polishedChars": 772,
+      "reference": [1],
+      "boundaries": [
+        {"after": 1, "silence": 1.6},
+        {"after": 2, "silence": 0.74},
+        {"after": 3, "silence": 0.48}
+      ],
+      "longMidSentenceSilences": [1.4]
+    }
+  }
+}
