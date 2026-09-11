@@ -863,6 +863,13 @@ class KeyboardState: ObservableObject {
     /// The App Group key is deliberately NOT read here: the caller clears it before
     /// calling, which is what stops a redelivered Darwin notification from inserting
     /// the same text twice.
+    /// NOT ARMED for #530's mirror detector, and the reason is plumbing rather than
+    /// principle (#548). A bracket here would be valid — this is one synchronous
+    /// insert — but `MirrorSyncState` lives on `DictusKeyboardBridge`, `bridge` is
+    /// private on KeyboardViewController, and this type holds only a
+    /// `UIInputViewController`. Reaching it means widening that surface across a
+    /// subsystem boundary, which is more than the bracketing #548 is scoped to.
+    /// Worth revisiting if a desync is ever traced to a dictation insert.
     func insertDictation(_ transcription: String) {
         controller?.textDocumentProxy.insertText(transcription)
         PersistentLog.log(.keyboardTextInserted)
@@ -1121,6 +1128,14 @@ class KeyboardState: ObservableObject {
             return
         }
 
+        // NOT ARMED for #530's mirror detector, and here the reason is structural
+        // rather than plumbing (#548). These chunks are separated by
+        // `DispatchQueue.main.async`, so a before/after pair would straddle a run-loop
+        // turn and a host callback could land between the two reads — which is exactly
+        // what #530's attributability rule forbids, since the discrepancy could then
+        // belong to the host rather than to this burst. The burst has its own
+        // verification instead: `DictationUndo.verify` re-proves the remainder against
+        // the live context after every chunk (#266).
         let batch = min(remaining, Self.dictationUndoChunkSize)
         for _ in 0..<batch {
             proxy.deleteBackward()
