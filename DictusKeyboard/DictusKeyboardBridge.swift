@@ -126,7 +126,7 @@ final class DictusKeyboardBridge: NSObject,
     ///
     /// Grapheme count, matching what a delete count is expressed in: one
     /// deleteBackward() removes one grapheme, so the two are the same unit.
-    private func mirrorLength() -> Int {
+    func mirrorLength() -> Int {
         #if DEBUG
         let start = DispatchTime.now().uptimeNanoseconds
         defer { MirrorReadCost.sample(nanos: DispatchTime.now().uptimeNanoseconds - start) }
@@ -140,7 +140,7 @@ final class DictusKeyboardBridge: NSObject,
     /// `before` must be read immediately before the edit and this called immediately
     /// after it, with nothing in between that yields the run loop: that is what makes
     /// a discrepancy attributable to the mirror rather than to a host callback.
-    private func observeMirror(before: Int, deleted: Int = 0, inserted: Int = 0) {
+    func observeMirror(before: Int, deleted: Int = 0, inserted: Int = 0) {
         mirrorSync.observe(
             before: before,
             after: mirrorLength(),
@@ -477,8 +477,15 @@ final class DictusKeyboardBridge: NSObject,
         suggestionState?.pendingUndo = nil
         guard let proxy = controller?.textDocumentProxy,
               let before = proxy.documentContextBeforeInput, !before.isEmpty else {
-            // Fallback: single character delete if no text context
+            // Fallback: single character delete if no text context.
+            // Armed like every other edit (#548). It can never actually raise
+            // suspicion — the guard above only fails when the mirror is empty, so
+            // `min(deleted, before)` is zero and the edit is consistent by
+            // construction — but a site that reports nothing is a site that can hide
+            // a desync later, and uniformity is cheaper than remembering why.
+            let mirrorBefore = mirrorLength()
             controller?.textDocumentProxy.deleteBackward()
+            observeMirror(before: mirrorBefore, deleted: 1)
             #if DEBUG
             MirrorProbe.shared.record(.deleteBackward)
             MirrorProbe.shared.probe(
@@ -507,9 +514,14 @@ final class DictusKeyboardBridge: NSObject,
 
         // Delete trailing spaces + word (at least 1 character)
         let total = trailingSpaces + charsInWord
+        // #548: `before` is the mirror read at the top of this function and nothing
+        // has yielded the run loop since, so it IS the pre-edit mirror length —
+        // reusing it satisfies #530's bracketing rule and costs no extra IPC.
+        let mirrorBefore = before.count
         for _ in 0..<max(1, total) {
             proxy.deleteBackward()
         }
+        observeMirror(before: mirrorBefore, deleted: max(1, total))
         #if DEBUG
         MirrorProbe.shared.record(.replace(deleted: max(1, total), inserted: ""))
         MirrorProbe.shared.probe(
@@ -786,7 +798,11 @@ final class DictusKeyboardBridge: NSObject,
     /// "correct" a perfectly valid prediction.
     func handlePredictionTap(word: String) {
         let proxy = controller?.textDocumentProxy
+        // #548: the edit is reported before the trailing space settles the suspicion.
+        // Order matters — settling first would discard whatever this insert revealed.
+        let mirrorBefore = mirrorLength()
         proxy?.insertText(word + " ")
+        observeMirror(before: mirrorBefore, inserted: (word + " ").count)
         mirrorSync.noteBoundaryInserted(reason: "prediction-tap-space", atLength: mirrorLength())
         lastInsertedCharacter = " "
         #if DEBUG

@@ -285,6 +285,47 @@ final class CountingSiteReplayTests: XCTestCase {
         XCTAssertEqual(doc.deleteCalls, 0)
     }
 
+    // MARK: - #548: a desync caused by a user-initiated site is not hidden
+
+    func testAWordDeleteThatTheMirrorIgnoresProtectsTheNextCorrection() {
+        // The gap #548 closes, asserted on the document. Before this, `handleWordDelete`
+        // edited and told the detector nothing, so the correction that followed counted
+        // against a mirror nobody had flagged — #530's exact failure, reached through a
+        // site #530 deliberately left counting.
+        //
+        // Here the word delete removes seven characters from the document and the
+        // mirror registers none of them.
+        let doc = FakeDocument(document: "Ok je vais", mirrorPhantomSuffix: "s")
+        let state = MirrorSyncState()
+        state.observe(before: 40, after: 40, deleted: 7, inserted: 0)
+        XCTAssertTrue(state.isSuspect, "the word delete must report itself")
+
+        let outcome = AutocorrectCountingSite.apply(
+            editor: doc, word: "vaiss", correction: "vais", mirror: state
+        )
+
+        XCTAssertEqual(outcome, .refused(reason: MirrorGatedReplacement.suspectReason))
+        XCTAssertEqual(doc.document, "Ok je vais", "untouched — no delete, no insert")
+        XCTAssertEqual(doc.deleteCalls, 0)
+    }
+
+    func testATapThatTheMirrorReflectsLeavesTheNextCorrectionAlone() {
+        // The other half, and the one that keeps #530's criterion 9 honest: a
+        // suggestion tap the mirror follows faithfully must leave the detector calm,
+        // so the next correction is made in full exactly as develop makes it.
+        let doc = FakeDocument(document: "je pense quee")
+        let state = MirrorSyncState()
+        state.observe(before: 20, after: 24, deleted: 4, inserted: 8)   // bar-replace
+        XCTAssertFalse(state.isSuspect)
+
+        let outcome = AutocorrectCountingSite.apply(
+            editor: doc, word: "quee", correction: "que", mirror: state
+        )
+
+        XCTAssertEqual(outcome, .applied(deleted: 4))
+        XCTAssertEqual(doc.document, "je pense que ")
+    }
+
     // MARK: - The seam itself
 
     func testTheFakeKeepsDocumentAndMirrorApart() {
