@@ -1,6 +1,7 @@
 // DictusApp/DictusApp.swift
 import SwiftUI
 import StoreKit
+import Combine
 import DictusCore
 
 // MARK: - AppDelegate (sourceApplication diagnostic)
@@ -297,7 +298,6 @@ struct DictusApp: App {
                         // DictationCoordinator.cleanupRecordingKeys() when the recording finishes.
                         if !isRecordingActive {
                             AppGroup.defaults.set(false, forKey: SharedKeys.coldStartActive)
-                            AppGroup.defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
                             AppGroup.defaults.synchronize()
                             PersistentLog.log(.coldStartFlagSet(active: false, context: "background-cleanup"))
                         }
@@ -341,6 +341,143 @@ struct DictusApp: App {
     /// WHY static: @State/@StateObject reset on view recreation, but a static var persists
     /// for the entire process lifetime — exactly matching "app was killed vs still in memory".
     private static var hasBeenActive = false
+
+    /// Reopens the app the keyboard was serving, if it can be named and has a way back.
+    ///
+    /// Runs inside the ~300 ms window in which a freshly foregrounded app is still
+    /// allowed to call `open()`. Past it, iOS refuses with "Application is neither
+    /// visible nor entitled" — which is why the 200 ms wait is a wait and not a retry
+    /// loop: there is no second chance to schedule.
+    ///
+    /// WHY 200 ms at all: the recording needs to have actually started before the
+    /// foreground changes hands. It is the same figure VivaDicta settled on, and it sits
+    /// comfortably inside the window.
+    ///
+    /// WHY it waits for the recording rather than a fixed delay. `startDictation` returns
+    /// before its recording task has run, so the previous fixed 200 ms was a bet that the
+    /// task wins the race. A device capture settled it: `recState=idle`, 7 times out of 7
+    /// — the bet was lost every time, and the user lost the head of the dictation while
+    /// the engine started underneath a backgrounding app.
+    ///
+    /// So this now waits for `.recording` and opens anyway at `recordingWaitCeilingMs`.
+    /// **The property that matters is that it can only gain, never lose**: if the engine
+    /// is ready early the user arrives already recording, and if it is not, the open
+    /// happens exactly as it did before. Waiting *without* a ceiling would have been the
+    /// obvious reading of the review and is the one thing that must not be done — it
+    /// trades a partial loss for a total one.
+    ///
+    /// `recState=` stays on the line, with `waitedMs=`, because they are what will say
+    /// whether the ceiling is calibrated and whether a later change to the audio pipeline
+    /// has pushed the start out again.
+    ///
+    /// Every branch that does not open something logs why, at `notice`. The app is
+    /// usually terminated moments after this runs, so an `info` line would not survive
+    /// to explain itself, and `no-scheme` is this project's only report channel for a
+    /// host nobody has mapped — there is no analytics, the debug log is it (#255).
+    /// How long the return may wait for recording to have actually started.
+    ///
+    /// **A ceiling, not a wait.** It is bounded by the window in which a freshly
+    /// foregrounded app may still call `open()` — about 300 ms, past which iOS refuses
+    /// with "Application is neither visible nor entitled" and the user gets *no* return
+    /// at all. 250 ms keeps margin under that.
+    ///
+    /// Do not raise it to "make the wait more reliable": every millisecond added is
+    /// borrowed from the only thing that makes the feature work, and a return that never
+    /// happens is a worse failure than a dictation missing its first syllable. If a
+    /// capture keeps showing `recState=idle waitedMs=250`, the answer is not a longer
+    /// ceiling — it is that the engine cannot start inside the window at all, and the fix
+    /// moves to starting it sooner rather than waiting for it longer.
+    ///
+    /// Note the ceiling is not the elapsed time: `asyncAfter` is a floor, not a deadline,
+    /// and a simulator under load turned 250 into a measured `waitedMs=305`. The return
+    /// still succeeded at 305 ms, which is mild evidence the foreground window is more
+    /// forgiving than the ~300 ms figure — but not evidence to spend, and `waitedMs=` is
+    /// on the line precisely so the real distribution can be read instead of assumed.
+    private static let recordingWaitCeilingMs = 250
+
+    private func returnToHostApp(hostId: String?, coordinator: DictationCoordinator) {
+        guard let hostId else {
+            PersistentLog.log(.hostReturn(hostId: "unknown", outcome: "table-miss"))
+            return
+        }
+        guard let target = KnownAppSchemes.returnURL(forHostId: hostId) else {
+            // `isWorthReporting` keeps the system pseudo-hosts — the in-app browser, the
+            // share-sheet composer, Spotlight — out of the log. They are dead ends, not
+            // gaps in the catalogue, and reporting them at every triage pass costs
+            // attention forever.
+            let outcome = KnownAppSchemes.isWorthReporting(hostId) ? "no-scheme" : "no-scheme-known"
+            PersistentLog.log(.hostReturn(hostId: hostId, outcome: outcome))
+            return
+        }
+
+        let startedAt = Date()
+        var readyCancellable: AnyCancellable?
+        var observedCancellable: AnyCancellable?
+        var hasOpened = false
+
+        // Both paths funnel here, and the first one to arrive wins. Whichever it is, the
+        // subscription is torn down — which is also what breaks the reference cycle that
+        // keeps it alive in the meantime, since nothing else holds it.
+        func openNow(trigger: String) {
+            guard !hasOpened else { return }
+            hasOpened = true
+            readyCancellable?.cancel()
+            readyCancellable = nil
+
+            // Emitted **before** the open, not in its completion handler, and that
+            // matters for reading a log. The outcome line below can only be written once
+            // iOS calls back — after the open, after the app has begun backgrounding —
+            // so a `statusChanged to=recording` landing in between appears *earlier* in
+            // the file than a `recState=idle` that was sampled before it. That ordering
+            // read as a contradiction in a device capture and cost a round of diagnosis.
+            // Sampling and reporting in the same breath removes the illusion.
+            let waitedMs = Int(Date().timeIntervalSince(startedAt) * 1000)
+            PersistentLog.log(.hostReturn(
+                hostId: hostId,
+                outcome: "opening via=\(trigger) recState=\(coordinator.status.rawValue) waitedMs=\(waitedMs)"
+            ))
+            UIApplication.shared.open(target, options: [:]) { opened in
+                PersistentLog.log(.hostReturn(hostId: hostId, outcome: opened ? "returned" : "open-failed"))
+            }
+        }
+
+        // The coordinator already publishes its status, so the wait rides that rather
+        // than a timer. Deliberate: a run-loop `Timer` with `target: self` outlives what
+        // scheduled it and goes on firing, which is how #390 deleted text after the
+        // finger had left the key and what #416 still does. `@Published` replays its
+        // current value on subscribe, so a recording that is already running opens
+        // immediately instead of waiting for a transition that has been and gone.
+        readyCancellable = coordinator.$status
+            .first { $0 == .recording }
+            .receive(on: DispatchQueue.main)
+            .sink { _ in openNow(trigger: "recording") }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Self.recordingWaitCeilingMs)) {
+            openNow(trigger: "ceiling")
+        }
+
+        // Independently of who opens, record *when* recording actually begins. This is
+        // the number the ceiling has to be judged against, and nothing else in the log
+        // carries it: the coordinator's own `statusChanged` line has one-second
+        // resolution and no origin to measure from. `via=ceiling` with a
+        // `recordingObserved` that never appears means the engine did not start at all;
+        // `via=ceiling` followed by `recordingObserved waitedMs=800` means it started,
+        // far too late for any ceiling that fits inside the foreground window — and that
+        // is the measurement that says to delete the wait rather than tune it.
+        observedCancellable = coordinator.$status
+            .first { $0 == .recording }
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                let waitedMs = Int(Date().timeIntervalSince(startedAt) * 1000)
+                PersistentLog.log(.hostReturn(hostId: hostId, outcome: "recordingObserved waitedMs=\(waitedMs)"))
+                // Reading it before clearing is what keeps the subscription alive until
+                // it fires: nothing else holds this cancellable, so the closure's own
+                // capture of it is the retain, and the compiler only sees that as a use
+                // if it is read rather than merely assigned.
+                observedCancellable?.cancel()
+                observedCancellable = nil
+            }
+    }
 
     private func handleIncomingURL(_ url: URL) {
         guard url.scheme == "dictus" else { return }
@@ -408,10 +545,24 @@ struct DictusApp: App {
                 origin: isFromKeyboard ? .keyboard : .app
             )
 
-            // On cold start, the swipe-back overlay (Plan 02) guides the user back.
-            // Auto-return was removed because there's no public API to detect which app
-            // the keyboard is serving — iterating KnownAppSchemes always opened the first
-            // installed app (e.g., WhatsApp) regardless of where the user actually was.
+            // #23: send the user back to the app they were typing in.
+            //
+            // Only on a cold start. A warm start never took the foreground away, so
+            // there is nothing to give back, and opening the host app then would yank a
+            // user who is deliberately looking at Dictus.
+            //
+            // Ordered after `startDictation` on purpose: recording has to be running
+            // before the foreground goes away, because the user arrives back in the host
+            // app expecting to already be recording, and `open()` only reports failure
+            // once it has already tried. Waiting for its answer would cost the head of
+            // the recording for no information.
+            //
+            // Every failure below falls through to `SwipeBackOverlayView`, which is
+            // already on screen at this point and stays the floor: unresolved host, host
+            // with no known scheme, and `open()` returning false all land there.
+            if isColdStart, isFromKeyboard {
+                returnToHostApp(hostId: KeyboardDictationURL.hostId(from: url), coordinator: coordinator)
+            }
         case "stop":
             // Stop recording from Dynamic Island expanded view button.
             coordinator.stopDictation()
