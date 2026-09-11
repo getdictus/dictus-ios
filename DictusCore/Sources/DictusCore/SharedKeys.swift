@@ -19,6 +19,14 @@ public enum SharedKeys {
     /// "ready" = active model is loaded in RAM and `transcribe()` calls will succeed.
     /// The keyboard reads this to refuse mic taps during load (issue #144).
     public static let modelLoadState = "dictus.modelLoadState"
+    /// `[modelIdentifier: installIdentity]` — which models have run an inference in THIS
+    /// installation of Dictus (issue #542).
+    ///
+    /// The three keys above all describe the model FILE, and a downloaded file whose Core
+    /// ML cache is cold cannot transcribe for minutes. This is the one that tells the two
+    /// apart, and it is the reason the keyboard can refuse a dictation it would otherwise
+    /// have lost. Read and written only through `ModelWarmth`.
+    public static let modelWarmth = "dictus.modelWarmth"
 
     // Keyboard-App cross-process contracts (added for Plan 3.1)
     /// Legacy single global keyboard layout, stored as String ("azerty"/"qwerty"/"qwertz").

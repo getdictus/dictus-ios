@@ -8,6 +8,7 @@
 // and the init lock, so moving it out did not mean opening up the coordinator's
 // private state wholesale.
 import Foundation
+import UIKit
 import DictusCore
 import WhisperKit
 
@@ -54,7 +55,11 @@ extension DictationCoordinator {
         RecordTapRouting.decide(
             dictationStatus: status,
             isModelDownloaded: defaults.bool(forKey: SharedKeys.modelReady),
-            loadState: modelLoadState
+            loadState: modelLoadState,
+            isModelWarm: ModelWarmth.isActiveModelWarm(
+                defaults: defaults,
+                systemVersion: UIDevice.current.systemVersion
+            )
         )
     }
 
@@ -299,9 +304,9 @@ extension DictationCoordinator {
         // fourth-review finding 2). It is raised only when somebody else already holds
         // the gate, and it comes down when this loop ends — which is the moment the
         // caller takes the hardware and starts being responsible for its own progress.
-        let deferralIsOurs = isInsideEngineLoadForDictation && neuralEngineHolder != nil
-        if deferralIsOurs { isWaitingForNeuralEngine = true }
-        defer { if deferralIsOurs { isWaitingForNeuralEngine = false } }
+        let deferralIsOurs = Self.isInsideEngineLoadForDictation && neuralEngineHolder != nil
+        if deferralIsOurs { enterNeuralEngineWait() }
+        defer { if deferralIsOurs { leaveNeuralEngineWait() } }
 
         while neuralEngineHolder != nil {
             try await Task.sleep(nanoseconds: 500_000_000)
@@ -360,6 +365,22 @@ extension DictationCoordinator {
     /// a lock of its own while this one was parked. Going straight to the compile after
     /// a single wait would be the double compile this exists to prevent.
     ///
+    /// THIS WAIT ALSO DEFERS THE STAGE WATCHDOG (issue #542). The deferral used to be
+    /// raised only inside `acquireNeuralEngine`'s queue wait, and a dictation started
+    /// while the app process was dead never reaches that wait: it parks here, on the
+    /// launch preload's `initTask`, and the 30s transcription watchdog cancelled it. That
+    /// is not a belt-and-braces addition — parking on this lock is the normal path of
+    /// every cold-start dictation, and it survived on margin alone. Two measured
+    /// survivals on a warm cache, 7s and 3s parked against a 30s budget; a cold backgrounded
+    /// compile is 48s for Parakeet and 236s for Turbo.
+    ///
+    /// SAME STRICT RULE AS `acquireNeuralEngine`: defer only while the in-flight init
+    /// belongs to somebody else. Being inside this loop *is* that condition — the task was
+    /// installed before this caller arrived, so it is never this dictation's own work — and
+    /// the flag comes down on every exit. Deferring around a caller's own compile is what
+    /// turns a recoverable failure into an unbounded hang, which is the trade
+    /// `waitingForNeuralEngine` documents at length.
+    ///
     /// - Returns: `true` when the caller can return immediately because the load that
     ///   just finished was the one it wanted.
     func awaitInFlightEngineInit(
@@ -367,7 +388,23 @@ extension DictationCoordinator {
         component: String,
         isAlreadyLoaded: () -> Bool
     ) async throws -> Bool {
+        // Raised lazily rather than before the loop: a caller that finds no lock installed
+        // waits for nothing and must not lower a deferral it never raised. `defer` covers
+        // the `return true` in the middle as well as the two normal exits.
+        var deferralIsOurs = false
+        defer { if deferralIsOurs { leaveNeuralEngineWait() } }
+
         while let inFlight = initTask {
+            if Self.isInsideEngineLoadForDictation, !deferralIsOurs {
+                deferralIsOurs = true
+                enterNeuralEngineWait()
+                PersistentLog.log(.diagnosticProbe(
+                    component: "NeuralEngine",
+                    instanceID: modelName,
+                    action: "queuedBehindEngineInit",
+                    details: "caller=\(component) watchdogDeferred=true"
+                ))
+            }
             let isCurrentGeneration = initTaskEpoch == modelLoadEpoch
             if #available(iOS 14.0, *) {
                 DictusLogger.app.info("Engine init already in progress — awaiting existing task")
@@ -477,12 +514,19 @@ extension DictationCoordinator {
     ///
     /// The rule the watchdog needs is narrower: **defer only while ANOTHER holder owns
     /// the gate.** The moment this caller takes it, the work is its own and the watchdog
-    /// must be allowed to do its job. So the deferral is raised inside the queue wait
-    /// (see `acquireNeuralEngine`) and comes down the instant the gate is taken.
+    /// must be allowed to do its job. So the deferral is raised inside the waits
+    /// themselves — `acquireNeuralEngine`'s queue wait and `awaitInFlightEngineInit`'s
+    /// wait on the init lock (issue #542) — and comes down the instant either ends.
+    ///
+    /// A TASK-LOCAL BINDING, so the marker travels with this call and not with the
+    /// coordinator: `ModelManager`'s prewarms run concurrently, call
+    /// `acquireNeuralEngine` themselves, and must read `false` rather than inheriting a
+    /// dictation's marker and raising a deferral that is neither theirs to raise nor
+    /// theirs to lower. See `isInsideEngineLoadForDictation` for what that cost.
     func waitingForNeuralEngine<T>(_ work: () async throws -> T) async rethrows -> T {
-        isInsideEngineLoadForDictation = true
-        defer { isInsideEngineLoadForDictation = false }
-        return try await work()
+        try await Self.$isInsideEngineLoadForDictation.withValue(true) {
+            try await work()
+        }
     }
 
     /// Whether a fired stage watchdog should be deferred rather than acted on.
@@ -496,6 +540,10 @@ extension DictationCoordinator {
     /// hardware itself is responsible for its own progress again, and if its compile
     /// hangs the watchdog must be free to act — otherwise deferring here turns a
     /// recoverable failure into an unbounded one, which is what this branch is about.
+    ///
+    /// "THE GATE" IS EITHER OF TWO WAITS since issue #542 — the Neural Engine queue and
+    /// the engine-init lock. The predicate is the same for both and it is not "a load is
+    /// running" but "somebody else's load is running".
     func shouldDeferStageWatchdog(for status: DictationStatus) -> Bool {
         guard isWaitingForNeuralEngine else { return false }
         PersistentLog.log(.diagnosticProbe(
@@ -578,11 +626,24 @@ extension DictationCoordinator {
         let start = Date()
         do {
             try await engine.runWarmInference()
+            // This line is also where the model stops being cold for this install (#542).
+            // A completed warm inference is the first proof anything in this process has
+            // that the model can produce a RESULT rather than merely be resident — which is
+            // exactly the distinction the readiness gate was missing. Written here and
+            // nowhere else, so the claim can never outrun the evidence for it.
+            ModelWarmth.markWarm(
+                modelName,
+                identity: ModelWarmth.installIdentity(
+                    bundlePathComponents: Bundle.main.bundleURL.pathComponents,
+                    systemVersion: UIDevice.current.systemVersion
+                ),
+                defaults: defaults
+            )
             PersistentLog.log(.diagnosticProbe(
                 component: "WarmInference",
                 instanceID: modelName,
                 action: "completed",
-                details: "ms=\(Int(Date().timeIntervalSince(start) * 1000)) engine=\(engine.engineName) samples=\(WarmInferenceAudio.sampleCount)"
+                details: "ms=\(Int(Date().timeIntervalSince(start) * 1000)) engine=\(engine.engineName) samples=\(WarmInferenceAudio.sampleCount) warmthRecorded=true"
             ))
         } catch {
             // Not warm after all, so do not remember it as warm: the next load of this

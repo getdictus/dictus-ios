@@ -175,9 +175,24 @@ class DictationCoordinator: ObservableObject {
     var initTaskEpoch = 0
 
     /// Set while a dictation is somewhere inside `ensureEngineReady`. On its own it says
-    /// nothing about whose work is blocking; `isQueuedForNeuralEngine` is the one the
+    /// nothing about whose work is blocking; `isWaitingForNeuralEngine` is the one the
     /// watchdog reads. Raised only by `waitingForNeuralEngine`, at the one call site.
-    var isInsideEngineLoadForDictation = false
+    ///
+    /// TASK-LOCAL, NOT A STORED FLAG, AND THAT IS THE WHOLE POINT (CodeRabbit on #542).
+    /// It used to be an instance property, which meant it answered "is *a* dictation
+    /// inside an engine load" to whoever asked — including callers that are not that
+    /// dictation. `ModelManager`'s two prewarm paths call `acquireNeuralEngine` from
+    /// their own tasks, by design and with a comment saying so, precisely to wait out
+    /// the dictation path's compile. Each of them read this flag as if the wait were
+    /// theirs, raised the shared deferral, and lowered it again on the way out — under a
+    /// dictation still parked in a wait of its own.
+    ///
+    /// A task-local answers the question that was actually meant: is **this** wait on a
+    /// dictation's call path. Every other caller reads false and raises nothing, which
+    /// also closes a hole that predates #542 — a prewarm queued behind the dictation's
+    /// OWN compile used to defer the watchdog around that compile's hang, which is the
+    /// unbounded failure `waitingForNeuralEngine` exists to prevent.
+    @TaskLocal static var isInsideEngineLoadForDictation = false
 
     /// Set while a dictation is parked waiting for the Neural Engine rather than doing
     /// any work of its own (fourth review, finding 2).
@@ -192,7 +207,37 @@ class DictationCoordinator: ObservableObject {
     /// The watchdog exists to catch a stage that will never hand over. A stage waiting
     /// for hardware WILL hand over, so this tells the two apart rather than shortening
     /// the wait or removing the guard.
-    var isWaitingForNeuralEngine = false
+    ///
+    /// TWO WAITS RAISE IT, and the second one is the common one (issue #542):
+    /// `acquireNeuralEngine`'s queue wait, and `awaitInFlightEngineInit`'s wait on the
+    /// init lock. A dictation started while the app process was dead parks on the second
+    /// and never reaches the first, so for a year the deferral covered the rarer of the
+    /// two paths. Both raise it only while the work being waited on belongs to somebody
+    /// else, and both lower it the moment this caller becomes responsible for its own
+    /// progress.
+    ///
+    /// A DEPTH AND NOT A BOOL (CodeRabbit on #542). An earlier version of this was a
+    /// Bool, justified by "there is at most one dictation, so the two waits can never be
+    /// raised at the same time". That argument was wrong, and the counter-example is in
+    /// this repository: a scope that raises a shared Bool also lowers it, so any second
+    /// scope that overlaps the first clears the deferral out from under a wait that is
+    /// still parked, and the watchdog then cancels a dictation whose audio is captured
+    /// and perfectly good. A depth cannot be cleared by somebody else's `defer`.
+    private var neuralEngineWaitDepth = 0
+
+    /// Whether any dictation-owned wait is currently parked. Read by the watchdog.
+    var isWaitingForNeuralEngine: Bool { neuralEngineWaitDepth > 0 }
+
+    /// Enter and leave a dictation-owned wait. Balanced by construction: both call sites
+    /// pair the entry with a `defer`, and the floor at zero means a stray exit cannot
+    /// push the depth negative and silently disarm every later deferral.
+    func enterNeuralEngineWait() {
+        neuralEngineWaitDepth += 1
+    }
+
+    func leaveNeuralEngineWait() {
+        neuralEngineWaitDepth = max(0, neuralEngineWaitDepth - 1)
+    }
 
     /// Who holds the Neural Engine for a Core ML compile right now, or nil if it is free.
     ///

@@ -2743,24 +2743,24 @@
         }
       }
     },
-    "The first preparation of this model takes about %lld minutes. It happens only once, and later ones take a few seconds." : {
-      "comment" : "Preparation screen: names how long a first Core ML compile takes for models where it has been measured (issue #432). The argument is a number of minutes, always 2 or more.",
+    "After each update, the first preparation of this model takes about %lld minutes. Later ones take a few seconds." : {
+      "comment" : "Preparation screen: names how long a first Core ML compile takes for models where it has been measured (issue #432). The argument is a number of minutes, always 2 or more. The wait returns after every install, app update and OS update (issue #542).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La première préparation de ce modèle prend environ %lld minutes. Elle n'a lieu qu'une fois, et les suivantes ne prennent que quelques secondes."
+            "value" : "Après chaque mise à jour, la première préparation de ce modèle prend environ %lld minutes. Les suivantes ne prennent que quelques secondes."
           }
         }
       }
     },
-    "The first preparation of this model takes under a minute. It happens only once, and later ones take a few seconds." : {
-      "comment" : "Preparation screen: shown for a model whose measured first compile is under a minute, such as Medium at 32s (issue #432).",
+    "After each update, the first preparation of this model takes under a minute. Later ones take a few seconds." : {
+      "comment" : "Preparation screen: shown for a model whose measured first compile is under a minute, such as Medium at 32s (issue #432). The wait returns after every install, app update and OS update (issue #542).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La première préparation de ce modèle prend moins d'une minute. Elle n'a lieu qu'une fois, et les suivantes ne prennent que quelques secondes."
+            "value" : "Après chaque mise à jour, la première préparation de ce modèle prend moins d'une minute. Les suivantes ne prennent que quelques secondes."
           }
         }
       }
@@ -2960,13 +2960,13 @@
         }
       }
     },
-    "This preparation happens only once for this model. Later ones take a few seconds." : {
-      "comment" : "Preparation screen: shown for a model whose first compile nobody has timed. Says the wait happens once and invents no duration (issue #432).",
+    "This preparation runs again after each update. Later ones take a few seconds." : {
+      "comment" : "Preparation screen: shown for a model whose first compile nobody has timed. Says when the wait comes back and invents no duration (issues #432, #542).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cette préparation n'a lieu qu'une fois pour ce modèle. Les suivantes ne prennent que quelques secondes."
+            "value" : "Cette préparation recommence après chaque mise à jour. Les suivantes ne prennent que quelques secondes."
           }
         }
       }
