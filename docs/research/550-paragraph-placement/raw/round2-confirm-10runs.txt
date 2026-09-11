@@ -1,0 +1,212 @@
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'polish-harness' complete! (0.21s)
+
+
+████ ARM 6b-index-count — kind=index, 10 run(s) × 7 fixture(s)
+     Arm 6 plus the count. The two variables the round exists to separate: the shape of the output, and whether the model is told how many breaks to place.
+
+━━ [P1-free-form] 403 chars, 4 sentences, N=1
+   cut: 1. Bon alors, je pensais à un truc ce matin en marchant.
+        2. C'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.
+        3. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser.
+        4. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.
+  #1 1061ms breaks=1/N=1 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #2 356ms breaks=1/N=1 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #3 364ms breaks=2/N=1 starts=2,4 fidelity=ok inSentence=0
+     engineOut: 2, 4
+  #4 350ms breaks=2/N=1 starts=2,4 fidelity=ok inSentence=0
+     engineOut: 2,4
+  #5 323ms breaks=1/N=1 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #6 369ms breaks=3/N=1 starts=2,3,4 fidelity=ok inSentence=0
+     engineOut: 1, 2, 3, 4
+  #7 347ms breaks=2/N=1 starts=2,4 fidelity=ok inSentence=0
+     engineOut: 2, 4
+  #8 397ms breaks=1/N=1 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #9 329ms breaks=1/N=1 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #10 409ms breaks=1/N=1 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+
+━━ [P2-project-update] 698 chars, 9 sentences, N=2
+   cut: 1. Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.
+        2. Il reste deux trucs.
+        3. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout.
+        4. Et le deuxième c'est le vocabulaire personnalisé.
+        5. Et là dessus on a une spec mais pas de code.
+        6. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version.
+        7. L'objectif, c'est de passer la barre des 1000 avant fin octobre.
+        8. Je vois Sarah jeudi à 14h pour caler la partie Apple Store.
+        9. Et si tout se passe bien, on soumet la semaine du 12.
+  #1 394ms breaks=2/N=2 starts=2,4 fidelity=ok inSentence=0
+     engineOut: 2, 4
+  #2 372ms breaks=0/N=2 PARSE-FAIL(sentence 10 does not exist (cut has 9))
+     engineOut: 2, 10
+  #3 347ms breaks=1/N=2 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #4 391ms breaks=2/N=2 starts=2,6 fidelity=ok inSentence=0
+     engineOut: 2, 6
+  #5 381ms breaks=2/N=2 starts=2,7 fidelity=ok inSentence=0
+     engineOut: 2, 7
+  #6 330ms breaks=1/N=2 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #7 373ms breaks=2/N=2 starts=2,6 fidelity=ok inSentence=0
+     engineOut: 2, 6
+  #8 374ms breaks=1/N=2 starts=5 fidelity=ok inSentence=0
+     engineOut: 1, 5
+  #9 375ms breaks=2/N=2 starts=2,5 fidelity=ok inSentence=0
+     engineOut: 2, 5
+  #10 378ms breaks=2/N=2 starts=2,6 fidelity=ok inSentence=0
+     engineOut: 2, 6
+
+━━ [P3-message-draft] 356 chars, 6 sentences, N=1
+   cut: 1. Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.
+        2. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait.
+        3. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait.
+        4. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante.
+        5. Mais ce sera moyen.
+        6. Dis-moi ce qui t'arrange.
+  #1 381ms breaks=3/N=1 starts=2,4,6 fidelity=ok inSentence=0
+     engineOut: 2, 4, 6
+  #2 339ms breaks=2/N=1 starts=2,5 fidelity=ok inSentence=0
+     engineOut: 2, 5
+  #3 303ms breaks=1/N=1 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #4 427ms breaks=5/N=1 starts=2,3,4,5,6 fidelity=ok inSentence=0
+     engineOut: 1, 2, 3, 4, 5, 6
+  #5 401ms breaks=4/N=1 starts=2,3,4,5 fidelity=ok inSentence=0
+     engineOut: 2, 3, 4, 5
+  #6 347ms breaks=1/N=1 starts=3 fidelity=ok inSentence=0
+     engineOut: 1, 3
+  #7 308ms breaks=1/N=1 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #8 330ms breaks=2/N=1 starts=2,3 fidelity=ok inSentence=0
+     engineOut: 2, 3
+  #9 347ms breaks=2/N=1 starts=2,4 fidelity=ok inSentence=0
+     engineOut: 2, 4
+  #10 340ms breaks=2/N=1 starts=2,4 fidelity=ok inSentence=0
+     engineOut: 2, 4
+
+━━ [P4-explanation] 838 chars, 11 sentences, N=2
+   cut: 1. Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.
+        2. En gros, il y a trois étapes.
+        3. La première c'est la capture.
+        4. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.
+        5. La deuxième étape c'est le modèle.
+        6. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment.
+        7. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant.
+        8. Parce que le contexte aide énormément à lever les ambiguïtés.
+        9. Et la troisième étape, c'est la mise en forme.
+        10. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix.
+        11. Le deuxième c'est 90 % du temps.
+  #1 415ms breaks=2/N=2 starts=2,4 fidelity=ok inSentence=0
+     engineOut: 2, 4
+  #2 415ms breaks=1/N=2 starts=10 fidelity=ok inSentence=0
+     engineOut: 1, 10
+  #3 403ms breaks=2/N=2 starts=2,10 fidelity=ok inSentence=0
+     engineOut: 2, 10
+  #4 408ms breaks=2/N=2 starts=2,9 fidelity=ok inSentence=0
+     engineOut: 2, 9
+  #5 375ms breaks=1/N=2 starts=2 fidelity=ok inSentence=0
+     engineOut: 1, 2
+  #6 418ms breaks=1/N=2 starts=10 fidelity=ok inSentence=0
+     engineOut: 1, 10
+  #7 419ms breaks=2/N=2 starts=2,3 fidelity=ok inSentence=0
+     engineOut: 2, 3
+  #8 410ms breaks=2/N=2 starts=2,10 fidelity=ok inSentence=0
+     engineOut: 2, 10
+  #9 412ms breaks=1/N=2 starts=10 fidelity=ok inSentence=0
+     engineOut: 1, 10
+  #10 400ms breaks=2/N=2 starts=2,10 fidelity=ok inSentence=0
+     engineOut: 2, 10
+
+━━ [P5-rambling] 1240 chars, 26 sentences, N=3
+   cut: 1. Bon alors, je me lance.
+        2. Je voulais faire le point sur plein de choses en fait.
+        3. Déjà, il faut que je répète le comptable.
+        4. Je l'ai eu vendredi.
+        5. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.
+        6. Bon, ensuite, ça, c'est important.
+        7. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend.
+        8. Je crois qu'il commence un peu à se demander si je les zappais.
+        9. Ce qui est un peu le cas, honnêtement.
+        10. Quoi d'autre?
+        11. Ah oui, le site, le site.
+        12. Il faut le refaire.
+        13. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait.
+        14. Les gens arrivent, ils lisent trois lignes, ils partent.
+        15. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon.
+        16. Ça, c'est vraiment le sujet en fait.
+        17. Enfin, bref.
+        18. Ah, j'ai aussi.
+        19. Il faut que je pense à annuler l'abonnement machine.
+        20. Celui à 19 euros par mois qu'on n'utilise plus depuis février.
+        21. Ça fait donc 6 mois qu'on paie pour rien.
+        22. Super quoi.
+        23. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi.
+        24. Ça, c'est tout.
+        25. Ah, non, il y avait un dernier truc.
+        26. Ça m'échappe, mais ça me reviendra.
+  #1 590ms breaks=2/N=3 starts=10,20 fidelity=ok inSentence=0
+     engineOut: 1, 10, 20
+  #2 582ms breaks=2/N=3 starts=5,9 fidelity=ok inSentence=0
+     engineOut: 1, 5, 9
+  #3 634ms breaks=3/N=3 starts=4,10,14 fidelity=ok inSentence=0
+     engineOut: 4, 10, 14
+  #4 598ms breaks=3/N=3 starts=2,4,11 fidelity=ok inSentence=0
+     engineOut: 2, 4, 11
+  #5 584ms breaks=2/N=3 starts=2,3 fidelity=ok inSentence=0
+     engineOut: 1, 2, 3
+  #6 574ms breaks=2/N=3 starts=2,3 fidelity=ok inSentence=0
+     engineOut: 1, 2, 3
+  #7 568ms breaks=2/N=3 starts=6,24 fidelity=ok inSentence=0
+     engineOut: 1, 6, 24
+  #8 601ms breaks=3/N=3 starts=2,13,25 fidelity=ok inSentence=0
+     engineOut: 2, 13, 25
+  #9 586ms breaks=3/N=3 starts=5,10,15 fidelity=ok inSentence=0
+     engineOut: 5, 10, 15
+  #10 591ms breaks=3/N=3 starts=2,6,10 fidelity=ok inSentence=0
+     engineOut: 2, 6, 10
+
+━━ [P6-unscripted] 1161 chars, 6 sentences, N=3
+   cut: 1. Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.
+        2. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.
+        3. L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.
+        4. Et voilà, tout simplement, l'idée ça va être de voir tout ça.
+        5. Et ensuite, on va analyser tout ça.
+        6. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.
+  #1 469ms breaks=2/N=3 starts=2,3 fidelity=ok inSentence=0
+     engineOut: 1, 2, 3
+  #2 487ms breaks=2/N=3 starts=2,3 fidelity=ok inSentence=0
+     engineOut: 1, 2, 3
+  #3 478ms breaks=2/N=3 starts=3,5 fidelity=ok inSentence=0
+     engineOut: 1, 3, 5
+  #4 470ms breaks=2/N=3 starts=4,6 fidelity=ok inSentence=0
+     engineOut: 1, 4, 6
+  #5 475ms breaks=2/N=3 starts=2,3 fidelity=ok inSentence=0
+     engineOut: 1, 2, 3
+  #6 473ms breaks=2/N=3 starts=2,3 fidelity=ok inSentence=0
+     engineOut: 1, 2, 3
+  #7 471ms breaks=2/N=3 starts=2,4 fidelity=ok inSentence=0
+     engineOut: 1, 2, 4
+  #8 476ms breaks=2/N=3 starts=2,3 fidelity=ok inSentence=0
+     engineOut: 1, 2, 3
+  #9 472ms breaks=2/N=3 starts=5,6 fidelity=ok inSentence=0
+     engineOut: 1, 5, 6
+  #10 474ms breaks=2/N=3 starts=3,5 fidelity=ok inSentence=0
+     engineOut: 1, 3, 5
+
+━━ [P7-89s] 1150 chars, 8 sentences, N=3
+   cut: 1. Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.
+        2. Ce que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.
+        3. Alors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.
+        4. Bref, on va avoir un truc qui va être beaucoup plus structuré.
+        5. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça.
+        6. Et ça sera un mode intelligent de Dictus.
+        7. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire.
+        8. Encore une fois, si on arrive à faire un truc qu

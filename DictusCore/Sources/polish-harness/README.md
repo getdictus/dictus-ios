@@ -99,6 +99,44 @@ are written to put pressure on their mode — a field dictation that failed on
 device, rambles with no structure, input already partly in the target language,
 and input in a language outside the four.
 
+## Paragraph placement (#550)
+
+`paragraph` drives Apple FM on light, committed prompt **arms** whose only job is to
+split an already-polished French text into paragraphs, and scores the four bars
+declared in `docs/research/550-paragraph-placement/bars.md` before the first arm call.
+The arms live in `docs/research/550-paragraph-placement/arms/`, one JSON file each, so
+every prompt exists as a file before it is run and stays re-runnable after.
+
+```sh
+# One arm, five samples per fixture. --arm repeats, and the arms run in order.
+swift run polish-harness paragraph Sources/polish-harness/fixtures/paragraph-fr.json \
+  --arm ../docs/research/550-paragraph-placement/arms/7-index-ranked.json \
+  --runs 5 --json /tmp/capture.json
+```
+
+Two things about it differ from every other command here, and both are deliberate.
+
+**It runs no `PolishPipeline`.** Two arms return **integers** rather than text — the
+numbers of the sentences that start a paragraph — and the text is reassembled in code
+from `PolishSegmentation.sentences`. Every acceptance band necessarily rejects a list
+of integers, so routing them through the pipeline would measure the guardrail instead
+of the model. The question is a capability question, and a guardrail refusal and a
+model failure must not be summed. The price is that **whatever holds here still has to
+be re-measured inside the pipeline before it could ship.**
+
+**It scores its own bars**, on the same sentence cut the arm was given, so the prompt
+and the scorer cannot disagree about what a boundary is. The cut is printed once per
+fixture in the capture so it is auditable rather than assumed. What the Swift side
+does not score — placement agreement with the Typeless reference, and the fit for the
+break count — is in `docs/research/550-paragraph-placement/score.py`, because bars.md
+declares both **reported, never barred**.
+
+Fixture set: `fixtures/paragraph-fr.json`, seven **already-polished** texts. #437's six
+second-pass texts verbatim, plus fixture 7, the 89 s sample of 2026-09-11. Polished
+rather than raw because a paragrapher is a presentation pass, and because "the words
+did not move" is not a predicate that can be written against a transcript polish is
+allowed to change.
+
 ## Guardrail corpora (#413, #414, #466)
 
 `guardrail` scores the three output-inspection checks — the per-segment language

@@ -51,7 +51,14 @@ struct ParagraphArm: Decodable {
     let instructions: String
     let framing: String
 
-    var returnsIndices: Bool { kind == "index" }
+    var returnsIndices: Bool { kind == "index" || kind == "index-ranked" }
+
+    /// The model returns the boundaries in order of confidence and the caller keeps
+    /// the first N. Round 1's finding made this arm worth writing: telling the model
+    /// the count moves it from "one break per sentence" to within one break of N, but
+    /// not to N. Ranking moves the count out of the model's hands entirely, the same
+    /// way returning integers moved fidelity out of them.
+    var truncatesToN: Bool { kind == "index-ranked" }
 }
 
 /// One fixture, resolved once: the text, the sentence cut every arm and every bar is
@@ -98,6 +105,11 @@ struct ParagraphRun {
     let listSyntax: Bool
     /// Index arms only: the output was not a usable list of sentence numbers.
     let parseFailure: String?
+    /// Set when Apple FM threw. Such a run is excluded from every bar and reported on
+    /// its own line: a model that never answered has not violated a contract, and
+    /// counting it as a fidelity failure would put two different findings in one
+    /// number. Round 1 hit one in 245.
+    let engineError: String?
 }
 
 // MARK: - The round
@@ -144,18 +156,19 @@ enum ParagraphRound {
         let framing = resolve(arm.framing, case: work)
 
         let started = Date()
-        let engineOutput: String
+        var engineOutput = ""
+        var engineError: String?
         do {
             let session = LanguageModelSession(instructions: instructions)
             let response = try await session.respond(to: framing)
             engineOutput = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
-            engineOutput = "<engine error: \(error)>"
+            engineError = "\(error)"
         }
         let milliseconds = Int(Date().timeIntervalSince(started) * 1000)
 
-        return score(arm: arm, case: work, run: index,
-                     engineOutput: engineOutput, milliseconds: milliseconds)
+        return score(arm: arm, case: work, run: index, engineOutput: engineOutput,
+                     engineError: engineError, milliseconds: milliseconds)
     }
 
     // MARK: Scoring
@@ -164,6 +177,7 @@ enum ParagraphRound {
                       case work: ParagraphCase,
                       run index: Int,
                       engineOutput: String,
+                      engineError: String? = nil,
                       milliseconds: Int) -> ParagraphRun {
         let text = work.fixture.raw
         let sentences = work.sentences
@@ -172,11 +186,13 @@ enum ParagraphRound {
         var parseFailure: String?
         var fidelity: Bool?
 
-        if arm.returnsIndices {
+        if engineError != nil {
+            // Nothing to score. Left entirely out of the bars by the nil fields.
+        } else if arm.returnsIndices {
             switch parseIndices(engineOutput, sentenceCount: sentences.count) {
             case .success(let parsed):
-                starts = parsed
-                let reassembled = reassemble(sentences, startingAt: parsed)
+                starts = (arm.truncatesToN ? Array(parsed.prefix(work.targetN)) : parsed).sorted()
+                let reassembled = reassemble(sentences, startingAt: starts)
                 output = reassembled
                 // Structurally true, and measured anyway: it is the sentence cut that
                 // is being trusted here, not the model, and a cut that dropped a
@@ -199,7 +215,9 @@ enum ParagraphRound {
 
         let breaks = output.map { $0.filter { $0 == "\n" }.count } ?? 0
         let boundaryViolations: Int?
-        if arm.returnsIndices {
+        if engineError != nil {
+            boundaryViolations = nil
+        } else if arm.returnsIndices {
             // Structural: a start index is a sentence number, so there is no offset at
             // which a break could land inside a sentence.
             boundaryViolations = parseFailure == nil ? 0 : nil
@@ -216,7 +234,7 @@ enum ParagraphRound {
             engineOutput: engineOutput, output: output, starts: starts, breaks: breaks,
             targetN: work.targetN, sentenceCount: sentences.count, fidelity: fidelity,
             boundaryViolations: boundaryViolations, listSyntax: listSyntax,
-            parseFailure: parseFailure
+            parseFailure: parseFailure, engineError: engineError
         )
     }
 
@@ -300,7 +318,10 @@ enum ParagraphRound {
         if let outOfRange = numbers.first(where: { $0 < 1 || $0 > sentenceCount }) {
             return .failure("sentence \(outOfRange) does not exist (cut has \(sentenceCount))")
         }
-        return .success(Array(Set(numbers.filter { $0 > 1 })).sorted())
+        // First-occurrence order, NOT sorted: the ranked arm's whole design is that
+        // the ORDER is the model's answer, and sorting here would throw it away.
+        var seen: Set<Int> = []
+        return .success(numbers.filter { $0 > 1 && seen.insert($0).inserted })
     }
 
     /// The deterministic reassembly. This is the half of arm 6 that is not the model:
@@ -345,12 +366,21 @@ func runParagraphRound(fixtures: [Fixture], armPaths: [String], runs: Int, jsonO
     }
 
     var all: [ParagraphRun] = []
+    var printedCut: Set<String> = []
     for arm in arms {
         print("\n\n████ ARM \(arm.id) — kind=\(arm.kind), \(runs) run(s) × \(fixtures.count) fixture(s)")
         if let note = arm.note { print("     \(note)") }
         for work in fixtures.map(ParagraphCase.init) {
             print("\n━━ [\(work.fixture.id)] \(work.fixture.raw.count) chars, "
                   + "\(work.sentences.count) sentences, N=\(work.targetN)")
+            if !printedCut.contains(work.fixture.id) {
+                printedCut.insert(work.fixture.id)
+                // The cut decides what a boundary IS for arms 5, 6, 6b and 7, and for
+                // bar 2 on every arm. bars.md §9 names it as a risk, so it is printed
+                // rather than assumed.
+                print("   cut: " + ParagraphRound.numbered(work.sentences)
+                        .replacingOccurrences(of: "\n", with: "\n        "))
+            }
             for index in 1...max(1, runs) {
                 let result = await ParagraphRound.run(arm, case: work, run: index)
                 all.append(result)
@@ -393,6 +423,7 @@ struct ParagraphRunRecord: Encodable {
     let boundaryViolations: Int?
     let listSyntax: Bool
     let parseFailure: String?
+    let engineError: String?
     let engineOutput: String
     let output: String?
 
@@ -409,6 +440,7 @@ struct ParagraphRunRecord: Encodable {
         boundaryViolations = run.boundaryViolations
         listSyntax = run.listSyntax
         parseFailure = run.parseFailure
+        engineError = run.engineError
         engineOutput = run.engineOutput
         output = run.output
     }
@@ -422,6 +454,10 @@ extension ParagraphRound {
     static func verdict(_ result: ParagraphRun) -> String {
         var parts: [String] = ["\(result.milliseconds)ms",
                                "breaks=\(result.breaks)/N=\(result.targetN)"]
+        if let failure = result.engineError {
+            parts.append("ENGINE-ERROR(\(failure.prefix(60)))")
+            return parts.joined(separator: " ")
+        }
         if let failure = result.parseFailure {
             parts.append("PARSE-FAIL(\(failure))")
             return parts.joined(separator: " ")
@@ -444,9 +480,12 @@ extension ParagraphRound {
     /// The bar table, per arm, over every run of the round.
     static func summary(_ all: [ParagraphRun], arms: [ParagraphArm]) {
         print("\n\n════ BARS, per arm (bars.md §6)\n")
-        print("arm                  runs  fidelity  inSentence  listSyntax  parseFail  countHit  median ms")
+        print(pad("arm", 20) + pad("runs", 6)
+              + ["fidelity", "inSentence", "listSyntax", "parseFail", "countHit", "median ms", "engineErr"]
+                  .map { pad($0, 12) }.joined())
         for arm in arms {
-            let rows = all.filter { $0.arm == arm.id }
+            let errors = all.filter { $0.arm == arm.id && $0.engineError != nil }.count
+            let rows = all.filter { $0.arm == arm.id && $0.engineError == nil }
             guard !rows.isEmpty else { continue }
             let fidelityFails = rows.filter { $0.fidelity == false }.count
             let interior = rows.compactMap(\.boundaryViolations).filter { $0 > 0 }.count
@@ -455,16 +494,15 @@ extension ParagraphRound {
             let countHits = rows.filter { $0.parseFailure == nil && $0.breaks == $0.targetN }.count
             let times = rows.map(\.milliseconds).sorted()
             let median = times[times.count / 2]
-            print(String(format: "%-20@ %4d  %8@  %10@  %10@  %9@  %8@  %9d",
-                         arm.id as NSString, rows.count,
-                         "\(fidelityFails)/\(rows.count)" as NSString,
-                         "\(interior)/\(rows.count)" as NSString,
-                         "\(lists)/\(rows.count)" as NSString,
-                         "\(parseFails)/\(rows.count)" as NSString,
-                         "\(countHits)/\(rows.count)" as NSString,
-                         median))
+            let cells = ["\(fidelityFails)/\(rows.count)", "\(interior)/\(rows.count)",
+                         "\(lists)/\(rows.count)", "\(parseFails)/\(rows.count)",
+                         "\(countHits)/\(rows.count)", "\(median)", "\(errors)"]
+            print(pad(arm.id, 20) + pad("\(rows.count)", 6)
+                  + cells.map { pad($0, 12) }.joined())
         }
         print("\n  fidelity / inSentence / listSyntax / parseFail are VIOLATION counts — 0 is the bar.")
+        print("  engineErr runs are excluded from every column: a call that never answered")
+        print("  has violated nothing, and folding it into fidelity would blur two findings.")
         print("  countHit is the number of runs whose break count equalled N.")
 
         print("\n\n════ BREAKS PER RUN, per arm per fixture (never pooled)\n")
@@ -474,13 +512,22 @@ extension ParagraphRound {
             print("── \(arm.id)")
             for fixture in orderedFixtures(rows) {
                 let runs = rows.filter { $0.fixture == fixture }.sorted { $0.run < $1.run }
-                let counts = runs.map { $0.parseFailure == nil ? String($0.breaks) : "x" }
-                print(String(format: "   %-20@ N=%d  %@",
-                             fixture as NSString, runs[0].targetN,
-                             counts.joined(separator: ", ") as NSString))
+                let counts = runs.map { run -> String in
+                    if run.engineError != nil { return "e" }
+                    return run.parseFailure == nil ? String(run.breaks) : "x"
+                }
+                print("   " + pad(fixture, 20) + "N=\(runs[0].targetN)  "
+                      + counts.joined(separator: ", "))
             }
         }
         print("\n   x = the arm returned something that is not a usable answer.")
+        print("   e = Apple FM threw; the run is in no denominator above.")
+    }
+
+    /// Left-pad to a fixed column. `String(format: "%-20@")` does not honour a width
+    /// for `%@` here, which silently produced an unreadable committed capture.
+    static func pad(_ text: String, _ width: Int) -> String {
+        text.count >= width ? text + " " : text + String(repeating: " ", count: width - text.count)
     }
 
     private static func orderedFixtures(_ rows: [ParagraphRun]) -> [String] {
