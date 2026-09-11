@@ -1,0 +1,84 @@
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'polish-harness' complete! (0.12s)
+
+━━ [P1-salle] lang=fr stt=PK
+  raw:      Sinon je me débrouillerai pour suivre une visio depuis la salle à tante mais ce sera moyen
+  polished #1: Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante, mais ce sera moyen.
+            (success, 2461ms, detected=fr→natural)
+  polished #2: Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante, mais ce sera moyen.
+            (success, 1771ms, detected=fr→natural)
+  polished #3: Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante, mais ce sera moyen.
+            (success, 1754ms, detected=fr→natural)
+  polished #4: Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante, mais ce sera moyen.
+            (success, 1761ms, detected=fr→natural)
+  polished #5: Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante, mais ce sera moyen.
+            (success, 1748ms, detected=fr→natural)
+
+━━ [P2-morceaux] lang=fr stt=PK
+  raw:      Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaye de deviner quels sons ont été prononcés
+  polished #1: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaie de deviner quels sons ont été prononcés.
+            (success, 1737ms, detected=fr→natural)
+  polished #2: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaie de deviner quels sons ont été prononcés.
+            (success, 1750ms, detected=fr→natural)
+  polished #3: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaie de deviner quels sons ont été prononcés.
+            (success, 1741ms, detected=fr→natural)
+  polished #4: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaie de deviner quels sons ont été prononcés.
+            (success, 1747ms, detected=fr→natural)
+  polished #5: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaie de deviner quels sons ont été prononcés.
+            (success, 1729ms, detected=fr→natural)
+
+━━ [P3-comptable] lang=fr stt=PK
+  raw:      Il faut que je répète le comptable, le comptable je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle
+  polished #1: Il faut que je répète le comptable, le comptable, je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle.
+            (success, 1811ms, detected=fr→natural)
+  polished #2: Il faut que je répète le comptable, le comptable, je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle.
+            (success, 1816ms, detected=fr→natural)
+  polished #3: Il faut que je répète le comptable. Le comptable, je l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle.
+            (success, 1789ms, detected=fr→natural)
+  polished #4: Il faut que je répète le comptable, le comptable, je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle.
+            (success, 1814ms, detected=fr→natural)
+  polished #5: Il faut que je répète le comptable. Le comptable, je l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle.
+            (success, 1801ms, detected=fr→natural)
+
+━━ [P4-appstore] lang=fr stt=PK
+  raw:      Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12
+  polished #1: Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12.
+            (success, 1853ms, detected=fr→natural)
+  polished #2: Thomas a fini l'intégration StoreKit et ça passe en sandbox. Je vois Sarah jeudi pour caler la partie Apple Store. Si tout se passe bien, on soumet la semaine du 12.
+            (success, 1893ms, detected=fr→natural)
+  polished #3: Thomas a terminé l'intégration StoreKit et ça passe en sandbox. Je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien, on soumet la semaine du 12.
+            (success, 1877ms, detected=fr→natural)
+  polished #4: Thomas a terminé l'intégration StoreKit et ça passe en sandbox. Je vois Sarah jeudi pour caler la partie Apple Store et, si tout se passe bien, on soumet la semaine du 12.
+            (success, 1867ms, detected=fr→natural)
+  polished #5: Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12.
+            (success, 1860ms, detected=fr→natural)
+
+━━ [P5-zappe] lang=fr stt=PK
+  raw:      Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais
+  polished #1: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais
+            (engineFailed, 1718ms, detected=fr→natural, reason=guardrailViolation)
+  polished #2: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais
+            (engineFailed, 1686ms, detected=fr→natural, reason=guardrailViolation)
+  polished #3: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais
+            (engineFailed, 1697ms, detected=fr→natural, reason=guardrailViolation)
+  polished #4: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais
+            (engineFailed, 1708ms, detected=fr→natural, reason=guardrailViolation)
+  polished #5: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais
+            (engineFailed, 1701ms, detected=fr→natural, reason=guardrailViolation)
+
+━━ [P6-calcul] lang=fr stt=PK
+  raw:      Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps
+  polished #1: Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. La deuxième, c'est 90% du temps.
+            (success, 1867ms, detected=fr→natural)
+  polished #2: Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps.
+            (success, 1777ms, detected=fr→natural)
+  polished #3: Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. La deuxième, c'est 90 % du temps.
+            (success, 1902ms, detected=fr→natural)
+  polished #4: Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps.
+            (success, 1826ms, detected=fr→natural)
+  polished #5: Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. La deuxième est 90% du temps.
+            (success, 1817ms, detected=fr→natural)
+
+── outcomes: 25/30 success
+   engineFailed: 5/30 — P5-zappe×5
