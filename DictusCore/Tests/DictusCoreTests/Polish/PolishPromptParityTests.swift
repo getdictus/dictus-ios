@@ -102,10 +102,9 @@ final class PolishPromptParityTests: XCTestCase {
     /// to lift it at a change of subject. The licence was written five ways — as a
     /// permission, as an imperative, with three worked examples, restated in the GOAL
     /// line at the top, and asking for an ordinary newline instead of the marker — and
-    /// produced **not one line break in 132 outputs** across both prompt routes. The
-    /// same instruction moved into the user turn fires in roughly one output in four,
-    /// unstably, and twice in fifteen it breaks after every sentence rather than at a
-    /// section. Numbers in `docs/research/437-longform-breaks/findings.md`.
+    /// produced **not one line break in 144 outputs** across both prompt routes. The
+    /// same instruction moved into the user turn puts a break in 21 outputs of 168,
+    /// unstably, and 3 of those 21 break after every sentence rather than at a section. Numbers in `docs/research/437-longform-breaks/findings.md`.
     ///
     /// So the ban is a measurement now, not an oversight — the footing
     /// `testAutoPromptDoesNotCarryASRRepair` put rule 8's absence on. A future round is

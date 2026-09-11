@@ -14,7 +14,7 @@ Everything below is Apple FM on a Mac. Nothing here was confirmed on a physical 
 
 **The clause does not ship. Normal polish keeps its single block.**
 
-Seven arms, 252 outputs on the six fixtures, across both prompt routes. The bar that
+Twelve arms, 372 outputs on the six fixtures, across both prompt routes. The bar that
 decides — *fixtures 3, 4, 5 and 6 each return at least one line break, on every run* —
 is not approached by any arm. The best of them puts a break in **5 outputs of 18**, and
 never once on fixtures 3 and 6.
@@ -25,7 +25,7 @@ verdict.
 
 ## Finding 1 — the system prompt is not the lever, at all
 
-**132 outputs under five different system-prompt arms, and not one line break.**
+**144 outputs under five different system-prompt arms, and not one line break.**
 
 | Arm | What it changes in the system prompt | Outputs | With a break |
 |---|---|---|---|
@@ -70,12 +70,12 @@ instruction there is the only change in this round that produces a break at all.
 | J-auto | J on the Auto route | 30 | 4 | 14 |
 | K | G's user turn, GOAL line **and** bounded rule 5 | 30 | 2 | 11 |
 
-Read straight: the rate tops out around **one output in four** and moves as much with
-sampling as with wording. Stating the instruction at both ends (K) is not better than
+Read straight: **21 outputs of 168 carry a break at all**, the best single arm reaches
+5 in 18, and the rate moves as much with sampling as with wording. Stating the instruction at both ends (K) is not better than
 stating it at one. Damping it (H, I) makes it rarer without making it better placed.
 
-**And when it does fire, it often fires wrong.** Two of the fifteen firing outputs put
-one line per sentence — ten breaks on fixture 4, which has three sections. That is the
+**And when it does fire, it often fires wrong.** Three of the twenty-one firing outputs
+put one line per sentence — ten breaks on fixture 4, which has three sections. That is the
 failure the issue named in advance: *the risk is not too few breaks, it is too many*.
 
 Per fixture, breaks per run, best arm on each route:
@@ -132,7 +132,7 @@ Occurrences over all arms unless a cell says otherwise.
 
 | # | Bar | Result |
 |---|---|---|
-| 1 | Fixture 1 returns **0** breaks | **holds** — 0 in every output of every arm, 252 of 252 |
+| 1 | Fixture 1 returns **0** breaks | **holds** — 0 in all 62 of its outputs, every arm |
 | 2 | Fixtures 3, 4, 5, 6 return **≥ 1** break, every run | **fails** — best arm 5 outputs in 18; fixtures 3 and 6 never break under any arm |
 | 3 | **0** outputs carry list syntax | **holds** — 0 in 432 outputs, the probes included |
 | 4 | Fixture 5's `ça m'échappe mais ça me reviendra` survives every run | **fails, and it fails on the baseline too** — dropped 1/30 on baseline Auto, 0/30 on baseline per-language, and 0 in every candidate arm. One occurrence, on `develop`, unchanged by this round |
@@ -183,7 +183,7 @@ future attempt is spending.
 ## What this means for #437
 
 **The issue closes on the second of its two declared outcomes.** The clause was
-written, five ways, measured over 252 outputs on both prompt routes, and it does not
+written, eleven ways, measured over 312 candidate outputs on both prompt routes, and it does not
 hold the bars. Normal polish keeps its single block, and nothing in
 `DictusCore/Sources/DictusCore/Polish/` changes except a test that pins the ban so the
 next round has to be deliberate rather than accidental.

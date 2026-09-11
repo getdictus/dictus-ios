@@ -178,7 +178,7 @@ Traduction, whose transformations legitimately destroy alignment.
 **Nothing in this contract changes, and that is the result.** #437 asked whether the
 Forbidden list's *"Adding `<<NL>>` markers where none existed"* could be lifted at a
 change of subject, so a long dictation stops coming back as one block. The answer is
-measured rather than argued, over 252 outputs on six French dictations and both prompt
+measured rather than argued, over 372 outputs on six French dictations and both prompt
 routes: **it cannot, with the engine this build ships.**
 
 The contract the round was written against is worth recording even though it did not
@@ -196,9 +196,9 @@ contractual grounds.
 **What is measured and rejected: lifting the ban.** The licence was written as a
 permission, as an imperative, with worked examples, restated in the GOAL line, and
 asking for an ordinary newline instead of the pipeline's marker. Every one of those
-returned **zero line breaks** — 132 outputs. Moved into the user turn it fires in about
-one output in four, unstably, and when it fires it frequently breaks after every
-sentence. `PolishPromptParityTests.testEveryFreePolishPromptStillBansAddingMarkers`
+returned **zero line breaks** — 144 outputs. Moved into the user turn it fires in about
+one output in eight, unstably, and three of its twenty-one firing outputs break after
+every sentence rather than at a section. `PolishPromptParityTests.testEveryFreePolishPromptStillBansAddingMarkers`
 pins the ban so the next round has to be deliberate.
 
 **The limit is not fidelity and not the marker.** Handed already-polished text with the
