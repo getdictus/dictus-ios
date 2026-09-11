@@ -6,7 +6,7 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-10.
+Last reviewed: 2026-09-11.
 
 ## The lanes, in order
 
@@ -14,12 +14,12 @@ Last reviewed: 2026-09-10.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Now** |
-| **A′** | 1.8.3 — #23 auto-return, #531 last transcription | After B. #23's probe starts today; #531's is already answered. |
+| **A′** | 1.8.3 — #23 shipped; #542, #543, #531 remain | After B |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
 
-**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project has treated as settled since April turned out to be false, and its head item, #23, is the only one in any lane that a one-hour measurement can cancel outright. Its second item, #531, was added on 2026-09-10 and does not share that gate.
+**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**; what remains are the two defects shipping it exposed — #542 and #543 — plus #531, which never shared that gate.
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -133,17 +133,21 @@ His verdict was that Normal polish is not at the level and wants work before the
 
 ## Lane A′ — 1.8.3, auto-return
 
-**Item 1: #23, auto-return to the source app after a cold-start dictation.** Milestone `1.8.3 — auto-return`, `priority:high`, `ready-for-agent`. The number is provisional — if 2.0.0 cuts first this becomes a 2.0.x; [VERSIONING.md](VERSIONING.md) decides, not this file.
+**Item 1: #23, auto-return to the source app after a cold-start dictation. SHIPPED on 2026-09-11** in PR #538, merged as `51c4679`. Milestone `1.8.3 — auto-return`. The version number is provisional — if 2.0.0 cuts first this becomes a 2.0.x; [VERSIONING.md](VERSIONING.md) decides, not this file.
 
-It is out of band because its blocking premise was falsified. The April 2026 ADR concluded that no API lets a keyboard extension identify its host app, closed the question, and the swipe-back overlay has been the answer ever since. On 2026-09-10 the API was found in an open-source competitor, [`n0an/VivaDicta`](https://github.com/n0an/VivaDicta), and read out of the shipped binary it links: the bundle ID is not on the input view controller — where all thirteen 2026-04 probes looked — but on `UIKeyboardArbiterClient`, a UIKit singleton outside the view controller graph. The second historic blocker dissolves with it: `open()` needs no `LSApplicationQueriesSchemes` declaration, only `canOpenURL` does, and nothing here needs `canOpenURL`. The full mechanism, the evidence, the failure taxonomy and a four-phase plan are the [2026-09-10 comment on #23](https://github.com/getdictus/dictus-ios/issues/23#issuecomment-5619601818); the issue body carries a banner saying it is superseded.
+The keyboard now names the app it is typing in and the main app sends the user back there, recording already running. Device-validated across nine host apps, and **it has never once opened the wrong app** — the design's central property is that a stale reading yields a *missing* answer, never a wrong one, and every failure falls through to the swipe-back overlay that shipped before it.
 
-**The lane is gated on a measurement, and that is what keeps it from swallowing Lane B.** Phase 0 is a device probe: diagnostic code only, no product change, roughly an hour, and it answers whether the arbiter returns a correct bundle ID on current iOS and how long it lags a change of host. **It starts today, in parallel with Lane B** — like #215 it has external latency, in this case an API Apple can remove in any release, and it is the only thing that can cancel the lane. Everything after it waits for the flip.
+It is out of band because its blocking premise was falsified. The April 2026 ADR concluded that no API lets a keyboard extension identify its host app and closed the question. On 2026-09-10 the answer was read out of the KeyboardKit binary a competitor links: the bundle ID is not on the input view controller — where all thirteen 2026-04 probes looked — but on `_UIKeyboardArbiterClient`, a UIKit singleton outside that graph, **switched off by default and woken by swizzling `+enabled`**. The second historic blocker dissolved with it: `open()` needs no `LSApplicationQueriesSchemes` declaration, only `canOpenURL` does, and nothing here needs `canOpenURL`. The full evidence chain is the 2026-09-10 and 2026-09-11 comments on [#23](https://github.com/getdictus/dictus-ios/issues/23).
 
-**If the probe fails, the lane closes empty and #23 goes back to Someday.** That is a real outcome, not a formality: the technique is private API reached by runtime string lookup, and it is exactly the kind of thing that returns `nil` one iOS release later. The swipe-back overlay stays as the floor in every case — resolved-with-no-scheme, unresolved, and probe-failed all land on it.
+**Three things a reader will otherwise rediscover the hard way.** The pid cross-check is not a complication to simplify away — trusting `sourceBundleIdentifier` directly was measured at 0 for 9, and would have teleported the user into Spotlight nine times. `sms://` composes a message rather than resuming Messages; `ichat://` is the one that resumes, and four obvious-looking alternatives were measured wrong. And shipping private API was a deliberate decision taken on 2026-09-10 with the risk written down, not an oversight.
 
-**Two things a reader will otherwise rediscover the hard way.** VivaDicta measured their resolver naming an app that had been terminated for three seconds, 1.3 s after the keyboard changed host, and the app duly relaunched it; resolutions taken ≥8 s after the host appeared were correct. So the host is resolved **at the tap**, bounded at 2 s, and a timeout falls through to the overlay rather than to a cached answer — opening the wrong app is worse than opening none. And `SharedKeys.sourceAppScheme`, sitting in the repo since Phase 13 and looking exactly like the right key, is the wrong shape: a value persisted to the App Group outlives the keyboard process and teleports the user into last session's app. Delete it.
+**Item 2: #542, a cold-start dictation is silently lost while the model compiles** — opened 2026-09-11, `priority:high`. First, because it is the only item in this lane where a user loses words. Measured on device: with Turbo on a cold Core ML cache, a dictation started from the keyboard recorded, went to `transcribing`, returned to `idle` after 30 s with no text and no history entry, and the transcription finally ran 3 min 40 later and was cancelled.
 
-**One decision is the maintainer's and is not an agent's to take:** whether Dictus ships private API at all. The probe does not need that answer — it changes nothing a user can reach. Phase 1 does.
+The `CancellationError` half is #144. What belongs to this lane is that **nothing stopped the dictation from starting**: the keyboard's readiness gate reads the App Group, which says `ready` because the model *file* is on disk, while the compile has not begun. `ready` means "downloaded", not "can transcribe now", and those diverge for minutes after any install. #23 did not cause this and it made it invisible — the preparation screen that used to explain it is still presented, to an app the user has already been teleported out of.
+
+**Item 3: #543, auto-return resolves nothing 15-30% of the time** — opened 2026-09-11, `priority:high`. A rate problem, not a correctness one: the failures degrade to the overlay, and the floor is intact. It is in this cycle because a competitor using the same technique fails 0% of the time, so the gap is closable rather than inherent.
+
+What is measured: on a failure the arbiter is stuck on a stale host — nine consecutive misses all reading the same frozen `com.apple.Spotlight@pid46487` across four minutes and nine separate host launches — while `_hostProcessIdentifier` is correct on every line. **Two theories are already dead**: the pid cross-check is not at fault (0/9), and "Spotlight poisons it" is falsified, because VivaDicta returns correctly through Spotlight too. The live lead is the maintainer's: failures track how long the host's splash screen stays up, i.e. a true cold launch with a new pid rather than a fast resume. The next instrument is a **paired capture** — the same scripted actions run against both apps, both debug logs exported — which for the first time makes the comparison observable instead of inferred.
 
 **Item 2: #531, recover the last transcription from the expanded Dynamic Island** — added 2026-09-10, `ready-for-agent`. Long press the island in standby, the last transcript is there with a Copy button; power and mic keep their place, and the lock-screen banner never carries the text.
 
