@@ -405,6 +405,10 @@ class KeyboardViewController: UIInputViewController {
         // session then produced `known=0` with no way to tell whether the swizzle had not
         // installed or had installed and woken nothing. One line per appearance is a
         // price worth paying to never be blind there again.
+        // Retire the previous appearance's pid evidence before harvesting this one's. The
+        // keyboard appearing is what can change the host, and an entry from an earlier
+        // appearance is exactly the one a recycled pid would make wrong.
+        HostAppResolver.noteKeyboardAppeared()
         let activation = HostAppResolver.activateArbiter()
         PersistentLog.log(.hostReturn(
             hostId: "none",

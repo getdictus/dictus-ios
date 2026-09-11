@@ -340,6 +340,21 @@ final class LogEventTests: XCTestCase {
         XCTAssertTrue(event.payload().hasSuffix("hostId=com.apple.mobilenotes outcome=returned"))
     }
 
+    /// Every outcome the two processes actually emit, so the documented contract and the
+    /// call sites cannot drift. `no-scheme-known` was emitted for a whole device session
+    /// before it was written down.
+    func testEveryHostReturnOutcomeRendersIntact() {
+        let outcomes = ["returned", "open-failed", "no-scheme", "no-scheme-known", "table-miss"]
+        for outcome in outcomes {
+            let event = LogEvent.hostReturn(hostId: "com.apple.Spotlight", outcome: outcome)
+            XCTAssertEqual(event.level, .notice)
+            XCTAssertTrue(
+                event.payload().hasSuffix("hostId=com.apple.Spotlight outcome=\(outcome)"),
+                "outcome \(outcome) did not survive rendering"
+            )
+        }
+    }
+
     func testKeyboardTextInsertedIsDebugKeyboard() {
         let event = LogEvent.keyboardTextInserted
         XCTAssertEqual(event.level, .debug)

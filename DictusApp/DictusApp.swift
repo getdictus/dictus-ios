@@ -352,11 +352,22 @@ struct DictusApp: App {
     /// foreground changes hands. It is the same figure VivaDicta settled on, and it sits
     /// comfortably inside the window.
     ///
+    /// WHY it is a fixed wait and not a wait *for* the recording. `startDictation`
+    /// returns before its recording task has run, so 200 ms is a bet that the task wins
+    /// the race — and a review flagged that a lost bet costs the head of the dictation.
+    /// Waiting for the state instead would be better only if it stays inside the ~300 ms
+    /// foreground window; past that iOS refuses the open with "Application is neither
+    /// visible nor entitled" and the user gets no return at all, which is the worse
+    /// failure. Rather than trade one defect for another on reasoning, the line below
+    /// records the recording state **at the instant of the open**, so a device log
+    /// settles it: `recState=recording` means the bet is being won and the fixed wait
+    /// stays; anything else is the measurement that justifies changing it.
+    ///
     /// Every branch that does not open something logs why, at `notice`. The app is
     /// usually terminated moments after this runs, so an `info` line would not survive
     /// to explain itself, and `no-scheme` is this project's only report channel for a
     /// host nobody has mapped — there is no analytics, the debug log is it (#255).
-    private func returnToHostApp(hostId: String?) {
+    private func returnToHostApp(hostId: String?, recordingState: @escaping () -> String) {
         guard let hostId else {
             PersistentLog.log(.hostReturn(hostId: "unknown", outcome: "table-miss"))
             return
@@ -372,10 +383,11 @@ struct DictusApp: App {
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            let stateAtOpen = recordingState()
             UIApplication.shared.open(target, options: [:]) { opened in
                 PersistentLog.log(.hostReturn(
                     hostId: hostId,
-                    outcome: opened ? "returned" : "open-failed"
+                    outcome: (opened ? "returned" : "open-failed") + " recState=\(stateAtOpen)"
                 ))
             }
         }
@@ -463,7 +475,10 @@ struct DictusApp: App {
             // already on screen at this point and stays the floor: unresolved host, host
             // with no known scheme, and `open()` returning false all land there.
             if isColdStart, isFromKeyboard {
-                returnToHostApp(hostId: KeyboardDictationURL.hostId(from: url))
+                returnToHostApp(
+                    hostId: KeyboardDictationURL.hostId(from: url),
+                    recordingState: { coordinator.status.rawValue }
+                )
             }
         case "stop":
             // Stop recording from Dynamic Island expanded view button.

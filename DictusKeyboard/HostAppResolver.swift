@@ -1,7 +1,6 @@
 // DictusKeyboard/HostAppResolver.swift
 import UIKit
 import ObjectiveC
-import Darwin
 import DictusCore
 
 /// Names the app this keyboard is typing into, so a cold-start dictation can send the
@@ -72,21 +71,12 @@ enum HostAppResolver {
 
     // MARK: - Process-local state
 
-    /// pid → bundle identifier, learned from the arbiter and **never persisted**. See the
-    /// type comment: persisting this reintroduces the wrong-app bug through pid reuse.
-    private static var bundleIdsByPid: [Int: String] = [:]
-
-    /// Insertion order for `bundleIdsByPid`, so the table can be bounded.
+    /// What the keyboard has learned about which process is which app.
     ///
-    /// A keyboard process that outlived 64 distinct host apps has never been observed, and
-    /// each entry is a few tens of bytes — but this runs in an extension with a ~50 MB
-    /// ceiling, where "it will never get big" is the kind of assumption that shows up in a
-    /// jetsam report. The cap is cheap and it removes the question.
-    private static var pidInsertionOrder: [Int] = []
-
-    /// The most entries the table keeps. Oldest evicted first; the current host is by
-    /// definition the newest, so eviction cannot lose the answer that is about to be used.
-    private static let maxTableEntries = 64
+    /// **Never persisted** — not to the App Group, not to `UserDefaults`, nowhere that
+    /// outlives this process. The rules that stop it ever answering wrongly, and why a
+    /// plain dictionary is unsafe, are in `HostPidTable`.
+    private static var table = HostPidTable()
 
     // MARK: - Public surface
 
@@ -107,7 +97,7 @@ enum HostAppResolver {
         else {
             return
         }
-        record(bundleId: bundleId, forPid: pid)
+        table.record(bundleId: bundleId, forPid: pid)
     }
 
     /// What a resolution attempt produced, and why when it produced nothing.
@@ -138,23 +128,30 @@ enum HostAppResolver {
         /// installed and woken nothing.
         var reason: String {
             switch self {
-            case .resolved(_, let pid):
-                // Probed on the hits too, and that is the point: a route that answers
-                // only when the answer is already known proves nothing. Comparing it
-                // against a host the arbiter *did* name is what says whether it is right.
-                return "resolved \(HostAppResolver.pidIdentityProbe(pid: Int32(pid)))"
+            case .resolved: return "resolved"
             case .noHostPid: return "no-host-pid \(HostAppResolver.hopDiagnostics)"
             case .tableMiss(let pid):
-                return "table-miss(pid=\(pid),known=\(HostAppResolver.tableSize)) \(HostAppResolver.hopDiagnostics)"
-                    + " \(HostAppResolver.pidIdentityProbe(pid: Int32(pid)))"
+                return "table-miss(pid=\(pid),known=\(HostAppResolver.tableSize)"
+                    + ",trusted=\(HostAppResolver.trustedCount),seen=\(HostAppResolver.hasEverSeen(pid: pid)))"
+                    + " \(HostAppResolver.hopDiagnostics)"
             }
         }
     }
 
-    /// How many pid → bundle pairings this process has learned. Read only for the log
-    /// line above: `table-miss(known=0)` is an arbiter that never answered, and
-    /// `known=3` is an arbiter that answered about other apps but never this one.
-    static var tableSize: Int { bundleIdsByPid.count }
+    /// What the table holds, for the log line above. `known=0` is an arbiter that never
+    /// answered at all; `known=3 trusted=0` is one that answered in an earlier appearance
+    /// whose evidence has since been retired; `seen=true` says this very pid is in the
+    /// history and is no longer trusted — the recycling guard doing its job.
+    static var tableSize: Int { table.count }
+    static var trustedCount: Int { table.trustedCount }
+    static func hasEverSeen(pid: Int) -> Bool { table.hasEverSeen(pid: pid) }
+
+    /// Retires the previous appearance's evidence. Called when the keyboard appears,
+    /// before that appearance's first harvest — the keyboard appearing is the event that
+    /// can change the host, so it is the event that expires the old evidence.
+    static func noteKeyboardAppeared() {
+        table.noteAppearance()
+    }
 
     /// The state of every hop between us and the host's bundle identifier.
     ///
@@ -186,7 +183,7 @@ enum HostAppResolver {
     static func currentHost(for controller: UIInputViewController) -> Resolution {
         harvest()
         guard let pid = hostProcessIdentifier(of: controller) else { return .noHostPid }
-        guard let bundleId = bundleIdsByPid[pid] else { return .tableMiss(pid: pid) }
+        guard let bundleId = table.bundleId(forPid: pid) else { return .tableMiss(pid: pid) }
         return .resolved(bundleId, pid: pid)
     }
 
@@ -299,102 +296,19 @@ enum HostAppResolver {
         return object.value(forKey: key)
     }
 
-    // MARK: - Candidate B: naming a pid without the arbiter (diagnostic only)
+    // MARK: - Why the table is a necessity and not an optimisation
 
-    /// Asks the kernel what process `pid` is, by two routes that do not involve the
-    /// arbiter at all. **Nothing branches on the result.**
-    ///
-    /// ## Why this is worth measuring
-    ///
-    /// One failure mode is left: the first dictation from an app launched moments
-    /// earlier. The arbiter is awake and populated — it simply names a *different* app,
-    /// and the current host's pid has never been seen. Waiting does not fix it;
-    /// `clientState=true` says it is not mid-population, and stale stretches of over ten
-    /// seconds were measured. But `_hostProcessIdentifier` is correct at `elapsedMs=0`,
-    /// every time. So if a pid can be turned into a bundle identifier directly, the
-    /// harvested table stops being a necessity and becomes a cache, and this failure mode
-    /// disappears.
-    ///
-    /// ## The two routes
-    ///
-    /// `proc_pidpath` gives an executable path. The bundle *name* in it is not the bundle
-    /// *identifier* — `WhatsApp.app` is not `net.whatsapp.WhatsApp` — so the path has to
-    /// be walked up to the `.app` and its `Info.plist` read, and that read is where an
-    /// extension's sandbox is most likely to refuse.
-    ///
-    /// `sysctl(KERN_PROC_PID)` gives `p_comm`, a process name truncated to 16 characters.
-    /// Never a bundle identifier, but possibly enough to disambiguate if the first route
-    /// is denied.
-    ///
-    /// The expected answer is that both are refused, and that is a result worth having on
-    /// the record — it closes a question that would otherwise be reopened in six months.
-    /// Every failure carries its `errno`, because "denied" and "no such process" are
-    /// different answers.
-    static func pidIdentityProbe(pid: Int32) -> String {
-        var out: [String] = []
-
-        var pathBuffer = [CChar](repeating: 0, count: Int(MAXPATHLEN))
-        let written = proc_pidpath(pid, &pathBuffer, UInt32(pathBuffer.count))
-        if written <= 0 {
-            out.append("procPath=errno(\(errno))")
-        } else {
-            let path = String(cString: pathBuffer)
-            // Only the bundle's own name is logged, never the whole path: the path
-            // carries a per-install container UUID, and the name is all that is useful.
-            let bundleName = path.range(of: ".app")
-                .map { ((String(path[path.startIndex..<$0.upperBound])) as NSString).lastPathComponent }
-                ?? "none"
-            out.append("procPath=ok bundleName=\(bundleName)")
-            out.append("plistBundleId=\(bundleIdentifier(fromExecutablePath: path))")
-        }
-
-        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, pid]
-        var info = kinfo_proc()
-        var size = MemoryLayout<kinfo_proc>.stride
-        if sysctl(&mib, UInt32(mib.count), &info, &size, nil, 0) != 0 {
-            out.append("comm=errno(\(errno))")
-        } else {
-            let comm = withUnsafePointer(to: &info.kp_proc.p_comm) {
-                $0.withMemoryRebound(to: CChar.self, capacity: Int(MAXCOMLEN) + 1) { String(cString: $0) }
-            }
-            out.append("comm=\(comm.isEmpty ? "empty" : comm)")
-        }
-
-        return out.joined(separator: " ")
-    }
-
-    /// The `CFBundleIdentifier` of the app bundle containing `executablePath`.
-    ///
-    /// Returns a reason rather than nil, because *why* it failed is the measurement: a
-    /// sandbox denial and a missing key are different facts.
-    private static func bundleIdentifier(fromExecutablePath executablePath: String) -> String {
-        guard let appRange = executablePath.range(of: ".app") else { return "no-app-dir" }
-        let appPath = String(executablePath[executablePath.startIndex..<appRange.upperBound])
-        let plistPath = (appPath as NSString).appendingPathComponent("Info.plist")
-        guard FileManager.default.isReadableFile(atPath: plistPath) else {
-            return "unreadable(errno=\(errno))"
-        }
-        guard let data = FileManager.default.contents(atPath: plistPath),
-              let plist = try? PropertyListSerialization.propertyList(from: data, format: nil),
-              let info = plist as? [String: Any],
-              let bundleId = info["CFBundleIdentifier"] as? String
-        else {
-            return "no-key"
-        }
-        return bundleId
-    }
-
-    // MARK: - The table
-
-    /// Records one pid → bundle pairing, evicting the oldest entry past the cap.
-    private static func record(bundleId: String, forPid pid: Int) {
-        if bundleIdsByPid[pid] == nil {
-            pidInsertionOrder.append(pid)
-            if pidInsertionOrder.count > maxTableEntries {
-                let evicted = pidInsertionOrder.removeFirst()
-                bundleIdsByPid[evicted] = nil
-            }
-        }
-        bundleIdsByPid[pid] = bundleId
-    }
+    // The obvious simplification is to skip the harvest and translate the host pid
+    // directly. It is not available: `proc_pidpath` and `sysctl(KERN_PROC_PID)` both
+    // return `EPERM` inside a keyboard extension — measured on a physical iPhone, 7
+    // attempts across 7 hand-offs, iOS 26.6.1, 2026-09-11. A sandboxed extension cannot
+    // observe another process at all.
+    //
+    // A simulator says otherwise, and that is the trap: both calls succeed there and
+    // return the correct bundle identifier, because a simulator is a macOS process with
+    // far weaker sandboxing than an iPhone. Wiring anything to that measurement would
+    // have shipped dead code.
+    //
+    // So the arbiter is the only source, and `HostPidTable` is what makes its answers safe
+    // to use rather than an optimisation over something better.
 }

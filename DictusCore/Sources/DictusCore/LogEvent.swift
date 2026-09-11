@@ -174,8 +174,20 @@ public enum LogEvent: Sendable {
     /// they were typing in.
     ///
     /// `hostId` is the resolved bundle identifier, or `unknown` when the keyboard could
-    /// not name the host at all. `outcome` is one of `returned`, `table-miss`,
-    /// `no-scheme`, `open-failed`.
+    /// not name the host at all. `outcome` is one of:
+    ///
+    /// - `returned` — the user was sent back;
+    /// - `open-failed` — the scheme was known and iOS refused to open it;
+    /// - `no-scheme` — a real host with no catalogue entry. **The one worth acting on**:
+    ///   this is the project's only report channel for a gap, and the catalogue grows
+    ///   from these lines;
+    /// - `no-scheme-known` — a host already checked by hand and found to have no way
+    ///   back, such as the in-app browser or the share-sheet composer. Logged so the
+    ///   hand-off is still accounted for, and kept distinct so it is not mistaken for a
+    ///   gap at every triage pass;
+    /// - `table-miss` — the host could not be named;
+    /// - `tap-…` and `arbiter-…` — the keyboard-side lines, which carry their own
+    ///   diagnostics rather than a decision.
     ///
     /// `notice` and not `info`, and this is the case the level was added for: the app is
     /// usually terminated moments after a hand-off — that is what a hand-off *is* — and

@@ -68,7 +68,8 @@ public enum KnownAppSchemes {
     ///
     /// **Verified to resume:** `com.apple.mobilenotes`, `com.apple.MobileSMS`,
     /// `net.whatsapp.WhatsApp`, `com.apple.mobilemail`, `com.github.stormbreaker.prod`,
-    /// `com.openai.chat`, `com.anthropic.claude` (all on device, 2026-09-11), plus
+    /// `com.openai.chat`, `com.anthropic.claude`, `com.tinyspeck.chatlyio` (all on
+    /// device, 2026-09-11), plus
     /// `com.apple.reminders` on a simulator. **Rejected by measurement:**
     /// `com.apple.mobilesafari`, now in `knownNoSchemeHosts`.
     ///
@@ -80,11 +81,11 @@ public enum KnownAppSchemes {
     /// runtime ships are Messages, Safari and Reminders, and none of the third-party
     /// apps can be installed on one. Two groups deserve suspicion before the rest:
     ///
-    /// - **Action-shaped names.** `com.tinyspeck.chatlyio` → `slack://open` and
-    ///   `com.newin.nplayer.basic` → `nplayer-http://` carry a verb and a transport.
-    ///   Mail's `message://` was the top suspect on this reading and it is **wrong**:
-    ///   measured twice on device, it resumes correctly. The name-shape heuristic finds
-    ///   candidates to measure; it does not settle them.
+    /// - **Action-shaped names.** `com.newin.nplayer.basic` → `nplayer-http://` carries a
+    ///   transport in its name. The heuristic's other two candidates were both **wrong**:
+    ///   Mail's `message://` and Slack's `slack://open` each resume correctly, measured on
+    ///   device. Two false alarms out of three says plainly what this heuristic is — a way
+    ///   to choose what to measure next, never a verdict.
     /// - **The universal-link group below.** A root URL is a navigation *by
     ///   construction*: it opens the app at that page, not where the user was. They fail
     ///   the resume test on paper. They are kept because landing on an app's home is
@@ -129,9 +130,9 @@ public enum KnownAppSchemes {
         "ph.telegra.Telegraph": "tg://",
         // NOT `tg://`, which is shared with official Telegram — iOS would pick between them.
         "app.swiftgram.ios": "sg://",
-        // This bundle identifier is Slack. `://open` carries a verb, which is the shape
-        // that turned out wrong for Messages — untested, and worth measuring first if
-        // someone reports landing on the wrong screen.
+        // This bundle identifier is Slack. Verified on device: `://open` carries a verb,
+        // which is the shape that turned out wrong for Messages, and here it resumes
+        // correctly. Second time the name-shape heuristic raised a false alarm.
         "com.tinyspeck.chatlyio": "slack://open",
         // This bundle identifier is Simplenote.
         "com.codality.NotationalFlow": "simplenote://",
@@ -259,6 +260,8 @@ public enum KnownAppSchemes {
         // Apple view services and system apps that register no URL types.
         "com.apple.SafariViewService",
         "com.apple.springboard",
+        // Confirmed on device: it is reached as a real host and correctly falls to
+        // `no-scheme-known` rather than being reported as a gap.
         "com.apple.Spotlight",
         "com.apple.journal",
         "com.apple.mobilesms.compose",
