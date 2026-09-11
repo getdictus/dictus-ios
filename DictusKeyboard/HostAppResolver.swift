@@ -128,7 +128,11 @@ enum HostAppResolver {
         /// installed and woken nothing.
         var reason: String {
             switch self {
-            case .resolved: return "resolved"
+            case .resolved(_, let pid):
+                // The claim rides the hits too, and that is what makes the misses
+                // readable: without a baseline for what the arbiter says when it agrees
+                // with us, a mismatch on a failure has nothing to be a mismatch *from*.
+                return "resolved hostPid=\(pid) \(HostAppResolver.arbiterClaimNow)"
             case .noHostPid: return "no-host-pid \(HostAppResolver.hopDiagnostics)"
             case .tableMiss(let pid):
                 return "table-miss(pid=\(pid),known=\(HostAppResolver.tableSize)"
@@ -169,11 +173,50 @@ enum HostAppResolver {
             ($0 as AnyObject).responds(to: NSSelectorFromString(sharedClientSelectorName))
         }
         let client = arbiterClass.flatMap(sharedArbiterClient(of:))
+        let state = client.flatMap { read("currentClientState", from: $0) } as? NSObject
         return "swizzle=\(loadTimeActivation) retry=\(activateArbiter())"
             + " arbiterClass=\(arbiterClass != nil)"
             + " sharedSel=\(respondsToShared.map(String.init) ?? "n/a")"
             + " sharedClient=\(client != nil)"
-            + " clientState=\(client.flatMap { read("currentClientState", from: $0) } != nil)"
+            + " clientState=\(state != nil)"
+            + " \(arbiterClaim(state: state))"
+    }
+
+    /// What the arbiter is saying *right now*, as a whole pair.
+    ///
+    /// ## The question this exists to answer
+    ///
+    /// Our resolution refuses to use `sourceBundleIdentifier` unless its `processIdentifier`
+    /// matches the host pid. VivaDicta reads `sourceBundleIdentifier` directly, with no
+    /// cross-check, and in side-by-side testing under the same conditions they return the
+    /// user every time where we miss roughly a third.
+    ///
+    /// That leaves exactly two possibilities on a miss, and a boolean cannot tell them
+    /// apart — only the pair can:
+    ///
+    /// - the arbiter named **the right app** under a stale pid. Then our cross-check is
+    ///   throwing away a correct answer, and the guard is costing more than it protects.
+    /// - the arbiter named **a different app**. Then it really was stale, the guard just
+    ///   prevented a wrong app from opening, and VivaDicta is carrying a risk that has
+    ///   not yet bitten them.
+    ///
+    /// Logged next to `hostPid` on every miss so the two can be compared directly. The
+    /// bundle identifier here is the same category of data `hostId` already is — it names
+    /// an app, never what was typed into it, and `PRIVACY.md` covers it.
+    ///
+    /// **Measurement only.** Nothing reads this, and the resolution policy is unchanged:
+    /// it is the safety property of this feature and it does not move on a hypothesis.
+    /// The arbiter's current claim, resolving the chain itself. For the hit path, which
+    /// does not otherwise pay for the full hop diagnostics.
+    static var arbiterClaimNow: String {
+        arbiterClaim(state: currentClientState())
+    }
+
+    private static func arbiterClaim(state: NSObject?) -> String {
+        guard let state else { return "arbiterSays=<no-state>" }
+        let bundleId = read("sourceBundleIdentifier", from: state) as? String
+        let pid = (read("processIdentifier", from: state) as? NSNumber)?.intValue
+        return "arbiterSays=\(bundleId ?? "nil")@pid\(pid.map(String.init) ?? "nil")"
     }
 
     /// Resolves the app `controller` is serving.
