@@ -70,6 +70,39 @@ import Foundation
 ///   counter-example shows a fabricated one, because the failure mode here is a
 ///   title the speaker never said.
 ///
+/// ### The paragraph instruction lives in the USER turn, and that is measured
+///
+/// #437's finding 1: the system prompt is **not** the lever for a line break — 144
+/// outputs across five system-prompt arms, zero breaks, including one that said the
+/// model MUST break at a change of subject. Its finding 2: the user turn is a lever,
+/// and a weak one.
+///
+/// This mode reproduced finding 1 under the condition #437 said it lacked. Its first
+/// round, with the paragraph instruction stated only in the rules below, returned
+/// **0 breaks in 27 accepted outputs**. So the licence to rewrite is not what was
+/// missing, and the instruction moved into `userInstruction`. Four user turns,
+/// measured on the same six fixtures (`docs/research/523-structured/findings.md`):
+///
+/// | Arm | User turn | Outputs | With a break |
+/// |---|---|---|---|
+/// | A | `Rewrite this text as clear paragraphs.` | 27 | **0** |
+/// | B | `… : start a new line each time the speaker moves to a different subject, and only there.` | 18 | 4 |
+/// | **C — ships** | `… and break it into paragraphs, one per subject, separated by a blank line.` | 18 | **7** |
+/// | D | C plus `— never one per sentence.` | 18 | 8, splitting the control fixture one line per sentence |
+///
+/// C ships because it places breaks best and never split fixture 1, the single thought
+/// that must stay one block. D's extra bound made the model noisier rather than better
+/// bounded, which is #437's own result about damping this instruction.
+///
+/// **Rule 2 below stays even though it measured nothing**, because removing it would
+/// leave the system prompt describing a transformation whose shape it never states,
+/// and because the arms were measured with it present. It is not what produces the
+/// breaks; the user turn is.
+///
+/// The honest number, stated so nobody has to rediscover it: on the shipping prompt,
+/// **8 accepted outputs of 28 carry a paragraph break at all**. The deterministic
+/// route in #550 is where the rest of this problem lives.
+///
 /// ### One prompt, written in English
 ///
 /// The #239 auto-prompt pattern, same as every other mode: one English-written
@@ -94,7 +127,12 @@ enum SmartModeStructuredPrompt {
     /// Names the transformation, never an artefact — see this type's doc comment on
     /// the genre prior. Shaped like the polish framing that measured 0 hallucinated
     /// openers, closers and names in 190 calls.
-    static let userInstruction = "Rewrite this text as clear paragraphs. Output only the rewritten text, nothing else."
+    ///
+    /// It carries the paragraph instruction because **this is the only position that
+    /// produces one** (#437 finding 2, re-measured here as arm C). Editing this string
+    /// is editing the one lever the mode has; the arm table on this type says what the
+    /// three alternatives measured.
+    static let userInstruction = "Rewrite this text and break it into paragraphs, one per subject, separated by a blank line. Output only the rewritten text, nothing else."
     static let outputMarker = "Rewritten output:"
 
     static func instructions() -> String {

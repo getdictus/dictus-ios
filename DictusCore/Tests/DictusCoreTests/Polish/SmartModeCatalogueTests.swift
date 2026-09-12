@@ -340,6 +340,18 @@ final class SmartModeCatalogueTests: XCTestCase {
         }
     }
 
+    /// The one lever the mode has, pinned so an edit cannot quietly remove it.
+    ///
+    /// #437 measured the system prompt at **zero** line breaks over 144 outputs across
+    /// five arms, and this mode reproduced that: 0 breaks in 27 accepted outputs while
+    /// the instruction sat in the rules alone. Moving it into the user turn is what
+    /// produces a break at all, and the mode's whole want is paragraphs.
+    func testStructuredAsksForParagraphsInTheUserTurn() {
+        let framing = PolishTask.smart(SmartModeCatalogue.structured).userTurn(raw: "x")
+        XCTAssertTrue(framing.contains("break it into paragraphs"))
+        XCTAssertTrue(framing.lowercased().contains("output only"))
+    }
+
     /// The #239 pattern, same as every other mode: one English prompt, answering in
     /// the input's language.
     func testStructuredPromptIsWrittenOnceAndKeepsTheInputLanguage() {
