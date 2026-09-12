@@ -49,6 +49,10 @@ final class KeyboardPolishCoordinator {
     /// Unfreezes the overlay when a generation never comes back.
     private var stageWatchdog: Timer?
 
+    /// Sequence number for the memory probe below, so one dictation's readings can be
+    /// grouped in a log that interleaves several.
+    private var memoryProbeSequence = 0
+
     /// Whether DictusApp has already been told this dictation is over for display
     /// purposes. Reset per claim; see `concludeDisplayForUnreachableDocument`.
     private var hasConcludedDisplay = false
@@ -104,6 +108,8 @@ final class KeyboardPolishCoordinator {
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionSmartModeSkipped)
         defaults.removeObject(forKey: SharedKeys.handoffToken)
         PersistentLog.log(.polishHandoff(step: "claimed", outcome: "pending", chars: raw.count))
+        memoryProbeSequence &+= 1
+        probeMemory("claimed")
 
         activePolish = pending
         hasConcludedDisplay = false
@@ -236,6 +242,7 @@ final class KeyboardPolishCoordinator {
     // MARK: - The run
 
     private func run(_ pending: PendingDictation) async {
+        probeMemory("beforePolish")
         let outcome = await service.polish(
             raw: pending.raw,
             languagePolicy: pending.policy,
@@ -244,9 +251,12 @@ final class KeyboardPolishCoordinator {
             // Recorded, never polished on (#80).
             engineRaw: pending.engineRaw,
             onEngineWillRun: { [weak self] in
+                self?.probeMemory("engineWillRun")
                 self?.announceProcessingStage()
             }
         )
+
+        probeMemory("afterPolish")
 
         // A newer dictation claimed the slot while this generation was in flight
         // (decision 15). It owns the pending record, the stage and the app's
@@ -503,6 +513,47 @@ final class KeyboardPolishCoordinator {
         }
     }
 
+    /// Records `phys_footprint` at one point on the polish path (#555).
+    ///
+    /// WHY this exists: polish-on sessions settle near 68 MB and polish-off ones near
+    /// 35 MB, yet #361 measured twenty engine calls costing 5 MB. Its probe fired
+    /// straight at `AppleFoundationModelsPolishEngine` and never exercised this
+    /// coordinator, the guardrail, the text passes or the insertion — so the ~34 MB
+    /// has an owner nobody has measured. One line per stage names it.
+    ///
+    /// `phys_footprint` is the figure iOS judges a process on for jetsam, which is why
+    /// it is the one worth reading here rather than a heap total.
+    ///
+    /// **Measurement only.** Nothing reads these lines and no behaviour depends on them.
+    private func probeMemory(_ stage: String) {
+        PersistentLog.log(.diagnosticProbe(
+            component: "PolishMemory",
+            instanceID: "\(memoryProbeSequence)",
+            action: stage,
+            details: "mb=\(MemoryFootprint.residentMB())"
+        ))
+    }
+
+    /// The reading that matters most: what the process still holds once the dictation
+    /// is completely over. A stage delta that comes back down is a working set; one
+    /// that does not is what turns six dictations into 68 MB.
+    ///
+    /// Scheduled with `asyncAfter` rather than a run-loop `Timer`, and weakly: a
+    /// `Timer` with `target: self` outlives the keyboard, which this repo has paid for
+    /// twice (#390, #416).
+    private func probeMemoryAtRest() {
+        let sequence = memoryProbeSequence
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
+            guard self != nil else { return }
+            PersistentLog.log(.diagnosticProbe(
+                component: "PolishMemory",
+                instanceID: "\(sequence)",
+                action: "atRest30s",
+                details: "mb=\(MemoryFootprint.residentMB())"
+            ))
+        }
+    }
+
     private func stopStageWatchdog() {
         stageWatchdog?.invalidate()
         stageWatchdog = nil
@@ -625,9 +676,13 @@ final class KeyboardPolishCoordinator {
 
         guard let inserted else {
             KeyboardState.shared.endLocalProcessingStage()
+            probeMemory("finishedNoInsert")
+            probeMemoryAtRest()
             return
         }
         KeyboardState.shared.insertDictation(inserted)
+        probeMemory("finishedInserted")
+        probeMemoryAtRest()
     }
 
     // MARK: - Reading what travelled
