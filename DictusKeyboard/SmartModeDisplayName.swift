@@ -18,8 +18,9 @@ extension SmartMode {
     ///
     /// Most modes need nothing here. `"\u{2192} EN"` is deliberately language-neutral
     /// so one string fits a 46 pt fan row in every UI locale, and it falls straight
-    /// through. Only the bullet mode, renamed from `Notes` to `List` / `Liste` on
-    /// 2026-08-27, has a name that has to be said in the user's language.
+    /// through. Two modes have a name that has to be said in the
+    /// user's language: the bullet mode, renamed from `Notes` to `List` / `Liste` on
+    /// 2026-08-27, and `Structured` / `Structuré` (#523).
     ///
     /// Keyed on the **identifier**, which the rename deliberately did not touch: no
     /// persisted armed mode is invalidated and no pinned order is lost. A record that
@@ -45,6 +46,11 @@ extension SmartMode {
             return String(
                 localized: "List",
                 comment: "Name of the Smart Mode that turns spoken ideas into concise bullet points. Renamed from Notes on 2026-08-27."
+            )
+        case SmartModeCatalogue.structuredIdentifier:
+            return String(
+                localized: "Structured",
+                comment: "Name of the Smart Mode that rewrites a long dictation as clear written paragraphs (#523)."
             )
         default:
             return fallback
