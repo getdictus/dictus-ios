@@ -9,9 +9,9 @@ import DictusCore
 ///
 /// The fan is not the catalogue. It holds Normal plus the modes the user pinned,
 /// and it holds four entries because that is what fits above 44 pt on the smallest
-/// supported screen — see `SmartModeFanLayout`. The catalogue is five modes today
-/// (Notes and four translation targets) and grows with #269, so a choice has to be
-/// made somewhere. It is made here rather than in the keyboard because the keyboard
+/// supported screen — see `SmartModeFanLayout`. The catalogue is six modes today
+/// (Structured, List and four translation targets) and grows with #269, so a choice
+/// has to be made somewhere. It is made here rather than in the keyboard because the keyboard
 /// has 52 pt of chrome and no room for a settings screen, and because this is a
 /// decision taken once rather than during a dictation.
 ///
