@@ -50,13 +50,20 @@ final class SmartModeFanLayoutTests: XCTestCase {
     /// The shape re-decided on device on 2026-08-29: Normal, the default-pinned modes,
     /// and the way out. Four rows — the same four slots a subscriber sees, so
     /// subscribing un-greys the fan rather than replacing it.
+    ///
+    /// It shows the **first two** of the seed rather than all of it since #523 made
+    /// the seed three long. Normal and Dictus Pro take one slot each and the ceiling
+    /// is four, so two mode rows is all there has ever been room for; the assertion
+    /// tracks the slots rather than the seed's length, which is the invariant that
+    /// survives the next mode being added.
     func testTheUpgradeFanIsNormalTheDefaultModesAndTheProRow() {
         let entries = SmartModeFanLayout.entries(pinned: [], armed: nil, offersProUpgrade: true)
         XCTAssertEqual(entries.first, .normal)
         XCTAssertEqual(entries.last, .pro)
+        let modeSlots = SmartModeFanLayout.maximumEntries - 2
         XCTAssertEqual(
             entries.map(\.id),
-            ["normal"] + SmartModeCatalogue.defaultPinnedIdentifiers + ["pro"]
+            ["normal"] + SmartModeCatalogue.defaultPinnedIdentifiers.prefix(modeSlots) + ["pro"]
         )
     }
 
@@ -96,7 +103,10 @@ final class SmartModeFanLayoutTests: XCTestCase {
         let entries = SmartModeFanLayout.entries(
             pinned: [SmartModeCatalogue.translate(to: .spanish)], armed: nil, offersProUpgrade: true
         )
-        XCTAssertEqual(entries.compactMap { $0.smartMode?.id }, SmartModeCatalogue.defaultPinnedIdentifiers)
+        XCTAssertEqual(
+            entries.compactMap { $0.smartMode?.id },
+            Array(SmartModeCatalogue.defaultPinnedIdentifiers.prefix(SmartModeFanLayout.maximumEntries - 2))
+        )
     }
 
     /// And it opens whatever is pinned or armed, which is what keeps #402 from coming
