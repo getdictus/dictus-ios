@@ -1,6 +1,7 @@
 // DictusKeyboard/KeyboardLifecycleProbe.swift
 import UIKit
 import os
+import DictusCore
 
 /// Observation-only helpers for the #281 investigation.
 ///
@@ -146,4 +147,57 @@ extension UIInputViewController {
         "beingDismissed=\(isBeingDismissed) movingFromParent=\(isMovingFromParent)"
             + " hasParent=\(parent != nil) \(windowAttachmentProbeDetails)"
     }
+}
+
+// MARK: - Memory tick (#555)
+
+extension KeyboardViewController {
+
+    /// Logs `phys_footprint` every ten seconds while the keyboard is on screen (#555).
+    ///
+    /// WHY this exists: `memMB` is otherwise written only when the keyboard appears or
+    /// disappears, so a session spent typing without ever dismissing the keyboard
+    /// produces no readings at all. That makes the two suspects behind the 68 MB
+    /// plateau — plain typing and keyboard-language switching — impossible to tell
+    /// apart, because neither produces an appearance.
+    ///
+    /// WHY recursion rather than a repeating `Timer`: a run-loop `Timer` retains its
+    /// target and outlives the keyboard, which this repo has paid for twice (#390,
+    /// #416). `asyncAfter` with a weak capture and a generation check cannot.
+    ///
+    /// The generation counter is bumped on every appearance and on disappearance, so a
+    /// tick scheduled by an older appearance stops instead of running alongside a newer
+    /// one.
+    ///
+    /// **Measurement only**, and temporary — it belongs with #555 and comes out with it.
+    func startMemoryTick() {
+        MemoryTickGeneration.current &+= 1
+        scheduleMemoryTick(generation: MemoryTickGeneration.current)
+    }
+
+    func stopMemoryTick() {
+        MemoryTickGeneration.current &+= 1
+    }
+
+    private func scheduleMemoryTick(generation: Int) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) { [weak self] in
+            guard let self, MemoryTickGeneration.current == generation else { return }
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardMemory",
+                instanceID: self.controllerID,
+                action: "tick",
+                details: "mb=\(MemoryFootprint.residentMB()) lang=\(SupportedLanguage.active.rawValue)"
+            ))
+            self.scheduleMemoryTick(generation: generation)
+        }
+    }
+}
+
+/// The live memory-tick generation (#555).
+///
+/// Process-wide rather than per-controller because only one keyboard is on screen at a
+/// time, and because a stored property would have to live on `KeyboardViewController`,
+/// whose body is already at the `type_body_length` limit. Temporary, like the tick.
+enum MemoryTickGeneration {
+    @MainActor static var current = 0
 }

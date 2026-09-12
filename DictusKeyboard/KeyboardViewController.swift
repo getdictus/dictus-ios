@@ -641,6 +641,8 @@ class KeyboardViewController: UIInputViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
             self?.logLayoutSnapshot(action: "layoutSnapshot_2000ms")
         }
+
+        startMemoryTick()
     }
 
     /// First-run flag for viewDidLayoutSubviews. Used by upstream
@@ -730,6 +732,7 @@ class KeyboardViewController: UIInputViewController {
         // A finger held on backspace when iOS takes the keyboard away never produces a
         // touchesEnded, and the repeat timer was cleared by nothing else (#390).
         giellaKeyboard?.cancelKeyRepeat(reason: "viewDidDisappear")
+        stopMemoryTick()
 
         // Restore system gesture recognizer delay (be a good citizen)
         restoreWindowGestureDelay()
