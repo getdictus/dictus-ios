@@ -114,14 +114,24 @@ import Foundation
 /// The system prompt is priced into `PolishContextBudget` alongside the input, so
 /// every character spent here is taken off the dictation that still fits — and this
 /// is the mode most likely to meet the ceiling, since it is the one armed for a long
-/// dictation. Computed against `PolishContextBudget.appleFoundationModels` at the
-/// sizes that ship: this prompt is ~5 900 characters and overflows at about **4 000
-/// characters of dictation**, where `SmartModeNotesPrompt` at ~4 600 overflows at
-/// about 4 500. The difference is the price of two worked examples whose outputs are
-/// paragraphs rather than bullets, and of rules 4, 6 and 7, each of which is a bar
-/// this mode is measured against. Past the ceiling the user still gets their own
-/// words — `overflowBehaviour` is `.insertRawText` — so the cost is the structure,
-/// not the dictation. Anything added here should be weighed against those 4 000.
+/// dictation.
+///
+/// **Computed, not measured on a device**, by running the app's own pre-flight
+/// arithmetic — `PolishContextBudget.appleFoundationModels`, the constants that ship —
+/// over the resolved prompts, whose sizes come from
+/// `polish-harness prompt --mode <id>`:
+///
+/// | Mode | Resolved system prompt | Largest dictation that fits |
+/// |---|---|---|
+/// | `Structured` | 5 556 characters | **≈ 4 130** |
+/// | `List` | 4 184 characters | ≈ 4 620 |
+///
+/// So this mode refuses roughly 500 characters of speech sooner than the other mode
+/// built for long input. The difference is the price of two worked examples whose
+/// outputs are paragraphs rather than bullets, and of rules 4, 6 and 7, each of which
+/// is a bar this mode is measured against. Past the ceiling the user still gets their
+/// own words — `overflowBehaviour` is `.insertRawText` — so the cost is the structure,
+/// not the dictation. Anything added here should be weighed against those 4 130.
 enum SmartModeStructuredPrompt {
 
     /// Names the transformation, never an artefact — see this type's doc comment on
