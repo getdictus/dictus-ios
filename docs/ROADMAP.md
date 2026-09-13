@@ -6,7 +6,7 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-12.
+Last reviewed: 2026-09-13.
 
 ## The lanes, in order
 
@@ -14,12 +14,12 @@ Last reviewed: 2026-09-12.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Now** |
-| **A′** | 1.8.3 — #23 and #542 shipped; #543 remains | After B |
+| **A′** | 1.8.3 — #23 and #542 shipped; #543 and #558 remain | After B |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
 
-**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**, followed by **#542 the same day**; what remains is #543. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement.
+**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**, followed by **#542 the same day**. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement. **#558 joined the lane on 2026-09-13 on exactly the same ground**: a second settled premise — that Parakeet is simply the best engine on the recommended tier — turned out to be false in French. What remains in the lane is #543 and #558.
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -146,7 +146,7 @@ His verdict was that Normal polish is not at the level and wants work before the
 
 **#216, the Pro hub.** Deferred on 2026-08-24: the hub's content *is* the feature list, so building it before the features exist means building it three times.
 
-## Lane A′ — 1.8.3, auto-return
+## Lane A′ — 1.8.3, auto-return and the French engine
 
 **Item 1: #23, auto-return to the source app after a cold-start dictation. SHIPPED on 2026-09-11** in PR #538, merged as `51c4679`. Milestone `1.8.3 — auto-return`. The version number is provisional — if 2.0.0 cuts first this becomes a 2.0.x; [VERSIONING.md](VERSIONING.md) decides, not this file.
 
@@ -175,6 +175,18 @@ What is measured: on a failure the arbiter is stuck on a stale host — nine con
 **#531 was closed `not_planned` on 2026-09-11, after its PR was built and tested on device.** It was to put the last transcript under the island's long press with a Copy button. The copy is impossible: **iOS silently refuses a `UIPasteboard` write from a backgrounded process** — `wrote=36 readBack=-1 hasStrings=false`, with `host=app` proving `perform()` ran in the app and not the widget extension, so there was no wrong-sandbox to fix. Seven of nine manual steps passed; the display half worked entirely.
 
 **Two things not to rediscover.** A `UIPasteboard` write measured on a **simulator says nothing about a device** — the simulator does not enforce this, and that is exactly how the issue got cleared to be built. And nothing in a Live Activity can announce that a gesture exists: iOS owns the island's size and its expansion, so "the island grows to signal the transcript is there" is not implementable, and any future attempt at this needs an answer to discoverability before it needs code.
+
+**Item 4: #558, add Nemotron 3.5 ASR multilingual to the catalogue** — opened 2026-09-13, `priority:high`. It is in this cycle for the same reason #23 was: a premise this project treated as settled is false. Parakeet TDT v3 was assumed to be simply the best engine on the recommended tier. It is not, in French — it drifts into pseudo-English mid-sentence, and nothing downstream repairs it.
+
+**The cause is architectural and upstream will not fix it.** A TDT transducer has no decoder prompt to condition, so the decoder is never locked to a language and falls back to English, its dominant training language, when the acoustics get hard. Three requests for a language parameter — NeMo #14799, NeMo #15097, FluidAudio #303 — are open with no maintainer reply. Another dictation app hit the identical wall, measured 16.7-30% English intrusions on spontaneous French, and shipped a warning rather than a fix.
+
+**What #552 measured**, two files of pure French containing no English word: Nemotron with French forced does 10.75% and 10.41% word error rate, Whisper small 16.82% and 13.88%, Parakeet 23.36% and 85.41%. Nemotron emitted no English word in any run. Its cost is real and is written on the issue: it francises English jargon, and on clean French where Parakeet does not drift Parakeet still wins, 2.56% against 9.40%. **It is an added option, never a replacement.**
+
+**Three things a reader should not rediscover.** Chunking the audio was tested as a repair and is a lottery, not a lever — the same 85 seconds scores between 13.55% and 47.66% depending only on where the cuts land, and silence-aligned cutting gave the worst result of the set. The "longer audio drifts more" theory is dead: the first isolated 15 seconds of the 7-minute file is already destroyed. And an engine's own transcript is never evidence about the audio in the span where that engine failed — reading Parakeet's output as proof that the speaker had switched to English is what produced one wrong conclusion in #552 before re-listening killed it.
+
+**Its first step is a gate, and it is the only thing that matters.** The cold Core ML compile must be measured on a physical iPhone before any other work. The whole rationale is that Nemotron loads like Parakeet (17 s) and not like Turbo (202-236 s), and a Mac cannot answer it — both load in under a second there, including the one that takes 17 s on a phone. The structural argument is that Nemotron is Parakeet's sibling, a FastConformer encoder plus transducer from the same converter, while what costs Turbo three and a half minutes is an autoregressive transformer decoder Nemotron does not have. **If the compile lands near Turbo's, stop and report: the feature's purpose is gone.**
+
+Streaming is out of scope and stays out. It is why Nemotron exists upstream and it is a separate, larger feature, candidate for Pro. So is the automatic fallback routed by Parakeet's confidence score, which waits on **#554** — that issue records the score in the debug log with no behaviour change, so the real drift rate becomes measurable from usage instead of from four files recorded in one evening.
 
 ## Lane C — the keyboard session
 
