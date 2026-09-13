@@ -9,34 +9,28 @@ import XCTest
 /// land in `dictus_debug.log` and really carry no typed word, and neither of those
 /// is provable by reading the code.
 ///
-/// WHY they drive the real log file instead of a temp one: the acceptance criteria
-/// are about what an export shows, and `PersistentLog`'s file path is not
-/// injectable. On a Mac the App Group container resolves under
-/// `~/Library/Group Containers/group.solutions.pivi.dictus`, so these tests write
-/// and delete a host-side file that nothing reads — the log that matters is the
-/// one on the device.
+/// WHY they drive `PersistentLog`'s public API rather than its `ForTesting` helpers:
+/// the acceptance criteria are about what an export shows, so the lines have to go
+/// through `log`, the collapsing and `read` exactly as they do on device. Only the
+/// file under them moves to a temp path, through `fileURLOverrideForTesting`.
 ///
-/// WHY setUp creates that directory: `FileManager.containerURL` hands back the
-/// path whether or not it exists, and an unsigned test host has never had it
-/// created for it. On device the container is always there. The test skips
-/// rather than fails if the directory cannot be made, so a locked-down machine
-/// reports "not run" instead of "broken".
+/// WHY not the App Group container: on a Mac it resolves under
+/// `~/Library/Group Containers/group.solutions.pivi.dictus`, a folder macOS guards
+/// for the app that owns it. A test host without Full Disk Access gets its `open()`
+/// held on a prompt that never resolves, and the whole `swift test` run hangs there.
 ///
 /// WHY the assertions are on substrings of the file rather than on `LogEvent`
 /// values: an event that formats correctly but never reaches the file would pass
 /// the second kind of test and fail the criterion.
 final class UserDictionaryLoggingTests: XCTestCase {
 
+    private var logFileURL: URL!
+
     override func setUpWithError() throws {
         try super.setUpWithError()
-        let container = try XCTUnwrap(AppGroup.containerURL, "No App Group container URL")
-        do {
-            try FileManager.default.createDirectory(
-                at: container, withIntermediateDirectories: true
-            )
-        } catch {
-            throw XCTSkip("Cannot create the App Group container on this host: \(error)")
-        }
+        logFileURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("test_user_dictionary_\(UUID().uuidString).log")
+        PersistentLog.fileURLOverrideForTesting = logFileURL
         setDeveloperToggle(false)
         UserDictionary.shared.resetAll()
         AppGroup.defaults.removeObject(forKey: UserDictionary.prunedTrieDuplicatesKey)
@@ -48,11 +42,8 @@ final class UserDictionaryLoggingTests: XCTestCase {
         UserDictionary.shared.resetAll()
         AppGroup.defaults.removeObject(forKey: UserDictionary.prunedTrieDuplicatesKey)
         clearLog()
-        // Leave nothing behind on the host: this file is a test artifact here,
-        // unlike on device where it is the log the maintainer exports.
-        if let url = AppGroup.containerURL?.appendingPathComponent("dictus_debug.log") {
-            try? FileManager.default.removeItem(at: url)
-        }
+        PersistentLog.fileURLOverrideForTesting = nil
+        try? FileManager.default.removeItem(at: logFileURL)
         super.tearDown()
     }
 
