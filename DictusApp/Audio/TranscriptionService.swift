@@ -181,10 +181,11 @@ class TranscriptionService {
             do {
                 let result = try await activeEngine.transcribe(audioSamples: audioSamples, language: language)
                 let durationMs = Int(Date().timeIntervalSince(transcriptionStart) * 1000)
-                let wordCount = result.split(separator: " ").count
-                PersistentLog.log(.transcriptionCompleted(durationMs: durationMs, wordCount: wordCount, confidence: nil))
+                let wordCount = result.text.split(separator: " ").count
+                PersistentLog.log(.transcriptionCompleted(
+                    durationMs: durationMs, wordCount: wordCount, confidence: result.confidence))
                 logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
-                return result
+                return result.text
             } catch {
                 // The diagnostic, not `localizedDescription`: since #313 the latter is the
                 // sentence written for the user, and a log line that carried it would say

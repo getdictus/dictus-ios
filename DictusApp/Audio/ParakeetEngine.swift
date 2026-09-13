@@ -140,8 +140,8 @@ class ParakeetEngine: SpeechModelProtocol {
     ///     a no-op either way. The "Transcription language" setting is therefore
     ///     only effective on Whisper models, which Settings documents via the
     ///     existing Parakeet caveat. Language forcing requires Qwen3-ASR (iOS 18+).
-    /// - Returns: Transcribed text.
-    func transcribe(audioSamples: [Float], language: String?) async throws -> String {
+    /// - Returns: Transcribed text, with FluidAudio's confidence score (#554).
+    func transcribe(audioSamples: [Float], language: String?) async throws -> SpeechTranscription {
         guard let asrManager else {
             throw TranscriptionError.notReady
         }
@@ -172,7 +172,9 @@ class ParakeetEngine: SpeechModelProtocol {
                 throw TranscriptionError.noSpeechDetected(context: "empty Parakeet transcription result")
             }
 
-            return text
+            // The mean of the decoder's token probabilities, kept for the log only (#554):
+            // it is how a drift into pseudo-English shows up in a field report.
+            return SpeechTranscription(text: text, confidence: result.confidence)
         } catch let error as TranscriptionError {
             throw error
         } catch {
