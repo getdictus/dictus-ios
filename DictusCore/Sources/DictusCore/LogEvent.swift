@@ -85,7 +85,16 @@ public enum LogEvent: Sendable {
 
     // MARK: Transcription
     case transcriptionStarted(modelName: String)
-    case transcriptionCompleted(durationMs: Int, wordCount: Int)
+    /// `confidence` is the engine's own score for the transcript it returned, when it
+    /// has one (#554). Only Parakeet does: FluidAudio's mean token probability. Whisper
+    /// has no comparable figure and passes `nil`, which prints no field at all rather
+    /// than a placeholder a reader could mistake for a measurement.
+    ///
+    /// WHY it is logged and nothing reads it: Parakeet v3 drifts into pseudo-English on
+    /// pure French, and five runs in #552 put a drifted transcript below ~0.93 and a
+    /// clean one above. Five points are an observation, not a threshold; this field is
+    /// how real dictations turn it into a distribution.
+    case transcriptionCompleted(durationMs: Int, wordCount: Int, confidence: Float?)
     case transcriptionFailed(error: String)
     case recordingTooShort(durationMs: Int)
     case transcriptionPerformance(modelName: String, audioDurationMs: Int, transcriptionDurationMs: Int, peakMemoryMB: Int)
@@ -827,8 +836,10 @@ public enum LogEvent: Sendable {
         // Transcription
         case .transcriptionStarted(let modelName):
             return "model=\(modelName)"
-        case .transcriptionCompleted(let durationMs, let wordCount):
-            return "duration=\(durationMs)ms words=\(wordCount)"
+        case .transcriptionCompleted(let durationMs, let wordCount, let confidence):
+            // Absent, not zero, when the engine has no score (#554).
+            let confidenceField = confidence.map { " confidence=\(String(format: "%.3f", $0))" } ?? ""
+            return "duration=\(durationMs)ms words=\(wordCount)\(confidenceField)"
         case .transcriptionFailed(let error):
             return "error=\(error)"
         case .recordingTooShort(let durationMs):

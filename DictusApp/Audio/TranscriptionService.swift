@@ -182,7 +182,7 @@ class TranscriptionService {
                 let result = try await activeEngine.transcribe(audioSamples: audioSamples, language: language)
                 let durationMs = Int(Date().timeIntervalSince(transcriptionStart) * 1000)
                 let wordCount = result.split(separator: " ").count
-                PersistentLog.log(.transcriptionCompleted(durationMs: durationMs, wordCount: wordCount))
+                PersistentLog.log(.transcriptionCompleted(durationMs: durationMs, wordCount: wordCount, confidence: nil))
                 logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
                 return result
             } catch {
@@ -255,7 +255,7 @@ class TranscriptionService {
 
             let durationMs = Int(Date().timeIntervalSince(transcriptionStart) * 1000)
             let wordCount = trimmed.split(separator: " ").count
-            PersistentLog.log(.transcriptionCompleted(durationMs: durationMs, wordCount: wordCount))
+            PersistentLog.log(.transcriptionCompleted(durationMs: durationMs, wordCount: wordCount, confidence: nil))
             logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
             return trimmed
         } catch let error as TranscriptionError {

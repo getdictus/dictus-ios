@@ -259,9 +259,24 @@ final class LogEventTests: XCTestCase {
     }
 
     func testTranscriptionCompletedIsInfoTranscription() {
-        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42)
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: nil)
         XCTAssertEqual(event.level, .info)
         XCTAssertEqual(event.subsystem, .transcription)
+    }
+
+    /// Parakeet's score travels with the event, to three decimals: the drifted runs in
+    /// #552 sit 0.005 apart, so two would blur exactly the gap being measured (#554).
+    func testTranscriptionCompletedCarriesTheEngineConfidence() {
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: 0.9163)
+        XCTAssertEqual(event.message, "duration=2500ms words=42 confidence=0.916")
+    }
+
+    /// An engine with no score logs no field — not `confidence=0`, not `nil`. A
+    /// placeholder would read as a measurement to whoever aggregates these lines (#554).
+    func testTranscriptionCompletedWithoutConfidencePrintsNoField() {
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: nil)
+        XCTAssertEqual(event.message, "duration=2500ms words=42")
+        XCTAssertFalse(event.payload().contains("confidence"))
     }
 
     func testTranscriptionFailedIsErrorTranscription() {
