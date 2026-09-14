@@ -9,12 +9,14 @@ final class ParakeetModelRepositoryTests: XCTestCase {
     /// the real Application Support directory.
     private var cacheDirectory: URL!
 
-    /// The file names FluidAudio's `ModelNames.ASR` supplies at the call site.
+    /// The file names the app supplies at the call site: FluidAudio 0.15.7's
+    /// `ModelNames.ASR.requiredModelsV3(precision: .int8)`, through
+    /// `ParakeetEngine.requiredModelBundles` (#558).
     private let requiredBundles: Set<String> = [
         "Preprocessor.mlmodelc",
         "Encoder.mlmodelc",
         "Decoder.mlmodelc",
-        "JointDecision.mlmodelc"
+        "JointDecisionv3.mlmodelc"
     ]
     private let vocabularyFileName = "parakeet_vocab.json"
 
@@ -295,9 +297,9 @@ final class ParakeetModelRepositoryTests: XCTestCase {
             "Encoder.mlmodelc/coremldata.bin",
             "Encoder.mlmodelc/model.mil",
             "Encoder.mlmodelc/weights/weight.bin",
-            "JointDecision.mlmodelc/coremldata.bin",
-            "JointDecision.mlmodelc/model.mil",
-            "JointDecision.mlmodelc/weights/weight.bin",
+            "JointDecisionv3.mlmodelc/coremldata.bin",
+            "JointDecisionv3.mlmodelc/model.mil",
+            "JointDecisionv3.mlmodelc/weights/weight.bin",
             "Preprocessor.mlmodelc/coremldata.bin",
             "Preprocessor.mlmodelc/model.mil",
             "Preprocessor.mlmodelc/weights/weight.bin",
@@ -363,5 +365,54 @@ final class ParakeetModelRepositoryTests: XCTestCase {
         try FileManager.default.createDirectory(at: weight, withIntermediateDirectories: true)
 
         XCTAssertEqual(firstMissingRequiredPath(), "Encoder.mlmodelc/weights/weight.bin")
+    }
+
+    // MARK: - The v3 set and what a repair needs to know (#558)
+
+    /// The cache every install made on FluidAudio 0.12 holds: four complete bundles,
+    /// the OLD joint among them, and no `JointDecisionv3`. The 0.12 guard called this
+    /// complete, because it read the old names; on the v3 set it must not be.
+    func testACacheDownloadedOnTheOldJointIsIncompleteOnTheV3Set() throws {
+        try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+        for bundle in ["Preprocessor.mlmodelc", "Encoder.mlmodelc", "Decoder.mlmodelc", "JointDecision.mlmodelc"] {
+            try makeCompiledBundle(bundle)
+        }
+        try Data("{}".utf8).write(to: cacheDirectory.appendingPathComponent(vocabularyFileName))
+
+        XCTAssertFalse(ParakeetModelRepository.isCacheComplete(
+            cacheDirectory, requiredModelBundles: requiredBundles, vocabularyFileName: vocabularyFileName
+        ))
+        XCTAssertNil(ParakeetModelRepository.installedCacheDirectory(
+            cacheDirectory, requiredModelBundles: requiredBundles, vocabularyFileName: vocabularyFileName
+        ))
+        XCTAssertEqual(ParakeetModelRepository.missingEntries(
+            in: cacheDirectory, requiredModelBundles: requiredBundles, vocabularyFileName: vocabularyFileName
+        ), ["JointDecisionv3.mlmodelc"])
+    }
+
+    func testACompleteCacheHasNothingMissing() throws {
+        try makeCompleteCache()
+        XCTAssertEqual(ParakeetModelRepository.missingEntries(
+            in: cacheDirectory, requiredModelBundles: requiredBundles, vocabularyFileName: vocabularyFileName
+        ), [])
+    }
+
+    /// A joint whose weights never landed is missing, not present: the repair has to
+    /// replace it, and copying next to a shell would leave the shell in place.
+    func testAPartialJointIsListedAsMissing() throws {
+        try makeCompleteCache()
+        let joint = cacheDirectory.appendingPathComponent("JointDecisionv3.mlmodelc/weights/weight.bin")
+        try FileManager.default.removeItem(at: joint)
+        XCTAssertEqual(ParakeetModelRepository.missingEntries(
+            in: cacheDirectory, requiredModelBundles: requiredBundles, vocabularyFileName: vocabularyFileName
+        ), ["JointDecisionv3.mlmodelc"])
+    }
+
+    /// Bundles first, sorted, then the vocabulary: the order the log line prints.
+    func testMissingEntriesOfAnEmptyDirectoryNameEverything() throws {
+        try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+        XCTAssertEqual(ParakeetModelRepository.missingEntries(
+            in: cacheDirectory, requiredModelBundles: requiredBundles, vocabularyFileName: vocabularyFileName
+        ), ["Decoder.mlmodelc", "Encoder.mlmodelc", "JointDecisionv3.mlmodelc", "Preprocessor.mlmodelc", vocabularyFileName])
     }
 }

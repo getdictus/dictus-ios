@@ -98,6 +98,11 @@ class ModelManager: ObservableObject {
     /// compiles of the same model.
     private static var hasResumedDownloadsThisProcess = false
 
+    /// Whether this process has already started completing the downloaded models whose
+    /// files are incomplete on disk (#558). Static for the same reason as the two flags
+    /// above: two instances completing the same model would run two compiles.
+    private static var hasRepairedIncompleteModelsThisProcess = false
+
     /// The serial prewarm lock used to live here, as `isPrewarming`. It now lives on
     /// `DictationCoordinator` (issue #428, second review): the Neural Engine cannot
     /// compile two models at once, and a lock owned by this class covered neither
@@ -140,7 +145,14 @@ class ModelManager: ObservableObject {
         // already-downloaded deprecated models still get their state set to .ready).
         for model in ModelInfo.allIncludingDeprecated {
             if downloadedModels.contains(model.identifier) {
-                modelStates[model.identifier] = .ready
+                // A model listed as downloaded whose files the loader cannot use must not
+                // read as installed (#558). `.ready` draws a card with no action at all,
+                // which on an offline device is a dead end: the model fails every dictation
+                // and nothing on screen offers to finish it. `.error` draws "Retry", and the
+                // card's tap re-enters `downloadModel`, which fetches only what is missing.
+                modelStates[model.identifier] = Self.hasIncompleteFiles(model)
+                    ? .error(Self.incompleteDownloadMessage)
+                    : .ready
             } else {
                 modelStates[model.identifier] = .notDownloaded
             }
@@ -188,6 +200,9 @@ class ModelManager: ObservableObject {
         // What a previous process left mid-transfer (issue #449). Seeded on every
         // instance so both screens agree; only ever driven from one.
         adoptInterruptedDownloads()
+        // Then what no transfer is carrying: a downloaded model whose files are
+        // incomplete (#558). After the adoption, so a model already resuming is skipped.
+        repairIncompleteModelsIfNeeded()
     }
 
     deinit {
@@ -371,7 +386,88 @@ class ModelManager: ObservableObject {
                     NotificationCenter.default.removeObserver(observer)
                     self.becameActiveObserver = nil
                 }
+                // Both are once per process behind their own flags, so whichever of the
+                // two armed this observer, running both is safe (#558).
                 self.adoptInterruptedDownloads()
+                self.repairIncompleteModelsIfNeeded()
+            }
+        }
+    }
+
+    // MARK: - Incomplete models (#558)
+
+    /// What the card says, under "Retry", for a downloaded model whose files are incomplete.
+    static let incompleteDownloadMessage = String(
+        localized: "Download incomplete. Tap to finish it.",
+        comment: "Model card, for a model listed as downloaded whose files are incomplete on disk (issue #558). Tapping the card downloads only the missing files."
+    )
+
+    /// Whether a downloaded model's files are incomplete, so no engine could load it.
+    ///
+    /// Parakeet only. WhisperKit's completeness is `reconcileDownloadedModelsWithDisk`'s
+    /// question and has its own history (#433); this answers the one FluidAudio 0.15
+    /// created, where a model downloaded in full on 0.12 lacks a file 0.15 loads.
+    private static func hasIncompleteFiles(_ model: DictusCore.ModelInfo) -> Bool {
+        switch model.engine {
+        case .parakeet:
+            return !ParakeetCacheRepair.missingEntries().isEmpty
+        case .whisperKit:
+            return false
+        }
+    }
+
+    /// Completes, without being asked, every downloaded model whose files are incomplete.
+    ///
+    /// LAYER 1 OF #558, the permanent one. The app bundle restores what it carries at
+    /// launch (`ParakeetCacheRepair`, layer 2); whatever is still missing is fetched here,
+    /// through `downloadModel`, which is the only place a model download may start:
+    /// `ModelRepoDownloader` skips every file already on disk, so this moves exactly the
+    /// missing bytes, with progress on the card, and the prewarm that follows compiles
+    /// the model it completed. While it runs the model reads as not ready, twice over:
+    /// `downloadModel` clears its warmth record, which sends a keyboard mic tap to the
+    /// preparation screen (#542), and the load guard refuses a partial cache.
+    ///
+    /// With no network the transfer fails in `downloadModel`'s own catch and the card
+    /// lands on `.error`, which offers "Retry". A dictation meanwhile fails with
+    /// `SpeechModelError.modelNotInstalled`.
+    ///
+    /// NEVER FROM THE BACKGROUND, for the reason `adoptInterruptedDownloads` gives: the
+    /// sequence ends in a Core ML compile, and a process iOS relaunched in the background
+    /// is free to be suspended in the middle of one.
+    private func repairIncompleteModelsIfNeeded() {
+        guard !Self.hasRepairedIncompleteModelsThisProcess else { return }
+        let candidates = downloadedModels.filter { identifier in
+            guard let model = ModelInfo.forIdentifier(identifier) else { return false }
+            return Self.hasIncompleteFiles(model)
+        }
+        guard !candidates.isEmpty else { return }
+
+        guard UIApplication.shared.applicationState != .background else {
+            waitForForegroundToAdoptDownloads()
+            return
+        }
+        Self.hasRepairedIncompleteModelsThisProcess = true
+
+        for identifier in candidates {
+            // A transfer adopted from a previous process is already completing it.
+            if modelStates[identifier] == .downloading || modelStates[identifier] == .prewarming {
+                continue
+            }
+            let missing = ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "launchRepair")
+            guard !missing.isEmpty else {
+                // The bundle had everything after all (a file removed after launch).
+                modelStates[identifier] = .ready
+                continue
+            }
+            PersistentLog.log(.diagnosticProbe(
+                component: "ParakeetCacheRepair",
+                instanceID: identifier,
+                action: "networkFetchStarted",
+                details: "missing=\(missing.joined(separator: ",")) source=network"
+            ))
+            Task { [weak self] in
+                // Failures land in `downloadModel`'s own catch, which sets `.error` and logs.
+                try? await self?.downloadModel(identifier)
             }
         }
     }
@@ -835,6 +931,13 @@ class ModelManager: ObservableObject {
     /// Since Dictus now targets iOS 17, no availability guard is needed.
     /// FluidAudio is always available.
     private func downloadParakeetModel(_ identifier: String) async throws {
+        // A model already listed as downloaded is being COMPLETED, not downloaded (#558):
+        // the launch repair and the card's "Retry" on an incomplete model both come through
+        // here. It keeps its place in the list and it does not take `activeModel` from
+        // whatever the user has selected; #174's adoption is for a model the user just
+        // chose to download. A failed first download is never listed (the identifier is
+        // appended after the prewarm), so this cannot mistake one for the other.
+        let isCompletingInstalledModel = downloadedModels.contains(identifier)
         setState(.downloading, for: identifier)
         seedDownloadProgress(for: identifier)
         lastLoggedDeciles[identifier] = -1
@@ -858,6 +961,11 @@ class ModelManager: ObservableObject {
             // the same files into the same cache directory using a delegate-based
             // downloadTask that does deliver byte callbacks.
             let cacheDir = AsrModels.defaultCacheDirectory(for: .v3)
+            // Take what the app bundle carries before listing the repository (#558), so a
+            // fresh download on this release uses the same bundled joint an update does,
+            // and the downloader, which skips files already on disk, never fetches it.
+            try FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
+            ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "download")
             let downloader = ModelRepoDownloader(configuration: .parakeet())
             try await downloader.download(to: cacheDir, modelName: identifier) { [weak self] progress in
                 Task { @MainActor in
@@ -962,8 +1070,16 @@ class ModelManager: ObservableObject {
 
             // Issue #174: a freshly downloaded model becomes the active one — see the
             // comment in the WhisperKit path, including why the user's later choice wins.
+            // A completion is not a fresh download and leaves the selection alone (#558).
             let userMovedOn = DictationCoordinator.shared.loadWasAbandoned(since: prewarmEpoch)
-            if userMovedOn {
+            if isCompletingInstalledModel {
+                PersistentLog.log(.diagnosticProbe(
+                    component: "ParakeetCacheRepair",
+                    instanceID: identifier,
+                    action: "completed",
+                    details: "source=network compileMs=\(prewarmDurationMs) active=\(activeModel ?? "nil")"
+                ))
+            } else if userMovedOn {
                 PersistentLog.log(.diagnosticProbe(
                     component: "ModelPrewarm",
                     instanceID: identifier,
@@ -992,8 +1108,10 @@ class ModelManager: ObservableObject {
             DictationCoordinator.shared.releaseNeuralEngine(from: engineHolder)
 
             // Issue #144: same proactive load as the WhisperKit path — see comment there,
-            // including why an abandoned preparation does not get one.
-            if !userMovedOn {
+            // including why an abandoned preparation does not get one. A completed model
+            // is loaded only when it is the one selected (#558): a background completion
+            // must not swap out the engine the user is dictating with.
+            if !userMovedOn, activeModel == identifier {
                 DictationCoordinator.shared.preloadActiveModel()
             }
         } catch is CancellationError {
@@ -1023,6 +1141,14 @@ class ModelManager: ObservableObject {
             // #210. There is no `ModelCleanupPolicy` call to make here because there is
             // no branch — nothing on this path deletes anything, ever.
             PersistentLog.log(.modelDownloadFailed(name: identifier, error: error.localizedDescription))
+            if isCompletingInstalledModel {
+                PersistentLog.log(.diagnosticProbe(
+                    component: "ParakeetCacheRepair",
+                    instanceID: identifier,
+                    action: "networkFetchFailed",
+                    details: "missing=\(ParakeetCacheRepair.missingEntries().joined(separator: ",")) error=\(error.localizedDescription)"
+                ))
+            }
             throw error
         }
     }

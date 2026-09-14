@@ -111,6 +111,36 @@ public enum ParakeetModelRepository {
         return cacheDirectory
     }
 
+    /// The required entries that are not usable on disk: each bundle that is not a compiled
+    /// Core ML directory, then the vocabulary file if it is not a regular file. Empty when
+    /// the cache is complete.
+    ///
+    /// WHY a list and not only `isCacheComplete` (#558): a cache can be incomplete for a
+    /// reason nobody interrupted. FluidAudio 0.15 renamed the joint Parakeet v3 loads, so
+    /// every install made on 0.12 holds four complete bundles and still lacks
+    /// `JointDecisionv3.mlmodelc`. The repair has to know WHICH entries are missing, to
+    /// take the one the app bundle carries from there and to log what it did, and it has
+    /// to reach that answer through the same rule the load guard applies, or the two
+    /// could disagree about whether a repair is needed at all.
+    ///
+    /// Sorted, so the log line it feeds reads the same on every launch.
+    public static func missingEntries(
+        in cacheDirectory: URL,
+        requiredModelBundles: Set<String>,
+        vocabularyFileName: String,
+        fileManager: FileManager = .default
+    ) -> [String] {
+        let missingBundles = requiredModelBundles.sorted().filter { bundleName in
+            !isCompiledModelBundle(
+                cacheDirectory.appendingPathComponent(bundleName, isDirectory: true),
+                fileManager: fileManager
+            )
+        }
+        let vocabulary = cacheDirectory.appendingPathComponent(vocabularyFileName)
+        let missingVocabulary = isRegularFile(vocabulary, fileManager: fileManager) ? [] : [vocabularyFileName]
+        return missingBundles + missingVocabulary
+    }
+
     /// Whether every required bundle is a compiled Core ML directory and the vocabulary
     /// file is present, so the model set can be loaded without touching the network.
     public static func isCacheComplete(
@@ -122,15 +152,13 @@ public enum ParakeetModelRepository {
         // An empty required set would make any directory, including a missing one, pass.
         guard !requiredModelBundles.isEmpty else { return false }
 
-        let vocabulary = cacheDirectory.appendingPathComponent(vocabularyFileName)
-        guard isRegularFile(vocabulary, fileManager: fileManager) else { return false }
-
-        return requiredModelBundles.allSatisfy { bundleName in
-            isCompiledModelBundle(
-                cacheDirectory.appendingPathComponent(bundleName, isDirectory: true),
-                fileManager: fileManager
-            )
-        }
+        // One rule for the guard and the repair (#558): complete means nothing is missing.
+        return missingEntries(
+            in: cacheDirectory,
+            requiredModelBundles: requiredModelBundles,
+            vocabularyFileName: vocabularyFileName,
+            fileManager: fileManager
+        ).isEmpty
     }
 
     /// Whether the URL is a compiled Core ML bundle holding a model, rather than a

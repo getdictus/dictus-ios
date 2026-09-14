@@ -141,6 +141,12 @@ struct DictusApp: App {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         PersistentLog.log(.appLaunched(version: version))
 
+        // Complete a Parakeet cache the 0.15 loader cannot use, from the app bundle, before
+        // the coordinator's launch preload can reach it (#558). A no-op on a complete cache
+        // and on a device that never downloaded Parakeet. What the bundle cannot supply is
+        // fetched later by `ModelManager`, with progress on the model card.
+        ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "appLaunch")
+
         // A process that has just started cannot have a model load in flight (#428).
         //
         // `modelLoadState` lives in the App Group and nothing ever cleared it, so a

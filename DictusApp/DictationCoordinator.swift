@@ -1706,10 +1706,20 @@ private extension DictationCoordinator {
                 return
             }
 
+            // Take from the app bundle whatever it carries that the cache lacks, before
+            // judging the cache (#558). Launch already did this once; a file can go missing
+            // between then and now, and the rule is "before any Parakeet load".
+            ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "ParakeetLoad")
+
             // Fail fast, before any task is created, when the cache is absent or partial —
             // mirrors the WhisperKit guard above. `SharedKeys.modelReady` only reflects App
             // Group bookkeeping; this checks the bundles FluidAudio will actually read.
             guard let cacheDirectory = ParakeetEngine.installedModelCacheDirectory() else {
+                // An incomplete model is not warm, whatever this install recorded about it
+                // (#558). Clearing the record sends the next keyboard mic tap to the
+                // preparation screen, the way #542 routes a cold model, instead of into a
+                // recording that fails here again. `ModelManager` completes the files.
+                ModelWarmth.clear(modelName, defaults: defaults)
                 let error = SpeechModelError.modelNotInstalled(identifier: modelName)
                 PersistentLog.log(.diagnosticProbe(
                     component: "ParakeetLoad",

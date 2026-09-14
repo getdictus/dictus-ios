@@ -857,6 +857,17 @@
         }
       }
     },
+    "Download incomplete. Tap to finish it." : {
+      "comment" : "Model card, for a model listed as downloaded whose files are incomplete on disk (issue #558). Tapping the card downloads only the missing files.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargement incomplet. Touchez pour le terminer."
+          }
+        }
+      }
+    },
     "Downloaded" : {
       "localizations" : {
         "fr" : {
