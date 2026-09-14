@@ -71,17 +71,23 @@ struct FluidAudioDownloadRoute {
 
     /// Removes every cached file of this engine's model, best effort or throwing.
     ///
-    /// Parakeet clears every `AsrModelVersion` directory it has ever used, as it always did.
+    /// Parakeet clears every `AsrModelVersion` directory it has ever used, as it always did,
+    /// under both the 0.15 folder names and the 0.12 ones (#558): a cache layer 0 never got to
+    /// migrate is still the user's disk.
     /// Nemotron clears its whole repository directory, every ship and tier in it: Dictus only
     /// ever writes one variant there, and a stale one left by an older build is the user's
     /// disk too.
     func removeCachedFiles(fileManager: FileManager = .default) throws {
         switch engine {
         case .parakeet:
+            let modelsDirectory = MLModelConfigurationUtils.defaultModelsDirectory()
             for version: AsrModelVersion in [.v2, .v3] {
-                let versionDir = AsrModels.defaultCacheDirectory(for: version)
-                if fileManager.fileExists(atPath: versionDir.path) {
-                    try fileManager.removeItem(at: versionDir)
+                var directories = [AsrModels.defaultCacheDirectory(for: version)]
+                if let legacyName = ParakeetCacheRepair.legacyCacheFolderNames[version] {
+                    directories.append(modelsDirectory.appendingPathComponent(legacyName, isDirectory: true))
+                }
+                for directory in directories where fileManager.fileExists(atPath: directory.path) {
+                    try fileManager.removeItem(at: directory)
                 }
             }
         case .nemotron:

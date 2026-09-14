@@ -100,7 +100,16 @@ class ParakeetEngine: SpeechModelProtocol {
 
             // Initialize the ASR manager for transcription. `initialize(models:)` became
             // `loadModels(_:)` in FluidAudio 0.15 (#558); same work, new name.
-            let manager = AsrManager(config: .default)
+            //
+            // `parallelChunkConcurrency: 1`, not the 0.15 default of 4 (#558). 0.15 splits a
+            // dictation longer than ~15 s into chunks and, by default, decodes four at once on
+            // four cloned managers. The transcript does not depend on it — each chunk is
+            // decoded from a fresh state — but memory does, and a keyboard dictation is
+            // transcribed in a DictusApp that iOS has put in the background. The default
+            // engine's resource profile does not change in the PR that bumps the SDK; one
+            // chunk at a time is what 0.12 did. The other long-form defaults (silence-aligned
+            // chunk starts, seam-gap repair) are kept: they are what #552 measured with.
+            let manager = AsrManager(config: ASRConfig(parallelChunkConcurrency: 1))
             try await manager.loadModels(models)
 
             self.asrManager = manager

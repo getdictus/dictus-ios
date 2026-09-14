@@ -14,7 +14,10 @@ import FluidAudio
 /// fetching it itself (`ModelHub.offlineMode`, set in `DictusApp.init`), and it should
 /// be: that fetch is the silent download #252 removed from the load path.
 ///
-/// Two layers answer it, decided on #558:
+/// Three layers answer it, decided on #558, and they run in this order:
+/// - **Layer 0, here, permanent.** FluidAudio 0.15 also renamed the cache folder,
+///   `parakeet-tdt-0.6b-v3-coreml` to `parakeet-tdt-0.6b-v3`. `migrateLegacyCacheFolder`
+///   moves a 0.12 cache into the folder 0.15 reads, before anything judges it.
 /// - **Layer 2, here, temporary.** The bundle carries the new joint, byte-identical to
 ///   the repository file, and a missing copy is restored from it before any load. The
 ///   first launch after the update works offline, with no download at all.
@@ -45,6 +48,42 @@ enum ParakeetCacheRepair {
         AsrModels.defaultCacheDirectory(for: .v3)
     }
 
+    /// The folders FluidAudio 0.12 cached Parakeet in, by version: `Repo.folderName` was then
+    /// the repository name with its `-coreml` suffix, which 0.15 strips. Written out rather
+    /// than derived, because the SDK that derived them no longer exists in this build.
+    /// v2 is listed for deletion only; Dictus never shipped it, but the old delete path
+    /// cleared both, and the new one must not leave what the old one would have removed.
+    static let legacyCacheFolderNames: [AsrModelVersion: String] = [
+        .v3: "parakeet-tdt-0.6b-v3-coreml",
+        .v2: "parakeet-tdt-0.6b-v2-coreml"
+    ]
+
+    /// Where a FluidAudio 0.12 install kept the Parakeet v3 cache.
+    static var legacyCacheDirectory: URL {
+        MLModelConfigurationUtils.defaultModelsDirectory()
+            .appendingPathComponent(legacyCacheFolderNames[.v3] ?? "parakeet-tdt-0.6b-v3-coreml", isDirectory: true)
+    }
+
+    /// Layer 0 (#558): moves a cache left in the 0.12 folder into the folder 0.15 reads.
+    ///
+    /// The rule and its cases are `ModelCacheFolderMigration`'s, in DictusCore where they are
+    /// tested. Logs only when an old folder was found, so a normal launch writes nothing.
+    static func migrateLegacyCacheFolder(context: String, fileManager: FileManager = .default) {
+        let outcome = ModelCacheFolderMigration.migrate(
+            from: legacyCacheDirectory, to: cacheDirectory, fileManager: fileManager
+        )
+        guard outcome.foundLegacyFolder else { return }
+        PersistentLog.log(.diagnosticProbe(
+            component: "ParakeetCacheRepair",
+            instanceID: "parakeet-tdt-0.6b-v3",
+            action: "legacyFolderMigrated",
+            details: "context=\(context) from=\(legacyCacheDirectory.lastPathComponent) to=\(cacheDirectory.lastPathComponent) "
+                + "moved=\(outcome.moved.isEmpty ? "none" : outcome.moved.joined(separator: ",")) "
+                + "alreadyPresent=\(outcome.alreadyPresent.isEmpty ? "none" : outcome.alreadyPresent.joined(separator: ",")) "
+                + "legacyRemoved=\(outcome.removedLegacyFolder)"
+        ))
+    }
+
     /// What the loader would find missing right now. Empty when the cache is complete.
     static func missingEntries(fileManager: FileManager = .default) -> [String] {
         ParakeetModelRepository.missingEntries(
@@ -71,6 +110,11 @@ enum ParakeetCacheRepair {
     /// - Returns: what is still missing afterwards, which is what layer 1 has to fetch.
     @discardableResult
     static func restoreFromBundleIfNeeded(context: String, fileManager: FileManager = .default) -> [String] {
+        // Layer 0 first, every time: the bundle restore below acts only on a cache that exists
+        // in the folder 0.15 reads, and a 0.12 cache is not there until it has moved. With no
+        // old folder this is one `fileExists`.
+        migrateLegacyCacheFolder(context: context, fileManager: fileManager)
+
         var isDirectory: ObjCBool = false
         guard fileManager.fileExists(atPath: cacheDirectory.path, isDirectory: &isDirectory),
               isDirectory.boolValue else {

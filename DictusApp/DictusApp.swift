@@ -141,10 +141,11 @@ struct DictusApp: App {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         PersistentLog.log(.appLaunched(version: version))
 
-        // Complete a Parakeet cache the 0.15 loader cannot use, from the app bundle, before
-        // the coordinator's launch preload can reach it (#558). A no-op on a complete cache
-        // and on a device that never downloaded Parakeet. What the bundle cannot supply is
-        // fetched later by `ModelManager`, with progress on the model card.
+        // Complete a Parakeet cache the 0.15 loader cannot use, before the coordinator's
+        // launch preload can reach it (#558): layer 0 moves a 0.12 cache into the folder 0.15
+        // reads, then layer 2 restores the new joint from the app bundle. A no-op on a
+        // complete cache and on a device that never downloaded Parakeet. What neither can
+        // supply is fetched later by `ModelManager` (layer 1), with progress on the card.
         ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "appLaunch")
 
         // A process that has just started cannot have a model load in flight (#428).
