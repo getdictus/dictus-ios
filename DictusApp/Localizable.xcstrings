@@ -134,6 +134,16 @@
         }
       }
     },
+    "28 languages (multilingual)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "28 langues (multilingue)"
+          }
+        }
+      }
+    },
     "A model file arrived damaged. Dictus will download it again." : {
       "comment" : "Model download error when an assembled file fails its size or SHA-256 check (issue #449).",
       "localizations" : {
@@ -1499,6 +1509,16 @@
         }
       }
     },
+    "Locks the language you speak (NVIDIA)" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verrouille la langue parlée (NVIDIA)"
+          }
+        }
+      }
+    },
     "Main languages" : {
       "comment" : "Language detail sheet: section header for curated highlighted languages (issue #240).",
       "localizations" : {
@@ -1616,6 +1636,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mes termes"
+          }
+        }
+      }
+    },
+    "Nemotron: transcription engine developed by NVIDIA that transcribes in the language chosen in Settings. Nemotron 3.5 ASR model." : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nemotron : moteur de transcription développé par NVIDIA, qui transcrit dans la langue choisie dans les Réglages. Modèle Nemotron 3.5 ASR."
           }
         }
       }
