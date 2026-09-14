@@ -66,8 +66,10 @@ final class NemotronEngine: SpeechModelProtocol {
     ]
 
     /// The repository's local root, where `ModelRepoDownloader` writes and where FluidAudio's
-    /// own cache layout puts this repository:
-    /// `Application Support/FluidAudio/Models/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b-CoreML`.
+    /// own cache layout puts this repository: `Application Support/FluidAudio/Models/` plus
+    /// `Repo.nemotronMultilingual.folderName`, which is `nemotron-multilingual` in 0.15.7
+    /// (read from the simulator's container, 2026-09-14). Derived, never written out, so an SDK
+    /// that renames it moves this with it; a rename would then need Parakeet's layer 0 (#558).
     ///
     /// Process-relative Application Support, so DictusApp only, like Parakeet's cache.
     static var repositoryCacheDirectory: URL {
