@@ -132,7 +132,10 @@ final class RecordTapRoutingTests: XCTestCase {
 final class NemotronColdCacheRoutingTests: XCTestCase {
 
     private let suiteName = "NemotronColdCacheRoutingTests"
-    private var defaults: UserDefaults!
+    /// Created per test in `setUp`, released in `tearDown`. Optional rather than implicitly
+    /// unwrapped (CodeRabbit, PR #561): a test reaches it through `store()`, which fails the
+    /// test instead of crashing the run if it is ever missing.
+    private var defaults: UserDefaults?
     private let nemotron = "nemotron-3.5-asr-multilingual-2240ms"
     private let bundlePath = [
         "/", "private", "var", "containers", "Bundle", "Application",
@@ -151,36 +154,40 @@ final class NemotronColdCacheRoutingTests: XCTestCase {
         super.tearDown()
     }
 
-    private func keyboardTap() -> RecordTapRouting.Decision {
+    private func store() throws -> UserDefaults {
+        try XCTUnwrap(defaults, "setUp did not create the test suite")
+    }
+
+    private func keyboardTap() throws -> RecordTapRouting.Decision {
         RecordTapRouting.decide(
             dictationStatus: .idle,
             isModelDownloaded: true,
             loadState: .ready,
             isModelWarm: ModelWarmth.isActiveModelWarm(
-                defaults: defaults, bundlePathComponents: bundlePath, systemVersion: "26.6.1"
+                defaults: try store(), bundlePathComponents: bundlePath, systemVersion: "26.6.1"
             )
         )
     }
 
-    func testANeverWarmedNemotronRoutesToThePreparationScreen() {
-        defaults.set(nemotron, forKey: SharedKeys.activeModel)
-        XCTAssertEqual(keyboardTap(), .presentPreparation)
+    func testANeverWarmedNemotronRoutesToThePreparationScreen() throws {
+        try store().set(nemotron, forKey: SharedKeys.activeModel)
+        XCTAssertEqual(try keyboardTap(), .presentPreparation)
     }
 
     /// Warm for another model is not warm for this one: Parakeet's record from before the
     /// user switched says nothing about Nemotron's Core ML cache.
-    func testParakeetsWarmthDoesNotCoverNemotron() {
+    func testParakeetsWarmthDoesNotCoverNemotron() throws {
         let identity = ModelWarmth.installIdentity(bundlePathComponents: bundlePath, systemVersion: "26.6.1")
-        ModelWarmth.markWarm("parakeet-tdt-0.6b-v3", identity: identity, defaults: defaults)
-        defaults.set(nemotron, forKey: SharedKeys.activeModel)
-        XCTAssertEqual(keyboardTap(), .presentPreparation)
+        ModelWarmth.markWarm("parakeet-tdt-0.6b-v3", identity: identity, defaults: try store())
+        try store().set(nemotron, forKey: SharedKeys.activeModel)
+        XCTAssertEqual(try keyboardTap(), .presentPreparation)
     }
 
     /// And once its warm inference has completed in this install, the tap goes through.
-    func testAWarmedNemotronStartsTheDictation() {
+    func testAWarmedNemotronStartsTheDictation() throws {
         let identity = ModelWarmth.installIdentity(bundlePathComponents: bundlePath, systemVersion: "26.6.1")
-        ModelWarmth.markWarm(nemotron, identity: identity, defaults: defaults)
-        defaults.set(nemotron, forKey: SharedKeys.activeModel)
-        XCTAssertEqual(keyboardTap(), .startDictation)
+        ModelWarmth.markWarm(nemotron, identity: identity, defaults: try store())
+        try store().set(nemotron, forKey: SharedKeys.activeModel)
+        XCTAssertEqual(try keyboardTap(), .startDictation)
     }
 }
