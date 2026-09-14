@@ -6,7 +6,7 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-13.
+Last reviewed: 2026-09-14.
 
 ## The lanes, in order
 
@@ -190,7 +190,7 @@ What is measured: on a failure the arbiter is stuck on a stale host — nine con
 
 **Three things a reader should not rediscover.** Chunking the audio was tested as a repair and is a lottery, not a lever — the same 85 seconds scores between 13.55% and 47.66% depending only on where the cuts land, and silence-aligned cutting gave the worst result of the set. The "longer audio drifts more" theory is dead: the first isolated 15 seconds of the 7-minute file is already destroyed. And an engine's own transcript is never evidence about the audio in the span where that engine failed — reading Parakeet's output as proof that the speaker had switched to English is what produced one wrong conclusion in #552 before re-listening killed it.
 
-**Its first step is a gate, and it is the only thing that matters.** The cold Core ML compile must be measured on a physical iPhone before any other work. The whole rationale is that Nemotron loads like Parakeet (17 s) and not like Turbo (202-236 s), and a Mac cannot answer it — both load in under a second there, including the one that takes 17 s on a phone. The structural argument is that Nemotron is Parakeet's sibling, a FastConformer encoder plus transducer from the same converter, while what costs Turbo three and a half minutes is an autoregressive transformer decoder Nemotron does not have. **If the compile lands near Turbo's, stop and report: the feature's purpose is gone.**
+**Built first, decided on device — reversed on 2026-09-14.** The cold Core ML compile on a physical iPhone is still the number that matters: the whole rationale is that Nemotron loads like Parakeet (17 s) and not like Turbo (202-236 s), and a Mac cannot answer it — both load in under a second there. It was written as a gate before any work, and that order could not be followed: measuring the compile needs a build that downloads, compiles and runs the model inside Dictus, which is most of the issue. So the whole scope is built on a PR that ships a device test list, and **the keep/drop decision is taken after that list is run** — dropping the model is a legitimate outcome, and the PR is not merged before it. The structural argument still stands as an argument: Nemotron is Parakeet's sibling, a FastConformer encoder plus transducer from the same converter, while what costs Turbo three and a half minutes is an autoregressive transformer decoder Nemotron does not have. **If the compile lands near Turbo's, the feature's purpose is gone.**
 
 Streaming is out of scope and stays out. It is why Nemotron exists upstream and it is a separate, larger feature, candidate for Pro. So is the automatic fallback routed by Parakeet's confidence score, which waits on **#554** — that issue records the score in the debug log with no behaviour change, so the real drift rate becomes measurable from usage instead of from four files recorded in one evening.
 
