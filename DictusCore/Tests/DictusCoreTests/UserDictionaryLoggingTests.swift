@@ -24,13 +24,14 @@ import XCTest
 /// the second kind of test and fail the criterion.
 final class UserDictionaryLoggingTests: XCTestCase {
 
-    private var logFileURL: URL!
+    private var logFileURL: URL?
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        logFileURL = FileManager.default.temporaryDirectory
+        let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("test_user_dictionary_\(UUID().uuidString).log")
-        PersistentLog.fileURLOverrideForTesting = logFileURL
+        logFileURL = url
+        PersistentLog.fileURLOverrideForTesting = url
         setDeveloperToggle(false)
         UserDictionary.shared.resetAll()
         AppGroup.defaults.removeObject(forKey: UserDictionary.prunedTrieDuplicatesKey)
@@ -43,7 +44,9 @@ final class UserDictionaryLoggingTests: XCTestCase {
         AppGroup.defaults.removeObject(forKey: UserDictionary.prunedTrieDuplicatesKey)
         clearLog()
         PersistentLog.fileURLOverrideForTesting = nil
-        try? FileManager.default.removeItem(at: logFileURL)
+        if let url = logFileURL {
+            try? FileManager.default.removeItem(at: url)
+        }
         super.tearDown()
     }
 
