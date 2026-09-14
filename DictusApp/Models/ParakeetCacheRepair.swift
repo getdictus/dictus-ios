@@ -64,23 +64,52 @@ enum ParakeetCacheRepair {
             .appendingPathComponent(legacyCacheFolderNames[.v3] ?? "parakeet-tdt-0.6b-v3-coreml", isDirectory: true)
     }
 
-    /// Layer 0 (#558): moves a cache left in the 0.12 folder into the folder 0.15 reads.
+    /// Bundles the 0.12 loader used that 0.15.7 never opens: `JointDecision.mlmodelc`, which
+    /// `JointDecisionv3.mlmodelc` replaced.
+    ///
+    /// Derived rather than written out: the 0.12 set is still `ModelNames.ASR.requiredModels`,
+    /// and whatever it names that the v3 set does not is dead weight. Derived this way it can
+    /// never name a bundle the loader needs. Measured on device 2026-09-14: layer 0 as first
+    /// written carried it across, 12.7 MB on every migrated phone.
+    static let obsoleteModelBundles: Set<String> = ModelNames.ASR.requiredModels.subtracting(ParakeetEngine.requiredModelBundles)
+
+    /// Layer 0 (#558): moves a cache left in the 0.12 folder into the folder 0.15 reads, and
+    /// removes what 0.15 never loads.
     ///
     /// The rule and its cases are `ModelCacheFolderMigration`'s, in DictusCore where they are
-    /// tested. Logs only when an old folder was found, so a normal launch writes nothing.
+    /// tested. Completeness is `ParakeetModelRepository`'s, the load guard's own rule. Logs only
+    /// when it did something, so a normal launch writes nothing.
     static func migrateLegacyCacheFolder(context: String, fileManager: FileManager = .default) {
         let outcome = ModelCacheFolderMigration.migrate(
-            from: legacyCacheDirectory, to: cacheDirectory, fileManager: fileManager
+            from: legacyCacheDirectory,
+            to: cacheDirectory,
+            obsoleteEntries: obsoleteModelBundles,
+            isComplete: { url in
+                url.pathExtension == "mlmodelc"
+                    ? ParakeetModelRepository.isCompiledModelBundle(url, fileManager: fileManager)
+                    : ParakeetModelRepository.isRegularFile(url, fileManager: fileManager)
+            },
+            fileManager: fileManager
         )
-        guard outcome.foundLegacyFolder else { return }
+        guard outcome.didAnything else { return }
+        // Built field by field: one concatenated interpolation of this length is more than the
+        // type checker will solve in reasonable time.
+        let fields: [String] = [
+            "context=\(context)",
+            "from=\(legacyCacheDirectory.lastPathComponent)",
+            "to=\(cacheDirectory.lastPathComponent)",
+            "legacyFound=\(outcome.foundLegacyFolder)",
+            "moved=\(list(outcome.moved))",
+            "replaced=\(list(outcome.replaced))",
+            "alreadyPresent=\(list(outcome.alreadyPresent))",
+            "obsoleteRemoved=\(list(outcome.removedObsolete))",
+            "legacyRemoved=\(outcome.removedLegacyFolder)"
+        ]
         PersistentLog.log(.diagnosticProbe(
             component: "ParakeetCacheRepair",
             instanceID: "parakeet-tdt-0.6b-v3",
             action: "legacyFolderMigrated",
-            details: "context=\(context) from=\(legacyCacheDirectory.lastPathComponent) to=\(cacheDirectory.lastPathComponent) "
-                + "moved=\(outcome.moved.isEmpty ? "none" : outcome.moved.joined(separator: ",")) "
-                + "alreadyPresent=\(outcome.alreadyPresent.isEmpty ? "none" : outcome.alreadyPresent.joined(separator: ",")) "
-                + "legacyRemoved=\(outcome.removedLegacyFolder)"
+            details: fields.joined(separator: " ")
         ))
     }
 
@@ -108,6 +137,11 @@ enum ParakeetCacheRepair {
     ///
     /// - Parameter context: who asked, for the log.
     /// - Returns: what is still missing afterwards, which is what layer 1 has to fetch.
+    /// A list for a log field, `none` when empty.
+    private static func list(_ names: [String]) -> String {
+        names.isEmpty ? "none" : names.joined(separator: ",")
+    }
+
     @discardableResult
     static func restoreFromBundleIfNeeded(context: String, fileManager: FileManager = .default) -> [String] {
         // Layer 0 first, every time: the bundle restore below acts only on a cache that exists
@@ -120,6 +154,8 @@ enum ParakeetCacheRepair {
               isDirectory.boolValue else {
             return missingEntries(fileManager: fileManager)
         }
+
+        sweepStaleStaging(fileManager: fileManager)
 
         let missing = missingEntries(fileManager: fileManager)
         let restorable = missing.filter { bundledModelBundles.contains($0) }
@@ -166,21 +202,36 @@ enum ParakeetCacheRepair {
         return stillMissing
     }
 
+    /// Prefix of the staging directories `copyBundle` creates, hidden and named for the sweep.
+    static let stagingPrefix = ".restoring-"
+
+    /// Removes staging directories a previous restore left: the process died between the copy
+    /// and the move (CodeRabbit, PR #561). Each is a hidden, uniquely named partial copy that
+    /// nothing reads and nothing else would ever delete, short of deleting the model.
+    private static func sweepStaleStaging(fileManager: FileManager) {
+        let names = (try? fileManager.contentsOfDirectory(atPath: cacheDirectory.path)) ?? []
+        for name in names where name.hasPrefix(stagingPrefix) {
+            try? fileManager.removeItem(at: cacheDirectory.appendingPathComponent(name, isDirectory: true))
+        }
+    }
+
     /// Copies one compiled bundle into the cache, replacing any shell of it.
     ///
     /// Staged under a temporary name and moved into place, so a copy interrupted by the
     /// process dying leaves a directory the completeness rule refuses (no bundle of that
-    /// name) rather than a half-written bundle under the real name, which it might not.
+    /// name) rather than a half-written bundle under the real name, which it might not. A
+    /// failure at any step after the staging directory exists removes it, and a death the
+    /// process cannot clean up after is swept by the next restore.
     private static func copyBundle(from source: URL, named name: String, fileManager: FileManager) throws {
         let destination = cacheDirectory.appendingPathComponent(name, isDirectory: true)
-        let staging = cacheDirectory.appendingPathComponent(".\(name).restoring-\(UUID().uuidString)", isDirectory: true)
-        try fileManager.copyItem(at: source, to: staging)
-        if fileManager.fileExists(atPath: destination.path) {
-            // A shell an interrupted download left: `missingEntries` already said it is
-            // not a compiled bundle, so nothing usable is lost by removing it.
-            try fileManager.removeItem(at: destination)
-        }
+        let staging = cacheDirectory.appendingPathComponent("\(stagingPrefix)\(name)-\(UUID().uuidString)", isDirectory: true)
         do {
+            try fileManager.copyItem(at: source, to: staging)
+            if fileManager.fileExists(atPath: destination.path) {
+                // A shell an interrupted download left: `missingEntries` already said it is
+                // not a compiled bundle, so nothing usable is lost by removing it.
+                try fileManager.removeItem(at: destination)
+            }
             try fileManager.moveItem(at: staging, to: destination)
         } catch {
             try? fileManager.removeItem(at: staging)

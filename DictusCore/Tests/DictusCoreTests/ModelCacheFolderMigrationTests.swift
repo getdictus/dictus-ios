@@ -38,6 +38,24 @@ final class ModelCacheFolderMigrationTests: XCTestCase {
         String(decoding: try Data(contentsOf: folder.appendingPathComponent("\(name)/coremldata.bin")), as: UTF8.self)
     }
 
+    /// The app's rule, restated for the tests: a bundle is complete when its marker is there.
+    /// (`ParakeetModelRepository.isCompiledModelBundle` asks for more; the merge only needs a yes
+    /// or a no, and this keeps the fixtures small.)
+    private func isComplete(_ url: URL) -> Bool {
+        FileManager.default.fileExists(atPath: url.appendingPathComponent("coremldata.bin").path)
+            || (url.pathExtension == "json" && FileManager.default.fileExists(atPath: url.path))
+    }
+
+    private func migrate(_ legacy: URL, _ current: URL, obsolete: Set<String> = []) -> ModelCacheFolderMigration.Outcome {
+        ModelCacheFolderMigration.migrate(from: legacy, to: current, obsoleteEntries: obsolete, isComplete: isComplete)
+    }
+
+    /// A bundle directory with no marker: an interrupted download.
+    private func makePartialBundle(_ name: String, in folder: URL) throws {
+        try FileManager.default.createDirectory(
+            at: folder.appendingPathComponent("\(name)/weights", isDirectory: true), withIntermediateDirectories: true)
+    }
+
     private func entries(_ folder: URL) -> [String] {
         ((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []).sorted()
     }
@@ -50,7 +68,7 @@ final class ModelCacheFolderMigrationTests: XCTestCase {
         }
         try Data("{}".utf8).write(to: legacy.appendingPathComponent("parakeet_vocab.json"))
 
-        let outcome = ModelCacheFolderMigration.migrate(from: legacy, to: current)
+        let outcome = migrate(legacy, current)
 
         XCTAssertEqual(outcome.moved, ["Decoder.mlmodelc", "Encoder.mlmodelc", "JointDecision.mlmodelc",
                                        "Preprocessor.mlmodelc", "parakeet_vocab.json"])
@@ -67,10 +85,11 @@ final class ModelCacheFolderMigrationTests: XCTestCase {
         let (legacy, current) = try folders()
         try makeBundle("Encoder.mlmodelc", in: current, tag: "new")
 
-        let outcome = ModelCacheFolderMigration.migrate(from: legacy, to: current)
+        let outcome = migrate(legacy, current)
 
         XCTAssertEqual(outcome, ModelCacheFolderMigration.Outcome(
             moved: [], alreadyPresent: [], foundLegacyFolder: false, removedLegacyFolder: false))
+        XCTAssertFalse(outcome.didAnything)
         XCTAssertEqual(entries(current), ["Encoder.mlmodelc"])
         XCTAssertEqual(try tag(of: "Encoder.mlmodelc", in: current), "new")
     }
@@ -84,7 +103,7 @@ final class ModelCacheFolderMigrationTests: XCTestCase {
         try makeBundle("Decoder.mlmodelc", in: current, tag: "new")
         try makeBundle("JointDecisionv3.mlmodelc", in: current, tag: "new")
 
-        let outcome = ModelCacheFolderMigration.migrate(from: legacy, to: current)
+        let outcome = migrate(legacy, current)
 
         XCTAssertEqual(outcome.moved, ["Encoder.mlmodelc"])
         XCTAssertEqual(outcome.alreadyPresent, ["Decoder.mlmodelc"])
@@ -99,7 +118,7 @@ final class ModelCacheFolderMigrationTests: XCTestCase {
     func testNeitherFolderDoesNothingAndCreatesNothing() throws {
         let (legacy, current) = try folders()
 
-        let outcome = ModelCacheFolderMigration.migrate(from: legacy, to: current)
+        let outcome = migrate(legacy, current)
 
         XCTAssertFalse(outcome.foundLegacyFolder)
         XCTAssertFalse(FileManager.default.fileExists(atPath: legacy.path))
@@ -110,11 +129,91 @@ final class ModelCacheFolderMigrationTests: XCTestCase {
     func testASecondRunIsANoOp() throws {
         let (legacy, current) = try folders()
         try makeBundle("Encoder.mlmodelc", in: legacy, tag: "old")
-        _ = ModelCacheFolderMigration.migrate(from: legacy, to: current)
+        _ = migrate(legacy, current)
 
-        let second = ModelCacheFolderMigration.migrate(from: legacy, to: current)
+        let second = migrate(legacy, current)
 
         XCTAssertFalse(second.foundLegacyFolder)
         XCTAssertEqual(entries(current), ["Encoder.mlmodelc"])
+    }
+
+    // MARK: - Review and device findings (#558)
+
+    /// CodeRabbit, PR #561: an interrupted 0.15 download left a partial bundle in the new folder
+    /// while the old one holds it complete. The complete copy must win, or an offline user loses
+    /// a bundle nothing can bring back.
+    func testACompleteLegacyBundleReplacesAPartialDestination() throws {
+        let (legacy, current) = try folders()
+        try makeBundle("Encoder.mlmodelc", in: legacy, tag: "old-complete")
+        try makePartialBundle("Encoder.mlmodelc", in: current)
+
+        let outcome = migrate(legacy, current)
+
+        XCTAssertEqual(outcome.replaced, ["Encoder.mlmodelc"])
+        XCTAssertEqual(outcome.alreadyPresent, [])
+        XCTAssertTrue(outcome.removedLegacyFolder)
+        XCTAssertEqual(try tag(of: "Encoder.mlmodelc", in: current), "old-complete")
+    }
+
+    /// Both partial: nothing is gained by swapping, the new folder's copy stays for layers 2 and 1.
+    func testTwoPartialCopiesKeepTheDestination() throws {
+        let (legacy, current) = try folders()
+        try makePartialBundle("Encoder.mlmodelc", in: legacy)
+        try makePartialBundle("Encoder.mlmodelc", in: current)
+        try Data("new-marker".utf8).write(
+            to: current.appendingPathComponent("Encoder.mlmodelc/weights/partial.bin"))
+
+        let outcome = migrate(legacy, current)
+
+        XCTAssertEqual(outcome.replaced, [])
+        XCTAssertEqual(outcome.alreadyPresent, ["Encoder.mlmodelc"])
+        XCTAssertTrue(FileManager.default.fileExists(
+            atPath: current.appendingPathComponent("Encoder.mlmodelc/weights/partial.bin").path))
+    }
+
+    /// A complete destination is never replaced, even by a complete old copy.
+    func testACompleteDestinationIsNeverReplaced() throws {
+        let (legacy, current) = try folders()
+        try makeBundle("Decoder.mlmodelc", in: legacy, tag: "old")
+        try makeBundle("Decoder.mlmodelc", in: current, tag: "new")
+
+        let outcome = migrate(legacy, current)
+
+        XCTAssertEqual(outcome.alreadyPresent, ["Decoder.mlmodelc"])
+        XCTAssertEqual(try tag(of: "Decoder.mlmodelc", in: current), "new")
+    }
+
+    /// Device finding, 2026-09-14: the 0.12 joint, which 0.15 never loads, was carried into the
+    /// new folder. It is not moved, and it goes with the old folder.
+    func testAnObsoleteEntryIsNotMovedAndGoesWithTheOldFolder() throws {
+        let (legacy, current) = try folders()
+        for bundle in ["Decoder.mlmodelc", "Encoder.mlmodelc", "JointDecision.mlmodelc", "Preprocessor.mlmodelc"] {
+            try makeBundle(bundle, in: legacy, tag: "old")
+        }
+
+        let outcome = migrate(legacy, current, obsolete: ["JointDecision.mlmodelc"])
+
+        XCTAssertEqual(outcome.moved, ["Decoder.mlmodelc", "Encoder.mlmodelc", "Preprocessor.mlmodelc"])
+        XCTAssertEqual(outcome.removedObsolete, ["JointDecision.mlmodelc"])
+        XCTAssertTrue(outcome.removedLegacyFolder)
+        XCTAssertFalse(entries(current).contains("JointDecision.mlmodelc"))
+    }
+
+    /// A device a previous build already migrated holds the obsolete joint in the new folder and
+    /// has no old folder any more. It is removed there, and nothing else is touched.
+    func testAnObsoleteEntryAlreadyMigratedIsRemovedFromTheNewFolder() throws {
+        let (legacy, current) = try folders()
+        for bundle in ["Decoder.mlmodelc", "JointDecision.mlmodelc", "JointDecisionv3.mlmodelc"] {
+            try makeBundle(bundle, in: current, tag: "new")
+        }
+
+        let outcome = migrate(legacy, current, obsolete: ["JointDecision.mlmodelc"])
+
+        XCTAssertFalse(outcome.foundLegacyFolder)
+        XCTAssertEqual(outcome.removedObsolete, ["JointDecision.mlmodelc"])
+        XCTAssertTrue(outcome.didAnything)
+        XCTAssertEqual(entries(current), ["Decoder.mlmodelc", "JointDecisionv3.mlmodelc"])
+        XCTAssertFalse(migrate(legacy, current, obsolete: ["JointDecision.mlmodelc"]).didAnything,
+                       "a second launch has nothing left to do")
     }
 }
