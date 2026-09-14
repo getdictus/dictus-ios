@@ -57,10 +57,21 @@ final class ModelCatalogueSizeAuditTests: XCTestCase {
             )
         }
 
+        /// Mirrors `Configuration.nemotron()` (#558): the whole variant folder, nothing at
+        /// the repository root.
+        static func nemotron() -> RepoSource {
+            RepoSource(
+                repoPath: NemotronModelRepository.repositoryID,
+                directoryPatterns: ["\(NemotronModelRepository.variantDirectory)/"],
+                includesRootMetadata: false
+            )
+        }
+
         static func forModel(_ model: ModelInfo) -> RepoSource {
             switch model.engine {
             case .whisperKit: return .whisperKit(variant: model.identifier)
             case .parakeet: return .parakeet()
+            case .nemotron: return .nemotron()
             }
         }
     }

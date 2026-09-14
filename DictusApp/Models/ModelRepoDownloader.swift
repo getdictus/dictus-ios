@@ -124,6 +124,32 @@ final class ModelRepoDownloader {
             )
         }
 
+        /// The Nemotron 3.5 ASR multilingual ship at the 2240 ms tier (#558).
+        ///
+        /// The whole `multilingual/2240ms/` folder, downloaded into
+        /// `NemotronEngine.repositoryCacheDirectory` with its repository path preserved, so the
+        /// model lands in `NemotronEngine.modelDirectory`. Nothing at the repository root is
+        /// taken: that root holds eight bundles across two ships and four tiers.
+        ///
+        /// NOT FluidAudio's `downloadVariant`, which bypasses this downloader's progress and
+        /// cancellation and picks the `latin/` ship for any `fr`/`en`/`es`/`de` code.
+        ///
+        /// Required paths come from `NemotronModelRepository`, the rule `NemotronEngine`'s load
+        /// guard applies too, so the download's promise and the guard's belief are one list.
+        static func nemotron() -> Configuration {
+            Configuration(
+                repoPath: NemotronModelRepository.repositoryID,
+                directoryPatterns: ["\(NemotronModelRepository.variantDirectory)/"],
+                includesRootMetadata: false,
+                requiredPaths: { _ in
+                    NemotronModelRepository.requiredDownloadPaths(
+                        requiredModelBundles: NemotronEngine.requiredModelBundles,
+                        rootFileNames: NemotronEngine.rootFileNames
+                    )
+                }
+            )
+        }
+
         /// One WhisperKit variant from argmaxinc/whisperkit-coreml.
         ///
         /// WHY exact-folder matching is safe here: `WhisperKit.download` resolves the
@@ -314,6 +340,8 @@ final class ModelRepoDownloader {
         switch ModelInfo.forIdentifier(identifier)?.engine {
         case .parakeet:
             return AsrModels.defaultCacheDirectory(for: .v3)
+        case .nemotron:
+            return NemotronEngine.repositoryCacheDirectory
         case .whisperKit, nil:
             return WhisperModelRepository.repositoryURL()
         }

@@ -229,7 +229,8 @@ public struct ModelInfo: Identifiable {
     // MARK: - Catalog
 
     /// Models available for new downloads. Excludes deprecated Tiny/Base.
-    /// On iOS 17+, includes Parakeet models. On iOS 16, Parakeet is filtered out.
+    /// On iOS 17+, includes the FluidAudio models (Parakeet, Nemotron). On iOS 16 they
+    /// are filtered out.
     ///
     /// WHY runtime OS version check instead of #available:
     /// ModelInfo is in DictusCore (a framework), not the app target.
@@ -240,9 +241,14 @@ public struct ModelInfo: Identifiable {
         let isIOS17OrLater = ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 17
         return allIncludingDeprecated.filter { model in
             guard model.visibility == .available else { return false }
-            // Hide Parakeet models on iOS 16
-            if model.engine == .parakeet && !isIOS17OrLater { return false }
-            return true
+            // Hide the FluidAudio models on iOS 16. Nemotron takes Parakeet's gate (#558):
+            // iOS 17 is also FluidAudio 0.15.7's own floor.
+            switch model.engine {
+            case .parakeet, .nemotron:
+                return isIOS17OrLater
+            case .whisperKit:
+                return true
+            }
         }
     }()
 
@@ -384,6 +390,41 @@ public struct ModelInfo: Identifiable {
             // user sees, not a consequence of measuring a compile. One reading, on the
             // fastest hardware this model is offered on, is thin ground for a promise
             // made to every device. Worth doing, deliberately not done here.
+        ),
+        // Nemotron 3.5 ASR, multilingual ship, 2240 ms chunk tier (#558). An ADDED option
+        // for a user whose French Parakeet drifts into pseudo-English, never a replacement:
+        // Parakeet stays the recommended default and `recommendedIdentifier(for:)` never
+        // returns this. Whether it stays in the catalogue at all is decided on device after
+        // #558's test list.
+        ModelInfo(
+            identifier: NemotronModelRepository.catalogueIdentifier,
+            displayName: "Nemotron 3.5",
+            // Measured 2026-09-14 from the repository tree: every file under
+            // `multilingual/2240ms/` of the repository `NemotronModelRepository` names
+            // (encoder 565 MB, decoder_joint 49 MB, decoder 30 MB, joint 19 MB, the
+            // preprocessor, `metadata.json`, `tokenizer.json`). The downloader takes the
+            // whole folder, so this is the download.
+            sizeBytes: 664_846_846,
+            engine: .nemotron,
+            // HAND-ASSIGNED, like every other entry's accuracy. #552 measured it below
+            // Parakeet on clean French (9.40% against 2.56% WER on the one long sample with
+            // no drift) and above Whisper Small on the two drift samples (10.75% against
+            // 16.82%, 10.41% against 13.88%). 0.75 sits between Small (0.6) and Parakeet
+            // (0.85), which is what those numbers say, without pretending to be derived.
+            accuracyScore: 0.75,
+            // UNMEASURED ON A PHONE. On a Mac it transcribes at 90-141x real time, the same
+            // order as Parakeet, and a Mac figure says nothing about an iPhone (Parakeet
+            // loads in under a second there and in 17 s on the phone). Parakeet's 0.85
+            // until the device test list gives a number.
+            speedScore: 0.85,
+            description: "Locks the language you speak (NVIDIA)",
+            visibility: .available,
+            // 300 s, the Turbo entries' budget, not the 120 s default. The first compile of a
+            // 665 MB model on an iPhone has never been watched, and it is the one reading
+            // #558 exists to take: a default that cut it off would turn that measurement
+            // into a failure. Same reasoning as Turbo's, see there.
+            prewarmTimeoutSeconds: 300
+            // No `firstPreparationSeconds` until a device reading exists (#432's rule).
         ),
         // Phase 37 (issue #104): Whisper Turbo re-introduced using an Argmax
         // iPhone-supported QUANTIZED variant.

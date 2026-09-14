@@ -279,6 +279,25 @@ final class LogEventTests: XCTestCase {
         XCTAssertFalse(event.payload().contains("confidence"))
     }
 
+    /// Nemotron's forced language, the prompt it resolved to and the tag the decoder emitted
+    /// (#558), in that order, and no `confidence=` field: that one is Parakeet's.
+    func testTranscriptionCompletedCarriesNemotronsLanguageFields() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 900, wordCount: 120, confidence: nil,
+            language: "fr", promptId: 8, detectedLanguage: "fr-FR"
+        )
+        XCTAssertEqual(event.message, "duration=900ms words=120 language=fr promptId=8 detected=fr-FR")
+        XCTAssertFalse(event.payload().contains("confidence"))
+    }
+
+    /// No tag emitted: the field is absent rather than `detected=nil`.
+    func testTranscriptionCompletedWithoutADetectedLanguagePrintsNoField() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 900, wordCount: 3, confidence: nil, language: "auto", promptId: 101
+        )
+        XCTAssertEqual(event.message, "duration=900ms words=3 language=auto promptId=101")
+    }
+
     func testTranscriptionFailedIsErrorTranscription() {
         let event = LogEvent.transcriptionFailed(error: "modelNotLoaded")
         XCTAssertEqual(event.level, .error)

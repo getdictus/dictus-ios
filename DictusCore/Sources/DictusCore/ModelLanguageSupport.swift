@@ -29,6 +29,9 @@ public struct ModelLanguageSupport: Equatable, Sendable {
         /// Parakeet TDT v3: exactly the 25 European languages documented by
         /// NVIDIA. No Chinese or other non-European languages.
         case parakeetEuropean
+        /// Nemotron 3.5 ASR multilingual: the 28 languages (32 locales) NVIDIA ships
+        /// as transcribing out of the box (#558).
+        case nemotronMultilingual
     }
 
     /// A curated quality note attached to a highlighted language on a
@@ -213,6 +216,27 @@ extension ModelLanguageSupport {
             "lv", "lt", "mt", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "uk"
         ]
     )
+
+    /// Nemotron 3.5 ASR streaming 0.6B, multilingual ship (#558).
+    ///
+    /// SOURCE OF TRUTH: the "Supported Languages" table of NVIDIA's model card,
+    /// `nvidia/nemotron-3.5-asr-streaming-0.6b`, read 2026-09-14. It sorts 40 locales
+    /// into three tiers, and only the first two transcribe without fine-tuning:
+    /// "transcription-ready" (19 locales) and "broad-coverage" (13 locales), 32 locales
+    /// in 28 languages. Those 28 are listed here. The eight "adaptation-ready" locales
+    /// (el, lt, lv, mt, sl, he, th, nn) are recognised by the tokenizer and not claimed:
+    /// NVIDIA itself says they need fine-tuning before they transcribe properly.
+    ///
+    /// Norwegian Bokmål is `nb`, the code the card uses (`nb-NO`), not the macro `no`.
+    /// The codes below are the list minus the four tested languages in `highlights`.
+    static let nemotron35 = ModelLanguageSupport(
+        coverage: .nemotronMultilingual,
+        highlights: testedHighlights,
+        additionalCodes: [
+            "ar", "bg", "cs", "da", "et", "fi", "hi", "hr", "hu", "it", "ja", "ko",
+            "nb", "nl", "pl", "pt", "ro", "ru", "sk", "sv", "tr", "uk", "vi", "zh"
+        ]
+    )
 }
 
 // MARK: - ModelInfo accessor
@@ -238,6 +262,8 @@ extension ModelInfo {
             return .whisperHighAccuracy
         case "parakeet-tdt-0.6b-v3":
             return .parakeetV3
+        case NemotronModelRepository.catalogueIdentifier:
+            return .nemotron35
         default:
             // tiny / base / small / small_216MB, plus any future Whisper
             // entry until it is explicitly classified above. Defaulting to
@@ -248,6 +274,8 @@ extension ModelInfo {
                 return .whisperSmallClass
             case .parakeet:
                 return .parakeetV3
+            case .nemotron:
+                return .nemotron35
             }
         }
     }

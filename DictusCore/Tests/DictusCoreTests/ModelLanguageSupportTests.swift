@@ -231,4 +231,30 @@ final class ModelLanguageSupportTests: XCTestCase {
             XCTAssertNotEqual(name, code, "\(code) resolved to itself — likely invalid")
         }
     }
+
+    // MARK: - Nemotron documented list (#558)
+
+    /// The 28 languages NVIDIA ships as transcribing out of the box, and not the eight
+    /// "adaptation-ready" locales its own card says need fine-tuning first.
+    func testNemotronListsThe28TranscribingLanguagesAndNoAdaptationOnlyOnes() {
+        guard let nemotron = ModelInfo.forIdentifier("nemotron-3.5-asr-multilingual-2240ms") else {
+            XCTFail("Nemotron missing from catalog")
+            return
+        }
+        let support = nemotron.languageSupport
+        let allCodes = support.highlights.map(\.code) + support.additionalCodes
+        XCTAssertEqual(allCodes.count, 28)
+        XCTAssertEqual(Set(allCodes).count, 28, "language codes must be unique")
+        XCTAssertEqual(Array(allCodes.prefix(4)), testedCodes, "tested languages first")
+        for adaptationOnly in ["el", "lt", "lv", "mt", "sl", "he", "th", "nn"] {
+            XCTAssertFalse(allCodes.contains(adaptationOnly), "\(adaptationOnly) needs fine-tuning, not claimed")
+        }
+        XCTAssertTrue(allCodes.contains("zh") && allCodes.contains("ja"), "the multilingual ship covers CJK")
+        XCTAssertTrue(support.tierGroups.isEmpty)
+        for code in allCodes {
+            let name = Locale(identifier: "en").localizedString(forLanguageCode: code)
+            XCTAssertNotNil(name, "\(code) is not a language code the OS can name")
+            XCTAssertNotEqual(name, code, "\(code) resolved to itself — likely invalid")
+        }
+    }
 }

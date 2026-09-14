@@ -404,13 +404,14 @@ class ModelManager: ObservableObject {
 
     /// Whether a downloaded model's files are incomplete, so no engine could load it.
     ///
-    /// Parakeet only. WhisperKit's completeness is `reconcileDownloadedModelsWithDisk`'s
-    /// question and has its own history (#433); this answers the one FluidAudio 0.15
-    /// created, where a model downloaded in full on 0.12 lacks a file 0.15 loads.
+    /// The FluidAudio engines only. WhisperKit's completeness is
+    /// `reconcileDownloadedModelsWithDisk`'s question and has its own history (#433); this
+    /// answers the one FluidAudio 0.15 created, where a Parakeet model downloaded in full on
+    /// 0.12 lacks a file 0.15 loads, and applies the same rule to Nemotron's cache.
     private static func hasIncompleteFiles(_ model: DictusCore.ModelInfo) -> Bool {
         switch model.engine {
-        case .parakeet:
-            return !ParakeetCacheRepair.missingEntries().isEmpty
+        case .parakeet, .nemotron:
+            return !FluidAudioDownloadRoute(engine: model.engine).missingEntries().isEmpty
         case .whisperKit:
             return false
         }
@@ -453,14 +454,18 @@ class ModelManager: ObservableObject {
             if modelStates[identifier] == .downloading || modelStates[identifier] == .prewarming {
                 continue
             }
-            let missing = ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "launchRepair")
+            guard let engine = ModelInfo.forIdentifier(identifier)?.engine else { continue }
+            let route = FluidAudioDownloadRoute(engine: engine)
+            let missing = engine == .parakeet
+                ? ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "launchRepair")
+                : route.missingEntries()
             guard !missing.isEmpty else {
                 // The bundle had everything after all (a file removed after launch).
                 modelStates[identifier] = .ready
                 continue
             }
             PersistentLog.log(.diagnosticProbe(
-                component: "ParakeetCacheRepair",
+                component: route.repairLogComponent,
                 instanceID: identifier,
                 action: "networkFetchStarted",
                 details: "missing=\(missing.joined(separator: ",")) source=network"
@@ -574,14 +579,16 @@ class ModelManager: ObservableObject {
         // download must not leave a warmth record standing over a half-written model.
         ModelWarmth.clear(identifier, defaults: defaults)
 
-        // Check if this is a Parakeet model and route accordingly
-        let modelInfo = ModelInfo.forIdentifier(identifier)
-        if modelInfo?.engine == .parakeet {
-            try await downloadParakeetModel(identifier)
-            return
+        // Route by engine. Parakeet and Nemotron share the FluidAudio path (#558); every
+        // engine is named, so a new one cannot fall into WhisperKit's by accident.
+        switch ModelInfo.forIdentifier(identifier)?.engine {
+        case .parakeet:
+            try await downloadFluidAudioModel(identifier, engine: .parakeet)
+        case .nemotron:
+            try await downloadFluidAudioModel(identifier, engine: .nemotron)
+        case .whisperKit, nil:
+            try await downloadWhisperKitModel(identifier)
         }
-
-        try await downloadWhisperKitModel(identifier)
     }
 
     /// Download a WhisperKit model variant from HuggingFace.
@@ -921,7 +928,14 @@ class ModelManager: ObservableObject {
         }
     }
 
-    /// Download a Parakeet model via the app-side downloader, then compile via FluidAudio.
+    /// Download a FluidAudio model (Parakeet or Nemotron) via the app-side downloader, then
+    /// compile it via FluidAudio.
+    ///
+    /// ONE PATH FOR BOTH ENGINES (#558): the sequence below — transfer with progress, queue for
+    /// the Neural Engine, compile under the catalogue's budget, adopt, announce — is identical,
+    /// and every step of it was paid for by an issue. What differs is three things, and
+    /// `FluidAudioDownloadRoute` holds them: the downloader configuration, the destination,
+    /// and the engine that compiles.
     ///
     /// WHY a separate method:
     /// WhisperKit and Parakeet use completely different download pipelines and
@@ -930,7 +944,8 @@ class ModelManager: ObservableObject {
     ///
     /// Since Dictus now targets iOS 17, no availability guard is needed.
     /// FluidAudio is always available.
-    private func downloadParakeetModel(_ identifier: String) async throws {
+    private func downloadFluidAudioModel(_ identifier: String, engine: SpeechEngine) async throws {
+        let route = FluidAudioDownloadRoute(engine: engine)
         // A model already listed as downloaded is being COMPLETED, not downloaded (#558):
         // the launch repair and the card's "Retry" on an incomplete model both come through
         // here. It keeps its place in the list and it does not take `activeModel` from
@@ -960,13 +975,16 @@ class ModelManager: ObservableObject {
             // rejected 1.7.1(19) as "frozen at 4%"). ModelRepoDownloader downloads
             // the same files into the same cache directory using a delegate-based
             // downloadTask that does deliver byte callbacks.
-            let cacheDir = AsrModels.defaultCacheDirectory(for: .v3)
+            let cacheDir = route.cacheDirectory
             // Take what the app bundle carries before listing the repository (#558), so a
             // fresh download on this release uses the same bundled joint an update does,
             // and the downloader, which skips files already on disk, never fetches it.
+            // Parakeet only: the bundle carries nothing for Nemotron.
             try FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
-            ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "download")
-            let downloader = ModelRepoDownloader(configuration: .parakeet())
+            if engine == .parakeet {
+                ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "download")
+            }
+            let downloader = ModelRepoDownloader(configuration: route.downloaderConfiguration)
             try await downloader.download(to: cacheDir, modelName: identifier) { [weak self] progress in
                 Task { @MainActor in
                     self?.updateDownloadProgress(progress, identifier: identifier)
@@ -1004,7 +1022,7 @@ class ModelManager: ObservableObject {
             }
 
             // Step 4: Load and compile CoreML models, under the catalogue's budget.
-            // ParakeetEngine.prepare() loads the files step 1 just downloaded and compiles
+            // The engine's prepare() loads the files step 1 just downloaded and compiles
             // them; it never downloads anything itself (issue #252). This method is the
             // only place a Parakeet download starts.
             //
@@ -1038,8 +1056,7 @@ class ModelManager: ObservableObject {
                     // Built inside the operation, not captured: the engine is this
                     // compile's alone, and after a deadline expiry nothing out here is
                     // entitled to touch it any more.
-                    let parakeetEngine = ParakeetEngine()
-                    try await parakeetEngine.prepare(modelIdentifier: identifier)
+                    try await route.makeEngine().prepare(modelIdentifier: identifier)
                 } whenLateCompilationLands: { result in
                     DictationCoordinator.shared.releaseNeuralEngine(from: engineHolder)
                     let landedAfterMs = Int(Date().timeIntervalSince(prewarmStart) * 1000)
@@ -1074,7 +1091,7 @@ class ModelManager: ObservableObject {
             let userMovedOn = DictationCoordinator.shared.loadWasAbandoned(since: prewarmEpoch)
             if isCompletingInstalledModel {
                 PersistentLog.log(.diagnosticProbe(
-                    component: "ParakeetCacheRepair",
+                    component: route.repairLogComponent,
                     instanceID: identifier,
                     action: "completed",
                     details: "source=network compileMs=\(prewarmDurationMs) active=\(activeModel ?? "nil")"
@@ -1143,10 +1160,10 @@ class ModelManager: ObservableObject {
             PersistentLog.log(.modelDownloadFailed(name: identifier, error: error.localizedDescription))
             if isCompletingInstalledModel {
                 PersistentLog.log(.diagnosticProbe(
-                    component: "ParakeetCacheRepair",
+                    component: route.repairLogComponent,
                     instanceID: identifier,
                     action: "networkFetchFailed",
-                    details: "missing=\(ParakeetCacheRepair.missingEntries().joined(separator: ",")) error=\(error.localizedDescription)"
+                    details: "missing=\(route.missingEntries().joined(separator: ",")) error=\(error.localizedDescription)"
                 ))
             }
             throw error
@@ -1239,16 +1256,14 @@ class ModelManager: ObservableObject {
             }
         }
 
-        // Remove FluidAudio/Parakeet cached models
-        // FluidAudio stores downloaded + compiled CoreML models in Application Support/FluidAudio/Models/{version}/
-        // Clean ALL known AsrModelVersion caches so this works for any current or future Parakeet model.
-        if engine == .parakeet {
-            for version: AsrModelVersion in [.v2, .v3] {
-                let versionDir = AsrModels.defaultCacheDirectory(for: version)
-                if FileManager.default.fileExists(atPath: versionDir.path) {
-                    try FileManager.default.removeItem(at: versionDir)
-                }
-            }
+        // Remove FluidAudio cached models (Parakeet, and Nemotron since #558).
+        // FluidAudio stores downloaded + compiled CoreML models in Application Support/FluidAudio/Models/.
+        // Every engine is named: WhisperKit's files were removed above.
+        switch engine {
+        case .parakeet, .nemotron:
+            try FluidAudioDownloadRoute(engine: engine).removeCachedFiles()
+        case .whisperKit:
+            break
         }
 
         // And the staging area of any transfer still holding partial bytes for it
@@ -1301,11 +1316,14 @@ class ModelManager: ObservableObject {
             try? FileManager.default.removeItem(at: whisperKitDir)
         }
 
-        // Clean FluidAudio/Parakeet cached models (all versions)
-        if ModelInfo.allIncludingDeprecated.first(where: { $0.identifier == identifier })?.engine == .parakeet {
-            for version: AsrModelVersion in [.v2, .v3] {
-                try? FileManager.default.removeItem(at: AsrModels.defaultCacheDirectory(for: version))
-            }
+        // Clean FluidAudio cached models (Parakeet: all versions; Nemotron: its repository, #558)
+        switch ModelInfo.allIncludingDeprecated.first(where: { $0.identifier == identifier })?.engine {
+        case .parakeet:
+            try? FluidAudioDownloadRoute(engine: .parakeet).removeCachedFiles()
+        case .nemotron:
+            try? FluidAudioDownloadRoute(engine: .nemotron).removeCachedFiles()
+        case .whisperKit, nil:
+            break
         }
 
         // The manifest, the partials and the chunks a resumable transfer keeps outside

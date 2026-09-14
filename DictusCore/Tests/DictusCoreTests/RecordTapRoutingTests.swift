@@ -124,3 +124,63 @@ final class RecordTapRoutingTests: XCTestCase {
         XCTAssertEqual(decide(.idle, load: .loading, warm: false), .presentPreparation)
     }
 }
+
+/// #542's cold-cache gate on the Nemotron identifier (#558). The gate keys on the model
+/// identifier, so a model it has never seen is exactly the case that must refuse: a cold
+/// Nemotron compile lasts minutes, and a dictation recorded into it is lost the way #542
+/// described.
+final class NemotronColdCacheRoutingTests: XCTestCase {
+
+    private let suiteName = "NemotronColdCacheRoutingTests"
+    private var defaults: UserDefaults!
+    private let nemotron = "nemotron-3.5-asr-multilingual-2240ms"
+    private let bundlePath = [
+        "/", "private", "var", "containers", "Bundle", "Application",
+        "1E5F0B24-0000-4000-8000-000000000558", "Dictus.app", "PlugIns", "DictusKeyboard.appex"
+    ]
+
+    override func setUp() {
+        super.setUp()
+        UserDefaults().removePersistentDomain(forName: suiteName)
+        defaults = UserDefaults(suiteName: suiteName)
+    }
+
+    override func tearDown() {
+        UserDefaults().removePersistentDomain(forName: suiteName)
+        defaults = nil
+        super.tearDown()
+    }
+
+    private func keyboardTap() -> RecordTapRouting.Decision {
+        RecordTapRouting.decide(
+            dictationStatus: .idle,
+            isModelDownloaded: true,
+            loadState: .ready,
+            isModelWarm: ModelWarmth.isActiveModelWarm(
+                defaults: defaults, bundlePathComponents: bundlePath, systemVersion: "26.6.1"
+            )
+        )
+    }
+
+    func testANeverWarmedNemotronRoutesToThePreparationScreen() {
+        defaults.set(nemotron, forKey: SharedKeys.activeModel)
+        XCTAssertEqual(keyboardTap(), .presentPreparation)
+    }
+
+    /// Warm for another model is not warm for this one: Parakeet's record from before the
+    /// user switched says nothing about Nemotron's Core ML cache.
+    func testParakeetsWarmthDoesNotCoverNemotron() {
+        let identity = ModelWarmth.installIdentity(bundlePathComponents: bundlePath, systemVersion: "26.6.1")
+        ModelWarmth.markWarm("parakeet-tdt-0.6b-v3", identity: identity, defaults: defaults)
+        defaults.set(nemotron, forKey: SharedKeys.activeModel)
+        XCTAssertEqual(keyboardTap(), .presentPreparation)
+    }
+
+    /// And once its warm inference has completed in this install, the tap goes through.
+    func testAWarmedNemotronStartsTheDictation() {
+        let identity = ModelWarmth.installIdentity(bundlePathComponents: bundlePath, systemVersion: "26.6.1")
+        ModelWarmth.markWarm(nemotron, identity: identity, defaults: defaults)
+        defaults.set(nemotron, forKey: SharedKeys.activeModel)
+        XCTAssertEqual(keyboardTap(), .startDictation)
+    }
+}

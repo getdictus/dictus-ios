@@ -7,16 +7,18 @@ final class ModelInfoTests: XCTestCase {
     // MARK: - Catalog visibility
 
     func testAllContainsOnlyAvailableModels() {
-        // ModelInfo.all should contain 5 available models (4 WhisperKit + 1 Parakeet).
+        // ModelInfo.all should contain 6 available models (4 WhisperKit + 1 Parakeet
+        // + 1 Nemotron, #558).
         // Phase 37 (issue #104) re-introduced Whisper Turbo to the catalog with per-device
         // gating — it is present here regardless of device; UI filtering happens via
         // `available(on:)` using `isSupported(on:)` in the view layer.
-        XCTAssertEqual(ModelInfo.all.count, 5)
+        XCTAssertEqual(ModelInfo.all.count, 6)
         let ids = Set(ModelInfo.all.map(\.identifier))
         XCTAssertTrue(ids.contains("openai_whisper-small"))
         XCTAssertTrue(ids.contains("openai_whisper-small_216MB"))
         XCTAssertTrue(ids.contains("openai_whisper-medium"))
         XCTAssertTrue(ids.contains("parakeet-tdt-0.6b-v3"))
+        XCTAssertTrue(ids.contains("nemotron-3.5-asr-multilingual-2240ms"))
         XCTAssertTrue(ids.contains("openai_whisper-large-v3-v20240930_turbo_632MB"))
         XCTAssertFalse(ids.contains("openai_whisper-tiny"))
         XCTAssertFalse(ids.contains("openai_whisper-base"))
@@ -24,14 +26,14 @@ final class ModelInfoTests: XCTestCase {
         XCTAssertFalse(ids.contains("openai_whisper-large-v3_turbo_954MB"))
     }
 
-    func testAllIncludingDeprecatedContainsEight() {
-        // allIncludingDeprecated should contain all 8 models (3 deprecated + 5 available):
+    func testAllIncludingDeprecatedContainsNine() {
+        // allIncludingDeprecated should contain all 9 models (3 deprecated + 6 available):
         // Tiny, Base, and the `_954MB` Turbo superseded by issue #408.
-        XCTAssertEqual(ModelInfo.allIncludingDeprecated.count, 8)
+        XCTAssertEqual(ModelInfo.allIncludingDeprecated.count, 9)
         let deprecated = ModelInfo.allIncludingDeprecated.filter { $0.visibility == .deprecated }
         XCTAssertEqual(deprecated.count, 3)
         let available = ModelInfo.allIncludingDeprecated.filter { $0.visibility == .available }
-        XCTAssertEqual(available.count, 5)
+        XCTAssertEqual(available.count, 6)
     }
 
     func testDeprecatedModelStillResolvable() {
@@ -63,11 +65,15 @@ final class ModelInfoTests: XCTestCase {
     func testSpeechEngineRawValues() {
         XCTAssertEqual(SpeechEngine.whisperKit.rawValue, "WK")
         XCTAssertEqual(SpeechEngine.parakeet.rawValue, "PK")
+        // Persisted in history records and in the policy the keyboard decodes (#558):
+        // the marker is a storage format, not a label.
+        XCTAssertEqual(SpeechEngine.nemotron.rawValue, "NM")
     }
 
     func testSpeechEngineDisplayNames() {
         XCTAssertEqual(SpeechEngine.whisperKit.displayName, "WhisperKit")
         XCTAssertEqual(SpeechEngine.parakeet.displayName, "Parakeet")
+        XCTAssertEqual(SpeechEngine.nemotron.displayName, "Nemotron")
     }
 
     func testEngineAssignment() {
@@ -76,6 +82,65 @@ final class ModelInfoTests: XCTestCase {
         XCTAssertEqual(whisperKitModels.count, 7, "Should have 7 WhisperKit models (incl. both Turbo variants)")
         XCTAssertEqual(parakeetModels.count, 1, "Should have 1 Parakeet model")
         XCTAssertEqual(parakeetModels.first?.identifier, "parakeet-tdt-0.6b-v3")
+        let nemotronModels = ModelInfo.allIncludingDeprecated.filter { $0.engine == .nemotron }
+        XCTAssertEqual(nemotronModels.map(\.identifier), ["nemotron-3.5-asr-multilingual-2240ms"])
+    }
+
+    // MARK: - Nemotron 3.5 (#558)
+
+    /// The entry the brief specifies, field by field: the multilingual ship at the 2240 ms
+    /// tier, its measured size, the Turbo budget, and no preparation time nobody watched.
+    func testNemotronEntryCarriesTheSpecifiedMetadata() {
+        guard let nemotron = ModelInfo.forIdentifier("nemotron-3.5-asr-multilingual-2240ms") else {
+            XCTFail("the Nemotron entry is missing from the catalogue")
+            return
+        }
+        XCTAssertEqual(nemotron.engine, .nemotron)
+        XCTAssertEqual(nemotron.sizeBytes, 664_846_846, "measured 2026-09-14 from multilingual/2240ms/")
+        XCTAssertEqual(nemotron.sizeLabel, "~664 MB")
+        XCTAssertEqual(nemotron.visibility, .available)
+        XCTAssertEqual(nemotron.prewarmTimeoutSeconds, 300,
+                       "the 120 s default would cut off the cold compile #558 exists to measure")
+        XCTAssertEqual(ModelInfo.preloadDeadlineSeconds(for: nemotron.identifier), 300)
+        XCTAssertNil(nemotron.firstPreparationSeconds, "no device reading yet")
+        XCTAssertEqual(NemotronModelRepository.repositoryID,
+                       "FluidInference/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b-CoreML")
+        XCTAssertEqual(NemotronModelRepository.variantDirectory, "multilingual/2240ms",
+                       "the multilingual ship, never latin/")
+        XCTAssertEqual(nemotron.languageSupport.coverage, .nemotronMultilingual)
+    }
+
+    /// An added option, never a replacement: no device, on any tier, is told to install it.
+    func testNemotronIsNeverRecommended() {
+        let devices = [
+            makeCapabilities(ramGB: 4, model: "iPhone12,1"),
+            makeCapabilities(ramGB: 4, model: "iPhone13,2"),
+            makeCapabilities(ramGB: 6, model: "iPhone15,4"),
+            makeCapabilities(ramGB: 8, model: "iPhone16,2"),
+            makeCapabilities(ramGB: 12, model: "iPhone18,1")
+        ]
+        for device in devices {
+            XCTAssertNotEqual(ModelInfo.recommendedIdentifier(for: device),
+                              "nemotron-3.5-asr-multilingual-2240ms",
+                              "Nemotron recommended on \(device.deviceModelIdentifier)")
+        }
+    }
+
+    /// Parakeet's device gate: off the A12/A13 matrix like every non-Argmax model, and
+    /// no memory rule of its own.
+    func testNemotronTakesParakeetsDeviceGate() {
+        guard let nemotron = ModelInfo.forIdentifier("nemotron-3.5-asr-multilingual-2240ms"),
+              let parakeet = ModelInfo.forIdentifier("parakeet-tdt-0.6b-v3") else {
+            XCTFail("a FluidAudio entry is missing from the catalogue")
+            return
+        }
+        for device in [makeCapabilities(ramGB: 4, model: "iPhone12,1"),
+                       makeCapabilities(ramGB: 4, model: "iPhone13,2"),
+                       makeCapabilities(ramGB: 8, model: "iPhone16,2")] {
+            XCTAssertEqual(nemotron.incompatibilityReason(on: device),
+                           parakeet.incompatibilityReason(on: device),
+                           "on \(device.deviceModelIdentifier)")
+        }
     }
 
     // MARK: - Phase 37: per-device gating (issue #104)
@@ -551,10 +616,13 @@ final class ModelInfoTests: XCTestCase {
 
     /// The default exists so that giving Turbo a budget did not silently re-time
     /// every other model. Everything that is not Turbo stays on the Phase 37 value.
+    ///
+    /// Nemotron is the one other exception (#558), and for Turbo's reason: its first
+    /// compile on a phone has never been watched, and the budget must let it finish.
     func testEveryNonTurboModelKeepsTheDefaultBudget() {
         XCTAssertEqual(ModelInfo.defaultPrewarmTimeoutSeconds, 120)
-        let turboIdentifiers: Set<String> = [turbo632, turbo954]
-        for model in ModelInfo.allIncludingDeprecated where !turboIdentifiers.contains(model.identifier) {
+        let longCompileIdentifiers: Set<String> = [turbo632, turbo954, "nemotron-3.5-asr-multilingual-2240ms"]
+        for model in ModelInfo.allIncludingDeprecated where !longCompileIdentifiers.contains(model.identifier) {
             XCTAssertEqual(
                 model.prewarmTimeoutSeconds,
                 ModelInfo.defaultPrewarmTimeoutSeconds,

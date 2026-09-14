@@ -183,7 +183,7 @@ public enum ParakeetModelRepository {
     /// directory too, so a `coremldata.bin/` or `parakeet_vocab.json/` directory would
     /// read as a usable cache and the failure would only surface once FluidAudio tried
     /// to read it — which is the wipe-and-re-download path this check exists to avoid.
-    private static func isRegularFile(_ url: URL, fileManager: FileManager) -> Bool {
+    static func isRegularFile(_ url: URL, fileManager: FileManager) -> Bool {
         var isDirectory: ObjCBool = false
         return fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory)
             && !isDirectory.boolValue

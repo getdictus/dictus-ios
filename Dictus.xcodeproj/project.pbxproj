@@ -61,6 +61,8 @@
 		AA000050 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100050 /* ModelManager.swift */; };
 		AA000052 /* ModelRepoDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100052 /* ModelRepoDownloader.swift */; };
 		AA055801 /* ParakeetCacheRepair.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155801 /* ParakeetCacheRepair.swift */; };
+		AA055803 /* NemotronEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155803 /* NemotronEngine.swift */; };
+		AA055804 /* FluidAudioDownloadRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155804 /* FluidAudioDownloadRoute.swift */; };
 		AA055802 /* JointDecisionv3.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = AA155802 /* JointDecisionv3.mlmodelc */; };
 		AA000449 /* BackgroundModelDownloadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100449 /* BackgroundModelDownloadService.swift */; };
 		AA000492 /* DownloadConnectivityWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100492 /* DownloadConnectivityWatch.swift */; };
@@ -243,6 +245,8 @@
 		AA100050 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
 		AA100052 /* ModelRepoDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelRepoDownloader.swift; sourceTree = "<group>"; };
 		AA155801 /* ParakeetCacheRepair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParakeetCacheRepair.swift; sourceTree = "<group>"; };
+		AA155803 /* NemotronEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NemotronEngine.swift; sourceTree = "<group>"; };
+		AA155804 /* FluidAudioDownloadRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FluidAudioDownloadRoute.swift; sourceTree = "<group>"; };
 		AA155802 /* JointDecisionv3.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = JointDecisionv3.mlmodelc; path = DictusApp/ParakeetMigration/JointDecisionv3.mlmodelc; sourceTree = SOURCE_ROOT; };
 		AA100449 /* BackgroundModelDownloadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModelDownloadService.swift; sourceTree = "<group>"; };
 		AA100492 /* DownloadConnectivityWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadConnectivityWatch.swift; sourceTree = "<group>"; };
@@ -530,6 +534,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1000F1 /* ParakeetEngine.swift */,
+				AA155803 /* NemotronEngine.swift */,
 				AA1000F0 /* SpeechModelProtocol.swift */,
 				AA100041 /* TranscriptionService.swift */,
 				AA100045 /* UnifiedAudioEngine.swift */,
@@ -609,6 +614,7 @@
 				AA100050 /* ModelManager.swift */,
 				AA100052 /* ModelRepoDownloader.swift */,
 				AA155801 /* ParakeetCacheRepair.swift */,
+				AA155804 /* FluidAudioDownloadRoute.swift */,
 				AA100449 /* BackgroundModelDownloadService.swift */,
 				AA100492 /* DownloadConnectivityWatch.swift */,
 			);
@@ -1037,6 +1043,8 @@
 				AA000050 /* ModelManager.swift in Sources */,
 				AA000052 /* ModelRepoDownloader.swift in Sources */,
 				AA055801 /* ParakeetCacheRepair.swift in Sources */,
+				AA055803 /* NemotronEngine.swift in Sources */,
+				AA055804 /* FluidAudioDownloadRoute.swift in Sources */,
 				AA000449 /* BackgroundModelDownloadService.swift in Sources */,
 				AA000492 /* DownloadConnectivityWatch.swift in Sources */,
 				AA000051 /* ModelManagerView.swift in Sources */,
