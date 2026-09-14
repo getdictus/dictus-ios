@@ -13,13 +13,15 @@ Last reviewed: 2026-09-14.
 | Lane | What it is | Runs |
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
-| **B** | 2.0.0, the Pro launch | **Now** |
-| **A′** | 1.8.3 — #23 and #542 shipped; #543 and #558 remain | After B |
+| **B** | 2.0.0, the Pro launch | In progress — **cuts after 1.8.3** |
+| **A′** | 1.8.3 — #23 and #542 shipped; #543 and #558 remain | **Now — cuts as 1.8.3, before 2.0.0** |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
 
 **Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**, followed by **#542 the same day**. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement. **#558 joined the lane on 2026-09-13 on exactly the same ground**: a second settled premise — that Parakeet is simply the best engine on the recommended tier — turned out to be false in French. What remains in the lane is #543 and #558.
+
+**1.8.3 cuts before 2.0.0 — decided by Pierre on 2026-09-14.** Almost every user will install 1.8.3, from the App Store or TestFlight, before 2.0.0 exists. #558 relies on that: it ships a one-version migration file in the app bundle that 2.0.0 removes (see Lane B).
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -59,6 +61,8 @@ The device test of that PR surfaced **#515**, which shipped in the same PR: the 
 | `vocabulary` | Built — #80 shipped in PR #525, device-validated in the app and the keyboard. Its glossary half was cut, not fixed, in #536. |
 
 So the launch scope is not a question of how many features to build. It is one hole to fill, plus making the two existing ones keep their promise.
+
+**One cut-time chore, conditional on #558 shipping in 1.8.3:** remove the bundled `JointDecisionv3.mlmodelc` from DictusApp before cutting 2.0.0. It exists only to let the first launch after the 1.8.3 update complete Parakeet offline; users who skip 1.8.3 are covered by the self-repairing download #558 ships permanently.
 
 ### The order
 
@@ -154,7 +158,7 @@ His verdict was that Normal polish is not at the level and wants work before the
 
 ## Lane A′ — 1.8.3, auto-return and the French engine
 
-**Item 1: #23, auto-return to the source app after a cold-start dictation. SHIPPED on 2026-09-11** in PR #538, merged as `51c4679`. Milestone `1.8.3 — auto-return`. The version number is provisional — if 2.0.0 cuts first this becomes a 2.0.x; [VERSIONING.md](VERSIONING.md) decides, not this file.
+**Item 1: #23, auto-return to the source app after a cold-start dictation. SHIPPED on 2026-09-11** in PR #538, merged as `51c4679`. Milestone `1.8.3 — auto-return`. It cuts as 1.8.3, before 2.0.0 (decided 2026-09-14); [VERSIONING.md](VERSIONING.md) still owns how the number is written.
 
 The keyboard now names the app it is typing in and the main app sends the user back there, recording already running. Device-validated across nine host apps, and **it has never once opened the wrong app** — the design's central property is that a stale reading yields a *missing* answer, never a wrong one, and every failure falls through to the swipe-back overlay that shipped before it.
 
