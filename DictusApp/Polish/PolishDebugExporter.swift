@@ -26,6 +26,11 @@ struct PolishDebugExport: Codable {
     /// open, so seeding it with every known slug would print noise on a healthy
     /// export.
     let failureReasons: [String: Int]
+    /// How many rejections each of the four output checks accounted for (#466).
+    /// `rejectedGuardrail` in `outcomes` above is one number for four questions,
+    /// and the whole point of #466's fourth check is that its rate be countable
+    /// after the fact — which needs the split, not the total.
+    let guardrailChecks: [String: Int]
     /// The same counts split by writing process, e.g.
     /// `{"<KBD>": {"rateLimited": 0}, "<APP>": {"rateLimited": 21}}` (#361).
     ///
@@ -101,10 +106,23 @@ struct PolishDebugExport: Codable {
         /// auto-detects from audio — so `sttLanguageCode` there says what was
         /// passed, never what was transcribed.
         let sttLanguageIsEffective: Bool?
+        /// What the raw was made of, by language (#456): code → share of the
+        /// counted characters. `detectedLanguage` names one language and never
+        /// says how much of the transcript backed it, which is the distinction
+        /// the #456 event turns on — `{"en":1.0}` and `{"fr":0.776,"en":0.224}`
+        /// look identical everywhere else on this event.
+        let languageMix: [String: Double]?
+        /// Which input decided the target: `explicit`, `proportion`, `keyboard`
+        /// or `none` (auto path).
+        let targetSource: String?
 
         let outcome: String
         /// Why the engine failed (#315) — present on `engineFailed` events only.
         let failureReason: String?
+        /// Which of the four output checks refused (#466) — `length`, `language`,
+        /// `grounding` or `prefixAlignment`. Present on `rejectedGuardrail` events
+        /// only, and absent on every event written before the field existed.
+        let guardrailCheck: String?
         let latencyMs: Int
         /// Latency breakdown — `latencyMs` ≈ preprocess + engine + postprocess.
         /// `engineMs` is the pure LLM cost; the other two are our regex passes.
@@ -156,11 +174,15 @@ enum PolishDebugExporter {
         ]
         var failureReasons: [String: Int] = [:]
         var failureReasonsByWriter: [String: [String: Int]] = [:]
+        var guardrailChecks: [String: Int] = [:]
         for e in entries {
             outcomes[e.metrics.outcome.rawValue, default: 0] += 1
             if let reason = e.metrics.failureReason {
                 failureReasons[reason.slug, default: 0] += 1
                 failureReasonsByWriter[e.writer ?? "unrecorded", default: [:]][reason.slug, default: 0] += 1
+            }
+            if let check = e.metrics.guardrailCheck {
+                guardrailChecks[check.rawValue, default: 0] += 1
             }
         }
 
@@ -177,8 +199,11 @@ enum PolishDebugExporter {
                 keyboardLanguage: entry.metrics.languageResolution?.keyboardLanguage,
                 sttLanguageCode: entry.metrics.languageResolution?.sttLanguageCode,
                 sttLanguageIsEffective: entry.metrics.languageResolution?.sttLanguageIsEffective,
+                languageMix: entry.metrics.languageResolution?.languageMix,
+                targetSource: entry.metrics.languageResolution?.targetSource,
                 outcome: entry.metrics.outcome.rawValue,
                 failureReason: entry.metrics.failureReason?.slug,
+                guardrailCheck: entry.metrics.guardrailCheck?.rawValue,
                 latencyMs: entry.metrics.latencyMs,
                 preprocessMs: entry.metrics.timings?.preprocessMs,
                 engineMs: entry.metrics.timings?.engineMs,
@@ -198,6 +223,7 @@ enum PolishDebugExporter {
             settings: settings,
             outcomes: outcomes,
             failureReasons: failureReasons,
+            guardrailChecks: guardrailChecks,
             failureReasonsByWriter: failureReasonsByWriter,
             events: events
         )

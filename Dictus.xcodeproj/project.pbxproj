@@ -32,6 +32,7 @@
 		AA000006 /* DictationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000A /* DictationView.swift */; };
 		AA000007 /* KeyboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000B /* KeyboardState.swift */; };
 		AA0000F7 /* KeyboardLifecycleProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F6 /* KeyboardLifecycleProbe.swift */; };
+		AA483002 /* KeyboardCallGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA483001 /* KeyboardCallGuard.swift */; };
 		AA000008 /* MicButtonDisabled.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000C /* MicButtonDisabled.swift */; };
 		AA000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA900010 /* DictusCore */; };
 		AA000011 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA900011 /* DictusCore */; };
@@ -56,6 +57,8 @@
 		AA423002 /* SmartModeDisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA423001 /* SmartModeDisplayName.swift */; };
 		AA000050 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100050 /* ModelManager.swift */; };
 		AA000052 /* ModelRepoDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100052 /* ModelRepoDownloader.swift */; };
+		AA000449 /* BackgroundModelDownloadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100449 /* BackgroundModelDownloadService.swift */; };
+		AA000492 /* DownloadConnectivityWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100492 /* DownloadConnectivityWatch.swift */; };
 		AA000051 /* ModelManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100051 /* ModelManagerView.swift */; };
 		AA000060 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100060 /* ToolbarView.swift */; };
 		AA00006L /* KeyboardPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10006L /* KeyboardPanelView.swift */; };
@@ -97,6 +100,7 @@
 		AA0000E4 /* SwipeBackOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000E4 /* SwipeBackOverlayView.swift */; };
 		AA000300 /* CyclingLoadingText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100300 /* CyclingLoadingText.swift */; };
 		AA000301 /* ModelLoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100301 /* ModelLoadingOverlay.swift */; };
+		AA000484 /* ModelPreparationPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100484 /* ModelPreparationPresentation.swift */; };
 		AA000302 /* ModelLanguageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100302 /* ModelLanguageDetailView.swift */; };
 		AA0000F0 /* SpeechModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F0 /* SpeechModelProtocol.swift */; };
 		AA0000F1 /* ParakeetEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F1 /* ParakeetEngine.swift */; };
@@ -206,6 +210,7 @@
 		AA10000A /* DictationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationView.swift; sourceTree = "<group>"; };
 		AA10000B /* KeyboardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardState.swift; sourceTree = "<group>"; };
 		AA1000F6 /* KeyboardLifecycleProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLifecycleProbe.swift; sourceTree = "<group>"; };
+		AA483001 /* KeyboardCallGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardCallGuard.swift; sourceTree = "<group>"; };
 		AA10000C /* MicButtonDisabled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicButtonDisabled.swift; sourceTree = "<group>"; };
 		AA100030 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
 		AA100035 /* FullAccessBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullAccessBanner.swift; sourceTree = "<group>"; };
@@ -229,6 +234,8 @@
 		AA100202 /* DictusApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DictusApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		AA100050 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
 		AA100052 /* ModelRepoDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelRepoDownloader.swift; sourceTree = "<group>"; };
+		AA100449 /* BackgroundModelDownloadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModelDownloadService.swift; sourceTree = "<group>"; };
+		AA100492 /* DownloadConnectivityWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadConnectivityWatch.swift; sourceTree = "<group>"; };
 		AA100051 /* ModelManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManagerView.swift; sourceTree = "<group>"; };
 		AA100060 /* ToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarView.swift; sourceTree = "<group>"; };
 		AA10006L /* KeyboardPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPanelView.swift; sourceTree = "<group>"; };
@@ -270,6 +277,7 @@
 		AA1000E4 /* SwipeBackOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeBackOverlayView.swift; sourceTree = "<group>"; };
 		AA100300 /* CyclingLoadingText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclingLoadingText.swift; sourceTree = "<group>"; };
 		AA100301 /* ModelLoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadingOverlay.swift; sourceTree = "<group>"; };
+		AA100484 /* ModelPreparationPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPreparationPresentation.swift; sourceTree = "<group>"; };
 		AA100302 /* ModelLanguageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLanguageDetailView.swift; sourceTree = "<group>"; };
 		AA1000F0 /* SpeechModelProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechModelProtocol.swift; sourceTree = "<group>"; };
 		AA1000F1 /* ParakeetEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParakeetEngine.swift; sourceTree = "<group>"; };
@@ -428,6 +436,7 @@
 				AA100004 /* KeyboardRootView.swift */,
 				AA10000B /* KeyboardState.swift */,
 				AA1000F6 /* KeyboardLifecycleProbe.swift */,
+				AA483001 /* KeyboardCallGuard.swift */,
 				AA361003 /* KeyboardPolishCoordinator.swift */,
 				AA361007 /* KeyboardPolishStage.swift */,
 				AA361009 /* KeyboardSmartModeFan.swift */,
@@ -557,6 +566,7 @@
 				AA1000F3 /* SoundSettingsView.swift */,
 				AA100300 /* CyclingLoadingText.swift */,
 				AA100301 /* ModelLoadingOverlay.swift */,
+				AA100484 /* ModelPreparationPresentation.swift */,
 				SS100002 /* PaywallView.swift */,
 				AA361013 /* SmartModeListView.swift */,
 				SS100009 /* PaywallPresentation.swift */,
@@ -582,6 +592,8 @@
 			children = (
 				AA100050 /* ModelManager.swift */,
 				AA100052 /* ModelRepoDownloader.swift */,
+				AA100449 /* BackgroundModelDownloadService.swift */,
+				AA100492 /* DownloadConnectivityWatch.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1006,6 +1018,8 @@
 				AA000043 /* RecordingView.swift in Sources */,
 				AA000050 /* ModelManager.swift in Sources */,
 				AA000052 /* ModelRepoDownloader.swift in Sources */,
+				AA000449 /* BackgroundModelDownloadService.swift in Sources */,
+				AA000492 /* DownloadConnectivityWatch.swift in Sources */,
 				AA000051 /* ModelManagerView.swift in Sources */,
 				AA000071 /* TestDictationView.swift in Sources */,
 				AA000090 /* MainTabView.swift in Sources */,
@@ -1030,6 +1044,7 @@
 				AA0000E4 /* SwipeBackOverlayView.swift in Sources */,
 				AA000300 /* CyclingLoadingText.swift in Sources */,
 				AA000301 /* ModelLoadingOverlay.swift in Sources */,
+				AA000484 /* ModelPreparationPresentation.swift in Sources */,
 				AA000302 /* ModelLanguageDetailView.swift in Sources */,
 				AA0000F2 /* SoundFeedbackService.swift in Sources */,
 				AA0000F3 /* SoundSettingsView.swift in Sources */,
@@ -1054,6 +1069,7 @@
 				AA000004 /* KeyboardRootView.swift in Sources */,
 				AA000007 /* KeyboardState.swift in Sources */,
 				AA0000F7 /* KeyboardLifecycleProbe.swift in Sources */,
+				AA483002 /* KeyboardCallGuard.swift in Sources */,
 				AA361004 /* KeyboardPolishCoordinator.swift in Sources */,
 				AA361008 /* KeyboardPolishStage.swift in Sources */,
 				AA361010 /* KeyboardSmartModeFan.swift in Sources */,

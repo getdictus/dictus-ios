@@ -162,6 +162,13 @@ private struct EntryRow: View {
                         .font(.caption2.monospaced())
                         .foregroundStyle(entry.metrics.outcome.tintColor)
                         .lineLimit(1)
+                } else if let check = entry.metrics.guardrailCheck {
+                    // Same slot, same reasoning (#466): on a rejected event the
+                    // check that refused is what gets read, not the mode.
+                    Text(check.rawValue)
+                        .font(.caption2.monospaced())
+                        .foregroundStyle(entry.metrics.outcome.tintColor)
+                        .lineLimit(1)
                 } else if let mode = entry.metrics.mode {
                     Text(mode).font(.caption2).foregroundStyle(.secondary)
                 }
@@ -266,6 +273,15 @@ private struct EntryDetailView: View {
                             : "\(resolution.sttLanguageCode) (inert)"
                     )
                 }
+                // The proportions the target was elected from (#456). Reading
+                // "target=en" next to "detected=en" hid the captured bug
+                // completely; reading it next to "fr 0.78 / en 0.22" cannot.
+                if let mix = resolution.languageMix {
+                    HStack(spacing: 12) {
+                        LabeledValue("mix", Self.renderMix(mix))
+                        LabeledValue("target from", resolution.targetSource ?? "-")
+                    }
+                }
             }
             HStack(spacing: 12) {
                 LabeledValue("latency", "\(entry.metrics.latencyMs) ms")
@@ -274,7 +290,23 @@ private struct EntryDetailView: View {
             if let reason = entry.metrics.failureReason {
                 LabeledValue("failure reason", reason.slug)
             }
+            // Which of the four output checks refused (#466). A rejection is the
+            // one outcome the user notices without being told why, so the detail
+            // sheet is where "why" has to be readable.
+            if let check = entry.metrics.guardrailCheck {
+                LabeledValue("guardrail check", check.rawValue)
+            }
         }
+    }
+
+    /// `fr 0.78 / en 0.22`, leader first. Sorted by share rather than by code so
+    /// the language the target was elected from is the one the eye lands on.
+    private static func renderMix(_ mix: [String: Double]) -> String {
+        mix.sorted { lhs, rhs in
+            lhs.value == rhs.value ? lhs.key < rhs.key : lhs.value > rhs.value
+        }
+        .map { String(format: "%@ %.2f", $0.key, $0.value) }
+        .joined(separator: " / ")
     }
 
     private func section(_ title: String, text: String) -> some View {

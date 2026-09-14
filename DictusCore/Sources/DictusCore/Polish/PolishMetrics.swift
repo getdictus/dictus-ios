@@ -90,25 +90,78 @@ public struct PolishMetrics: Sendable, Codable {
         /// there describes what was passed, never what was heard.
         public let sttLanguageIsEffective: Bool
 
+        /// What the raw transcript was made of, by language: `NLLanguage` code →
+        /// share of the counted characters, rounded to three decimals (#456).
+        ///
+        /// WHY the shares and not just the winner: `detectedLanguage` above says
+        /// which language was read and never how much of the text agreed, and that
+        /// is the whole distinction the captured #456 event turns on. `{"en":1.0}`
+        /// and `{"fr":0.776,"en":0.224}` are the same winner-plus-confidence story
+        /// to every other field on this event, and completely different facts. A
+        /// reader can now tell "detection was mixed" from "detection was
+        /// confident" without re-running anything on the raw text.
+        ///
+        /// Optional for the reason the whole trail is: events persisted by builds
+        /// predating this carry no shares, and absent means "not recorded then".
+        public let languageMix: [String: Double]?
+
+        /// Where the polish target came from, in one word (#456):
+        /// - `explicit` — the user named a transcription language;
+        /// - `proportion` — elected from `languageMix`, which had a clear leader;
+        /// - `keyboard` — nothing was read, or nothing led by enough, so the
+        ///   keyboard language took over;
+        /// - `none` — the auto path, which targets nothing at all.
+        ///
+        /// Derivable from `transcriptionMode` + `languageMix` + the dominance
+        /// floor, and recorded anyway: re-deriving it means knowing which floor the
+        /// build that wrote the event was using, and the floor is exactly the thing
+        /// a reader might be about to change.
+        public let targetSource: String?
+
         public init(transcriptionMode: String,
                     keyboardLanguage: String,
                     sttLanguageCode: String,
-                    sttLanguageIsEffective: Bool) {
+                    sttLanguageIsEffective: Bool,
+                    languageMix: [String: Double]? = nil,
+                    targetSource: String? = nil) {
             self.transcriptionMode = transcriptionMode
             self.keyboardLanguage = keyboardLanguage
             self.sttLanguageCode = sttLanguageCode
             self.sttLanguageIsEffective = sttLanguageIsEffective
+            self.languageMix = languageMix
+            self.targetSource = targetSource
         }
 
-        /// Read the trail off the per-dictation policy snapshot — the same
-        /// snapshot the target was resolved from, so the two can never drift.
-        public init(policy: TranscriptionLanguagePolicy) {
+        /// Read the trail off the per-dictation policy snapshot and the measurement
+        /// the target was elected from — the same two values the election itself
+        /// used, so the event and the decision can never drift.
+        ///
+        /// `mix` is optional only so a caller with no transcript (there is none
+        /// today; `prewarm` records nothing) is expressible.
+        public init(policy: TranscriptionLanguagePolicy, mix: PolishLanguageMix? = nil) {
             self.init(
                 transcriptionMode: policy.mode.telemetryDescription,
                 keyboardLanguage: policy.keyboardLanguage.rawValue,
                 sttLanguageCode: policy.sttLanguageCodeDescription,
-                sttLanguageIsEffective: policy.sttLanguageIsEffective
+                sttLanguageIsEffective: policy.sttLanguageIsEffective,
+                languageMix: mix?.roundedShares,
+                targetSource: mix.map { Self.targetSource(policy: policy, mix: $0) }
             )
+        }
+
+        /// Which of the three inputs decided the target, given the same policy and
+        /// mix the election saw.
+        private static func targetSource(policy: TranscriptionLanguagePolicy,
+                                         mix: PolishLanguageMix) -> String {
+            switch policy.mode {
+            case .autoDetect: return "none"
+            case .explicit: return "explicit"
+            case .followKeyboard:
+                let elected = mix.electedLanguage(
+                    floor: TranscriptionLanguagePolicy.dominantLanguageShareFloor
+                )
+                return elected == nil ? "keyboard" : "proportion"
+            }
         }
     }
 
@@ -176,6 +229,20 @@ public struct PolishMetrics: Sendable, Codable {
     /// unclassified failure.
     public let failureReason: PolishFailureReason?
 
+    /// Which guardrail refused the output, when one did (#466). Set on
+    /// `.rejectedGuardrail` and only there.
+    ///
+    /// WHY it is on the event and not only in the log: #466 asks that the new
+    /// refusal's rate be measurable after the fact, and the log line naming the
+    /// check lives on the device that wrote it while the event survives seven days
+    /// in the ring and travels in an export. A reader counting how often the
+    /// preamble check fires needs the export, not a log they cannot get.
+    ///
+    /// Optional for the reason every other late field here is: the ring holds seven
+    /// days of events written by whatever build was installed at the time. A missing
+    /// key means "written before this existed", never "no check fired".
+    public let guardrailCheck: PolishGuardrail.Check?
+
     public init(engine: String,
                 mode: String?,
                 targetLanguage: SupportedLanguage?,
@@ -188,6 +255,7 @@ public struct PolishMetrics: Sendable, Codable {
                 sttModelID: String? = nil,
                 timings: PolishTimings? = nil,
                 failureReason: PolishFailureReason? = nil,
+                guardrailCheck: PolishGuardrail.Check? = nil,
                 languageResolution: LanguageResolution? = nil) {
         self.engine = engine
         self.mode = mode
@@ -202,6 +270,7 @@ public struct PolishMetrics: Sendable, Codable {
         self.sttModelID = sttModelID
         self.timings = timings
         self.failureReason = failureReason
+        self.guardrailCheck = guardrailCheck
     }
 
     /// Emit one line for a pre-call context refusal (#270). The metrics event
@@ -218,23 +287,26 @@ public struct PolishMetrics: Sendable, Codable {
         }
     }
 
-    /// Name which guardrail refused an engine output (#413, #414).
+    /// Name which guardrail refused an engine output (#413, #414, #466).
     ///
     /// `outcome = rejectedGuardrail` says a check failed and never which one, and
-    /// there are three now — length, language, grounding. The reader of this log is
-    /// an agent triaging a report of "the mode gave me nothing", and the three have
-    /// three different answers: the band is mis-sized for the mode, the prompt
-    /// drifted out of the speaker's language, or the model invented a name. One
-    /// word tells them apart.
+    /// there are four now — length, language, grounding, prefix alignment. The
+    /// reader of this log is an agent triaging a report of "the mode gave me
+    /// nothing", and the four have four different answers: the band is mis-sized for
+    /// the mode, the prompt drifted out of the speaker's language, the model
+    /// invented a name, or the model wrote about its own task. One word tells them
+    /// apart.
     ///
     /// Deliberately not a new `Outcome` case. Splitting the outcome would ripple
     /// into the debug exporter, the debug view's filter list and the availability
-    /// gate, for a distinction that belongs in the log line rather than in the
-    /// counter. #349 asks for a separate outcome and can still have one.
-    public static func logGuardrailRejection(check: String, task: PolishTask) {
+    /// gate, for a distinction that belongs beside the counter rather than inside
+    /// it. Since #466 the same word also travels on the event itself
+    /// (`guardrailCheck`), because a log line lives on the device that wrote it and
+    /// a rate has to be countable from an export.
+    public static func logGuardrailRejection(check: PolishGuardrail.Check, task: PolishTask) {
         if #available(iOS 14.0, macOS 11.0, *) {
             PolishLog.logger.info(
-                "📊 polish guardrail-rejected check=\(check, privacy: .public) mode=\(task.identifier, privacy: .public)"
+                "📊 polish guardrail-rejected check=\(check.rawValue, privacy: .public) mode=\(task.identifier, privacy: .public)"
             )
         }
     }
@@ -249,17 +321,30 @@ public struct PolishMetrics: Sendable, Codable {
             // events that succeed, and a `reason=-` on every one of them would
             // pay for nothing.
             let reason = m.failureReason.map { " reason=\($0.slug)" } ?? ""
+            // Which of the four checks refused (#466). Appended only on a rejection,
+            // for the same reason `reason` is: it is nil on every other event.
+            let check = m.guardrailCheck.map { " check=\($0.rawValue)" } ?? ""
             // How the target was arrived at (#332), appended only when the
             // event carries the trail so pre-#332 events keep their old shape.
             // `inert` marks a code the engine ignores — Parakeet auto-detects
             // from audio, so `stt:de` there says nothing about what was heard.
             let resolution = m.languageResolution.map { r in
                 let inert = r.sttLanguageIsEffective ? "" : "(inert)"
+                // The proportions the target was elected from (#456), sorted by
+                // share so the leader reads first: `mix:fr .78/en .22`. Appended
+                // only when the event carries them, so pre-#456 events keep their
+                // shape exactly as pre-#332 ones do.
+                let mix = r.languageMix.map { shares in
+                    let rendered = shares.sorted { lhs, rhs in
+                        lhs.value == rhs.value ? lhs.key < rhs.key : lhs.value > rhs.value
+                    }.map { String(format: "%@ %.2f", $0.key, $0.value) }.joined(separator: "/")
+                    return " mix=\(rendered) via:\(r.targetSource ?? "-")"
+                } ?? ""
                 return " resolution=tx:\(r.transcriptionMode)/kbd:\(r.keyboardLanguage)"
-                    + "/stt:\(r.sttLanguageCode)\(inert)"
+                    + "/stt:\(r.sttLanguageCode)\(inert)" + mix
             } ?? ""
             PolishLog.logger.info(
-                "📊 polish outcome=\(m.outcome.rawValue, privacy: .public) engine=\(m.engine, privacy: .public) mode=\(m.mode ?? "-", privacy: .public) target=\(m.targetLanguage?.rawValue ?? "none", privacy: .public) detected=\(m.detectedLanguage ?? "-", privacy: .public)\(resolution, privacy: .public) stt=\(m.sttEngine ?? "-", privacy: .public)/\(m.sttModelID ?? "-", privacy: .public) chars=\(m.rawCharCount, privacy: .public)→\(m.polishedCharCount, privacy: .public) latencyMs=\(m.latencyMs, privacy: .public)\(breakdown, privacy: .public)\(reason, privacy: .public)"
+                "📊 polish outcome=\(m.outcome.rawValue, privacy: .public) engine=\(m.engine, privacy: .public) mode=\(m.mode ?? "-", privacy: .public) target=\(m.targetLanguage?.rawValue ?? "none", privacy: .public) detected=\(m.detectedLanguage ?? "-", privacy: .public)\(resolution, privacy: .public) stt=\(m.sttEngine ?? "-", privacy: .public)/\(m.sttModelID ?? "-", privacy: .public) chars=\(m.rawCharCount, privacy: .public)→\(m.polishedCharCount, privacy: .public) latencyMs=\(m.latencyMs, privacy: .public)\(breakdown, privacy: .public)\(reason, privacy: .public)\(check, privacy: .public)"
             )
         }
     }
