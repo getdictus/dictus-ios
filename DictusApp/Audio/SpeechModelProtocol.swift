@@ -56,8 +56,32 @@ struct SpeechTranscription {
     let text: String
 
     /// The engine's own score for `text`, or `nil` when it has no comparable figure.
-    /// Parakeet: FluidAudio's mean token probability. Whisper: always `nil`.
+    /// Parakeet: FluidAudio's mean token probability. Whisper and Nemotron: always `nil`.
     let confidence: Float?
+
+    /// The language code the engine was forced to, `auto` included, or `nil` for an engine
+    /// that is not told one (#558). Nemotron only today: Whisper logs its own resolution in
+    /// the `languageResolution` probe, and Parakeet has no language to force.
+    let language: String?
+
+    /// The prompt id FluidAudio resolved `language` to (Nemotron, #558). Logged because an
+    /// unknown code falls back to the auto prompt without an error.
+    let promptId: Int?
+
+    /// The language tag the model emitted, when it emitted one (Nemotron, #558).
+    let detectedLanguage: String?
+
+    init(text: String,
+         confidence: Float?,
+         language: String? = nil,
+         promptId: Int? = nil,
+         detectedLanguage: String? = nil) {
+        self.text = text
+        self.confidence = confidence
+        self.language = language
+        self.promptId = promptId
+        self.detectedLanguage = detectedLanguage
+    }
 }
 
 /// Failures raised while preparing a speech model for transcription.

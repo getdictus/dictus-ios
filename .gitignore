@@ -52,6 +52,11 @@ Thumbs.db
 
 # Whisper models (downloaded at runtime, too large for git)
 *.mlmodelc
+# Except the one compiled bundle the app ships for the FluidAudio 0.15 Parakeet
+# migration (#558). Temporary: removed with it before the 2.0.0 cut, see
+# DictusApp/ParakeetMigration/README.md.
+!DictusApp/ParakeetMigration/JointDecisionv3.mlmodelc
+!DictusApp/ParakeetMigration/JointDecisionv3.mlmodelc/**
 # Only ignore top-level Models/ directory (downloaded Whisper model files)
 # DictusKeyboard/Models/ contains Swift source files and must be tracked
 /Models/

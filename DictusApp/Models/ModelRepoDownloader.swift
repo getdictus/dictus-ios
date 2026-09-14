@@ -32,8 +32,14 @@ import FluidAudio
 /// that meant onboarding never finished unless the user stared at it.
 ///
 /// Parity contracts to re-check on dependency bumps:
-/// - FluidAudio 0.12.4 `DownloadUtils.downloadRepo` (file selection + layout) so that
+/// - FluidAudio 0.15.7 `ModelHub.download` (file selection + layout) so that
 ///   `AsrModels.load` finds the cached files and goes straight to CoreML compilation.
+///   Since #558 the app also sets `ModelHub.offlineMode`, so a file this downloader
+///   misses makes the SDK refuse the load instead of fetching it behind our back.
+///   The package reference also carries `traits = ()` in `project.pbxproj`, which
+///   keeps FluidAudio's default `NemoTextProcessing` trait off: a TTS/ITN engine Dictus
+///   never calls, ~29 MB per static slice, and its simulator slice is arm64-only, so
+///   leaving it on fails the x86_64 link of every `generic/platform=iOS Simulator` build.
 ///   Since issue #252 nothing downloads Parakeet on the load path, so a file this
 ///   downloader misses is a hard failure rather than a silent second download.
 /// - WhisperKit `WhisperKit.download` / HubApi snapshot layout
@@ -82,7 +88,7 @@ final class ModelRepoDownloader {
         /// declared its download verified at the one moment it most likely was not.
         let requiredPaths: @Sendable (URL) -> [String]
 
-        /// Parakeet v3 repo. Matches FluidAudio's `Repo.parakeet.remotePath` and its
+        /// Parakeet v3 repo. Matches FluidAudio's `Repo.parakeetV3.remotePath` (`Repo.parakeet` before 0.15) and its
         /// file selection.
         ///
         /// Required paths moved to `ParakeetModelRepository` for issue #438, and they
@@ -98,20 +104,47 @@ final class ModelRepoDownloader {
         /// `AsrModels.load`. FluidAudio's own cache check has the same blind spot, so the
         /// mirror was faithful and worthless; the leaf list is the deliberate divergence.
         ///
-        /// The bundle set stays FluidAudio's `ModelNames.ASR.requiredModels` rather than a
+        /// The bundle set is `ParakeetEngine.requiredModelBundles` — FluidAudio's v3 set,
+        /// `JointDecisionv3.mlmodelc` included since #558 — rather than a
         /// reading of the cache directory (which is what the WhisperKit configuration
         /// below does): that cache holds one directory per `AsrModelVersion`, shared by
         /// every model of the version, so what is on disk is not the same question as
         /// what this download owed.
         static func parakeet() -> Configuration {
             Configuration(
-                repoPath: Repo.parakeet.remotePath,
-                directoryPatterns: ModelNames.ASR.requiredModels.map { "\($0)/" }.sorted(),
+                repoPath: Repo.parakeetV3.remotePath,
+                directoryPatterns: ParakeetEngine.requiredModelBundles.map { "\($0)/" }.sorted(),
                 includesRootMetadata: true,
                 requiredPaths: { _ in
                     ParakeetModelRepository.requiredDownloadPaths(
-                        requiredModelBundles: ModelNames.ASR.requiredModels,
+                        requiredModelBundles: ParakeetEngine.requiredModelBundles,
                         vocabularyFileName: ModelNames.ASR.vocabularyFile
+                    )
+                }
+            )
+        }
+
+        /// The Nemotron 3.5 ASR multilingual ship at the 2240 ms tier (#558).
+        ///
+        /// The whole `multilingual/2240ms/` folder, downloaded into
+        /// `NemotronEngine.repositoryCacheDirectory` with its repository path preserved, so the
+        /// model lands in `NemotronEngine.modelDirectory`. Nothing at the repository root is
+        /// taken: that root holds eight bundles across two ships and four tiers.
+        ///
+        /// NOT FluidAudio's `downloadVariant`, which bypasses this downloader's progress and
+        /// cancellation and picks the `latin/` ship for any `fr`/`en`/`es`/`de` code.
+        ///
+        /// Required paths come from `NemotronModelRepository`, the rule `NemotronEngine`'s load
+        /// guard applies too, so the download's promise and the guard's belief are one list.
+        static func nemotron() -> Configuration {
+            Configuration(
+                repoPath: NemotronModelRepository.repositoryID,
+                directoryPatterns: ["\(NemotronModelRepository.variantDirectory)/"],
+                includesRootMetadata: false,
+                requiredPaths: { _ in
+                    NemotronModelRepository.requiredDownloadPaths(
+                        requiredModelBundles: NemotronEngine.requiredModelBundles,
+                        rootFileNames: NemotronEngine.rootFileNames
                     )
                 }
             )
@@ -307,6 +340,8 @@ final class ModelRepoDownloader {
         switch ModelInfo.forIdentifier(identifier)?.engine {
         case .parakeet:
             return AsrModels.defaultCacheDirectory(for: .v3)
+        case .nemotron:
+            return NemotronEngine.repositoryCacheDirectory
         case .whisperKit, nil:
             return WhisperModelRepository.repositoryURL()
         }

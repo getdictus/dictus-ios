@@ -13,14 +13,14 @@ struct Fixture: Codable {
     /// — mirroring the app, where languages without a dedicated prompt only
     /// ever reach polish through auto mode.
     let lang: String
-    /// "PK" (Parakeet) or "WK" (WhisperKit). Defaults to Parakeet.
+    /// "PK" (Parakeet), "WK" (WhisperKit) or "NM" (Nemotron). Defaults to Parakeet.
     let sttEngine: String?
     /// Declarative contract checks (eval mode). Each entry sets ONE predicate.
     let expect: [Expectation]?
 
     /// `nil` routes the fixture through the Auto-detect path.
     var language: SupportedLanguage? { SupportedLanguage(rawValue: lang) }
-    var speechEngine: SpeechEngine { sttEngine == "WK" ? .whisperKit : .parakeet }
+    var speechEngine: SpeechEngine { sttEngine.flatMap(SpeechEngine.init(rawValue:)) ?? .parakeet }
 
     /// The same case routed through another path (`--lang`, #439).
     ///

@@ -583,3 +583,86 @@ final class PolishLanguageResolutionPersistenceTests: XCTestCase {
         XCTAssertEqual(decoded.timings?.engineMs, 3180)
     }
 }
+
+/// Nemotron 3.5 (#558): the "Transcription language" setting becomes real on this engine,
+/// through the three modes that already exist.
+final class NemotronLanguagePolicyTests: XCTestCase {
+
+    private func policy(_ mode: TranscriptionLanguageMode,
+                        keyboard: SupportedLanguage) -> TranscriptionLanguagePolicy {
+        TranscriptionLanguagePolicy(
+            mode: mode, keyboardLanguage: keyboard, engine: .nemotron,
+            modelIdentifier: "nemotron-3.5-asr-multilingual-2240ms"
+        )
+    }
+
+    /// `.followKeyboard` is the default and what "never set" means: forced to the keyboard.
+    func testFollowKeyboardForcesTheKeyboardLanguage() {
+        for keyboard in SupportedLanguage.allCases {
+            let sut = policy(.followKeyboard, keyboard: keyboard)
+            XCTAssertEqual(sut.sttLanguageCode, keyboard.rawValue)
+            XCTAssertEqual(NemotronLanguagePrompt.code(forSTTLanguageCode: sut.sttLanguageCode), keyboard.rawValue)
+            XCTAssertFalse(sut.insertsTranscriptionAsIs)
+        }
+        // The stored value nothing ever wrote resolves to the same thing.
+        XCTAssertEqual(TranscriptionLanguageMode(storedValue: nil), .followKeyboard)
+    }
+
+    /// `.explicit` forces the chosen language, whatever the keyboard says.
+    func testExplicitForcesTheChosenLanguage() {
+        let sut = policy(.explicit(.french), keyboard: .german)
+        XCTAssertEqual(sut.sttLanguageCode, "fr")
+        XCTAssertEqual(NemotronLanguagePrompt.code(forSTTLanguageCode: sut.sttLanguageCode), "fr")
+        XCTAssertFalse(sut.insertsTranscriptionAsIs)
+    }
+
+    /// `.autoDetect` passes the model's own `"auto"` prompt, and its output is inserted as-is,
+    /// like Whisper auto-detect, because it can land on any of the model's languages.
+    func testAutoDetectPassesTheAutoPromptAndInsertsAsIs() {
+        let sut = policy(.autoDetect, keyboard: .french)
+        XCTAssertNil(sut.sttLanguageCode, "nil is auto-detection in the policy, as on Whisper")
+        XCTAssertEqual(NemotronLanguagePrompt.code(forSTTLanguageCode: sut.sttLanguageCode), "auto")
+        XCTAssertEqual(sut.sttLanguageCodeDescription, "auto")
+        XCTAssertTrue(sut.insertsTranscriptionAsIs)
+    }
+
+    func testTheSettingIsEffectiveOnNemotronAndStillNotOnParakeet() {
+        XCTAssertTrue(policy(.followKeyboard, keyboard: .french).sttLanguageIsEffective)
+        let parakeet = TranscriptionLanguagePolicy(
+            mode: .explicit(.english), keyboardLanguage: .french, engine: .parakeet, modelIdentifier: "p"
+        )
+        XCTAssertFalse(parakeet.sttLanguageIsEffective)
+        XCTAssertEqual(parakeet.sttLanguageCode, "fr", "Parakeet keeps its pre-#226 code")
+        XCTAssertFalse(TranscriptionLanguagePolicy(
+            mode: .autoDetect, keyboardLanguage: .french, engine: .parakeet, modelIdentifier: "p"
+        ).insertsTranscriptionAsIs)
+    }
+
+    /// An empty code is not a language: FluidAudio would resolve it to its default prompt
+    /// silently, so the mapping says `"auto"` out loud instead.
+    func testAnEmptyCodeIsAutoOutLoud() {
+        XCTAssertEqual(NemotronLanguagePrompt.code(forSTTLanguageCode: ""), "auto")
+    }
+
+    /// The four keyboard languages are keys of the multilingual ship's `prompt_dictionary`,
+    /// transcribed from `multilingual/2240ms/metadata.json` read 2026-09-14. A new
+    /// `SupportedLanguage` whose code is not a key would silently run auto-detect.
+    func testEveryKeyboardLanguageIsAPromptDictionaryKey() {
+        let promptDictionaryShortKeys: Set<String> = [
+            "en", "es", "fr", "de", "hi", "ar", "ru", "pt", "ko", "it", "nl", "pl", "tr", "uk",
+            "ro", "el", "cs", "hu", "sv", "da", "fi", "no", "sk", "hr", "bg", "lt", "et", "lv",
+            "sl", "nb", "nn"
+        ]
+        for language in SupportedLanguage.allCases {
+            XCTAssertTrue(promptDictionaryShortKeys.contains(language.rawValue),
+                          "\(language.rawValue) is not a Nemotron prompt key")
+        }
+    }
+
+    /// Polish: the language is forced upstream, as on Whisper, so never Repair.
+    func testPolishModeIsNaturalWhateverWasDetected() {
+        for detected in SupportedLanguage.allCases {
+            XCTAssertEqual(PolishPipeline.mode(sttEngine: .nemotron, detected: detected, target: .french), .natural)
+        }
+    }
+}

@@ -69,7 +69,7 @@ class TranscriptionService {
     /// The active STT engine, set via prepare(engine:).
     /// WHY a protocol reference:
     /// DictationCoordinator creates the appropriate engine (WhisperKitEngine or
-    /// ParakeetEngine) based on the user's active model. TranscriptionService
+    /// ParakeetEngine or NemotronEngine) based on the user's active model. TranscriptionService
     /// doesn't know or care which engine it is — it just calls transcribe().
     private var activeEngine: SpeechModelProtocol?
 
@@ -152,7 +152,8 @@ class TranscriptionService {
                     languagePolicy: TranscriptionLanguagePolicy) async throws -> String {
         let transcriptionStart = Date()
 
-        // nil = Whisper auto-detection. Parakeet ignores the value entirely.
+        // nil = auto-detection (Whisper's, or Nemotron's `auto` prompt). Parakeet ignores the
+        // value entirely.
         let language = languagePolicy.sttLanguageCode
 
         // Determine active model name for logging (from the same snapshot the
@@ -183,7 +184,9 @@ class TranscriptionService {
                 let durationMs = Int(Date().timeIntervalSince(transcriptionStart) * 1000)
                 let wordCount = result.text.split(separator: " ").count
                 PersistentLog.log(.transcriptionCompleted(
-                    durationMs: durationMs, wordCount: wordCount, confidence: result.confidence))
+                    durationMs: durationMs, wordCount: wordCount, confidence: result.confidence,
+                    language: result.language, promptId: result.promptId,
+                    detectedLanguage: result.detectedLanguage))
                 logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
                 return result.text
             } catch {

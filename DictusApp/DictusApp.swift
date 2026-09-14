@@ -3,6 +3,7 @@ import SwiftUI
 import StoreKit
 import Combine
 import DictusCore
+import FluidAudio
 
 // MARK: - AppDelegate (sourceApplication diagnostic)
 // Temporary diagnostic: UIApplicationDelegateAdaptor captures sourceApplication
@@ -123,9 +124,29 @@ struct DictusApp: App {
     private var hasCompletedOnboarding = false
 
     init() {
+        // FluidAudio never downloads on its own (#558). Before anything else in the
+        // process can reach the SDK.
+        //
+        // WHY: its loaders fetch any file they find missing from HuggingFace, in the
+        // middle of a load, with no progress and no cancellation, and on a failed load
+        // they wipe the cache and download it again. That is the behaviour #252 removed
+        // from the dictation path, and FluidAudio 0.15 made it reachable again: Parakeet
+        // v3 now loads `JointDecisionv3.mlmodelc`, which no install made on 0.12 holds.
+        // With this flag the SDK refuses instead, and downloading stays
+        // `ModelRepoDownloader`'s job, where the model card shows progress. It is a
+        // static on the SDK, so setting it once covers every engine and every load path.
+        ModelHub.offlineMode = true
+
         PersistentLog.source = "APP"
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         PersistentLog.log(.appLaunched(version: version))
+
+        // Complete a Parakeet cache the 0.15 loader cannot use, before the coordinator's
+        // launch preload can reach it (#558): layer 0 moves a 0.12 cache into the folder 0.15
+        // reads, then layer 2 restores the new joint from the app bundle. A no-op on a
+        // complete cache and on a device that never downloaded Parakeet. What neither can
+        // supply is fetched later by `ModelManager` (layer 1), with progress on the card.
+        ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "appLaunch")
 
         // A process that has just started cannot have a model load in flight (#428).
         //
