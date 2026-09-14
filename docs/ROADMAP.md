@@ -135,6 +135,12 @@ His verdict was that Normal polish is not at the level and wants work before the
 
     **Done is Pierre's device verdict, not a harness number.** The PR ships installable with the mode pinned in the free third fan slot and stays open while he lives with it; whether `Structuré` later replaces `List` in the default pins is deferred to that verdict, and `List` is not reopened.
 
+    **Built and paused mid-validation on 2026-09-14. PR #557 is open at `c4b4788` and installed on the phone; it is neither rejected nor accepted.** Every hard bar of the spec holds — 0 invented facts in 28 outputs, the flagged incompleteness kept 5/5, the speaker's person kept 28/28, 1931 tests and a clean lint. **The want is under-delivered on both halves, and they are not the same kind of failure.** Paragraphs land in 8 accepted outputs of 28, and that is a *measured ceiling*: the only lever is moving the clause from the system prompt into the user turn (0/27 → 7/18), and #437 reached the same ~29 % after 372 outputs. Do not run another prompt round on it. The rewriting half reads ~1.00 similar to the raw on five of six fixtures — but five of those six are not rambles, and the one that is uses the licence well, so that number may describe the corpus rather than the mode. Only Pierre's own long dictation settles it.
+
+    **#550 cannot be sequenced in front of this, and the reason is mechanical.** Its signal is `tokenTimings` over the *raw* transcript, which maps into an output only because Normal polish is additive; `Structuré` reformulates, so the mapping dies. The one route that would carry a deterministic break through a model call is #520, measured at six markers in and zero line breaks out on the contract with the least licence to touch anything. And #550 waits on a second speaker, which is recruitment, not code. **One consequence to keep in view:** if #550 lands, paragraphs reach the *free* path while the paid mode still has none.
+
+    **The open proposal, not yet ruled on:** drop the paragraph half from this issue's acceptance and let it arrive with #550, keep pushing the rewriting half, and close the mode into #79 if that half does not satisfy him either. The full handover is [the 2026-09-14 comment](https://github.com/getdictus/dictus-ios/issues/523#issuecomment-5663558244).
+
 5. **#494** — offer Pro after the first successful dictation in onboarding.
 6. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
 7. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
