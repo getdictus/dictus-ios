@@ -3,6 +3,7 @@ import SwiftUI
 import StoreKit
 import Combine
 import DictusCore
+import FluidAudio
 
 // MARK: - AppDelegate (sourceApplication diagnostic)
 // Temporary diagnostic: UIApplicationDelegateAdaptor captures sourceApplication
@@ -123,6 +124,19 @@ struct DictusApp: App {
     private var hasCompletedOnboarding = false
 
     init() {
+        // FluidAudio never downloads on its own (#558). Before anything else in the
+        // process can reach the SDK.
+        //
+        // WHY: its loaders fetch any file they find missing from HuggingFace, in the
+        // middle of a load, with no progress and no cancellation, and on a failed load
+        // they wipe the cache and download it again. That is the behaviour #252 removed
+        // from the dictation path, and FluidAudio 0.15 made it reachable again: Parakeet
+        // v3 now loads `JointDecisionv3.mlmodelc`, which no install made on 0.12 holds.
+        // With this flag the SDK refuses instead, and downloading stays
+        // `ModelRepoDownloader`'s job, where the model card shows progress. It is a
+        // static on the SDK, so setting it once covers every engine and every load path.
+        ModelHub.offlineMode = true
+
         PersistentLog.source = "APP"
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         PersistentLog.log(.appLaunched(version: version))

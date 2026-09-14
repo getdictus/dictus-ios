@@ -32,8 +32,14 @@ import FluidAudio
 /// that meant onboarding never finished unless the user stared at it.
 ///
 /// Parity contracts to re-check on dependency bumps:
-/// - FluidAudio 0.12.4 `DownloadUtils.downloadRepo` (file selection + layout) so that
+/// - FluidAudio 0.15.7 `ModelHub.download` (file selection + layout) so that
 ///   `AsrModels.load` finds the cached files and goes straight to CoreML compilation.
+///   Since #558 the app also sets `ModelHub.offlineMode`, so a file this downloader
+///   misses makes the SDK refuse the load instead of fetching it behind our back.
+///   The package reference also carries `traits = ()` in `project.pbxproj`, which
+///   keeps FluidAudio's default `NemoTextProcessing` trait off: a TTS/ITN engine Dictus
+///   never calls, ~29 MB per static slice, and its simulator slice is arm64-only, so
+///   leaving it on fails the x86_64 link of every `generic/platform=iOS Simulator` build.
 ///   Since issue #252 nothing downloads Parakeet on the load path, so a file this
 ///   downloader misses is a hard failure rather than a silent second download.
 /// - WhisperKit `WhisperKit.download` / HubApi snapshot layout
@@ -82,7 +88,7 @@ final class ModelRepoDownloader {
         /// declared its download verified at the one moment it most likely was not.
         let requiredPaths: @Sendable (URL) -> [String]
 
-        /// Parakeet v3 repo. Matches FluidAudio's `Repo.parakeet.remotePath` and its
+        /// Parakeet v3 repo. Matches FluidAudio's `Repo.parakeetV3.remotePath` (`Repo.parakeet` before 0.15) and its
         /// file selection.
         ///
         /// Required paths moved to `ParakeetModelRepository` for issue #438, and they
@@ -98,19 +104,20 @@ final class ModelRepoDownloader {
         /// `AsrModels.load`. FluidAudio's own cache check has the same blind spot, so the
         /// mirror was faithful and worthless; the leaf list is the deliberate divergence.
         ///
-        /// The bundle set stays FluidAudio's `ModelNames.ASR.requiredModels` rather than a
+        /// The bundle set is `ParakeetEngine.requiredModelBundles` — FluidAudio's v3 set,
+        /// `JointDecisionv3.mlmodelc` included since #558 — rather than a
         /// reading of the cache directory (which is what the WhisperKit configuration
         /// below does): that cache holds one directory per `AsrModelVersion`, shared by
         /// every model of the version, so what is on disk is not the same question as
         /// what this download owed.
         static func parakeet() -> Configuration {
             Configuration(
-                repoPath: Repo.parakeet.remotePath,
-                directoryPatterns: ModelNames.ASR.requiredModels.map { "\($0)/" }.sorted(),
+                repoPath: Repo.parakeetV3.remotePath,
+                directoryPatterns: ParakeetEngine.requiredModelBundles.map { "\($0)/" }.sorted(),
                 includesRootMetadata: true,
                 requiredPaths: { _ in
                     ParakeetModelRepository.requiredDownloadPaths(
-                        requiredModelBundles: ModelNames.ASR.requiredModels,
+                        requiredModelBundles: ParakeetEngine.requiredModelBundles,
                         vocabularyFileName: ModelNames.ASR.vocabularyFile
                     )
                 }

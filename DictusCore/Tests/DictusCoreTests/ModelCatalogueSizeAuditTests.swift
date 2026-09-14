@@ -42,14 +42,15 @@ final class ModelCatalogueSizeAuditTests: XCTestCase {
         }
 
         /// Mirrors `Configuration.parakeet()`: FluidAudio's `Repo.parakeet.remotePath`
-        /// and the four folders in `ModelNames.ASR.requiredModels`.
+        /// and the four folders in `ModelNames.ASR.requiredModelsV3(precision: .int8)`.
+        /// The joint is `JointDecisionv3` since FluidAudio 0.15 (#558).
         static func parakeet() -> RepoSource {
             RepoSource(
                 repoPath: "FluidInference/parakeet-tdt-0.6b-v3-coreml",
                 directoryPatterns: [
                     "Decoder.mlmodelc/",
                     "Encoder.mlmodelc/",
-                    "JointDecision.mlmodelc/",
+                    "JointDecisionv3.mlmodelc/",
                     "Preprocessor.mlmodelc/"
                 ],
                 includesRootMetadata: true

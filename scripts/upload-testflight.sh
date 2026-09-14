@@ -75,12 +75,11 @@ echo "→ version : $VERSION ($BUILD)"
 echo "→ commit  : $(git rev-parse --short HEAD)"
 echo "→ archive : $ARCHIVE"
 
-# --- 1. Resolve packages, then patch FluidAudio -----------------------------
-# The patch has to land after resolution and before the build, or a fresh
-# derived data fails to compile FluidAudio (#285).
+# --- 1. Resolve packages -----------------------------------------------------
+# No FluidAudio patch step any more: 0.15.7 compiles unpatched, and the
+# Swift 5 patch script was deleted with that bump (#558).
 xcodebuild -resolvePackageDependencies \
   -project Dictus.xcodeproj -scheme DictusApp -derivedDataPath "$DERIVED" >/dev/null
-./scripts/patch-fluidaudio-swift5.sh "$DERIVED"
 
 # --- 2. Archive -------------------------------------------------------------
 mkdir -p .asc/artifacts

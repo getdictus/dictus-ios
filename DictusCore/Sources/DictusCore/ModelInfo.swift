@@ -332,7 +332,14 @@ public struct ModelInfo: Identifiable {
             identifier: "parakeet-tdt-0.6b-v3",
             displayName: "Parakeet v3",
             // The one entry that OVERSTATED: 800 MB announced, 483 MB served.
-            sizeBytes: 483_254_686,
+            //
+            // Re-derived 2026-09-14 for FluidAudio 0.15.7 (#558), by the method above
+            // `allIncludingDeprecated`: the joint in the v3 set is now
+            // `JointDecisionv3.mlmodelc` (12 658 756 bytes) and it REPLACES
+            // `JointDecision.mlmodelc` (12 656 200 bytes) in the files the downloader
+            // selects, it does not add to them. Hence +2 556 bytes over the 0.12 figure
+            // of 483 254 686, not +12.7 MB.
+            sizeBytes: 483_257_242,
             engine: .parakeet,
             accuracyScore: 0.85,
             speedScore: 0.85,

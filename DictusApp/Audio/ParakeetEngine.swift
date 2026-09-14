@@ -42,10 +42,25 @@ class ParakeetEngine: SpeechModelProtocol {
     static func installedModelCacheDirectory(version: AsrModelVersion = .v3) -> URL? {
         ParakeetModelRepository.installedCacheDirectory(
             AsrModels.defaultCacheDirectory(for: version),
-            requiredModelBundles: ModelNames.ASR.requiredModels,
+            requiredModelBundles: requiredModelBundles,
             vocabularyFileName: ModelNames.ASR.vocabularyFile
         )
     }
+
+    /// The compiled bundles `AsrModels.load(from:version: .v3)` actually opens (#558).
+    ///
+    /// WHY NOT `ModelNames.ASR.requiredModels`, which this used to read: since FluidAudio
+    /// 0.15 that constant still names `JointDecision.mlmodelc`, while the v3 loader opens
+    /// `JointDecisionv3.mlmodelc` instead. The old set compiles, and it describes a cache
+    /// the loader cannot use: every install that downloaded Parakeet on 0.12 holds the
+    /// four old bundles and lacks the new joint, and a guard reading the old set called
+    /// that cache complete. `requiredModelsV3` is the set the SDK's own cache check uses
+    /// for this version, and `.int8` is the precision `AsrModels.load` defaults to, so the
+    /// download, the guard and the loader name one list.
+    ///
+    /// Read by `ModelRepoDownloader.Configuration.parakeet()` too, so nothing restates
+    /// these names.
+    static let requiredModelBundles: Set<String> = ModelNames.ASR.requiredModelsV3(precision: .int8)
 
     /// Load and initialize Parakeet v3 models from the local FluidAudio cache.
     ///
@@ -83,9 +98,10 @@ class ParakeetEngine: SpeechModelProtocol {
             // guard above verified; it does not resolve anything over the network.
             let models = try await AsrModels.load(from: cacheDirectory, version: .v3)
 
-            // Initialize the ASR manager for transcription
+            // Initialize the ASR manager for transcription. `initialize(models:)` became
+            // `loadModels(_:)` in FluidAudio 0.15 (#558); same work, new name.
             let manager = AsrManager(config: .default)
-            try await manager.initialize(models: models)
+            try await manager.loadModels(models)
 
             self.asrManager = manager
             self.isInitialized = true
@@ -110,9 +126,11 @@ class ParakeetEngine: SpeechModelProtocol {
     /// specializes anything. What is not known is how much that costs here. The
     /// `WarmInference` log line carries the duration so a device session answers it.
     ///
-    /// Safe to run ahead of a real transcription because `AsrManager.transcribe` resets
-    /// its decoder state after every call — its own documented "stateless architecture"
-    /// — so a throwaway pass cannot leak into the dictation that follows.
+    /// Safe to run ahead of a real transcription because every `transcribe` call below
+    /// builds its own fresh `TdtDecoderState` and throws it away afterwards, so a
+    /// throwaway pass cannot leak into the dictation that follows. Until FluidAudio 0.15
+    /// the manager reset its own state after every call; it no longer does (#558), which
+    /// is why the state is now created here rather than trusted to the SDK.
     ///
     /// It goes through `transcribe` rather than the manager directly: warming the exact
     /// path production uses is the whole point.
@@ -165,7 +183,18 @@ class ParakeetEngine: SpeechModelProtocol {
         }
 
         do {
-            let result = try await asrManager.transcribe(audioSamples)
+            // A FRESH decoder state per dictation (#558). FluidAudio 0.12's
+            // `transcribe(_:)` reset the TDT decoder after every call, its documented
+            // "stateless architecture". 0.15 made the state an `inout` parameter and stopped
+            // resetting it, so reusing one across calls would carry the previous
+            // dictation's decoder context into the next. Building it here, and dropping it
+            // when this function returns, is what keeps today's behaviour exactly.
+            // `decoderLayers` is left at its default of 2, the Parakeet TDT v3 decoder.
+            var decoderState = try TdtDecoderState()
+            // No `language:` argument, on purpose: on Parakeet it only filters tokens by
+            // script, it does not condition the decoder on a language (#552), and passing
+            // nothing is what 0.12 did.
+            let result = try await asrManager.transcribe(audioSamples, decoderState: &decoderState)
             let text = result.text.trimmingCharacters(in: .whitespacesAndNewlines)
 
             guard !text.isEmpty else {
