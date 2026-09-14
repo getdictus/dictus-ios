@@ -28,8 +28,8 @@ protocol SpeechModelProtocol {
     ///   - language: BCP-47 language code (e.g., "fr", "en"), or `nil` to let
     ///     the engine auto-detect the spoken language (issue #226 Auto-detect
     ///     mode — Whisper's built-in language detection).
-    /// - Returns: Transcribed text string.
-    func transcribe(audioSamples: [Float], language: String?) async throws -> String
+    /// - Returns: The transcribed text, with the engine's confidence when it has one.
+    func transcribe(audioSamples: [Float], language: String?) async throws -> SpeechTranscription
 
     /// Run one inference on generated silence and throw the result away (issue #426).
     ///
@@ -44,6 +44,20 @@ protocol SpeechModelProtocol {
     /// Distinct from `UnifiedAudioEngine.warmUp()` (#106), which warms the audio
     /// engine. Different subsystem, similar name; hence "warm inference" throughout.
     func runWarmInference() async throws
+}
+
+/// What an engine hands back from `transcribe`.
+///
+/// WHY a struct rather than the bare text (#554): Parakeet returns a confidence score
+/// alongside its transcript, and that score is the only signal in the pipeline that
+/// separates a transcript that drifted into pseudo-English from a clean one. It is
+/// written to the log and to nothing else — no caller branches on it.
+struct SpeechTranscription {
+    let text: String
+
+    /// The engine's own score for `text`, or `nil` when it has no comparable figure.
+    /// Parakeet: FluidAudio's mean token probability. Whisper: always `nil`.
+    let confidence: Float?
 }
 
 /// Failures raised while preparing a speech model for transcription.
@@ -230,7 +244,7 @@ class WhisperKitEngine: SpeechModelProtocol {
         )
     }
 
-    func transcribe(audioSamples: [Float], language: String?) async throws -> String {
+    func transcribe(audioSamples: [Float], language: String?) async throws -> SpeechTranscription {
         guard let whisperKit else {
             throw TranscriptionError.notReady
         }
@@ -306,6 +320,9 @@ class WhisperKitEngine: SpeechModelProtocol {
             throw TranscriptionError.noSpeechDetected(context: "empty WhisperKit transcription result")
         }
 
-        return trimmed
+        // No confidence: WhisperKit exposes per-segment log-probabilities, which are not
+        // the same measure as Parakeet's, and a log line mixing the two under one name
+        // would be read as one distribution (#554).
+        return SpeechTranscription(text: trimmed, confidence: nil)
     }
 }
