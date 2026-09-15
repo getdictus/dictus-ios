@@ -421,13 +421,10 @@ class KeyboardViewController: UIInputViewController {
         // Retire the previous appearance's pid evidence before harvesting this one's. The
         // keyboard appearing is what can change the host, and an entry from an earlier
         // appearance is exactly the one a recycled pid would make wrong.
-        HostAppResolver.noteKeyboardAppeared()
-        let activation = HostAppResolver.activateArbiter()
-        PersistentLog.log(.hostReturn(
-            hostId: "none",
-            outcome: "arbiter-\(activation) atLoad-\(HostAppResolver.loadTimeActivation)"
-        ))
-        HostAppResolver.harvest()
+        //
+        // #543: the same call registers this keyboard with the arbiter when it holds no
+        // connection, before the host signals its keyboard — see `ensureArbiterConnection`.
+        HostAppResolver.keyboardWillAppear()
         // Point KeyboardState's weak controller ref at the currently-visible controller
         // so call sites in KeyboardRootView and KeyboardState can access textDocumentProxy.
         // Previously set from KeyboardRootView.onAppear, which held a strong ref → #134.
