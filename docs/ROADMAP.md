@@ -147,12 +147,20 @@ His verdict was that Normal polish is not at the level and wants work before the
 
     ⚠️ **The harness and the phone do not run the same model.** macOS 26.5.1's Apple FM against iOS 27.0's. On the same transcript the phone rewrites five sections and repairs a drift the Mac leaves in place 9 times in 10. **A ceiling measured on the Mac understates the device**, which is new and applies to every prompt round in this repo.
 
-    **Open after the merge.** #570 — two accepted outputs damaged meaning past every guardrail: `mon application dictus` became `mon application dictée`, and `c'est pas naturel` became `ce qui est naturel`. The acceptance criterion looks for what the model *added*, `PolishGrounding` only asks about names, and nothing reads polarity. That is the rewrite licence meeting a guardrail family built for contracts that may not rewrite, and **it gates the 2.0.0 cut, not this merge**. The issue stays open until Pierre's verdict over time, per decision 12.
+    **Open after the merge: #570, which is now item 5 of this lane.** Two accepted outputs damaged meaning past every guardrail, and **it gates the 2.0.0 cut, not this merge**. #523 itself stays open until Pierre's verdict over time, per decision 12.
 
-5. **#494** — offer Pro after the first successful dictation in onboarding.
-6. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
-7. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
-8. **#279** — flip `PremiumFlags.paywallVisible`, in the same PR as the first reachable Pro feature. Walk all four entry points; the flag is compile-time, so a site that was never wired to it stays silently hidden.
+5. **#570 — two `Structuré` outputs damaged meaning, and every guardrail passed them.** On the `6-unscripted` fixture, 2 of 28 accepted outputs: `mon application dictus` became `mon application dictée`, and `les autres c'est pas vraiment ma voix, c'est pas naturel` became `les autres tests ne reflètent pas vraiment ma voix, ce qui est naturel`. A product name replaced by a common noun, and a dropped negation that makes the sentence assert the opposite of what was said. Found by CodeRabbit on PR #557, verified against `docs/research/523-structured/corpus.json` on 2026-09-16. Promoted into the lane on 2026-09-16.
+
+    **It is a launch item because the defect class arrives with the rewrite licence, which is the point of the mode.** Normal polish and `Liste` cannot produce either defect — neither may substitute a word — so nothing in the guardrail family was built to see this, and three blind spots line up. The acceptance criterion looks for what the model *added* and cannot see a token it *replaced*, and `dictus` is lowercase in the transcript so no capitalisation rule applies. `PolishGrounding` asks only whether a **name** in the output appears in the input, and `dictée` is an ordinary French word. And no check reads polarity: a dropped `pas` moves no length band, no language and almost no word set.
+
+    **Two bars, worth separating before either is built.** The protected-term anchor is the narrow one, reuses #80's vocabulary machinery, and is the half a user notices — the app's own name first. The polarity check over aligned sentences is the general one, and it is where the cost sits: **#466 measured 10 of 10 legitimate repairs refused at every threshold tried**, so widening a check blind is the known failure mode on this exact ground.
+
+    **Not `ready-for-agent`: it carries a diagnosis and two candidate shapes, not decisions.** It needs a grilling before an agent can be pointed at it.
+
+6. **#494** — offer Pro after the first successful dictation in onboarding.
+7. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
+8. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
+9. **#279** — flip `PremiumFlags.paywallVisible`, in the same PR as the first reachable Pro feature. Walk all four entry points; the flag is compile-time, so a site that was never wired to it stays silently hidden.
 
 ### What was deliberately cut from this lane
 
