@@ -157,10 +157,22 @@ His verdict was that Normal polish is not at the level and wants work before the
 
     **Not `ready-for-agent`: it carries a diagnosis and two candidate shapes, not decisions.** It needs a grilling before an agent can be pointed at it.
 
-6. **#494** — offer Pro after the first successful dictation in onboarding.
-7. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
-8. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
-9. **#279** — flip `PremiumFlags.paywallVisible`, in the same PR as the first reachable Pro feature. Walk all four entry points; the flag is compile-time, so a site that was never wired to it stays silently hidden.
+6. **#572 — `Message`, the mode that writes what you meant rather than what you said.** Promoted into the lane by Pierre on 2026-09-16: both new modes launch with Pro rather than after it.
+
+    **It carries the strongest evidence in the tracker: Pierre has not sent one message with Dictus in four months.** The reason was written down on 2026-05-30 and has not moved — ADR 0003's `natural` contract forbids removing a repetition, removing a filler and substituting a synonym, so by construction the free polish produces *clean speech* and never *written register*. Those are different objects, and the second is what a message is.
+
+    **The licence it needs is the one nothing else claims: it may delete whole clauses.** #523 was written around exactly that licence and its grilling replaced it with a licence to rewrite, which is why `Structuré` now says *do not summarise* and floors at 0.4. So the deletion licence is free, and it is this mode.
+
+    **It is also the mode nearest the fire that cut Email to #269** — two independent implementations inventing greetings, sign-offs and names the model cannot know — and it must clear #393's **bar B**, visibly different from the free polish. That is the exact bar Email failed and the reason SMS was cut from #79's design session in the first place. If the output is what Normal already produces, it does not ship.
+
+7. **#571 — `Résumé`, the gist in prose.** The hole is clean: `Liste` extracts **actions** into infinitive bullets, `Structuré` is forbidden from summarising, so nobody returns the substance in two or three sentences. #79's cut reason — *"List already synthesises"* — was true of the axis and false of the shape.
+
+    **The cheapest mode in the catalogue to build**: the machinery is entirely in place, and compression is the one behaviour Apple FM never had to be coaxed into. Contrast #523 round 9-10, where it emitted a list 2 times in 15 even with no contract at all.
+
+8. **#494** — offer Pro after the first successful dictation in onboarding.
+9. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
+10. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
+11. **#279** — flip `PremiumFlags.paywallVisible`, in the same PR as the first reachable Pro feature. Walk all four entry points; the flag is compile-time, so a site that was never wired to it stays silently hidden.
 
 ### What was deliberately cut from this lane
 
@@ -262,7 +274,7 @@ Four modes on one axis — **how much am I allowed to lose** — and the axis is
 | **`Message`** (#572) | **whole clauses** | a message | send it to a person |
 | **`Résumé`** (#571) | a great deal | two or three sentences | read it, or forward it |
 
-**Both new modes ship after the 2.0.0 cut**, in 2.1. 2.0.0 launches the three that exist; #570 gates that cut.
+**Both new modes ship WITH 2.0.0** — moved into the lane by Pierre on 2026-09-16, against the first proposal to hold them for 2.1. The launch promise is the panoply, not three modes and a plan. #570 still gates the cut.
 
 **A Typeless-like mode — many paragraphs and bullets — is REFUSED, and the ground is measured.** #523 round 9 and 10: the model emits a list 0 times in 15 under the Smart Mode contract, and 2 times in 15 under no contract at all, where it also stops rewriting, stops repairing the Parakeet drift (1 of 10 against 4 of 5) and breaks on every sentence. So the contract is not what blocks the list; it is what buys the rewriting. And a second mode for "make my long dictation readable" would split one need in two, which costs the user a choice at every dictation. `Structuré` is not to be pushed toward it either: the moment it fabricates task lists it **is** `Liste` (#523 decision 5).
 
