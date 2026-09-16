@@ -202,6 +202,10 @@ public enum LogEvent: Sendable {
     ///   hand-off is still accounted for, and kept distinct so it is not mistaken for a
     ///   gap at every triage pass;
     /// - `table-miss` — the host could not be named;
+    /// - `skipped-warm` — the hand-off was deliberately not attempted, because the app
+    ///   was already warm and never took the foreground away. It exists so a capture can
+    ///   tell "not attempted" from "attempted and refused": #567 was a return that never
+    ///   ran, and an absent line is indistinguishable from a branch that never executed;
     /// - `tap-…` and `arbiter-…` — the keyboard-side lines, which carry their own
     ///   diagnostics rather than a decision.
     ///
