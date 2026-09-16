@@ -14,12 +14,12 @@ Last reviewed: 2026-09-16.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | In progress — **cuts after 1.9.0** |
-| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | **Cut on 2026-09-16 as 1.9.0 (33)** |
+| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | Cut as 1.9.0 (33) — **reopened for fixes, not promoted** |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
 
-**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**, followed by **#542 the same day**. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement. **#558 joined the lane on 2026-09-13 on exactly the same ground**: a second settled premise — that Parakeet is simply the best engine on the recommended tier — turned out to be false in French. #558 closed on 2026-09-14 with PR #561 (`5b0ad24`) and **#543 on 2026-09-15** with PR #563 (`26e735d`): nothing remains in the lane.
+**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**, followed by **#542 the same day**. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement. **#558 joined the lane on 2026-09-13 on exactly the same ground**: a second settled premise — that Parakeet is simply the best engine on the recommended tier — turned out to be false in French. #558 closed on 2026-09-14 with PR #561 (`5b0ad24`) and **#543 on 2026-09-15** with PR #563 (`26e735d`). The lane then **reopened on 2026-09-16**, the day of its own cut: see the end of the lane for what is left and why the version number does not move.
 
 **1.9.0 cuts before 2.0.0 — decided by Pierre on 2026-09-14.** Almost every user will install 1.9.0, from the App Store or TestFlight, before 2.0.0 exists. #558 relies on that: it ships a one-version migration file in the app bundle that 2.0.0 removes (see Lane B).
 
@@ -203,6 +203,20 @@ Streaming is out of scope and stays out. It is why Nemotron exists upstream and 
 **Why the number is 1.9.0 and not 1.8.3.** The lane was written as a patch cycle and cut as a MINOR on 2026-09-16, on Pierre's reading and on [VERSIONING.md](VERSIONING.md)'s own table: a *new model in the catalogue* is a MINOR, and so is a feature a returning user notices — this lane has both, Nemotron and auto-return. The rule the table states and that this lane forgot is that the digit is judged on the **whole cycle**, not on the lane's original intent.
 
 **The cut cost two abandoned builds and a build-system fix.** Builds 31 and 32 never uploaded: `xcodebuild` refused to resolve packages because `traits = ();` on the FluidAudio reference (#558) disables default traits on a package that declares none. PR #566 removed it and set `EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64`, which is what #558 actually needed. Nothing had caught it because #558's device build and CI both reused an already-resolved package graph — CI caches SourcePackages on the pbxproj hash, so its resolve step was a no-op. A green CI on a dependency bump says nothing about resolution.
+
+### The lane reopened on the day it cut — 2026-09-16
+
+**1.9.0 (33) is on TestFlight and does not go to the App Store yet.** Decided by Pierre on 2026-09-16, after device use of the build surfaced bugs on the very paths the lane exists to fix. The version number stays **1.9.0**; the fixes ride successive **build numbers** — 34, 35, and so on — each one a TestFlight cut through `scripts/cut-testflight.sh`. There is no 1.9.1: nothing has shipped to the public yet, so there is nothing to patch, and a MINOR that reaches the App Store with a broken auto-return would spend the lane's whole point.
+
+This is the closed-list rule of Lane A applied one lane over, with one difference: a bug **on a path this lane shipped** belongs to this lane, however late it arrives. A bug anywhere else waits.
+
+**Item 5: #567, auto-return is skipped on an engine-dead restart** — opened and triaged `ready-for-agent` on 2026-09-16, milestone `1.9.0 — auto-return and the French engine`. The two gates in `DictusApp.swift` do not test the same condition: the swipe-back overlay fires on `isColdStart || isEngineDeadRestart` (`:548`), the return fires on `isColdStart` alone (`:584`), and the two flags are mutually exclusive by construction. So every engine-dead restart gets the overlay and is structurally excluded from the return.
+
+**It is the common path, not a corner case.** `releaseWarmState` (#106, `idleReleaseInterval = 10 * 60`) stops the engine after ten idle minutes, which is exactly what makes `isEngineRunning` false on the next keyboard tap. The dictations that reach the auto-return today are the ones following another dictation within ten minutes; **the first dictation of any session is the one that loses it**, and that is the one where being thrown into Dictus is most disorienting.
+
+Two things already verified against the code, so no one re-derives them: `returnToHostApp` already waits for recording to actually start before it opens, capped at 250 ms (`recordingWaitCeilingMs`), so returning early cannot strand a dead engine in the background; and a cold start restarts the engine from zero in exactly the same way, so this case adds no risk the shipped #23 path does not already carry. The fix's shape is fixed by the issue's fourth acceptance criterion: **one named condition consumed by both gates**, so a later change to one cannot silently desynchronise them again.
+
+**The rest of the list is open.** More device use of build 33 is expected to add items here. Anything that lands on a path from #23, #542, #543 or #558 joins this lane; anything else goes to its own.
 
 ## Lane C — the keyboard session
 
