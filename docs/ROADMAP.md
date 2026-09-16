@@ -6,22 +6,22 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-14.
+Last reviewed: 2026-09-16.
 
 ## The lanes, in order
 
 | Lane | What it is | Runs |
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
-| **B** | 2.0.0, the Pro launch | In progress — **cuts after 1.8.3** |
-| **A′** | 1.8.3 — #23, #542, #558 and #543 shipped | **Complete — ready to cut as 1.8.3, before 2.0.0** |
+| **B** | 2.0.0, the Pro launch | In progress — **cuts after 1.9.0** |
+| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | **Cut on 2026-09-16 as 1.9.0 (33)** |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
 
 **Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**, followed by **#542 the same day**. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement. **#558 joined the lane on 2026-09-13 on exactly the same ground**: a second settled premise — that Parakeet is simply the best engine on the recommended tier — turned out to be false in French. #558 closed on 2026-09-14 with PR #561 (`5b0ad24`) and **#543 on 2026-09-15** with PR #563 (`26e735d`): nothing remains in the lane.
 
-**1.8.3 cuts before 2.0.0 — decided by Pierre on 2026-09-14.** Almost every user will install 1.8.3, from the App Store or TestFlight, before 2.0.0 exists. #558 relies on that: it ships a one-version migration file in the app bundle that 2.0.0 removes (see Lane B).
+**1.9.0 cuts before 2.0.0 — decided by Pierre on 2026-09-14.** Almost every user will install 1.9.0, from the App Store or TestFlight, before 2.0.0 exists. #558 relies on that: it ships a one-version migration file in the app bundle that 2.0.0 removes (see Lane B).
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -62,7 +62,7 @@ The device test of that PR surfaced **#515**, which shipped in the same PR: the 
 
 So the launch scope is not a question of how many features to build. It is one hole to fill, plus making the two existing ones keep their promise.
 
-**One cut-time chore, conditional on #558 shipping in 1.8.3:** remove the bundled `JointDecisionv3.mlmodelc` from DictusApp before cutting 2.0.0. It exists only to let the first launch after the 1.8.3 update complete Parakeet offline; users who skip 1.8.3 are covered by the self-repairing download #558 ships permanently.
+**One cut-time chore, now that #558 shipped in 1.9.0:** remove the bundled `JointDecisionv3.mlmodelc` from DictusApp before cutting 2.0.0. It exists only to let the first launch after the 1.9.0 update complete Parakeet offline; users who skip 1.9.0 are covered by the self-repairing download #558 ships permanently.
 
 ### The order
 
@@ -156,9 +156,9 @@ His verdict was that Normal polish is not at the level and wants work before the
 
 **#216, the Pro hub.** Deferred on 2026-08-24: the hub's content *is* the feature list, so building it before the features exist means building it three times.
 
-## Lane A′ — 1.8.3, auto-return and the French engine
+## Lane A′ — 1.9.0, auto-return and the French engine
 
-**Item 1: #23, auto-return to the source app after a cold-start dictation. SHIPPED on 2026-09-11** in PR #538, merged as `51c4679`. Milestone `1.8.3 — auto-return`. It cuts as 1.8.3, before 2.0.0 (decided 2026-09-14); [VERSIONING.md](VERSIONING.md) still owns how the number is written.
+**Item 1: #23, auto-return to the source app after a cold-start dictation. SHIPPED on 2026-09-11** in PR #538, merged as `51c4679`. Milestone `1.8.3 — auto-return`. It cut as **1.9.0 (33) on 2026-09-16**, before 2.0.0 (decided 2026-09-14); [VERSIONING.md](VERSIONING.md) still owns how the number is written.
 
 The keyboard now names the app it is typing in and the main app sends the user back there, recording already running. Device-validated across nine host apps, and **it has never once opened the wrong app** — the design's central property is that a stale reading yields a *missing* answer, never a wrong one, and every failure falls through to the swipe-back overlay that shipped before it.
 
@@ -199,6 +199,10 @@ The `CancellationError` half is #144. What belongs to this lane is that **nothin
 **Built first, decided on device — reversed on 2026-09-14.** The cold Core ML compile on a physical iPhone is still the number that matters: the whole rationale is that Nemotron loads like Parakeet (17 s) and not like Turbo (202-236 s), and a Mac cannot answer it — both load in under a second there. It was written as a gate before any work, and that order could not be followed: measuring the compile needs a build that downloads, compiles and runs the model inside Dictus, which is most of the issue. So the whole scope is built on a PR that ships a device test list, and **the keep/drop decision is taken after that list is run** — dropping the model is a legitimate outcome, and the PR is not merged before it. The structural argument still stands as an argument: Nemotron is Parakeet's sibling, a FastConformer encoder plus transducer from the same converter, while what costs Turbo three and a half minutes is an autoregressive transformer decoder Nemotron does not have. **If the compile lands near Turbo's, the feature's purpose is gone.**
 
 Streaming is out of scope and stays out. It is why Nemotron exists upstream and it is a separate, larger feature, candidate for Pro. So is the automatic fallback routed by Parakeet's confidence score, which waits on **#554** — that issue records the score in the debug log with no behaviour change, so the real drift rate becomes measurable from usage instead of from four files recorded in one evening.
+
+**Why the number is 1.9.0 and not 1.8.3.** The lane was written as a patch cycle and cut as a MINOR on 2026-09-16, on Pierre's reading and on [VERSIONING.md](VERSIONING.md)'s own table: a *new model in the catalogue* is a MINOR, and so is a feature a returning user notices — this lane has both, Nemotron and auto-return. The rule the table states and that this lane forgot is that the digit is judged on the **whole cycle**, not on the lane's original intent.
+
+**The cut cost two abandoned builds and a build-system fix.** Builds 31 and 32 never uploaded: `xcodebuild` refused to resolve packages because `traits = ();` on the FluidAudio reference (#558) disables default traits on a package that declares none. PR #566 removed it and set `EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64`, which is what #558 actually needed. Nothing had caught it because #558's device build and CI both reused an already-resolved package graph — CI caches SourcePackages on the pbxproj hash, so its resolve step was a no-op. A green CI on a dependency bump says nothing about resolution.
 
 ## Lane C — the keyboard session
 
