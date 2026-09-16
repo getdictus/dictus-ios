@@ -530,23 +530,32 @@ struct DictusApp: App {
                 return
             }
 
-            // Show cold start overlay when:
-            // 1. TRUE cold start: app was terminated by iOS and keyboard just launched it
-            // 2. Engine-dead restart: app is in memory but audio engine was stopped
-            //    (e.g., Power button in Dynamic Island). Functionally a cold start because
-            //    the app must come to foreground to restart the engine.
-            let isColdStart = isFromKeyboard && !Self.hasBeenActive
-            let isEngineDeadRestart = isFromKeyboard && Self.hasBeenActive
-                && !DictationCoordinator.shared.isEngineRunning
+            // Did this dictation take the foreground away from the app the user was
+            // typing in? Two shapes do — a true cold start, where the URL launched the
+            // process, and an engine-dead restart, where the process was alive but its
+            // audio engine was not (the ten-minute idle release of #106, or the Dynamic
+            // Island's Power button). iOS will not start an audio engine from the
+            // background, so both arrive over the URL fallback and both cost the user
+            // their host app.
+            //
+            // One value, asked twice below: once for the swipe-back overlay and once for
+            // the auto-return. They used to be two expressions that happened to agree,
+            // and #567 is what that cost — see `HostForegroundDebt` for the whole story.
+            // Keep both gates reading `owesReturnToHost`; do not re-derive either.
+            let foregroundDebt = HostForegroundDebt.resolve(
+                isFromKeyboard: isFromKeyboard,
+                hasBeenActive: Self.hasBeenActive,
+                isEngineRunning: DictationCoordinator.shared.isEngineRunning
+            )
 
             PersistentLog.log(.coldStartURLReceived(
-                isColdStart: isColdStart,
-                isEngineDead: isEngineDeadRestart,
+                isColdStart: foregroundDebt == .coldStart,
+                isEngineDead: foregroundDebt == .engineDead,
                 hasBeenActive: Self.hasBeenActive
             ))
 
-            if isColdStart || isEngineDeadRestart {
-                let reason = isColdStart ? "first launch" : "engine dead"
+            if foregroundDebt.owesReturnToHost {
+                let reason = foregroundDebt.logContext
                 DictusLogger.app.info("Cold/engine-dead start from keyboard (\(reason, privacy: .public)) — showing swipe-back overlay")
                 AppGroup.defaults.set(true, forKey: SharedKeys.coldStartActive)
                 AppGroup.defaults.synchronize()
@@ -568,9 +577,17 @@ struct DictusApp: App {
 
             // #23: send the user back to the app they were typing in.
             //
-            // Only on a cold start. A warm start never took the foreground away, so
-            // there is nothing to give back, and opening the host app then would yank a
-            // user who is deliberately looking at Dictus.
+            // Whenever the foreground was taken, and only then — the same condition the
+            // overlay above is raised on, read from the same value. A cold start and an
+            // engine-dead restart both teleported the user here and both owe the trip
+            // back; a genuinely warm start never took the foreground away, so there is
+            // nothing to give back and opening the host app would yank a user who is
+            // deliberately looking at Dictus.
+            //
+            // Returning on an engine-dead restart does not strand a dead engine in the
+            // background: `returnToHostApp` waits for `.recording` before it opens, under
+            // a 250 ms ceiling, and a cold start restarts the engine from zero in exactly
+            // the same way (#567).
             //
             // Ordered after `startDictation` on purpose: recording has to be running
             // before the foreground goes away, because the user arrives back in the host
@@ -581,8 +598,17 @@ struct DictusApp: App {
             // Every failure below falls through to `SwipeBackOverlayView`, which is
             // already on screen at this point and stays the floor: unresolved host, host
             // with no known scheme, and `open()` returning false all land there.
-            if isColdStart, isFromKeyboard {
+            if foregroundDebt.owesReturnToHost {
                 returnToHostApp(hostId: KeyboardDictationURL.hostId(from: url), coordinator: coordinator)
+            } else if isFromKeyboard {
+                // A hand-off that is deliberately not attempted still says so. #567 was
+                // diagnosed from an *absent* `hostReturn` line, which cannot be told from
+                // a line that never ran, so the silent branch gets a voice: a capture can
+                // now read "attempted and refused" against "not attempted, and why".
+                PersistentLog.log(.hostReturn(
+                    hostId: KeyboardDictationURL.hostId(from: url) ?? "unknown",
+                    outcome: "skipped-warm"
+                ))
             }
         case "stop":
             // Stop recording from Dynamic Island expanded view button.

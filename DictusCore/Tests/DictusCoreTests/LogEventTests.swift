@@ -378,7 +378,13 @@ final class LogEventTests: XCTestCase {
     /// call sites cannot drift. `no-scheme-known` was emitted for a whole device session
     /// before it was written down.
     func testEveryHostReturnOutcomeRendersIntact() {
-        let outcomes = ["returned", "open-failed", "no-scheme", "no-scheme-known", "table-miss"]
+        let outcomes = [
+            "returned", "open-failed", "no-scheme", "no-scheme-known", "table-miss",
+            // #567: the branch that deliberately does not return now says so, because
+            // the bug it came from was an absent line nobody could distinguish from a
+            // branch that never ran.
+            "skipped-warm"
+        ]
         for outcome in outcomes {
             let event = LogEvent.hostReturn(hostId: "com.apple.Spotlight", outcome: outcome)
             XCTAssertEqual(event.level, .notice)
