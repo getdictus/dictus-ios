@@ -8,8 +8,9 @@ final class SmartModeCatalogueTests: XCTestCase {
     // MARK: - The rows
 
     func testCatalogueShipsNotesAndOneTranslateEntryPerSupportedLanguage() {
-        XCTAssertEqual(SmartModeCatalogue.builtIns.count, 1 + SupportedLanguage.allCases.count)
+        XCTAssertEqual(SmartModeCatalogue.builtIns.count, 2 + SupportedLanguage.allCases.count)
         XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "notes" })
+        XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "structured" })
         for language in SupportedLanguage.allCases {
             XCTAssertTrue(
                 SmartModeCatalogue.builtIns.contains { $0.id == "translate.\(language.rawValue)" },
@@ -215,13 +216,26 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertEqual(SmartModeCatalogue.notes.displayName, "List")
     }
 
-    /// The seed still names it by identifier, so a fresh install pins the same two
-    /// rows it always did.
+    /// The seed names every mode by identifier, so the 2026-08-27 rename left a fresh
+    /// install pinning exactly what it pinned before. #523 added a third row to the
+    /// front of it — the free slot, not List's.
     func testTheDefaultPinsAreUnchangedByTheRename() {
-        XCTAssertEqual(SmartModeCatalogue.defaultPinnedIdentifiers, ["notes", "translate.en"])
+        XCTAssertEqual(
+            SmartModeCatalogue.defaultPinnedIdentifiers,
+            ["structured", "notes", "translate.en"]
+        )
     }
 
-    /// The two rows a non-subscriber is promised (#404). Resolved from the seed rather
+    /// A seed longer than the fan can hold would be silently truncated by
+    /// `SmartModeStore.pinnedModes`, which is a fan the user never chose.
+    func testTheSeedFitsTheFan() {
+        XCTAssertLessThanOrEqual(
+            SmartModeCatalogue.defaultPinnedIdentifiers.count,
+            SmartModeCatalogue.maximumPinnedModes
+        )
+    }
+
+    /// The rows a non-subscriber is promised (#404). Resolved from the seed rather
     /// than from the store, because a non-subscriber cannot reach the mode list to
     /// arrange anything.
     func testTheDefaultPinnedModesResolveToTheSeedInOrder() {
@@ -231,11 +245,118 @@ final class SmartModeCatalogueTests: XCTestCase {
         )
     }
 
-    /// And there are exactly enough of them for the slots the upgrade fan has left
-    /// after Normal and Dictus Pro take one each.
-    func testTheSeedFitsTheUpgradeFansModeSlots() {
-        XCTAssertEqual(
+    /// And there are at least enough of them to fill the slots the upgrade fan has
+    /// left after Normal and Dictus Pro take one each, so that fan never draws a gap.
+    ///
+    /// It used to be an equality. #523 made the seed three long against two slots, so
+    /// the upgrade fan now shows the first two — Structured and List — and the
+    /// language axis falls off the bottom of the **non-subscriber's** promise. That is
+    /// a consequence of the seed order, recorded here rather than left to be
+    /// rediscovered from a screenshot.
+    func testTheSeedFillsTheUpgradeFansModeSlots() {
+        XCTAssertGreaterThanOrEqual(
             SmartModeCatalogue.defaultPinnedModes.count, SmartModeFanLayout.maximumEntries - 2
         )
+    }
+
+    // MARK: - Structured (#523)
+
+    /// The identifier is a wire value from the day it ships: it keys the session
+    /// cache, the metrics event and the per-dictation App Group snapshot.
+    func testStructuredKeepsItsIdentifierAndName() {
+        XCTAssertEqual(SmartModeCatalogue.structuredIdentifier, "structured")
+        XCTAssertEqual(SmartModeCatalogue.structured.id, "structured")
+        XCTAssertEqual(SmartModeCatalogue.structured.displayName, "Structured")
+        XCTAssertEqual(SmartModeCatalogue.mode(withIdentifier: "structured")?.id, "structured")
+    }
+
+    /// The badge needs no override: a paragraph glyph names this mode on its own,
+    /// which is not true of a globe (#79).
+    func testStructuredBadgeIsItsIcon() {
+        XCTAssertEqual(SmartModeCatalogue.structured.icon, "text.alignleft")
+        XCTAssertEqual(SmartModeCatalogue.structured.badge, .symbol("text.alignleft"))
+    }
+
+    /// Decision 8, and the one band in this file that is a measurement rather than a
+    /// judgement call: the reference outputs of 2026-08-27 run 0.57…1.00 of their
+    /// input's length, median 0.93. The floor clears the worst of them with margin.
+    func testStructuredBandIsSizedFromTheMeasuredReference() {
+        let contract = SmartModeCatalogue.structured.contract
+        XCTAssertEqual(contract.minimumLengthRatio, 0.4)
+        XCTAssertEqual(contract.maximumLengthRatio, 1.5)
+        XCTAssertLessThan(contract.minimumLengthRatio, 0.57)
+        // It is not a summarising mode: its floor stays well above List's, which is
+        // sized for a three-bullet synthesis of a two-minute dictation.
+        XCTAssertGreaterThan(contract.minimumLengthRatio, SmartModeCatalogue.notes.contract.minimumLengthRatio)
+    }
+
+    /// Decisions 9 and 10. Grounded because the mode rewrites in the speaker's own
+    /// language and may add nothing; unaligned because it may promote its opening
+    /// words into a heading, which is a rewritten head by construction (#466).
+    func testStructuredIsGroundedAndNeverTranslates() {
+        let contract = SmartModeCatalogue.structured.contract
+        XCTAssertEqual(contract.outputLanguage, .sameAsInput)
+        XCTAssertTrue(contract.requiresGroundedNames)
+        XCTAssertFalse(contract.requiresAlignedPrefix)
+        XCTAssertEqual(SmartModeCatalogue.structured.overflowBehaviour, .insertRawText)
+    }
+
+    /// The rule that stops this mode collapsing into List on the input where they
+    /// would otherwise meet — free-form rambling, the primary use case (decision 5).
+    /// Stated in the prompt because that is the only place the model reads it.
+    func testStructuredPromptKeepsTheSpeakersGrammaticalPerson() {
+        let instructions = SmartModeCatalogue.structured.prompt.instructions
+        XCTAssertTrue(instructions.contains("KEEP THE SPEAKER'S GRAMMATICAL PERSON"))
+        XCTAssertTrue(instructions.contains("infinitive"))
+    }
+
+    /// Decision 7's hard bar: the one thing the reference drops and Dictus keeps.
+    func testStructuredPromptKeepsASpeakerFlaggedIncompleteness() {
+        let instructions = SmartModeCatalogue.structured.prompt.instructions
+        XCTAssertTrue(instructions.contains("j'ai oublié un truc"))
+        XCTAssertTrue(instructions.contains("KEEP IT"))
+    }
+
+    /// Decision 6: a heading is a promotion of the speaker's own opening words, never
+    /// an invention. Both reference headings are exactly that.
+    func testStructuredPromptForbidsAnInventedTitle() {
+        let instructions = SmartModeCatalogue.structured.prompt.instructions
+        XCTAssertTrue(instructions.contains("Never invent a title"))
+    }
+
+    /// Decision 4 with measurement A behind it: median 0.93 is not a summary.
+    func testStructuredPromptForbidsSummarising() {
+        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Do NOT summarise"))
+    }
+
+    /// The #414 copying finding, pinned: every example in this prompt is neutralised
+    /// together, so no example names a person. A test cannot read intent, but it can
+    /// hold the one property that makes a copied line survivable — that the reader
+    /// recognises it as not theirs.
+    func testStructuredPromptNamesNoPersonInAnyExample() {
+        let instructions = SmartModeCatalogue.structured.prompt.instructions
+        for name in ["Sophie", "Julien", "Thomas", "Sarah", "Marie", "Paul"] {
+            XCTAssertFalse(instructions.contains(name), "the prompt names \(name)")
+        }
+    }
+
+    /// The one lever the mode has, pinned so an edit cannot quietly remove it.
+    ///
+    /// #437 measured the system prompt at **zero** line breaks over 144 outputs across
+    /// five arms, and this mode reproduced that: 0 breaks in 27 accepted outputs while
+    /// the instruction sat in the rules alone. Moving it into the user turn is what
+    /// produces a break at all, and the mode's whole want is paragraphs.
+    func testStructuredAsksForParagraphsInTheUserTurn() {
+        let framing = PolishTask.smart(SmartModeCatalogue.structured).userTurn(raw: "x")
+        XCTAssertTrue(framing.contains("break it into paragraphs"))
+        XCTAssertTrue(framing.lowercased().contains("output only"))
+    }
+
+    /// The #239 pattern, same as every other mode: one English prompt, answering in
+    /// the input's language.
+    func testStructuredPromptIsWrittenOnceAndKeepsTheInputLanguage() {
+        let instructions = SmartModeCatalogue.structured.prompt.instructions
+        XCTAssertTrue(instructions.contains("OUTPUT LANGUAGE: the language of the input"))
+        XCTAssertTrue(instructions.contains("NEVER translate"))
     }
 }

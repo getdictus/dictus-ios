@@ -18,10 +18,11 @@ import NaturalLanguage
 ///
 /// ### A segment is a line
 ///
-/// After `PolishPostpass.decodeNewlines` every dictated and every model-emitted
-/// break is a single `\n`, so one bullet is one line — this splits on the text the
-/// post-pass already produced and changes nothing about how breaks are encoded,
-/// decoded or emitted (#437 owns that).
+/// After `PolishPostpass.decodeNewlines` a dictated break is a single `\n` and a
+/// model-emitted paragraph break is a blank line (#523), so one bullet is still one
+/// line — the split drops empty subsequences, which is what makes a blank line
+/// invisible here. This splits on the text the post-pass already produced and
+/// changes nothing about how breaks are encoded, decoded or emitted (#437 owns that).
 ///
 /// Sentence-level segmentation was considered for that check and is not what ships
 /// there. A sentence is short enough that the recogniser is unreliable on it, so the

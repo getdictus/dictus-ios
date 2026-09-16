@@ -446,6 +446,17 @@
         }
       }
     },
+    "Structured" : {
+      "comment" : "Name of the Smart Mode that rewrites a long dictation as clear written paragraphs (#523).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Structuré"
+          }
+        }
+      }
+    },
     "Starting..." : {
       "localizations" : {
         "fr" : {

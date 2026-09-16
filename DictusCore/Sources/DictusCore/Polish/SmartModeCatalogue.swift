@@ -7,7 +7,10 @@ import Foundation
 /// ### v1 ships two families, and Email is not one of them
 ///
 /// **List** moves the text along the structure axis, **Translate → X** along the
-/// language axis. SMS and Summary were cut in the design session: the free polish
+/// language axis. **Structured** joined the structure axis in #523, with a licence
+/// neither of the other two carries: it rewrites the speaker's sentences rather than
+/// reshaping them, which is why it is a row of its own rather than a rendering option
+/// on List. SMS and Summary were cut in the design session: the free polish
 /// already produces natural conversational text — that is literally the ADR 0003
 /// `natural` contract — so an SMS mode would be the one paid mode whose output is
 /// indistinguishable from the free one, and List already synthesises.
@@ -34,6 +37,11 @@ public enum SmartModeCatalogue {
     /// event records, so the rename deliberately did **not** touch it: no persisted
     /// armed mode is invalidated and no pinned order is lost.
     public static let notesIdentifier = "notes"
+
+    /// Identifier of the long-form mode, displayed as "Structured" / "Structuré"
+    /// (#523). A wire value from the day it ships, for the reason above: it keys the
+    /// session cache, the metrics event and the per-dictation App Group snapshot.
+    public static let structuredIdentifier = "structured"
 
     /// Identifier of the Translate mode targeting `language`.
     public static func translateIdentifier(target: SupportedLanguage) -> String {
@@ -93,6 +101,63 @@ public enum SmartModeCatalogue {
         overflowBehaviour: .insertRawText
     )
 
+    /// Structured: the long vocal message, rewritten as paragraphs that do not read
+    /// as though they were dictated (#523).
+    ///
+    /// ### Why this is a fourth mode and not `List` rendered as prose
+    ///
+    /// The two differ by **licence**, not by shape. `SmartModeNotesPrompt` keeps the
+    /// speaker's words — *"Do not substitute synonyms"*, *"Keep every fact, number,
+    /// date, name and decision exactly as spoken"* — and restructures them into
+    /// bullets. This mode rewrites them, which is the whole product and which no
+    /// other contract in this repo allows. #437 closed on the measurement that makes
+    /// the licence necessary: under a contract that forbids rewriting, Apple FM
+    /// cannot place a paragraph break at all.
+    ///
+    /// The rule that keeps the two apart on the input where they would otherwise
+    /// collapse is in the prompt, not here: Structured keeps the speaker's
+    /// grammatical person, where `List` produces infinitive tasks. See
+    /// `SmartModeStructuredPrompt`.
+    ///
+    /// ### The band is measured, unusually for this file
+    ///
+    /// `PolishAcceptanceContract` warns that these bands are judgement calls. This
+    /// one is not. The six paired dictations of 2026-08-27 (#437) put the reference
+    /// competitor's output at 0.98, 0.93, 1.00, 0.94, **0.57** and 0.87 of its
+    /// input's length — median 0.93, and materially shorter only on the pure ramble.
+    /// **Structured is not a summarising mode.** The floor clears the worst measured
+    /// case with margin; the ceiling is there for runaway generation, which is the
+    /// only thing a band catches (PR #388: 0 rejections in 240 calls).
+    ///
+    /// Grounded, because this mode rewrites in the speaker's own language and the
+    /// licence it carries is to reformulate, never to add: rewriting *what was said*
+    /// is the product, putting a date or a name in the speaker's mouth is the defect
+    /// #414 exists to catch. The prefix check is off for the reason `List` has it
+    /// off and then some — the mode may promote its opening words into a heading,
+    /// which is precisely a rewritten head (#466).
+    public static let structured = SmartMode(
+        id: structuredIdentifier,
+        displayName: "Structured",
+        icon: "text.alignleft",
+        prompt: SmartModePrompt(
+            instructions: SmartModeStructuredPrompt.instructions(),
+            userInstruction: SmartModeStructuredPrompt.userInstruction,
+            outputMarker: SmartModeStructuredPrompt.outputMarker
+        ),
+        contract: PolishAcceptanceContract(
+            minimumLengthRatio: 0.4,
+            maximumLengthRatio: 1.5,
+            outputLanguage: .sameAsInput,
+            requiresGroundedNames: true,
+            requiresAlignedPrefix: false
+        ),
+        // The mode armed for the longest dictations is the one that meets the context
+        // ceiling first — sooner than `List`, because its prompt is longer. The floor
+        // is the speaker's own words, unstructured: plainer than what they asked for,
+        // and never wrong. Same reasoning `List` carries (#270).
+        overflowBehaviour: .insertRawText
+    )
+
     /// Translate → `target`.
     ///
     /// The band is wide on both sides because translation legitimately changes
@@ -142,8 +207,12 @@ public enum SmartModeCatalogue {
     /// transcription and the per-language polish prompts are limited to. They are
     /// **not** filtered by the keyboard language: the spoken language is unknown
     /// until the user speaks, so "→ FR" stays offerable on a French keyboard.
+    ///
+    /// Structured leads the structure-axis pair because it is the mode the
+    /// maintainer ranks first for his own use (#523), and this order is what the
+    /// app's mode list draws.
     public static let builtIns: [SmartMode] =
-        [notes] + SupportedLanguage.allCases.map { translate(to: $0) }
+        [structured, notes] + SupportedLanguage.allCases.map { translate(to: $0) }
 
     /// Every mode, with the user's pin state stamped on each row.
     public static var all: [SmartMode] {
@@ -208,9 +277,24 @@ public enum SmartModeCatalogue {
     /// What a fresh install has pinned before the user has ever opened the mode list.
     ///
     /// A seed, not a rule: the moment the user pins anything, `SmartModeStore` holds
-    /// their list and this stops being consulted. List and "→ EN" because they are
-    /// the two entries that demonstrate the two axes the catalogue moves text along.
+    /// their list and this stops being consulted.
+    ///
+    /// **Three since #523**, filling the fan: Structured first because it is the mode
+    /// the maintainer arms for the dictations he cares most about, then List, then
+    /// "→ EN" — List and "→ EN" being the pair that demonstrates the two axes the
+    /// catalogue moves text along. The third slot was free, so nothing was sacrificed
+    /// to make room. Whether Structured later *replaces* List in the seed is
+    /// deliberately deferred to the maintainer's verdict after living with it; #523
+    /// does not reopen List.
+    ///
+    /// One surface reads this list and cannot show all of it: the **upgrade fan**
+    /// (#404) has two mode slots, since Normal and Dictus Pro take one each, so a
+    /// non-subscriber now sees Structured and List where they used to see List and
+    /// "→ EN". `SmartModeFanLayout.entries` takes the first two, which keeps the fan
+    /// an exact promise of what the user would get pinned — it is simply no longer
+    /// the whole of it, and the language axis is what falls off the bottom.
     public static let defaultPinnedIdentifiers = [
+        structuredIdentifier,
         notesIdentifier,
         translateIdentifier(target: .english)
     ]

@@ -196,6 +196,15 @@ let armPaths: [String] = args.indices.compactMap { index in
     return args[index + 1]
 }
 let paragraphJSONOut = optionValue("--json", in: args)
+
+/// Print the engine's own output on a SUCCESS too, with every break made visible
+/// (`⏎`), rather than only on a refusal.
+///
+/// #523: the post-pass used to collapse every run of newlines to one, so no
+/// measurement ever made anywhere in this repo could tell a model that emitted a
+/// blank line from one that emitted a single break. `show` printed the final text,
+/// where the two look identical. This flag is how that question is asked.
+let showEngineOut = args.contains("--engine-out")
 // #439. Overrides every fixture's `lang`. See `Fixture.routed(through:)`.
 let langOverride = optionValue("--lang", in: args)
 let modeAIdentifier = optionValue("--mode-a", in: args) ?? modeIdentifier
@@ -356,6 +365,16 @@ struct RunOutcome {
     /// failure seen here reads against the field data without a translation.
     let failureReason: PolishFailureReason?
 
+    /// Which of the five output checks refused, on a `rejectedGuardrail` (#466).
+    ///
+    /// Carried and printed because `rejectedGuardrail` is one outcome for five
+    /// questions, and #523's decision 9 asks a question the outcome alone cannot
+    /// answer: *which* check refuses a legitimate output. A mode that fails closed
+    /// inserts nothing, so a false refusal costs the user a two-minute dictation —
+    /// and "widen the check" and "fix the prompt" are opposite answers that depend
+    /// entirely on which of the five fired.
+    let rejectedCheck: PolishGuardrail.Check?
+
     init(final: String?,
          engineOutput: String?,
          outcome: PolishMetrics.Outcome,
@@ -363,7 +382,8 @@ struct RunOutcome {
          detected: String?,
          task: PolishTask?,
          preprocessed: String,
-         failureReason: PolishFailureReason? = nil) {
+         failureReason: PolishFailureReason? = nil,
+         rejectedCheck: PolishGuardrail.Check? = nil) {
         self.final = final
         self.engineOutput = engineOutput
         self.outcome = outcome
@@ -372,6 +392,7 @@ struct RunOutcome {
         self.task = task
         self.preprocessed = preprocessed
         self.failureReason = failureReason
+        self.rejectedCheck = rejectedCheck
     }
 
     /// `final`, rendered for a log line. The refusal has to read as a refusal in a
@@ -494,7 +515,8 @@ func runOnce(_ fx: Fixture,
     let final = PolishPipeline.resolvedOutput(r, preprocessed: preprocessed, job: job)
     return RunOutcome(final: final, engineOutput: r.engineOutput, outcome: r.outcome,
                       engineMs: r.engineMs, detected: detectedCode, task: job.task,
-                      preprocessed: preprocessed, failureReason: r.failureReason)
+                      preprocessed: preprocessed, failureReason: r.failureReason,
+                      rejectedCheck: r.rejectedCheck)
 }
 
 /// Auto-detect path (#239), mirroring `PolishCoordinator.polishAutoDetected`:
@@ -532,7 +554,8 @@ func runOnceAuto(_ fx: Fixture,
     let final = PolishPipeline.resolvedOutput(r, preprocessed: preprocessed, job: job)
     return RunOutcome(final: final, engineOutput: r.engineOutput, outcome: r.outcome,
                       engineMs: r.engineMs, detected: detectedCode, task: job.task,
-                      preprocessed: preprocessed, failureReason: r.failureReason)
+                      preprocessed: preprocessed, failureReason: r.failureReason,
+                      rejectedCheck: r.rejectedCheck)
 }
 
 /// What `prompt` prints for one fixture: the task the engine would run, the text it
@@ -692,6 +715,22 @@ func runTargetElection() {
     for wrong in score.wrong { print("   WRONG: \(wrong)") }
 }
 
+/// What the engine returned, on the two occasions it is worth seeing.
+///
+/// On a refusal it is the failure itself — for a Smart Mode nothing else shows it.
+/// On a success it is printed only under `--engine-out`, with every break made
+/// visible, because the final text renders a blank line and a bare newline
+/// identically and #523 turned on telling them apart.
+@available(macOS 26.0, *)
+func printEngineOutput(_ outcome: RunOutcome, tag: String) {
+    guard let engineOutput = outcome.engineOutput else { return }
+    if outcome.outcome != .success {
+        print("  engineOut\(tag): \(engineOutput)")
+    } else if showEngineOut {
+        print("  breaks\(tag): \(engineOutput.replacingOccurrences(of: "\n", with: "⏎"))")
+    }
+}
+
 @available(macOS 26.0, *)
 func runHarness() async {
     switch command {
@@ -710,16 +749,16 @@ func runHarness() async {
                 tally.record(o.outcome, fixture: fx.id)
                 let tag = runs > 1 ? " #\(run)" : ""
                 let why = o.failureReason.map { ", reason=\($0.slug)" } ?? ""
-                let route = "\(o.outcome.rawValue), \(o.engineMs)ms, detected=\(o.detected ?? "-")→\(o.task?.identifier ?? "-")\(o.contractNote)\(why)"
+                // Which of the five refused, never just that one did (#523, decision 9).
+                let check = o.rejectedCheck.map { ", check=\($0.rawValue)" } ?? ""
+                let route = "\(o.outcome.rawValue), \(o.engineMs)ms, detected=\(o.detected ?? "-")→\(o.task?.identifier ?? "-")\(o.contractNote)\(why)\(check)"
                 print("  polished\(tag): \(o.displayText)")
                 print("            (\(route))")
                 // When the guardrail rejects, `final` is the raw fallback — or, for a
                 // Smart Mode, nothing at all. Surface what the engine actually
                 // produced so guardrail and prompt issues are both visible; for a
                 // mode this line IS the failure, since nothing else shows it.
-                if o.outcome != .success, let engineOutput = o.engineOutput {
-                    print("  engineOut\(tag): \(engineOutput)")
-                }
+                printEngineOutput(o, tag: tag)
             }
         }
         // The rate, not just the outputs — the number #393 asks for.
@@ -751,6 +790,7 @@ func runHarness() async {
                 outcome: o.outcome.rawValue,
                 failureReason: o.failureReason?.slug
             )
+            let refusedBy = o.rejectedCheck.map { " (check=\($0.rawValue))" } ?? ""
             // A mode that failed closed has no output to check, and that is normally
             // a failure of the fixture rather than a reason to skip it: the mode's
             // own contract refused what the engine produced, which is precisely what
@@ -759,7 +799,7 @@ func runHarness() async {
             // refusal, so nothing reaching the document is the pass condition.
             var failures: [String] = []
             if o.final == nil, checks.isEmpty || checks.contains(where: \.inspectsInsertedText) {
-                failures.append("the mode inserted nothing (\(o.outcome.rawValue))")
+                failures.append("the mode inserted nothing (\(o.outcome.rawValue)\(refusedBy))")
             }
             failures += checks.compactMap { $0.failure(evidence) }
             total += 1

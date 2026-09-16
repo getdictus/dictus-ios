@@ -1,0 +1,272 @@
+# `Structuré` — the round that ships with the mode (#523)
+
+**Where:** Mac, macOS 26, Apple Intelligence on, `polish-harness`, 2026-09-12.
+**Fixtures:** `DictusCore/Sources/polish-harness/fixtures/longform-fr.json` — the six
+French dictations of 2026-08-27, `raw` verbatim from the device export.
+**Captures:** `raw/`. **Prompt arms:** `prompts/`. **Labelled outputs:** `corpus.json`.
+**Side by side with `List` and Typeless:** `comparison.md`.
+
+Everything below is Apple FM on a Mac. Nothing here was confirmed on a physical iPhone;
+decision 12 makes that the maintainer's, and it is the definition of done.
+
+---
+
+## The verdict in one line
+
+**The mode holds every bar #523 set, and under-delivers the want it was asked for.**
+Nothing is invented, nothing the speaker flagged is dropped, the person is the
+speaker's in 28 outputs of 28 — and the paragraphs the mode exists to produce appear in
+**8 accepted outputs of 28**. The licence to rewrite was granted, and the model largely
+declines to use it.
+
+## The bars, each with its number
+
+| Bar | Result |
+|---|---|
+| 30 outputs committed | `raw/round6-structured-shipping-5runs.txt`, 28 accepted, 2 refused |
+| Zero invented facts, figures, dates or names **reaching the document** | **0 of 28.** No number, and no capitalised token absent from the input, in any accepted output |
+| Zero speaker-flagged incompleteness dropped; fixture 5's trailing sentence in 5/5 | **5 of 5.** `ça m'échappe, mais ça me reviendra` present in every run |
+| First person preserved; no infinitive task list | **28 of 28.** `il faut que je …` four times per fixture-5 output; no bullet or numbered shape in any accepted output |
+| No guardrail rejection of a legitimate output | **1 of 29 refused.** Reported below, not worked around |
+
+## The one legitimate output the guardrail refuses, and why
+
+Re-runnable, model-free, from the `DictusCore` directory:
+
+```sh
+swift run polish-harness guardrail ../docs/research/523-structured/corpus.json --anchors
+```
+
+```
+── #413 per-segment language check          caught 0/0   false rejections 0/30
+── #414 grounding check                     caught 0/1   false rejections 1/29
+   FALSE REJECTION: 6-unscripted#4 — TypeLess
+── #414 worst-segment overlap               caught 1/1   false rejections 0/29
+── #414 anchors OR overlap (the pipeline)   caught 1/1   false rejections 1/29
+```
+
+The refused output writes **`TypeLess`** where the transcript says `type less` in one
+place and `Type Laiss` in another. `PolishGrounding.isGrounded` matches a name as a
+contiguous run of input words, so one token cannot be grounded by two, and the anchor is
+called invented. The output is legitimate: the model normalised a product name the STT
+rendered three ways inside one dictation.
+
+**It is not a property of this mode.** Any contract with `requiresGroundedNames` —
+Normal polish, Auto, `List` — refuses the same rewrite, and it is the same
+multi-rendering problem #80 measured when Parakeet spelled `Claude Code` five ways
+across six dictations. Nothing was widened to make the number go away, per decision 9.
+The user-visible cost is one dictation in twenty-nine inserting nothing, on input
+carrying a product name the transcript cannot spell consistently.
+
+**The other refusal is the guardrail working.** `1-free-form#3` ran away: it returned
+the dictation, then two paragraphs of generic advice (*"Il faut donc être très vigilant
+et bien planifier…"*), then the same two paragraphs again. The length ceiling of 1.5
+refused it before anything reached the document. That is the only fabrication in 30
+outputs, and the band caught it — worth recording, since PR #388 measured a band
+rejecting nothing in 240 calls.
+
+## The gap: paragraphs
+
+Breaks per run, shipping prompt:
+
+| Fixture | run 1 | run 2 | run 3 | run 4 | run 5 |
+|---|---|---|---|---|---|
+| 1 `free-form` (control: 0 is right) | 0 | 0 | refused | 0 | 0 |
+| 2 `project-update` | 0 | 0 | **2** | 0 | 0 |
+| 3 `message-draft` | 0 | **5** | **1** | 0 | 0 |
+| 4 `explanation` | 0 | 0 | **3** | **3** | **2** |
+| 5 `rambling` | 0 | **6** | **3** | 0 | 0 |
+| 6 `unscripted` | 0 | 0 | 0 | refused | 0 |
+
+**8 of 28.** Fixture 6 — a real 90-second dictation, the closest thing in the set to the
+use case — never breaks. Fixture 3 breaks once per *sentence* when it breaks at all,
+which is the failure #437 named in advance.
+
+This reproduces #437 exactly, under the one condition #437 said it lacked. That issue
+measured 144 outputs across five system-prompt arms and got **zero** breaks, and
+concluded the obstacle was the contract forbidding rewriting. #523 grants the licence to
+rewrite, and the first round of this mode returned **0 breaks in 27 accepted outputs**
+(`raw/round1-structured-show-5runs.txt`). The licence is not what was missing.
+
+What moves the needle is what #437's finding 2 already said: the **user turn**, and only
+weakly. Four user turns, same six fixtures:
+
+| Arm | User turn | Outputs | With a break |
+|---|---|---|---|
+| A | `Rewrite this text as clear paragraphs.` | 27 | **0** |
+| B | `… : start a new line each time the speaker moves to a different subject, and only there.` | 18 | 4 |
+| **C — ships** | `… and break it into paragraphs, one per subject, separated by a blank line.` | 18 | **7** |
+| D | C plus `— never one per sentence.` | 18 | 8, but it splits the control fixture one line per sentence |
+
+C ships because it places breaks best and never split fixture 1, the one that must stay
+one block. D's extra bound made the model noisier rather than better bounded. A fifth
+arm, on the **system** prompt — an explicit `DO NOT COPY THE INPUT` clause above the
+rules (`prompts/B-structured-anticopy.txt`, `raw/round7-armB-anticopy-3runs.txt`) —
+moved neither copying nor breaks outside sampling noise, and does not ship.
+
+## The second gap, which nobody asked about: it barely rewrites
+
+Similarity between the accepted output and the raw transcript is **1.00 on five of six
+fixtures** in the arm-B round. The mode returns the speaker's sentences with the
+punctuation repaired, which is Normal polish. It does not repair `salle à tante` (0 of
+5, where Typeless does), it does not resolve fixture 5's self-correction, and on fixture
+1 four runs of five are the transcript verbatim.
+
+Where it does use the licence it uses it well — fixture 5's ramble comes back in whole
+sentences, in the first person, with the open loop kept — but that is the exception, not
+the rule.
+
+Read `comparison.md` with this in mind: the `Structuré` column there is the run with the
+most breaks of five, so it shows the mode at its best per fixture, not its median.
+
+## What this leaves for the maintainer to decide
+
+Three answers are open, and none of them is an agent's to pick:
+
+1. **Ship it as the better polish it currently is**, and let the paragraph half arrive
+   from #550's deterministic route, which places breaks from `tokenTimings` rather than
+   from the model's judgement. That issue is open and already owns this problem.
+2. **Keep iterating on the prompt.** #437 spent 372 outputs on this dial and moved it
+   from 0 to 5 of 18; this round moved it to 8 of 28 with the same lever. The measured
+   ceiling of the prompt route is low.
+3. **Cut it**, per #393's precedent, if a mode that reads like a cleaner polish is not
+   worth a fourth row in a 46 pt fan.
+
+Decision 12 makes the verdict his after living with it, which is why the mode ships
+installable and pinned rather than held back for another round here.
+
+## Round 8, 2026-09-16 — the blank line never existed downstream
+
+**The paragraph break the model emits is a blank line, and `PolishPostpass.decodeNewlines`
+erased every one of them before anything could see it.** Measured on the six longform-fr
+fixtures, 5 runs, `--mode structured --engine-out`, with the collapse lifted:
+
+| | |
+|---|---|
+| Accepted outputs | 29 of 30 (1 refusal on `1-free-form`, `check=segmentOverlap`) |
+| Outputs carrying at least one break | **11** |
+| Break runs of exactly two newlines (a blank line) | **24** |
+| Break runs of exactly one newline | **0** |
+
+Zero. Whenever Apple FM breaks a paragraph it emits `\n\n`, and the old post-pass
+rewrote every run of newlines — dictated or model-emitted — to a single `\n`. So:
+
+- The maintainer's device verdict, 2026-09-16 — *"ce qui manque c'est vraiment le saut
+  de ligne, pas juste le retour à la ligne"* — is a **code artifact, not a model
+  ceiling**. His own capture (`device-3steps.json`, iOS 27, build 1.9.0 (34)) came back
+  with five sections glued by bare newlines; the model had separated them.
+- Every earlier count in this document, and #437's, measured *whether a break existed*.
+  None of them could measure its **shape**, because `engineOutput` in `PolishPipeline`
+  is recorded **after** the post-pass. `--engine-out` on `show` is what makes the raw
+  shape visible; `raw/round8-blank-lines-5runs.txt` is that round.
+- The **rate** is unchanged — 11 of 29 here against 8 of 28 on round 6, which is
+  run-to-run noise on the same prompt. Lifting the collapse does not make the model
+  break more often. It makes the breaks it does place legible.
+
+The marker keeps its old meaning: a dictated *"à la ligne"* is exactly one break and
+absorbs whatever the model stacked around it. Only the model's own runs survive, capped
+at one blank line.
+
+## Round 9, 2026-09-16 — numbering an enumerated sequence: three arms, zero
+
+The reference numbers the steps of `device-3steps.json` (`1.` `2.` `3.`); Structured
+writes prose. Three arms, 5 runs each on that fixture, everything else unchanged:
+
+| Arm | Where | What it says | Numbered outputs |
+|---|---|---|---|
+| E | system, rule 8 | `When the speaker COUNTED the items out loud … number them: "1. ", "2. ", "3. "` | **0 / 5** |
+| F | system, rule 8 + a worked example | E plus a numbered example, off-domain, first person, counting words dropped | **0 / 5** |
+| G | user turn | `If the speaker counted their items out loud, number those items instead.` | **0 / 4** (1 refusal) |
+
+Zero in fifteen. This is the same shape as round 6's `no bullet or numbered shape in
+any accepted output, 28 of 28`: under this prompt family the model does not produce a
+list at all, and rule 8's bullets have never fired either. Arm F costs 823 characters
+of system prompt — the dictation ceiling falls from ≈ 4 130 to ≈ 3 500 — and buys
+nothing, so it does not ship.
+
+Arm G has a side effect worth recording: it did not number, but it broke the text into
+**3 to 4 paragraphs instead of 1 to 2**, and one of its five runs was refused. That is
+arm D's failure mode from round 5 — a break per sentence rather than per subject — so
+it is not a free win, and the shipping user turn stays.
+
+⚠️ **One caveat that now applies to every harness number in this document.** The
+harness runs the Mac's Apple FM (macOS 26.5.1); the phone runs iOS 27.0's. They are not
+the same model generation, and the device output is visibly the better writer: on this
+exact transcript the phone returned five rewritten sections where the Mac returns two
+and leaves the Parakeet drift `And the three attack` in place on 3 of 5 runs. So a
+ceiling measured here **understates the device**, and a prompt verdict should be
+confirmed on the phone before it is called final.
+
+## Round 10, 2026-09-16 — is it the contract that blocks the list? Strip it and see
+
+Round 9 changed rule 8 and the user turn while keeping every other rule, both worked
+examples, both counter-examples and the acceptance contract. So it measured *our prompt
+family*, not *the model*. The maintainer asked the right question: is the contract
+itself too rigid for a Smart Mode to be modular?
+
+**Arm H** answers it. Four lines, no contract, no examples, no counter-examples: rewrite
+as written text, same language, output nothing else, number the items when the speaker
+counted them. 15 runs on `device-3steps.json`.
+
+| | Arm H — bare, 15 runs | Shipping prompt, 5 runs |
+|---|---|---|
+| Numbered the steps | **2 (13 %)** — one complete `1. 2. 3.`, one stopping at `2.` | 0 |
+| Repaired the Parakeet drift `And the three attack` | **1 of 10** | **4 of 5** |
+| Rewrote the sentences at all | no — the raw transcript, re-broken | yes |
+| Paragraph breaks | one per **sentence**, every run | one per subject, 1-2 per output |
+
+So:
+
+- **The contract is not what blocks the numbering.** Delete the whole thing and the
+  model numbers 2 times in 15 — once completely, once stopping at the second item. So
+  the capability exists on macOS 26.5.1's Apple FM and is rare whatever the prompt says,
+  which is the honest reading of round 9's zero.
+- **The contract is what buys the rewriting and the drift repair** — 4 of 5 against 1 of
+  10. Everything this mode exists to do is contract-side.
+- **What the contract does suppress is break FREQUENCY.** The bare prompt breaks on
+  every sentence. That is round 5's arm D failure, rejected there for the same reason:
+  a break per sentence is not a paragraph.
+
+**Arm I** — the full contract with the two counter-examples deleted — numbered 0 of 4
+with 1 engine failure, so the counter-example that shows a bulleted infinitive list as
+WRONG is not the suppressor either.
+
+The conclusion for the Smart Mode architecture, stated for the next person who asks:
+a contract this specific costs structural variety and buys fidelity. The route to a
+visibly more structured output is **another mode with another contract** — the
+maintainer's own 2026-09-12 idea of a Typeless-like mode with many paragraphs and
+bullets — not a loosening of this one, which measurably returns the raw transcript.
+
+## Correction, 2026-09-16 — two accepted outputs damage the meaning, and the round-6 verdict overstated
+
+CodeRabbit read the corpus and found what the acceptance table missed. Both are in
+`6-unscripted`, the fixture that is the maintainer's own voice, and both were counted as
+accepted:
+
+| Run | Raw | Output | What it is |
+|---|---|---|---|
+| 3 | `mon application dictus` | `mon application dictée` | **the product's name, replaced by a common noun** |
+| 5 | `les autres c'est pas vraiment ma voix, c'est pas naturel` | `les autres tests ne reflètent pas vraiment ma voix, ce qui est naturel` | **a negation dropped — the sentence now says the opposite** |
+
+Run 5 carries the name substitution too.
+
+**Why nothing caught them.** The round-6 criterion was *"no number or capitalised token
+absent from the input"*: it looks for content the model **added**, so a token the model
+**replaced** is invisible to it — and `dictus` is lowercase in the transcript, so no
+capitalisation rule applies either. `PolishGrounding` with `requiresGroundedNames` asks
+whether a name in the output appears in the input; `dictée` is an ordinary French word,
+not a name, so it is never asked about. And no check in the pipeline measures a
+negation: `PolishGuardrail`'s five checks are a length ratio, two `NaturalLanguage`
+passes and two word-set comparisons, none of which reads polarity.
+
+**So the verdict changes.** `Zero invented facts, figures, dates, names` stands as
+written — nothing was invented. What the table cannot claim is that nothing was **lost
+or altered**: 2 of 28 accepted outputs alter meaning the reader cannot recover, one of
+them on the product's own name. The corpus labels are left exactly as measured
+(`wasAccepted` records what the harness did, and that is a fact); it is the *reading* of
+them in the acceptance table that was wrong.
+
+This is the licence to rewrite meeting the guardrail family that was built for a
+contract which may not rewrite (ADR 0003, #413/#414). It is filed rather than fixed
+here: the fix is a guardrail question, not a prompt question, and widening a check is
+the one thing #466 measured as expensive.
