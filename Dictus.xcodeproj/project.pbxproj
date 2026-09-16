@@ -1501,8 +1501,6 @@
 				kind = upToNextMinorVersion;
 				minimumVersion = 0.15.7;
 			};
-			traits = (
-			);
 		};
 		CC800001 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
