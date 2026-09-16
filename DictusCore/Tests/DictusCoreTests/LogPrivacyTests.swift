@@ -17,7 +17,7 @@ final class LogPrivacyTests: XCTestCase {
             .audioSessionConfigured(category: "playAndRecord"),
             .audioSessionFailed(error: "configError"),
             .transcriptionStarted(modelName: "base"),
-            .transcriptionCompleted(durationMs: 2500, wordCount: 42),
+            .transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: 0.916),
             .transcriptionFailed(error: "modelNotLoaded"),
             // #80's pass reports counters only. A term the user typed is their own
             // vocabulary, and a character count of the transcript is not the transcript.

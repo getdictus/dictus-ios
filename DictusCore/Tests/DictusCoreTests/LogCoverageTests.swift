@@ -17,7 +17,7 @@ final class LogCoverageTests: XCTestCase {
             .audioSessionConfigured(category: "playAndRecord"),
             .audioSessionFailed(error: "configError"),
             .transcriptionStarted(modelName: "base"),
-            .transcriptionCompleted(durationMs: 2500, wordCount: 42),
+            .transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: 0.916),
             .transcriptionFailed(error: "modelNotLoaded"),
             .vocabularyApplied(enabled: true, entries: 3, replacements: 1, chars: 58),
             .modelDownloadStarted(name: "large-v3", sizeMB: 1500),

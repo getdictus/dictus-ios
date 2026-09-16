@@ -244,11 +244,15 @@ public struct TranscriptionLanguagePolicy: Equatable, Sendable, Codable {
         )
     }
 
-    /// Language code for the STT engine, or `nil` for Whisper auto-detection.
+    /// Language code for the STT engine, or `nil` for the engine's own detection.
     /// Parakeet ignores the parameter either way; it receives the keyboard
     /// code exactly as it did before #226 so its flows stay byte-identical.
+    ///
+    /// Nemotron resolves exactly as Whisper does (#558): the keyboard language in
+    /// `.followKeyboard`, the chosen language in `.explicit`, and `nil` in `.autoDetect`,
+    /// which `NemotronLanguagePrompt` turns into the model's `"auto"` prompt.
     public var sttLanguageCode: String? {
-        guard engine == .whisperKit else { return keyboardLanguage.rawValue }
+        guard sttLanguageIsEffective else { return keyboardLanguage.rawValue }
         return mode.resolvedLanguageCode(keyboardLanguageCode: keyboardLanguage.rawValue)
     }
 
@@ -363,8 +367,16 @@ public struct TranscriptionLanguagePolicy: Equatable, Sendable, Codable {
     /// way, which made `stt=en engine=PK` read as "transcribed in English"
     /// when the raw text was French; recording this alongside it is what
     /// removes the ambiguity.
+    ///
+    /// Nemotron honours it (#558): the code becomes the encoder's language prompt, which
+    /// is the whole reason the engine is in the catalogue.
     public var sttLanguageIsEffective: Bool {
-        engine == .whisperKit
+        switch engine {
+        case .whisperKit, .nemotron:
+            return true
+        case .parakeet:
+            return false
+        }
     }
 
     /// `sttLanguageCode` rendered for logs and the debug export, with `nil`
@@ -374,10 +386,12 @@ public struct TranscriptionLanguagePolicy: Equatable, Sendable, Codable {
     }
 
     /// True when the transcription must be inserted literally as-is (no
-    /// trailing-separator coercion): Whisper Auto-detect only, where the
-    /// output language is unknown and appending Western punctuation to e.g.
-    /// CJK text would corrupt it.
+    /// trailing-separator coercion): auto-detection on an engine that really
+    /// detects, where the output language is unknown and appending Western
+    /// punctuation to e.g. CJK text would corrupt it. Whisper and, since #558,
+    /// Nemotron, whose `"auto"` prompt can land on any of its languages. Parakeet
+    /// never, as before: its Auto mode changes nothing at the STT stage.
     public var insertsTranscriptionAsIs: Bool {
-        engine == .whisperKit && mode == .autoDetect
+        sttLanguageIsEffective && mode == .autoDetect
     }
 }

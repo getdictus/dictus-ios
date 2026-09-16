@@ -18,6 +18,8 @@ extension ModelInfo {
             return String(localized: "Best accuracy")
         case "parakeet-tdt-0.6b-v3":
             return String(localized: "Fast and accurate (NVIDIA)")
+        case NemotronModelRepository.catalogueIdentifier:
+            return String(localized: "Locks the language you speak (NVIDIA)")
         case "openai_whisper-large-v3-v20240930_turbo_632MB":
             return String(localized: "Most accurate, and fast")
         // The deprecated `_954MB` (issue #408) keeps its own case, and its own words:
@@ -62,6 +64,8 @@ extension ModelLanguageSupport.Coverage {
             return String(localized: "About 99 languages (multilingual)")
         case .parakeetEuropean:
             return String(localized: "25 European languages")
+        case .nemotronMultilingual:
+            return String(localized: "28 languages (multilingual)")
         }
     }
 }

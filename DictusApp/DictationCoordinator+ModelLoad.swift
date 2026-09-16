@@ -572,9 +572,43 @@ extension DictationCoordinator {
     @available(iOS 17.0, *)
     func warmedParakeetEngine(modelName: String) async throws -> ParakeetEngine {
         let engine = ParakeetEngine()
-        try await engine.prepare(modelIdentifier: modelName)
+        try await prepareLoggingCompilation(engine, modelName: modelName)
         await runWarmInference(on: engine, modelName: modelName)
         return engine
+    }
+
+    /// The Nemotron counterpart (#558). Same order: load, warm, hand back.
+    @available(iOS 17.0, *)
+    func warmedNemotronEngine(modelName: String) async throws -> NemotronEngine {
+        let engine = NemotronEngine()
+        try await prepareLoggingCompilation(engine, modelName: modelName)
+        await runWarmInference(on: engine, modelName: modelName)
+        return engine
+    }
+
+    /// Load a FluidAudio engine and log how long the load took, as `modelCompilationCompleted`.
+    ///
+    /// WHY ON THIS PATH TOO (#558): that line used to come only from `ModelManager`'s download
+    /// path, so a model loaded at launch, on selection or on a dictation left no duration at
+    /// all, Parakeet included. #558's device test compares Nemotron's warm load against
+    /// Parakeet's, and a comparison needs the same line from both. It is the same event with
+    /// the same fields; what tells the two paths apart in a log is what surrounds it: here it
+    /// follows `<Engine>Load localModelResolved`, on the download path it is followed by
+    /// `modelPrewarmPeakMemory` and `modelDownloadCompleted`.
+    ///
+    /// Only on success: a failed load already logs `loadFailed`, and a duration next to it
+    /// would read as a compile that finished.
+    ///
+    /// FluidAudio engines only. WhisperKit's load is `WhisperKit(config)` with prewarm, timed
+    /// by nothing on this path, and changing its log is not #558's to do.
+    @available(iOS 17.0, *)
+    func prepareLoggingCompilation(_ engine: SpeechModelProtocol, modelName: String) async throws {
+        let start = Date()
+        try await engine.prepare(modelIdentifier: modelName)
+        PersistentLog.log(.modelCompilationCompleted(
+            name: modelName,
+            durationMs: Int(Date().timeIntervalSince(start) * 1000)
+        ))
     }
 
     /// Give up on a load whose engine is not going to be published.

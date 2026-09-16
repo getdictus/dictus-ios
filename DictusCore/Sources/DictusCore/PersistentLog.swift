@@ -136,9 +136,21 @@ public enum PersistentLog {
     /// Cross-process safety is handled by NSFileCoordinator.
     private static let writeQueue = DispatchQueue(label: "com.pivi.dictus.persistentlog", qos: .utility)
 
-    private static var fileURL: URL? {
-        AppGroup.containerURL?.appendingPathComponent(fileName)
+    /// Internal, not private: `AutocorrectDebugLog` appends to this same file and
+    /// must follow the test redirect below along with everything else.
+    static var fileURL: URL? {
+        fileURLOverrideForTesting ?? AppGroup.containerURL?.appendingPathComponent(fileName)
     }
+
+    /// Redirects the public API to another file (for unit tests).
+    ///
+    /// WHY this exists: on a Mac the App Group container is a folder macOS guards
+    /// for the app that owns it. A test host that is not that app gets its `open()`
+    /// held on an authorization prompt, and under a host with no Full Disk Access
+    /// the prompt never resolves, so the test hangs instead of failing. Tests that
+    /// need `log`, `read` and `clear` end to end point them at a temp file instead.
+    /// Always `nil` in the apps.
+    static var fileURLOverrideForTesting: URL?
 
     // MARK: - Public API (Structured)
 

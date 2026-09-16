@@ -102,8 +102,24 @@ struct SettingsView: View {
 
     /// Whether the currently active model uses the Parakeet engine (CTC/TDT).
     /// Parakeet auto-detects language — the language picker has no effect on it.
+    ///
+    /// Nemotron is NOT Parakeet here (#558), even though both run through FluidAudio: the
+    /// setting forces Nemotron's language, so the "only applies to Whisper models" caveat
+    /// this drives must not show while it is active.
     private var isParakeetActive: Bool {
         ModelInfo.forIdentifier(activeModel)?.engine == .parakeet
+    }
+
+    /// Whether Auto-detect's "any language Whisper supports" sentence describes the active
+    /// engine. Only Whisper's, or no model at all, which is how the footer read before #558.
+    /// Parakeet already has its caveat, and Nemotron's auto-detect is not Whisper's.
+    private var describesWhisperAutoDetect: Bool {
+        switch ModelInfo.forIdentifier(activeModel)?.engine {
+        case .whisperKit, nil:
+            return true
+        case .parakeet, .nemotron:
+            return false
+        }
     }
 
     /// Tracks log export async operation for spinner display.
@@ -238,7 +254,7 @@ struct SettingsView: View {
                 // both engines.
                 if transcriptionLanguage == TranscriptionLanguageMode.autoStoredValue {
                     VStack(alignment: .leading, spacing: 4) {
-                        if !isParakeetActive {
+                        if describesWhisperAutoDetect {
                             Text("Auto-detect lets you dictate in any language Whisper supports. Polish adapts to the language you speak.")
                         }
                         Text("Language support varies by model. Tap ⓘ on a model card in Models for details.")

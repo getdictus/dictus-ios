@@ -161,6 +161,20 @@ enum HostAppResolver {
     static var trustedCount: Int { table.trustedCount }
     static func hasEverSeen(pid: Int) -> Bool { table.hasEverSeen(pid: pid) }
 
+    /// Everything the keyboard's appearance owes the resolver, in order: retire the
+    /// previous appearance's evidence, make sure the arbiter is switched on and this
+    /// keyboard is registered with it, write the one line that reports both, then harvest.
+    static func keyboardWillAppear() {
+        noteKeyboardAppeared()
+        let activation = activateArbiter()
+        let connection = ensureArbiterConnection()
+        PersistentLog.log(.hostReturn(
+            hostId: "none",
+            outcome: "arbiter-\(activation) atLoad-\(loadTimeActivation) connection-\(connection)"
+        ))
+        harvest()
+    }
+
     /// Retires the previous appearance's evidence. Called when the keyboard appears,
     /// before that appearance's first harvest — the keyboard appearing is the event that
     /// can change the host, so it is the event that expires the old evidence.
@@ -280,6 +294,57 @@ enum HostAppResolver {
     @discardableResult
     static func activateArbiter() -> String {
         DictusHostArbiterActivation.activate()
+    }
+
+    /// Registers this keyboard with the system keyboard arbiter when it holds no
+    /// connection, and reports what it did.
+    ///
+    /// ## Why this exists (#543)
+    ///
+    /// The arbiter's client state is not read from anywhere: it is *pushed*. The system's
+    /// arbiter daemon (`InputUI`'s `KeyboardArbiter`) receives a host's
+    /// `signalKeyboardChanged` when that host shows a keyboard, and forwards the new
+    /// client record — source bundle, on screen, scene — only to keyboard processes that
+    /// have sent it `startArbitration`. A keyboard's registration is dropped whenever it
+    /// leaves the screen (`lostConnection (invalidation)` in the daemon's log), for
+    /// every third-party keyboard alike.
+    ///
+    /// The difference is when a keyboard registers again. The device system log shows
+    /// Wispr Flow's and Typeless's keyboards re-sending `startArbitration` as they are
+    /// presented, before the host signals, so the host's record reaches them a few
+    /// hundred milliseconds before the mic tap. Dictus's keyboard re-registered only
+    /// seconds later, after the tap: on the misses the daemon forwarded Claude's record to
+    /// the keyboard that *was* registered and never to ours, which then held the previous
+    /// client — Spotlight, SpringBoard, or the host's own force-quit process — and the pid
+    /// cross-check correctly refused it. That is the whole residual failure rate.
+    ///
+    /// `startConnection` is the call that sends `startArbitration`. Measured on the
+    /// force-quit protocol that produced 7 misses in 10: 8 returns in 8 with it, 4 through
+    /// Spotlight and 4 from the home screen. Reading the lazy `arbiterConnection` getter
+    /// instead creates the client-side connection without registering, and measured 2 in 8.
+    ///
+    /// ## Why only when `connection` is nil
+    ///
+    /// A live connection is never doubled. When one exists, UIKit's own management
+    /// re-registers it, and in the measured run most taps followed a presentation that
+    /// found the connection already in place.
+    ///
+    /// Like `activateArbiter`, this is private surface resolved by name: a missing class or
+    /// selector is a clean no-op and the feature degrades to the swipe-back overlay.
+    ///
+    /// Returns `connected`, `started`, `no-client` or `no-selector`.
+    @discardableResult
+    static func ensureArbiterConnection() -> String {
+        guard let arbiterClass = resolveArbiterClass(),
+              let client = sharedArbiterClient(of: arbiterClass)
+        else {
+            return "no-client"
+        }
+        guard read("connection", from: client) == nil else { return "connected" }
+        let selector = NSSelectorFromString("startConnection")
+        guard client.responds(to: selector) else { return "no-selector" }
+        _ = client.perform(selector)
+        return "started"
     }
 
     /// What the load-time constructor produced, for the one line that reports it.

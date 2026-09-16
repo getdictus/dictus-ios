@@ -49,13 +49,15 @@ git -C /Users/pierreviviere/dev/dictus-wt/device rev-parse --short HEAD
 
 Create it if missing: `git worktree add --detach ../dictus-wt/device <sha>`, then resolve once (below). Leave it in place afterwards — it is not per-issue, it is the build machine.
 
-**First use of a fresh worktree only** — packages resolve from zero and FluidAudio needs its Swift 5 patch or the build fails (#285):
+**First use of a fresh worktree only**: packages resolve from zero.
 
 ```bash
 cd /Users/pierreviviere/dev/dictus-wt/device
 xcodebuild -resolvePackageDependencies -project Dictus.xcodeproj -scheme DictusApp \
   -derivedDataPath build/DerivedData
-./scripts/patch-fluidaudio-swift5.sh build/DerivedData
+# Only when the checked-out commit still carries the script, i.e. FluidAudio 0.12 (#285).
+# It was deleted with the FluidAudio 0.15.7 bump (#558), which compiles unpatched.
+if [ -x scripts/patch-fluidaudio-swift5.sh ]; then ./scripts/patch-fluidaudio-swift5.sh build/DerivedData; fi
 ```
 
 ## Build, then verify, then install

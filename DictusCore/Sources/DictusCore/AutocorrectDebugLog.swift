@@ -356,7 +356,7 @@ public enum AutocorrectDebugLog {
 
     /// Appends to the same file PersistentLog uses, so logs appear together in exports.
     private static func appendToLogFile(_ line: String) {
-        guard let url = AppGroup.containerURL?.appendingPathComponent("dictus_debug.log") else { return }
+        guard let url = PersistentLog.fileURL else { return }
         let coordinator = NSFileCoordinator()
         var error: NSError?
         coordinator.coordinate(writingItemAt: url, options: .forMerging, error: &error) { coordURL in

@@ -85,7 +85,23 @@ public enum LogEvent: Sendable {
 
     // MARK: Transcription
     case transcriptionStarted(modelName: String)
-    case transcriptionCompleted(durationMs: Int, wordCount: Int)
+    /// `confidence` is the engine's own score for the transcript it returned, when it
+    /// has one (#554). Only Parakeet does: FluidAudio's mean token probability. Whisper
+    /// has no comparable figure and passes `nil`, which prints no field at all rather
+    /// than a placeholder a reader could mistake for a measurement.
+    ///
+    /// WHY it is logged and nothing reads it: Parakeet v3 drifts into pseudo-English on
+    /// pure French, and five runs in #552 put a drifted transcript below ~0.93 and a
+    /// clean one above. Five points are an observation, not a threshold; this field is
+    /// how real dictations turn it into a distribution.
+    ///
+    /// `language`, `promptId` and `detectedLanguage` are Nemotron's (#558), and nil on every
+    /// other engine, which prints no field. `language` is the code the model was forced to
+    /// (`auto` for auto-detection), `promptId` the prompt FluidAudio resolved it to — the
+    /// only way to see that an unknown code silently fell back to auto — and
+    /// `detectedLanguage` the language tag the decoder emitted, when it emitted one. They are
+    /// what the #558 device tests read to tell a forced French run from a drifting one.
+    case transcriptionCompleted(durationMs: Int, wordCount: Int, confidence: Float?, language: String? = nil, promptId: Int? = nil, detectedLanguage: String? = nil)
     case transcriptionFailed(error: String)
     case recordingTooShort(durationMs: Int)
     case transcriptionPerformance(modelName: String, audioDurationMs: Int, transcriptionDurationMs: Int, peakMemoryMB: Int)
@@ -827,8 +843,13 @@ public enum LogEvent: Sendable {
         // Transcription
         case .transcriptionStarted(let modelName):
             return "model=\(modelName)"
-        case .transcriptionCompleted(let durationMs, let wordCount):
-            return "duration=\(durationMs)ms words=\(wordCount)"
+        case .transcriptionCompleted(let durationMs, let wordCount, let confidence, let language, let promptId, let detected):
+            // Absent, not zero, when the engine has no score (#554), and absent when it has
+            // no language to report (#558).
+            let confidenceField = confidence.map { " confidence=\(String(format: "%.3f", $0))" } ?? ""
+            let languageFields = [language.map { "language=\($0)" }, promptId.map { "promptId=\($0)" }, detected.map { "detected=\($0)" }]
+                .compactMap { $0 }.map { " \($0)" }.joined()
+            return "duration=\(durationMs)ms words=\(wordCount)\(confidenceField)\(languageFields)"
         case .transcriptionFailed(let error):
             return "error=\(error)"
         case .recordingTooShort(let durationMs):

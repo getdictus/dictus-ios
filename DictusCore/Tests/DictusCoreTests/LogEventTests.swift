@@ -259,9 +259,43 @@ final class LogEventTests: XCTestCase {
     }
 
     func testTranscriptionCompletedIsInfoTranscription() {
-        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42)
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: nil)
         XCTAssertEqual(event.level, .info)
         XCTAssertEqual(event.subsystem, .transcription)
+    }
+
+    /// Parakeet's score travels with the event, to three decimals: the drifted runs in
+    /// #552 sit 0.005 apart, so two would blur exactly the gap being measured (#554).
+    func testTranscriptionCompletedCarriesTheEngineConfidence() {
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: 0.9163)
+        XCTAssertEqual(event.message, "duration=2500ms words=42 confidence=0.916")
+    }
+
+    /// An engine with no score logs no field — not `confidence=0`, not `nil`. A
+    /// placeholder would read as a measurement to whoever aggregates these lines (#554).
+    func testTranscriptionCompletedWithoutConfidencePrintsNoField() {
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: nil)
+        XCTAssertEqual(event.message, "duration=2500ms words=42")
+        XCTAssertFalse(event.payload().contains("confidence"))
+    }
+
+    /// Nemotron's forced language, the prompt it resolved to and the tag the decoder emitted
+    /// (#558), in that order, and no `confidence=` field: that one is Parakeet's.
+    func testTranscriptionCompletedCarriesNemotronsLanguageFields() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 900, wordCount: 120, confidence: nil,
+            language: "fr", promptId: 8, detectedLanguage: "fr-FR"
+        )
+        XCTAssertEqual(event.message, "duration=900ms words=120 language=fr promptId=8 detected=fr-FR")
+        XCTAssertFalse(event.payload().contains("confidence"))
+    }
+
+    /// No tag emitted: the field is absent rather than `detected=nil`.
+    func testTranscriptionCompletedWithoutADetectedLanguagePrintsNoField() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 900, wordCount: 3, confidence: nil, language: "auto", promptId: 101
+        )
+        XCTAssertEqual(event.message, "duration=900ms words=3 language=auto promptId=101")
     }
 
     func testTranscriptionFailedIsErrorTranscription() {

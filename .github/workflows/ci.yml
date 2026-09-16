@@ -34,8 +34,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode 26.3
-        run: sudo xcode-select -s /Applications/Xcode_26.3.app
+      # Xcode 26.4.1, the local development toolchain, as the original 26.3 pin intended
+      # ("match the local development environment"). It also became load-bearing with
+      # #558: `project.pbxproj` sets `traits = ()` on FluidAudio to keep its default
+      # NemoTextProcessing trait unlinked. Xcode 26.3 ignores that key, links the trait's
+      # static library, and the library's simulator slice is arm64-only, so the x86_64
+      # half of this generic simulator build fails to link. 26.4.1 honours the key, which
+      # is also what the device and TestFlight builds are made with. The macos-26 image
+      # ships 26.0.1 through 26.6 (actions/runner-images, image 20260907).
+      - name: Select Xcode 26.4.1
+        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
 
       - name: Show Xcode version
         run: xcodebuild -version
@@ -52,9 +60,13 @@ jobs:
           path: |
             ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: spm-${{ runner.os }}-${{ hashFiles('Dictus.xcodeproj/project.pbxproj', 'DictusCore/Package.swift') }}
+          # `fa015` in both keys (#558): a SwiftPM cache that resolved FluidAudio 0.12 makes
+          # resolution fail on 0.15.7 with "Disabled default traits … on package 'fluidaudio'
+          # that declares no traits" (measured on a local checkout). The prefix keeps any
+          # cache from before the bump from being restored.
+          key: spm-fa015-${{ runner.os }}-${{ hashFiles('Dictus.xcodeproj/project.pbxproj', 'DictusCore/Package.swift') }}
           restore-keys: |
-            spm-${{ runner.os }}-
+            spm-fa015-${{ runner.os }}-
 
       - name: Resolve SwiftPM dependencies
         run: |

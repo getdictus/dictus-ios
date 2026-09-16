@@ -6,20 +6,22 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-12.
+Last reviewed: 2026-09-16.
 
 ## The lanes, in order
 
 | Lane | What it is | Runs |
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
-| **B** | 2.0.0, the Pro launch | **Now** |
-| **A′** | 1.8.3 — #23 and #542 shipped; #543 remains | After B |
+| **B** | 2.0.0, the Pro launch | In progress — **cuts after 1.9.0** |
+| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | **Cut on 2026-09-16 as 1.9.0 (33)** |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
 
-**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**, followed by **#542 the same day**; what remains is #543. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement.
+**Lane A′ was inserted on 2026-09-10** and is the only lane added out of band. It exists because a premise this project had treated as settled since April turned out to be false. Its gating measurement passed and **#23 shipped on 2026-09-11**, followed by **#542 the same day**. #531, which never shared that gate, was closed `not_planned` the same day on a device measurement. **#558 joined the lane on 2026-09-13 on exactly the same ground**: a second settled premise — that Parakeet is simply the best engine on the recommended tier — turned out to be false in French. #558 closed on 2026-09-14 with PR #561 (`5b0ad24`) and **#543 on 2026-09-15** with PR #563 (`26e735d`): nothing remains in the lane.
+
+**1.9.0 cuts before 2.0.0 — decided by Pierre on 2026-09-14.** Almost every user will install 1.9.0, from the App Store or TestFlight, before 2.0.0 exists. #558 relies on that: it ships a one-version migration file in the app bundle that 2.0.0 removes (see Lane B).
 
 ## Lane 0 — the one thing that waits on Apple
 
@@ -59,6 +61,8 @@ The device test of that PR surfaced **#515**, which shipped in the same PR: the 
 | `vocabulary` | Built — #80 shipped in PR #525, device-validated in the app and the keyboard. Its glossary half was cut, not fixed, in #536. |
 
 So the launch scope is not a question of how many features to build. It is one hole to fill, plus making the two existing ones keep their promise.
+
+**One cut-time chore, now that #558 shipped in 1.9.0:** remove the bundled `JointDecisionv3.mlmodelc` from DictusApp before cutting 2.0.0. It exists only to let the first launch after the 1.9.0 update complete Parakeet offline; users who skip 1.9.0 are covered by the self-repairing download #558 ships permanently.
 
 ### The order
 
@@ -135,6 +139,12 @@ His verdict was that Normal polish is not at the level and wants work before the
 
     **Done is Pierre's device verdict, not a harness number.** The PR ships installable with the mode pinned in the free third fan slot and stays open while he lives with it; whether `Structuré` later replaces `List` in the default pins is deferred to that verdict, and `List` is not reopened.
 
+    **Built and paused mid-validation on 2026-09-14. PR #557 is open at `c4b4788` and installed on the phone; it is neither rejected nor accepted.** Every hard bar of the spec holds — 0 invented facts in 28 outputs, the flagged incompleteness kept 5/5, the speaker's person kept 28/28, 1931 tests and a clean lint. **The want is under-delivered on both halves, and they are not the same kind of failure.** Paragraphs land in 8 accepted outputs of 28, and that is a *measured ceiling*: the only lever is moving the clause from the system prompt into the user turn (0/27 → 7/18), and #437 reached the same ~29 % after 372 outputs. Do not run another prompt round on it. The rewriting half reads ~1.00 similar to the raw on five of six fixtures — but five of those six are not rambles, and the one that is uses the licence well, so that number may describe the corpus rather than the mode. Only Pierre's own long dictation settles it.
+
+    **#550 cannot be sequenced in front of this, and the reason is mechanical.** Its signal is `tokenTimings` over the *raw* transcript, which maps into an output only because Normal polish is additive; `Structuré` reformulates, so the mapping dies. The one route that would carry a deterministic break through a model call is #520, measured at six markers in and zero line breaks out on the contract with the least licence to touch anything. And #550 waits on a second speaker, which is recruitment, not code. **One consequence to keep in view:** if #550 lands, paragraphs reach the *free* path while the paid mode still has none.
+
+    **The open proposal, not yet ruled on:** drop the paragraph half from this issue's acceptance and let it arrive with #550, keep pushing the rewriting half, and close the mode into #79 if that half does not satisfy him either. The full handover is [the 2026-09-14 comment](https://github.com/getdictus/dictus-ios/issues/523#issuecomment-5663558244).
+
 5. **#494** — offer Pro after the first successful dictation in onboarding.
 6. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
 7. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
@@ -146,9 +156,9 @@ His verdict was that Normal polish is not at the level and wants work before the
 
 **#216, the Pro hub.** Deferred on 2026-08-24: the hub's content *is* the feature list, so building it before the features exist means building it three times.
 
-## Lane A′ — 1.8.3, auto-return
+## Lane A′ — 1.9.0, auto-return and the French engine
 
-**Item 1: #23, auto-return to the source app after a cold-start dictation. SHIPPED on 2026-09-11** in PR #538, merged as `51c4679`. Milestone `1.8.3 — auto-return`. The version number is provisional — if 2.0.0 cuts first this becomes a 2.0.x; [VERSIONING.md](VERSIONING.md) decides, not this file.
+**Item 1: #23, auto-return to the source app after a cold-start dictation. SHIPPED on 2026-09-11** in PR #538, merged as `51c4679`. Milestone `1.8.3 — auto-return`. It cut as **1.9.0 (33) on 2026-09-16**, before 2.0.0 (decided 2026-09-14); [VERSIONING.md](VERSIONING.md) still owns how the number is written.
 
 The keyboard now names the app it is typing in and the main app sends the user back there, recording already running. Device-validated across nine host apps, and **it has never once opened the wrong app** — the design's central property is that a stale reading yields a *missing* answer, never a wrong one, and every failure falls through to the swipe-back overlay that shipped before it.
 
@@ -168,13 +178,31 @@ It is out of band because its blocking premise was falsified. The April 2026 ADR
 
 The `CancellationError` half is #144. What belongs to this lane is that **nothing stopped the dictation from starting**: the keyboard's readiness gate reads the App Group, which says `ready` because the model *file* is on disk, while the compile has not begun. `ready` means "downloaded", not "can transcribe now", and those diverge for minutes after any install. #23 did not cause this and it made it invisible — the preparation screen that used to explain it is still presented, to an app the user has already been teleported out of.
 
-**Item 3: #543, auto-return resolves nothing 15-30% of the time** — opened 2026-09-11, `priority:high`. A rate problem, not a correctness one: the failures degrade to the overlay, and the floor is intact. It is in this cycle because a competitor using the same technique fails 0% of the time, so the gap is closable rather than inherent.
+**Item 3: #543, auto-return resolves nothing 15-30% of the time. SHIPPED on 2026-09-15** in PR #563, merged as `26e735d`. Measured on the force-quit protocol that produced 7 misses in 10: **8/8 returns** on the diagnostic build, 4 through Spotlight and 4 from the home screen, then **4/4** on the PR's own build.
 
-What is measured: on a failure the arbiter is stuck on a stale host — nine consecutive misses all reading the same frozen `com.apple.Spotlight@pid46487` across four minutes and nine separate host launches — while `_hostProcessIdentifier` is correct on every line. **Two theories are already dead**: the pid cross-check is not at fault (0/9), and "Spotlight poisons it" is falsified, because VivaDicta returns correctly through Spotlight too. The live lead is the maintainer's: failures track how long the host's splash screen stays up, i.e. a true cold launch with a new pid rather than a fast resume. The next instrument is a **paired capture** — the same scripted actions run against both apps, both debug logs exported — which for the first time makes the comparison observable instead of inferred.
+**The cause was registration, not a stale source.** The arbiter record is pushed, not read. The system's arbiter daemon, `InputUI(KeyboardArbiter)`, forwards a host's `signalKeyboardChanged` only to keyboard processes that have sent it `startArbitration`, and every third-party keyboard loses that registration when it leaves the screen. Wispr Flow's and Typeless's keyboards re-register as they are presented, before the host signals. Dictus's re-registered seconds after the tap, so the host's record went to another keyboard and ours still held the previous client. The fix calls `startConnection` at `viewWillAppear` when no connection is held. The whole evidence chain is the 2026-09-15 comment on [#543](https://github.com/getdictus/dictus-ios/issues/543).
+
+**Four things not to rediscover.** The daemon's device log (`RX … startArbitration`, `TX <keyboard> queue_keyboardChanged`, `lostConnection`) answers any future "why is the arbiter stale" in one USB capture with `idevicesyslog`, for our keyboard and a competitor's alike, and no probe can see what it shows. The competitor comparison was wrong three times over before that capture — "they have 0%", "it is an iOS limitation", "they wait in the keyboard" — each read from outcomes instead of from the daemon. Every in-process pid → bundle route is closed on iOS 27, measured: breadcrumb, RunningBoard, BaseBoard, the audit token through SecTask, and every other arbiter field. And the pid cross-check stays; the fix changes when the record arrives, not whether it is trusted.
 
 **#531 was closed `not_planned` on 2026-09-11, after its PR was built and tested on device.** It was to put the last transcript under the island's long press with a Copy button. The copy is impossible: **iOS silently refuses a `UIPasteboard` write from a backgrounded process** — `wrote=36 readBack=-1 hasStrings=false`, with `host=app` proving `perform()` ran in the app and not the widget extension, so there was no wrong-sandbox to fix. Seven of nine manual steps passed; the display half worked entirely.
 
 **Two things not to rediscover.** A `UIPasteboard` write measured on a **simulator says nothing about a device** — the simulator does not enforce this, and that is exactly how the issue got cleared to be built. And nothing in a Live Activity can announce that a gesture exists: iOS owns the island's size and its expansion, so "the island grows to signal the transcript is there" is not implementable, and any future attempt at this needs an answer to discoverability before it needs code.
+
+**Item 4: #558, add Nemotron 3.5 ASR multilingual to the catalogue** — opened 2026-09-13, `priority:high`. It is in this cycle for the same reason #23 was: a premise this project treated as settled is false. Parakeet TDT v3 was assumed to be simply the best engine on the recommended tier. It is not, in French — it drifts into pseudo-English mid-sentence, and nothing downstream repairs it.
+
+**The cause is architectural and upstream will not fix it.** A TDT transducer has no decoder prompt to condition, so the decoder is never locked to a language and falls back to English, its dominant training language, when the acoustics get hard. Three requests for a language parameter — NeMo #14799, NeMo #15097, FluidAudio #303 — are open with no maintainer reply. Another dictation app hit the identical wall, measured 16.7-30% English intrusions on spontaneous French, and shipped a warning rather than a fix.
+
+**What #552 measured**, two files of pure French containing no English word: Nemotron with French forced does 10.75% and 10.41% word error rate, Whisper small 16.82% and 13.88%, Parakeet 23.36% and 85.41%. Nemotron emitted no English word in any run. Its cost is real and is written on the issue: it francises English jargon, and on clean French where Parakeet does not drift Parakeet still wins, 2.56% against 9.40%. **It is an added option, never a replacement.**
+
+**Three things a reader should not rediscover.** Chunking the audio was tested as a repair and is a lottery, not a lever — the same 85 seconds scores between 13.55% and 47.66% depending only on where the cuts land, and silence-aligned cutting gave the worst result of the set. The "longer audio drifts more" theory is dead: the first isolated 15 seconds of the 7-minute file is already destroyed. And an engine's own transcript is never evidence about the audio in the span where that engine failed — reading Parakeet's output as proof that the speaker had switched to English is what produced one wrong conclusion in #552 before re-listening killed it.
+
+**Built first, decided on device — reversed on 2026-09-14.** The cold Core ML compile on a physical iPhone is still the number that matters: the whole rationale is that Nemotron loads like Parakeet (17 s) and not like Turbo (202-236 s), and a Mac cannot answer it — both load in under a second there. It was written as a gate before any work, and that order could not be followed: measuring the compile needs a build that downloads, compiles and runs the model inside Dictus, which is most of the issue. So the whole scope is built on a PR that ships a device test list, and **the keep/drop decision is taken after that list is run** — dropping the model is a legitimate outcome, and the PR is not merged before it. The structural argument still stands as an argument: Nemotron is Parakeet's sibling, a FastConformer encoder plus transducer from the same converter, while what costs Turbo three and a half minutes is an autoregressive transformer decoder Nemotron does not have. **If the compile lands near Turbo's, the feature's purpose is gone.**
+
+Streaming is out of scope and stays out. It is why Nemotron exists upstream and it is a separate, larger feature, candidate for Pro. So is the automatic fallback routed by Parakeet's confidence score, which waits on **#554** — that issue records the score in the debug log with no behaviour change, so the real drift rate becomes measurable from usage instead of from four files recorded in one evening.
+
+**Why the number is 1.9.0 and not 1.8.3.** The lane was written as a patch cycle and cut as a MINOR on 2026-09-16, on Pierre's reading and on [VERSIONING.md](VERSIONING.md)'s own table: a *new model in the catalogue* is a MINOR, and so is a feature a returning user notices — this lane has both, Nemotron and auto-return. The rule the table states and that this lane forgot is that the digit is judged on the **whole cycle**, not on the lane's original intent.
+
+**The cut cost two abandoned builds and a build-system fix.** Builds 31 and 32 never uploaded: `xcodebuild` refused to resolve packages because `traits = ();` on the FluidAudio reference (#558) disables default traits on a package that declares none. PR #566 removed it and set `EXCLUDED_ARCHS[sdk=iphonesimulator*] = x86_64`, which is what #558 actually needed. Nothing had caught it because #558's device build and CI both reused an already-resolved package graph — CI caches SourcePackages on the pbxproj hash, so its resolve step was a no-op. A green CI on a dependency bump says nothing about resolution.
 
 ## Lane C — the keyboard session
 
