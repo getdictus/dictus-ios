@@ -210,11 +210,17 @@ Streaming is out of scope and stays out. It is why Nemotron exists upstream and 
 
 This is the closed-list rule of Lane A applied one lane over, with one difference: a bug **on a path this lane shipped** belongs to this lane, however late it arrives. A bug anywhere else waits.
 
-**Item 5: #567, auto-return is skipped on an engine-dead restart** — opened and triaged `ready-for-agent` on 2026-09-16, milestone `1.9.0 — auto-return and the French engine`. The two gates in `DictusApp.swift` do not test the same condition: the swipe-back overlay fires on `isColdStart || isEngineDeadRestart` (`:548`), the return fires on `isColdStart` alone (`:584`), and the two flags are mutually exclusive by construction. So every engine-dead restart gets the overlay and is structurally excluded from the return.
+**Item 5: #567, auto-return is skipped on an engine-dead restart. SHIPPED on 2026-09-16** in PR #568, merged as `18a8e6e`. Opened, built and device-validated the same day. The two gates in `DictusApp.swift` do not test the same condition: the swipe-back overlay fires on `isColdStart || isEngineDeadRestart` (`:548`), the return fires on `isColdStart` alone (`:584`), and the two flags are mutually exclusive by construction. So every engine-dead restart gets the overlay and is structurally excluded from the return.
 
 **It is the common path, not a corner case.** `releaseWarmState` (#106, `idleReleaseInterval = 10 * 60`) stops the engine after ten idle minutes, which is exactly what makes `isEngineRunning` false on the next keyboard tap. The dictations that reach the auto-return today are the ones following another dictation within ten minutes; **the first dictation of any session is the one that loses it**, and that is the one where being thrown into Dictus is most disorienting.
 
 Two things already verified against the code, so no one re-derives them: `returnToHostApp` already waits for recording to actually start before it opens, capped at 250 ms (`recordingWaitCeilingMs`), so returning early cannot strand a dead engine in the background; and a cold start restarts the engine from zero in exactly the same way, so this case adds no risk the shipped #23 path does not already carry. The fix's shape is fixed by the issue's fourth acceptance criterion: **one named condition consumed by both gates**, so a later change to one cannot silently desynchronise them again.
+
+**Device-validated across two engine-dead restarts** on `7817f52`: Notes at 16:44:59Z and Telegram at 18:00:24Z, each preceded by `warmStateReleased idleSeconds=600`, each returning. No wrong app was opened in a 3.5-hour capture.
+
+**One measurement the fix did not cause and that outlives it.** Every return in that capture left `via=ceiling` with recording not yet started, 8 of 8, `waitedMs` between 259 and 523, never `via=ready`. It is the #23 path's pre-existing behaviour, identical either side of this change, and `returnToHostApp`'s doc comment already says what follows from it: the answer is not a longer ceiling, it is starting the engine sooner. Not filed yet.
+
+That last point is also why **CodeRabbit's review was declined**: it proposed holding the user in Dictus when the ceiling expires before recording starts. Past roughly 300 ms iOS refuses `open()` with "Application is neither visible nor entitled", so with 8 of 8 returns leaving at the ceiling that change would have removed the return in every measured case. The reasoning is on #567 rather than only in the PR thread.
 
 **The rest of the list is open.** More device use of build 33 is expected to add items here. Anything that lands on a path from #23, #542, #543 or #558 joins this lane; anything else goes to its own.
 
