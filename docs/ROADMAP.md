@@ -250,6 +250,24 @@ Three themes came out of it, and they are not equal in size:
 
 Two things the lane must not re-litigate: **#138 is `wontfix`** — a keyboard extension cannot extend a key's hit area, it was measured, so the spacebar's touch target is not a lever. And **changing `KeyboardAreaMode` destroys SwiftUI gesture identity**, which #505 walks straight into.
 
+## The Smart Mode panoply, decided on 2026-09-16
+
+Four modes on one axis — **how much am I allowed to lose** — and the axis is what makes the set legible to a user who will not read a manual.
+
+| Mode | Loses | Shape | What you do next |
+|---|---|---|---|
+| Normal (free) | not one word | a block | send it as is |
+| `Structuré` | words yes, facts no | paragraphs, your person | send a long text |
+| `Liste` | a great deal | bullets, actions | tick things off |
+| **`Message`** (#572) | **whole clauses** | a message | send it to a person |
+| **`Résumé`** (#571) | a great deal | two or three sentences | read it, or forward it |
+
+**Both new modes ship after the 2.0.0 cut**, in 2.1. 2.0.0 launches the three that exist; #570 gates that cut.
+
+**A Typeless-like mode — many paragraphs and bullets — is REFUSED, and the ground is measured.** #523 round 9 and 10: the model emits a list 0 times in 15 under the Smart Mode contract, and 2 times in 15 under no contract at all, where it also stops rewriting, stops repairing the Parakeet drift (1 of 10 against 4 of 5) and breaks on every sentence. So the contract is not what blocks the list; it is what buys the rewriting. And a second mode for "make my long dictation readable" would split one need in two, which costs the user a choice at every dictation. `Structuré` is not to be pushed toward it either: the moment it fabricates task lists it **is** `Liste` (#523 decision 5).
+
+**`Message` is the one with the strongest evidence and the highest risk.** The evidence is that the maintainer has not sent a single message with Dictus in four months, for a reason written down on 2026-05-30 and unchanged since: ADR 0003's `natural` contract forbids removing a repetition, removing a filler and substituting a synonym, so by construction it produces clean speech rather than written register. The risk is that it sits one step from the failure that cut Email to #269 — two implementations inventing greetings, sign-offs and names — and that it has to clear #393's bar B, visibly different from the free polish, which is the exact bar Email failed.
+
 ## Someday
 
 A GitHub milestone holding 23 issues, all `priority:low`. Not refused, not scheduled, and deliberately out of the default view — the open count went from 80 to 36 on 2026-09-05 by moving them there, and that number is the point.
