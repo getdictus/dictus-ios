@@ -196,3 +196,42 @@ exact transcript the phone returned five rewritten sections where the Mac return
 and leaves the Parakeet drift `And the three attack` in place on 3 of 5 runs. So a
 ceiling measured here **understates the device**, and a prompt verdict should be
 confirmed on the phone before it is called final.
+
+## Round 10, 2026-09-16 — is it the contract that blocks the list? Strip it and see
+
+Round 9 changed rule 8 and the user turn while keeping every other rule, both worked
+examples, both counter-examples and the acceptance contract. So it measured *our prompt
+family*, not *the model*. The maintainer asked the right question: is the contract
+itself too rigid for a Smart Mode to be modular?
+
+**Arm H** answers it. Four lines, no contract, no examples, no counter-examples: rewrite
+as written text, same language, output nothing else, number the items when the speaker
+counted them. 15 runs on `device-3steps.json`.
+
+| | Arm H — bare, 15 runs | Shipping prompt, 5 runs |
+|---|---|---|
+| Numbered the steps | **2 (13 %)**, and both stop at `2.` of three | 0 |
+| Repaired the Parakeet drift `And the three attack` | **1 of 10** | **4 of 5** |
+| Rewrote the sentences at all | no — the raw transcript, re-broken | yes |
+| Paragraph breaks | one per **sentence**, every run | one per subject, 1-2 per output |
+
+So:
+
+- **The contract is not what blocks the numbering.** Delete the whole thing and the
+  model numbers 2 times in 15, incompletely. The capability is barely there at all on
+  macOS 26.5.1's Apple FM, which is the honest answer to round 9.
+- **The contract is what buys the rewriting and the drift repair** — 4 of 5 against 1 of
+  10. Everything this mode exists to do is contract-side.
+- **What the contract does suppress is break FREQUENCY.** The bare prompt breaks on
+  every sentence. That is round 5's arm D failure, rejected there for the same reason:
+  a break per sentence is not a paragraph.
+
+**Arm I** — the full contract with the two counter-examples deleted — numbered 0 of 4
+with 1 engine failure, so the counter-example that shows a bulleted infinitive list as
+WRONG is not the suppressor either.
+
+The conclusion for the Smart Mode architecture, stated for the next person who asks:
+a contract this specific costs structural variety and buys fidelity. The route to a
+visibly more structured output is **another mode with another contract** — the
+maintainer's own 2026-09-12 idea of a Typeless-like mode with many paragraphs and
+bullets — not a loosening of this one, which measurably returns the raw transcript.
