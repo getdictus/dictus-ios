@@ -143,7 +143,7 @@ fixtures, 5 runs, `--mode structured --engine-out`, with the collapse lifted:
 
 | | |
 |---|---|
-| Accepted outputs | 29 of 30 (1 length refusal on `1-free-form`) |
+| Accepted outputs | 29 of 30 (1 refusal on `1-free-form`, `check=segmentOverlap`) |
 | Outputs carrying at least one break | **11** |
 | Break runs of exactly two newlines (a blank line) | **24** |
 | Break runs of exactly one newline | **0** |
@@ -210,7 +210,7 @@ counted them. 15 runs on `device-3steps.json`.
 
 | | Arm H — bare, 15 runs | Shipping prompt, 5 runs |
 |---|---|---|
-| Numbered the steps | **2 (13 %)**, and both stop at `2.` of three | 0 |
+| Numbered the steps | **2 (13 %)** — one complete `1. 2. 3.`, one stopping at `2.` | 0 |
 | Repaired the Parakeet drift `And the three attack` | **1 of 10** | **4 of 5** |
 | Rewrote the sentences at all | no — the raw transcript, re-broken | yes |
 | Paragraph breaks | one per **sentence**, every run | one per subject, 1-2 per output |
@@ -218,8 +218,9 @@ counted them. 15 runs on `device-3steps.json`.
 So:
 
 - **The contract is not what blocks the numbering.** Delete the whole thing and the
-  model numbers 2 times in 15, incompletely. The capability is barely there at all on
-  macOS 26.5.1's Apple FM, which is the honest answer to round 9.
+  model numbers 2 times in 15 — once completely, once stopping at the second item. So
+  the capability exists on macOS 26.5.1's Apple FM and is rare whatever the prompt says,
+  which is the honest reading of round 9's zero.
 - **The contract is what buys the rewriting and the drift repair** — 4 of 5 against 1 of
   10. Everything this mode exists to do is contract-side.
 - **What the contract does suppress is break FREQUENCY.** The bare prompt breaks on
@@ -235,3 +236,37 @@ a contract this specific costs structural variety and buys fidelity. The route t
 visibly more structured output is **another mode with another contract** — the
 maintainer's own 2026-09-12 idea of a Typeless-like mode with many paragraphs and
 bullets — not a loosening of this one, which measurably returns the raw transcript.
+
+## Correction, 2026-09-16 — two accepted outputs damage the meaning, and the round-6 verdict overstated
+
+CodeRabbit read the corpus and found what the acceptance table missed. Both are in
+`6-unscripted`, the fixture that is the maintainer's own voice, and both were counted as
+accepted:
+
+| Run | Raw | Output | What it is |
+|---|---|---|---|
+| 3 | `mon application dictus` | `mon application dictée` | **the product's name, replaced by a common noun** |
+| 5 | `les autres c'est pas vraiment ma voix, c'est pas naturel` | `les autres tests ne reflètent pas vraiment ma voix, ce qui est naturel` | **a negation dropped — the sentence now says the opposite** |
+
+Run 5 carries the name substitution too.
+
+**Why nothing caught them.** The round-6 criterion was *"no number or capitalised token
+absent from the input"*: it looks for content the model **added**, so a token the model
+**replaced** is invisible to it — and `dictus` is lowercase in the transcript, so no
+capitalisation rule applies either. `PolishGrounding` with `requiresGroundedNames` asks
+whether a name in the output appears in the input; `dictée` is an ordinary French word,
+not a name, so it is never asked about. And no check in the pipeline measures a
+negation: `PolishGuardrail`'s five checks are a length ratio, two `NaturalLanguage`
+passes and two word-set comparisons, none of which reads polarity.
+
+**So the verdict changes.** `Zero invented facts, figures, dates, names` stands as
+written — nothing was invented. What the table cannot claim is that nothing was **lost
+or altered**: 2 of 28 accepted outputs alter meaning the reader cannot recover, one of
+them on the product's own name. The corpus labels are left exactly as measured
+(`wasAccepted` records what the harness did, and that is a fact); it is the *reading* of
+them in the acceptance table that was wrong.
+
+This is the licence to rewrite meeting the guardrail family that was built for a
+contract which may not rewrite (ADR 0003, #413/#414). It is filed rather than fixed
+here: the fix is a guardrail question, not a prompt question, and widening a check is
+the one thing #466 measured as expensive.

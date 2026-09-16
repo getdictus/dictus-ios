@@ -42,6 +42,12 @@ public enum PolishPostpass {
     public static func decodeNewlines(_ polished: String) -> String {
         var out = polished
 
+        // Every rule below is written for LF. Nothing upstream normalises a CRLF or
+        // a lone CR, so without this line `a\r\n\r\n\r\nb` would walk past both the
+        // trim and the cap and reach the field as three breaks.
+        out = out.replacingOccurrences(of: "\r\n", with: "\n")
+        out = out.replacingOccurrences(of: "\r", with: "\n")
+
         // A DICTATED break is exactly one line break, and it absorbs whatever the
         // model stacked around it. "retour à la ligne" encodes to exactly one
         // marker, but the model adds its OWN breaks around the marker when the text

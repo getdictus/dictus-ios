@@ -136,6 +136,19 @@ final class PolishPostpassTests: XCTestCase {
         )
     }
 
+    func testDecodeNormalisesCarriageReturns() {
+        // The rules below are LF-only and nothing upstream normalises: a CRLF run
+        // would otherwise survive both the trim and the cap.
+        XCTAssertEqual(
+            PolishPostpass.decodeFromEngine("a\r\n\r\n\r\nb", language: .french),
+            "a\n\nb"
+        )
+        XCTAssertEqual(
+            PolishPostpass.decodeFromEngine("a\rb", language: .french),
+            "a\nb"
+        )
+    }
+
     func testDecodeKeepsAModelSingleNewline() {
         XCTAssertEqual(
             PolishPostpass.decodeFromEngine("- un\n- deux", language: .french),
