@@ -196,6 +196,15 @@ let armPaths: [String] = args.indices.compactMap { index in
     return args[index + 1]
 }
 let paragraphJSONOut = optionValue("--json", in: args)
+
+/// Print the engine's own output on a SUCCESS too, with every break made visible
+/// (`⏎`), rather than only on a refusal.
+///
+/// #523: the post-pass used to collapse every run of newlines to one, so no
+/// measurement ever made anywhere in this repo could tell a model that emitted a
+/// blank line from one that emitted a single break. `show` printed the final text,
+/// where the two look identical. This flag is how that question is asked.
+let showEngineOut = args.contains("--engine-out")
 // #439. Overrides every fixture's `lang`. See `Fixture.routed(through:)`.
 let langOverride = optionValue("--lang", in: args)
 let modeAIdentifier = optionValue("--mode-a", in: args) ?? modeIdentifier
@@ -706,6 +715,22 @@ func runTargetElection() {
     for wrong in score.wrong { print("   WRONG: \(wrong)") }
 }
 
+/// What the engine returned, on the two occasions it is worth seeing.
+///
+/// On a refusal it is the failure itself — for a Smart Mode nothing else shows it.
+/// On a success it is printed only under `--engine-out`, with every break made
+/// visible, because the final text renders a blank line and a bare newline
+/// identically and #523 turned on telling them apart.
+@available(macOS 26.0, *)
+func printEngineOutput(_ outcome: RunOutcome, tag: String) {
+    guard let engineOutput = outcome.engineOutput else { return }
+    if outcome.outcome != .success {
+        print("  engineOut\(tag): \(engineOutput)")
+    } else if showEngineOut {
+        print("  breaks\(tag): \(engineOutput.replacingOccurrences(of: "\n", with: "⏎"))")
+    }
+}
+
 @available(macOS 26.0, *)
 func runHarness() async {
     switch command {
@@ -733,9 +758,7 @@ func runHarness() async {
                 // Smart Mode, nothing at all. Surface what the engine actually
                 // produced so guardrail and prompt issues are both visible; for a
                 // mode this line IS the failure, since nothing else shows it.
-                if o.outcome != .success, let engineOutput = o.engineOutput {
-                    print("  engineOut\(tag): \(engineOutput)")
-                }
+                printEngineOutput(o, tag: tag)
             }
         }
         // The rate, not just the outputs — the number #393 asks for.

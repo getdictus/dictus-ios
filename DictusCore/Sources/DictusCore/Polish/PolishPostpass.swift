@@ -41,19 +41,39 @@ public enum PolishPostpass {
     /// and would mangle unknown scripts (e.g. CJK full-width punctuation).
     public static func decodeNewlines(_ polished: String) -> String {
         var out = polished
-        out = out.replacingOccurrences(of: newlineMarker, with: "\n")
 
-        // Collapse stray newlines (language-agnostic). Each "retour à la ligne"
-        // encodes to exactly one marker, but the model adds its OWN paragraph
-        // breaks around the marker when the text looks structured (a meeting
-        // recap, an enumeration). After decode those stack into `\n\n\n\n`.
-        // Reduce any run of whitespace-separated newlines to a single `\n`, and
-        // trim the spaces hugging each break. We deliberately drop the
-        // single-vs-blank-line distinction — the verbal command does not carry
-        // it, and the model mangles blank lines unreliably anyway.
+        // A DICTATED break is exactly one line break, and it absorbs whatever the
+        // model stacked around it. "retour à la ligne" encodes to exactly one
+        // marker, but the model adds its OWN breaks around the marker when the text
+        // looks structured (a meeting recap, an enumeration), so after a naive
+        // decode those stack into `\n\n\n\n`. The marker wins: the user asked for
+        // one break and gets one.
+        let marker = NSRegularExpression.escapedPattern(for: newlineMarker)
         out = out.replacingOccurrences(
-            of: #"[ \t]*\n(?:[ \t]*\n)*[ \t]*"#,
+            of: "[ \t\n]*(?:" + marker + "[ \t\n]*)+",
             with: "\n",
+            options: [.regularExpression]
+        )
+
+        // A MODEL-EMITTED break survives with its shape (#523). Trim the spaces
+        // hugging every break, then cap a run at one blank line.
+        //
+        // This distinction used to be dropped — every run, dictated or not,
+        // collapsed to a single `\n` — on the ground that "the model mangles blank
+        // lines unreliably anyway". #523 measured what that costs: the Structured
+        // mode's user turn asks for paragraphs "separated by a blank line", the
+        // engine's output was the only place a blank line could exist, and this
+        // function erased it before the guardrail, the log or the text field ever
+        // saw it. Nothing downstream could tell a paragraph break from a line break
+        // because nothing downstream was ever shown one.
+        out = out.replacingOccurrences(
+            of: #"[ \t]*\n[ \t]*"#,
+            with: "\n",
+            options: [.regularExpression]
+        )
+        out = out.replacingOccurrences(
+            of: #"\n{3,}"#,
+            with: "\n\n",
             options: [.regularExpression]
         )
         return out

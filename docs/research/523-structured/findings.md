@@ -134,3 +134,35 @@ Three answers are open, and none of them is an agent's to pick:
 
 Decision 12 makes the verdict his after living with it, which is why the mode ships
 installable and pinned rather than held back for another round here.
+
+## Round 8, 2026-09-16 — the blank line never existed downstream
+
+**The paragraph break the model emits is a blank line, and `PolishPostpass.decodeNewlines`
+erased every one of them before anything could see it.** Measured on the six longform-fr
+fixtures, 5 runs, `--mode structured --engine-out`, with the collapse lifted:
+
+| | |
+|---|---|
+| Accepted outputs | 29 of 30 (1 length refusal on `1-free-form`) |
+| Outputs carrying at least one break | **11** |
+| Break runs of exactly two newlines (a blank line) | **24** |
+| Break runs of exactly one newline | **0** |
+
+Zero. Whenever Apple FM breaks a paragraph it emits `\n\n`, and the old post-pass
+rewrote every run of newlines — dictated or model-emitted — to a single `\n`. So:
+
+- The maintainer's device verdict, 2026-09-16 — *"ce qui manque c'est vraiment le saut
+  de ligne, pas juste le retour à la ligne"* — is a **code artifact, not a model
+  ceiling**. His own capture (`device-3steps.json`, iOS 27, build 1.9.0 (34)) came back
+  with five sections glued by bare newlines; the model had separated them.
+- Every earlier count in this document, and #437's, measured *whether a break existed*.
+  None of them could measure its **shape**, because `engineOutput` in `PolishPipeline`
+  is recorded **after** the post-pass. `--engine-out` on `show` is what makes the raw
+  shape visible; `raw/round8-blank-lines-5runs.txt` is that round.
+- The **rate** is unchanged — 11 of 29 here against 8 of 28 on round 6, which is
+  run-to-run noise on the same prompt. Lifting the collapse does not make the model
+  break more often. It makes the breaks it does place legible.
+
+The marker keeps its old meaning: a dictated *"à la ligne"* is exactly one break and
+absorbs whatever the model stacked around it. Only the model's own runs survive, capped
+at one blank line.
