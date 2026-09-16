@@ -166,3 +166,33 @@ rewrote every run of newlines — dictated or model-emitted — to a single `\n`
 The marker keeps its old meaning: a dictated *"à la ligne"* is exactly one break and
 absorbs whatever the model stacked around it. Only the model's own runs survive, capped
 at one blank line.
+
+## Round 9, 2026-09-16 — numbering an enumerated sequence: three arms, zero
+
+The reference numbers the steps of `device-3steps.json` (`1.` `2.` `3.`); Structured
+writes prose. Three arms, 5 runs each on that fixture, everything else unchanged:
+
+| Arm | Where | What it says | Numbered outputs |
+|---|---|---|---|
+| E | system, rule 8 | `When the speaker COUNTED the items out loud … number them: "1. ", "2. ", "3. "` | **0 / 5** |
+| F | system, rule 8 + a worked example | E plus a numbered example, off-domain, first person, counting words dropped | **0 / 5** |
+| G | user turn | `If the speaker counted their items out loud, number those items instead.` | **0 / 4** (1 refusal) |
+
+Zero in fifteen. This is the same shape as round 6's `no bullet or numbered shape in
+any accepted output, 28 of 28`: under this prompt family the model does not produce a
+list at all, and rule 8's bullets have never fired either. Arm F costs 823 characters
+of system prompt — the dictation ceiling falls from ≈ 4 130 to ≈ 3 500 — and buys
+nothing, so it does not ship.
+
+Arm G has a side effect worth recording: it did not number, but it broke the text into
+**3 to 4 paragraphs instead of 1 to 2**, and one of its five runs was refused. That is
+arm D's failure mode from round 5 — a break per sentence rather than per subject — so
+it is not a free win, and the shipping user turn stays.
+
+⚠️ **One caveat that now applies to every harness number in this document.** The
+harness runs the Mac's Apple FM (macOS 26.5.1); the phone runs iOS 27.0's. They are not
+the same model generation, and the device output is visibly the better writer: on this
+exact transcript the phone returned five rewritten sections where the Mac returns two
+and leaves the Parakeet drift `And the three attack` in place on 3 of 5 runs. So a
+ceiling measured here **understates the device**, and a prompt verdict should be
+confirmed on the phone before it is called final.
