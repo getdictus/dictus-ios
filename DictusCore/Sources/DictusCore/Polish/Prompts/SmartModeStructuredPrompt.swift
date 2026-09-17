@@ -130,7 +130,7 @@ import Foundation
 /// built for long input. The difference is the price of two worked examples whose
 /// outputs are paragraphs rather than bullets, and of rules 4, 6 and 7, each of which
 /// is a bar this mode is measured against. Past the ceiling the user still gets their
-/// own words — `overflowBehaviour` is `.insertRawText` — so the cost is the structure,
+/// own words — `floorBehaviour` is `.insertRawText` — so the cost is the structure,
 /// not the dictation. Anything added here should be weighed against those 4 130.
 enum SmartModeStructuredPrompt {
 

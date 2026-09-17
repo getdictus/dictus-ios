@@ -298,7 +298,7 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertEqual(contract.outputLanguage, .sameAsInput)
         XCTAssertTrue(contract.requiresGroundedNames)
         XCTAssertFalse(contract.requiresAlignedPrefix)
-        XCTAssertEqual(SmartModeCatalogue.structured.overflowBehaviour, .insertRawText)
+        XCTAssertEqual(SmartModeCatalogue.structured.floorBehaviour, .insertRawText)
     }
 
     /// The rule that stops this mode collapsing into List on the input where they

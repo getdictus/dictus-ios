@@ -65,7 +65,7 @@ public struct SmartModeFailure: Equatable, Sendable {
 ///
 /// A mode may also come back with *text and a failure at once*: the transformation
 /// did not happen, but this mode declared that the untransformed floor is better
-/// than nothing for this particular refusal — see `SmartModeOverflowBehaviour`. The
+/// than nothing for this particular refusal — see `SmartModeFloorBehaviour`. The
 /// user is told in both failing shapes. Refusing in silence and degrading in silence
 /// are the same defect, which is why `smartModeFailure` is what a surface keys on
 /// and `text` only decides whether anything is typed.

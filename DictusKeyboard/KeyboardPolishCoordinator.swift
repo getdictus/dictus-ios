@@ -316,11 +316,11 @@ final class KeyboardPolishCoordinator {
         // bullets, or for English, and would silently get neither.
         //
         // The mode may also come back with the untransformed floor *and* a failure —
-        // a context overflow on a mode that declared the floor better than nothing,
-        // see `SmartModeOverflowBehaviour`. Then text is inserted and the message
-        // still fires: degrading in silence and refusing in silence are the same
-        // defect, which is why the message is keyed on the failure and not on
-        // whether anything was typed.
+        // a context overflow or a guardrail rejection on a mode that declared the
+        // floor better than nothing, see `SmartModeFloorBehaviour`. Then text is
+        // inserted and the message still fires: degrading in silence and refusing in
+        // silence are the same defect, which is why the message is keyed on the
+        // failure and not on whether anything was typed.
         let failure = outcome.smartModeFailure
         let degraded = outcome.isDegraded
 

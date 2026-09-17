@@ -56,28 +56,50 @@ public enum SmartModeBadge: Equatable, Sendable, Codable {
     case text(String)
 }
 
-/// What the user receives when a mode's transformation is refused **before the
-/// engine is ever called** — today only a context overflow (#270).
+/// What the user receives when a mode's transformation is refused and **nothing the
+/// engine produced can reach the document** — a context overflow (#270) or a
+/// guardrail rejection (#580).
 ///
 /// ### Why this is not simply the fail-closed rule
 ///
 /// `PolishTask.isSmart` states the rule the rest of the pipeline follows: a Smart
 /// Mode must never silently insert untransformed text, so a refusal inserts nothing.
-/// That rule exists to stop a *wrong transformation* reaching the document.
-/// `.exceededContextBudget` is the one non-success where no transformation was
-/// attempted, so the risk it guards against is absent by construction — and the
-/// cost of applying it anyway is not symmetrical:
+/// That rule exists to stop a *wrong transformation* reaching the document. Two
+/// non-successes carry no such risk, for the same reason by two different routes:
 ///
-/// - **Notes** overflows at roughly 4,500-4,900 characters, and Notes is precisely
+/// - `.exceededContextBudget` is decided before the engine is called, so no
+///   transformation was ever attempted.
+/// - `.rejectedGuardrail` throws the engine's output away whole. What is inserted in
+///   its place is `preprocessed` — the transcript with the verbal-punctuation
+///   pre-pass applied, a deterministic function of the user's own words. Nothing
+///   that half-happened can reach the document.
+///
+/// In both, the risk is absent by construction and what the user loses by refusing
+/// is the same thing: the structuring, not the words. And the cost of refusing
+/// anyway is not symmetrical:
+///
+/// - **List** overflows at roughly 4,500-4,900 characters, and List is precisely
 ///   the mode built for a long rambling dictation. Refusing costs the user the whole
 ///   text; inserting the deterministic floor costs them the bullets. Same language,
-///   same content, just not restructured.
+///   same content, just not restructured. #580 measured the guardrail half of this
+///   on `Structured`: 9 runs, 3 refused, one of them 1,337 characters of ordinary
+///   French that the user dictated for two minutes and never saw again.
 /// - **Translate → X** cannot degrade at all. The floor *is* the wrong language, so
 ///   inserting it is the exact scenario #79 names as the worst available: French
 ///   sent to an American client, with a transient toolbar line as the only warning.
 ///
 /// Both cases show a message; neither is silent. That is what made this block B's
 /// decision rather than something block A could have inherited (#79, 2026-08-24).
+///
+/// ### What this field does NOT license
+///
+/// `.engineFailed` and `.cancelled` are partial generations — something may have
+/// half-happened — and `.engineUnavailable` describes a process that will not call
+/// the model again for its lifetime, which is a different conversation to have with
+/// the user (#315). `.unsupportedInputLanguage` (#490) never reached the engine
+/// either, yet stays closed too: its floor is text in a language the model cannot
+/// read, so "at least the words are there" is not the offer it is here. All four
+/// ignore this field. The gate is in `PolishPipeline.degradesToFloor`.
 ///
 /// ### Why a field rather than a derivation
 ///
@@ -87,7 +109,12 @@ public enum SmartModeBadge: Equatable, Sendable, Codable {
 /// the question rather than inherit an answer from a property chosen for an
 /// unrelated reason. A mode that condenses *and* translates would break the
 /// derivation silently; it cannot break an answer someone had to write down.
-public enum SmartModeOverflowBehaviour: String, Equatable, Sendable, Codable {
+///
+/// **Named `SmartModeOverflowBehaviour` until #580**, when the guardrail case joined
+/// the overflow one and the old name stopped describing the question. The raw values
+/// are unchanged, and so is the JSON key the record is written under — see
+/// `SmartMode.CodingKeys`.
+public enum SmartModeFloorBehaviour: String, Equatable, Sendable, Codable {
 
     /// Insert the deterministic floor — the raw text with verbal punctuation
     /// applied — and say the mode did not run.
@@ -156,9 +183,10 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     /// nothing reads it there.
     public var isPinned: Bool
 
-    /// What the user gets when this mode's transformation is refused before the
-    /// engine runs. See `SmartModeOverflowBehaviour` for why it is a field.
-    public let overflowBehaviour: SmartModeOverflowBehaviour
+    /// What the user gets when this mode's transformation is refused and the engine's
+    /// output cannot reach the document. See `SmartModeFloorBehaviour` for why it is
+    /// a field, and which refusals consult it.
+    public let floorBehaviour: SmartModeFloorBehaviour
 
     public init(id: String,
                 displayName: String,
@@ -166,7 +194,7 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
                 badge: SmartModeBadge? = nil,
                 prompt: SmartModePrompt,
                 contract: PolishAcceptanceContract,
-                overflowBehaviour: SmartModeOverflowBehaviour,
+                floorBehaviour: SmartModeFloorBehaviour,
                 isPinned: Bool = false) {
         self.id = id
         self.displayName = displayName
@@ -174,13 +202,13 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.badge = badge ?? .symbol(icon)
         self.prompt = prompt
         self.contract = contract
-        self.overflowBehaviour = overflowBehaviour
+        self.floorBehaviour = floorBehaviour
         self.isPinned = isPinned
     }
 
     // MARK: - Decoding
 
-    /// Hand-written so `overflowBehaviour` can default rather than fail the whole
+    /// Hand-written so `floorBehaviour` can default rather than fail the whole
     /// record.
     ///
     /// A `SmartMode` is written to the App Group inside the per-dictation snapshot,
@@ -199,7 +227,7 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.id = try container.decode(String.self, forKey: .id)
         self.displayName = try container.decode(String.self, forKey: .displayName)
         self.icon = try container.decode(String.self, forKey: .icon)
-        // Same upgrade-across-a-dictation argument as `overflowBehaviour` below, with
+        // Same upgrade-across-a-dictation argument as `floorBehaviour` below, with
         // a cheaper default: a record written by the previous build has no badge, and
         // `icon` is what that build drew. The worst case is a globe on the pill for
         // one snapshot, not a lost transformation.
@@ -208,9 +236,28 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.prompt = try container.decode(SmartModePrompt.self, forKey: .prompt)
         self.contract = try container.decode(PolishAcceptanceContract.self, forKey: .contract)
         self.isPinned = try container.decodeIfPresent(Bool.self, forKey: .isPinned) ?? false
-        self.overflowBehaviour = try container.decodeIfPresent(
-            SmartModeOverflowBehaviour.self, forKey: .overflowBehaviour
+        self.floorBehaviour = try container.decodeIfPresent(
+            SmartModeFloorBehaviour.self, forKey: .floorBehaviour
         ) ?? .insertNothing
+    }
+
+    /// Written out rather than synthesised for one key only: `floorBehaviour` is
+    /// persisted as `"overflowBehaviour"`, the name it had before #580.
+    ///
+    /// The record is written to the App Group by DictusApp at transcription start and
+    /// read by the keyboard extension, and an app update can land between the two.
+    /// A synthesised `CodingKeys` would make the renamed property a *new* key, so a
+    /// snapshot taken by the previous build would decode through the
+    /// `decodeIfPresent` default above — `.insertNothing` — and the very dictation
+    /// this issue is about would insert nothing after all. Pinning the string costs
+    /// one enum and removes the window entirely.
+    ///
+    /// The cost of writing it out: a property added to `SmartMode` has to be added
+    /// here too. `init(from:)` above is hand-written for the same reason and carries
+    /// the same obligation.
+    private enum CodingKeys: String, CodingKey {
+        case id, displayName, icon, badge, prompt, contract, isPinned
+        case floorBehaviour = "overflowBehaviour"
     }
 
     /// The same record with its pinned flag set. Used by the catalogue when it

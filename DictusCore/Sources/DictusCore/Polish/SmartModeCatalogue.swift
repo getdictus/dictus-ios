@@ -98,7 +98,9 @@ public enum SmartModeCatalogue {
         // The mode built for a long rambling dictation is the one that walks users
         // into the context ceiling, so a refusal there costs the whole text. The
         // floor is the same words in the same language, merely not restructured.
-        overflowBehaviour: .insertRawText
+        // Since #580 the same answer covers a guardrail rejection, which discards the
+        // engine's output whole and so cannot put a half-transformation in the field.
+        floorBehaviour: .insertRawText
     )
 
     /// Structured: the long vocal message, rewritten as paragraphs that do not read
@@ -155,7 +157,11 @@ public enum SmartModeCatalogue {
         // ceiling first — sooner than `List`, because its prompt is longer. The floor
         // is the speaker's own words, unstructured: plainer than what they asked for,
         // and never wrong. Same reasoning `List` carries (#270).
-        overflowBehaviour: .insertRawText
+        //
+        // This mode is also the one #580 measured being refused by a guardrail — three
+        // times in nine device runs, one of them 1,337 characters — and the sentence
+        // above is already the answer to that: the words are the speaker's either way.
+        floorBehaviour: .insertRawText
     )
 
     /// Translate → `target`.
@@ -194,10 +200,11 @@ public enum SmartModeCatalogue {
                 // anywhere else (#466).
                 requiresAlignedPrefix: false
             ),
-            // Translation cannot degrade: the floor is the input language, which is
-            // the one thing this mode exists to change. Inserting it would be the
-            // failure #79 names as the worst available.
-            overflowBehaviour: .insertNothing
+            // Translation cannot degrade, for any refusal: the floor is the input
+            // language, which is the one thing this mode exists to change. Inserting
+            // it would be the failure #79 names as the worst available. #580 widened
+            // which outcomes ask this question; it did not change this answer.
+            floorBehaviour: .insertNothing
         )
     }
 
