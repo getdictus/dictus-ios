@@ -8,9 +8,10 @@ final class SmartModeCatalogueTests: XCTestCase {
     // MARK: - The rows
 
     func testCatalogueShipsNotesAndOneTranslateEntryPerSupportedLanguage() {
-        XCTAssertEqual(SmartModeCatalogue.builtIns.count, 2 + SupportedLanguage.allCases.count)
+        XCTAssertEqual(SmartModeCatalogue.builtIns.count, 3 + SupportedLanguage.allCases.count)
         XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "notes" })
         XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "structured" })
+        XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "message" })
         for language in SupportedLanguage.allCases {
             XCTAssertTrue(
                 SmartModeCatalogue.builtIns.contains { $0.id == "translate.\(language.rawValue)" },
@@ -358,5 +359,177 @@ final class SmartModeCatalogueTests: XCTestCase {
         let instructions = SmartModeCatalogue.structured.prompt.instructions
         XCTAssertTrue(instructions.contains("OUTPUT LANGUAGE: the language of the input"))
         XCTAssertTrue(instructions.contains("NEVER translate"))
+    }
+
+    // MARK: - Message (#572)
+
+    /// The identifier is a wire value from the day it ships: it keys the session
+    /// cache, the metrics event and the per-dictation App Group snapshot.
+    func testMessageKeepsItsIdentifierAndName() {
+        XCTAssertEqual(SmartModeCatalogue.messageIdentifier, "message")
+        XCTAssertEqual(SmartModeCatalogue.message.id, "message")
+        XCTAssertEqual(SmartModeCatalogue.message.displayName, "Message")
+        XCTAssertEqual(SmartModeCatalogue.mode(withIdentifier: "message")?.id, "message")
+    }
+
+    /// Decision 3's floor, and its ceiling as amended.
+    ///
+    /// The floor is the widest in the repo and is the only thing bounding the
+    /// deletion licence. The ceiling was locked at 1.0 and ships at **1.1**: the
+    /// guardrail's ratio counts the blank lines decision 6 requires, so 1.00 refused
+    /// 10 of the 12 blocked outputs in a 32-output run while accepting 19 of the 20
+    /// that came back as one paragraph. This assertion is deliberately an equality
+    /// so that restoring 1.00 is one line here and one line in the catalogue.
+    func testMessageBandIsTheWidestFloorAndTheTightestCeiling() {
+        let contract = SmartModeCatalogue.message.contract
+        XCTAssertEqual(contract.minimumLengthRatio, 0.2)
+        XCTAssertEqual(contract.maximumLengthRatio, 1.1)
+        // It may cut where Structured may not: its floor sits below Structured's,
+        // which is sized from a reference that never summarises.
+        XCTAssertLessThan(contract.minimumLengthRatio,
+                          SmartModeCatalogue.structured.contract.minimumLengthRatio)
+        // And it is still the tightest ceiling in the catalogue by a wide margin:
+        // every other mode may at least half again its input.
+        for mode in SmartModeCatalogue.builtIns where mode.id != "message" {
+            XCTAssertGreaterThanOrEqual(mode.contract.maximumLengthRatio, 1.5, mode.id)
+        }
+    }
+
+    /// Grounded because the mode rewrites in the speaker's own language and may add
+    /// nothing (#414); unaligned because it may drop the opening entirely, which is
+    /// rule 3 and would make #466's check measure a licence rather than a defect.
+    func testMessageIsGroundedAndNeverTranslates() {
+        let contract = SmartModeCatalogue.message.contract
+        XCTAssertEqual(contract.outputLanguage, .sameAsInput)
+        XCTAssertTrue(contract.requiresGroundedNames)
+        XCTAssertFalse(contract.requiresAlignedPrefix)
+        XCTAssertEqual(SmartModeCatalogue.message.overflowBehaviour, .insertRawText)
+    }
+
+    /// **The genre trap, pinned.** PR #388 measured an email framing producing a
+    /// literal `[Votre Nom]` under a prompt that banned it by name, and the
+    /// competitor's own `chat` preset produced a sign-off under a line forbidding
+    /// sign-offs (2026-09-17). Both `SmartModeNotesPrompt` and
+    /// `SmartModeStructuredPrompt` answer that by never naming their artefact. This
+    /// mode is the one nearest the fire, so the ban is executable rather than a
+    /// paragraph: neither the prompt nor the user turn may say what the output is.
+    func testMessagePromptNeverNamesItsOwnGenre() {
+        let mode = SmartModeCatalogue.message
+        let framing = PolishTask.smart(mode).userTurn(raw: "x")
+        for text in [mode.prompt.instructions, framing] {
+            for noun in ["message", "SMS", "text message", "chat", "email", "e-mail"] {
+                XCTAssertFalse(text.lowercased().contains(noun.lowercased()),
+                               "the model is shown the word \(noun)")
+            }
+        }
+        // And the user-facing name, which the model never sees, still is that word.
+        XCTAssertEqual(mode.displayName, "Message")
+    }
+
+    /// Decision 6, and the position is the measurement. #437 put the system prompt
+    /// at 0 line breaks over 144 outputs; #523 reproduced it at 0 in 27 and only the
+    /// user turn produced any. The block shape is this mode's whole output contract,
+    /// so it ships in the one position that works.
+    func testMessageAsksForBlocksInTheUserTurn() {
+        let framing = PolishTask.smart(SmartModeCatalogue.message).userTurn(raw: "x")
+        XCTAssertTrue(framing.contains("short blocks"))
+        XCTAssertTrue(framing.contains("blank line"))
+        XCTAssertTrue(framing.lowercased().contains("output only"))
+    }
+
+    /// Decision 6's other half: `?` and `!` carry meaning a period does not, so they
+    /// stay and the period goes.
+    func testMessagePromptForbidsClosingABlockWithAPeriod() {
+        let instructions = SmartModeCatalogue.message.prompt.instructions
+        XCTAssertTrue(instructions.contains("Never close a block with a period"))
+    }
+
+    /// Decision 1. The register is mirrored and never chosen, and that is wider than
+    /// `tu`/`vous` — the corpus logs Normal polish lifting `comment tu vas` to
+    /// `comment vas-tu` as a defect, not as an improvement (#439).
+    func testMessagePromptMirrorsTheRegisterRatherThanChoosingOne() {
+        let instructions = SmartModeCatalogue.message.prompt.instructions
+        XCTAssertTrue(instructions.contains("MIRROR THE REGISTER YOU HEARD"))
+        XCTAssertTrue(instructions.contains("more formal"))
+    }
+
+    /// The licence that makes this mode a row of its own: it deletes whole clauses,
+    /// where `Structured` is explicitly forbidden from cutting substance.
+    func testMessagePromptCarriesTheDeletionLicenceStructuredGaveUp() {
+        XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions.contains("CUT, and not only fillers"))
+        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Do NOT summarise"))
+    }
+
+    /// Decisions 2 and 7: a dictated emoji is the speaker's content; an invented one
+    /// is an addition, and this mode has no addition licence.
+    func testMessagePromptKeepsADictatedEmojiAndInventsNone() {
+        let instructions = SmartModeCatalogue.message.prompt.instructions
+        XCTAssertTrue(instructions.contains("Keep an emoji the speaker dictated"))
+        XCTAssertTrue(instructions.contains("Never add one"))
+    }
+
+    /// Bar 2, the hard one, stated where the model reads it. It is the failure that
+    /// cut Email to #269, and it is measured on outputs as well — see
+    /// `docs/research/572-message/runs/`.
+    func testMessagePromptForbidsAnInventedOpeningClosingNameOrPlaceholder() {
+        let instructions = SmartModeCatalogue.message.prompt.instructions
+        XCTAssertTrue(instructions.contains("Do NOT open or close with a line the speaker did not say"))
+        XCTAssertTrue(instructions.contains("Do NOT write anyone's name unless the speaker said it"))
+        XCTAssertTrue(instructions.contains("bracketed placeholder"))
+    }
+
+    /// Decision 4's soft rule: kept by default, and deliberately not a hard bar the
+    /// corpus fails an output on — the one divergence from #523 decision 7.
+    func testMessagePromptKeepsASpeakerFlaggedIncompletenessByDefault() {
+        XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions.contains("j'ai oublié un truc"))
+    }
+
+    /// The #414 copying finding, pinned as `Structured` pins it: a copied line has to
+    /// be recognisable as not the user's. No person is named, and — the part specific
+    /// to this mode — **no example prints a greeting or a sign-off**, because a
+    /// copied one would be a bar-2 failure rather than an obviously foreign line.
+    func testMessagePromptNamesNoPersonAndPrintsNoGreetingInAnyExample() {
+        let instructions = SmartModeCatalogue.message.prompt.instructions
+        for name in ["Sophie", "Julien", "Thomas", "Sarah", "Marie", "Paul", "Manu"] {
+            XCTAssertFalse(instructions.contains(name), "the prompt names \(name)")
+        }
+        // The example blocks are everything after the first "INPUT:" line. The
+        // FORBIDDEN block above it has to be able to say these words; an example
+        // must never print one as output.
+        guard let examplesStart = instructions.range(of: "INPUT:") else {
+            XCTFail("the prompt no longer carries a worked example")
+            return
+        }
+        let examples = instructions[examplesStart.lowerBound...]
+        for greeting in ["Bonjour", "Cordialement", "Bonne journée", "Bien à", "Best regards", "À bientôt"] {
+            XCTAssertFalse(examples.contains(greeting), "an example prints \(greeting)")
+        }
+    }
+
+    /// The #239 pattern, same as every other mode: one English prompt, answering in
+    /// the input's language. The 2026-09-17 competitor run is the measurement of what
+    /// omitting this block costs — 10 of 11 engine outputs in English on French.
+    func testMessagePromptIsWrittenOnceAndKeepsTheInputLanguage() {
+        let instructions = SmartModeCatalogue.message.prompt.instructions
+        XCTAssertTrue(instructions.contains("OUTPUT LANGUAGE: the language of the input"))
+        XCTAssertTrue(instructions.contains("NEVER translate"))
+    }
+
+    /// Every character of a system prompt is taken off the dictation that still fits
+    /// (`PolishContextBudget`), so the budget is pinned rather than left to drift.
+    ///
+    /// #572 invited this to be *"the first prompt in this repo written tight"*, on
+    /// the ground that a message is short input. It is shorter than `Structured`,
+    /// which is the mode it shares a licence family with, and it is **not** shorter
+    /// than `List`: 4 841 characters against 4 184, which is ≈ 4 390 characters of
+    /// speech against ≈ 4 620. What stands between the two is the language block,
+    /// #414's examples and the counter-example block, and every one of those is
+    /// load-bearing by measurement rather than by taste. **Which paragraphs of these
+    /// prompts actually do work is #573 part 3**, and it is the issue that owns the
+    /// trim for all five modes at once rather than for this one by eye.
+    func testMessagePromptStaysWithinItsStatedBudget() {
+        let message = SmartModeCatalogue.message.prompt.instructions.count
+        XCTAssertLessThan(message, SmartModeCatalogue.structured.prompt.instructions.count)
+        XCTAssertLessThan(message, 5_000, "the prompt grew past what the doc comment claims")
     }
 }
