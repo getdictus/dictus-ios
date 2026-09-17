@@ -56,12 +56,36 @@ public enum PolishPropositionCut {
 
     /// Fewest content words a clause must carry before the cut will make it one.
     ///
-    /// Three, which is `PolishSegmentOverlapThresholds.default.minimumContentWords`,
-    /// taken from there rather than chosen here: below three a unit can only score
-    /// 0, 0.33, 0.67 or 1, so a single unmatched word decides a whole verdict. The
-    /// two checks measure opposite directions over the same text and there is no
-    /// reading under which they should disagree about how small a unit is too small.
-    public static let minimumContentWords = PolishSegmentOverlapThresholds.default.minimumContentWords
+    /// ### Two, and `bars.md` §4 declared three
+    ///
+    /// Three is `PolishSegmentOverlapThresholds.default.minimumContentWords`, and the
+    /// pre-registered plan took it from there on the argument that two checks
+    /// measuring opposite directions over the same text should not disagree about how
+    /// small a unit is too small. The calibration replay — model-free, on the
+    /// committed device outputs, **before** the first arm of the live round — measured
+    /// that three cannot represent this corpus, and the change is recorded in
+    /// `bars.md` §6 rather than made quietly. Three things moved, all in the same
+    /// direction:
+    ///
+    /// 1. **Axis 3 could not see the case it exists for.** `Je te laisserai regarder,
+    ///    il s'agit de la dernière transcription.` has a left clause of two content
+    ///    words, so three merges the sentence whole — one proposition in, one out, and
+    ///    the swap the device produced is unrepresentable. At two it reads 1 inversion.
+    /// 2. **It removed a false person-lost.** That same merge aligned the whole input
+    ///    sentence to the output clause that had dropped the `je`, while the output's
+    ///    *other* sentence carried it. Axis 2 reported a person loss on an output that
+    ///    preserves the person perfectly.
+    /// 3. **It turned a bench miss into a catch.** `D3-plan-mode`'s only hand-labelled
+    ///    defect is a dropped `s'il te plaît`, two content words. At three it is
+    ///    absorbed into the clause before it and invisible; at two it is flagged by
+    ///    name, at a recall of 0.00.
+    ///
+    /// The floor `PolishSegmentOverlapThresholds` is protecting against — a unit so
+    /// short that one unmatched word decides a verdict — is real, and it is why this
+    /// is two rather than one. It is not the same risk in both directions: #414's
+    /// check REFUSES a user's dictation on its reading, and this one asks a human to
+    /// look at a line.
+    public static let minimumContentWords = 2
 
     /// Separators a sentence may be cut at. Not `.` — that is the sentence cut's job,
     /// and `NLTokenizer` already knows not to cut on an abbreviation or a decimal.

@@ -113,6 +113,12 @@ is *between* them. So:
    `PolishSegmentOverlapThresholds.default` uses for the same reason: below it a unit
    can only score 0, 0.5 or 1 and a single unmatched word decides everything.
 
+> **AMENDED during calibration, 2026-09-17, before the first arm of the live round.**
+> `minimumContentWords` is **2**, not 3 — §6.1 holds the measurement that moved it and
+> what it cost. Written here rather than applied quietly: the whole value of §1–§9 is
+> that it was fixed before the numbers, and an edit that hides itself is worth less
+> than whatever it buys.
+
 For each input proposition, against the output's propositions:
 
 - `bestRecall` — the highest share of the input proposition's **content words** found
@@ -234,6 +240,25 @@ The floor that ships in the bench is chosen off that table and the table is prin
 findings.md, with the false positives named. If no floor separates the two, **that is
 the finding** and it is reported as one rather than worked around — the same rule #414
 followed when its own floor did not separate cleanly.
+
+### 6.1 What the calibration changed, written here because §1–§9 were written first
+
+Two amendments, both made on the model-free replay and both **before** the first arm of
+the live round. Both are in `findings.md` with their tables.
+
+1. **`minimumContentWords` 3 → 2.** Three could not represent this corpus. The
+   65-character reordering — the fixture axis 3 exists for — has a two-content-word
+   left clause, so three merges its sentence whole and the swap becomes
+   unrepresentable; the same merge then produced a **false** person-lost on it, and
+   absorbed `D3-plan-mode`'s only hand-labelled defect (a dropped `s'il te plaît`,
+   two content words) into the clause before it. At two: 1 inversion where the device
+   swapped two clauses, no false person-lost, and `s'il te plaît.` flagged by name at
+   recall 0.00. The `otherFlags` column rises from 8 to 9 at the shipping floor, and
+   `findings.md` names every one of the nine.
+2. **The sweep's second column is `otherFlags`, not `falseFlags`.** It counts
+   propositions flagged on an output that carries no *deletion* label, and on this
+   corpus most of them are real defects of another class. Calling them false in a
+   committed capture would have been the bench asserting something it did not measure.
 
 ## 7. The arms
 

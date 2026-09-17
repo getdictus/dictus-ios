@@ -1,0 +1,161 @@
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+[1/4] Write sources
+[3/6] Compiling polish_harness FidelityRound.swift
+[4/6] Emitting module polish_harness
+[5/7] Compiling polish_harness main.swift
+[5/8] Write Objects.LinkFileList
+[6/8] Linking polish-harness
+[7/8] Applying polish-harness
+Build of product 'polish-harness' complete! (1.91s)
+corpus: 9 outputs from 1 source(s), floor 0.35
+
+════ AXIS 1 FLOOR SWEEP (bars.md §6) — hand labels vs the screen
+
+floor   caught                    otherFlags    flagged outputs
+0.10    2/2 labelled deletions    5             D1-three-steps×1, D3-plan-mode×1, D5-lets-go×1, D6-issues-check×1, D7-mod-rejects×1, D9-suggestion-bar×2
+0.15    2/2 labelled deletions    5             D1-three-steps×1, D3-plan-mode×1, D5-lets-go×1, D6-issues-check×1, D7-mod-rejects×1, D9-suggestion-bar×2
+0.20    2/2 labelled deletions    5             D1-three-steps×1, D3-plan-mode×1, D5-lets-go×1, D6-issues-check×1, D7-mod-rejects×1, D9-suggestion-bar×2
+0.25    2/2 labelled deletions    6             D1-three-steps×1, D3-plan-mode×1, D5-lets-go×1, D6-issues-check×2, D7-mod-rejects×1, D9-suggestion-bar×2
+0.30    2/2 labelled deletions    7             D1-three-steps×1, D3-plan-mode×1, D5-lets-go×1, D6-issues-check×3, D7-mod-rejects×1, D9-suggestion-bar×2
+0.35    2/2 labelled deletions    9             D1-three-steps×2, D2-three-steps-drift×1, D3-plan-mode×1, D5-lets-go×1, D6-issues-check×4, D7-mod-rejects×1, D9-suggestion-bar×2
+0.40    2/2 labelled deletions    9             D1-three-steps×2, D2-three-steps-drift×1, D3-plan-mode×1, D5-lets-go×1, D6-issues-check×4, D7-mod-rejects×1, D9-suggestion-bar×2
+0.45    2/2 labelled deletions    9             D1-three-steps×3, D2-three-steps-drift×1, D3-plan-mode×1, D5-lets-go×1, D6-issues-check×4, D7-mod-rejects×2, D9-suggestion-bar×2
+0.50    2/2 labelled deletions    9             D1-three-steps×3, D2-three-steps-drift×1, D3-plan-mode×1, D5-lets-go×1, D6-issues-check×4, D7-mod-rejects×2, D9-suggestion-bar×2
+0.55    2/2 labelled deletions    15            D1-three-steps×3, D2-three-steps-drift×1, D3-plan-mode×1, D4-logs-polish×1, D5-lets-go×1, D6-issues-check×5, D7-mod-rejects×3, D9-suggestion-bar×6
+0.60    2/2 labelled deletions    19            D1-three-steps×4, D2-three-steps-drift×2, D3-plan-mode×1, D4-logs-polish×3, D5-lets-go×1, D6-issues-check×5, D7-mod-rejects×3, D9-suggestion-bar×7
+
+  caught     = outputs labelled `propositionDeleted` in which the screen flags something.
+  otherFlags = propositions flagged on outputs carrying NO deletion label. Not
+               necessarily errors — the mode may legitimately drop dead weight
+               (#523 decision 4) — which is why every flagged text is printed below.
+
+
+━━ [D1-three-steps] 2026-09-16T19:52:41Z labels=[propositionDeleted]
+  838→669 success recall=15/17 UNRECALLED=2 PERSON-LOST=1 HEDGE-LOST=1 inversions=0/105
+     UNRECALLED (whole 0.00, best 0.00): Le truc important à comprendre,
+     UNRECALLED (whole 0.33, best 0.33): c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul.
+     PERSONLOST: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.
+       → La reconnaissance vocale sur le téléphone fonctionne en trois étapes.
+     HEDGELOST: En gros, il y a trois étapes.
+       → La reconnaissance vocale sur le téléphone fonctionne en trois étapes.
+
+━━ [D2-three-steps-drift] 2026-09-16T20:27:21Z labels=[termSubstituted]
+  795→777 success recall=14/15 UNRECALLED=1 PERSON-LOST=1 HEDGE-LOST=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     PERSONLOST: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone.
+       → La reconnaissance de club sur téléphone fonctionne en trois étapes.
+     HEDGELOST: En gros, il y a trois étapes.
+       → La reconnaissance de club sur téléphone fonctionne en trois étapes.
+
+━━ [D3-plan-mode] 2026-09-17T07:03:54Z labels=[registerDropped]
+  192→150 success recall=2/3 UNRECALLED=1 inversions=0/1
+     UNRECALLED (whole 0.00, best 0.00): s'il te plaît.
+
+━━ [D4-logs-polish] 2026-09-17T12:10:45Z labels=[intentionInvented, factFabricated, personLost, stanceHardened, misspelled]
+  578→567 success recall=11/11 dispersed=2 PERSON-LOST=1 HEDGE-LOST=2 negationDropped=1 inversions=0/36
+     PERSONLOST: Tu verras c'est j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé.
+       → Tu verras qu'il y a une dizaine qui ont été créées après ton dernier message.
+     HEDGELOST: Honnêtement je suis assez surpris du mod.
+       → Honestement, je suis surpris du mod.
+     HEDGELOST: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → Notamment, tu verras que le dernier texte enlève les mots « le » et « chérie » quand je dis « coucou ma chérie ».
+     NEGATIONDROPPED: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → Notamment, tu verras que le dernier texte enlève les mots « le » et « chérie » quand je dis « coucou ma chérie ».
+
+━━ [D5-lets-go] 2026-09-17T12:14:57Z labels=[exampleLeaked, refusedByGuardrail]
+  15→93 rejectedGuardrail recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Vas-y let's go.
+
+━━ [D6-issues-check] 2026-09-17T14:45:48Z labels=[refusedByGuardrail]
+  433→405 rejectedGuardrail recall=5/9 UNRECALLED=4 PERSON-LOST=1 negationDropped=1 inversions=0/10
+     UNRECALLED (whole 0.22, best 0.11): J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS.
+     UNRECALLED (whole 0.00, best 0.00): Enfin tu regarderas dans le slide,
+     UNRECALLED (whole 0.29, best 0.29): Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues,
+     UNRECALLED (whole 0.33, best 0.33): Alors tu verras, il y a plusieurs postes.
+     NEGATIONDROPPED: on a pas mal discuté.
+       → Nous avons discuté, et il semble qu’on ait presque tout enregistré.
+     PERSONLOST: liste-les-moi simplement et on fait un point.
+       → liste-les simplement,
+
+━━ [D7-mod-rejects] 2026-09-17T14:47:15Z labels=[reordered, propositionDeleted]
+  246→169 success recall=5/6 UNRECALLED=1 PERSON-LOST=1 inversions=1/10
+     UNRECALLED (whole 0.00, best 0.00): Parce que là c'est quand même embêtant,
+     PERSONLOST: Alors je viens d'avoir à nouveau un problème avec toujours ce mod.
+       → Il y a un problème avec ce mod,
+
+━━ [D8-last-transcription] 2026-09-17T14:47:31Z labels=[reordered]
+  65→66 success recall=2/2 inversions=1/1
+
+━━ [D9-suggestion-bar] 2026-09-17T15:29:03Z labels=[speakerStateFabricated, refusedByGuardrail]
+  1337→1089 rejectedGuardrail recall=17/19 UNRECALLED=2 dispersed=3 PERSON-LOST=4 HEDGE-LOST=2 negationDropped=1 inversions=6/91 SPEAKER-STATE-FABRICATED(closing)
+     UNRECALLED (whole 0.00, best 0.00): Donc j'aimerais que tu goûtes,
+     UNRECALLED (whole 0.00, best 0.00): j'aimerais bien que on puisse la désactiver potentiellement.
+     PERSONLOST: Pour moi, il y a de la barre la barre de suggestion déjà.
+       → Il y a déjà une barre de suggestion.
+     PERSONLOST: Pour moi, il y a tout un design à revoir.
+       → Il y a tout un design à revoir.
+     PERSONLOST: Je crois qu'on a une issue à ce sujet.
+       → Il paraît qu'il y a une issue à ce sujet.
+     HEDGELOST: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → que l'autocorrection continue de fonctionner mais que l'on ne voie pas les mots de suggestion,
+     NEGATIONDROPPED: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → que l'autocorrection continue de fonctionner mais que l'on ne voie pas les mots de suggestion,
+     PERSONLOST: Il me semble que ça,
+       → Il faudrait juste que tu confirmes ça.
+     HEDGELOST: Il me semble que ça,
+       → Il faudrait juste que tu confirmes ça.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       
+device                9        7/9         6/9         4/9         0/9         1/9         0/9         1/9         
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+device                8             5             3/9           0/9
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── device
+   D1-three-steps          U2PH
+   D2-three-steps-drift    U1PH
+   D3-plan-mode            U1
+   D4-logs-polish          PH
+   D5-lets-go              U1
+   D6-issues-check         U4P
+   D7-mod-rejects          U1Po1
+   D8-last-transcription   o1
+   D9-suggestion-bar       U2PHFo6
+
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+
+════ BENCH vs HAND LABELS (#570's two comments of 2026-09-17)
+
+fixture                 hand labels                                   bench
+D1-three-steps          propositionDeleted                            unrecalled×2, personLost×1, hedgeLost×1
+D2-three-steps-drift    termSubstituted                               unrecalled×1, personLost×1, hedgeLost×1
+D3-plan-mode            registerDropped                               unrecalled×1
+D4-logs-polish          intentionInvented, factFabricated, personLost, stanceHardened, misspelled personLost×1, hedgeLost×2, negDropped×1
+D5-lets-go              exampleLeaked, refusedByGuardrail             unrecalled×1
+D6-issues-check         refusedByGuardrail                            unrecalled×4, personLost×1, negDropped×1
+D7-mod-rejects          reordered, propositionDeleted                 unrecalled×1, personLost×1, inversions=1
+D8-last-transcription   reordered                                     inversions=1
+D9-suggestion-bar       speakerStateFabricated, refusedByGuardrail    unrecalled×2, personLost×4, hedgeLost×2, negDropped×1, inversions=6, speakerState=fabricated
+
+  A label with no bench column is a defect class the four axes do not cover.
+  A bench column with no label is either a real defect the hand read missed or a
+  false flag, and only reading the printed text above tells them apart.
+
+── wrote 9 runs to ../docs/research/570-structured-fidelity/capture-device-replay.json

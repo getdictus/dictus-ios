@@ -116,6 +116,9 @@ public enum PolishFidelityScorer {
                              floor: Double = defaultFloor) -> PolishFidelityScore {
         let alignments = PolishPropositionCut.align(input: input, output: output)
         let outputPropositions = PolishPropositionCut.propositions(of: output)
+        // The booster check reads the WHOLE input, not the aligned clause. See
+        // `stanceMisses(input:output:wholeInput:)`.
+        let wholeInputWords = PolishLexicon.words(in: input)
 
         let judgeable = alignments.count { $0.proposition.isJudgeable }
         let unrecalled = alignments
@@ -138,7 +141,9 @@ public enum PolishFidelityScorer {
             unrecalled: unrecalled,
             dispersed: dispersed,
             alignedPairs: aligned.count,
-            stanceMisses: aligned.flatMap(stanceMisses(input:output:)),
+            stanceMisses: aligned.flatMap {
+                stanceMisses(input: $0.0, output: $0.1, wholeInput: wholeInputWords)
+            },
             inversions: inversions(in: aligned.map { $0.1.index }),
             comparablePairs: max(0, aligned.count * (aligned.count - 1) / 2),
             speakerState: PolishSpeakerState.verdict(output: output, input: input),
@@ -153,8 +158,21 @@ public enum PolishFidelityScorer {
     /// by **adding**. The asymmetry is deliberate: a hedge the model adds makes the
     /// sentence claim less than the speaker did, which is a softening no user has ever
     /// complained about, while a booster it adds makes the sentence claim more.
+    /// `wholeInput` is every word of the input, and only the booster check reads it.
+    ///
+    /// A short input clause aligns to whichever output clause carries most of its
+    /// words, and that output clause is often much longer — so asking "is this booster
+    /// new" against the input *clause* alone flags every intensifier the speaker used
+    /// one clause earlier. Measured: `c'est pas vraiment ma voix, c'est pas naturel`
+    /// against its rewrite reported a hardened stance on `vraiment`, a word the
+    /// speaker had said himself. Against the whole input it reports nothing, and
+    /// `effectivement` arriving where the speaker said `quand même` still does.
+    ///
+    /// Person is NOT widened the same way and must not be: the whole point of the
+    /// device defect it exists for is that the rest of the output is full of `je`.
     static func stanceMisses(input: PolishProposition,
-                             output: PolishProposition) -> [PolishStanceMiss] {
+                             output: PolishProposition,
+                             wholeInput: [String]) -> [PolishStanceMiss] {
         var misses: [PolishStanceMiss] = []
 
         func lost(_ kind: PolishStanceMiss.Kind) {
@@ -169,13 +187,26 @@ public enum PolishFidelityScorer {
         let outHedge = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.hedges, in: output.allWords)
         if inHedge > 0, outHedge == 0 { lost(.hedgeLost) }
 
-        let inBooster = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.boosters, in: input.allWords)
+        let inBooster = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.boosters, in: wholeInput)
         let outBooster = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.boosters, in: output.allWords)
-        if outBooster > inBooster { lost(.stanceHardened) }
+        if inBooster == 0, outBooster > 0 { lost(.stanceHardened) }
 
+        // Strictly fewer, where person and hedge ask for NONE left. The asymmetry is
+        // the difference between a marker and a truth condition: a clause can carry
+        // two hedges, lose one and still hedge, so only the last one going says the
+        // stance moved — while every negation is a polarity, and losing one flips the
+        // proposition it was in. #570's own opening example is the proof: `c'est pas
+        // vraiment ma voix, c'est pas naturel` -> `ne reflètent pas vraiment ma voix,
+        // ce qui est naturel` keeps one `pas` and reverses the second clause, so a
+        // rule asking for zero left would miss the defect the issue is titled after.
+        //
+        // It over-flags a legitimate merge (`pas de problème, pas du tout` -> `aucun
+        // problème`), and that is affordable here and nowhere else: this is an
+        // OBSERVABLE (`bars.md` §4), every hit is printed with both texts, and a
+        // reader decides. It is in no bar and in no `hasScoredDefect`.
         let inNegation = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.negations, in: input.allWords)
         let outNegation = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.negations, in: output.allWords)
-        if inNegation > 0, outNegation == 0 { lost(.negationDropped) }
+        if inNegation > 0, outNegation < inNegation { lost(.negationDropped) }
 
         return misses
     }
