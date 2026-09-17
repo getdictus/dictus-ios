@@ -102,6 +102,12 @@ struct FidelityRun {
 
 enum FidelityRound {
 
+    /// `PolishMetrics.Outcome.engineFailed`'s raw value, which is what the driver
+    /// records when Apple FM throws. Named rather than spelled out at four call sites
+    /// because every one of them has to agree, and a typo in one would silently put an
+    /// engine error back into a denominator.
+    static let engineFailure = PolishMetrics.Outcome.engineFailed.rawValue
+
     /// The floor sweep grid declared in `bars.md` §6: 0.10 to 0.60 in steps of 0.05.
     ///
     /// Built from integers rather than `stride(from: 0.10, through: 0.60, by: 0.05)`,
@@ -210,9 +216,15 @@ enum FidelityRound {
         print("\n\n════ AXES, per arm (bars.md §4)\n")
         print(pad("arm", 22) + pad("outputs", 9)
               + ["unrecalled", "personLost", "hedgeLost", "hardened", "fabricated", "dropped", "clean"]
-                  .map { pad($0, 12) }.joined())
+                  .map { pad($0, 12) }.joined() + "engineErr")
         for arm in arms {
-            let rows = all.filter { $0.arm == arm }
+            // A call that never answered has violated nothing, and counting its empty
+            // output as a total recall failure would put two findings in one number.
+            // #550's round excludes its engine errors from every bar for the same
+            // reason; measured here at 2 in 306 on the first two rounds, both ~35 s
+            // timeouts on a 68-character input.
+            let errors = all.count { $0.arm == arm && $0.outcome == engineFailure }
+            let rows = all.filter { $0.arm == arm && $0.outcome != engineFailure }
             guard !rows.isEmpty else { continue }
             let cells = [
                 "\(rows.count { !$0.score.unrecalled.isEmpty })/\(rows.count)",
@@ -223,16 +235,19 @@ enum FidelityRound {
                 "\(rows.count { $0.score.speakerState == .dropped })/\(rows.count)",
                 "\(rows.count { !$0.score.hasScoredDefect })/\(rows.count)"
             ]
-            print(pad(arm, 22) + pad("\(rows.count)", 9) + cells.map { pad($0, 12) }.joined())
+            print(pad(arm, 22) + pad("\(rows.count)", 9) + cells.map { pad($0, 12) }.joined() + "\(errors)")
         }
         print("\n  Counts are OUTPUTS carrying at least one, not occurrences.")
+        print("  engineErr runs are in NO column and in no denominator: a call that never")
+        print("  answered has violated nothing, and its empty output would otherwise read as a")
+        print("  total recall failure.")
         print("  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation")
         print("  count are observables by declaration (bars.md §1, §4) and are in no column here.")
 
         print("\n\n════ OBSERVABLES, per arm — reported, never barred\n")
         print(pad("arm", 22) + pad("inversions", 14) + pad("dispersed", 14) + pad("negDropped", 14) + "speakerState preserved")
         for arm in arms {
-            let rows = all.filter { $0.arm == arm }
+            let rows = all.filter { $0.arm == arm && $0.outcome != engineFailure }
             guard !rows.isEmpty else { continue }
             print(pad(arm, 22)
                   + pad("\(rows.reduce(0) { $0 + $1.score.inversions })", 14)
@@ -249,6 +264,7 @@ enum FidelityRound {
             for fixture in orderedFixtures(rows) {
                 let runs = rows.filter { $0.fixture == fixture }.sorted { $0.run < $1.run }
                 let cells = runs.map { run -> String in
+                    guard run.outcome != engineFailure else { return "e" }
                     var flags = ""
                     if !run.score.unrecalled.isEmpty { flags += "U\(run.score.unrecalled.count)" }
                     if run.score.personLost > 0 { flags += "P" }
@@ -262,7 +278,8 @@ enum FidelityRound {
                 print("   " + pad(fixture, 24) + cells.joined(separator: "  "))
             }
         }
-        print("\n   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened")
+        print("\n   e = Apple FM threw; the run is in no denominator above.")
+        print("   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened")
         print("   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions")
         print("   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.")
     }
