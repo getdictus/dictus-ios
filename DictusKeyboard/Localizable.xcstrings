@@ -45,6 +45,17 @@
         }
       }
     },
+    "%@: could not be applied, text inserted as dictated." : {
+      "comment" : "Shown when an armed Smart Mode was refused by a guardrail and the untransformed text was inserted instead. The placeholder is the mode's name.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : n’a pas pu s’appliquer, texte inséré tel quel."
+          }
+        }
+      }
+    },
     "%@: could not be applied. Try again." : {
       "comment" : "Shown when an armed Smart Mode fails and nothing is inserted. The placeholder is the mode's name.",
       "localizations" : {
