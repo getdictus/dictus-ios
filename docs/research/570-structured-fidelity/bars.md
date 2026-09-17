@@ -289,6 +289,13 @@ Committed: the console capture under `raw/`, the JSON sidecar, the corpus, the a
 its number, every rejection reported rather than worked around, and one recommended
 variant with the measurement that justifies it.
 
+## 8.1 What actually ran
+
+Four rounds, not one: the two declared above, plus two high-N probes on the shortest
+fixtures, because the defect #581 is about turned out to happen about once in a hundred
+outputs and three runs per fixture cannot see a 1 % event. 720 outputs in all.
+`findings.md` §1 lists them with their captures.
+
 ## 9. Risks, declared in advance
 
 1. **The Mac is not the phone.** macOS 26.5.1's Apple FM against iOS 27.0's. #523's

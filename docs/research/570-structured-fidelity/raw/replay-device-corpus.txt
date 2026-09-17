@@ -1,13 +1,3 @@
-Building for debugging...
-[0/3] Write swift-version--58304C5D6DBC2206.txt
-[1/4] Write sources
-[3/6] Compiling polish_harness FidelityRound.swift
-[4/6] Emitting module polish_harness
-[5/7] Compiling polish_harness main.swift
-[5/8] Write Objects.LinkFileList
-[6/8] Linking polish-harness
-[7/8] Applying polish-harness
-Build of product 'polish-harness' complete! (1.91s)
 corpus: 9 outputs from 1 source(s), floor 0.35
 
 ════ AXIS 1 FLOOR SWEEP (bars.md §6) — hand labels vs the screen
@@ -109,10 +99,13 @@ floor   caught                    otherFlags    flagged outputs
 
 ════ AXES, per arm (bars.md §4)
 
-arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       
-device                9        7/9         6/9         4/9         0/9         1/9         0/9         1/9         
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       engineErr
+device                9        7/9         6/9         4/9         0/9         1/9         0/9         1/9         0
 
   Counts are OUTPUTS carrying at least one, not occurrences.
+  engineErr runs are in NO column and in no denominator: a call that never
+  answered has violated nothing, and its empty output would otherwise read as a
+  total recall failure.
   `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
   count are observables by declaration (bars.md §1, §4) and are in no column here.
 
@@ -136,6 +129,7 @@ device                8             5             3/9           0/9
    D8-last-transcription   o1
    D9-suggestion-bar       U2PHFo6
 
+   e = Apple FM threw; the run is in no denominator above.
    U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
    F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
    · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.

@@ -1,0 +1,595 @@
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'polish-harness' complete! (0.23s)
+
+
+████ ARM shipping — 15 run(s) × 5 fixture(s), floor 0.35
+
+━━ [S1-synthetic-short] 68 chars, lang=fr
+  #1 68→62 2943ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #2 68→68 1387ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #3 68→39 1336ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #4 68→69 1434ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #5 68→62 1377ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #6 68→68 1458ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #7 68→62 1395ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #8 68→69 1408ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #9 68→131 1631ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎---⏎⏎Je voulais te dire que la réunion est décalée à quinze heures.
+  #10 68→39 1291ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #11 68→62 1346ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #12 68→69 1379ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #13 68→62 1423ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #14 68→62 1360ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #15 68→69 1403ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+
+━━ [D5-lets-go] 15 chars, lang=fr
+  #1 15→16 1317ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #2 15→16 1323ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #3 15→16 1308ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #4 15→16 1305ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #5 15→16 1375ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #6 15→16 1337ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #7 15→16 1341ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #8 15→16 1320ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #9 15→16 1343ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #10 15→16 1339ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #11 15→16 1349ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #12 15→16 1396ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #13 15→16 1772ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #14 15→16 1419ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #15 15→256 2102ms rejectedGuardrail(length) recall=1/1 dispersed=1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Vas-y, allons-y.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.⏎⏎Il y avait un autre truc, mais ça m'échappe.
+
+━━ [D8-last-transcription] 65 chars, lang=fr
+  #1 65→65 1326ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #2 65→66 1353ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #3 65→65 1316ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #4 65→66 1382ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #5 65→66 1374ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #6 65→65 1352ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #7 65→65 1374ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #8 65→65 1406ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #9 65→66 1383ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #10 65→65 1340ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #11 65→65 1397ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #12 65→65 1366ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #13 65→65 1384ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #14 65→65 1382ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #15 65→65 1384ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+
+━━ [D3-plan-mode] 192 chars, lang=fr
+  #1 192→188 1980ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #2 192→188 2602ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue. S'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #3 192→192 2050ms success recall=3/3 inversions=0/3
+     engineOut: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #4 192→188 2239ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #5 192→188 1954ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #6 192→188 2014ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #7 192→188 2235ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #8 192→188 2045ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #9 192→188 1919ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #10 192→188 2121ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #11 192→188 2232ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #12 192→188 2543ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #13 192→192 2837ms success recall=3/3 inversions=0/3
+     engineOut: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #14 192→188 1992ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #15 192→188 1882ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+
+━━ [D7-mod-rejects] 246 chars, lang=fr
+  #1 246→231 2064ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #2 246→240 2026ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #3 246→231 2045ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #4 246→231 1995ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #5 246→240 2001ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #6 246→240 2121ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #7 246→246 2413ms success recall=6/6 inversions=0/15
+     engineOut: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #8 246→246 2716ms success recall=6/6 inversions=0/15
+     engineOut: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #9 246→246 2056ms success recall=6/6 inversions=0/15
+     engineOut: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #10 246→240 2006ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #11 246→237 1993ms success recall=6/6 inversions=0/15
+     engineOut: Alors je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #12 246→240 2139ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #13 246→231 2000ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #14 246→231 2005ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #15 246→246 2027ms success recall=6/6 inversions=0/15
+     engineOut: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+
+
+████ ARM V1-rule7-property — 15 run(s) × 5 fixture(s), floor 0.35
+     prompt: ../docs/research/570-structured-fidelity/arms/V1-rule7-property.txt
+
+━━ [S1-synthetic-short] 68 chars, lang=fr
+  #1 68→68 1481ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #2 68→62 1479ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #3 68→69 1468ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #4 68→69 1445ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #5 68→62 1416ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #6 68→62 1526ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #7 68→68 1433ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #8 68→68 1424ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #9 68→62 1413ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #10 68→62 1441ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #11 68→62 1460ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #12 68→39 1396ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #13 68→68 1511ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #14 68→0 35098ms engineFailed recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Alors je voulais te dire que la réunion est décalée à quinze heures.
+     engineOut: 
+  #15 68→68 1583ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+
+━━ [D5-lets-go] 15 chars, lang=fr
+  #1 15→36 1553ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎---⏎⏎---⏎⏎---⏎⏎---
+  #2 15→16 1573ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #3 15→19 1428ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, nous allons.
+  #4 15→18 1400ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, faisons ça.
+  #5 15→16 1382ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #6 15→16 1399ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #7 15→38 1626ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎Laisser-nous partir.
+  #8 15→16 1425ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #9 15→16 1390ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #10 15→16 1432ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #11 15→16 1414ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #12 15→16 1406ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #13 15→16 1390ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #14 15→16 1392ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #15 15→16 1451ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+
+━━ [D8-last-transcription] 65 chars, lang=fr
+  #1 65→65 1575ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #2 65→66 1642ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #3 65→66 1753ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #4 65→65 1403ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #5 65→65 1412ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #6 65→65 1397ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #7 65→65 1438ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #8 65→66 1582ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #9 65→65 1542ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #10 65→65 1489ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #11 65→65 1393ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #12 65→65 1401ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #13 65→66 1439ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #14 65→65 1419ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #15 65→65 1533ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+
+━━ [D3-plan-mode] 192 chars, lang=fr
+  #1 192→188 2027ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #2 192→188 1920ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #3 192→192 1851ms success recall=3/3 inversions=0/3
+     engineOut: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #4 192→192 1977ms success recall=3/3 inversions=0/3
+     engineOut: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #5 192→188 2392ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #6 192→192 2019ms success recall=3/3 inversions=0/3
+     engineOut: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #7 192→192 1921ms success recall=3/3 inversions=0/3
+     engineOut: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #8 192→188 1843ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #9 192→188 1884ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #10 192→188 1990ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #11 192→187 2116ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue. S'il te plaît, tu peux passer en mode plan pour faire ça. Ensuite, je validerai une fois que tu auras fait le plan de l'implémentation.
+  #12 192→188 1881ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #13 192→188 1894ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #14 192→192 1883ms success recall=3/3 inversions=0/3
+     engineOut: Ok, je te laisse préparer l'intégration de cette issue. S'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #15 192→188 1952ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+
+━━ [D7-mod-rejects] 246 chars, lang=fr
+  #1 246→240 2100ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #2 246→231 2201ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #3 246→246 2095ms success recall=6/6 inversions=0/15
+     engineOut: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #4 246→240 2037ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #5 246→240 2123ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #6 246→231 2072ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #7 246→231 2030ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #8 246→231 2013ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #9 246→231 2100ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #10 246→231 2045ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #11 246→231 2048ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #12 246→231 2017ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #13 246→240 2042ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #14 246→231 2131ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #15 246→231 2122ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+
+
+████ ARM V2-fidelity — 15 run(s) × 5 fixture(s), floor 0.35
+     prompt: ../docs/research/570-structured-fidelity/arms/V2-fidelity.txt
+
+━━ [S1-synthetic-short] 68 chars, lang=fr
+  #1 68→0 34137ms engineFailed recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Alors je voulais te dire que la réunion est décalée à quinze heures.
+     engineOut: 
+  #2 68→62 1657ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #3 68→69 1644ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #4 68→68 1531ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #5 68→62 1528ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #6 68→62 1525ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #7 68→68 1509ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #8 68→69 1532ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #9 68→68 1511ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #10 68→68 1528ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #11 68→69 1552ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #12 68→62 1535ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #13 68→69 1538ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #14 68→68 1508ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #15 68→62 1505ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+
+━━ [D5-lets-go] 15 chars, lang=fr
+  #1 15→16 1560ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #2 15→16 1525ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #3 15→16 1493ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #4 15→16 1519ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #5 15→16 1543ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #6 15→16 1526ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #7 15→16 1479ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #8 15→16 1497ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #9 15→16 1500ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #10 15→16 1508ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #11 15→16 1499ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #12 15→16 1464ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #13 15→16 1465ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #14 15→16 1460ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #15 15→16 1604ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+
+━━ [D8-last-transcription] 65 chars, lang=fr
+  #1 65→65 1516ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #2 65→65 1486ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #3 65→65 1497ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #4 65→65 1532ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #5 65→65 1469ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #6 65→65 1513ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #7 65→65 1527ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #8 65→66 1510ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #9 65→65 1519ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #10 65→65 1504ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #11 65→65 1500ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #12 65→66 1503ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder.⏎⏎Il s'agit de la dernière transcription.
+  #13 65→65 1492ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+  #14 65→65 1502ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.
+  #15 65→65 1490ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder. Il s'agit de la dernière transcription.
+
+━━ [D3-plan-mode] 192 chars, lang=fr
+  #1 192→188 1950ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #2 192→188 1966ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #3 192→188 1959ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #4 192→188 2101ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #5 192→188 1967ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #6 192→192 1950ms success recall=3/3 inversions=0/3
+     engineOut: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #7 192→188 1951ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #8 192→188 1952ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #9 192→188 2058ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #10 192→192 1956ms success recall=3/3 inversions=0/3
+     engineOut: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #11 192→188 1981ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #12 192→188 1994ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #13 192→188 1957ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #14 192→188 2043ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #15 192→188 2020ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+
+━━ [D7-mod-rejects] 246 chars, lang=fr
+  #1 246→240 2225ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #2 246→231 2159ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #3 246→231 2253ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #4 246→240 2262ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #5 246→240 2128ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #6 246→240 2147ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #7 246→231 2131ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #8 246→246 2157ms success recall=6/6 inversions=0/15
+     engineOut: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #9 246→246 2129ms success recall=6/6 inversions=0/15
+     engineOut: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #10 246→247 2186ms success recall=6/6 inversions=0/15
+     engineOut: Alors, je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #11 246→231 2210ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #12 246→240 2233ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #13 246→237 2193ms success recall=6/6 inversions=0/15
+     engineOut: Alors je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #14 246→231 2182ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  #15 246→231 2125ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       
+shipping              75       14/75       2/75        0/75        0/75        1/75        0/75        58/75       
+V1-rule7-property     75       16/75       1/75        0/75        0/75        0/75        0/75        58/75       
+V2-fidelity           75       16/75       0/75        0/75        0/75        0/75        0/75        59/75       
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             1             0/75          0/75
+V1-rule7-property     0             0             0/75          0/75
+V2-fidelity           0             0             0/75          0/75
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   S1-synthetic-short      ·  ·  P  ·  ·  ·  ·  ·  ·  P  ·  ·  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  F
+   D8-last-transcription   ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D3-plan-mode            ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D7-mod-rejects          ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+── V1-rule7-property
+   S1-synthetic-short      ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  P  ·  U1  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1
+   D8-last-transcription   ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D3-plan-mode            ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D7-mod-rejects          ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+── V2-fidelity
+   S1-synthetic-short      U1  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1
+   D8-last-transcription   ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D3-plan-mode            ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D7-mod-rejects          ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 225 runs to ../docs/research/570-structured-fidelity/capture-shortprobe.json

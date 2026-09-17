@@ -1,0 +1,32 @@
+[
+  {
+    "id": "S1-synthetic-short",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Alors je voulais te dire que la réunion est décalée à quinze heures."
+  },
+  {
+    "id": "D5-lets-go",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Vas-y let's go."
+  },
+  {
+    "id": "D8-last-transcription",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Je te laisserai regarder, il s'agit de la dernière transcription."
+  },
+  {
+    "id": "D3-plan-mode",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation."
+  },
+  {
+    "id": "D7-mod-rejects",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs."
+  }
+]

@@ -1,0 +1,979 @@
+
+
+████ ARM shipping — 60 run(s) × 2 fixture(s), floor 0.35
+
+━━ [S1-synthetic-short] 68 chars, lang=fr
+  #1 68→69 3661ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #2 68→62 1400ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #3 68→62 1622ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #4 68→62 1459ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #5 68→62 1404ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #6 68→69 1458ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #7 68→68 1389ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #8 68→62 1451ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #9 68→62 1664ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #10 68→62 1771ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #11 68→62 1462ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #12 68→62 1430ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #13 68→62 1414ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #14 68→68 1620ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #15 68→62 1590ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #16 68→68 1989ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #17 68→68 2058ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #18 68→68 2339ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #19 68→62 2343ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #20 68→62 2030ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #21 68→62 2394ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #22 68→68 1833ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #23 68→62 2033ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #24 68→69 2336ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #25 68→0 39609ms engineFailed recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Alors je voulais te dire que la réunion est décalée à quinze heures.
+     engineOut: 
+  #26 68→62 1736ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #27 68→69 1514ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #28 68→69 1483ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #29 68→68 1605ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #30 68→68 1634ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #31 68→62 1480ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #32 68→62 1451ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #33 68→62 1521ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #34 68→69 1463ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #35 68→62 1424ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #36 68→69 1486ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #37 68→69 1900ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #38 68→69 1969ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #39 68→69 1847ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #40 68→319 3384ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.⏎⏎---⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.⏎⏎---⏎⏎Il y avait un autre truc, mais ça m'échappe.
+  #41 68→68 1651ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #42 68→39 1486ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #43 68→62 1427ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #44 68→39 1633ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #45 68→68 1430ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #46 68→68 1383ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #47 68→69 1426ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #48 68→68 1393ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #49 68→68 1411ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #50 68→68 1381ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #51 68→69 1647ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #52 68→68 1435ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #53 68→62 1389ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #54 68→68 1377ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #55 68→69 1449ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #56 68→62 1448ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #57 68→68 1403ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #58 68→69 1460ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #59 68→69 1446ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #60 68→68 1405ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+
+━━ [D5-lets-go] 15 chars, lang=fr
+  #1 15→36 1504ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎---⏎⏎---⏎⏎---⏎⏎---
+  #2 15→16 1366ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #3 15→16 1361ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #4 15→16 1354ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #5 15→16 1464ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #6 15→16 1384ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #7 15→16 1357ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #8 15→16 1348ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #9 15→16 1353ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #10 15→16 1380ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #11 15→16 1371ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #12 15→16 1352ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #13 15→16 1507ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #14 15→16 1340ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #15 15→16 1361ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #16 15→16 1362ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #17 15→26 1428ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎---⏎⏎---
+  #18 15→16 1339ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #19 15→16 1356ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #20 15→16 1434ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #21 15→16 1388ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #22 15→16 1449ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #23 15→16 1348ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #24 15→20 1450ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, on va partir.
+  #25 15→18 1420ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, faisons-le.
+  #26 15→16 1344ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #27 15→16 1431ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #28 15→16 1360ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #29 15→16 1384ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #30 15→16 1363ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #31 15→16 1372ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #32 15→16 1356ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #33 15→16 1337ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #34 15→16 1482ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #35 15→32 1468ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, il faut que nous allions.
+  #36 15→16 1351ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #37 15→16 1396ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #38 15→16 1425ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #39 15→16 1401ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #40 15→16 1356ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #41 15→16 1378ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #42 15→16 1399ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #43 15→16 1367ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #44 15→16 1352ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #45 15→16 1367ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #46 15→16 1332ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #47 15→16 1340ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #48 15→16 1450ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #49 15→16 1384ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #50 15→23 1451ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, on va.⏎⏎---⏎⏎---
+  #51 15→16 1346ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #52 15→20 1438ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, on va partir.
+  #53 15→16 1355ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #54 15→32 1417ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, il faut que nous allions.
+  #55 15→16 1340ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #56 15→16 1445ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #57 15→16 1350ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #58 15→16 1339ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #59 15→16 1346ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #60 15→16 1364ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+
+
+████ ARM V1-rule7-property — 60 run(s) × 2 fixture(s), floor 0.35
+     prompt: ../docs/research/570-structured-fidelity/arms/V1-rule7-property.txt
+
+━━ [S1-synthetic-short] 68 chars, lang=fr
+  #1 68→62 1446ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #2 68→523 3079ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.⏎⏎Quick update on the garden:⏎⏎The fence is done — the guy came on Tuesday. Two things are left:⏎⏎- I need to get the hedge cut.⏎- I want to move the compost bin before it rains.⏎⏎Il faut que je commande le bois. Il y avait un dernier machin, mais ça m'échappe.
+  #3 68→62 1504ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #4 68→69 1505ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #5 68→523 3030ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.⏎⏎Quick update on the garden:⏎⏎The fence is done — the guy came on Tuesday. Two things are left:⏎⏎- I need to get the hedge cut.⏎- I want to move the compost bin before it rains.⏎⏎Il faut que je commande le bois. Il y avait un dernier machin, mais ça m'échappe.
+  #6 68→179 1899ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.⏎⏎---⏎⏎Je vais vérifier si nous avons besoin d'adapter notre agenda pour prendre en compte cette nouvelle date.
+  #7 68→68 1505ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #8 68→69 1592ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #9 68→190 1912ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Je voulais te dire que la réunion est décalée à quinze heures.
+  #10 68→39 1406ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #11 68→69 1515ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #12 68→68 1486ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #13 68→39 1568ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #14 68→62 1561ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #15 68→69 1525ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #16 68→62 1459ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #17 68→69 1482ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #18 68→68 1512ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #19 68→69 1522ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #20 68→62 1610ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #21 68→68 1492ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #22 68→68 1486ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #23 68→62 1477ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #24 68→135 1743ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Bonjour, je voulais te dire que la réunion est décalée à quinze heures.
+  #25 68→62 1486ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #26 68→68 1543ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #27 68→62 1488ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #28 68→69 1491ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #29 68→62 1508ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #30 68→62 1455ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #31 68→68 1449ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #32 68→39 1378ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #33 68→68 1480ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #34 68→62 1489ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #35 68→62 1440ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #36 68→68 1474ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #37 68→69 1488ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #38 68→517 2997ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.⏎⏎Quick update on the garden:⏎⏎The fence is done — the guy came on Tuesday. Two things are left:⏎⏎- I need to get the hedge cut.⏎- I want to move the compost bin before it rains.⏎⏎Il faut que je commande le bois. Il y avait un dernier machin, mais ça m'échappe.
+  #39 68→62 1479ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #40 68→68 1461ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #41 68→62 1489ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #42 68→0 35191ms engineFailed recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Alors je voulais te dire que la réunion est décalée à quinze heures.
+     engineOut: 
+  #43 68→68 1627ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #44 68→62 1437ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #45 68→39 1384ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #46 68→62 1457ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #47 68→39 1375ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #48 68→0 35203ms engineFailed recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Alors je voulais te dire que la réunion est décalée à quinze heures.
+     engineOut: 
+  #49 68→126 1852ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Je voulais te dire que la réunion est décalée à quinze heures.
+  #50 68→68 1458ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #51 68→62 1439ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #52 68→68 1455ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #53 68→69 1488ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #54 68→68 1799ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #55 68→62 1632ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #56 68→62 1476ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #57 68→39 1410ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+     engineOut: La réunion est décalée à quinze heures.
+  #58 68→62 1467ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #59 68→68 1464ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #60 68→62 1567ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+
+━━ [D5-lets-go] 15 chars, lang=fr
+  #1 15→16 1434ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #2 15→16 1438ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #3 15→16 1400ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #4 15→16 1407ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #5 15→16 1401ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #6 15→16 1418ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #7 15→16 1469ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #8 15→16 1505ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #9 15→16 1434ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #10 15→16 1395ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #11 15→209 2029ms rejectedGuardrail(length) recall=1/1 dispersed=1 inversions=0/0
+     engineOut: Vas-y, allons-y.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau. Le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+  #12 15→16 1453ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #13 15→18 1412ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, commençons.
+  #14 15→16 1435ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #15 15→752 3740ms rejectedGuardrail(length) recall=1/1 dispersed=1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Vas-y, allons-y.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.⏎⏎Here the speaker announced their own topic, so it may become a heading — and what they enumerated stays enumerated, in their person:⏎⏎Quick update on the garden:⏎⏎The fence is done — the guy came on Tuesday. Two things are left:⏎⏎- I need to get the hedge cut.⏎- I want to move the compost bin before it rains.⏎⏎RULE 7, shown on a fragment rather than on a whole output. The sentence is kept because the speaker said it; it is never added when they did not.⏎⏎Il faut que je commande le bois. Il y avait un dernier machin, mais ça m'échappe.
+  #16 15→16 1411ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #17 15→16 1403ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #18 15→16 1402ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #19 15→31 1544ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎---⏎⏎---⏎⏎---
+  #20 15→16 1434ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #21 15→16 1433ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #22 15→16 1413ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #23 15→16 1411ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #24 15→51 1604ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎Je vais te montrer comment faire.
+  #25 15→18 1505ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, faisons-le.
+  #26 15→16 1888ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #27 15→16 1429ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #28 15→32 1511ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, il faut que nous allions.
+  #29 15→26 1505ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎---⏎⏎---
+  #30 15→16 1454ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #31 15→16 1432ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #32 15→16 1548ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #33 15→18 1439ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, faisons ça.
+  #34 15→16 1435ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #35 15→16 1437ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #36 15→16 1453ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #37 15→16 1412ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #38 15→16 1418ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #39 15→16 1486ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #40 15→16 1424ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #41 15→27 1497ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y, allons-y.⏎⏎Let's go.
+  #42 15→16 1427ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #43 15→16 1405ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #44 15→16 1405ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #45 15→16 1428ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #46 15→16 1455ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #47 15→16 1425ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #48 15→16 1413ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #49 15→16 1429ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #50 15→16 1524ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #51 15→16 1391ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #52 15→16 1412ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #53 15→16 1416ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #54 15→27 1477ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y, allons-y.⏎⏎Let's go.
+  #55 15→16 1419ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #56 15→16 1419ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #57 15→16 1419ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #58 15→26 1487ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎---⏎⏎---
+  #59 15→16 1414ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #60 15→16 1436ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+
+
+████ ARM V2-fidelity — 60 run(s) × 2 fixture(s), floor 0.35
+     prompt: ../docs/research/570-structured-fidelity/arms/V2-fidelity.txt
+
+━━ [S1-synthetic-short] 68 chars, lang=fr
+  #1 68→69 1613ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #2 68→62 1545ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #3 68→69 1587ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #4 68→68 1554ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #5 68→68 1538ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #6 68→62 1733ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #7 68→517 3236ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.⏎⏎Quick update on the garden:⏎⏎The fence is done — the guy came on Tuesday. Two things are left:⏎⏎- I need to get the hedge cut.⏎- I want to move the compost bin before it rains.⏎⏎Il faut que je commande le bois. Il y avait un dernier machin, mais ça m'échappe.
+  #8 68→68 1578ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #9 68→0 35101ms engineFailed recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Alors je voulais te dire que la réunion est décalée à quinze heures.
+     engineOut: 
+  #10 68→68 1865ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #11 68→68 1572ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #12 68→68 1561ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #13 68→69 1595ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #14 68→68 1579ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #15 68→68 1556ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #16 68→69 1617ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #17 68→126 1801ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Je voulais te dire que la réunion est décalée à quinze heures.
+  #18 68→68 1560ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #19 68→68 1555ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #20 68→62 1539ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #21 68→69 1588ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #22 68→132 2170ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #23 68→68 1580ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #24 68→68 1573ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #25 68→69 1604ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #26 68→62 1561ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #27 68→62 1545ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #28 68→140 1981ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Bonjour, je suis désolé pour le changement. Merci de ta compréhension.
+  #29 68→62 1570ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #30 68→68 1569ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #31 68→62 1576ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #32 68→69 1581ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #33 68→69 1584ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #34 68→69 1602ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #35 68→62 1563ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #36 68→62 1553ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #37 68→62 1534ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #38 68→68 1546ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #39 68→69 1565ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #40 68→62 1589ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #41 68→68 1595ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #42 68→62 1561ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #43 68→68 1575ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #44 68→62 1578ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #45 68→68 1601ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #46 68→69 1684ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #47 68→310 2451ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.⏎⏎---⏎⏎Je voulais aussi te rappeler que les documents nécessaires sont à la maison.⏎⏎---⏎⏎Je voulais aussi te dire que la réunion est décalée à quinze heures.⏎⏎---⏎⏎Je voulais aussi te rappeler que les documents nécessaires sont à la maison.
+  #48 68→62 1584ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #49 68→68 1584ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #50 68→69 1582ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #51 68→68 1536ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #52 68→62 1589ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #53 68→132 1862ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Je voulais te dire que la réunion est décalée à quinze heures.
+  #54 68→68 1569ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #55 68→62 1559ms success recall=1/1 inversions=0/0
+     engineOut: Je voulais te dire que la réunion est décalée à quinze heures.
+  #56 68→163 1978ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Bonjour,⏎⏎Je voulais te dire que la réunion est décalée à quinze heures.⏎⏎Merci,⏎⏎[Votre Nom]
+  #57 68→68 1531ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #58 68→69 1627ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+  #59 68→68 1594ms success recall=1/1 inversions=0/0
+     engineOut: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  #60 68→69 1607ms success recall=1/1 inversions=0/0
+     engineOut: Alors, je voulais te dire que la réunion est décalée à quinze heures.
+
+━━ [D5-lets-go] 15 chars, lang=fr
+  #1 15→16 1522ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #2 15→16 1536ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #3 15→16 1505ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #4 15→16 1712ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #5 15→16 1540ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #6 15→59 1742ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, il faut que nous allions.⏎⏎Il faut que nous allions.
+  #7 15→16 1516ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #8 15→16 1537ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #9 15→16 1526ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #10 15→16 1497ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #11 15→26 1672ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎---⏎⏎---
+  #12 15→16 1535ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #13 15→16 1527ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #14 15→34 1615ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎Vas-y, allons-y.
+  #15 15→16 1504ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #16 15→16 1512ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #17 15→16 1556ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #18 15→16 1519ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #19 15→16 1534ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #20 15→16 1515ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #21 15→32 1567ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, il faut que nous allions.
+  #22 15→16 1503ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #23 15→16 1500ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #24 15→16 1609ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #25 15→16 1535ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #26 15→32 1589ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, il faut que nous allions.
+  #27 15→16 1519ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #28 15→16 1506ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #29 15→16 1521ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #30 15→16 1531ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #31 15→16 1542ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #32 15→16 1562ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #33 15→16 1633ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #34 15→16 1695ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #35 15→210 2172ms rejectedGuardrail(length) recall=1/1 dispersed=1 inversions=0/0
+     engineOut: Vas-y, allons-y.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+  #36 15→20 2009ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, on va partir.
+  #37 15→16 2453ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #38 15→16 1554ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #39 15→210 2149ms rejectedGuardrail(length) recall=1/1 dispersed=1 inversions=0/0
+     engineOut: Vas-y, allons-y.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+  #40 15→16 1533ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #41 15→16 1571ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #42 15→16 1629ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #43 15→36 2566ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎---⏎⏎---⏎⏎---⏎⏎---
+  #44 15→16 1745ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #45 15→34 1621ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.⏎⏎Vas-y, allons-y.
+  #46 15→16 1548ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #47 15→16 1620ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #48 15→16 1578ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #49 15→16 1527ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #50 15→16 1535ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #51 15→16 1511ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #52 15→16 1503ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #53 15→21 1621ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, on va y aller.
+  #54 15→16 1540ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #55 15→210 2134ms rejectedGuardrail(length) recall=1/1 dispersed=1 inversions=0/0
+     engineOut: Vas-y, allons-y.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+  #56 15→16 1520ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #57 15→16 1511ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #58 15→16 1511ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #59 15→16 1570ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+  #60 15→16 1607ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+     engineOut: Vas-y, allons-y.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       engineErr
+shipping              119      60/119      2/119       0/119       0/119       1/119       0/119       56/119      1
+V1-rule7-property     118      56/118      6/118       0/118       0/118       4/118       0/118       52/118      2
+V2-fidelity           119      57/119      0/119       0/119       0/119       1/119       0/119       61/119      1
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  engineErr runs are in NO column and in no denominator: a call that never
+  answered has violated nothing, and its empty output would otherwise read as a
+  total recall failure.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             0             0/119         0/119
+V1-rule7-property     0             2             0/118         0/118
+V2-fidelity           0             3             0/119         0/119
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   S1-synthetic-short      ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  e  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  F  ·  P  ·  P  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1
+── V1-rule7-property
+   S1-synthetic-short      ·  F  ·  ·  F  ·  ·  ·  ·  P  ·  ·  P  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  P  ·  ·  ·  ·  ·  F  ·  ·  ·  e  ·  ·  P  ·  P  e  ·  ·  ·  ·  ·  ·  ·  ·  P  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  F  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  U1  U1  U1
+── V2-fidelity
+   S1-synthetic-short      ·  ·  ·  ·  ·  ·  F  ·  e  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  ·  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  U1  U1
+
+   e = Apple FM threw; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 360 runs to ../docs/research/570-structured-fidelity/capture-leakprobe.json
