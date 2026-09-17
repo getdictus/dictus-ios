@@ -34,16 +34,33 @@ public struct SmartModeFailure: Equatable, Sendable {
     /// outcome ignores it.
     public let detectedLanguage: String?
 
+    /// Which guardrail refused the engine's output (`PolishGuardrail.Check.rawValue`),
+    /// or nil when this refusal is not a guardrail rejection.
+    ///
+    /// Here because the refusal is otherwise unreadable after the fact (#580).
+    /// `outcome` says `rejectedGuardrail` and `reason` says "-" — nothing was thrown —
+    /// so a persistent log could not tell `length` from `segmentOverlap` from
+    /// `prefixAlignment`, and those are three different bugs. `PolishMetrics` has
+    /// carried the check to the app's debug export all along; this puts it on the
+    /// value the refusal itself travels on, which is what `smartModeRefused` prints.
+    ///
+    /// A `String` rather than the `Check` itself, matching `outcome` and `reason`:
+    /// this value crosses target boundaries and is read by surfaces that have no
+    /// business knowing the guardrail's type.
+    public let guardrailCheck: String?
+
     public init(modeIdentifier: String,
                 modeDisplayName: String,
                 outcome: String,
                 reason: String,
-                detectedLanguage: String? = nil) {
+                detectedLanguage: String? = nil,
+                guardrailCheck: String? = nil) {
         self.modeIdentifier = modeIdentifier
         self.modeDisplayName = modeDisplayName
         self.outcome = outcome
         self.reason = reason
         self.detectedLanguage = detectedLanguage
+        self.guardrailCheck = guardrailCheck
     }
 }
 

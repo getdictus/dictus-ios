@@ -207,7 +207,7 @@ final class KeyboardPolishCoordinator {
         // `finish(reporting:inserting:)`.
         if let mode = pending.smartMode {
             PersistentLog.log(.smartModeRefused(
-                mode: mode.id, outcome: "recovered", reason: "no-generation"
+                mode: mode.id, outcome: "recovered", reason: "no-generation", check: "-"
             ))
             PersistentLog.log(.polishHandoff(step: "recovered", outcome: "smart-refused", chars: pending.raw.count))
             // Nothing to report and nothing to type: no generation ever ran for this
