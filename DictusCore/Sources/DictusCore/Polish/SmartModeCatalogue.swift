@@ -246,7 +246,16 @@ public enum SmartModeCatalogue {
             maximumLengthRatio: 1.1,
             outputLanguage: .sameAsInput,
             requiresGroundedNames: true,
-            requiresAlignedPrefix: false
+            requiresAlignedPrefix: false,
+            // The one contract in the catalogue that moves this, and #572 round 2 is
+            // why: at the measured default of 3 content words, every short message
+            // this mode exists to serve is skipped untested, and two fabrications went
+            // through on 2026-09-17 — one that answered the dictated question, one that
+            // replaced a farewell with its opposite. `floor` is untouched at the
+            // measured 0.15; only which segments get read changes.
+            segmentOverlapThresholds: PolishSegmentOverlapThresholds(
+                floor: PolishSegmentOverlapThresholds.default.floor, minimumContentWords: 1
+            )
         ),
         // The one mode here whose input is short by construction — what you send to
         // a person — and its context ceiling sits at ≈ 4 032 characters of speech

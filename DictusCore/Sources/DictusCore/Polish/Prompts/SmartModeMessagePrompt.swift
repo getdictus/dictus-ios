@@ -168,21 +168,24 @@ import Foundation
 /// characters for `Structured`.
 ///
 /// #572 invited this to be the first prompt here written tight, since a message is
-/// short input. It shipped at 4 841 characters and **the device round bought 995 more
-/// of them**: the second counter-example, rule 3's bound and rule 2's positive
-/// statement are what a hard bar cost. **Computed rather than claimed**, by running
-/// the app's own pre-flight arithmetic over the resolved prompts:
+/// short input. It shipped at 4 841 characters and **two device rounds bought 1 805
+/// more of them** — round 1's counter-example and rule bounds against bar 3, round 2's
+/// language carve-out and short-input example against bar 4. **Computed rather than
+/// claimed**, by binary-searching the app's own `PolishContextBudget.fit` over the
+/// resolved prompts:
 ///
 /// | Mode | Resolved system prompt | Largest dictation that fits |
 /// |---|---|---|
-/// | **`Message`** | **5 836 characters** | **≈ 4 032** |
-/// | `Structured` | 5 556 characters | ≈ 4 130 |
-/// | `List` | 4 184 characters | ≈ 4 620 |
+/// | **`Message`** | **6 646 characters** | **3 743** |
+/// | `Structured` | 5 556 characters | 4 130 |
+/// | `List` | 4 184 characters | 4 620 |
 ///
-/// So it is now the longest prompt in the repo and refuses the earliest — and this is
-/// the mode whose input is a text message, which is the one place in the catalogue
-/// where 4 032 characters of speech is not a constraint anybody meets. That trade was
-/// taken deliberately against bar 3, which the device round failed.
+/// So it is by some way the longest prompt in the repo and refuses the earliest — and
+/// this is the mode whose input is a text message. **3 743 characters of speech is
+/// roughly 700 spoken words in one message**, which is the one place in the catalogue
+/// where the ceiling is not a constraint anybody meets, and the overflow branch hands
+/// back the speaker's own words anyway. The trade was taken twice deliberately,
+/// against the two hard bars the device rounds failed.
 ///
 /// Every block here is load-bearing by measurement, which is why none of it was
 /// traded back: the 2026-09-17 competitor run put 10 of 11 engine outputs in English
@@ -243,6 +246,8 @@ enum SmartModeMessagePrompt {
 
         OUTPUT LANGUAGE: the language of the input. Always. NEVER translate into another language. Never answer in English unless the input itself is in English.
 
+        NOT A LICENCE TO CORRECT THE SPEAKER'S OWN WORDS: a word they said stays as they said it even when it comes from another language. A borrowed greeting is a register choice, not a language error. "Hello" in French speech stays "Hello".
+
         YOUR RESPONSE IS THE REWRITTEN TEXT. NOTHING ELSE.
         - Never address the user. Never say "I will", "Here is", "Sure", "Voici", "Claro".
         - Never acknowledge the task. Never explain what you did.
@@ -290,6 +295,12 @@ enum SmartModeMessagePrompt {
 
         I still have to find the invoice, it's somewhere
 
+        INPUT: Hello chef, comment tu vas ?
+        OUTPUT:
+        Hello chef, comment tu vas ?
+
+        Nothing there is ceremony to cut — it IS what they are sending. Their greeting stays in their own word, and a question stays a question: it is never answered.
+
         COUNTER-EXAMPLES — the WRONG outputs below break rules 2, 3 and 4. Never produce them.
 
         INPUT: ok donc pour le jardin faut que je rappelle le mec de la haie avant vendredi
@@ -307,6 +318,13 @@ enum SmartModeMessagePrompt {
         Coucou toi, j'ai récupéré la tondeuse chez le voisin
 
         Je te la ramène demain matin, je sais pas encore à quelle heure, à plus
+
+        The shortest inputs are where all of this is easiest to break. A short input is not an input with nothing in it.
+
+        INPUT: Hello chef, à demain, à plus
+        WRONG (swapped their own greeting): Salut chef, à demain, à plus
+        WRONG (cut who they addressed, then invented a line to fill the gap): Salut, je suis là
+        RIGHT: Hello chef, à demain, à plus
         """
     }
 }

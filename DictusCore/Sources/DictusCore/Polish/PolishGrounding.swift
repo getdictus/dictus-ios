@@ -43,7 +43,7 @@ public struct PolishAnchor: Equatable, Sendable {
 /// and leaves the two that score higher to the named-entity check, which catches one
 /// of them. Raising it to 0.25 takes the third and costs a measured false rejection;
 /// that trade was declined on 2026-09-07.
-public struct PolishSegmentOverlapThresholds: Equatable, Sendable {
+public struct PolishSegmentOverlapThresholds: Equatable, Sendable, Codable {
 
     /// Share of a segment's content words that must also appear in the input.
     /// Strictly below it the output is refused.
@@ -58,6 +58,23 @@ public struct PolishSegmentOverlapThresholds: Equatable, Sendable {
     /// like `Actions :` has. The corpus scores identically at 1, 2 and 3, so this
     /// costs nothing measured; 4 costs a measured catch (`W2-nom-prefixe`, whose
     /// fabricated bullet carries exactly 3).
+    ///
+    /// ### It is a per-contract number since #572, and the reason is structural
+    ///
+    /// That reasoning was measured on #414's corpora, which are **`List` outputs** —
+    /// bullets synthesised from a long dictation, where a sub-three-word segment is a
+    /// heading and refusing the whole dictation over it is the false rejection this
+    /// floor exists to avoid. It inverts on `Message`, whose input is short **by
+    /// construction**: a greeting, a name and one clause. The device round of
+    /// 2026-09-17 accepted two outright fabrications there — one that *answered* the
+    /// dictated question, one that replaced a farewell with its opposite — and the
+    /// check did not score them generously, it **never read them**. Each reduces to
+    /// one content word once `functionWords` is removed, so every segment was skipped
+    /// and `acceptsSegmentOverlap` returned `true` on its no-judgeable-segment branch.
+    ///
+    /// So the mode most exposed to fabrication was the one this guard structurally
+    /// could not protect, on precisely its own commonest input. `Message` carries
+    /// `minimumContentWords: 1`; every other contract keeps the measured 3.
     public let minimumContentWords: Int
 
     /// `assert` rather than `precondition`, and no clamping, for the reasons

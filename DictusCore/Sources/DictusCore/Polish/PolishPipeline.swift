@@ -269,7 +269,14 @@ public enum PolishPipeline {
                                                       preprocessed: String,
                                                       job: PolishJob) -> Bool {
         guard job.task.contract.requiresGroundedNames else { return true }
-        return PolishGrounding.acceptsSegmentOverlap(polished: polished, raw: preprocessed)
+        // Thresholds from the contract and not the global default since #572: which
+        // segments are short enough to skip is a per-mode answer, because a mode whose
+        // input is a two-line message skips everything at the number measured on
+        // `List` bullets. See `PolishAcceptanceContract.segmentOverlapThresholds`.
+        return PolishGrounding.acceptsSegmentOverlap(
+            polished: polished, raw: preprocessed,
+            thresholds: job.task.contract.segmentOverlapThresholds
+        )
     }
 
     /// Prefix-alignment guardrail (#466, #349): the output has to open where the

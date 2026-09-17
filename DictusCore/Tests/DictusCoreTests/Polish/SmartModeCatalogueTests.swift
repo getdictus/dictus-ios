@@ -560,20 +560,26 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// (`PolishContextBudget`), so the budget is pinned rather than left to drift.
     ///
     /// #572 invited this to be *"the first prompt in this repo written tight"*, on the
-    /// ground that a message is short input. It shipped at 4 841 characters and the
-    /// device round of 2026-09-17 bought 995 more — the second counter-example, rule
-    /// 3's bound and rule 2's positive statement, which is what bar 3 cost. At 5 836
-    /// it is the longest prompt in the repo and refuses at ≈ 4 032 characters of
-    /// speech, against `Structured`'s ≈ 4 130.
+    /// ground that a message is short input. **Two device rounds on 2026-09-17 took
+    /// that away**, and this assertion is where the cost is visible: it shipped at
+    /// 4 841 characters, round 1 bought 995 against bar 3, and round 2 bought 810 more
+    /// against bar 4 — the language carve-out that stops the model translating the
+    /// speaker's own greeting, and the short-input example that stops it inventing a
+    /// line when it finds nothing left to cut.
     ///
-    /// **That is a deliberate trade and this assertion is where it is visible.** This
-    /// is the mode whose input is a text message, so it is the one place in the
-    /// catalogue where the ceiling is not a constraint anybody meets. The bound is
-    /// kept tight above today's value so that the next addition is a decision rather
-    /// than a drift; **which paragraphs of these prompts do work is #573 part 3**,
-    /// across all five modes at once rather than this one by eye.
+    /// At 6 646 it is by some way the longest prompt in the repo and refuses at
+    /// **3 743** characters of speech, against `Structured`'s 4 130 — measured by
+    /// binary-searching `PolishContextBudget.fit`, not interpolated. That is roughly
+    /// 700 spoken words **in one message**, so this is the one mode in the catalogue
+    /// whose ceiling nobody meets, and the overflow branch returns the speaker's own
+    /// words regardless.
+    ///
+    /// The bound stays a few hundred characters above today's value so the next
+    /// addition is a decision rather than a drift. **Which paragraphs of these prompts
+    /// actually do work is #573 part 3**, across all five modes at once rather than
+    /// this one by eye — and at this length that question is now owed.
     func testMessagePromptStaysWithinItsStatedBudget() {
         let message = SmartModeCatalogue.message.prompt.instructions.count
-        XCTAssertLessThan(message, 6_000, "the prompt grew past what the doc comment claims")
+        XCTAssertLessThan(message, 6_900, "the prompt grew past what the doc comment claims")
     }
 }
