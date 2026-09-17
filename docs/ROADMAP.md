@@ -173,10 +173,18 @@ His verdict was that Normal polish is not at the level and wants work before the
 
     **The cheapest mode in the catalogue to build**: the machinery is entirely in place, and compression is the one behaviour Apple FM never had to be coaxed into. Contrast #523 round 9-10, where it emitted a list 2 times in 15 even with no contract at all.
 
-8. **#494** — offer Pro after the first successful dictation in onboarding.
-9. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
-10. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
-11. **#279** — flip `PremiumFlags.paywallVisible`, in the same PR as the first reachable Pro feature. Walk all four entry points; the flag is compile-time, so a site that was never wired to it stays silently hidden.
+8. **#573 — bench the competition's presets and rebuild `Liste`'s prompt.** Pierre, 2026-09-17: *"notre mode liste, je trouve qu'il est un peu faible. Il faudrait vraiment qu'on l'améliore avant de livrer."* It is one of the three modes 2.0.0 launches with and the one its maintainer rates lowest, so the `Liste` half is a launch item.
+
+    **The portability question is already answered, so the issue does not spend a round on it.** `n0an/VivaDicta` ships 18+ presets with their prompts in the open. Its `chat` preset run through our pipeline on four French message dictations: **1 accepted of 12**, and that one returned the input unchanged; 11 refused on `check=language`, with **10 of 11 engine outputs written in English on French speech**. Their prompts are monolingual by omission — nothing in their eight lines says *answer in the language of the input* — so none of them is portable verbatim. Two of their own bars also failed under their own prompt: `emoji-friendly` produced emojis the speaker never said, and `Do not add greetings, sign-offs` did not stop `Thanks a lot!`. That is #414 from another angle — a rule stated once in prose, with no example and no counter-example, does not hold.
+
+    **What the round did buy is a design idea and a number.** `short lines, natural breaks` became #572's decision 6, independently confirmed by Pierre's own hand-typed message. And eleven outputs that would have replaced a French message with an English one never reached a text field, which answers *"est-ce que notre architecture est OK"* with a measurement rather than a conviction: the contract is not ceremony.
+
+    The issue's third part is the one worth reading twice — their prompts are 8 lines, ours are 5 556 characters, and that length is what sets the context ceiling at ≈ 4 130 characters of speech. Which paragraphs of ours actually do work is unmeasured, and an answer would pay across all five modes. That part is **not** a launch item.
+
+9. **#494** — offer Pro after the first successful dictation in onboarding.
+10. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here).
+11. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
+12. **#279** — flip `PremiumFlags.paywallVisible`, in the same PR as the first reachable Pro feature. Walk all four entry points; the flag is compile-time, so a site that was never wired to it stays silently hidden.
 
 ### What was deliberately cut from this lane
 
