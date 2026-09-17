@@ -1,0 +1,135 @@
+[
+  {
+    "id": "D1-three-steps",
+    "source": "device-2026-09-17",
+    "timestamp": "2026-09-16T19:52:41Z",
+    "lang": "fr",
+    "accepted": true,
+    "outcome": "success",
+    "labels": [
+      "propositionDeleted"
+    ],
+    "note": "The sentence carrying the passage's point is gone, negation included: `ces trois étapes ne coûtent pas du tout le même prix en calcul`. #570 comment 1, defect 1.",
+    "raw": "Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.",
+    "output": "La reconnaissance vocale sur le téléphone fonctionne en trois étapes.\nLa première étape est la capture : le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.\nLa deuxième étape est le modèle : il prend ses morceaux et essaye de deviner quels sons ont été prononcés, puis quels mots se sont formés, en utilisant à la fois ce qu’il entend et ce qu’il a déjà écrit. Le contexte aide énormément à lever les ambiguïtés.\nLa troisième étape est la mise en forme : on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, et on découpe en paragraphes.\nLe deuxième élément coûte 90 % du temps."
+  },
+  {
+    "id": "D2-three-steps-drift",
+    "source": "device-2026-09-17",
+    "timestamp": "2026-09-16T20:27:21Z",
+    "lang": "fr",
+    "accepted": true,
+    "outcome": "success",
+    "labels": [
+      "termSubstituted"
+    ],
+    "note": "Same dictation as D1, 35 minutes later. KEEPS the proposition D1 deleted and substitutes the speaker's technical term instead: `le même prix en calcul` -> `le même temps de calcul`. The pair is the evidence for three runs per fixture. #570 comment 1, defect 2.",
+    "raw": "Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petit morceau de quelques millisecondes. The deuxième étape is the model. He prends his morceaux and essays of devine quels have been prononced, and what form. for that il micro ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement on découpe en paragraph. Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième c'est 90% du temps.",
+    "output": "La reconnaissance de club sur téléphone fonctionne en trois étapes.\n\nLa première étape est la capture : le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape est le modèle : il prend les morceaux et essaie de déterminer quels ont été prononcés et quelle forme ils ont pris. Pour cela, il analyse ce qu’il entend et ce qu’il a déjà écrit, car le contexte aide énormément à résoudre les ambiguïtés.\n\nLa troisième étape est la mise en forme : on prend le texte brut qui sort du modèle, on ajoute la ponctuation, les majuscules éventuellement, et on découpe le texte en paragraphes.\n\nLe truc important à comprendre est que ces trois étapes ne coûtent pas du tout le même temps de calcul. Le deuxième est 90 % du temps."
+  },
+  {
+    "id": "D3-plan-mode",
+    "source": "device-2026-09-17",
+    "timestamp": "2026-09-17T07:03:54Z",
+    "lang": "fr",
+    "accepted": true,
+    "outcome": "success",
+    "labels": [
+      "registerDropped"
+    ],
+    "note": "`s'il te plaît` dropped. Politeness is register, not filler, and rule 3's list does not cover it. #570 comment 1, defect 3.",
+    "raw": "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "output": "Je te laisse préparer l'intégration de cette issue.\n\nTu peux passer en mode plan. Je validerai une fois que tu auras fait le plan de l'implémentation."
+  },
+  {
+    "id": "D4-logs-polish",
+    "source": "device-2026-09-17",
+    "timestamp": "2026-09-17T12:10:45Z",
+    "lang": "fr",
+    "accepted": true,
+    "outcome": "success",
+    "labels": [
+      "intentionInvented",
+      "factFabricated",
+      "personLost",
+      "stanceHardened",
+      "misspelled"
+    ],
+    "note": "Five defects in one accepted output at ratio 0.98. `j'avais oublié de supprimer les logs` -> `Je voulais supprimer les logs, mais je les avais oubliés` (an intention the speaker never stated); a disfluency reified into a quoted false claim; `j'en ai fait une dizaine` -> `il y a une dizaine qui ont été créées` (person); `quand même` -> `effectivement` (stance); `Honnêtement` -> `Honestement`. #570 comment 1, defect 4.",
+    "raw": "Écoute, je vais te partager les logs polish. Alors j'avais oublié de supprimer les logs donc t'as encore les anciennes. Je te laisserai regarder par rapport à l'heure. Tu verras c'est j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé. Honnêtement je suis assez surpris du mod. Il est pas trop mal. Le seul truc c'est qu'effectivement, il coupe quand même pas mal de mots. Notamment le dernier tu verras, je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie. Je te laisse analyser et me dire ce que tu en penses.",
+    "output": "Écoute, je vais te partager les logs polish.\n\nJe voulais supprimer les logs, mais je les avais oubliés, alors tu as encore les anciennes.\n\nJe te laisserai analyser les logs par rapport à l'heure. Tu verras qu'il y a une dizaine qui ont été créées après ton dernier message.\n\nHonestement, je suis surpris du mod. Il est pas trop mal.\n\nLe seul truc, c'est qu'il enlève effectivement beaucoup de mots. Notamment, tu verras que le dernier texte enlève les mots « le » et « chérie » quand je dis « coucou ma chérie ».\n\nJe te laisse analyser et me dire ce que tu en penses."
+  },
+  {
+    "id": "D5-lets-go",
+    "source": "device-2026-09-17",
+    "timestamp": "2026-09-17T12:14:57Z",
+    "lang": "fr",
+    "accepted": false,
+    "outcome": "rejectedGuardrail",
+    "labels": [
+      "exampleLeaked",
+      "refusedByGuardrail"
+    ],
+    "note": "15-character input. The output is the prompt's own counter-example verbatim (plants, coffee). Trap 1 of SmartModeStructuredPrompt's doc comment firing as predicted; the off-domain mitigation held and the length check refused it. Tracked as #580 for what the user gets. #570 comment 1.",
+    "raw": "Vas-y let's go.",
+    "output": "Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café."
+  },
+  {
+    "id": "D6-issues-check",
+    "source": "device-2026-09-17",
+    "timestamp": "2026-09-17T14:45:48Z",
+    "lang": "fr",
+    "accepted": false,
+    "outcome": "rejectedGuardrail",
+    "labels": [
+      "refusedByGuardrail"
+    ],
+    "note": "Refused by segmentOverlap. Not labelled defect-by-defect in the tracker; carried here because a refusal is part of the rate and because the output rewrites the opening into something the speaker did not say (`Il faut que tu sois présent pour effectuer une vérification préliminaire`).",
+    "raw": "J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.",
+    "output": "Il faut que tu sois présent pour effectuer une vérification préliminaire concernant les problèmes liés à iOS.\n\nJ’ai reçu un retour d’utilisateur. Nous avons discuté, et il semble qu’on ait presque tout enregistré.\n\nAvant de vérifier les problèmes, vérifie notre conversation avec lui. Il y a plusieurs points.\n\nDis-moi les retours qu’il a formulés, liste-les simplement, et nous effectuerons une synthèse."
+  },
+  {
+    "id": "D7-mod-rejects",
+    "source": "device-2026-09-17",
+    "timestamp": "2026-09-17T14:47:15Z",
+    "lang": "fr",
+    "accepted": true,
+    "outcome": "success",
+    "labels": [
+      "reordered",
+      "propositionDeleted"
+    ],
+    "note": "The raw opens on `je viens d'avoir à nouveau un problème`, the output on `Il faut qu'on fasse une issue`. Plus two deletions: `à nouveau` (this had happened before, which is the point) and `Parce que là c'est quand même embêtant`. #570 comment 2.",
+    "raw": "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "output": "Il faut qu'on fasse une issue et qu'on log un peu tous ces rejets.\n\nIl y a un problème avec ce mod, et il faut analyser ce problème en profondeur.\n\nJe t'envoie les logs."
+  },
+  {
+    "id": "D8-last-transcription",
+    "source": "device-2026-09-17",
+    "timestamp": "2026-09-17T14:47:31Z",
+    "lang": "fr",
+    "accepted": true,
+    "outcome": "success",
+    "labels": [
+      "reordered"
+    ],
+    "note": "65 chars in, 66 out — the most innocent ratio possible. The two ideas are swapped. This is the fixture that lands on the decision-3-versus-rule-2 contradiction, which is why axis 3 scores nothing. #570 comment 2.",
+    "raw": "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "output": "Il s'agit de la dernière transcription.\n\nJe te laisserai regarder."
+  },
+  {
+    "id": "D9-suggestion-bar",
+    "source": "device-2026-09-17",
+    "timestamp": "2026-09-17T15:29:03Z",
+    "lang": "fr",
+    "accepted": false,
+    "outcome": "rejectedGuardrail",
+    "labels": [
+      "speakerStateFabricated",
+      "refusedByGuardrail"
+    ],
+    "note": "#581's POSITIVE CONTROL. The output ends on `Il y a un autre truc, mais je ne me souviens pas.`, a near-verbatim paraphrase of the prompt's own worked example at SmartModeStructuredPrompt.swift:192. Nothing in the 1337-character raw says anything of the kind. segmentOverlap refused the whole output, which is the check working; the dictation was lost instead (#580).",
+    "raw": "Super, merci pour ce détail. Donc j'aimerais que tu goûtes, tu regardes si on a des issues qui couvrent les points qu'il faut qu'on corrige par rapport à ces retours. Pour moi, il y a de la barre la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu'on a une issue à ce sujet. Moi j'aimerais vraiment qu'on se rapproche sur le design de ce qu'on a sur Apple. Là je trouve qu'elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Sur la barre de suggestion, j'aimerais bien que on puisse la désactiver potentiellement. Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application, ça ça serait vraiment top. Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c'est aussi un point qu'on avait noté, c'est initiaux. Il faudrait juste que tu confirmes ça.",
+    "output": "Super, merci pour ce détail.\n\nJe voudrais que tu regardes si on a des issues qui couvrent les points qu'il faut qu'on corrige par rapport à ces retours. Il y a déjà une barre de suggestion. Il y a tout un design à revoir. Il paraît qu'il y a une issue à ce sujet.\n\nJe voudrais vraiment qu'on se rapproche sur le design de la barre de suggestion. Je trouve qu'elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Il faudrait qu'en gros elle soit invisible, que l'autocorrection continue de fonctionner mais que l'on ne voie pas les mots de suggestion, donc qu'elle soit paramétrable dans l'application.\n\nIl y a le point en automatique à la fin de chaque phrase. Il faudrait vérifier dans la partie post-inscription si on doit le faire, mais il faudrait l'enlever si c'est possible ou si c'est un paramètre dans l'application.\n\nIl y a aussi le changement de layer de clavier quand on passe du 1-2-3 au ABC. Il paraît qu'il y a un point à ce sujet. Il faudrait juste que tu confirmes ça.\n\nIl y a un autre truc, mais je ne me souviens pas."
+  }
+]
