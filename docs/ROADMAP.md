@@ -163,9 +163,13 @@ His verdict was that Normal polish is not at the level and wants work before the
 
     **The licence it needs is the one nothing else claims: it may delete whole clauses.** #523 was written around exactly that licence and its grilling replaced it with a licence to rewrite, which is why `Structuré` now says *do not summarise* and floors at 0.4. So the deletion licence is free, and it is this mode.
 
+    **Grilled on 2026-09-16, five decisions locked, `ready-for-agent` — the issue body is the spec.** The mode never *chooses* a register, it mirrors the one it heard, and that is wider than `tu`/`vous`: formality and warmth come from the input too, because a message that arrives in a register the sender never used is not noticed before send. Emoji are never added — the mode with the widest deletion licence does not also get an addition licence. The band is `0.2 … 1.0`, the widest floor in the repo and no licence to expand. And a speaker-flagged incompleteness is kept **by default without being a hard bar**, the one deliberate divergence from #523 decision 7, because Pierre's own answer was that it depends on the sentence. Done is his verdict in real use, #523 decision 12's structure.
+
     **It is also the mode nearest the fire that cut Email to #269** — two independent implementations inventing greetings, sign-offs and names the model cannot know — and it must clear #393's **bar B**, visibly different from the free polish. That is the exact bar Email failed and the reason SMS was cut from #79's design session in the first place. If the output is what Normal already produces, it does not ship.
 
 7. **#571 — `Résumé`, the gist in prose.** The hole is clean: `Liste` extracts **actions** into infinitive bullets, `Structuré` is forbidden from summarising, so nobody returns the substance in two or three sentences. #79's cut reason — *"List already synthesises"* — was true of the axis and false of the shape.
+
+    **Grilled on 2026-09-16, five decisions locked, `ready-for-agent`.** The length is a **band** (`0.1 … 0.6`) and never a sentence count — a fixed "two or three sentences" is absurd on a twenty-second dictation and useless on a ten-minute one. **Prose only, no bullets ever**, which is the single rule keeping it out of `Liste`'s territory. The speaker's person is kept. A speaker-flagged incompleteness **may** be dropped here, unlike #523 decision 7, because this reader knows by construction that they are reading a summary.
 
     **The cheapest mode in the catalogue to build**: the machinery is entirely in place, and compression is the one behaviour Apple FM never had to be coaxed into. Contrast #523 round 9-10, where it emitted a list 2 times in 15 even with no contract at all.
 
