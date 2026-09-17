@@ -249,7 +249,7 @@ public enum SmartModeCatalogue {
             requiresAlignedPrefix: false
         ),
         // The one mode here whose input is short by construction — what you send to
-        // a person — and its context ceiling sits at ≈ 4 390 characters of speech
+        // a person — and its context ceiling sits at ≈ 4 032 characters of speech
         // (see `SmartModeMessagePrompt`). So the overflow branch is close to
         // unreachable; it answers `.insertRawText` anyway for the reason the other
         // two structure modes do, that the floor is the speaker's own words in the

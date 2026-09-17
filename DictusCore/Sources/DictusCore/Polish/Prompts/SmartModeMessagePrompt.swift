@@ -70,6 +70,54 @@ import Foundation
 /// prompt rule, and `SmartModeNotesPrompt` already carries the precedent one line
 /// away — *"A bullet does not need a terminal period."*
 ///
+/// ### What the device round of 2026-09-17 settled, and what it sent back here
+///
+/// Seven dictations under this mode on an iPhone16,2, iOS 27.0, build 1.9.0 (34):
+/// 7 successes, 0 guardrail refusals. **The Mac was wrong about this mode, and not in
+/// the conservative direction** — #523 round 10's finding, confirmed a third time:
+///
+/// | | macOS 26.5.1 | iOS 27.0 |
+/// |---|---|---|
+/// | Length ratio | 0.97 … 1.05 | **0.26 … 1.00** |
+/// | Block-final periods | 63 across 32 outputs | **1 across 7** |
+/// | Outputs in blocks | 12 of 32 | 2 of 7 — and those are exactly the 2 inputs with more than one beat |
+///
+/// So the deletion licence fires, decision 6 holds, and **#393's bar B passes**: the
+/// output is nothing like what Normal returns. A spoken self-correction of a time came
+/// back as the corrected value alone, correction and correcting both gone — rule 3
+/// doing exactly its job. Bars 2 and 4 held: nothing invented in 7.
+///
+/// **Bar 3 failed, and as one family: the model deletes the relational layer.** Across
+/// the seven it cut the addressee's first name, a term of endearment twice, a
+/// thanks-for-the-exchange clause, a courtesy opener and a sign-off — every one of them
+/// dictated — while losing no fact, figure, date or decision anywhere. The same drift
+/// showed as a rule 4 violation: a spoken French negation with the `ne` dropped came
+/// back with the `ne` restored. **The model normalises the register toward neutral**,
+/// and deleting the relational layer is its most visible face. It is the worst
+/// available place to fail, for decision 1's reason: a message stripped of its
+/// endearment reads like a message to a colleague, and the sender does not notice
+/// before pressing send.
+///
+/// Two causes, both diagnosable from the text above, and the repair is all prompt:
+///
+/// 1. **Rule 3's open clause was the only open-ended cut target and the only one with
+///    no counter-example.** It now names what is never an aside. #414's measurement is
+///    the precedent: a rule stated in prose, with no counter-example, does not hold.
+/// 2. **Three separate lines pushed against names** — rule 7's *keep every name*, the
+///    FORBIDDEN line's *never write a name the speaker did not say*, and the whole
+///    bar-2 framing. Facing a name that *was* said, the model's safe move was deletion.
+///    The second counter-example below is what rebalances it, and it is deliberately
+///    the one place in this prompt where an example prints an opener and a closing:
+///    they are in its own input, which is the whole point.
+///
+/// Two more, recorded rather than chased. **Internal commas were stripped once** — the
+/// model generalised rule 2's terminal-period ban into "no punctuation", so rule 2 now
+/// states the inside of a block positively. And **the same input dictated twice
+/// returned 0.77 and 0.44**, the second dropping its last two beats: the milder form of
+/// the first-beat-only shape recorded under `userInstruction`. **The 0.2 floor does not
+/// catch that**, and the band must not be widened to chase it — the lowest accepted
+/// output of the round was 0.26 against that floor, so the floor is placed right.
+///
 /// ### The failure this mode sits nearest, and the two traps it inherits
 ///
 /// Email was cut to #269 because two independent implementations **invent greetings
@@ -120,23 +168,29 @@ import Foundation
 /// characters for `Structured`.
 ///
 /// #572 invited this to be the first prompt here written tight, since a message is
-/// short input. **Computed rather than claimed**, by running the app's own
-/// pre-flight arithmetic over the resolved prompts:
+/// short input. It shipped at 4 841 characters and **the device round bought 995 more
+/// of them**: the second counter-example, rule 3's bound and rule 2's positive
+/// statement are what a hard bar cost. **Computed rather than claimed**, by running
+/// the app's own pre-flight arithmetic over the resolved prompts:
 ///
 /// | Mode | Resolved system prompt | Largest dictation that fits |
 /// |---|---|---|
+/// | **`Message`** | **5 836 characters** | **≈ 4 032** |
 /// | `Structured` | 5 556 characters | ≈ 4 130 |
 /// | `List` | 4 184 characters | ≈ 4 620 |
-/// | **`Message`** | **4 841 characters** | **≈ 4 390** |
 ///
-/// So it is tighter than the mode it shares a licence family with and looser than
-/// `List`. What sits between it and `List` is the language block, the worked
-/// examples and the counter-example block, and each is load-bearing by measurement:
-/// the 2026-09-17 competitor run put 10 of 11 engine outputs in English on French
-/// speech with no language block, and #414 measured that deleting examples makes
-/// copying worse rather than better. **A real trim is #573 part 3's job** — it owns
-/// the question of which paragraphs of these prompts do work, across all five modes
-/// at once, which is the only way to answer it without guessing.
+/// So it is now the longest prompt in the repo and refuses the earliest — and this is
+/// the mode whose input is a text message, which is the one place in the catalogue
+/// where 4 032 characters of speech is not a constraint anybody meets. That trade was
+/// taken deliberately against bar 3, which the device round failed.
+///
+/// Every block here is load-bearing by measurement, which is why none of it was
+/// traded back: the 2026-09-17 competitor run put 10 of 11 engine outputs in English
+/// on French speech with no language block, #414 measured that deleting examples makes
+/// copying worse rather than better, and the device round measured what a rule with no
+/// counter-example is worth. **A real trim is #573 part 3's job** — it owns the
+/// question of which paragraphs of these prompts do work, across all five modes at
+/// once, which is the only way to answer it without guessing.
 enum SmartModeMessagePrompt {
 
     /// Carries the block instruction because **this is the only position that
@@ -199,8 +253,8 @@ enum SmartModeMessagePrompt {
         RULES — apply these:
 
         1. Short blocks, one per beat, separated by a blank line. A beat is one thing the speaker is saying; when they move on, start a new block.
-        2. Never close a block with a period. `?` and `!` stay, including at the end of a block. A period between two sentences inside a block is fine.
-        3. CUT, and not only fillers — whole clauses go. A restated sentence keeps only its better version. A self-correction keeps only what they corrected TO, and the correcting itself goes ("enfin non", "pardon je me suis planté"). An aside that would never have been typed goes.
+        2. Never close a block with a period — only that one. Everything inside a block keeps its normal punctuation: commas, apostrophes, a period between two sentences. `?` and `!` stay everywhere, end of a block included.
+        3. CUT, and not only fillers — whole clauses go. A restated sentence keeps only its better version. A self-correction keeps only what they corrected TO, and the correcting itself goes ("enfin non", "pardon je me suis planté"). An aside that only exists because they were speaking aloud goes. NEVER THE PERSON: who they are addressing, the name or the words they call them by, how they open and how they close are what you are writing — not an aside. If they said it, it is in the output.
         4. MIRROR THE REGISTER YOU HEARD — never choose one. Said "tu", write "tu"; said "vous", write "vous". Keep their familiarity, their slang, their spoken negation ("je sais pas" stays "je sais pas"), and any opening words they said. NEVER make the text more formal, more polite or warmer than they were.
         5. Keep their grammatical person and their intent: a request stays a request, a question stays a question. Never turn their clauses into infinitive tasks.
         6. You may tighten a long-winded clause, or use the word they would have typed for one they only said — never against rule 4, and never against a fact.
@@ -226,7 +280,7 @@ enum SmartModeMessagePrompt {
 
         Il est là, je l'ouvre pas tant que t'es pas là
 
-        The opening words are the speaker's own and stay. The hesitation, the self-correction and the whole apology are cut, and nothing replaces them.
+        The opening words are the speaker's own and stay; the hesitation, the self-correction and the apology are cut, and nothing replaces them.
 
         INPUT: uh so I wanted to ask about the hedge at the back, is it ok if the guy comes on tuesday instead, thursday doesn't work for me, and uh I still have to find the invoice, it's somewhere
         OUTPUT:
@@ -236,12 +290,23 @@ enum SmartModeMessagePrompt {
 
         I still have to find the invoice, it's somewhere
 
-        COUNTER-EXAMPLES — the WRONG outputs below break rules 2 and 4. Never produce them.
+        COUNTER-EXAMPLES — the WRONG outputs below break rules 2, 3 and 4. Never produce them.
 
         INPUT: ok donc pour le jardin faut que je rappelle le mec de la haie avant vendredi
         WRONG (more formal than what was said): Il conviendrait que je recontacte l'entreprise d'entretien des haies avant vendredi
         WRONG (closed the block with a period): Il faut que je rappelle le mec de la haie avant vendredi.
         RIGHT: Il faut que je rappelle le mec de la haie avant vendredi
+
+        The next one is the most important here: everything the speaker said about WHO they are writing to survives.
+
+        INPUT: coucou toi, j'ai récupéré la tondeuse chez le voisin, euh je te la ramène demain matin, je sais pas encore à quelle heure, à plus
+        WRONG (cut how the speaker addressed the person, and how they closed): J'ai récupéré la tondeuse chez le voisin, je te la ramène demain matin
+        WRONG (put back a negation the speaker did not say): Je ne sais pas encore à quelle heure
+        WRONG (stripped the commas inside the blocks): Coucou toi j'ai récupéré la tondeuse chez le voisin
+        RIGHT:
+        Coucou toi, j'ai récupéré la tondeuse chez le voisin
+
+        Je te la ramène demain matin, je sais pas encore à quelle heure, à plus
         """
     }
 }
