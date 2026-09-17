@@ -76,3 +76,39 @@ the first mode in this repo written tight.
 They also wrap the transcript in `<TRANSCRIPT>` tags, which is #474 — measured on #518 as
 clearing the false language refusal 0 of 10, and not landed only because tagging one prompt
 of twelve is the half-tagged state #474 forbids.
+
+## Their prompt, run through our pipeline — 2026-09-17
+
+The obvious question once their catalogue is open: could we just use their prompts? Measured
+rather than argued. VivaDicta's `chat` preset as the system prompt, our pipeline, the four
+French fixtures above, 3 runs each — `polish-harness show corpus.json --instructions
+arms/arm-vivadicta-chat.txt --runs 3 --engine-out`. The only edit is `<TRANSCRIPT>` → `the
+text`, since we do not wrap the transcript in tags (#474).
+
+| | |
+|---|---|
+| Accepted by our guardrails | **1 of 12**, and that one returned the input unchanged |
+| Refused | **11 of 12**, every one on `check=language` |
+| Output written in English on a French input | **10 of 11** engine outputs |
+| Carrying an emoji the speaker never said | 2, under a prompt line that says `don't invent new ones` |
+| Opening with a chat preamble | 1 — `Sure thing! Here's a polished version of the text:` |
+| Adding a sign-off | at least 2 — `Thanks a lot! 🙏`, under a line that says `Do not add greetings, sign-offs, or commentary` |
+
+**Their prompt is monolingual by omission.** Nothing in those eight lines says *answer in the
+language of the input*, so an English-written instruction produces English output on French
+speech. Ours devotes a whole block to it, and that block exists because #456, #518 and the
+#239 auto-prompt pattern each cost a campaign to learn. This is not a defect of their app —
+their prompt presumably runs behind a language setting we do not have — but it is the exact
+measurement of what our extra length buys.
+
+**Two of their own bars fail under their own prompt**, which is #414's finding from another
+angle: `emoji-friendly` in the instructions produced emojis the speaker never said, and
+`Do not add greetings, sign-offs` did not stop `Thanks a lot!`. A rule stated once in prose,
+with no worked example and no counter-example, does not hold.
+
+**What survives the test is their design, not their text.** `short lines, natural breaks` is
+right and is now decision 6. The prompt that carries it is not portable here.
+
+**And the guardrails earned their keep in public.** Eleven outputs that would have replaced a
+French message with an English one never reached a text field. That is the architecture
+question answered with a number: the contract is not ceremony.
