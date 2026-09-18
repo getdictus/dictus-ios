@@ -25,10 +25,54 @@ public struct SmartModePrompt: Equatable, Sendable, Codable {
     /// "Polished output:" marker the polish framing has always used.
     public let outputMarker: String
 
-    public init(instructions: String, userInstruction: String, outputMarker: String) {
+    /// Below this many characters, an accepted output's blank lines become single
+    /// line breaks (#572). `nil` — every mode but `Message` — leaves the layout alone.
+    ///
+    /// ### Why it exists
+    ///
+    /// `Message`'s decision 6 asks for short blocks separated by a blank line, one per
+    /// beat. It was written from the maintainer's own hand-typed target, 184
+    /// characters in three beats, and it reads right there. On a 60-character message
+    /// to a partner the model produced three blocks and two blank lines, and the
+    /// maintainer's verdict on device (2026-09-18) was *"un peu trop d'espace"*. Asked
+    /// how he would have typed it himself, he chose the beats on separate lines with
+    /// no blank line between them.
+    ///
+    /// ### Why in code and not in the prompt
+    ///
+    /// Every prompt round on this mode moved another behaviour — round 2's short
+    /// example taught the model to echo a short input, which cost round 1's cuts — and
+    /// the prompt sits at its stated budget. A deterministic pass after acceptance
+    /// cannot move anything the model does, is tested exactly, and the guardrails have
+    /// already judged the model's own output by the time it runs.
+    ///
+    /// ### Why 100
+    ///
+    /// A judgement call between three measured points, not a measurement: the
+    /// 60-character message the maintainer wanted tighter, a 139-character one he
+    /// did not flag, and his own 184-character target, which keeps its blank lines.
+    public let shortOutputBlockLimit: Int?
+
+    public init(instructions: String, userInstruction: String, outputMarker: String,
+                shortOutputBlockLimit: Int? = nil) {
         self.instructions = instructions
         self.userInstruction = userInstruction
         self.outputMarker = outputMarker
+        self.shortOutputBlockLimit = shortOutputBlockLimit
+    }
+
+    /// Hand-written so the layout field can be absent, for the reason
+    /// `PolishAcceptanceContract.init(from:)` is: a prompt crosses the App Group inside
+    /// the per-dictation snapshot, and an app update can land between the write and
+    /// the read. Absent means `nil`, which is exactly the layout before #572.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.instructions = try container.decode(String.self, forKey: .instructions)
+        self.userInstruction = try container.decode(String.self, forKey: .userInstruction)
+        self.outputMarker = try container.decode(String.self, forKey: .outputMarker)
+        self.shortOutputBlockLimit = try container.decodeIfPresent(
+            Int.self, forKey: .shortOutputBlockLimit
+        )
     }
 }
 

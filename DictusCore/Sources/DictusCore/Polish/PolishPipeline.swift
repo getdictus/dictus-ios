@@ -170,8 +170,15 @@ public enum PolishPipeline {
                 return Result(engineOutput: polished, outcome: .rejectedGuardrail,
                               engineMs: engineMs, postprocessMs: postMs, rejectedCheck: refused)
             }
+            // Layout only, and only after every check has accepted the model's own
+            // output (#572): the guardrails judge what the model wrote, and this pass
+            // cannot change a word of it. Note the export then logs the tightened text,
+            // as it already logs the decoded one.
+            let delivered = job.task.smartMode?.prompt.shortOutputBlockLimit.map {
+                PolishPostpass.tightenBlocks(polished, whenShorterThan: $0)
+            } ?? polished
             let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
-            return Result(engineOutput: polished, outcome: .success, engineMs: engineMs, postprocessMs: postMs)
+            return Result(engineOutput: delivered, outcome: .success, engineMs: engineMs, postprocessMs: postMs)
         } catch is CancellationError {
             let engineMs = Int(Date().timeIntervalSince(engineStart) * 1000)
             return Result(engineOutput: nil, outcome: .cancelled, engineMs: engineMs, postprocessMs: 0)

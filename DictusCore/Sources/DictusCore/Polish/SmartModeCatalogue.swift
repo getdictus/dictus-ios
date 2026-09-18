@@ -236,7 +236,11 @@ public enum SmartModeCatalogue {
         prompt: SmartModePrompt(
             instructions: SmartModeMessagePrompt.instructions(),
             userInstruction: SmartModeMessagePrompt.userInstruction,
-            outputMarker: SmartModeMessagePrompt.outputMarker
+            outputMarker: SmartModeMessagePrompt.outputMarker,
+            // A short message keeps its beats on separate lines without the blank
+            // line between them — the maintainer's own choice on device, 2026-09-18.
+            // See `SmartModePrompt.shortOutputBlockLimit`.
+            shortOutputBlockLimit: 100
         ),
         contract: PolishAcceptanceContract(
             minimumLengthRatio: 0.2,
