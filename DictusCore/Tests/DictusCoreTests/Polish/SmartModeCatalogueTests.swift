@@ -441,7 +441,7 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// stay and the period goes.
     func testMessagePromptForbidsClosingABlockWithAPeriod() {
         let instructions = SmartModeCatalogue.message.prompt.instructions
-        XCTAssertTrue(instructions.contains("Never close a block with a period"))
+        XCTAssertTrue(instructions.contains("never close a block with a period"))
     }
 
     /// Decision 1. The register is mirrored and never chosen, and that is wider than
@@ -449,14 +449,14 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// `comment vas-tu` as a defect, not as an improvement (#439).
     func testMessagePromptMirrorsTheRegisterRatherThanChoosingOne() {
         let instructions = SmartModeCatalogue.message.prompt.instructions
-        XCTAssertTrue(instructions.contains("MIRROR THE REGISTER YOU HEARD"))
+        XCTAssertTrue(instructions.contains("Mirror their register exactly"))
         XCTAssertTrue(instructions.contains("more formal"))
     }
 
     /// The licence that makes this mode a row of its own: it deletes whole clauses,
     /// where `Structured` is explicitly forbidden from cutting substance.
     func testMessagePromptCarriesTheDeletionLicenceStructuredGaveUp() {
-        XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions.contains("CUT, and not only fillers"))
+        XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions.contains("Cut what only exists because they were speaking"))
         XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Do NOT summarise"))
     }
 
@@ -464,8 +464,8 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// is an addition, and this mode has no addition licence.
     func testMessagePromptKeepsADictatedEmojiAndInventsNone() {
         let instructions = SmartModeCatalogue.message.prompt.instructions
-        XCTAssertTrue(instructions.contains("Keep an emoji the speaker dictated"))
-        XCTAssertTrue(instructions.contains("Never add one"))
+        XCTAssertTrue(instructions.contains("Keep an emoji they dictated"))
+        XCTAssertTrue(instructions.contains("Never add anything they did not say"))
     }
 
     /// Bar 2, the hard one, stated where the model reads it. It is the failure that
@@ -473,46 +473,50 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// `docs/research/572-message/runs/`.
     func testMessagePromptForbidsAnInventedOpeningClosingNameOrPlaceholder() {
         let instructions = SmartModeCatalogue.message.prompt.instructions
-        XCTAssertTrue(instructions.contains("Do NOT open or close with a line the speaker did not say"))
-        XCTAssertTrue(instructions.contains("Do NOT write anyone's name unless the speaker said it"))
-        XCTAssertTrue(instructions.contains("bracketed placeholder"))
+        XCTAssertTrue(instructions.contains("no greeting, sign-off, name, emoji or fact"))
+        XCTAssertTrue(instructions.contains("square brackets"))
     }
 
-    /// **The device round's repair, pinned — bar 3's three edits.**
+    /// **Bar 3, pinned — the relational layer survives the cut.**
     ///
-    /// Seven dictations on iOS 27.0 on 2026-09-17 passed bars 1, 2 and 4 and failed
-    /// bar 3 as one family: the model deleted the relational layer — the addressee's
-    /// name, a term of endearment twice, a courtesy opener, a sign-off — every one of
-    /// them dictated, while losing no fact anywhere. Rule 3's only open-ended cut
-    /// target was also its only one without a counter-example, which is #414's finding
-    /// from another angle. These three assertions are the repair, and a later edit
-    /// that removes any of them puts the failure straight back.
+    /// Seven dictations on iOS 27.0 on 2026-09-17 failed bar 3 as one family: the model
+    /// deleted the addressee's name, a term of endearment twice, a courtesy opener and
+    /// a sign-off — every one of them dictated. Rounds 1 to 4 repaired it with
+    /// counter-examples; the round-6 rewrite (2026-09-18) states it once, in rule 2, by
+    /// naming each part, and keeps one example that prints an opener and a closing
+    /// because they are in its own input. **Holding it without a counter-example is the
+    /// rewrite's main bet, and only a device round can settle it** — the Mac harness
+    /// barely cuts at all, so it cannot see a deletion either way.
     func testMessagePromptProtectsTheRelationalLayer() {
         let instructions = SmartModeCatalogue.message.prompt.instructions
-        // 1. Rule 3's open clause is bounded: the person is never an aside.
-        XCTAssertTrue(instructions.contains("NEVER THE PERSON"))
-        XCTAssertTrue(instructions.contains("how they open and how they close"))
-        // 2. A counter-example carries it, because a rule in prose alone does not hold.
-        XCTAssertTrue(instructions.contains("cut how the speaker addressed the person"))
-        // 3. And the same counter-example holds rule 4's line, which the round also
-        //    broke: a spoken negation came back with its `ne` restored.
-        XCTAssertTrue(instructions.contains("put back a negation the speaker did not say"))
+        // Rule 2: everything said to the person survives, by name — the greeting, the
+        // name or pet name, and the closing — and the cut licence stops at a sentence.
+        XCTAssertTrue(instructions.contains("the greeting, the name or pet name they used"))
+        XCTAssertTrue(instructions.contains("the closing"))
+        XCTAssertTrue(instructions.contains("never a sentence they meant"))
+        // Rule 3: the spoken negation a round-1 output restored.
+        XCTAssertTrue(instructions.contains("\"je sais pas\" stays \"je sais pas\""))
     }
 
-    /// The round's third defect: one output came back with every internal comma gone,
-    /// the model having generalised rule 2's terminal-period ban into "no
-    /// punctuation". So the inside of a block is now stated positively rather than
-    /// left as the absence of a ban.
+    /// One output came back with every internal comma gone, the model having
+    /// generalised the terminal-period ban into "no punctuation"; so the inside of a
+    /// block is stated positively. And round 5's long message was cut into blocks in
+    /// the middle of its sentences, which the rewrite forbids by name.
     func testMessagePromptStatesWhatSurvivesInsideABlock() {
         let instructions = SmartModeCatalogue.message.prompt.instructions
-        XCTAssertTrue(instructions.contains("Everything inside a block keeps its normal punctuation"))
-        XCTAssertTrue(instructions.contains("stripped the commas inside the blocks"))
+        XCTAssertTrue(instructions.contains("Normal punctuation inside a block"))
+        XCTAssertTrue(instructions.contains("Never split a sentence across two blocks"))
     }
 
     /// Decision 4's soft rule: kept by default, and deliberately not a hard bar the
     /// corpus fails an output on — the one divergence from #523 decision 7.
     func testMessagePromptKeepsASpeakerFlaggedIncompletenessByDefault() {
-        XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions.contains("j'ai oublié un truc"))
+        // Stated by its property, not by a liftable sentence: #581 measured
+        // `Structuré` copying its own rule-7 example phrasing onto the end of a
+        // dictation, and a sentence about the speaker's memory fits any input.
+        let instructions = SmartModeCatalogue.message.prompt.instructions
+        XCTAssertTrue(instructions.contains("When they say something is missing or unfinished, keep that"))
+        XCTAssertFalse(instructions.contains("j'ai oublié un truc"))
     }
 
     /// The #414 copying finding, pinned as `Structured` pins it: a copied line has to
@@ -552,37 +556,30 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// omitting this block costs — 10 of 11 engine outputs in English on French.
     func testMessagePromptIsWrittenOnceAndKeepsTheInputLanguage() {
         let instructions = SmartModeCatalogue.message.prompt.instructions
-        XCTAssertTrue(instructions.contains("OUTPUT LANGUAGE: the language of the input"))
-        XCTAssertTrue(instructions.contains("NEVER translate"))
+        XCTAssertTrue(instructions.contains("write in the language of the input"))
+        XCTAssertTrue(instructions.contains("Never translate"))
+        // The carve-out round 2 needed: four of four borrowed greetings were
+        // translated while this block was emphatic and had none.
+        XCTAssertTrue(instructions.contains("A word the speaker said in another language"))
     }
 
     /// Every character of a system prompt is taken off the dictation that still fits
     /// (`PolishContextBudget`), so the budget is pinned rather than left to drift.
     ///
-    /// #572 invited this to be *"the first prompt in this repo written tight"*, on the
-    /// ground that a message is short input. **Two device rounds on 2026-09-17 took
-    /// that away**, and this assertion is where the cost is visible: it shipped at
-    /// 4 841 characters, round 1 bought 995 against bar 3, round 2 bought 810 against
-    /// bar 4 — the language carve-out that stops the model translating the speaker's
-    /// own greeting, and the short-input example that stops it inventing a line when it
-    /// finds nothing left to cut — round 3 bought 212 for the short self-correction
-    /// example, after round 2's example taught the model that a short input is echoed,
-    /// and round 4 bought 178 for rule 3's never-a-beat clause, after the model kept a
-    /// message's first beat and dropped the rest for the third time on device.
+    /// **This bound is the lesson of rounds 1 to 5.** The prompt shipped at 4 841
+    /// characters and four device rounds of patches took it to 7 036 — each one a
+    /// counter-example or a clause against the last defect, and each moving another
+    /// behaviour: round 2's short example taught the model to echo, round 5 put a line
+    /// in capitals and swapped a word. Pierre's call on 2026-09-18 was to stop
+    /// patching and rewrite it short. The rewrite is **2 925** characters and refuses at
+    /// **5 071** characters of speech, binary-searched through `PolishContextBudget.fit`.
     ///
-    /// At 7 036 it is by some way the longest prompt in the repo and refuses at
-    /// **3 606** characters of speech, against `Structured`'s 4 130 — measured by
-    /// binary-searching `PolishContextBudget.fit`, not interpolated. That is roughly
-    /// 700 spoken words **in one message**, so this is the one mode in the catalogue
-    /// whose ceiling nobody meets, and the overflow branch returns the speaker's own
-    /// words regardless.
-    ///
-    /// The bound stays a few hundred characters above today's value so the next
-    /// addition is a decision rather than a drift. **Which paragraphs of these prompts
-    /// actually do work is #573 part 3**, across all five modes at once rather than
-    /// this one by eye — and at this length that question is now owed.
+    /// The bound sits a few hundred characters above that so that growing the prompt
+    /// again is a decision someone has to argue here, not a drift. Two of the lines the
+    /// rewrite first dropped were measured back in on the Mac (see the prompt's doc):
+    /// that is the bar for adding anything.
     func testMessagePromptStaysWithinItsStatedBudget() {
         let message = SmartModeCatalogue.message.prompt.instructions.count
-        XCTAssertLessThan(message, 7_200, "the prompt grew past what the doc comment claims")
+        XCTAssertLessThan(message, 3_200, "the prompt grew past what the doc comment claims")
     }
 }
