@@ -562,13 +562,14 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// #572 invited this to be *"the first prompt in this repo written tight"*, on the
     /// ground that a message is short input. **Two device rounds on 2026-09-17 took
     /// that away**, and this assertion is where the cost is visible: it shipped at
-    /// 4 841 characters, round 1 bought 995 against bar 3, and round 2 bought 810 more
-    /// against bar 4 — the language carve-out that stops the model translating the
-    /// speaker's own greeting, and the short-input example that stops it inventing a
-    /// line when it finds nothing left to cut.
+    /// 4 841 characters, round 1 bought 995 against bar 3, round 2 bought 810 against
+    /// bar 4 — the language carve-out that stops the model translating the speaker's
+    /// own greeting, and the short-input example that stops it inventing a line when it
+    /// finds nothing left to cut — and round 3 bought 212 for the short self-correction
+    /// example, after round 2's example taught the model that a short input is echoed.
     ///
-    /// At 6 646 it is by some way the longest prompt in the repo and refuses at
-    /// **3 743** characters of speech, against `Structured`'s 4 130 — measured by
+    /// At 6 858 it is by some way the longest prompt in the repo and refuses at
+    /// **3 665** characters of speech, against `Structured`'s 4 130 — measured by
     /// binary-searching `PolishContextBudget.fit`, not interpolated. That is roughly
     /// 700 spoken words **in one message**, so this is the one mode in the catalogue
     /// whose ceiling nobody meets, and the overflow branch returns the speaker's own

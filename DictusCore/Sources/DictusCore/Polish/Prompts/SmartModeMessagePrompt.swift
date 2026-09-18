@@ -168,20 +168,21 @@ import Foundation
 /// characters for `Structured`.
 ///
 /// #572 invited this to be the first prompt here written tight, since a message is
-/// short input. It shipped at 4 841 characters and **two device rounds bought 1 805
+/// short input. It shipped at 4 841 characters and **three device rounds bought 2 017
 /// more of them** — round 1's counter-example and rule bounds against bar 3, round 2's
-/// language carve-out and short-input example against bar 4. **Computed rather than
+/// language carve-out and short-input example against bar 4, and round 3's short
+/// self-correction example, which stops round 2's from reading as *short means echo*. **Computed rather than
 /// claimed**, by binary-searching the app's own `PolishContextBudget.fit` over the
 /// resolved prompts:
 ///
 /// | Mode | Resolved system prompt | Largest dictation that fits |
 /// |---|---|---|
-/// | **`Message`** | **6 646 characters** | **3 743** |
+/// | **`Message`** | **6 858 characters** | **3 665** |
 /// | `Structured` | 5 556 characters | 4 130 |
 /// | `List` | 4 184 characters | 4 620 |
 ///
 /// So it is by some way the longest prompt in the repo and refuses the earliest — and
-/// this is the mode whose input is a text message. **3 743 characters of speech is
+/// this is the mode whose input is a text message. **3 665 characters of speech is
 /// roughly 700 spoken words in one message**, which is the one place in the catalogue
 /// where the ceiling is not a constraint anybody meets, and the overflow branch hands
 /// back the speaker's own words anyway. The trade was taken twice deliberately,
@@ -299,7 +300,13 @@ enum SmartModeMessagePrompt {
         OUTPUT:
         Hello chef, comment tu vas ?
 
-        Nothing there is ceremony to cut — it IS what they are sending. Their greeting stays in their own word, and a question stays a question: it is never answered.
+        Nothing there is ceremony to cut — it IS what they are sending. Their greeting stays in their own word, and a question stays a question: it is never answered. It stays whole because every word addresses the person, NOT because it is short.
+
+        INPUT: je te ramène le tournevis ce soir, enfin non la perceuse.
+        OUTPUT:
+        Je te ramène la perceuse ce soir
+
+        Short is not untouched: the correcting still goes, and so does the final period.
 
         COUNTER-EXAMPLES — the WRONG outputs below break rules 2, 3 and 4. Never produce them.
 
@@ -319,7 +326,7 @@ enum SmartModeMessagePrompt {
 
         Je te la ramène demain matin, je sais pas encore à quelle heure, à plus
 
-        The shortest inputs are where all of this is easiest to break. A short input is not an input with nothing in it.
+        Short inputs are where all of this breaks most easily.
 
         INPUT: Hello chef, à demain, à plus
         WRONG (swapped their own greeting): Salut chef, à demain, à plus
