@@ -328,14 +328,14 @@ public enum PolishPipeline {
     /// three bullets were expected. So the answer is `nil`, and the caller inserts
     /// nothing.
     ///
-    /// ### With one exception, and only one: a context overflow on a mode that says
-    /// it may degrade
+    /// ### With two exceptions, on a mode that says it may degrade
     ///
-    /// `.exceededContextBudget` is decided *before* the engine is called, so no
-    /// transformation was attempted and the wrong-transformation risk the rule
+    /// `.exceededContextBudget` is decided *before* the engine is called, and
+    /// `.rejectedGuardrail` throws the engine's output away whole (#580). Neither can
+    /// put a half-finished transformation in the document, so the risk the rule
     /// guards against is absent by construction. Whether that licenses the floor is
-    /// the mode's own answer — see `SmartModeOverflowBehaviour`, which explains why
-    /// Notes says yes and Translate says no.
+    /// the mode's own answer — see `SmartModeFloorBehaviour`, which explains why
+    /// List says yes and Translate says no.
     ///
     /// **A caller cannot tell the two apart from this return value alone.** A
     /// degraded output is a `String` exactly like a success, so `PolishService`
@@ -357,22 +357,40 @@ public enum PolishPipeline {
 
     /// Whether an armed mode accepts the deterministic floor for this outcome.
     ///
-    /// The outcome test is as narrow as the argument that justifies it. `.engineFailed`,
-    /// `.rejectedGuardrail`, `.cancelled` and `.engineUnavailable` all stay
-    /// fail-closed for every mode, whatever it declares — the first three because a
-    /// transformation was attempted and may have half-happened, the last because it
-    /// describes a process that will not run the model again for its lifetime, which
-    /// is a different conversation to have with the user (#315).
+    /// The outcome test is as narrow as the argument that justifies it: it admits the
+    /// two refusals where **nothing the engine produced can reach the document**, and
+    /// then still asks the mode.
+    ///
+    /// - `.exceededContextBudget` never called the engine.
+    /// - `.rejectedGuardrail` called it and discarded the answer whole (#580). The
+    ///   floor here is `preprocessed` — the transcript with the verbal-punctuation
+    ///   pre-pass applied — which is a deterministic function of what the user said,
+    ///   not of what the model wrote. So the wrong-transformation risk the fail-closed
+    ///   rule exists to stop is absent exactly as it is for an overflow, and what the
+    ///   refusal costs the user is the same thing: the structuring, not the words.
+    ///   Measured on device 2026-09-17: three `Structured` rejections in nine runs,
+    ///   one of them 1,337 characters that reached an empty field.
+    ///
+    /// `.engineFailed` and `.cancelled` stay fail-closed for every mode, whatever it
+    /// declares, because a transformation was attempted and may have half-happened;
+    /// `.engineUnavailable` because it describes a process that will not run the model
+    /// again for its lifetime, which is a different conversation to have with the
+    /// user (#315).
     ///
     /// `.unsupportedInputLanguage` (#490) never reached the engine either, and stays
     /// fail-closed anyway. What the mode would degrade to is text in a language the
     /// model cannot read — Czech bullets from a mode that promised bullets, Czech
     /// from a mode that promised English — so "at least the words are there" is not
-    /// the same offer it is for an overflow, where the words are the ones the user
+    /// the same offer it is for the two above, where the words are the ones the user
     /// would have got. The user is told, and DictusApp's card still holds the raw.
+    ///
+    /// The mode's own answer is still the gate, and it is the whole reason
+    /// `Translate → X` inserts nothing on a refused translation: its floor is the
+    /// input language, the one thing the mode exists to change.
     public static func degradesToFloor(_ mode: SmartMode,
                                        outcome: PolishMetrics.Outcome) -> Bool {
-        outcome == .exceededContextBudget && mode.overflowBehaviour == .insertRawText
+        guard mode.floorBehaviour == .insertRawText else { return false }
+        return outcome == .exceededContextBudget || outcome == .rejectedGuardrail
     }
 
     /// Deterministic pre-pass for the auto path (#239 device-test fix).

@@ -59,9 +59,10 @@ extension DictationCoordinator {
         // untransformed text would be the worst outcome available — the user asked
         // for bullets, or for English, and would get neither without being told.
         // A mode can also come back with the untransformed floor *and* a failure — a
-        // context overflow on a mode that declared the floor better than nothing, see
-        // `SmartModeOverflowBehaviour`. The text below is then the raw rather than the
-        // transformation, and `outcome.isDegraded` is what says so.
+        // context overflow or a guardrail rejection on a mode that declared the floor
+        // better than nothing, see `SmartModeFloorBehaviour`. The text below is then
+        // the raw rather than the transformation, and `outcome.isDegraded` is what
+        // says so.
         //
         // **This path does not tell the user yet, and the keyboard's does.** Not an
         // oversight and not equivalent to inserting it silently: the refusal is logged
