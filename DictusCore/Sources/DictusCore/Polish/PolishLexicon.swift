@@ -21,14 +21,24 @@ import NaturalLanguage
 /// The folding is deliberately blunt — case and diacritics only, no stemming and no
 /// list of any kind. `Müller` in the output is supported by `muller` in the input
 /// and `Léa` by `lea`, and nothing else is claimed.
-enum PolishLexicon {
+///
+/// ### Why it is public (#570)
+///
+/// The `PolishFidelity` research target scores an output against its input on four
+/// axes, and three of them are word comparisons. It has to cut and fold words the
+/// way the shipped guardrails do or its numbers cannot be read against theirs —
+/// which is this type's own founding argument, applied one target further out. A
+/// second tokeniser in the bench would mean the bench and the guardrail disagreeing
+/// about what a word is, and no reader could trace why they disagreed about an
+/// answer. Nothing links `PolishFidelity` into the app or the keyboard.
+public enum PolishLexicon {
 
     /// The text's words, lowercased, diacritic-folded, **in order**.
     ///
     /// A word is a run of letters or numbers; everything else separates. Order is
     /// kept because both callers need it — one matches a contiguous sequence, the
     /// other measures where a sequence starts.
-    static func words(in text: String) -> [String] {
+    public static func words(in text: String) -> [String] {
         fold(text)
             .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
             .flatMap(subdivide(_:))
@@ -92,7 +102,7 @@ enum PolishLexicon {
     private static let unsegmentedRunLength = 8
 
     /// Case- and diacritic-folded text, without splitting it.
-    static func fold(_ text: String) -> String {
+    public static func fold(_ text: String) -> String {
         text.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: nil)
     }
 }

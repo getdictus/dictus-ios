@@ -1,0 +1,14 @@
+[
+  {
+    "id": "S1-synthetic-short",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Alors je voulais te dire que la réunion est décalée à quinze heures."
+  },
+  {
+    "id": "D5-lets-go",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Vas-y let's go."
+  }
+]
