@@ -110,13 +110,26 @@ import Foundation
 ///    the one place in this prompt where an example prints an opener and a closing:
 ///    they are in its own input, which is the whole point.
 ///
-/// Two more, recorded rather than chased. **Internal commas were stripped once** — the
-/// model generalised rule 2's terminal-period ban into "no punctuation", so rule 2 now
-/// states the inside of a block positively. And **the same input dictated twice
-/// returned 0.77 and 0.44**, the second dropping its last two beats: the milder form of
-/// the first-beat-only shape recorded under `userInstruction`. **The 0.2 floor does not
-/// catch that**, and the band must not be widened to chase it — the lowest accepted
-/// output of the round was 0.26 against that floor, so the floor is placed right.
+/// **Internal commas were stripped once** — the model generalised rule 2's
+/// terminal-period ban into "no punctuation", so rule 2 now states the inside of a
+/// block positively.
+///
+/// ### The first-beat-only truncation, and why it is now a clause of rule 3
+///
+/// Recorded after round 1 and not chased; chased after round 4 (2026-09-18), because it
+/// kept coming back and it loses content silently. The model keeps the opening beat and
+/// drops everything after it. Three device captures: round 1 returned 0.44 on a message
+/// whose last two beats — an endearment and a sign-off — were gone, **accepted**; round
+/// 4 returned 0.20 on a long run-on message that ended on a request to the reader,
+/// refused by the length floor. The Mac harness saw the same shape 8 times in 48 on
+/// three user-turn arms, then 0 in 72.
+///
+/// **The 0.2 floor is not the defence and must not be widened to become one**: it
+/// catches only the extreme, and 0.44 sits deep inside the band. Rule 3's cut licence
+/// was the only rule saying what may go, and nothing said what may *not* go except the
+/// person — so rule 3 now closes on the beat as well: a cut takes words out of a beat,
+/// never a beat out of the text, and it names the last beat because that is the one the
+/// captures lost.
 ///
 /// ### The failure this mode sits nearest, and the two traps it inherits
 ///
@@ -168,21 +181,22 @@ import Foundation
 /// characters for `Structured`.
 ///
 /// #572 invited this to be the first prompt here written tight, since a message is
-/// short input. It shipped at 4 841 characters and **three device rounds bought 2 017
+/// short input. It shipped at 4 841 characters and **four device rounds bought 2 195
 /// more of them** — round 1's counter-example and rule bounds against bar 3, round 2's
-/// language carve-out and short-input example against bar 4, and round 3's short
-/// self-correction example, which stops round 2's from reading as *short means echo*. **Computed rather than
+/// language carve-out and short-input example against bar 4, round 3's short
+/// self-correction example, which stops round 2's from reading as *short means echo*,
+/// and round 4's never-a-beat clause on rule 3. **Computed rather than
 /// claimed**, by binary-searching the app's own `PolishContextBudget.fit` over the
 /// resolved prompts:
 ///
 /// | Mode | Resolved system prompt | Largest dictation that fits |
 /// |---|---|---|
-/// | **`Message`** | **6 858 characters** | **3 665** |
+/// | **`Message`** | **7 036 characters** | **3 606** |
 /// | `Structured` | 5 556 characters | 4 130 |
 /// | `List` | 4 184 characters | 4 620 |
 ///
 /// So it is by some way the longest prompt in the repo and refuses the earliest — and
-/// this is the mode whose input is a text message. **3 665 characters of speech is
+/// this is the mode whose input is a text message. **3 606 characters of speech is
 /// roughly 700 spoken words in one message**, which is the one place in the catalogue
 /// where the ceiling is not a constraint anybody meets, and the overflow branch hands
 /// back the speaker's own words anyway. The trade was taken twice deliberately,
@@ -260,7 +274,7 @@ enum SmartModeMessagePrompt {
 
         1. Short blocks, one per beat, separated by a blank line. A beat is one thing the speaker is saying; when they move on, start a new block.
         2. Never close a block with a period — only that one. Everything inside a block keeps its normal punctuation: commas, apostrophes, a period between two sentences. `?` and `!` stay everywhere, end of a block included.
-        3. CUT, and not only fillers — whole clauses go. A restated sentence keeps only its better version. A self-correction keeps only what they corrected TO, and the correcting itself goes ("enfin non", "pardon je me suis planté"). An aside that only exists because they were speaking aloud goes. NEVER THE PERSON: who they are addressing, the name or the words they call them by, how they open and how they close are what you are writing — not an aside. If they said it, it is in the output.
+        3. CUT, and not only fillers — whole clauses go. A restated sentence keeps only its better version. A self-correction keeps only what they corrected TO, and the correcting itself goes ("enfin non", "pardon je me suis planté"). An aside that only exists because they were speaking aloud goes. NEVER THE PERSON: who they are addressing, the name or the words they call them by, how they open and how they close are what you are writing — not an aside. If they said it, it is in the output. NEVER A BEAT EITHER: a cut takes words out of a beat, never a beat out of the text. Every request, question, piece of news and closing they said survives, the last one included.
         4. MIRROR THE REGISTER YOU HEARD — never choose one. Said "tu", write "tu"; said "vous", write "vous". Keep their familiarity, their slang, their spoken negation ("je sais pas" stays "je sais pas"), and any opening words they said. NEVER make the text more formal, more polite or warmer than they were.
         5. Keep their grammatical person and their intent: a request stays a request, a question stays a question. Never turn their clauses into infinitive tasks.
         6. You may tighten a long-winded clause, or use the word they would have typed for one they only said — never against rule 4, and never against a fact.

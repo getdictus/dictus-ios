@@ -565,11 +565,13 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// 4 841 characters, round 1 bought 995 against bar 3, round 2 bought 810 against
     /// bar 4 — the language carve-out that stops the model translating the speaker's
     /// own greeting, and the short-input example that stops it inventing a line when it
-    /// finds nothing left to cut — and round 3 bought 212 for the short self-correction
-    /// example, after round 2's example taught the model that a short input is echoed.
+    /// finds nothing left to cut — round 3 bought 212 for the short self-correction
+    /// example, after round 2's example taught the model that a short input is echoed,
+    /// and round 4 bought 178 for rule 3's never-a-beat clause, after the model kept a
+    /// message's first beat and dropped the rest for the third time on device.
     ///
-    /// At 6 858 it is by some way the longest prompt in the repo and refuses at
-    /// **3 665** characters of speech, against `Structured`'s 4 130 — measured by
+    /// At 7 036 it is by some way the longest prompt in the repo and refuses at
+    /// **3 606** characters of speech, against `Structured`'s 4 130 — measured by
     /// binary-searching `PolishContextBudget.fit`, not interpolated. That is roughly
     /// 700 spoken words **in one message**, so this is the one mode in the catalogue
     /// whose ceiling nobody meets, and the overflow branch returns the speaker's own
@@ -581,6 +583,6 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// this one by eye — and at this length that question is now owed.
     func testMessagePromptStaysWithinItsStatedBudget() {
         let message = SmartModeCatalogue.message.prompt.instructions.count
-        XCTAssertLessThan(message, 6_900, "the prompt grew past what the doc comment claims")
+        XCTAssertLessThan(message, 7_200, "the prompt grew past what the doc comment claims")
     }
 }
