@@ -225,9 +225,12 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
         // never heard of this field decodes to the pair #414 measured, never to a
         // stricter one. The safe half here is the one that cannot introduce a
         // rejection nobody measured for a snapshot written by an older build.
-        self.segmentOverlapThresholds = try container.decodeIfPresent(
+        // An invalid stored value lands on the same default an absent one does,
+        // rather than failing the whole contract: a snapshot that cannot be read
+        // costs the user their dictation, a measured default costs nothing.
+        self.segmentOverlapThresholds = (try? container.decodeIfPresent(
             PolishSegmentOverlapThresholds.self, forKey: .segmentOverlapThresholds
-        ) ?? .default
+        )) ?? .default
     }
 
     /// The band as a range, for `PolishGuardrail.accepts(raw:polished:band:)`.

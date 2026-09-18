@@ -95,6 +95,26 @@ public struct PolishSegmentOverlapThresholds: Equatable, Sendable, Codable {
     public static let `default` = PolishSegmentOverlapThresholds(
         floor: 0.15, minimumContentWords: 3
     )
+
+    /// Validates what the initializer only asserts, because a decoded value never
+    /// passes through the initializer (#572 review). These thresholds cross the App
+    /// Group inside a contract snapshot, and a corrupt one would not crash here — it
+    /// would silently move the guard: a `floor` above 1 refuses every output, and a
+    /// `minimumContentWords` of 0 divides by zero on an empty segment. So an invalid
+    /// value throws, and `PolishAcceptanceContract.init(from:)` answers it with the
+    /// measured `.default`.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let floor = try container.decode(Double.self, forKey: .floor)
+        let minimumContentWords = try container.decode(Int.self, forKey: .minimumContentWords)
+        guard floor.isFinite, (0...1).contains(floor), minimumContentWords > 0 else {
+            throw DecodingError.dataCorrupted(.init(
+                codingPath: decoder.codingPath,
+                debugDescription: "invalid overlap thresholds: floor \(floor), minimumContentWords \(minimumContentWords)"
+            ))
+        }
+        self.init(floor: floor, minimumContentWords: minimumContentWords)
+    }
 }
 
 /// Whether the model's output is about the text it was given.

@@ -73,6 +73,9 @@ final class MessageShortLayoutTests: XCTestCase {
             job: PolishJob(task: .smart(SmartModeCatalogue.structured),
                            promptLanguage: .french, languageAgnosticPath: false)
         )
+        // `engineOutput` is also set on a refusal, so the outcome is what proves the
+        // blank lines reached the user rather than being refused with the output.
+        XCTAssertEqual(result.outcome, .success)
         XCTAssertEqual(result.engineOutput, blocked)
     }
 

@@ -140,6 +140,39 @@ final class MessageGroundingBlindSpotTests: XCTestCase {
         }
     }
 
+    /// End to end through `PolishPipeline.transform`, so removing the pipeline's
+    /// forwarding of the contract's thresholds cannot go unnoticed (#572 review): the
+    /// direct `PolishGrounding` tests above would all still pass without it.
+    func testThePipelineRefusesAShortFabricationUnderTheMessageContract() async {
+        for case let (name, raw, polished) in fabrications {
+            let result = await PolishPipeline.transform(
+                preprocessed: raw,
+                engine: FixedOutputEngine(output: polished),
+                job: PolishJob(task: .smart(SmartModeCatalogue.message),
+                               promptLanguage: .french, languageAgnosticPath: false)
+            )
+            XCTAssertEqual(result.outcome, .rejectedGuardrail, name)
+            XCTAssertEqual(result.rejectedCheck, .segmentOverlap, name)
+        }
+    }
+
+    /// An invalid stored pair — a corrupt snapshot — lands on the measured default
+    /// instead of failing the contract or moving the guard.
+    func testAnInvalidDecodedThresholdFallsBackToTheMeasuredPair() throws {
+        for bad in [#""floor":1.5,"minimumContentWords":1"#, #""floor":0.15,"minimumContentWords":0"#] {
+            let json = """
+            {"minimumLengthRatio":0.2,"maximumLengthRatio":1.1,"outputLanguage":"sameAsInput",
+             "requiresGroundedNames":true,"requiresAlignedPrefix":false,
+             "segmentOverlapThresholds":{\(bad)}}
+            """
+            let decoded = try JSONDecoder().decode(PolishAcceptanceContract.self, from: Data(json.utf8))
+            XCTAssertEqual(decoded.segmentOverlapThresholds, .default, bad)
+            XCTAssertThrowsError(try JSONDecoder().decode(
+                PolishSegmentOverlapThresholds.self, from: Data("{\(bad)}".utf8)
+            ), bad)
+        }
+    }
+
     /// A contract written by a build that never heard of this field decodes to the
     /// measured pair, never to a stricter one: a snapshot crosses the App Group and an
     /// app update can land between the write and the read, and a rejection on a Smart
@@ -160,5 +193,18 @@ final class MessageGroundingBlindSpotTests: XCTestCase {
         let decoded = try JSONDecoder().decode(PolishAcceptanceContract.self, from: data)
         XCTAssertEqual(decoded.segmentOverlapThresholds.minimumContentWords, 1)
         XCTAssertEqual(decoded, SmartModeCatalogue.message.contract)
+    }
+}
+
+/// Returns one fixed string, the way `PolishPipelineTests`' own stub does. Repeated
+/// here rather than shared because that one is `private` to its file.
+private struct FixedOutputEngine: PolishEngineProtocol {
+    let identifier = "fixed-output"
+    let output: String
+
+    func polish(raw: String,
+                targetLanguage: SupportedLanguage,
+                task: PolishTask) async throws -> String {
+        output
     }
 }
