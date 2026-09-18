@@ -293,8 +293,11 @@ variant with the measurement that justifies it.
 
 Four rounds, not one: the two declared above, plus two high-N probes on the shortest
 fixtures, because the defect #581 is about turned out to happen about once in a hundred
-outputs and three runs per fixture cannot see a 1 % event. 720 outputs in all.
-`findings.md` §1 lists them with their captures.
+outputs and three runs per fixture cannot see a 1 % event. 720 outputs in all, on
+macOS 26.5.1. `findings.md` §1 lists them with their captures.
+
+Rounds 1 and 3 were then re-run **unchanged** on macOS 27.0 (26A428), 135 more outputs,
+to test §9's first risk directly. `findings.md` §9.
 
 ## 9. Risks, declared in advance
 

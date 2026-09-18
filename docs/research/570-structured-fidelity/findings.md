@@ -1,6 +1,10 @@
 # `Structuré` fidelity — what the licence to rewrite costs (#570, #581)
 
-**Where:** Mac, macOS 26.5.1, Apple Intelligence on, `polish-harness`, 2026-09-17.
+**Where:** Mac, Apple Intelligence on, `polish-harness`. **Two OS generations, and every
+number says which:** rounds 1-4 and the calibration ran on **macOS 26.5.1** on
+2026-09-17; rounds 1 and 3 were re-run unchanged on **macOS 27.0 (26A428)** on
+2026-09-18, after Pierre upgraded the Mac specifically to test §6's first caveat. §9 is
+that re-run. Sections 1-8 are macOS 26.5.1 throughout unless they say otherwise.
 **Brief:** #570's comment of 2026-09-17 16:40, *"The bench this issue needs, specified"*.
 **Bars:** `bars.md`, committed before the first arm ran, with its two calibration
 amendments recorded in §6.1.
@@ -20,14 +24,17 @@ amendments recorded in §6.1.
 1. **The bench works.** Replayed against the nine device outputs, it flags a defect on
    a scored axis in **8 of 9**, including every deletion, every person loss and the
    fabrication Pierre found by hand — and it stays silent on rule 7 doing its job.
-2. **The Mac does not reproduce the device's damage.** Over **714 scored outputs** on
-   the shipping prompt and two variants, the same bench flags **2 fabrications in 239**
-   on the shipping prompt, and no person loss on any ordinary-length fixture the phone
-   broke. The phone uses the licence; this Mac's model largely declines to.
-3. **No prompt variant is recommended.** #581's proposed fix, implemented literally and
-   measured over 360 outputs, does not lower the fabrication rate (p = 0.21) and is
-   refused nearly three times as often (p = 0.042). It relocated the liftable line
-   rather than removing it. §5, §7.
+2. **Neither Mac reproduces the device's rewriting damage.** On macOS 26.5.1 (714
+   scored outputs) the shipping prompt fabricates 2 times in 239 and loses the speaker's
+   person on no fixture the phone broke. macOS 27.0 is a different model — it reproduces
+   the device's **counter-example leak** on `D5` 3 of 3 — and it still does not delete
+   `D1`'s proposition, move `D4` out of the first person, or refuse `D6`. Mac 27 is not
+   iPhone 27 either. §9.
+3. **No prompt variant is recommended, on either OS, for any round.** #581's proposed fix
+   (V1) does not lower the fabrication rate on macOS 26 (p = 0.21, direction against) and
+   on macOS 27 it produces the defect #581 is about **and gets it accepted**: `D1`,
+   838 → 854, closing on `Et puis, il y avait un dernier machin, mais ça m'échappe.`,
+   passed by every guardrail. §5, §7, §9.
 
 ---
 
@@ -280,10 +287,11 @@ shortest inputs, both variants make the model **less stable in every direction a
 A refusal costs a Smart Mode user their whole dictation (#580), so this is the cost that
 would actually be felt.
 
-**Nothing leaked reached a document, in any round.** Across all four rounds, **12
-outputs of 714 copied prompt content and 0 of the 12 were accepted** — the length
-ceiling refused every one. That is the band doing the job #523's decision 8 sized it
-for, on every arm, and it is why none of this was ever user-visible off the device.
+**On macOS 26.5.1, nothing leaked reached a document.** Across all four rounds, **12
+outputs of 714 copied prompt content and 0 of the 12 were accepted** — every one was a
+wholesale dump long enough for the length ceiling to refuse. **That stops being true on
+macOS 27**, where a single appended sentence gets through on all three arms, the shipping
+prompt included. §9.
 
 ## 6. Every reason to distrust these numbers, before anyone acts on them
 
@@ -343,6 +351,12 @@ rule 7 clause, and the demonstration moved out into an elided fragment.
 One row of that table is a win and it is the one that only says the change did no harm
 to decision 7. Everything else is neutral or negative.
 
+**On macOS 27 it is worse, and qualitatively so (§9).** Round 1 re-run: 4 fabrications in
+26 against shipping's 0 in 27, three of them `D6` appending the whole house example plus
+the V1 fragment. And one of them is **accepted**: `D1-three-steps` run 1, 838 → 854,
+closing on `Et puis, il y avait un dernier machin, mais ça m'échappe.` Every guardrail
+passes it. That is #581's exact defect reaching the document, caused by #581's fix.
+
 ### `V2-fidelity` — NOT recommended
 
 V1 plus two FORBIDDEN lines naming deletion and person change. It moved nothing
@@ -365,21 +379,32 @@ saying so rather than a reason to write a third variant.**
 2. **Do not re-word rule 7 again without a device round.** Two arms, 240 outputs, no
    improvement and a measurable destabilisation. A third wording is re-buying a lesson
    twice paid for.
-3. **The guardrail is where this defect is actually caught today, and it works.** 12
-   leaks in 714 outputs, **0 accepted**. `PolishSpeakerState` from this campaign is a
-   deterministic, model-free check that reads a fabricated closing sentence directly —
-   it is the obvious shape for a sixth guardrail check. **It is not proposed here**, for
-   #466's reason: adding a check costs false refusals, this corpus has only one
-   positive, and a check nobody has swept is exactly what #466 measured the price of.
-   What is proposed is that a future issue sweep it on a corpus built for it.
-4. **If any prompt work happens, measure it on the phone.** §6, item 1. Across rounds
-   1-3 — 360 outputs of ordinary length, all three arms — the Mac produced **one**
-   fabrication; the phone produced one in its first nine dictations. The instrument that reaches this behaviour is a device.
+3. **The length ceiling catches the prompt DUMP, not the appended sentence.** On macOS
+   26, 12 leaks in 714 outputs and 0 accepted — every one was a wholesale copy of the
+   example block, long enough to trip 1.5. On macOS 27 that stops being the whole story:
+   **4 fabrications were accepted across the three arms**, one of them on the shipping
+   prompt (§9), because a single appended sentence costs a long dictation almost no
+   length. The device's own fabrication (`D9`) was only refused because `segmentOverlap`
+   happened to fire. So the guardrail family does **not** reliably catch #581's shape,
+   and this round is the first evidence of that off the device.
+   `PolishSpeakerState` from this campaign is a deterministic, model-free check that
+   reads a fabricated closing sentence directly — the obvious shape for a sixth guardrail
+   check. **It is still not proposed here**, for #466's reason: adding a check costs
+   false refusals, and nobody has swept this one. What is proposed is that a future issue
+   sweep it, and this round now gives that issue its positives — five accepted
+   fabrications across two OS generations, plus the device's.
+4. **If any prompt work happens, measure it where the defect lives.** §6, item 1, and §9:
+   macOS 27 is closer to the phone than macOS 26 on the leak and still far from it on the
+   rewriting. The instrument that reaches the rewriting damage is a device.
 
-### What a device round would have to look like
+### What a device round would have to look like — with no candidate to put in it
 
-The Mac cannot answer this. A device round is the only instrument that reaches the
-behaviour, and it needs to be a **rate**, not a session:
+**Neither variant here is a candidate for a device round any more.** V1 was the one
+provisionally put forward before round 4; macOS 27 shows it producing the defect it was
+meant to remove and getting it accepted. V2 carries V1's fragment and produced two
+accepted fabrications on macOS 27. Sending either to the phone would spend eighty
+dictations of Pierre's voice measuring a variant already measured worse. The protocol is
+kept for whatever candidate comes next:
 
 1. Install a build carrying the variant under test, pinned as `Structuré`.
 2. Dictate the four short device transcripts of `device-structured-fr.json` verbatim,
@@ -389,7 +414,7 @@ behaviour, and it needs to be a **rate**, not a session:
 
 Eighty device dictations is a lot of Pierre's voice. That is the honest price of a
 1 % event, and it is why §5 spent 360 Mac outputs trying to avoid asking for it — and
-came back with a null.
+came back with a null on macOS 26, and a refutation on macOS 27.
 
 ## 8. What this round leaves open
 
@@ -397,6 +422,15 @@ came back with a null.
   it is settled, and no measurement can settle it.
 - **Term substitution has no axis.** §6.3. It is the defect class #570's title is half
   about and the brief did not ask for it.
+- **Duplicated content has no axis either, and it reaches the document.** Found on
+  macOS 27 (§9): `D9-suggestion-bar`, shipping, run 2, is **accepted** at 1 337 → 1 892
+  characters, a ratio of 1.42 against a 1.5 ceiling. It reproduces the whole dictation,
+  then restates it as a five-item bullet list. Every axis reads it as clean — recall is
+  perfect, nothing is fabricated, the person is kept — because every one of them asks
+  whether something was *lost* or *invented*, and here nothing was: it was said twice.
+  The length ceiling is the only check that could see it, and 1.42 is inside the band
+  #523's decision 8 sized from Typeless's 0.57 floor. **Named here as unmeasured, the way
+  term substitution is. No axis was built for it.**
 - **`D6-issues-check`, refused on device, accepted on the Mac.** Its Mac output rewrites
   the opening into `Il faut que tu sois présent pour effectuer une vérification
   préliminaire` — words the speaker did not say — and the bench flags four unrecalled
@@ -404,3 +438,114 @@ came back with a null.
   two different problems on two model revisions.
 - **#580 is untouched here.** Three of nine device dictations were lost to a refusal.
   This round measures what is in the outputs, not what the user gets when there is none.
+
+## 9. macOS 27: the same bench on a newer model, 2026-09-18
+
+§6's first caveat — *the Mac is not the phone* — named a hypothesis #523's own findings
+had already recorded: the Mac and the phone were not running the same Apple FM
+generation. Pierre upgraded the Mac to **macOS 27.0 (26A428)** to test it. Xcode 26.4.1
+and the harness still run unchanged. Rounds 1 and 3 were re-run **exactly as before** —
+same fixtures, same three arms, three runs each. Rounds 2 and 4 were deliberately **not**
+re-run: round 1 already settles V1, and the leak probe answers a question that no longer
+has a live candidate.
+
+| Round | Captures |
+|---|---|
+| 1 — device fixtures | `capture-device-macos27.json`, `raw/round1-device-3arms-3runs-macos27.txt` |
+| 3 — longform | `capture-longform-macos27.json`, `raw/round3-longform-3arms-3runs-macos27.txt` |
+
+### The model did change
+
+Shipping prompt, round 1, macOS 26.5.1 → macOS 27.0:
+
+| | macOS 26.5.1 | macOS 27.0 |
+|---|---|---|
+| refused | 0/27 | **3/27** — all `length`, all `D5-lets-go` |
+| counter-example leak (plants, coffee) | 0/27 | **3/27** — `D5`, 3 of 3 |
+| inversions (observable) | 32 | **51** |
+| negation dropped (observable) | 1/27 | **5/27** |
+
+The 3-of-3 plants leak on `D5` **is the device event of 2026-09-17 12:14:57**, reproduced
+on the Mac for the first time: a 15-character input, the prompt's own counter-example
+returned verbatim, refused on length. macOS 26 never produced it in 18 attempts across
+rounds 1 and 2.
+
+### It still does not reproduce the phone's rewriting damage
+
+| Fixture | Phone | macOS 27, shipping, 3 runs |
+|---|---|---|
+| `D1-three-steps` | a proposition deleted | no deletion; the one flag each run is the model **repairing** Parakeet's `And the three attack` drift |
+| `D4-logs-polish` | five defects, incl. person and stance | no defect, 3/3 |
+| `D6-issues-check` | refused | **accepted 3/3** |
+| `D9-suggestion-bar` | refused; fabricated closing sentence | accepted 3/3, no fabrication |
+
+Outputs mostly stay close to the raw. **Mac 27 is not iPhone 27 either.** The upgrade
+closed the gap on the leak and not on the rewriting, which is the half of #570 that
+matters most.
+
+### V1 is refuted, and harder than round 4 said
+
+Rounds 1 and 3 on macOS 27, engine failures excluded:
+
+| arm | scored | fabricated | **accepted fabrications** | refused |
+|---|---|---|---|---|
+| shipping | 45 | 1 | **1** | 3 |
+| V1-rule7-property | 43 | 4 | **1** | 8 |
+| V2-fidelity | 43 | 3 | **2** | 8 |
+
+On round 1 alone, V1 fabricates **4 of 26 against shipping's 0 of 27** (the coordinator's
+reading, verified from the capture). Three are `D6` appending the whole house example
+plus the V1 fragment, refused on length. The fourth is the one that matters:
+
+> **`D1-three-steps`, V1, run 1 — accepted, 838 → 854.** A faithful rewrite of the whole
+> dictation, closing on **`Et puis, il y avait un dernier machin, mais ça m'échappe.`**
+> Every guardrail passes it.
+
+That is #581's exact defect reaching the document, and the sentence is **the fragment V1
+introduced**. Pooled over both rounds the fabrication rate is still not statistically
+separated (1/45 against 4/43, p = 0.20), and it does not need to be: the variant built to
+remove the defect produced it in an accepted output, on a model closer to the phone.
+
+### Every arm now produces an ACCEPTED fabrication — including shipping
+
+This did not happen on macOS 26, where every one of 12 leaks was a prompt dump long
+enough to trip the length ceiling. On macOS 27 a single sentence is appended to an
+otherwise-faithful output, and a single sentence costs almost no length:
+
+| Arm | Output | Ratio | What was appended |
+|---|---|---|---|
+| **shipping** | `1-free-form` #3 | 395 → 399 | **`J'ai oublié un truc.`** |
+| V1 | `D1-three-steps` #1 | 838 → 854 | `Et puis, il y avait un dernier machin, mais ça m'échappe.` |
+| V2 | `6-unscripted` #2 | 1 159 → 1 275 | `… voilà c'est tout, ah non il y avait un dernier machin mais ça m'échappe.` |
+| V2 | `D9-suggestion-bar` #2 | 1 337 → 1 468 | `Et puis je pense que ma mémoire a failli, mais je ne sais plus si c'est bien ce que j'ai dit à propos du changement de layer de clavier.` |
+
+Three findings sit in that table.
+
+1. **The shipping prompt's accepted fabrication is `J'ai oublié un truc.` — one of rule
+   7's four instruction-text phrasings, word for word.** Not the worked example. That is
+   #581's *second* source (*"The four phrasings in rule 7's instruction text are the
+   second source"*), observed on the prompt that ships today. #581 named two sources and
+   this campaign has now seen both leak.
+2. **V2's `D9` sentence was copied from nothing.** No example contains *"ma mémoire a
+   failli"*. Stating rule 7 by its *property* — "a sentence about their memory" — appears
+   to describe the sentence well enough for the model to **write a new one**. Rewording
+   the rule did not remove the invitation; it generalised it. One observation, and it is
+   the most worrying line in the document.
+3. **The guardrail family does not reliably catch #581's shape.** Four accepted, across
+   all three arms. §7 item 3 is corrected accordingly.
+
+**Rule 7 still fires on macOS 27.** `5-rambling`'s flagged incompleteness is preserved
+3/3 on every arm, exactly as on macOS 26. Decision 7 holds on both generations.
+
+### What macOS 27 changes in the recommendation
+
+- **V1 is no longer a candidate for a device round**, and neither is V2. §7.
+- **#581's diagnosis is now confirmed on both of its named sources**, on the shipping
+  prompt, off the device. The prompt as shipped leaks rule 7 — through its example on
+  macOS 26 and the device, through its instruction text on macOS 27.
+- **The measured case for a speaker-state guardrail check got stronger, and it is still
+  not proposed here.** It now has accepted positives to be swept against, which it did
+  not have yesterday. It still has no false-refusal measurement, and #466 is why that
+  matters.
+- **Everything in §1-§8 remains a macOS 26.5.1 number.** None of it was re-labelled or
+  re-computed; §9 is additive.
