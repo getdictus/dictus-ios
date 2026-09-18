@@ -1,0 +1,5 @@
+Cut every hesitation, every repetition and every self-correction from this text — keep only what the speaker corrected TO — then write what is left the way they would have typed it, in short blocks, one per beat, separated by a blank line. Output only the rewritten text, nothing else.
+
+{{INPUT}}
+
+Typed output:

@@ -241,6 +241,17 @@
         }
       }
     },
+    "Message" : {
+      "comment" : "Name of the Smart Mode that rewrites a dictation as the short blocks the speaker would have typed to a person (#572).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Message"
+          }
+        }
+      }
+    },
     "No results" : {
       "localizations" : {
         "fr" : {

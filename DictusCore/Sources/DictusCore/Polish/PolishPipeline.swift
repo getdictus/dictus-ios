@@ -170,8 +170,15 @@ public enum PolishPipeline {
                 return Result(engineOutput: polished, outcome: .rejectedGuardrail,
                               engineMs: engineMs, postprocessMs: postMs, rejectedCheck: refused)
             }
+            // Layout only, and only after every check has accepted the model's own
+            // output (#572): the guardrails judge what the model wrote, and this pass
+            // cannot change a word of it. Note the export then logs the tightened text,
+            // as it already logs the decoded one.
+            let delivered = job.task.smartMode?.prompt.shortOutputBlockLimit.map {
+                PolishPostpass.tightenBlocks(polished, whenShorterThan: $0)
+            } ?? polished
             let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
-            return Result(engineOutput: polished, outcome: .success, engineMs: engineMs, postprocessMs: postMs)
+            return Result(engineOutput: delivered, outcome: .success, engineMs: engineMs, postprocessMs: postMs)
         } catch is CancellationError {
             let engineMs = Int(Date().timeIntervalSince(engineStart) * 1000)
             return Result(engineOutput: nil, outcome: .cancelled, engineMs: engineMs, postprocessMs: 0)
@@ -269,7 +276,14 @@ public enum PolishPipeline {
                                                       preprocessed: String,
                                                       job: PolishJob) -> Bool {
         guard job.task.contract.requiresGroundedNames else { return true }
-        return PolishGrounding.acceptsSegmentOverlap(polished: polished, raw: preprocessed)
+        // Thresholds from the contract and not the global default since #572: which
+        // segments are short enough to skip is a per-mode answer, because a mode whose
+        // input is a two-line message skips everything at the number measured on
+        // `List` bullets. See `PolishAcceptanceContract.segmentOverlapThresholds`.
+        return PolishGrounding.acceptsSegmentOverlap(
+            polished: polished, raw: preprocessed,
+            thresholds: job.task.contract.segmentOverlapThresholds
+        )
     }
 
     /// Prefix-alignment guardrail (#466, #349): the output has to open where the

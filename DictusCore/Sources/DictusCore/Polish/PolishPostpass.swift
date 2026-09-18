@@ -85,6 +85,21 @@ public enum PolishPostpass {
         return out
     }
 
+    /// Blank lines become single line breaks when `text` is shorter than `limit`
+    /// characters (#572). Longer text is returned untouched.
+    ///
+    /// Only runs of blank lines are touched: a single line break is already the
+    /// layout wanted, and every other character — punctuation included — is kept, so
+    /// this can never change what the text says. See
+    /// `SmartModePrompt.shortOutputBlockLimit` for why it exists and why it is not a
+    /// prompt rule.
+    public static func tightenBlocks(_ text: String, whenShorterThan limit: Int) -> String {
+        guard text.count < limit else { return text }
+        return text.replacingOccurrences(
+            of: #"\n[ \t]*(?:\n[ \t]*)+"#, with: "\n", options: [.regularExpression]
+        )
+    }
+
     /// Run on the engine's output. Restores newlines from markers and
     /// applies language-specific typography Apple FM is unreliable about.
     public static func decodeFromEngine(_ polished: String,

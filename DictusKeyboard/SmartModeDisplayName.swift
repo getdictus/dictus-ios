@@ -18,9 +18,11 @@ extension SmartMode {
     ///
     /// Most modes need nothing here. `"\u{2192} EN"` is deliberately language-neutral
     /// so one string fits a 46 pt fan row in every UI locale, and it falls straight
-    /// through. Two modes have a name that has to be said in the
+    /// through. Three modes have a name that has to be said in the
     /// user's language: the bullet mode, renamed from `Notes` to `List` / `Liste` on
-    /// 2026-08-27, and `Structured` / `Structuré` (#523).
+    /// 2026-08-27, `Structured` / `Structuré` (#523), and `Message` (#572) — which
+    /// spells the same in both UI locales today, and is keyed here anyway so that a
+    /// later locale, or a later rename, has one place to land.
     ///
     /// Keyed on the **identifier**, which the rename deliberately did not touch: no
     /// persisted armed mode is invalidated and no pinned order is lost. A record that
@@ -51,6 +53,11 @@ extension SmartMode {
             return String(
                 localized: "Structured",
                 comment: "Name of the Smart Mode that rewrites a long dictation as clear written paragraphs (#523)."
+            )
+        case SmartModeCatalogue.messageIdentifier:
+            return String(
+                localized: "Message",
+                comment: "Name of the Smart Mode that rewrites a dictation as the short blocks the speaker would have typed to a person (#572)."
             )
         default:
             return fallback
