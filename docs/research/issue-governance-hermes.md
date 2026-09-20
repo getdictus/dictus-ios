@@ -12,19 +12,19 @@ Scope: primary sources only from `NousResearch/hermes-agent` and the official He
 
 Hermes uses two related but distinct governance layers:
 
-1. **Public repository governance**: intake forms structure reports, the contribution guide publishes a priority order, and labels separate priority, type, component, workflow state, and automation risk.[1][3][6]
-   Tracking issues can serve as dependency-ordered roadmaps, while CI combines automated checks with an explicit human-review gate for sensitive changes.[8][13][14]
+1. **Public repository governance**: intake forms structure reports, the contribution guide publishes a priority order, and labels separate priority, type, component, workflow state, and automation risk.[1] [3] [6]
+   Tracking issues can serve as dependency-ordered roadmaps, while CI combines automated checks with an explicit human-review gate for sensitive changes.[8] [13] [14]
 2. **Runtime work governance**: a durable SQLite Kanban state machine governs task handoffs, retries, blockers, human intervention, review, and audit history.[9]
-   Cron provides persistent scheduled execution, while webhooks and hooks provide event-driven activation with idempotency and capability controls.[10][11][15]
+   Cron provides persistent scheduled execution, while webhooks and hooks provide event-driven activation with idempotency and capability controls.[10] [11] [15]
 
-The strongest reusable idea for Dictus is not “automate everything.” It is **automate evidence gathering, routing, and repeatable state transitions while reserving product judgment and risky approvals for humans**. Hermes makes that boundary explicit in both its repository instructions and its runtime primitives.[2][9][14]
+The strongest reusable idea for Dictus is not “automate everything.” It is **automate evidence gathering, routing, and repeatable state transitions while reserving product judgment and risky approvals for humans**. Hermes makes that boundary explicit in both its repository instructions and its runtime primitives.[2] [9] [14]
 
 ## Research method and limitations
 
 - Repository files were inspected at the pinned commit above so file citations remain stable.
-- Live labels and issue metadata were inspected through GitHub’s public repository/API surfaces on 2026-09-20.[6][7][8]
+- Live labels and issue metadata were inspected through GitHub’s public repository/API surfaces on 2026-09-20.[6] [7] [8]
 - The repository milestones API returned an empty array, so no repository milestones were observable at research time.[16]
-- GitHub Projects v2 could not be fully enumerated because the available token lacked `read:project`. Therefore this note does **not** claim that Nous Research has no organization-level project boards. The two sampled governance issues had no project or milestone attached in their public metadata.[7][8]
+- GitHub Projects v2 could not be fully enumerated because the available token lacked `read:project`. Therefore this note does **not** claim that Nous Research has no organization-level project boards. The two sampled governance issues had no project or milestone attached in their public metadata.[7] [8]
 - “Observed” below means directly present in a primary source. “Inference for Dictus” is a recommendation derived from those observations, not a claim about Hermes’s internal maintainer process.
 
 ## 1. Prioritization and issue taxonomy
@@ -41,7 +41,7 @@ The live label catalog separates several independent dimensions instead of encod
 - **Decision/blocking state:** `needs-decision`, `needs-repro`, `awaiting-reporter`, `blocked`.
 - **Automation provenance/risk:** `sweeper:*` labels record disposition, blast radius, and specific risks such as caching, compatibility, message delivery, security boundaries, and session state.[6]
 
-There is some observable taxonomy drift: the feature-request form requests the legacy `enhancement` label and the bug form requests `bug`, while the live taxonomy also uses `type/feature` and `type/bug`. The forms themselves collect useful structured data - problem/use case, proposed solution, alternatives, feature type and scope for features; reproducible steps, expected/actual behavior, component, platform and debug report for bugs - but their default labels are not fully aligned with the richer live taxonomy.[3][4][6]
+There is some observable taxonomy drift: the feature-request form requests the legacy `enhancement` label and the bug form requests `bug`, while the live taxonomy also uses `type/feature` and `type/bug`. The forms themselves collect useful structured data - problem/use case, proposed solution, alternatives, feature type and scope for features; reproducible steps, expected/actual behavior, component, platform and debug report for bugs - but their default labels are not fully aligned with the richer live taxonomy.[3] [4] [6]
 
 Hermes sometimes uses a parent tracking issue as the roadmap. The plugin-interface tracker declares itself the “plan of record,” decomposes work into dependency-ordered phases, gives every sub-issue design constraints and acceptance criteria, and uses GitHub sub-issues to show completion.[8] The repository milestones endpoint, by contrast, had no entries at the time of inspection.[16]
 
@@ -62,9 +62,9 @@ Keep priority definitions objective. For Dictus, a plausible mapping is:
 - `P2`: degraded behavior with a workaround;
 - `P3`: polish, ergonomics, or non-blocking enhancement.
 
-Use a tracking issue with sub-issues when sequence and dependency matter. Do not add milestones merely to imitate a conventional roadmap; Hermes demonstrates that a well-written plan-of-record issue can carry phases, constraints, and completion without them.[8][16]
+Use a tracking issue with sub-issues when sequence and dependency matter. Do not add milestones merely to imitate a conventional roadmap; Hermes demonstrates that a well-written plan-of-record issue can carry phases, constraints, and completion without them.[8] [16]
 
-Finally, make label names canonical in one checked-in file or sync script and validate templates against it. That is the direct lesson from the observable `enhancement`/`type/feature` drift.[4][6]
+Finally, make label names canonical in one checked-in file or sync script and validate templates against it. That is the direct lesson from the observable `enhancement`/`type/feature` drift.[4] [6]
 
 ## 2. Triage policy and the human/automation boundary
 
@@ -90,7 +90,7 @@ Define an explicit triage decision table:
 | Product taste, UX trade-off, monetization, privacy policy, App Store risk, architecture direction | Summarize evidence and apply `ready-for-human`/`needs-decision` | Decide |
 | External dependency or missing capability | Apply `blocked` with a concrete reason and unblock condition | Supply input or change direction |
 
-Automation should always leave a short evidence record: what it checked, which commit/current behavior it compared, the reason for the transition, and how a human can reverse it. Hermes’s public sweeper comment is a good model.[2][7]
+Automation should always leave a short evidence record: what it checked, which commit/current behavior it compared, the reason for the transition, and how a human can reverse it. Hermes’s public sweeper comment is a good model.[2] [7]
 
 Do **not** let a model close an issue merely because it judges the feature undesirable. For Dictus, product scope and user-facing behavior are maintainer decisions, even if an agent prepares the comparison and recommendation.
 
@@ -148,7 +148,7 @@ Hermes CI first classifies changed paths, then runs only affected lanes: Python 
 
 Sensitive paths are not approved by green tests alone. Changes to CI-sensitive files, the MCP catalog, or critical supply-chain findings require the manually applied `ci-reviewed` label; the workflow fails until that label is present. Applying the label triggers a rerun of failed checks.[14]
 
-The contribution guide and agent instructions prefer behavior contracts over snapshot/change-detector tests and require end-to-end validation for config propagation, security boundaries, remote backends, and real I/O paths where mocks could hide integration failures.[1][2]
+The contribution guide and agent instructions prefer behavior contracts over snapshot/change-detector tests and require end-to-end validation for config propagation, security boundaries, remote backends, and real I/O paths where mocks could hide integration failures.[1] [2]
 
 ### Inference for Dictus
 
@@ -174,7 +174,7 @@ Use a two-tier merge gate:
 
 A single human-approval label can gate all sensitive classes if the bot comment lists the class-specific checklist, mirroring Hermes’s `ci-reviewed` pattern.[14]
 
-Path-based CI is reusable, but Dictus should fail open on classifier uncertainty: if a changed path is unknown, run the broader suite rather than silently skipping coverage. Hermes explicitly treats post-merge/dispatch classification conservatively.[13]
+Path-based CI is reusable, but Dictus should default to the broader suite on classifier uncertainty: if a changed path is unknown, run the broader suite rather than silently skipping coverage. Hermes explicitly treats post-merge/dispatch classification conservatively.[13]
 
 ## 5. Scheduled and event-driven automation
 
@@ -288,27 +288,27 @@ A task is not done when code is merely written. It is done when:
 ## 7. What not to copy blindly
 
 1. **Do not copy Hermes’s label volume.** Hermes has a very large product surface. Dictus should reuse the dimensions, not the count.[6]
-2. **Do not assume issue forms stay synchronized automatically.** The observed legacy/richer-label mismatch shows why a validation or sync check is needed.[3][4][6]
-3. **Do not treat an agent’s confidence as evidence.** Require reproduction, code/doc citations, and test output before automatic disposition.[2][7]
+2. **Do not assume issue forms stay synchronized automatically.** The observed legacy/richer-label mismatch shows why a validation or sync check is needed.[3] [4] [6]
+3. **Do not treat an agent’s confidence as evidence.** Require reproduction, code/doc citations, and test output before automatic disposition.[2] [7]
 4. **Do not keep retrying human-blocked work.** Persist the reason and unblock condition, then stop until an external event changes state.[9]
 5. **Do not expose broad tools to untrusted webhook text.** Authenticate the sender, constrain capabilities, and still treat issue/PR content as untrusted.[11]
-6. **Do not make all review automated.** Hermes’s strongest pattern is selective automation plus explicit human gates for judgment and sensitive changes.[2][14]
+6. **Do not make all review automated.** Hermes’s strongest pattern is selective automation plus explicit human gates for judgment and sensitive changes.[2] [14]
 
 ## Sources
 
-[1] https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/CONTRIBUTING.md
-[2] https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/AGENTS.md
-[3] https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/ISSUE_TEMPLATE/bug_report.yml
-[4] https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/ISSUE_TEMPLATE/feature_request.yml
-[5] https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/PULL_REQUEST_TEMPLATE.md
-[6] https://github.com/NousResearch/hermes-agent/labels
-[7] https://github.com/NousResearch/hermes-agent/issues/31016
-[8] https://github.com/NousResearch/hermes-agent/issues/64182
-[9] https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban
-[10] https://hermes-agent.nousresearch.com/docs/user-guide/features/cron
-[11] https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks
-[12] https://hermes-agent.nousresearch.com/docs/guides/automation-blueprints
-[13] https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/workflows/ci.yaml
-[14] https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/workflows/review-labels.yml
-[15] https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks
-[16] https://api.github.com/repos/NousResearch/hermes-agent/milestones?state=all&per_page=100
+[1]: https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/CONTRIBUTING.md
+[2]: https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/AGENTS.md
+[3]: https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/ISSUE_TEMPLATE/bug_report.yml
+[4]: https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/ISSUE_TEMPLATE/feature_request.yml
+[5]: https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/PULL_REQUEST_TEMPLATE.md
+[6]: https://github.com/NousResearch/hermes-agent/labels
+[7]: https://github.com/NousResearch/hermes-agent/issues/31016
+[8]: https://github.com/NousResearch/hermes-agent/issues/64182
+[9]: https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban
+[10]: https://hermes-agent.nousresearch.com/docs/user-guide/features/cron
+[11]: https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks
+[12]: https://hermes-agent.nousresearch.com/docs/guides/automation-blueprints
+[13]: https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/workflows/ci.yaml
+[14]: https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/.github/workflows/review-labels.yml
+[15]: https://hermes-agent.nousresearch.com/docs/user-guide/features/hooks
+[16]: https://api.github.com/repos/NousResearch/hermes-agent/milestones?state=all&per_page=100

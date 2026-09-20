@@ -10,7 +10,7 @@ This note compares public, primary-source evidence from GitHub itself and establ
 
 ## GitHub's native model
 
-GitHub Projects is designed as a synchronized table, board and roadmap over issues and pull requests, with saved views, custom fields and automation.[1][2] GitHub's own guidance recommends one source of truth for each fact, small issues and PRs, explicit dependency links, customized views, column limits and automatic updates for mechanical state.[1]
+GitHub Projects is designed as a synchronized table, board and roadmap over issues and pull requests, with saved views, custom fields and automation.[1] [2] GitHub's own guidance recommends one source of truth for each fact, small issues and PRs, explicit dependency links, customized views, column limits and automatic updates for mechanical state.[1]
 
 Milestones are the native repository-level grouping for a release or other outcome. They expose scope, completion and an ordered list of issues and PRs.[4] They are therefore a good fit for Dictus releases, but not enough on their own for separate agent, decision and validation queues.
 
@@ -31,13 +31,13 @@ Protected branches can require reviews, status checks and resolved conversations
 
 Pierre's issue [#11950](https://github.com/pingdotgg/t3code/issues/11950) provides a concrete public trace. A repository member posted a source-grounded triage note six minutes after filing and applied `bug`, `accepted` and `via-triage`.[6] A Devin integration appeared later, and PR [#12002](https://github.com/pingdotgg/t3code/pull/12002) states that it was written by Claude through the Devin harness.[7]
 
-The PR did not rely only on generated code. It included focused unit tests, a simulator reproduction, before/after visual evidence and multiple automated checks. It was merged 6 hours 49 minutes after the issue opened.[6][7]
+The PR did not rely only on generated code. It included focused unit tests, a simulator reproduction, before/after visual evidence and multiple automated checks. It was merged 6 hours 49 minutes after the issue opened.[6] [7]
 
 T3 Code also ships a public triage playbook. It tells an agent to gather local evidence, match the installed version to source, search upstream, prefer a confirmed duplicate over a new issue, redact secrets and obtain explicit user approval before filing.[8]
 
 ### Observed boundary
 
-The public timeline proves fast AI-assisted triage and AI-assisted implementation. It does not prove that every new issue automatically starts an implementation agent. The `accepted` decision was applied by a repository member before the Devin-authored PR appeared.[6][7]
+The public timeline proves fast AI-assisted triage and AI-assisted implementation. It does not prove that every new issue automatically starts an implementation agent. The `accepted` decision was applied by a repository member before the Devin-authored PR appeared.[6] [7]
 
 ### Pattern to adopt
 
@@ -73,11 +73,11 @@ The missing layer is operational routing. `ready-for-agent` currently mixes "spe
 
 ## OpenClaw
 
-OpenClaw's scale is much larger than Dictus, but its boundary model is directly relevant. Structured issue forms collect evidence and route support or security reports away from ordinary product issues. Its labels separate type, product surface, priority, impact, evidence state, automation eligibility and human gates rather than trying to encode all of them in one status.[9][10]
+OpenClaw's scale is much larger than Dictus, but its boundary model is directly relevant. Structured issue forms collect evidence and route support or security reports away from ordinary product issues. Its labels separate type, product surface, priority, impact, evidence state, automation eligibility and human gates rather than trying to encode all of them in one status.[9] [10]
 
 The ClawSweeper design keeps model workers away from mutation credentials. AI workers analyze and recommend; deterministic scripts own comments, labels, pushes, closure and merges through bounded credentials. Repair and automerge are opt-in, exact-head and fail-closed.[11]
 
-OpenClaw also has explicit human-gate labels such as product decision, maintainer review and security review. Its public maintainer guidance keeps rejection, out-of-scope decisions and uncertain expected behavior under human authority.[10][11]
+OpenClaw also has explicit human-gate labels such as product decision, maintainer review and security review. Its public maintainer guidance keeps rejection, out-of-scope decisions and uncertain expected behavior under human authority.[10] [11]
 
 ### Pattern to adopt
 
@@ -138,21 +138,21 @@ The resulting lightweight Dictus model is documented in [`docs/ISSUE-GOVERNANCE.
 
 ## Sources
 
-[1] https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/best-practices-for-projects - Best practices for GitHub Projects
-[2] https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects - About GitHub Projects
-[3] https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations - GitHub Projects built-in automations
-[4] https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/about-milestones - About GitHub milestones
-[5] https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches - About protected branches
-[6] https://github.com/pingdotgg/t3code/issues/11950 - T3 Code issue #11950
-[7] https://github.com/pingdotgg/t3code/pull/12002 - T3 Code PR #12002
-[8] https://github.com/pingdotgg/t3code/blob/main/.github/triage/PLAYBOOK.md - T3 Code triage playbook
-[9] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/CONTRIBUTING.md - OpenClaw contribution guide
-[10] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/openclaw-pr-maintainer/references/triage.md - OpenClaw maintainer triage guide
-[11] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/clawsweeper/SKILL.md - OpenClaw ClawSweeper
-[12] https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/AGENTS.md - Hermes Agent repository instructions
-[13] https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban - Hermes Kanban
-[14] https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks - Hermes webhooks
-[15] https://www.kubernetes.dev/docs/guide/issue-triage - Kubernetes issue triage
-[16] https://github.com/home-assistant/core/blob/dev/.github/ISSUE_TEMPLATE/bug_report.yml - Home Assistant bug form
-[17] https://github.com/home-assistant/core/blob/dev/.github/workflows/detect-duplicate-issues.yml - Home Assistant duplicate suggestion workflow
-[18] https://github.com/microsoft/vscode/wiki/Issues-Triaging - VS Code issue triage
+[1]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/best-practices-for-projects "Best practices for GitHub Projects"
+[2]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects "About GitHub Projects"
+[3]: https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/using-the-built-in-automations "GitHub Projects built-in automations"
+[4]: https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/about-milestones "About GitHub milestones"
+[5]: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches "About protected branches"
+[6]: https://github.com/pingdotgg/t3code/issues/11950 "T3 Code issue #11950"
+[7]: https://github.com/pingdotgg/t3code/pull/12002 "T3 Code PR #12002"
+[8]: https://github.com/pingdotgg/t3code/blob/main/.github/triage/PLAYBOOK.md "T3 Code triage playbook"
+[9]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/CONTRIBUTING.md "OpenClaw contribution guide"
+[10]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/openclaw-pr-maintainer/references/triage.md "OpenClaw maintainer triage guide"
+[11]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/clawsweeper/SKILL.md "OpenClaw ClawSweeper"
+[12]: https://github.com/NousResearch/hermes-agent/blob/02c7ae956e42891d5e337a921b45de0a6067146d/AGENTS.md "Hermes Agent repository instructions"
+[13]: https://hermes-agent.nousresearch.com/docs/user-guide/features/kanban "Hermes Kanban"
+[14]: https://hermes-agent.nousresearch.com/docs/user-guide/messaging/webhooks "Hermes webhooks"
+[15]: https://www.kubernetes.dev/docs/guide/issue-triage "Kubernetes issue triage"
+[16]: https://github.com/home-assistant/core/blob/dev/.github/ISSUE_TEMPLATE/bug_report.yml "Home Assistant bug form"
+[17]: https://github.com/home-assistant/core/blob/dev/.github/workflows/detect-duplicate-issues.yml "Home Assistant duplicate suggestion workflow"
+[18]: https://github.com/microsoft/vscode/wiki/Issues-Triaging "VS Code issue triage"

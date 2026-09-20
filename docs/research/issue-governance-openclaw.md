@@ -16,11 +16,11 @@ The sections titled **Observed practice** report what the sources explicitly sho
 
 OpenClaw treats issue governance as a layered control system rather than a single board:
 
-1. Structured forms and routing rules improve evidence at intake and divert support or security reports away from public issues.[1][2][3]
+1. Structured forms and routing rules improve evidence at intake and divert support or security reports away from public issues.[1] [2] [3]
 2. Labels encode several independent dimensions: type/component, priority, impact, issue or PR quality, evidence state, automation eligibility, and a human-decision escape hatch.[29]
-3. Deterministic automation handles mechanical policy; an AI reviewer analyzes issues and PRs; deterministic code owns mutations; maintainers retain product, security, merge, and release authority.[6][7][22]
-4. Agent-authored changes are explicitly accepted, but they use the same issue linkage, proof, CI, review, and human judgment as human-authored changes.[1][4]
-5. Roadmap intent is communicated through broad focus areas, labels, and release machinery rather than repository milestones: the repository has no milestones, and the two public organization projects are for the Windows Companion App and ClawHub rather than the core backlog.[1][11][12]
+3. Deterministic automation handles mechanical policy; an AI reviewer analyzes issues and PRs; deterministic code owns mutations; maintainers retain product, security, merge, and release authority.[6] [7] [22]
+4. Agent-authored changes are explicitly accepted, but they use the same issue linkage, proof, CI, review, and human judgment as human-authored changes.[1] [4]
+5. Roadmap intent is communicated through broad focus areas, labels, and release machinery rather than repository milestones: the repository has no milestones, and the two public organization projects are for the Windows Companion App and ClawHub rather than the core backlog.[1] [11] [12]
 6. The strongest reusable pattern for Dictus is not OpenClaw's full label count or automation footprint. It is the separation of **evidence**, **machine recommendation**, **deterministic action**, and **human authority**.
 
 ## 1. Issue intake and routing
@@ -102,7 +102,7 @@ Priority should reflect user harm and blast radius, not reporter urgency or impl
 - `CONTRIBUTING.md` names broad current focus areas: channel stability, onboarding/error-message UX, skills via ClawHub, and token/compaction performance.[1]
 - The core repository's milestones page shows zero open and zero closed milestones.[11]
 - The organization projects page shows two public open projects - Windows Companion App and ClawHub - not a core issue roadmap.[12]
-- Therefore, the public issue tracker does not expose release scope through milestones. Priority and focus are visible mainly through labels, contribution guidance, issue discussion, release branches/tags, and release validation workflows.[1][11][12]
+- Therefore, the public issue tracker does not expose release scope through milestones. Priority and focus are visible mainly through labels, contribution guidance, issue discussion, release branches/tags, and release validation workflows.[1] [11] [12]
 - Release execution is deliberately separate from ordinary issue priority. Full Release Validation binds exact Validation and Tooling SHAs, distinguishes beta/stable/full profiles, records child evidence, and rejects mismatched source identity. Publishing is a separate mutating workflow with protected release refs and environment approval.[13]
 - The release-maintainer instructions require explicit approval for version changes and irreversible publication, distinguish prepare authority from publish authority, prohibit weakening gates to manufacture success, and make the active release - not unrelated work - the work queue.[24]
 
@@ -123,7 +123,7 @@ Separate “important” from “ships in this release.” A P1 may miss the tra
 
 OpenClaw divides automation into two principal layers:
 
-- **Barnacle** is deterministic GitHub triage. It handles known queue rules such as empty PR bodies, missing evidence, unsupported refactor/test-only changes, unrelated branch content, plugin routing, and the 20-open-PR cap. It can label, comment, or close without executing contributor code.[6][22]
+- **Barnacle** is deterministic GitHub triage. It handles known queue rules such as empty PR bodies, missing evidence, unsupported refactor/test-only changes, unrelated branch content, plugin routing, and the 20-open-PR cap. It can label, comment, or close without executing contributor code.[6] [22]
 - **ClawSweeper** is AI-assisted review and maintenance. It reviews issues and PRs, evaluates proof, leaves durable comments, and can enter bounded repair or automerge flows. Its positive result is supporting evidence, never maintainer approval.[6]
 
 The ClawSweeper trust boundary is explicit:
@@ -141,7 +141,7 @@ Human authority remains explicit at several points:
 
 - Product rejection, out-of-scope decisions, and unclear expected behavior.[5]
 - Maintainer opt-in for repair/automerge and the ability to stop automation.[7]
-- Security-sensitive changes: command approval for external authors plus independent SecOps `CODEOWNERS` review for protected security paths.[1][14][15]
+- Security-sensitive changes: command approval for external authors plus independent SecOps `CODEOWNERS` review for protected security paths.[1] [14] [15]
 - Merge and CI enforcement: active rulesets protect `main`, require the OpenClaw CI gate, dismiss stale code-owner approvals, and protect release refs; the ClawSweeper merge-authorization rule was only in evaluation mode at the snapshot.[16]
 - Release preparation versus irreversible publication.[24]
 
@@ -182,10 +182,10 @@ OpenClaw explicitly welcomes Codex, Claude, and other AI-assisted PRs without re
 The expected path is:
 
 1. Create or reuse an issue for agent-authored or non-trivial work.[1]
-2. Keep the PR narrowly focused and visibly link it with `Closes #…` or `Related: #…`.[1][4]
-3. Keep the PR body durable and current: problem, user impact, why the change was made, and evidence. Do not hide risks, migrations, or evidence gaps.[1][4]
+2. Keep the PR narrowly focused and visibly link it with `Closes #…` or `Related: #…`.[1] [4]
+3. Keep the PR body durable and current: problem, user impact, why the change was made, and evidence. Do not hide risks, migrations, or evidence gaps.[1] [4]
 4. Run local build/check/test gates and surface-specific validation. UI changes require before/after screenshots.[1]
-5. When available, run an independent `autoreview` before requesting review and address accepted/actionable findings.[1][18]
+5. When available, run an independent `autoreview` before requesting review and address accepted/actionable findings.[1] [18]
 6. Treat bot feedback like normal review feedback. Update the branch, PR description, evidence, and CI before asking for `@clawsweeper re-review`; repeated empty review requests are queue noise.[6]
 7. Maintainers still decide readiness and merge timing.[6]
 
@@ -227,9 +227,9 @@ For iOS, “green unit tests” are not enough for keyboard-extension behavior. 
 
 OpenClaw separates ordinary PR evidence from release authorization:
 
-- PR evidence can include focused tests, CI, screenshots, recordings, terminal output, live observations, redacted logs, and artifact links.[1][4]
+- PR evidence can include focused tests, CI, screenshots, recordings, terminal output, live observations, redacted logs, and artifact links.[1] [4]
 - Release validation binds immutable source identities and collects independent child workflow results rather than treating one green lane as universal proof.[13]
-- Beta, stable, and full profiles have different coverage. Stable/full require broader provider and soak coverage; beta defers some confidence work but keeps release-critical lanes.[13][25]
+- Beta, stable, and full profiles have different coverage. Stable/full require broader provider and soak coverage; beta defers some confidence work but keeps release-critical lanes.[13] [25]
 - Required failures cannot be waived by success elsewhere. Deferred or omitted checks are not “passed.” Exact-source successful evidence should be reused rather than rerun merely for ceremony.[25]
 - A Codex-based release-validation skill may analyze a published tag, but it writes a schema-validated artifact first; a separate trusted publisher downloads and validates that artifact before creating or updating the campaign issue.[19]
 
@@ -286,29 +286,29 @@ For Dictus, the value lies in preserving those boundaries with a small label set
 
 ## Sources
 
-[1] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/CONTRIBUTING.md - OpenClaw CONTRIBUTING.md
-[2] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/ISSUE_TEMPLATE/bug_report.yml - OpenClaw bug issue form
-[3] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/ISSUE_TEMPLATE/feature_request.yml - OpenClaw feature request form
-[4] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/pull_request_template.md - OpenClaw pull request template
-[5] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/openclaw-pr-maintainer/references/triage.md - OpenClaw maintainer triage reference
-[6] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/docs/reference/pull-request-review-flow.md - OpenClaw pull request review flow
-[7] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/clawsweeper/SKILL.md - OpenClaw ClawSweeper skill
-[8] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/clawsweeper-dispatch.yml - OpenClaw ClawSweeper dispatch workflow
-[9] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/stale.yml - OpenClaw stale workflow
-[11] https://github.com/openclaw/openclaw/milestones - OpenClaw milestones
-[12] https://github.com/orgs/openclaw/projects - OpenClaw organization projects
-[13] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/docs/ci/release-validation/full-release-validation.md - OpenClaw full release validation
-[14] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/CODEOWNERS - OpenClaw CODEOWNERS
-[15] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/security-review.yml - OpenClaw security review workflow
-[16] https://api.github.com/repos/openclaw/openclaw/rulesets - OpenClaw repository rulesets API
-[17] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/AGENTS.md - OpenClaw AGENTS.md
-[18] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/autoreview/SKILL.md - OpenClaw autoreview skill
-[19] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/release-validation-skill-runner.yml - OpenClaw release validation skill runner
-[20] https://github.com/openclaw/openclaw/issues/13241 - OpenClaw issue #13241: issue triage and priority framework
-[21] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/ISSUE_TEMPLATE/config.yml - OpenClaw issue template configuration
-[22] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/auto-response.yml - OpenClaw Barnacle auto-response workflow
-[23] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/duplicate-after-merge.yml - OpenClaw duplicate PR after merge workflow
-[24] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/release-openclaw-maintainer/SKILL.md - OpenClaw release maintainer skill
-[25] https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/release-openclaw-maintainer/references/validation.md - OpenClaw release validation and confidence reference
-[27] https://api.github.com/repos/openclaw/openclaw/labels?per_page=100&page=3 - OpenClaw labels API (page 3)
-[29] https://github.com/openclaw/openclaw/labels - OpenClaw labels
+[1]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/CONTRIBUTING.md "OpenClaw CONTRIBUTING.md"
+[2]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/ISSUE_TEMPLATE/bug_report.yml "OpenClaw bug issue form"
+[3]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/ISSUE_TEMPLATE/feature_request.yml "OpenClaw feature request form"
+[4]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/pull_request_template.md "OpenClaw pull request template"
+[5]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/openclaw-pr-maintainer/references/triage.md "OpenClaw maintainer triage reference"
+[6]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/docs/reference/pull-request-review-flow.md "OpenClaw pull request review flow"
+[7]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/clawsweeper/SKILL.md "OpenClaw ClawSweeper skill"
+[8]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/clawsweeper-dispatch.yml "OpenClaw ClawSweeper dispatch workflow"
+[9]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/stale.yml "OpenClaw stale workflow"
+[11]: https://github.com/openclaw/openclaw/milestones "OpenClaw milestones"
+[12]: https://github.com/orgs/openclaw/projects "OpenClaw organization projects"
+[13]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/docs/ci/release-validation/full-release-validation.md "OpenClaw full release validation"
+[14]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/CODEOWNERS "OpenClaw CODEOWNERS"
+[15]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/security-review.yml "OpenClaw security review workflow"
+[16]: https://api.github.com/repos/openclaw/openclaw/rulesets "OpenClaw repository rulesets API"
+[17]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/AGENTS.md "OpenClaw AGENTS.md"
+[18]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/autoreview/SKILL.md "OpenClaw autoreview skill"
+[19]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/release-validation-skill-runner.yml "OpenClaw release validation skill runner"
+[20]: https://github.com/openclaw/openclaw/issues/13241 "OpenClaw issue #13241: issue triage and priority framework"
+[21]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/ISSUE_TEMPLATE/config.yml "OpenClaw issue template configuration"
+[22]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/auto-response.yml "OpenClaw Barnacle auto-response workflow"
+[23]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.github/workflows/duplicate-after-merge.yml "OpenClaw duplicate PR after merge workflow"
+[24]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/release-openclaw-maintainer/SKILL.md "OpenClaw release maintainer skill"
+[25]: https://github.com/openclaw/openclaw/blob/e63393bddc3a3f6748acd8ad873a96a7a3af9702/.agents/skills/release-openclaw-maintainer/references/validation.md "OpenClaw release validation and confidence reference"
+[27]: https://api.github.com/repos/openclaw/openclaw/labels?per_page=100&page=3 "OpenClaw labels API (page 3)"
+[29]: https://github.com/openclaw/openclaw/labels "OpenClaw labels"
