@@ -403,7 +403,7 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertEqual(contract.outputLanguage, .sameAsInput)
         XCTAssertTrue(contract.requiresGroundedNames)
         XCTAssertFalse(contract.requiresAlignedPrefix)
-        XCTAssertEqual(SmartModeCatalogue.message.overflowBehaviour, .insertRawText)
+        XCTAssertEqual(SmartModeCatalogue.message.floorBehaviour, .insertRawText)
     }
 
     /// **The genre trap, pinned.** PR #388 measured an email framing producing a

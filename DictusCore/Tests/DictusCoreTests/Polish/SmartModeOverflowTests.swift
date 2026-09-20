@@ -91,6 +91,26 @@ final class SmartModeOverflowTests: XCTestCase {
         )
     }
 
+    /// `Message` (#572) landed on `develop` while #580 was on device, so it was never
+    /// exercised there. Its overflow branch is close to unreachable — the input is
+    /// short by construction — and a guardrail rejection is the branch this answer
+    /// actually serves: what goes in the field is then what the speaker said.
+    func testMessageDegradesOnAGuardrailRejection() {
+        XCTAssertTrue(
+            PolishPipeline.degradesToFloor(
+                SmartModeCatalogue.message, outcome: .rejectedGuardrail
+            )
+        )
+        XCTAssertEqual(
+            PolishPipeline.resolvedOutput(
+                result(.rejectedGuardrail),
+                preprocessed: "Ok, petit test ?",
+                job: job(SmartModeCatalogue.message)
+            ),
+            "Ok, petit test\u{00A0}?"
+        )
+    }
+
     /// The negative case, and the one the change must not take with it: the gate is
     /// still the mode's own declared behaviour, and Translate's floor is the input
     /// language — the one thing the mode exists to change.
