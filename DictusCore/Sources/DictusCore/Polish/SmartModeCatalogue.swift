@@ -112,7 +112,9 @@ public enum SmartModeCatalogue {
         // The mode built for a long rambling dictation is the one that walks users
         // into the context ceiling, so a refusal there costs the whole text. The
         // floor is the same words in the same language, merely not restructured.
-        overflowBehaviour: .insertRawText
+        // Since #580 the same answer covers a guardrail rejection, which discards the
+        // engine's output whole and so cannot put a half-transformation in the field.
+        floorBehaviour: .insertRawText
     )
 
     /// Structured: the long vocal message, rewritten as paragraphs that do not read
@@ -169,7 +171,11 @@ public enum SmartModeCatalogue {
         // ceiling first — sooner than `List`, because its prompt is longer. The floor
         // is the speaker's own words, unstructured: plainer than what they asked for,
         // and never wrong. Same reasoning `List` carries (#270).
-        overflowBehaviour: .insertRawText
+        //
+        // This mode is also the one #580 measured being refused by a guardrail — three
+        // times in nine device runs, one of them 1,337 characters — and the sentence
+        // above is already the answer to that: the words are the speaker's either way.
+        floorBehaviour: .insertRawText
     )
 
     /// Message: what the speaker would have typed, rather than a clean copy of what
@@ -208,9 +214,10 @@ public enum SmartModeCatalogue {
     /// character against the space it replaces, so a short message laid out in
     /// blocks measures 1.01 to 1.05 of its own transcript while containing no word
     /// the speaker did not say. **A ceiling of 1.00 therefore selects almost
-    /// perfectly against the mode's own output shape**, and since a Smart Mode
-    /// refusal inserts nothing, the user would get either a paragraph — which is
-    /// what Normal already produces, #393's bar B — or an empty field.
+    /// perfectly against the mode's own output shape**, and a refusal never gives
+    /// the message back: the user would get either a paragraph — which is what
+    /// Normal already produces, #393's bar B — or, since #580, the raw transcript
+    /// that `floorBehaviour` inserts in its place.
     ///
     /// 1.1 is the smallest value that clears the worst measured legitimate case
     /// (1.05) with margin. It still refuses expansion in any sense decision 3 meant:
@@ -263,11 +270,18 @@ public enum SmartModeCatalogue {
         ),
         // The one mode here whose input is short by construction — what you send to
         // a person — and its context ceiling sits at ≈ 4 032 characters of speech
-        // (see `SmartModeMessagePrompt`). So the overflow branch is close to
-        // unreachable; it answers `.insertRawText` anyway for the reason the other
-        // two structure modes do, that the floor is the speaker's own words in the
-        // speaker's own language and is never *wrong*, only plainer (#270).
-        overflowBehaviour: .insertRawText
+        // (see `SmartModeMessagePrompt`), so the overflow branch is close to
+        // unreachable. That was the whole of this answer until #580.
+        //
+        // The branch #580 added is not unreachable at all, and it is the one this
+        // mode wants most: a guardrail rejection. The contract above runs the
+        // grounding check on short input the measured default skips, and
+        // `check=length` refused 10 of 32 outputs one notch of ceiling away from the
+        // shipped one. A refused message now puts the speaker's own words in the
+        // field instead of nothing — plainer than what they asked for, in their own
+        // language, and never *wrong* (#270), which is the answer the other two
+        // structure modes already give.
+        floorBehaviour: .insertRawText
     )
 
     /// Translate → `target`.
@@ -306,10 +320,11 @@ public enum SmartModeCatalogue {
                 // anywhere else (#466).
                 requiresAlignedPrefix: false
             ),
-            // Translation cannot degrade: the floor is the input language, which is
-            // the one thing this mode exists to change. Inserting it would be the
-            // failure #79 names as the worst available.
-            overflowBehaviour: .insertNothing
+            // Translation cannot degrade, for any refusal: the floor is the input
+            // language, which is the one thing this mode exists to change. Inserting
+            // it would be the failure #79 names as the worst available. #580 widened
+            // which outcomes ask this question; it did not change this answer.
+            floorBehaviour: .insertNothing
         )
     }
 

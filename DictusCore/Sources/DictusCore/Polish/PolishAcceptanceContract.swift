@@ -121,7 +121,7 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
     ///
     /// `outputLanguage` happens to discriminate the translation case today, and
     /// deriving from it would work for this catalogue — the same argument
-    /// `SmartModeOverflowBehaviour` answers, with the same conclusion. A custom mode
+    /// `SmartModeFloorBehaviour` answers, with the same conclusion. A custom mode
     /// (#269) must *answer* the question rather than inherit an answer from a
     /// property chosen for an unrelated reason, and a mode that condenses *and*
     /// reconstructs would break the derivation silently. It cannot break an answer
