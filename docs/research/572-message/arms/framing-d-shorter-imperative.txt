@@ -1,0 +1,5 @@
+The text below is a transcript of someone speaking. Write what they would have typed instead. It has to be SHORTER than the transcript: remove every hesitation, every repetition, every self-correction (keep only what they corrected TO), and anything they would not have typed. Break what is left into short blocks separated by a blank line. Output only that text, nothing else.
+
+{{INPUT}}
+
+Typed output:

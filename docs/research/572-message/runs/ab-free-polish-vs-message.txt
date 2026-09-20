@@ -1,0 +1,29 @@
+━━ [1-message] lang=fr
+  raw: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que... dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+  A [polish] (2931ms): Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu, mais je suis en train de travailler dessus, je te tiens au courant dès que possible. Enfin, pardon, pas s'il te plaît, je me suis planté.
+  B [smart.message] (2249ms): Yo man, j'espère que tu vas bien.
+
+Écoute, je suis en train de regarder le projet.
+
+Je t'ai pas répondu mais je suis en train de travailler dessus.
+
+Je te tiens au jus dès que dès que.
+
+Dès que j'ai avancé un petit peu plus dessus, s'il te plaît.
+
+Enfin pardon, pas s'il te plaît je me suis planté.
+
+━━ [2-message] lang=fr
+  raw: Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.
+  A [polish] (2001ms): Salut Manu, comment ça va ? Est-ce que tu pourrais vérifier si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+  B [smart.message] (1557ms): Salut Manu, comment vas-tu? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît? Des bisous.
+
+━━ [3-message] lang=fr
+  raw: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  A [polish] (2116ms): Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  B [smart.message] (1735ms): Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+
+━━ [4-message] lang=fr
+  raw: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  A [polish] (2630ms): Yo les gars, vous savez comment on peut voir les limites d'utilisation du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info, les gars, je suis preneur.
+  B [smart.message] (2136ms): Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.

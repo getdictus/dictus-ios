@@ -23,7 +23,14 @@ final class PolishPromptInventoryTests: XCTestCase {
             ("repair-en", PolishRepairPromptEN.instructions()),
             ("repair-es", PolishRepairPromptES.instructions()),
             ("repair-de", PolishRepairPromptDE.instructions()),
-            ("smart.notes", SmartModeNotesPrompt.instructions())
+            ("smart.notes", SmartModeNotesPrompt.instructions()),
+            // Added with #572, together with `smart.structured`, which #523 shipped
+            // without a line here. That omission is the exact half-state this suite
+            // exists to forbid: the prompt was outside every check below for three
+            // weeks, and the count assertion could not see it because the count was
+            // written from the same list.
+            ("smart.structured", SmartModeStructuredPrompt.instructions()),
+            ("smart.message", SmartModeMessagePrompt.instructions())
         ] + SupportedLanguage.allCases.map {
             ("smart.translate.\($0.rawValue)", SmartModeTranslatePrompt.instructions(target: $0))
         }
@@ -47,11 +54,22 @@ final class PolishPromptInventoryTests: XCTestCase {
         }
     }
 
-    /// The count is the point: eleven builders, and the fourteen strings they produce
-    /// once Translate is expanded per target. A prompt added without a line here
-    /// would sit outside every check above.
+    /// The count is the point: thirteen builders, and the sixteen strings they
+    /// produce once Translate is expanded per target. A prompt added without a line
+    /// here would sit outside every check above — which is what happened to
+    /// `smart.structured` between #523 and #572.
+    ///
+    /// The second assertion is the cheap catch for that: it walks the catalogue
+    /// rather than this file's own list, so a mode whose prompt never got a line
+    /// above fails here instead of being silently unmeasured.
     func testTheInventoryCoversEveryPromptTheBuildSends() {
-        XCTAssertEqual(shippingPrompts.count, 10 + SupportedLanguage.allCases.count)
+        XCTAssertEqual(shippingPrompts.count, 12 + SupportedLanguage.allCases.count)
+        for mode in SmartModeCatalogue.builtIns {
+            XCTAssertTrue(
+                shippingPrompts.contains { $0.1 == mode.prompt.instructions },
+                "\(mode.id)'s prompt is not in this file's inventory"
+            )
+        }
         for (name, prompt) in shippingPrompts {
             XCTAssertTrue(prompt.contains("TEXT TRANSFORMATION FUNCTION"),
                           "\(name) no longer opens on the framing every prompt shares")

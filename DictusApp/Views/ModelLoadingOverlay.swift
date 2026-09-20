@@ -458,9 +458,18 @@ struct ModelLoadingOverlay: View {
         // The model is ready, but if we have never seen any actual work happen
         // yet, the parent likely just opened the overlay and the state will
         // imminently flip to `.downloading`. Keep the cover up.
-        let preparationWasAlreadyReady = activeContext.isPrepareOnly
-            && currentModelState == .ready
-            && modelManager.modelLoadState == .ready
+        //
+        // The one exception — a preparation asked for a model that genuinely is loaded
+        // already — is `ModelPreparationOutcome`'s to decide, in DictusCore where it is
+        // tested. What it needs and this line used to omit is whether anything alive in
+        // this launch wrote the load state at all (#579): read at `onAppear` on a launch
+        // from dead, it is the previous process's, and every part of it is false.
+        let preparationWasAlreadyReady = ModelPreparationOutcome.preparationWasAlreadyReady(
+            context: activeContext,
+            isModelOnDisk: currentModelState == .ready,
+            loadState: modelManager.modelLoadState,
+            loadStateIsFromThisLaunch: modelManager.loadStateIsFromThisLaunch
+        )
         guard hasSeenWorkPhase || preparationWasAlreadyReady else {
             return
         }
