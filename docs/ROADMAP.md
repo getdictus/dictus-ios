@@ -2,6 +2,8 @@
 
 The ordered queue. One list, one order, and the first unfinished item is what happens next.
 
+How issues enter this queue, wait for product decisions and move through agent or human validation is defined in [ISSUE-GOVERNANCE.md](ISSUE-GOVERNANCE.md).
+
 **Scope.** [RELEASE-PLAN.md](RELEASE-PLAN.md) says what a cycle *is* and why. This file says what to *do*, in what order. The tracker holds the detail; this file holds the sequence, because 80 open issues and 19 of them marked `priority:high` is not a sequence.
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.

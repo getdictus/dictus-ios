@@ -5,13 +5,16 @@ Thank you for your interest in contributing to Dictus! Whether you are fixing a 
 ## How to Contribute
 
 1. **Fork** the repository.
-2. **Create a feature branch** from `main`:
+2. **Create a feature branch** from `develop`:
    ```bash
+   git checkout develop
    git checkout -b feature/your-feature-name
    ```
 3. **Make your changes** following the conventions below.
-4. **Test** your changes on a real device (the keyboard extension requires a physical iPhone).
-5. **Open a Pull Request** against `main`.
+4. **Test** code changes on a real device before merge, following the current repository rule in `CLAUDE.md`. [The issue governance guide](docs/ISSUE-GOVERNANCE.md) defines what automated, simulator, device and product evidence must accompany that test.
+5. **Open a Pull Request** against `develop`. `main` tracks the App Store release and is promoted separately by the maintainer.
+
+Before starting an issue, read [Issue governance and delivery](docs/ISSUE-GOVERNANCE.md). An issue labelled `ready-for-agent` is specified, but it is not necessarily scheduled in the active release queue.
 
 ## Code Conventions
 
