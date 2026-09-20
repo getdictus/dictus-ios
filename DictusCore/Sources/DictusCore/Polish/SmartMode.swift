@@ -101,15 +101,15 @@ public enum SmartModeBadge: Equatable, Sendable, Codable {
 }
 
 /// What the user receives when a mode's transformation is refused and **nothing the
-/// engine produced can reach the document** — a context overflow (#270) or a
-/// guardrail rejection (#580).
+/// engine produced can reach the document** — a context overflow (#270), a guardrail
+/// rejection, or an engine throw (#580).
 ///
 /// ### Why this is not simply the fail-closed rule
 ///
 /// `PolishTask.isSmart` states the rule the rest of the pipeline follows: a Smart
 /// Mode must never silently insert untransformed text, so a refusal inserts nothing.
-/// That rule exists to stop a *wrong transformation* reaching the document. Two
-/// non-successes carry no such risk, for the same reason by two different routes:
+/// That rule exists to stop a *wrong transformation* reaching the document. Three
+/// non-successes carry no such risk, for the same reason by three different routes:
 ///
 /// - `.exceededContextBudget` is decided before the engine is called, so no
 ///   transformation was ever attempted.
@@ -117,10 +117,14 @@ public enum SmartModeBadge: Equatable, Sendable, Codable {
 ///   its place is `preprocessed` — the transcript with the verbal-punctuation
 ///   pre-pass applied, a deterministic function of the user's own words. Nothing
 ///   that half-happened can reach the document.
+/// - `.engineFailed` was handed nothing to throw away: the engine call is a single
+///   batch `respond()` that returns its whole content or throws, and the `catch` that
+///   produces this outcome builds its result with `engineOutput: nil`. A partial
+///   generation has no route into the pipeline, let alone into the document.
 ///
-/// In both, the risk is absent by construction and what the user loses by refusing
-/// is the same thing: the structuring, not the words. And the cost of refusing
-/// anyway is not symmetrical:
+/// In all three, the risk is absent by construction and what the user loses by
+/// refusing is the same thing: the structuring, not the words. And the cost of
+/// refusing anyway is not symmetrical:
 ///
 /// - **List** overflows at roughly 4,500-4,900 characters, and List is precisely
 ///   the mode built for a long rambling dictation. Refusing costs the user the whole
@@ -137,13 +141,19 @@ public enum SmartModeBadge: Equatable, Sendable, Codable {
 ///
 /// ### What this field does NOT license
 ///
-/// `.engineFailed` and `.cancelled` are partial generations — something may have
-/// half-happened — and `.engineUnavailable` describes a process that will not call
-/// the model again for its lifetime, which is a different conversation to have with
-/// the user (#315). `.unsupportedInputLanguage` (#490) never reached the engine
-/// either, yet stays closed too: its floor is text in a language the model cannot
-/// read, so "at least the words are there" is not the offer it is here. All four
-/// ignore this field. The gate is in `PolishPipeline.degradesToFloor`.
+/// `.cancelled` stays closed because the user stopped the dictation themselves, and
+/// what they want in the field then is a question neither #79 nor #580 asked.
+/// `.engineUnavailable` describes a process that will not call the model again for
+/// its lifetime, which is a different conversation to have with the user (#315).
+/// `.unsupportedInputLanguage` (#490) never reached the engine either, yet stays
+/// closed too: its floor is text in a language the model cannot read, so "at least
+/// the words are there" is not the offer it is here. All three ignore this field.
+/// The gate is in `PolishPipeline.degradesToFloor`.
+///
+/// `.engineFailed` used to be listed here, excluded as a "partial generation". It
+/// never was one — see the third bullet above, which is a reading of the code rather
+/// than of the outcome's name — and the exclusion was withdrawn on 2026-09-20 after a
+/// device capture lost 107 characters of French to it under `Structured`.
 ///
 /// ### Why a field rather than a derivation
 ///
@@ -154,8 +164,9 @@ public enum SmartModeBadge: Equatable, Sendable, Codable {
 /// unrelated reason. A mode that condenses *and* translates would break the
 /// derivation silently; it cannot break an answer someone had to write down.
 ///
-/// **Named `SmartModeOverflowBehaviour` until #580**, when the guardrail case joined
-/// the overflow one and the old name stopped describing the question. The raw values
+/// **Named `SmartModeOverflowBehaviour` until #580**, when the guardrail and engine-
+/// throw cases joined the overflow one and the old name stopped describing the
+/// question. The raw values
 /// are unchanged, and so is the JSON key the record is written under — see
 /// `SmartMode.CodingKeys`.
 public enum SmartModeFloorBehaviour: String, Equatable, Sendable, Codable {

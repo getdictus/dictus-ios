@@ -360,20 +360,24 @@ final class KeyboardPolishCoordinator {
     ///   carry the remedy, because it is the only case where the user has lost
     ///   something and shortening the dictation genuinely fixes it.
     /// - **Could not be applied, text inserted** (#580) — a guardrail refused the
-    ///   engine's output on a mode that declared the floor acceptable. Same shape as
-    ///   the overflow pair, and deliberately *not* the same sentence: "too long" would
-    ///   be a diagnosis the refusal does not support. It drops "Try again", which is
-    ///   wrong advice once the text is already in the field.
+    ///   engine's output, or the engine threw, on a mode that declared the floor
+    ///   acceptable. Same shape as the overflow pair, and deliberately *not* the same
+    ///   sentence: "too long" would be a diagnosis neither case supports. It drops
+    ///   "Try again", which is wrong advice once the text is already in the field.
+    ///   The sentence says nothing about the cause, which is why it carries both: a
+    ///   guardrail rejection and an Apple `guardrailViolation` throw are two different
+    ///   refusals, and what the user can do about either is identical — nothing, and
+    ///   the words are already there.
     /// - **The dictated language is one the model does not read** (#490) — names that
     ///   language and stops there. It is the one refusal with a knowable cause and no
     ///   remedy: Apple Foundation Models classifies the user turn and refuses before
     ///   generating, so the same words in the same language will be refused again.
     ///   "Try again" would be an instruction to repeat a failure.
-    /// - **Anything else** — engine throw, cancellation, and a guardrail rejection on
-    ///   a mode whose floor would be wrong rather than merely plainer. The
-    ///   user can do nothing specific about any of them, so the copy does not pretend
-    ///   otherwise; it matches the in-app wording (`DictationHandoff`) word for word,
-    ///   so the same failure reads the same on both surfaces.
+    /// - **Anything else** — cancellation, an unavailable engine (#315), and any
+    ///   refusal at all on a mode whose floor would be wrong rather than merely
+    ///   plainer. The user can do nothing specific about any of them, so the copy does
+    ///   not pretend otherwise; it matches the in-app wording (`DictationHandoff`)
+    ///   word for word, so the same failure reads the same on both surfaces.
     ///
     /// The language branch keys on the OUTCOME, never on the
     /// `unsupportedLanguageOrLocale` slug. #518 measured that slug arriving from
@@ -428,10 +432,12 @@ final class KeyboardPolishCoordinator {
                 comment: "Shown when a Smart Mode hit the context ceiling and could not fall back, so nothing was inserted. The placeholder is the mode's name."
             )
         case (false, true):
-            // A guardrail rejection on a mode that accepts the floor (#580). A blend
-            // of the two neighbours above and below on purpose: the register is every
-            // other Smart Mode refusal's, and the half that changes is the half that
-            // is true here.
+            // A guardrail rejection, or an engine throw, on a mode that accepts the
+            // floor (#580). A blend of the two neighbours above and below on purpose:
+            // the register is every other Smart Mode refusal's, and the half that
+            // changes is the half that is true here. It does not name the cause, and
+            // that is what lets it serve both: from where the user stands the two are
+            // the same event — the mode did not apply, the words went in anyway.
             return String(
                 localized: "\(name): could not be applied, text inserted as dictated.",
                 comment: "Shown when an armed Smart Mode was refused by a guardrail and the untransformed text was inserted instead. The placeholder is the mode's name."

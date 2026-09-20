@@ -328,14 +328,15 @@ public enum PolishPipeline {
     /// three bullets were expected. So the answer is `nil`, and the caller inserts
     /// nothing.
     ///
-    /// ### With two exceptions, on a mode that says it may degrade
+    /// ### With three exceptions, on a mode that says it may degrade
     ///
-    /// `.exceededContextBudget` is decided *before* the engine is called, and
-    /// `.rejectedGuardrail` throws the engine's output away whole (#580). Neither can
-    /// put a half-finished transformation in the document, so the risk the rule
-    /// guards against is absent by construction. Whether that licenses the floor is
-    /// the mode's own answer — see `SmartModeFloorBehaviour`, which explains why
-    /// List says yes and Translate says no.
+    /// `.exceededContextBudget` is decided *before* the engine is called,
+    /// `.rejectedGuardrail` throws the engine's output away whole, and `.engineFailed`
+    /// never received one (#580). None of the three can put a half-finished
+    /// transformation in the document, so the risk the rule guards against is absent
+    /// by construction. Whether that licenses the floor is the mode's own answer —
+    /// see `SmartModeFloorBehaviour`, which explains why List says yes and Translate
+    /// says no.
     ///
     /// **A caller cannot tell the two apart from this return value alone.** A
     /// degraded output is a `String` exactly like a success, so `PolishService`
@@ -358,8 +359,8 @@ public enum PolishPipeline {
     /// Whether an armed mode accepts the deterministic floor for this outcome.
     ///
     /// The outcome test is as narrow as the argument that justifies it: it admits the
-    /// two refusals where **nothing the engine produced can reach the document**, and
-    /// then still asks the mode.
+    /// three refusals where **nothing the engine produced can reach the document**,
+    /// and then still asks the mode.
     ///
     /// - `.exceededContextBudget` never called the engine.
     /// - `.rejectedGuardrail` called it and discarded the answer whole (#580). The
@@ -370,12 +371,28 @@ public enum PolishPipeline {
     ///   refusal costs the user is the same thing: the structuring, not the words.
     ///   Measured on device 2026-09-17: three `Structured` rejections in nine runs,
     ///   one of them 1,337 characters that reached an empty field.
+    /// - `.engineFailed` called it and got **nothing** back. `transform`'s `catch`
+    ///   builds the result with `engineOutput: nil`, and what it wraps is a single
+    ///   batch `respond()` that either returns its whole content or throws — there is
+    ///   no partial delivery for a half-finished transformation to arrive through.
     ///
-    /// `.engineFailed` and `.cancelled` stay fail-closed for every mode, whatever it
-    /// declares, because a transformation was attempted and may have half-happened;
-    /// `.engineUnavailable` because it describes a process that will not run the model
-    /// again for its lifetime, which is a different conversation to have with the
-    /// user (#315).
+    ///   Until 2026-09-20 this case was excluded, and the reason written here was
+    ///   that "a transformation was attempted and may have half-happened". **That
+    ///   reason was false**, and the code above is what falsifies it: this branch has
+    ///   never been able to produce a partial generation, so the exclusion rested on a
+    ///   risk that does not exist. It is not amended, it is withdrawn. What it cost is
+    ///   measured: device capture 2026-09-20T14:29:56Z, 1.9.0 (34), `Structured` armed
+    ///   on 107 characters of French, `reason=guardrailViolation` — Apple's own safety
+    ///   filter refusing to generate, `polished: null`, `engineMs: 3433` — and an
+    ///   empty field. That is the harm #580 exists to end, reached through a second
+    ///   outcome.
+    ///
+    /// `.cancelled` stays fail-closed for every mode, whatever it declares, and the
+    /// reason is not partiality: the user stopped the dictation themselves, so what
+    /// they want in the field is a question this issue never asked.
+    /// `.engineUnavailable` stays closed because it describes a process that will not
+    /// run the model again for its lifetime, which is a different conversation to have
+    /// with the user (#315).
     ///
     /// `.unsupportedInputLanguage` (#490) never reached the engine either, and stays
     /// fail-closed anyway. What the mode would degrade to is text in a language the
@@ -390,7 +407,9 @@ public enum PolishPipeline {
     public static func degradesToFloor(_ mode: SmartMode,
                                        outcome: PolishMetrics.Outcome) -> Bool {
         guard mode.floorBehaviour == .insertRawText else { return false }
-        return outcome == .exceededContextBudget || outcome == .rejectedGuardrail
+        return outcome == .exceededContextBudget
+            || outcome == .rejectedGuardrail
+            || outcome == .engineFailed
     }
 
     /// Deterministic pre-pass for the auto path (#239 device-test fix).

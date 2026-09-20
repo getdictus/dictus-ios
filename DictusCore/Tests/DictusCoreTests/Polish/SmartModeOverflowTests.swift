@@ -1,6 +1,6 @@
 // DictusCore/Tests/DictusCoreTests/Polish/SmartModeOverflowTests.swift
 // What an armed mode inserts when the context guard refuses it (#79, block B decision)
-// and, since #580, when a guardrail does.
+// and, since #580, when a guardrail does or the engine throws.
 import XCTest
 @testable import DictusCore
 
@@ -129,21 +129,95 @@ final class SmartModeOverflowTests: XCTestCase {
         }
     }
 
-    /// The exceptions stay as narrow as the argument for them. These four either
-    /// attempted a transformation that may have half-happened, describe a process
-    /// that will not call the engine again (#315), or would degrade to text in a
-    /// language the model cannot read (#490) — so fail-closed still applies to List
-    /// as much as to Translate.
+    // MARK: - An engine throw (#580, second outcome)
+
+    /// Device capture 2026-09-20T14:29:56Z, 1.9.0 (34): `Structured` armed on 107
+    /// characters of French, `outcome=engineFailed reason=guardrailViolation` — Apple's
+    /// own safety filter refusing to generate, not our `PolishGuardrail` — and an empty
+    /// field. `polished: null` in the export is what tells the two refusals apart.
+    ///
+    /// The floor is `preprocessed` here for the same reason it is on a rejection: the
+    /// `catch` that builds this outcome sets `engineOutput: nil`, and the engine call
+    /// is a single batch `respond()`, so there is no partial generation to guard
+    /// against.
+    func testStructuredDegradesOnAnEngineThrow() {
+        XCTAssertTrue(
+            PolishPipeline.degradesToFloor(
+                SmartModeCatalogue.structured, outcome: .engineFailed
+            )
+        )
+        XCTAssertEqual(
+            PolishPipeline.resolvedOutput(
+                result(.engineFailed),
+                preprocessed: "Ok, petit test ?",
+                job: job(SmartModeCatalogue.structured)
+            ),
+            "Ok, petit test\u{00A0}?",
+            "the floor is the pre-pass output with typography, and the engine wrote nothing"
+        )
+    }
+
+    /// Every mode that declares `.insertRawText` answers the same way — the gate is the
+    /// declaration, not the mode's identity.
+    func testEveryDegradingModeDegradesOnAnEngineThrow() {
+        let modes = [
+            SmartModeCatalogue.notes, SmartModeCatalogue.structured, SmartModeCatalogue.message
+        ]
+        for mode in modes {
+            XCTAssertEqual(mode.floorBehaviour, .insertRawText, "fixture check for \(mode.id)")
+            XCTAssertTrue(
+                PolishPipeline.degradesToFloor(mode, outcome: .engineFailed),
+                "\(mode.id) declares the floor acceptable, so an engine throw must insert it"
+            )
+            XCTAssertEqual(
+                PolishPipeline.resolvedOutput(
+                    result(.engineFailed),
+                    preprocessed: "Ok, petit test ?",
+                    job: job(mode)
+                ),
+                "Ok, petit test\u{00A0}?"
+            )
+        }
+    }
+
+    /// The negative case this outcome must not take with it, and the reason the test
+    /// above is not enough on its own: Translate's floor is the input language.
+    func testTranslateInsertsNothingOnAnEngineThrow() {
+        for language in SupportedLanguage.allCases {
+            let mode = SmartModeCatalogue.translate(to: language)
+            XCTAssertFalse(
+                PolishPipeline.degradesToFloor(mode, outcome: .engineFailed),
+                "translate.\(language.rawValue) must not fall back to the input language"
+            )
+            XCTAssertNil(PolishPipeline.resolvedOutput(
+                result(.engineFailed),
+                preprocessed: "Ok, petit test ?",
+                job: job(mode)
+            ))
+        }
+    }
+
+    /// The regression fence. These three stay closed on a mode that accepts the floor,
+    /// and each for its own reason — none of them partiality, which is the argument
+    /// #580 withdrew on 2026-09-20:
+    ///
+    /// - `.cancelled` — the user stopped the dictation themselves.
+    /// - `.engineUnavailable` — a process that will not run the model again (#315).
+    /// - `.unsupportedInputLanguage` — the floor would be text in a language the model
+    ///   cannot read (#490), which is not the same offer.
+    ///
+    /// `.skipped` rides along as the control: no mode path produces it, and it must
+    /// not start degrading by accident either.
     func testEveryOtherFailureStaysClosedEvenForADegradingMode() {
         let others: [PolishMetrics.Outcome] = [
-            .engineFailed, .cancelled, .engineUnavailable, .skipped
+            .cancelled, .engineUnavailable, .unsupportedInputLanguage, .skipped
         ]
         for outcome in others {
             XCTAssertNil(
                 PolishPipeline.resolvedOutput(
                     result(outcome), preprocessed: "Ok", job: job(SmartModeCatalogue.notes)
                 ),
-                "\(outcome.rawValue) must not degrade — a transformation was attempted"
+                "\(outcome.rawValue) must not degrade"
             )
             XCTAssertFalse(
                 PolishPipeline.degradesToFloor(SmartModeCatalogue.notes, outcome: outcome)
