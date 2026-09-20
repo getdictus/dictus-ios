@@ -52,7 +52,7 @@ Adopt a **small multidimensional label schema**, not one giant workflow label:
 - `P0`–`P3` for urgency/impact;
 - `type/*` for work kind;
 - `area/*` for product surface (`keyboard`, `transcription`, `models`, `onboarding`, `privacy`, `release`);
-- one workflow state from `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `blocked`;
+- one workflow state from `needs-triage`, `needs-info`, `needs-decision`, `ready-for-agent`, `ready-for-human`, `blocked`;
 - optional `risk/*` labels for privacy, data loss, App Store/release, migration, and extension-memory limits.
 
 Keep priority definitions objective. For Dictus, a plausible mapping is:
@@ -87,7 +87,7 @@ Define an explicit triage decision table:
 | Exact duplicate or already fixed on `main` with cited evidence | Comment, label, optionally close | Audit reversibility |
 | Bug lacks reproducible steps/device/OS/logs | Apply `needs-info` or `needs-repro`; request specific evidence | Close only after an explicit inactivity policy |
 | Implementation is safe, scoped, and acceptance criteria are complete | Apply `ready-for-agent` | Periodic sampling/audit |
-| Product taste, UX trade-off, monetization, privacy policy, App Store risk, architecture direction | Summarize evidence and apply `ready-for-human`/`needs-decision` | Decide |
+| Product taste, UX trade-off, monetization, privacy policy, App Store risk, architecture direction | Summarize evidence and apply `needs-decision` | Decide |
 | External dependency or missing capability | Apply `blocked` with a concrete reason and unblock condition | Supply input or change direction |
 
 Automation should always leave a short evidence record: what it checked, which commit/current behavior it compared, the reason for the transition, and how a human can reverse it. Hermes’s public sweeper comment is a good model.[2] [7]
@@ -113,7 +113,7 @@ The queue includes operational safeguards: atomic claims, stale-claim/crashed-wo
 GitHub Issues can approximate the same durable state machine without adopting Hermes Kanban itself:
 
 ```text
-needs-triage -> needs-info | ready-for-agent | ready-for-human | blocked
+needs-triage -> needs-info | needs-decision | ready-for-agent | ready-for-human | blocked
 ready-for-agent -> in-progress -> review -> done
 review -> changes-requested -> ready-for-agent
 blocked -> previous actionable state (only when unblock condition is met)
@@ -134,7 +134,7 @@ Use GitHub issue/PR comments as the durable protocol, not chat history. Agents s
 Add simple circuit breakers:
 
 - no more than two automated retries for the same failure signature;
-- repeated identical blockers route to `ready-for-human` rather than another retry;
+- repeated identical blockers route to `needs-decision` rather than another retry;
 - creation automation must use an idempotency key such as `source:event-id` in a hidden marker or external ledger;
 - cap concurrent agent implementation tasks so review capacity is not overwhelmed.
 
@@ -212,7 +212,7 @@ Priority: P0, P1, P2, P3
 Type: type/bug, type/feature, type/docs, type/test, type/refactor
 Area: area/keyboard, area/stt, area/models, area/onboarding,
       area/settings, area/privacy, area/release
-Workflow: needs-triage, needs-info, ready-for-agent,
+Workflow: needs-triage, needs-info, needs-decision, ready-for-agent,
           ready-for-human, blocked
 Risk: risk/privacy, risk/data-loss, risk/app-store,
       risk/memory, risk/migration
@@ -240,7 +240,7 @@ Use exactly one priority, one type, at least one area, and one active workflow s
 - alternatives/workarounds;
 - privacy, offline, memory, and keyboard-extension implications;
 - acceptance criteria;
-- explicit `ready-for-human` default for product judgment.
+- explicit `needs-decision` default for unresolved product judgment.
 
 ### Automation authority
 

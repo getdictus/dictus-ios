@@ -81,7 +81,7 @@ Do **not** copy 366 labels. Reuse the axes with a much smaller vocabulary:
 
 - **Type:** `bug`, `enhancement`, `docs`.
 - **Priority:** `P0` through `P3`, with written semantics.
-- **Workflow:** retain Dictus's existing `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`.
+- **Workflow:** retain Dictus's states `needs-triage`, `needs-info`, `needs-decision`, `ready-for-agent`, `ready-for-human`, and `wontfix`.
 - **Evidence:** add at most `reproduced` and `needs-device-proof` if those distinctions repeatedly matter.
 - **Surface:** use only stable product boundaries such as `app`, `keyboard-extension`, `speech-model`, and `release`.
 
@@ -200,12 +200,13 @@ A reusable Dictus issue-to-agent contract could be:
 ```text
 needs-triage
   -> needs-info                missing evidence
-  -> ready-for-human           product/privacy/App Store decision
+  -> needs-decision            product/privacy/App Store decision
+  -> ready-for-human           settled work requiring human access or action
   -> ready-for-agent           expected behavior and acceptance criteria are clear
 
 ready-for-agent
   -> assigned + branch/PR      agent claims current unowned work
-  -> ready-for-human           PR has evidence, CI, review summary, and known gaps
+  -> Project Review/Validation PR has evidence, CI, review summary, and known gaps
   -> needs-info                reproduction or requirements proved insufficient
 ```
 
@@ -256,7 +257,7 @@ Record skipped checks as gaps, not as success. Bind agent review and release evi
 The smallest useful adaptation is:
 
 1. **Three issue forms:** bug, feature, docs; blank issues disabled.
-2. **Five existing workflow labels:** `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`.
+2. **Six workflow labels after rollout:** `needs-triage`, `needs-info`, `needs-decision`, `ready-for-agent`, `ready-for-human`, `wontfix`.
 3. **Four priority labels:** P0-P3 with one-sentence definitions.
 4. **A few stable surface labels:** app, keyboard extension, speech/model, release.
 5. **One trusted triage action:** validate form completeness, suggest duplicates, and move only among allowed workflow states.

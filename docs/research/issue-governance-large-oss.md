@@ -73,7 +73,7 @@ VS Code also uses bounded community signals: candidate feature requests can grad
 
 ### 1. Keep five independent dimensions
 
-Retain the existing canonical workflow labels - `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix` - and add only labels that answer a different question:
+Retain the canonical workflow labels - `needs-triage`, `needs-info`, `needs-decision`, `ready-for-agent`, `ready-for-human`, and `wontfix` - and add only labels that answer a different question:
 
 - **Type:** `bug`, `feature`, `maintenance`, `documentation`
 - **Impact:** `priority/critical`, `priority/high`, `priority/normal`
@@ -89,13 +89,14 @@ Use one primary workflow state at a time:
 
 ```text
 new -> needs-triage
-needs-triage -> needs-info | ready-for-human | ready-for-agent | closed(reason)
+needs-triage -> needs-info | needs-decision | ready-for-human | ready-for-agent | closed(reason)
 needs-info -> needs-triage (reporter replied) | closed(not-reproducible)
-ready-for-human -> ready-for-agent | milestone/current-release | closed(wontfix/out-of-scope)
+needs-decision -> ready-for-agent | ready-for-human | closed(wontfix/out-of-scope)
+ready-for-human -> human action -> done
 ready-for-agent -> in-progress/assigned -> PR -> done
 ```
 
-`ready-for-human` should mean a product, UX, privacy, architecture, or release decision is required - not merely that an agent has failed. `ready-for-agent` should mean scope and acceptance criteria are clear, affected files are reasonably bounded, and a verifier/test strategy is stated. This mirrors the large projects’ separation of evidence, acceptance, ownership, and execution without importing their organizational hierarchy.[1] [12] [16]
+`needs-decision` should mean a product, UX, privacy, architecture, or release decision is required. `ready-for-human` should mean those decisions are settled but the work itself needs human access or action. `ready-for-agent` should mean scope and acceptance criteria are clear, affected files are reasonably bounded, and a verifier/test strategy is stated. This mirrors the large projects’ separation of evidence, acceptance, ownership, and execution without importing their organizational hierarchy.[1] [12] [16]
 
 ### 3. Use milestones sparingly
 

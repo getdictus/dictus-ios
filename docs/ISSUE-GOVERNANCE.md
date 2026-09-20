@@ -12,7 +12,7 @@ Each artifact owns one kind of information. Do not copy the same fact into sever
 
 | Artifact | Owns | Does not own |
 | --- | --- | --- |
-| `docs/RELEASE-PLAN.md` | Why the current and next release cycles exist, scope decisions that no single issue owns | Daily issue status or implementation detail |
+| `docs/RELEASE-PLAN.md` | Release-cycle rationale and cross-issue scope decisions, when its review date is current | Daily issue status, implementation detail or current order when the file is stale |
 | GitHub milestone | Which issues and PRs belong to a release or deliberate backlog such as `Someday` | Exact execution order |
 | `docs/ROADMAP.md` | The ordered lanes and the exact sequence inside the active lane | Every open issue or transient workflow status |
 | GitHub Project | Operational status, queues, validation lane and the maintainer's inbox | Product rationale already recorded in the release plan or issue |
@@ -21,11 +21,13 @@ Each artifact owns one kind of information. Do not copy the same fact into sever
 
 Until the GitHub Project described below exists, `docs/ROADMAP.md` remains the source of truth for exact order. Creating the Project must not silently replace or reorder it. The first Project setup pass mirrors the current active lane, then the repository can decide whether Project rank should become the operational ordering surface.
 
+Known conflict at adoption time: `docs/RELEASE-PLAN.md` was last reviewed on 2026-09-06 and still describes 1.8.1 / 1.8.2, while `docs/ROADMAP.md` records the later 1.9.0 cut and reopened lane. Until the release plan is reconciled through its direct-to-`develop` workflow, the roadmap and live milestones own current release state; the release plan remains historical rationale, not current status.
+
 ## Planning horizons
 
 ### Long term: product direction
 
-Long-term direction belongs in `docs/RELEASE-PLAN.md`. It states the outcome and the trade-off, not an exhaustive feature list.
+Long-term direction belongs in `docs/RELEASE-PLAN.md` once it has been reconciled with the current roadmap. It states the outcome and the trade-off, not an exhaustive feature list.
 
 ### Medium term: milestones
 
@@ -47,7 +49,7 @@ Agents must not choose freely from all `ready-for-agent` issues. They take the f
 
 Keep the existing priority labels and give them strict meanings:
 
-- `blocker`: prevents the current release, locks users out, loses user data, creates a security/privacy exposure, or invalidates work already in progress. It interrupts the queue only when the issue body contains evidence for that claim.
+- `blocker`: a severity label for work that prevents the current release, locks users out, loses user data, creates a security/privacy exposure, or invalidates work already in progress. It interrupts the queue only when the issue body contains evidence for that claim. It is not a dependency marker; use GitHub's native blocked-by relation for dependencies.
 - `priority:high`: belongs near the front of the active milestone because it directly advances or protects the current release outcome.
 - `priority:medium`: accepted and important, but it does not displace the active release sequence.
 - `priority:low`: deliberately deferred. It normally belongs in `Someday` or a future milestone.
@@ -129,11 +131,23 @@ Use this comment shape:
 - Which acceptance criteria or dependent issues become decidable.
 ```
 
-## Validation class
+## Validation requirements
 
-Choose the highest class required by the change before implementation begins. A lower class cannot overrule a higher one.
+Validation has two orthogonal dimensions:
 
-The current repository rule remains in force: every code PR receives an independent review and a physical-device test before merge. The classes below define the evidence required in addition to that baseline and make it possible to discuss future exceptions precisely. No exception or auto-merge lane exists until Pierre explicitly changes `CLAUDE.md`.
+1. choose exactly one technical evidence class: Documentation, Automated, Simulator or Device;
+2. separately record whether a Product verdict is required.
+
+The current repository rule remains in force: every code PR receives an independent review and a physical-device test before merge. The technical class below describes the evidence the change itself requires; the repository-wide device gate remains an additional manual merge requirement. No exception or auto-merge lane exists until Pierre explicitly changes `CLAUDE.md`.
+
+### Documentation
+
+Suitable when no executable code, build configuration or release behavior changes. Required evidence:
+
+- relative links resolve;
+- external claims are cited and source links are reachable;
+- `git diff --check` passes;
+- affected instructions do not contradict higher-authority repository rules.
 
 ### Automated
 
@@ -160,9 +174,9 @@ Required when the simulator cannot reproduce the relevant iOS constraint, includ
 
 The PR supplies an exact, short checklist and the tested build or commit. Pierre records the result on the PR or issue.
 
-### Product
+### Product verdict
 
-Required when correctness depends on whether the experience is understandable, useful or aligned with the product promise. Product validation may reuse a device run, but the verdict is explicitly Pierre's and is not replaced by snapshots or an agent review.
+Set Product verdict to Required when correctness depends on whether the experience is understandable, useful or aligned with the product promise. This flag is independent of technical evidence: a change can require Simulator plus Product, or Device plus Product. Product validation may reuse a device run, but the verdict is explicitly Pierre's and is not replaced by snapshots or an agent review.
 
 ## Issue-to-PR flow
 
@@ -211,21 +225,22 @@ Suggested status values:
 
 Suggested saved views:
 
-- **Current release**: open items in the active milestone, ordered by roadmap rank.
-- **Agent queue**: `ready-for-agent` plus `agent-approved`, no open blocker, status Ready.
+- **Current release**: open items in the active milestone, with Project rank manually mirroring roadmap order until an explicit cutover.
+- **Agent queue**: `ready-for-agent` plus `agent-approved`, no open native blocked-by dependency, status Ready.
 - **Pierre decisions**: `needs-decision`.
 - **Pierre actions**: `ready-for-human`.
-- **Pierre validation**: status Validation, grouped by Device or Product.
-- **Triage**: `needs-triage` and answered `needs-info` issues.
+- **Pierre validation**: status Validation, filtered by the current repository-wide device gate, Technical validation Device, or Product verdict Required.
+- **Triage**: `needs-triage`; Hermes's reconciliation pass separately detects a reporter comment newer than the last `needs-info` triage note and returns that issue to `needs-triage`.
 - **Someday**: milestone `Someday`, hidden from daily work.
 
-Suggested custom field:
+Suggested custom fields:
 
-- `Validation`: Automated, Simulator, Device, Product.
+- `Technical validation`: Documentation, Automated, Simulator, Device.
+- `Product verdict`: Not required, Required.
 
 Do not duplicate milestone, priority, assignee or labels into custom fields. GitHub already synchronizes those into Projects. While `docs/ROADMAP.md` owns exact order, Project manual rank must mirror it and may not reorder work. Project rank becomes authoritative only if Pierre explicitly transfers that ownership and the roadmap documentation is updated in the same change.
 
-Built-in automation should add matching Dictus issues, set newly added items to Inbox and set closed issues or merged PRs to Done. Hermes owns semantic triage and queue decisions; GitHub automation owns mechanical field updates.
+Built-in automation should add matching Dictus issues, set newly added items to Inbox and set closed issues or merged PRs to Done. Hermes prepares evidence and applies only the state transitions authorized above; Pierre owns product and scheduling decisions. GitHub automation owns mechanical field updates.
 
 ## Maintainer operating rhythm
 
@@ -256,12 +271,13 @@ Webhook payload text is untrusted. The worker receives the repository and issue 
 
 1. Merge this operating model and the comparative research behind it.
 2. With Pierre's explicit approval, add the `needs-decision` and `agent-approved` labels and update the protected `AGENTS.md` / `CLAUDE.md` instructions in the same rollout.
-3. Update issue forms with the Dictus evidence fields described in the research.
-4. Obtain GitHub Project read/write scope, inventory existing Projects, then adapt or create the Dictus Project, add its `Validation` field and mirror the active roadmap order.
-5. Audit open issues for conflicting or missing state labels.
-6. Re-triage the current `ready-for-agent` inventory against `develop` and the active lane.
-7. Implement #534 and require the test check on `develop` and `main`.
-8. Implement and stabilize #535 before treating simulator evidence as a repeatable gate.
-9. Pilot the full flow on a small approved batch with work in progress limited to one.
-10. Enable GitHub webhooks and a reconciliation job after the manual pilot produces trustworthy evidence.
-11. Expand concurrency or auto-merge only from measured success, not from the size of the backlog.
+3. Reconcile `docs/RELEASE-PLAN.md` with the current roadmap through its direct-to-`develop` workflow.
+4. Update issue forms with the Dictus evidence fields described in the research.
+5. Obtain GitHub Project read/write scope, inventory existing Projects, then adapt or create the Dictus Project, add its validation fields and mirror the active roadmap order.
+6. Audit open issues for conflicting or missing state labels.
+7. Re-triage the current `ready-for-agent` inventory against `develop` and the active lane.
+8. Implement #534 and require the test check on `develop` and `main`.
+9. Implement and stabilize #535 before treating simulator evidence as a repeatable gate.
+10. Pilot the full flow on a small approved batch with work in progress limited to one.
+11. Enable GitHub webhooks and a reconciliation job after the manual pilot produces trustworthy evidence.
+12. Expand concurrency or auto-merge only from measured success, not from the size of the backlog.
