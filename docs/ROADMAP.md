@@ -260,6 +260,8 @@ Two things already verified against the code, so no one re-derives them: `return
 
 That last point is also why **CodeRabbit's review was declined**: it proposed holding the user in Dictus when the ceiling expires before recording starts. Past roughly 300 ms iOS refuses `open()` with "Application is neither visible nor entitled", so with 7 of 7 returns leaving at the ceiling that change would have removed the return in every measured case. The same captures also put a device floor under that 300 ms figure for the first time: `open()` was accepted at `waitedMs=523`, and no return in either capture ended `open-failed`. The reasoning is on #567 rather than only in the PR thread.
 
+**Build 35 went to both TestFlight groups on 2026-09-21** with #579's fix, device-checked by Pierre the same day. It also carries every polish-pipeline change merged since 34 (#523, #572, #580), and that pipeline runs on every dictation, subscriber or not — so 35 changes the free dictation path, not only Pro code, which stays unreachable (`paywallVisible = false`, the forced entitlement compiled out of Release). **Promotion of 35 to the App Store is to be decided on 2026-09-24**, after three days of tester use, by Pierre through `appstore-promote`.
+
 **The rest of the list is open.** More device use of build 33 is expected to add items here. Anything that lands on a path from #23, #542, #543 or #558 joins this lane; anything else goes to its own.
 
 ## Lane C — the keyboard session
