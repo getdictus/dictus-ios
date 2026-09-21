@@ -489,6 +489,17 @@
         }
       }
     },
+    "Summary" : {
+      "comment" : "Name of the Smart Mode that condenses a dictation into its gist, in a few sentences of prose (#571).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résumé"
+          }
+        }
+      }
+    },
     "The microphone is busy on a call. Try again once the call ends." : {
       "comment" : "Toolbar message shown when the keyboard declines a mic tap because a call holds the microphone (issues #313, #483). Same sentence as DictusApp's.",
       "localizations" : {
