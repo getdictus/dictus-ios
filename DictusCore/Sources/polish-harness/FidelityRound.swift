@@ -31,6 +31,7 @@
 
 #if os(macOS)
 import Foundation
+import NaturalLanguage
 import DictusCore
 import PolishFidelity
 
@@ -108,6 +109,60 @@ struct FidelityRun {
     /// that did produce output keeps this true and stays scoreable — #581's positive
     /// control is exactly such a run.
     let hasEngineOutput: Bool
+    /// Output language, list lines and the shipping fabrication check (#587). Nil on a
+    /// replay or a rescore of a capture written before they existed.
+    var shape: FidelityShape?
+}
+
+/// What #587's bars read beyond the four axes: which language came back, whether the
+/// output carries a list, and what the shipping incompleteness check says about it.
+///
+/// Observables of the output, computed here rather than in `PolishFidelity`: the
+/// language reading is `NLLanguageRecognizer`'s, the list test is a line prefix, and
+/// the fabrication verdict is the shipped `PolishIncompleteness` itself — none of them
+/// is a new scorer that would need pinning, and the bars in
+/// `docs/research/587-structured-rewrite/bars.md` §4 say how each is read.
+struct FidelityShape {
+    /// The language the output must be in: the fixture's `lang`, or the input's own
+    /// reading on an `auto` fixture.
+    let expectedLanguage: String
+    /// The recogniser's top reading of the whole output, with no confidence floor.
+    let outputLanguage: String?
+    /// Sentences of 20 characters or more read as another language at 0.85 or above.
+    /// A screen for a hand read, never a verdict: a fragment the speaker said in
+    /// another language is legitimately kept.
+    let foreignSentences: [String]
+    /// Lines opening on a list marker.
+    let listLines: Int
+    /// `PolishIncompleteness.isFabricated` on this output against its transcript.
+    let incompletenessFabricated: Bool
+
+    init(output: String, raw: String, fixtureLanguage: String) {
+        let expected = fixtureLanguage == "auto"
+            ? (PolishPipeline.detectLanguageCode(in: raw) ?? "und") : fixtureLanguage
+        expectedLanguage = expected
+        outputLanguage = FidelityShape.reading(output, floor: 0)
+        foreignSentences = output.split(separator: "\n")
+            .flatMap { PolishSegmentation.sentences(of: String($0)) }
+            .filter { $0.count >= 20 }
+            .filter { sentence in
+                guard let code = FidelityShape.reading(sentence, floor: 0.85) else { return false }
+                return code != expected
+            }
+        listLines = output.split(separator: "\n").count { line in
+            line.range(of: #"^\s*([-*•–]|\d+[.)])\s"#, options: .regularExpression) != nil
+        }
+        incompletenessFabricated = PolishIncompleteness.isFabricated(polished: output, raw: raw)
+    }
+
+    /// The recogniser's top hypothesis, or nil below `floor`.
+    static func reading(_ text: String, floor: Double) -> String? {
+        let recognizer = NLLanguageRecognizer()
+        recognizer.processString(text)
+        guard let top = recognizer.languageHypotheses(withMaximum: 1).max(by: { $0.value < $1.value }),
+              top.value >= floor else { return nil }
+        return top.key.rawValue
+    }
 }
 
 // MARK: - The round
@@ -192,6 +247,14 @@ enum FidelityRound {
         if score.stanceHardened > 0 { parts.append("STANCE-HARDENED=\(score.stanceHardened)") }
         if score.negationDropped > 0 { parts.append("negationDropped=\(score.negationDropped)") }
         parts.append("inversions=\(score.inversions)/\(score.comparablePairs)")
+        if let shape = result.shape {
+            if shape.outputLanguage != shape.expectedLanguage {
+                parts.append("LANG=\(shape.outputLanguage ?? "?")≠\(shape.expectedLanguage)")
+            }
+            if !shape.foreignSentences.isEmpty { parts.append("FOREIGN-SENTENCES=\(shape.foreignSentences.count)") }
+            if shape.listLines > 0 { parts.append("LIST=\(shape.listLines)") }
+            if shape.incompletenessFabricated { parts.append("INCOMPLETENESS-CHECK") }
+        }
         switch score.speakerState {
         case .fabricated: parts.append("SPEAKER-STATE-FABRICATED" + (score.closesOnSpeakerState ? "(closing)" : "(body)"))
         case .dropped: parts.append("SPEAKER-STATE-DROPPED")
@@ -210,6 +273,9 @@ enum FidelityRound {
         for miss in result.score.stanceMisses {
             print("     \(miss.kind.rawValue.uppercased()): \(miss.input)")
             print("       → \(miss.output)")
+        }
+        for sentence in result.shape?.foreignSentences ?? [] {
+            print("     FOREIGN: \(sentence)")
         }
     }
 
@@ -266,6 +332,8 @@ enum FidelityRound {
                   + "\(rows.count { $0.score.speakerState == .preserved })/\(rows.count)")
         }
 
+        printLanguageTable(all, arms: arms)
+
         print("\n\n════ PER FIXTURE, per arm (never pooled)\n")
         for arm in arms {
             let rows = all.filter { $0.arm == arm }
@@ -292,6 +360,42 @@ enum FidelityRound {
         print("   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened")
         print("   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions")
         print("   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.")
+    }
+
+    /// #587's language and list observables, per arm and per expected language.
+    ///
+    /// `refusedLang` is B1b's count and the ladder's stop rule; `wrongAccepted` is B1a's
+    /// screen — an accepted output whose whole reading, or one of whose sentences, is
+    /// another language. Both are read by hand before any bar is called (bars.md §4).
+    static func printLanguageTable(_ all: [FidelityRun], arms: [String]) {
+        let rows = all.filter { $0.hasEngineOutput && $0.shape != nil }
+        guard !rows.isEmpty else { return }
+        print("\n\n════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)\n")
+        print(pad("arm", 22) + pad("lang", 10) + pad("outputs", 9) + pad("refusedLang", 13)
+              + pad("wrongAccepted", 15) + pad("wrongAny", 10) + pad("withList", 10) + "incompleteness")
+        for arm in arms {
+            let armRows = rows.filter { $0.arm == arm }
+            var seen: Set<String> = []
+            let languages = armRows.compactMap { $0.shape?.expectedLanguage }.filter { seen.insert($0).inserted }
+            for language in languages {
+                let cell = armRows.filter { $0.shape?.expectedLanguage == language }
+                let wrong: (FidelityRun) -> Bool = { run in
+                    guard let shape = run.shape else { return false }
+                    return shape.outputLanguage != shape.expectedLanguage || !shape.foreignSentences.isEmpty
+                }
+                print(pad(arm, 22) + pad(language, 10) + pad("\(cell.count)", 9)
+                      + pad("\(cell.count { $0.rejectedCheck == PolishGuardrail.Check.language.rawValue })", 13)
+                      + pad("\(cell.count { $0.outcome == "success" && wrong($0) })", 15)
+                      + pad("\(cell.count(where: wrong))", 10)
+                      + pad("\(cell.count { ($0.shape?.listLines ?? 0) > 0 })", 10)
+                      + "\(cell.count { $0.shape?.incompletenessFabricated == true })")
+            }
+        }
+        print("\n  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).")
+        print("  wrongAccepted = accepted, and the whole output or a sentence reads as another language")
+        print("                  (B1a's screen: a fragment the speaker said in that language is legitimate).")
+        print("  wrongAny      = the same screen over every output, refused or not (B1c for English).")
+        print("  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).")
     }
 
     /// Where the bench and the hand labels agree, and where they do not.
@@ -372,6 +476,12 @@ struct FidelityRunRecord: Codable {
     /// Optional on decode: captures written before PR #583's review carry no such
     /// field, and `--rescore` derives it for them (see `FidelityRescore`).
     let hasEngineOutput: Bool?
+    /// #587's observables. Optional on decode for every capture written before them.
+    let expectedLanguage: String?
+    let outputLanguage: String?
+    let foreignSentences: [String]?
+    let listLines: Int?
+    let incompletenessFabricated: Bool?
 
     init(_ run: FidelityRun) {
         arm = run.arm
@@ -398,6 +508,11 @@ struct FidelityRunRecord: Codable {
         closesOnSpeakerState = run.score.closesOnSpeakerState
         output = run.output
         hasEngineOutput = run.hasEngineOutput
+        expectedLanguage = run.shape?.expectedLanguage
+        outputLanguage = run.shape?.outputLanguage
+        foreignSentences = run.shape?.foreignSentences
+        listLines = run.shape?.listLines
+        incompletenessFabricated = run.shape?.incompletenessFabricated
     }
 }
 
@@ -463,7 +578,8 @@ func runFidelityRound(fixtures: [Fixture],
                     outcome: outcome.outcome.rawValue,
                     rejectedCheck: outcome.rejectedCheck?.rawValue, labels: [],
                     score: PolishFidelityScorer.score(output: scored, input: fixture.raw, floor: floor),
-                    output: scored, hasEngineOutput: outcome.engineOutput != nil
+                    output: scored, hasEngineOutput: outcome.engineOutput != nil,
+                    shape: FidelityShape(output: scored, raw: fixture.raw, fixtureLanguage: fixture.lang)
                 )
                 all.append(result)
                 print("  #\(index) \(FidelityRound.verdict(result))")
