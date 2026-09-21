@@ -53,7 +53,7 @@ public struct PolishLanguageSegmentThresholds: Equatable, Sendable {
 
 /// Runtime sanity check on every polish output.
 ///
-/// Five complementary checks:
+/// Six complementary checks:
 /// 1. `accepts(raw:polished:mode:)` — character-length ratio. Catches catastrophic
 ///    over- or under-generation (empty output, runaway generation).
 /// 2. `detectedLanguageMatches(polished:target:)` — language detection on the
@@ -73,9 +73,14 @@ public struct PolishLanguageSegmentThresholds: Equatable, Sendable {
 ///    cannot see by construction: a preamble (#466) and a refusal (#349), both of
 ///    them the model writing about its own task in the language it was told to
 ///    write in. Its own type for the same reason check 3 is.
+/// 6. `PolishIncompleteness` — whether the output reports the speaker's memory
+///    failing when the transcript does not (#581, #587). The one sentence a mode that
+///    keeps a speaker-flagged incompleteness has been seen inventing, and one check 4
+///    passes on a long input because a generic sentence shares its ordinary words.
+///    Runs only where the contract asks for it.
 public enum PolishGuardrail {
 
-    /// Which of the five refused an output.
+    /// Which of the six refused an output.
     ///
     /// One `PolishMetrics.Outcome.rejectedGuardrail` covers five questions with five
     /// different answers — the band is mis-sized for the mode, the prompt drifted
@@ -100,6 +105,10 @@ public enum PolishGuardrail {
         case grounding
         case segmentOverlap
         case prefixAlignment
+        /// The output reports the speaker's memory failing and the transcript does
+        /// not (#587). Named apart from `segmentOverlap`, which refuses some of the
+        /// same outputs, so an export counts #581's shape under its own name.
+        case incompleteness
 
         public var description: String { rawValue }
     }

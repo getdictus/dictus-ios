@@ -165,7 +165,13 @@ public enum SmartModeCatalogue {
             maximumLengthRatio: 1.5,
             outputLanguage: .sameAsInput,
             requiresGroundedNames: true,
-            requiresAlignedPrefix: false
+            requiresAlignedPrefix: false,
+            // The one mode that keeps a speaker-flagged incompleteness as a hard bar
+            // (#523, decision 7), and the one the device caught inventing one: seven
+            // outputs closing on a sentence about the speaker's memory, three of them
+            // inserted (#581). Rule 7 stays; this refuses the sentence when the
+            // transcript never said it (#587, decision 6). See `PolishIncompleteness`.
+            refusesFabricatedIncompleteness: true
         ),
         // The mode armed for the longest dictations is the one that meets the context
         // ceiling first — sooner than `List`, because its prompt is longer. The floor

@@ -30,11 +30,11 @@ public enum PolishPipeline {
         /// and only there; `nil` on every other outcome, so a caller can key on its
         /// presence exactly as it does on `failureReason`.
         ///
-        /// The four values are `PolishGuardrail.Check`'s slugs. `outcome` alone says
-        /// a check failed and never which one, and the four have four different
-        /// answers — the band is mis-sized for the mode, the prompt drifted out of
-        /// the speaker's language, the model invented a name, or the model wrote
-        /// about its own task. Carrying the word makes the rate of each countable
+        /// The values are `PolishGuardrail.Check`'s slugs. `outcome` alone says a
+        /// check failed and never which one, and each has a different answer — the
+        /// band is mis-sized for the mode, the prompt drifted out of the speaker's
+        /// language, the model invented a name, a line, or the speaker's own memory
+        /// failing, or the model wrote about its own task. Carrying the word makes the rate of each countable
         /// from an export after the fact, which is what #466 asks for.
         public let rejectedCheck: PolishGuardrail.Check?
 
@@ -138,16 +138,18 @@ public enum PolishPipeline {
             }
             // Guardrail baseline is the preprocessed text — what the engine
             // actually saw (modulo the newline marker the post-pass undid).
-            // The five output checks, in the order they cost: a character ratio,
-            // then two `NaturalLanguage` passes, then two word-set comparisons. Each
-            // names itself in the result so an export can count the five apart
-            // (#466) — `rejectedGuardrail` is one outcome for five questions.
+            // The six output checks, in the order they cost: a character ratio,
+            // then two `NaturalLanguage` passes, then three word-set comparisons. Each
+            // names itself in the result so an export can count the six apart
+            // (#466) — `rejectedGuardrail` is one outcome for six questions.
             //
-            // The two word-set checks are ordered by SPECIFICITY rather than by cost,
-            // which is the same for both. A chat preamble fails them both, and #466
-            // owns that shape: leaving `segmentOverlap` last keeps every captured
+            // The word-set checks are ordered by SPECIFICITY rather than by cost,
+            // which is the same for all three. A chat preamble fails two of them, and
+            // #466 owns that shape: leaving `segmentOverlap` last keeps every captured
             // preamble counted as `prefixAlignment`, so a seven-day export still
-            // measures the rate #466 shipped against.
+            // measures the rate #466 shipped against. `incompleteness` sits before it
+            // for the same reason: #581's closing sentence often fails the overlap
+            // check too, and it should be counted under the name that says what it is.
             let refused: PolishGuardrail.Check?
             if !PolishGuardrail.accepts(
                 raw: preprocessed, polished: polished, contract: job.task.contract
@@ -159,6 +161,11 @@ public enum PolishPipeline {
                 refused = .grounding
             } else if !prefixGuardrailPasses(polished: polished, preprocessed: preprocessed, job: job) {
                 refused = .prefixAlignment
+            } else if job.task.contract.refusesFabricatedIncompleteness,
+                      PolishIncompleteness.isFabricated(polished: polished, raw: preprocessed) {
+                // Off the contract, like every other check here: only a mode that keeps a
+                // speaker-flagged incompleteness has been seen inventing one (#587).
+                refused = .incompleteness
             } else if !segmentOverlapGuardrailPasses(polished: polished, preprocessed: preprocessed, job: job) {
                 refused = .segmentOverlap
             } else {
