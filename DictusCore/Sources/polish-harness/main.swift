@@ -113,7 +113,7 @@ func corpusPaths(in args: [String], valuedOptions: Set<String> = []) -> [String]
 }
 
 let args = Array(CommandLine.arguments.dropFirst())
-guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
+guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "summary", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
     print("""
     polish-harness — off-device polish eval (macOS + Apple Intelligence)
 
@@ -125,6 +125,7 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "f
       fidelity  <fixtures.json> --mode <id> [--runs N] [--arm <prompt.txt> …] [--floor N] [--json <out.json>]
       fidelity  <corpus.json> --replay [--floor N] [--sweep] [--json <out.json>]
       fidelity  --rescore <capture.json> --fixtures <fixtures.json> [--floor N] [--json <out.json>]
+      summary   <fixtures.json> [--mode <id>] [--runs N] [--arm <prompt.txt> …] [--json <out.json>]
       guardrail <corpus.json> [<corpus.json> …] [--segments] [--sweep] [--anchors]
       target    <corpus.json> [<corpus.json> …] [--sweep] [--floor N]
       vocabulary <corpus.json> [<corpus.json> …]
@@ -1009,6 +1010,16 @@ case "fidelity" where rescorePath != nil:
     runFidelityRescore()
 case "fidelity" where isReplay:
     runFidelityReplay()
+// #571. The Résumé bench: bars in docs/research/571-summary/bars.md. Dispatched here
+// rather than inside `runHarness`, whose switch is at the complexity ceiling.
+case "summary":
+    if #available(macOS 26.0, *) {
+        await runSummaryRound(fixtures: fixtures, mode: loadSmartMode(modeIdentifier),
+                              armPaths: armPaths, runs: runs, jsonOut: paragraphJSONOut)
+    } else {
+        print("error: this command drives Apple Foundation Models and needs macOS 26.")
+        exit(1)
+    }
 default:
     if #available(macOS 26.0, *) {
         await runHarness()
