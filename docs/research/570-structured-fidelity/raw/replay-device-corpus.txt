@@ -99,13 +99,12 @@ floor   caught                    otherFlags    flagged outputs
 
 ════ AXES, per arm (bars.md §4)
 
-arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       engineErr
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
 device                9        7/9         6/9         4/9         0/9         1/9         0/9         1/9         0
 
   Counts are OUTPUTS carrying at least one, not occurrences.
-  engineErr runs are in NO column and in no denominator: a call that never
-  answered has violated nothing, and its empty output would otherwise read as a
-  total recall failure.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
   `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
   count are observables by declaration (bars.md §1, §4) and are in no column here.
 
@@ -129,7 +128,7 @@ device                8             5             3/9           0/9
    D8-last-transcription   o1
    D9-suggestion-bar       U2PHFo6
 
-   e = Apple FM threw; the run is in no denominator above.
+   e = the engine produced no output; the run is in no denominator above.
    U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
    F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
    · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.

@@ -1,0 +1,206 @@
+rescored: 81 stored runs from ../docs/research/570-structured-fidelity/capture-device-macos27.json, floor 0.35 — no model called
+
+━━ [shipping] D1-three-steps#1
+  838→794 5078ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+
+━━ [shipping] D1-three-steps#2
+  838→794 4585ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+
+━━ [shipping] D1-three-steps#3
+  838→788 4583ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+
+━━ [shipping] D2-three-steps-drift#1
+  795→806 4919ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [shipping] D2-three-steps-drift#2
+  795→805 4914ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [shipping] D2-three-steps-drift#3
+  795→800 4860ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [shipping] D4-logs-polish#1
+  578→576 3983ms success recall=11/11 HEDGE-LOST=1 negationDropped=1 inversions=4/55
+     HEDGELOST: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     NEGATIONDROPPED: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+
+━━ [shipping] D4-logs-polish#2
+  578→576 3977ms success recall=11/11 HEDGE-LOST=1 negationDropped=1 inversions=4/55
+     HEDGELOST: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     NEGATIONDROPPED: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+
+━━ [shipping] D4-logs-polish#3
+  578→576 4001ms success recall=11/11 HEDGE-LOST=1 negationDropped=1 inversions=4/55
+     HEDGELOST: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     NEGATIONDROPPED: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+
+━━ [shipping] D9-suggestion-bar#1
+  1337→1337 7514ms success recall=19/19 HEDGE-LOST=1 negationDropped=1 inversions=13/171
+     HEDGELOST: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → Donc l'autocorrection continue de fonctionner mais que l'on ne voie pas les mots de suggestion,
+     NEGATIONDROPPED: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → Donc l'autocorrection continue de fonctionner mais que l'on ne voie pas les mots de suggestion,
+
+━━ [shipping] D9-suggestion-bar#2
+  1337→1892 11114ms success recall=19/19 negationDropped=1 inversions=13/171
+     NEGATIONDROPPED: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → donc faudrait qu'en gros elle ne s'affiche pas donc faudrait que ce soit paramétrable dans l'application,
+
+━━ [V1-rule7-property] D1-three-steps#1
+  838→854 5212ms success recall=16/17 UNRECALLED=1 inversions=0/120 SPEAKER-STATE-FABRICATED(closing)
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+
+━━ [V1-rule7-property] D1-three-steps#2
+  838→794 4551ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+
+━━ [V1-rule7-property] D1-three-steps#3
+  838→794 4580ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+
+━━ [V1-rule7-property] D2-three-steps-drift#1
+  795→803 4960ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [V1-rule7-property] D2-three-steps-drift#2
+  795→800 4864ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [V1-rule7-property] D2-three-steps-drift#3
+  795→795 4955ms rejectedGuardrail(language) recall=9/15 UNRECALLED=6 dispersed=2 inversions=1/21
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     UNRECALLED (whole 0.00, best 0.00): Parce que le contexte aide énormément à lever les ambiguïtés.
+     UNRECALLED (whole 0.33, best 0.33): c'est la mise en forme.
+     UNRECALLED (whole 0.00, best 0.00): Là on prend le texte brut qui sort du modèle.
+     UNRECALLED (whole 0.00, best 0.00): On ajoute la ponctuation,
+     UNRECALLED (whole 0.25, best 0.25): les majuscules éventuellement on découpe en paragraph.
+
+━━ [V1-rule7-property] D4-logs-polish#2
+  578→577 4186ms success recall=11/11 HEDGE-LOST=1 negationDropped=1 inversions=4/55
+     HEDGELOST: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     NEGATIONDROPPED: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+
+━━ [V1-rule7-property] D6-issues-check#1
+  433→672 4442ms rejectedGuardrail(length) recall=9/9 inversions=0/36 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V1-rule7-property] D6-issues-check#2
+  433→676 4494ms rejectedGuardrail(length) recall=9/9 inversions=0/36 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V1-rule7-property] D6-issues-check#3
+  433→669 4295ms rejectedGuardrail(length) recall=9/9 inversions=0/36 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V1-rule7-property] D9-suggestion-bar#3
+  1337→1689 10636ms success recall=19/19 PERSON-LOST=1 HEDGE-LOST=1 negationDropped=1 inversions=20/171
+     PERSONLOST: Pour moi, il y a tout un design à revoir.
+       → Il y a tout un design à revoir.
+     HEDGELOST: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → - Il faudrait que la désactivation potentielle de la barre de suggestion soit paramétrable dans l’application.
+     NEGATIONDROPPED: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → - Il faudrait que la désactivation potentielle de la barre de suggestion soit paramétrable dans l’application.
+
+━━ [V2-fidelity] D1-three-steps#1
+  838→794 4834ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+
+━━ [V2-fidelity] D1-three-steps#2
+  838→794 4865ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+
+━━ [V2-fidelity] D1-three-steps#3
+  838→794 4918ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+
+━━ [V2-fidelity] D2-three-steps-drift#1
+  795→803 5108ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [V2-fidelity] D2-three-steps-drift#2
+  795→803 5090ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [V2-fidelity] D2-three-steps-drift#3
+  795→803 5091ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [V2-fidelity] D6-issues-check#3
+  433→456 3332ms rejectedGuardrail(segmentOverlap) recall=9/9 inversions=0/36 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V2-fidelity] D9-suggestion-bar#2
+  1337→1468 9388ms success recall=19/19 inversions=13/171 SPEAKER-STATE-FABRICATED(closing)
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              27       6/27        0/27        4/27        0/27        0/27        0/27        17/27       0
+V1-rule7-property     26       6/26        1/26        2/26        0/26        4/26        0/26        15/26       1
+V2-fidelity           25       6/25        0/25        0/25        0/25        2/25        0/25        17/25       2
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  excluded, by outcome: engineFailed×3
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              51            1             5/27          0/27
+V1-rule7-property     59            2             2/26          0/26
+V2-fidelity           43            2             0/25          0/25
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   D1-three-steps          U1  U1  U1
+   D2-three-steps-drift    U1  U1  U1
+   D3-plan-mode            ·  ·  ·
+   D4-logs-polish          Ho4  Ho4  Ho4
+   D5-lets-go              ·  ·  ·
+   D6-issues-check         ·  ·  ·
+   D7-mod-rejects          ·  ·  ·
+   D8-last-transcription   ·  ·  ·
+   D9-suggestion-bar       Ho13  o13  o13
+── V1-rule7-property
+   D1-three-steps          U1F  U1  U1
+   D2-three-steps-drift    U1  U1  U6o1
+   D3-plan-mode            ·  ·  ·
+   D4-logs-polish          o4  Ho4  o4
+   D5-lets-go              ·  ·  ·
+   D6-issues-check         F  F  F
+   D7-mod-rejects          ·  e  ·
+   D8-last-transcription   ·  ·  ·
+   D9-suggestion-bar       o13  o13  PHo20
+── V2-fidelity
+   D1-three-steps          U1  U1  U1
+   D2-three-steps-drift    U1  U1  U1
+   D3-plan-mode            ·  ·  ·
+   D4-logs-polish          o4  e  e
+   D5-lets-go              ·  ·  ·
+   D6-issues-check         ·  ·  F
+   D7-mod-rejects          ·  ·  ·
+   D8-last-transcription   ·  ·  ·
+   D9-suggestion-bar       o13  Fo13  o13
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 81 runs to /tmp/rescore570/capture-device-macos27.json

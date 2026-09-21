@@ -1,0 +1,247 @@
+rescored: 225 stored runs from ../docs/research/570-structured-fidelity/capture-shortprobe.json, floor 0.35 — no model called
+
+━━ [shipping] S1-synthetic-short#3
+  68→39 1336ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [shipping] S1-synthetic-short#10
+  68→39 1291ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [shipping] D5-lets-go#1
+  15→16 1317ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#2
+  15→16 1323ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#3
+  15→16 1308ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#4
+  15→16 1305ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#5
+  15→16 1375ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#6
+  15→16 1337ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#7
+  15→16 1341ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#8
+  15→16 1320ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#9
+  15→16 1343ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#10
+  15→16 1339ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#11
+  15→16 1349ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#12
+  15→16 1396ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#13
+  15→16 1772ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#14
+  15→16 1419ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#15
+  15→256 2102ms rejectedGuardrail(length) recall=1/1 dispersed=1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V1-rule7-property] S1-synthetic-short#12
+  68→39 1396ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [V1-rule7-property] D5-lets-go#1
+  15→36 1553ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#2
+  15→16 1573ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#3
+  15→19 1428ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#4
+  15→18 1400ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#5
+  15→16 1382ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#6
+  15→16 1399ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#7
+  15→38 1626ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#8
+  15→16 1425ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#9
+  15→16 1390ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#10
+  15→16 1432ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#11
+  15→16 1414ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#12
+  15→16 1406ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#13
+  15→16 1390ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#14
+  15→16 1392ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#15
+  15→16 1451ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#1
+  15→16 1560ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#2
+  15→16 1525ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#3
+  15→16 1493ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#4
+  15→16 1519ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#5
+  15→16 1543ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#6
+  15→16 1526ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#7
+  15→16 1479ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#8
+  15→16 1497ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#9
+  15→16 1500ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#10
+  15→16 1508ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#11
+  15→16 1499ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#12
+  15→16 1464ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#13
+  15→16 1465ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#14
+  15→16 1460ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#15
+  15→16 1604ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              75       14/75       2/75        0/75        0/75        1/75        0/75        58/75       0
+V1-rule7-property     74       15/74       1/74        0/74        0/74        0/74        0/74        58/74       1
+V2-fidelity           74       15/74       0/74        0/74        0/74        0/74        0/74        59/74       1
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  excluded, by outcome: engineFailed×2
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             1             0/75          0/75
+V1-rule7-property     0             0             0/74          0/74
+V2-fidelity           0             0             0/74          0/74
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   S1-synthetic-short      ·  ·  P  ·  ·  ·  ·  ·  ·  P  ·  ·  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  F
+   D8-last-transcription   ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D3-plan-mode            ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D7-mod-rejects          ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+── V1-rule7-property
+   S1-synthetic-short      ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  P  ·  e  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1
+   D8-last-transcription   ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D3-plan-mode            ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D7-mod-rejects          ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+── V2-fidelity
+   S1-synthetic-short      e  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1
+   D8-last-transcription   ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D3-plan-mode            ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D7-mod-rejects          ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 225 runs to /tmp/rescore570/capture-shortprobe.json

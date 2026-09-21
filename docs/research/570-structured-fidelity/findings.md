@@ -19,7 +19,7 @@ amendments recorded in §6.1.
 
 ---
 
-## The verdict in three lines
+## The verdict in four lines
 
 1. **The bench works.** Replayed against the nine device outputs, it flags a defect on
    a scored axis in **8 of 9**, including every deletion, every person loss and the
@@ -35,6 +35,11 @@ amendments recorded in §6.1.
    on macOS 27 it produces the defect #581 is about **and gets it accepted**: `D1`,
    838 → 854, closing on `Et puis, il y avait un dernier machin, mais ça m'échappe.`,
    passed by every guardrail. §5, §7, §9.
+4. **On macOS 27, nine accepted outputs carry content the speaker never said**,
+   hand-labelled — one on the shipping prompt, and one (V2) carrying the prompt's own
+   plumber-and-firewood example inserted into a real project update as the speaker's
+   tasks. **The scorer caught 4 of the 9.** Every earlier count of accepted fabrications
+   in this document was the scorer's and undercounted. §9.1.
 
 ---
 
@@ -134,6 +139,15 @@ and no axis reads it. **Term substitution is not one of the brief's four axes an
 bench does not measure it.** It is the same class as the `dictus` → `dictée` defect
 #570's body opens on, and it remains unmeasured.
 
+**It misses `D4`'s hardened stance, and the reason is alignment, not the booster rule.**
+Pierre labelled `effectivement, il coupe quand même pas mal de mots` → `il enlève
+effectivement beaucoup de mots` as hardened. The `effectivement` is the speaker's own
+and its clause pairs correctly with the output clause carrying it. What was lost is the
+hedge — `quand même`, `pas mal` — and the clause that carried it keeps one content word of
+three (`coupe` → `enlève`, `pas mal` → `beaucoup`), so it aligns with nothing and axis 2
+is never asked. That is term substitution again. Pinned by
+`testAxis2CannotSeeD4sHardeningAndSaysWhy`.
+
 **`D8` is the only `clean` output and that is the contradiction, not a pass.** Its one
 finding is an inversion, and axis 3 calls nothing a defect because #523's decision 3 and
 the prompt's rule 2 disagree. Under rule 2 that output is damaged; under decision 3 it
@@ -177,8 +191,13 @@ the harness cannot see the dangerous half.
 | arm | outputs | unrecalled | personLost | hedgeLost | fabricated | clean | rule 7 preserved |
 |---|---|---|---|---|---|---|---|
 | shipping | 18 | 1/18 | 3/18 | 0/18 | 0/18 | 14/18 | **3/18** |
-| V1-rule7-property | 18 | 1/18 | 2/18 | 1/18 | 0/18 | 15/18 | **3/18** |
-| V2-fidelity | 18 | 2/18 | 1/18 | 1/18 | 0/18 | 15/18 | **3/18** |
+| V1-rule7-property | 18 | 1/18 | 2/18 | 0/18 | 0/18 | 15/18 | **3/18** |
+| V2-fidelity | 18 | 2/18 | 1/18 | 0/18 | 0/18 | 15/18 | **3/18** |
+
+*Rescored (§10): `hedgeLost` for V1 and V2 was 1/18 each and is 0/18. Both were false
+positives. `Alors je vais quand même faire un sixième test parce que les autres c'est
+pas vraiment ma voix` was read as one clause, and both outputs keep `quand même` in their
+previous sentence.*
 
 The `3/18` column is the same fixture on every arm: `5-rambling`, whose raw ends on *"il
 y avait un dernier truc ça m'échappe mais ça me reviendra"*. **3 of 3 on all three arms.**
@@ -326,6 +345,14 @@ prompt included. §9.
    describe what an ordinary `Structuré` dictation does. They were chosen because they
    are where the leak lives, which is the same thing as saying they are unrepresentative
    of everything else.
+9. **Axis 4 is a phrase list, and it is not an exhaustive count of fabrications.** It
+   caught 4 of the 9 accepted additions a hand read found on macOS 27 (§9.1): it cannot
+   see a memory sentence phrased outside its list, and it does not look for prompt
+   content. Every `fabricated` number in this document is a floor. No phrasing was added
+   to make the misses count, because a list fitted to the sample it is scored on measures
+   nothing.
+10. **The scorer was corrected after CodeRabbit's review of PR #583**, and every live
+    number was rescored from the stored outputs, not re-measured (§10).
 
 ## 7. What is recommended, and what is not
 
@@ -382,17 +409,20 @@ saying so rather than a reason to write a third variant.**
 3. **The length ceiling catches the prompt DUMP, not the appended sentence.** On macOS
    26, 12 leaks in 714 outputs and 0 accepted — every one was a wholesale copy of the
    example block, long enough to trip 1.5. On macOS 27 that stops being the whole story:
-   **4 fabrications were accepted across the three arms**, one of them on the shipping
-   prompt (§9), because a single appended sentence costs a long dictation almost no
+   **9 accepted outputs carry content the speaker never said** — hand-labelled, §9.1 —
+   one of them on the shipping prompt and one carrying the prompt's own house example
+   as the speaker's tasks, because a sentence or two costs a long dictation almost no
    length. The device's own fabrication (`D9`) was only refused because `segmentOverlap`
    happened to fire. So the guardrail family does **not** reliably catch #581's shape,
    and this round is the first evidence of that off the device.
-   `PolishSpeakerState` from this campaign is a deterministic, model-free check that
-   reads a fabricated closing sentence directly — the obvious shape for a sixth guardrail
-   check. **It is still not proposed here**, for #466's reason: adding a check costs
-   false refusals, and nobody has swept this one. What is proposed is that a future issue
-   sweep it, and this round now gives that issue its positives — five accepted
-   fabrications across two OS generations, plus the device's.
+   `PolishSpeakerState` from this campaign reads a fabricated closing sentence directly,
+   but **it would have caught 4 of those 9**: it is a phrase list, and it looks for no
+   prompt content. So it is not, on this evidence, the shape of a sixth guardrail check —
+   a check for prompt content reaching the output is at least as necessary, and the
+   plumber row is why. **Neither is proposed here**, for #466's reason: adding a check
+   costs false refusals, and nobody has swept either. What is proposed is that a future
+   issue sweep both, against the nine hand-labelled positives in `accepted-additions.json`
+   plus the device's.
 4. **If any prompt work happens, measure it where the defect lives.** §6, item 1, and §9:
    macOS 27 is closer to the phone than macOS 26 on the leak and still far from it on the
    rewriting. The instrument that reaches the rewriting damage is a device.
@@ -401,8 +431,9 @@ saying so rather than a reason to write a third variant.**
 
 **Neither variant here is a candidate for a device round any more.** V1 was the one
 provisionally put forward before round 4; macOS 27 shows it producing the defect it was
-meant to remove and getting it accepted. V2 carries V1's fragment and produced two
-accepted fabrications on macOS 27. Sending either to the phone would spend eighty
+meant to remove and getting it accepted. V2 carries V1's fragment and produced six
+accepted outputs with added content on macOS 27, one of them the prompt's house example
+inserted into a project update. Sending either to the phone would spend eighty
 dictations of Pierre's voice measuring a variant already measured worse. The protocol is
 kept for whatever candidate comes next:
 
@@ -485,13 +516,15 @@ matters most.
 
 ### V1 is refuted, and harder than round 4 said
 
-Rounds 1 and 3 on macOS 27, engine failures excluded:
+Rounds 1 and 3 on macOS 27, engine failures excluded. The `fabricated` column is **the
+scorer's** axis 4; the accepted column is the **hand-labelled** count of §9.1, which the
+scorer undercounts by more than half:
 
-| arm | scored | fabricated | **accepted fabrications** | refused |
-|---|---|---|---|---|
-| shipping | 45 | 1 | **1** | 3 |
-| V1-rule7-property | 43 | 4 | **1** | 8 |
-| V2-fidelity | 43 | 3 | **2** | 8 |
+| arm | scored | fabricated (scorer) | **accepted outputs with added content (hand-labelled)** | of which the scorer caught | refused |
+|---|---|---|---|---|---|
+| shipping | 45 | 1 | **1** | 1 | 3 |
+| V1-rule7-property | 43 | 4 | **2** | 1 | 8 |
+| V2-fidelity | 43 | 3 | **6** | 2 | 8 |
 
 On round 1 alone, V1 fabricates **4 of 26 against shipping's 0 of 27** (the coordinator's
 reading, verified from the capture). Three are `D6` appending the whole house example
@@ -506,33 +539,66 @@ introduced**. Pooled over both rounds the fabrication rate is still not statisti
 separated (1/45 against 4/43, p = 0.20), and it does not need to be: the variant built to
 remove the defect produced it in an accepted output, on a model closer to the phone.
 
-### Every arm now produces an ACCEPTED fabrication — including shipping
+### 9.1 What reached the document: nine accepted outputs carry content the speaker never said
 
-This did not happen on macOS 26, where every one of 12 leaks was a prompt dump long
-enough to trip the length ceiling. On macOS 27 a single sentence is appended to an
-otherwise-faithful output, and a single sentence costs almost no length:
+**This section was corrected after CodeRabbit's review of PR #583, and the correction is
+the most serious finding in the document.** The first version of it listed four accepted
+fabrications, read off the scorer's axis 4. Axis 4 is a list of speaker-state phrasings,
+so it cannot see an invented sentence phrased any other way, and it cannot see prompt
+content at all. The table below is the result of reading every accepted output by hand:
+`summarise.py --additions` screens every accepted sentence against its transcript (20
+flagged, 11 of them faithful paraphrases), and a grep covers the prompt's own example
+content and anything about the speaker's memory. The labels, each asserted against its
+capture, are in `accepted-additions.json`.
 
-| Arm | Output | Ratio | What was appended |
-|---|---|---|---|
-| **shipping** | `1-free-form` #3 | 395 → 399 | **`J'ai oublié un truc.`** |
-| V1 | `D1-three-steps` #1 | 838 → 854 | `Et puis, il y avait un dernier machin, mais ça m'échappe.` |
-| V2 | `6-unscripted` #2 | 1 159 → 1 275 | `… voilà c'est tout, ah non il y avait un dernier machin mais ça m'échappe.` |
-| V2 | `D9-suggestion-bar` #2 | 1 337 → 1 468 | `Et puis je pense que ma mémoire a failli, mais je ne sais plus si c'est bien ce que j'ai dit à propos du changement de layer de clavier.` |
+**It is the set found, not a proven total.** A fabrication that reuses the speaker's own
+words can pass both screens — `J'ai oublié un truc.` scores 0.50 on a dictation that says
+`un truc`, and is only in this table because the scorer caught it.
 
-Three findings sit in that table.
+**Nothing of the kind was found in any macOS 26.5.1 capture.** On macOS 26 every one of
+12 leaks was a prompt dump long enough to trip the length ceiling. On macOS 27 a sentence
+or two is appended to an otherwise-faithful output, and that costs a long dictation almost
+no length:
 
-1. **The shipping prompt's accepted fabrication is `J'ai oublié un truc.` — one of rule
-   7's four instruction-text phrasings, word for word.** Not the worked example. That is
-   #581's *second* source (*"The four phrasings in rule 7's instruction text are the
-   second source"*), observed on the prompt that ships today. #581 named two sources and
-   this campaign has now seen both leak.
-2. **V2's `D9` sentence was copied from nothing.** No example contains *"ma mémoire a
-   failli"*. Stating rule 7 by its *property* — "a sentence about their memory" — appears
-   to describe the sentence well enough for the model to **write a new one**. Rewording
-   the rule did not remove the invitation; it generalised it. One observation, and it is
-   the most worrying line in the document.
-3. **The guardrail family does not reliably catch #581's shape.** Four accepted, across
-   all three arms. §7 item 3 is corrected accordingly.
+| Arm | Output | Chars | What was added | Scorer |
+|---|---|---|---|---|
+| **V2** | **`2-project-update` #2** | **698 → 878** | **`Et là dessus, je vois que je dois rappeler le plombier pour le chauffe-eau, parce que le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.`** | **missed** |
+| V2 | `6-unscripted` #2 | 1 159 → 1 275 | `Et puis il faut que je commande le bois. voilà c'est tout, ah non il y avait un dernier machin mais ça m'échappe.` | caught, via the fragment only |
+| **shipping** | `1-free-form` #3 | 395 → 399 | **`J'ai oublié un truc.`** | caught |
+| V1 | `D1-three-steps` #1 | 838 → 854 | `Et puis, il y avait un dernier machin, mais ça m'échappe.` | caught |
+| V1 | `2-project-update` #1 | 698 → 767 | `Je vois que la mémoire me manque, et je ne sais pas si j'ai tout retenu.` | **missed** |
+| V2 | `D9-suggestion-bar` #1 | 1 337 → 1 404 | `Et puis, je pense que ma mémoire a échoué sur ce dernier point.` | **missed** |
+| V2 | `D9-suggestion-bar` #2 | 1 337 → 1 468 | `Et puis je pense que ma mémoire a failli, mais je ne sais plus si c'est bien ce que j'ai dit à propos du changement de layer de clavier.` | caught |
+| V2 | `2-project-update` #1 | 698 → ? | `Et là dessus, j'ai du mal à me souvenir de ce qui manquait.` | **missed** |
+| V2 | `2-project-update` #3 | 698 → ? | `Et là dessus, j'ai du mal à me souvenir de ce qui manquait.` | **missed** |
+
+**The first row is the worst thing in this document.** A real project update — a
+submission date, a meeting — comes back **accepted** with two sentences inserted as the
+speaker's own tasks: call the plumber about the water heater, order the wood before winter.
+They are the prompt's first worked example, rewritten in the first person to fit. Every
+guardrail passes the output. #581's off-domain defence argued that a copied example is
+harmless because the reader sees something obviously not theirs; **a plumber inserted into
+a to-do list is not obviously anyone else's**. That argument assumed the copy would arrive
+as a block of foreign text. Here it arrives as a plausible task.
+
+What the table establishes:
+
+1. **The scorer's axis 4 catches 4 of the 9.** Every miss is a memory sentence phrased
+   outside its list, or prompt content, which it does not look for. No phrasing was added
+   to the list to make these count: fitting a list to the test set it is scored on would
+   make the next number meaningless. The limit is named instead (§6, item 9).
+2. **The shipping prompt's accepted fabrication is `J'ai oublié un truc.` — one of rule
+   7's four instruction-text phrasings, word for word.** That is #581's *second* named
+   source, observed on the prompt that ships today. #581 named two sources and this
+   campaign has now seen both leak.
+3. **Five of V2's six, and one of V1's two, are sentences copied from no example** — `ma
+   mémoire a échoué`, `la mémoire me manque`, `j'ai du mal à me souvenir`. Stating rule 7
+   by its *property* ("a sentence about their memory") appears to describe the sentence
+   well enough for the model to **write new ones**. Rewording the rule did not remove the
+   invitation; it generalised it. Across both variants that is now six observations, not
+   one.
+4. **The guardrail family does not catch this shape.** Nine accepted. §7 item 3 is
+   corrected accordingly.
 
 **Rule 7 still fires on macOS 27.** `5-rambling`'s flagged incompleteness is preserved
 3/3 on every arm, exactly as on macOS 26. Decision 7 holds on both generations.
@@ -543,9 +609,46 @@ Three findings sit in that table.
 - **#581's diagnosis is now confirmed on both of its named sources**, on the shipping
   prompt, off the device. The prompt as shipped leaks rule 7 — through its example on
   macOS 26 and the device, through its instruction text on macOS 27.
-- **The measured case for a speaker-state guardrail check got stronger, and it is still
-  not proposed here.** It now has accepted positives to be swept against, which it did
-  not have yesterday. It still has no false-refusal measurement, and #466 is why that
-  matters.
+- **The measured case for a guardrail on this shape got stronger, and it is still not
+  proposed here.** It now has nine hand-labelled accepted positives to be swept against,
+  including one carrying prompt content, which it did not have before. It still has no
+  false-refusal measurement, and #466 is why that matters. A speaker-state phrase list
+  alone would have caught 4 of the 9.
 - **Everything in §1-§8 remains a macOS 26.5.1 number.** None of it was re-labelled or
   re-computed; §9 is additive.
+
+## 10. The scorer after review, and what moved — 2026-09-21
+
+CodeRabbit's review of PR #583 found five problems. Four were scorer bugs and one was
+this document overstating the scorer. **No model was called to answer any of them.** A
+new model-free path, `fidelity --rescore <capture.json> --fixtures <fixtures.json>`,
+scores the stored outputs again with the corrected scorers. For all six live captures it
+was checked that every run's output, outcome and timing are byte-identical before and
+after, so **every number that moved, moved because the scorer changed**. The rescore
+console output is in `raw/rescore-*.txt`. The earlier `raw/round*.txt` captures are left
+as they were printed, with the old scorer; the JSON captures and `summarise.py` are the
+source of truth.
+
+| Fix | What changed | Numbers that moved |
+|---|---|---|
+| A run with **no engine output** is scored as an empty output | Every table filters on `hasEngineOutput`, whatever the outcome. The earlier fix filtered on `engineFailed` alone and left `unsupportedInputLanguage`, `exceededContextBudget` and a pre-output `cancelled` in the denominators. | **None.** Every no-output run in these captures was an `engineFailed` (2, 4, 3 and 1 across the four captures that had any), so the old filter happened to exclude them all. |
+| `pas vraiment` / `not really` are not hedges | Added as hedge phrases; `boosterCount(in:)` no longer counts their `vraiment` / `really`. | `hedgeLost` on macOS 26 longform, V1 and V2: 1/18 → **0/18** each. Both were false positives (§3). |
+| `sans` in `sans doute` / `sans aucun doute` counts as a negation | `negationCount(in:)` discounts the fixed expressions. | **None** in any capture. |
+| Boosters compared against the whole input | Compared per **output clause, over every input clause merged into it**. A pair-by-pair rule was tried first and, rescored, flagged 16 outputs across both OS generations, 6 of them on the shipping prompt. The six on macOS 26 longform were read by hand and every one was `6-unscripted` keeping the speaker's own `vraiment`; the other ten were not read before the rule was replaced. That is why the unit is the merge. | **None** in the final rule. `D4`'s hardening is still not detected, for the alignment reason in §2. |
+| Accepted fabrications presented as exhaustive | Every accepted output hand-read, `accepted-additions.json`, §9.1. | **4 → 9** accepted outputs with added content on macOS 27, one carrying the prompt's house example. |
+
+**The calibration replay does not move:** 7/9 unrecalled, 6/9 person lost, 4/9 hedge
+lost, 1/9 fabricated, 1/9 clean.
+
+### Did any conclusion move?
+
+- **The recommendation, no.** No variant was recommended before and none is now. The
+  corrected count makes the case against both variants stronger: V2 carries six of the
+  nine accepted additions, including the house example.
+- **The claim about what the guardrails catch, yes.** It was already corrected from
+  macOS 26's "0 accepted" to macOS 27's "4 accepted". It is now nine, and one of them is
+  prompt content arriving as a plausible task, which the off-domain defence was built to
+  make harmless and does not.
+- **The claim about what a sixth guardrail check should look like, yes.** A speaker-state
+  phrase list would have caught 4 of the 9. Any future sweep has to include prompt content
+  reaching the output, not only memory sentences (§7 item 3).

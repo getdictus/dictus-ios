@@ -1,0 +1,160 @@
+rescored: 54 stored runs from ../docs/research/570-structured-fidelity/capture-longform.json, floor 0.35 — no model called
+
+━━ [shipping] 1-free-form#1
+  395→400 5482ms success recall=6/6 negationDropped=1 inversions=0/15
+     NEGATIONDROPPED: Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+       → Et du coup, on saute dessus et au bout de 6 mois,
+
+━━ [shipping] 3-message-draft#2
+  353→355 2710ms success recall=6/7 UNRECALLED=1 inversions=0/15
+     UNRECALLED (whole 0.33, best 0.33): ça m'arrangerait.
+
+━━ [shipping] 5-rambling#1
+  1283→1284 6590ms success recall=25/25 dispersed=2 inversions=0/253 speakerState=preserved
+
+━━ [shipping] 5-rambling#2
+  1283→1284 6685ms success recall=25/25 dispersed=2 inversions=0/253 speakerState=preserved
+
+━━ [shipping] 5-rambling#3
+  1283→1281 6333ms success recall=25/25 inversions=0/300 speakerState=preserved
+
+━━ [shipping] 6-unscripted#1
+  1159→1146 4707ms success recall=10/10 PERSON-LOST=1 negationDropped=1 inversions=3/45
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+     NEGATIONDROPPED: soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen
+       → soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus.
+
+━━ [shipping] 6-unscripted#2
+  1159→1155 4589ms success recall=10/10 PERSON-LOST=1 inversions=3/45
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+
+━━ [shipping] 6-unscripted#3
+  1159→1161 4613ms success recall=10/10 PERSON-LOST=1 inversions=3/45
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+
+━━ [V1-rule7-property] 1-free-form#1
+  395→405 2741ms success recall=6/6 negationDropped=1 inversions=0/15
+     NEGATIONDROPPED: Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+       → Et du coup, on saute dessus et au bout de 6 mois,
+
+━━ [V1-rule7-property] 5-rambling#1
+  1283→1244 6412ms success recall=25/25 dispersed=2 inversions=0/253 speakerState=preserved
+
+━━ [V1-rule7-property] 5-rambling#2
+  1283→1210 6883ms success recall=25/25 dispersed=2 inversions=0/253 speakerState=preserved
+
+━━ [V1-rule7-property] 5-rambling#3
+  1283→1256 6646ms success recall=25/25 dispersed=1 negationDropped=1 inversions=0/276 speakerState=preserved
+     NEGATIONDROPPED: Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend.
+       → Il faut absolument que je réponde à Julien parce que ça fait peut-être une semaine et demie qu'il attend.
+
+━━ [V1-rule7-property] 6-unscripted#1
+  1159→1074 5543ms success recall=8/10 UNRECALLED=2 dispersed=2 inversions=2/15
+     UNRECALLED (whole 0.00, best 0.00): c'est pas naturel.
+     UNRECALLED (whole 0.33, best 0.33): Et voilà, tout simplement l,
+
+━━ [V1-rule7-property] 6-unscripted#2
+  1159→1156 4820ms success recall=10/10 PERSON-LOST=1 inversions=3/45
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+
+━━ [V1-rule7-property] 6-unscripted#3
+  1159→1141 4763ms success recall=10/10 PERSON-LOST=1 inversions=3/45
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+
+━━ [V2-fidelity] 1-free-form#1
+  395→400 2849ms success recall=6/6 negationDropped=1 inversions=0/15
+     NEGATIONDROPPED: Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+       → Et du coup, on saute dessus et au bout de 6 mois,
+
+━━ [V2-fidelity] 1-free-form#2
+  395→382 2887ms success recall=6/6 negationDropped=1 inversions=0/15
+     NEGATIONDROPPED: Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+       → Et du coup, on saute dessus et au bout de 6 mois,
+
+━━ [V2-fidelity] 5-rambling#1
+  1283→1290 7254ms success recall=25/25 dispersed=2 inversions=0/253 speakerState=preserved
+
+━━ [V2-fidelity] 5-rambling#2
+  1283→1261 7169ms success recall=25/25 dispersed=1 negationDropped=1 inversions=0/276 speakerState=preserved
+     NEGATIONDROPPED: Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend.
+       → Il faut absolument que je réponde à Julien parce que ça fait peut-être une semaine et demie qu'il attend.
+
+━━ [V2-fidelity] 5-rambling#3
+  1283→1255 7173ms success recall=25/25 dispersed=2 inversions=0/253 speakerState=preserved
+
+━━ [V2-fidelity] 6-unscripted#1
+  1159→1057 5857ms success recall=9/10 UNRECALLED=1 dispersed=2 inversions=2/21
+     UNRECALLED (whole 0.33, best 0.33): Et voilà, tout simplement l,
+
+━━ [V2-fidelity] 6-unscripted#2
+  1159→1144 5323ms success recall=10/10 PERSON-LOST=1 negationDropped=1 inversions=3/45
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+     NEGATIONDROPPED: soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen
+       → Je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dicté.
+
+━━ [V2-fidelity] 6-unscripted#3
+  1159→916 5604ms success recall=6/10 UNRECALLED=4 dispersed=2 inversions=0/6
+     UNRECALLED (whole 0.00, best 0.00): c'est pas naturel.
+     UNRECALLED (whole 0.33, best 0.33): Et voilà, tout simplement l,
+     UNRECALLED (whole 0.33, best 0.33): 'idée ça va être de voir tout ça.
+     UNRECALLED (whole 0.33, best 0.33): Et ensuite, on va analyser tout ça.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              18       1/18        3/18        0/18        0/18        0/18        0/18        14/18       0
+V1-rule7-property     18       1/18        2/18        0/18        0/18        0/18        0/18        15/18       0
+V2-fidelity           18       2/18        1/18        0/18        0/18        0/18        0/18        15/18       0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              9             7             2/18          3/18
+V1-rule7-property     8             9             2/18          3/18
+V2-fidelity           5             12            4/18          3/18
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   1-free-form             ·  ·  ·
+   2-project-update        ·  ·  ·
+   3-message-draft         ·  U1  ·
+   4-explanation           ·  ·  ·
+   5-rambling              ·  ·  ·
+   6-unscripted            Po3  Po3  Po3
+── V1-rule7-property
+   1-free-form             ·  ·  ·
+   2-project-update        ·  ·  ·
+   3-message-draft         ·  ·  ·
+   4-explanation           ·  ·  ·
+   5-rambling              ·  ·  ·
+   6-unscripted            U2o2  Po3  Po3
+── V2-fidelity
+   1-free-form             ·  ·  ·
+   2-project-update        ·  ·  ·
+   3-message-draft         ·  ·  ·
+   4-explanation           ·  ·  ·
+   5-rambling              ·  ·  ·
+   6-unscripted            U1o2  Po3  U4
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 54 runs to /tmp/rescore570/capture-longform.json
