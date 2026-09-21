@@ -1,0 +1,1000 @@
+[
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3858,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Lancer un produit seul, le plus dur c'est de ne pas faire ce qui ne marche pas, car chaque idée semble meilleure que celle sur laquelle on travaille, et au bout de 6 mois on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 211,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.5341772151898734,
+    "rawChars" : 395,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3959,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Lancer un produit seul, le plus dur c'est de ne pas faire ce qui ne marche pas, parce qu'une idée meilleure surgit toujours et au bout de 6 mois on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 185,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.46835443037974683,
+    "rawChars" : 395,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3449,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Lancer un produit seul, le plus dur c'est de ne pas faire certaines idées, car une nouvelle idée semble meilleure et on saute dessus, et après 6 mois on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 190,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.4810126582278481,
+    "rawChars" : 395,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4733,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Lancer un produit seul, le plus dur c'est de décider quoi ne pas faire. Une idée meilleure surgit toujours et on saute dessus. Au bout de 6 mois, on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 186,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.4708860759493671,
+    "rawChars" : 395,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3468,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Lancer un produit seul, le plus dur c'est de ne pas faire certaines idées parce qu'il y a toujours une meilleure idée et après 6 mois on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 174,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.44050632911392407,
+    "rawChars" : 395,
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6641,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste l'historique des transcriptions qui n'est pas commencé et le vocabulaire personnalisé avec une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19%, faible mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "outputChars" : 566,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.8108882521489972,
+    "rawChars" : 698,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5459,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. L'historique des transcriptions n'est pas commencé et le vocabulaire personnalisé a une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19 %. L'objectif est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12.",
+    "outputChars" : 488,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.6991404011461319,
+    "rawChars" : 698,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5683,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste l'historique des transcriptions qui n'est pas commencé et le vocabulaire personnalisé avec une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19%, faible mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "outputChars" : 566,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.8108882521489972,
+    "rawChars" : 698,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7788,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste l'historique des transcriptions qui n'est pas commencé et le vocabulaire personnalisé avec une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19%, faible mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "outputChars" : 566,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.8108882521489972,
+    "rawChars" : 698,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7457,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste l'historique des transcriptions qui n'est pas commencé du tout et le vocabulaire personnalisé avec une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19%, faible mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "outputChars" : 574,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.8223495702005731,
+    "rawChars" : 698,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S3-rambling",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6788,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Je dois rappeler le comptable pour l'assurance, répondre à Julien parce qu'il attend depuis une semaine et demie, changer la page d'accueil du site pour qu'elle dise ce qu'on fait, annuler l'abonnement de 19 euros par mois utilisé depuis février pendant 6 mois, et préparer les questions pour l'entretien de mardi.",
+    "outputChars" : 314,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.24473889321901793,
+    "rawChars" : 1283,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S3-rambling",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3529,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Je dois parler au comptable pour l'assurance, répondre à Julien parce qu'il attend depuis une semaine et demie, changer la page d'accueil du site pour qu'elle dise ce qu'on fait, annuler l'abonnement à 19 euros par mois utilisé depuis février, et préparer les questions pour l'entretien de mardi.",
+    "outputChars" : 296,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.23070927513639908,
+    "rawChars" : 1283,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S3-rambling",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3031,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Je dois parler au comptable pour l'assurance, répondre à Julien, changer la page d'accueil du site, annuler l'abonnement à 19 euros depuis février, et préparer les questions pour l'entretien de mardi.",
+    "outputChars" : 200,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.1558846453624318,
+    "rawChars" : 1283,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S3-rambling",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3048,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Je dois rappeler le comptable pour l'assurance, répondre à Julien, changer la page d'accueil du site, annuler l'abonnement à 19 euros depuis février après 6 mois, et préparer les questions pour l'entretien de mardi.",
+    "outputChars" : 215,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.16757599376461418,
+    "rawChars" : 1283,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S3-rambling",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4238,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Je dois parler au comptable pour l'assurance, répondre à Julien parce qu'il attend depuis une semaine et demie, changer la page d'accueil du site pour qu'elle dise ce qu'on fait, annuler l'abonnement à 19 euros par mois qu'on n'utilise plus depuis février après six mois, et préparer les questions pour l'entretien de mardi.",
+    "outputChars" : 324,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.2525331254871395,
+    "rawChars" : 1283,
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S4-unscripted",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 6053,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I will make a sixth test because the others are not really my voice, they are not natural. The idea is to see again how less behaves compared to my application, to check the quality of transcription and how Type Laiss cuts and organizes paragraphs, whether it adds lists or spaces between lines. Then we will analyze it to try creating a different mode or improving polish, which can really improve the experience for users, even free ones, because right now when you launch a large audio, it makes a big block on Dictus, but when developing it is not disturbing, it is true that if you want to use it to discuss with someone it is a bit average",
+    "outputChars" : 645,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5565142364106989,
+    "rawChars" : 1159,
+    "rejectedCheck" : "language",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S4-unscripted",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 6773,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I will make a sixth test because the others are not really my voice, it is not natural. The idea is to see again how less behaves compared to my application, to check the quality of the transcription and how Type Laiss cuts the different paragraphs, organizes them, if it puts lists, if it puts spaces between the lines. And that is the idea, it will be to see all this. And then, we will analyze all this. That way, we will be able to try to create a different mode or improve our polish and I think that can be really interesting because it will really improve the users' experience and even the free users because right now when you launch a large audio like I can do it right away it makes a big lump on Dictus then when I do development it is not disturbing but it is true that if you want to use it to discuss with someone it is a bit medium",
+    "outputChars" : 847,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.730802415875755,
+    "rawChars" : 1159,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S4-unscripted",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 6879,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I will make a sixth test because the others are not really my voice, they are not natural. I want to see how less behaves compared to my application, to check the quality of transcription and how Type Laiss cuts paragraphs, organizes them, creates lists, puts spaces between lines. Then we will analyze it so we can create a different mode or improve polish, which can really improve the experience for users, even free ones, because right now when you launch a large audio like I can do it right away it makes a big block on Dictus, but when you do development it is not disturbing, but when you want to use it to discuss with someone it is a bit average",
+    "outputChars" : 655,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5651423641069888,
+    "rawChars" : 1159,
+    "rejectedCheck" : "language",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S4-unscripted",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 7199,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I will make a sixth test because the others are not really my voice, they are not natural. The idea is to see again how less behaves compared to my application, to check the quality of transcription and how Type Laiss cuts the paragraphs, organizes them, puts lists, puts spaces between lines. And then we will analyze all this. This will allow us to try to create a different mode or improve our polish, and I think it can be really interesting because it will really improve the users' experience, even free users because right now when you launch a big audio like I can do it here right away it makes a big block on Dictus, but when you do development it is not disturbing but it is true that if you want to use it to discuss with someone it is a bit average",
+    "outputChars" : 761,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.6566005176876618,
+    "rawChars" : 1159,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S4-unscripted",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : false,
+    "listLines" : 0,
+    "ms" : 5848,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I will make a sixth test because the others do not sound like my voice. I want to see how less behaves compared to my application, to check the transcription quality and how Type Laiss separates paragraphs, organizes them, creates lists, and adds line breaks. Then we will analyze this to try creating a different mode or improving polish, which could greatly improve the experience for users, even free ones, because now when launching a large audio file it creates a big block on Dictus, while for development it is not a problem but when talking it is somewhat average.",
+    "outputChars" : 572,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.49352890422778256,
+    "rawChars" : 1159,
+    "rejectedCheck" : "language",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S5-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3939,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "je dois récupérer les chiffres de janvier auprès de Marion mercredi, faire le tableau comparatif avec l'année dernière et appeler le prestataire parce que son devis est passé de 12000 à 15000 euros sans validation, et réserver la salle du deuxième étage parce que l'autre est prise toute la semaine.",
+    "outputChars" : 299,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.5111111111111111,
+    "rawChars" : 585,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S5-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4606,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "je dois récupérer les chiffres de janvier auprès de Marion qui les aura mercredi je dois faire le tableau comparatif avec ceux de l'année dernière je dois appeler le prestataire parce que son devis est passé de 12000 à 15000 euros sans validation et je dois réserver la salle du deuxième étage parce que l'autre est prise toute la semaine",
+    "outputChars" : 338,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.5777777777777777,
+    "rawChars" : 585,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S5-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4857,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "je dois récupérer les chiffres de janvier auprès de Marion, qui les aura mercredi, je dois faire le tableau comparatif avec ceux de l'année dernière, j'ai besoin d'appeler le prestataire parce que leur devis est passé de 12000 à 15000 euros et personne ne l'a validé, et je dois réserver la salle du deuxième étage parce que l'autre est prise toute la semaine",
+    "outputChars" : 359,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.6136752136752137,
+    "rawChars" : 585,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S5-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4587,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Je dois récupérer les chiffres de janvier auprès de Marion mercredi, faire le tableau comparatif avec l'année dernière, appeler le prestataire car leur devis est passé de 12000 à 15000 euros sans validation et réserver la salle du deuxième étage car l'autre est prise toute la semaine.",
+    "outputChars" : 285,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.48717948717948717,
+    "rawChars" : 585,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S5-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5105,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Je dois récupérer les chiffres de janvier auprès de Marion mercredi, faire le tableau comparatif avec l'année dernière, appeler le prestataire car son devis est passé de 12000 à 15000 euros sans validation et réserver la salle du deuxième étage car l'autre est prise toute la semaine.",
+    "outputChars" : 284,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.48547008547008547,
+    "rawChars" : 585,
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S6-one-line",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3849,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je dois rappeler le comptable avant vendredi pour la TVA du trimestre.",
+    "outputChars" : 70,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.958904109589041,
+    "rawChars" : 73,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "S6-one-line",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5128,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Il faut rappeler le comptable avant vendredi pour la TVA du trimestre.",
+    "outputChars" : 70,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.958904109589041,
+    "rawChars" : 73,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S6-one-line",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5134,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je dois rappeler le comptable avant vendredi pour la TVA du trimestre.",
+    "outputChars" : 70,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.958904109589041,
+    "rawChars" : 73,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S6-one-line",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5045,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je dois rappeler le comptable avant vendredi pour la TVA du trimestre",
+    "outputChars" : 69,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9452054794520548,
+    "rawChars" : 73,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S6-one-line",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2262,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je dois rappeler le comptable avant vendredi pour la TVA du trimestre.",
+    "outputChars" : 70,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.958904109589041,
+    "rawChars" : 73,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S7-addressed-request",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3697,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "J'ai besoin d'un check sur les issues iOS suite à un retour d'utilisateur. On a discuté et presque tout est noté. Avant de checker les issues, regarde notre conversation avec lui. Il y a plusieurs postes. Dis-moi les retours qu'il a faits et liste-les-moi simplement pour faire un point.",
+    "outputChars" : 287,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.6628175519630485,
+    "rawChars" : 433,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S7-addressed-request",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3400,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "J'ai besoin d'un check sur les issues iOS suite à un retour d'utilisateur. On a quasiment tout noté. Avant de checker les issues, je veux voir les retours de lui. Il y a plusieurs postes. Dis-moi les retours et on fait un point.",
+    "outputChars" : 228,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.5265588914549654,
+    "rawChars" : 433,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S7-addressed-request",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3906,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "J'ai besoin d'un check sur les issues iOS après un retour d'utilisateur. On a discuté et on a quasiment tout noté. Avant de checker les issues, regarde notre conversation avec lui. Il a fait plusieurs retours. Donne-moi la liste et on fait un point.",
+    "outputChars" : 249,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.5750577367205543,
+    "rawChars" : 433,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S7-addressed-request",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3527,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "J'ai besoin de toi pour vérifier les retours sur les issues iOS. On a discuté et presque tout est noté. Avant de checker les problèmes, regarde notre conversation avec lui. Il a plusieurs points à faire. Dis-moi les retours et on fait un point.",
+    "outputChars" : 244,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.5635103926096998,
+    "rawChars" : 433,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "S7-addressed-request",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3859,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "J'ai besoin de toi pour faire un check sur les issues dictées iOS. J'ai un retour d'utilisateur. On a discuté sur le slide. Je pense qu'on a quasiment tout noté. Avant de checker les issues, check notre conversation avec lui. Il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.",
+    "outputChars" : 330,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.7621247113163973,
+    "rawChars" : 433,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  }
+]

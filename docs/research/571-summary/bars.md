@@ -122,3 +122,68 @@ for every mode at once (#587 decision 5), not by one mode alone.
 
 **The Mac understates the phone** (#523 round 10, PR #576's device round). A bar that
 holds here is a floor for the device, not a verdict. The device round is Pierre's.
+
+---
+
+## 6. Results (appended after the runs; §1–§5 unchanged)
+
+Shipping prompt = arm `G-D-plus-closing-language` (byte-identical to
+`SmartModeSummaryPrompt.instructions()`, checked with `polish-harness prompt`). FR and EN
+numbers come from that arm in `runs/arms-DFG-{fr,en}.*`; the 13 other languages from
+`runs/shipping-i18n.*`. One deviation from §5, declared: bar L1's "≤ 10 % refused on
+`check=language`" is read as **≤ 10 % wrong-language engine outputs**, which is stricter,
+because a wrong-language output is often refused by `length` first (CJK → English
+roughly doubles the character count) and would otherwise not be counted.
+
+### How the shipping prompt was reached
+
+| Candidate | FR wrong language | EN wrong language | FR in band | Kept? |
+|---|---|---|---|---|
+| `v1` (French example first, English last) | 11/35 | — | 17/35 | no |
+| `A` + a language line above the rules | 8/35 | — | 16/35 | no |
+| `C` = `A` with the examples swapped (French last) | 1/35 | — | 15/35 | no |
+| `D` = `C` + rule 3 "cut hard" | 6/35 | 0/20 | 19/35 | no |
+| `F` = `A` + cut hard + closing line "in its own language" | 10/35 | 0/20 | 18/35 | no |
+| **`G` = `D` + the closing line** | **0/35** | **0/20** | 15/35 | **yes** |
+| `G` + user turn "to about a quarter of its length" | 5/35 | 0/20 | 21/35 | no |
+| `G` + user turn "far shorter than it is" | 5/35 | 0/20 | 20/35 | no |
+| `H` = `G` + "never in English unless the text is English" (13 langs) | 35/77 in the 13 languages | | | no |
+
+### Bars, shipping prompt
+
+| Bar | Result | Verdict |
+|---|---|---|
+| **L1** FR | 0/35 wrong language | holds |
+| **L1** EN | 20/20 English | holds |
+| **L1** 13 other languages | **55/130 wrong language (English), 0 accepted**. Over 10 %: de 10/10, ja 10/10, es 5/10, it 5/10, ko 5/10, pt 5/10, vi 5/10, zh 5/10, tr 4/10. Under: da 1/10, nb 0, nl 0, sv 0 | **fails on 9 languages** |
+| **B** no bullets | 0/318 engine outputs across every run of the shipping prompt | holds |
+| **R** in band (`S6-one-line` excluded) | FR 15/30 (50 %), EN 13/20 (65 %). Out of band = long dense dictations the Mac keeps at 0.6 to 0.85 | **fails on the Mac** |
+| **P** person | 0 report framing, 0 infinitive opening. EN flags 6: 5 are `E1`, whose input speaks in the generic "you" the output keeps (hand read: kept); 1 is `E4` written as note fragments, the first person gone (hand read: lost, accepted) | holds with 1 exception |
+| **D** vs `Liste` | 5/5: `Résumé` 0 bullets in 15, `Liste` bullets in 15/15 | holds |
+| **D** vs Normal | median ratio ≤ half of Normal's on 2/5 (S1 0.49, S3 0.24; S5 0.60, E3 0.50, E4 0.70 against Normal ≈ 1.0) | **fails on the Mac** |
+| **F** invented facts | 0 example content, 0 novel figure in an accepted output (the 10 figure flags are thousands separators and one `1500`, all refused). **Meaning damage, accepted**: `dictus` → `dictées` in 5/5 `S7`, and `qu'on n'utilise plus depuis février` → `utilisé depuis février` in 2/5 `S3` | holds on invention; **2 accepted distortions** |
+| **A** never answers | 0 preamble in 318; `S7` (a request addressed to an assistant) condensed 5/5, never answered | holds |
+
+Reported: decision 4, `S3`'s closing *"il y avait un dernier truc ça m'échappe"* was
+dropped in 5/5 — which the decision allows. `S6-one-line` (73 characters) came back at
+0.95 in 5/5 and was refused by the ceiling: the raw goes in, as §5 predicted.
+
+### Step 2, probed and not landed (`step2/`)
+
+Same rules, only the two examples translated into the transcript's language:
+
+| Language | Step 1 wrong language | Step 2 wrong language | Step 1 accepted | Step 2 accepted |
+|---|---|---|---|---|
+| de | 10/10 | 0/10 | 0/10 | 8/10 |
+| es | 5/10 | 0/10 | 0/10 | 6/10 |
+| ja | 10/10 | 0/10 | 0/10 | 8/10 |
+| zh | 3/10 | 0/10 | 5/10 | 3/10 |
+
+Per #587 decision 5, a language above 10 % climbs **every** mode to step 2. That is
+#587's call, not this mode's alone; the seam is `SmartModeSummaryPrompt.instructions(examples:)`.
+
+### Context: `Message` on the same 13-language fixtures
+
+`runs/baseline-message-i18n.*`: 0/78 wrong language. But on the Mac `Message` barely
+rewrites (PR #576's own finding), so an echo keeps its language trivially. This is not
+evidence that step 1 holds for a mode that rewrites.

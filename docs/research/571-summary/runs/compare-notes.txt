@@ -1,0 +1,58 @@
+
+
+████ ARM shipping — mode notes, 3 run(s) × 5 fixture(s)
+
+━━ [S1-free-form] 395 chars, lang=fr
+  raw: Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+  #1 success ratio=0.72 3154ms  ⚑ LIST×4
+     out: - Le plus dur quand on lance un produit tout seul ce n'est pas de le coder, c'est de décider quoi ne pas faire⏎- Il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser⏎- On saute dessus⏎- Au bout de 6 mois on a 15 trucs commencés et rien de fini
+  #2 success ratio=0.56 3501ms  ⚑ LIST×4
+     out: - Lancer un produit seul, le plus dur n'est pas coder, c'est décider quoi ne pas faire⏎- Une idée semble meilleure que celle sur laquelle on travaille⏎- Sauter sur l'idée meilleure⏎- 6 mois, 15 trucs commencés, rien de fini
+  #3 success ratio=0.73 3312ms  ⚑ LIST×3
+     out: - Quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire⏎- Il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser⏎- On saute dessus et au bout de 6 mois on a 15 trucs commencés et rien de fini
+
+━━ [S3-rambling] 1283 chars, lang=fr
+  raw: Bon alors je me lance. Je voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête. Quoi d'autre? Ah oui, le site, le site, il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait. Enfin bref. Ah, j'ai aussi... Il faut que je pense à annuler l'abonnement machin. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi. Et puis la dernière chose, et là je note vraiment parce que sinon je vais oublier c'est de préparer les questions pour l'entretien de mardi voilà je crois que c'est tout ah non il y avait un dernier truc ça m'échappe mais ça me reviendra
+  #1 success ratio=0.31 4453ms  ⚑ LIST×5
+     out: - Répéter le comptable : l'assurance à rappeler pour le truc de la voiture⏎- Répondre à Julien : il attend depuis peut-être une semaine et demie⏎- Changer la page d'accueil du site : ne pas dire ce qu'on fait, les gens lisent trois lignes et partent⏎- Annuler l'abonnement à 19 euros par mois : non utilisé depuis février, 6 mois de paiement inutile⏎- Préparer les questions pour l'entretien de mardi
+  #2 success ratio=0.36 4620ms  ⚑ LIST×5
+     out: - Répéter le comptable : l'assurance, le truc de la voiture⏎- Répondre à Julien : il attend depuis peut-être une semaine et demie, il commence à se demander si je les zappais⏎- Refaire le site : changer la page d'accueil parce qu'elle ne dit pas ce qu'on fait, les gens lisent trois lignes et partent⏎- Annuler l'abonnement à 19 euros par mois, inutilisé depuis février, cela fait 6 mois pour payer pour rien⏎- Préparer les questions pour l'entretien de mardi
+  #3 success ratio=0.31 4311ms  ⚑ LIST×5
+     out: - Répéter le comptable : l'assurance à rappeler pour le truc de la voiture⏎- Répondre à Julien : il attend depuis peut-être une semaine et demie⏎- Changer la page d'accueil du site : ne pas dire ce qu'on fait, les gens lisent trois lignes et partent⏎- Annuler l'abonnement à 19 euros par mois : non utilisé depuis février, 6 mois de paiement pour rien⏎- Préparer les questions pour l'entretien de mardi
+
+━━ [S5-todo-enumeration] 585 chars, lang=fr
+  raw: bon alors euh je récapitule ce qu'il faut que je fasse avant la réunion donc déjà faut que je récupère les chiffres de janvier auprès de Marion elle m'a dit qu'elle les aurait mardi enfin non mercredi et euh du coup faudra que je fasse le tableau comparatif avec ceux de l'année dernière et puis aussi tu vois il faut absolument que j'appelle le prestataire parce que leur devis il est encore passé de 12000 à 15000 euros et ça personne l'a validé et enfin bon voilà il faudrait aussi que je pense à réserver la salle du deuxième étage parce que l'autre elle est prise toute la semaine
+  #1 success ratio=0.58 4175ms  ⚑ LIST×4 PERSON-LOST
+     out: - Récupérer les chiffres de janvier auprès de Marion : elle les aurait mardi, mais ce sera mercredi⏎- Faire le tableau comparatif avec ceux de l'année dernière⏎- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé⏎- Réserver la salle du deuxième étage : l'autre salle est prise toute la semaine
+  #2 success ratio=0.54 4404ms  ⚑ LIST×4 PERSON-LOST FIGURE[12,000,15,000]
+     out: - Récupérer les chiffres de janvier auprès de Marion, qui les aura mercredi⏎- Faire le tableau comparatif avec ceux de l'année dernière⏎- Appeler le prestataire, car leur devis est passé de 12 000 à 15 000 euros et personne ne l'a validé⏎- Réserver la salle du deuxième étage, car l'autre est prise toute la semaine
+  #3 success ratio=0.54 4689ms  ⚑ LIST×4 PERSON-LOST
+     out: - Récupérer les chiffres de janvier auprès de Marion : elle les aurait mercredi⏎- Faire le tableau comparatif avec ceux de l'année dernière⏎- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé⏎- Réserver la salle du deuxième étage : l'autre salle est prise toute la semaine
+
+━━ [E3-todo-enumeration] 503 chars, lang=en
+  raw: okay so uh let me go over what I need to do before the meeting so first I need to get the January numbers from Marion she told me she'd have them Tuesday well no Wednesday and uh so then I'll have to do the comparison table with last year's and also you know I absolutely have to call the contractor because their quote went up again from 12000 to 15000 euros and nobody signed off on that and well yeah I should also remember to book the room on the second floor because the other one is taken all week
+  #1 rejectedGuardrail/language ratio=0.65 7149ms  ⚑ LANG=fr LIST×4 PERSON-LOST
+     out: - Gérer les chiffres de janvier avec Marion, qui a eux le mardi, mais ils seront disponibles le mercredi⏎- Créer le tableau comparatif avec l'année précédente⏎- Appeler le contratant car le devis est passé de 12000 à 15000 euros et personne n'a signé⏎- Réserver la salle au deuxième étage car l'autre est occupée toute la semaine
+  #2 success ratio=0.58 5889ms  ⚑ LIST×4 PERSON-LOST
+     out: - Get the January numbers from Marion: Tuesday, then Wednesday⏎- Create the comparison table with last year's data⏎- Call the contractor because their quote increased from 12000 to 15000 euros and no one signed off⏎- Book the room on the second floor because the other one is taken all week
+  #3 success ratio=0.57 6138ms  ⚑ LIST×4 PERSON-LOST
+     out: - Get the January numbers from Marion: Tuesday, well Wednesday⏎- Do the comparison table with last year's⏎- Call the contractor because their quote went up from 12000 to 15000 euros and nobody signed off on that⏎- Book the room on the second floor because the other one is taken all week
+
+━━ [E4-native-brain-dump] 384 chars, lang=en
+  raw: okay so quick brain dump before I forget the deploy is blocked because the certificate expired on the staging box and uh Sam said he'd rotate it tomorrow morning but we also need to bump the node version because the build image is on eighteen and the new package needs twenty and honestly I think we should just do both in the same window otherwise we're doing two freezes for nothing
+  #1 success ratio=0.64 2764ms  ⚑ LIST×4 PERSON-LOST
+     out: - Deploy blocked because certificate expired on staging box⏎- Sam said he'd rotate certificate tomorrow morning⏎- Need to bump node version because build image on eighteen and new package needs twenty⏎- Do both in same window or risk two freezes
+  #2 success ratio=0.66 2784ms  ⚑ LIST×4 PERSON-LOST
+     out: - Deploy blocked because certificate expired on staging box⏎- Sam said rotate certificate tomorrow morning⏎- Need to bump node version because build image on eighteen and new package needs twenty⏎- Do both in same window otherwise two freezes for nothing
+  #3 success ratio=0.64 2605ms  ⚑ LIST×4 PERSON-LOST
+     out: - Deploy blocked because certificate expired on staging box⏎- Sam will rotate certificate tomorrow morning⏎- Bump node version because build image on eighteen and new package needs twenty⏎- Do both in same window otherwise two freezes for nothing
+
+
+══ bars (engine outputs; `acc` = accepted by the pipeline)
+arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | report/infinitive/person-lost | preamble | example | figure | accepted
+shipping | en | 6 | 1 (0) | 1 (17%) | 6 | 6/6 (100%) | 6 | 0 | 0 | 0 | 5/6
+shipping | fr | 9 | 0 (0) | 0 (0%) | 9 | 9/9 (100%) | 3 | 0 | 0 | 1 | 9/9
+shipping | ALL | 15 | 1 (0) | 1 (7%) | 15 | 15/15 (100%) | 9 | 0 | 0 | 1 | 14/15
+   refusals, shipping: language×1
+
+capture written: ../docs/research/571-summary/runs/compare-notes.json
