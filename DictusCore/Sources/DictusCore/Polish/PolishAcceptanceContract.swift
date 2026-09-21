@@ -121,7 +121,7 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
     ///
     /// `outputLanguage` happens to discriminate the translation case today, and
     /// deriving from it would work for this catalogue — the same argument
-    /// `SmartModeOverflowBehaviour` answers, with the same conclusion. A custom mode
+    /// `SmartModeFloorBehaviour` answers, with the same conclusion. A custom mode
     /// (#269) must *answer* the question rather than inherit an answer from a
     /// property chosen for an unrelated reason, and a mode that condenses *and*
     /// reconstructs would break the derivation silently. It cannot break an answer
@@ -157,16 +157,43 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
     /// true and has nothing to do with order.
     public let requiresAlignedPrefix: Bool
 
+    /// How short a segment may be and still be judged by the overlap check (#572).
+    ///
+    /// ### Why this had to stop being a global constant
+    ///
+    /// `PolishSegmentOverlapThresholds.minimumContentWords` was measured at 3 on
+    /// #414's corpora, which are `List` outputs: there, a segment under three content
+    /// words is a heading like `Actions :`, and refusing a whole dictation over one is
+    /// the false rejection the floor exists to prevent. `Message` inverts that shape —
+    /// its input is short by construction — and the 2026-09-17 device round accepted
+    /// two fabrications the check never read, because each reduced to a single content
+    /// word. Both guards were blind at once: their length ratios, 0.56 and 0.72, sit
+    /// deep inside the mode's own band.
+    ///
+    /// ### Why a field on the contract and not a lower global default
+    ///
+    /// The same argument `requiresGroundedNames` records, plus a measured cost:
+    /// lowering the floor for every mode re-opens the false-rejection trade declined
+    /// on 2026-09-07. A mode that condenses long speech and a mode that rewrites a
+    /// two-line message do not want the same answer, and a custom mode (#269) has to
+    /// be able to give its own.
+    ///
+    /// **`floor` is deliberately not moved by anyone.** 0.15 is the measured number;
+    /// only *which segments get read* varies by mode.
+    public let segmentOverlapThresholds: PolishSegmentOverlapThresholds
+
     public init(minimumLengthRatio: Double,
                 maximumLengthRatio: Double,
                 outputLanguage: PolishOutputLanguage,
                 requiresGroundedNames: Bool,
-                requiresAlignedPrefix: Bool) {
+                requiresAlignedPrefix: Bool,
+                segmentOverlapThresholds: PolishSegmentOverlapThresholds = .default) {
         self.minimumLengthRatio = minimumLengthRatio
         self.maximumLengthRatio = maximumLengthRatio
         self.outputLanguage = outputLanguage
         self.requiresGroundedNames = requiresGroundedNames
         self.requiresAlignedPrefix = requiresAlignedPrefix
+        self.segmentOverlapThresholds = segmentOverlapThresholds
     }
 
     // MARK: - Decoding
@@ -194,6 +221,16 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
         self.requiresAlignedPrefix = try container.decodeIfPresent(
             Bool.self, forKey: .requiresAlignedPrefix
         ) ?? false
+        // Same reasoning as the two flags above, pointed the same way: a build that
+        // never heard of this field decodes to the pair #414 measured, never to a
+        // stricter one. The safe half here is the one that cannot introduce a
+        // rejection nobody measured for a snapshot written by an older build.
+        // An invalid stored value lands on the same default an absent one does,
+        // rather than failing the whole contract: a snapshot that cannot be read
+        // costs the user their dictation, a measured default costs nothing.
+        self.segmentOverlapThresholds = (try? container.decodeIfPresent(
+            PolishSegmentOverlapThresholds.self, forKey: .segmentOverlapThresholds
+        )) ?? .default
     }
 
     /// The band as a range, for `PolishGuardrail.accepts(raw:polished:band:)`.

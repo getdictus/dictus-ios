@@ -329,11 +329,9 @@ public final class PolishService {
         }
         let reason = bundle.failureReason?.slug ?? "-"
         let degraded = PolishPipeline.degradesToFloor(mode, outcome: bundle.outcome)
-        PersistentLog.log(.smartModeRefused(
-            mode: mode.id,
-            outcome: bundle.outcome.rawValue,
-            reason: degraded ? "\(reason)|degraded" : reason
-        ))
+        // Built before the log line, and the log line reads it: the value the surfaces
+        // get and the sentence the export carries then cannot describe two different
+        // refusals (#580).
         let failure = SmartModeFailure(
             modeIdentifier: mode.id,
             modeDisplayName: mode.displayName,
@@ -349,8 +347,18 @@ public final class PolishService {
             // weights the opening of the transcript (#456), which is the region
             // Parakeet gets wrong most. A message naming a language the refusal was
             // not about would be worse than the generic sentence it replaces.
-            detectedLanguage: detectedLanguage
+            detectedLanguage: detectedLanguage,
+            // Nil on every outcome but `rejectedGuardrail`, where `reason` is "-"
+            // because nothing was thrown and this is the only thing that names the
+            // cause.
+            guardrailCheck: bundle.rejectedCheck?.rawValue
         )
+        PersistentLog.log(.smartModeRefused(
+            mode: mode.id,
+            outcome: failure.outcome,
+            reason: degraded ? "\(reason)|degraded" : reason,
+            check: failure.guardrailCheck ?? "-"
+        ))
         guard degraded, let returned else { return PolishOutcome(failure: failure) }
         return PolishOutcome(degradedTo: returned, failure: failure)
     }

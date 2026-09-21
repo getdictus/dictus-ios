@@ -651,4 +651,28 @@ final class LogEventTests: XCTestCase {
         XCTAssertTrue(formatted.contains("[keyboard]"))
         XCTAssertTrue(formatted.contains("keyboardTextInserted"))
     }
+
+    // MARK: - smartModeRefused names the guardrail (#580)
+
+    /// The line this issue was filed on read `reason=-` and nothing else, so an
+    /// export could not tell `length` from `segmentOverlap` — three different bugs
+    /// behind one outcome. The check has to be in the line, not only in the metrics.
+    func testASmartModeRejectionNamesTheCheckThatRefusedIt() {
+        let formatted = LogEvent.smartModeRefused(
+            mode: "structured", outcome: "rejectedGuardrail",
+            reason: "-", check: "segmentOverlap"
+        ).formatted()
+        XCTAssertTrue(formatted.contains("outcome=rejectedGuardrail"), formatted)
+        XCTAssertTrue(formatted.contains("check=segmentOverlap"), formatted)
+    }
+
+    /// Every other refusal keeps a placeholder rather than an absent key: a reader
+    /// grepping `check=` must not have to know which outcomes carry one.
+    func testARefusalWithNoGuardrailStillPrintsThePlaceholder() {
+        let formatted = LogEvent.smartModeRefused(
+            mode: "translate.en", outcome: "engineFailed",
+            reason: "guardrailViolation", check: "-"
+        ).formatted()
+        XCTAssertTrue(formatted.contains("check=-"), formatted)
+    }
 }

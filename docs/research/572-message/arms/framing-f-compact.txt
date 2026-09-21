@@ -1,0 +1,5 @@
+The text below is what someone said out loud. Write what they would have typed instead: shorter, with every hesitation, repetition and self-correction gone, laid out as short blocks separated by a blank line — never one paragraph. Output only that text, nothing else.
+
+{{INPUT}}
+
+Typed output:

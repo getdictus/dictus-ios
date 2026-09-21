@@ -472,7 +472,12 @@ public enum LogEvent: Sendable {
     /// `outcome` is the `PolishMetrics.Outcome` that refused it (the contract
     /// rejected the output, the engine threw, the input did not fit); `reason` is the
     /// engine's own name for what it threw, or "-".
-    case smartModeRefused(mode: String, outcome: String, reason: String)
+    ///
+    /// `check` names the guardrail on an `outcome=rejectedGuardrail`, and is "-"
+    /// otherwise. Without it that outcome logged `reason=-` and nothing else (#580):
+    /// a rejection is the one refusal with a knowable cause, and `length`,
+    /// `segmentOverlap` and `prefixAlignment` are three different bugs to open.
+    case smartModeRefused(mode: String, outcome: String, reason: String, check: String)
 
     /// Issue #79: a dictation that had a mode armed is running Normal instead.
     ///
@@ -1072,8 +1077,8 @@ public enum LogEvent: Sendable {
             return "reason=\(reason) ageMs=\(ageMs)"
         case .polishCallSuperseded(let inflightMs):
             return "inflightMs=\(inflightMs)"
-        case .smartModeRefused(let mode, let outcome, let reason):
-            return "mode=\(mode) outcome=\(outcome) reason=\(reason)"
+        case .smartModeRefused(let mode, let outcome, let reason, let check):
+            return "mode=\(mode) outcome=\(outcome) reason=\(reason) check=\(check)"
         case .smartModeSkipped(let mode, let reason, let disarmed):
             return "mode=\(mode) reason=\(reason) disarmed=\(disarmed)"
         case .polishEngineUnavailable(let engine, let reason, let consecutiveRefusals):

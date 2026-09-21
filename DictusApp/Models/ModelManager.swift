@@ -77,6 +77,17 @@ class ModelManager: ObservableObject {
     /// so SwiftUI can drive the loading overlay reactively.
     @Published var modelLoadState: ModelLoadState = .idle
 
+    /// Whether `modelLoadState` above carries a value a live process in THIS launch
+    /// wrote, rather than the one the App Group remembered (issue #579).
+    ///
+    /// WHY A SECOND PROPERTY AND NOT A CHANGE TO THE SHARED KEY: the key is read by the
+    /// keyboard as well, where it is the readiness gate's input (#542), and stamping it
+    /// with the writing process's identity would be a schema change on both sides of the
+    /// App Group. Which process wrote it is a question only this process can answer and
+    /// only this process needs to, so the answer stays here, in memory, and dies with
+    /// the launch it describes — which is precisely what makes it true.
+    @Published private(set) var loadStateIsFromThisLaunch = false
+
     // MARK: - Private
 
     private let defaults = AppGroup.defaults
@@ -160,6 +171,11 @@ class ModelManager: ObservableObject {
         // Mirror the coordinator's load state so SwiftUI can react (issue #144).
         // We read the persisted value once for cold-start consistency, then subscribe
         // to subsequent changes posted by `DictationCoordinator.setModelLoadState`.
+        //
+        // THAT FIRST READ IS THE APP GROUP'S MEMORY, not this process's opinion (#579):
+        // the key outlives whoever wrote it, so a launch from dead seeds itself with a
+        // dead process's verdict. `loadStateIsFromThisLaunch` stays false until the
+        // subscription below carries a value somebody alive actually published.
         if let raw = defaults.string(forKey: SharedKeys.modelLoadState),
            let state = ModelLoadState(rawValue: raw) {
             modelLoadState = state
@@ -182,7 +198,14 @@ class ModelManager: ObservableObject {
         ) { [weak self] note in
             guard let raw = note.userInfo?["state"] as? String,
                   let state = ModelLoadState(rawValue: raw) else { return }
-            MainActor.assumeIsolated { self?.modelLoadState = state }
+            MainActor.assumeIsolated {
+                // Set with the state and never apart from it: a reader woken by this same
+                // post must not find the new value next to a flag still saying nobody
+                // wrote it. The notification is in-process — `setModelLoadState` is the
+                // only poster and it runs in DictusApp — so receiving one is the proof.
+                self?.loadStateIsFromThisLaunch = true
+                self?.modelLoadState = state
+            }
         }
         peerStateObserver = NotificationCenter.default.addObserver(
             forName: .dictusModelPreparationChanged,
