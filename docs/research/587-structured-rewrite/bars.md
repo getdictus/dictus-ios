@@ -230,7 +230,7 @@ cd DictusCore
 H="swift run polish-harness fidelity"
 A=../docs/research/587-structured-rewrite/arms/C1.txt
 O=../docs/research/587-structured-rewrite
-$H Sources/polish-harness/fixtures/device-structured-fr.json Sources/polish-harness/fixtures/longform-fr.json \
+$H Sources/polish-harness/fixtures/device-structured-fr.json \
    --mode structured --runs 3 --arm $A --json $O/capture-r1.json      > $O/raw/r1.txt
 $H Sources/polish-harness/fixtures/device-structured-0918-fr.json \
    --mode structured --runs 3 --arm $A --json $O/capture-r2.json      > $O/raw/r2.txt
@@ -259,3 +259,14 @@ meaning without knowing whether the shipping prompt fails the same languages.
 5. **The fidelity scorers are FR/EN** (#570 bars.md §9 item 3); B4 is therefore read on R1
    alone, which is French.
 6. **One speaker, one domain.** Every real fixture is Pierre talking about Dictus.
+
+## 9. Amendments made after §1–§8 were committed, and still before the first model call
+
+1. **R1 runs as two invocations, not one.** `fidelity` reads one fixture file; §7's R1 line
+   passing two would have run only the first. Captures: `capture-r1-device.json` and
+   `capture-r1-longform.json`. Nothing else about R1 changes.
+2. **The observables of §4 are recorded by the harness**, not recomputed afterwards:
+   `FidelityShape` stores the expected language, the output's reading, the foreign
+   sentences, the list lines and the shipping check's verdict on every run, and the
+   harness prints a per-language table. The definitions are §4's, unchanged.
+3. **C1 is committed as `arms/C1.txt`, 2 966 characters**, before its first call.
