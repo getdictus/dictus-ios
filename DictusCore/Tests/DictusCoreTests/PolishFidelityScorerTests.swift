@@ -230,6 +230,63 @@ final class PolishFidelityScorerTests: XCTestCase {
                        + "update findings.md and delete this test")
     }
 
+    /// #570's own opening example, as CodeRabbit put it on PR #583: `pas vraiment` is
+    /// a hedge, and dropping it is a stance change. Before the phrase was in the
+    /// lexicon this reported nothing.
+    func testAxis2FlagsADroppedPasVraiment() {
+        let score = PolishFidelityScorer.score(output: "C'est pas ma voix sur ces enregistrements.",
+                                               input: "c'est pas vraiment ma voix sur ces enregistrements")
+        XCTAssertTrue(score.stanceMisses.contains { $0.kind == .hedgeLost },
+                      "got \(score.stanceMisses.map(\.kind))")
+    }
+
+    /// `pas vraiment` kept is neither a hedge lost nor a booster added.
+    func testAxis2DoesNotReadPasVraimentAsABooster() {
+        let score = PolishFidelityScorer.score(output: "Ce n'est pas vraiment ma voix sur ces enregistrements.",
+                                               input: "c'est pas vraiment ma voix sur ces enregistrements")
+        XCTAssertTrue(score.stanceMisses.isEmpty, "got \(score.stanceMisses.map(\.kind))")
+    }
+
+    /// `sans doute` carries no polarity: rewriting it as `probablement` changes no
+    /// truth value and must not read as a dropped negation (CodeRabbit, PR #583).
+    func testSansDouteIsNotANegation() {
+        XCTAssertEqual(PolishStanceLexicon.negationCount(in: PolishLexicon.words(in: "il viendra sans doute demain")), 0)
+        XCTAssertEqual(PolishStanceLexicon.negationCount(in: PolishLexicon.words(in: "sans aucun doute")), 0)
+        XCTAssertEqual(PolishStanceLexicon.negationCount(in: PolishLexicon.words(in: "sans les logs")), 1,
+                       "a `sans` outside the fixed expressions is still a negation")
+    }
+
+    /// Rule 1 licenses merging two clauses into one, so a booster the speaker said in
+    /// ONE of them must not be charged to the other. The measured case: rescoring the
+    /// committed captures with a pair-by-pair booster rule flagged the shipping prompt
+    /// for keeping `6-unscripted`'s own `vraiment`, because a later input clause aligned
+    /// to the same output clause.
+    func testAxis2DoesNotChargeAMergedClauseForTheOthersBooster() {
+        let raw = "l'idée ça va être vraiment de repérer la qualité de la transcription. "
+            + "l'idée ça va être de repérer la transcription et sa qualité."
+        let output = "L'idée ça va être vraiment de repérer la qualité de la transcription."
+        XCTAssertFalse(PolishFidelityScorer.score(output: output, input: raw)
+            .stanceMisses.contains { $0.kind == .stanceHardened })
+    }
+
+    /// A MEASURED LIMIT, pinned because CodeRabbit asked for the opposite assertion and
+    /// it cannot honestly be made.
+    ///
+    /// Pierre labelled `D4-logs-polish` `stanceHardened`: `effectivement, il coupe
+    /// quand même pas mal de mots` → `il enlève effectivement beaucoup de mots`. The
+    /// `effectivement` is the speaker's own (`c'est qu'effectivement,`), and its clause
+    /// aligns correctly with the output clause carrying it, so no booster was added.
+    /// What was lost is the hedge (`quand même`, `pas mal`) — and the clause that
+    /// carried it keeps one content word of three (`coupe` → `enlève`, `pas mal` →
+    /// `beaucoup`), so it aligns with nothing and axis 2 is never asked about it. That
+    /// is term substitution, the class `findings.md` §8 names as unmeasured.
+    func testAxis2CannotSeeD4sHardeningAndSaysWhy() throws {
+        let work = try deviceCase("D4-logs-polish")
+        let score = PolishFidelityScorer.score(output: work.output, input: work.raw)
+        XCTAssertFalse(score.stanceMisses.contains { $0.kind == .stanceHardened },
+                       "if this ever fires, the limit is gone — update findings.md §2 and delete this test")
+    }
+
     // MARK: - Axis 3, order
 
     /// The 65-character device run: 65 characters in, 66 out, the most innocent length

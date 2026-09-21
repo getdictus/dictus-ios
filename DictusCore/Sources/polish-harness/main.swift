@@ -124,6 +124,7 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "f
       paragraph <fixtures.json> --arm <arm.json> [--arm <arm.json> …] [--runs N] [--json <out.json>]
       fidelity  <fixtures.json> --mode <id> [--runs N] [--arm <prompt.txt> …] [--floor N] [--json <out.json>]
       fidelity  <corpus.json> --replay [--floor N] [--sweep] [--json <out.json>]
+      fidelity  --rescore <capture.json> --fixtures <fixtures.json> [--floor N] [--json <out.json>]
       guardrail <corpus.json> [<corpus.json> …] [--segments] [--sweep] [--anchors]
       target    <corpus.json> [<corpus.json> …] [--sweep] [--floor N]
       vocabulary <corpus.json> [<corpus.json> …]
@@ -222,6 +223,12 @@ let fidelityFloor = numericOption(
 // takes a corpus path where the live round takes a fixture file — which is why the
 // fixture loader below has to be told not to try.
 let isReplay = args.contains("--replay")
+// #570, PR #583 review. `--rescore <capture.json> --fixtures <fixtures.json>` scores a
+// committed live capture again with the current scorers and calls no model. Model-free
+// like `--replay`, so it is dispatched with it.
+let rescorePath = optionValue("--rescore", in: args)
+let rescoreFixtures = optionValue("--fixtures", in: args)
+let isModelFreeFidelity = isReplay || rescorePath != nil
 
 /// Print the engine's own output on a SUCCESS too, with every break made visible
 /// (`⏎`), rather than only on a refusal.
@@ -244,7 +251,7 @@ let fixtures: [Fixture]
 // with the transcripts they rewrite, none of which is a fixture, so those three
 // have nothing to load here. `--lang` (#439) reroutes what IS loaded,
 // so it stays inside the loading branch.
-if ["guardrail", "target", "vocabulary"].contains(command) || (command == "fidelity" && isReplay) {
+if ["guardrail", "target", "vocabulary"].contains(command) || (command == "fidelity" && isModelFreeFidelity) {
     fixtures = []
 } else {
     do {
@@ -296,7 +303,7 @@ guard #available(macOS 26.0, *) else {
 // `prompt` never runs a model — it prints the bytes one would be sent — so it is
 // usable on a machine with Apple Intelligence off, which is the point of it.
 if command != "prompt", command != "guardrail", command != "vocabulary",
-   !(command == "fidelity" && isReplay), engineKind == "apple-fm" {
+   !(command == "fidelity" && isModelFreeFidelity), engineKind == "apple-fm" {
     switch SystemLanguageModel.default.availability {
     case .available:
         break
@@ -742,6 +749,32 @@ func runFidelityReplay() {
     writeFidelityCapture(results, to: paragraphJSONOut)
 }
 
+/// #570, PR #583 review. Rescore a committed live capture with the current scorers.
+/// Calls no model: the stored outputs are the samples, and only their reading changes.
+func runFidelityRescore() {
+    guard let rescorePath, let rescoreFixtures else {
+        print("error: fidelity --rescore needs a capture and its fixtures, e.g.\n"
+              + "  swift run polish-harness fidelity --rescore ../docs/research/570-structured-fidelity/capture-device.json "
+              + "--fixtures Sources/polish-harness/fixtures/device-structured-fr.json")
+        exit(2)
+    }
+    let results = FidelityRescore.rescore(capturePath: rescorePath, fixturesPath: rescoreFixtures,
+                                          floor: fidelityFloor)
+    print("rescored: \(results.count) stored runs from \(rescorePath), floor "
+          + "\(String(format: "%.2f", fidelityFloor)) — no model called")
+    var arms: [String] = []
+    for arm in results.map(\.arm) where !arms.contains(arm) { arms.append(arm) }
+    for result in results where result.hasEngineOutput {
+        let score = result.score
+        guard score.hasScoredDefect || score.negationDropped > 0 || score.speakerState != .absent else { continue }
+        print("\n━━ [\(result.arm)] \(result.fixture)#\(result.run)")
+        print("  \(FidelityRound.verdict(result))")
+        FidelityRound.detail(result)
+    }
+    FidelityRound.summary(results, arms: arms)
+    writeFidelityCapture(results, to: paragraphJSONOut)
+}
+
 // #456. Scores the polish target election against committed raw transcripts. No
 // model runs: the election is `PolishLanguageMix.measure` plus a comparison, both
 // deterministic local calls, which is what makes the dominance floor a measurement
@@ -972,6 +1005,8 @@ case "vocabulary":
 // Intelligence, which is the point of it: the floor behind axes 1 and 2 is
 // re-runnable by anyone. The live half is a pipeline round and is dispatched from
 // `runHarness` with the rest.
+case "fidelity" where rescorePath != nil:
+    runFidelityRescore()
 case "fidelity" where isReplay:
     runFidelityReplay()
 default:

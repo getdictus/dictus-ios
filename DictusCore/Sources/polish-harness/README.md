@@ -171,6 +171,13 @@ swift run polish-harness fidelity Sources/polish-harness/fixtures/device-structu
 # floor behind axes 1 and 2 is re-runnable by anyone. --sweep prints the whole grid.
 swift run polish-harness fidelity ../docs/research/570-structured-fidelity/device-corpus.json \
   --replay --sweep
+
+# Score a committed live capture again with the CURRENT scorers. No model: the stored
+# outputs are the samples, so a number that moves after a scorer fix moved because of
+# the fix and not because Apple FM sampled differently. The capture stores fixture ids,
+# not transcripts, so the fixture file it was run on is required.
+swift run polish-harness fidelity --rescore ../docs/research/570-structured-fidelity/capture-device.json \
+  --fixtures Sources/polish-harness/fixtures/device-structured-fr.json --json /tmp/rescored.json
 ```
 
 Three things about it differ from the other commands here.

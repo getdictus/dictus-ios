@@ -64,10 +64,11 @@ public enum PolishStanceLexicon {
         "je dirais", "peut etre", "sans doute", "probablement", "apparemment",
         "il parait", "plutot", "assez", "un peu", "quand meme", "a mon avis",
         "je sais pas", "je ne sais pas", "je suppose", "en gros", "a priori",
+        "pas vraiment",
         // English
         "i think", "i believe", "i guess", "i suppose", "maybe", "perhaps",
         "probably", "apparently", "kind of", "sort of", "a bit", "rather",
-        "it seems", "somewhat", "pretty much", "i d say"
+        "it seems", "somewhat", "pretty much", "i d say", "not really"
     ])
 
     /// Boosters: the speaker marking their own claim as more than certain.
@@ -78,11 +79,14 @@ public enum PolishStanceLexicon {
     /// missing and a booster arriving are two different edits and the second is the
     /// one that changes what the sentence claims.
     ///
-    /// `vraiment` and `really` are the ambiguous entries: `pas vraiment` is a hedge,
-    /// not a booster. They stay because the check only fires when the booster is
-    /// **absent from the input proposition**, and `pas vraiment` in the input puts
-    /// `vraiment` there. An intensifier the speaker already used is never counted as
-    /// one the model added.
+    /// `vraiment` and `really` are the ambiguous entries: `pas vraiment` and `not
+    /// really` are hedges, not boosters, and they are in `hedges` as phrases. So
+    /// `boosterCount(in:)` subtracts every occurrence of those two phrases before it
+    /// counts — otherwise `C'est pas vraiment ma voix` would read as a booster, and a
+    /// rewrite keeping `pas vraiment` would read as a hardened stance. Found by
+    /// CodeRabbit on PR #583: without the hedge phrase, `C'est pas vraiment ma voix`
+    /// → `C'est pas ma voix` reported no `hedgeLost` at all, on #570's own opening
+    /// example.
     public static let boosters: [[String]] = phrases([
         // French
         "effectivement", "en effet", "vraiment", "evidemment", "clairement",
@@ -104,8 +108,13 @@ public enum PolishStanceLexicon {
     /// `ne` is deliberately absent: spoken French drops it (`je sais pas`), so its
     /// absence from an output says nothing, and ADR 0003 explicitly forbids the polish
     /// from adding it back. `plus` is absent for the opposite reason — `plus de temps`
-    /// and `plus du tout` are opposite polarities spelled identically. What is left is
-    /// the set whose presence is unambiguous.
+    /// and `plus du tout` are opposite polarities spelled identically.
+    ///
+    /// `sans` and `aucun` stay, and `negationCount(in:)` discounts them where they sit
+    /// inside the fixed expressions `sans doute` (a hedge) and `sans aucun doute` (a
+    /// booster). Neither expression carries a polarity: rewriting `sans doute` as
+    /// `probablement` changes no truth value, and counting its `sans` reported a
+    /// dropped negation where none was. Found by CodeRabbit on PR #583.
     public static let negations: Set<String> = [
         // French
         "pas", "jamais", "aucun", "aucune", "rien", "ni", "sans",
@@ -138,6 +147,24 @@ public enum PolishStanceLexicon {
     public static func occurrences(of set: Set<String>, in words: [String]) -> Int {
         words.count { set.contains($0) }
     }
+
+    /// Boosters in `words`, with `pas vraiment` / `not really` discounted: those are
+    /// hedges that happen to contain a booster word.
+    public static func boosterCount(in words: [String]) -> Int {
+        max(0, occurrences(of: boosters, in: words) - occurrences(of: boosterShapedHedges, in: words))
+    }
+
+    /// Negations in `words`, with the `sans` of `sans doute` and the `sans` and
+    /// `aucun` of `sans aucun doute` discounted — fixed expressions with no polarity.
+    public static func negationCount(in words: [String]) -> Int {
+        let raw = occurrences(of: negations, in: words)
+        let discounted = occurrences(of: [PolishLexicon.words(in: "sans doute")], in: words)
+            + 2 * occurrences(of: [PolishLexicon.words(in: "sans aucun doute")], in: words)
+        return max(0, raw - discounted)
+    }
+
+    /// The two hedges spelled with a booster word inside them.
+    private static let boosterShapedHedges: [[String]] = phrases(["pas vraiment", "not really"])
 
     /// Split each written phrase into the folded word sequence `PolishLexicon` would
     /// produce for it, so the lexicon and the text are cut by the same rule.

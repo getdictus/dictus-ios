@@ -116,9 +116,6 @@ public enum PolishFidelityScorer {
                              floor: Double = defaultFloor) -> PolishFidelityScore {
         let alignments = PolishPropositionCut.align(input: input, output: output)
         let outputPropositions = PolishPropositionCut.propositions(of: output)
-        // The booster check reads the WHOLE input, not the aligned clause. See
-        // `stanceMisses(input:output:wholeInput:)`.
-        let wholeInputWords = PolishLexicon.words(in: input)
 
         let judgeable = alignments.count { $0.proposition.isJudgeable }
         let unrecalled = alignments
@@ -141,9 +138,7 @@ public enum PolishFidelityScorer {
             unrecalled: unrecalled,
             dispersed: dispersed,
             alignedPairs: aligned.count,
-            stanceMisses: aligned.flatMap {
-                stanceMisses(input: $0.0, output: $0.1, wholeInput: wholeInputWords)
-            },
+            stanceMisses: aligned.flatMap(stanceMisses(input:output:)) + hardenings(in: aligned),
             inversions: inversions(in: aligned.map { $0.1.index }),
             comparablePairs: max(0, aligned.count * (aligned.count - 1) / 2),
             speakerState: PolishSpeakerState.verdict(output: output, input: input),
@@ -158,21 +153,10 @@ public enum PolishFidelityScorer {
     /// by **adding**. The asymmetry is deliberate: a hedge the model adds makes the
     /// sentence claim less than the speaker did, which is a softening no user has ever
     /// complained about, while a booster it adds makes the sentence claim more.
-    /// `wholeInput` is every word of the input, and only the booster check reads it.
-    ///
-    /// A short input clause aligns to whichever output clause carries most of its
-    /// words, and that output clause is often much longer — so asking "is this booster
-    /// new" against the input *clause* alone flags every intensifier the speaker used
-    /// one clause earlier. Measured: `c'est pas vraiment ma voix, c'est pas naturel`
-    /// against its rewrite reported a hardened stance on `vraiment`, a word the
-    /// speaker had said himself. Against the whole input it reports nothing, and
-    /// `effectivement` arriving where the speaker said `quand même` still does.
-    ///
-    /// Person is NOT widened the same way and must not be: the whole point of the
-    /// device defect it exists for is that the rest of the output is full of `je`.
+    /// Person, hedge and negation, compared over one aligned pair. Hardening is NOT
+    /// here — see `hardenings(in:)` for why it needs every pair at once.
     static func stanceMisses(input: PolishProposition,
-                             output: PolishProposition,
-                             wholeInput: [String]) -> [PolishStanceMiss] {
+                             output: PolishProposition) -> [PolishStanceMiss] {
         var misses: [PolishStanceMiss] = []
 
         func lost(_ kind: PolishStanceMiss.Kind) {
@@ -187,10 +171,6 @@ public enum PolishFidelityScorer {
         let outHedge = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.hedges, in: output.allWords)
         if inHedge > 0, outHedge == 0 { lost(.hedgeLost) }
 
-        let inBooster = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.boosters, in: wholeInput)
-        let outBooster = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.boosters, in: output.allWords)
-        if inBooster == 0, outBooster > 0 { lost(.stanceHardened) }
-
         // Strictly fewer, where person and hedge ask for NONE left. The asymmetry is
         // the difference between a marker and a truth condition: a clause can carry
         // two hedges, lose one and still hedge, so only the last one going says the
@@ -204,11 +184,56 @@ public enum PolishFidelityScorer {
         // problème`), and that is affordable here and nowhere else: this is an
         // OBSERVABLE (`bars.md` §4), every hit is printed with both texts, and a
         // reader decides. It is in no bar and in no `hasScoredDefect`.
-        let inNegation = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.negations, in: input.allWords)
-        let outNegation = PolishStanceLexicon.occurrences(of: PolishStanceLexicon.negations, in: output.allWords)
+        let inNegation = PolishStanceLexicon.negationCount(in: input.allWords)
+        let outNegation = PolishStanceLexicon.negationCount(in: output.allWords)
         if inNegation > 0, outNegation < inNegation { lost(.negationDropped) }
 
         return misses
+    }
+
+    /// `stanceHardened`: a booster the output clause carries that none of the input
+    /// clauses merged into it carried.
+    ///
+    /// ### Why the unit is the output clause, and neither the pair nor the whole input
+    ///
+    /// Three revisions, each measured against the one before:
+    ///
+    /// 1. **The whole input.** Silenced a false hardening on `c'est pas vraiment ma
+    ///    voix, c'est pas naturel`, where the `vraiment` sat in the speaker's other
+    ///    clause — but CodeRabbit showed on PR #583 that it also let any `effectivement`
+    ///    anywhere in a dictation excuse a booster the model added somewhere else.
+    /// 2. **The aligned pair.** Rescored over the committed captures, it flagged the
+    ///    shipping prompt for keeping a word the speaker said: `6-unscripted`'s
+    ///    `l'idée ça va être vraiment de repérer…` survives verbatim, and a later,
+    ///    different input clause (`l'idée ça va être de voir tout ça`) aligns to the
+    ///    same output clause and was blamed for its `vraiment`. Rule 1 licenses merging
+    ///    two clauses into one, so several input clauses legitimately share an output
+    ///    clause.
+    /// 3. **The output clause and everything merged into it.** A booster is added only
+    ///    when the output clause carries more than all of its aligned input clauses
+    ///    together. That is the reading both earlier failures were approximating.
+    ///
+    /// `pas vraiment` and `not really` are hedges, and `boosterCount(in:)` does not
+    /// count them — which is what removed the false positive revision 1 was written for.
+    static func hardenings(in aligned: [(PolishProposition, PolishProposition)]) -> [PolishStanceMiss] {
+        var merged: [Int: (inputs: [PolishProposition], output: PolishProposition)] = [:]
+        var order: [Int] = []
+        for (input, output) in aligned {
+            if merged[output.index] == nil {
+                merged[output.index] = ([], output)
+                order.append(output.index)
+            }
+            merged[output.index]?.inputs.append(input)
+        }
+        return order.compactMap { index in
+            guard let group = merged[index] else { return nil }
+            let before = group.inputs.reduce(0) { $0 + PolishStanceLexicon.boosterCount(in: $1.allWords) }
+            let after = PolishStanceLexicon.boosterCount(in: group.output.allWords)
+            guard after > before else { return nil }
+            return PolishStanceMiss(kind: .stanceHardened,
+                                    input: group.inputs.map(\.text).joined(separator: " / "),
+                                    output: group.output.text)
+        }
     }
 
     /// Axis 3: pairs `(i < j)` whose aligned output positions run backwards.

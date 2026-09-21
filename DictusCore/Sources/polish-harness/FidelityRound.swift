@@ -96,17 +96,23 @@ struct FidelityRun {
     let score: PolishFidelityScore
     /// What was scored, committed verbatim.
     let output: String
+    /// Whether the engine answered at all.
+    ///
+    /// `PolishPipeline.transform` returns a nil engine output on `engineFailed`,
+    /// `unsupportedInputLanguage`, `exceededContextBudget` and a `cancelled` that
+    /// landed before the engine produced anything. A run with no output has violated
+    /// nothing, and scoring its absence as an empty string put a total recall failure
+    /// in the denominator. CodeRabbit found on PR #583 that the first fix for this
+    /// filtered on `engineFailed` alone and left the other three in; this flag is what
+    /// every table now filters on, whatever the outcome that caused it. A REFUSED run
+    /// that did produce output keeps this true and stays scoreable — #581's positive
+    /// control is exactly such a run.
+    let hasEngineOutput: Bool
 }
 
 // MARK: - The round
 
 enum FidelityRound {
-
-    /// `PolishMetrics.Outcome.engineFailed`'s raw value, which is what the driver
-    /// records when Apple FM throws. Named rather than spelled out at four call sites
-    /// because every one of them has to agree, and a typo in one would silently put an
-    /// engine error back into a denominator.
-    static let engineFailure = PolishMetrics.Outcome.engineFailed.rawValue
 
     /// The floor sweep grid declared in `bars.md` §6: 0.10 to 0.60 in steps of 0.05.
     ///
@@ -127,7 +133,7 @@ enum FidelityRound {
                 outcome: work.outcome ?? (work.accepted ? "success" : "rejectedGuardrail"),
                 rejectedCheck: nil, labels: work.labels,
                 score: PolishFidelityScorer.score(output: work.output, input: work.raw, floor: floor),
-                output: work.output
+                output: work.output, hasEngineOutput: true
             )
         }
         if sweep { printSweep(cases) }
@@ -216,15 +222,14 @@ enum FidelityRound {
         print("\n\n════ AXES, per arm (bars.md §4)\n")
         print(pad("arm", 22) + pad("outputs", 9)
               + ["unrecalled", "personLost", "hedgeLost", "hardened", "fabricated", "dropped", "clean"]
-                  .map { pad($0, 12) }.joined() + "engineErr")
+                  .map { pad($0, 12) }.joined() + "noOutput")
         for arm in arms {
-            // A call that never answered has violated nothing, and counting its empty
-            // output as a total recall failure would put two findings in one number.
+            // A run with no engine output has violated nothing, and counting its
+            // absence as a total recall failure would put two findings in one number.
             // #550's round excludes its engine errors from every bar for the same
-            // reason; measured here at 2 in 306 on the first two rounds, both ~35 s
-            // timeouts on a 68-character input.
-            let errors = all.count { $0.arm == arm && $0.outcome == engineFailure }
-            let rows = all.filter { $0.arm == arm && $0.outcome != engineFailure }
+            // reason. Filtered on `hasEngineOutput`, never on one outcome.
+            let errors = all.count { $0.arm == arm && !$0.hasEngineOutput }
+            let rows = all.filter { $0.arm == arm && $0.hasEngineOutput }
             guard !rows.isEmpty else { continue }
             let cells = [
                 "\(rows.count { !$0.score.unrecalled.isEmpty })/\(rows.count)",
@@ -238,16 +243,21 @@ enum FidelityRound {
             print(pad(arm, 22) + pad("\(rows.count)", 9) + cells.map { pad($0, 12) }.joined() + "\(errors)")
         }
         print("\n  Counts are OUTPUTS carrying at least one, not occurrences.")
-        print("  engineErr runs are in NO column and in no denominator: a call that never")
-        print("  answered has violated nothing, and its empty output would otherwise read as a")
-        print("  total recall failure.")
+        print("  noOutput runs are in NO column and in no denominator: a run whose engine")
+        print("  produced nothing has violated nothing, whatever the outcome that caused it.")
+        let excluded = all.filter { !$0.hasEngineOutput }
+        if !excluded.isEmpty {
+            let byOutcome = Dictionary(grouping: excluded, by: \.outcome)
+                .map { "\($0.key)×\($0.value.count)" }.sorted().joined(separator: ", ")
+            print("  excluded, by outcome: \(byOutcome)")
+        }
         print("  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation")
         print("  count are observables by declaration (bars.md §1, §4) and are in no column here.")
 
         print("\n\n════ OBSERVABLES, per arm — reported, never barred\n")
         print(pad("arm", 22) + pad("inversions", 14) + pad("dispersed", 14) + pad("negDropped", 14) + "speakerState preserved")
         for arm in arms {
-            let rows = all.filter { $0.arm == arm && $0.outcome != engineFailure }
+            let rows = all.filter { $0.arm == arm && $0.hasEngineOutput }
             guard !rows.isEmpty else { continue }
             print(pad(arm, 22)
                   + pad("\(rows.reduce(0) { $0 + $1.score.inversions })", 14)
@@ -264,7 +274,7 @@ enum FidelityRound {
             for fixture in orderedFixtures(rows) {
                 let runs = rows.filter { $0.fixture == fixture }.sorted { $0.run < $1.run }
                 let cells = runs.map { run -> String in
-                    guard run.outcome != engineFailure else { return "e" }
+                    guard run.hasEngineOutput else { return "e" }
                     var flags = ""
                     if !run.score.unrecalled.isEmpty { flags += "U\(run.score.unrecalled.count)" }
                     if run.score.personLost > 0 { flags += "P" }
@@ -278,7 +288,7 @@ enum FidelityRound {
                 print("   " + pad(fixture, 24) + cells.joined(separator: "  "))
             }
         }
-        print("\n   e = Apple FM threw; the run is in no denominator above.")
+        print("\n   e = the engine produced no output; the run is in no denominator above.")
         print("   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened")
         print("   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions")
         print("   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.")
@@ -335,7 +345,7 @@ enum FidelityRound {
 
 /// The shape committed next to the human capture, so a later analysis is a script over
 /// data rather than a re-read of prose.
-struct FidelityRunRecord: Encodable {
+struct FidelityRunRecord: Codable {
     let arm: String
     let fixture: String
     let run: Int
@@ -359,6 +369,9 @@ struct FidelityRunRecord: Encodable {
     let speakerState: String
     let closesOnSpeakerState: Bool
     let output: String
+    /// Optional on decode: captures written before PR #583's review carry no such
+    /// field, and `--rescore` derives it for them (see `FidelityRescore`).
+    let hasEngineOutput: Bool?
 
     init(_ run: FidelityRun) {
         arm = run.arm
@@ -384,6 +397,7 @@ struct FidelityRunRecord: Encodable {
         speakerState = run.score.speakerState.rawValue
         closesOnSpeakerState = run.score.closesOnSpeakerState
         output = run.output
+        hasEngineOutput = run.hasEngineOutput
     }
 }
 
@@ -438,7 +452,9 @@ func runFidelityRound(fixtures: [Fixture],
             print("\n━━ [\(fixture.id)] \(fixture.raw.count) chars, lang=\(fixture.lang)")
             for index in 1...max(1, runs) {
                 let outcome = await runOnce(fixture, engine: engine, mode: mode)
-                // The ENGINE's output, not `final`. See this file's header.
+                // The ENGINE's output, not `final`. See this file's header. A nil output
+                // is stored as "" for the capture and flagged by `hasEngineOutput`, which
+                // keeps it out of every denominator.
                 let scored = outcome.engineOutput ?? ""
                 let result = FidelityRun(
                     fixture: fixture.id, arm: arm.label, run: index,
@@ -447,7 +463,7 @@ func runFidelityRound(fixtures: [Fixture],
                     outcome: outcome.outcome.rawValue,
                     rejectedCheck: outcome.rejectedCheck?.rawValue, labels: [],
                     score: PolishFidelityScorer.score(output: scored, input: fixture.raw, floor: floor),
-                    output: scored
+                    output: scored, hasEngineOutput: outcome.engineOutput != nil
                 )
                 all.append(result)
                 print("  #\(index) \(FidelityRound.verdict(result))")
