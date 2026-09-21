@@ -1,0 +1,298 @@
+[
+  {
+    "alignedPairs" : 15,
+    "arm" : "device",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 105,
+    "dispersed" : 0,
+    "fixture" : "D1-three-steps",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "inversions" : 0,
+    "judgeablePropositions" : 17,
+    "labels" : [
+      "propositionDeleted"
+    ],
+    "ms" : 0,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "La reconnaissance vocale sur le téléphone fonctionne en trois étapes.\nLa première étape est la capture : le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.\nLa deuxième étape est le modèle : il prend ses morceaux et essaye de deviner quels sons ont été prononcés, puis quels mots se sont formés, en utilisant à la fois ce qu’il entend et ce qu’il a déjà écrit. Le contexte aide énormément à lever les ambiguïtés.\nLa troisième étape est la mise en forme : on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, et on découpe en paragraphes.\nLe deuxième élément coûte 90 % du temps.",
+    "outputChars" : 669,
+    "personLost" : 1,
+    "rawChars" : 838,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Le truc important à comprendre,",
+      "c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 14,
+    "arm" : "device",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 91,
+    "dispersed" : 0,
+    "fixture" : "D2-three-steps-drift",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+      "termSubstituted"
+    ],
+    "ms" : 0,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "La reconnaissance de club sur téléphone fonctionne en trois étapes.\n\nLa première étape est la capture : le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape est le modèle : il prend les morceaux et essaie de déterminer quels ont été prononcés et quelle forme ils ont pris. Pour cela, il analyse ce qu’il entend et ce qu’il a déjà écrit, car le contexte aide énormément à résoudre les ambiguïtés.\n\nLa troisième étape est la mise en forme : on prend le texte brut qui sort du modèle, on ajoute la ponctuation, les majuscules éventuellement, et on découpe le texte en paragraphes.\n\nLe truc important à comprendre est que ces trois étapes ne coûtent pas du tout le même temps de calcul. Le deuxième est 90 % du temps.",
+    "outputChars" : 777,
+    "personLost" : 1,
+    "rawChars" : 795,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "He prends his morceaux and essays of devine quels have been prononced,"
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "device",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+      "registerDropped"
+    ],
+    "ms" : 0,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue.\n\nTu peux passer en mode plan. Je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 150,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "s'il te plaît."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 9,
+    "arm" : "device",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 36,
+    "dispersed" : 2,
+    "fixture" : "D4-logs-polish",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 2,
+    "inversions" : 0,
+    "judgeablePropositions" : 11,
+    "labels" : [
+      "intentionInvented",
+      "factFabricated",
+      "personLost",
+      "stanceHardened",
+      "misspelled"
+    ],
+    "ms" : 0,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Écoute, je vais te partager les logs polish.\n\nJe voulais supprimer les logs, mais je les avais oubliés, alors tu as encore les anciennes.\n\nJe te laisserai analyser les logs par rapport à l'heure. Tu verras qu'il y a une dizaine qui ont été créées après ton dernier message.\n\nHonestement, je suis surpris du mod. Il est pas trop mal.\n\nLe seul truc, c'est qu'il enlève effectivement beaucoup de mots. Notamment, tu verras que le dernier texte enlève les mots « le » et « chérie » quand je dis « coucou ma chérie ».\n\nJe te laisse analyser et me dire ce que tu en penses.",
+    "outputChars" : 567,
+    "personLost" : 1,
+    "rawChars" : 578,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "device",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+      "exampleLeaked",
+      "refusedByGuardrail"
+    ],
+    "ms" : 0,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.",
+    "outputChars" : 93,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "device",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "fixture" : "D6-issues-check",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 9,
+    "labels" : [
+      "refusedByGuardrail"
+    ],
+    "ms" : 0,
+    "negationDropped" : 1,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Il faut que tu sois présent pour effectuer une vérification préliminaire concernant les problèmes liés à iOS.\n\nJ’ai reçu un retour d’utilisateur. Nous avons discuté, et il semble qu’on ait presque tout enregistré.\n\nAvant de vérifier les problèmes, vérifie notre conversation avec lui. Il y a plusieurs points.\n\nDis-moi les retours qu’il a formulés, liste-les simplement, et nous effectuerons une synthèse.",
+    "outputChars" : 405,
+    "personLost" : 1,
+    "rawChars" : 433,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS.",
+      "Enfin tu regarderas dans le slide,",
+      "Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues,",
+      "Alors tu verras, il y a plusieurs postes."
+    ],
+    "unrecalledWholeRecall" : [
+      0.2222222222222222,
+      0,
+      0.2857142857142857,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "device",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 1,
+    "judgeablePropositions" : 6,
+    "labels" : [
+      "reordered",
+      "propositionDeleted"
+    ],
+    "ms" : 0,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Il faut qu'on fasse une issue et qu'on log un peu tous ces rejets.\n\nIl y a un problème avec ce mod, et il faut analyser ce problème en profondeur.\n\nJe t'envoie les logs.",
+    "outputChars" : 169,
+    "personLost" : 1,
+    "rawChars" : 246,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Parce que là c'est quand même embêtant,"
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "device",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 1,
+    "judgeablePropositions" : 2,
+    "labels" : [
+      "reordered"
+    ],
+    "ms" : 0,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Il s'agit de la dernière transcription.\n\nJe te laisserai regarder.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 14,
+    "arm" : "device",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 91,
+    "dispersed" : 3,
+    "fixture" : "D9-suggestion-bar",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 2,
+    "inversions" : 6,
+    "judgeablePropositions" : 19,
+    "labels" : [
+      "speakerStateFabricated",
+      "refusedByGuardrail"
+    ],
+    "ms" : 0,
+    "negationDropped" : 1,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Super, merci pour ce détail.\n\nJe voudrais que tu regardes si on a des issues qui couvrent les points qu'il faut qu'on corrige par rapport à ces retours. Il y a déjà une barre de suggestion. Il y a tout un design à revoir. Il paraît qu'il y a une issue à ce sujet.\n\nJe voudrais vraiment qu'on se rapproche sur le design de la barre de suggestion. Je trouve qu'elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Il faudrait qu'en gros elle soit invisible, que l'autocorrection continue de fonctionner mais que l'on ne voie pas les mots de suggestion, donc qu'elle soit paramétrable dans l'application.\n\nIl y a le point en automatique à la fin de chaque phrase. Il faudrait vérifier dans la partie post-inscription si on doit le faire, mais il faudrait l'enlever si c'est possible ou si c'est un paramètre dans l'application.\n\nIl y a aussi le changement de layer de clavier quand on passe du 1-2-3 au ABC. Il paraît qu'il y a un point à ce sujet. Il faudrait juste que tu confirmes ça.\n\nIl y a un autre truc, mais je ne me souviens pas.",
+    "outputChars" : 1089,
+    "personLost" : 4,
+    "rawChars" : 1337,
+    "run" : 1,
+    "speakerState" : "fabricated",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Donc j'aimerais que tu goûtes,",
+      "j'aimerais bien que on puisse la désactiver potentiellement."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0
+    ]
+  }
+]

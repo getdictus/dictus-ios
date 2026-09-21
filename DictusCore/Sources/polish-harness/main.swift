@@ -35,6 +35,7 @@
 
 import Foundation
 import DictusCore
+import PolishFidelity
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -112,7 +113,7 @@ func corpusPaths(in args: [String], valuedOptions: Set<String> = []) -> [String]
 }
 
 let args = Array(CommandLine.arguments.dropFirst())
-guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
+guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
     print("""
     polish-harness — off-device polish eval (macOS + Apple Intelligence)
 
@@ -121,6 +122,9 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "g
       ab     <fixtures.json> [--a <promptA.txt>] [--b <promptB.txt>] [--mode <id>] [--mode-a <id>] [--mode-b <id>]
       prompt <fixtures.json> [--id <fixtureID>] [--out <dir>] [--mode <id>]
       paragraph <fixtures.json> --arm <arm.json> [--arm <arm.json> …] [--runs N] [--json <out.json>]
+      fidelity  <fixtures.json> --mode <id> [--runs N] [--arm <prompt.txt> …] [--floor N] [--json <out.json>]
+      fidelity  <corpus.json> --replay [--floor N] [--sweep] [--json <out.json>]
+      fidelity  --rescore <capture.json> --fixtures <fixtures.json> [--floor N] [--json <out.json>]
       guardrail <corpus.json> [<corpus.json> …] [--segments] [--sweep] [--anchors]
       target    <corpus.json> [<corpus.json> …] [--sweep] [--floor N]
       vocabulary <corpus.json> [<corpus.json> …]
@@ -140,6 +144,15 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "g
     two of the arms return integers rather than text, which every acceptance band
     necessarily rejects, and a guardrail refusal and a model failure are different
     findings. Arms live in docs/research/550-paragraph-placement/arms/.
+
+    fidelity (#570, #581) scores a Smart Mode's output against its input on the four
+    axes declared in docs/research/570-structured-fidelity/bars.md: proposition
+    recall, person and stance, order (an OBSERVABLE, never a defect) and
+    speaker-state fabrication. It scores the ENGINE's output, not the inserted text,
+    because a mode that fails its contract inserts nothing and #581's positive
+    control is a refused output. --replay scores committed, hand-labelled outputs and
+    drives NO model, which is how the recall floor is calibrated; --sweep prints that
+    calibration. Corpus and arms in docs/research/570-structured-fidelity/.
 
     guardrail (#413, #414, #466) scores the four output-inspection checks against
     committed, hand-labelled outputs. It drives NO model and needs no Apple
@@ -196,6 +209,26 @@ let armPaths: [String] = args.indices.compactMap { index in
     return args[index + 1]
 }
 let paragraphJSONOut = optionValue("--json", in: args)
+// #570. The recall floor axes 1 and 2 are read at. Its default is the value
+// calibrated on the hand-labelled device corpus (`bars.md` §6); `--floor` re-runs the
+// bench at another one, and `--sweep` on a replay prints the whole grid the default
+// was read off. Parsed here with every other option rather than inside the command,
+// so a typo is refused before a round starts rather than after it — the reason
+// `numericOption` exists at all.
+let fidelityFloor = numericOption(
+    "--floor", in: args, default: PolishFidelityScorer.defaultFloor,
+    expected: "must be a finite share from 0 to 1"
+) { $0.isFinite && (0...1).contains($0) }
+// #570. `--replay` scores committed outputs instead of driving the pipeline, so it
+// takes a corpus path where the live round takes a fixture file — which is why the
+// fixture loader below has to be told not to try.
+let isReplay = args.contains("--replay")
+// #570, PR #583 review. `--rescore <capture.json> --fixtures <fixtures.json>` scores a
+// committed live capture again with the current scorers and calls no model. Model-free
+// like `--replay`, so it is dispatched with it.
+let rescorePath = optionValue("--rescore", in: args)
+let rescoreFixtures = optionValue("--fixtures", in: args)
+let isModelFreeFidelity = isReplay || rescorePath != nil
 
 /// Print the engine's own output on a SUCCESS too, with every break made visible
 /// (`⏎`), rather than only on a refusal.
@@ -218,7 +251,7 @@ let fixtures: [Fixture]
 // with the transcripts they rewrite, none of which is a fixture, so those three
 // have nothing to load here. `--lang` (#439) reroutes what IS loaded,
 // so it stays inside the loading branch.
-if ["guardrail", "target", "vocabulary"].contains(command) {
+if ["guardrail", "target", "vocabulary"].contains(command) || (command == "fidelity" && isModelFreeFidelity) {
     fixtures = []
 } else {
     do {
@@ -269,7 +302,8 @@ guard #available(macOS 26.0, *) else {
 #if canImport(FoundationModels)
 // `prompt` never runs a model — it prints the bytes one would be sent — so it is
 // usable on a machine with Apple Intelligence off, which is the point of it.
-if command != "prompt", command != "guardrail", command != "vocabulary", engineKind == "apple-fm" {
+if command != "prompt", command != "guardrail", command != "vocabulary",
+   !(command == "fidelity" && isModelFreeFidelity), engineKind == "apple-fm" {
     switch SystemLanguageModel.default.availability {
     case .available:
         break
@@ -686,6 +720,61 @@ func runGuardrail() {
     })
 }
 
+/// #570, #581. Score committed, hand-labelled outputs. Drives no model.
+///
+/// Its own function rather than a `case` body for the reason `runGuardrail` is one:
+/// it is the whole calibration behind a threshold two axes are read at, and folding
+/// it into `runHarness` would push that function past the cyclomatic-complexity limit.
+func runFidelityReplay() {
+    // Same reasoning as `runGuardrail`: a flag-only invocation must error rather than
+    // load nothing and report a clean 0/0 that reads like a result.
+    let paths = corpusPaths(in: args, valuedOptions: ["--floor", "--json", "--runs", "--mode", "--arm"])
+    guard !paths.isEmpty else {
+        print("error: fidelity --replay needs at least one corpus file, e.g.\n"
+              + "  swift run polish-harness fidelity ../docs/research/570-structured-fidelity/device-corpus.json --replay --sweep")
+        exit(2)
+    }
+    let cases = FidelityCorpus.load(paths)
+    print("corpus: \(cases.count) outputs from \(Set(cases.map(\.source)).count) source(s), "
+          + "floor \(String(format: "%.2f", fidelityFloor))")
+    let results = FidelityRound.replay(cases, floor: fidelityFloor, sweep: args.contains("--sweep"))
+    print("")
+    for (result, work) in zip(results, cases) {
+        print("\n━━ [\(result.fixture)] \(work.timestamp ?? "-") labels=[\(result.labels.joined(separator: ", "))]")
+        print("  \(FidelityRound.verdict(result))")
+        FidelityRound.detail(result)
+    }
+    FidelityRound.summary(results, arms: ["device"])
+    FidelityRound.labelAgreement(results)
+    writeFidelityCapture(results, to: paragraphJSONOut)
+}
+
+/// #570, PR #583 review. Rescore a committed live capture with the current scorers.
+/// Calls no model: the stored outputs are the samples, and only their reading changes.
+func runFidelityRescore() {
+    guard let rescorePath, let rescoreFixtures else {
+        print("error: fidelity --rescore needs a capture and its fixtures, e.g.\n"
+              + "  swift run polish-harness fidelity --rescore ../docs/research/570-structured-fidelity/capture-device.json "
+              + "--fixtures Sources/polish-harness/fixtures/device-structured-fr.json")
+        exit(2)
+    }
+    let results = FidelityRescore.rescore(capturePath: rescorePath, fixturesPath: rescoreFixtures,
+                                          floor: fidelityFloor)
+    print("rescored: \(results.count) stored runs from \(rescorePath), floor "
+          + "\(String(format: "%.2f", fidelityFloor)) — no model called")
+    var arms: [String] = []
+    for arm in results.map(\.arm) where !arms.contains(arm) { arms.append(arm) }
+    for result in results where result.hasEngineOutput {
+        let score = result.score
+        guard score.hasScoredDefect || score.negationDropped > 0 || score.speakerState != .absent else { continue }
+        print("\n━━ [\(result.arm)] \(result.fixture)#\(result.run)")
+        print("  \(FidelityRound.verdict(result))")
+        FidelityRound.detail(result)
+    }
+    FidelityRound.summary(results, arms: arms)
+    writeFidelityCapture(results, to: paragraphJSONOut)
+}
+
 // #456. Scores the polish target election against committed raw transcripts. No
 // model runs: the election is `PolishLanguageMix.measure` plus a comparison, both
 // deterministic local calls, which is what makes the dominance floor a measurement
@@ -737,6 +826,12 @@ func runHarness() async {
     case "paragraph":
         await runParagraphRound(fixtures: fixtures, armPaths: armPaths,
                                 runs: runs, jsonOut: paragraphJSONOut)
+    case "fidelity":
+        await runFidelityRound(
+            fixtures: fixtures, mode: loadSmartMode(modeIdentifier),
+            options: FidelityRoundOptions(armPaths: armPaths, runs: runs,
+                                          floor: fidelityFloor, jsonOut: paragraphJSONOut)
+        )
     case "show":
         let mode = loadSmartMode(modeIdentifier)
         let engine = makeEngine(loadInstructions(instructionsFile))
@@ -906,6 +1001,14 @@ case "target":
     runTargetElection()
 case "vocabulary":
     runVocabulary()
+// #570. The replay half drives no model and needs neither macOS 26 nor Apple
+// Intelligence, which is the point of it: the floor behind axes 1 and 2 is
+// re-runnable by anyone. The live half is a pipeline round and is dispatched from
+// `runHarness` with the rest.
+case "fidelity" where rescorePath != nil:
+    runFidelityRescore()
+case "fidelity" where isReplay:
+    runFidelityReplay()
 default:
     if #available(macOS 26.0, *) {
         await runHarness()

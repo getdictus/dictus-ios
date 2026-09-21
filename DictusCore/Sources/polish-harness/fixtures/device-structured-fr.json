@@ -1,0 +1,56 @@
+[
+  {
+    "id": "D1-three-steps",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps."
+  },
+  {
+    "id": "D2-three-steps-drift",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petit morceau de quelques millisecondes. The deuxième étape is the model. He prends his morceaux and essays of devine quels have been prononced, and what form. for that il micro ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement on découpe en paragraph. Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième c'est 90% du temps."
+  },
+  {
+    "id": "D3-plan-mode",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation."
+  },
+  {
+    "id": "D4-logs-polish",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Écoute, je vais te partager les logs polish. Alors j'avais oublié de supprimer les logs donc t'as encore les anciennes. Je te laisserai regarder par rapport à l'heure. Tu verras c'est j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé. Honnêtement je suis assez surpris du mod. Il est pas trop mal. Le seul truc c'est qu'effectivement, il coupe quand même pas mal de mots. Notamment le dernier tu verras, je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie. Je te laisse analyser et me dire ce que tu en penses."
+  },
+  {
+    "id": "D5-lets-go",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Vas-y let's go."
+  },
+  {
+    "id": "D6-issues-check",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point."
+  },
+  {
+    "id": "D7-mod-rejects",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs."
+  },
+  {
+    "id": "D8-last-transcription",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Je te laisserai regarder, il s'agit de la dernière transcription."
+  },
+  {
+    "id": "D9-suggestion-bar",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Super, merci pour ce détail. Donc j'aimerais que tu goûtes, tu regardes si on a des issues qui couvrent les points qu'il faut qu'on corrige par rapport à ces retours. Pour moi, il y a de la barre la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu'on a une issue à ce sujet. Moi j'aimerais vraiment qu'on se rapproche sur le design de ce qu'on a sur Apple. Là je trouve qu'elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Sur la barre de suggestion, j'aimerais bien que on puisse la désactiver potentiellement. Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application, ça ça serait vraiment top. Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c'est aussi un point qu'on avait noté, c'est initiaux. Il faudrait juste que tu confirmes ça."
+  }
+]
