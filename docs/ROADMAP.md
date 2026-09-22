@@ -6,7 +6,7 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-21.
+Last reviewed: 2026-09-22.
 
 ## The lanes, in order
 
@@ -14,7 +14,7 @@ Last reviewed: 2026-09-21.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Active** — reordered 2026-09-21, **cuts after 1.9.0** |
-| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | Builds 33 → 35 on TestFlight — **nothing left in the lane on 2026-09-21**, promotion decided 2026-09-24 |
+| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | Builds 33 → 35 on TestFlight — **#564 reopened the lane on 2026-09-22**, promotion decided 2026-09-24 |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
@@ -269,7 +269,7 @@ That last point is also why **CodeRabbit's review was declined**: it proposed ho
 
 **Build 35 went to both TestFlight groups on 2026-09-21** with #579's fix, device-checked by Pierre the same day. It also carries every polish-pipeline change merged since 34 (#523, #572, #580), and that pipeline runs on every dictation, subscriber or not — so 35 changes the free dictation path, not only Pro code, which stays unreachable (`paywallVisible = false`, the forced entitlement compiled out of Release). **Promotion of 35 to the App Store is to be decided on 2026-09-24**, after three days of tester use, by Pierre through `appstore-promote`.
 
-**The list is empty on 2026-09-21.** The milestone's last open issue, #564 (T3 Code in the auto-return catalogue), moved to `2.1`: T3 Code has no URL that resumes a session — `t3code://` lands on its home screen — and that is reported upstream as t3code#11950, so nothing on this side can ship it. #569 stays outside the lane, as recorded above. A bug that lands on a path from #23, #542, #543 or #558 before the promotion still joins this lane; anything else goes to its own.
+**Item 6: #564, T3 Code in the auto-return catalogue — back in the lane on 2026-09-22, `ready-for-agent`, first thing to do.** It had moved to `2.1` on 2026-09-21 because `t3code://` landed on T3 Code's home screen. Upstream fixed that in t3code#12002 and shipped it in T3 Code 1.2.0 on 2026-09-16. The Safari resume test has not yet been rerun on 1.2.0: it opens the PR's device test list, and the PR does not merge if it fails. It does not hold the promotion of 35: if it is not validated by 2026-09-24, it rides the next build. #569 stays outside the lane, as recorded above. A bug that lands on a path from #23, #542, #543 or #558 before the promotion still joins this lane; anything else goes to its own.
 
 ## Lane C — the keyboard session
 
