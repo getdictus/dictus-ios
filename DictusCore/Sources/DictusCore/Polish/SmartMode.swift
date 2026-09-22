@@ -53,12 +53,51 @@ public struct SmartModePrompt: Equatable, Sendable, Codable {
     /// did not flag, and his own 184-character target, which keeps its blank lines.
     public let shortOutputBlockLimit: Int?
 
+    /// The system prompt with its worked examples in the transcript's language, keyed
+    /// by `NLLanguage` code (`"de"`, `"ja"`, `"zh-Hant"`, or a base subtag like
+    /// `"zh"`). `nil` — every mode that has not climbed there — sends `instructions`
+    /// whatever the language.
+    ///
+    /// ### Why it exists (#587, decision 5 step 2)
+    ///
+    /// The rules stay one English text, but the model reads the worked examples as
+    /// the template, language included: `Structuré` with an English example set
+    /// translated a Danish dictation into English 3 of 3, and #571 measured `Résumé`
+    /// returning English on 28 of 40 outputs across four languages with English and
+    /// French examples, and on 0 of 40 once the two examples were in the transcript's
+    /// language. So a mode can carry one example set per language, and
+    /// `instructions(forTranscriptLanguage:)` picks the one that matches.
+    ///
+    /// ### What it costs
+    ///
+    /// The record crosses the App Group inside the per-dictation snapshot, so a mode
+    /// that fills this carries every language's prompt with it — about 16 × 3 KB for
+    /// a mode localised into every Apple FM language. That is the price of keeping
+    /// the prompt a property of the record rather than a lookup the keyboard could
+    /// resolve differently from the app, and it is paid once per dictation.
+    public let localizedInstructions: [String: String]?
+
     public init(instructions: String, userInstruction: String, outputMarker: String,
-                shortOutputBlockLimit: Int? = nil) {
+                shortOutputBlockLimit: Int? = nil,
+                localizedInstructions: [String: String]? = nil) {
         self.instructions = instructions
         self.userInstruction = userInstruction
         self.outputMarker = outputMarker
         self.shortOutputBlockLimit = shortOutputBlockLimit
+        self.localizedInstructions = localizedInstructions
+    }
+
+    /// The system prompt for a transcript in `code`: the exact code's entry, else its
+    /// base subtag's (`"zh-Hans"` → `"zh"`, `"pt-BR"` → `"pt"`), else `instructions`.
+    ///
+    /// `nil` — no language known, as at prewarm on the auto path — is the fallback.
+    /// So is a language the mode has no set for: the fallback is the prompt that was
+    /// measured before any set existed, never a guess at a neighbouring language.
+    public func instructions(forTranscriptLanguage code: String?) -> String {
+        guard let code, let table = localizedInstructions else { return instructions }
+        if let exact = table[code] { return exact }
+        let base = code.split(whereSeparator: { $0 == "-" || $0 == "_" }).first.map(String.init)
+        return base.flatMap { table[$0] } ?? instructions
     }
 
     /// Hand-written so the layout field can be absent, for the reason
@@ -72,6 +111,11 @@ public struct SmartModePrompt: Equatable, Sendable, Codable {
         self.outputMarker = try container.decode(String.self, forKey: .outputMarker)
         self.shortOutputBlockLimit = try container.decodeIfPresent(
             Int.self, forKey: .shortOutputBlockLimit
+        )
+        // Absent means `nil`: a snapshot written before #587 sends the one prompt it
+        // was written with, whatever the transcript's language.
+        self.localizedInstructions = try container.decodeIfPresent(
+            [String: String].self, forKey: .localizedInstructions
         )
     }
 }
@@ -313,6 +357,29 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     private enum CodingKeys: String, CodingKey {
         case id, displayName, icon, badge, prompt, contract, isPinned
         case floorBehaviour = "overflowBehaviour"
+    }
+
+    /// The same record, with `prompt.instructions` resolved for a transcript in
+    /// `code` (#587). See `SmartModePrompt.instructions(forTranscriptLanguage:)`.
+    ///
+    /// The pipeline calls this once, before the engine, so the engine, the context
+    /// guard and the session cache all see the one string that is actually sent. The
+    /// identifier does not change: a mode is the same mode in every language, and the
+    /// metrics event keys on it.
+    public func resolvingExamples(forTranscriptLanguage code: String?) -> SmartMode {
+        let resolved = prompt.instructions(forTranscriptLanguage: code)
+        guard resolved != prompt.instructions else { return self }
+        return SmartMode(
+            id: id, displayName: displayName, icon: icon, badge: badge,
+            prompt: SmartModePrompt(
+                instructions: resolved,
+                userInstruction: prompt.userInstruction,
+                outputMarker: prompt.outputMarker,
+                shortOutputBlockLimit: prompt.shortOutputBlockLimit,
+                localizedInstructions: prompt.localizedInstructions
+            ),
+            contract: contract, floorBehaviour: floorBehaviour, isPinned: isPinned
+        )
     }
 
     /// The same record with its pinned flag set. Used by the catalogue when it

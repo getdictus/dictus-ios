@@ -124,11 +124,20 @@ public final class PolishService {
         // a warm-up is not a dictation. Warming the session of a mode that turns out
         // to be unrunnable costs nothing — the engine only exists where the SDK does,
         // and the dictation resolves the mode again from scratch.
-        let task = SmartModeStore.armedMode.map(PolishTask.smart)
+        let armedTask = SmartModeStore.armedMode.map(PolishTask.smart)
         guard PolishGatePolicy.runsDespiteToggle(
-            task: task ?? .natural,
+            task: armedTask ?? .natural,
             polishEnabled: defaults.bool(forKey: SharedKeys.polishEnabled)
         ) else { return }
+        let policy = TranscriptionLanguagePolicy.snapshot()
+        // A mode's worked examples follow the transcript's language (#587), and there
+        // is no transcript yet. A forced transcription language is the one thing known
+        // in advance, so it warms the matching prompt; otherwise the fallback is warmed,
+        // and a dictation in another language pays for a cold session rather than
+        // being sent the wrong examples (the engine keys its cache on the prompt).
+        let task = armedTask?.resolvingExamples(
+            forTranscriptLanguage: PolishJob.transcriptLanguageCode(mode: policy.mode, detectedCode: nil)
+        )
         // Resolve the prompt selection through the language policy
         // (#226/#239/#332): explicit mode targets the language the user chose,
         // not the keyboard one; Auto mode warms the language-agnostic auto
@@ -138,8 +147,7 @@ public final class PolishService {
         // its own — and passes an undetermined language mix, since there is no
         // transcript yet. A stale warm target is harmless: prewarm is
         // best-effort, and `polish()` resolves the real target from scratch.
-        let selection = TranscriptionLanguagePolicy.snapshot()
-            .polishPromptSelection(languageMix: .undetermined)
+        let selection = policy.polishPromptSelection(languageMix: .undetermined)
         Task {
             switch selection {
             case .language(let target):
@@ -297,6 +305,14 @@ public final class PolishService {
         /// and a target it was too mixed to elect is still a transcript whose
         /// leading language decides whether the polish has anything to repair.
         let detected: SupportedLanguage?
+
+        /// Which language's worked examples a Smart Mode shows (#587): the forced
+        /// transcription language, else the mix's leader, else the whole-blob reading.
+        var transcriptLanguageCode: String? {
+            PolishJob.transcriptLanguageCode(
+                mode: languagePolicy.mode, detectedCode: languageMix.dominantCode ?? detectedCode
+            )
+        }
 
         /// The armed Smart Mode as a task, when there is one. Nil means the free
         /// polish, and each path resolves its own prompt variant.
@@ -490,7 +506,8 @@ public final class PolishService {
             // What the pipeline's input-language pre-flight judges (#490). The whole
             // mix, not the leader: it answers "is any of this readable", and the
             // measurement is already in hand.
-            inputLanguageCodes: request.languageMix.countedCodes
+            inputLanguageCodes: request.languageMix.countedCodes,
+            transcriptLanguageCode: request.transcriptLanguageCode
         )
 
         // Resolve the engine for this call — see `activeEngine` doc-comment.
@@ -634,7 +651,8 @@ public final class PolishService {
             task: request.smartTask ?? .auto,
             promptLanguage: contextLanguage,
             languageAgnosticPath: true,
-            inputLanguageCodes: request.languageMix.countedCodes
+            inputLanguageCodes: request.languageMix.countedCodes,
+            transcriptLanguageCode: request.transcriptLanguageCode
         )
         let currentEngine = activeEngine
         supersedeInflight()
