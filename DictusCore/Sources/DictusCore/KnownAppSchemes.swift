@@ -70,8 +70,9 @@ public enum KnownAppSchemes {
     /// `net.whatsapp.WhatsApp`, `com.apple.mobilemail`, `com.github.stormbreaker.prod`,
     /// `com.openai.chat`, `com.anthropic.claude`, `com.tinyspeck.chatlyio` (all on
     /// device, 2026-09-11), plus
-    /// `com.apple.reminders` on a simulator. **Rejected by measurement:**
-    /// `com.apple.mobilesafari`, now in `knownNoSchemeHosts`.
+    /// `com.apple.reminders` on a simulator, and `com.t3tools.t3code` (on device, T3 Code
+    /// 1.2.0, 2026-09-22). **Rejected by measurement:** `com.apple.mobilesafari`, now in
+    /// `knownNoSchemeHosts`.
     ///
     /// Four of those were inherited entries nobody had checked, and all four worked
     /// first time — which is mild evidence that the upstream catalogue is sound, and no
@@ -162,6 +163,14 @@ public enum KnownAppSchemes {
         "ai.perplexity.app": "perplexity-app://",
         // Verified on device.
         "com.anthropic.claude": "claude://",
+        // Verified on device, T3 Code 1.2.0, 2026-09-22. The first entry added on purpose
+        // rather than inherited, and it was in `knownNoSchemeHosts` until then. The scheme
+        // always opened the app; up to 1.1.0 it also reset navigation to Home, measured on
+        // device with `t3code://` and `t3code:///` alike. Upstream fixed that on our report
+        // (pingdotgg/t3code#11950, #12002), so a result measured before 1.2.0 says nothing
+        // about this entry. NOT the `.dev`, `.preview` or `.swiftui` bundles: nobody
+        // outside T3's team runs them, and none was tested.
+        "com.t3tools.t3code": "t3code://",
         "ai.x.GrokApp": "grok://",
         "md.obsidian": "obsidian://",
         "im.monica.app.monica": "monica://",
@@ -275,7 +284,6 @@ public enum KnownAppSchemes {
         "com.stably.orca.mobile",
         "org.edupage",
         "com.rivetrune.cognilog",
-        "com.t3tools.t3code",
         "com.davetech.todo",
         "cc.calacatta.happiest",
 

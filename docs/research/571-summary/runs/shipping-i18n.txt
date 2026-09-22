@@ -1,0 +1,362 @@
+
+
+████ ARM shipping — mode summary, 5 run(s) × 26 fixture(s)
+
+━━ [da-free-form] 391 chars, lang=da
+  raw: Nå okay, jeg tænkte på noget her til morgen mens jeg gik, og det er at når man lancerer et produkt helt alene, så er det sværeste faktisk ikke at kode det, det er at beslutte hvad man ikke skal lave. Fordi der er altid en idé der ser bedre ud end den man er i gang med at arbejde på. Og så hopper man på den, og efter 6 måneder har man faktisk 15 ting der er startet og intet der er færdigt.
+  #1 rejectedGuardrail/length ratio=0.66 OUT-OF-BAND 3888ms
+     out: At lancere et produkt alene er sværere end at kode det, det er at beslutte hvad man ikke skal lave. Der er altid en idé der ser bedre ud end den man arbejder på, og man hopper på den, og efter 6 måneder har man 15 ting der er startet og intet der er færdigt.
+  #2 rejectedGuardrail/length ratio=0.69 OUT-OF-BAND 4433ms
+     out: Når man lancerer et produkt alene er det sværeste ikke at kode det men at beslutte hvad man ikke skal lave fordi der altid er en idé der ser bedre ud end den man arbejder på og man hopper på den og efter 6 måneder har man 15 ting der er startet og intet der er færdigt.
+  #3 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 3766ms
+     out: Når man lancerer et produkt alene er det sværere end at kode det at beslutte hvad man ikke skal lave fordi der altid er en idé der ser bedre ud end den man arbejder på og man hopper på den og efter 6 måneder har man 15 ting der er startet og intet der er færdigt
+  #4 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 5520ms
+     out: Når man lancerer et produkt alene er det sværere at beslutte hvad man ikke skal lave end at kode det fordi der altid er en idé der ser bedre ud end det man arbejder på og man hopper på den og efter 6 måneder har man 15 ting der er startet og intet der er færdigt.
+  #5 success ratio=0.52 3597ms
+     out: At lancere et produkt alene er sværere end at kode det fordi man altid ser bedre idéer end den man arbejder på og hopper på dem og efter 6 måneder har man 15 ting der er startet og intet der er færdigt.
+
+━━ [da-todo-enumeration] 468 chars, lang=da
+  raw: okay så øh lad mig lige gennemgå hvad jeg skal nå før mødet så først skal jeg have januartallene fra Marion hun sagde hun ville have dem tirsdag nej onsdag og øh så skal jeg lave sammenligningstabellen med sidste års tal og så også du ved jeg skal altså ringe til leverandøren fordi deres tilbud er steget igen fra 12000 til 15000 euro og det er der ingen der har godkendt og nå ja jeg skal også huske at booke lokalet på anden sal fordi det andet er optaget hele ugen
+  #1 success ratio=0.59 4817ms
+     out: Jeg skal få januartallene fra Marion tirsdag og onsdag og lave sammenligningstabellen med sidste års tal og ringe til leverandøren fordi deres tilbud er steget fra 12000 til 15000 euro og ingen har godkendt og booke lokalet på anden sal fordi det andet er optaget hele ugen.
+  #2 success ratio=0.50 4362ms
+     out: Jeg skal få januarstallene fra Marion tirsdag og onsdag, lave sammenligningstabellen med sidste års tal og ringe til leverandøren om deres tilbud fra 12000 til 15000 euro, booke lokalet på anden sal fordi det andet er optaget hele ugen.
+  #3 success ratio=0.50 5065ms
+     out: Jeg skal få januarstallene fra Marion tirsdag og onsdag, lave sammenligningstabellen med sidste års tal og ringe til leverandøren om deres tilbud fra 12000 til 15000 euro, booke lokalet på anden sal fordi det andet er optaget hele ugen.
+  #4 success ratio=0.59 4565ms
+     out: Jeg skal have januartallene fra Marion tirsdag og onsdag, lave sammenligningstabellen med sidste års tal og ringe til leverandøren fordi deres tilbud er steget fra 12000 til 15000 euro og ingen har godkendt det og booke lokalet på anden sal fordi det andet er optaget hele ugen.
+  #5 rejectedGuardrail/length ratio=0.61 OUT-OF-BAND 5055ms  ⚑ LANG=en
+     out: I must obtain the January figures from Marion on Wednesday, create the comparison table with last year's data, call the supplier because their offer rose from 12000 to 15000 euros and no one has approved it, and book the room on the second floor because the other is occupied all week.
+
+━━ [de-free-form] 429 chars, lang=de
+  raw: Also okay, ich hab heute Morgen beim Spazierengehen über was nachgedacht, und zwar dass, wenn man ein Produkt ganz allein startet, das Schwierigste eigentlich nicht das Programmieren ist, sondern zu entscheiden, was man nicht macht. Weil es immer eine Idee gibt, die besser aussieht als die, an der man gerade arbeitet. Und dann springt man drauf und nach 6 Monaten hat man eigentlich 15 angefangene Sachen und nichts ist fertig.
+  #1 rejectedGuardrail/language ratio=0.52 4188ms  ⚑ LANG=en
+     out: When you start a product alone the hardest thing is deciding what you don't do because every idea looks better than the one you are working on and after six months you have fifteen started projects and nothing is finished.
+  #2 rejectedGuardrail/language ratio=0.52 6222ms  ⚑ LANG=en
+     out: When you start a product alone the hardest thing is deciding what you do not make because every idea looks better than the one you are working on and after six months you have fifteen started projects and nothing is finished.
+  #3 rejectedGuardrail/language ratio=0.50 5955ms  ⚑ LANG=en
+     out: Starting a product alone the hardest thing is deciding what not to do because every idea looks better than the one you are working on and after six months you have fifteen started projects and nothing is finished.
+  #4 rejectedGuardrail/language ratio=0.51 5763ms  ⚑ LANG=en
+     out: When you start a product alone the hardest thing is deciding what you do not make because every idea looks better than the one you are working on and after 6 months you have 15 started projects and nothing is finished.
+  #5 rejectedGuardrail/language ratio=0.49 3236ms  ⚑ LANG=en
+     out: Starting a product alone the hardest thing is deciding what not to do because every idea looks better than the one you are working on and after six months you have fifteen started ideas and nothing is finished.
+
+━━ [de-todo-enumeration] 533 chars, lang=de
+  raw: also äh ich fass mal zusammen was ich vor dem Meeting machen muss also erstmal muss ich die Januarzahlen von Marion holen sie hat gesagt sie hätte sie Dienstag nee Mittwoch und äh dann muss ich die Vergleichstabelle mit denen vom letzten Jahr machen und dann auch weißt du ich muss unbedingt den Dienstleister anrufen weil ihr Angebot schon wieder von 12000 auf 15000 Euro gestiegen ist und das hat keiner freigegeben und naja ich sollte auch dran denken den Raum im zweiten Stock zu buchen weil der andere die ganze Woche belegt ist
+  #1 rejectedGuardrail/language ratio=0.51 4709ms  ⚑ LANG=en
+     out: I must get Marion's January numbers on Wednesday, make the comparison table with last year's data, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the room on the second floor because the other one is occupied all week.
+  #2 rejectedGuardrail/language ratio=0.49 3689ms  ⚑ LANG=en
+     out: I must get Marion's January numbers on Wednesday, make the comparison table with last year's data, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the second-floor room since the other one is full all week.
+  #3 rejectedGuardrail/language ratio=0.49 3546ms  ⚑ LANG=en
+     out: I must get Marion's January numbers on Wednesday, make the comparison table with last year's data, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the second-floor room because the other one is full all week.
+  #4 rejectedGuardrail/language ratio=0.50 3574ms  ⚑ LANG=en
+     out: I must get Marion's January numbers on Wednesday, make the comparison table with last year's data, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the second-floor room since the other one is occupied all week.
+  #5 rejectedGuardrail/language ratio=0.51 3552ms  ⚑ LANG=en
+     out: I must get Marion's January numbers on Wednesday, make the comparison table with last year's figures, call the service provider because their offer rose from 12000 to 15000 Euro without approval, and book the second floor room because the other one is occupied all week.
+
+━━ [es-free-form] 369 chars, lang=es
+  raw: Bueno pues estaba pensando en una cosa esta mañana mientras caminaba, y es que al final cuando lanzas un producto tú solo, lo más difícil no es programarlo, es decidir qué no hacer en realidad. Porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo. Y entonces te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #1 rejectedGuardrail/length ratio=0.70 OUT-OF-BAND 3113ms
+     out: Pensé esta mañana que lo más difícil al lanzar un producto solo no es programarlo sino decidir qué no hacer porque siempre hay una idea mejor que la que haces ahora y luego te lanzas a por ella y a los seis meses tienes quince cosas empezadas y nada terminado.
+  #2 rejectedGuardrail/length ratio=0.70 OUT-OF-BAND 2960ms
+     out: Al final cuando lanzas un producto tú solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #3 rejectedGuardrail/length ratio=0.70 OUT-OF-BAND 2963ms
+     out: Al final cuando lanzas un producto tú solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #4 success ratio=0.54 3320ms
+     out: Decidir qué no hacer es lo más difícil cuando lanzas un producto solo porque siempre hay una idea mejor que la actual y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+  #5 rejectedGuardrail/length ratio=0.72 OUT-OF-BAND 3335ms
+     out: Al final cuando lanzas un producto tú solo lo más difícil no es programarlo es decidir qué no hacer porque siempre hay una idea que parece mejor que la que estás haciendo ahora mismo y te lanzas a por ella y a los 6 meses tienes 15 cosas empezadas y nada terminado.
+
+━━ [es-todo-enumeration] 526 chars, lang=es
+  raw: bueno eh a ver resumo lo que tengo que hacer antes de la reunión entonces primero tengo que conseguir las cifras de enero de Marion me dijo que las tendría el martes bueno no el miércoles y eh entonces tendré que hacer la tabla comparativa con las del año pasado y además sabes tengo que llamar sí o sí al proveedor porque su presupuesto ha vuelto a subir de 12000 a 15000 euros y eso no lo ha aprobado nadie y bueno también tendría que acordarme de reservar la sala del segundo piso porque la otra está ocupada toda la semana
+  #1 rejectedGuardrail/language ratio=0.50 4767ms  ⚑ LANG=en
+     out: I must get Marion’s January figures by Tuesday, make the comparative table with last year’s numbers, call the supplier because their budget rose from 12000 to 15000 euros and no one approved, and reserve the second floor room because the other is occupied all week.
+  #2 rejectedGuardrail/language ratio=0.52 4473ms  ⚑ LANG=en
+     out: I must get Marion's January figures by Tuesday, make the comparative table with last year's, call the supplier because their budget rose from 12000 to 15000 euros and no one approved it, and remember to reserve the second floor room because the other one is occupied all week.
+  #3 rejectedGuardrail/language ratio=0.51 4468ms  ⚑ LANG=en
+     out: I have to get Marion's January figures on Tuesday, make a comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros and no one approved it, and reserve the second floor room because the other one is occupied all week.
+  #4 rejectedGuardrail/language ratio=0.51 5643ms  ⚑ LANG=en
+     out: I must get Marion's January figures on Tuesday, make the comparative table with last year's data, call the supplier because their budget rose from 12000 to 15000 euros and no one approved it, and reserve the second floor room because the other one is occupied all week.
+  #5 rejectedGuardrail/language ratio=0.45 5728ms  ⚑ LANG=en
+     out: I must get Marion's January figures by Tuesday, make a comparative table with last year's, call the supplier about the budget rising from 12000 to 15000 euros, and reserve the second floor room because the other one is occupied all week.
+
+━━ [it-free-form] 357 chars, lang=it
+  raw: Allora niente, stamattina camminando pensavo a una cosa, cioè che alla fine quando lanci un prodotto da solo, la parte più difficile non è programmarlo, è decidere cosa non fare in realtà. Perché c'è sempre un'idea che sembra migliore di quella su cui stai lavorando. E quindi ci salti sopra e dopo 6 mesi in pratica hai 15 cose iniziate e niente di finito.
+  #1 success ratio=0.60 6545ms
+     out: Lanciare un prodotto da solo la parte più difficile non è programmarlo ma decidere cosa non fare perché un'idea sembra migliore di quella su cui stai lavorando e dopo 6 mesi hai 15 cose iniziate e niente di finito.
+  #2 success ratio=0.60 5180ms
+     out: Lanciare un prodotto da solo la parte più difficile non è programmarlo ma decidere cosa non fare perché un'idea sembra migliore di quella su cui stai lavorando e dopo 6 mesi hai 15 cose iniziate e niente di finito.
+  #3 success ratio=0.60 3019ms
+     out: Lanciare un prodotto da solo la parte più difficile non è programmarlo è decidere cosa non fare perché un'idea sembra migliore di quella su cui stai lavorando e dopo 6 mesi hai 15 cose iniziate e niente di finito.
+  #4 rejectedGuardrail/length ratio=0.63 OUT-OF-BAND 2875ms
+     out: Lanciare un prodotto da solo la parte più difficile non è programmarlo ma decidere cosa non fare perché un'idea sembra migliore di quella su cui stai lavorando e dopo sei mesi hai diciassette cose iniziate e niente di finito.
+  #5 success ratio=0.32 2717ms
+     out: L'idea sembra migliore di quella su cui si sta lavorando e dopo 6 mesi si hanno 15 cose iniziate e niente di finito.
+
+━━ [it-todo-enumeration] 529 chars, lang=it
+  raw: allora ehm riassumo quello che devo fare prima della riunione quindi prima di tutto devo farmi dare i numeri di gennaio da Marion mi ha detto che li avrebbe avuti martedì anzi no mercoledì e ehm quindi dovrò fare la tabella di confronto con quelli dell'anno scorso e poi anche sai devo assolutamente chiamare il fornitore perché il loro preventivo è salito di nuovo da 12000 a 15000 euro e nessuno l'ha approvato e insomma dovrei anche ricordarmi di prenotare la sala al secondo piano perché l'altra è occupata tutta la settimana
+  #1 rejectedGuardrail/language ratio=0.52 3623ms  ⚑ LANG=en
+     out: I must get Marion’s January numbers by mercredi, make a comparison table with last year’s figures, call the supplier because their quote rose from 12000 to 15000 euros and no one approved it, and remember to book the second floor room because the other one is full all week.
+  #2 rejectedGuardrail/language ratio=0.57 3678ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I must get Marion to send me the numbers for January by Wednesday, make a comparison table with last year's figures, call the supplier because their quote rose from 12,000 to 15,000 euros and no one approved it, and remember to book the room on the second floor because the other one is full all week.
+  #3 rejectedGuardrail/language ratio=0.53 4136ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I must get Marion’s numbers for January by Wednesday, make a comparison table with last year’s figures, call the supplier because their quote rose from 12,000 to 15,000 euros and no one approved it, and remember to book the second-floor room because the other one is full all week.
+  #4 rejectedGuardrail/language ratio=0.52 4847ms  ⚑ LANG=en
+     out: I must get Marion’s January numbers by mercredi, make a comparison table with last year’s figures, call the supplier because their quote rose from 12000 to 15000 euro and no one approved it, and remember to book the second floor room because the other one is full all week.
+  #5 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 4765ms  ⚑ LANG=en
+     out: I must get the numbers for January from Marion, she said she will have them on Wednesday, I need to make the comparison table with last year's figures and I must call the supplier because their quote rose from 12000 to 15000 euros and no one approved it I also need to remember to book the room on the second floor because the other one is occupied all week
+
+━━ [ja-free-form] 173 chars, lang=ja
+  raw: えっと、今朝歩きながらちょっと考えてたんだけど、結局一人でプロダクトを立ち上げるときって、一番難しいのはコードを書くことじゃなくて、実は何をやらないかを決めることなんだよね。だっていつも、今取り組んでるものより良さそうに見えるアイデアがあるから。それでついそっちに飛びついて、6か月後には始めたものが15個あって、終わったものは何もないっていう。
+  #1 rejectedGuardrail/length ratio=1.20 OUT-OF-BAND 2927ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not coding but deciding what not to do because new ideas always seem better than what you're working on, leading to 15 started projects and nothing finished after 6 months.
+  #2 rejectedGuardrail/length ratio=1.23 OUT-OF-BAND 3397ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you’re working on and after six months you have fifteen started and nothing finished.
+  #3 rejectedGuardrail/length ratio=1.23 OUT-OF-BAND 3372ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you’re working on and after six months you have fifteen started and nothing finished.
+  #4 rejectedGuardrail/length ratio=1.22 OUT-OF-BAND 3613ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you're working on, leading to 15 started projects and none finished after 6 months.
+  #5 rejectedGuardrail/length ratio=1.24 OUT-OF-BAND 8110ms  ⚑ LANG=en
+     out: Starting a product alone is hardest not writing code but deciding what not to do because new ideas always seem better than what you're working on, leading to 15 started projects and nothing finished after 6 months.
+
+━━ [ja-todo-enumeration] 208 chars, lang=ja
+  raw: えーと、会議の前にやらなきゃいけないことをまとめると、まずマリオンから1月の数字をもらわないといけない、火曜日にはあるって言ってた、いや水曜日だ、それで、えー、去年の数字との比較表を作らないといけなくて、あとさ、業者に絶対電話しなきゃいけない、見積もりがまた12000ユーロから15000ユーロに上がってて、それ誰も承認してないから、で、まあ、2階の会議室も予約しとかなきゃ、もう一つの方は一週間ずっと埋まってるから
+  #1 rejectedGuardrail/length ratio=1.28 OUT-OF-BAND 8951ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I must get the numbers from Marion on Wednesday, make a comparison table with last year’s data, call the contractor because the estimate rose from 12,000 to 15,000 euros with no approval, and book the second-floor meeting room since the other one is full for a week.
+  #2 rejectedGuardrail/length ratio=1.31 OUT-OF-BAND 183233ms  ⚑ LANG=en FIGURE[1500]
+     out: I must get the January numbers from Marion by Wednesday, make a comparison table with last year’s data, call the contractor because the estimate rose from 12000 euros to 1500 euros with no approval, and book the second-floor meeting room since the other one is always full.
+  #3 rejectedGuardrail/length ratio=1.31 OUT-OF-BAND 6277ms  ⚑ LANG=en FIGURE[1500]
+     out: I must get the numbers from Marion on Wednesday, make a comparison table with last year's figures, call the contractor because the estimate rose from 12000 euros to 1500 euros without approval, and book the second-floor meeting room since the other one is full for a week.
+  #4 rejectedGuardrail/length ratio=1.40 OUT-OF-BAND 6671ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I must get the January numbers from Marion, which is on Wednesday, create a comparison table with last year's figures, call the contractor because the estimate rose from 12,000 euros to 15,000 without approval, and book the second-floor meeting room since the other one is booked for a week.
+  #5 rejectedGuardrail/length ratio=1.32 OUT-OF-BAND 6363ms  ⚑ LANG=en FIGURE[1500]
+     out: I must get the numbers from Marion on Wednesday, make a comparison table with last year's figures, call the contractor because the estimate rose from 12000 euros to 1500 euros without approval, and reserve the second-floor meeting room as the first one is booked for a week.
+
+━━ [ko-free-form] 176 chars, lang=ko
+  raw: 음 그러니까 오늘 아침에 걷다가 뭔가 생각이 났는데, 결국 혼자서 제품을 출시할 때 제일 어려운 건 코딩이 아니라 사실 뭘 안 할지 정하는 거더라고. 왜냐하면 지금 작업하고 있는 것보다 더 좋아 보이는 아이디어가 항상 있거든. 그래서 거기에 달려들고, 6개월 지나면 시작한 건 15개인데 끝낸 건 하나도 없는 거지.
+  #1 rejectedGuardrail/length ratio=0.71 OUT-OF-BAND 3716ms
+     out: 혼자서 제품을 출시할 때 제일 어려운 건 코딩이 아니라 뭘 안 할지 정하는 거였어. 지금 작업 중인 것보다 더 좋아 보이는 아이디어가 항상 있어서 거기에 달려들고, 6개월 지나면 시작한 건 15개인데 끝낸 건 하나도 없었어.
+  #2 rejectedGuardrail/length ratio=0.62 OUT-OF-BAND 3356ms
+     out: 혼자서 제품을 출시할 때 가장 어려운 건 코딩이 아니라 뭘 안 할지 정하는 것이고, 항상 더 좋아 보이는 아이디어가 있어 거기에 달려들고, 6개월 지나면 시작한 건 15개인데 끝낸 건 하나도 없다.
+  #3 rejectedGuardrail/length ratio=0.73 OUT-OF-BAND 3185ms
+     out: 오늘 아침에 생각이 났는데 출시할 때 가장 어려운 건 코딩이 아니라 뭘 안 할지 정하는 거야. 지금 작업 중인 것보다 더 좋아 보이는 아이디어가 항상 있어서 거기에 달려들고 6개월 지나면 시작한 건 15개인데 끝낸 건 하나도 없어.
+  #4 rejectedGuardrail/length ratio=0.74 OUT-OF-BAND 3320ms
+     out: 오늘 아침에 생각이 났는데 출시할 때 가장 어려운 건 코딩이 아니라 뭘 안 할지 정하는 거다. 지금 작업 중인 것보다 더 좋아 보이는 아이디어가 항상 있어서 거기에 달려들고, 6개월 지나면 시작한 건 15개인데 끝낸 건 하나도 없다.
+  #5 rejectedGuardrail/length ratio=0.73 OUT-OF-BAND 3409ms
+     out: 오늘 아침에 생각났는데 출시할 때 가장 어려운 건 코딩이 아니라 뭘 안 할지 정하는 것이야. 지금 작업 중인 것보다 더 좋아 보이는 아이디어가 항상 있어서 거기에 달려들고 6개월 지나면 시작한 건 15개인데 끝낸 건 하나도 없어.
+
+━━ [ko-todo-enumeration] 206 chars, lang=ko
+  raw: 음 그러니까 회의 전에 해야 할 걸 정리하자면 일단 마리옹한테서 1월 수치를 받아야 해 화요일에 준다고 했는데 아니 수요일이구나 그리고 음 그러면 작년 수치랑 비교표를 만들어야 하고 또 있잖아 업체에 꼭 전화해야 돼 견적이 또 12000유로에서 15000유로로 올랐는데 그걸 아무도 승인 안 했거든 그리고 뭐 2층 회의실도 예약해야 돼 다른 방은 일주일 내내 차 있어서
+  #1 rejectedGuardrail/length ratio=1.61 OUT-OF-BAND 4401ms  ⚑ LANG=en
+     out: I need to get the January figures from Marion, which come on Wednesday instead of Tuesday. I must make a comparison table with last year's figures. I have to call the company, as the quote rose from 12000 euros to 15000 euros without approval. I also need to book the second-floor meeting room, as other rooms are booked for a week.
+  #2 rejectedGuardrail/length ratio=1.61 OUT-OF-BAND 4466ms  ⚑ LANG=en
+     out: I need to get the January figures from Marion, which are coming on Wednesday instead of Tuesday. I must make a comparison table with last year's data and call the company, as the quote rose from 12000 euros to 15000 euros without approval. I also have to book the second-floor meeting room, as the other rooms are booked for a week.
+  #3 rejectedGuardrail/length ratio=1.37 OUT-OF-BAND 4961ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I must get the January figures from Marion, which come on Wednesday, make a comparison table with last year’s data, call the vendor, as the quote rose from 12,000 euros to 15,000 euros without approval, and book the second-floor meeting room, since other rooms are booked for a week.
+  #4 rejectedGuardrail/length ratio=1.36 OUT-OF-BAND 4127ms  ⚑ LANG=en
+     out: I must get the January figures from Marion, which come on Wednesday, make a comparison table with last year's data, call the vendor, as the quote rose from 12000 euros to 15000 euros without approval, and book the second-floor meeting room, since other rooms are booked for a week.
+  #5 rejectedGuardrail/length ratio=1.37 OUT-OF-BAND 5599ms  ⚑ LANG=en
+     out: I need to get the January figures from Marion, which come on Wednesday, make a comparison table with last year’s data, call the vendor, as the quote rose from 12000 euros to 15000 without approval, and book the second-floor meeting room, since the other rooms are booked for a week.
+
+━━ [nb-free-form] 383 chars, lang=nb
+  raw: Ja altså, jeg tenkte på en ting i morges mens jeg gikk, og det er at når man lanserer et produkt helt alene, så er ikke det vanskeligste å kode det, det er faktisk å bestemme hva man ikke skal gjøre. For det finnes alltid en idé som ser bedre ut enn den man holder på med akkurat nå. Og så hiver man seg på den, og etter 6 måneder har man liksom 15 ting påbegynt og ingenting ferdig.
+  #1 success ratio=0.58 4208ms
+     out: Når man lanserer et produkt alene er det vanskeligste å bestemme hva man ikke skal gjøre. En idé ser alltid bedre ut enn det man har nå og man hiver seg på den. Etter 6 måneder har man 15 ting påbegynt og ingenting ferdig.
+  #2 rejectedGuardrail/length ratio=0.64 OUT-OF-BAND 5084ms
+     out: Når man lanserer et produkt alene er det vanskeligste å bestemme hva man ikke skal gjøre. Det finnes alltid en idé som ser bedre ut enn det man holder på med og man hiver seg på den og etter 6 måneder har man 15 ting påbegynt og ingenting ferdig.
+  #3 rejectedGuardrail/length ratio=0.71 OUT-OF-BAND 7076ms
+     out: Når man lanserer et produkt alene er det ikke koding som er vanskeligst, det er å bestemme hva man ikke skal gjøre. Det finnes alltid en idé som ser bedre ut enn det man holder på med og man hiver seg på den og etter 6 måneder har man 15 ting påbegynt og ingenting ferdig.
+  #4 rejectedGuardrail/length ratio=0.66 OUT-OF-BAND 5484ms
+     out: Når man lanserer et produkt alene er det ikke kodingen som er vanskeligst det er å bestemme hva man ikke skal gjøre fordi alltid en idé ser bedre ut enn den man har og man hiver seg på den og etter 6 måneder har man 15 ting påbegynt og ingenting ferdig
+  #5 rejectedGuardrail/length ratio=0.72 OUT-OF-BAND 5839ms
+     out: Når man lanserer et produkt alene er det ikke kodingen som er vanskeligst, det er å bestemme hva man ikke skal gjøre. Det finnes alltid en idé som ser bedre ut enn det man holder på med nå, og man hiver seg på den. Etter 6 måneder har man 15 ting påbegynt og ingenting ferdig.
+
+━━ [nb-todo-enumeration] 449 chars, lang=nb
+  raw: okei så eh jeg oppsummerer hva jeg må gjøre før møtet så først må jeg få januartallene fra Marion hun sa hun ville ha dem tirsdag nei onsdag og eh så må jeg lage sammenligningstabellen med fjorårets tall og så også vet du jeg må absolutt ringe leverandøren fordi tilbudet deres har gått opp igjen fra 12000 til 15000 euro og det er det ingen som har godkjent og ja jeg bør også huske å booke rommet i andre etasje fordi det andre er opptatt hele uka
+  #1 success ratio=0.56 6525ms
+     out: Jeg må få januar-tallene fra Marion tirsdag eller onsdag, lage sammenligningstabellen med fjorårets tall, ringe leverandøren fordi tilbudet deres har gått opp fra 12000 til 15000 euro og booke rommet i andre etasje fordi det andre er opptatt hele uka.
+  #2 rejectedGuardrail/length ratio=0.60 OUT-OF-BAND 6713ms
+     out: Jeg må få januarstallene fra Marion tirsdag eller onsdag, lage sammenligningstabellen med fjorårets tall og ringe leverandøren fordi tilbudet deres har gått opp fra 12000 til 15000 euro uten godkjenning og booke rommet i andre etasje fordi det andre er opptatt hele uka.
+  #3 rejectedGuardrail/length ratio=0.65 OUT-OF-BAND 6611ms
+     out: Jeg må få januarstallene fra Marion tirsdag eller onsdag, lage sammenligningstabellen med fjorårets tall og ringe leverandøren fordi tilbudet deres har gått opp fra 12000 til 15000 euro og ingen har godkjent det og jeg må også booke rommet i andre etasje fordi det andre er opptatt hele uka.
+  #4 rejectedGuardrail/length ratio=0.61 OUT-OF-BAND 3301ms
+     out: Jeg må få januar-tallene fra Marion tirsdag eller onsdag, lage sammenligningstabellen med fjorårets tall og ringe leverandøren fordi tilbudet deres har gått opp til 15000 euro uten godkjenning, og jeg må huske å booke rommet i andre etasje fordi det andre er opptatt hele uka.
+  #5 rejectedGuardrail/length ratio=0.62 OUT-OF-BAND 3212ms
+     out: Jeg må få januar-tallene fra Marion tirsdag eller onsdag, lage sammenligningstabellen med fjorårets tall og ringe leverandøren fordi tilbudet deres har gått opp fra 12000 til 15000 euro uten godkjenning og jeg må booke rommet i andre etasje fordi det andre er opptatt hele uka.
+
+━━ [nl-free-form] 373 chars, lang=nl
+  raw: Nou oké, ik zat vanochtend tijdens het wandelen ergens over na te denken, namelijk dat als je in je eentje een product lanceert, het moeilijkste eigenlijk niet het programmeren is, maar beslissen wat je niet doet. Want er is altijd een idee dat beter lijkt dan waar je nu mee bezig bent. En dan spring je erop en na 6 maanden heb je eigenlijk 15 dingen begonnen en niks af.
+  #1 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 2499ms
+     out: Als je alleen een product lanceert is het moeilijkste niet programmeren maar beslissen wat je niet doet want er is altijd een idee dat beter lijkt dan wat je nu doet en dan spring je erop en na 6 maanden heb je eigenlijk 15 dingen begonnen en niks af.
+  #2 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 3129ms
+     out: Als je alleen een product lanceert is het moeilijkste niet programmeren maar beslissen wat je niet doet want er is altijd een idee dat beter lijkt dan wat je nu doet en dan spring je erop en na 6 maanden heb je eigenlijk 15 dingen begonnen en niks af.
+  #3 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 3228ms
+     out: Als je alleen een product lanceert is het moeilijkste niet programmeren maar beslissen wat je niet doet want er is altijd een idee dat beter lijkt dan wat je nu doet en dan spring je erop en na 6 maanden heb je eigenlijk 15 dingen begonnen en niks af.
+  #4 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 3184ms
+     out: Als je alleen een product lanceert is het moeilijkste niet programmeren maar beslissen wat je niet doet want er is altijd een idee dat beter lijkt dan wat je nu doet en dan spring je erop en na 6 maanden heb je eigenlijk 15 dingen begonnen en niks af.
+  #5 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 3254ms
+     out: Als je alleen een product lanceert is het moeilijkste niet programmeren maar beslissen wat je niet doet want er is altijd een idee dat beter lijkt dan wat je nu doet en dan spring je erop en na 6 maanden heb je eigenlijk 15 dingen begonnen en niks af.
+
+━━ [nl-todo-enumeration] 507 chars, lang=nl
+  raw: oké dus eh ik zet even op een rij wat ik moet doen voor de vergadering dus eerst moet ik de cijfers van januari bij Marion ophalen ze zei dat ze die dinsdag zou hebben nee woensdag en eh dan moet ik de vergelijkingstabel maken met die van vorig jaar en ook weet je ik moet echt de leverancier bellen want hun offerte is weer gestegen van 12000 naar 15000 euro en niemand heeft dat goedgekeurd en ja ik moet er ook aan denken de zaal op de tweede verdieping te reserveren want de andere is de hele week bezet
+  #1 success ratio=0.60 4169ms
+     out: Ik haal de cijfers van januari bij Marion op woensdag. Ik maak de vergelijkingstabel met die van vorig jaar. Ik bel de leverancier omdat hun offerte is gestegen van 12000 naar 15000 euro en niemand heeft dat goedgekeurd. Ik reserveer de zaal op de tweede verdieping omdat de andere de hele week bezet is.
+  #2 success ratio=0.60 3995ms
+     out: Ik haal de cijfers van januari bij Marion op woensdag en maak de vergelijkingstabel met die van vorig jaar. Ik bel de leverancier omdat hun offerte is gestegen van 12000 naar 15000 euro en niemand heeft dat goedgekeurd. Ik reserveer de zaal op de tweede verdieping omdat de andere de hele week bezet is.
+  #3 success ratio=0.60 4335ms
+     out: Ik haal de cijfers van januari bij Marion op woensdag. Ik maak de vergelijkingstabel met die van vorig jaar. Ik bel de leverancier omdat hun offerte is gestegen van 12000 naar 15000 euro en niemand heeft dat goedgekeurd. Ik reserveer de zaal op de tweede verdieping omdat de andere de hele week bezet is.
+  #4 success ratio=0.60 4265ms
+     out: Ik haal de cijfers van januari bij Marion op woensdag en maak de vergelijkingstabel met die van vorig jaar. Ik bel de leverancier omdat hun offerte is gestegen van 12000 naar 15000 euro en niemand heeft dat goedgekeurd. Ik reserveer de zaal op de tweede verdieping omdat de andere de hele week bezet is.
+  #5 success ratio=0.60 4431ms
+     out: Ik haal de cijfers van januari bij Marion op woensdag. Ik maak de vergelijkingstabel met die van vorig jaar. Ik bel de leverancier omdat hun offerte is gestegen van 12000 naar 15000 euro en niemand heeft dat goedgekeurd. Ik reserveer de zaal op de tweede verdieping omdat de andere de hele week bezet is.
+
+━━ [pt-free-form] 377 chars, lang=pt
+  raw: Então tá, eu tava pensando numa coisa hoje de manhã enquanto caminhava, que é que no fim quando você lança um produto sozinho, a parte mais difícil não é programar, é decidir o que não fazer na verdade. Porque sempre tem uma ideia que parece melhor do que aquela em que você tá trabalhando. E aí você pula nela e depois de 6 meses você tem 15 coisas começadas e nada terminado.
+  #1 rejectedGuardrail/length ratio=0.66 OUT-OF-BAND 4018ms
+     out: Quando você lança um produto sozinho a parte mais difícil não é programar é decidir o que não fazer porque sempre tem uma ideia que parece melhor do que a em que você tá trabalhando e depois de 6 meses você tem 15 coisas começadas e nada terminado.
+  #2 rejectedGuardrail/length ratio=0.64 OUT-OF-BAND 3877ms
+     out: Lançar um produto sozinho é difícil porque a parte mais complicada é decidir o que não fazer, pois sempre tem uma ideia que parece melhor do que a em que você está trabalhando e depois de 6 meses você tem 15 coisas começadas e nada terminado.
+  #3 rejectedGuardrail/length ratio=0.64 OUT-OF-BAND 3847ms
+     out: Lançando um produto sozinho, o mais difícil não é programar, é decidir o que não fazer. Sempre tem uma ideia que parece melhor do que a em que você está trabalhando. Você pula nela e depois de 6 meses tem 15 coisas começadas e nada terminado.
+  #4 rejectedGuardrail/length ratio=0.63 OUT-OF-BAND 5478ms
+     out: Lançar um produto sozinho é difícil porque a parte mais difícil é decidir o que não fazer, pois sempre tem uma ideia que parece melhor do que a em que você está trabalhando e depois de 6 meses você tem 15 coisas começadas e nada terminado.
+  #5 rejectedGuardrail/length ratio=0.63 OUT-OF-BAND 5282ms
+     out: Lançar um produto sozinho é difícil porque a parte mais difícil é decidir o que não fazer, pois sempre há uma ideia que parece melhor do que a em que se está trabalhando e depois de 6 meses você tem 15 coisas começadas e nada terminado.
+
+━━ [pt-todo-enumeration] 530 chars, lang=pt
+  raw: então tá hã deixa eu recapitular o que eu tenho que fazer antes da reunião então primeiro eu preciso pegar os números de janeiro com a Marion ela disse que teria na terça quer dizer não na quarta e hã aí eu vou ter que fazer a tabela comparativa com os do ano passado e também sabe eu preciso ligar de qualquer jeito pro fornecedor porque o orçamento deles subiu de novo de 12000 pra 15000 euros e ninguém aprovou isso e enfim eu também tenho que lembrar de reservar a sala do segundo andar porque a outra tá ocupada a semana toda
+  #1 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 6927ms  ⚑ LANG=en FIGURE[12,000,15,000]
+     out: I need to get the January numbers from Marion on Wednesday since she said she would have them on Thursday. I must make a comparative table with last year’s data and call the supplier anyway because their budget rose from 12,000 to 15,000 euros and no one approved it. I also have to reserve the second-floor room because the other one is occupied all week.
+  #2 rejectedGuardrail/length ratio=0.68 OUT-OF-BAND 3978ms  ⚑ LANG=en
+     out: I need to get the January numbers from Marion, she said she will have them on Tuesday meaning not Thursday, I have to make the comparative table with last year's data, I must call the supplier anyway because their budget rose from 12000 to 15000 euros and no one approved it, I also have to reserve the second floor room because the other one is occupied all week
+  #3 rejectedGuardrail/language ratio=0.53 3443ms  ⚑ LANG=en
+     out: I need to get the January numbers from Marion by Thursday, make the comparative table with last year’s data, call the supplier because their budget rose from 12000 to 15000 euros and no one approved it, and reserve the second floor room because the other one is occupied all week.
+  #4 rejectedGuardrail/length ratio=0.70 OUT-OF-BAND 4039ms  ⚑ LANG=en
+     out: I need to get the January numbers from Marion, she said she will have them on Tuesday which means not on Thursday, I will make the comparative table with last year's numbers and I must call the supplier because their budget rose from 12000 to 15000 euros and no one approved it and I also have to reserve the second floor room because the other one is occupied all week.
+  #5 rejectedGuardrail/length ratio=0.60 OUT-OF-BAND 3889ms  ⚑ LANG=en
+     out: I need to get the January numbers from Marion on Tuesday, which means I will make the comparative table with last year’s data. I must call the supplier anyway because their budget rose from 12000 to 15000 euros and no one approved it. I also have to book the second-floor room because the other one is occupied all week.
+
+━━ [sv-free-form] 373 chars, lang=sv
+  raw: Okej så, jag tänkte på en grej i morse när jag gick, och det är att när man lanserar en produkt helt själv så är det svåraste faktiskt inte att koda den, det är att bestämma vad man inte ska göra. För det finns alltid en idé som verkar bättre än den man håller på med just nu. Och då hoppar man på den och efter 6 månader har man typ 15 saker påbörjade och ingenting klart.
+  #1 rejectedGuardrail/length ratio=0.76 OUT-OF-BAND 3227ms
+     out: När man lanserar en produkt helt själv är det svåraste inte att koda den utan att bestämma vad man inte ska göra eftersom det alltid finns en idé som verkar bättre än den man håller på med och då hoppar man på den och efter 6 månader har man typ 15 saker påbörjade och ingenting klart.
+  #2 rejectedGuardrail/length ratio=0.65 OUT-OF-BAND 2703ms
+     out: Att lansera en produkt helt själv är svårast inte att koda utan att bestämma vad man inte ska göra eftersom alltid en idé verkar bättre än den man håller på med och efter sex månader har man ungefär femton saker påbörjade och ingenting klart.
+  #3 rejectedGuardrail/length ratio=0.76 OUT-OF-BAND 2912ms
+     out: När man lanserar en produkt helt själv är det svåraste inte att koda den utan att bestämma vad man inte ska göra eftersom det alltid finns en idé som verkar bättre än den man håller på med och då hoppar man på den och efter 6 månader har man typ 15 saker påbörjade och ingenting klart.
+  #4 rejectedGuardrail/length ratio=0.76 OUT-OF-BAND 2938ms
+     out: När man lanserar en produkt helt själv är det svåraste inte att koda den utan att bestämma vad man inte ska göra eftersom det alltid finns en idé som verkar bättre än den man håller på med och då hoppar man på den och efter 6 månader har man typ 15 saker påbörjade och ingenting klart.
+  #5 rejectedGuardrail/length ratio=0.76 OUT-OF-BAND 2876ms
+     out: När man lanserar en produkt helt själv är det svåraste inte att koda den utan att bestämma vad man inte ska göra. Det finns alltid en idé som verkar bättre än den man håller på med just nu. Då hoppar man på den och efter 6 månader har man typ 15 saker påbörjade och ingenting klart.
+
+━━ [sv-todo-enumeration] 474 chars, lang=sv
+  raw: okej så eh jag sammanfattar vad jag måste göra innan mötet så först måste jag hämta januarisiffrorna från Marion hon sa att hon skulle ha dem på tisdag nej onsdag och eh sen måste jag göra jämförelsetabellen med fjolårets och så också du vet jag måste verkligen ringa leverantören för deras offert har gått upp igen från 12000 till 15000 euro och det har ingen godkänt och ja jag borde också komma ihåg att boka rummet på andra våningen för det andra är upptaget hela veckan
+  #1 rejectedGuardrail/length ratio=0.64 OUT-OF-BAND 196340ms
+     out: Jag måste hämta januarisiffrorna från Marion på tisdag eller onsdag, göra jämförelsetabellen med fjolårets och ringa leverantören för deras offert som gått upp från 12000 till 15000 euro eftersom ingen har godkänt och jag måste boka rummet på andra våningen eftersom det andra är upptaget hela veckan.
+  #2 rejectedGuardrail/length ratio=0.65 OUT-OF-BAND 4670ms  ⚑ FIGURE[12,000,15,000]
+     out: Jag måste hämta januari-dokumenten från Marion på tisdag eller onsdag, göra jämförelsetabellen med fjolårets och ringa leverantören för deras offert som gått upp från 12 000 till 15 000 euro eftersom ingen godkände den och jag måste boka rummet på andra våningen eftersom det andra är upptaget hela veckan.
+  #3 success ratio=0.56 190348ms
+     out: Jag måste hämta januarisiffrorna från Marion på tisdag eller onsdag, göra jämförelsetabellen med fjolårets och ringa leverantören för deras offert som gått upp från 12000 till 15000 euro och boka rummet på andra våningen eftersom det andra är upptaget hela veckan.
+  #4 rejectedGuardrail/length ratio=0.65 OUT-OF-BAND 4977ms
+     out: Jag måste hämta januariiffrorna från Marion på tisdag eller onsdag, göra jämförelsetabellen med fjolårets och ringa leverantören för deras offert eftersom den gått upp från 12000 till 15000 euro och ingen har godkänt den, och jag måste boka rummet på andra våningen eftersom det andra är upptaget hela veckan.
+  #5 rejectedGuardrail/length ratio=0.62 OUT-OF-BAND 4740ms
+     out: jag måste hämta januarisiffrorna från marion på onsdag och göra jämförelsetabellen med fjolårets och ringa leverantören för deras offert som gått upp från 12000 till 15000 euro eftersom ingen godkänt och jag måste också boka rummet på andra våningen eftersom det andra är upptaget hela veckan
+
+━━ [tr-free-form] 324 chars, lang=tr
+  raw: Şey yani, bu sabah yürürken bir şey düşünüyordum, aslında tek başına bir ürün çıkardığında en zor kısım kodlamak değil, neyi yapmayacağına karar vermek. Çünkü her zaman şu an üzerinde çalıştığından daha iyi görünen bir fikir oluyor. Sonra ona atlıyorsun ve 6 ay sonra bakıyorsun 15 tane başlanmış iş var ve hiçbiri bitmemiş.
+  #1 rejectedGuardrail/length ratio=0.78 OUT-OF-BAND 3925ms
+     out: Tek başına bir ürün çıktığında kodlamak değil, neyi yapmayacağına karar vermek en zor kısım. Her zaman şu an üzerinde çalıştığından daha iyi görünen bir fikir oluyor. Ona atılıyorsun ve 6 ay sonra bakıyorsun 15 tane başlamış iş var ve hiçbiri bitmemiş.
+  #2 rejectedGuardrail/length ratio=0.60 OUT-OF-BAND 5700ms
+     out: Kodlamak değil, neyi yapmayacağına karar vermek en zor kısım. Her zaman üzerinde çalıştığından daha iyi görünen bir fikir çıkıyor ve 6 ay sonra bakıyorsun 15 tane başlamış iş ve hiçbiri bitmemiş.
+  #3 rejectedGuardrail/length ratio=0.78 OUT-OF-BAND 6282ms
+     out: Tek başına bir ürün çıkardığında kodlamak değil, neyi yapmayacağına karar vermek en zor kısım. Her zaman şu an üzerinde çalıştığından daha iyi görünen bir fikir oluyor. Ona atlıyorsun ve 6 ay sonra bakıyorsun 15 tane başlanmış iş var ve hiçbiri bitmemiş.
+  #4 rejectedGuardrail/length ratio=0.77 OUT-OF-BAND 6129ms
+     out: Tek başına bir ürün çıktığında kodlamak değil, neyi yapmayacağına karar vermek en zor kısım. Her zaman şu an üzerinde çalıştığından daha iyi görünen bir fikir oluyor. Ona atılıyorsun ve 6 ay sonra bakıyorsun 15 tane başlamış iş ve hiçbiri bitmemiş.
+  #5 rejectedGuardrail/length ratio=0.76 OUT-OF-BAND 2552ms
+     out: Tek başına bir ürün çıktığında kodlamak değil, neyi yapmayacağına karar vermek en zor kısım. Her zaman üzerinde çalıştığından daha iyi görünen bir fikir oluyor. Ona atlıyorsun ve 6 ay sonra bakıyorsun 15 tane başlamış iş var ve hiçbiri bitmemiş.
+
+━━ [tr-todo-enumeration] 438 chars, lang=tr
+  raw: tamam şey toplantıdan önce yapmam gerekenleri bir özetleyeyim önce Marion'dan ocak rakamlarını almam lazım salı alırım demişti yok yok çarşamba ve şey sonra geçen yılınkilerle karşılaştırma tablosunu yapmam gerekecek bir de biliyor musun tedarikçiyi mutlaka aramam lazım çünkü teklifleri yine 12000'den 15000 euroya çıktı ve bunu kimse onaylamadı ve işte bir de ikinci kattaki salonu ayırtmayı unutmamam lazım çünkü öbürü bütün hafta dolu
+  #1 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 3410ms  ⚑ LANG=en
+     out: I must get the January figures from Marion on Wednesday and make the comparison table with last year's numbers. I need to call the supplier because their offers went from 12000 to 15000 euros and no one approved. I must also reserve the second-floor room because the other one is full all week.
+  #2 rejectedGuardrail/length ratio=0.70 OUT-OF-BAND 3367ms
+     out: Marion'dan ocak rakamlarını almam lazım, çarşamba alırım. Geçen yılın rakamlarıyla karşılaştırma tablosu yapmam gerekecek. Tedarikçiyi mutlaka aramam lazım çünkü teklifleri 12000'den 15000 euroya çıktı ve bunu kimse onaylamadı. İkinci kattaki salonu ayırtmayı unutmamam lazım çünkü öbürü bütün hafta dolu.
+  #3 rejectedGuardrail/length ratio=0.65 OUT-OF-BAND 3741ms  ⚑ LANG=en
+     out: I must get the January numbers from Marion on Wednesday and make a comparison table with last year’s data. I need to call the supplier because their offers went from 12000 to 15000 euros and no one approved. I must also book the second-floor room because the other one is full all week.
+  #4 rejectedGuardrail/length ratio=0.69 OUT-OF-BAND 3762ms  ⚑ LANG=en
+     out: I must get the January numbers from Marion on Wednesday and make the comparison table with last year’s figures. I need to call the supplier because their offers went from 12000 to 15000 euro and no one approved. I must not forget to reserve the second-floor room because the other one is full all week.
+  #5 rejectedGuardrail/length ratio=0.67 OUT-OF-BAND 3778ms  ⚑ LANG=en
+     out: I must get the January numbers from Marion on Wednesday and make a comparison table with last year's figures. I need to call the supplier because their offers went from 12000 to 15000 euros and no one approved it. I must also reserve the second-floor room because the other one is full all week.
+
+━━ [vi-free-form] 340 chars, lang=vi
+  raw: Ừm thì sáng nay lúc đi bộ tôi có nghĩ về một chuyện, đó là cuối cùng khi mình tự ra mắt một sản phẩm một mình, cái khó nhất không phải là viết code, mà thật ra là quyết định cái gì không làm. Vì lúc nào cũng có một ý tưởng trông hay hơn cái mình đang làm. Thế là mình nhảy vào nó và sau 6 tháng thì có 15 thứ bắt đầu mà chẳng có gì xong cả.
+  #1 success ratio=0.50 2768ms
+     out: Khi tự ra mắt sản phẩm một mình, khó nhất là quyết định không làm gì vì luôn có ý tưởng hay hơn nên mình nhảy vào và sau 6 tháng có 15 thứ bắt đầu mà chẳng có gì xong cả.
+  #2 success ratio=0.44 2853ms
+     out: Khi tự ra mắt sản phẩm một mình khó nhất là quyết định không làm gì vì luôn có ý tưởng hay hơn và sau 6 tháng có 15 thứ bắt đầu mà chẳng có gì xong.
+  #3 success ratio=0.56 2980ms
+     out: Khi tự ra mắt sản phẩm một mình, khó nhất không phải viết code mà là quyết định cái gì không làm vì luôn có ý tưởng hay hơn nên nhảy vào và sau 6 tháng có 15 thứ bắt đầu mà chẳng có gì xong.
+  #4 success ratio=0.49 3114ms
+     out: Khi tự ra mắt sản phẩm một mình, khó nhất là quyết định cái gì không làm vì luôn có ý tưởng hay hơn nên nhảy vào và sau 6 tháng có 15 thứ bắt đầu mà chẳng có gì xong.
+  #5 success ratio=0.50 3106ms
+     out: Khi tự ra mắt sản phẩm một mình, khó nhất là quyết định không làm gì, vì luôn có ý tưởng hay hơn khiến tôi nhảy vào và sau 6 tháng có 15 thứ bắt đầu mà chẳng có gì xong.
+
+━━ [vi-todo-enumeration] 414 chars, lang=vi
+  raw: ừ thì ờ để tôi tóm lại những việc phải làm trước cuộc họp đầu tiên là phải lấy số liệu tháng một từ Marion cô ấy bảo thứ ba sẽ có à không thứ tư và ờ thế là phải làm bảng so sánh với số liệu năm ngoái rồi còn nữa nhé tôi nhất định phải gọi cho nhà cung cấp vì báo giá của họ lại tăng từ 12000 lên 15000 euro mà chưa ai duyệt cả và thôi thì tôi cũng phải nhớ đặt phòng họp ở tầng hai vì phòng kia bị kín cả tuần rồi
+  #1 rejectedGuardrail/length ratio=0.75 OUT-OF-BAND 4149ms  ⚑ LANG=en
+     out: I must get January data from Marion on Wednesday or Thursday and make a comparison table with last year's figures. I have to call the supplier because their price rose from 12000 to 15000 euro without approval. I also need to book the meeting room on the second floor because the other one is closed all week.
+  #2 rejectedGuardrail/length ratio=0.78 OUT-OF-BAND 4931ms  ⚑ LANG=en
+     out: I must obtain January data from Marion, who says it will come on Wednesday or Thursday, make a comparison table with last year's figures, call the supplier because their price rose from 12000 to 15000 euros and no one has approved it, and book the meeting room on the second floor because the other room is closed all week.
+  #3 rejectedGuardrail/length ratio=0.84 OUT-OF-BAND 4939ms  ⚑ LANG=en
+     out: I must get the January data from Marion, she said it will come on Wednesday or Thursday, then make a comparison table with last year’s figures. I have to call the supplier because their price rose from 12000 to 15000 euro and no one has approved it. I also need to book a meeting room on the second floor because the other one is closed all week.
+  #4 rejectedGuardrail/length ratio=0.80 OUT-OF-BAND 4716ms  ⚑ LANG=en
+     out: I must retrieve the January data from Marion, who says it will come on Wednesday or Thursday, then make a comparison table with last year’s figures, call the supplier because their price rose from 12000 to 15000 euro and no one has approved it, and book the meeting room on the second floor because the other one is closed all week.
+  #5 rejectedGuardrail/length ratio=0.76 OUT-OF-BAND 6888ms  ⚑ LANG=en
+     out: I must get the January data from Marion, which she said will come on Wednesday or Thursday, make a comparison table with last year's figures, call the supplier because their price rose from 12000 to 15000 euro without approval, and book a meeting room on the second floor because the other one is closed all week.
+
+━━ [zh-free-form] 113 chars, lang=zh
+  raw: 嗯那个，我今天早上散步的时候在想一件事，就是说其实一个人做产品的时候，最难的不是写代码，而是决定不做什么。因为总是有一个想法看起来比你正在做的那个更好。然后你就扑上去了，结果六个月以后你手上有15个开了头的东西，一个都没做完。
+  #1 success ratio=0.53 5321ms
+     out: 做产品最难不是写代码，而是决定不做什么，因为总有一个想法比当前更好，结果六个月后手上有15个开了头的项目，一个都没做完。
+  #2 success ratio=0.53 5106ms
+     out: 做产品最难不是写代码，而是决定不做什么。一个想法看起来更好，你就扑上去，六个月后手上有15个开了头的项目，一个都没做完。
+  #3 success ratio=0.48 2388ms
+     out: 做产品最难的是决定不做什么，因为总有一个想法比当前更好，结果六个月后手上有15个开了头的项目，一个都没做完。
+  #4 success ratio=0.59 2295ms
+     out: 一个人做产品最难的不是写代码而是决定不做什么因为总有一个想法看起来更好所以你就扑上去结果六个月后你手上有15个开了头的东西一个都没做完
+  #5 success ratio=0.53 2366ms
+     out: 做产品最难不是写代码，而是决定不做什么，因为总有一个想法比现在更好，结果六个月后手上有15个开了头的项目，一个都没做完。
+
+━━ [zh-todo-enumeration] 149 chars, lang=zh
+  raw: 嗯那个我总结一下开会之前我要做的事情首先我得从Marion那里拿到一月份的数据她说她周二会有哦不是周三然后嗯那我就得做一个跟去年数据的对比表还有你知道吗我一定得给供应商打电话因为他们的报价又从12000涨到了15000欧元而且这个没有人批准过然后嗯我还得记得订二楼的会议室因为另一间整个星期都被占了
+  #1 rejectedGuardrail/length ratio=2.17 OUT-OF-BAND 4124ms  ⚑ LANG=en
+     out: I have to get the January data from Marion, she says she will have it on Wednesday, I must make a comparison table with last year's data, I need to call the supplier because their quote rose from 12000 to 15000 euros and no one approved it, I must book the second floor meeting room because another one is occupied all week.
+  #2 rejectedGuardrail/length ratio=2.17 OUT-OF-BAND 3963ms  ⚑ LANG=en
+     out: I need to get the January data from Marion, she says she will have it on Wednesday, I must make a comparison table with last year’s data, I have to call the supplier because their quote rose from 12000 to 15000 euros and no one approved it, I must book the second floor meeting room because another one is occupied all week.
+  #3 rejectedGuardrail/length ratio=2.18 OUT-OF-BAND 4075ms  ⚑ LANG=en
+     out: I have to get the January data from Marion, she says she will have it on Wednesday, I must make a comparison table with last year's data, I need to call the supplier because their quote rose from 12000 to 15000 euros and no one approved it, I must book the second floor meeting room because the other one is occupied all week
+  #4 rejectedGuardrail/length ratio=2.23 OUT-OF-BAND 4428ms  ⚑ LANG=en
+     out: I have to get the January data from Marion, she says she will have it on Wednesday. I must make a comparison table with last year’s data. I need to call the supplier because their quote has risen from 12000 to 15000 euros and no one has approved it. I must book the second floor meeting room because another one is occupied all week.
+  #5 rejectedGuardrail/length ratio=2.23 OUT-OF-BAND 4375ms  ⚑ LANG=en
+     out: I have to get the January data from Marion, she says she will have it on Wednesday, I must make a comparison table with last year’s data, I have to call the supplier because their quote has risen from 12000 to 15000 euros and no one has approved it, I must book the second floor meeting room because another one is occupied all week.
+
+
+══ bars (engine outputs; `acc` = accepted by the pipeline)
+arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | report/infinitive/person-lost | preamble | example | figure | accepted
+shipping | da | 10 | 1 (0) | 0 (0%) | 0 | 5/10 (50%) | 0 | 0 | 0 | 0 | 5/10
+shipping | de | 10 | 10 (0) | 10 (100%) | 0 | 10/10 (100%) | 0 | 0 | 0 | 0 | 0/10
+shipping | es | 10 | 5 (0) | 5 (50%) | 0 | 6/10 (60%) | 0 | 0 | 0 | 0 | 1/10
+shipping | it | 10 | 5 (0) | 4 (40%) | 0 | 8/10 (80%) | 0 | 0 | 0 | 2 | 4/10
+shipping | ja | 10 | 10 (0) | 0 (0%) | 0 | 0/10 (0%) | 0 | 0 | 0 | 5 | 0/10
+shipping | ko | 10 | 5 (0) | 0 (0%) | 0 | 0/10 (0%) | 0 | 0 | 0 | 1 | 0/10
+shipping | nb | 10 | 0 (0) | 0 (0%) | 0 | 2/10 (20%) | 0 | 0 | 0 | 0 | 2/10
+shipping | nl | 10 | 0 (0) | 0 (0%) | 0 | 5/10 (50%) | 0 | 0 | 0 | 0 | 5/10
+shipping | pt | 10 | 5 (0) | 1 (10%) | 0 | 1/10 (10%) | 0 | 0 | 0 | 1 | 0/10
+shipping | sv | 10 | 0 (0) | 0 (0%) | 0 | 1/10 (10%) | 0 | 0 | 0 | 1 | 1/10
+shipping | tr | 10 | 4 (0) | 0 (0%) | 0 | 0/10 (0%) | 0 | 0 | 0 | 0 | 0/10
+shipping | vi | 10 | 5 (0) | 0 (0%) | 0 | 5/10 (50%) | 0 | 0 | 0 | 0 | 5/10
+shipping | zh | 10 | 5 (0) | 0 (0%) | 0 | 5/10 (50%) | 0 | 0 | 0 | 0 | 5/10
+shipping | ALL | 130 | 55 (0) | 20 (15%) | 0 | 48/130 (37%) | 0 | 0 | 0 | 10 | 28/130
+   refusals, shipping: language×20, length×82
+
+capture written: ../docs/research/571-summary/runs/shipping-i18n.json

@@ -1,0 +1,567 @@
+[
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2378,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Launching a product alone, the hardest part is deciding what not to do because new ideas always look better than the one you're working on, and after 6 months you have 15 things started and nothing finished.",
+    "outputChars" : 207,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5294117647058824,
+    "rawChars" : 391,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2789,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Launching a product alone the hardest part is deciding what not to do because new ideas always look better than the one you're working on and after six months you have fifteen things started and nothing finished.",
+    "outputChars" : 212,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5421994884910486,
+    "rawChars" : 391,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3954,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Launching a product alone, the hardest part is deciding what not to do. New ideas always look better than the one you're working on, so you jump on them. After six months you have fifteen things started and nothing finished.",
+    "outputChars" : 224,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5728900255754475,
+    "rawChars" : 391,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3306,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Launching a product alone the hardest part is deciding what not to do. Every new idea looks better than the one you're working on so you jump on it and after 6 months you have 15 things started and nothing finished.",
+    "outputChars" : 215,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5498721227621484,
+    "rawChars" : 391,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : true,
+    "fixture" : "E1-free-form",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3526,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Launching a product alone the hardest part is deciding what not to do because new ideas always look better than the one you're working on and after 6 months you have 15 things started and nothing finished.",
+    "outputChars" : 205,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5242966751918159,
+    "rawChars" : 391,
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4721,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "We switched the subscription last Monday, Thomas finished StoreKit integration and it works in sandbox. Transcription history hasn't started. Custom vocabulary has a spec but no code. We have 412 downloads and a 7-day retention rate of 19%. The goal is to reach 1000 before the end of October. I meet Sarah Thursday at 2pm to sort out the App Store part. If all goes well, we submit the week of the 12th.",
+    "outputChars" : 404,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.600297176820208,
+    "rawChars" : 673,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5011,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "We switched the subscription last Monday, Thomas finished StoreKit integration and it works in sandbox. Transcription history hasn't started and custom vocabulary has a spec but no code. We have 412 downloads and a 19% 7-day retention rate. The goal is 1000 before the end of October. I meet Sarah Thursday at 2pm to sort out the App Store part. If all goes well we submit the week of the 12th.",
+    "outputChars" : 394,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5854383358098069,
+    "rawChars" : 673,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4660,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "We switched the subscription last Monday, Thomas finished StoreKit integration and it works in sandbox. Transcription history hasn't started, custom vocabulary has a spec but no code. We have 412 downloads and a 19% 7-day retention rate. Goal is 1000 before the end of October. I meet Sarah Thursday at 2pm to sort out the App Store part. If all goes well, we submit the week of the 12th.",
+    "outputChars" : 388,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5765230312035661,
+    "rawChars" : 673,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5314,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "We switched the subscription last Monday, Thomas finished StoreKit integration and it works in sandbox. Transcription history and custom vocabulary are left, with a spec for the latter but no code. We have 412 downloads and a 19% 7-day retention rate, aiming past 1000 before the end of October. I meet Sarah Thursday at 2pm to sort out the App Store part, and if all goes well we submit the week of the 12th.",
+    "outputChars" : 409,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.6077265973254086,
+    "rawChars" : 673,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E2-project-update",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5528,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "We switched the subscription last Monday, Thomas finished StoreKit integration and it works in sandbox. Transcription history hasn't started, custom vocabulary has a spec but no code. We have 412 downloads and 19% 7-day retention, aiming past 1000 before the end of October. I meet Sarah Thursday at 2pm to sort out the App Store part, and if all goes well we submit the week of the 12th.",
+    "outputChars" : 388,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5765230312035661,
+    "rawChars" : 673,
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E3-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4471,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "I need the January numbers from Marion by Wednesday and I must make the comparison table with last year. I have to call the contractor because their quote rose from 12000 to 15000 euros and no one signed off. I should book the room on the second floor because the other one is taken all week.",
+    "outputChars" : 292,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5805168986083499,
+    "rawChars" : 503,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E3-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6251,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "I need the January numbers from Marion by Wednesday, make the comparison table with last year, call the contractor about the quote rising to 15000 euros with no sign-off, and book the room on the second floor because the other one is taken all week.",
+    "outputChars" : 249,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.49502982107355864,
+    "rawChars" : 503,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E3-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7106,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "I need the January numbers from Marion by Wednesday, do the comparison table with last year, call the contractor about the quote rising to 15000 euros with no sign-off, and book the room on the second floor because the other one is taken all week.",
+    "outputChars" : 247,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.49105367793240556,
+    "rawChars" : 503,
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E3-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7717,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "I need the January numbers from Marion by Wednesday, then I’ll make the comparison table with last year’s. I must call the contractor because their quote rose from 12000 to 15000 euros and no one signed off, and I have to book the room on the second floor because the other one is taken all week.",
+    "outputChars" : 296,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.588469184890656,
+    "rawChars" : 503,
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E3-todo-enumeration",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3230,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "I need the January numbers from Marion by Wednesday, I’ll make the comparison table with last year’s, I have to call the contractor because their quote went up from 12000 to 15000 euros and nobody signed off on it, I should book the room on the second floor because the other one is taken all week.",
+    "outputChars" : 298,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5924453280318092,
+    "rawChars" : 503,
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E4-native-brain-dump",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2391,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Deploy blocked because certificate expired on staging box. Sam will rotate it tomorrow morning. We need to bump node version from eighteen to twenty. I think we should do both in the same window.",
+    "outputChars" : 195,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5078125,
+    "rawChars" : 384,
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E4-native-brain-dump",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 2313,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "success",
+    "output" : "Deploy blocked because certificate expired on staging box. Sam will rotate it tomorrow morning. We need to bump node version from eighteen to twenty. I think we should do both in the same window.",
+    "outputChars" : 195,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.5078125,
+    "rawChars" : 384,
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E4-native-brain-dump",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3517,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "The deploy is blocked because the certificate expired on the staging box. Sam said he'd rotate it tomorrow morning. We need to bump the node version because the build image is on eighteen and the new package needs twenty. I think we should do both in the same window otherwise we're doing two freezes for nothing.",
+    "outputChars" : 313,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.8151041666666666,
+    "rawChars" : 384,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E4-native-brain-dump",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3812,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "The deploy is blocked because the certificate expired on the staging box. Sam said he'd rotate it tomorrow morning. We need to bump the node version because the build image is on eighteen and the new package needs twenty. I think we should do both in the same window otherwise we're doing two freezes for nothing.",
+    "outputChars" : 313,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.8151041666666666,
+    "rawChars" : 384,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "E4-native-brain-dump",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3162,
+    "novelFigures" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "The deploy is blocked because the certificate expired on the staging box. Sam said he'd rotate it tomorrow morning. We need to bump the node version because the build image is on eighteen and the new package needs twenty. I think we should do both in the same window otherwise we're doing two freezes for nothing.",
+    "outputChars" : 313,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.8151041666666666,
+    "rawChars" : 384,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  }
+]

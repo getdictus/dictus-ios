@@ -57,6 +57,11 @@ public enum SmartModeCatalogue {
     /// metrics event and the per-dictation App Group snapshot.
     public static let messageIdentifier = "message"
 
+    /// Identifier of the gist mode, displayed as "Summary" / "Résumé" (#571). A wire
+    /// value from the day it ships, for the reason above: it keys the session cache,
+    /// the metrics event and the per-dictation App Group snapshot.
+    public static let summaryIdentifier = "summary"
+
     /// Identifier of the Translate mode targeting `language`.
     public static func translateIdentifier(target: SupportedLanguage) -> String {
         "translate.\(target.rawValue)"
@@ -290,6 +295,73 @@ public enum SmartModeCatalogue {
         floorBehaviour: .insertRawText
     )
 
+    /// Summary: the gist of a dictation, in prose, in the speaker's person (#571).
+    ///
+    /// ### The axis, and why this is not `List` without bullets
+    ///
+    /// The #79 design session cut Summary because *List already synthesises*. True
+    /// of the axis, not of the shape: `List` compresses into **actions**, as
+    /// infinitive bullets, and a dictation with no action in it gets bullets invented
+    /// out of statements. This row compresses into **substance**, as prose, and the
+    /// difference is visible in one glance — #393's bar B, the one Email failed.
+    ///
+    /// ### The band is `0.1 … 0.75`: decision 1's shape, its ceiling raised once
+    ///
+    /// A band and never a sentence count, proportional to what was said. The floor is
+    /// `List`'s, the mode that compresses comparably.
+    ///
+    /// **The ceiling was 0.6 and is 0.75 since the device round of 2026-09-22**,
+    /// approved by the maintainer. That round measured the phone condensing long
+    /// dictations to 0.36 and 0.44, far below the Mac's 0.6 to 0.85, and refusing a
+    /// good one: a 263-character, three-sentence dictation carrying two negations,
+    /// condensed to about 0.72 with both negations kept. A short dense dictation has
+    /// little to drop, and 0.6 read that as a failure. 0.75 still refuses a text that
+    /// keeps three quarters of its input, which is not what the user who armed this
+    /// mode asked for; whether it stays visibly different from Normal (#393 bar B) is
+    /// re-measured in `docs/research/571-summary/bars.md` §8.
+    ///
+    /// **A very short dictation lands on the floor by construction.** The gist of a
+    /// one-line dictation is the line, and no faithful rewrite of it is 75 % of its
+    /// length. That is the contract working, not a defect: the speaker's own words go
+    /// in, which is the answer the other same-language modes give.
+    ///
+    /// Grounded, for the reason every same-language mode is: condensing is the
+    /// licence, adding a figure or a name is the #414 defect. The prefix check is off
+    /// because a gist may open on any sentence of the input (#466).
+    public static let summary = SmartMode(
+        id: summaryIdentifier,
+        displayName: "Summary",
+        // `text.quote` and not `text.line.3.summary`: the second is an SF Symbols 2025
+        // glyph, iOS 26 only, and the mode list is shown on every iOS a Pro user runs
+        // (`SettingsView` does not gate it on device capability), so it would draw an
+        // empty slot on iOS 17 to 25.
+        icon: "text.quote",
+        prompt: SmartModePrompt(
+            instructions: SmartModeSummaryPrompt.instructions(),
+            userInstruction: SmartModeSummaryPrompt.userInstruction,
+            outputMarker: SmartModeSummaryPrompt.outputMarker,
+            // Step 2 of #587 decision 5 (round 2, 2026-09-22): the examples in the
+            // transcript's own language, one prompt per Apple FM language. The
+            // `instructions` above is the step-1 fallback. See
+            // `SmartModeSummaryExamples` for the measurement behind it.
+            localizedInstructions: SmartModeSummaryPrompt.localizedInstructions()
+        ),
+        contract: PolishAcceptanceContract(
+            minimumLengthRatio: 0.1,
+            // 0.75 since round 2 (2026-09-22), not decision 1's 0.6: see the doc
+            // comment above.
+            maximumLengthRatio: 0.75,
+            outputLanguage: .sameAsInput,
+            requiresGroundedNames: true,
+            requiresAlignedPrefix: false
+        ),
+        // The mode armed for the longest dictations after `Structured`, so it meets
+        // the context ceiling and the band's ceiling more than most. Either way the
+        // floor is the speaker's own words in their own language: longer than asked
+        // for, and never wrong (#270, #580).
+        floorBehaviour: .insertRawText
+    )
+
     /// Translate → `target`.
     ///
     /// The band is wide on both sides because translation legitimately changes
@@ -354,8 +426,12 @@ public enum SmartModeCatalogue {
     /// and dropping one of the three shipped modes out of a non-subscriber's promise
     /// is a product decision this issue did not take. A user reaches `Message` by
     /// pinning it in the app, like any fourth mode.
+    ///
+    /// `Summary` (#571) follows `Message` on the same two grounds: appended rather
+    /// than inserted, so no row a user has already read moves, and not in the seed,
+    /// which is still full.
     public static let builtIns: [SmartMode] =
-        [structured, notes, message] + SupportedLanguage.allCases.map { translate(to: $0) }
+        [structured, notes, message, summary] + SupportedLanguage.allCases.map { translate(to: $0) }
 
     /// Every mode, with the user's pin state stamped on each row.
     public static var all: [SmartMode] {

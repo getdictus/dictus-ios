@@ -2634,6 +2634,17 @@
         }
       }
     },
+    "Summary" : {
+      "comment" : "Name of the Smart Mode that condenses a dictation into its gist, in a few sentences of prose (#571).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résumé"
+          }
+        }
+      }
+    },
     "Supported languages" : {
       "comment" : "Accessibility label of the info button on model cards opening the language detail sheet (issue #240).",
       "localizations" : {

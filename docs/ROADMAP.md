@@ -6,7 +6,7 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-21.
+Last reviewed: 2026-09-22.
 
 ## The lanes, in order
 
@@ -14,7 +14,7 @@ Last reviewed: 2026-09-21.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Active** — reordered 2026-09-21, **cuts after 1.9.0** |
-| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | Builds 33 → 35 on TestFlight — **nothing left in the lane on 2026-09-21**, promotion decided 2026-09-24 |
+| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | Builds 33 → 36 on TestFlight — **nothing left in the lane on 2026-09-22**, promotion of 36 decided 2026-09-24 |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
@@ -173,7 +173,7 @@ His verdict was that Normal polish is not at the level and wants work before the
 
     **It is also the mode nearest the fire that cut Email to #269** — two independent implementations inventing greetings, sign-offs and names the model cannot know — and it must clear #393's **bar B**, visibly different from the free polish. That is the exact bar Email failed and the reason SMS was cut from #79's design session in the first place. If the output is what Normal already produces, it does not ship.
 
-7. **#571 — `Résumé`, the gist in prose.** Its agent starts after item 5's grilling, so the mode is born with the decision on worked examples rather than retrofitted with it. The hole is clean: `Liste` extracts **actions** into infinitive bullets, `Structuré` is forbidden from summarising, so nobody returns the substance in two or three sentences. #79's cut reason — *"List already synthesises"* — was true of the axis and false of the shape.
+7. ~~**#571 — `Résumé`**~~ — **MERGED on 2026-09-22 in PR #589 (`91da079`)**, device-validated the same day: 5 of 5 accepted, language 5 of 5, long dictations at 0.30-0.35, and step 2 of #587's ladder measured at 0 wrong-language outputs across all 15 Apple FM languages (against 55 of 130 at step 1). The issue is closed; its residual meaning distortion at the 0.75 ceiling belongs to #570. The gist in prose.** Its agent starts after item 5's grilling, so the mode is born with the decision on worked examples rather than retrofitted with it. The hole is clean: `Liste` extracts **actions** into infinitive bullets, `Structuré` is forbidden from summarising, so nobody returns the substance in two or three sentences. #79's cut reason — *"List already synthesises"* — was true of the axis and false of the shape.
 
     **Grilled on 2026-09-16, five decisions locked, `ready-for-agent`.** The length is a **band** (`0.1 … 0.6`) and never a sentence count — a fixed "two or three sentences" is absurd on a twenty-second dictation and useless on a ten-minute one. **Prose only, no bullets ever**, which is the single rule keeping it out of `Liste`'s territory. The speaker's person is kept. A speaker-flagged incompleteness **may** be dropped here, unlike #523 decision 7, because this reader knows by construction that they are reading a summary.
 
@@ -269,7 +269,7 @@ That last point is also why **CodeRabbit's review was declined**: it proposed ho
 
 **Build 35 went to both TestFlight groups on 2026-09-21** with #579's fix, device-checked by Pierre the same day. It also carries every polish-pipeline change merged since 34 (#523, #572, #580), and that pipeline runs on every dictation, subscriber or not — so 35 changes the free dictation path, not only Pro code, which stays unreachable (`paywallVisible = false`, the forced entitlement compiled out of Release). **Promotion of 35 to the App Store is to be decided on 2026-09-24**, after three days of tester use, by Pierre through `appstore-promote`.
 
-**The list is empty on 2026-09-21.** The milestone's last open issue, #564 (T3 Code in the auto-return catalogue), moved to `2.1`: T3 Code has no URL that resumes a session — `t3code://` lands on its home screen — and that is reported upstream as t3code#11950, so nothing on this side can ship it. #569 stays outside the lane, as recorded above. A bug that lands on a path from #23, #542, #543 or #558 before the promotion still joins this lane; anything else goes to its own.
+**Item 6: #564, T3 Code in the auto-return catalogue. SHIPPED on 2026-09-22** in PR #590, merged as `977ce75`. It had moved to `2.1` on 2026-09-21 because `t3code://` landed on T3 Code's home screen; upstream fixed that in t3code#12002, shipped in T3 Code 1.2.0 on 2026-09-16. Device-validated on build `48558db`, T3 Code 1.2.0: the Safari resume test passes, and a dictation from a T3 Code thread returns to that thread (`opening via=recording waitedMs=144` → `returned`). The recipe for adding any app now lives in `docs/auto-return-catalogue.md`. **Build 36 carries it**, cut and uploaded on 2026-09-22 (`build/36`, `c230730`): smoke-tested by Pierre from TestFlight, then put in both groups, `Team PIVI` and `Public Beta`; Apple approved the external distribution at once. The only behaviour change against 35 is this one. **The 2026-09-24 promotion is now of 36**, still by Pierre through `appstore-promote`.
 
 ## Lane C — the keyboard session
 

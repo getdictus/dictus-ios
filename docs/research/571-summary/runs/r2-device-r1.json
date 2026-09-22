@@ -1,0 +1,1322 @@
+[
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R1-date-word",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4066,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Pour demain je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match le soir.",
+    "outputChars" : 190,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.8085106382978723,
+    "rawChars" : 235,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R1-date-word",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6081,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+      "+demain"
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match le soir.",
+    "outputChars" : 178,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.7574468085106383,
+    "rawChars" : 235,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R1-date-word",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6073,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+      "+demain"
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match ce soir.",
+    "outputChars" : 178,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.7574468085106383,
+    "rawChars" : 235,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R1-date-word",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6445,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+      "+demain"
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match le soir.",
+    "outputChars" : 178,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.7574468085106383,
+    "rawChars" : 235,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R1-date-word",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4674,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Pour demain je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match le soir.",
+    "outputChars" : 190,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.8085106382978723,
+    "rawChars" : 235,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R2-misrendered-product",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4600,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "J'ai regardé les hue dictus iOS ce matin : il y a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.",
+    "outputChars" : 218,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9954337899543378,
+    "rawChars" : 219,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R2-misrendered-product",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4953,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "J'ai regardé les hue dictus iOS ce matin : il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.",
+    "outputChars" : 221,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 1.0091324200913243,
+    "rawChars" : 219,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R2-misrendered-product",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6763,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "J'ai regardé les hue dictus iOS ce matin : il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.",
+    "outputChars" : 221,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 1.0091324200913243,
+    "rawChars" : 219,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R2-misrendered-product",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7251,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "J'ai regardé les hue dictus iOS ce matin : il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je veux qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.",
+    "outputChars" : 217,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9908675799086758,
+    "rawChars" : 219,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R2-misrendered-product",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7038,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "J'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.",
+    "outputChars" : 220,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 1.004566210045662,
+    "rawChars" : 219,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R3-no-qualifier",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 9193,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je ne vais pas réinstaller le téléphone tout de suite parce que je ne veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, je vais d'abord le redémarrer et vider le cache et on verra demain si ça va mieux.",
+    "outputChars" : 227,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9497907949790795,
+    "rawChars" : 239,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R3-no-qualifier",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 8978,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je ne vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.",
+    "outputChars" : 243,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 1.0167364016736402,
+    "rawChars" : 239,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R3-no-qualifier",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 9094,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je ne vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.",
+    "outputChars" : 243,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 1.0167364016736402,
+    "rawChars" : 239,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R3-no-qualifier",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 8554,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je ne vais pas réinstaller le téléphone tout de suite parce que je ne veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.",
+    "outputChars" : 241,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 1.00836820083682,
+    "rawChars" : 239,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R3-no-qualifier",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7734,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je ne vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, je vais d'abord le redémarrer et vider le cache et on verra demain si ça va mieux.",
+    "outputChars" : 224,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9372384937238494,
+    "rawChars" : 239,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-on-not-nous",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 8503,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider",
+    "outputChars" : 231,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9705882352941176,
+    "rawChars" : 238,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-on-not-nous",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4181,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider",
+    "outputChars" : 231,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9705882352941176,
+    "rawChars" : 238,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-on-not-nous",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4189,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.",
+    "outputChars" : 232,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9747899159663865,
+    "rawChars" : 238,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-on-not-nous",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4006,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.",
+    "outputChars" : 232,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9747899159663865,
+    "rawChars" : 238,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-on-not-nous",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5814,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.",
+    "outputChars" : 232,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9747899159663865,
+    "rawChars" : 238,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-telegraphic",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5833,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Ça fait une semaine que j'ai passé à la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.",
+    "outputChars" : 262,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9492753623188406,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-telegraphic",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 5806,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Ça fait une semaine que j'ai passé à la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.",
+    "outputChars" : 262,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9492753623188406,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-telegraphic",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3938,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Ça fait une semaine que j'ai la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.",
+    "outputChars" : 254,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9202898550724637,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-telegraphic",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3866,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Ça fait une semaine que j'ai la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.",
+    "outputChars" : 254,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9202898550724637,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-telegraphic",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3927,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Ça fait une semaine que j'ai la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.",
+    "outputChars" : 254,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9202898550724637,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R6-two-negations",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6586,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.",
+    "outputChars" : 267,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.967391304347826,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R6-two-negations",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6326,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je n'ai pas envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. J'attends la nouvelle grille tarifaire publiée lundi matin et je mets tout à jour avant de l'envoyer dans la journée.",
+    "outputChars" : 237,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.8586956521739131,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R6-two-negations",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6696,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je n'ai pas envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. Je attends la nouvelle grille tarifaire publiée lundi matin, puis je mets tout à jour et je l'envoie dans la journée.",
+    "outputChars" : 237,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.8586956521739131,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R6-two-negations",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 8833,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.",
+    "outputChars" : 267,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.967391304347826,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R6-two-negations",
+    "hasEngineOutput" : true,
+    "lang" : "fr",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 8080,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je n'ai pas envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.",
+    "outputChars" : 260,
+    "outputLanguage" : "fr",
+    "preamble" : false,
+    "ratio" : 0.9420289855072463,
+    "rawChars" : 276,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 8582,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I want us to review the budget for the end-of-year outing because I think we're spending too much on the venue and I want us to compare it with two other places before Friday so we can decide.",
+    "outputChars" : 192,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.9365853658536586,
+    "rawChars" : 205,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7729,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I want us to review the budget for the end-of-year outing because I think we're spending too much on the venue and I want to compare it with two other places before Friday so we can decide",
+    "outputChars" : 188,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.9170731707317074,
+    "rawChars" : 205,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7634,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I want us to review the budget for the end-of-year outing because I think we're spending too much on the venue and I want us to compare it with two other places before Friday so we can decide",
+    "outputChars" : 191,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.9317073170731708,
+    "rawChars" : 205,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7789,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I want us to review the budget for the end-of-year outing because I think we're spending too much on the venue and I want us to compare it with two other places before Friday so we can decide.",
+    "outputChars" : 192,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.9365853658536586,
+    "rawChars" : 205,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R4-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3924,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "I want us to review the budget for the end-of-year outing: we are spending too much on the venue, so I want to compare it with two other places before Friday.",
+    "outputChars" : 158,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.7707317073170732,
+    "rawChars" : 205,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 4086,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "it has been a week since I updated my phone to the new system version: i keep getting errors, notifications arrive late, the battery runs out quickly and two apps crash when i launch them. i am considering rolling back if it continues.",
+    "outputChars" : 235,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 1.0262008733624455,
+    "rawChars" : 229,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 1
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 3982,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "it has been a week since I updated my phone to the new system version: errors keep appearing, notifications arrive late, the battery runs down quickly and two apps crash on launch. I am considering rolling back if it continues.",
+    "outputChars" : 227,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.9912663755458515,
+    "rawChars" : 229,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 2
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6985,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "it has been a week since I updated my phone to the new system version: errors keep appearing, notifications arrive late, the battery runs out quickly and two apps crash on launch. I am considering rolling back if it continues.",
+    "outputChars" : 226,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.9868995633187773,
+    "rawChars" : 229,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 3
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 6996,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "It has been a week since I updated my phone to the new system version: I keep getting errors, notifications show up late, the battery drains fast and two apps crash on launch. I am thinking of rolling back if it keeps up.",
+    "outputChars" : 221,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.9650655021834061,
+    "rawChars" : 229,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 4
+  },
+  {
+    "arm" : "shipping",
+    "collectiveSwitch" : false,
+    "exampleContent" : [
+
+    ],
+    "firstPersonLost" : false,
+    "fixture" : "R5-en",
+    "hasEngineOutput" : true,
+    "lang" : "en",
+    "languageMatches" : true,
+    "listLines" : 0,
+    "ms" : 7007,
+    "novelFigures" : [
+
+    ],
+    "observableMisses" : [
+
+    ],
+    "opensOnInfinitive" : false,
+    "outcome" : "rejectedGuardrail",
+    "output" : "it has been a week since I updated my phone to the new system version: i keep getting errors, notifications show up late, the battery drains fast and two apps crash on launch. i am thinking of rolling back if it keeps up.",
+    "outputChars" : 221,
+    "outputLanguage" : "en",
+    "preamble" : false,
+    "ratio" : 0.9650655021834061,
+    "rawChars" : 229,
+    "rejectedCheck" : "length",
+    "reportFraming" : [
+
+    ],
+    "run" : 5
+  }
+]

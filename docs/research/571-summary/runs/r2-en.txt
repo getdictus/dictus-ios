@@ -1,0 +1,64 @@
+
+
+████ ARM shipping — mode summary, 5 run(s) × 4 fixture(s)
+
+━━ [E1-free-form] 391 chars, lang=en
+  raw: Okay so I was thinking about something this morning while walking, it's that in the end when you launch a product on your own, the hardest part isn't coding it, it's deciding what not to do actually. Because there's always an idea that looks better than the one you're working on right now. And so you jump on it and after 6 months actually you've got 15 things started and nothing finished.
+  #1 success ratio=0.60 4405ms
+     out: I thought this morning while walking that launching a product alone is hardest not coding but deciding what not to do because every idea seems better than the one I have and after 6 months I have 15 things started and nothing finished.
+  #2 success ratio=0.61 5390ms
+     out: I thought this morning while walking: launching a product alone, the hardest part is deciding what not to do because every idea seems better than the one I'm working on now, and after 6 months I have 15 things started and nothing finished.
+  #3 success ratio=0.62 5416ms
+     out: I thought this morning while walking that launching a product alone is hardest not coding but deciding what not to do because new ideas seem better than what I'm working on now and after 6 months I have 15 things started and nothing finished.
+  #4 success ratio=0.60 2562ms
+     out: I thought this morning while walking that launching a product alone is hardest not coding but deciding what not to do because every idea seems better than the one I have and after 6 months I have 15 things started and nothing finished.
+  #5 success ratio=0.63 2548ms
+     out: I thought this morning while walking: launching a product alone, the hardest part is deciding what not to do because every idea looks better than the one I'm working on now, and after six months I have fifteen things started and nothing finished.
+
+━━ [E2-project-update] 673 chars, lang=en
+  raw: Okay so quick update on the project, we switched over the subscription part last Monday, Thomas finished the StoreKit integration and it works in sandbox. There are two things left. The first one is the transcription history which hasn't been started at all. And the second one is the custom vocabulary. And on that one we have a spec but no code. On the numbers side, we're at 412 downloads since launch, with a 7-day retention rate of 19%, which is low, but not a disaster for a first version. The goal is to get past 1000 before the end of October. I'm seeing Sarah on Thursday at 2pm to sort out the App Store part. And if all goes well, we submit the week of the 12th.
+  #1 success ratio=0.73 3842ms
+     out: we switched the subscription last Monday: thomas finished the storekit integration and it works in sandbox. the transcription history is not started and the custom vocabulary has a spec but no code. we have 412 downloads since launch with a 7-day retention rate of 19%, which is low but not a disaster for a first version. the goal is to get past 1000 before the end of october. i meet sarah on thursday at 2pm to sort out the app store part and if all goes well we submit the week of the 12th.
+  #2 success ratio=0.74 5805ms
+     out: we switched the subscription last Monday: thomas finished the storekit integration and it works in sandbox. the transcription history hasn't started and the custom vocabulary has a spec but no code. we have 412 downloads since launch with a 7-day retention rate of 19%, which is low but not a disaster for a first version. the goal is to get past 1000 before the end of october. i'm seeing sarah on thursday at 2pm to sort out the app store part. if all goes well we submit the week of the 12th.
+  #3 success ratio=0.72 5847ms
+     out: we switched the subscription last Monday: thomas finished the storekit integration and it works in sandbox. the transcription history hasn't started and the custom vocabulary has a spec but no code. we have 412 downloads since launch with a 7-day retention rate of 19%, low but not a disaster for a first version. the goal is to get past 1000 before the end of october. i'm seeing sarah on thursday at 2pm to sort out the app store part. if all goes well we submit the week of the 12th.
+  #4 success ratio=0.74 5815ms
+     out: we switched the subscription last Monday: thomas finished the storekit integration and it works in sandbox. the transcription history hasn't started and the custom vocabulary has a spec but no code. we have 412 downloads since launch with a 7-day retention rate of 19%, which is low but not a disaster for a first version. the goal is to get past 1000 before the end of october. i'm seeing sarah on thursday at 2pm to sort out the app store part. if all goes well we submit the week of the 12th.
+  #5 success ratio=0.74 4899ms
+     out: we switched the subscription last Monday: thomas finished the storekit integration and it works in sandbox. the transcription history is not started and the custom vocabulary has a spec but no code. we have 412 downloads since launch with a 7-day retention rate of 19%, which is low but not a disaster for a first version. the goal is to get past 1000 before the end of october. i'm seeing sarah on thursday at 2pm to sort out the app store part and if all goes well we submit the week of the 12th.
+
+━━ [E3-todo-enumeration] 503 chars, lang=en
+  raw: okay so uh let me go over what I need to do before the meeting so first I need to get the January numbers from Marion she told me she'd have them Tuesday well no Wednesday and uh so then I'll have to do the comparison table with last year's and also you know I absolutely have to call the contractor because their quote went up again from 12000 to 15000 euros and nobody signed off on that and well yeah I should also remember to book the room on the second floor because the other one is taken all week
+  #1 success ratio=0.54 3690ms
+     out: I need to get the January numbers from Marion by Wednesday, make the comparison table with last year's, call the contractor about the quote rising from 12000 to 15000 euros and no one signed off, and book the room on the second floor because the other one is taken all week.
+  #2 success ratio=0.53 3561ms
+     out: I need to get the January numbers from Marion by Wednesday, make the comparison table with last year's, call the contractor because their quote rose to 15000 euros and no one signed off, and book the room on the second floor because the other one is taken all week.
+  #3 success ratio=0.52 2892ms
+     out: I need to get the January numbers from Marion by Wednesday, make the comparison table with last year's, call the contractor about the quote rising to 15000 euros and no one signing off, and book the room on the second floor because the other one is taken all week.
+  #4 success ratio=0.55 2977ms
+     out: I need to get the January numbers from Marion by Wednesday, make the comparison table with last year's, call the contractor because their quote went up from 12000 to 15000 euros and nobody signed off, and book the room on the second floor because the other one is taken all week.
+  #5 success ratio=0.54 3134ms
+     out: I need to get the January numbers from Marion by Wednesday, make the comparison table with last year's, call the contractor about the quote rising from 12000 to 15000 euros and no one signed off, and book the room on the second floor because the other one is taken all week.
+
+━━ [E4-native-brain-dump] 384 chars, lang=en
+  raw: okay so quick brain dump before I forget the deploy is blocked because the certificate expired on the staging box and uh Sam said he'd rotate it tomorrow morning but we also need to bump the node version because the build image is on eighteen and the new package needs twenty and honestly I think we should just do both in the same window otherwise we're doing two freezes for nothing
+  #1 rejectedGuardrail/length ratio=0.81 OUT-OF-BAND 11708ms
+     out: the deploy is blocked because the certificate expired on the staging box: Sam will rotate it tomorrow morning, and we need to bump the node version because the build image is on eighteen and the new package needs twenty; I think we should do both in the same window otherwise we're doing two freezes for nothing.
+  #2 rejectedGuardrail/length ratio=0.86 OUT-OF-BAND 8771ms
+     out: the deploy is blocked because the certificate expired on the staging box and Sam said he'd rotate it tomorrow morning but we also need to bump the node version because the build image is on eighteen and the new package needs twenty and I think we should just do both in the same window otherwise we're doing two freezes for nothing
+  #3 rejectedGuardrail/length ratio=0.84 OUT-OF-BAND 9039ms
+     out: the deploy is blocked because the certificate on the staging box expired and Sam said he'd rotate it tomorrow morning but we need to bump the node version because the build image is on eighteen and the new package needs twenty and I think we should do both in the same window otherwise we're doing two freezes for nothing
+  #4 rejectedGuardrail/length ratio=0.81 OUT-OF-BAND 5202ms
+     out: the deploy is blocked because the certificate expired on the staging box: Sam will rotate it tomorrow morning, and we need to bump the node version because the build image is on eighteen and the new package needs twenty: I think we should do both in the same window otherwise we're doing two freezes for nothing.
+  #5 rejectedGuardrail/length ratio=0.84 OUT-OF-BAND 4890ms
+     out: the deploy is blocked because the certificate expired on the staging box and Sam said he'd rotate it tomorrow morning but we need to bump the node version because the build image is on eighteen and the new package needs twenty and I think we should do both in the same window otherwise we're doing two freezes for nothing
+
+
+══ bars (engine outputs; `acc` = accepted by the pipeline)
+arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | person flags | preamble | example | figure | accepted
+shipping | en | 20 | 0 (0) | 0 (0%) | 0 | 15/20 (75%) | 0 | 0 | 0 | 0 | 15/20
+shipping | ALL | 20 | 0 (0) | 0 (0%) | 0 | 15/20 (75%) | 0 | 0 | 0 | 0 | 15/20
+   refusals, shipping: length×5
+
+capture written: ../docs/research/571-summary/runs/r2-en.json
