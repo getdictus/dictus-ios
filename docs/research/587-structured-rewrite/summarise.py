@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Read the #587 captures against the bars declared in bars.md §4.
 
-    python3 docs/research/587-structured-rewrite/summarise.py
+    python3 docs/research/587-structured-rewrite/summarise.py            # round 1 (C1)
+    python3 docs/research/587-structured-rewrite/summarise.py round2     # round 2 (C2)
+    python3 docs/research/587-structured-rewrite/summarise.py round3     # confirmation
 
 Every number in findings.md that is not read straight off a `raw/` capture comes from
 here. The harness already records, per run, the observables bars.md §4 defines
@@ -17,6 +19,7 @@ prompt family, not of a polish output, so it has no business in a shipped type.
 import json
 import re
 import statistics
+import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -43,6 +46,10 @@ EXAMPLE_CONTENT = {
                  "café", "hedge", "compost", "fence", "garden", "jardin"],
     "C1": ["vélo", "roue arrière", "frein", "magasin", "passport", "charger", "ferry",
            "hotel", "hôtel"],
+    # C2 and the landed prompt show the same two examples in every language; the
+    # screen is the French and English words, plus the one proper noun of the sets.
+    "C2": ["vélo", "roue arrière", "frein", "magasin", "passport", "charger", "ferry",
+           "hotel", "hôtel"],
 }
 
 # A sentence about the speaker's memory, in any of the covered languages. A screen for
@@ -53,10 +60,15 @@ MEMORY = re.compile(r"souvien|souvenir|rappelle plus|échapp|oubli|mémoire|revi
                     re.IGNORECASE)
 
 
+ROUND = sys.argv[1] if len(sys.argv) > 1 else ""
+CANDIDATE = {"": "C1", "round2": "C2", "round3": "shipping"}.get(ROUND, "C1")
+ARMS = ("shipping",) if CANDIDATE == "shipping" else ("shipping", CANDIDATE)
+
+
 def load():
     runs = []
     for round_name, (capture, fixture_file) in CAPTURES.items():
-        path = HERE / capture
+        path = HERE / ROUND / capture
         if not path.exists():
             continue
         raws = {f["id"]: f["raw"] for f in json.loads((FIXTURES / fixture_file).read_text())}
@@ -97,7 +109,7 @@ def b1(runs):
             table[r["expectedLanguage"]][r["arm"]].append(r)
     print(f"{'lang':9}{'arm':10}{'outputs':9}{'refusedLang':13}{'%':7}{'wrongAccepted':15}{'wrongAny':9}")
     for language in sorted(table):
-        for arm in ("shipping", "C1"):
+        for arm in ARMS:
             cell = table[language].get(arm, [])
             if not cell:
                 continue
@@ -120,7 +132,7 @@ def b1(runs):
 
 def b2(runs):
     section("B2 — fabrication (bars.md §4)")
-    for arm in ("shipping", "C1"):
+    for arm in ARMS:
         rows = [r for r in runs if r["arm"] == arm and scored(r)]
         accepted = [r for r in rows if r["outcome"] == "success"]
         check = [r for r in rows if r["incompletenessFabricated"]]
@@ -144,7 +156,7 @@ def b2(runs):
                   f"{'(' + r['rejectedCheck'] + ')' if r['rejectedCheck'] else ''} "
                   f"check={r['incompletenessFabricated']} axis4={r['speakerState']}: {tail[:160]}")
     print("\nB2b — rule 7 on 5-rambling (axis 4 verdict per run):")
-    for arm in ("shipping", "C1"):
+    for arm in ARMS:
         verdicts = [r["speakerState"] for r in runs if r["arm"] == arm and r["fixture"] == "5-rambling" and scored(r)]
         print(f"  {arm:9} {verdicts}")
     print("\nExample content copied into an output (arm's own examples):")
@@ -158,7 +170,7 @@ def b2(runs):
 
 def b3(runs):
     section("B3 — lists (bars.md §4)")
-    for arm in ("shipping", "C1"):
+    for arm in ARMS:
         rows = [r for r in runs if r["arm"] == arm and scored(r)]
         prose = [r for r in rows if is_prose(r["fixture"])]
         listed = [r for r in prose if r["listLines"] > 0]
@@ -185,17 +197,19 @@ def b4(runs):
             ("dropped", lambda r: r["speakerState"] == "dropped")]
     r1 = [r for r in runs if r["round"].startswith("r1") and scored(r)]
     counts = {}
-    for arm in ("shipping", "C1"):
+    for arm in ARMS:
         rows = [r for r in r1 if r["arm"] == arm]
         counts[arm] = {name: sum(test(r) for r in rows) for name, test in axes}
         counts[arm]["n"] = len(rows)
-    print(f"{'axis':16}{'shipping':12}{'C1':12}verdict")
+    print(f"{'axis':16}{'shipping':12}{CANDIDATE:12}verdict")
     for name, _ in axes:
-        s, c = counts["shipping"][name], counts["C1"][name]
-        print(f"{name:16}{s}/{counts['shipping']['n']:<9}{c}/{counts['C1']['n']:<9}"
+        if CANDIDATE not in counts:
+            continue
+        s, c = counts["shipping"][name], counts[CANDIDATE][name]
+        print(f"{name:16}{s}/{counts['shipping']['n']:<9}{c}/{counts[CANDIDATE]['n']:<9}"
               f"{'holds' if c <= s + 2 else 'FAILS'}")
     print("\nObservables on R1:")
-    for arm in ("shipping", "C1"):
+    for arm in ARMS:
         rows = [r for r in r1 if r["arm"] == arm]
         print(f"  {arm:9} inversions={sum(r['inversions'] for r in rows)} "
               f"negationDropped={sum(r['negationDropped'] > 0 for r in rows)}/{len(rows)}")
@@ -203,7 +217,7 @@ def b4(runs):
 
 def stray_lines(runs):
     section("Stray lines — a line made only of punctuation, e.g. `---` (observable)")
-    for arm in ("shipping", "C1"):
+    for arm in ARMS:
         rows = [r for r in runs if r["arm"] == arm and scored(r)]
         hits = [r for r in rows
                 if any(line.strip() and not re.search(r"\w", line) for line in r["output"].splitlines())]
