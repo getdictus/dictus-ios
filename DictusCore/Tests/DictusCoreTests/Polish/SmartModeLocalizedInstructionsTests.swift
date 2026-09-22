@@ -35,6 +35,19 @@ final class SmartModeLocalizedInstructionsTests: XCTestCase {
         XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "pt_PT"), "portugues")
     }
 
+    /// `no` is Norwegian too: a transcript labelled with the macrolanguage code gets
+    /// the Bokmål set, stored under `nb`, rather than the fallback.
+    func testNorwegianUnderNoReachesTheBokmalSet() {
+        let norwegian = SmartModePrompt(
+            instructions: "fallback", userInstruction: "u", outputMarker: "m",
+            localizedInstructions: ["nb": "bokmal"]
+        )
+        XCTAssertEqual(norwegian.instructions(forTranscriptLanguage: "no"), "bokmal")
+        XCTAssertEqual(norwegian.instructions(forTranscriptLanguage: "no-NO"), "bokmal")
+        XCTAssertEqual(norwegian.instructions(forTranscriptLanguage: "nb"), "bokmal")
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "no"), "fallback")
+    }
+
     /// No language known, or one the mode has no set for: the measured fallback, never
     /// a neighbouring language's examples.
     func testAnUnknownOrMissingLanguageGetsTheFallback() {
