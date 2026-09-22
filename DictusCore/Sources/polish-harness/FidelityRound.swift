@@ -562,9 +562,17 @@ func runFidelityRound(fixtures: [Fixture],
     for arm in arms {
         print("\n\n████ ARM \(arm.label) — \(runs) run(s) × \(fixtures.count) fixture(s), floor \(String(format: "%.2f", floor))")
         if let path = arm.path { print("     prompt: \(path)") }
-        let engine = makeEngine(loadInstructions(arm.path))
+        let armPrompts = arm.path.flatMap(localizedArm(at:))
+        let sharedEngine = armPrompts == nil ? makeEngine(loadInstructions(arm.path)) : nil
         for fixture in fixtures {
             print("\n━━ [\(fixture.id)] \(fixture.raw.count) chars, lang=\(fixture.lang)")
+            // A directory arm is one prompt per transcript language (#587, step 2),
+            // resolved by the rule the app uses, off the language the pipeline would
+            // pass for this fixture. Everything else about the run is unchanged.
+            let engine = sharedEngine ?? {
+                let text = armPrompts?.instructions(forTranscriptLanguage: transcriptLanguage(of: fixture)) ?? ""
+                return makeEngine { _, _ in text }
+            }()
             for index in 1...max(1, runs) {
                 let outcome = await runOnce(fixture, engine: engine, mode: mode)
                 // The ENGINE's output, not `final`. See this file's header. A nil output
@@ -591,6 +599,33 @@ func runFidelityRound(fixtures: [Fixture],
 
     FidelityRound.summary(all, arms: arms.map(\.label))
     writeFidelityCapture(all, to: jsonOut)
+}
+
+/// A directory arm: `fallback.txt` plus one `<NLLanguage code>.txt` per language,
+/// read into the same `SmartModePrompt` shape the app resolves from. Nil for a file.
+func localizedArm(at path: String) -> SmartModePrompt? {
+    var isDirectory: ObjCBool = false
+    guard FileManager.default.fileExists(atPath: path, isDirectory: &isDirectory), isDirectory.boolValue else {
+        return nil
+    }
+    let directory = URL(fileURLWithPath: path)
+    guard let names = try? FileManager.default.contentsOfDirectory(atPath: path),
+          let fallback = try? String(contentsOf: directory.appendingPathComponent("fallback.txt"), encoding: .utf8) else {
+        print("error: arm directory \(path) needs a fallback.txt")
+        exit(1)
+    }
+    var table: [String: String] = [:]
+    for name in names where name.hasSuffix(".txt") && name != "fallback.txt" {
+        table[String(name.dropLast(4))] = try? String(contentsOf: directory.appendingPathComponent(name), encoding: .utf8)
+    }
+    return SmartModePrompt(instructions: fallback, userInstruction: "", outputMarker: "", localizedInstructions: table)
+}
+
+/// The transcript language `runOnce` passes the pipeline for this fixture: its `lang`
+/// on the per-language path, the detected language on the auto path.
+func transcriptLanguage(of fixture: Fixture) -> String? {
+    if fixture.language != nil { return fixture.lang }
+    return PolishLanguageMix.measure(fixture.raw).dominantCode ?? PolishPipeline.detectLanguageCode(in: fixture.raw)
 }
 
 func writeFidelityCapture(_ all: [FidelityRun], to path: String?) {

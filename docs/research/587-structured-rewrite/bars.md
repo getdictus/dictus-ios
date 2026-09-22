@@ -270,3 +270,52 @@ meaning without knowing whether the shipping prompt fails the same languages.
    sentences, the list lines and the shipping check's verdict on every run, and the
    harness prints a per-language table. The definitions are §4's, unchanged.
 3. **C1 is committed as `arms/C1.txt`, 2 966 characters**, before its first call.
+
+## 10. Round 2 — step 2 of the ladder (2026-09-22), declared before its first call
+
+**Why a round 2.** Round 1 stopped at §1's rule: C1 failed B1b in Danish (`T3-plan-mode.da`
+translated into English 3 of 3). Pierre approved climbing to decision 5's step 2 on
+2026-09-22. Everything in this section is committed before the first C2 call.
+
+**The candidate, C2** — `arms/C2/`, one file per `NLLanguage` code plus `fallback.txt`:
+
+- **Rules byte-identical to C1.** Only the two worked examples change.
+- **Examples in the transcript's language**, the same two examples as C1 (bike prose that
+  stays prose; trip enumeration that becomes a short list), machine-translated by the
+  agent into all 16 Apple FM language codes. Decisions 4 and 7 unchanged: no
+  incompleteness line, no heading, no person named.
+- **`fallback.txt` is C1, byte for byte** (`cmp` checked), sent when the transcript's
+  language is unknown or has no set.
+- The files are dumped from `SmartModeStructuredPrompt.shortInstructions(examples:)`, so
+  if C2 lands, the landed strings are the benched strings.
+- The harness resolves a directory arm per fixture with the app's own rule
+  (`SmartModePrompt.instructions(forTranscriptLanguage:)`: exact code, then base subtag,
+  then fallback), off the language the pipeline is given: the fixture's `lang` on the
+  per-language path, the detected language on the auto path.
+
+**What changed in the pipeline since round 1, for both arms:** a trailing ```` ``` ```` or
+`---` line is now stripped before the guardrails (`PolishPostpass.stripTrailingFenceLines`),
+and the transcript language reaches the job. `engineOutput` is recorded after the strip, so
+the stray-line count in round 2 measures what is left, not what the model emitted.
+
+**Fixtures, unchanged:** R1–R4. Every Apple FM language other than French and English has
+**6 distinct translated dictations × 3 runs = 18 outputs**; French has 24 fixtures (R1, R2),
+English 11 (R3 plus six translated). No language is judged on one dictation.
+
+**Arms:** `shipping` (re-run the same day, as the baseline) and `C2`.
+
+**Bars: §4, unchanged. The 10 % threshold stays.** If any language exceeds it on
+`check=language`, the round stops and reports, and step 3 is not attempted.
+
+**One reading declared now, after seeing round 1, and flagged as such.** B3b (a list on
+`2-project-update` in ≥ 2 of 3) failed on **both** arms in round 1, 0 of 3 each, which
+matches #523's measured inability of the Mac model to list a spoken enumeration. If round 2
+repeats that on both arms, B3b is reported as failed and as a Mac capability limit, and it
+alone does not block landing C2; the device round is where it is judged. Every other bar
+blocks. This is the one place the pre-registration is loosened, it is loosened before the
+round-2 numbers exist, and the PR says so.
+
+**If the blocking bars hold:** C2 lands in `SmartModeStructuredPrompt` and the catalogue,
+and a **confirmation round** runs R4 once per fixture with no `--arm` (the landed prompt as
+`shipping`), to prove the pipeline resolves the right language's examples on its own. Its
+B1b is reported; it is a wiring check, not a second vote.
