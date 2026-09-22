@@ -97,7 +97,13 @@ public struct SmartModePrompt: Equatable, Sendable, Codable {
         guard let code, let table = localizedInstructions else { return instructions }
         if let exact = table[code] { return exact }
         let base = code.split(whereSeparator: { $0 == "-" || $0 == "_" }).first.map(String.init)
-        return base.flatMap { table[$0] } ?? instructions
+        if let found = base.flatMap({ table[$0] }) { return found }
+        // Norwegian arrives under two codes: `NLLanguageRecognizer` answers `nb`, and a
+        // locale or a transcription engine can say `no`, the macrolanguage. The tables
+        // store Bokmål under `nb`, so `no` would otherwise fall back silently (found by
+        // CodeRabbit on PR #589).
+        if base == "no", let bokmal = table["nb"] { return bokmal }
+        return instructions
     }
 
     /// Hand-written so the layout field can be absent, for the reason
