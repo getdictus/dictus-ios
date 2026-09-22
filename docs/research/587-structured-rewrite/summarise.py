@@ -50,6 +50,8 @@ EXAMPLE_CONTENT = {
     # screen is the French and English words, plus the one proper noun of the sets.
     "C2": ["vélo", "roue arrière", "frein", "magasin", "passport", "charger", "ferry",
            "hotel", "hôtel"],
+    "C3": ["vélo", "roue arrière", "frein", "magasin", "passport", "charger", "ferry",
+           "hotel", "hôtel"],
 }
 
 # A sentence about the speaker's memory, in any of the covered languages. A screen for
@@ -61,7 +63,7 @@ MEMORY = re.compile(r"souvien|souvenir|rappelle plus|échapp|oubli|mémoire|revi
 
 
 ROUND = sys.argv[1] if len(sys.argv) > 1 else ""
-CANDIDATE = {"": "C1", "round2": "C2", "round3": "shipping"}.get(ROUND, "C1")
+CANDIDATE = {"": "C1", "round2": "C2", "round3": "C3", "round4": "shipping"}.get(ROUND, "C1")
 ARMS = ("shipping",) if CANDIDATE == "shipping" else ("shipping", CANDIDATE)
 
 
