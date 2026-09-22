@@ -541,7 +541,11 @@ func runOnce(_ fx: Fixture,
         // mix the target was elected from, exactly as `PolishService` does it — a
         // harness that skipped it would let a fixture reach the engine where the app
         // refuses it locally, which is a path no user takes.
-        inputLanguageCodes: mix.countedCodes
+        inputLanguageCodes: mix.countedCodes,
+        // Which language's worked examples a Smart Mode shows (#587). A fixture's
+        // `lang` stands for the transcription language the user forced, exactly as
+        // it stands for the prompt target above.
+        transcriptLanguageCode: PolishJob.transcriptLanguageCode(mode: .explicit(target), detectedCode: detectedCode)
     )
     let r = await PolishPipeline.transform(preprocessed: preprocessed, engine: engine, job: job)
     // nil for a Smart Mode on any non-success: it inserts nothing rather than the
@@ -582,7 +586,12 @@ func runOnceAuto(_ fx: Fixture,
         task: smartTask ?? .auto, promptLanguage: .english, languageAgnosticPath: true,
         // Same pre-flight input as the per-language path (#490). Measured on the raw
         // for the reason the other path measures it there.
-        inputLanguageCodes: PolishLanguageMix.measure(fx.raw).countedCodes
+        inputLanguageCodes: PolishLanguageMix.measure(fx.raw).countedCodes,
+        // Nothing is forced on the auto path, so the transcript's language is the
+        // one detected in it (#587) — the mix's leader, as `PolishService` reads it.
+        transcriptLanguageCode: PolishJob.transcriptLanguageCode(
+            mode: .autoDetect, detectedCode: PolishLanguageMix.measure(fx.raw).dominantCode ?? detectedCode
+        )
     )
     let r = await PolishPipeline.transform(preprocessed: preprocessed, engine: engine, job: job)
     let final = PolishPipeline.resolvedOutput(r, preprocessed: preprocessed, job: job)
