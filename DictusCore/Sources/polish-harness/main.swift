@@ -113,7 +113,7 @@ func corpusPaths(in args: [String], valuedOptions: Set<String> = []) -> [String]
 }
 
 let args = Array(CommandLine.arguments.dropFirst())
-guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
+guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "summary", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
     print("""
     polish-harness — off-device polish eval (macOS + Apple Intelligence)
 
@@ -125,6 +125,7 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "f
       fidelity  <fixtures.json> --mode <id> [--runs N] [--arm <prompt.txt> …] [--floor N] [--json <out.json>]
       fidelity  <corpus.json> --replay [--floor N] [--sweep] [--json <out.json>]
       fidelity  --rescore <capture.json> --fixtures <fixtures.json> [--floor N] [--json <out.json>]
+      summary   <fixtures.json> [--mode <id>] [--runs N] [--arm <prompt.txt> …] [--json <out.json>]
       guardrail <corpus.json> [<corpus.json> …] [--segments] [--sweep] [--anchors]
       target    <corpus.json> [<corpus.json> …] [--sweep] [--floor N]
       vocabulary <corpus.json> [<corpus.json> …]
@@ -541,7 +542,11 @@ func runOnce(_ fx: Fixture,
         // mix the target was elected from, exactly as `PolishService` does it — a
         // harness that skipped it would let a fixture reach the engine where the app
         // refuses it locally, which is a path no user takes.
-        inputLanguageCodes: mix.countedCodes
+        inputLanguageCodes: mix.countedCodes,
+        // Which language's worked examples a Smart Mode shows (#587). A fixture's
+        // `lang` stands for the transcription language the user forced, exactly as
+        // it stands for the prompt target above.
+        transcriptLanguageCode: PolishJob.transcriptLanguageCode(mode: .explicit(target), detectedCode: detectedCode)
     )
     let r = await PolishPipeline.transform(preprocessed: preprocessed, engine: engine, job: job)
     // nil for a Smart Mode on any non-success: it inserts nothing rather than the
@@ -582,7 +587,12 @@ func runOnceAuto(_ fx: Fixture,
         task: smartTask ?? .auto, promptLanguage: .english, languageAgnosticPath: true,
         // Same pre-flight input as the per-language path (#490). Measured on the raw
         // for the reason the other path measures it there.
-        inputLanguageCodes: PolishLanguageMix.measure(fx.raw).countedCodes
+        inputLanguageCodes: PolishLanguageMix.measure(fx.raw).countedCodes,
+        // Nothing is forced on the auto path, so the transcript's language is the
+        // one detected in it (#587) — the mix's leader, as `PolishService` reads it.
+        transcriptLanguageCode: PolishJob.transcriptLanguageCode(
+            mode: .autoDetect, detectedCode: PolishLanguageMix.measure(fx.raw).dominantCode ?? detectedCode
+        )
     )
     let r = await PolishPipeline.transform(preprocessed: preprocessed, engine: engine, job: job)
     let final = PolishPipeline.resolvedOutput(r, preprocessed: preprocessed, job: job)
@@ -1009,6 +1019,16 @@ case "fidelity" where rescorePath != nil:
     runFidelityRescore()
 case "fidelity" where isReplay:
     runFidelityReplay()
+// #571. The Résumé bench: bars in docs/research/571-summary/bars.md. Dispatched here
+// rather than inside `runHarness`, whose switch is at the complexity ceiling.
+case "summary":
+    if #available(macOS 26.0, *) {
+        await runSummaryRound(fixtures: fixtures, mode: loadSmartMode(modeIdentifier),
+                              armPaths: armPaths, runs: runs, jsonOut: paragraphJSONOut)
+    } else {
+        print("error: this command drives Apple Foundation Models and needs macOS 26.")
+        exit(1)
+    }
 default:
     if #available(macOS 26.0, *) {
         await runHarness()

@@ -61,9 +61,11 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
     public func polish(raw: String,
                        targetLanguage: SupportedLanguage,
                        task: PolishTask) async throws -> String {
+        let instructions = resolvedInstructions(task: task, language: targetLanguage)
         let key = SessionKey(
             task: task.identifier,
-            language: Self.sessionLanguage(for: task, requested: targetLanguage)
+            language: Self.sessionLanguage(for: task, requested: targetLanguage),
+            instructions: instructions
         )
         // A session lives exactly one polish call. `prewarm()` (fired at
         // recording start) leaves a fresh, warmed session in the cache; we use
@@ -76,10 +78,7 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
         // latency grow turn-after-turn and would eventually throw
         // `exceededContextWindowSize` (4096-token ceiling). Polish is a
         // stateless transform, so we keep at most `instructions + 1 input`.
-        let session = await cache.session(
-            for: key,
-            instructions: resolvedInstructions(task: task, language: targetLanguage)
-        )
+        let session = await cache.session(for: key, instructions: instructions)
         // Wrap the input with explicit Input/Output framing. Without this Apple
         // FM treats the raw as a conversational turn and emits chat-reply
         // acknowledgements ("I'll polish it for you") instead of the polished
@@ -122,12 +121,10 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
     /// prerequisite for the stateless invariant in `polish()`.
     public func prewarm(task: PolishTask, targetLanguage: SupportedLanguage) async {
         let language = Self.sessionLanguage(for: task, requested: targetLanguage)
-        let key = SessionKey(task: task.identifier, language: language)
+        let instructions = resolvedInstructions(task: task, language: language)
+        let key = SessionKey(task: task.identifier, language: language, instructions: instructions)
         await cache.drop(key)
-        let session = await cache.session(
-            for: key,
-            instructions: resolvedInstructions(task: task, language: language)
-        )
+        let session = await cache.session(for: key, instructions: instructions)
         session.prewarm()
     }
 
@@ -282,6 +279,13 @@ private struct SessionKey: Hashable, Sendable {
     /// #79, because a Smart Mode is a record and has no enum case to key on.
     let task: String
     let language: SupportedLanguage
+    /// The system prompt the session was built with (#587). Since a Smart Mode can
+    /// carry one prompt per transcript language, the same `(task, language)` pair no
+    /// longer names one prompt: a session warmed at recording start with the fallback
+    /// must not answer a dictation whose prompt shows Danish examples. Keying on the
+    /// string itself makes a mismatch a cache miss — a cold session — rather than the
+    /// wrong prompt sent warm.
+    let instructions: String
 }
 
 /// Per-`(task, language)` `LanguageModelSession` cache with naive LRU eviction.

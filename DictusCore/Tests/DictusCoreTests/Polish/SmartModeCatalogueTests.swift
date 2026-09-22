@@ -8,10 +8,11 @@ final class SmartModeCatalogueTests: XCTestCase {
     // MARK: - The rows
 
     func testCatalogueShipsNotesAndOneTranslateEntryPerSupportedLanguage() {
-        XCTAssertEqual(SmartModeCatalogue.builtIns.count, 3 + SupportedLanguage.allCases.count)
+        XCTAssertEqual(SmartModeCatalogue.builtIns.count, 4 + SupportedLanguage.allCases.count)
         XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "notes" })
         XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "structured" })
         XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "message" })
+        XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == "summary" })
         for language in SupportedLanguage.allCases {
             XCTAssertTrue(
                 SmartModeCatalogue.builtIns.contains { $0.id == "translate.\(language.rawValue)" },
@@ -389,8 +390,10 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertLessThan(contract.minimumLengthRatio,
                           SmartModeCatalogue.structured.contract.minimumLengthRatio)
         // And it is still the tightest ceiling in the catalogue by a wide margin:
-        // every other mode may at least half again its input.
-        for mode in SmartModeCatalogue.builtIns where mode.id != "message" {
+        // every other mode may at least half again its input. `summary` is the one
+        // exception, by construction: it is the mode that must shorten (#571), and
+        // its own suite pins its ceiling below every other row's.
+        for mode in SmartModeCatalogue.builtIns where !["message", "summary"].contains(mode.id) {
             XCTAssertGreaterThanOrEqual(mode.contract.maximumLengthRatio, 1.5, mode.id)
         }
     }

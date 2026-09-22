@@ -43,14 +43,27 @@ public struct PolishJob: Equatable, Sendable {
     /// valid, frequent value and always lets the call through.
     public let inputLanguageCodes: Set<String>
 
+    /// The language the transcript is in, as an `NLLanguage` code, or nil when
+    /// nothing is known (#587, decision 5): the transcription language the user
+    /// forced, if they forced one, else the language detected in the transcript.
+    ///
+    /// A fourth language field, and not one of the three above, because none of them
+    /// can say it. `promptLanguage` is one of the four tested languages, so it cannot
+    /// name Danish; `typographyLanguage` is nil on the auto path by design; and
+    /// `inputLanguageCodes` is a set, where a Smart Mode needs the one language whose
+    /// worked examples it should show. See `transcriptLanguageCode(mode:detectedCode:)`.
+    public let transcriptLanguageCode: String?
+
     public init(task: PolishTask,
                 promptLanguage: SupportedLanguage,
                 typographyLanguage: SupportedLanguage?,
-                inputLanguageCodes: Set<String> = []) {
+                inputLanguageCodes: Set<String> = [],
+                transcriptLanguageCode: String? = nil) {
         self.task = task
         self.promptLanguage = promptLanguage
         self.typographyLanguage = typographyLanguage
         self.inputLanguageCodes = inputLanguageCodes
+        self.transcriptLanguageCode = transcriptLanguageCode
     }
 
     /// Build the job for one dictation, deriving the typography language from the
@@ -65,7 +78,8 @@ public struct PolishJob: Equatable, Sendable {
     public init(task: PolishTask,
                 promptLanguage: SupportedLanguage,
                 languageAgnosticPath: Bool,
-                inputLanguageCodes: Set<String> = []) {
+                inputLanguageCodes: Set<String> = [],
+                transcriptLanguageCode: String? = nil) {
         let typography: SupportedLanguage?
         switch task.contract.outputLanguage {
         case .fixed(let language):
@@ -75,7 +89,29 @@ public struct PolishJob: Equatable, Sendable {
         }
         self.init(
             task: task, promptLanguage: promptLanguage, typographyLanguage: typography,
-            inputLanguageCodes: inputLanguageCodes
+            inputLanguageCodes: inputLanguageCodes, transcriptLanguageCode: transcriptLanguageCode
+        )
+    }
+
+    /// The transcript's language as #587 decision 5 defines it: the language the user
+    /// forced, if they forced one, else the detected one.
+    ///
+    /// Only `.explicit` counts as forced. `.followKeyboard` is the keyboard's language,
+    /// which says what the user types in, not what they said; the transcript can be
+    /// in another, and detection is the better witness of which.
+    public static func transcriptLanguageCode(mode: TranscriptionLanguageMode,
+                                              detectedCode: String?) -> String? {
+        if case .explicit(let language) = mode { return language.rawValue }
+        return detectedCode
+    }
+
+    /// This job with its task's worked examples resolved for its transcript language.
+    /// What `PolishPipeline.transform` runs, so every later step sees one prompt.
+    public func resolvingExamples() -> PolishJob {
+        PolishJob(
+            task: task.resolvingExamples(forTranscriptLanguage: transcriptLanguageCode),
+            promptLanguage: promptLanguage, typographyLanguage: typographyLanguage,
+            inputLanguageCodes: inputLanguageCodes, transcriptLanguageCode: transcriptLanguageCode
         )
     }
 }
