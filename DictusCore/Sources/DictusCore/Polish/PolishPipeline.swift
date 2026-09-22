@@ -73,6 +73,10 @@ public enum PolishPipeline {
                                  engine: PolishEngineProtocol,
                                  job: PolishJob,
                                  gate: PolishAvailabilityGate = PolishAvailabilityGate()) async -> Result {
+        // A Smart Mode's worked examples in the transcript's language, when it has
+        // them (#587). Resolved once, here, so the context guard, the engine and its
+        // session cache all price, send and key on the same string.
+        let job = job.resolvingExamples()
         // Polish is in its unavailable state for this engine (#315): two
         // consecutive `rateLimited` refusals said this process is on the wrong
         // side of Apple's background rate limit, and only a fresh process
