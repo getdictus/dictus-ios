@@ -246,3 +246,70 @@ the **linguistic structure** of one device failure and none of its topic.
 | `R5-telegraphic` | a week of phone trouble, told in `je` | P2: first person kept, not a noun-phrase list |
 | `R6-two-negations` | 3 sentences, two negations, ~260 characters | both negations kept; accepted under 0.75 |
 | `R4-en`, `R5-en` | English versions of R4 and R5 | P2 in English |
+
+---
+
+## 8. Round-2 results (appended after the runs; §7 unchanged)
+
+Shipping prompt = round-2 code on `feature/571-resume-mode` (step-2 table through
+#587's seam `adafb69` and harness commit `4fe1c6c`, both cherry-picked unchanged).
+Runs: `runs/r2-*`, reproducible with `run-round2.sh`. macOS 27.0. `Liste` and Normal
+comparison runs are round 1's (`compare-notes.*`, `compare-polish.*`): neither prompt
+moved.
+
+### Bars
+
+| Bar | Round 1 | Round 2 | Verdict |
+|---|---|---|---|
+| **L1** FR | 0/35 wrong language | **0/35** | holds |
+| **L1** EN | 20/20 English | **20/20** | holds |
+| **L1** 13 other languages | 55/130 wrong (English) | **0/130** | **holds in every language** (step 2) |
+| **B** bullets | 0/318 | **0/240** (FR, EN, device-shaped, 13 languages, compare) | holds |
+| **R** in band, FR (one-line excluded) | 15/30 in `0.1…0.6` | **21/30** in `0.1…0.75` | fails ≥ 90 % on the Mac |
+| **R** in band, EN | 13/20 | **15/20** | fails ≥ 90 % on the Mac |
+| **R** in band, 13 languages | 48/130 | **105/130** (81 %) | — |
+| **P2** person, FR and EN accepted | 1 lost (EN notes) | **0 flags** in 36 accepted + hand read of every accepted output: first person kept, no `nous devons`, no noun-phrase string | holds |
+| **D** vs `Liste` | 5/5 | **5/5** (0/15 bullets vs 15/15) | holds |
+| **D** vs Normal (median ≤ half of Normal's) | 2/5 | **1/5** (S3 0.25; S1 0.62, S5 0.54, E3 0.54, E4 0.82 against Normal ≈ 1.0) | **fails on the Mac** |
+| **A** never answers | 0 | **0** | holds |
+
+**Bar D under the new ceiling, stated plainly.** 19 of the 36 accepted FR/EN outputs
+sit between 0.6 and 0.75, i.e. they were refused under 0.6 and are accepted now
+(`S1`, `S4`, `S7`, `E1`, `E2`). Each is 60 to 75 % of its input where Normal is about
+100 %: shorter, but not "half". On the Mac, 0.75 lets through outputs that read closer
+to Normal than to a gist. The device condensed long dictations to 0.36 and 0.44 on
+2026-09-22, which is well inside "half of Normal"; whether short, dense dictations
+stay visibly different on the phone under 0.75 is the device round's question.
+
+### What 0.75 now lets through that 0.6 refused
+
+`S7` (a request addressed to an assistant, `issues dictus iOS`) was refused 5/5 in
+round 1 at 0.69 to 0.88. In round 2 it is **accepted 4/5 at 0.69 to 0.74, and all 4
+turn `dictus` into `dictées`**: the #570 meaning distortion, which the old ceiling
+happened to hide. Likewise `E2` is accepted 5/5 at 0.72 to 0.74 with proper names
+lowercased (`thomas`, `storekit`).
+
+### Observables: the device distortions (`summary-device-r1.json`, 40 runs)
+
+On the Mac **all 40 were refused on `length`** (0.76 to 1.03): the Mac barely
+condenses ~250-character inputs, where the phone reached 0.72. So these read the
+engine output only:
+
+| Fixture | Observable | Mac |
+|---|---|---|
+| `R1-date-word` | `demain` kept, never `aujourd'hui` | `aujourd'hui` 0/5; `demain` **dropped** 3/5 |
+| `R2-misrendered-product` | `dictus` kept | 5/5 kept (output ≈ input) |
+| `R3-no-qualifier` | no invented qualifier | 0/5 |
+| `R4-on-not-nous`, `R4-en` | no `nous devons` / `we must` | 0/10 |
+| `R5-telegraphic`, `R5-en` | first person kept | 10/10 |
+| `R6-two-negations` | both negations kept | 5/5 (hand read) |
+
+These cannot show the device's distortions because the Mac leaves the text almost
+untouched. They are the fixtures the next fidelity check (#570) can measure against.
+
+### Other things the round showed
+
+- **Japanese, a figure changed and accepted** 2/10: `15000` → `1500` (`ja-todo-enumeration`).
+- **Italian, the grounding check refused 5/5** `it-todo-enumeration` outputs that read
+  correctly by hand: a guardrail false refusal candidate, not investigated here.
+- Korean and Turkish sit at 5/10 in band: under-condensing, not language.

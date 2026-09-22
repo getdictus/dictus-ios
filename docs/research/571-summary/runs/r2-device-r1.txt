@@ -1,0 +1,117 @@
+
+
+████ ARM shipping — mode summary, 5 run(s) × 8 fixture(s)
+
+━━ [R1-date-word] 235 chars, lang=fr
+  raw: bon alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match
+  #1 rejectedGuardrail/length ratio=0.81 OUT-OF-BAND 4066ms
+     out: Pour demain je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match le soir.
+  #2 rejectedGuardrail/length ratio=0.76 OUT-OF-BAND 6081ms  ⚑ OBS[+demain]
+     out: Je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match le soir.
+  #3 rejectedGuardrail/length ratio=0.76 OUT-OF-BAND 6073ms  ⚑ OBS[+demain]
+     out: Je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match ce soir.
+  #4 rejectedGuardrail/length ratio=0.76 OUT-OF-BAND 6445ms  ⚑ OBS[+demain]
+     out: Je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match le soir.
+  #5 rejectedGuardrail/length ratio=0.81 OUT-OF-BAND 4674ms
+     out: Pour demain je dois passer à la banque le matin, rendre les livres à la médiathèque, appeler le garage pour le contrôle technique et préparer le sac de sport du petit pour son match le soir.
+
+━━ [R2-misrendered-product] 219 chars, lang=fr
+  raw: j'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version
+  #1 rejectedGuardrail/length ratio=1.00 OUT-OF-BAND 4600ms
+     out: J'ai regardé les hue dictus iOS ce matin : il y a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.
+  #2 rejectedGuardrail/length ratio=1.01 OUT-OF-BAND 4953ms
+     out: J'ai regardé les hue dictus iOS ce matin : il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.
+  #3 rejectedGuardrail/length ratio=1.01 OUT-OF-BAND 6763ms
+     out: J'ai regardé les hue dictus iOS ce matin : il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.
+  #4 rejectedGuardrail/length ratio=0.99 OUT-OF-BAND 7251ms
+     out: J'ai regardé les hue dictus iOS ce matin : il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je veux qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.
+  #5 rejectedGuardrail/length ratio=1.00 OUT-OF-BAND 7038ms
+     out: J'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.
+
+━━ [R3-no-qualifier] 239 chars, lang=fr
+  raw: je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux
+  #1 rejectedGuardrail/length ratio=0.95 OUT-OF-BAND 9193ms
+     out: Je ne vais pas réinstaller le téléphone tout de suite parce que je ne veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, je vais d'abord le redémarrer et vider le cache et on verra demain si ça va mieux.
+  #2 rejectedGuardrail/length ratio=1.02 OUT-OF-BAND 8978ms
+     out: Je ne vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.
+  #3 rejectedGuardrail/length ratio=1.02 OUT-OF-BAND 9094ms
+     out: Je ne vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.
+  #4 rejectedGuardrail/length ratio=1.01 OUT-OF-BAND 8554ms
+     out: Je ne vais pas réinstaller le téléphone tout de suite parce que je ne veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.
+  #5 rejectedGuardrail/length ratio=0.94 OUT-OF-BAND 7734ms
+     out: Je ne vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, je vais d'abord le redémarrer et vider le cache et on verra demain si ça va mieux.
+
+━━ [R4-on-not-nous] 238 chars, lang=fr
+  raw: alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider
+  #1 rejectedGuardrail/length ratio=0.97 OUT-OF-BAND 8503ms
+     out: Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider
+  #2 rejectedGuardrail/length ratio=0.97 OUT-OF-BAND 4181ms
+     out: Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider
+  #3 rejectedGuardrail/length ratio=0.97 OUT-OF-BAND 4189ms
+     out: Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.
+  #4 rejectedGuardrail/length ratio=0.97 OUT-OF-BAND 4006ms
+     out: Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.
+  #5 rejectedGuardrail/length ratio=0.97 OUT-OF-BAND 5814ms
+     out: Je voudrais qu'on fasse un point rapide sur le budget de la sortie de fin d'année parce que je trouve qu'on dépense beaucoup trop pour la salle et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.
+
+━━ [R5-telegraphic] 276 chars, lang=fr
+  raw: ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue
+  #1 rejectedGuardrail/length ratio=0.95 OUT-OF-BAND 5833ms
+     out: Ça fait une semaine que j'ai passé à la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+  #2 rejectedGuardrail/length ratio=0.95 OUT-OF-BAND 5806ms
+     out: Ça fait une semaine que j'ai passé à la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+  #3 rejectedGuardrail/length ratio=0.92 OUT-OF-BAND 3938ms
+     out: Ça fait une semaine que j'ai la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+  #4 rejectedGuardrail/length ratio=0.92 OUT-OF-BAND 3866ms
+     out: Ça fait une semaine que j'ai la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+  #5 rejectedGuardrail/length ratio=0.92 OUT-OF-BAND 3927ms
+     out: Ça fait une semaine que j'ai la nouvelle version du système sur mon téléphone et j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+
+━━ [R6-two-negations] 276 chars, lang=fr
+  raw: Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+  #1 rejectedGuardrail/length ratio=0.97 OUT-OF-BAND 6586ms
+     out: Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+  #2 rejectedGuardrail/length ratio=0.86 OUT-OF-BAND 6326ms
+     out: Je n'ai pas envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. J'attends la nouvelle grille tarifaire publiée lundi matin et je mets tout à jour avant de l'envoyer dans la journée.
+  #3 rejectedGuardrail/length ratio=0.86 OUT-OF-BAND 6696ms
+     out: Je n'ai pas envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. Je attends la nouvelle grille tarifaire publiée lundi matin, puis je mets tout à jour et je l'envoie dans la journée.
+  #4 rejectedGuardrail/length ratio=0.97 OUT-OF-BAND 8833ms
+     out: Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+  #5 rejectedGuardrail/length ratio=0.94 OUT-OF-BAND 8080ms
+     out: Je n'ai pas envoyé le devis au client parce que les prix du fournisseur ne sont pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+
+━━ [R4-en] 205 chars, lang=en
+  raw: so I'd like us to go over the budget for the end-of-year outing, because I think we're spending way too much on the venue, and I'd like us to compare it with two other places before Friday so we can decide
+  #1 rejectedGuardrail/length ratio=0.94 OUT-OF-BAND 8582ms
+     out: I want us to review the budget for the end-of-year outing because I think we're spending too much on the venue and I want us to compare it with two other places before Friday so we can decide.
+  #2 rejectedGuardrail/length ratio=0.92 OUT-OF-BAND 7729ms
+     out: I want us to review the budget for the end-of-year outing because I think we're spending too much on the venue and I want to compare it with two other places before Friday so we can decide
+  #3 rejectedGuardrail/length ratio=0.93 OUT-OF-BAND 7634ms
+     out: I want us to review the budget for the end-of-year outing because I think we're spending too much on the venue and I want us to compare it with two other places before Friday so we can decide
+  #4 rejectedGuardrail/length ratio=0.94 OUT-OF-BAND 7789ms
+     out: I want us to review the budget for the end-of-year outing because I think we're spending too much on the venue and I want us to compare it with two other places before Friday so we can decide.
+  #5 rejectedGuardrail/length ratio=0.77 OUT-OF-BAND 3924ms
+     out: I want us to review the budget for the end-of-year outing: we are spending too much on the venue, so I want to compare it with two other places before Friday.
+
+━━ [R5-en] 229 chars, lang=en
+  raw: it's been a week since I updated my phone to the new system version and honestly I keep getting errors, notifications show up late, the battery drains fast and two apps crash on launch, I'm thinking of rolling back if it keeps up
+  #1 rejectedGuardrail/length ratio=1.03 OUT-OF-BAND 4086ms
+     out: it has been a week since I updated my phone to the new system version: i keep getting errors, notifications arrive late, the battery runs out quickly and two apps crash when i launch them. i am considering rolling back if it continues.
+  #2 rejectedGuardrail/length ratio=0.99 OUT-OF-BAND 3982ms
+     out: it has been a week since I updated my phone to the new system version: errors keep appearing, notifications arrive late, the battery runs down quickly and two apps crash on launch. I am considering rolling back if it continues.
+  #3 rejectedGuardrail/length ratio=0.99 OUT-OF-BAND 6985ms
+     out: it has been a week since I updated my phone to the new system version: errors keep appearing, notifications arrive late, the battery runs out quickly and two apps crash on launch. I am considering rolling back if it continues.
+  #4 rejectedGuardrail/length ratio=0.97 OUT-OF-BAND 6996ms
+     out: It has been a week since I updated my phone to the new system version: I keep getting errors, notifications show up late, the battery drains fast and two apps crash on launch. I am thinking of rolling back if it keeps up.
+  #5 rejectedGuardrail/length ratio=0.97 OUT-OF-BAND 7007ms
+     out: it has been a week since I updated my phone to the new system version: i keep getting errors, notifications show up late, the battery drains fast and two apps crash on launch. i am thinking of rolling back if it keeps up.
+
+
+══ bars (engine outputs; `acc` = accepted by the pipeline)
+arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | person flags | preamble | example | figure | accepted
+shipping | en | 10 | 0 (0) | 0 (0%) | 0 | 0/10 (0%) | 0 | 0 | 0 | 0 | 0/10
+shipping | fr | 30 | 0 (0) | 0 (0%) | 0 | 0/30 (0%) | 0 | 0 | 0 | 0 | 0/30
+shipping | ALL | 40 | 0 (0) | 0 (0%) | 0 | 0/40 (0%) | 0 | 0 | 0 | 0 | 0/40
+   refusals, shipping: length×40
+
+capture written: ../docs/research/571-summary/runs/r2-device-r1.json
