@@ -88,6 +88,17 @@ final class KnownAppSchemesTests: XCTestCase {
         XCTAssertFalse(KnownAppSchemes.isWorthReporting("com.apple.mobilesafari"))
     }
 
+    /// T3 Code was inherited as a host with no way back, and up to 1.1.0 `t3code://`
+    /// did land on Home. Upstream fixed that in 1.2.0 (#564), so the entry moved: it must
+    /// not drift back into the dead-end set, and the dev/preview builds stay unmapped.
+    func testT3CodeReturnsThroughItsAppScheme() {
+        XCTAssertEqual(KnownAppSchemes.returnURL(forHostId: "com.t3tools.t3code"), URL(string: "t3code://"))
+        XCTAssertFalse(KnownAppSchemes.knownNoSchemeHosts.contains("com.t3tools.t3code"))
+        for unverified in ["com.t3tools.t3code.dev", "com.t3tools.t3code.preview", "com.t3tools.t3code.swiftui"] {
+            XCTAssertNil(KnownAppSchemes.schemesByBundleId[unverified], "\(unverified) was never tested")
+        }
+    }
+
     // MARK: - The three hosts the acceptance criteria name
 
     func testTheAcceptanceHostsAreAllMapped() {
