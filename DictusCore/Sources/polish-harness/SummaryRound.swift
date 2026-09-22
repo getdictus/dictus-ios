@@ -34,9 +34,13 @@ struct SummaryRun: Codable {
     let reportFraming: [String]
     let opensOnInfinitive: Bool
     let firstPersonLost: Bool
+    let collectiveSwitch: Bool?
     let preamble: Bool
     let exampleContent: [String]
     let novelFigures: [String]
+    /// The fixture's own `expect` entries this output missed (#571 round 2): the
+    /// device distortions, carried as observables rather than bars.
+    let observableMisses: [String]?
     let output: String
     let hasEngineOutput: Bool
 
@@ -50,9 +54,11 @@ struct SummaryRun: Codable {
         if !reportFraming.isEmpty { flags.append("REPORT[\(reportFraming.joined(separator: ","))]") }
         if opensOnInfinitive { flags.append("INFINITIVE") }
         if firstPersonLost { flags.append("PERSON-LOST") }
+        if collectiveSwitch == true { flags.append("COLLECTIVE") }
         if preamble { flags.append("PREAMBLE") }
         if !exampleContent.isEmpty { flags.append("EXAMPLE[\(exampleContent.joined(separator: ","))]") }
         if !novelFigures.isEmpty { flags.append("FIGURE[\(novelFigures.joined(separator: ","))]") }
+        if let misses = observableMisses, !misses.isEmpty { flags.append("OBS[\(misses.joined(separator: ","))]") }
         return flags
     }
 }
@@ -87,8 +93,10 @@ func runSummaryRound(fixtures: [Fixture], mode: SmartMode?, armPaths: [String],
                     outputLanguage: score.outputLanguage, languageMatches: score.languageMatches,
                     listLines: score.listLines, ratio: score.ratio, reportFraming: score.reportFraming,
                     opensOnInfinitive: score.opensOnInfinitive, firstPersonLost: score.firstPersonLost,
+                    collectiveSwitch: score.collectiveSwitch,
                     preamble: score.preamble, exampleContent: score.exampleContent,
-                    novelFigures: score.novelFigures, output: output,
+                    novelFigures: score.novelFigures,
+                    observableMisses: observableMisses(fixture, output: output), output: output,
                     hasEngineOutput: outcome.engineOutput != nil
                 )
                 all.append(run)
@@ -104,10 +112,21 @@ func runSummaryRound(fixtures: [Fixture], mode: SmartMode?, armPaths: [String],
     writeSummaryCapture(all, to: jsonOut)
 }
 
+/// The fixture's `contains` / `notContains` expectations that `output` misses,
+/// case-insensitively. Empty when the fixture declares none.
+func observableMisses(_ fixture: Fixture, output: String) -> [String] {
+    let lowered = output.lowercased()
+    return (fixture.expect ?? []).compactMap { expectation in
+        if let needle = expectation.contains, !lowered.contains(needle.lowercased()) { return "+\(needle)" }
+        if let needle = expectation.notContains, lowered.contains(needle.lowercased()) { return "-\(needle)" }
+        return nil
+    }
+}
+
 /// One row per arm and language: the numbers each bar is read off.
 func printSummaryTable(_ all: [SummaryRun], arms: [String], band: ClosedRange<Double>) {
     print("\n\n══ bars (engine outputs; `acc` = accepted by the pipeline)")
-    print("arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | report/infinitive/person-lost | preamble | example | figure | accepted")
+    print("arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | person flags | preamble | example | figure | accepted")
     for arm in arms {
         let rows = all.filter { $0.arm == arm && $0.hasEngineOutput }
         let languages = Array(Set(rows.map(\.lang))).sorted()
@@ -121,7 +140,9 @@ func printSummaryTable(_ all: [SummaryRun], arms: [String], band: ClosedRange<Do
             }.count
             let lists = set.filter { $0.listLines > 0 }.count
             let inBand = set.filter { band.contains($0.ratio) }.count
-            let person = set.filter { !$0.reportFraming.isEmpty || $0.opensOnInfinitive || $0.firstPersonLost }.count
+            let person = set.filter {
+                !$0.reportFraming.isEmpty || $0.opensOnInfinitive || $0.firstPersonLost || $0.collectiveSwitch == true
+            }.count
             let cells = [
                 arm, lang, "\(count)",
                 "\(wrong.count) (\(wrong.filter(\.accepted).count))",

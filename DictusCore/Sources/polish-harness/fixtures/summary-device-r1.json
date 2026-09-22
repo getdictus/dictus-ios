@@ -1,0 +1,107 @@
+[
+  {
+    "id": "R1-date-word",
+    "lang": "fr",
+    "raw": "bon alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match",
+    "expect": [
+      {
+        "contains": "demain"
+      },
+      {
+        "notContains": "aujourd'hui"
+      }
+    ],
+    "sttEngine": "PK"
+  },
+  {
+    "id": "R2-misrendered-product",
+    "lang": "fr",
+    "raw": "j'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version",
+    "expect": [
+      {
+        "contains": "dictus"
+      },
+      {
+        "notContains": "dictionnaire"
+      },
+      {
+        "notContains": "dictée"
+      }
+    ],
+    "sttEngine": "PK"
+  },
+  {
+    "id": "R3-no-qualifier",
+    "lang": "fr",
+    "raw": "je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux",
+    "expect": [
+      {
+        "notContains": "coûteu"
+      },
+      {
+        "notContains": "longue"
+      },
+      {
+        "notContains": "pénible"
+      },
+      {
+        "notContains": "risqué"
+      },
+      {
+        "notContains": "compliqu"
+      }
+    ],
+    "sttEngine": "PK"
+  },
+  {
+    "id": "R4-on-not-nous",
+    "lang": "fr",
+    "raw": "alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider",
+    "expect": [
+      {
+        "notContains": "nous devons"
+      },
+      {
+        "notContains": "nous devrions"
+      }
+    ],
+    "sttEngine": "PK"
+  },
+  {
+    "id": "R5-telegraphic",
+    "lang": "fr",
+    "raw": "ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue",
+    "sttEngine": "PK"
+  },
+  {
+    "id": "R6-two-negations",
+    "lang": "fr",
+    "raw": "Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.",
+    "expect": [
+      {
+        "contains": "pas"
+      }
+    ],
+    "sttEngine": "PK"
+  },
+  {
+    "id": "R4-en",
+    "lang": "en",
+    "raw": "so I'd like us to go over the budget for the end-of-year outing, because I think we're spending way too much on the venue, and I'd like us to compare it with two other places before Friday so we can decide",
+    "expect": [
+      {
+        "notContains": "we must"
+      },
+      {
+        "notContains": "we need to"
+      }
+    ],
+    "sttEngine": "PK"
+  },
+  {
+    "id": "R5-en",
+    "lang": "en",
+    "raw": "it's been a week since I updated my phone to the new system version and honestly I keep getting errors, notifications show up late, the battery drains fast and two apps crash on launch, I'm thinking of rolling back if it keeps up",
+    "sttEngine": "PK"
+  }
+]

@@ -60,6 +60,21 @@ final class PolishSummaryShapeTests: XCTestCase {
         XCTAssertEqual(report.reportFraming, ["le locuteur"])
     }
 
+    /// Round 2's device failure, `j'aimerais qu'on fasse un point` → `Nous devons
+    /// aborder`: a collective obligation the speaker never voiced. A spoken `on`
+    /// kept as `on` is not flagged, nor is a `nous` the speaker said.
+    func testACollectiveObligationTheSpeakerNeverUsedIsFlagged() {
+        let input = "j'aimerais qu'on fasse un point sur le budget"
+        XCTAssertTrue(PolishSummaryShape.score(output: "Nous devons faire un point sur le budget.",
+                                               input: input, expectedLanguage: "fr").collectiveSwitch)
+        XCTAssertFalse(PolishSummaryShape.score(output: "J'aimerais qu'on fasse un point sur le budget.",
+                                                input: input, expectedLanguage: "fr").collectiveSwitch)
+        XCTAssertFalse(PolishSummaryShape.score(output: "Nous partons demain.",
+                                                input: "nous partons demain matin", expectedLanguage: "fr").collectiveSwitch)
+        XCTAssertTrue(PolishSummaryShape.score(output: "We must review the budget.",
+                                               input: "I'd like us to go over the budget", expectedLanguage: "en").collectiveSwitch)
+    }
+
     /// A report term the speaker used themselves is theirs, not the model's.
     func testAReportTermPresentInTheInputIsNotFlagged() {
         let input = "the speaker at the conference said I should call back"

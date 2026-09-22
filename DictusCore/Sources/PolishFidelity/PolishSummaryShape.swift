@@ -27,6 +27,10 @@ public struct PolishSummaryShapeScore: Equatable, Sendable {
     /// The input speaks in the first person and the output never does. FR and EN;
     /// `false` wherever the check cannot run.
     public let firstPersonLost: Bool
+    /// The output switches the speaker to a collective obligation they never used —
+    /// `nous devons`, `we must` — where the input said `on`/`je`/`I` (#571 round 2,
+    /// device: `j'aimerais qu'on fasse un point` → `Nous devons aborder`). FR and EN.
+    public let collectiveSwitch: Bool
     /// The output opens on a preamble or a label (`Voici`, `In short`, `Summary:`).
     public let preamble: Bool
     /// Content of the prompt's own worked examples, absent from the input (#414).
@@ -94,6 +98,7 @@ public enum PolishSummaryShape {
             reportFraming: framing,
             opensOnInfinitive: opensOnInfinitive(output, language: base),
             firstPersonLost: firstPersonLost(output: output, input: input, language: base),
+            collectiveSwitch: collectiveSwitch(output: output, input: input, language: base),
             preamble: opensOnPreamble(loweredOutput, firstLine: lines.first),
             exampleContent: examples,
             novelFigures: figures
@@ -151,6 +156,21 @@ public enum PolishSummaryShape {
         default:
             return false
         }
+    }
+
+    /// FR and EN only: a collective subject or obligation in the output that the
+    /// input never used. `nous` is not how a French speaker says "we" out loud (`on`
+    /// is), so its appearance is the model's voice; in English only the obligation
+    /// forms are flagged, because a spoken `we` is ordinary.
+    static func collectiveSwitch(output: String, input: String, language: String) -> Bool {
+        let pattern: String
+        switch language {
+        case "fr": pattern = #"(?i)(^|[^\p{L}])nous([^\p{L}]|$)"#
+        case "en": pattern = #"(?i)(^|[^\p{L}])we (must|need to|have to|should)([^\p{L}]|$)"#
+        default: return false
+        }
+        let has = { (text: String) in text.range(of: pattern, options: .regularExpression) != nil }
+        return has(output) && !has(input)
     }
 
     /// FR and EN only: whether the speaker's first person, present in the input,
