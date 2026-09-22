@@ -107,6 +107,17 @@ import Foundation
 /// **What held everywhere:** 0 bullets in 318 outputs, including the enumerations
 /// `List` bullets 15 times in 15; 0 report framings; 0 preambles; 0 example content
 /// copied; 0 answers to a dictation addressed to an assistant.
+///
+/// ### Round 2 (2026-09-22): device round, then step 2, a hard person rule, ceiling 0.75
+///
+/// The maintainer's device round (iOS 27.0, 8 dictations) held the language 6/6, the
+/// prose 8/8 and the no-answer rule, condensed long dictations to 0.36 and 0.44 —
+/// far below the Mac — and lost the speaker's person in 2 of 6 accepted outputs: a
+/// string of noun phrases with no `je`, and a spoken `on` turned into `Nous devons`.
+/// Rule 5 now names both. The examples moved to the transcript's language
+/// (`SmartModeSummaryExamples`), and the Mac bench went from 55 wrong-language
+/// outputs in 130 to **0 in 130** across the 13 other languages, still 0 in FR and EN.
+/// Person flags: 0 in 240 outputs. Numbers in `docs/research/571-summary/bars.md` §8.
 enum SmartModeSummaryPrompt {
 
     /// One worked example: a transcript and the condensed text it should become.
