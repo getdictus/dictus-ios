@@ -187,3 +187,62 @@ Per #587 decision 5, a language above 10 % climbs **every** mode to step 2. That
 `runs/baseline-message-i18n.*`: 0/78 wrong language. But on the Mac `Message` barely
 rewrites (PR #576's own finding), so an echo keeps its language trivially. This is not
 evidence that step 1 holds for a mode that rewrites.
+
+---
+
+## 7. Round 2 — amendments, declared before the first round-2 candidate call (2026-09-22)
+
+**Why a round 2.** Pierre's device round of 2026-09-22 (iPhone16,2, iOS 27.0, commit
+`13ea392`, 8 `Résumé` dictations, FR/EN, Parakeet v3):
+
+| What | Device result |
+|---|---|
+| Language | 6/6 correct (FR and EN) |
+| Bullets / answers | 0 / 0 |
+| Condensing | long dictations at **0.36 and 0.44**: the phone condenses far more than the Mac |
+| Meaning changed | **3 of 6 accepted**: a date word (`pour demain` → `Aujourd'hui`) on a to-do list; a product name Parakeet misrendered (`hue dictus iOS`) turned into `les dictionnaires iOS`; an invented qualifier (`réinstallation coûteuse` where the speaker only said he did not want to lose his setup) |
+| Person lost | **2 of 6**: a telegraphic noun-phrase output with no `je`; `j'aimerais qu'on fasse un point` → `Nous devons aborder` |
+| Ceiling | a good 263-character, three-sentence dictation with two negations came back at ~0.72, both negations kept, **refused by the 0.6 ceiling**. A 38-character line refused as intended; a 73-character English line accepted at 0.47 |
+
+Pierre approved three changes. Each amends §2, §3 or §5, and says so.
+
+### 7.1 Amendments
+
+| # | Amends | Change |
+|---|---|---|
+| A1 | §3, "The step-2 table is not built" | **Step 2 of #587 decision 5.** Worked examples in the transcript's language, for all 15 Apple FM languages (agent-translated from the two step-1 examples, same content, same shape). Rules stay in English, rule 1 stays the language rule. The language is the forced transcription language if set, else the transcript's detected language (#587 decision 5). Wired through #587's shared seam (`SmartModePrompt.localizedInstructions`), cherry-picked as an identical commit. Unknown language → the step-1 set. |
+| A2 | §3, rule 5 | **The speaker's person is a hard rule**: first person stays first person (`je` / `on` / `I` / `we` as spoken), no telegraphic noun-phrase summary, no switch to a collective obligation (`nous devons`, `we must`) the speaker did not use. |
+| A3 | §2, `maximumLengthRatio: 0.6` | **Ceiling 0.75.** Decision 1 still holds (a band, never a sentence count); only its top moves. |
+
+**Explicitly not done:** no meaning or fidelity guardrail. That is being grilled with
+Pierre separately (#570, extended to every rewriting mode). The three device
+distortions become **observables**, not bars.
+
+### 7.2 Round-2 bars
+
+Runs: 5 per fixture on FR, EN and the new device-shaped set; 5 per fixture on the 13
+other languages. Engine outputs, as in §5.
+
+| # | Bar | Threshold |
+|---|---|---|
+| **L1** (unchanged in substance) | Output language, every Apple FM language | **≤ 10 % wrong-language engine outputs per language** (the reading §6 declared), 0 accepted, English 100 % English |
+| **B** (unchanged) | No bullets | 0 |
+| **R** (amended by A3) | In band `0.1 … 0.75` | ≥ 90 % of engine outputs, FR and EN separately, one-line fixtures excluded. **Reported against the Mac's known under-condensing**: the device condensed to 0.36–0.44 where the Mac gave 0.6–0.85, so a miss here is read beside the device numbers, not alone |
+| **P2** (new, from A2) | Speaker's person, hard | FR and EN, **0 accepted outputs** that (a) lose a first-person marker the input had, (b) introduce `nous` / collective `we must/need/have to` the input did not use, or (c) open on a bare infinitive or report framing. Scored by `PolishSummaryShape`, every flag hand-read |
+| **D** (re-checked under A3) | Visibly different from Normal polish (#393 bar B) and from `Liste` | Same five dictations as §6: Résumé 0 bullets where `Liste` bullets; Résumé median ratio ≤ half of Normal's. **Also reported:** how many accepted outputs sit between 0.6 and 0.75, i.e. the ones the old ceiling refused, each with its ratio to Normal's |
+| **A** (unchanged) | Never answers | 0 |
+
+### 7.3 Observables (reported, never barred): the device distortions, rephrased
+
+`fixtures/summary-device-r1.json`. The device texts are private; each fixture keeps
+the **linguistic structure** of one device failure and none of its topic.
+
+| Fixture | Keeps the structure of | Observable |
+|---|---|---|
+| `R1-date-word` | a to-do list said "pour demain" | output keeps `demain`, never `aujourd'hui` |
+| `R2-misrendered-product` | Parakeet's `hue dictus iOS` | output keeps `dictus`, no `dictionnaire` / `dictée` |
+| `R3-no-qualifier` | "je veux pas perdre ma config" before a reinstall | no evaluative qualifier the speaker did not say (`coûteu`, `longue`, `pénible`, `risqué`, `compliqu`) |
+| `R4-on-not-nous` | "j'aimerais qu'on fasse un point" | P2: no `nous devons`, first person kept |
+| `R5-telegraphic` | a week of phone trouble, told in `je` | P2: first person kept, not a noun-phrase list |
+| `R6-two-negations` | 3 sentences, two negations, ~260 characters | both negations kept; accepted under 0.75 |
+| `R4-en`, `R5-en` | English versions of R4 and R5 | P2 in English |
