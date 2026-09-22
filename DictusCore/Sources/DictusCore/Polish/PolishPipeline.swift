@@ -133,9 +133,12 @@ public enum PolishPipeline {
             // Restore newlines (+ output-language typography, when there is an
             // output language) BEFORE the guardrail so the char-ratio compares
             // apples to apples (both sides use `\n`).
-            let polished = job.typographyLanguage.map {
+            // A closing fence the model appended is dropped before anything judges
+            // the text (#587): it carries no word, so no guardrail would refuse it
+            // and it would reach the document as the last line.
+            let polished = PolishPostpass.stripTrailingFenceLines(job.typographyLanguage.map {
                 PolishPostpass.decodeFromEngine(polishedRaw, language: $0)
-            } ?? PolishPostpass.decodeNewlines(polishedRaw)
+            } ?? PolishPostpass.decodeNewlines(polishedRaw))
             if Task.isCancelled {
                 let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
                 return Result(engineOutput: polished, outcome: .cancelled, engineMs: engineMs, postprocessMs: postMs)

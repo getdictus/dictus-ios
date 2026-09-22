@@ -85,6 +85,34 @@ public enum PolishPostpass {
         return out
     }
 
+    /// Drops every trailing line made only of a code fence (```` ``` ````) or a
+    /// horizontal rule (`---`), and the blank lines before them (#587).
+    ///
+    /// The short `Structuré` prompt closed 18 of 354 Mac outputs on such a line, and
+    /// every one of the 18 was accepted: the guardrails judge words, and a fence
+    /// carries none, so nothing refused it. It is the model closing a block it thinks
+    /// it opened, not something the speaker said — nobody dictates three backticks.
+    ///
+    /// **It can never remove a word.** A line goes only when, trimmed, it is exactly
+    /// one of those two tokens, and only while it is the last line: a fence or a rule
+    /// anywhere else, or one sharing its line with any other character, is left alone.
+    public static func stripTrailingFenceLines(_ text: String) -> String {
+        var lines = text.components(separatedBy: "\n")
+        var stripped = false
+        while let last = lines.last {
+            let trimmed = last.trimmingCharacters(in: .whitespaces)
+            if trimmed.isEmpty, stripped || lines.count > 1 {
+                lines.removeLast()
+            } else if trimmed == "```" || trimmed == "---" {
+                lines.removeLast()
+                stripped = true
+            } else {
+                break
+            }
+        }
+        return stripped ? lines.joined(separator: "\n") : text
+    }
+
     /// Blank lines become single line breaks when `text` is shorter than `limit`
     /// characters (#572). Longer text is returned untouched.
     ///
