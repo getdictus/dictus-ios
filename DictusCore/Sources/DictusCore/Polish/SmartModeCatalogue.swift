@@ -163,7 +163,11 @@ public enum SmartModeCatalogue {
         prompt: SmartModePrompt(
             instructions: SmartModeStructuredPrompt.instructions(),
             userInstruction: SmartModeStructuredPrompt.userInstruction,
-            outputMarker: SmartModeStructuredPrompt.outputMarker
+            outputMarker: SmartModeStructuredPrompt.outputMarker,
+            // One example set per Apple FM language (#587, decision 5 step 2). Benched
+            // at 0 % refused on `check=language` in all 16, against up to 29 % for the
+            // prompt this replaces; the rules stay one English text.
+            localizedInstructions: SmartModeStructuredPrompt.localizedInstructions()
         ),
         contract: PolishAcceptanceContract(
             minimumLengthRatio: 0.4,

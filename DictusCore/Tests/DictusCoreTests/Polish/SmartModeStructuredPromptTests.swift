@@ -12,8 +12,7 @@ import XCTest
 /// about the speaker's memory is a set nobody would read again.
 final class SmartModeStructuredPromptTests: XCTestCase {
 
-    /// The short prompts #587 benched: the fallback pair and the 16 localized sets.
-    /// They are **not** what the mode sends today — see the last test.
+    /// Every prompt this mode can send: the fallback pair and the 16 localized sets.
     private var prompts: [(String, String)] {
         [("fallback", SmartModeStructuredPrompt.shortInstructions())]
             + SmartModeStructuredPrompt.localizedInstructions().map { ($0.key, $0.value) }
@@ -99,10 +98,17 @@ final class SmartModeStructuredPromptTests: XCTestCase {
         }
     }
 
-    /// The sets are **benched and not wired** (#587 round 3 fails B3a), so the mode
-    /// still sends one prompt whatever the language. This assertion is what will fail
-    /// the day someone wires them without moving this file.
-    func testTheCatalogueDoesNotCarryTheSetsYet() {
-        XCTAssertNil(SmartModeCatalogue.structured.prompt.localizedInstructions)
+    /// What the catalogue sends: the mode carries the table, and a transcript in one of
+    /// the 16 languages gets that language's prompt rather than the fallback.
+    func testTheCatalogueCarriesEverySetAndResolvesIt() {
+        let prompt = SmartModeCatalogue.structured.prompt
+        XCTAssertEqual(prompt.instructions, SmartModeStructuredPrompt.shortInstructions())
+        XCTAssertEqual(prompt.localizedInstructions?.count, 16)
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "ja"),
+                       SmartModeStructuredPrompt.localizedInstructions()["ja"])
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "no"),
+                       SmartModeStructuredPrompt.localizedInstructions()["nb"])
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions)
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: nil), prompt.instructions)
     }
 }
