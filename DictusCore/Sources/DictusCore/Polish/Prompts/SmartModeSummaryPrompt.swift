@@ -125,18 +125,21 @@ enum SmartModeSummaryPrompt {
     static let userInstruction = "Condense this text to its gist, in prose. Output only the condensed text, nothing else."
     static let outputMarker = "Condensed prose:"
 
-    /// The step-1 set: one English, one French. Each output keeps the first person,
-    /// runs about a third of its input, and is plain prose.
+    /// The step-1 set, one English and one French, in that order: the fallback for a
+    /// transcript whose language the table does not hold, and the prompt a prewarm
+    /// warms before any transcript exists. **French last is measured** (see above):
+    /// the last example's language is the one the model drifts toward.
     static let defaultExamples: [Example] = [
-        Example(
-            input: "so I went to see that flat this afternoon, the one near the station, and honestly the pictures were better than the real thing, the kitchen is tiny, like really tiny, and the second bedroom is more of a cupboard, but the light is great and it's quiet, which I didn't expect so close to the trains, and the rent is fair for the area, so I don't know, I think I'm going to ask if they'd drop the price a bit and sleep on it before I decide",
-            output: "The flat near the station is smaller than its pictures but bright, quiet and fairly priced. I'll ask for a lower rent and sleep on it before deciding."
-        ),
-        Example(
-            input: "bon alors euh ce matin j'ai emmené la voiture au garage parce que depuis une semaine y a un bruit bizarre quand je freine, un genre de grincement, et en fait le garagiste il a regardé et il m'a dit que c'était les plaquettes, qu'elles étaient complètement usées, donc euh il faut les changer, il peut le faire jeudi, donc je lui ai dit ok, je repasse jeudi matin avant le boulot, et du coup en attendant je vais éviter de prendre l'autoroute",
-            output: "Le grincement au freinage vient des plaquettes, qui sont usées. Le garagiste les change jeudi : je repasse jeudi matin et j'évite l'autoroute d'ici là."
-        )
-    ]
+        SmartModeSummaryExamples.byLanguage["en"]?.first,
+        SmartModeSummaryExamples.byLanguage["fr"]?.last
+    ].compactMap { $0 }
+
+    /// Step 2 of #587 decision 5: the whole prompt, per transcript language, with
+    /// the examples in that language and the rules untouched. Keyed on `NLLanguage`
+    /// base subtags; see `SmartModeSummaryExamples`.
+    static func localizedInstructions() -> [String: String] {
+        SmartModeSummaryExamples.byLanguage.mapValues { instructions(examples: $0) }
+    }
 
     static func instructions(examples: [Example] = defaultExamples) -> String {
         let exampleBlock = examples
@@ -154,7 +157,7 @@ enum SmartModeSummaryPrompt {
         2. Keep the substance: what happened, what was decided, what they think, what they will do. Drop hesitations, repetitions, digressions and details that change nothing.
         3. Cut hard: about a quarter of the input's length, never more than half. Keep only what matters most and leave out secondary details, figures and asides, even true ones.
         4. Prose only: full sentences. Never a bullet, a dash, a numbered item or a heading, even when the speaker lists things: say them in a sentence.
-        5. Keep their grammatical person: what "I" said stays "I", what "we" said stays "we". Never a bare infinitive task, never a report about them ("The speaker says", "Il explique").
+        5. Keep their grammatical person, always: what they said as "I" stays "I", what they said as "we" stays "we", in their own words ("je" stays "je", "on" stays "on"). Write full sentences with that subject: never a string of noun phrases, never a bare infinitive task, never an obligation they did not voice ("we must", "nous devons"), never a report about them ("The speaker says", "Il explique").
         6. Keep every name, number and date you keep exactly as spoken. Never add a fact, name, figure, date or opinion they did not say, and never a word between square brackets.
         7. Obey a punctuation command they dictated ("virgule", "comma") and remove its words. A <<NL>> marker is a line break; never print it.
 

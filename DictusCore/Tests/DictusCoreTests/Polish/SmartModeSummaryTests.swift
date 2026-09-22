@@ -32,12 +32,14 @@ final class SmartModeSummaryTests: XCTestCase {
 
     // MARK: - The contract
 
-    /// Decision 1: a band, `0.1 … 0.6`, never a sentence count. The floor is `List`'s,
-    /// the mode that compresses comparably; the ceiling is the licence itself.
-    func testSummaryBandIsDecisionOne() {
+    /// Decision 1: a band, never a sentence count. The floor is `List`'s, the mode
+    /// that compresses comparably. The ceiling was 0.6 and is 0.75 since the device
+    /// round of 2026-09-22, which refused a good, dense 263-character summary at 0.72.
+    /// An equality, so moving it again is a decision argued here.
+    func testSummaryBandIsDecisionOneWithItsCeilingRaised() {
         let contract = SmartModeCatalogue.summary.contract
         XCTAssertEqual(contract.minimumLengthRatio, 0.1)
-        XCTAssertEqual(contract.maximumLengthRatio, 0.6)
+        XCTAssertEqual(contract.maximumLengthRatio, 0.75)
         XCTAssertEqual(contract.minimumLengthRatio, SmartModeCatalogue.notes.contract.minimumLengthRatio)
         // The only row whose ceiling sits below 1: it is the one mode that must shorten.
         for mode in SmartModeCatalogue.builtIns where mode.id != "summary" {
@@ -55,12 +57,14 @@ final class SmartModeSummaryTests: XCTestCase {
     }
 
     /// The band, end to end through the pipeline's own check: an output that keeps
-    /// two thirds of its input is refused, a gist is accepted.
+    /// four fifths of its input is refused, the device's 0.72 and a gist are accepted.
     func testTheBandRefusesATextThatIsNotAGist() {
         let raw = String(repeating: "je pense que le projet avance bien ", count: 10)
         let contract = SmartModeCatalogue.summary.contract
-        XCTAssertFalse(PolishGuardrail.accepts(raw: raw, polished: String(raw.prefix(raw.count * 2 / 3)),
+        XCTAssertFalse(PolishGuardrail.accepts(raw: raw, polished: String(raw.prefix(raw.count * 4 / 5)),
                                                contract: contract))
+        XCTAssertTrue(PolishGuardrail.accepts(raw: raw, polished: String(raw.prefix(raw.count * 72 / 100)),
+                                              contract: contract))
         XCTAssertTrue(PolishGuardrail.accepts(raw: raw, polished: String(raw.prefix(raw.count / 4)),
                                               contract: contract))
     }
@@ -142,10 +146,77 @@ final class SmartModeSummaryTests: XCTestCase {
         XCTAssertEqual(rules(built), rules(instructions))
     }
 
-    /// Decisions 2 and 3, stated where the model reads them.
-    func testProseOnlyAndThePersonKept() {
+    /// Decisions 2 and 3, stated where the model reads them. Decision 3 is a hard rule
+    /// since the device round of 2026-09-22 lost the person in 2 of 6 accepted
+    /// outputs: a string of noun phrases with no `je`, and `on` turned into
+    /// `Nous devons`. The rule names both.
+    func testProseOnlyAndThePersonKeptAsAHardRule() {
         XCTAssertTrue(instructions.contains("Never a bullet"))
-        XCTAssertTrue(instructions.contains("Keep their grammatical person"))
+        XCTAssertTrue(instructions.contains("Keep their grammatical person, always"))
+        XCTAssertTrue(instructions.contains("never a string of noun phrases"))
+        XCTAssertTrue(instructions.contains("\"on\" stays \"on\""))
+        XCTAssertTrue(instructions.contains("\"nous devons\""))
+        // Every example output speaks in the first person, in every language set.
+        for (code, set) in SmartModeSummaryExamples.byLanguage {
+            for example in set where ["en", "fr"].contains(code) {
+                XCTAssertTrue(example.output.hasPrefix("I ") || example.output.hasPrefix("J'"),
+                              "\(code): \(example.output)")
+            }
+        }
+    }
+
+    // MARK: - Step 2 (#587 decision 5), round 2
+
+    /// Every Apple FM language `SystemLanguageModel` listed on 2026-09-21 has a set.
+    func testEveryAppleFMLanguageHasItsOwnExamples() {
+        let expected: Set = ["da", "de", "en", "es", "fr", "it", "ja", "ko", "nb", "nl", "pt", "sv", "tr", "vi", "zh"]
+        XCTAssertEqual(Set(SmartModeSummaryExamples.byLanguage.keys), expected)
+        XCTAssertEqual(Set(SmartModeCatalogue.summary.prompt.localizedInstructions?.keys ?? [:].keys), expected)
+    }
+
+    /// Each set is in the language it is filed under: the whole point of step 2. Read
+    /// by the same recogniser the language guardrail uses. Danish and Norwegian are
+    /// close enough that the recogniser may swap them, so each accepts the other.
+    func testEachExampleSetIsInItsOwnLanguage() {
+        for (code, set) in SmartModeSummaryExamples.byLanguage {
+            XCTAssertEqual(set.count, 2, code)
+            for example in set {
+                for text in [example.input, example.output] {
+                    let read = PolishPipeline.detectLanguageCode(in: text, confidenceThreshold: 0).map {
+                        String($0.split(separator: "-")[0])
+                    }
+                    let accepted = ["da", "nb"].contains(code) ? ["da", "nb", "no"] : [code]
+                    XCTAssertTrue(read.map(accepted.contains) ?? false, "\(code) example reads as \(read ?? "nil"): \(text.prefix(40))")
+                }
+                let ratio = Double(example.output.count) / Double(example.input.count)
+                XCTAssertTrue(SmartModeCatalogue.summary.contract.lengthBand.contains(ratio), "\(code) ratio \(ratio)")
+            }
+        }
+    }
+
+    /// Only the examples vary: the rules every language reads are byte-identical.
+    func testEveryLocalizedPromptCarriesTheSameRules() {
+        func rules(_ prompt: String) -> String { prompt.components(separatedBy: "Examples.").first ?? "" }
+        for (code, prompt) in SmartModeCatalogue.summary.prompt.localizedInstructions ?? [:] {
+            XCTAssertEqual(rules(prompt), rules(instructions), code)
+            XCTAssertLessThan(prompt.count, 3_900, code)
+            for name in ["Sophie", "Julien", "Thomas", "Sarah", "Marion"] {
+                XCTAssertFalse(prompt.contains(name), "\(code) names \(name)")
+            }
+        }
+    }
+
+    /// The lookup a dictation takes: the recogniser's `zh-Hans` and `pt-BR` land on
+    /// their base set, a language outside the table on the step-1 fallback.
+    func testTheTranscriptLanguageSelectsItsSet() {
+        let prompt = SmartModeCatalogue.summary.prompt
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "zh-Hans"),
+                       prompt.localizedInstructions?["zh"])
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "pt-BR"),
+                       prompt.localizedInstructions?["pt"])
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions)
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: nil), prompt.instructions)
+        XCTAssertTrue(prompt.instructions(forTranscriptLanguage: "de").contains("Bremsbeläge"))
     }
 
     /// Decision 5.
@@ -163,6 +234,6 @@ final class SmartModeSummaryTests: XCTestCase {
     /// Every character of a system prompt is taken off the dictation that still fits
     /// (`PolishContextBudget`), and this mode is armed for long dictations.
     func testThePromptStaysWithinItsBudget() {
-        XCTAssertLessThan(instructions.count, 3_600)
+        XCTAssertLessThan(instructions.count, 3_800)
     }
 }

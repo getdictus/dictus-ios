@@ -299,15 +299,23 @@ public enum SmartModeCatalogue {
     /// out of statements. This row compresses into **substance**, as prose, and the
     /// difference is visible in one glance — #393's bar B, the one Email failed.
     ///
-    /// ### The band is `0.1 … 0.6`, decision 1 unchanged
+    /// ### The band is `0.1 … 0.75`: decision 1's shape, its ceiling raised once
     ///
     /// A band and never a sentence count, proportional to what was said. The floor is
-    /// `List`'s, the mode that compresses comparably. The ceiling is the licence
-    /// itself: a text that keeps two thirds of its input is not what the user who
-    /// armed this mode asked for, so it is refused and the floor goes in.
+    /// `List`'s, the mode that compresses comparably.
     ///
-    /// **A very short dictation lands on that floor by construction.** The gist of a
-    /// one-line dictation is the line, and no faithful rewrite of it is 60 % of its
+    /// **The ceiling was 0.6 and is 0.75 since the device round of 2026-09-22**,
+    /// approved by the maintainer. That round measured the phone condensing long
+    /// dictations to 0.36 and 0.44, far below the Mac's 0.6 to 0.85, and refusing a
+    /// good one: a 263-character, three-sentence dictation carrying two negations,
+    /// condensed to about 0.72 with both negations kept. A short dense dictation has
+    /// little to drop, and 0.6 read that as a failure. 0.75 still refuses a text that
+    /// keeps three quarters of its input, which is not what the user who armed this
+    /// mode asked for; whether it stays visibly different from Normal (#393 bar B) is
+    /// re-measured in `docs/research/571-summary/bars.md` §8.
+    ///
+    /// **A very short dictation lands on the floor by construction.** The gist of a
+    /// one-line dictation is the line, and no faithful rewrite of it is 75 % of its
     /// length. That is the contract working, not a defect: the speaker's own words go
     /// in, which is the answer the other same-language modes give.
     ///
@@ -325,11 +333,18 @@ public enum SmartModeCatalogue {
         prompt: SmartModePrompt(
             instructions: SmartModeSummaryPrompt.instructions(),
             userInstruction: SmartModeSummaryPrompt.userInstruction,
-            outputMarker: SmartModeSummaryPrompt.outputMarker
+            outputMarker: SmartModeSummaryPrompt.outputMarker,
+            // Step 2 of #587 decision 5 (round 2, 2026-09-22): the examples in the
+            // transcript's own language, one prompt per Apple FM language. The
+            // `instructions` above is the step-1 fallback. See
+            // `SmartModeSummaryExamples` for the measurement behind it.
+            localizedInstructions: SmartModeSummaryPrompt.localizedInstructions()
         ),
         contract: PolishAcceptanceContract(
             minimumLengthRatio: 0.1,
-            maximumLengthRatio: 0.6,
+            // 0.75 since round 2 (2026-09-22), not decision 1's 0.6: see the doc
+            // comment above.
+            maximumLengthRatio: 0.75,
             outputLanguage: .sameAsInput,
             requiresGroundedNames: true,
             requiresAlignedPrefix: false
