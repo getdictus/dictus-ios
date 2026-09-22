@@ -17,10 +17,10 @@ Every open issue must carry exactly one state label after the governance rollout
 
 `needs-decision` is the state for unfinished grilling. Do not use `ready-for-human` merely because Pierre has questions to answer.
 
-## Scheduling label
+## Scheduling is not a label
 
-`agent-approved` is orthogonal to state. It means Pierre has admitted a `ready-for-agent` issue into the active execution queue. An autonomous worker requires both labels and still follows roadmap or Project rank.
+`ready-for-agent` says an issue is specified, never that it is next. The schedule lives in [`docs/ROADMAP.md`](../ROADMAP.md): an issue is next when it is the first unfinished item of the active lane. Do not read the label as permission to start, and do not add a label to express that permission.
 
-Until the new labels have been created in GitHub as part of the governance rollout, do not invent them through comments or silently substitute another state. Record the recommended transition and leave the issue in `needs-triage`.
+Until `needs-decision` has been created in GitHub as part of the governance rollout, do not invent it through comments or silently substitute another state. Record the recommended transition and leave the issue in `needs-triage`.
 
 When a skill mentions a canonical role, use the corresponding label string from this table. When the local operating model is stricter than the generic skill, the local model wins.

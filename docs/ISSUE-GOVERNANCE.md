@@ -21,19 +21,19 @@ Each artifact owns one kind of information. Do not copy the same fact into sever
 
 Until the GitHub Project described below exists, `docs/ROADMAP.md` remains the source of truth for exact order. Creating the Project must not silently replace or reorder it. The first Project setup pass mirrors the current active lane, then the repository can decide whether Project rank should become the operational ordering surface.
 
-Known conflict at adoption time: `docs/RELEASE-PLAN.md` was last reviewed on 2026-09-06 and still describes 1.8.1 / 1.8.2, while `docs/ROADMAP.md` records the later 1.9.0 cut and reopened lane. Until the release plan is reconciled through its direct-to-`develop` workflow, the roadmap and live milestones own current release state; the release plan remains historical rationale, not current status.
+When the release plan and the roadmap disagree about the current release, the roadmap and the live milestones win: the roadmap carries a review date and is revised at every version cut, the release plan is revised less often. Reconcile the release plan rather than restating the drift here.
 
 ## Planning horizons
 
 ### Long term: product direction
 
-Long-term direction belongs in `docs/RELEASE-PLAN.md` once it has been reconciled with the current roadmap. It states the outcome and the trade-off, not an exhaustive feature list.
+Long-term direction belongs in `docs/RELEASE-PLAN.md`. It states the outcome and the trade-off, not an exhaustive feature list.
 
 ### Medium term: milestones
 
 A milestone is a concrete release or deliberately parked body of work:
 
-- the active release, currently the `2.0.0` Dictus Pro milestone;
+- the active release, whichever milestone the roadmap's active lane points at;
 - a named follow-up release or focused campaign;
 - `Someday`, for accepted work that is intentionally unscheduled.
 
@@ -73,18 +73,17 @@ A closed issue may retain its final historical labels. The exactly-one rule appl
 
 ## Scheduling gate
 
-`ready-for-agent` means executable, not scheduled.
+`ready-for-agent` means executable, not scheduled. Scheduling is not a label: it is a position in `docs/ROADMAP.md`. An issue is scheduled when Pierre has written it into the active lane, and it is next when it is the first unfinished item of that lane. There is no second approval to grant, and therefore no second list that can disagree with the roadmap.
 
-Add the orthogonal label `agent-approved` only when all of the following are true:
+Before claiming that item, the worker checks:
 
 1. the issue is still current on the latest `develop`;
-2. it belongs to the active lane or Pierre explicitly promoted it;
-3. its acceptance criteria map to concrete verification;
-4. required product decisions are closed;
-5. its validation class is known;
-6. no existing PR or newer implementation makes it redundant.
+2. its acceptance criteria map to concrete verification;
+3. required product decisions are closed;
+4. its validation class is known;
+5. no existing PR or newer implementation makes it redundant.
 
-The autonomous worker only claims issues carrying both `ready-for-agent` and `agent-approved`.
+Any check that fails stops the claim. The worker reports it and leaves the ordering to Pierre instead of stepping over the item.
 
 Initial work-in-progress limit: one implementation issue. Research tasks may run in parallel only when they do not touch the same code or consume a decision needed by the implementation.
 
@@ -93,8 +92,7 @@ Initial work-in-progress limit: one implementation issue. Research tasks may run
 During the pilot, authority is deliberately narrower than technical capability:
 
 - A triage agent may recommend category, priority, milestone and state changes. Once the new states are enabled, it may apply `needs-triage`, `needs-info`, `needs-decision`, `ready-for-agent` or `ready-for-human` only with a public evidence note and after removing the previous state label in the same operation.
-- Pierre owns roadmap order, milestone commitment, priority overrides, `wontfix`, exceptions and the `agent-approved` gate.
-- Only Pierre adds or removes `agent-approved`. It remains present while the approved issue is in progress and is removed when the issue is completed, explicitly de-scheduled or returned for a new product decision.
+- Pierre owns roadmap order, milestone commitment, priority overrides, `wontfix` and exceptions. Because scheduling is the roadmap, no agent edits `docs/ROADMAP.md` to add, reorder or promote work; it only ticks an item that shipped.
 - The implementation worker changes Project status to In progress, Review or Validation. It does not rewrite priority or roadmap order.
 - No agent closes an issue during the pilot. A later deterministic close path may be considered for exact duplicates or behavior proven already implemented, but only after its evidence and reversal policy are approved.
 - GitHub built-in automation may perform mechanical transitions such as setting closed issues and merged PRs to Done.
@@ -138,7 +136,9 @@ Validation has two orthogonal dimensions:
 1. choose exactly one technical evidence class: Documentation, Automated, Simulator or Device;
 2. separately record whether a Product verdict is required.
 
-The current repository rule remains in force: every code PR receives an independent review and a physical-device test before merge. The technical class below describes the evidence the change itself requires; the repository-wide device gate remains an additional manual merge requirement. No exception or auto-merge lane exists until Pierre explicitly changes `CLAUDE.md`.
+The current repository rule remains in force, and it is written without qualification: in `CLAUDE.md`, *every* PR receives an independent review and a physical-device test before merge. The only documented exception is not a merge exception at all — `docs/ROADMAP.md` and `docs/RELEASE-PLAN.md` are committed directly to `develop` and never open a PR.
+
+The technical class below describes the evidence the change itself requires. It is additional to that rule, never a substitute for it. This document grants no exemption: if a documentation-only PR should be released from the device test, `CLAUDE.md` has to say so, and only Pierre can write that.
 
 ### Documentation
 
@@ -201,8 +201,8 @@ A green build is evidence of compilation, not evidence of product correctness. A
 
 The current merge policy is conservative:
 
-- every code PR requires the evidence for its validation class, an independent review and Pierre's physical-device verdict;
-- documentation-only changes follow the existing documentation exception in `CLAUDE.md`;
+- every PR requires the evidence for its validation class, an independent review and Pierre's physical-device verdict, exactly as `CLAUDE.md` states it, with no carve-out for documentation;
+- `docs/ROADMAP.md` and `docs/RELEASE-PLAN.md` are the only files that bypass the PR entirely, because `CLAUDE.md` routes them straight to `develop`;
 - payments, entitlement, privacy, destructive migration, release and App Store actions always remain human-gated;
 - no agent auto-merges code.
 
@@ -226,11 +226,11 @@ Suggested status values:
 Suggested saved views:
 
 - **Current release**: open items in the active milestone, with Project rank manually mirroring roadmap order until an explicit cutover.
-- **Agent queue**: `ready-for-agent` plus `agent-approved`, no open native blocked-by dependency, status Ready.
+- **Agent queue**: `ready-for-agent` in the active milestone, no open native blocked-by dependency, status Ready, ranked in roadmap order.
 - **Pierre decisions**: `needs-decision`.
 - **Pierre actions**: `ready-for-human`.
 - **Pierre validation**: status Validation, filtered by the current repository-wide device gate, Technical validation Device, or Product verdict Required.
-- **Triage**: `needs-triage`; Hermes's reconciliation pass separately detects a reporter comment newer than the last `needs-info` triage note and returns that issue to `needs-triage`.
+- **Triage**: `needs-triage`; the triage worker's reconciliation pass separately detects a reporter comment newer than the last `needs-info` triage note and returns that issue to `needs-triage`.
 - **Someday**: milestone `Someday`, hidden from daily work.
 
 Suggested custom fields:
@@ -240,7 +240,7 @@ Suggested custom fields:
 
 Do not duplicate milestone, priority, assignee or labels into custom fields. GitHub already synchronizes those into Projects. While `docs/ROADMAP.md` owns exact order, Project manual rank must mirror it and may not reorder work. Project rank becomes authoritative only if Pierre explicitly transfers that ownership and the roadmap documentation is updated in the same change.
 
-Built-in automation should add matching Dictus issues, set newly added items to Inbox and set closed issues or merged PRs to Done. Hermes prepares evidence and applies only the state transitions authorized above; Pierre owns product and scheduling decisions. GitHub automation owns mechanical field updates.
+Built-in automation should add matching Dictus issues, set newly added items to Inbox and set closed issues or merged PRs to Done. The triage worker prepares evidence and applies only the state transitions authorized above; Pierre owns product and scheduling decisions. GitHub automation owns mechanical field updates.
 
 ## Maintainer operating rhythm
 
@@ -251,16 +251,16 @@ A small recurring inbox is enough:
 1. **Decisions**: answer one coherent grilling round from `needs-decision` issues.
 2. **Validation**: run the first device or product checklist in the Validation view.
 3. **Human actions**: perform the first `ready-for-human` item when it blocks the active release.
-4. **Weekly steering**: confirm the top of the active lane and approve only the next small batch with `agent-approved`.
+4. **Weekly steering**: confirm the top of the active lane in `docs/ROADMAP.md`, and reorder it there when the release outcome has moved.
 
-Hermes can prepare and summarize these queues. It must not silently convert an unanswered product question into an implementation assumption.
+An agent can prepare and summarize these queues. It must not silently convert an unanswered product question into an implementation assumption.
 
 ## Automation model
 
 Use events for responsiveness and periodic reconciliation for reliability:
 
 - GitHub issue and comment events wake the triage worker.
-- An `agent-approved` label or Ready transition wakes the implementation queue.
+- A roadmap commit touching the active lane, or a Ready transition, wakes the implementation queue.
 - Pull request updates, reviews and completed checks wake the PR shepherd.
 - A periodic sweep finds missed events, stale claims, conflicting state labels and issues whose reporter has replied.
 - A daily recap reports only decisions, validations and blockers that need Pierre. It does not dump all open issues.
@@ -270,7 +270,7 @@ Webhook payload text is untrusted. The worker receives the repository and issue 
 ## Rollout
 
 1. Merge this operating model and the comparative research behind it.
-2. With Pierre's explicit approval, add the `needs-decision` and `agent-approved` labels and update the protected `AGENTS.md` / `CLAUDE.md` instructions in the same rollout.
+2. With Pierre's explicit approval, add the `needs-decision` label and update the protected `AGENTS.md` / `CLAUDE.md` instructions in the same rollout.
 3. Reconcile `docs/RELEASE-PLAN.md` with the current roadmap through its direct-to-`develop` workflow.
 4. Update issue forms with the Dictus evidence fields described in the research.
 5. Obtain GitHub Project read/write scope, inventory existing Projects, then adapt or create the Dictus Project, add its validation fields and mirror the active roadmap order.

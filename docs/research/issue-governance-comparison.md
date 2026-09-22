@@ -134,7 +134,7 @@ structured intake
   -> human-controlled release
 ```
 
-The resulting lightweight Dictus model is documented in [`docs/ISSUE-GOVERNANCE.md`](../ISSUE-GOVERNANCE.md). It deliberately keeps the existing milestones and priority labels, adds a distinct `needs-decision` state, separates `ready-for-agent` from `agent-approved`, and limits the initial implementation queue to one issue.
+The resulting lightweight Dictus model is documented in [`docs/ISSUE-GOVERNANCE.md`](../ISSUE-GOVERNANCE.md). It deliberately keeps the existing milestones and priority labels, adds a distinct `needs-decision` state, keeps scheduling in `docs/ROADMAP.md` rather than in a second approval label, and limits the initial implementation queue to one issue.
 
 ## Sources
 
