@@ -224,6 +224,40 @@ public enum PolishGuardrail {
               top.value >= confidenceFloor else {
             return true
         }
-        return top.key.rawValue == expectedCode
+        return matches(read: top.key.rawValue, expected: expectedCode)
     }
+
+    /// Whether a reading answers the expected language.
+    ///
+    /// Equal codes, or **both inside the continental Scandinavian set** — Danish,
+    /// Norwegian Bokmål, the `no` macrolanguage, and Swedish.
+    ///
+    /// ### Why that exception, and why only that one
+    ///
+    /// Measured on #587's bench, 2026-09-22: a `Structuré` output in correct Danish
+    /// was refused twice on `check=language` because one of its sentences —
+    /// `Jeg tror, jeg kan eksportere loggene, som de er.`, copied verbatim from the
+    /// Danish transcript — reads as **`nb` at 0.993**. Danish and Bokmål are close
+    /// enough in writing that `NLLanguageRecognizer` confidently picks the wrong one
+    /// on an ordinary sentence, so the per-segment check (#413) refuses a faithful
+    /// output. What the user loses is real: since #580 the refusal hands back the raw
+    /// transcript, so a Danish or Norwegian speaker gets no Smart Mode at all on the
+    /// dictations where the misreading lands.
+    ///
+    /// **It is a whitelist of four codes and not a notion of "similar languages".**
+    /// The check's job is catching Apple FM answering in another language — the chat
+    /// reply, the translation drift — and the confusions that matter there are
+    /// between distant languages, which stay refused. Widening this to a general
+    /// similarity rule would reopen exactly the hole #413 closed: Spanish accepted for
+    /// Portuguese, Simplified accepted for Traditional. Nothing outside these four is
+    /// affected, and the cost of the exception is bounded by the same four: a Swedish
+    /// output on a Danish dictation is accepted, and nobody has measured that
+    /// happening.
+    static func matches(read: String, expected: String) -> Bool {
+        if read == expected { return true }
+        return continentalScandinavian.contains(read) && continentalScandinavian.contains(expected)
+    }
+
+    /// Danish, Bokmål, the `no` macrolanguage and Swedish. See `matches(read:expected:)`.
+    private static let continentalScandinavian: Set<String> = ["da", "nb", "no", "sv"]
 }

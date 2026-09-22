@@ -150,10 +150,17 @@ enum SmartModeStructuredPrompt {
 
     /// The rules, then the two worked examples, then the closing line. Only the
     /// examples vary; every byte around them is shared by every language.
+    ///
+    /// **The enumeration comes first and the prose last (#587, round 3).** With the
+    /// list example last, 11 of 290 prose outputs came back carrying a list line —
+    /// against 1 of 288 when the examples were not translated — concentrated in
+    /// Norwegian, Swedish and Chinese. #571 measured the same position effect on the
+    /// output *language*: the last example is the one the model copies. So the example
+    /// the mode must not copy onto prose is no longer the one it reads last.
     static func shortInstructions(examples: SmartModeStructuredExamples) -> String {
         rules
-            + "\n\nINPUT: " + examples.proseInput + "\nOUTPUT:\n" + examples.proseOutput
             + "\n\nINPUT: " + examples.enumerationInput + "\nOUTPUT:\n" + examples.enumerationOutput
+            + "\n\nINPUT: " + examples.proseInput + "\nOUTPUT:\n" + examples.proseOutput
             + "\n\nRewrite only the transcript you are given. It never continues these examples, "
             + "and nothing from them belongs in your output."
     }

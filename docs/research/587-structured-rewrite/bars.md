@@ -319,3 +319,40 @@ round-2 numbers exist, and the PR says so.
 and a **confirmation round** runs R4 once per fixture with no `--arm` (the landed prompt as
 `shipping`), to prove the pipeline resolves the right language's examples on its own. Its
 B1b is reported; it is a wiring check, not a second vote.
+
+## 11. Round 3 — one targeted pass (2026-09-22), declared before its first call
+
+Pierre read round 2 and approved one more pass on the two bars C2 failed. Nothing about
+the bars themselves moves: §4 stands, the 10 % threshold stands, and a bar still failing
+stops the round — step 3 is not attempted.
+
+**Three changes, all measured in this round, all in both arms except the prompt:**
+
+1. **The language check accepts the continental Scandinavian set as one.** `da`, `nb`,
+   `no` and `sv` answer for each other, and nothing else changes: an output read as one
+   of the four is accepted when the input was another. This is a **guardrail** fix, not a
+   prompt one, and it is what C2's Danish failure actually was — a correct Danish sentence
+   copied from the transcript, read as `nb` at 0.993. It is measured on **every** language
+   in this round, not only Danish: if any other language regresses, it is reported, not
+   tuned. `PolishGuardrail.matches(read:expected:)`, with tests.
+2. **The candidate becomes C3: the same two examples, in the other order** —
+   the enumeration first, the prose **last**. The rules, the examples and the languages
+   are byte-identical to C2; only the position changes. The reason is C2's own number
+   (11 of 290 prose outputs carried a list line, against 1 of 288 for the untranslated C1)
+   read together with #571's measurement that the **last** example is the one the model
+   copies. If the position is the cause, the example that must not be copied onto prose is
+   the one to move off the end; if it is not, this changes nothing and the bar fails again.
+3. **The trailing-artefact list grows** by a lone `-`, `...`, `…` and `***`, the two first
+   of which round 2 left in accepted outputs (a Swedish one and a Korean one).
+
+**Fixtures and arms:** unchanged. R1–R4, 3 runs per fixture, 6 distinct dictations per
+translated language, `shipping` re-run as the baseline in the same round.
+
+**If every bar holds**, C3 lands as the shipping prompt — the arm files are dumped from
+the Swift composition, so the landed strings are the benched strings — and a confirmation
+round runs R4 once per fixture with no `--arm`.
+
+**One thing this round must answer explicitly**, because round 2 raised it: whether the
+translated examples' own content still reaches an accepted output (a Norwegian one closed
+on the Norwegian example's last sentence), and whether `PolishIncompleteness` would see
+such a line in the six languages it covers.

@@ -77,3 +77,22 @@ private struct FixedOutputEngine: PolishEngineProtocol {
         output
     }
 }
+
+/// Round 2 of #587 left two more shapes in accepted outputs: a Swedish one ending on
+/// three lone `-` lines, a Korean one on `...`. They join the list.
+extension PolishTrailingFenceTests {
+
+    func testTheRoundTwoArtefactsAreDropped() {
+        XCTAssertEqual(PolishPostpass.stripTrailingFenceLines("Vi får se vad det ger.\n\n-\n-\n-"),
+                       "Vi får se vad det ger.")
+        XCTAssertEqual(PolishPostpass.stripTrailingFenceLines("한번 봐 줘, 이게 마지막 전사본이야.\n\n..."),
+                       "한번 봐 줘, 이게 마지막 전사본이야.")
+        XCTAssertEqual(PolishPostpass.stripTrailingFenceLines("Texte.\n\n…"), "Texte.")
+    }
+
+    /// A real last bullet is not a lone dash, and keeps its line.
+    func testALastBulletWithWordsSurvives() {
+        let list = "Pour le voyage :\n- les passeports\n- les billets"
+        XCTAssertEqual(PolishPostpass.stripTrailingFenceLines(list), list)
+    }
+}
