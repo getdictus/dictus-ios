@@ -279,6 +279,17 @@ public struct PolishMetrics: Sendable, Codable {
     /// key means "written before this existed", never "no check fired".
     public let guardrailCheck: PolishGuardrail.Check?
 
+    /// The armed Smart Mode this dictation **skipped** because the transcript was
+    /// shorter than the mode's floor (#587, round 4), or nil. The event itself then
+    /// describes the path the dictation actually took — Normal polish — and this field
+    /// is what lets an export tell "the user had `Structuré` armed and it did not run,
+    /// by design" from "the user had nothing armed".
+    ///
+    /// Not an `Outcome`, for the reason `guardrailCheck` is not: the outcome is the
+    /// Normal polish's own, and it is correct. Optional for the reason every late
+    /// field here is.
+    public var smartModeSkippedForLength: String?
+
     public init(engine: String,
                 mode: String?,
                 targetLanguage: SupportedLanguage?,
