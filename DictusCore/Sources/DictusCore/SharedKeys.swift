@@ -305,6 +305,22 @@ public enum SharedKeys {
     /// Bool: per-feature toggle for Vocabulary. Seeded like `smartModeEnabled` above.
     public static let vocabularyEnabled = "dictus.vocabularyEnabled"
 
+    // MARK: - Reverse trial (#593)
+    /// Double (seconds since 1970): when the reverse trial started. The App Group
+    /// **mirror** of a record whose source of truth is the Keychain; see
+    /// `ProTrialStore`. Absent when no trial was ever granted.
+    public static let proTrialStartedAt = "dictus.proTrialStartedAt"
+    /// Double (seconds since 1970): when the reverse trial ends. Mirrored beside
+    /// `proTrialStartedAt`, and what the keyboard reads to agree with the app.
+    public static let proTrialEndsAt = "dictus.proTrialEndsAt"
+    /// Bool: the end-of-trial paywall has been shown. It is shown once (#593).
+    public static let proTrialEndPaywallShown = "dictus.proTrialEndPaywallShown"
+    /// Int: Smart Mode dictations that succeeded while the trial ran. Written by
+    /// whichever process ran the mode, read by the end-of-trial recap.
+    public static let proTrialSmartModeUses = "dictus.proTrialSmartModeUses"
+    /// Int: words the custom vocabulary rewrote while the trial ran.
+    public static let proTrialVocabularyFixes = "dictus.proTrialVocabularyFixes"
+
     // MARK: - Retired keys
     /// The #357 probe's arming flag, removed with the probe in #361. Kept as a
     /// literal, and only here, so DictusApp can delete it from the App Group on
