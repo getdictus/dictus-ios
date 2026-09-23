@@ -1,0 +1,271 @@
+corpus: 482 outputs from 16 sources
+
+── #414 anchors found per output
+  [adversarial:X3-de-liste#1] grounded: Müller, Herrn Müller
+  [adversarial:X4-es-liste#1] grounded: Carmen
+  [adversarial:X5-fr-bullets-tres-courts#1] grounded: Léa
+  [adversarial:X6-fr-noms-propres-seuls#1] grounded: Thomas, Sophie, Karim, Marion, Léa
+  [adversarial:X7-en-liste-noms-fr#1] grounded: Bouygues, Créteil
+  [adversarial:Y1-fr-nom-invente#1] fabricated: Nathalie⚑
+  [adversarial:Y2-fr-entreprise-inventee#1] fabricated: Bouygues Telecom⚑
+  [adversarial:Y3-en-nom-invente#1] fabricated: Michael⚑
+  [adversarial:Y4-fr-lieu-invente#1] fabricated: Strasbourg⚑
+  [live-2026-08-27:Z1-sophie-reoccurrence#1] fabricated: Marion
+  [review-2026-08-29:W1-nom-assemble#1] fabricated: Marion⚑, Alice Smith⚑
+  [review-2026-08-29:W2-nom-prefixe#1] fabricated: Marion⚑, Sophie⚑
+  [review-2026-08-29:W3-nom-complet-reel#1] grounded: Alice Smith
+  [round1-notes-show-5runs.txt:N2-reunion-vrac#1] grounded: Marion
+  [round1-notes-show-5runs.txt:N2-reunion-vrac#2] grounded: Marion
+  [round1-notes-show-5runs.txt:N2-reunion-vrac#4] grounded: Marion
+  [round1-notes-show-5runs.txt:N2-reunion-vrac#5] fabricated: Marion, Sophie⚑
+  [round1-notes-show-5runs.txt:N3-projet-fleuve#1] grounded: Thomas
+  [round1-notes-show-5runs.txt:N3-projet-fleuve#2] grounded: Thomas
+  [round1-notes-show-5runs.txt:N3-projet-fleuve#3] grounded: Thomas
+  [round1-notes-show-5runs.txt:N3-projet-fleuve#5] grounded: Thomas
+  [round1-notes-show-5runs.txt:N5-en-ramble#1] grounded: Sam, Node
+  [round1-notes-show-5runs.txt:N5-en-ramble#2] grounded: Sam
+  [round1-notes-show-5runs.txt:N5-en-ramble#3] grounded: Sam, Node
+  [round1-notes-show-5runs.txt:N5-en-ramble#4] grounded: Sam
+  [round1-notes-show-5runs.txt:N5-en-ramble#5] grounded: Sam, Node
+  [round7-notes-v2-5runs.txt:N2-reunion-vrac#1] grounded: Marion
+  [round7-notes-v2-5runs.txt:N2-reunion-vrac#2] grounded: Marion
+  [round7-notes-v2-5runs.txt:N2-reunion-vrac#3] grounded: Marion
+  [round7-notes-v2-5runs.txt:N2-reunion-vrac#5] grounded: Marion
+  [round7-notes-v2-5runs.txt:N3-projet-fleuve#2] grounded: Thomas
+  [round7-notes-v2-5runs.txt:N3-projet-fleuve#4] grounded: Thomas
+  [round7-notes-v2-5runs.txt:N3-projet-fleuve#5] grounded: Thomas
+  [round7-notes-v2-5runs.txt:N5-en-ramble#1] grounded: Sam, Certificate, Node
+  [round7-notes-v2-5runs.txt:N5-en-ramble#2] grounded: Sam
+  [round7-notes-v2-5runs.txt:N5-en-ramble#3] grounded: Sam, Certificate, Node
+  [round7-notes-v2-5runs.txt:N5-en-ramble#4] grounded: Sam, Certificate, Node
+  [round7-notes-v2-5runs.txt:N5-en-ramble#5] grounded: Sam, Node
+  [round3-ab-freepolish-vs-notes.txt:N5-en-ramble#1] grounded: Sam
+  [round3-ab-freepolish-vs-notes.txt:N5-en-ramble#1] grounded: Sam, Node
+  [mac-200-run-20260903:R118#1] grounded: Dobra⚑
+  [mac-200-run-20260903:R135#1] grounded: Okay
+  [mac-200-run-20260903:R190#1] grounded: Dobra⚑
+  [r4-freepolish-auto-3runs-after.txt:auto-it#1] grounded: Marco
+  [r4-freepolish-auto-3runs-after.txt:auto-it#2] grounded: Marco
+  [r4-freepolish-auto-3runs-after.txt:auto-it#3] grounded: Marco
+  (⚑ = present in the output, absent from the input)
+
+── #413 per-segment language check, shipping thresholds (minChars=12, floor=0.85)
+   caught 18/18   false rejections 0/464
+
+── #414 grounding check (translation and repair skipped: the check is unsound there)
+   caught 7/11   false rejections 0/328
+   missed:   adversarial:Y5-refus-applefm#1
+   missed:   live-2026-08-27:Z1-sophie-reoccurrence#1
+   missed:   adversarial:Y6-notes-abstraite-inventee#1
+   missed:   mac-456-50run-20260903:T017#1
+   not counted (another check refuses it): mac-200-run-20260903:R118#1 — language (wrongLanguage)
+   not counted (another check refuses it): mac-200-run-20260903:R190#1 — language (wrongLanguage)
+
+── #414 worst-segment overlap, shipping thresholds (floor=0.15, minContentWords=3)
+   caught 9/11   false rejections 0/328
+   missed:   adversarial:Y4-fr-lieu-invente#1
+   missed:   live-2026-08-27:Z1-sophie-reoccurrence#1
+   not counted (another check refuses it): issue-466-device-capture:P1-chat-preamble#1 — prefix alignment (displaced)
+   not counted (another check refuses it): device-20260902-1632:P3-short-preamble#1 — prefix alignment (displaced)
+   not counted (another check refuses it): coderabbit-review-478:P4-preamble-zh#1 — prefix alignment (displaced)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N1-field-commits#1 — language (wrongLanguage)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N1-field-commits#3 — language (wrongLanguage)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N1-field-commits#4 — language (wrongLanguage)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N1-field-commits#5 — language (wrongLanguage)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N3-projet-fleuve#2 — language (bilingual)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N3-projet-fleuve#3 — language (bilingual)
+   not counted (another check refuses it): round7-notes-v2-5runs.txt:N1-field-commits#3 — language (wrongLanguage)
+   not counted (another check refuses it): round7-notes-v2-5runs.txt:N5-en-ramble#2 — language (wrongLanguage)
+   not counted (another check refuses it): mac-456-50run-20260903:T001#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T002#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T003#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T006#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T007#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T008#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T009#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T010#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T011#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T012#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T013#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T014#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T015#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T018#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T020#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T021#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T022#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T023#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T024#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T026#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T028#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T029#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T031#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T033#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T035#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T037#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T040#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T041#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T042#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T043#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T044#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T045#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T048#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T050#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R006#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R012#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R013#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R016#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R020#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R023#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R029#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R033#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R035#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R040#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R048#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R054#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R055#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R067#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R074#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R078#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R080#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R082#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R087#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R095#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R096#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R098#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R099#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R102#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R107#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R109#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R118#1 — language (wrongLanguage)
+   not counted (another check refuses it): mac-200-run-20260903:R122#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R123#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R135#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R137#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R139#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R145#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R147#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R152#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R153#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R154#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R166#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R173#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R174#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R176#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R177#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R181#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R188#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R190#1 — language (wrongLanguage)
+   not counted (another check refuses it): mac-200-run-20260903:R195#1 — prefix alignment (displaced)
+   not counted (another check refuses it): r4-freepolish-auto-3runs-after.txt:auto-verbal-fr#3 — prefix alignment (unrelated)
+
+── #414 anchors OR overlap — what the pipeline refuses
+   caught 10/11   false rejections 0/328
+   missed:   live-2026-08-27:Z1-sophie-reoccurrence#1
+   not counted (another check refuses it): issue-466-device-capture:P1-chat-preamble#1 — prefix alignment (displaced)
+   not counted (another check refuses it): device-20260902-1632:P3-short-preamble#1 — prefix alignment (displaced)
+   not counted (another check refuses it): coderabbit-review-478:P4-preamble-zh#1 — prefix alignment (displaced)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N1-field-commits#1 — language (wrongLanguage)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N1-field-commits#3 — language (wrongLanguage)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N1-field-commits#4 — language (wrongLanguage)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N1-field-commits#5 — language (wrongLanguage)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N3-projet-fleuve#2 — language (bilingual)
+   not counted (another check refuses it): round1-notes-show-5runs.txt:N3-projet-fleuve#3 — language (bilingual)
+   not counted (another check refuses it): round7-notes-v2-5runs.txt:N1-field-commits#3 — language (wrongLanguage)
+   not counted (another check refuses it): round7-notes-v2-5runs.txt:N5-en-ramble#2 — language (wrongLanguage)
+   not counted (another check refuses it): mac-456-50run-20260903:T001#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T002#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T003#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T006#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T007#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T008#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T009#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T010#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T011#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T012#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T013#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T014#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T015#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T018#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T020#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T021#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T022#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T023#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T024#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T026#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T028#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T029#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T031#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T033#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T035#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T037#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T040#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T041#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T042#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T043#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T044#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T045#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T048#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-456-50run-20260903:T050#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R006#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R012#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R013#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R016#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R020#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R023#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R029#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R033#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R035#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R040#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R048#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R054#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R055#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R067#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R074#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R078#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R080#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R082#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R087#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R095#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R096#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R098#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R099#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R102#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R107#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R109#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R118#1 — language (wrongLanguage)
+   not counted (another check refuses it): mac-200-run-20260903:R122#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R123#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R135#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R137#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R139#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R145#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R147#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R152#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R153#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R154#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R166#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R173#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R174#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R176#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R177#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R181#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R188#1 — prefix alignment (displaced)
+   not counted (another check refuses it): mac-200-run-20260903:R190#1 — language (wrongLanguage)
+   not counted (another check refuses it): mac-200-run-20260903:R195#1 — prefix alignment (displaced)
+   not counted (another check refuses it): r4-freepolish-auto-3runs-after.txt:auto-verbal-fr#3 — prefix alignment (unrelated)
+
+── #466 prefix-alignment check, shipping thresholds (window=8, floor=0.7, minimum=8)
+   natural + auto — the modes it ships on:
+   caught 87/87   false rejections 0/269
+   repair — measured, not shipped on:
+   caught 1/1   false rejections 10/10
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:6-repair-es#1 — no stretch is the speaker's
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:6-repair-es#2 — no stretch is the speaker's
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:6-repair-es#3 — no stretch is the speaker's
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:6-repair-es#4 — no stretch is the speaker's
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:6-repair-es#5 — no stretch is the speaker's
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:7-repair-de#1 — no stretch is the speaker's
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:7-repair-de#2 — no stretch is the speaker's
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:7-repair-de#3 — no stretch is the speaker's
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:7-repair-de#4 — no stretch is the speaker's
+   FALSE REJECTION: r3-freepolish-seed-5runs-after.txt:7-repair-de#5 — no stretch is the speaker's
