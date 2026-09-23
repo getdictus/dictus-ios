@@ -53,7 +53,7 @@ public struct PolishLanguageSegmentThresholds: Equatable, Sendable {
 
 /// Runtime sanity check on every polish output.
 ///
-/// Five complementary checks:
+/// Six complementary checks:
 /// 1. `accepts(raw:polished:mode:)` — character-length ratio. Catches catastrophic
 ///    over- or under-generation (empty output, runaway generation).
 /// 2. `detectedLanguageMatches(polished:target:)` — language detection on the
@@ -73,9 +73,14 @@ public struct PolishLanguageSegmentThresholds: Equatable, Sendable {
 ///    cannot see by construction: a preamble (#466) and a refusal (#349), both of
 ///    them the model writing about its own task in the language it was told to
 ///    write in. Its own type for the same reason check 3 is.
+/// 6. `PolishIncompleteness` — whether the output reports the speaker's memory
+///    failing when the transcript does not (#581, #587). The one sentence a mode that
+///    keeps a speaker-flagged incompleteness has been seen inventing, and one check 4
+///    passes on a long input because a generic sentence shares its ordinary words.
+///    Runs only where the contract asks for it.
 public enum PolishGuardrail {
 
-    /// Which of the five refused an output.
+    /// Which of the six refused an output.
     ///
     /// One `PolishMetrics.Outcome.rejectedGuardrail` covers five questions with five
     /// different answers — the band is mis-sized for the mode, the prompt drifted
@@ -100,6 +105,10 @@ public enum PolishGuardrail {
         case grounding
         case segmentOverlap
         case prefixAlignment
+        /// The output reports the speaker's memory failing and the transcript does
+        /// not (#587). Named apart from `segmentOverlap`, which refuses some of the
+        /// same outputs, so an export counts #581's shape under its own name.
+        case incompleteness
 
         public var description: String { rawValue }
     }
@@ -215,6 +224,40 @@ public enum PolishGuardrail {
               top.value >= confidenceFloor else {
             return true
         }
-        return top.key.rawValue == expectedCode
+        return matches(read: top.key.rawValue, expected: expectedCode)
     }
+
+    /// Whether a reading answers the expected language.
+    ///
+    /// Equal codes, or **both inside the continental Scandinavian set** — Danish,
+    /// Norwegian Bokmål, the `no` macrolanguage, and Swedish.
+    ///
+    /// ### Why that exception, and why only that one
+    ///
+    /// Measured on #587's bench, 2026-09-22: a `Structuré` output in correct Danish
+    /// was refused twice on `check=language` because one of its sentences —
+    /// `Jeg tror, jeg kan eksportere loggene, som de er.`, copied verbatim from the
+    /// Danish transcript — reads as **`nb` at 0.993**. Danish and Bokmål are close
+    /// enough in writing that `NLLanguageRecognizer` confidently picks the wrong one
+    /// on an ordinary sentence, so the per-segment check (#413) refuses a faithful
+    /// output. What the user loses is real: since #580 the refusal hands back the raw
+    /// transcript, so a Danish or Norwegian speaker gets no Smart Mode at all on the
+    /// dictations where the misreading lands.
+    ///
+    /// **It is a whitelist of four codes and not a notion of "similar languages".**
+    /// The check's job is catching Apple FM answering in another language — the chat
+    /// reply, the translation drift — and the confusions that matter there are
+    /// between distant languages, which stay refused. Widening this to a general
+    /// similarity rule would reopen exactly the hole #413 closed: Spanish accepted for
+    /// Portuguese, Simplified accepted for Traditional. Nothing outside these four is
+    /// affected, and the cost of the exception is bounded by the same four: a Swedish
+    /// output on a Danish dictation is accepted, and nobody has measured that
+    /// happening.
+    static func matches(read: String, expected: String) -> Bool {
+        if read == expected { return true }
+        return continentalScandinavian.contains(read) && continentalScandinavian.contains(expected)
+    }
+
+    /// Danish, Bokmål, the `no` macrolanguage and Swedish. See `matches(read:expected:)`.
+    private static let continentalScandinavian: Set<String> = ["da", "nb", "no", "sv"]
 }

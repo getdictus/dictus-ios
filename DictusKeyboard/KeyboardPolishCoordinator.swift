@@ -373,6 +373,10 @@ final class KeyboardPolishCoordinator {
     ///   remedy: Apple Foundation Models classifies the user turn and refuses before
     ///   generating, so the same words in the same language will be refused again.
     ///   "Try again" would be an instruction to repeat a failure.
+    /// - **Too short, text inserted** (#587) — `Structuré` declines a dictation under
+    ///   its floor rather than structuring a sentence. It names the cause where the
+    ///   refusals above do not, because this one is knowable and repeatable: the same
+    ///   words will be declined again, and dictating more is what changes it.
     /// - **Anything else** — cancellation, an unavailable engine (#315), and any
     ///   refusal at all on a mode whose floor would be wrong rather than merely
     ///   plainer. The user can do nothing specific about any of them, so the copy does
@@ -411,6 +415,16 @@ final class KeyboardPolishCoordinator {
         let name = SmartMode.localizedDisplayName(
             identifier: failure.modeIdentifier, fallback: failure.modeDisplayName
         )
+        if failure.outcome == PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue {
+            // The mode declined the dictation for length (#587). It reads as the #580
+            // sentence's sibling — same slot, same register, the text is in the field —
+            // and it names the cause, because unlike a guardrail refusal this one is
+            // knowable, stable, and something the user can act on by dictating more.
+            return String(
+                localized: "\(name): dictation too short, text inserted as dictated.",
+                comment: "Shown when an armed Smart Mode declined a dictation for being shorter than the mode's floor, so the text went in as dictated. The placeholder is the mode's name."
+            )
+        }
         if failure.outcome == PolishMetrics.Outcome.unsupportedInputLanguage.rawValue,
            let code = failure.detectedLanguage {
             let language = PolishLanguageName.display(for: code)

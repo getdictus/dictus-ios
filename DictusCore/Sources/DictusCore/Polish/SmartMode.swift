@@ -293,6 +293,24 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     /// a field, and which refusals consult it.
     public let floorBehaviour: SmartModeFloorBehaviour
 
+    /// Shortest transcript, in characters, this mode runs on. Below it the mode is
+    /// **skipped, not refused**: the dictation takes the path it would take with no
+    /// mode armed, and nothing is announced. `nil` — every mode but `Structuré` — runs
+    /// on any length.
+    ///
+    /// ### Why a mode can decline short input (#587, round 4)
+    ///
+    /// A mode that structures text has nothing to structure in one sentence, and on
+    /// device that is where it did damage: `Comment tu vas aujourd'hui ?` (28
+    /// characters) came back as `Comment vais-je aujourd'hui ?`, and a 90-character line
+    /// gained a leading `Voici`. See `SmartModeCatalogue.structured` for the floor and
+    /// the corpus it was read from.
+    ///
+    /// It is a property of the mode rather than a pipeline constant because it is a
+    /// product answer about the mode: `Message` exists for short text and must never
+    /// skip it, and `Résumé` already bounds itself through its band.
+    public let minimumInputCharacters: Int?
+
     public init(id: String,
                 displayName: String,
                 icon: String,
@@ -300,7 +318,8 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
                 prompt: SmartModePrompt,
                 contract: PolishAcceptanceContract,
                 floorBehaviour: SmartModeFloorBehaviour,
-                isPinned: Bool = false) {
+                isPinned: Bool = false,
+                minimumInputCharacters: Int? = nil) {
         self.id = id
         self.displayName = displayName
         self.icon = icon
@@ -309,6 +328,13 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.contract = contract
         self.floorBehaviour = floorBehaviour
         self.isPinned = isPinned
+        self.minimumInputCharacters = minimumInputCharacters
+    }
+
+    /// Whether this mode runs on a transcript of `characters` characters.
+    public func runs(onInputOfLength characters: Int) -> Bool {
+        guard let floor = minimumInputCharacters else { return true }
+        return characters >= floor
     }
 
     // MARK: - Decoding
@@ -344,6 +370,11 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.floorBehaviour = try container.decodeIfPresent(
             SmartModeFloorBehaviour.self, forKey: .floorBehaviour
         ) ?? .insertNothing
+        // Absent means no floor: a snapshot written before #587 round 4 runs the mode
+        // on any length, which is what that build did.
+        self.minimumInputCharacters = try container.decodeIfPresent(
+            Int.self, forKey: .minimumInputCharacters
+        )
     }
 
     /// Written out rather than synthesised for one key only: `floorBehaviour` is
@@ -361,7 +392,7 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     /// here too. `init(from:)` above is hand-written for the same reason and carries
     /// the same obligation.
     private enum CodingKeys: String, CodingKey {
-        case id, displayName, icon, badge, prompt, contract, isPinned
+        case id, displayName, icon, badge, prompt, contract, isPinned, minimumInputCharacters
         case floorBehaviour = "overflowBehaviour"
     }
 
@@ -384,7 +415,8 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
                 shortOutputBlockLimit: prompt.shortOutputBlockLimit,
                 localizedInstructions: prompt.localizedInstructions
             ),
-            contract: contract, floorBehaviour: floorBehaviour, isPinned: isPinned
+            contract: contract, floorBehaviour: floorBehaviour, isPinned: isPinned,
+            minimumInputCharacters: minimumInputCharacters
         )
     }
 

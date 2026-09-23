@@ -308,27 +308,54 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// Stated in the prompt because that is the only place the model reads it.
     func testStructuredPromptKeepsTheSpeakersGrammaticalPerson() {
         let instructions = SmartModeCatalogue.structured.prompt.instructions
-        XCTAssertTrue(instructions.contains("KEEP THE SPEAKER'S GRAMMATICAL PERSON"))
-        XCTAssertTrue(instructions.contains("infinitive"))
+        XCTAssertTrue(instructions.contains("Keep their grammatical person, tense and tone"))
+        XCTAssertTrue(instructions.contains("never a task list"))
     }
 
     /// Decision 7's hard bar: the one thing the reference drops and Dictus keeps.
+    ///
+    /// Since #587 the rule is conditioned on the transcript and quotes **no** phrasing:
+    /// the four it used to name were one of the two sources PR #583 measured leaking
+    /// into outputs that said nothing of the kind. `PolishIncompleteness` is the
+    /// backstop; `SmartModeStructuredPromptTests` asserts no example shows one either.
     func testStructuredPromptKeepsASpeakerFlaggedIncompleteness() {
         let instructions = SmartModeCatalogue.structured.prompt.instructions
-        XCTAssertTrue(instructions.contains("j'ai oublié un truc"))
-        XCTAssertTrue(instructions.contains("KEEP IT"))
+        XCTAssertTrue(instructions.contains("If the transcript itself says that something is missing"))
+        XCTAssertTrue(instructions.contains("keep that sentence in their words"))
+        XCTAssertFalse(instructions.contains("j'ai oublié un truc"))
+        XCTAssertFalse(instructions.contains("ça m'échappe"))
     }
 
     /// Decision 6: a heading is a promotion of the speaker's own opening words, never
     /// an invention. Both reference headings are exactly that.
     func testStructuredPromptForbidsAnInventedTitle() {
         let instructions = SmartModeCatalogue.structured.prompt.instructions
-        XCTAssertTrue(instructions.contains("Never invent a title"))
+        XCTAssertTrue(instructions.contains("no fact, name, date, conclusion, title or closing sentence"))
+        XCTAssertTrue(instructions.contains("A short heading is allowed only when their own first words"))
     }
 
     /// Decision 4 with measurement A behind it: median 0.93 is not a summary.
     func testStructuredPromptForbidsSummarising() {
-        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Do NOT summarise"))
+        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Never summarise"))
+    }
+
+    /// Decision 7 of #587: a list only when the speaker enumerates, and never one
+    /// bullet per sentence — the shape the device returned on 2026-09-20.
+    func testStructuredPromptAllowsAListOnlyOnARealEnumeration() {
+        let instructions = SmartModeCatalogue.structured.prompt.instructions
+        XCTAssertTrue(instructions.contains("Use a list only when they enumerate separate items themselves"))
+        XCTAssertTrue(instructions.contains("Never one bullet per sentence"))
+    }
+
+    /// Decision 5 step 2: the mode carries one example set per Apple FM language, and
+    /// the rules stay one English text. The sets themselves are pinned in
+    /// `SmartModeStructuredPromptTests`.
+    func testStructuredCarriesAnExampleSetPerLanguage() {
+        let prompt = SmartModeCatalogue.structured.prompt
+        XCTAssertEqual(prompt.localizedInstructions?.count, 16)
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "da"),
+                       SmartModeStructuredPrompt.localizedInstructions()["da"])
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions)
     }
 
     /// The #414 copying finding, pinned: every example in this prompt is neutralised
@@ -358,8 +385,8 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// the input's language.
     func testStructuredPromptIsWrittenOnceAndKeepsTheInputLanguage() {
         let instructions = SmartModeCatalogue.structured.prompt.instructions
-        XCTAssertTrue(instructions.contains("OUTPUT LANGUAGE: the language of the input"))
-        XCTAssertTrue(instructions.contains("NEVER translate"))
+        XCTAssertTrue(instructions.contains("1. Write in the language of the transcript, whatever it is"))
+        XCTAssertTrue(instructions.contains("Never translate, not even partly"))
     }
 
     // MARK: - Message (#572)
@@ -460,7 +487,7 @@ final class SmartModeCatalogueTests: XCTestCase {
     /// where `Structured` is explicitly forbidden from cutting substance.
     func testMessagePromptCarriesTheDeletionLicenceStructuredGaveUp() {
         XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions.contains("Cut what only exists because they were speaking"))
-        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Do NOT summarise"))
+        XCTAssertTrue(SmartModeCatalogue.structured.prompt.instructions.contains("Never summarise"))
     }
 
     /// Decisions 2 and 7: a dictated emoji is the speaker's content; an invented one

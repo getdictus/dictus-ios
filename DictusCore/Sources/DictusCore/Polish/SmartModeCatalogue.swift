@@ -163,14 +163,24 @@ public enum SmartModeCatalogue {
         prompt: SmartModePrompt(
             instructions: SmartModeStructuredPrompt.instructions(),
             userInstruction: SmartModeStructuredPrompt.userInstruction,
-            outputMarker: SmartModeStructuredPrompt.outputMarker
+            outputMarker: SmartModeStructuredPrompt.outputMarker,
+            // One example set per Apple FM language (#587, decision 5 step 2). Benched
+            // at 0 % refused on `check=language` in all 16, against up to 29 % for the
+            // prompt this replaces; the rules stay one English text.
+            localizedInstructions: SmartModeStructuredPrompt.localizedInstructions()
         ),
         contract: PolishAcceptanceContract(
             minimumLengthRatio: 0.4,
             maximumLengthRatio: 1.5,
             outputLanguage: .sameAsInput,
             requiresGroundedNames: true,
-            requiresAlignedPrefix: false
+            requiresAlignedPrefix: false,
+            // The one mode that keeps a speaker-flagged incompleteness as a hard bar
+            // (#523, decision 7), and the one the device caught inventing one: seven
+            // outputs closing on a sentence about the speaker's memory, three of them
+            // inserted (#581). Rule 7 stays; this refuses the sentence when the
+            // transcript never said it (#587, decision 6). See `PolishIncompleteness`.
+            refusesFabricatedIncompleteness: true
         ),
         // The mode armed for the longest dictations is the one that meets the context
         // ceiling first — sooner than `List`, because its prompt is longer. The floor
@@ -180,7 +190,19 @@ public enum SmartModeCatalogue {
         // This mode is also the one #580 measured being refused by a guardrail — three
         // times in nine device runs, one of them 1,337 characters — and the sentence
         // above is already the answer to that: the words are the speaker's either way.
-        floorBehaviour: .insertRawText
+        floorBehaviour: .insertRawText,
+        // Below 200 characters the mode is skipped and the dictation takes the path it
+        // would take with no mode armed (#587, round 4). Read from the 51 `Structuré`
+        // dictations in the device exports of 2026-09-13 to 09-23: all 8 under 120
+        // characters are a single sentence, and 15 of the 16 under 200 are one or two.
+        // That is where the mode did its damage and had nothing to structure — a person swapped
+        // at 28 (`Comment tu vas` → `Comment vais-je`), a `Voici` added at 90, two
+        // clauses swapped at 65, a `s'il te plaît` dropped at 192, a tense and register
+        // lifted at 149 — and where no output in the corpus gained a paragraph worth
+        // having. The one exception is also the known cost: a 149-character dictation
+        // counting off three tasks now gets Normal polish instead of a list; `Liste` is
+        // the mode for that.
+        minimumInputCharacters: 200
     )
 
     /// Message: what the speaker would have typed, rather than a clean copy of what
