@@ -106,6 +106,9 @@ struct DictusApp: App {
     @StateObject private var proStatus: ProStatusManager
     @StateObject private var subscriptionManager: SubscriptionManager
 
+    /// Raises the reverse trial's announcement and its end-of-trial paywall (#593).
+    @StateObject private var trialCoordinator: ProTrialCoordinator
+
     /// The saved dictations (#70). A `StateObject` on the singleton, like the
     /// coordinator above: the object outlives every view, and this is what publishes
     /// it to the screens that read it.
@@ -253,8 +256,13 @@ struct DictusApp: App {
         // to App Group). We need to create proStatus first, pass it to
         // SubscriptionManager, then wrap both in StateObject.
         let proStatus = ProStatusManager()
+        // The Keychain decides whether a trial was ever granted, and the App Group only
+        // mirrors it (#593). Reconciled here, before any view can ask whether a trial
+        // may start, so a reinstall finds its old trial instead of a fresh one.
+        proStatus.reconcileTrial()
         _proStatus = StateObject(wrappedValue: proStatus)
         _subscriptionManager = StateObject(wrappedValue: SubscriptionManager(proStatus: proStatus))
+        _trialCoordinator = StateObject(wrappedValue: ProTrialCoordinator(proStatus: proStatus))
 
         // Warm up the polish engine for the current target language (#141).
         // No-op when the toggle is off or when the engine has nothing to warm.
@@ -270,6 +278,7 @@ struct DictusApp: App {
                 .environmentObject(proStatus)
                 .environmentObject(subscriptionManager)
                 .environmentObject(history)
+                .environmentObject(trialCoordinator)
                 .onOpenURL { url in
                     handleIncomingURL(url)
                 }
@@ -346,6 +355,10 @@ struct DictusApp: App {
                             name: Notification.Name("DictusOnboardingCompleted"),
                             object: nil
                         )
+                        // A new user's trial is announced, and started, at the end of
+                        // onboarding (#593): after the first successful dictation, not
+                        // at install, because the model download can take minutes.
+                        trialCoordinator.onboardingCompleted()
                     }
                 }
                 .fullScreenCover(isPresented: .constant(!hasCompletedOnboarding)) {

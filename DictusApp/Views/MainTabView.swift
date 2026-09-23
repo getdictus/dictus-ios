@@ -17,6 +17,7 @@ import DictusCore
 /// fullScreenCover would leave the tab bar visible underneath on some iOS versions.
 struct MainTabView: View {
     @EnvironmentObject var coordinator: DictationCoordinator
+    @EnvironmentObject var trialCoordinator: ProTrialCoordinator
     @StateObject private var modelManager = ModelManager()
 
     @State private var selectedTab: Int = 0
@@ -95,6 +96,16 @@ struct MainTabView: View {
         modelManager.activeModel ?? Self.persistedActiveModelIdentifier
     }
 
+    /// Whether the app may raise one of the reverse trial's own screens (#593).
+    ///
+    /// Only over the ordinary tab navigation, and only when nothing else owns the
+    /// display: a cold-start dictation, a model preparation screen, a recording or a
+    /// paywall the user opened. The trial is announced openly, but never by
+    /// interrupting a dictation.
+    private var mayRaiseTrialScreens: Bool {
+        !isColdStartMode && preparation == nil && coordinator.status == .idle && !showsPaywall
+    }
+
     var body: some View {
         ZStack {
             if let preparation {
@@ -144,6 +155,20 @@ struct MainTabView: View {
                     .tag(2)
                 }
                 .tint(.dictusAccent)
+                // The reverse trial's two self-raised screens (#593). On the TabView and
+                // not on the ZStack below, which already carries the user's paywall
+                // cover: two full-screen covers on one view is a presentation SwiftUI
+                // does not promise to honour. Here they also only exist while the
+                // ordinary navigation is on screen, which is the only time they may.
+                .sheet(
+                    item: $trialCoordinator.announcement,
+                    onDismiss: { trialCoordinator.announcementDismissed() },
+                    content: { announcement in ProTrialAnnouncementView(announcement: announcement) }
+                )
+                .paywallCover(isPresented: $trialCoordinator.showsEndOfTrialPaywall, framing: .trialEnded)
+                .onAppear {
+                    trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
+                }
             }
 
             // Full-screen recording overlay covers everything including tab bar.
@@ -257,6 +282,11 @@ struct MainTabView: View {
             )
         })
         .onChange(of: scenePhase) { _, newPhase in
+            // Every return to the foreground can be "the next launch" #593 speaks of:
+            // the trial may have ended while the app sat suspended.
+            if newPhase == .active {
+                trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
+            }
             if newPhase == .background {
                 isColdStartMode = false
                 // The launch intent describes the frame this process launched into.
@@ -272,4 +302,5 @@ struct MainTabView: View {
     MainTabView()
         .environmentObject(DictationCoordinator.shared)
         .environmentObject(TranscriptionHistoryStore.shared)
+        .environmentObject(ProTrialCoordinator(proStatus: ProStatusManager()))
 }
