@@ -96,7 +96,12 @@ public enum SmartModeCatalogue {
         prompt: SmartModePrompt(
             instructions: SmartModeNotesPrompt.instructions(),
             userInstruction: SmartModeNotesPrompt.userInstruction,
-            outputMarker: SmartModeNotesPrompt.outputMarker
+            outputMarker: SmartModeNotesPrompt.outputMarker,
+            // One example set per Apple FM language (#587 decision 9, step 2). This
+            // mode's prompt carried three French blocks and one English one, which is
+            // #585's mechanism in the mode's own file. Only the examples are
+            // translated; no rule of `List` moves here, its rebuild is #573.
+            localizedInstructions: SmartModeNotesPrompt.localizedInstructions()
         ),
         contract: PolishAcceptanceContract(
             minimumLengthRatio: 0.1,
@@ -274,7 +279,12 @@ public enum SmartModeCatalogue {
             // A short message keeps its beats on separate lines without the blank
             // line between them — the maintainer's own choice on device, 2026-09-18.
             // See `SmartModePrompt.shortOutputBlockLimit`.
-            shortOutputBlockLimit: 100
+            shortOutputBlockLimit: 100,
+            // One example set per Apple FM language (#587 decision 9, step 2). Both of
+            // this prompt's examples were French, so #585 applied to it in full. The
+            // French set is the shipping pair byte for byte: a French dictation, which
+            // is what the maintainer sends daily, gets the prompt it got before.
+            localizedInstructions: SmartModeMessagePrompt.localizedInstructions()
         ),
         contract: PolishAcceptanceContract(
             minimumLengthRatio: 0.2,
