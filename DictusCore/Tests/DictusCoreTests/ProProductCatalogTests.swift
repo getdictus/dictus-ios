@@ -61,11 +61,18 @@ final class ProProductCatalogTests: XCTestCase {
         XCTAssertEqual(yearly["recurringSubscriptionPeriod"] as? String, "P1Y")
     }
 
-    func testTrialIsOnTheYearlyPlanOnly() throws {
-        // A non-consumable cannot carry an introductory offer at all, so the
-        // absence below is structural rather than a configuration choice.
+    /// No plan carries a StoreKit free trial (#593, #215 comment of 2026-09-23).
+    ///
+    /// Pro launches with a reverse trial instead, and a user who has just finished two
+    /// free weeks must never be offered "7 more days free" on the end-of-trial paywall.
+    /// This used to pin the 7-day offer on the yearly plan; the local configuration now
+    /// matches the App Store Connect catalogue #215 creates without it.
+    ///
+    /// A non-consumable cannot carry an introductory offer at all, so the lifetime's
+    /// absence is structural rather than a configuration choice.
+    func testNoPlanCarriesAStoreKitFreeTrial() throws {
         let config = try storeKitConfiguration()
-        XCTAssertNotNil(config.subscriptions[ProProductID.yearly]?["introductoryOffer"] as? [String: Any])
+        XCTAssertNil(config.subscriptions[ProProductID.yearly]?["introductoryOffer"] as? [String: Any])
         XCTAssertNil(config.subscriptions[ProProductID.monthly]?["introductoryOffer"] as? [String: Any])
         XCTAssertNil(config.nonConsumables[ProProductID.lifetime]?["introductoryOffer"])
     }
