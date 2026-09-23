@@ -102,7 +102,8 @@ def main():
                 print(f"{corpus}\t{key}\t{lw}\n    IN : {raw}\n    OUT: {text}")
         return
     labels = json.load(open(os.path.join(HERE, "labels.json"), encoding="utf-8"))
-    for corpus in ("round", "longform", "freepol"):
+    # The round corpus is scored by summarise.py, whose labels cover every output.
+    for corpus in ("longform", "freepol"):
         rows = [(k, r, t) for c, k, r, t in pairs if c == corpus]
         stats = {}
         for thr in (1, 2):

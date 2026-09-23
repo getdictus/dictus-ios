@@ -1,0 +1,255 @@
+
+━━ [D1-selfcorrect] lang=fr stt=PK
+  raw:      Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que... dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #1: Yo man, j’espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t’ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j’ai avancé un petit peu plus dessus, s’il te plaît. Enfin pardon, pas s’il te plaît je me suis planté.
+            (success, 2861ms, detected=fr→natural)
+  breaks #1: Yo man, j’espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t’ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j’ai avancé un petit peu plus dessus, s’il te plaît. Enfin pardon, pas s’il te plaît je me suis planté.
+  polished #2: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2703ms, detected=fr→natural)
+  breaks #2: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #3: Yo man, j’espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t’ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j’ai avancé un petit peu plus dessus, s’il te plaît. Enfin pardon, pas s’il te plaît je me suis planté.
+            (success, 2779ms, detected=fr→natural)
+  breaks #3: Yo man, j’espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t’ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j’ai avancé un petit peu plus dessus, s’il te plaît. Enfin pardon, pas s’il te plaît je me suis planté.
+  polished #4: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2999ms, detected=fr→natural)
+  breaks #4: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #5: Yo man, j’espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t’ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j’ai avancé un petit peu plus dessus, s’il te plaît. Enfin pardon, pas s’il te plaît je me suis planté.
+            (success, 2566ms, detected=fr→natural)
+  breaks #5: Yo man, j’espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t’ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j’ai avancé un petit peu plus dessus, s’il te plaît. Enfin pardon, pas s’il te plaît je me suis planté.
+
+━━ [D2-bisous] lang=fr stt=PK
+  raw:      Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.
+  polished #1: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+            (success, 1696ms, detected=fr→natural)
+  breaks #1: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+  polished #2: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+            (success, 1958ms, detected=fr→natural)
+  breaks #2: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+  polished #3: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+            (success, 1892ms, detected=fr→natural)
+  breaks #3: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+  polished #4: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+            (success, 1681ms, detected=fr→natural)
+  breaks #4: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+  polished #5: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+            (success, 1616ms, detected=fr→natural)
+  breaks #5: Salut Manu, comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure, s'il te plaît ? Des bisous.
+
+━━ [D3-petit-peu] lang=fr stt=PK
+  raw:      Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #1: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1922ms, detected=fr→natural)
+  breaks #1: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #2: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1912ms, detected=fr→natural)
+  breaks #2: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #3: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1885ms, detected=fr→natural)
+  breaks #3: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #4: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1871ms, detected=fr→natural)
+  breaks #4: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #5: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1846ms, detected=fr→natural)
+  breaks #5: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+
+━━ [D4-preneur] lang=fr stt=PK
+  raw:      Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #1: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les paramètres d'utilisation de ChatGPT, je vois juste l'usage global, je ne vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2383ms, detected=fr→natural)
+  breaks #1: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les paramètres d'utilisation de ChatGPT, je vois juste l'usage global, je ne vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #2: Yo les gars, vous savez comment on peut voir les limites d'utilisation du modèle Astra ? Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les paramètres d'utilisation de ChatGPT, je vois juste l'utilisation globale, je ne vois pas l'utilisation par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2371ms, detected=fr→natural)
+  breaks #2: Yo les gars, vous savez comment on peut voir les limites d'utilisation du modèle Astra ? Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les paramètres d'utilisation de ChatGPT, je vois juste l'utilisation globale, je ne vois pas l'utilisation par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #3: Yo les gars, vous savez comment on peut voir les limites d’usage du modèle Astra. Parce que ce matin j’ai voulu le tester et visiblement j’ai atteint les limites. Mais quand je vais voir dans les paramètres d’utilisation de ChatGPT, je vois juste l’usage global, je vois pas l’usage par modèle. Si vous avez l’info les gars, je suis preneur.
+            (success, 2311ms, detected=fr→natural)
+  breaks #3: Yo les gars, vous savez comment on peut voir les limites d’usage du modèle Astra. Parce que ce matin j’ai voulu le tester et visiblement j’ai atteint les limites. Mais quand je vais voir dans les paramètres d’utilisation de ChatGPT, je vois juste l’usage global, je vois pas l’usage par modèle. Si vous avez l’info les gars, je suis preneur.
+  polished #4: Yo les gars, vous savez comment on peut voir les limites d’usage du modèle Astra. Parce que ce matin j’ai voulu le tester et visiblement j’ai atteint les limites. Mais quand je vais voir dans les paramètres d’utilisation de ChatGPT, je vois juste l’usage global, je ne vois pas l’usage par modèle. Si vous avez l’info les gars, je suis preneur.
+            (success, 2380ms, detected=fr→natural)
+  breaks #4: Yo les gars, vous savez comment on peut voir les limites d’usage du modèle Astra. Parce que ce matin j’ai voulu le tester et visiblement j’ai atteint les limites. Mais quand je vais voir dans les paramètres d’utilisation de ChatGPT, je vois juste l’usage global, je ne vois pas l’usage par modèle. Si vous avez l’info les gars, je suis preneur.
+  polished #5: Yo les gars, vous savez comment on peut voir les limites d’usage du modèle Astra. Parce que ce matin j’ai voulu le tester et visiblement j’ai atteint les limites. Mais quand je vais voir dans les paramètres d’utilisation de ChatGPT, je vois juste l’usage global, je vois pas l’usage par modèle. Si vous avez l’info les gars, je suis preneur.
+            (success, 2307ms, detected=fr→natural)
+  breaks #5: Yo les gars, vous savez comment on peut voir les limites d’usage du modèle Astra. Parce que ce matin j’ai voulu le tester et visiblement j’ai atteint les limites. Mais quand je vais voir dans les paramètres d’utilisation de ChatGPT, je vois juste l’usage global, je vois pas l’usage par modèle. Si vous avez l’info les gars, je suis preneur.
+
+━━ [H1-thanks] lang=fr stt=PK
+  raw:      Merci beaucoup pour hier, c'était vraiment cool. Je te revaudrai ça promis. On se capte la semaine prochaine pour le reste.
+  polished #1: Merci beaucoup pour hier, c'était vraiment cool. Je te revoilà ça promis. On se capte la semaine prochaine pour le reste.
+            (success, 1404ms, detected=fr→natural)
+  breaks #1: Merci beaucoup pour hier, c'était vraiment cool. Je te revoilà ça promis. On se capte la semaine prochaine pour le reste.
+  polished #2: Merci beaucoup pour hier, c'était vraiment cool. Je te revaudrai ça, promis. On se capte la semaine prochaine pour le reste.
+            (success, 1449ms, detected=fr→natural)
+  breaks #2: Merci beaucoup pour hier, c'était vraiment cool. Je te revaudrai ça, promis. On se capte la semaine prochaine pour le reste.
+  polished #3: Merci beaucoup pour hier, c'était vraiment cool. Je te reviendrai ça promis. On se capte la semaine prochaine pour le reste.
+            (success, 1489ms, detected=fr→natural)
+  breaks #3: Merci beaucoup pour hier, c'était vraiment cool. Je te reviendrai ça promis. On se capte la semaine prochaine pour le reste.
+  polished #4: Merci beaucoup pour hier, c'était vraiment cool. Je te revaudrai ça, promis. On se capte la semaine prochaine pour le reste.
+            (success, 1436ms, detected=fr→natural)
+  breaks #4: Merci beaucoup pour hier, c'était vraiment cool. Je te revaudrai ça, promis. On se capte la semaine prochaine pour le reste.
+  polished #5: Merci beaucoup pour hier, c'était vraiment cool. Je te revaudrai ça, promis. On se capte la semaine prochaine pour le reste.
+            (success, 1412ms, detected=fr→natural)
+  breaks #5: Merci beaucoup pour hier, c'était vraiment cool. Je te revaudrai ça, promis. On se capte la semaine prochaine pour le reste.
+
+━━ [P1-bisous-alone] lang=fr stt=PK
+  raw:      Coucou tu peux me rappeler quand t'as deux minutes s'il te plaît. Bisous.
+  polished #1: Coucou, tu peux me rappeler quand tu as deux minutes, s'il te plaît. Bisous.
+            (success, 1377ms, detected=fr→natural)
+  breaks #1: Coucou, tu peux me rappeler quand tu as deux minutes, s'il te plaît. Bisous.
+  polished #2: Coucou, tu peux me rappeler quand tu as deux minutes, s'il te plaît. Bisous.
+            (success, 1363ms, detected=fr→natural)
+  breaks #2: Coucou, tu peux me rappeler quand tu as deux minutes, s'il te plaît. Bisous.
+  polished #3: Coucou, tu peux me rappeler quand tu as deux minutes, s'il te plaît. Bisous.
+            (success, 1411ms, detected=fr→natural)
+  breaks #3: Coucou, tu peux me rappeler quand tu as deux minutes, s'il te plaît. Bisous.
+  polished #4: Coucou, tu peux me rappeler quand t'as deux minutes, s'il te plaît ? Bisous.
+            (success, 1334ms, detected=fr→natural)
+  breaks #4: Coucou, tu peux me rappeler quand t'as deux minutes, s'il te plaît ? Bisous.
+  polished #5: Coucou, tu peux me rappeler quand t’as deux minutes, s’il te plaît. Bisous.
+            (success, 1366ms, detected=fr→natural)
+  breaks #5: Coucou, tu peux me rappeler quand t’as deux minutes, s’il te plaît. Bisous.
+
+━━ [P2-merci-avance] lang=fr stt=PK
+  raw:      Est-ce que tu pourrais m'envoyer le devis avant vendredi s'il te plaît ? Merci d'avance, bonne soirée.
+  polished #1: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+            (success, 1325ms, detected=fr→natural)
+  breaks #1: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+  polished #2: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+            (success, 1323ms, detected=fr→natural)
+  breaks #2: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+  polished #3: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+            (success, 1320ms, detected=fr→natural)
+  breaks #3: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+  polished #4: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+            (success, 1331ms, detected=fr→natural)
+  breaks #4: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+  polished #5: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+            (success, 1337ms, detected=fr→natural)
+  breaks #5: Est-ce que tu pourrais m'envoyer le devis avant vendredi ? Merci d'avance, bonne soirée.
+
+━━ [P3-bises-plus] lang=fr stt=PK
+  raw:      Ok ça marche pour samedi, je ramène les bières. Bises, à plus.
+  polished #1: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+            (success, 1166ms, detected=fr→natural)
+  breaks #1: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+  polished #2: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+            (success, 1163ms, detected=fr→natural)
+  breaks #2: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+  polished #3: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+            (success, 1159ms, detected=fr→natural)
+  breaks #3: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+  polished #4: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+            (success, 1153ms, detected=fr→natural)
+  breaks #4: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+  polished #5: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+            (success, 1170ms, detected=fr→natural)
+  breaks #5: Ok, ça marche pour samedi, je ramène les bières. Bises, à plus.
+
+━━ [P4-preneur-alone] lang=fr stt=PK
+  raw:      Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+  polished #1: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+            (success, 1225ms, detected=fr→natural)
+  breaks #1: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+  polished #2: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+            (success, 1246ms, detected=fr→natural)
+  breaks #2: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+  polished #3: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+            (success, 1279ms, detected=fr→natural)
+  breaks #3: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+  polished #4: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+            (success, 1297ms, detected=fr→natural)
+  breaks #4: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+  polished #5: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+            (success, 1251ms, detected=fr→natural)
+  breaks #5: Si jamais t'as encore des places pour le concert de samedi, je suis preneur.
+
+━━ [P5-revaudrai-alone] lang=fr stt=PK
+  raw:      Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+  polished #1: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+            (success, 1250ms, detected=fr→natural)
+  breaks #1: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+  polished #2: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+            (success, 1246ms, detected=fr→natural)
+  breaks #2: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+  polished #3: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+            (success, 1222ms, detected=fr→natural)
+  breaks #3: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+  polished #4: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+            (success, 1210ms, detected=fr→natural)
+  breaks #4: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+  polished #5: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+            (success, 1215ms, detected=fr→natural)
+  breaks #5: Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.
+
+━━ [P6-capte-alone] lang=fr stt=PK
+  raw:      Je finis tard ce soir, on se capte demain pour caler la réunion.
+  polished #1: Je finis tard ce soir, on se capte demain pour caler la réunion.
+            (success, 1192ms, detected=fr→natural)
+  breaks #1: Je finis tard ce soir, on se capte demain pour caler la réunion.
+  polished #2: Je finis tard ce soir, on se capte demain pour caler la réunion.
+            (success, 1182ms, detected=fr→natural)
+  breaks #2: Je finis tard ce soir, on se capte demain pour caler la réunion.
+  polished #3: Je finis tard ce soir, on se capte demain pour caler la réunion.
+            (success, 1170ms, detected=fr→natural)
+  breaks #3: Je finis tard ce soir, on se capte demain pour caler la réunion.
+  polished #4: Je finis tard ce soir, on se capte demain pour caler la réunion.
+            (success, 1181ms, detected=fr→natural)
+  breaks #4: Je finis tard ce soir, on se capte demain pour caler la réunion.
+  polished #5: Je finis tard ce soir, on se capte demain pour caler la réunion.
+            (success, 1162ms, detected=fr→natural)
+  breaks #5: Je finis tard ce soir, on se capte demain pour caler la réunion.
+
+━━ [P7-idioms] lang=fr stt=PK
+  raw:      Franchement ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+  polished #1: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+            (success, 1341ms, detected=fr→natural)
+  breaks #1: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+  polished #2: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+            (success, 1327ms, detected=fr→natural)
+  breaks #2: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+  polished #3: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+            (success, 1329ms, detected=fr→natural)
+  breaks #3: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+  polished #4: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+            (success, 1352ms, detected=fr→natural)
+  breaks #4: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+  polished #5: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+            (success, 1343ms, detected=fr→natural)
+  breaks #5: Franchement, ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.
+
+━━ [P8-register] lang=fr stt=PK
+  raw:      Hello Julie comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+  polished #1: Hello Julie, comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+            (success, 1390ms, detected=fr→natural)
+  breaks #1: Hello Julie, comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+  polished #2: Hello Julie comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+            (rejectedGuardrail, 1380ms, detected=fr→natural, check=grounding)
+  engineOut #2: Bonjour Julie, comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+  polished #3: Hello Julie, comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+            (success, 1380ms, detected=fr→natural)
+  breaks #3: Hello Julie, comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+  polished #4: Hello Julie, comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+            (success, 1377ms, detected=fr→natural)
+  breaks #4: Hello Julie, comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+  polished #5: Hello Julie comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+            (rejectedGuardrail, 1402ms, detected=fr→natural, check=grounding)
+  engineOut #5: Bonjour Julie, comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?
+
+━━ [C1-control] lang=fr stt=PK
+  raw:      Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+  polished #1: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+            (success, 1331ms, detected=fr→natural)
+  breaks #1: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+  polished #2: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+            (success, 1350ms, detected=fr→natural)
+  breaks #2: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+  polished #3: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+            (success, 1331ms, detected=fr→natural)
+  breaks #3: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+  polished #4: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+            (success, 1338ms, detected=fr→natural)
+  breaks #4: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+  polished #5: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+            (success, 1394ms, detected=fr→natural)
+  breaks #5: Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.
+
+── outcomes: 68/70 success
+   rejectedGuardrail: 2/70 — P8-register×2

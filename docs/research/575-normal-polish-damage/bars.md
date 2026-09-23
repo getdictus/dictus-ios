@@ -192,3 +192,24 @@ Two defects in the **instrument**. Neither touches a threshold.
 
 The same corpora ran through the detector again after both fixes. Every flag left is
 read by hand in `labels.json`.
+
+## Amendment A2 — 2026-09-23, made AFTER reading the first shipping capture
+
+Recorded in full because it follows a result. No threshold moved.
+
+- **One `_keep` was a bug.** `D1-selfcorrect` asked for `je suis planté`, but the raw
+  says `je me suis planté`. So the scorer marked all 10 FR outputs damaged, and none of
+  them were. The phrase is fixed in `fixtures.json`.
+- **The fixed lists missed damage the outputs showed, so two screens were added. Both
+  make the bar harder.** An added `ne` (`je vois pas` → `je ne vois pas`) is now
+  checked on every fixture (`score.py`, `added_ne`). That was already a Preserve-list
+  violation in ADR 0003 and in #439's bar 2, and no `_keep` named it. Every damage
+  label in `findings.md` is also the **union** of `score.py` and D-lost's lost words,
+  read group by group (`harness/summarise.py`). That is how `pourrais` → `peux`,
+  `usage` → `utilisation` and `Hello` → `Bonjour` were counted.
+- **Refused runs are scored from their engine output**, printed beneath them. They count
+  as damage *the guardrails caught*, never as damage that reached a user.
+- **`harness/protected.py` was written after the round.** It is a sketch of a narrower
+  check than D-lost. It is not a declared candidate. Its numbers on this round are
+  fitted to this round. Its false-refusal count on the two legacy corpora is a fair
+  measurement, because it never saw them, and it is reported as such.

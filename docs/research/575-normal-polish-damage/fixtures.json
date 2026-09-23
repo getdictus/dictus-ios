@@ -7,7 +7,7 @@
   "_note": "Device capture 2026-09-17, iPhone16,2, iOS 27.0, build 1.9.0 (34), Parakeet v3 + Normal polish, raw verbatim from docs/research/572-message/corpus.json. Not a #575 row; carried as a control on a device input the issue does not name.",
   "_keep": [
    "j'espère que tu vas bien",
-   "je suis planté",
+   "je me suis planté",
    "tu vas bien"
   ],
   "_forbid": []

@@ -18,8 +18,15 @@ def norm(s):
 
 def parse(path):
     """Yield (fixture_id, run, text, outcome) from a `show` capture."""
-    fid, pending = None, None
+    fid, pending, held = None, None, None
     for line in open(path, encoding="utf-8"):
+        # Amendment A2: a refused run's ENGINE output is printed beneath it. Scored as
+        # model behaviour the guardrail caught, never as what reached the user.
+        m = re.match(r"  engineOut(?: #(\d+))?: (.*)$", line)
+        if m and held:
+            yield held[0], held[1], m.group(2), "caught:" + held[2]
+            held = None
+            continue
         m = re.match(r"━━ \[([^\]]+)\]", line)
         if m:
             fid = m.group(1)
@@ -31,6 +38,8 @@ def parse(path):
         m = re.match(r"\s+\((\w+),", line)
         if m and pending:
             yield fid, pending[0], pending[1], m.group(1)
+            if m.group(1) != "success":
+                held = (fid, pending[0], m.group(1))
             pending = None
 
 
@@ -54,9 +63,19 @@ def rows(fid, t):
     return fired
 
 
+NE = re.compile(r"\b(ne|n')\b|\bn'")
+
+
+def added_ne(raw, t):
+    """Amendment A2: an oral negation formalised (`je vois pas` -> `je ne vois pas`)."""
+    return len(NE.findall(t)) > len(NE.findall(norm(raw)))
+
+
 def damage(fx, t):
     lost = [k for k in fx["_keep"] if norm(k) not in t]
     bad = [f for f in fx["_forbid"] if norm(f) in t]
+    if added_ne(fx["raw"], t):
+        bad.append("+ne")
     return lost, bad
 
 
@@ -67,7 +86,12 @@ def main():
         dmg, n = {}, {}
         blind = 0
         details = []
+        caught = []
         for fid, run, text, outcome in parse(path):
+            if outcome.startswith("caught:"):
+                lost, bad = damage(fixtures[fid], norm(text))
+                caught.append(f"   {fid} #{run}: {'DAMAGED' if lost or bad else 'clean'} lost={lost} forbidden={bad} :: {text}")
+                continue
             outcomes[outcome] = outcomes.get(outcome, 0) + 1
             if outcome != "success":
                 continue
@@ -101,6 +125,10 @@ def main():
         print(f"   B4 damaged AND success (guardrail-blind): {blind}")
         for d in details:
             print(d)
+        if caught:
+            print("   refused runs, engine output (never reached the user):")
+            for c in caught:
+                print(c)
 
 
 if __name__ == "__main__":
