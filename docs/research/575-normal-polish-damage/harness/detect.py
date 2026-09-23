@@ -40,7 +40,8 @@ STOP = {
 
 
 def tokens(s):
-    s = s.lower().replace("’", "'")
+    # Amendment A1: the ligatures fold to two letters, so `oeuf` and `œuf` are one word.
+    s = s.lower().replace("’", "'").replace("œ", "oe").replace("æ", "ae")
     return [t for t in re.split(r"[^\w]+", s) if t and t != "_"]
 
 

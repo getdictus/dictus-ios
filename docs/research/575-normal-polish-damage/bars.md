@@ -173,3 +173,22 @@ Every output either variant flags is **read by a human** and labelled `damage` o
 - **D-lost is bag-of-words.** It cannot see reordering, including `comment vas-tu`. It
   will read a legitimate rule-8 repair as a loss. That is #570's limit and #466's
   lesson, and it is named here so the number is not read as more than it is.
+
+---
+
+## Amendment A1 — 2026-09-23, made after reading D-lost's flags on the two legacy corpora, before scoring this round
+
+Two defects in the **instrument**. Neither touches a threshold.
+
+- **The detector compared the model's output against the raw, not against the pre-passed
+  text.** On `freepolish.json` it flagged `interrogation`, `exclamation`, `retour` and
+  `ligne` as lost on every verbal-punctuation fixture. The regex pre-pass had already
+  replaced those, as the pipeline does, and the guardrails in production judge against
+  the pre-passed text too. `detector_eval.py` now applies a Python mirror of
+  `VerbalPunctuationPrepass`'s French rules first. That is 22 fewer flags, and every one
+  of them was a false positive.
+- **`oeuf` against `œuf` counted as a loss.** The ligatures now fold to two letters in
+  `detect.tokens`. That is 5 fewer flags, all false positives.
+
+The same corpora ran through the detector again after both fixes. Every flag left is
+read by hand in `labels.json`.
