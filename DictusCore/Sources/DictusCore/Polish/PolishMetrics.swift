@@ -77,6 +77,42 @@ public struct PolishMetrics: Sendable, Codable {
         /// it means *we* read the transcript as a language the model does not
         /// publish, which is a fact about the dictation rather than about the model.
         case unsupportedInputLanguage
+        /// An armed Smart Mode declined the dictation for being shorter than its floor
+        /// (#587, round 4), so the engine was never asked to transform it and the
+        /// dictation took the path it takes with nothing armed.
+        ///
+        /// Its own outcome rather than a flag on the Normal event that follows: with
+        /// the polish toggle off there IS no event that follows — `PolishService`
+        /// returns the raw text before writing anything — and the first export of this
+        /// behaviour (2026-09-23) therefore showed a short dictation as no event at
+        /// all. An outcome is also what `outcomes` in the debug export counts, which is
+        /// the number that answers "how often did the mode I armed decline to run".
+        ///
+        /// Distinct from `skippedShort`, which is the **recording-duration** gate on
+        /// the free polish (#141): that one is about how long the user spoke, this one
+        /// about how much they said, and they can fire on different dictations.
+        case smartModeSkippedShortInput
+    }
+
+    /// Why an armed Smart Mode declined a dictation for length (#587), on the event
+    /// that records the skip.
+    ///
+    /// Carries the two numbers the decision was made on rather than only the verdict:
+    /// a reader asking whether the floor is right needs to see what it refused, and
+    /// the floor travels with the mode's record, which an export does not hold.
+    public struct SmartModeLengthSkip: Sendable, Codable, Equatable {
+        /// `SmartMode.id` of the mode that declined.
+        public let mode: String
+        /// Characters in the transcript it was handed.
+        public let characters: Int
+        /// The mode's `minimumInputCharacters` at the time.
+        public let floor: Int
+
+        public init(mode: String, characters: Int, floor: Int) {
+            self.mode = mode
+            self.characters = characters
+            self.floor = floor
+        }
     }
 
     /// The inputs that decided the polish target, captured per event (#332).
@@ -279,16 +315,9 @@ public struct PolishMetrics: Sendable, Codable {
     /// key means "written before this existed", never "no check fired".
     public let guardrailCheck: PolishGuardrail.Check?
 
-    /// The armed Smart Mode this dictation **skipped** because the transcript was
-    /// shorter than the mode's floor (#587, round 4), or nil. The event itself then
-    /// describes the path the dictation actually took — Normal polish — and this field
-    /// is what lets an export tell "the user had `Structuré` armed and it did not run,
-    /// by design" from "the user had nothing armed".
-    ///
-    /// Not an `Outcome`, for the reason `guardrailCheck` is not: the outcome is the
-    /// Normal polish's own, and it is correct. Optional for the reason every late
-    /// field here is.
-    public var smartModeSkippedForLength: String?
+    /// Set on a `smartModeSkippedShortInput` event and nowhere else: which mode
+    /// declined, on how many characters, against which floor (#587).
+    public let smartModeLengthSkip: SmartModeLengthSkip?
 
     public init(engine: String,
                 mode: String?,
@@ -303,7 +332,8 @@ public struct PolishMetrics: Sendable, Codable {
                 timings: PolishTimings? = nil,
                 failureReason: PolishFailureReason? = nil,
                 guardrailCheck: PolishGuardrail.Check? = nil,
-                languageResolution: LanguageResolution? = nil) {
+                languageResolution: LanguageResolution? = nil,
+                smartModeLengthSkip: SmartModeLengthSkip? = nil) {
         self.engine = engine
         self.mode = mode
         self.targetLanguage = targetLanguage
@@ -318,6 +348,7 @@ public struct PolishMetrics: Sendable, Codable {
         self.timings = timings
         self.failureReason = failureReason
         self.guardrailCheck = guardrailCheck
+        self.smartModeLengthSkip = smartModeLengthSkip
     }
 
     /// Emit one line for a pre-call context refusal (#270). The metrics event

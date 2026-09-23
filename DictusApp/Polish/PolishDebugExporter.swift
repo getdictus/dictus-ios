@@ -31,10 +31,10 @@ struct PolishDebugExport: Codable {
     /// and the whole point of #466's fourth check is that its rate be countable
     /// after the fact — which needs the split, not the total.
     let guardrailChecks: [String: Int]
-    /// How many dictations skipped each armed mode because the transcript was under
-    /// its floor (#587), e.g. `{"structured": 3}`. The events themselves are Normal
-    /// polish — that is what ran — so without this count an export could not say how
-    /// often `Structuré` was armed and deliberately not used.
+    /// How many dictations each armed mode declined for being under its floor (#587),
+    /// e.g. `{"structured": 3}`. The same number is countable from `outcomes`, which
+    /// carries `smartModeSkippedShortInput`; this splits it per mode, the way
+    /// `guardrailChecks` splits `rejectedGuardrail`.
     let smartModesSkippedForLength: [String: Int]
     /// The same counts split by writing process, e.g.
     /// `{"<KBD>": {"rateLimited": 0}, "<APP>": {"rateLimited": 21}}` (#361).
@@ -128,10 +128,13 @@ struct PolishDebugExport: Codable {
         /// `grounding` or `prefixAlignment`. Present on `rejectedGuardrail` events
         /// only, and absent on every event written before the field existed.
         let guardrailCheck: String?
-        /// The armed mode this dictation skipped for being shorter than the mode's
-        /// floor (#587), e.g. `structured`. The rest of the event is the Normal polish
-        /// that ran instead. Absent on every other event.
-        let smartModeSkippedForLength: String?
+        /// On a `smartModeSkippedShortInput` event: which mode declined, on how many
+        /// characters, against which floor (#587). Absent on every other event.
+        ///
+        /// The dictation's own result is the **next** event, the Normal polish that ran
+        /// in the mode's place — or no event at all when the polish toggle is off, which
+        /// is exactly why the skip needed one of its own.
+        let smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip?
         let latencyMs: Int
         /// Latency breakdown — `latencyMs` ≈ preprocess + engine + postprocess.
         /// `engineMs` is the pure LLM cost; the other two are our regex passes.
@@ -194,15 +197,18 @@ enum PolishDebugExporter {
         var outcomes: [String: Int] = [
             "success": 0, "rejectedGuardrail": 0, "skipped": 0,
             "skippedShort": 0, "skippedAutoMode": 0, "cancelled": 0, "engineFailed": 0,
-            "engineUnavailable": 0, "exceededContextBudget": 0
+            "engineUnavailable": 0, "exceededContextBudget": 0,
+            // Seeded like the rest so a zero reads as "did not happen" rather than as
+            // "this build does not know about it" (#587).
+            "smartModeSkippedShortInput": 0
         ]
         var failureReasons: [String: Int] = [:]
         var failureReasonsByWriter: [String: [String: Int]] = [:]
         var guardrailChecks: [String: Int] = [:]
         var smartModesSkippedForLength: [String: Int] = [:]
         for e in entries {
-            if let skipped = e.metrics.smartModeSkippedForLength {
-                smartModesSkippedForLength[skipped, default: 0] += 1
+            if let skip = e.metrics.smartModeLengthSkip {
+                smartModesSkippedForLength[skip.mode, default: 0] += 1
             }
             outcomes[e.metrics.outcome.rawValue, default: 0] += 1
             if let reason = e.metrics.failureReason {
@@ -232,7 +238,7 @@ enum PolishDebugExporter {
                 outcome: entry.metrics.outcome.rawValue,
                 failureReason: entry.metrics.failureReason?.slug,
                 guardrailCheck: entry.metrics.guardrailCheck?.rawValue,
-                smartModeSkippedForLength: entry.metrics.smartModeSkippedForLength,
+                smartModeLengthSkip: entry.metrics.smartModeLengthSkip,
                 latencyMs: entry.metrics.latencyMs,
                 preprocessMs: entry.metrics.timings?.preprocessMs,
                 engineMs: entry.metrics.timings?.engineMs,

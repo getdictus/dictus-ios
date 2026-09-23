@@ -193,22 +193,25 @@ public final class PolishService {
                        recordingDuration: TimeInterval,
                        engineRaw: String? = nil,
                        onEngineWillRun: (() -> Void)? = nil) async -> PolishOutcome {
-        // A mode with a length floor is skipped below it, not refused (#587, round 4):
-        // the dictation continues exactly as if nothing were armed — Normal polish when
-        // the toggle is on, the raw text otherwise — and nothing is announced, because
-        // nothing failed. It is logged, and its identifier rides on the metrics event,
-        // so an export can say the mode was skipped for length.
+        // A mode with a length floor declines below it, and declining is not failing
+        // (#587, round 4): the dictation continues exactly as if nothing were armed —
+        // Normal polish when the toggle is on, the raw text otherwise.
+        //
+        // Two things happen around that, and both are answers to what the first device
+        // round of this behaviour showed. The user is **told**, through the same
+        // `SmartModeFailure` channel every other did-not-run sentence takes: someone who
+        // armed `Structuré` and receives plain text cannot otherwise tell a deliberate
+        // skip from a broken mode. And the skip is **recorded as its own event**, here,
+        // before the delegated call — with the toggle off that call writes nothing at
+        // all, which is why Pierre's 2026-09-23 export showed his short dictation as no
+        // event whatsoever.
         if let armed = smartMode, !armed.runs(onInputOfLength: raw.count) {
-            PersistentLog.log(.smartModeSkipped(
-                mode: armed.id,
-                reason: "shortInput chars=\(raw.count) floor=\(armed.minimumInputCharacters ?? 0)",
-                disarmed: false
-            ))
-            return await Self.$modeSkippedForLength.withValue(armed.id) {
-                await polish(raw: raw, languagePolicy: languagePolicy, smartMode: nil,
-                             recordingDuration: recordingDuration, engineRaw: engineRaw,
-                             onEngineWillRun: onEngineWillRun)
-            }
+            return await skipForShortInput(
+                armed,
+                request: ShortInputSkip(raw: raw, languagePolicy: languagePolicy,
+                                        recordingDuration: recordingDuration, engineRaw: engineRaw),
+                onEngineWillRun: onEngineWillRun
+            )
         }
         let task = smartMode.map(PolishTask.smart)
         guard PolishGatePolicy.runsDespiteToggle(
@@ -837,21 +840,67 @@ public final class PolishService {
         onBecameUnavailable?()
     }
 
-    /// The armed mode the current dictation skipped for length, if any (#587).
+    /// What `polish` was called with, for the skip path to pass along unchanged.
+    /// Grouped for the reason `Request` below is grouped: four values with no type
+    /// distinction between them, and a fixed argument order is how the wrong one ends
+    /// up in the wrong slot.
+    private struct ShortInputSkip {
+        let raw: String
+        let languagePolicy: TranscriptionLanguagePolicy
+        let recordingDuration: TimeInterval
+        let engineRaw: String?
+    }
+
+    /// Record the skip, then run the dictation as if nothing were armed (#587).
     ///
-    /// A task-local rather than a parameter because it only has to reach `emit`, and
-    /// the path between the two is every free-polish branch of this type: threading it
-    /// through all of them would touch five metric constructions for one field. It is
-    /// bound for the duration of one `polish` call and cannot leak into the next.
-    @TaskLocal private static var modeSkippedForLength: String?
+    /// The returned outcome carries the text of that run **and** a `SmartModeFailure`,
+    /// which is what `isDegraded` already means everywhere else: text was inserted and
+    /// the mode did not run. The keyboard's toolbar says so in one sentence.
+    private func skipForShortInput(_ mode: SmartMode,
+                                   request: ShortInputSkip,
+                                   onEngineWillRun: (() -> Void)?) async -> PolishOutcome {
+        let raw = request.raw
+        let floor = mode.minimumInputCharacters ?? 0
+        PersistentLog.log(.smartModeSkipped(
+            mode: mode.id, reason: "shortInput chars=\(raw.count) floor=\(floor)", disarmed: false
+        ))
+        await emit(
+            PolishMetrics(
+                engine: activeEngine.identifier,
+                mode: PolishTask.smart(mode).identifier,
+                targetLanguage: nil,
+                detectedLanguage: PolishPipeline.detectLanguageCode(in: raw),
+                rawCharCount: raw.count,
+                polishedCharCount: raw.count,
+                latencyMs: 0,
+                outcome: .smartModeSkippedShortInput,
+                smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip(
+                    mode: mode.id, characters: raw.count, floor: floor
+                )
+            ),
+            raw: raw, engineRaw: request.engineRaw, polished: nil
+        )
+        let outcome = await polish(
+            raw: raw, languagePolicy: request.languagePolicy, smartMode: nil,
+            recordingDuration: request.recordingDuration, engineRaw: request.engineRaw,
+            onEngineWillRun: onEngineWillRun
+        )
+        return PolishOutcome(
+            degradedTo: outcome.text ?? raw,
+            failure: SmartModeFailure(
+                modeIdentifier: mode.id,
+                modeDisplayName: mode.displayName,
+                outcome: PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue,
+                reason: "shortInput"
+            )
+        )
+    }
 
     /// Log one metrics event and hand it to whichever sink this process owns.
-    private func emit(_ metrics: PolishMetrics,
+    private func emit(_ m: PolishMetrics,
                       raw: String,
                       engineRaw: String?,
                       polished: String?) async {
-        var m = metrics
-        m.smartModeSkippedForLength = Self.modeSkippedForLength
         PolishMetrics.log(m)
         // An engine failure also goes to the persistent log (#315), where it can
         // be read against the dictation timeline around it. Keyed on the

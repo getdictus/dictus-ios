@@ -359,7 +359,7 @@ private extension PolishMetrics.Outcome {
     static var allDisplayCases: [PolishMetrics.Outcome] {
         [.success, .rejectedGuardrail, .skipped, .skippedShort, .skippedAutoMode,
          .cancelled, .engineFailed, .engineUnavailable, .exceededContextBudget,
-         .unsupportedInputLanguage]
+         .unsupportedInputLanguage, .smartModeSkippedShortInput]
     }
 
     var shortLabel: String {
@@ -374,6 +374,7 @@ private extension PolishMetrics.Outcome {
         case .engineUnavailable: return "unavailable"
         case .exceededContextBudget: return "too long"
         case .unsupportedInputLanguage: return "language"
+        case .smartModeSkippedShortInput: return "mode skipped"
         }
     }
 
@@ -383,7 +384,11 @@ private extension PolishMetrics.Outcome {
         // Orange, not red: an overflow is a refusal, not a breakage — the
         // engine was never called and the user still got their text (#270).
         case .rejectedGuardrail, .skipped, .skippedShort, .skippedAutoMode,
-             .exceededContextBudget, .unsupportedInputLanguage: return .orange
+             .exceededContextBudget, .unsupportedInputLanguage,
+             // A mode declining a dictation it has nothing to do with is the mildest
+             // entry on this list, and it belongs with the refusals rather than with
+             // the failures: the user got their text (#587).
+             .smartModeSkippedShortInput: return .orange
         // Red, with the failures rather than with the refusals above (#315):
         // nothing failed on this dictation, but the feature is off for the rest
         // of the process, which is the worst state on this list and the one that

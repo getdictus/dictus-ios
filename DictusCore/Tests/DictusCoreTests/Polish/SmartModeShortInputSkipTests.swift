@@ -48,19 +48,50 @@ final class SmartModeShortInputSkipTests: XCTestCase {
         XCTAssertTrue(old.runs(onInputOfLength: 28))
     }
 
-    /// What an export carries: the event of the Normal polish that ran instead, with the
-    /// skipped mode named on it, and nothing when no mode was skipped.
-    func testTheMetricsEventNamesTheSkippedMode() throws {
-        var metrics = PolishMetrics(
+    /// What an export carries: the skip is its own outcome, with the two numbers the
+    /// decision was made on, so a reader can ask whether the floor is right.
+    func testTheSkipIsItsOwnOutcomeWithItsNumbers() throws {
+        let metrics = PolishMetrics(
+            engine: "apple-fm", mode: "smart.structured", targetLanguage: nil, detectedLanguage: "fr",
+            rawCharCount: 28, polishedCharCount: 28, latencyMs: 0,
+            outcome: .smartModeSkippedShortInput,
+            smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip(
+                mode: "structured", characters: 28, floor: 200
+            )
+        )
+        let decoded = try JSONDecoder().decode(PolishMetrics.self, from: JSONEncoder().encode(metrics))
+        XCTAssertEqual(decoded.outcome, .smartModeSkippedShortInput)
+        XCTAssertEqual(decoded.smartModeLengthSkip?.mode, "structured")
+        XCTAssertEqual(decoded.smartModeLengthSkip?.characters, 28)
+        XCTAssertEqual(decoded.smartModeLengthSkip?.floor, 200)
+        XCTAssertEqual(decoded.outcome.rawValue, "smartModeSkippedShortInput")
+    }
+
+    /// Every other outcome leaves the field empty, so a reader can key on its presence.
+    func testNoOtherEventCarriesTheSkipDetail() throws {
+        let metrics = PolishMetrics(
             engine: "apple-fm", mode: "natural", targetLanguage: .french, detectedLanguage: "fr",
             rawCharCount: 28, polishedCharCount: 28, latencyMs: 900, outcome: .success
         )
-        XCTAssertNil(try JSONDecoder().decode(PolishMetrics.self, from: JSONEncoder().encode(metrics))
-            .smartModeSkippedForLength)
-        metrics.smartModeSkippedForLength = SmartModeCatalogue.structuredIdentifier
         let decoded = try JSONDecoder().decode(PolishMetrics.self, from: JSONEncoder().encode(metrics))
-        XCTAssertEqual(decoded.smartModeSkippedForLength, "structured")
-        XCTAssertEqual(decoded.outcome, .success)
+        XCTAssertNil(decoded.smartModeLengthSkip)
+    }
+
+    /// The user is told. The skip travels on the same `SmartModeFailure` channel as
+    /// every other did-not-run sentence, with text inserted — which is what
+    /// `isDegraded` means — so the keyboard raises its notice.
+    func testTheSkipReachesTheToolbarAsADegradedOutcome() {
+        let outcome = PolishOutcome(
+            degradedTo: "Comment tu vas aujourd'hui ?",
+            failure: SmartModeFailure(
+                modeIdentifier: "structured", modeDisplayName: "Structured",
+                outcome: PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue,
+                reason: "shortInput"
+            )
+        )
+        XCTAssertTrue(outcome.isDegraded)
+        XCTAssertEqual(outcome.text, "Comment tu vas aujourd'hui ?")
+        XCTAssertEqual(outcome.smartModeFailure?.outcome, "smartModeSkippedShortInput")
     }
 
     /// The persistent log line an agent reads: the existing "ran Normal instead" event,
