@@ -6,6 +6,8 @@ The goal is not to process the largest possible number of issues. The goal is to
 
 The design is grounded in the comparative research at [`docs/research/issue-governance-comparison.md`](research/issue-governance-comparison.md), with detailed notes for OpenClaw, Hermes Agent, Kubernetes, Home Assistant and VS Code in the same directory.
 
+**Hermes**, in this document, is the name Pierre uses for the agent that triages Dictus issues, prepares evidence and shepherds pull requests. It is not NousResearch's Hermes Agent, which appears in `docs/research/issue-governance-hermes.md` as a studied project and nothing more. Wherever this document grants or withholds authority to Hermes, it means the Dictus worker.
+
 ## Sources of truth
 
 Each artifact owns one kind of information. Do not copy the same fact into several places.
@@ -230,7 +232,7 @@ Suggested saved views:
 - **Pierre decisions**: `needs-decision`.
 - **Pierre actions**: `ready-for-human`.
 - **Pierre validation**: status Validation, filtered by the current repository-wide device gate, Technical validation Device, or Product verdict Required.
-- **Triage**: `needs-triage`; the triage worker's reconciliation pass separately detects a reporter comment newer than the last `needs-info` triage note and returns that issue to `needs-triage`.
+- **Triage**: `needs-triage`; Hermes's reconciliation pass separately detects a reporter comment newer than the last `needs-info` triage note and returns that issue to `needs-triage`.
 - **Someday**: milestone `Someday`, hidden from daily work.
 
 Suggested custom fields:
@@ -240,7 +242,7 @@ Suggested custom fields:
 
 Do not duplicate milestone, priority, assignee or labels into custom fields. GitHub already synchronizes those into Projects. While `docs/ROADMAP.md` owns exact order, Project manual rank must mirror it and may not reorder work. Project rank becomes authoritative only if Pierre explicitly transfers that ownership and the roadmap documentation is updated in the same change.
 
-Built-in automation should add matching Dictus issues, set newly added items to Inbox and set closed issues or merged PRs to Done. The triage worker prepares evidence and applies only the state transitions authorized above; Pierre owns product and scheduling decisions. GitHub automation owns mechanical field updates.
+Built-in automation should add matching Dictus issues, set newly added items to Inbox and set closed issues or merged PRs to Done. Hermes prepares evidence and applies only the state transitions authorized above; Pierre owns product and scheduling decisions. GitHub automation owns mechanical field updates.
 
 ## Maintainer operating rhythm
 
@@ -253,13 +255,13 @@ A small recurring inbox is enough:
 3. **Human actions**: perform the first `ready-for-human` item when it blocks the active release.
 4. **Weekly steering**: confirm the top of the active lane in `docs/ROADMAP.md`, and reorder it there when the release outcome has moved.
 
-An agent can prepare and summarize these queues. It must not silently convert an unanswered product question into an implementation assumption.
+Hermes can prepare and summarize these queues. It must not silently convert an unanswered product question into an implementation assumption.
 
 ## Automation model
 
 Use events for responsiveness and periodic reconciliation for reliability:
 
-- GitHub issue and comment events wake the triage worker.
+- GitHub issue and comment events wake Hermes's triage pass.
 - A roadmap commit touching the active lane, or a Ready transition, wakes the implementation queue.
 - Pull request updates, reviews and completed checks wake the PR shepherd.
 - A periodic sweep finds missed events, stale claims, conflicting state labels and issues whose reporter has replied.
