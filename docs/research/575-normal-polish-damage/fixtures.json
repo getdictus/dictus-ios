@@ -1,0 +1,216 @@
+[
+ {
+  "id": "D1-selfcorrect",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que... dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.",
+  "_note": "Device capture 2026-09-17, iPhone16,2, iOS 27.0, build 1.9.0 (34), Parakeet v3 + Normal polish, raw verbatim from docs/research/572-message/corpus.json. Not a #575 row; carried as a control on a device input the issue does not name.",
+  "_keep": [
+   "j'espère que tu vas bien",
+   "je suis planté",
+   "tu vas bien"
+  ],
+  "_forbid": []
+ },
+ {
+  "id": "D2-bisous",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.",
+  "_note": "Device capture 2026-09-17, iPhone16,2, iOS 27.0, build 1.9.0 (34), Parakeet v3 + Normal polish, raw verbatim from docs/research/572-message/corpus.json. Rows 1 and 4.",
+  "_keep": [
+   "s'il te plaît",
+   "bisous",
+   "comment tu vas",
+   "checker",
+   "le mail"
+  ],
+  "_forbid": [
+   "vas-tu",
+   "vérifier",
+   "email",
+   "e-mail",
+   "courriel"
+  ]
+ },
+ {
+  "id": "D3-petit-peu",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.",
+  "_note": "Device capture 2026-09-17, iPhone16,2, iOS 27.0, build 1.9.0 (34), Parakeet v3 + Normal polish, raw verbatim from docs/research/572-message/corpus.json. Not a #575 row. The device output also dropped 'petit' from 'un petit peu'; carried to count that.",
+  "_keep": [
+   "un petit peu",
+   "je te tiens au jus",
+   "honnêtement"
+  ],
+  "_forbid": []
+ },
+ {
+  "id": "D4-preneur",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.",
+  "_note": "Device capture 2026-09-17, iPhone16,2, iOS 27.0, build 1.9.0 (34), Parakeet v3 + Normal polish, raw verbatim from docs/research/572-message/corpus.json. Row 2.",
+  "_keep": [
+   "je suis preneur",
+   "les gars",
+   "settings"
+  ],
+  "_forbid": [
+   "je suis prêt"
+  ]
+ },
+ {
+  "id": "H1-thanks",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Merci beaucoup pour hier, c'était vraiment cool. Je te revaudrai ça promis. On se capte la semaine prochaine pour le reste.",
+  "_note": "Rows 3 and 5. The harness fixture '3-thanks' of 2026-09-17, raw verbatim, recovered from the session transcript that produced the #439 comment of 2026-09-17 07:54.",
+  "_keep": [
+   "revaudrai",
+   "se capte",
+   "promis"
+  ],
+  "_forbid": [
+   "reviendrai",
+   "revoilà",
+   "se voit",
+   "se retrouve"
+  ]
+ },
+ {
+  "id": "P1-bisous-alone",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Coucou tu peux me rappeler quand t'as deux minutes s'il te plaît. Bisous.",
+  "_note": "Shape probe, written for #575: a sign-off and a politeness formula, nothing else at risk.",
+  "_keep": [
+   "s'il te plaît",
+   "bisous",
+   "t'as",
+   "deux minutes"
+  ],
+  "_forbid": []
+ },
+ {
+  "id": "P2-merci-avance",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Est-ce que tu pourrais m'envoyer le devis avant vendredi s'il te plaît ? Merci d'avance, bonne soirée.",
+  "_note": "Shape probe: politeness formula + a two-part sign-off.",
+  "_keep": [
+   "s'il te plaît",
+   "merci d'avance",
+   "bonne soirée",
+   "devis"
+  ],
+  "_forbid": []
+ },
+ {
+  "id": "P3-bises-plus",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Ok ça marche pour samedi, je ramène les bières. Bises, à plus.",
+  "_note": "Shape probe: a closing made of two short sign-offs.",
+  "_keep": [
+   "bises",
+   "à plus",
+   "bières",
+   "ça marche"
+  ],
+  "_forbid": []
+ },
+ {
+  "id": "P4-preneur-alone",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Si jamais t'as encore des places pour le concert de samedi, je suis preneur.",
+  "_note": "Shape probe: row 2's idiom in a different message.",
+  "_keep": [
+   "je suis preneur",
+   "t'as"
+  ],
+  "_forbid": [
+   "je suis prêt"
+  ]
+ },
+ {
+  "id": "P5-revaudrai-alone",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Merci de m'avoir dépanné ce matin avec la voiture, je te revaudrai ça.",
+  "_note": "Shape probe: row 3's idiom in a different message, without 'promis'.",
+  "_keep": [
+   "je te revaudrai ça",
+   "dépanné"
+  ],
+  "_forbid": [
+   "reviendrai",
+   "revoilà"
+  ]
+ },
+ {
+  "id": "P6-capte-alone",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Je finis tard ce soir, on se capte demain pour caler la réunion.",
+  "_note": "Shape probe: row 5's slang verb in a different message.",
+  "_keep": [
+   "on se capte",
+   "caler"
+  ],
+  "_forbid": [
+   "se voit",
+   "se retrouve",
+   "se parle"
+  ]
+ },
+ {
+  "id": "P7-idioms",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Franchement ton idée me botte, je suis chaud pour tester ce week-end, t'inquiète pas pour le matos.",
+  "_note": "Shape probe: three other familiar idioms ADR 0003 does not list by name.",
+  "_keep": [
+   "me botte",
+   "je suis chaud",
+   "t'inquiète",
+   "matos"
+  ],
+  "_forbid": []
+ },
+ {
+  "id": "P8-register",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Hello Julie comment tu vas ? Tu peux checker le mail que je t'ai envoyé ce matin et me dire ce que t'en penses ?",
+  "_note": "Shape probe: row 4's three register items in a different message.",
+  "_keep": [
+   "comment tu vas",
+   "checker",
+   "le mail",
+   "t'en penses"
+  ],
+  "_forbid": [
+   "vas-tu",
+   "vérifier",
+   "email",
+   "e-mail",
+   "courriel"
+  ]
+ },
+ {
+  "id": "C1-control",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Je serai à la gare vers 18h30, je t'attends devant l'entrée principale avec les billets.",
+  "_note": "Control: a message with no sign-off, no politeness formula, no idiom, no register marker. Any damage here is the base rate.",
+  "_keep": [
+   "18h30",
+   "entrée principale",
+   "billets"
+  ],
+  "_forbid": []
+ }
+]
