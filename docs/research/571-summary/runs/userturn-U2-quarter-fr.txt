@@ -1,0 +1,103 @@
+
+
+████ ARM shipping — mode summary, 5 run(s) × 7 fixture(s)
+
+━━ [S1-free-form] 395 chars, lang=fr
+  raw: Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+  #1 success ratio=0.46 2230ms
+     out: Lancer un produit seul, le plus dur c'est de décider quoi ne pas faire. Une idée meilleure surgit toujours et on saute dessus. Après 6 mois, on a 15 trucs commencés et rien de fini.
+  #2 success ratio=0.47 3027ms
+     out: Lancer un produit seul, le plus dur c'est de décider quoi ne pas faire. Une idée meilleure surgit toujours et on saute dessus. Au bout de 6 mois, on a 15 trucs commencés et rien de fini.
+  #3 success ratio=0.45 3554ms
+     out: Lancer un produit seul, le plus dur c'est de décider quoi ne pas faire. Une idée meilleure surgit toujours et on la saute. Après 6 mois, 15 trucs commencent et rien n'est fini.
+  #4 success ratio=0.49 4476ms
+     out: Lancer un produit seul, le plus dur c'est de décider quoi ne pas faire, parce qu'une idée meilleure surgit toujours et on saute dessus, au bout de 6 mois on a 15 trucs commencés et rien de fini.
+  #5 success ratio=0.46 3355ms
+     out: Lancer un produit seul, le plus dur c'est de décider quoi ne pas faire. Une idée meilleure surgit toujours et on saute dessus. Après 6 mois, 15 trucs commencent et rien n'est fini.
+
+━━ [S2-project-update] 698 chars, lang=fr
+  raw: Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.
+  #1 rejectedGuardrail/length ratio=0.82 OUT-OF-BAND 4865ms
+     out: On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste l'historique des transcriptions qui n'est pas commencé du tout et le vocabulaire personnalisé avec une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19%, faible mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.
+  #2 rejectedGuardrail/length ratio=0.84 OUT-OF-BAND 4953ms
+     out: On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste l'historique des transcriptions qui n'est pas commencé du tout et le vocabulaire personnalisé avec une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19%, ce qui est faible mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store et si tout se passe bien, on soumet la semaine du 12.
+  #3 rejectedGuardrail/length ratio=0.82 OUT-OF-BAND 5224ms
+     out: On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste l'historique des transcriptions qui n'est pas commencé du tout et le vocabulaire personnalisé avec une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19%, faible mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store et si tout se passe bien, on soumet la semaine du 12.
+  #4 rejectedGuardrail/length ratio=0.82 OUT-OF-BAND 5782ms
+     out: On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste l'historique des transcriptions qui n'est pas commencé du tout et le vocabulaire personnalisé avec une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19%, faible mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.
+  #5 rejectedGuardrail/length ratio=0.82 OUT-OF-BAND 5584ms
+     out: On a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste l'historique des transcriptions qui n'est pas commencé du tout et le vocabulaire personnalisé avec une spec mais pas de code. On est à 412 téléchargements depuis le lancement avec un taux de rétention à 7 jours de 19%, faible mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store et si tout se passe bien, on soumet la semaine du 12.
+
+━━ [S3-rambling] 1283 chars, lang=fr
+  raw: Bon alors je me lance. Je voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête. Quoi d'autre? Ah oui, le site, le site, il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait. Enfin bref. Ah, j'ai aussi... Il faut que je pense à annuler l'abonnement machin. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi. Et puis la dernière chose, et là je note vraiment parce que sinon je vais oublier c'est de préparer les questions pour l'entretien de mardi voilà je crois que c'est tout ah non il y avait un dernier truc ça m'échappe mais ça me reviendra
+  #1 success ratio=0.24 7487ms  ⚑ REPORT[elle indique]
+     out: Je dois rappeler l'assurance du comptable, répondre à Julien parce qu'il attend depuis une semaine et demie, changer la page d'accueil du site pour qu'elle indique ce qu'on fait, annuler l'abonnement à 19 euros par mois utilisé depuis février pour 6 mois, et préparer les questions pour l'entretien de mardi.
+  #2 success ratio=0.27 7546ms
+     out: Je dois parler au comptable pour l'assurance, je dois répondre à Julien parce qu'il attend depuis une semaine et demie, je dois changer la page d'accueil du site pour qu'elle dise ce qu'on fait, je dois annuler l'abonnement à 19 euros par mois qu'on n'utilise plus depuis février, et je dois préparer les questions pour l'entretien de mardi.
+  #3 success ratio=0.25 7218ms
+     out: Je dois parler au comptable pour l'assurance, répondre à Julien parce qu'il attend depuis une semaine et demie, changer la page d'accueil du site pour qu'elle dise ce qu'on fait, annuler l'abonnement de 19 euros par mois depuis février après 6 mois de paiement inutile, et préparer les questions pour l'entretien de mardi.
+  #4 success ratio=0.25 4126ms
+     out: Je dois parler au comptable pour l'assurance, répondre à Julien parce qu'il attend depuis peut-être une semaine et demie, changer la page d'accueil du site pour qu'elle dise ce qu'on fait, annuler l'abonnement à 19 euros par mois qu'on n'utilise plus depuis février, préparer les questions pour l'entretien de mardi.
+  #5 success ratio=0.24 3917ms
+     out: Je dois rappeler le comptable pour l'assurance, répondre à Julien parce qu'il attend depuis une semaine et demie, changer la page d'accueil du site pour qu'elle dise ce qu'on fait, annuler l'abonnement à 19 euros par mois qu'on n'utilise plus depuis février, préparer les questions pour l'entretien de mardi.
+
+━━ [S4-unscripted] 1159 chars, lang=fr
+  raw: Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement l,'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen
+  #1 rejectedGuardrail/language ratio=0.49 5765ms  ⚑ LANG=en
+     out: I will do a sixth test because the others do not sound like my voice. The idea is to see how less behaves compared to my dictation, to check the transcription quality, how Type Laiss separates paragraphs, organizes them, creates lists, and adds line breaks. Then we will analyze this to try creating a different mode or improving polish, which could greatly improve the experience for users, even free ones, because launching a long audio now makes a big block on Dictation, though it is not a problem for development, but it is average for discussing with someone.
+  #2 rejectedGuardrail/length ratio=0.66 OUT-OF-BAND 7552ms  ⚑ LANG=en
+     out: I will do a sixth test because the others are not really my voice, it is not natural. The idea is to see again how less behaves compared to my application, to spot the quality of the transcription and how Type Laiss cuts the paragraphs, organizes them, puts lists, puts spaces between lines. And then we will analyze all this. This will allow us to try to create a different mode or improve our polish and I think it can be really interesting because it will really improve the experience of users and even free users because it is true that when you launch a large audio like I can do it right away it makes a big block on dictus then when I do development it is not disturbing but it is true that if you want to use it to discuss with someone it is a bit average
+  #3 rejectedGuardrail/language ratio=0.46 6334ms  ⚑ LANG=en
+     out: I will make a sixth test because the others do not sound like my voice. The idea is to see how less behaves compared to my dictation, to check the transcription quality, how Type Laiss divides paragraphs, organizes them, creates lists, and adds line breaks. Then we will analyze this to try creating a different mode or improving polish, which could greatly improve the experience for users, even free ones, because currently launching a long audio creates a big block on dictation, though development does not cause disturbance.
+  #4 rejectedGuardrail/language ratio=0.43 6470ms  ⚑ LANG=en
+     out: I will make a sixth test because the others do not sound like my voice. I want to see how less behaves compared to my dictation, to check the transcription quality and how Type Laiss handles paragraph separation, lists, and line spacing. Then we will analyze this to try creating a different mode or improving polish, which could greatly improve the experience for users, even free ones, because now launching a long audio creates a big block on Dictatus, while development does not cause trouble.
+  #5 rejectedGuardrail/language ratio=0.42 6130ms  ⚑ LANG=en
+     out: I will do a sixth test because the others do not sound like my voice. The idea is to see how less behaves compared to my dictation, to assess the transcription quality and how Type Laiss organizes paragraphs, lists, and spacing. We will then analyze this to create a different mode or improve polish, which could greatly enhance the experience for users, even free ones, because launching a long audio now creates a large block on dictation, while development does not cause disruption.
+
+━━ [S5-todo-enumeration] 585 chars, lang=fr
+  raw: bon alors euh je récapitule ce qu'il faut que je fasse avant la réunion donc déjà faut que je récupère les chiffres de janvier auprès de Marion elle m'a dit qu'elle les aurait mardi enfin non mercredi et euh du coup faudra que je fasse le tableau comparatif avec ceux de l'année dernière et puis aussi tu vois il faut absolument que j'appelle le prestataire parce que leur devis il est encore passé de 12000 à 15000 euros et ça personne l'a validé et enfin bon voilà il faudrait aussi que je pense à réserver la salle du deuxième étage parce que l'autre elle est prise toute la semaine
+  #1 success ratio=0.54 5541ms
+     out: je dois récupérer les chiffres de janvier auprès de Marion qui les aura mercredi, je ferai le tableau comparatif avec ceux de l'année dernière, j'appelle le prestataire car leur devis est passé de 12000 à 15000 euros sans validation et je réserve la salle du deuxième étage car l'autre est prise toute la semaine.
+  #2 success ratio=0.54 5556ms
+     out: Je dois récupérer les chiffres de janvier auprès de Marion qui les aura mercredi, faire le tableau comparatif avec ceux de l'année dernière, appeler le prestataire parce que leur devis est passé de 12000 à 15000 euros sans validation et réserver la salle du deuxième étage parce que l'autre est prise toute la semaine.
+  #3 success ratio=0.52 4949ms
+     out: Je dois récupérer les chiffres de janvier auprès de Marion mercredi, faire le tableau comparatif avec ceux de l'année dernière, appeler le prestataire parce que leur devis est passé de 12000 à 15000 euros sans validation, et réserver la salle du deuxième étage parce que l'autre est prise toute la semaine.
+  #4 success ratio=0.57 5004ms
+     out: Je dois récupérer les chiffres de janvier auprès de Marion, qui les aura mercredi, et faire le tableau comparatif avec ceux de l'année dernière. Je dois aussi appeler le prestataire parce que son devis est passé de 12000 à 15000 euros sans validation, et réserver la salle du deuxième étage parce que l'autre est prise toute la semaine.
+  #5 success ratio=0.59 5178ms
+     out: Je dois récupérer les chiffres de janvier auprès de Marion, qui les aura mercredi, puis faire le tableau comparatif avec ceux de l'année dernière. Je dois aussi appeler le prestataire parce que leur devis est passé de 12000 à 15000 euros sans validation, et je dois réserver la salle du deuxième étage parce que l'autre est prise toute la semaine.
+
+━━ [S6-one-line] 73 chars, lang=fr
+  raw: faut que je rappelle le comptable avant vendredi pour la TVA du trimestre
+  #1 rejectedGuardrail/length ratio=1.05 OUT-OF-BAND 3682ms
+     out: Il faut que je rappelle le comptable avant vendredi pour la TVA du trimestre.
+  #2 rejectedGuardrail/length ratio=0.96 OUT-OF-BAND 3654ms
+     out: Je dois rappeler le comptable avant vendredi pour la TVA du trimestre.
+  #3 rejectedGuardrail/length ratio=1.05 OUT-OF-BAND 3698ms
+     out: Il faut que je rappelle le comptable avant vendredi pour la TVA du trimestre.
+  #4 rejectedGuardrail/length ratio=0.96 OUT-OF-BAND 196878ms
+     out: Je dois rappeler le comptable avant vendredi pour la TVA du trimestre.
+  #5 rejectedGuardrail/length ratio=0.96 OUT-OF-BAND 4966ms
+     out: Je dois rappeler le comptable avant vendredi pour la TVA du trimestre.
+
+━━ [S7-addressed-request] 433 chars, lang=fr
+  raw: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+  #1 rejectedGuardrail/length ratio=0.66 OUT-OF-BAND 6208ms
+     out: J'ai besoin d'un check sur les issues iOS suite à un retour d'utilisateur. On a discuté et quasiment tout noté. Avant de passer aux problèmes, regarde notre conversation avec lui. Il y a plusieurs postes. Dis-moi les retours qu'il a faits, liste-les-moi simplement et on fait un point.
+  #2 rejectedGuardrail/length ratio=0.62 OUT-OF-BAND 3450ms
+     out: J'ai besoin d'un check sur les issues iOS suite à un retour d'utilisateur. On a discuté et quasiment tout noté. Avant de checker les issues, je veux voir la conversation avec lui. Il a fait plusieurs retours. Dis-moi les listes-les-moi simplement et on fait un point.
+  #3 success ratio=0.54 3129ms
+     out: Je veux un check sur les retours iOS après notre discussion sur le slide. On a quasiment tout noté. Avant de vérifier les issues, regarde notre conversation avec lui. Il a fait plusieurs retours. Dis-moi les listes et on fait un point.
+  #4 rejectedGuardrail/length ratio=0.65 OUT-OF-BAND 3588ms
+     out: J'ai besoin d'un check sur les issues dictées iOS. On a discuté et j'ai quasiment noté tous les retours. Avant de checker les issues, regarde notre conversation avec lui. Il a fait plusieurs postes. Dis-moi les retours qu'il a faits et liste-les-moi simplement pour faire un point.
+  #5 success ratio=0.33 3213ms
+     out: Je veux un check sur les issues iOS après avoir vu le slide et nos discussions. J'ai besoin des retours de l'utilisateur pour faire un point.
+
+
+══ bars (engine outputs; `acc` = accepted by the pipeline)
+arm | lang | runs | wrong-lang (acc) | refused on language | list lines | in band | report/infinitive/person-lost | preamble | example | figure | accepted
+shipping | fr | 35 | 5 (0) | 4 (11%) | 0 | 21/35 (60%) | 1 | 0 | 0 | 0 | 17/35
+shipping | ALL | 35 | 5 (0) | 4 (11%) | 0 | 21/35 (60%) | 1 | 0 | 0 | 0 | 17/35
+   refusals, shipping: language×4, length×14
+
+capture written: ../docs/research/571-summary/runs/userturn-U2-quarter-fr.json

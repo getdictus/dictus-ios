@@ -1,0 +1,370 @@
+
+
+████ ARM shipping — 3 run(s) × 9 fixture(s), floor 0.35
+
+━━ [D1-three-steps] 838 chars, lang=fr
+  #1 838→794 5078ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #2 838→794 4585ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #3 838→788 4583ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+     engineOut: Je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+
+━━ [D2-three-steps-drift] 795 chars, lang=fr
+  #1 795→806 4919ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape, c'est le modèle. Il prend ses morceaux et essaie de deviner quels ont été prononcés, et quelle forme. Pour cela, il micro ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎La troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #2 795→805 4914ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape est le modèle. Il prend ses morceaux et essaie de deviner quels ont été prononcés, et quelle forme. Pour cela, il microce ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎La troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #3 795→800 4860ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petit morceau de quelques millisecondes.⏎⏎La deuxième étape est le modèle. Il prend ses morceaux et essaie de deviner quels ont été prononcés, et quel forme. Pour cela, il microce ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎La troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement, on découpe en paragraphe. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+
+━━ [D3-plan-mode] 192 chars, lang=fr
+  #1 192→253 2231ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎⏎- Je pense que l'intégration de cette issue doit être préparée.
+  #2 192→194 1899ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça, et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎⏎- -
+  #3 192→253 2236ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎⏎- Je pense que l'intégration de cette issue doit être préparée.
+
+━━ [D4-logs-polish] 578 chars, lang=fr
+  #1 578→576 3983ms success recall=11/11 HEDGE-LOST=1 negationDropped=1 inversions=4/55
+     HEDGELOST: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     NEGATIONDROPPED: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     engineOut: Écoute, je vais te partager les logs polish. J'avais oublié de supprimer les logs, donc t'as encore les anciennes. Je te laisserai regarder par rapport à l'heure. Tu verras, c'est que j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé.⏎⏎Honnêtement, je suis assez surpris du mod. Il n'est pas trop mal. Le seul truc, c'est qu'effectivement, il coupe quand même pas mal de mots. Notamment le dernier, tu verras, je ne sais pas pourquoi, mais il enlève les le quand je dis coucou ma chérie.⏎⏎Je te laisse analyser et me dire ce que tu en penses.
+  #2 578→576 3977ms success recall=11/11 HEDGE-LOST=1 negationDropped=1 inversions=4/55
+     HEDGELOST: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     NEGATIONDROPPED: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     engineOut: Écoute, je vais te partager les logs polish. J'avais oublié de supprimer les logs, donc tu as encore les anciennes. Je te laisserai regarder par rapport à l'heure. Tu verras, c'est que j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé. Honnêtement, je suis assez surpris du mod. Il n'est pas trop mal. Le seul truc, c'est qu'effectivement, il coupe quand même pas mal de mots. Notamment le dernier, tu verras, je ne sais pas pourquoi, mais il enlève les le quand je dis coucou ma chérie.⏎⏎Je te laisse analyser et me dire ce que tu en penses.
+  #3 578→576 4001ms success recall=11/11 HEDGE-LOST=1 negationDropped=1 inversions=4/55
+     HEDGELOST: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     NEGATIONDROPPED: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     engineOut: Écoute, je vais te partager les logs polish. J'avais oublié de supprimer les logs, donc t'as encore les anciennes. Je te laisserai regarder par rapport à l'heure. Tu verras, c'est que j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé.⏎⏎Honnêtement, je suis assez surpris du mod. Il n'est pas trop mal. Le seul truc, c'est qu'effectivement, il coupe quand même pas mal de mots. Notamment le dernier, tu verras, je ne sais pas pourquoi, mais il enlève les le quand je dis coucou ma chérie.⏎⏎Je te laisse analyser et me dire ce que tu en penses.
+
+━━ [D5-lets-go] 15 chars, lang=fr
+  #1 15→111 1526ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y, let's go.⏎⏎Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+  #2 15→112 1606ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y let's go.⏎⏎Il faut que je arrosse les plantes du hall avant de partir, et que je pense à racheter du café.
+  #3 15→112 1556ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y, let's go.⏎⏎Il faut que j'arrosse les plantes du hall avant de partir, et que je pense à racheter du café.
+
+━━ [D6-issues-check] 433 chars, lang=fr
+  #1 433→408 2940ms success recall=9/9 inversions=0/36
+     engineOut: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours.⏎⏎Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes.⏎⏎Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+  #2 433→408 2927ms success recall=9/9 inversions=0/36
+     engineOut: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours.⏎⏎Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes.⏎⏎Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+  #3 433→408 2924ms success recall=9/9 inversions=0/36
+     engineOut: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours.⏎⏎Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes.⏎⏎Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+
+━━ [D7-mod-rejects] 246 chars, lang=fr
+  #1 246→278 2346ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.⏎⏎- Il faut analyser ça en profondeur.
+  #2 246→282 2442ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.⏎⏎- Il faudrait analyser ça en profondeur.
+  #3 246→290 2366ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.⏎⏎- Il faudra analyser, analyser ça en profondeur.
+
+━━ [D8-last-transcription] 65 chars, lang=fr
+  #1 65→66 1345ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.⏎
+  #2 65→66 1348ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.⏎
+  #3 65→66 1326ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.⏎
+
+━━ [D9-suggestion-bar] 1337 chars, lang=fr
+  #1 1337→1337 7514ms success recall=19/19 HEDGE-LOST=1 negationDropped=1 inversions=13/171
+     HEDGELOST: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → Donc l'autocorrection continue de fonctionner mais que l'on ne voie pas les mots de suggestion,
+     NEGATIONDROPPED: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → Donc l'autocorrection continue de fonctionner mais que l'on ne voie pas les mots de suggestion,
+     engineOut: Super, merci pour ce détail. Je voudrais que tu goûtes, que tu regardes si on a des problèmes qui couvrent les points qu'il faut corriger par rapport à ces retours. Pour moi, il y a de la barre la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu'on a un problème à ce sujet.⏎⏎Je voudrais vraiment qu'on se rapproche sur le design de ce qu'on a sur Apple. Là, je trouve qu'elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Sur la barre de suggestion, j'aimerais bien que l'on puisse la désactiver potentiellement. Donc l'autocorrection continue de fonctionner mais que l'on ne voie pas les mots de suggestion, donc il faudrait qu'en gros elle ne s'affiche pas, donc il faudrait que ce soit paramétrable dans l'application, ça ça serait vraiment top.⏎⏎Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription, faudrait vérifier, mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c'est aussi un point qu'on avait noté, c'est initiaux. Il faudrait juste que tu confirmes ça.
+  #2 1337→1892 11114ms success recall=19/19 negationDropped=1 inversions=13/171
+     NEGATIONDROPPED: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → donc faudrait qu'en gros elle ne s'affiche pas donc faudrait que ce soit paramétrable dans l'application,
+     engineOut: Super, merci pour ce détail. Je voudrais que tu goûtes, que tu regardes si on a des problèmes qui couvrent les points qu'il faut qu'on corrige par rapport à ces retours. Pour moi, il y a de la barre la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu'on a un problème à ce sujet. Je voudrais vraiment qu'on se rapproche du design de ce qu'on a sur Apple. Là, je trouve qu'elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Sur la barre de suggestion, j'aimerais bien que l'on puisse la désactiver potentiellement. Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion, donc faudrait qu'en gros elle ne s'affiche pas donc faudrait que ce soit paramétrable dans l'application, ça ça serait vraiment top. Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c'est aussi un point qu'on avait noté, c'est initiaux. Il faudrait juste que tu confirmes ça.⏎⏎- Sur la barre de suggestion, j'aimerais bien que l'on puisse la désactiver potentiellement.⏎- L'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion, donc faudrait qu'en gros elle ne s'affiche pas donc faudrait que ce soit paramétrable dans l'application, ça ça serait vraiment top.⏎- Le point en automatique à la fin de chaque phrase.⏎- Le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c'est aussi un point qu'on avait noté, c'est initiaux.⏎- Il faudrait juste que tu confirmes ça.
+  #3 1337→1332 8443ms success recall=19/19 dispersed=1 inversions=13/153
+     engineOut: Super, merci pour ce détail. Je voudrais que tu goûtes, que tu regardes si on a des problèmes qui couvrent les points qu'il faut corriger par rapport à ces retours. Pour moi, il y a de la barre, la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu'on a un problème à ce sujet.⏎⏎Je voudrais vraiment qu'on se rapproche du design de ce qu'on a sur Apple. Là, je trouve qu'elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Sur la barre de suggestion, j'aimerais bien que l'on puisse la désactiver potentiellement. Donc l'autocorrection continue de fonctionner, mais qu'on ne voit pas les mots de suggestion, donc il faudrait qu'en gros elle ne s'affiche pas, donc il faudrait que ce soit paramétrable dans l'application, ça ça serait vraiment top. Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription, faudrait vérifier, mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour, le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c'est aussi un point qu'on avait noté, c'est initiaux. Il faudrait juste que tu confirmes ça.
+
+
+████ ARM V1-rule7-property — 3 run(s) × 9 fixture(s), floor 0.35
+     prompt: ../docs/research/570-structured-fidelity/arms/V1-rule7-property.txt
+
+━━ [D1-three-steps] 838 chars, lang=fr
+  #1 838→854 5212ms success recall=16/17 UNRECALLED=1 inversions=0/120 SPEAKER-STATE-FABRICATED(closing)
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.⏎⏎Et puis, il y avait un dernier machin, mais ça m'échappe.
+  #2 838→794 4551ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #3 838→794 4580ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+
+━━ [D2-three-steps-drift] 795 chars, lang=fr
+  #1 795→803 4960ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petit morceau de quelques millisecondes.⏎⏎La deuxième étape est le modèle. Il prend ses morceaux et essaie de deviner quels ont été prononcés, et quelle forme. Pour cela, il microce ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎La troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #2 795→800 4864ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petit morceau de quelques millisecondes.⏎⏎La deuxième étape est le modèle. Il prend ses morceaux et essaie de deviner quels ont été prononcés, et quelle forme. Pour cela, il microce ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎La troisième étape est la mise en forme. Là, on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #3 795→795 4955ms rejectedGuardrail(language) recall=9/15 UNRECALLED=6 dispersed=2 inversions=1/21
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     UNRECALLED (whole 0.00, best 0.00): Parce que le contexte aide énormément à lever les ambiguïtés.
+     UNRECALLED (whole 0.33, best 0.33): c'est la mise en forme.
+     UNRECALLED (whole 0.00, best 0.00): Là on prend le texte brut qui sort du modèle.
+     UNRECALLED (whole 0.00, best 0.00): On ajoute la ponctuation,
+     UNRECALLED (whole 0.25, best 0.25): les majuscules éventuellement on découpe en paragraph.
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petit morceau de quelques millisecondes.⏎⏎La deuxième étape is the model. He prends his morceaux and tries to guess which have been pronounced, and what form. For that, he micro ce qu'il entend and ce qu'il a déjà écrit before. Because the context helps a lot to lift the ambiguities.⏎⏎The third step is the formatting. Here we take the raw text that comes out of the model. We add the punctuation, the capitals if needed, and cut it into paragraphs. The important thing to understand is that these three steps do not cost the same at all in terms of computation. The second one is 90% of the time.
+
+━━ [D3-plan-mode] 192 chars, lang=fr
+  #1 192→254 2354ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça, et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎⏎- Je pense que l'intégration de cette issue doit être préparée.
+  #2 192→240 2155ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎⏎- L'intégration de cette issue doit être préparée.
+  #3 192→235 2116ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça, et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎⏎- Tu peux passer en mode plan pour faire ça.
+
+━━ [D4-logs-polish] 578 chars, lang=fr
+  #1 578→580 4036ms success recall=11/11 inversions=4/55
+     engineOut: Écoute, je vais te partager les logs polish. J'avais oublié de supprimer les logs, donc t'as encore les anciennes. Je te laisserai regarder par rapport à l'heure. Tu verras, c'est j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé.⏎⏎Honnêtement, je suis assez surpris du mod. Il n'est pas trop mal. Le seul truc c'est qu'effectivement, il coupe quand même pas mal de mots. Notamment le dernier, tu verras, je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.⏎⏎Je te laisse analyser et me dire ce que tu en penses.
+  #2 578→577 4186ms success recall=11/11 HEDGE-LOST=1 negationDropped=1 inversions=4/55
+     HEDGELOST: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     NEGATIONDROPPED: je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+       → mais il enlève les le quand je dis coucou ma chérie.
+     engineOut: Écoute, je vais te partager les logs polish. J'avais oublié de supprimer les logs, donc tu as encore les anciennes. Je te laisserai regarder par rapport à l'heure. Tu verras, c'est que j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé.⏎⏎Honnêtement, je suis assez surpris du mod. Il n'est pas trop mal. Le seul truc, c'est qu'effectivement, il coupe quand même pas mal de mots. Notamment le dernier, tu verras, je ne sais pas pourquoi, mais il enlève les le quand je dis coucou ma chérie.⏎⏎Je te laisse analyser et me dire ce que tu en penses.
+  #3 578→578 4038ms success recall=11/11 inversions=4/55
+     engineOut: Écoute, je vais te partager les logs polish. J'avais oublié de supprimer les logs, donc t'as encore les anciennes. Je te laisserai regarder par rapport à l'heure. Tu verras, c'est j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé.⏎⏎Honnêtement, je suis assez surpris du mod. Il est pas trop mal. Le seul truc c'est qu'effectivement, il coupe quand même pas mal de mots. Notamment le dernier, tu verras, je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.⏎⏎Je te laisse analyser et me dire ce que tu en penses.
+
+━━ [D5-lets-go] 15 chars, lang=fr
+  #1 15→110 1620ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y let's go.⏎⏎Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+  #2 15→111 1632ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y, let's go.⏎⏎Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+  #3 15→110 1609ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y let's go.⏎⏎Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+
+━━ [D6-issues-check] 433 chars, lang=fr
+  #1 433→672 4442ms rejectedGuardrail(length) recall=9/9 inversions=0/36 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours.⏎⏎Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.⏎⏎Je pense que je dois rappeler le plombier pour le chauffe-eau, le garage c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard. voilà c'est tout.⏎⏎Il y avait un dernier machin mais ça m'échappe.
+  #2 433→676 4494ms rejectedGuardrail(length) recall=9/9 inversions=0/36 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours.⏎⏎Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes.⏎⏎Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.⏎⏎Voilà c'est tout. Ah non il y avait un dernier machin mais ça m'échappe.
+  #3 433→669 4295ms rejectedGuardrail(length) recall=9/9 inversions=0/36 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours.⏎⏎Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.⏎⏎Il faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.⏎⏎Voilà c'est tout.⏎⏎Il y avait un dernier machin mais ça m'échappe.
+
+━━ [D7-mod-rejects] 246 chars, lang=fr
+  #1 246→274 2448ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.⏎⏎Il faut que je logue ces rejets.
+  #2 246→0 165554ms engineFailed recall=0/6 UNRECALLED=6 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Alors je viens d'avoir à nouveau un problème avec toujours ce mod.
+     UNRECALLED (whole 0.00, best 0.00): Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets.
+     UNRECALLED (whole 0.00, best 0.00): Parce que là c'est quand même embêtant,
+     UNRECALLED (whole 0.00, best 0.00): il faudra analyser,
+     UNRECALLED (whole 0.00, best 0.00): analyser ça en profondeur.
+     UNRECALLED (whole 0.00, best 0.00): Je t'envoie les logs.
+     engineOut: 
+  #3 246→276 2644ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on logue un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.⏎⏎Il faut que je logue ces rejets.
+
+━━ [D8-last-transcription] 65 chars, lang=fr
+  #1 65→66 1437ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.⏎
+  #2 65→66 1417ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.⏎
+  #3 65→108 1557ms rejectedGuardrail(length) recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.⏎⏎- Il s'agit de la dernière transcription.
+
+━━ [D9-suggestion-bar] 1337 chars, lang=fr
+  #1 1337→1526 8709ms success recall=19/19 inversions=13/171
+     engineOut: Super, merci pour ce détail. Je voudrais que tu goûtes, que tu regardes si on a des problèmes qui couvrent les points qu'il faut qu'on corrige par rapport à ces retours. Pour moi, il y a de la barre la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu'on a un problème à ce sujet. Je voudrais vraiment qu'on se rapproche du design de ce qu'on a sur Apple. Là je trouve qu'elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Sur la barre de suggestion, j'aimerais bien que l'on puisse la désactiver potentiellement. Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc faudrait que ce soit paramétrable dans l'application, ça ça serait vraiment top. Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c'est aussi un point qu'on avait noté, c'est initiaux. Il faudrait juste que tu confirmes ça.⏎⏎- Il faudrait que ce soit paramétrable dans l'application.⏎- Il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application.⏎- Il faudrait que tu confirmes ça.
+  #2 1337→2000 11273ms success recall=19/19 inversions=13/171
+     engineOut: Super, merci pour ce détail. Je voudrais que tu goûtes, que tu regardes si on a des problèmes qui couvrent les points qu’il faut corriger par rapport à ces retours. Pour moi, il y a de la barre la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu’on a un problème à ce sujet. Je voudrais vraiment qu’on se rapproche sur le design de ce qu’on a sur Apple. Là je trouve qu’elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Sur la barre de suggestion, j’aimerais bien que l’on puisse la désactiver potentiellement. Donc l’autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu’en gros elle soit ne s’affiche pas donc faudrait que ce soit paramétrable dans l’application, ça ça serait vraiment top. Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l’enlever si c’est possible ou pareil que ce soit un paramètre dans l’application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c’est aussi un point qu’on avait noté, c’est initiaux. Il faudrait juste que tu confirmes ça.⏎⏎- Sur la barre de suggestion, j’aimerais bien que l’on puisse la désactiver potentiellement.⏎- L’autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu’en gros elle soit ne s’affiche pas donc faudrait que ce soit paramétrable dans l’application, ça ça serait vraiment top.⏎- Il y a le point en automatique à la fin de chaque phrase.⏎- Il faudrait l’enlever si c’est possible ou pareil que ce soit un paramètre dans l’application.⏎- Le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c’est aussi un point qu’on avait noté, c’est initiaux. Il faudrait juste que tu confirmes ça.
+  #3 1337→1689 10636ms success recall=19/19 PERSON-LOST=1 HEDGE-LOST=1 negationDropped=1 inversions=20/171
+     PERSONLOST: Pour moi, il y a tout un design à revoir.
+       → Il y a tout un design à revoir.
+     HEDGELOST: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → - Il faudrait que la désactivation potentielle de la barre de suggestion soit paramétrable dans l’application.
+     NEGATIONDROPPED: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → - Il faudrait que la désactivation potentielle de la barre de suggestion soit paramétrable dans l’application.
+     engineOut: Super, merci pour ce détail. Je voudrais que tu goûtes, que tu regardes si on a des problèmes qui couvrent les points qu’il faut corriger par rapport à ces retours. Pour moi, il y a déjà la barre de suggestion. Il y a tout un design à revoir. Je crois qu’on a un problème à ce sujet. Je voudrais vraiment qu’on se rapproche du design de ce qu’on a sur Apple. Là, je trouve qu’elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion.⏎⏎Sur la barre de suggestion, j’aimerais bien qu’on puisse la désactiver potentiellement. L’autocorrection continue de fonctionner, mais qu’on ne voit pas les mots de suggestion, donc qu’elle ne s’affiche pas, donc qu’elle soit paramétrable dans l’application, ça ça serait vraiment top. Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription, faudrait vérifier, mais il faudrait l’enlever si c’est possible ou pareil que ce soit un paramètre dans l’application. Enfin, le retour automatique, enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c’est aussi un point qu’on avait noté, c’est initiaux. Il faudrait juste que tu confirmes ça.⏎⏎- Il faudrait juste que tu confirmes ça.⏎- Il faudrait revoir le design de la barre de suggestion.⏎- Il faudrait que la désactivation potentielle de la barre de suggestion soit paramétrable dans l’application.⏎- Il faudrait que le point en automatique à la fin de chaque phrase soit enlevé ou soit un paramètre dans l’application.⏎- Il faudrait que le changement de layer de clavier quand on passe du 1-2-3 au ABC soit confirmé.
+
+
+████ ARM V2-fidelity — 3 run(s) × 9 fixture(s), floor 0.35
+     prompt: ../docs/research/570-structured-fidelity/arms/V2-fidelity.txt
+
+━━ [D1-three-steps] 838 chars, lang=fr
+  #1 838→794 4834ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #2 838→794 4865ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #3 838→794 4918ms success recall=16/17 UNRECALLED=1 inversions=0/120
+     UNRECALLED (whole 0.20, best 0.20): And the three attack C'est une mise en forme.
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+
+━━ [D2-three-steps-drift] 795 chars, lang=fr
+  #1 795→803 5108ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petit morceau de quelques millisecondes.⏎⏎La deuxième étape est le modèle. Il prend ses morceaux et essaie de deviner quels ont été prononcés, et quelle forme. Pour cela, il microce ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎La troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #2 795→803 5090ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petit morceau de quelques millisecondes.⏎⏎La deuxième étape est le modèle. Il prend ses morceaux et essaie de deviner quels ont été prononcés, et quelle forme. Pour cela, il microce ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎La troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  #3 795→803 5091ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+     engineOut: Alors, je t'explique comment fonctionne la reconnaissance de club sur téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petit morceau de quelques millisecondes.⏎⏎La deuxième étape est le modèle. Il prend ses morceaux et essaie de deviner quels ont été prononcés, et quelle forme. Pour cela, il microce ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎La troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle. On ajoute la ponctuation, les majuscules éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+
+━━ [D3-plan-mode] 192 chars, lang=fr
+  #1 192→369 2875ms rejectedGuardrail(length) recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎⏎- Je te laisse préparer l'intégration de cette issue.⏎⏎- Tu peux passer en mode plan pour faire ça.⏎⏎- ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  #2 192→389 3149ms rejectedGuardrail(length) recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça, et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎Il faut que je laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça, et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎
+  #3 192→189 2151ms success recall=3/3 inversions=0/3
+     engineOut: Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.⏎
+
+━━ [D4-logs-polish] 578 chars, lang=fr
+  #1 578→575 4031ms success recall=11/11 inversions=4/55
+     engineOut: Écoute, je vais te partager les logs polish. J'avais oublié de supprimer les logs, donc t'as encore les anciennes. Je te laisserai regarder par rapport à l'heure. Tu verras, c'est que j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé.⏎⏎Honnêtement, je suis assez surpris du mod. Il n'est pas trop mal. Le seul truc, c'est qu'effectivement, il coupe quand même pas mal de mots. Notamment le dernier, tu verras, je ne sais pas pourquoi mais il enlève les le quand je dis coucou ma chérie.⏎⏎Je te laisse analyser et me dire ce que tu en penses.
+  #2 578→0 164840ms engineFailed recall=0/11 UNRECALLED=11 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Écoute, je vais te partager les logs polish.
+     UNRECALLED (whole 0.00, best 0.00): Alors j'avais oublié de supprimer les logs donc t'as encore les anciennes.
+     UNRECALLED (whole 0.00, best 0.00): Je te laisserai regarder par rapport à l'heure.
+     UNRECALLED (whole 0.00, best 0.00): Tu verras c'est j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé.
+     UNRECALLED (whole 0.00, best 0.00): Honnêtement je suis assez surpris du mod.
+     UNRECALLED (whole 0.00, best 0.00): Il est pas trop mal.
+     UNRECALLED (whole 0.00, best 0.00): Le seul truc c'est qu'effectivement,
+     UNRECALLED (whole 0.00, best 0.00): il coupe quand même pas mal de mots.
+     UNRECALLED (whole 0.00, best 0.00): Notamment le dernier tu verras,
+     UNRECALLED (whole 0.00, best 0.00): je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+     UNRECALLED (whole 0.00, best 0.00): Je te laisse analyser et me dire ce que tu en penses.
+     engineOut: 
+  #3 578→0 164429ms engineFailed recall=0/11 UNRECALLED=11 inversions=0/0
+     UNRECALLED (whole 0.00, best 0.00): Écoute, je vais te partager les logs polish.
+     UNRECALLED (whole 0.00, best 0.00): Alors j'avais oublié de supprimer les logs donc t'as encore les anciennes.
+     UNRECALLED (whole 0.00, best 0.00): Je te laisserai regarder par rapport à l'heure.
+     UNRECALLED (whole 0.00, best 0.00): Tu verras c'est j'en ai fait une dizaine qui sont faits après le dernier message que tu m'as envoyé.
+     UNRECALLED (whole 0.00, best 0.00): Honnêtement je suis assez surpris du mod.
+     UNRECALLED (whole 0.00, best 0.00): Il est pas trop mal.
+     UNRECALLED (whole 0.00, best 0.00): Le seul truc c'est qu'effectivement,
+     UNRECALLED (whole 0.00, best 0.00): il coupe quand même pas mal de mots.
+     UNRECALLED (whole 0.00, best 0.00): Notamment le dernier tu verras,
+     UNRECALLED (whole 0.00, best 0.00): je ne sais pas pourquoi mais il enlève les le ma chérie quand je dis coucou ma chérie.
+     UNRECALLED (whole 0.00, best 0.00): Je te laisse analyser et me dire ce que tu en penses.
+     engineOut: 
+
+━━ [D5-lets-go] 15 chars, lang=fr
+  #1 15→111 1781ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y, let's go.⏎⏎Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+  #2 15→111 1713ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y let's go.⏎⏎Il faut que j'arrosse les plantes du hall avant de partir, et que je pense à racheter du café.
+  #3 15→110 1717ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Vas-y let's go.⏎⏎Il faut que j'arrose les plantes du hall avant de partir, et que je pense à racheter du café.
+
+━━ [D6-issues-check] 433 chars, lang=fr
+  #1 433→408 3064ms success recall=9/9 inversions=0/36
+     engineOut: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours.⏎⏎Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes.⏎⏎Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+  #2 433→408 3056ms success recall=9/9 inversions=0/36
+     engineOut: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours.⏎⏎Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes.⏎⏎Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+  #3 433→456 3332ms rejectedGuardrail(segmentOverlap) recall=9/9 inversions=0/36 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours.⏎⏎Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.⏎⏎Il y avait un dernier machin mais ça m'échappe.
+
+━━ [D7-mod-rejects] 246 chars, lang=fr
+  #1 246→284 2522ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.⏎⏎Il faut que je log un peu tous ces rejets.
+  #2 246→314 2671ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.⏎⏎Il faut analyser ça en profondeur. Il faudra log un peu tous ces rejets.
+  #3 246→285 2549ms success recall=6/6 inversions=0/15
+     engineOut: Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.⏎⏎- Il faut qu'on log un peu tous ces rejets.
+
+━━ [D8-last-transcription] 65 chars, lang=fr
+  #1 65→107 1659ms rejectedGuardrail(length) recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.⏎- Il s'agit de la dernière transcription.
+  #2 65→66 1518ms success recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.⏎
+  #3 65→166 2004ms rejectedGuardrail(length) recall=2/2 inversions=0/1
+     engineOut: Je te laisserai regarder, il s'agit de la dernière transcription.⏎Il faut que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.
+
+━━ [D9-suggestion-bar] 1337 chars, lang=fr
+  #1 1337→1404 9207ms success recall=19/19 dispersed=1 inversions=13/153
+     engineOut: Super, merci pour ce détail. Je voudrais que tu goûtes, que tu regardes si on a des problèmes qui couvrent les points qu’il faut qu’on corrige par rapport à ces retours. Pour moi, il y a de la barre, la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu’on a un problème à ce sujet. Je voudrais vraiment qu’on se rapproche du design de ce qu’on a sur Apple. Là, je trouve qu’elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion.⏎⏎Sur la barre de suggestion, j’aimerais bien que l’on puisse la désactiver potentiellement. Donc, l’autocorrection continue de fonctionner, mais que juste on ne voit pas les mots de suggestion, donc faudrait qu’en gros elle ne s’affiche pas, donc faudrait que ce soit paramétrable dans l’application, ça ça serait vraiment top. Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription, faudrait vérifier, mais il faudrait l’enlever si c’est possible ou pareil que ce soit un paramètre dans l’application et enfin le retour, le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c’est aussi un point qu’on avait noté, c’est initiaux. Il faudrait juste que tu confirmes ça.⏎⏎Et puis, je pense que ma mémoire a échoué sur ce dernier point.
+  #2 1337→1468 9388ms success recall=19/19 inversions=13/171 SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Super, merci pour ce détail. Je voudrais que tu goûtes, que tu regardes si on a des problèmes qui couvrent les points qu’il faut corriger par rapport à ces retours. Pour moi, il y a de la barre la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu’on a un problème à ce sujet.⏎⏎Je voudrais vraiment qu’on se rapproche sur le design de ce qu’on a sur Apple. Là je trouve qu’elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Sur la barre de suggestion, j’aimerais bien que l’on puisse la désactiver potentiellement. Donc l’autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu’en gros elle ne s’affiche pas donc faudrait que ce soit paramétrable dans l’application, ça ça serait vraiment top.⏎⏎Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l’enlever si c’est possible ou pareil que ce soit un paramètre dans l’application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c’est aussi un point qu’on avait noté, c’est initiaux. Il faudrait juste que tu confirmes ça.⏎⏎Et puis je pense que ma mémoire a failli, mais je ne sais plus si c’est bien ce que j’ai dit à propos du changement de layer de clavier.
+  #3 1337→1326 8307ms success recall=19/19 dispersed=1 inversions=13/153
+     engineOut: Super, merci pour ce détail. Je voudrais que tu goûtes, que tu regardes si on a des problèmes qui couvrent les points qu’il faut corriger par rapport à ces retours. Pour moi, il y a de la barre la barre de suggestion déjà. Pour moi, il y a tout un design à revoir. Je crois qu’on a un problème à ce sujet.⏎⏎Je voudrais vraiment qu’on se rapproche du design de ce qu’on a sur Apple. Là, je trouve qu’elle est un peu trop marquée avec une écriture foncée. Il faut revoir le design de la barre de suggestion. Sur la barre de suggestion, j’aimerais bien que l’on puisse la désactiver potentiellement. Donc, l’autocorrection continue de fonctionner, mais qu’on ne voit pas les mots de suggestion, donc faudrait qu’en gros elle ne s’affiche pas, donc faudrait que ce soit paramétrable dans l’application, ça ça serait vraiment top.⏎⏎Et effectivement, il y a le point en automatique à la fin de chaque phrase. Il me semble que ça, on doit le faire dans la partie post-inscription, faudrait vérifier, mais il faudrait l’enlever si c’est possible ou pareil que ce soit un paramètre dans l’application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC, ça il me semble que c’est aussi un point qu’on avait noté, c’est initiaux. Il faudrait juste que tu confirmes ça.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       engineErr
+shipping              27       6/27        0/27        4/27        0/27        0/27        0/27        17/27       0
+V1-rule7-property     26       6/26        1/26        2/26        0/26        4/26        0/26        15/26       1
+V2-fidelity           25       6/25        0/25        0/25        0/25        2/25        0/25        17/25       2
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  engineErr runs are in NO column and in no denominator: a call that never
+  answered has violated nothing, and its empty output would otherwise read as a
+  total recall failure.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              51            1             5/27          0/27
+V1-rule7-property     59            2             2/26          0/26
+V2-fidelity           43            2             0/25          0/25
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   D1-three-steps          U1  U1  U1
+   D2-three-steps-drift    U1  U1  U1
+   D3-plan-mode            ·  ·  ·
+   D4-logs-polish          Ho4  Ho4  Ho4
+   D5-lets-go              ·  ·  ·
+   D6-issues-check         ·  ·  ·
+   D7-mod-rejects          ·  ·  ·
+   D8-last-transcription   ·  ·  ·
+   D9-suggestion-bar       Ho13  o13  o13
+── V1-rule7-property
+   D1-three-steps          U1F  U1  U1
+   D2-three-steps-drift    U1  U1  U6o1
+   D3-plan-mode            ·  ·  ·
+   D4-logs-polish          o4  Ho4  o4
+   D5-lets-go              ·  ·  ·
+   D6-issues-check         F  F  F
+   D7-mod-rejects          ·  e  ·
+   D8-last-transcription   ·  ·  ·
+   D9-suggestion-bar       o13  o13  PHo20
+── V2-fidelity
+   D1-three-steps          U1  U1  U1
+   D2-three-steps-drift    U1  U1  U1
+   D3-plan-mode            ·  ·  ·
+   D4-logs-polish          o4  e  e
+   D5-lets-go              ·  ·  ·
+   D6-issues-check         ·  ·  F
+   D7-mod-rejects          ·  ·  ·
+   D8-last-transcription   ·  ·  ·
+   D9-suggestion-bar       o13  Fo13  o13
+
+   e = Apple FM threw; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 81 runs to /tmp/bench27/capture-device-macos27.json

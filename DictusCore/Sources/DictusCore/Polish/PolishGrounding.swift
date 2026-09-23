@@ -298,7 +298,13 @@ public enum PolishGrounding {
     /// no reader could trace. The list is applied here rather than in `PolishLexicon`
     /// because that type is deliberately list-free — the anchor check below matches
     /// names and must not have `de` or `von` removed from an input under it.
-    private static func contentWords(in text: String) -> [String] {
+    ///
+    /// Public for the reason `worstSegmentOverlap` is (#570): the fidelity bench runs
+    /// this check **backwards** — it asks whether each *input* proposition is
+    /// supported by the output, where #414 asks whether each *output* segment is
+    /// supported by the input — and a recall measured over a different word set than
+    /// the precision it is compared against would not be comparable to it.
+    public static func contentWords(in text: String) -> [String] {
         PolishLexicon.words(in: text).filter { !functionWords.contains($0) }
     }
 

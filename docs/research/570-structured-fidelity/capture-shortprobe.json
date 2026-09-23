@@ -1,0 +1,6981 @@
+[
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 2943,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1387,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1336,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "La réunion est décalée à quinze heures.",
+    "outputChars" : 39,
+    "personLost" : 1,
+    "rawChars" : 68,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1434,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1377,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1458,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1395,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1408,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1631,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.\n\n---\n\nJe voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 131,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "rejectedCheck" : "length",
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1291,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "La réunion est décalée à quinze heures.",
+    "outputChars" : 39,
+    "personLost" : 1,
+    "rawChars" : 68,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1346,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1379,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1423,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1360,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1403,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1317,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1323,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1308,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1305,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1375,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1337,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1341,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1320,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1343,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1339,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1349,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1396,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1772,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1419,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 2102,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Vas-y, allons-y.\n\nIl faut que je rappelle le plombier pour le chauffe-eau : le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.\n\nIl y avait un autre truc, mais ça m'échappe.",
+    "outputChars" : 256,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "rejectedCheck" : "length",
+    "run" : 15,
+    "speakerState" : "fabricated",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1326,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1353,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1316,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1382,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1374,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1352,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1374,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1406,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1383,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1340,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1397,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1366,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1384,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1382,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1384,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1980,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2602,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue. S'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2050,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 192,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2239,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1954,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2014,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2235,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2045,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1919,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2121,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2232,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2543,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2837,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 192,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1992,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1882,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2064,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2026,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2045,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 1995,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2001,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2121,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2413,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 246,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2716,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 246,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2056,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 246,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2006,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 1993,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 237,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2139,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2000,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2005,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2027,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 246,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1481,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1479,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1468,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1445,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1416,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1526,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1433,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1424,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1413,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1441,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1460,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1396,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "La réunion est décalée à quinze heures.",
+    "outputChars" : 39,
+    "personLost" : 1,
+    "rawChars" : 68,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1511,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : false,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 35098,
+    "negationDropped" : 0,
+    "outcome" : "engineFailed",
+    "output" : "",
+    "outputChars" : 0,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors je voulais te dire que la réunion est décalée à quinze heures."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1583,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1553,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Vas-y, allons-y.\n\n---\n\n---\n\n---\n\n---",
+    "outputChars" : 36,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "rejectedCheck" : "length",
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1573,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1428,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, nous allons.",
+    "outputChars" : 19,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1400,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, faisons ça.",
+    "outputChars" : 18,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1382,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1399,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1626,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Vas-y, allons-y.\n\nLaisser-nous partir.",
+    "outputChars" : 38,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "rejectedCheck" : "length",
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1425,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1390,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1432,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1414,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1406,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1390,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1392,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1451,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1575,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1642,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1753,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1403,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1412,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1397,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1438,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1582,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1542,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1489,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1393,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1401,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1439,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1419,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1533,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2027,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1920,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1851,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 192,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1977,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 192,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2392,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2019,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 192,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1921,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 192,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1843,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1884,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1990,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2116,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue. S'il te plaît, tu peux passer en mode plan pour faire ça. Ensuite, je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 187,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1881,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1894,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1883,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ok, je te laisse préparer l'intégration de cette issue. S'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 192,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1952,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2100,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2201,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2095,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 246,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2037,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2123,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2072,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2030,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2013,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2100,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2045,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2048,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2017,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2042,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2131,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2122,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : false,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 34137,
+    "negationDropped" : 0,
+    "outcome" : "engineFailed",
+    "output" : "",
+    "outputChars" : 0,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors je voulais te dire que la réunion est décalée à quinze heures."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1657,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1644,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1531,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1528,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1525,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1509,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1532,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1511,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1528,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1552,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1535,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1538,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 69,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1508,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 68,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "S1-synthetic-short",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1505,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais te dire que la réunion est décalée à quinze heures.",
+    "outputChars" : 62,
+    "personLost" : 0,
+    "rawChars" : 68,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1560,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1525,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1493,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1519,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1543,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1526,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1479,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1497,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1500,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1508,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1499,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1464,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1465,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1460,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "D5-lets-go",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "ms" : 1604,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Vas-y, allons-y.",
+    "outputChars" : 16,
+    "personLost" : 0,
+    "rawChars" : 15,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Vas-y let's go."
+    ],
+    "unrecalledWholeRecall" : [
+      0.25
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1516,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1486,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1497,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1532,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1469,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1513,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1527,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1510,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1519,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1504,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1500,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1503,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder.\n\nIl s'agit de la dernière transcription.",
+    "outputChars" : 66,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1492,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1502,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder, il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 2,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 1,
+    "dispersed" : 0,
+    "fixture" : "D8-last-transcription",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 2,
+    "labels" : [
+
+    ],
+    "ms" : 1490,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisserai regarder. Il s'agit de la dernière transcription.",
+    "outputChars" : 65,
+    "personLost" : 0,
+    "rawChars" : 65,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1950,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1966,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1959,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2101,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1967,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1950,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 192,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1951,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1952,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2058,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1956,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 192,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1981,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1994,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 1957,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2043,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "fixture" : "D3-plan-mode",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 3,
+    "labels" : [
+
+    ],
+    "ms" : 2020,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.",
+    "outputChars" : 188,
+    "personLost" : 0,
+    "rawChars" : 192,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2225,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2159,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2253,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2262,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 4,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2128,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 5,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2147,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 6,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2131,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 7,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2157,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 246,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 8,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2129,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 246,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 9,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2186,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors, je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 247,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 10,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2210,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 11,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2233,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 240,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 12,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2193,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 237,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 13,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2182,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 14,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "D7-mod-rejects",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2125,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens d'avoir à nouveau un problème avec ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.",
+    "outputChars" : 231,
+    "personLost" : 0,
+    "rawChars" : 246,
+    "run" : 15,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  }
+]

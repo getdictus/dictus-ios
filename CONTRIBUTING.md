@@ -74,6 +74,10 @@ workaround.
 
 The CI does **not** sign builds, run tests, or upload to TestFlight. Its only job is to catch broken compilations and obvious style regressions.
 
+## Adding an App to Auto-Return
+
+After a dictation, Dictus returns the user to the app they were typing in, if that app is in the catalogue in `KnownAppSchemes.swift`. To add one, follow [docs/auto-return-catalogue.md](docs/auto-return-catalogue.md). An entry needs a resume test on a device first.
+
 ## Pull Request Guidelines
 
 - Use a **descriptive title** (e.g., "Fix waveform animation on cold start").

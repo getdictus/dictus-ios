@@ -1,0 +1,168 @@
+rescored: 81 stored runs from ../docs/research/570-structured-fidelity/capture-device.json, floor 0.35 — no model called
+
+━━ [shipping] D2-three-steps-drift#2
+  795→797 4050ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [shipping] D5-lets-go#1
+  15→16 1347ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#2
+  15→16 1331ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#3
+  15→16 1327ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D6-issues-check#2
+  433→422 2742ms success recall=8/9 UNRECALLED=1 inversions=0/28
+     UNRECALLED (whole 0.33, best 0.33): Enfin tu regarderas dans le slide,
+
+━━ [shipping] D9-suggestion-bar#1
+  1337→1221 5997ms success recall=18/19 UNRECALLED=1 dispersed=1 PERSON-LOST=2 HEDGE-LOST=1 inversions=13/136
+     UNRECALLED (whole 0.00, best 0.00): c'est initiaux.
+     PERSONLOST: Pour moi, il y a tout un design à revoir.
+       → De plus, il y a un tout autre design à revoir.
+     PERSONLOST: ça il me semble que c'est aussi un point qu'on avait noté,
+       → est un autre point qu'on avait noté.
+     HEDGELOST: ça il me semble que c'est aussi un point qu'on avait noté,
+       → est un autre point qu'on avait noté.
+
+━━ [shipping] D9-suggestion-bar#2
+  1337→1333 6400ms success recall=19/19 HEDGE-LOST=2 negationDropped=1 inversions=6/171
+     HEDGELOST: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → Donc, l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion,
+     NEGATIONDROPPED: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → Donc, l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion,
+     HEDGELOST: on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC,
+       → faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application.
+
+━━ [shipping] D9-suggestion-bar#3
+  1337→1333 5780ms success recall=19/19 HEDGE-LOST=1 inversions=5/171
+     HEDGELOST: on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC,
+       → on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application.
+
+━━ [V1-rule7-property] D5-lets-go#1
+  15→16 1413ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#2
+  15→16 1374ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#3
+  15→16 1435ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D6-issues-check#3
+  433→226 2139ms success recall=5/9 UNRECALLED=4 inversions=0/10
+     UNRECALLED (whole 0.22, best 0.11): J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS.
+     UNRECALLED (whole 0.00, best 0.00): J'ai eu un retour d'utilisateur.
+     UNRECALLED (whole 0.00, best 0.00): Enfin tu regarderas dans le slide,
+     UNRECALLED (whole 0.00, best 0.00): on a pas mal discuté.
+
+━━ [V1-rule7-property] D9-suggestion-bar#1
+  1337→1336 6072ms success recall=19/19 HEDGE-LOST=1 inversions=5/171
+     HEDGELOST: on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC,
+       → on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application.
+
+━━ [V1-rule7-property] D9-suggestion-bar#2
+  1337→1337 6160ms success recall=19/19 HEDGE-LOST=1 inversions=5/171
+     HEDGELOST: on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC,
+       → on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application.
+
+━━ [V2-fidelity] D2-three-steps-drift#2
+  795→801 4348ms success recall=14/15 UNRECALLED=1 inversions=0/91
+     UNRECALLED (whole 0.33, best 0.33): He prends his morceaux and essays of devine quels have been prononced,
+
+━━ [V2-fidelity] D5-lets-go#1
+  15→16 1476ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#3
+  15→16 1472ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D6-issues-check#3
+  433→451 3113ms success recall=9/9 PERSON-LOST=1 negationDropped=1 inversions=0/36
+     NEGATIONDROPPED: on a pas mal discuté.
+       → car nous avons beaucoup discuté.
+     PERSONLOST: liste-les-moi simplement et on fait un point.
+       → et liste-les simplement.
+
+━━ [V2-fidelity] D9-suggestion-bar#2
+  1337→1327 6951ms success recall=19/19 dispersed=1 HEDGE-LOST=1 inversions=11/153
+     HEDGELOST: on doit le faire dans la partie post-inscription faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application et enfin le retour le retour automatique enfin en gros le changement de layer de clavier quand on passe du 1-2-3 au ABC,
+       → Faudrait vérifier mais il faudrait l'enlever si c'est possible ou pareil que ce soit un paramètre dans l'application.
+
+━━ [V2-fidelity] D9-suggestion-bar#3
+  1337→1340 7043ms success recall=19/19 dispersed=1 HEDGE-LOST=1 negationDropped=1 inversions=6/153
+     HEDGELOST: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → Donc, l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion,
+     NEGATIONDROPPED: Donc l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion donc faudrait qu'en gros elle soit ne s'affiche pas donc il faudrait que ce soit paramétrable dans l'application,
+       → Donc, l'autocorrection continue de fonctionner mais que juste on ne voit pas les mots de suggestion,
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              27       6/27        1/27        3/27        0/27        0/27        0/27        19/27       0
+V1-rule7-property     27       4/27        0/27        2/27        0/27        0/27        0/27        21/27       0
+V2-fidelity           27       3/27        1/27        2/27        0/27        0/27        0/27        21/27       0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              32            1             1/27          0/27
+V1-rule7-property     23            0             0/27          0/27
+V2-fidelity           30            3             2/27          0/27
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   D1-three-steps          ·  ·  ·
+   D2-three-steps-drift    ·  U1  ·
+   D3-plan-mode            ·  ·  ·
+   D4-logs-polish          ·  o4  o4
+   D5-lets-go              U1  U1  U1
+   D6-issues-check         ·  U1  ·
+   D7-mod-rejects          ·  ·  ·
+   D8-last-transcription   ·  ·  ·
+   D9-suggestion-bar       U1PHo13  Ho6  Ho5
+── V1-rule7-property
+   D1-three-steps          ·  ·  ·
+   D2-three-steps-drift    ·  ·  ·
+   D3-plan-mode            ·  ·  ·
+   D4-logs-polish          o4  o4  ·
+   D5-lets-go              U1  U1  U1
+   D6-issues-check         ·  ·  U4
+   D7-mod-rejects          ·  ·  ·
+   D8-last-transcription   ·  ·  ·
+   D9-suggestion-bar       Ho5  Ho5  o5
+── V2-fidelity
+   D1-three-steps          ·  ·  ·
+   D2-three-steps-drift    ·  U1  ·
+   D3-plan-mode            ·  ·  ·
+   D4-logs-polish          o4  o4  ·
+   D5-lets-go              U1  ·  U1
+   D6-issues-check         ·  ·  P
+   D7-mod-rejects          ·  ·  ·
+   D8-last-transcription   ·  ·  ·
+   D9-suggestion-bar       o5  Ho11  Ho6
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 81 runs to /tmp/rescore570/capture-device.json

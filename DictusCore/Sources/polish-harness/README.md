@@ -137,6 +137,71 @@ rather than raw because a paragrapher is a presentation pass, and because "the w
 did not move" is not a predicate that can be written against a transcript polish is
 allowed to change.
 
+## Fidelity: what an accepted output damaged (#570, #581)
+
+`fidelity` scores a Smart Mode's output against its input on the four axes declared
+in `docs/research/570-structured-fidelity/bars.md` **before** the first arm ran:
+
+1. **proposition recall** — every content proposition of the input has an aligned one
+   in the output. This is `PolishGrounding.worstSegmentOverlap` run **backwards**: #414
+   asks whether each *output* segment is supported by the input, this asks whether each
+   *input* proposition is supported by the output. The pipeline only ever ran the first
+   half, which is why a deleted sentence is invisible to every check we ship — deleting
+   raises no length ratio, invents no name, and lowers no per-segment overlap on the
+   segments that remain.
+2. **person and stance** — first person stays first person, a hedge stays a hedge.
+   Per aligned *clause*, not per document: the device defect it exists for is
+   `j'en ai fait une dizaine` → `il y a une dizaine qui ont été créées`, in an output
+   whose other sentences are full of `je`.
+3. **order** — inversions between the input's sequence and the output's. **Reported as
+   an observable and never scored**: #523's decision 3 licenses "reorder within a topic"
+   while the prompt's rule 2 forbids moving an idea, and which governs is the
+   maintainer's call, not a measurement's.
+4. **speaker-state fabrication (#581)** — whether the output ends on a sentence in which
+   the speaker reports their own recall failing, absent from the input.
+
+```sh
+# The live round: the shipping prompt plus every --arm, three runs per fixture.
+swift run polish-harness fidelity Sources/polish-harness/fixtures/device-structured-fr.json \
+  --mode structured --runs 3 \
+  --arm ../docs/research/570-structured-fidelity/arms/V1-rule7-property.txt \
+  --json /tmp/capture.json
+
+# The calibration. Scores committed, hand-labelled outputs and drives NO model, so the
+# floor behind axes 1 and 2 is re-runnable by anyone. --sweep prints the whole grid.
+swift run polish-harness fidelity ../docs/research/570-structured-fidelity/device-corpus.json \
+  --replay --sweep
+
+# Score a committed live capture again with the CURRENT scorers. No model: the stored
+# outputs are the samples, so a number that moves after a scorer fix moved because of
+# the fix and not because Apple FM sampled differently. The capture stores fixture ids,
+# not transcripts, so the fixture file it was run on is required.
+swift run polish-harness fidelity --rescore ../docs/research/570-structured-fidelity/capture-device.json \
+  --fixtures Sources/polish-harness/fixtures/device-structured-fr.json --json /tmp/rescored.json
+```
+
+Three things about it differ from the other commands here.
+
+**It scores the ENGINE's output, not the inserted text.** A Smart Mode that fails its
+contract inserts nothing, so scoring the document text would score three of the nine
+device runs as defect-free — and one of those three is #581's positive control, whose
+only defect lives in the refused output. The guardrail verdict is printed beside each
+run and never folded into it.
+
+**Three runs per fixture, never one.** Two runs of the same device dictation 35 minutes
+apart produced *different* defects: one deleted a proposition, the other substituted a
+technical term. A single run cannot see that class.
+
+**Its scorers live in the `PolishFidelity` library, not here**, so `swift test` can pin
+them — axis 4 carries a positive control (the 1 337-character device fabrication) and a
+negative one (rule 7 doing its job on `longform-fr.json` fixture 5, which must never
+read as a fabrication). A scorer nobody can test is a scorer nobody should believe.
+
+Fixture set: `fixtures/device-structured-fr.json`, the nine `Structuré` dictations of
+2026-09-17, `raw` verbatim. It exists because `longform-fr.json` runs 353 to 1 283
+characters and every device defect but one was on input **shorter than its shortest
+fixture** — 65, 192, 246, 578.
+
 ## Guardrail corpora (#413, #414, #466)
 
 `guardrail` scores the three output-inspection checks — the per-segment language

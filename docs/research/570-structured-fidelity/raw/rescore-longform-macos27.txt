@@ -1,0 +1,152 @@
+rescored: 54 stored runs from ../docs/research/570-structured-fidelity/capture-longform-macos27.json, floor 0.35 — no model called
+
+━━ [shipping] 1-free-form#3
+  395→399 3049ms success recall=6/6 inversions=0/15 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [shipping] 5-rambling#1
+  1283→1172 7416ms success recall=25/25 dispersed=2 PERSON-LOST=1 inversions=41/253 speakerState=preserved
+     PERSONLOST: Ah, j'ai aussi...
+       → Ah non,
+
+━━ [shipping] 5-rambling#2
+  1283→1012 6639ms success recall=22/25 UNRECALLED=3 dispersed=2 PERSON-LOST=1 negationDropped=1 inversions=29/190 speakerState=preserved
+     UNRECALLED (whole 0.00, best 0.00): Quoi d'autre?
+     UNRECALLED (whole 0.00, best 0.00): Enfin bref.
+     UNRECALLED (whole 0.00, best 0.00): Et puis la dernière chose,
+     NEGATIONDROPPED: Enfin, pas le refaire,
+       → Il faut refaire le site,
+     PERSONLOST: Ah, j'ai aussi...
+       → ah non,
+
+━━ [shipping] 5-rambling#3
+  1283→1100 6787ms success recall=25/25 dispersed=2 inversions=41/253 speakerState=preserved
+
+━━ [shipping] 6-unscripted#1
+  1159→1170 6349ms success recall=10/10 dispersed=1 PERSON-LOST=1 negationDropped=1 inversions=3/36
+     NEGATIONDROPPED: Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix,
+       → Je vais quand même faire un sixième test parce que les autres,
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+
+━━ [shipping] 6-unscripted#2
+  1159→1180 6335ms success recall=10/10 dispersed=1 PERSON-LOST=1 negationDropped=1 inversions=3/36
+     NEGATIONDROPPED: Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix,
+       → Je vais quand même faire un sixième test parce que les autres,
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+
+━━ [shipping] 6-unscripted#3
+  1159→1167 6368ms success recall=10/10 dispersed=1 PERSON-LOST=1 negationDropped=1 inversions=3/36
+     NEGATIONDROPPED: Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix,
+       → Je vais quand même faire un sixième test parce que les autres,
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+
+━━ [V1-rule7-property] 5-rambling#1
+  1283→1205 7731ms success recall=25/25 dispersed=2 inversions=0/253 speakerState=preserved
+
+━━ [V1-rule7-property] 5-rambling#2
+  1283→1181 7630ms success recall=25/25 dispersed=2 PERSON-LOST=1 inversions=28/253 speakerState=preserved
+     PERSONLOST: Ah, j'ai aussi...
+       → Ah non,
+
+━━ [V1-rule7-property] 5-rambling#3
+  1283→1178 7639ms success recall=25/25 dispersed=1 PERSON-LOST=1 HEDGE-LOST=1 negationDropped=1 inversions=28/276 speakerState=preserved
+     HEDGELOST: Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend.
+       → Il faut que je répète le comptable — je l'ai eu vendredi — c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.
+     NEGATIONDROPPED: Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend.
+       → Il faut que je répète le comptable — je l'ai eu vendredi — c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.
+     PERSONLOST: Ah, j'ai aussi...
+       → Ah non,
+
+━━ [V2-fidelity] 5-rambling#1
+  1283→1053 7659ms success recall=22/25 UNRECALLED=3 dispersed=1 PERSON-LOST=1 HEDGE-LOST=1 negationDropped=1 inversions=25/210 speakerState=preserved
+     UNRECALLED (whole 0.00, best 0.00): Quoi d'autre?
+     UNRECALLED (whole 0.00, best 0.00): le site, le site,
+     UNRECALLED (whole 0.00, best 0.00): Et puis la dernière chose,
+     HEDGELOST: Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend.
+       → Il faut que je répète le comptable — je l'ai eu vendredi — c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.
+     NEGATIONDROPPED: Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend.
+       → Il faut que je répète le comptable — je l'ai eu vendredi — c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.
+     PERSONLOST: Ah, j'ai aussi...
+       → Ah non,
+
+━━ [V2-fidelity] 5-rambling#2
+  1283→1053 7756ms success recall=22/25 UNRECALLED=3 dispersed=1 PERSON-LOST=1 HEDGE-LOST=1 negationDropped=1 inversions=25/210 speakerState=preserved
+     UNRECALLED (whole 0.00, best 0.00): Quoi d'autre?
+     UNRECALLED (whole 0.00, best 0.00): le site, le site,
+     UNRECALLED (whole 0.00, best 0.00): Et puis la dernière chose,
+     HEDGELOST: Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend.
+       → Il faut que je répète le comptable — je l'ai eu vendredi — c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.
+     NEGATIONDROPPED: Déjà, il faut que je répète le comptable le comptable je l'ai eu vendredi c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture bon ensuite alors ça c'est important il faut absolument que je réponde à julien parce que ça fait je ne sais pas ça fait peut-être une semaine et demie qu'il attend.
+       → Il faut que je répète le comptable — je l'ai eu vendredi — c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.
+     PERSONLOST: Ah, j'ai aussi...
+       → Ah non,
+
+━━ [V2-fidelity] 5-rambling#3
+  1283→1021 7356ms success recall=22/25 UNRECALLED=3 dispersed=2 PERSON-LOST=1 inversions=25/190 speakerState=preserved
+     UNRECALLED (whole 0.00, best 0.00): Quoi d'autre?
+     UNRECALLED (whole 0.00, best 0.00): le site, le site,
+     UNRECALLED (whole 0.00, best 0.00): Et puis la dernière chose,
+     PERSONLOST: Ah, j'ai aussi...
+       → Ah non,
+
+━━ [V2-fidelity] 6-unscripted#2
+  1159→1275 6997ms success recall=10/10 PERSON-LOST=1 inversions=3/45 SPEAKER-STATE-FABRICATED(closing)
+     PERSONLOST: L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+       → l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              18       1/18        5/18        0/18        0/18        1/18        0/18        12/18       0
+V1-rule7-property     17       0/17        2/17        1/17        0/17        0/17        0/17        15/17       1
+V2-fidelity           18       3/18        4/18        2/18        0/18        1/18        0/18        14/18       0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  excluded, by outcome: engineFailed×1
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              120           9             4/18          3/18
+V1-rule7-property     65            5             1/17          3/17
+V2-fidelity           84            4             2/18          3/18
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   1-free-form             ·  ·  F
+   2-project-update        ·  ·  ·
+   3-message-draft         ·  ·  ·
+   4-explanation           ·  ·  ·
+   5-rambling              Po41  U3Po29  o41
+   6-unscripted            Po3  Po3  Po3
+── V1-rule7-property
+   1-free-form             ·  ·  ·
+   2-project-update        ·  e  ·
+   3-message-draft         ·  ·  ·
+   4-explanation           ·  ·  ·
+   5-rambling              ·  Po28  PHo28
+   6-unscripted            o3  o3  o3
+── V2-fidelity
+   1-free-form             ·  ·  ·
+   2-project-update        ·  ·  ·
+   3-message-draft         ·  ·  ·
+   4-explanation           ·  ·  ·
+   5-rambling              U3PHo25  U3PHo25  U3Po25
+   6-unscripted            o3  PFo3  o3
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 54 runs to /tmp/rescore570/capture-longform-macos27.json
