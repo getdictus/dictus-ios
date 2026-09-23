@@ -193,14 +193,15 @@ public enum SmartModeCatalogue {
         floorBehaviour: .insertRawText,
         // Below 200 characters the mode is skipped and the dictation takes the path it
         // would take with no mode armed (#587, round 4). Read from the 51 `Structuré`
-        // dictations in the device exports of 2026-09-13 to 09-23: every one under 120
-        // characters is a single sentence, and under 200 there are at most two. That is
-        // where the mode did its damage and had nothing to structure — a person swapped
+        // dictations in the device exports of 2026-09-13 to 09-23: all 8 under 120
+        // characters are a single sentence, and 15 of the 16 under 200 are one or two.
+        // That is where the mode did its damage and had nothing to structure — a person swapped
         // at 28 (`Comment tu vas` → `Comment vais-je`), a `Voici` added at 90, two
         // clauses swapped at 65, a `s'il te plaît` dropped at 192, a tense and register
         // lifted at 149 — and where no output in the corpus gained a paragraph worth
-        // having. The known cost: one 149-character dictation counting off three tasks
-        // now gets Normal polish instead of a list; `Liste` is the mode for that.
+        // having. The one exception is also the known cost: a 149-character dictation
+        // counting off three tasks now gets Normal polish instead of a list; `Liste` is
+        // the mode for that.
         minimumInputCharacters: 200
     )
 
