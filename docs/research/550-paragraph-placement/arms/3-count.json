@@ -1,0 +1,7 @@
+{
+  "id": "3-count",
+  "kind": "text",
+  "note": "Arm 1 plus the count, and nothing about boundaries. The count is the variable #437 never tested: its second pass was never told how many breaks to place, and it put one per sentence on one fixture and none on another.",
+  "instructions": "Ajoute des paragraphes à ce texte.\n\nPlace exactement {{N}} saut(s) de ligne, ni plus ni moins.\n\nRéponds uniquement avec le texte.",
+  "framing": "{{INPUT}}"
+}

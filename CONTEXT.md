@@ -55,8 +55,12 @@ The polish prompt variant applied when the language detected on raw STT output m
 ### Repair mode
 The polish prompt variant applied when raw STT output is in a different language than the target (typically Parakeet hallucinating in the wrong language) or when language detection is uncertain. Allowed to substitute words to reconstruct the user's intent in the target language, while preserving loanwords and proper nouns. Triggered only on Parakeet, never on Whisper. Skipped entirely (raw passes through) when raw output is gibberish — measured by `NLLanguageRecognizer` returning all candidate languages with low confidence. Also called **Mode B**.
 
-### PolishGlossary
-Static, maintainer-curated list of ~20-30 domain terms (`Dictus`, `WhisperKit`, `Parakeet v3`, `GitHub`, `TestFlight`, `iOS`, …) injected into every polish prompt as context. Biases the LLM toward correct spellings of terms STT commonly massacres. Language-agnostic. Lives in `DictusCore/Polish/PolishGlossary.swift`. **Distinct from `LanguageProfile.overrides`** (keyboard autocorrect, offline trie) and from custom vocabulary (#80, premium, user-managed). Evolves by PR as failures appear in test logs.
+### PolishGlossary — REMOVED 2026-09-10 (#536)
+Was a static, maintainer-curated list of domain terms (`Dictus`, `WhisperKit`, `Parakeet v3`, …) injected into every polish prompt, extended since #80 with the user's own canonical terms. Kept here as a term a reader will meet in old issues, commits and ADR 0002.
+
+It is gone because it was measured to do nothing: Apple FM polished `dictus` into `dictés` and left `Parakit V3` alone with both correct spellings sitting in the prompt, while correcting `whisperflow` — in no list — from its own priors. A competitor asking for phonetic repair in a tagged block scored 0/5 on the same device, which closes the rewrite branch as well.
+
+Two mechanisms remain and they are distinct: **`LanguageProfile.overrides`** (keyboard autocorrect, offline trie) and **custom vocabulary** (#80, premium, user-managed), which rewrites transcripts deterministically through `VocabularyReplacer` and never touches a prompt.
 
 ### Polish guardrail
 Runtime sanity check applied to every polish output. Rejects the polished string and writes the deterministic floor instead — the user's own words, never the polish. **Four checks**, all recorded under `outcome = rejectedGuardrail` and told apart by the `guardrailCheck` field on the event (#466):

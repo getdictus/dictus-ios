@@ -170,9 +170,15 @@ final class PolishPipelineTests: XCTestCase {
 
     // MARK: - The two holes #393 found, end to end (#413, #414)
 
-    /// The measured #413 case, through the whole pipeline: the guardrail must
-    /// refuse it, and a Smart Mode refusing means NOTHING is inserted.
-    func testABilingualListIsRefusedAndTheModeInsertsNothing() async {
+    /// The measured #413 case, through the whole pipeline: the guardrail must refuse
+    /// it, and **the drifted output must not reach the document**.
+    ///
+    /// Until #580 that was asserted as "nothing is inserted at all". It is now the
+    /// floor that is inserted — `List` declares `.insertRawText` — and the assertion
+    /// moved to the thing #413 is actually about: what the engine wrote is gone, and
+    /// what lands is the speaker's own French, which no guardrail was ever protecting
+    /// the user from.
+    func testABilingualListIsRefusedAndTheEngineOutputNeverLands() async {
         let raw = "alors euh je fais le point général donc côté design c'est bon les maquettes ont "
             + "été validées vendredi par contre le dev a pris deux semaines de retard à cause de "
             + "l'API du prestataire et on décale la livraison au 15 mars"
@@ -189,13 +195,19 @@ final class PolishPipelineTests: XCTestCase {
             preprocessed: raw, engine: FixedOutputEngine(output: drift), job: job
         )
         XCTAssertEqual(result.outcome, .rejectedGuardrail)
-        XCTAssertNil(PolishPipeline.resolvedOutput(result, preprocessed: raw, job: job))
+        let inserted = PolishPipeline.resolvedOutput(result, preprocessed: raw, job: job)
+        XCTAssertEqual(inserted, raw, "the floor is the speaker's own words (#580)")
+        XCTAssertFalse(
+            inserted?.contains("two-week delay") ?? false,
+            "the English the guardrail refused must not reach the document (#413)"
+        )
     }
 
     /// The measured #414 case, through the whole pipeline. The last bullet is the
     /// worked example inside `SmartModeNotesPrompt`, on a dictation naming neither
-    /// Sophie nor December.
-    func testAFabricatedNameIsRefusedAndTheModeInsertsNothing() async {
+    /// Sophie nor December. Same shape as the test above since #580: the fabrication
+    /// is discarded, the dictation is not.
+    func testAFabricatedNameIsRefusedAndTheEngineOutputNeverLands() async {
         let raw = "bon alors euh je récapitule ce qu'il faut que je fasse avant la réunion donc "
             + "déjà faut que je récupère les chiffres de janvier auprès de Marion et puis il faut "
             + "que j'appelle le prestataire et réserver la salle du deuxième étage"
@@ -212,7 +224,12 @@ final class PolishPipelineTests: XCTestCase {
             preprocessed: raw, engine: FixedOutputEngine(output: output), job: job
         )
         XCTAssertEqual(result.outcome, .rejectedGuardrail)
-        XCTAssertNil(PolishPipeline.resolvedOutput(result, preprocessed: raw, job: job))
+        let inserted = PolishPipeline.resolvedOutput(result, preprocessed: raw, job: job)
+        XCTAssertEqual(inserted, raw, "the floor is the speaker's own words (#580)")
+        XCTAssertFalse(
+            inserted?.contains("Sophie") ?? false,
+            "the name the speaker never said must not reach the document (#414)"
+        )
     }
 
     /// The counter-test that matters just as much: the same fixture, condensed
@@ -570,18 +587,34 @@ final class PolishPipelineTests: XCTestCase {
     /// speaker's words and are supported from word 0. The inertness is therefore a
     /// contract decision about what the mode is *licensed* to do, not a workaround
     /// for a check that always fires.
+    ///
+    /// ### Why the fixture changed under #414
+    ///
+    /// This test used to run on a fully abstractive list — `Décision : accélérer le
+    /// projet` / `Risque identifié : la concurrence` / `Échéance retenue : cette
+    /// semaine` — and #414's overlap check refuses it. On inspection that refusal is
+    /// right rather than a cost: the speaker gave no deadline, and `cette semaine` is
+    /// a date invented for them. The old fixture is now committed as a labelled
+    /// fabrication (`adversarial.json`, `Y6-notes-abstraite-inventee`) so the claim is
+    /// measured instead of argued, and this test runs on a list that condenses
+    /// without inventing — which still opens on words that are not the speaker's, so
+    /// the prefix check would still refuse it.
     func testThePrefixCheckIsInertForList() async {
         let raw = "alors voilà pour résumer on a beaucoup discuté hier soir et franchement "
             + "je pense qu'on devrait avancer vite sur ce sujet là parce que sinon on va se "
             + "faire dépasser"
         let output = """
-        - Décision : accélérer le projet
-        - Risque identifié : la concurrence
-        - Échéance retenue : cette semaine
+        - Décision retenue : avancer vite
+        - Risque : se faire dépasser
+        - Point discuté hier soir
         """
         XCTAssertFalse(
             PolishPrefixAlignment.accepts(polished: output, raw: raw),
             "precondition: the check WOULD refuse this output if it ran"
+        )
+        XCTAssertTrue(
+            PolishGrounding.acceptsSegmentOverlap(polished: output, raw: raw),
+            "precondition: every bullet is made of the speaker's own words (#414)"
         )
         let result = await PolishPipeline.transform(
             preprocessed: raw,
@@ -620,8 +653,9 @@ final class PolishPipelineTests: XCTestCase {
         XCTAssertNil(result.rejectedCheck)
     }
 
-    /// The four checks name themselves apart (#466). One `rejectedGuardrail` outcome
-    /// covers four questions, and an export has to be able to count them separately.
+    /// The five checks name themselves apart (#466, #414). One `rejectedGuardrail`
+    /// outcome covers five questions, and an export has to be able to count them
+    /// separately.
     func testEachGuardrailNamesItselfOnTheResult() async {
         let raw = "bon alors il faut que je pense à rappeler le plombier avant vendredi "
             + "et à préparer le dossier pour la réunion de lundi matin"
@@ -658,6 +692,25 @@ final class PolishPipelineTests: XCTestCase {
             )
         )
         XCTAssertEqual(sophie.rejectedCheck, .grounding)
+
+        // A fabricated bullet naming nobody: the anchor check has nothing to look at,
+        // so this is the one the overlap check exists for (#414). It has to pass the
+        // three cheaper checks to reach it — the list is French, it condenses, and it
+        // names no one.
+        let invented = await PolishPipeline.transform(
+            preprocessed: raw,
+            engine: FixedOutputEngine(output: """
+            - Rappeler le plombier avant vendredi
+            - Préparer le dossier pour la réunion de lundi
+            - Commander les fournitures de bureau manquantes
+            """),
+            job: PolishJob(
+                task: .smart(SmartModeCatalogue.notes),
+                promptLanguage: .french,
+                languageAgnosticPath: false
+            )
+        )
+        XCTAssertEqual(invented.rejectedCheck, .segmentOverlap)
 
         let preamble = await PolishPipeline.transform(
             preprocessed: PolishPrefixAlignmentTests.preambleRaw,

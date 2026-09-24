@@ -1,0 +1,58 @@
+━━ [1-message] lang=fr stt=PK
+  raw:      Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que... dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #1: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j'ai avancé un petit peu plus dessus. Enfin pardon, je me suis planté.
+            (success, 3110ms, detected=fr→natural)
+  breaks #1: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que j'ai avancé un petit peu plus dessus. Enfin pardon, je me suis planté.
+  polished #2: Yo man, j'espère que tu vas bien.
+
+Écoute, je suis en train de regarder le projet.
+
+Je t'ai pas répondu mais je suis en train de travailler dessus.
+
+Je te tiens au jus dès que j'ai avancé un petit peu plus dessus.
+
+Enfin pardon, je me suis planté.
+            (success, 2161ms, detected=fr→natural)
+  breaks #2: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet.⏎⏎Je t'ai pas répondu mais je suis en train de travailler dessus.⏎⏎Je te tiens au jus dès que j'ai avancé un petit peu plus dessus.⏎⏎Enfin pardon, je me suis planté.
+  polished #3: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2166ms, detected=fr→natural)
+  breaks #3: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+
+━━ [2-message] lang=fr stt=PK
+  raw:      Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.
+  polished #1: Salut Manu, comment vas-tu ? Est-ce que tu as bien reçu le mail que je t'ai envoyé tout à l'heure ? Des bisous.
+            (success, 1557ms, detected=fr→natural)
+  breaks #1: Salut Manu, comment vas-tu ? Est-ce que tu as bien reçu le mail que je t'ai envoyé tout à l'heure ? Des bisous.
+  polished #2: Salut Manu, comment vas-tu ? Est-ce que tu pourrais checker si tu as bien reçu le mail ? Des bisous.
+            (success, 1444ms, detected=fr→natural)
+  breaks #2: Salut Manu, comment vas-tu ? Est-ce que tu pourrais checker si tu as bien reçu le mail ? Des bisous.
+  polished #3: Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.
+            (rejectedGuardrail, 1352ms, detected=fr→natural, check=length)
+  engineOut #3: Salut Manu comment vas ? Est-ce que tu as bien reçu le mail ? Des bisous.
+
+━━ [3-message] lang=fr stt=PK
+  raw:      Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #1: Je te tiens au jus. Je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1782ms, detected=fr→natural)
+  breaks #1: Je te tiens au jus. Je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #2: Je te tiens au jus. Je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1762ms, detected=fr→natural)
+  breaks #2: Je te tiens au jus. Je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #3: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1792ms, detected=fr→natural)
+  breaks #3: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+
+━━ [4-message] lang=fr stt=PK
+  raw:      Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #1: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2038ms, detected=fr→natural)
+  breaks #1: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #2: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra? Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2057ms, detected=fr→natural)
+  breaks #2: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra? Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #3: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra? Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2046ms, detected=fr→natural)
+  breaks #3: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra? Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+
+── outcomes: 11/12 success
+   rejectedGuardrail: 1/12 — 2-message×1

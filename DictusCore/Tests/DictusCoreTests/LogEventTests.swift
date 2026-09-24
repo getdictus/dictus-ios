@@ -7,13 +7,14 @@ final class LogEventTests: XCTestCase {
 
     // MARK: - LogLevel cases
 
-    func testLogLevelHasExactly4Cases() {
-        XCTAssertEqual(LogLevel.allCases.count, 4)
+    func testLogLevelHasExactly5Cases() {
+        XCTAssertEqual(LogLevel.allCases.count, 5)
     }
 
     func testLogLevelRawValues() {
         XCTAssertEqual(LogLevel.debug.rawValue, "debug")
         XCTAssertEqual(LogLevel.info.rawValue, "info")
+        XCTAssertEqual(LogLevel.notice.rawValue, "notice")
         XCTAssertEqual(LogLevel.warning.rawValue, "warning")
         XCTAssertEqual(LogLevel.error.rawValue, "error")
     }
@@ -22,6 +23,7 @@ final class LogEventTests: XCTestCase {
         // All padded names should be 7 chars for alignment
         XCTAssertEqual(LogLevel.debug.paddedName, "DEBUG  ")
         XCTAssertEqual(LogLevel.info.paddedName, "INFO   ")
+        XCTAssertEqual(LogLevel.notice.paddedName, "NOTICE ")
         XCTAssertEqual(LogLevel.warning.paddedName, "WARNING")
         XCTAssertEqual(LogLevel.error.paddedName, "ERROR  ")
     }
@@ -257,9 +259,43 @@ final class LogEventTests: XCTestCase {
     }
 
     func testTranscriptionCompletedIsInfoTranscription() {
-        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42)
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: nil)
         XCTAssertEqual(event.level, .info)
         XCTAssertEqual(event.subsystem, .transcription)
+    }
+
+    /// Parakeet's score travels with the event, to three decimals: the drifted runs in
+    /// #552 sit 0.005 apart, so two would blur exactly the gap being measured (#554).
+    func testTranscriptionCompletedCarriesTheEngineConfidence() {
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: 0.9163)
+        XCTAssertEqual(event.message, "duration=2500ms words=42 confidence=0.916")
+    }
+
+    /// An engine with no score logs no field — not `confidence=0`, not `nil`. A
+    /// placeholder would read as a measurement to whoever aggregates these lines (#554).
+    func testTranscriptionCompletedWithoutConfidencePrintsNoField() {
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: nil)
+        XCTAssertEqual(event.message, "duration=2500ms words=42")
+        XCTAssertFalse(event.payload().contains("confidence"))
+    }
+
+    /// Nemotron's forced language, the prompt it resolved to and the tag the decoder emitted
+    /// (#558), in that order, and no `confidence=` field: that one is Parakeet's.
+    func testTranscriptionCompletedCarriesNemotronsLanguageFields() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 900, wordCount: 120, confidence: nil,
+            language: "fr", promptId: 8, detectedLanguage: "fr-FR"
+        )
+        XCTAssertEqual(event.message, "duration=900ms words=120 language=fr promptId=8 detected=fr-FR")
+        XCTAssertFalse(event.payload().contains("confidence"))
+    }
+
+    /// No tag emitted: the field is absent rather than `detected=nil`.
+    func testTranscriptionCompletedWithoutADetectedLanguagePrintsNoField() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 900, wordCount: 3, confidence: nil, language: "auto", promptId: 101
+        )
+        XCTAssertEqual(event.message, "duration=900ms words=3 language=auto promptId=101")
     }
 
     func testTranscriptionFailedIsErrorTranscription() {
@@ -324,6 +360,39 @@ final class LogEventTests: XCTestCase {
         let event = LogEvent.keyboardMicTapped
         XCTAssertEqual(event.level, .info)
         XCTAssertEqual(event.subsystem, .keyboard)
+    }
+
+    /// #23. `notice` and not `info` is the point of the case: the app is usually
+    /// terminated moments after a hand-off — that is what a hand-off is — and an `info`
+    /// line in the os.log mirror dies with it, taking the only account of why the user
+    /// did or did not land back where they were.
+    func testHostReturnIsNoticeKeyboard() {
+        let event = LogEvent.hostReturn(hostId: "com.apple.mobilenotes", outcome: "returned")
+        XCTAssertEqual(event.level, .notice)
+        XCTAssertEqual(event.subsystem, .keyboard)
+        XCTAssertEqual(event.name, "hostReturn")
+        XCTAssertTrue(event.payload().hasSuffix("hostId=com.apple.mobilenotes outcome=returned"))
+    }
+
+    /// Every outcome the two processes actually emit, so the documented contract and the
+    /// call sites cannot drift. `no-scheme-known` was emitted for a whole device session
+    /// before it was written down.
+    func testEveryHostReturnOutcomeRendersIntact() {
+        let outcomes = [
+            "returned", "open-failed", "no-scheme", "no-scheme-known", "table-miss",
+            // #567: the branch that deliberately does not return now says so, because
+            // the bug it came from was an absent line nobody could distinguish from a
+            // branch that never ran.
+            "skipped-warm"
+        ]
+        for outcome in outcomes {
+            let event = LogEvent.hostReturn(hostId: "com.apple.Spotlight", outcome: outcome)
+            XCTAssertEqual(event.level, .notice)
+            XCTAssertTrue(
+                event.payload().hasSuffix("hostId=com.apple.Spotlight outcome=\(outcome)"),
+                "outcome \(outcome) did not survive rendering"
+            )
+        }
     }
 
     func testKeyboardTextInsertedIsDebugKeyboard() {
@@ -469,6 +538,90 @@ final class LogEventTests: XCTestCase {
         }
     }
 
+    // MARK: - Polish engine failure (#315, #518)
+
+    /// The line has to answer "whose fault was this refusal" on its own.
+    ///
+    /// `unsupportedLanguageOrLocale` is returned byte-identically for a language
+    /// genuinely outside Apple's set (#490) and for one squarely inside it that
+    /// their classifier misread (#518), and iOS 26's `GenerationError.Context`
+    /// carries no `languageCode` to separate them. What separates them is the
+    /// reading taken before the call, which is why these two fields are on the line
+    /// rather than only in the debug export: this log is the one an agent greps
+    /// (#255), and a reason slug alone sends it to read three files.
+    func testPolishEngineFailedNamesTheLanguageItReadBeforeTheCall() {
+        // The bug: French, read as French at full share, refused anyway.
+        let ours = LogEvent.polishEngineFailed(
+            reason: "unsupportedLanguageOrLocale", engine: "apple-fm", mode: "natural",
+            engineMs: 7, detected: "fr", mix: "fr 1.00"
+        )
+        XCTAssertEqual(ours.name, "polishEngineFailed")
+        XCTAssertEqual(
+            ours.message,
+            "reason=unsupportedLanguageOrLocale engine=apple-fm mode=natural engineMs=7 "
+                + "detected=fr mix=fr 1.00"
+        )
+        XCTAssertEqual(ours.level, .warning)
+        XCTAssertEqual(ours.subsystem, .transcription)
+
+        // The legitimate case, same slug, and now distinguishable from the line.
+        let theirs = LogEvent.polishEngineFailed(
+            reason: "unsupportedLanguageOrLocale", engine: "apple-fm",
+            mode: "smart.translate.en", engineMs: 22, detected: "cs", mix: "cs 1.00"
+        )
+        XCTAssertTrue(theirs.message.contains("detected=cs"))
+        XCTAssertNotEqual(ours.message, theirs.message)
+    }
+
+    // MARK: - The pre-flight refusal (#490)
+
+    /// Its own name, so a reader can tell "we declined to ask" from "the engine
+    /// refused" with one grep instead of by reading a latency.
+    func testPolishInputLanguageRefusedIsItsOwnEventAndNotAFailure() {
+        let event = LogEvent.polishInputLanguageRefused(
+            engine: "apple-fm", mode: "smart.translate.en", detected: "cs", mix: "cs 1.00"
+        )
+        XCTAssertEqual(event.name, "polishInputLanguageRefused")
+        XCTAssertEqual(
+            event.message,
+            "engine=apple-fm mode=smart.translate.en detected=cs mix=cs 1.00"
+        )
+        // Info, not warning: the guard declining a call the backend was going to
+        // refuse anyway is the feature working.
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .transcription)
+    }
+
+    /// The two events read against each other on one page, which is how the two
+    /// causes of #490 and #518 are told apart.
+    func testTheRefusalAndTheFailureCarryTheSameReadingInTheSameShape() {
+        let refused = LogEvent.polishInputLanguageRefused(
+            engine: "apple-fm", mode: "smart.translate.en", detected: "cs", mix: "cs 1.00"
+        )
+        let failed = LogEvent.polishEngineFailed(
+            reason: "unsupportedLanguageOrLocale", engine: "apple-fm",
+            mode: "smart.translate.en", engineMs: 22, detected: "cs", mix: "cs 1.00"
+        )
+        for line in [refused.message, failed.message] {
+            XCTAssertTrue(line.contains("detected=cs"), line)
+            XCTAssertTrue(line.contains("mix=cs 1.00"), line)
+        }
+    }
+
+    /// A failure recorded before the mix was measured still logs, with `-` in both
+    /// slots rather than an absent field. The event predates #456's trail, and a
+    /// line whose shape changes with its content is a line no grep can rely on.
+    func testPolishEngineFailedRendersAnAbsentReadingAsPlaceholders() {
+        let event = LogEvent.polishEngineFailed(
+            reason: "rateLimited", engine: "apple-fm", mode: "natural",
+            engineMs: 4, detected: "-", mix: "-"
+        )
+        XCTAssertEqual(
+            event.message,
+            "reason=rateLimited engine=apple-fm mode=natural engineMs=4 detected=- mix=-"
+        )
+    }
+
     // MARK: - Formatted output
 
     func testFormattedOutputContainsLevelSubsystemAndEventName() {
@@ -497,5 +650,29 @@ final class LogEventTests: XCTestCase {
         XCTAssertTrue(formatted.contains("DEBUG"))
         XCTAssertTrue(formatted.contains("[keyboard]"))
         XCTAssertTrue(formatted.contains("keyboardTextInserted"))
+    }
+
+    // MARK: - smartModeRefused names the guardrail (#580)
+
+    /// The line this issue was filed on read `reason=-` and nothing else, so an
+    /// export could not tell `length` from `segmentOverlap` — three different bugs
+    /// behind one outcome. The check has to be in the line, not only in the metrics.
+    func testASmartModeRejectionNamesTheCheckThatRefusedIt() {
+        let formatted = LogEvent.smartModeRefused(
+            mode: "structured", outcome: "rejectedGuardrail",
+            reason: "-", check: "segmentOverlap"
+        ).formatted()
+        XCTAssertTrue(formatted.contains("outcome=rejectedGuardrail"), formatted)
+        XCTAssertTrue(formatted.contains("check=segmentOverlap"), formatted)
+    }
+
+    /// Every other refusal keeps a placeholder rather than an absent key: a reader
+    /// grepping `check=` must not have to know which outcomes carry one.
+    func testARefusalWithNoGuardrailStillPrintsThePlaceholder() {
+        let formatted = LogEvent.smartModeRefused(
+            mode: "translate.en", outcome: "engineFailed",
+            reason: "guardrailViolation", check: "-"
+        ).formatted()
+        XCTAssertTrue(formatted.contains("check=-"), formatted)
     }
 }

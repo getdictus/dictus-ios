@@ -230,3 +230,81 @@ the rule-8 version, `short` is what ships.
 - `auto.json`: **10/10, 9/10, 9/10** — identical to `develop`'s 10/10, 9/10, 9/10. The two
   misses are the `auto-verbal-*` fixtures dropping a `!`, the same sampling noise the
   baseline had.
+
+---
+
+# Part 2 — the bare `point` clause, measured (2026-09-11)
+
+Bars in `bars.md` §5–§8, committed before the first model call. Amendments in §9.
+Captures: `raw/point-pass{1,2}-{A,B}-*.txt`. Scorer: `harness/score-point.py`.
+Arms: `prompts/D-natural-fr-point-kept.txt` against
+`prompts/E-natural-fr-point-removed.txt`, which differ by **one line and fifteen
+characters** — `diff` the two files, that is the whole experiment.
+
+## The verdict: the clause stays, and it buys nothing
+
+| | arm A, clause kept | arm B, clause removed |
+|---|---|---|
+| **P1/P2** noun class, `point` lost | **0 / 96 scored outputs** | 0 / 99 |
+| **P4** command word removed | **66 / 100** | **66 / 100** |
+| **P3** boundary mark supplied | 70 / 80 | 73 / 80 |
+| **P5** non-success | 24 / 220 | 21 / 220 |
+
+The decision rule declared in §7 was: *keep the clause only if the noun class is clean*.
+It is clean, across seven noun fixtures and two passes, including `N7-noun-at-a-boundary`
+— `point` as a noun sitting exactly where a sentence boundary belongs — which was added
+after pass 1 precisely because pass 1 was clean. **The clause stays in FR and EN Natural.**
+
+## What #185's open revisit turns out to say
+
+The prepass doc-comment ends with *"Revisit once the LLM owns punctuation contextually"*,
+and rests on a claim that was *observed on device, never counted*: that the model supplies
+the terminal period at natural sentence boundaries on its own. Counted now, on the
+boundary itself rather than anywhere in the output:
+
+- **The claim holds.** 70/80 with the clause, 73/80 without it. The model closes the
+  sentence at the command position whether or not rule 4 tells it to.
+- **The fear does not materialise.** #185 ruled the substitution too dangerous for a regex
+  because `point` is an ordinary French noun with no multi-word context to disambiguate.
+  The model has that context and uses it: 96 outputs, 7 noun shapes, `un point final`
+  included, and not one `point` converted to a mark or dropped. The distinction #185 drew
+  between what a regex may do and what a model may do is confirmed, from the other side.
+
+**So the clause is safe. It is also useless.** The command word is removed 66 times in 100
+under both arms — the same number, arrived at from opposite directions in the two passes.
+The between-pass swing within one arm (30→36 for A, 37→29 for B) is larger than any
+difference between the arms, which is zero. Rule 4's bare-`point` entry does not change
+what the model does with a bare `point`, in either direction.
+
+It is kept because the decision rule said to keep it and because it is the correct
+statement of the contract, not because it was shown to help. That is the same footing the
+`cela` PRESERVE line was left on in the first half of this issue.
+
+## A user-visible defect this round found and did not fix
+
+**Thirty-four command-class outputs in a hundred leave a stray `Point,` in the text**, in
+both arms:
+
+```
+raw     : je passe au bureau demain matin vers 9h point on se voit directement en salle de réunion
+polished: Je passe au bureau demain matin vers 9 h. Point, on se voit directement en salle de réunion.
+```
+
+The model reliably puts the mark in and then keeps the word as well, which is the worst of
+the two available failures: the user reads a sentence that is correctly punctuated and
+carries one word nobody said. It is present on `develop` today, it is not caused by
+anything in this round, and **neither arm reduces it** — 66/100 either way.
+
+This is not #439's defect and it is not fixed here. It is the shape #185 left behind when
+it took the bare period word out of the pre-pass: the regex no longer removes the word, and
+the prompt turns out not to remove it either. Worth its own issue.
+
+## An aside worth recording: Apple refuses a benign French sentence
+
+`N2-point-de-vue` — *"de mon point de vue le plus gros risque c'est qu'on livre en retard
+et que le client s'en aperçoive avant nous"* — is refused by Apple's safety guardrail
+**39 times in 40** across the two arms and two passes, `reason=guardrailViolation`. `N6-point-de-vue-bis`,
+the same shape in different words, is refused 6 times in 20. Nothing in either sentence is
+sensitive. It is recorded here because it is the second time this campaign has had to
+route around Apple refusing ordinary dictation, and because a 39/40 refusal rate on a
+sentence a user could plausibly dictate is a product fact, not a harness artefact.

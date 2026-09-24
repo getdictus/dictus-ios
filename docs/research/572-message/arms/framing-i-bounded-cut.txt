@@ -1,0 +1,5 @@
+Rewrite this text the way the speaker would have typed it, and break it into short blocks, one per beat, separated by a blank line. Keep every point they made; drop the hesitations, the repetitions and the self-corrections. Output only the rewritten text, nothing else.
+
+{{INPUT}}
+
+Typed output:

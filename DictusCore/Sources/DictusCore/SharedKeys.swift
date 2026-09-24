@@ -19,6 +19,14 @@ public enum SharedKeys {
     /// "ready" = active model is loaded in RAM and `transcribe()` calls will succeed.
     /// The keyboard reads this to refuse mic taps during load (issue #144).
     public static let modelLoadState = "dictus.modelLoadState"
+    /// `[modelIdentifier: installIdentity]` — which models have run an inference in THIS
+    /// installation of Dictus (issue #542).
+    ///
+    /// The three keys above all describe the model FILE, and a downloaded file whose Core
+    /// ML cache is cold cannot transcribe for minutes. This is the one that tells the two
+    /// apart, and it is the reason the keyboard can refuse a dictation it would otherwise
+    /// have lost. Read and written only through `ModelWarmth`.
+    public static let modelWarmth = "dictus.modelWarmth"
 
     // Keyboard-App cross-process contracts (added for Plan 3.1)
     /// Legacy single global keyboard layout, stored as String ("azerty"/"qwerty"/"qwertz").
@@ -142,6 +150,19 @@ public enum SharedKeys {
     /// cannot measure this — it never saw the audio — and the polish duration gate
     /// (#141) is decided on it.
     public static let lastTranscriptionDuration = "dictus.lastTranscriptionDuration"
+    /// String: the speech engine's own output for the transcription sitting in
+    /// `lastTranscription`, written **only** when the custom-vocabulary pass (#80)
+    /// rewrote something and therefore the two differ.
+    ///
+    /// It exists so the keyboard's polish export records what the engine produced
+    /// rather than what the vocabulary made of it. #80's corpus has to be mined from
+    /// those exports, and a feature that quietly rewrites the record its own
+    /// validation depends on is a design fault rather than a logging detail.
+    ///
+    /// Absent is the normal case and means "identical to `lastTranscription`", so
+    /// nothing is written and nothing is read for the users who never touch the
+    /// feature. Claimed and cleared with the rest of the hand-off keys.
+    public static let lastTranscriptionEngineRaw = "dictus.lastTranscriptionEngineRaw"
     /// Data: the JSON-encoded `PendingDictation` the keyboard has claimed and not
     /// yet typed. Read and written only through `PendingDictationChannel`, which is
     /// where the rule about who clears it lives.
@@ -247,9 +268,6 @@ public enum SharedKeys {
     /// Set by handleIncomingURL when source=keyboard query parameter is present.
     /// Cleared when the app enters background.
     public static let coldStartActive = "dictus.coldStartActive"
-    /// String: URL scheme of the source app (e.g., "whatsapp") or "unknown".
-    /// Used by auto-return logic to navigate back to the correct app after dictation.
-    public static let sourceAppScheme = "dictus.sourceAppScheme"
 
     // Keyboard teardown diagnostics (issue #281)
     /// String: DictusApp's last reported scene phase, one of `AppScenePhaseMarker`.

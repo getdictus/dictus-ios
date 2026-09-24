@@ -118,7 +118,7 @@ The polish layer (issue #141, ADR 0003) runs a per-language system prompt agains
 
 ### Where to add the prompt
 
-`DictusCore/Sources/DictusCore/Polish/Prompts/PolishNaturalPrompt<XX>.swift` where `<XX>` is the uppercase two-letter ISO 639-1 code (`FR`, `EN`, `ES`, `DE`, …). One file per language, one `enum` per file, single static `instructions(glossary:)` method returning the prompt string.
+`DictusCore/Sources/DictusCore/Polish/Prompts/PolishNaturalPrompt<XX>.swift` where `<XX>` is the uppercase two-letter ISO 639-1 code (`FR`, `EN`, `ES`, `DE`, …). One file per language, one `enum` per file, single static `instructions()` method returning the prompt string.
 
 ### What to copy from
 
@@ -131,10 +131,11 @@ The polish layer (issue #141, ADR 0003) runs a per-language system prompt agains
 5. RULES section (1-9) — the operations the model MUST perform.
 6. PRESERVE section — what stays untouched.
 7. FORBIDDEN section — what must never happen.
-8. Domain glossary slot (`\(glossary)`).
-9. INPUT/OUTPUT examples covering each rule.
-10. ASR-repair example (rule 8).
-11. `<<NL>>` marker examples (rule 5).
+8. INPUT/OUTPUT examples covering each rule.
+9. ASR-repair example (rule 8).
+10. `<<NL>>` marker examples (rule 5).
+
+There is no domain-vocabulary slot. There was one until #536, which measured that a supplied term list changes nothing Apple FM writes; do not add one back to a new prompt.
 
 ### What to adapt per language
 
@@ -159,7 +160,7 @@ Add a `case` arm in `AppleFoundationModelsPolishEngine.instructions(for:language
 
 ```swift
 case (.natural, .<yourLanguage>):
-    return PolishNaturalPrompt<XX>.instructions(glossary: glossary)
+    return PolishNaturalPrompt<XX>.instructions()
 ```
 
 The compiler enforces exhaustiveness — adding a new `SupportedLanguage` case without an arm here is a build error, which is what we want.
@@ -174,7 +175,7 @@ Without a dedicated Repair prompt, the dispatch falls back to `PolishRepairPromp
 
 ```swift
 case (.repair, .<yourLanguage>):
-    return PolishRepairPrompt<XX>.instructions(glossary: glossary)
+    return PolishRepairPrompt<XX>.instructions()
 ```
 
 Caveat (Apple FM, 26.x): cross-lingual reconstruction is not uniformly reliable. ES Repair works; **DE Repair reproducibly leaks Polish** when reconstructing from a Romance-language input, and the prior is not promptable away. The guardrail catches it (raw fallback), but until a third-party local LLM lands, Repair quality is language-dependent and must be checked per language with `polish-harness show`.

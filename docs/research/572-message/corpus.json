@@ -1,0 +1,36 @@
+[
+ {
+  "id": "1-message",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "_note": "Device capture 2026-09-17T07:04:53Z, iPhone16,2, iOS 27.0, build 1.9.0 (34), Parakeet v3 + Normal polish. A real message the maintainer was about to send. The self-correction case. The speaker hesitates ('dès que… dès que') and then corrects himself out loud ('s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté'). Carries the maintainer's own hand-typed target and Superwhisper's output on the same content.",
+  "raw": "Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que... dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.",
+  "_normalPolish": "Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que. Dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.",
+  "_target": "Yo man j'espère que tu vas bien\n\nJe suis en train de regarder le projet! Je t'ai pas répondu mais je suis en train de travailler dessus\n\nJe te tiens au jus dès que j'avance un peu plus",
+  "_superwhisper": "Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet. Je t'ai pas répondu mais je suis en train de travailler dessus. Je te tiens au jus dès que j'ai avancé un petit peu plus dessus, enfin pardon, je me suis planté."
+ },
+ {
+  "id": "2-message",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "_note": "Device capture 2026-09-17T07:05:59Z, iPhone16,2, iOS 27.0, build 1.9.0 (34), Parakeet v3 + Normal polish. A real message the maintainer was about to send. The politeness case. Addressee's initials replaced with a first name; nothing else altered. Normal polish DELETED the sign-off and the politeness formula, and lifted the register ('comment tu vas' → 'comment vas-tu', 'checker' → 'vérifier', 'le mail' → 'l'email') — #439.",
+  "raw": "Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.",
+  "_normalPolish": "Salut Manu, comment vas-tu ? Est-ce que tu pourrais vérifier si tu as bien reçu l’email que j’ai envoyé tout à l’heure ?"
+ },
+ {
+  "id": "3-message",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "_note": "Device capture 2026-09-17T07:06:53Z, iPhone16,2, iOS 27.0, build 1.9.0 (34), Parakeet v3 + Normal polish. A real message the maintainer was about to send. The short case. Three sentences, no defect. Normal polish substituted 'je suis preneur' → 'je suis prêt', which changes the meaning — #439.",
+  "raw": "Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.",
+  "_normalPolish": "Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l’abonnement pour pouvoir essayer. Mais honnêtement, de ce que j’ai cru comprendre, c’est peut-être un peu moins bien que Hermes et OpenClaw."
+ },
+ {
+  "id": "4-message",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "_note": "Device capture 2026-09-17T07:17:54Z, iPhone16,2, iOS 27.0, build 1.9.0 (34), Parakeet v3 + Normal polish. A real message the maintainer was about to send. The group-message case. Addressed to several people, contains a product name and a question with no question mark in the raw.",
+  "raw": "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.",
+  "_normalPolish": "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis prêt."
+ }
+]

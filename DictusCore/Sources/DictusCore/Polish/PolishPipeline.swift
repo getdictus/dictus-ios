@@ -82,6 +82,21 @@ public enum PolishPipeline {
         guard gate.allowsCall(engine: engine.identifier) else {
             return Result(engineOutput: nil, outcome: .engineUnavailable, engineMs: 0, postprocessMs: 0)
         }
+        // Input-language pre-flight (#490). Apple Foundation Models classifies the
+        // user turn and refuses a language outside its set before generating
+        // anything — 22 ms on device, 3 to 5 on the Mac. Asking the backend for its
+        // list first turns that round trip into a local verdict, and, unlike the
+        // slug the round trip returns, one that can be explained to the user: the
+        // engine's `unsupportedLanguageOrLocale` arrives byte-identically from a
+        // false positive on a supported language (#518), this does not.
+        //
+        // Placed with the availability gate rather than with the context guard: both
+        // are "do not call at all", and both must cost nothing. `.unknown` — no list
+        // published, or nothing readable in the transcript — always falls through.
+        if engine.inputLanguageSupport(countedCodes: job.inputLanguageCodes) == .unsupported {
+            return Result(engineOutput: nil, outcome: .unsupportedInputLanguage,
+                          engineMs: 0, postprocessMs: 0)
+        }
         // Encode newlines as a marker so the model can't "naturalise" them into
         // ", " + capital — see `PolishPostpass`. Sub-millisecond, kept out of the
         // engine timing below.
@@ -123,10 +138,16 @@ public enum PolishPipeline {
             }
             // Guardrail baseline is the preprocessed text — what the engine
             // actually saw (modulo the newline marker the post-pass undid).
-            // The four output checks, in the order they cost: a character ratio,
-            // then two `NaturalLanguage` passes, then a word-set comparison. Each
-            // names itself in the result so an export can count the four apart
-            // (#466) — `rejectedGuardrail` is one outcome for four questions.
+            // The five output checks, in the order they cost: a character ratio,
+            // then two `NaturalLanguage` passes, then two word-set comparisons. Each
+            // names itself in the result so an export can count the five apart
+            // (#466) — `rejectedGuardrail` is one outcome for five questions.
+            //
+            // The two word-set checks are ordered by SPECIFICITY rather than by cost,
+            // which is the same for both. A chat preamble fails them both, and #466
+            // owns that shape: leaving `segmentOverlap` last keeps every captured
+            // preamble counted as `prefixAlignment`, so a seven-day export still
+            // measures the rate #466 shipped against.
             let refused: PolishGuardrail.Check?
             if !PolishGuardrail.accepts(
                 raw: preprocessed, polished: polished, contract: job.task.contract
@@ -138,6 +159,8 @@ public enum PolishPipeline {
                 refused = .grounding
             } else if !prefixGuardrailPasses(polished: polished, preprocessed: preprocessed, job: job) {
                 refused = .prefixAlignment
+            } else if !segmentOverlapGuardrailPasses(polished: polished, preprocessed: preprocessed, job: job) {
+                refused = .segmentOverlap
             } else {
                 refused = nil
             }
@@ -147,8 +170,15 @@ public enum PolishPipeline {
                 return Result(engineOutput: polished, outcome: .rejectedGuardrail,
                               engineMs: engineMs, postprocessMs: postMs, rejectedCheck: refused)
             }
+            // Layout only, and only after every check has accepted the model's own
+            // output (#572): the guardrails judge what the model wrote, and this pass
+            // cannot change a word of it. Note the export then logs the tightened text,
+            // as it already logs the decoded one.
+            let delivered = job.task.smartMode?.prompt.shortOutputBlockLimit.map {
+                PolishPostpass.tightenBlocks(polished, whenShorterThan: $0)
+            } ?? polished
             let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
-            return Result(engineOutput: polished, outcome: .success, engineMs: engineMs, postprocessMs: postMs)
+            return Result(engineOutput: delivered, outcome: .success, engineMs: engineMs, postprocessMs: postMs)
         } catch is CancellationError {
             let engineMs = Int(Date().timeIntervalSince(engineStart) * 1000)
             return Result(engineOutput: nil, outcome: .cancelled, engineMs: engineMs, postprocessMs: 0)
@@ -224,6 +254,38 @@ public enum PolishPipeline {
         ).isEmpty
     }
 
+    /// Worst-segment overlap guardrail (#414): every line of the output has to be
+    /// made of words the input actually contains.
+    ///
+    /// Gated on the same `requiresGroundedNames` the anchor check is, and
+    /// deliberately not folded into it. The field asks one question — *is this
+    /// transformation licensed to introduce material the speaker did not say* — and
+    /// both checks want the same answer to it: a translation localises names AND
+    /// keeps no word of the input, and repair reconstructs both. A second field would
+    /// have to be set to the same value on every contract in the codebase, which is a
+    /// knob that can only be set wrong.
+    ///
+    /// It stays a separate function, and a separate `Check`, because the two answers
+    /// differ: `.grounding` says the model named someone the speaker did not,
+    /// `.segmentOverlap` says it wrote a line the speaker has no words in. Merging
+    /// them would make a seven-day export unable to tell which hole is being hit.
+    ///
+    /// The baseline is `preprocessed` for the reason the other three use it: that is
+    /// the text the engine actually saw.
+    private static func segmentOverlapGuardrailPasses(polished: String,
+                                                      preprocessed: String,
+                                                      job: PolishJob) -> Bool {
+        guard job.task.contract.requiresGroundedNames else { return true }
+        // Thresholds from the contract and not the global default since #572: which
+        // segments are short enough to skip is a per-mode answer, because a mode whose
+        // input is a two-line message skips everything at the number measured on
+        // `List` bullets. See `PolishAcceptanceContract.segmentOverlapThresholds`.
+        return PolishGrounding.acceptsSegmentOverlap(
+            polished: polished, raw: preprocessed,
+            thresholds: job.task.contract.segmentOverlapThresholds
+        )
+    }
+
     /// Prefix-alignment guardrail (#466, #349): the output has to open where the
     /// input opens.
     ///
@@ -266,14 +328,15 @@ public enum PolishPipeline {
     /// three bullets were expected. So the answer is `nil`, and the caller inserts
     /// nothing.
     ///
-    /// ### With one exception, and only one: a context overflow on a mode that says
-    /// it may degrade
+    /// ### With three exceptions, on a mode that says it may degrade
     ///
-    /// `.exceededContextBudget` is decided *before* the engine is called, so no
-    /// transformation was attempted and the wrong-transformation risk the rule
-    /// guards against is absent by construction. Whether that licenses the floor is
-    /// the mode's own answer — see `SmartModeOverflowBehaviour`, which explains why
-    /// Notes says yes and Translate says no.
+    /// `.exceededContextBudget` is decided *before* the engine is called,
+    /// `.rejectedGuardrail` throws the engine's output away whole, and `.engineFailed`
+    /// never received one (#580). None of the three can put a half-finished
+    /// transformation in the document, so the risk the rule guards against is absent
+    /// by construction. Whether that licenses the floor is the mode's own answer —
+    /// see `SmartModeFloorBehaviour`, which explains why List says yes and Translate
+    /// says no.
     ///
     /// **A caller cannot tell the two apart from this return value alone.** A
     /// degraded output is a `String` exactly like a success, so `PolishService`
@@ -295,16 +358,58 @@ public enum PolishPipeline {
 
     /// Whether an armed mode accepts the deterministic floor for this outcome.
     ///
-    /// The outcome test is as narrow as the argument that justifies it: only
-    /// `.exceededContextBudget` never reached the engine. `.engineFailed`,
-    /// `.rejectedGuardrail`, `.cancelled` and `.engineUnavailable` all stay
-    /// fail-closed for every mode, whatever it declares — the first three because a
-    /// transformation was attempted and may have half-happened, the last because it
-    /// describes a process that will not run the model again for its lifetime, which
-    /// is a different conversation to have with the user (#315).
+    /// The outcome test is as narrow as the argument that justifies it: it admits the
+    /// three refusals where **nothing the engine produced can reach the document**,
+    /// and then still asks the mode.
+    ///
+    /// - `.exceededContextBudget` never called the engine.
+    /// - `.rejectedGuardrail` called it and discarded the answer whole (#580). The
+    ///   floor here is `preprocessed` — the transcript with the verbal-punctuation
+    ///   pre-pass applied — which is a deterministic function of what the user said,
+    ///   not of what the model wrote. So the wrong-transformation risk the fail-closed
+    ///   rule exists to stop is absent exactly as it is for an overflow, and what the
+    ///   refusal costs the user is the same thing: the structuring, not the words.
+    ///   Measured on device 2026-09-17: three `Structured` rejections in nine runs,
+    ///   one of them 1,337 characters that reached an empty field.
+    /// - `.engineFailed` called it and got **nothing** back. `transform`'s `catch`
+    ///   builds the result with `engineOutput: nil`, and what it wraps is a single
+    ///   batch `respond()` that either returns its whole content or throws — there is
+    ///   no partial delivery for a half-finished transformation to arrive through.
+    ///
+    ///   Until 2026-09-20 this case was excluded, and the reason written here was
+    ///   that "a transformation was attempted and may have half-happened". **That
+    ///   reason was false**, and the code above is what falsifies it: this branch has
+    ///   never been able to produce a partial generation, so the exclusion rested on a
+    ///   risk that does not exist. It is not amended, it is withdrawn. What it cost is
+    ///   measured: device capture 2026-09-20T14:29:56Z, 1.9.0 (34), `Structured` armed
+    ///   on 107 characters of French, `reason=guardrailViolation` — Apple's own safety
+    ///   filter refusing to generate, `polished: null`, `engineMs: 3433` — and an
+    ///   empty field. That is the harm #580 exists to end, reached through a second
+    ///   outcome.
+    ///
+    /// `.cancelled` stays fail-closed for every mode, whatever it declares, and the
+    /// reason is not partiality: the user stopped the dictation themselves, so what
+    /// they want in the field is a question this issue never asked.
+    /// `.engineUnavailable` stays closed because it describes a process that will not
+    /// run the model again for its lifetime, which is a different conversation to have
+    /// with the user (#315).
+    ///
+    /// `.unsupportedInputLanguage` (#490) never reached the engine either, and stays
+    /// fail-closed anyway. What the mode would degrade to is text in a language the
+    /// model cannot read — Czech bullets from a mode that promised bullets, Czech
+    /// from a mode that promised English — so "at least the words are there" is not
+    /// the same offer it is for the two above, where the words are the ones the user
+    /// would have got. The user is told, and DictusApp's card still holds the raw.
+    ///
+    /// The mode's own answer is still the gate, and it is the whole reason
+    /// `Translate → X` inserts nothing on a refused translation: its floor is the
+    /// input language, the one thing the mode exists to change.
     public static func degradesToFloor(_ mode: SmartMode,
                                        outcome: PolishMetrics.Outcome) -> Bool {
-        outcome == .exceededContextBudget && mode.overflowBehaviour == .insertRawText
+        guard mode.floorBehaviour == .insertRawText else { return false }
+        return outcome == .exceededContextBudget
+            || outcome == .rejectedGuardrail
+            || outcome == .engineFailed
     }
 
     /// Deterministic pre-pass for the auto path (#239 device-test fix).
@@ -369,11 +474,12 @@ public enum PolishPipeline {
 
     /// Choose the polish mode. Whisper respects the language picker upstream →
     /// always Natural. Parakeet auto-detects → Repair when detected ≠ target.
+    /// Nemotron is forced to the language upstream, as Whisper is (#558) → Natural.
     public static func mode(sttEngine: SpeechEngine,
                             detected: SupportedLanguage,
                             target: SupportedLanguage) -> PolishMode {
         switch sttEngine {
-        case .whisperKit:
+        case .whisperKit, .nemotron:
             return .natural
         case .parakeet:
             return detected == target ? .natural : .repair

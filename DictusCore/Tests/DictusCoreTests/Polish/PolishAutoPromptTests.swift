@@ -9,7 +9,7 @@ import XCTest
 final class PolishAutoPromptTests: XCTestCase {
 
     func testAutoPromptStatesTheAutoDetectContract() {
-        let prompt = PolishAutoPrompt.instructions(glossary: PolishGlossary.promptBlock)
+        let prompt = PolishAutoPrompt.instructions()
         // The maintainer-locked contract: English-written prompt, announces
         // that the input language was auto-detected, forbids translation.
         XCTAssertTrue(prompt.contains("AUTO-DETECTED"))
@@ -24,7 +24,7 @@ final class PolishAutoPromptTests: XCTestCase {
     /// vocabulary (backup layer for fr/en, only layer for es/de and beyond).
     /// Bare sentence-period words stay excluded (#185).
     func testAutoPromptListsVerbalCommandVocabulary() {
-        let prompt = PolishAutoPrompt.instructions(glossary: PolishGlossary.promptBlock)
+        let prompt = PolishAutoPrompt.instructions()
         for command in ["point d'exclamation", "retour à la ligne",
                         "exclamation mark", "new line",
                         "signo de exclamación", "nueva línea",
@@ -44,7 +44,7 @@ final class PolishAutoPromptTests: XCTestCase {
     /// this build sends, so they are not spent. If a future engine can do the
     /// repair, this test is the thing to delete first.
     func testAutoPromptDoesNotCarryASRRepair() {
-        let prompt = PolishAutoPrompt.instructions(glossary: PolishGlossary.promptBlock)
+        let prompt = PolishAutoPrompt.instructions()
         XCTAssertFalse(prompt.contains("ASR error repair"))
         XCTAssertFalse(prompt.contains("Repair IN PLACE"))
         // The clauses a repair rule would sit next to and could undermine.
@@ -55,7 +55,7 @@ final class PolishAutoPromptTests: XCTestCase {
     /// #439 C, and the scope fence it shares with #437: content may not be dropped,
     /// and this round must not have handed the model line breaks.
     func testAutoPromptBansDeletionAndStillBansNewMarkers() {
-        let prompt = PolishAutoPrompt.instructions(glossary: PolishGlossary.promptBlock)
+        let prompt = PolishAutoPrompt.instructions()
         XCTAssertTrue(prompt.contains("Do NOT delete words that carry meaning"))
         XCTAssertTrue(prompt.contains("Do NOT add `\(PolishPostpass.newlineMarker)` markers where none existed"))
     }
@@ -71,19 +71,12 @@ final class PolishAutoPromptTests: XCTestCase {
     /// exists for. Rule 4 is then the only mechanism, and a ban promising that every
     /// noun in the input survives tells the model to keep the command word.
     func testAutoPromptDeletionBanExceptsTheVerbalPunctuationRule() {
-        let prompt = PolishAutoPrompt.instructions(glossary: PolishGlossary.promptBlock)
+        let prompt = PolishAutoPrompt.instructions()
         XCTAssertTrue(prompt.contains("Rules 4, 5 and 6 are the only licence to remove a word"))
         XCTAssertTrue(prompt.contains("rule 4 removes a spoken punctuation command"))
         XCTAssertTrue(prompt.contains("the speaker DICTATED appears in the output"))
         // The old wording, which promised the opposite of rule 4.
         XCTAssertFalse(prompt.contains("Rules 5 and 6 (stutters, hesitation fillers) are the only licence"))
-    }
-
-    func testAutoPromptEmbedsGlossary() {
-        let prompt = PolishAutoPrompt.instructions(glossary: PolishGlossary.promptBlock)
-        for term in PolishGlossary.terms {
-            XCTAssertTrue(prompt.contains(term), "glossary term \(term) missing from auto prompt")
-        }
     }
 
     #if canImport(FoundationModels)
@@ -101,7 +94,7 @@ final class PolishAutoPromptTests: XCTestCase {
         }
         XCTAssertEqual(
             reference,
-            PolishAutoPrompt.instructions(glossary: PolishGlossary.promptBlock)
+            PolishAutoPrompt.instructions()
         )
         // And it must be distinct from every per-language prompt.
         for language in SupportedLanguage.allCases {

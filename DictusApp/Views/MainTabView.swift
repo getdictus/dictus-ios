@@ -237,6 +237,20 @@ struct MainTabView: View {
         // so this handler only presents. It is installed on the ZStack rather than on the
         // TabView so `RecordingView`, a sibling and the second of the two buttons, sees it too.
         .environment(\.presentModelPreparation, PresentModelPreparationAction {
+            // A preparation screen with nothing preparing behind it is a dead end (#542).
+            // #484's case always had a load in flight — that is what it was refusing for —
+            // but the cold-cache refusal can land with `modelLoadState` at `.idle`, which in
+            // a live process means the last load failed or was abandoned. The screen would
+            // then show its ready state, dismiss, and send the user back to a tap that
+            // refuses again. Kicking the load is what makes the refusal productive.
+            //
+            // ONLY in that exact state. `.loading` is #484 untouched, and `.ready` never
+            // reaches here cold: the load that writes `.ready` is the same one that records
+            // the warmth. `preloadActiveModel` also clears the memory of an abandoned load,
+            // which is correct here and only here — the user is asking for this load.
+            if coordinator.modelLoadState == .idle {
+                coordinator.preloadActiveModel()
+            }
             preparation = PreparationPresentation(
                 modelIdentifier: activeModelIdentifier,
                 context: .appRecordTap

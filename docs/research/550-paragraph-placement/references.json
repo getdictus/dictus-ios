@@ -1,0 +1,25 @@
+{
+  "_what": "Where Typeless put its paragraph breaks, expressed as the 1-based number of the sentence that STARTS each new paragraph, in the Dictus sentence cut the arms are scored against (PolishSegmentation.sentences, printed in raw/round1-5runs.txt).",
+  "_status": "REPORTED, NEVER BARRED. bars.md §2: text A is the same four sentences split two different ways on two takes, both defensible, so the reference is one acceptable answer among several. #437 scored against a single correct boundary and that is the mistake this round is built to avoid — in both directions.",
+  "_mapping": "Typeless rewrites, so its sentences do not map one-to-one onto the Dictus cut. Each break is placed by content: the Dictus sentence whose content opens the Typeless paragraph. Where Typeless deleted a sentence outright (P7 sentence 4, 'Bref, on va avoir un truc qui va être beaucoup plus structuré.'), the break is placed at the next surviving sentence.",
+  "_excluded": "P2, P4, P5 and P6 have a Typeless output and it is NOT paragraphing: numbered lists, bullets and invented headings, measured in #437 (comment of 2026-08-27 14:39). Its line count there is list structure. Scoring placement against it would fit against a transformation ADR 0003 forbids, so those four carry no reference at all rather than a weak one.",
+
+  "P1-free-form": {
+    "starts": [2],
+    "sentences": 4,
+    "source": "#437 comment 2026-08-27 14:39, Typeless fixture 1",
+    "note": "Two paragraphs, the break after 'ce matin en marchant.'. #437 scored this break as over-formatting on a single-idea text and barred it to zero. The maintainer's reading of 2026-09-11 is that it is correct, which is one of the two reasons #550 exists rather than #437 being reopened."
+  },
+  "P3-message-draft": {
+    "starts": [3, 6],
+    "sentences": 6,
+    "source": "#437 comment 2026-08-27 14:39, Typeless fixture 3",
+    "note": "Three paragraphs: the reason for the absence, the arrangement proposed, and the closing question. 356 characters for 2 breaks is the densest point in the N fit and the one both forms of it miss (bars.md §4)."
+  },
+  "P7-89s": {
+    "starts": [2, 5, 8],
+    "sentences": 8,
+    "source": "#550 issue body, fixture 7 of 2026-09-11",
+    "note": "Four paragraphs. These are the same three positions the issue body's pause table names — after '…en plusieurs paragraphes.', '…beaucoup plus structuré.' and '…agréables à lire.' — reached from the text rather than from the audio, which is a consistency check on the alignment that opened the issue and not new evidence for it."
+  }
+}

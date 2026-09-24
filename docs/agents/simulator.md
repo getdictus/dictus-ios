@@ -95,14 +95,12 @@ That snapshot is a simulated iPhone 11 — 4 GB in the real world — reporting 
 
 ## 2. Build for that simulator
 
-A fresh worktree resolves its packages from zero, so all three steps are needed the first time:
+A fresh worktree resolves its packages from zero, so both steps are needed the first time:
 
 ```bash
 xcodebuild -resolvePackageDependencies \
   -project Dictus.xcodeproj -scheme DictusApp \
   -derivedDataPath build/DerivedData
-
-./scripts/patch-fluidaudio-swift5.sh build/DerivedData
 
 xcodebuild build \
   -project Dictus.xcodeproj -scheme DictusApp -configuration Debug \
@@ -110,12 +108,7 @@ xcodebuild build \
   -derivedDataPath build/DerivedData
 ```
 
-The patch step is not optional and the path is not optional (#285): a build passing `-derivedDataPath` resolves its own FluidAudio checkout, and patching Xcode's shared one says nothing about it.
-
-```
-Patched: /Users/…/298/build/DerivedData/SourcePackages/checkouts/FluidAudio/Package.swift
-FluidAudio checkout patched for the build using: /Users/…/298/build/DerivedData
-```
+There used to be a third step between them, `./scripts/patch-fluidaudio-swift5.sh build/DerivedData`, which forced FluidAudio 0.12 into Swift 5 mode. FluidAudio 0.15.7 compiles unpatched under Xcode 26.4.1 / Swift 6.3, and the script was deleted with that bump (#558). A branch still on FluidAudio 0.12 carries its own copy of the script; run it there, and only there.
 
 Building `DictusApp` builds the embedded keyboard, widgets and core. The product lands at:
 

@@ -1,0 +1,1720 @@
+[
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "1-free-form",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 3523,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Bon alors je pensais à un truc ce matin en marchant : quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire.\n\nIl y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus, et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 360,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "1-free-form",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2829,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant : quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.\n\nIl y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 368,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "1-free-form",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 3049,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.\n\nIl y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.\n\nJ'ai oublié un truc.",
+    "outputChars" : 399,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 3,
+    "speakerState" : "fabricated",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 15,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 105,
+    "dispersed" : 0,
+    "fixture" : "2-project-update",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "ms" : 4230,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point rapide sur le projet : on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\n\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\n\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "outputChars" : 695,
+    "personLost" : 0,
+    "rawChars" : 698,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 15,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 105,
+    "dispersed" : 0,
+    "fixture" : "2-project-update",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "ms" : 4244,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point rapide sur le projet : on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\n\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\n\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "outputChars" : 695,
+    "personLost" : 0,
+    "rawChars" : 698,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 15,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 105,
+    "dispersed" : 0,
+    "fixture" : "2-project-update",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "ms" : 4250,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point rapide sur le projet : on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\n\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\n\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "outputChars" : 695,
+    "personLost" : 0,
+    "rawChars" : 698,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "fixture" : "3-message-draft",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "ms" : 2808,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h et je pense que ça va déborder.\n\nSi tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait. Sinon je me débrouillerais pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\n\nDis-moi ce qui t'arrange.",
+    "outputChars" : 344,
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "fixture" : "3-message-draft",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "ms" : 2851,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h et je pense que ça va déborder.\n\nSi tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\n\nDis-moi ce qui t'arrange.",
+    "outputChars" : 344,
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "fixture" : "3-message-draft",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "ms" : 2843,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h et je pense que cela va déborder.\n\nSi tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\n\nDis-moi ce qui t'arrange.",
+    "outputChars" : 346,
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 12,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 66,
+    "dispersed" : 0,
+    "fixture" : "4-explanation",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "ms" : 4674,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\n\nEt la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.",
+    "outputChars" : 840,
+    "personLost" : 0,
+    "rawChars" : 838,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 12,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 66,
+    "dispersed" : 0,
+    "fixture" : "4-explanation",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "ms" : 4754,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros il y a trois étapes. La première c'est la capture : le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape c'est le modèle : il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\n\nLa troisième étape, c'est la mise en forme : là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes. Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.",
+    "outputChars" : 841,
+    "personLost" : 0,
+    "rawChars" : 838,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 12,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 66,
+    "dispersed" : 0,
+    "fixture" : "4-explanation",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "ms" : 4685,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\n\nEt la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes. Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.",
+    "outputChars" : 841,
+    "personLost" : 0,
+    "rawChars" : 838,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 23,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 253,
+    "dispersed" : 2,
+    "fixture" : "5-rambling",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 41,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "ms" : 7416,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais faire le point sur plein de choses en fait. Il faut que je rappelle le comptable, je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Ensuite, ça c'est important : il faut absolument que je réponde à Julien, parce que ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête. Quoi d'autre ?\n\nLe site, il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait.\n\nIl faut que je pense à annuler l'abonnement machin, celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi. Et puis la dernière chose, et là je note vraiment parce que sinon je vais oublier : préparer les questions pour l'entretien de mardi. Voilà, je crois que c'est tout. Ah non, il y avait un dernier truc, ça m'échappe mais ça me reviendra.",
+    "outputChars" : 1172,
+    "personLost" : 1,
+    "rawChars" : 1283,
+    "run" : 1,
+    "speakerState" : "preserved",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 20,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 190,
+    "dispersed" : 2,
+    "fixture" : "5-rambling",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 29,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "ms" : 6639,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je voulais faire le point sur plein de choses en fait.\n\nIl faut que je rappelle le comptable, l'assurance qu'il faut que je rappelle pour le truc de la voiture.\n\nIl faut absolument que je réponde à Julien, parce que ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête.\n\nIl faut refaire le site, mais pas le refaire — je changeais la page d'accueil, parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait.\n\nIl faut que je pense à annuler l'abonnement machin, celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi.\n\nIl faut préparer les questions pour l'entretien de mardi. Je crois que c'est tout, ah non, il y avait un dernier truc, ça m'échappe, mais ça me reviendra.",
+    "outputChars" : 1012,
+    "personLost" : 1,
+    "rawChars" : 1283,
+    "run" : 2,
+    "speakerState" : "preserved",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Quoi d'autre?",
+      "Enfin bref.",
+      "Et puis la dernière chose,"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 23,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 253,
+    "dispersed" : 2,
+    "fixture" : "5-rambling",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 41,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "ms" : 6787,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais faire le point sur plein de choses en fait. Il faut que je répète le comptable, l'assurance qu'il faut que je rappelle pour le truc de la voiture.\n\nIl faut absolument que je réponde à Julien, parce que ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête. Quoi d'autre ?\n\nLe site, il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil, parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait.\n\nIl faut que je pense à annuler l'abonnement machin, celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi. Et puis la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ah, j'ai aussi. Il y avait un dernier truc, ça m'échappe, mais ça me reviendra.",
+    "outputChars" : 1100,
+    "personLost" : 0,
+    "rawChars" : 1283,
+    "run" : 3,
+    "speakerState" : "preserved",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 9,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 36,
+    "dispersed" : 1,
+    "fixture" : "6-unscripted",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 3,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "ms" : 6349,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je vais quand même faire un sixième test parce que les autres, c’est pas vraiment ma voix, c’est pas naturel. L’idée, c’est vraiment de voir encore une fois comment se comporte type less vs mon application dictus : l’idée, ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s’il met éventuellement des listes, s’il met des espaces entre les lignes. Et voilà, tout simplement, l’idée, ça va être de voir tout ça.\n\nEt ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d’essayer de créer par la suite soit un mode différent, soit améliorer notre polish, et je pense que ça, ça peut être vraiment très intéressant parce que ça va vraiment améliorer l’expérience des utilisateurs et même les utilisateurs qui sont gratuits, parce que c’est vrai que là, pour l’instant, quand tu lances un grand, un grand audio comme je peux le faire là tout de suite, ça fait un gros pavé sur dictus alors quand je fais du développement, c’est pas dérangeant mais c’est vrai que si tu veux l’utiliser pour discuter avec quelqu’un, c’est un peu moyen.",
+    "outputChars" : 1170,
+    "personLost" : 1,
+    "rawChars" : 1159,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 9,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 36,
+    "dispersed" : 1,
+    "fixture" : "6-unscripted",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 3,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "ms" : 6335,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je vais quand même faire un sixième test parce que les autres, ce n’est pas vraiment ma voix, ce n’est pas naturel. L’idée, c’est vraiment de voir encore une fois comment se comporte type less vs mon application dictus : l’idée, ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s’il met éventuellement des listes, s’il met des espaces entre les lignes. Et voilà, tout simplement, l’idée, ça va être de voir tout ça. Et ensuite, on va analyser tout ça.\n\nComme ça, ça va nous permettre d’essayer de créer par la suite soit un mode différent, soit améliorer notre polish, et je pense que ça, ça peut être vraiment très intéressant parce que ça va vraiment améliorer l’expérience des utilisateurs et même les utilisateurs qui sont gratuits, parce que c’est vrai que, là, pour l’instant, quand tu lances un grand un grand audio, comme je peux le faire là, tout de suite, ça fait un gros pavé sur dictus, alors quand je fais du développement, c’est pas dérangeant, mais c’est vrai que si tu veux l’utiliser pour discuter avec quelqu’un, c’est un peu moyen.",
+    "outputChars" : 1180,
+    "personLost" : 1,
+    "rawChars" : 1159,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 9,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 36,
+    "dispersed" : 1,
+    "fixture" : "6-unscripted",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 3,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "ms" : 6368,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je vais quand même faire un sixième test parce que les autres, c’est pas vraiment ma voix, c’est pas naturel. L’idée, c’est vraiment de voir encore une fois comment se comporte type less vs mon application dictus : l’idée, ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s’il met éventuellement des listes, s’il met des espaces entre les lignes. Et voilà, tout simplement l’idée, ça va être de voir tout ça.\n\nEnsuite, on va analyser tout ça. Comme ça, ça va nous permettre d’essayer de créer par la suite soit un mode différent, soit améliorer notre polish, et je pense que ça, ça peut être vraiment très intéressant parce que ça va vraiment améliorer l’expérience des utilisateurs et même les utilisateurs qui sont gratuits, parce que c’est vrai que là, pour l’instant, quand tu lances un grand, un grand audio comme je peux le faire là, tout de suite, ça fait un gros pavé sur dictus alors quand je fais du développement, c’est pas dérangeant mais c’est vrai que si tu veux l’utiliser pour discuter avec quelqu’un, c’est un peu moyen.",
+    "outputChars" : 1167,
+    "personLost" : 1,
+    "rawChars" : 1159,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "1-free-form",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2897,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.\n\nIl y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 377,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "1-free-form",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2900,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.\n\nIl y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 377,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "1-free-form",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2908,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.\n\nIl y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 377,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 15,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 105,
+    "dispersed" : 0,
+    "fixture" : "2-project-update",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "ms" : 5129,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point rapide sur le projet: on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste deux trucs.\n\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout.\n\nLe deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\n\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre.\n\nJe vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.\n\nJe vois que la mémoire me manque, et je ne sais pas si j'ai tout retenu.",
+    "outputChars" : 767,
+    "personLost" : 0,
+    "rawChars" : 698,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "fixture" : "2-project-update",
+    "hasEngineOutput" : false,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "ms" : 180701,
+    "negationDropped" : 0,
+    "outcome" : "engineFailed",
+    "output" : "",
+    "outputChars" : 0,
+    "personLost" : 0,
+    "rawChars" : 698,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors point rapide sur le projet,",
+      "on a basculé la partie abonnement lundi dernier,",
+      "Thomas a fini l'intégration StoreKit et ça passe en sandbox.",
+      "Il reste deux trucs.",
+      "Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout.",
+      "Et le deuxième c'est le vocabulaire personnalisé.",
+      "Et là dessus on a une spec mais pas de code.",
+      "Côté chiffres,",
+      "on est à 412 téléchargements depuis le lancement,",
+      "avec un taux de rétention à 7 jours de 19%,",
+      "ce qui est faible, mais pas catastrophique pour une première version.",
+      "L'objectif,",
+      "c'est de passer la barre des 1000 avant fin octobre.",
+      "Je vois Sarah jeudi à 14h pour caler la partie Apple Store.",
+      "Et si tout se passe bien, on soumet la semaine du 12."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 15,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 105,
+    "dispersed" : 0,
+    "fixture" : "2-project-update",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "ms" : 4893,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point rapide sur le projet : on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste deux trucs.\n\nL'historique des transcriptions qui n'est pas commencé du tout.\n\nLe vocabulaire personnalisé. On a une spec mais pas de code.\n\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.\n\nJe vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "outputChars" : 760,
+    "personLost" : 0,
+    "rawChars" : 698,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "fixture" : "3-message-draft",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "ms" : 2969,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h et je pense que cela va déborder.\n\nSi tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\n\nDis-moi ce qui t'arrange.",
+    "outputChars" : 346,
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "fixture" : "3-message-draft",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "ms" : 2825,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h et je pense que ça va déborder.\n\nSi tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait. Sinon je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\n\nDis-moi ce qui t'arrange.",
+    "outputChars" : 343,
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "fixture" : "3-message-draft",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "ms" : 2818,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h et je pense que ça va déborder.\n\nSi tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait. Sinon je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\n\nDis-moi ce qui t'arrange.",
+    "outputChars" : 343,
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 12,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 66,
+    "dispersed" : 0,
+    "fixture" : "4-explanation",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "ms" : 4706,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\n\nLa troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.",
+    "outputChars" : 837,
+    "personLost" : 0,
+    "rawChars" : 838,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 12,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 66,
+    "dispersed" : 0,
+    "fixture" : "4-explanation",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "ms" : 4719,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\n\nLa troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.",
+    "outputChars" : 837,
+    "personLost" : 0,
+    "rawChars" : 838,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 12,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 66,
+    "dispersed" : 0,
+    "fixture" : "4-explanation",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "ms" : 4714,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\n\nLa troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.",
+    "outputChars" : 837,
+    "personLost" : 0,
+    "rawChars" : 838,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 23,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 253,
+    "dispersed" : 2,
+    "fixture" : "5-rambling",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "ms" : 7731,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je me lance. Je voulais faire le point sur plein de choses en fait. Il faut que je rappelle le comptable, c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Ensuite, c'est important : il faut absolument que je réponde à Julien, parce que ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête. Quoi d'autre ? Ah oui, le site, le site, il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait. Enfin bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machin, celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi. Et puis la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Je crois que c'est tout. Ah non, il y avait un dernier truc, ça m'échappe mais ça me reviendra.",
+    "outputChars" : 1205,
+    "personLost" : 0,
+    "rawChars" : 1283,
+    "run" : 1,
+    "speakerState" : "preserved",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 23,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 253,
+    "dispersed" : 2,
+    "fixture" : "5-rambling",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 28,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "ms" : 7630,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je me lance. Je voulais faire le point sur plein de choses en fait. Il faut que je répète le comptable, je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Ensuite, c'est important : il faut absolument que je réponde à Julien, parce que ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête. Quoi d'autre ?\n\nLe site, il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait.\n\nIl faut que je pense à annuler l'abonnement machin, celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi. Et puis la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Je crois que c'est tout. Ah non, il y avait un dernier truc, ça m'échappe mais ça me reviendra.",
+    "outputChars" : 1181,
+    "personLost" : 1,
+    "rawChars" : 1283,
+    "run" : 2,
+    "speakerState" : "preserved",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 24,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 276,
+    "dispersed" : 1,
+    "fixture" : "5-rambling",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "inversions" : 28,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "ms" : 7639,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je me lance. Je voulais faire le point sur plein de choses en fait. Il faut que je répète le comptable — je l'ai eu vendredi — c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Ensuite, ça c'est important : il faut absolument que je réponde à Julien parce que ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête. Quoi d'autre ?\n\nLe site, il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait.\n\nIl faut que je pense à annuler l'abonnement machin — celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi. Et puis la dernière chose, et là je note vraiment parce que sinon je vais oublier : préparer les questions pour l'entretien de mardi. Je crois que c'est tout. Ah non, il y avait un dernier truc, ça m'échappe mais ça me reviendra.",
+    "outputChars" : 1178,
+    "personLost" : 1,
+    "rawChars" : 1283,
+    "run" : 3,
+    "speakerState" : "preserved",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 45,
+    "dispersed" : 0,
+    "fixture" : "6-unscripted",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 3,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "ms" : 5834,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement l,'idée ça va être de voir tout ça.\n\nEt ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "outputChars" : 1155,
+    "personLost" : 0,
+    "rawChars" : 1159,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 45,
+    "dispersed" : 0,
+    "fixture" : "6-unscripted",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 3,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "ms" : 5749,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement l,'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça.\n\nComme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen",
+    "outputChars" : 1154,
+    "personLost" : 0,
+    "rawChars" : 1159,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "V1-rule7-property",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 45,
+    "dispersed" : 0,
+    "fixture" : "6-unscripted",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 3,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "ms" : 5827,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement l,'idée ça va être de voir tout ça.\n\nEt ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "outputChars" : 1155,
+    "personLost" : 0,
+    "rawChars" : 1159,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "1-free-form",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2973,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.\n\nIl y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 377,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "1-free-form",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2934,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.\n\nIl y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 377,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "fixture" : "1-free-form",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "ms" : 2930,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.\n\nIl y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.",
+    "outputChars" : 377,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 15,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 105,
+    "dispersed" : 0,
+    "fixture" : "2-project-update",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "ms" : 5058,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point rapide sur le projet : on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\n\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\n\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre.\n\nJe vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.\n\nEt là dessus, j'ai du mal à me souvenir de ce qui manquait.",
+    "outputChars" : 757,
+    "personLost" : 0,
+    "rawChars" : 698,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 15,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 105,
+    "dispersed" : 0,
+    "fixture" : "2-project-update",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "ms" : 5669,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point rapide sur le projet : on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste deux trucs. L'historique des transcriptions qui n'est pas commencé du tout. Le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\n\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.\n\nEt là dessus, je vois que je dois rappeler le plombier pour le chauffe-eau, parce que le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.",
+    "outputChars" : 878,
+    "personLost" : 0,
+    "rawChars" : 698,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 15,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 105,
+    "dispersed" : 0,
+    "fixture" : "2-project-update",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "ms" : 5110,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point rapide sur le projet : on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\n\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\n\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre.\n\nJe vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.\n\nEt là dessus, j'ai du mal à me souvenir de ce qui manquait.",
+    "outputChars" : 757,
+    "personLost" : 0,
+    "rawChars" : 698,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "fixture" : "3-message-draft",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "ms" : 3029,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h et je pense que ça va déborder.\n\nSi tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\n\nDis-moi ce qui t'arrange.",
+    "outputChars" : 344,
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "fixture" : "3-message-draft",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "ms" : 3006,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h et je pense que ça va déborder.\n\nDu coup, si tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\n\nDis-moi ce qui t'arrange.",
+    "outputChars" : 353,
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "fixture" : "3-message-draft",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "ms" : 2966,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h et je pense que ça va déborder.\n\nSi tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait. Sinon je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\n\nDis-moi ce qui t'arrange.",
+    "outputChars" : 343,
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 12,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 66,
+    "dispersed" : 0,
+    "fixture" : "4-explanation",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "ms" : 4779,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\n\nLa troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.",
+    "outputChars" : 837,
+    "personLost" : 0,
+    "rawChars" : 838,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 12,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 66,
+    "dispersed" : 0,
+    "fixture" : "4-explanation",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "ms" : 4767,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\n\nEt la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.",
+    "outputChars" : 840,
+    "personLost" : 0,
+    "rawChars" : 838,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 12,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 66,
+    "dispersed" : 0,
+    "fixture" : "4-explanation",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "ms" : 4779,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.\n\nLa deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\n\nLa troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.",
+    "outputChars" : 837,
+    "personLost" : 0,
+    "rawChars" : 838,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 21,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 210,
+    "dispersed" : 1,
+    "fixture" : "5-rambling",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "inversions" : 25,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "ms" : 7659,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je me lance. Je voulais faire le point sur plein de choses en fait. Il faut que je répète le comptable — je l'ai eu vendredi — c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.\n\nIl faut absolument que je réponde à Julien, parce que ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête.\n\nIl faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil, parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait.\n\nIl faut que je pense à annuler l'abonnement machin — celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi.\n\nIl faut préparer les questions pour l'entretien de mardi. Je crois que c'est tout. Ah non, il y avait un dernier truc, ça m'échappe, mais ça me reviendra.",
+    "outputChars" : 1053,
+    "personLost" : 1,
+    "rawChars" : 1283,
+    "run" : 1,
+    "speakerState" : "preserved",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Quoi d'autre?",
+      "le site, le site,",
+      "Et puis la dernière chose,"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 21,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 210,
+    "dispersed" : 1,
+    "fixture" : "5-rambling",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "inversions" : 25,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "ms" : 7756,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je me lance. Je voulais faire le point sur plein de choses en fait. Il faut que je répète le comptable — je l'ai eu vendredi — c'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.\n\nIl faut absolument que je réponde à Julien, parce que ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête.\n\nIl faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil, parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait.\n\nIl faut que je pense à annuler l'abonnement machin — celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi.\n\nIl faut préparer les questions pour l'entretien de mardi. Je crois que c'est tout. Ah non, il y avait un dernier truc, ça m'échappe, mais ça me reviendra.",
+    "outputChars" : 1053,
+    "personLost" : 1,
+    "rawChars" : 1283,
+    "run" : 2,
+    "speakerState" : "preserved",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Quoi d'autre?",
+      "le site, le site,",
+      "Et puis la dernière chose,"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 20,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 190,
+    "dispersed" : 2,
+    "fixture" : "5-rambling",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 25,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "ms" : 7356,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je me lance. Je voulais faire le point sur plein de choses en fait. Il faut que je répète le comptable, l'assurance qu'il faut que je rappelle pour le truc de la voiture.\n\nIl faut absolument que je réponde à Julien, parce que ça fait peut-être une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas honnête.\n\nIl faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil, parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça c'est vraiment le sujet en fait.\n\nIl faut que je pense à annuler l'abonnement, celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paye pour rien. Super quoi.\n\nIl faut préparer les questions pour l'entretien de mardi. Voilà je crois que c'est tout. Ah non, il y avait un dernier truc, ça m'échappe mais ça me reviendra.",
+    "outputChars" : 1021,
+    "personLost" : 1,
+    "rawChars" : 1283,
+    "run" : 3,
+    "speakerState" : "preserved",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Quoi d'autre?",
+      "le site, le site,",
+      "Et puis la dernière chose,"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 45,
+    "dispersed" : 0,
+    "fixture" : "6-unscripted",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 3,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "ms" : 6234,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je vais quand même faire un sixième test parce que les autres ce n'est pas vraiment ma voix, ce n'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça.\n\nComme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "outputChars" : 1160,
+    "personLost" : 0,
+    "rawChars" : 1159,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 45,
+    "dispersed" : 0,
+    "fixture" : "6-unscripted",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 3,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "ms" : 6997,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je vais quand même faire un sixième test parce que les autres ce n'est pas vraiment ma voix, ce n'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus, l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.\n\nEt puis il faut que je commande le bois. voilà c'est tout, ah non il y avait un dernier machin mais ça m'échappe.",
+    "outputChars" : 1275,
+    "personLost" : 1,
+    "rawChars" : 1159,
+    "run" : 2,
+    "speakerState" : "fabricated",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "V2-fidelity",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 45,
+    "dispersed" : 0,
+    "fixture" : "6-unscripted",
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "inversions" : 3,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "ms" : 6264,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je vais quand même faire un sixième test parce que les autres ce n'est pas vraiment ma voix, ce n'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça.\n\nComme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "outputChars" : 1160,
+    "personLost" : 0,
+    "rawChars" : 1159,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  }
+]

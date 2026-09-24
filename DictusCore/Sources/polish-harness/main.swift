@@ -10,6 +10,7 @@
 //   swift run polish-harness show  <fixtures.json> [--runs N] [--instructions <prompt.txt>]
 //   swift run polish-harness eval  <fixtures.json> [--instructions <prompt.txt>]
 //   swift run polish-harness ab    <fixtures.json> [--a <promptA.txt>] [--b <promptB.txt>]
+//   swift run polish-harness vocabulary <corpus.json>   (#80, no model, deterministic)
 //
 // `--lang <code>` (#439) reroutes every fixture in the file: "auto" sends a
 // per-language set through the Auto-detect path, "fr" pins an auto set to French.
@@ -34,6 +35,7 @@
 
 import Foundation
 import DictusCore
+import PolishFidelity
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -111,7 +113,7 @@ func corpusPaths(in args: [String], valuedOptions: Set<String> = []) -> [String]
 }
 
 let args = Array(CommandLine.arguments.dropFirst())
-guard let command = args.first, ["show", "eval", "ab", "prompt", "guardrail", "target"].contains(command), args.count >= 2 else {
+guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "guardrail", "target", "vocabulary"].contains(command), args.count >= 2 else {
     print("""
     polish-harness — off-device polish eval (macOS + Apple Intelligence)
 
@@ -119,8 +121,13 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "guardrail", "t
       eval   <fixtures.json> [--instructions <prompt.txt>] [--framing <framing.txt>] [--mode <id>]
       ab     <fixtures.json> [--a <promptA.txt>] [--b <promptB.txt>] [--mode <id>] [--mode-a <id>] [--mode-b <id>]
       prompt <fixtures.json> [--id <fixtureID>] [--out <dir>] [--mode <id>]
+      paragraph <fixtures.json> --arm <arm.json> [--arm <arm.json> …] [--runs N] [--json <out.json>]
+      fidelity  <fixtures.json> --mode <id> [--runs N] [--arm <prompt.txt> …] [--floor N] [--json <out.json>]
+      fidelity  <corpus.json> --replay [--floor N] [--sweep] [--json <out.json>]
+      fidelity  --rescore <capture.json> --fixtures <fixtures.json> [--floor N] [--json <out.json>]
       guardrail <corpus.json> [<corpus.json> …] [--segments] [--sweep] [--anchors]
       target    <corpus.json> [<corpus.json> …] [--sweep] [--floor N]
+      vocabulary <corpus.json> [<corpus.json> …]
 
     --lang (#439) reroutes every fixture in the file — `--lang auto` runs a
     per-language set through the Auto-detect prompt, `--lang fr` pins an auto set
@@ -131,10 +138,30 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "guardrail", "t
     --mode-a / --mode-b arm one side each; a side with no mode is the free polish,
     so `ab --mode-b notes` is the mode against free polish.
 
-    guardrail (#413, #414, #466) scores the three output-inspection checks against
+    paragraph (#550) drives Apple FM on light, committed prompt ARMS whose only job
+    is to split an already-polished text into paragraphs, and scores the four bars in
+    docs/research/550-paragraph-placement/bars.md. It does NOT run PolishPipeline:
+    two of the arms return integers rather than text, which every acceptance band
+    necessarily rejects, and a guardrail refusal and a model failure are different
+    findings. Arms live in docs/research/550-paragraph-placement/arms/.
+
+    fidelity (#570, #581) scores a Smart Mode's output against its input on the four
+    axes declared in docs/research/570-structured-fidelity/bars.md: proposition
+    recall, person and stance, order (an OBSERVABLE, never a defect) and
+    speaker-state fabrication. It scores the ENGINE's output, not the inserted text,
+    because a mode that fails its contract inserts nothing and #581's positive
+    control is a refused output. --replay scores committed, hand-labelled outputs and
+    drives NO model, which is how the recall floor is calibrated; --sweep prints that
+    calibration. Corpus and arms in docs/research/570-structured-fidelity/.
+
+    guardrail (#413, #414, #466) scores the four output-inspection checks against
     committed, hand-labelled outputs. It drives NO model and needs no Apple
     Intelligence, so the measurement behind their thresholds is re-runnable by
     anyone. Corpora live in docs/research/413-414-guardrail/.
+
+    vocabulary (#80) replays the custom-vocabulary replacement pass over committed
+    term/transcript pairs and checks idempotence. Deterministic, drives no model.
+    Corpus in docs/research/80-vocabulary/.
 
     target (#456) scores the polish TARGET election — which language the model is
     told to write in — against committed, hand-labelled raw transcripts, and
@@ -174,6 +201,43 @@ let framingFile = optionValue("--framing", in: args)
 // one per side and falls back to `--mode` for both, so a single flag A/Bs two prompt
 // candidates on one mode while `--mode-b` alone A/Bs a mode against the free polish.
 let modeIdentifier = optionValue("--mode", in: args)
+// #550. Repeatable: `paragraph` runs every arm given, in order, over every fixture,
+// so one invocation produces one comparable capture instead of seven that have to be
+// stitched together. `optionValue` returns the first match only, hence the collector.
+let armPaths: [String] = args.indices.compactMap { index in
+    guard args[index] == "--arm", index + 1 < args.count else { return nil }
+    return args[index + 1]
+}
+let paragraphJSONOut = optionValue("--json", in: args)
+// #570. The recall floor axes 1 and 2 are read at. Its default is the value
+// calibrated on the hand-labelled device corpus (`bars.md` §6); `--floor` re-runs the
+// bench at another one, and `--sweep` on a replay prints the whole grid the default
+// was read off. Parsed here with every other option rather than inside the command,
+// so a typo is refused before a round starts rather than after it — the reason
+// `numericOption` exists at all.
+let fidelityFloor = numericOption(
+    "--floor", in: args, default: PolishFidelityScorer.defaultFloor,
+    expected: "must be a finite share from 0 to 1"
+) { $0.isFinite && (0...1).contains($0) }
+// #570. `--replay` scores committed outputs instead of driving the pipeline, so it
+// takes a corpus path where the live round takes a fixture file — which is why the
+// fixture loader below has to be told not to try.
+let isReplay = args.contains("--replay")
+// #570, PR #583 review. `--rescore <capture.json> --fixtures <fixtures.json>` scores a
+// committed live capture again with the current scorers and calls no model. Model-free
+// like `--replay`, so it is dispatched with it.
+let rescorePath = optionValue("--rescore", in: args)
+let rescoreFixtures = optionValue("--fixtures", in: args)
+let isModelFreeFidelity = isReplay || rescorePath != nil
+
+/// Print the engine's own output on a SUCCESS too, with every break made visible
+/// (`⏎`), rather than only on a refusal.
+///
+/// #523: the post-pass used to collapse every run of newlines to one, so no
+/// measurement ever made anywhere in this repo could tell a model that emitted a
+/// blank line from one that emitted a single break. `show` printed the final text,
+/// where the two look identical. This flag is how that question is asked.
+let showEngineOut = args.contains("--engine-out")
 // #439. Overrides every fixture's `lang`. See `Fixture.routed(through:)`.
 let langOverride = optionValue("--lang", in: args)
 let modeAIdentifier = optionValue("--mode-a", in: args) ?? modeIdentifier
@@ -182,11 +246,12 @@ let modeBIdentifier = optionValue("--mode-b", in: args) ?? modeIdentifier
 // MARK: - Load fixtures
 
 let fixtures: [Fixture]
-// `guardrail` (#413, #414) takes corpora of hand-labelled OUTPUTS and `target`
-// (#456) corpora of hand-labelled raw transcripts, neither of which is a fixture,
-// so those two have nothing to load here. `--lang` (#439) reroutes what IS loaded,
+// `guardrail` (#413, #414) takes corpora of hand-labelled OUTPUTS, `target` (#456)
+// corpora of hand-labelled raw transcripts and `vocabulary` (#80) corpora of terms
+// with the transcripts they rewrite, none of which is a fixture, so those three
+// have nothing to load here. `--lang` (#439) reroutes what IS loaded,
 // so it stays inside the loading branch.
-if ["guardrail", "target"].contains(command) {
+if ["guardrail", "target", "vocabulary"].contains(command) || (command == "fidelity" && isModelFreeFidelity) {
     fixtures = []
 } else {
     do {
@@ -237,7 +302,8 @@ guard #available(macOS 26.0, *) else {
 #if canImport(FoundationModels)
 // `prompt` never runs a model — it prints the bytes one would be sent — so it is
 // usable on a machine with Apple Intelligence off, which is the point of it.
-if command != "prompt", command != "guardrail", engineKind == "apple-fm" {
+if command != "prompt", command != "guardrail", command != "vocabulary",
+   !(command == "fidelity" && isModelFreeFidelity), engineKind == "apple-fm" {
     switch SystemLanguageModel.default.availability {
     case .available:
         break
@@ -325,9 +391,23 @@ struct RunOutcome {
     /// Raw NLLanguage code of the input ("fr", "it", "zh-Hans", …).
     let detected: String?
     let task: PolishTask?
+    /// What the pre-pass produced, i.e. what the engine was handed once the
+    /// pipeline had encoded its newlines as markers. Carried so `eval` can assert
+    /// on the markers themselves: they exist in neither `raw` nor the fixture.
+    let preprocessed: String
     /// Set when the engine threw (#315) — the same slug the app exports, so a
     /// failure seen here reads against the field data without a translation.
     let failureReason: PolishFailureReason?
+
+    /// Which of the five output checks refused, on a `rejectedGuardrail` (#466).
+    ///
+    /// Carried and printed because `rejectedGuardrail` is one outcome for five
+    /// questions, and #523's decision 9 asks a question the outcome alone cannot
+    /// answer: *which* check refuses a legitimate output. A mode that fails closed
+    /// inserts nothing, so a false refusal costs the user a two-minute dictation —
+    /// and "widen the check" and "fix the prompt" are opposite answers that depend
+    /// entirely on which of the five fired.
+    let rejectedCheck: PolishGuardrail.Check?
 
     init(final: String?,
          engineOutput: String?,
@@ -335,14 +415,18 @@ struct RunOutcome {
          engineMs: Int,
          detected: String?,
          task: PolishTask?,
-         failureReason: PolishFailureReason? = nil) {
+         preprocessed: String,
+         failureReason: PolishFailureReason? = nil,
+         rejectedCheck: PolishGuardrail.Check? = nil) {
         self.final = final
         self.engineOutput = engineOutput
         self.outcome = outcome
         self.engineMs = engineMs
         self.detected = detected
         self.task = task
+        self.preprocessed = preprocessed
         self.failureReason = failureReason
+        self.rejectedCheck = rejectedCheck
     }
 
     /// `final`, rendered for a log line. The refusal has to read as a refusal in a
@@ -440,7 +524,8 @@ func runOnce(_ fx: Fixture,
         hasDetectedLanguage: detected != nil, task: smartTask ?? .natural
     ) {
         let fallback = PolishPostpass.decodeFromEngine(preprocessed, language: target)
-        return RunOutcome(final: fallback, engineOutput: nil, outcome: .skipped, engineMs: 0, detected: detectedCode, task: nil)
+        return RunOutcome(final: fallback, engineOutput: nil, outcome: .skipped, engineMs: 0,
+                          detected: detectedCode, task: nil, preprocessed: preprocessed)
     }
     // The armed mode when there is one, otherwise the free-polish variant the STT
     // engine and the detected-vs-target gap select. `detected ?? target` matches the
@@ -451,13 +536,21 @@ func runOnce(_ fx: Fixture,
             sttEngine: fx.speechEngine, detected: detected ?? target, target: target
         )),
         promptLanguage: target,
-        languageAgnosticPath: false
+        languageAgnosticPath: false,
+        // What the pipeline's input-language pre-flight judges (#490). Off the same
+        // mix the target was elected from, exactly as `PolishService` does it — a
+        // harness that skipped it would let a fixture reach the engine where the app
+        // refuses it locally, which is a path no user takes.
+        inputLanguageCodes: mix.countedCodes
     )
     let r = await PolishPipeline.transform(preprocessed: preprocessed, engine: engine, job: job)
     // nil for a Smart Mode on any non-success: it inserts nothing rather than the
     // untransformed floor, which #79 names as the worst outcome available.
     let final = PolishPipeline.resolvedOutput(r, preprocessed: preprocessed, job: job)
-    return RunOutcome(final: final, engineOutput: r.engineOutput, outcome: r.outcome, engineMs: r.engineMs, detected: detectedCode, task: job.task, failureReason: r.failureReason)
+    return RunOutcome(final: final, engineOutput: r.engineOutput, outcome: r.outcome,
+                      engineMs: r.engineMs, detected: detectedCode, task: job.task,
+                      preprocessed: preprocessed, failureReason: r.failureReason,
+                      rejectedCheck: r.rejectedCheck)
 }
 
 /// Auto-detect path (#239), mirroring `PolishCoordinator.polishAutoDetected`:
@@ -481,13 +574,22 @@ func runOnceAuto(_ fx: Fixture,
     if PolishGatePolicy.skipsForGibberish(
         hasDetectedLanguage: detectedCode != nil, task: smartTask ?? .auto
     ) {
-        return RunOutcome(final: fx.raw, engineOutput: nil, outcome: .skipped, engineMs: 0, detected: nil, task: nil)
+        return RunOutcome(final: fx.raw, engineOutput: nil, outcome: .skipped, engineMs: 0,
+                          detected: nil, task: nil, preprocessed: fx.raw)
     }
     let preprocessed = PolishPipeline.autoPreprocess(fx.raw, detectedCode: detectedCode)
-    let job = PolishJob(task: smartTask ?? .auto, promptLanguage: .english, languageAgnosticPath: true)
+    let job = PolishJob(
+        task: smartTask ?? .auto, promptLanguage: .english, languageAgnosticPath: true,
+        // Same pre-flight input as the per-language path (#490). Measured on the raw
+        // for the reason the other path measures it there.
+        inputLanguageCodes: PolishLanguageMix.measure(fx.raw).countedCodes
+    )
     let r = await PolishPipeline.transform(preprocessed: preprocessed, engine: engine, job: job)
     let final = PolishPipeline.resolvedOutput(r, preprocessed: preprocessed, job: job)
-    return RunOutcome(final: final, engineOutput: r.engineOutput, outcome: r.outcome, engineMs: r.engineMs, detected: detectedCode, task: job.task, failureReason: r.failureReason)
+    return RunOutcome(final: final, engineOutput: r.engineOutput, outcome: r.outcome,
+                      engineMs: r.engineMs, detected: detectedCode, task: job.task,
+                      preprocessed: preprocessed, failureReason: r.failureReason,
+                      rejectedCheck: r.rejectedCheck)
 }
 
 /// What `prompt` prints for one fixture: the task the engine would run, the text it
@@ -575,6 +677,8 @@ func runGuardrail() {
     if args.contains("--segments") { GuardrailCorpus.segmentTable(cases) }
     if args.contains("--sweep") {
         GuardrailCorpus.sweep(cases)
+        GuardrailCorpus.sweepOverlap(cases)
+        GuardrailCorpus.overlapTable(cases)
         GuardrailCorpus.sweepPrefix(cases)
     }
     if args.contains("--anchors") { GuardrailCorpus.anchorTable(cases) }
@@ -588,6 +692,16 @@ func runGuardrail() {
     let grounding = GuardrailCorpus.scoreGrounding(cases)
     print("\n── #414 grounding check (translation and repair skipped: the check is unsound there)")
     GuardrailCorpus.report(grounding)
+
+    // The two checks that share the `requiresGroundedNames` gate, apart and together.
+    // The union is the verdict the pipeline actually reaches, and it is not
+    // recoverable from the two columns: each catches a fabrication the other misses.
+    let overlapThresholds = PolishSegmentOverlapThresholds.default
+    print("\n── #414 worst-segment overlap, shipping thresholds "
+          + "(floor=\(overlapThresholds.floor), minContentWords=\(overlapThresholds.minimumContentWords))")
+    GuardrailCorpus.report(GuardrailCorpus.scoreOverlap(cases, thresholds: overlapThresholds))
+    print("\n── #414 anchors OR overlap — what the pipeline refuses")
+    GuardrailCorpus.report(GuardrailCorpus.scoreGroundingUnion(cases, thresholds: overlapThresholds))
 
     // Split rather than totalled (#466). Repair's output legitimately shares no
     // vocabulary with its input — it reconstructs intent in another language — so
@@ -604,6 +718,61 @@ func runGuardrail() {
     GuardrailCorpus.report(GuardrailCorpus.scorePrefix(cases, thresholds: prefixDefaults) {
         $0.polishMode == "repair"
     })
+}
+
+/// #570, #581. Score committed, hand-labelled outputs. Drives no model.
+///
+/// Its own function rather than a `case` body for the reason `runGuardrail` is one:
+/// it is the whole calibration behind a threshold two axes are read at, and folding
+/// it into `runHarness` would push that function past the cyclomatic-complexity limit.
+func runFidelityReplay() {
+    // Same reasoning as `runGuardrail`: a flag-only invocation must error rather than
+    // load nothing and report a clean 0/0 that reads like a result.
+    let paths = corpusPaths(in: args, valuedOptions: ["--floor", "--json", "--runs", "--mode", "--arm"])
+    guard !paths.isEmpty else {
+        print("error: fidelity --replay needs at least one corpus file, e.g.\n"
+              + "  swift run polish-harness fidelity ../docs/research/570-structured-fidelity/device-corpus.json --replay --sweep")
+        exit(2)
+    }
+    let cases = FidelityCorpus.load(paths)
+    print("corpus: \(cases.count) outputs from \(Set(cases.map(\.source)).count) source(s), "
+          + "floor \(String(format: "%.2f", fidelityFloor))")
+    let results = FidelityRound.replay(cases, floor: fidelityFloor, sweep: args.contains("--sweep"))
+    print("")
+    for (result, work) in zip(results, cases) {
+        print("\n━━ [\(result.fixture)] \(work.timestamp ?? "-") labels=[\(result.labels.joined(separator: ", "))]")
+        print("  \(FidelityRound.verdict(result))")
+        FidelityRound.detail(result)
+    }
+    FidelityRound.summary(results, arms: ["device"])
+    FidelityRound.labelAgreement(results)
+    writeFidelityCapture(results, to: paragraphJSONOut)
+}
+
+/// #570, PR #583 review. Rescore a committed live capture with the current scorers.
+/// Calls no model: the stored outputs are the samples, and only their reading changes.
+func runFidelityRescore() {
+    guard let rescorePath, let rescoreFixtures else {
+        print("error: fidelity --rescore needs a capture and its fixtures, e.g.\n"
+              + "  swift run polish-harness fidelity --rescore ../docs/research/570-structured-fidelity/capture-device.json "
+              + "--fixtures Sources/polish-harness/fixtures/device-structured-fr.json")
+        exit(2)
+    }
+    let results = FidelityRescore.rescore(capturePath: rescorePath, fixturesPath: rescoreFixtures,
+                                          floor: fidelityFloor)
+    print("rescored: \(results.count) stored runs from \(rescorePath), floor "
+          + "\(String(format: "%.2f", fidelityFloor)) — no model called")
+    var arms: [String] = []
+    for arm in results.map(\.arm) where !arms.contains(arm) { arms.append(arm) }
+    for result in results where result.hasEngineOutput {
+        let score = result.score
+        guard score.hasScoredDefect || score.negationDropped > 0 || score.speakerState != .absent else { continue }
+        print("\n━━ [\(result.arm)] \(result.fixture)#\(result.run)")
+        print("  \(FidelityRound.verdict(result))")
+        FidelityRound.detail(result)
+    }
+    FidelityRound.summary(results, arms: arms)
+    writeFidelityCapture(results, to: paragraphJSONOut)
 }
 
 // #456. Scores the polish target election against committed raw transcripts. No
@@ -635,9 +804,34 @@ func runTargetElection() {
     for wrong in score.wrong { print("   WRONG: \(wrong)") }
 }
 
+/// What the engine returned, on the two occasions it is worth seeing.
+///
+/// On a refusal it is the failure itself — for a Smart Mode nothing else shows it.
+/// On a success it is printed only under `--engine-out`, with every break made
+/// visible, because the final text renders a blank line and a bare newline
+/// identically and #523 turned on telling them apart.
+@available(macOS 26.0, *)
+func printEngineOutput(_ outcome: RunOutcome, tag: String) {
+    guard let engineOutput = outcome.engineOutput else { return }
+    if outcome.outcome != .success {
+        print("  engineOut\(tag): \(engineOutput)")
+    } else if showEngineOut {
+        print("  breaks\(tag): \(engineOutput.replacingOccurrences(of: "\n", with: "⏎"))")
+    }
+}
+
 @available(macOS 26.0, *)
 func runHarness() async {
     switch command {
+    case "paragraph":
+        await runParagraphRound(fixtures: fixtures, armPaths: armPaths,
+                                runs: runs, jsonOut: paragraphJSONOut)
+    case "fidelity":
+        await runFidelityRound(
+            fixtures: fixtures, mode: loadSmartMode(modeIdentifier),
+            options: FidelityRoundOptions(armPaths: armPaths, runs: runs,
+                                          floor: fidelityFloor, jsonOut: paragraphJSONOut)
+        )
     case "show":
         let mode = loadSmartMode(modeIdentifier)
         let engine = makeEngine(loadInstructions(instructionsFile))
@@ -650,22 +844,30 @@ func runHarness() async {
                 tally.record(o.outcome, fixture: fx.id)
                 let tag = runs > 1 ? " #\(run)" : ""
                 let why = o.failureReason.map { ", reason=\($0.slug)" } ?? ""
-                let route = "\(o.outcome.rawValue), \(o.engineMs)ms, detected=\(o.detected ?? "-")→\(o.task?.identifier ?? "-")\(o.contractNote)\(why)"
+                // Which of the five refused, never just that one did (#523, decision 9).
+                let check = o.rejectedCheck.map { ", check=\($0.rawValue)" } ?? ""
+                let route = "\(o.outcome.rawValue), \(o.engineMs)ms, detected=\(o.detected ?? "-")→\(o.task?.identifier ?? "-")\(o.contractNote)\(why)\(check)"
                 print("  polished\(tag): \(o.displayText)")
                 print("            (\(route))")
                 // When the guardrail rejects, `final` is the raw fallback — or, for a
                 // Smart Mode, nothing at all. Surface what the engine actually
                 // produced so guardrail and prompt issues are both visible; for a
                 // mode this line IS the failure, since nothing else shows it.
-                if o.outcome != .success, let engineOutput = o.engineOutput {
-                    print("  engineOut\(tag): \(engineOutput)")
-                }
+                printEngineOutput(o, tag: tag)
             }
         }
-        // The rate, not just the outputs. Printed for a mode run only: it is the
-        // number #393 asks for, and the free-polish paths already have their own
-        // evidence in `eval`.
-        if mode != nil { print(tally.report) }
+        // The rate, not just the outputs — the number #393 asks for.
+        //
+        // Printed on every run since #518, not only on a mode run. The reason it
+        // used to be mode-only was that "the free-polish paths already have their
+        // own evidence in `eval`", and #518 is the counterexample: on an
+        // `engineFailed` the free polish returns the deterministic FLOOR, which
+        // carries the speaker's words and passes every `contains` and length check
+        // in a fixture. So `eval` scores a dictation whose polish was dropped
+        // outright as a pass, and the one command that can see the outcome is this
+        // one. Counting it here costs two lines and is what makes a refusal RATE
+        // reportable on the free polish at all.
+        print(tally.report)
 
     case "eval":
         let mode = loadSmartMode(modeIdentifier)
@@ -675,13 +877,26 @@ func runHarness() async {
             let o = await runOnce(fx, engine: engine, mode: mode)
             let route = Expectation.routeName(perLanguage: fx.language != nil)
             let checks = (fx.expect ?? []).filter { $0.applies(to: route) }
-            // A mode that failed closed has no output to check, and that is a
-            // failure of the fixture rather than a reason to skip it: the mode's own
-            // contract refused what the engine produced, which is precisely what
-            // `eval` is being asked about.
-            let failures = o.final.map { final in
-                checks.compactMap { $0.failure(polished: final, raw: fx.raw) }
-            } ?? ["the mode inserted nothing (\(o.outcome.rawValue))"]
+            let evidence = RunEvidence(
+                polished: o.final,
+                raw: fx.raw,
+                preprocessed: o.preprocessed,
+                engineOutput: o.engineOutput,
+                outcome: o.outcome.rawValue,
+                failureReason: o.failureReason?.slug
+            )
+            let refusedBy = o.rejectedCheck.map { " (check=\($0.rawValue))" } ?? ""
+            // A mode that failed closed has no output to check, and that is normally
+            // a failure of the fixture rather than a reason to skip it: the mode's
+            // own contract refused what the engine produced, which is precisely what
+            // `eval` is being asked about. It is NOT a failure for a fixture whose
+            // assertions are all about the run — `refusal-cs.json` exists to prove a
+            // refusal, so nothing reaching the document is the pass condition.
+            var failures: [String] = []
+            if o.final == nil, checks.isEmpty || checks.contains(where: \.inspectsInsertedText) {
+                failures.append("the mode inserted nothing (\(o.outcome.rawValue)\(refusedBy))")
+            }
+            failures += checks.compactMap { $0.failure(evidence) }
             total += 1
             if failures.isEmpty {
                 passed += 1
@@ -774,8 +989,8 @@ func runHarness() async {
     }
 }
 
-// `guardrail` (#413, #414) and `target` (#456) score committed corpora with
-// deterministic local `NaturalLanguage` calls and drive no model at all. They are
+// `guardrail` (#413, #414), `target` (#456) and `vocabulary` (#80) score committed
+// corpora with deterministic local calls and drive no model at all. They are
 // dispatched here rather than inside `runHarness` because they need neither its
 // macOS 26 availability nor Apple Intelligence — which is the whole point of them:
 // the numbers behind a shipped threshold have to be re-runnable by anyone.
@@ -784,6 +999,16 @@ case "guardrail":
     runGuardrail()
 case "target":
     runTargetElection()
+case "vocabulary":
+    runVocabulary()
+// #570. The replay half drives no model and needs neither macOS 26 nor Apple
+// Intelligence, which is the point of it: the floor behind axes 1 and 2 is
+// re-runnable by anyone. The live half is a pipeline round and is dispatched from
+// `runHarness` with the rest.
+case "fidelity" where rescorePath != nil:
+    runFidelityRescore()
+case "fidelity" where isReplay:
+    runFidelityReplay()
 default:
     if #available(macOS 26.0, *) {
         await runHarness()

@@ -1,0 +1,7 @@
+{
+  "id": "2-boundary",
+  "kind": "text",
+  "note": "Arm 1 plus the one invariant the reference data supports: no break ever lands inside a sentence. Plus the fidelity clause, because a split that rewrites is not a split.",
+  "instructions": "Ajoute des paragraphes à ce texte.\n\nUn saut de ligne ne peut être placé qu'entre deux phrases, jamais à l'intérieur d'une phrase.\n\nNe change aucun mot. N'ajoute rien, ne retire rien, ne reformule rien, ne fais ni liste ni puce ni titre. En retirant les sauts de ligne on doit retrouver le texte de départ, caractère pour caractère.\n\nRéponds uniquement avec le texte.",
+  "framing": "{{INPUT}}"
+}

@@ -12,7 +12,7 @@ import Foundation
 /// Since verbal punctuation is a deterministic transformation anyway (no
 /// language understanding required), doing it in regex bypasses Apple FM
 /// entirely for this concern. Apple FM still handles the rest of Light:
-/// capitalisation, typographic spacing, accents, glossary spelling.
+/// capitalisation, typographic spacing, accents.
 ///
 /// Scope at round 1: French and English. Spanish/German added in step 7.
 ///
@@ -31,7 +31,21 @@ import Foundation
 /// unambiguous multi-word marks that merely CONTAIN "point" ("point
 /// d'interrogation", "point d'exclamation", "point virgule") stay. The same
 /// principle pre-emptively bars Spanish "punto" and German "Punkt" when those
-/// languages get rules. Revisit once the LLM owns punctuation contextually.
+/// languages get rules.
+///
+/// THE REVISIT HAPPENED (#439, 2026-09-11). This comment used to end "revisit
+/// once the LLM owns punctuation contextually", and the LLM does: two prompt arms
+/// differing only by the bare-"point" clause in Natural rule 4, 10 runs over 7
+/// French fixtures carrying "point" as an ordinary noun ("un point final"
+/// included), and not one conversion in 96 outputs. The claim this comment makes
+/// above — that the model supplies the terminal period at sentence boundaries on
+/// its own, observed on device and never counted — is counted too: 70/80 with the
+/// clause, 73/80 without. So the exclusion HERE stands (the regex still has no
+/// context) and the prompt clause stays, measured rather than assumed.
+/// What neither does is remove the leftover command WORD: 34 outputs in 100 keep a
+/// stray "Point," beside a correctly placed mark, with or without the clause. That
+/// is the gap this exclusion left and it is not closed.
+/// See `docs/research/439-natural-contract/findings.md`.
 public enum VerbalPunctuationPrepass {
 
     /// Apply the language's verbal-punctuation rules to `raw`. Returns the

@@ -1,0 +1,46 @@
+==============================================================================
+
+### A — WITH pauses   19.7s   speech 8.1s   4 sentences   noise -25dB
+  boundary 1 @ ~  5.1s   pause 1.32s   after «…é ma journée assez tranquillement.»
+  boundary 2 @ ~  9.0s   pause 1.19s   after «…i regardé rapidement mes messages.»
+  boundary 3 @ ~ 11.6s   pause 1.42s   after «…nsuite, je me suis mis au travail.»  <<< TYPELESS BREAK
+  mid-sentence pauses: 3.0s/0.49, 7.3s/0.55, 13.8s/0.43, 14.3s/0.24, 15.1s/0.31, 16.4s/0.21, 17.0s/1.95
+
+### A — WITHOUT pauses   15.9s   speech 10.2s   4 sentences   noise -25dB
+  boundary 1 @ ~  4.6s   pause 0.30s   after «…é ma journée assez tranquillement.»
+  boundary 2 @ ~  7.6s   pause 0.35s   after «…i regardé rapidement mes messages.»  <<< TYPELESS BREAK
+  boundary 3 @ ~  9.5s   pause 0.36s   after «…suite, je me suis mise au travail.»
+  mid-sentence pauses: 0.8s/1.69, 2.9s/0.30, 3.3s/0.25, 11.1s/0.24, 11.6s/0.48, 12.5s/0.20
+
+### B — WITH pauses   17.4s   speech 11.1s   3 sentences   noise -25dB
+  boundary 1 @ ~  8.0s   pause 0.80s   after «…médiatement, passer à la suivante.»
+  boundary 2 @ ~ 13.1s   pause 0.36s   after «…plement de mieux faire les choses.»  <<< TYPELESS BREAK
+  mid-sentence pauses: 4.1s/0.93, 10.2s/0.24
+
+### B — WITHOUT pauses   17.4s   speech 12.6s   3 sentences   noise -25dB
+  boundary 1 @ ~  8.4s   pause 0.51s   after «…atement et passer à la suivante...»
+  boundary 2 @ ~ 13.3s      no pause   after «…plement de mieux faire les choses.»  <<< TYPELESS BREAK
+  mid-sentence pauses: 0.3s/1.80, 5.4s/0.23, 6.7s/0.31, 10.6s/0.33, 11.9s/0.45
+==============================================================================
+
+### A — WITH pauses   19.7s   speech 10.3s   4 sentences   noise -30dB
+  boundary 1 @ ~  5.0s   pause 1.23s   after «…é ma journée assez tranquillement.»
+  boundary 2 @ ~  9.3s   pause 1.11s   after «…i regardé rapidement mes messages.»
+  boundary 3 @ ~ 11.9s   pause 1.17s   after «…nsuite, je me suis mis au travail.»  <<< TYPELESS BREAK
+  mid-sentence pauses: 3.1s/0.21, 7.3s/0.47, 14.3s/0.20, 15.2s/0.25, 17.2s/1.80
+
+### A — WITHOUT pauses   15.9s   speech 12.0s   4 sentences   noise -30dB
+  boundary 1 @ ~  4.4s      no pause   after «…é ma journée assez tranquillement.»
+  boundary 2 @ ~  7.6s   pause 0.34s   after «…i regardé rapidement mes messages.»  <<< TYPELESS BREAK
+  boundary 3 @ ~  9.8s   pause 0.27s   after «…suite, je me suis mise au travail.»
+  mid-sentence pauses: 0.8s/1.68, 11.6s/0.41, 14.8s/0.71
+
+### B — WITH pauses   17.4s   speech 14.7s   3 sentences   noise -30dB
+  boundary 1 @ ~  8.3s   pause 0.21s   after «…médiatement, passer à la suivante.»
+  boundary 2 @ ~ 13.4s      no pause   after «…plement de mieux faire les choses.»  <<< TYPELESS BREAK
+  mid-sentence pauses: 7.0s/0.24
+
+### B — WITHOUT pauses   17.4s   speech 16.0s   3 sentences   noise -30dB
+  boundary 1 @ ~  7.3s   pause 0.22s   after «…atement et passer à la suivante...»
+  boundary 2 @ ~ 13.4s      no pause   after «…plement de mieux faire les choses.»  <<< TYPELESS BREAK
+  mid-sentence pauses: 1.0s/0.50, 10.7s/0.23, 11.9s/0.41

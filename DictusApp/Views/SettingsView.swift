@@ -102,8 +102,24 @@ struct SettingsView: View {
 
     /// Whether the currently active model uses the Parakeet engine (CTC/TDT).
     /// Parakeet auto-detects language — the language picker has no effect on it.
+    ///
+    /// Nemotron is NOT Parakeet here (#558), even though both run through FluidAudio: the
+    /// setting forces Nemotron's language, so the "only applies to Whisper models" caveat
+    /// this drives must not show while it is active.
     private var isParakeetActive: Bool {
         ModelInfo.forIdentifier(activeModel)?.engine == .parakeet
+    }
+
+    /// Whether Auto-detect's "any language Whisper supports" sentence describes the active
+    /// engine. Only Whisper's, or no model at all, which is how the footer read before #558.
+    /// Parakeet already has its caveat, and Nemotron's auto-detect is not Whisper's.
+    private var describesWhisperAutoDetect: Bool {
+        switch ModelInfo.forIdentifier(activeModel)?.engine {
+        case .whisperKit, nil:
+            return true
+        case .parakeet, .nemotron:
+            return false
+        }
     }
 
     /// Tracks log export async operation for spinner display.
@@ -122,6 +138,35 @@ struct SettingsView: View {
     /// Drives the paywall cover. Shared by the Dictus Pro row and every locked
     /// feature row: they open the same screen, so one flag serves both.
     @State private var showPaywall = false
+
+    /// Whether the `Pro Features` section renders at all (#236, #577).
+    ///
+    /// `paywallVisible` decides what may be **sold**; this decides whether a user
+    /// can **manage** what they already have. The two coincide in Release and part
+    /// company in Debug, because `PremiumFlags.debugProEntitlementForced` (#460)
+    /// grants the entitlement without opening the paywall.
+    ///
+    /// WHY that split has to exist: `SmartModeListView` is the only screen in the
+    /// app that pins or reorders a Smart Mode, and it hangs off this section. With
+    /// the fan capped at `SmartModeCatalogue.maximumPinnedModes` and a seed that
+    /// predates half the catalogue, a forced entitlement without this exception
+    /// grants a fan nobody can arrange — which is #460 blocking the work it exists
+    /// to protect, one screen further in.
+    ///
+    /// WHY it is not just `proStatus.isProActive`: that would make the section
+    /// appear in Release for any future subscriber whose purchase predates the
+    /// paywall flip, which is the state #236 exists to forbid. The exception is
+    /// compiled out entirely, so Release has exactly one gate.
+    private var proManagementVisible: Bool {
+        #if DEBUG
+        // Read the revision so flipping the switch redraws this gate, the same
+        // reason the binding below reads it.
+        _ = proEntitlementRevision
+        return PremiumFlags.paywallVisible || PremiumFlags.debugProEntitlementForced
+        #else
+        return PremiumFlags.paywallVisible
+        #endif
+    }
 
     #if DEBUG
     /// Redraw trigger for the forced-entitlement switch below, the same shape
@@ -238,7 +283,7 @@ struct SettingsView: View {
                 // both engines.
                 if transcriptionLanguage == TranscriptionLanguageMode.autoStoredValue {
                     VStack(alignment: .leading, spacing: 4) {
-                        if !isParakeetActive {
+                        if describesWhisperAutoDetect {
                             Text("Auto-detect lets you dictate in any language Whisper supports. Polish adapts to the language you speak.")
                         }
                         Text("Language support varies by model. Tap ⓘ on a model card in Models for details.")
@@ -356,7 +401,10 @@ struct SettingsView: View {
             // locked rows, no PRO pills, no navigation path to PaywallView.
             // Pro toggles are also hidden: no user can be Pro while the
             // paywall is unreachable (no ASC product exists yet, #215).
-            if PremiumFlags.paywallVisible {
+            //
+            // ...with one DEBUG-only exception (#577): a forced entitlement has
+            // to be manageable. See `proManagementVisible`.
+            if proManagementVisible {
                 Section("Pro Features") {
                     ForEach(ProFeature.allCases, id: \.self) { feature in
                         if proStatus.isProActive {
@@ -371,8 +419,12 @@ struct SettingsView: View {
                                     Text(LocalizedStringKey(feature.displayName))
                                 }
                             }
-                        } else {
-                            // Locked: show lock + PRO pill, tap opens paywall
+                        } else if PremiumFlags.paywallVisible {
+                            // Locked: show lock + PRO pill, tap opens paywall.
+                            // Keyed on `paywallVisible` and not on the section's own
+                            // gate (#577): the DEBUG exception opens this section to
+                            // manage an entitlement already granted, and must never
+                            // put a row on sale while the paywall itself is hidden.
                             Button {
                                 showPaywall = true
                             } label: {
@@ -420,6 +472,22 @@ struct SettingsView: View {
                             }
                         }
                     }
+
+                    // The vocabulary's one screen (#80 decision 11), gated exactly
+                    // like the mode list above it: a subscriber who switched the
+                    // feature off in Settings has said what they want, and a list
+                    // under a switched-off toggle would edit rules nothing applies.
+                    if proStatus.isProActive && FeatureGate.isAvailable(.vocabulary) {
+                        NavigationLink {
+                            VocabularyListView()
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: ProFeature.vocabulary.icon)
+                                    .foregroundColor(.dictusAccent)
+                                Text("My terms")
+                            }
+                        }
+                    }
                 }
             }
 
@@ -448,7 +516,7 @@ struct SettingsView: View {
                 Toggle("Force Pro entitlement", isOn: proEntitlementForced)
             } footer: {
                 if proEntitlementForced.wrappedValue {
-                    Text("Smart Modes and every other Pro feature behave as if subscribed. The paywall stays hidden. Debug builds only.")
+                    Text("Smart Modes and every other Pro feature behave as if subscribed, and their settings appear above. The paywall stays hidden. Debug builds only.")
                         .foregroundColor(.orange)
                 } else {
                     Text("Grants Pro without a purchase, so hidden Pro features can be tested on device. Off by default.")

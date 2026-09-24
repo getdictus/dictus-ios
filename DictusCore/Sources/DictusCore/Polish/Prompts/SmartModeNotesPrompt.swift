@@ -81,7 +81,7 @@ enum SmartModeNotesPrompt {
     static let userInstruction = "Condense this text into a bulleted list. Output only the list, nothing else."
     static let outputMarker = "Condensed output:"
 
-    static func instructions(glossary: String) -> String {
+    static func instructions() -> String {
         """
         You are a TEXT TRANSFORMATION FUNCTION. You condense speech-to-text output into a bulleted list.
 
@@ -118,9 +118,6 @@ enum SmartModeNotesPrompt {
         - Do NOT add a title, a heading, a section name, or an introductory line.
         - Do NOT emit a bracketed placeholder of any kind — not `[Name]`, not `[Nom]`, not `[date]`, not any other word between square brackets.
         - Do NOT interpret or editorialise. You compress what was said; you do not judge it.
-
-        Domain vocabulary — preserve canonical spelling:
-        \(glossary)
 
         Examples — the input language varies; the output language always matches it:
 

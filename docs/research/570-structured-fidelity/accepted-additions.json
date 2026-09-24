@@ -1,0 +1,114 @@
+{
+  "method": "Every ACCEPTED output in the six live captures, screened by `summarise.py --additions` (sentences under 0.50 of the transcript's content words: 20 flagged), plus a grep for the prompt's own example content and for any sentence about the speaker's memory. Each hit read by hand against its raw transcript. A fabrication reusing the speaker's own words can escape both screens, so this is the set FOUND, not proved exhaustive. Labelled 2026-09-21 in answer to CodeRabbit's review of PR #583.",
+  "fabrications": [
+    {
+      "capture": "capture-longform-macos27.json",
+      "os": "macOS 27.0",
+      "arm": "shipping",
+      "fixture": "1-free-form",
+      "run": 3,
+      "chars": "395->399",
+      "added": "J'ai oublié un truc.",
+      "kind": "speakerState",
+      "source": "rule 7 instruction-text phrasing, verbatim",
+      "scorerVerdict": "fabricated"
+    },
+    {
+      "capture": "capture-device-macos27.json",
+      "os": "macOS 27.0",
+      "arm": "V1-rule7-property",
+      "fixture": "D1-three-steps",
+      "run": 1,
+      "chars": "838->854",
+      "added": "Et puis, il y avait un dernier machin, mais ça m'échappe.",
+      "kind": "speakerState",
+      "source": "the V1 rule-7 fragment",
+      "scorerVerdict": "fabricated"
+    },
+    {
+      "capture": "capture-longform-macos27.json",
+      "os": "macOS 27.0",
+      "arm": "V1-rule7-property",
+      "fixture": "2-project-update",
+      "run": 1,
+      "chars": "698->767",
+      "added": "Je vois que la mémoire me manque, et je ne sais pas si j'ai tout retenu.",
+      "kind": "speakerState",
+      "source": "no example — invented",
+      "scorerVerdict": "absent"
+    },
+    {
+      "capture": "capture-device-macos27.json",
+      "os": "macOS 27.0",
+      "arm": "V2-fidelity",
+      "fixture": "D9-suggestion-bar",
+      "run": 1,
+      "chars": "1337->1404",
+      "added": "Et puis, je pense que ma mémoire a échoué sur ce dernier point.",
+      "kind": "speakerState",
+      "source": "no example — invented",
+      "scorerVerdict": "absent"
+    },
+    {
+      "capture": "capture-device-macos27.json",
+      "os": "macOS 27.0",
+      "arm": "V2-fidelity",
+      "fixture": "D9-suggestion-bar",
+      "run": 2,
+      "chars": "1337->1468",
+      "added": "Et puis je pense que ma mémoire a failli, mais je ne sais plus si c'est bien ce que j'ai dit à propos du changement de layer de clavier.",
+      "kind": "speakerState",
+      "source": "no example — invented",
+      "scorerVerdict": "fabricated"
+    },
+    {
+      "capture": "capture-longform-macos27.json",
+      "os": "macOS 27.0",
+      "arm": "V2-fidelity",
+      "fixture": "2-project-update",
+      "run": 1,
+      "chars": "698->757",
+      "added": "Et là dessus, j'ai du mal à me souvenir de ce qui manquait.",
+      "kind": "speakerState",
+      "source": "no example — invented",
+      "scorerVerdict": "absent"
+    },
+    {
+      "capture": "capture-longform-macos27.json",
+      "os": "macOS 27.0",
+      "arm": "V2-fidelity",
+      "fixture": "2-project-update",
+      "run": 3,
+      "chars": "698->757",
+      "added": "Et là dessus, j'ai du mal à me souvenir de ce qui manquait.",
+      "kind": "speakerState",
+      "source": "no example — invented",
+      "scorerVerdict": "absent"
+    },
+    {
+      "capture": "capture-longform-macos27.json",
+      "os": "macOS 27.0",
+      "arm": "V2-fidelity",
+      "fixture": "2-project-update",
+      "run": 2,
+      "chars": "698->878",
+      "added": "Et là dessus, je vois que je dois rappeler le plombier pour le chauffe-eau, parce que le garage, c'est déjà fait. Il faut aussi que je commande le bois avant l'hiver, parce que l'année dernière on s'y est pris trop tard.",
+      "kind": "promptContent",
+      "source": "the prompt's first worked example (house), inserted as the speaker's own tasks",
+      "scorerVerdict": "absent"
+    },
+    {
+      "capture": "capture-longform-macos27.json",
+      "os": "macOS 27.0",
+      "arm": "V2-fidelity",
+      "fixture": "6-unscripted",
+      "run": 2,
+      "chars": "1159->1275",
+      "added": "Et puis il faut que je commande le bois. voilà c'est tout, ah non il y avait un dernier machin mais ça m'échappe.",
+      "kind": "promptContent+speakerState",
+      "source": "the house example plus the V1 rule-7 fragment",
+      "scorerVerdict": "fabricated"
+    }
+  ],
+  "notAdditions": "The other flagged sentences are faithful paraphrases, each checked against its raw: D6 `on fera un point` (raw: `on fait un point`), D5 `Vas-y, faisons ça` (a repair of `let's go`), and six 6-unscripted sentences restating what the speaker said (`intéressant`, `améliorer l'expérience`, `gratuits`, `pas naturel`, `voir tout ça`, `découper les paragraphes`). Also D7 `Il faut que je logue ces rejets` — faithful in content, though it moves `on` to `je`. No addition was found in any macOS 26.5.1 capture."
+}

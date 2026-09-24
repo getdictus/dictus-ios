@@ -7,10 +7,18 @@ import Foundation
 // MARK: - LogLevel
 
 /// Log severity levels for structured logging.
-/// 4 levels: debug (internal details), info (normal operations),
-/// warning (recoverable issues), error (failures).
+/// 5 levels: debug (internal details), info (normal operations),
+/// notice (an observation that must survive the process), warning (recoverable
+/// issues), error (failures).
+///
+/// WHY `notice` exists (#23). The persistent file log keeps every level, so on
+/// disk this changes nothing. The `os.log` mirror is where it matters: `info`
+/// entries there are memory-backed and die with the process, and the keyboard
+/// extension is killed routinely — a diagnostic read whose only purpose is to be
+/// read afterwards has to land on a level the unified log persists. `notice` is
+/// the lowest one that does.
 public enum LogLevel: String, CaseIterable, Sendable {
-    case debug, info, warning, error
+    case debug, info, notice, warning, error
 
     /// Level name padded to 7 characters for aligned log output.
     public var paddedName: String {
@@ -77,7 +85,23 @@ public enum LogEvent: Sendable {
 
     // MARK: Transcription
     case transcriptionStarted(modelName: String)
-    case transcriptionCompleted(durationMs: Int, wordCount: Int)
+    /// `confidence` is the engine's own score for the transcript it returned, when it
+    /// has one (#554). Only Parakeet does: FluidAudio's mean token probability. Whisper
+    /// has no comparable figure and passes `nil`, which prints no field at all rather
+    /// than a placeholder a reader could mistake for a measurement.
+    ///
+    /// WHY it is logged and nothing reads it: Parakeet v3 drifts into pseudo-English on
+    /// pure French, and five runs in #552 put a drifted transcript below ~0.93 and a
+    /// clean one above. Five points are an observation, not a threshold; this field is
+    /// how real dictations turn it into a distribution.
+    ///
+    /// `language`, `promptId` and `detectedLanguage` are Nemotron's (#558), and nil on every
+    /// other engine, which prints no field. `language` is the code the model was forced to
+    /// (`auto` for auto-detection), `promptId` the prompt FluidAudio resolved it to — the
+    /// only way to see that an unknown code silently fell back to auto — and
+    /// `detectedLanguage` the language tag the decoder emitted, when it emitted one. They are
+    /// what the #558 device tests read to tell a forced French run from a drifting one.
+    case transcriptionCompleted(durationMs: Int, wordCount: Int, confidence: Float?, language: String? = nil, promptId: Int? = nil, detectedLanguage: String? = nil)
     case transcriptionFailed(error: String)
     case recordingTooShort(durationMs: Int)
     case transcriptionPerformance(modelName: String, audioDurationMs: Int, transcriptionDurationMs: Int, peakMemoryMB: Int)
@@ -160,6 +184,40 @@ public enum LogEvent: Sendable {
     case keyboardDidDisappear
     case keyboardMicTapped
     case keyboardTextInserted  // No content parameter -- privacy by design
+
+    // MARK: Auto-return to the host app (#23)
+    /// The outcome of one cold-start hand-off's attempt to send the user back to the app
+    /// they were typing in.
+    ///
+    /// `hostId` is the resolved bundle identifier, or `unknown` when the keyboard could
+    /// not name the host at all. `outcome` is one of:
+    ///
+    /// - `returned` — the user was sent back;
+    /// - `open-failed` — the scheme was known and iOS refused to open it;
+    /// - `no-scheme` — a real host with no catalogue entry. **The one worth acting on**:
+    ///   this is the project's only report channel for a gap, and the catalogue grows
+    ///   from these lines;
+    /// - `no-scheme-known` — a host already checked by hand and found to have no way
+    ///   back, such as the in-app browser or the share-sheet composer. Logged so the
+    ///   hand-off is still accounted for, and kept distinct so it is not mistaken for a
+    ///   gap at every triage pass;
+    /// - `table-miss` — the host could not be named;
+    /// - `skipped-warm` — the hand-off was deliberately not attempted, because the app
+    ///   was already warm and never took the foreground away. It exists so a capture can
+    ///   tell "not attempted" from "attempted and refused": #567 was a return that never
+    ///   ran, and an absent line is indistinguishable from a branch that never executed;
+    /// - `tap-…` and `arbiter-…` — the keyboard-side lines, which carry their own
+    ///   diagnostics rather than a decision.
+    ///
+    /// `notice` and not `info`, and this is the case the level was added for: the app is
+    /// usually terminated moments after a hand-off — that is what a hand-off *is* — and
+    /// an `info` line in the os.log mirror dies with it. This line is the only account of
+    /// why a user did or did not land back where they were.
+    ///
+    /// A bundle identifier names an app, never what was typed into it. `no-scheme` is
+    /// also the project's only channel for "this host has no mapping": there is no
+    /// analytics here, the debug log is it, and its reader is an agent (#255).
+    case hostReturn(hostId: String, outcome: String)
 
     // MARK: Key auto-repeat (#390)
     // Neither case carries a key or a character. Only backspace auto-repeats, so
@@ -317,7 +375,50 @@ public enum LogEvent: Sendable {
     /// app doing". A failure that arrives in 4 ms has to be readable against the
     /// dictation timeline right next to it — status transitions, holds, the
     /// insertion — and only this log has all of them on one page.
-    case polishEngineFailed(reason: String, engine: String, mode: String, engineMs: Int)
+    ///
+    /// `detected` and `mix` are what the transcript was read as, and they are here
+    /// because the reason slug alone cannot say whose fault a refusal is (#518).
+    /// `unsupportedLanguageOrLocale` arrives byte-identical from two opposite
+    /// causes: a language genuinely outside Apple's set (#490 — legitimate, and the
+    /// dictation is what it is), and a language squarely inside it that Apple's
+    /// classifier misread because of our own prompt (#518 — ours to fix). On iOS 26
+    /// the error carries no `languageCode` to tell them apart; the reading we took
+    /// before the call does. `cs` + refusal is theirs, `fr` + `fr 1.00` + refusal
+    /// is ours.
+    ///
+    /// Language codes and shares only — the transcript itself never enters this log.
+    case polishEngineFailed(reason: String, engine: String, mode: String, engineMs: Int,
+                            detected: String, mix: String)
+
+    /// Issue #490: the polish engine was NOT called, because nothing the transcript
+    /// was measured to contain is in a language that backend reports it can read.
+    ///
+    /// Its own line rather than a `polishEngineFailed` with `engineMs=0`, because
+    /// nothing failed and nothing was asked. The distinction is the point of the
+    /// event: Apple returns `unsupportedLanguageOrLocale` for a language genuinely
+    /// outside its set AND for one inside it that its classifier misread (#518), so
+    /// a reader who finds this line knows which of the two they are looking at
+    /// without inferring it from a latency.
+    ///
+    /// `detected` and `mix` are the reading the refusal was made on, in the same
+    /// shape `polishEngineFailed` prints them, so one grep covers both.
+    case polishInputLanguageRefused(engine: String, mode: String,
+                                    detected: String, mix: String)
+
+    /// Issue #80: the custom-vocabulary pass ran on a transcript.
+    ///
+    /// Emitted on **every** dictation, including when the feature is off, because
+    /// the question this answers at diagnosis time is "did a correction happen?" —
+    /// and a pass that says nothing is indistinguishable from a pass that was never
+    /// wired in. #80's device test cost three round trips and an inspection of the
+    /// App Group container from the Mac to establish that it was running.
+    ///
+    /// `enabled` is the entitlement and the toggle together, so "switched off" and
+    /// "on but the vocabulary is empty" read differently. **Counters only, never a
+    /// term and never a fragment of the transcript**: the persistent log ships in
+    /// Release, which is the whole reason `autocorrectDebugLogging` is a separate
+    /// DEBUG-only surface.
+    case vocabularyApplied(enabled: Bool, entries: Int, replacements: Int, chars: Int)
 
     /// Issue #315: polish stopped calling its engine for the rest of this process,
     /// after `consecutiveRefusals` `rateLimited` results in a row.
@@ -371,7 +472,12 @@ public enum LogEvent: Sendable {
     /// `outcome` is the `PolishMetrics.Outcome` that refused it (the contract
     /// rejected the output, the engine threw, the input did not fit); `reason` is the
     /// engine's own name for what it threw, or "-".
-    case smartModeRefused(mode: String, outcome: String, reason: String)
+    ///
+    /// `check` names the guardrail on an `outcome=rejectedGuardrail`, and is "-"
+    /// otherwise. Without it that outcome logged `reason=-` and nothing else (#580):
+    /// a rejection is the one refusal with a knowable cause, and `length`,
+    /// `segmentOverlap` and `prefixAlignment` are three different bugs to open.
+    case smartModeRefused(mode: String, outcome: String, reason: String, check: String)
 
     /// Issue #79: a dictation that had a mode armed is running Normal instead.
     ///
@@ -414,6 +520,7 @@ public enum LogEvent: Sendable {
              .modelDownloadOffline:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
+             .hostReturn,
              .keyRepeatStarted, .keyRepeatStopped,
              .overlayShown, .overlayHidden, .rapidTapRejected,
              .dictationMessageSet, .dictationMessageDisplayed, .dictationMessageCleared,
@@ -452,8 +559,9 @@ public enum LogEvent: Sendable {
         // write, so it reads with the transcription stream rather than as a
         // subsystem of its own (#315).
         case .polishEngineFailed, .polishEngineUnavailable, .polishHandoff,
+             .polishInputLanguageRefused,
              .polishInsertionRefused, .polishCallSuperseded,
-             .smartModeRefused, .smartModeSkipped:
+             .smartModeRefused, .smartModeSkipped, .vocabularyApplied:
             return .transcription
         }
     }
@@ -474,6 +582,11 @@ public enum LogEvent: Sendable {
              .liveActivityFailed, .subscriptionError, .idleInvariantViolation,
              .modelDownloadIntegrityFailed:
             return .error
+
+        // Notice: an observation whose whole point is to be read after the process
+        // that made it is gone (#23). Never a normal operation, never a problem.
+        case .hostReturn:
+            return .notice
 
         // Warnings
         case .dictationDeferred, .dictationStateReconciled,
@@ -551,7 +664,12 @@ public enum LogEvent: Sendable {
         // Info: the hand-off steps describe a dictation working as designed, and
         // the refusal is the guard doing its job rather than something going wrong.
         // A superseded call is likewise the documented behaviour of decision 15.
-        case .polishHandoff, .polishInsertionRefused, .polishCallSuperseded:
+        // The pre-flight refusal joins them (#490): the check declining a call the
+        // backend was going to refuse anyway is the guard working, not a fault. So
+        // does the vocabulary pass (#80), which reports on every dictation whether
+        // or not it had anything to do.
+        case .polishHandoff, .polishInsertionRefused, .polishCallSuperseded,
+             .polishInputLanguageRefused, .vocabularyApplied:
             return .info
 
         // Warning: a Smart Mode that refused its own output cost the user a
@@ -602,6 +720,7 @@ public enum LogEvent: Sendable {
         case .keyboardDidAppear: return "keyboardDidAppear"
         case .keyboardDidDisappear: return "keyboardDidDisappear"
         case .keyboardMicTapped: return "keyboardMicTapped"
+        case .hostReturn: return "hostReturn"
         case .dictationMessageSet: return "dictationMessageSet"
         case .dictationMessageDisplayed: return "dictationMessageDisplayed"
         case .dictationMessageCleared: return "dictationMessageCleared"
@@ -673,7 +792,9 @@ public enum LogEvent: Sendable {
         case .modelDownloadSessionRestored: return "modelDownloadSessionRestored"
         case .modelDownloadOffline: return "modelDownloadOffline"
         case .polishEngineFailed: return "polishEngineFailed"
+        case .vocabularyApplied: return "vocabularyApplied"
         case .polishEngineUnavailable: return "polishEngineUnavailable"
+        case .polishInputLanguageRefused: return "polishInputLanguageRefused"
         case .polishHandoff: return "polishHandoff"
         case .polishInsertionRefused: return "polishInsertionRefused"
         case .polishCallSuperseded: return "polishCallSuperseded"
@@ -731,8 +852,13 @@ public enum LogEvent: Sendable {
         // Transcription
         case .transcriptionStarted(let modelName):
             return "model=\(modelName)"
-        case .transcriptionCompleted(let durationMs, let wordCount):
-            return "duration=\(durationMs)ms words=\(wordCount)"
+        case .transcriptionCompleted(let durationMs, let wordCount, let confidence, let language, let promptId, let detected):
+            // Absent, not zero, when the engine has no score (#554), and absent when it has
+            // no language to report (#558).
+            let confidenceField = confidence.map { " confidence=\(String(format: "%.3f", $0))" } ?? ""
+            let languageFields = [language.map { "language=\($0)" }, promptId.map { "promptId=\($0)" }, detected.map { "detected=\($0)" }]
+                .compactMap { $0 }.map { " \($0)" }.joined()
+            return "duration=\(durationMs)ms words=\(wordCount)\(confidenceField)\(languageFields)"
         case .transcriptionFailed(let error):
             return "error=\(error)"
         case .recordingTooShort(let durationMs):
@@ -789,6 +915,8 @@ public enum LogEvent: Sendable {
         case .keyboardDidAppear, .keyboardDidDisappear,
              .keyboardMicTapped, .keyboardTextInserted:
             return ""
+        case .hostReturn(let hostId, let outcome):
+            return "hostId=\(hostId) outcome=\(outcome)"
         case .keyRepeatStarted:
             return ""
         case .keyRepeatStopped(let ticks, let reason):
@@ -937,20 +1065,26 @@ public enum LogEvent: Sendable {
             return "removed=\(removed) learnedCount=\(learnedCount)"
 
         // Polish (#315)
-        case .polishEngineFailed(let reason, let engine, let mode, let engineMs):
-            return "reason=\(reason) engine=\(engine) mode=\(mode) engineMs=\(engineMs)"
+        case .polishEngineFailed(let reason, let engine, let mode, let engineMs, let detected, let mix):
+            return "reason=\(reason) engine=\(engine) mode=\(mode) engineMs=\(engineMs) "
+                + "detected=\(detected) mix=\(mix)"
+        case .vocabularyApplied(let enabled, let entries, let replacements, let chars):
+            return "enabled=\(enabled ? "yes" : "no") entries=\(entries) "
+                + "replacements=\(replacements) chars=\(chars)"
         case .polishHandoff(let step, let outcome, let chars):
             return "step=\(step) outcome=\(outcome) chars=\(chars)"
         case .polishInsertionRefused(let reason, let ageMs):
             return "reason=\(reason) ageMs=\(ageMs)"
         case .polishCallSuperseded(let inflightMs):
             return "inflightMs=\(inflightMs)"
-        case .smartModeRefused(let mode, let outcome, let reason):
-            return "mode=\(mode) outcome=\(outcome) reason=\(reason)"
+        case .smartModeRefused(let mode, let outcome, let reason, let check):
+            return "mode=\(mode) outcome=\(outcome) reason=\(reason) check=\(check)"
         case .smartModeSkipped(let mode, let reason, let disarmed):
             return "mode=\(mode) reason=\(reason) disarmed=\(disarmed)"
         case .polishEngineUnavailable(let engine, let reason, let consecutiveRefusals):
             return "engine=\(engine) reason=\(reason) consecutiveRefusals=\(consecutiveRefusals)"
+        case .polishInputLanguageRefused(let engine, let mode, let detected, let mix):
+            return "engine=\(engine) mode=\(mode) detected=\(detected) mix=\(mix)"
         }
     }
 

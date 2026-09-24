@@ -1,0 +1,5 @@
+Add the paragraph breaks to this text. Output only the text, nothing else.
+
+{{INPUT}}
+
+Output:

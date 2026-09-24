@@ -1,0 +1,57 @@
+[0/1] Planning build
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'polish-harness' complete! (0.22s)
+
+━━ [1-message] lang=fr stt=PK
+  raw:      Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que... dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #1: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que. dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+            (rejectedGuardrail, 3989ms, detected=fr→natural, check=language)
+  engineOut #1: Yo man, I hope you're doing well. I'm currently working on the project, so I haven't replied yet. I'll keep you updated as soon as I have something to share. Sorry for the delay, I've run into a little snag.
+  polished #2: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que. dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+            (rejectedGuardrail, 1457ms, detected=fr→natural, check=language)
+  engineOut #2: Sure thing! Here's a polished version of the text:
+
+"Hey man, I hope you're doing well. I'm currently reviewing the project, and I've been working on it. I haven't replied yet, but I'm on it. I'll keep you updated as soon as I make any progress. Sorry for the delay, I accidentally stumbled.
+  polished #3: Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que. dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+            (rejectedGuardrail, 1054ms, detected=fr→natural, check=language)
+  engineOut #3: Hey man, I hope you're doing well. I'm working on the project and haven't responded yet, but I'm making progress. I'll keep you updated as soon as I get a chance. Sorry, I accidentally hit the wrong button.
+
+━━ [2-message] lang=fr stt=PK
+  raw:      Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.
+  polished #1: Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.
+            (rejectedGuardrail, 874ms, detected=fr→natural, check=language)
+  engineOut #1: Salut Manu! 👋 Comment vas-tu ? Could you please check if you've received the email I sent you earlier? Thanks a lot! 🙏
+  polished #2: Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.
+            (rejectedGuardrail, 600ms, detected=fr→natural, check=language)
+  engineOut #2: Salut Manu, comment vas-tu ? Could you please check if you received the email I sent you earlier? Thanks!
+  polished #3: Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.
+            (rejectedGuardrail, 794ms, detected=fr→natural, check=language)
+  engineOut #3: Salut Manu! 😊 Comment vas-tu ? Could you please check if you received the mail I sent you earlier? Thanks!
+
+━━ [3-message] lang=fr stt=PK
+  raw:      Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #1: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (rejectedGuardrail, 1037ms, detected=fr→natural, check=language)
+  engineOut #1: I'm right here with you, I'll test it quickly. I just need to get the subscription to try it out. But honestly, from what I've understood, it might not be quite as good as Hermes and OpenClaw.
+  polished #2: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (rejectedGuardrail, 955ms, detected=fr→natural, check=language)
+  engineOut #2: I'm really excited to try it! I'll test it quickly. Just need to sign up to try it. But honestly, from what I understand, it might be a little less good than Hermes and OpenClaw.
+  polished #3: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 922ms, detected=fr→natural)
+  breaks #3: Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+
+━━ [4-message] lang=fr stt=PK
+  raw:      Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #1: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (rejectedGuardrail, 1399ms, detected=fr→natural, check=language)
+  engineOut #1: Hey guys, do you know how to see the usage limits for the Astra model? This morning, I wanted to test it, but I clearly reached the limits. However, when I check the usage settings in ChatGPT, I only see the overall usage, not the usage per model. If you have the information, guys, I'm interested.
+  polished #2: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (rejectedGuardrail, 1410ms, detected=fr→natural, check=language)
+  engineOut #2: Hey everyone, you know how to see the usage limits of the Astra model? This morning I tried it out, and I apparently hit the limits. But when I check the usage settings in ChatGPT, I only see the overall usage, not the usage by model. If anyone knows the info, I'm all ears!
+  polished #3: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (rejectedGuardrail, 1418ms, detected=fr→natural, check=language)
+  engineOut #3: Hey everyone, do you know how to view the usage limits of the Astra model? Because this morning I wanted to test it, and it seems I've hit the limits. But when I check the ChatGPT usage settings, I only see the overall usage, not the model-specific usage. If you have the information, please let me know.
+
+── outcomes: 1/12 success
+   rejectedGuardrail: 11/12 — 1-message×3, 2-message×3, 3-message×2, 4-message×3

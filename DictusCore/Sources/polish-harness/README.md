@@ -99,6 +99,109 @@ are written to put pressure on their mode — a field dictation that failed on
 device, rambles with no structure, input already partly in the target language,
 and input in a language outside the four.
 
+## Paragraph placement (#550)
+
+`paragraph` drives Apple FM on light, committed prompt **arms** whose only job is to
+split an already-polished French text into paragraphs, and scores the four bars
+declared in `docs/research/550-paragraph-placement/bars.md` before the first arm call.
+The arms live in `docs/research/550-paragraph-placement/arms/`, one JSON file each, so
+every prompt exists as a file before it is run and stays re-runnable after.
+
+```sh
+# One arm, five samples per fixture. --arm repeats, and the arms run in order.
+swift run polish-harness paragraph Sources/polish-harness/fixtures/paragraph-fr.json \
+  --arm ../docs/research/550-paragraph-placement/arms/7-index-ranked.json \
+  --runs 5 --json /tmp/capture.json
+```
+
+Two things about it differ from every other command here, and both are deliberate.
+
+**It runs no `PolishPipeline`.** Two arms return **integers** rather than text — the
+numbers of the sentences that start a paragraph — and the text is reassembled in code
+from `PolishSegmentation.sentences`. Every acceptance band necessarily rejects a list
+of integers, so routing them through the pipeline would measure the guardrail instead
+of the model. The question is a capability question, and a guardrail refusal and a
+model failure must not be summed. The price is that **whatever holds here still has to
+be re-measured inside the pipeline before it could ship.**
+
+**It scores its own bars**, on the same sentence cut the arm was given, so the prompt
+and the scorer cannot disagree about what a boundary is. The cut is printed once per
+fixture in the capture so it is auditable rather than assumed. What the Swift side
+does not score — placement agreement with the Typeless reference, and the fit for the
+break count — is in `docs/research/550-paragraph-placement/score.py`, because bars.md
+declares both **reported, never barred**.
+
+Fixture set: `fixtures/paragraph-fr.json`, seven **already-polished** texts. #437's six
+second-pass texts verbatim, plus fixture 7, the 89 s sample of 2026-09-11. Polished
+rather than raw because a paragrapher is a presentation pass, and because "the words
+did not move" is not a predicate that can be written against a transcript polish is
+allowed to change.
+
+## Fidelity: what an accepted output damaged (#570, #581)
+
+`fidelity` scores a Smart Mode's output against its input on the four axes declared
+in `docs/research/570-structured-fidelity/bars.md` **before** the first arm ran:
+
+1. **proposition recall** — every content proposition of the input has an aligned one
+   in the output. This is `PolishGrounding.worstSegmentOverlap` run **backwards**: #414
+   asks whether each *output* segment is supported by the input, this asks whether each
+   *input* proposition is supported by the output. The pipeline only ever ran the first
+   half, which is why a deleted sentence is invisible to every check we ship — deleting
+   raises no length ratio, invents no name, and lowers no per-segment overlap on the
+   segments that remain.
+2. **person and stance** — first person stays first person, a hedge stays a hedge.
+   Per aligned *clause*, not per document: the device defect it exists for is
+   `j'en ai fait une dizaine` → `il y a une dizaine qui ont été créées`, in an output
+   whose other sentences are full of `je`.
+3. **order** — inversions between the input's sequence and the output's. **Reported as
+   an observable and never scored**: #523's decision 3 licenses "reorder within a topic"
+   while the prompt's rule 2 forbids moving an idea, and which governs is the
+   maintainer's call, not a measurement's.
+4. **speaker-state fabrication (#581)** — whether the output ends on a sentence in which
+   the speaker reports their own recall failing, absent from the input.
+
+```sh
+# The live round: the shipping prompt plus every --arm, three runs per fixture.
+swift run polish-harness fidelity Sources/polish-harness/fixtures/device-structured-fr.json \
+  --mode structured --runs 3 \
+  --arm ../docs/research/570-structured-fidelity/arms/V1-rule7-property.txt \
+  --json /tmp/capture.json
+
+# The calibration. Scores committed, hand-labelled outputs and drives NO model, so the
+# floor behind axes 1 and 2 is re-runnable by anyone. --sweep prints the whole grid.
+swift run polish-harness fidelity ../docs/research/570-structured-fidelity/device-corpus.json \
+  --replay --sweep
+
+# Score a committed live capture again with the CURRENT scorers. No model: the stored
+# outputs are the samples, so a number that moves after a scorer fix moved because of
+# the fix and not because Apple FM sampled differently. The capture stores fixture ids,
+# not transcripts, so the fixture file it was run on is required.
+swift run polish-harness fidelity --rescore ../docs/research/570-structured-fidelity/capture-device.json \
+  --fixtures Sources/polish-harness/fixtures/device-structured-fr.json --json /tmp/rescored.json
+```
+
+Three things about it differ from the other commands here.
+
+**It scores the ENGINE's output, not the inserted text.** A Smart Mode that fails its
+contract inserts nothing, so scoring the document text would score three of the nine
+device runs as defect-free — and one of those three is #581's positive control, whose
+only defect lives in the refused output. The guardrail verdict is printed beside each
+run and never folded into it.
+
+**Three runs per fixture, never one.** Two runs of the same device dictation 35 minutes
+apart produced *different* defects: one deleted a proposition, the other substituted a
+technical term. A single run cannot see that class.
+
+**Its scorers live in the `PolishFidelity` library, not here**, so `swift test` can pin
+them — axis 4 carries a positive control (the 1 337-character device fabrication) and a
+negative one (rule 7 doing its job on `longform-fr.json` fixture 5, which must never
+read as a fabrication). A scorer nobody can test is a scorer nobody should believe.
+
+Fixture set: `fixtures/device-structured-fr.json`, the nine `Structuré` dictations of
+2026-09-17, `raw` verbatim. It exists because `longform-fr.json` runs 353 to 1 283
+characters and every device defect but one was on input **shorter than its shortest
+fixture** — 65, 192, 246, 578.
+
 ## Guardrail corpora (#413, #414, #466)
 
 `guardrail` scores the three output-inspection checks — the per-segment language
@@ -173,6 +276,14 @@ on device on 2026-08-27 (#437), `raw` verbatim from the debug-ring export. They
 are the fixture set for both #437 (structure) and #439 (fidelity); the
 expectations currently in the file are #439's bars, declared in
 `docs/research/439-natural-contract/bars.md` before the first model call.
+
+#437's round ran on the same six and **failed**: the `<<NL>>` ban stays, and the
+expectations in the file stay #439's. Its arms are reusable and worth knowing about
+before writing another one — `docs/research/437-longform-breaks/prompts/` holds five
+system-prompt variants that all returned zero line breaks, `framings/` the user-turn
+overrides that are the only lever that produced any, and `harness/probe-second-pass.json`
+is a standing capability probe for discourse-boundary detection. `harness/extract-prompt.py`
+there dumps `PolishAutoPrompt`'s bytes, which the `prompt` command cannot.
 
 ## Caveats
 

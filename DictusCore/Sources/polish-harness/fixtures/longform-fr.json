@@ -33,7 +33,7 @@
     "id": "2-project-update",
     "lang": "fr",
     "sttEngine": "PK",
-    "_note": "SCRIPT 2. Two proper nouns, five figures, three dates, all of which must survive verbatim. Carries repair target 6: Parakeet wrote `Apple Store` where the speaker said `App Store`, in a paragraph containing `StoreKit` and `on soumet` — and `App Store` is in PolishGlossary.",
+    "_note": "SCRIPT 2. Two proper nouns, five figures, three dates, all of which must survive verbatim. Carries repair target 6: Parakeet wrote `Apple Store` where the speaker said `App Store`, in a paragraph containing `StoreKit` and `on soumet` — and nothing in the prompt names `App Store` any more, since #536 removed the term list.",
     "raw": "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
     "expect": [
       {

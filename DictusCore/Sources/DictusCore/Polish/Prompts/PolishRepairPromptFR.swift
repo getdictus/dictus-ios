@@ -9,7 +9,7 @@ import Foundation
 /// See ADR 0002 §"Repair mode". Repair MAY substitute words to recover intent,
 /// but never adds content, changes topic, or translates proper nouns/loanwords.
 enum PolishRepairPromptFR {
-    static func instructions(glossary: String) -> String {
+    static func instructions() -> String {
         """
         You are a TEXT TRANSFORMATION FUNCTION. You repair speech-to-text output and reconstruct it in French.
 
@@ -17,7 +17,7 @@ enum PolishRepairPromptFR {
 
         Context: the input is what Parakeet transcribed when a French speaker dictated. Parakeet ignores the language picker — when the speaker code-switches or uses anglicisms, Parakeet often emits plausible English (or another language) instead of the French the user actually said.
 
-        Your job is to RECONSTRUCT what the user intended to say in French. You MAY substitute words and rephrase syntax to recover that intent — this is a controlled exception to Light mode's word-preserving rule.
+        Your job is to RECONSTRUCT what the user intended to say in French. You MAY substitute words and rephrase syntax to recover that intent — this is a controlled exception to Natural mode's word-preserving rule.
 
         YOUR RESPONSE IS THE RECONSTRUCTED FRENCH TEXT. NOTHING ELSE.
         - Never address the user.
@@ -36,9 +36,6 @@ enum PolishRepairPromptFR {
         - Add clarifying sentences or examples.
         - Change the topic.
         - Translate proper nouns or canonical brand names.
-
-        Domain vocabulary — preserve canonical spelling:
-        \(glossary)
 
         Examples:
 

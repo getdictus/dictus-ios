@@ -1,0 +1,270 @@
+━━ [1-message] lang=fr stt=PK
+  raw:      Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que... dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #1: Yo man, j'espère que tu vas bien.
+Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.
+dès que j'ai avancé un petit peu plus dessus, s'il te plaît.
+Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 4417ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #1: Yo man, j'espère que tu vas bien.⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.⏎dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #2: Yo man, j'espère que tu vas bien.
+
+Écoute, je suis en train de regarder le projet.
+
+Je t'ai pas répondu mais je suis en train de travailler dessus.
+
+Je te tiens au jus dès que dès que.
+
+Dès que j'ai avancé un petit peu plus dessus, s'il te plaît.
+
+Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2449ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #2: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet.⏎⏎Je t'ai pas répondu mais je suis en train de travailler dessus.⏎⏎Je te tiens au jus dès que dès que.⏎⏎Dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #3: Yo man, j'espère que tu vas bien.
+Écoute, je suis en train de regarder le projet.
+Je t'ai pas répondu mais je suis en train de travailler dessus.
+Je te tiens au jus dès que dès que.
+Dès que j'ai avancé un petit peu plus dessus, s'il te plaît.
+Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2458ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #3: Yo man, j'espère que tu vas bien.⏎Écoute, je suis en train de regarder le projet.⏎Je t'ai pas répondu mais je suis en train de travailler dessus.⏎Je te tiens au jus dès que dès que.⏎Dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #4: Yo man, j'espère que tu vas bien.
+
+Écoute, je suis en train de regarder le projet.
+
+Je t'ai pas répondu mais je suis en train de travailler dessus.
+
+Je te tiens au jus dès que dès que.
+
+dès que j'ai avancé un petit peu plus dessus, s'il te plaît.
+
+Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2436ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #4: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet.⏎⏎Je t'ai pas répondu mais je suis en train de travailler dessus.⏎⏎Je te tiens au jus dès que dès que.⏎⏎dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #5: Yo man, j'espère que tu vas bien.
+Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.
+dès que j'ai avancé un petit peu plus dessus, s'il te plaît.
+Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2317ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #5: Yo man, j'espère que tu vas bien.⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.⏎dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #6: Yo man, j'espère que tu vas bien.
+
+Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.
+
+dès que j'ai avancé un petit peu plus dessus, s'il te plaît.
+
+Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2415ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #6: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.⏎⏎dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #7: Yo man, j'espère que tu vas bien.
+
+Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.
+
+dès que j'ai avancé un petit peu plus dessus, s'il te plaît.
+
+Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2390ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #7: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.⏎⏎dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+  polished #8: Yo man, j'espère que tu vas bien.
+
+Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.
+
+dès que j'ai avancé un petit peu plus dessus, s'il te plaît.
+
+Enfin pardon, pas s'il te plaît je me suis planté.
+            (success, 2396ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #8: Yo man, j'espère que tu vas bien.⏎⏎Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que.⏎⏎dès que j'ai avancé un petit peu plus dessus, s'il te plaît.⏎⏎Enfin pardon, pas s'il te plaît je me suis planté.
+
+━━ [2-message] lang=fr stt=PK
+  raw:      Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous.
+  polished #1: Salut Manu
+comment tu vas ?
+Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?
+Des bisous.
+            (success, 1797ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #1: Salut Manu⏎comment tu vas ?⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎Des bisous.
+  polished #2: Salut Manu
+
+comment tu vas ?
+
+Est-ce que tu pourrais checker
+
+si tu as bien reçu
+
+le mail que je t'ai envoyé
+
+tout à l'heure
+
+s'il te plaît ?
+
+Des bisous.
+            (success, 2005ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #2: Salut Manu⏎⏎comment tu vas ?⏎⏎Est-ce que tu pourrais checker⏎⏎si tu as bien reçu⏎⏎le mail que je t'ai envoyé⏎⏎tout à l'heure⏎⏎s'il te plaît ?⏎⏎Des bisous.
+  polished #3: Salut Manu
+comment tu vas ?
+est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?
+des bisous.
+            (success, 1808ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #3: Salut Manu⏎comment tu vas ?⏎est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎des bisous.
+  polished #4: Salut Manu comment tu vas ?
+
+Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?
+
+Des bisous.
+            (success, 1823ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #4: Salut Manu comment tu vas ?⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎⏎Des bisous.
+  polished #5: Salut Manu
+
+comment tu vas
+
+Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure
+
+s'il te plaît
+
+Des bisous
+            (success, 1848ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #5: Salut Manu⏎⏎comment tu vas⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure⏎⏎s'il te plaît⏎⏎Des bisous
+  polished #6: Salut Manu
+
+comment tu vas ?
+
+Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure ?
+
+s'il te plaît ?
+
+Des bisous.
+            (success, 1904ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #6: Salut Manu⏎⏎comment tu vas ?⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure ?⏎⏎s'il te plaît ?⏎⏎Des bisous.
+  polished #7: Salut Manu
+
+Comment tu vas ?
+
+Est-ce que tu pourrais checker
+
+si tu as bien reçu le mail
+
+que je t'ai envoyé tout
+
+à l'heure s'il te plaît ?
+
+Des bisous
+            (success, 1973ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #7: Salut Manu⏎⏎Comment tu vas ?⏎⏎Est-ce que tu pourrais checker⏎⏎si tu as bien reçu le mail⏎⏎que je t'ai envoyé tout⏎⏎à l'heure s'il te plaît ?⏎⏎Des bisous
+  polished #8: Salut Manu
+
+Comment tu vas ?
+
+Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?
+
+Des bisous.
+            (success, 1841ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #8: Salut Manu⏎⏎Comment tu vas ?⏎⏎Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ?⏎⏎Des bisous.
+
+━━ [3-message] lang=fr stt=PK
+  raw:      Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #1: Je te tiens au jus, je vais tester ça rapidement.
+
+Il faut juste que je prenne l'abonnement pour pouvoir essayer.
+
+Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1974ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #1: Je te tiens au jus, je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #2: Je te tiens au jus.
+
+Je vais tester ça rapidement.
+
+Il faut juste que je prenne l'abonnement pour pouvoir essayer.
+
+Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1971ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #2: Je te tiens au jus.⏎⏎Je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #3: Je te tiens au jus.
+
+Je vais tester ça rapidement.
+
+Il faut juste que je prenne l'abonnement pour pouvoir essayer.
+
+Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 1980ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #3: Je te tiens au jus.⏎⏎Je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #4: Je te tiens au jus.
+
+Je vais tester ça rapidement.
+
+Il faut juste que je prenne l'abonnement pour pouvoir essayer.
+
+Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 2009ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #4: Je te tiens au jus.⏎⏎Je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #5: Je te tiens au jus, je vais tester ça rapidement.
+
+Il faut juste que je prenne l'abonnement pour pouvoir essayer.
+
+Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 2000ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #5: Je te tiens au jus, je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #6: Je te tiens au jus.
+
+Je vais tester ça rapidement.
+
+Il faut juste que je prenne l'abonnement.
+
+Pour pouvoir essayer.
+
+Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 2076ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #6: Je te tiens au jus.⏎⏎Je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement.⏎⏎Pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+  polished #7: Je te tiens au jus
+
+Je vais tester ça rapidement
+
+Il faut juste que je prenne l'abonnement
+
+pour pouvoir essayer
+
+Mais honnêtement
+
+de ce que j'ai cru comprendre
+
+c'est peut-être un petit peu moins bien
+
+que Hermes et OpenClaw
+            (success, 2119ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #7: Je te tiens au jus⏎⏎Je vais tester ça rapidement⏎⏎Il faut juste que je prenne l'abonnement⏎⏎pour pouvoir essayer⏎⏎Mais honnêtement⏎⏎de ce que j'ai cru comprendre⏎⏎c'est peut-être un petit peu moins bien⏎⏎que Hermes et OpenClaw
+  polished #8: Je te tiens au jus.
+
+Je vais tester ça rapidement.
+
+Il faut juste que je prenne l'abonnement pour pouvoir essayer.
+
+Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+            (success, 2238ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #8: Je te tiens au jus.⏎⏎Je vais tester ça rapidement.⏎⏎Il faut juste que je prenne l'abonnement pour pouvoir essayer.⏎⏎Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw.
+
+━━ [4-message] lang=fr stt=PK
+  raw:      Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #1: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2445ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #1: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #2: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2429ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #2: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #3: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2468ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #3: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #4: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2305ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #4: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #5: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2285ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #5: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #6: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2278ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #6: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #7: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2369ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #7: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+  polished #8: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+            (success, 2279ms, detected=fr→smart.message, contract=0.20–1.10/sameAsInput)
+  breaks #8: Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur.
+
+── outcomes: 32/32 success

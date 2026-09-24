@@ -1,0 +1,794 @@
+rescored: 360 stored runs from ../docs/research/570-structured-fidelity/capture-leakprobe.json, floor 0.35 — no model called
+
+━━ [shipping] S1-synthetic-short#40
+  68→319 3384ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [shipping] S1-synthetic-short#42
+  68→39 1486ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [shipping] S1-synthetic-short#44
+  68→39 1633ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [shipping] D5-lets-go#1
+  15→36 1504ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#2
+  15→16 1366ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#3
+  15→16 1361ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#4
+  15→16 1354ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#5
+  15→16 1464ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#6
+  15→16 1384ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#7
+  15→16 1357ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#8
+  15→16 1348ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#9
+  15→16 1353ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#10
+  15→16 1380ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#11
+  15→16 1371ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#12
+  15→16 1352ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#13
+  15→16 1507ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#14
+  15→16 1340ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#15
+  15→16 1361ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#16
+  15→16 1362ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#17
+  15→26 1428ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#18
+  15→16 1339ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#19
+  15→16 1356ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#20
+  15→16 1434ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#21
+  15→16 1388ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#22
+  15→16 1449ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#23
+  15→16 1348ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#24
+  15→20 1450ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#25
+  15→18 1420ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#26
+  15→16 1344ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#27
+  15→16 1431ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#28
+  15→16 1360ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#29
+  15→16 1384ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#30
+  15→16 1363ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#31
+  15→16 1372ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#32
+  15→16 1356ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#33
+  15→16 1337ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#34
+  15→16 1482ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#35
+  15→32 1468ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#36
+  15→16 1351ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#37
+  15→16 1396ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#38
+  15→16 1425ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#39
+  15→16 1401ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#40
+  15→16 1356ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#41
+  15→16 1378ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#42
+  15→16 1399ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#43
+  15→16 1367ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#44
+  15→16 1352ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#45
+  15→16 1367ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#46
+  15→16 1332ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#47
+  15→16 1340ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#48
+  15→16 1450ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#49
+  15→16 1384ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#50
+  15→23 1451ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#51
+  15→16 1346ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#52
+  15→20 1438ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#53
+  15→16 1355ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#54
+  15→32 1417ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#55
+  15→16 1340ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#56
+  15→16 1445ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#57
+  15→16 1350ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#58
+  15→16 1339ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#59
+  15→16 1346ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [shipping] D5-lets-go#60
+  15→16 1364ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] S1-synthetic-short#2
+  68→523 3079ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V1-rule7-property] S1-synthetic-short#5
+  68→523 3030ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V1-rule7-property] S1-synthetic-short#10
+  68→39 1406ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [V1-rule7-property] S1-synthetic-short#13
+  68→39 1568ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [V1-rule7-property] S1-synthetic-short#32
+  68→39 1378ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [V1-rule7-property] S1-synthetic-short#38
+  68→517 2997ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V1-rule7-property] S1-synthetic-short#45
+  68→39 1384ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [V1-rule7-property] S1-synthetic-short#47
+  68→39 1375ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [V1-rule7-property] S1-synthetic-short#57
+  68→39 1410ms success recall=1/1 PERSON-LOST=1 inversions=0/0
+     PERSONLOST: Alors je voulais te dire que la réunion est décalée à quinze heures.
+       → La réunion est décalée à quinze heures.
+
+━━ [V1-rule7-property] D5-lets-go#1
+  15→16 1434ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#2
+  15→16 1438ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#3
+  15→16 1400ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#4
+  15→16 1407ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#5
+  15→16 1401ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#6
+  15→16 1418ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#7
+  15→16 1469ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#8
+  15→16 1505ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#9
+  15→16 1434ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#10
+  15→16 1395ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#12
+  15→16 1453ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#13
+  15→18 1412ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#14
+  15→16 1435ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#15
+  15→752 3740ms rejectedGuardrail(length) recall=1/1 dispersed=1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V1-rule7-property] D5-lets-go#16
+  15→16 1411ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#17
+  15→16 1403ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#18
+  15→16 1402ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#19
+  15→31 1544ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#20
+  15→16 1434ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#21
+  15→16 1433ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#22
+  15→16 1413ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#23
+  15→16 1411ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#24
+  15→51 1604ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#25
+  15→18 1505ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#26
+  15→16 1888ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#27
+  15→16 1429ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#28
+  15→32 1511ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#29
+  15→26 1505ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#30
+  15→16 1454ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#31
+  15→16 1432ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#32
+  15→16 1548ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#33
+  15→18 1439ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#34
+  15→16 1435ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#35
+  15→16 1437ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#36
+  15→16 1453ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#37
+  15→16 1412ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#38
+  15→16 1418ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#39
+  15→16 1486ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#40
+  15→16 1424ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#42
+  15→16 1427ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#43
+  15→16 1405ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#44
+  15→16 1405ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#45
+  15→16 1428ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#46
+  15→16 1455ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#47
+  15→16 1425ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#48
+  15→16 1413ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#49
+  15→16 1429ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#50
+  15→16 1524ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#51
+  15→16 1391ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#52
+  15→16 1412ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#53
+  15→16 1416ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#55
+  15→16 1419ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#56
+  15→16 1419ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#57
+  15→16 1419ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#58
+  15→26 1487ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#59
+  15→16 1414ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V1-rule7-property] D5-lets-go#60
+  15→16 1436ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] S1-synthetic-short#7
+  68→517 3236ms rejectedGuardrail(length) recall=1/1 inversions=0/0 SPEAKER-STATE-FABRICATED(closing)
+
+━━ [V2-fidelity] D5-lets-go#1
+  15→16 1522ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#2
+  15→16 1536ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#3
+  15→16 1505ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#4
+  15→16 1712ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#5
+  15→16 1540ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#6
+  15→59 1742ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#7
+  15→16 1516ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#8
+  15→16 1537ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#9
+  15→16 1526ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#10
+  15→16 1497ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#11
+  15→26 1672ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#12
+  15→16 1535ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#13
+  15→16 1527ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#14
+  15→34 1615ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#15
+  15→16 1504ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#16
+  15→16 1512ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#17
+  15→16 1556ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#18
+  15→16 1519ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#19
+  15→16 1534ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#20
+  15→16 1515ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#21
+  15→32 1567ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#22
+  15→16 1503ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#23
+  15→16 1500ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#24
+  15→16 1609ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#25
+  15→16 1535ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#26
+  15→32 1589ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#27
+  15→16 1519ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#28
+  15→16 1506ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#29
+  15→16 1521ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#30
+  15→16 1531ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#31
+  15→16 1542ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#32
+  15→16 1562ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#33
+  15→16 1633ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#34
+  15→16 1695ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#36
+  15→20 2009ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#37
+  15→16 2453ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#38
+  15→16 1554ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#40
+  15→16 1533ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#41
+  15→16 1571ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#42
+  15→16 1629ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#43
+  15→36 2566ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#44
+  15→16 1745ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#45
+  15→34 1621ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#46
+  15→16 1548ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#47
+  15→16 1620ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#48
+  15→16 1578ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#49
+  15→16 1527ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#50
+  15→16 1535ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#51
+  15→16 1511ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#52
+  15→16 1503ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#53
+  15→21 1621ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#54
+  15→16 1540ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#56
+  15→16 1520ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#57
+  15→16 1511ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#58
+  15→16 1511ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#59
+  15→16 1570ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+━━ [V2-fidelity] D5-lets-go#60
+  15→16 1607ms success recall=0/1 UNRECALLED=1 inversions=0/0
+     UNRECALLED (whole 0.25, best 0.25): Vas-y let's go.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              119      60/119      2/119       0/119       0/119       1/119       0/119       56/119      1
+V1-rule7-property     118      56/118      6/118       0/118       0/118       4/118       0/118       52/118      2
+V2-fidelity           119      57/119      0/119       0/119       0/119       1/119       0/119       61/119      1
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  excluded, by outcome: engineFailed×4
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             0             0/119         0/119
+V1-rule7-property     0             2             0/118         0/118
+V2-fidelity           0             3             0/119         0/119
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   S1-synthetic-short      ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  e  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  F  ·  P  ·  P  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1
+── V1-rule7-property
+   S1-synthetic-short      ·  F  ·  ·  F  ·  ·  ·  ·  P  ·  ·  P  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  P  ·  ·  ·  ·  ·  F  ·  ·  ·  e  ·  ·  P  ·  P  e  ·  ·  ·  ·  ·  ·  ·  ·  P  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  F  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  U1  U1  U1
+── V2-fidelity
+   S1-synthetic-short      ·  ·  ·  ·  ·  ·  F  ·  e  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·
+   D5-lets-go              U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  ·  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  U1  ·  U1  U1  U1  U1  U1
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 360 runs to /tmp/rescore570/capture-leakprobe.json

@@ -72,4 +72,97 @@ final class ModelPreparationContextTests: XCTestCase {
         XCTAssertEqual(ModelPreparationOutcome.deadlineExpiredReason, "init-preload-deadline")
     }
 
+    // MARK: - A `ready` nobody alive wrote (#579)
+
+    /// The measured bug, as a table: a keyboard cold start reads `ready` at `onAppear`
+    /// because the App Group kept the answer of a process iOS had already killed. Two
+    /// seconds later the real load started; the screen was gone by then.
+    func testAReadyLeftBehindByADeadProcessIsNotAFinishedPreparation() {
+        XCTAssertFalse(ModelPreparationOutcome.preparationWasAlreadyReady(
+            context: .keyboardColdStart,
+            isModelOnDisk: true,
+            loadState: .ready,
+            loadStateIsFromThisLaunch: false
+        ))
+    }
+
+    /// Freshness is the question, not the context. The load that lands between the
+    /// keyboard's read and the app's presentation writes `ready` from a live process,
+    /// and that value is a fact — the screen owes the user its checkmark and its exit,
+    /// not a wait with nothing left to end it.
+    func testAReadyThisLaunchWroteIsAFinishedPreparation() {
+        for context in [ModelPreparationContext.keyboardColdStart, .appRecordTap] {
+            XCTAssertTrue(
+                ModelPreparationOutcome.preparationWasAlreadyReady(
+                    context: context,
+                    isModelOnDisk: true,
+                    loadState: .ready,
+                    loadStateIsFromThisLaunch: true
+                ),
+                "\(context.rawValue) hangs on a model that really is loaded"
+            )
+        }
+    }
+
+    /// No context escapes the freshness test — including the in-app tap, which cannot
+    /// meet a stale value today only because the launch preload always writes first.
+    /// Nothing should depend on that ordering staying true.
+    func testNoContextIsAllowedToBelieveAStaleReady() {
+        for context in ModelPreparationContext.allCases {
+            XCTAssertFalse(
+                ModelPreparationOutcome.preparationWasAlreadyReady(
+                    context: context,
+                    isModelOnDisk: true,
+                    loadState: .ready,
+                    loadStateIsFromThisLaunch: false
+                ),
+                "\(context.rawValue) celebrates a load state no live process wrote"
+            )
+        }
+    }
+
+    /// Onboarding and model selection raise this screen BEFORE their own work starts, so
+    /// the `ready` they read is about the model they are replacing. `hasSeenWorkPhase` is
+    /// what carries them, and this path must stay shut for them (the f5ba7ab race).
+    func testOnlyPrepareOnlyContextsTakeThisPath() {
+        for context in [ModelPreparationContext.onboarding, .modelSelection] {
+            XCTAssertFalse(
+                ModelPreparationOutcome.preparationWasAlreadyReady(
+                    context: context,
+                    isModelOnDisk: true,
+                    loadState: .ready,
+                    loadStateIsFromThisLaunch: true
+                ),
+                "\(context.rawValue) can now dismiss itself before its own work starts"
+            )
+        }
+    }
+
+    /// A load in flight and a load that failed are both the screen's whole reason to be
+    /// up. Only `ready` ends it early.
+    func testAnythingButReadyKeepsTheScreenUp() {
+        for state in [ModelLoadState.loading, .idle] {
+            XCTAssertFalse(
+                ModelPreparationOutcome.preparationWasAlreadyReady(
+                    context: .keyboardColdStart,
+                    isModelOnDisk: true,
+                    loadState: state,
+                    loadStateIsFromThisLaunch: true
+                ),
+                "\(state.rawValue) was read as a finished preparation"
+            )
+        }
+    }
+
+    /// `ready` about RAM while the files are not on disk is not a preparation anyone can
+    /// celebrate, and the download this screen is waiting for has not even started.
+    func testAModelThatIsNotOnDiskIsNeverAlreadyPrepared() {
+        XCTAssertFalse(ModelPreparationOutcome.preparationWasAlreadyReady(
+            context: .keyboardColdStart,
+            isModelOnDisk: false,
+            loadState: .ready,
+            loadStateIsFromThisLaunch: true
+        ))
+    }
+
 }

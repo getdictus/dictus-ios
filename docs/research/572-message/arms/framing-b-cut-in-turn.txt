@@ -1,0 +1,5 @@
+Rewrite this text the way the speaker would have typed it: cut everything that only exists because they were speaking, keep only the better version of anything they restated, and break what is left into short blocks separated by a blank line. Output only the rewritten text, nothing else.
+
+{{INPUT}}
+
+Typed output:

@@ -321,6 +321,15 @@ class KeyboardState: ObservableObject {
     /// a retain cycle: controller -> view -> state -> controller.
     weak var controller: UIInputViewController?
 
+    /// The host app resolved at the most recent mic tap, consumed when the cold-start
+    /// URL is built (#23).
+    ///
+    /// **Never persisted, and never written to the App Group.** A host that outlives the
+    /// keyboard process teleports the user into the app they were in *last* time, and
+    /// `SharedKeys.sourceAppScheme` was deleted rather than reused for exactly that
+    /// reason. In memory, for one hand-off, consumed on read.
+    private var pendingHostId: String?
+
     /// Closure to open a URL from the keyboard extension.
     /// WHY a closure: KeyboardState is not a SwiftUI View, so it cannot use
     /// @Environment(\.openURL). KeyboardRootView captures its own openURL
@@ -854,6 +863,13 @@ class KeyboardState: ObservableObject {
     /// The App Group key is deliberately NOT read here: the caller clears it before
     /// calling, which is what stops a redelivered Darwin notification from inserting
     /// the same text twice.
+    /// NOT ARMED for #530's mirror detector, and the reason is plumbing rather than
+    /// principle (#548). A bracket here would be valid — this is one synchronous
+    /// insert — but `MirrorSyncState` lives on `DictusKeyboardBridge`, `bridge` is
+    /// private on KeyboardViewController, and this type holds only a
+    /// `UIInputViewController`. Reaching it means widening that surface across a
+    /// subsystem boundary, which is more than the bracketing #548 is scoped to.
+    /// Worth revisiting if a desync is ever traced to a dictation insert.
     func insertDictation(_ transcription: String) {
         controller?.textDocumentProxy.insertText(transcription)
         PersistentLog.log(.keyboardTextInserted)
@@ -1112,6 +1128,14 @@ class KeyboardState: ObservableObject {
             return
         }
 
+        // NOT ARMED for #530's mirror detector, and here the reason is structural
+        // rather than plumbing (#548). These chunks are separated by
+        // `DispatchQueue.main.async`, so a before/after pair would straddle a run-loop
+        // turn and a host callback could land between the two reads — which is exactly
+        // what #530's attributability rule forbids, since the discrepancy could then
+        // belong to the host rather than to this burst. The burst has its own
+        // verification instead: `DictationUndo.verify` re-proves the remainder against
+        // the live context after every chunk (#266).
         let batch = min(remaining, Self.dictationUndoChunkSize)
         for _ in 0..<batch {
             proxy.deleteBackward()
@@ -1367,6 +1391,27 @@ class KeyboardState: ObservableObject {
         }
         lastMicTapDate = now
 
+        // #23: resolve the host app now, at the tap, and never later.
+        //
+        // At the tap and not at `viewWillAppear` because the value the keyboard holds
+        // from an earlier appearance is the least trustworthy one it has — that is
+        // VivaDicta's measured failure, an app terminated three seconds earlier being
+        // reopened. And never from a cache: `pendingHostId` is consumed when the URL is
+        // built, so a resolution belonging to one tap cannot be reused by the next.
+        //
+        // Placed after the debounce so a rejected rapid tap does not disturb it. Nil is
+        // the normal, safe outcome — it costs the auto-return and nothing else.
+        let resolution = controller.map(HostAppResolver.currentHost(for:))
+        pendingHostId = resolution?.hostId
+        // One line per tap, and it is the line that says which kind of failure this was.
+        // `no-host-pid` is the private surface being gone; `table-miss` is the arbiter
+        // never having named this host while we were reading, which is a coverage problem
+        // and a different fix entirely.
+        PersistentLog.log(.hostReturn(
+            hostId: pendingHostId ?? "unknown",
+            outcome: "tap-\(resolution?.reason ?? "no-controller")"
+        ))
+
         // A new dictation ends the previous one's undo offer, whatever comes of it.
         invalidateDictationUndo(reason: "new-dictation")
 
@@ -1382,9 +1427,16 @@ class KeyboardState: ObservableObject {
         // recording from starting until the model is ready.
         // We synchronize defaults first because cross-process writes from DictusApp
         // can lag a few ms behind the actual state change.
-        if isModelLoading() {
+        //
+        // Since #542 the same handoff also answers a model that is downloaded but whose
+        // Core ML cache is cold, which is the case that used to record into a wait the
+        // dictation could not survive. `intent=prepare` returns from `handleIncomingURL`
+        // before any auto-return code, so the user stays in DictusApp and reads the screen.
+        if let deferral = preparationDeferral() {
             PersistentLog.log(.keyboardMicTapped)
-            deferRecordingForModelPreparation()
+            deferRecordingForModelPreparation(
+                reason: "keyboard opened Dictus for model preparation (\(deferral))"
+            )
             return
         }
 
@@ -1397,9 +1449,11 @@ class KeyboardState: ObservableObject {
         // The model can begin loading after the first check while this tap is
         // being handed to DictusApp. Re-check immediately before posting the
         // recording request so a model swap cannot race into a recording.
-        if isModelLoading() {
+        if let deferral = preparationDeferral() {
             forceResetToIdle()
-            deferRecordingForModelPreparation(reason: "model became loading before Darwin handoff")
+            deferRecordingForModelPreparation(
+                reason: "model became unready before Darwin handoff (\(deferral))"
+            )
             return
         }
 
@@ -1415,9 +1469,11 @@ class KeyboardState: ObservableObject {
             guard let self = self else { return }
             let elapsedMs = Int(Date().timeIntervalSince(darwinPostTime) * 1000)
             if self.dictationStatus == .requested {
-                if self.isModelLoading() {
+                if let deferral = self.preparationDeferral() {
                     self.forceResetToIdle()
-                    self.deferRecordingForModelPreparation(reason: "model became loading before fallback URL")
+                    self.deferRecordingForModelPreparation(
+                        reason: "model became unready before fallback URL (\(deferral))"
+                    )
                     return
                 }
                 PersistentLog.log(.coldStartDarwinFallback(
@@ -1426,11 +1482,16 @@ class KeyboardState: ObservableObject {
                 ))
                 self.logProbe("fallbackOpenURL", details: self.sessionDetails())
                 // App didn't respond — not running. Open URL to launch it.
-                // Force unwrap: the argument is a compile-time literal and a
-                // well-formed absolute URL, so the failable initializer cannot
-                // return nil. Nothing at runtime can change this string.
-                // swiftlint:disable:next force_unwrapping
-                let url = URL(string: "dictus://dictate?source=keyboard")!
+                //
+                // The host resolved at the tap rides along as `&hostId=` (#23), and is
+                // consumed here so it cannot be reused by a later hand-off. A nil host
+                // simply omits the parameter and the app shows the swipe-back overlay,
+                // which is what it does today.
+                let hostId = self.pendingHostId
+                self.pendingHostId = nil
+                guard let url = KeyboardDictationURL.dictationURL(intent: .record, hostId: hostId) else {
+                    return
+                }
                 self.openDictusURL(url)
             }
         }
@@ -1439,23 +1500,20 @@ class KeyboardState: ObservableObject {
     /// Open Dictus without creating a recording request. The user explicitly
     /// starts dictation with a second tap once preparation has completed (#262).
     private func openModelPreparation() {
-        guard let url = URL(string: "dictus://dictate?source=keyboard&intent=prepare") else {
+        // No `hostId`: this path opens Dictus for the user to watch a model load, and
+        // nothing is handed back. Built through the same builder so the two URLs cannot
+        // drift apart in their query vocabulary.
+        guard let url = KeyboardDictationURL.dictationURL(intent: .prepare) else {
             return
         }
         openDictusURL(url)
     }
 
-    /// Re-read the shared state at each handoff boundary because the app can
-    /// start a model swap after the keyboard's previous snapshot.
-    private func isModelLoading() -> Bool {
-        defaults.synchronize()
-        let rawState = defaults.string(forKey: SharedKeys.modelLoadState)
-            ?? ModelLoadState.idle.rawValue
-        return rawState == ModelLoadState.loading.rawValue
-    }
-
     /// Defer recording without leaving a requested state behind in the keyboard.
-    private func deferRecordingForModelPreparation(reason: String = "keyboard opened Dictus for model preparation") {
+    /// `reason` has no default since #542: there are now two causes behind every one of the
+    /// three call sites, and a caller that does not say which leaves the log unable to tell
+    /// a load in progress from a compile that has not begun.
+    private func deferRecordingForModelPreparation(reason: String) {
         PersistentLog.log(.dictationDeferred(reason: reason))
         openModelPreparation()
     }
@@ -1709,12 +1767,38 @@ extension KeyboardState {
     /// `assignStatusMessage` makes for itself above. A future site that schedules its
     /// own clear would reintroduce the bug in full, and there would be nothing to stop
     /// it -- here there is no reason to write one.
+    ///
+    /// WHY the clear can decline (#490): the three seconds are three seconds of screen
+    /// time. A recording covers the toolbar with its overlay, so a timer that ran
+    /// through one spent the message's life on a surface nobody was looking at --
+    /// measured on device, a Smart Mode refusal that lived from 13:52:24 to 13:52:27
+    /// with the user recording again from 13:52:26. See
+    /// `StatusMessageLifetime.clearDecision`.
     func presentStatusMessage(_ message: String, reason: String, timeoutReason: String) {
         assignStatusMessage(message, reason: reason)
-        let token = messageLifetime.current
+        scheduleStatusMessageClear(token: messageLifetime.current, timeoutReason: timeoutReason)
+    }
+
+    /// Arm the clear for the message holding `token`, and re-arm it for as long as
+    /// the toolbar is covered (#490).
+    ///
+    /// The recursion is the whole rule: `clearDecision` answers `.waitForIdle` while
+    /// a dictation is in flight, because the recording overlay owns the keyboard area
+    /// and a message nobody can see is not being read. The token never changes, so
+    /// every re-arm stays bound to the same message and a replacement still
+    /// invalidates all of them at once.
+    ///
+    /// It cannot loop forever: a dictation is bounded by the watchdog, and every way
+    /// out of one already clears the message.
+    private func scheduleStatusMessageClear(token: Int, timeoutReason: String) {
         DispatchQueue.main.asyncAfter(deadline: .now() + StatusMessageLifetime.displayDuration) { [weak self] in
-            guard let self, self.messageLifetime.mayClear(token) else { return }
-            self.assignStatusMessage(nil, reason: timeoutReason)
+            guard let self else { return }
+            let active = DictationSessionLivenessPolicy.isActive(self.dictationStatus)
+            switch self.messageLifetime.clearDecision(token, dictationIsActive: active) {
+            case .superseded: break
+            case .waitForIdle: self.scheduleStatusMessageClear(token: token, timeoutReason: timeoutReason)
+            case .clear: self.assignStatusMessage(nil, reason: timeoutReason)
+            }
         }
     }
 
@@ -1829,5 +1913,54 @@ extension KeyboardState {
     func cancelTranscribingHoldTimer() {
         transcribingHoldTimer?.invalidate()
         transcribingHoldTimer = nil
+    }
+}
+
+// MARK: - Model readiness
+
+/// Whether the model behind this tap can transcribe *now*, and what to say when it cannot.
+///
+/// WHY AN EXTENSION and not three more methods on the class: `KeyboardState` sits at the
+/// `type_body_length` budget, and adding this to the body put it over. The budget is doing
+/// exactly the job it exists to do — the same one that moved `DictationCoordinator`'s model
+/// loading into a file of its own under #146 — and readiness is a self-contained question
+/// with a single caller, `startRecording`.
+extension KeyboardState {
+
+    /// The reason this tap must become a preparation screen, or nil to go ahead.
+    ///
+    /// Re-reads the shared state at every hand-off boundary because the app can start a
+    /// model swap after the keyboard's previous snapshot.
+    ///
+    /// THE RULE IS `RecordTapRouting`, IN DictusCore (#542). The keyboard used to ask a
+    /// one-line question of its own — is `modelLoadState` `loading` — and that question was
+    /// reliable exactly when the app was already running and already loading, and blind in
+    /// the case that costs the most: a cold app with a cold Core ML cache, where the state
+    /// says `ready` because the model FILE is there and the compile has not started yet. It
+    /// starts when the app launches, which is the same instant this code is handing off.
+    ///
+    /// The in-app record button had the same hole, so the rule is shared rather than copied
+    /// a third time — and `RecordTapRouting` is the copy with tests and with the order of
+    /// its questions written down.
+    ///
+    /// THE REASON IS NOT DECORATION. The two refusals are indistinguishable on screen and
+    /// have completely different fixes, and the reader of this log is an agent reading it
+    /// days later: `loading` means the app is working on it right now, `cold-cache` means
+    /// nothing is working on it yet and a multi-minute compile is about to start.
+    func preparationDeferral() -> String? {
+        defaults.synchronize()
+        let rawLoadState = defaults.string(forKey: SharedKeys.modelLoadState) ?? ""
+        let loadState = ModelLoadState(rawValue: rawLoadState) ?? .idle
+        let decision = RecordTapRouting.decide(
+            dictationStatus: dictationStatus,
+            isModelDownloaded: defaults.bool(forKey: SharedKeys.modelReady),
+            loadState: loadState,
+            isModelWarm: ModelWarmth.isActiveModelWarm(
+                defaults: defaults,
+                systemVersion: UIDevice.current.systemVersion
+            )
+        )
+        guard decision == .presentPreparation else { return nil }
+        return loadState == .loading ? "loading" : "cold-cache"
     }
 }

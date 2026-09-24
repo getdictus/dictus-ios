@@ -49,6 +49,10 @@ final class KeyboardPolishCoordinator {
     /// Unfreezes the overlay when a generation never comes back.
     private var stageWatchdog: Timer?
 
+    /// Sequence number for the memory probe below, so one dictation's readings can be
+    /// grouped in a log that interleaves several.
+    private var memoryProbeSequence = 0
+
     /// Whether DictusApp has already been told this dictation is over for display
     /// purposes. Reset per claim; see `concludeDisplayForUnreachableDocument`.
     private var hasConcludedDisplay = false
@@ -87,6 +91,8 @@ final class KeyboardPolishCoordinator {
         let duration = defaults.double(forKey: SharedKeys.lastTranscriptionDuration)
         let pending = PendingDictation(
             raw: raw,
+            // Absent unless the vocabulary pass changed something in the app (#80).
+            engineRaw: defaults.string(forKey: SharedKeys.lastTranscriptionEngineRaw),
             policy: policy,
             smartMode: storedSmartMode(),
             skippedSmartMode: storedSkippedSmartMode(),
@@ -96,11 +102,14 @@ final class KeyboardPolishCoordinator {
         PendingDictationChannel.store(pending)
         handoffToken = defaults.string(forKey: SharedKeys.handoffToken)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionPolicy)
+        defaults.removeObject(forKey: SharedKeys.lastTranscriptionEngineRaw)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionDuration)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionSmartMode)
         defaults.removeObject(forKey: SharedKeys.lastTranscriptionSmartModeSkipped)
         defaults.removeObject(forKey: SharedKeys.handoffToken)
         PersistentLog.log(.polishHandoff(step: "claimed", outcome: "pending", chars: raw.count))
+        memoryProbeSequence &+= 1
+        probeMemory("claimed")
 
         activePolish = pending
         hasConcludedDisplay = false
@@ -198,7 +207,7 @@ final class KeyboardPolishCoordinator {
         // `finish(reporting:inserting:)`.
         if let mode = pending.smartMode {
             PersistentLog.log(.smartModeRefused(
-                mode: mode.id, outcome: "recovered", reason: "no-generation"
+                mode: mode.id, outcome: "recovered", reason: "no-generation", check: "-"
             ))
             PersistentLog.log(.polishHandoff(step: "recovered", outcome: "smart-refused", chars: pending.raw.count))
             // Nothing to report and nothing to type: no generation ever ran for this
@@ -233,15 +242,21 @@ final class KeyboardPolishCoordinator {
     // MARK: - The run
 
     private func run(_ pending: PendingDictation) async {
+        probeMemory("beforePolish")
         let outcome = await service.polish(
             raw: pending.raw,
             languagePolicy: pending.policy,
             smartMode: pending.smartMode,
             recordingDuration: pending.recordingDuration,
+            // Recorded, never polished on (#80).
+            engineRaw: pending.engineRaw,
             onEngineWillRun: { [weak self] in
+                self?.probeMemory("engineWillRun")
                 self?.announceProcessingStage()
             }
         )
+
+        probeMemory("afterPolish")
 
         // A newer dictation claimed the slot while this generation was in flight
         // (decision 15). It owns the pending record, the stage and the app's
@@ -301,11 +316,11 @@ final class KeyboardPolishCoordinator {
         // bullets, or for English, and would silently get neither.
         //
         // The mode may also come back with the untransformed floor *and* a failure —
-        // a context overflow on a mode that declared the floor better than nothing,
-        // see `SmartModeOverflowBehaviour`. Then text is inserted and the message
-        // still fires: degrading in silence and refusing in silence are the same
-        // defect, which is why the message is keyed on the failure and not on
-        // whether anything was typed.
+        // a context overflow or a guardrail rejection on a mode that declared the
+        // floor better than nothing, see `SmartModeFloorBehaviour`. Then text is
+        // inserted and the message still fires: degrading in silence and refusing in
+        // silence are the same defect, which is why the message is keyed on the
+        // failure and not on whether anything was typed.
         let failure = outcome.smartModeFailure
         let degraded = outcome.isDegraded
 
@@ -336,7 +351,7 @@ final class KeyboardPolishCoordinator {
 
     /// Tell the user their armed mode did not run (#79).
     ///
-    /// Three sentences, because three different things happened and only one of them
+    /// Five sentences, because five different things happened and only one of them
     /// is "try again":
     ///
     /// - **Too long, text inserted** — the mode declared the floor acceptable. The
@@ -344,10 +359,31 @@ final class KeyboardPolishCoordinator {
     /// - **Too long, nothing inserted** — the mode could not degrade. This one has to
     ///   carry the remedy, because it is the only case where the user has lost
     ///   something and shortening the dictation genuinely fixes it.
-    /// - **Anything else** — engine throw, guardrail rejection, cancellation. The
-    ///   user can do nothing specific about any of them, so the copy does not pretend
-    ///   otherwise; it matches the in-app wording (`DictationHandoff`) word for word,
-    ///   so the same failure reads the same on both surfaces.
+    /// - **Could not be applied, text inserted** (#580) — a guardrail refused the
+    ///   engine's output, or the engine threw, on a mode that declared the floor
+    ///   acceptable. Same shape as the overflow pair, and deliberately *not* the same
+    ///   sentence: "too long" would be a diagnosis neither case supports. It drops
+    ///   "Try again", which is wrong advice once the text is already in the field.
+    ///   The sentence says nothing about the cause, which is why it carries both: a
+    ///   guardrail rejection and an Apple `guardrailViolation` throw are two different
+    ///   refusals, and what the user can do about either is identical — nothing, and
+    ///   the words are already there.
+    /// - **The dictated language is one the model does not read** (#490) — names that
+    ///   language and stops there. It is the one refusal with a knowable cause and no
+    ///   remedy: Apple Foundation Models classifies the user turn and refuses before
+    ///   generating, so the same words in the same language will be refused again.
+    ///   "Try again" would be an instruction to repeat a failure.
+    /// - **Anything else** — cancellation, an unavailable engine (#315), and any
+    ///   refusal at all on a mode whose floor would be wrong rather than merely
+    ///   plainer. The user can do nothing specific about any of them, so the copy does
+    ///   not pretend otherwise; it matches the in-app wording (`DictationHandoff`)
+    ///   word for word, so the same failure reads the same on both surfaces.
+    ///
+    /// The language branch keys on the OUTCOME, never on the
+    /// `unsupportedLanguageOrLocale` slug. #518 measured that slug arriving from
+    /// plain French, which Apple does read — telling a French speaker their language
+    /// is unsupported would be a lie the log would not even contradict. The outcome
+    /// is set by our own reading of the transcript and means only what it says.
     ///
     /// The mode name is the catalogue's own label — "→ EN" — so it reads as the
     /// thing the user armed. It goes through `SmartMode.localizedDisplayName` since
@@ -362,33 +398,56 @@ final class KeyboardPolishCoordinator {
     /// alternative and was rejected — `SmartModeCatalogue` picked a language-neutral
     /// label on purpose, and the fan is where that label mostly lives.
     private func announce(_ failure: SmartModeFailure, degraded: Bool) {
+        KeyboardState.shared.presentStatusMessage(
+            Self.message(for: failure, degraded: degraded),
+            reason: "smartModeFailed-\(failure.outcome)",
+            timeoutReason: "smartModeFailed-timeout"
+        )
+    }
+
+    /// The sentence for one refusal. Split out of `announce` so the copy can be read
+    /// as a set of five alternatives rather than as a presentation with branches in it.
+    private static func message(for failure: SmartModeFailure, degraded: Bool) -> String {
         let name = SmartMode.localizedDisplayName(
             identifier: failure.modeIdentifier, fallback: failure.modeDisplayName
         )
+        if failure.outcome == PolishMetrics.Outcome.unsupportedInputLanguage.rawValue,
+           let code = failure.detectedLanguage {
+            let language = PolishLanguageName.display(for: code)
+            return String(
+                localized: "\(name): Apple Intelligence does not support the dictated language (\(language)).",
+                comment: "Shown when an armed Smart Mode could not run because the language the user dictated is outside the set Apple Intelligence reads. First placeholder is the mode's name, second is the dictated language."
+            )
+        }
         let overflowed = failure.outcome == PolishMetrics.Outcome.exceededContextBudget.rawValue
-        let message: String
         switch (overflowed, degraded) {
         case (true, true):
-            message = String(
+            return String(
                 localized: "\(name): too long, text inserted as dictated.",
                 comment: "Shown when a Smart Mode hit the context ceiling and the untransformed text was inserted instead. The placeholder is the mode's name."
             )
         case (true, false):
-            message = String(
+            return String(
                 localized: "\(name): too long. Try a shorter dictation.",
                 comment: "Shown when a Smart Mode hit the context ceiling and could not fall back, so nothing was inserted. The placeholder is the mode's name."
             )
+        case (false, true):
+            // A guardrail rejection, or an engine throw, on a mode that accepts the
+            // floor (#580). A blend of the two neighbours above and below on purpose:
+            // the register is every other Smart Mode refusal's, and the half that
+            // changes is the half that is true here. It does not name the cause, and
+            // that is what lets it serve both: from where the user stands the two are
+            // the same event — the mode did not apply, the words went in anyway.
+            return String(
+                localized: "\(name): could not be applied, text inserted as dictated.",
+                comment: "Shown when an armed Smart Mode was refused by a guardrail and the untransformed text was inserted instead. The placeholder is the mode's name."
+            )
         default:
-            message = String(
+            return String(
                 localized: "\(name): could not be applied. Try again.",
                 comment: "Shown when an armed Smart Mode fails and nothing is inserted. The placeholder is the mode's name."
             )
         }
-        KeyboardState.shared.presentStatusMessage(
-            message,
-            reason: "smartModeFailed-\(failure.outcome)",
-            timeoutReason: "smartModeFailed-timeout"
-        )
     }
 
     /// Tell the user their armed mode did not run, and that the dictation went in as
@@ -472,6 +531,47 @@ final class KeyboardPolishCoordinator {
             DispatchQueue.main.async {
                 MainActor.assumeIsolated { self?.stageTimedOut(pending) }
             }
+        }
+    }
+
+    /// Records `phys_footprint` at one point on the polish path (#555).
+    ///
+    /// WHY this exists: polish-on sessions settle near 68 MB and polish-off ones near
+    /// 35 MB, yet #361 measured twenty engine calls costing 5 MB. Its probe fired
+    /// straight at `AppleFoundationModelsPolishEngine` and never exercised this
+    /// coordinator, the guardrail, the text passes or the insertion — so the ~34 MB
+    /// has an owner nobody has measured. One line per stage names it.
+    ///
+    /// `phys_footprint` is the figure iOS judges a process on for jetsam, which is why
+    /// it is the one worth reading here rather than a heap total.
+    ///
+    /// **Measurement only.** Nothing reads these lines and no behaviour depends on them.
+    private func probeMemory(_ stage: String) {
+        PersistentLog.log(.diagnosticProbe(
+            component: "PolishMemory",
+            instanceID: "\(memoryProbeSequence)",
+            action: stage,
+            details: "mb=\(MemoryFootprint.residentMB())"
+        ))
+    }
+
+    /// The reading that matters most: what the process still holds once the dictation
+    /// is completely over. A stage delta that comes back down is a working set; one
+    /// that does not is what turns six dictations into 68 MB.
+    ///
+    /// Scheduled with `asyncAfter` rather than a run-loop `Timer`, and weakly: a
+    /// `Timer` with `target: self` outlives the keyboard, which this repo has paid for
+    /// twice (#390, #416).
+    private func probeMemoryAtRest() {
+        let sequence = memoryProbeSequence
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30) { [weak self] in
+            guard self != nil else { return }
+            PersistentLog.log(.diagnosticProbe(
+                component: "PolishMemory",
+                instanceID: "\(sequence)",
+                action: "atRest30s",
+                details: "mb=\(MemoryFootprint.residentMB())"
+            ))
         }
     }
 
@@ -597,9 +697,13 @@ final class KeyboardPolishCoordinator {
 
         guard let inserted else {
             KeyboardState.shared.endLocalProcessingStage()
+            probeMemory("finishedNoInsert")
+            probeMemoryAtRest()
             return
         }
         KeyboardState.shared.insertDictation(inserted)
+        probeMemory("finishedInserted")
+        probeMemoryAtRest()
     }
 
     // MARK: - Reading what travelled

@@ -8,15 +8,20 @@ import XCTest
 /// coordinator — including the three statuses #458 says must never be covered.
 final class RecordTapRoutingTests: XCTestCase {
 
+    /// `warm: true` is the default so every test written before #542 keeps asking exactly
+    /// the question it was written to ask: a model that has already run an inference in this
+    /// install, which is what "the model is downloaded and fine" meant when they were written.
     private func decide(
         _ status: DictationStatus,
         downloaded: Bool = true,
-        load: ModelLoadState = .loading
+        load: ModelLoadState = .loading,
+        warm: Bool = true
     ) -> RecordTapRouting.Decision {
         RecordTapRouting.decide(
             dictationStatus: status,
             isModelDownloaded: downloaded,
-            loadState: load
+            loadState: load,
+            isModelWarm: warm
         )
     }
 
@@ -74,5 +79,115 @@ final class RecordTapRoutingTests: XCTestCase {
     func testNoModelDownloadedFallsThroughToTheCoordinatorsError() {
         XCTAssertEqual(decide(.idle, downloaded: false), .startDictation)
         XCTAssertEqual(decide(.ready, downloaded: false), .startDictation)
+    }
+
+    // MARK: - #542: the model file is present and the Core ML cache is not
+
+    /// The bug itself. The App Group said `ready` because the model FILE was on disk; the
+    /// compile had not started, because it starts when the app launches, which is the same
+    /// instant the keyboard is handing off. A dictation ran into a 3 min 40 wait and was lost
+    /// with no text and no history entry.
+    func testAColdModelPresentsEvenThoughTheLoadStateSaysReady() {
+        XCTAssertEqual(decide(.idle, load: .ready, warm: false), .presentPreparation)
+    }
+
+    /// `.idle` is the same story with the last load having failed rather than succeeded. The
+    /// record, not the load state, is what says whether a transcription can happen now.
+    func testAColdModelPresentsOnIdleToo() {
+        XCTAssertEqual(decide(.idle, load: .idle, warm: false), .presentPreparation)
+    }
+
+    /// Decision 6, and the one that must not move: a dead app process with a warm cache is the
+    /// ordinary cold start #23 just shipped. Refusing here would put a preparation screen in
+    /// front of an 8-second load every time iOS killed the app, which is most of the time.
+    func testAWarmModelIsUntouchedOnEveryLoadState() {
+        for status in DictationStatus.allCases {
+            XCTAssertEqual(decide(status, load: .ready, warm: true), .startDictation)
+            XCTAssertEqual(decide(status, load: .idle, warm: true), .startDictation)
+        }
+    }
+
+    /// Coldness never outranks the two questions asked before it. A dictation already running
+    /// is still never covered (#458), and a missing model is still the coordinator's error to
+    /// word rather than a wait that will never end (#428).
+    func testColdnessDoesNotReorderTheQuestionsAboveIt() {
+        for status in [DictationStatus.recording, .transcribing, .processing] {
+            XCTAssertEqual(decide(status, load: .ready, warm: false), .startDictation)
+        }
+        XCTAssertEqual(decide(.idle, downloaded: false, load: .ready, warm: false), .startDictation)
+    }
+
+    /// A load in flight presents whatever the warmth record says, which is #484 unchanged.
+    /// If this ever diverges, the cold-cache rule has been written into the wrong arm.
+    func testALoadInFlightIsUnaffectedByTheWarmthRecord() {
+        XCTAssertEqual(decide(.idle, load: .loading, warm: true), .presentPreparation)
+        XCTAssertEqual(decide(.idle, load: .loading, warm: false), .presentPreparation)
+    }
+}
+
+/// #542's cold-cache gate on the Nemotron identifier (#558). The gate keys on the model
+/// identifier, so a model it has never seen is exactly the case that must refuse: a cold
+/// Nemotron compile lasts minutes, and a dictation recorded into it is lost the way #542
+/// described.
+final class NemotronColdCacheRoutingTests: XCTestCase {
+
+    private let suiteName = "NemotronColdCacheRoutingTests"
+    /// Created per test in `setUp`, released in `tearDown`. Optional rather than implicitly
+    /// unwrapped (CodeRabbit, PR #561): a test reaches it through `store()`, which fails the
+    /// test instead of crashing the run if it is ever missing.
+    private var defaults: UserDefaults?
+    private let nemotron = "nemotron-3.5-asr-multilingual-2240ms"
+    private let bundlePath = [
+        "/", "private", "var", "containers", "Bundle", "Application",
+        "1E5F0B24-0000-4000-8000-000000000558", "Dictus.app", "PlugIns", "DictusKeyboard.appex"
+    ]
+
+    override func setUp() {
+        super.setUp()
+        UserDefaults().removePersistentDomain(forName: suiteName)
+        defaults = UserDefaults(suiteName: suiteName)
+    }
+
+    override func tearDown() {
+        UserDefaults().removePersistentDomain(forName: suiteName)
+        defaults = nil
+        super.tearDown()
+    }
+
+    private func store() throws -> UserDefaults {
+        try XCTUnwrap(defaults, "setUp did not create the test suite")
+    }
+
+    private func keyboardTap() throws -> RecordTapRouting.Decision {
+        RecordTapRouting.decide(
+            dictationStatus: .idle,
+            isModelDownloaded: true,
+            loadState: .ready,
+            isModelWarm: ModelWarmth.isActiveModelWarm(
+                defaults: try store(), bundlePathComponents: bundlePath, systemVersion: "26.6.1"
+            )
+        )
+    }
+
+    func testANeverWarmedNemotronRoutesToThePreparationScreen() throws {
+        try store().set(nemotron, forKey: SharedKeys.activeModel)
+        XCTAssertEqual(try keyboardTap(), .presentPreparation)
+    }
+
+    /// Warm for another model is not warm for this one: Parakeet's record from before the
+    /// user switched says nothing about Nemotron's Core ML cache.
+    func testParakeetsWarmthDoesNotCoverNemotron() throws {
+        let identity = ModelWarmth.installIdentity(bundlePathComponents: bundlePath, systemVersion: "26.6.1")
+        ModelWarmth.markWarm("parakeet-tdt-0.6b-v3", identity: identity, defaults: try store())
+        try store().set(nemotron, forKey: SharedKeys.activeModel)
+        XCTAssertEqual(try keyboardTap(), .presentPreparation)
+    }
+
+    /// And once its warm inference has completed in this install, the tap goes through.
+    func testAWarmedNemotronStartsTheDictation() throws {
+        let identity = ModelWarmth.installIdentity(bundlePathComponents: bundlePath, systemVersion: "26.6.1")
+        ModelWarmth.markWarm(nemotron, identity: identity, defaults: try store())
+        try store().set(nemotron, forKey: SharedKeys.activeModel)
+        XCTAssertEqual(try keyboardTap(), .startDictation)
     }
 }

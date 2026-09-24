@@ -76,4 +76,53 @@ public enum ModelPreparationOutcome {
     public static func reasonMeansGaveUp(_ reason: String) -> Bool {
         gaveUpReasons.contains(reason)
     }
+
+    /// Whether a preparation may run its completion state without ever having seen work
+    /// happen — the checkmark, then the dismissal — because the model is already loaded.
+    ///
+    /// WHY THIS IS NOT JUST "the load state says ready" (issue #579): `modelLoadState`
+    /// lives in the App Group, so it outlives the process that wrote it. A launch from
+    /// dead reads its predecessor's verdict, and on a keyboard cold start that verdict is
+    /// `ready` about RAM this process does not have. Measured on device 2026-09-17: the
+    /// screen celebrated and dismissed two seconds into a twenty-second load, and the user
+    /// went back to a keyboard that still refused them.
+    ///
+    /// `loadStateIsFromThisLaunch` is the whole fix. It is false until a live process in
+    /// this launch publishes a load state, which is what makes the value evidence rather
+    /// than a leftover. The launch preload publishes `.loading` within the first turns of
+    /// every launch that has a model, so the window this closes is exactly the one where
+    /// nothing in this process has spoken yet.
+    ///
+    /// WHY NOT THE CONTEXT TEST THE ISSUE PROPOSED, which was to exclude
+    /// `.keyboardColdStart` outright: the keyboard never *asks* for preparation about a
+    /// model it believes is loaded, but the app answers later than the keyboard asked —
+    /// a URL open and an app activation later. A load that lands in that window writes
+    /// `.ready` from a live process, and that value is a fact. Excluding the context
+    /// would leave the screen up with nothing left to dismiss it, and this screen
+    /// replaces the tab bar rather than covering it (issue #428). Freshness refuses the
+    /// stale value and keeps the honest one, which is what the issue's second acceptance
+    /// criterion asks for in those words.
+    ///
+    /// WHY IT STAYS `isPrepareOnly`: onboarding and model selection present this screen
+    /// *before* their own work starts, so a `.ready` read at that moment is about the
+    /// model they are replacing. They have `hasSeenWorkPhase` for that, and they keep it.
+    ///
+    /// - Parameters:
+    ///   - context: the flow that raised the preparation screen.
+    ///   - isModelOnDisk: whether the model's files are installed — `ModelState.ready`,
+    ///     which is a statement about the filesystem and never about RAM.
+    ///   - loadState: `SharedKeys.modelLoadState`, as this process currently reads it.
+    ///   - loadStateIsFromThisLaunch: whether a live process in this launch wrote that
+    ///     value, rather than it being the App Group's memory of a process that is gone.
+    public static func preparationWasAlreadyReady(
+        context: ModelPreparationContext,
+        isModelOnDisk: Bool,
+        loadState: ModelLoadState,
+        loadStateIsFromThisLaunch: Bool
+    ) -> Bool {
+        context.isPrepareOnly
+            && loadStateIsFromThisLaunch
+            && isModelOnDisk
+            && loadState == .ready
+    }
 }

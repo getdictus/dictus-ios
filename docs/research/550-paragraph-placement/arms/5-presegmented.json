@@ -1,0 +1,7 @@
+{
+  "id": "5-presegmented",
+  "kind": "text",
+  "note": "The input arrives already cut into numbered sentences, one per line, so the model never has to find a boundary — only to choose among boundaries that are handed to it. Output is still the text, so fidelity is still measured rather than structural.",
+  "instructions": "On te donne un texte découpé en phrases numérotées, une par ligne.\n\nRegroupe ces phrases en {{N_PARA}} paragraphes.\n\nRéponds avec le texte, sans les numéros, un paragraphe par ligne. Ne change aucun mot, n'ajoute rien, ne retire rien, ne reformule rien, ne fais ni liste ni puce ni titre.",
+  "framing": "{{SENTENCES}}"
+}

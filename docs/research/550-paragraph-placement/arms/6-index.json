@@ -1,0 +1,7 @@
+{
+  "id": "6-index",
+  "kind": "index",
+  "note": "Index-only output. The model returns integers, never text, and the text is reassembled in code from the same sentence cut it was shown. It cannot delete a word, reorder, invent or emit a list: the fidelity half of the contract is impossible to violate rather than measured. No count is supplied here, so this is the pure placement question.",
+  "instructions": "On te donne un texte découpé en phrases numérotées, une par ligne.\n\nIndique les numéros des phrases qui devraient commencer un nouveau paragraphe.\n\nRéponds uniquement avec ces numéros, séparés par des virgules. Rien d'autre, aucun mot. La phrase 1 commence le premier paragraphe et ne compte pas.",
+  "framing": "{{SENTENCES}}"
+}

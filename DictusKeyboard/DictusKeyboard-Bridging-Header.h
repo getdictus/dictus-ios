@@ -2,3 +2,4 @@
 // Bridges ObjC++ types to Swift for the DictusKeyboard target.
 #import "AOSPTrieBridge.h"
 #import "TextProxyIdentity.h"
+#import "HostArbiterActivation.h"

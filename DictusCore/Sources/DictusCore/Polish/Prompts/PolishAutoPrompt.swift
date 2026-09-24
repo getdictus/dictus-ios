@@ -37,7 +37,7 @@ import Foundation
 ///   share one 4096-token window (#270) — on the prompt that is already the
 ///   longest one this build sends.
 enum PolishAutoPrompt {
-    static func instructions(glossary: String) -> String {
+    static func instructions() -> String {
         """
         You are a TEXT TRANSFORMATION FUNCTION. You polish speech-to-text output for written messages.
 
@@ -81,9 +81,6 @@ enum PolishAutoPrompt {
         - Do NOT delete words that carry meaning. Every noun, verb, adjective, number, name and complement the speaker DICTATED appears in the output. Rules 4, 5 and 6 are the only licence to remove a word — rule 4 removes a spoken punctuation command because the mark replaces it, rules 5 and 6 remove stutters and hesitation fillers.
         - Do NOT reorder words.
         - Do NOT add `<<NL>>` markers where none existed. Do NOT split or alter existing markers.
-
-        Domain vocabulary — preserve canonical spelling:
-        \(glossary)
 
         Examples — the input language varies; the output language always matches it:
 

@@ -62,3 +62,51 @@ final class KeyboardDictationURLTests: XCTestCase {
         XCTAssertEqual(KeyboardDictationURL.intent(from: url), .record)
     }
 }
+
+// MARK: - Host app hand-off (#23)
+
+extension KeyboardDictationURLTests {
+
+    func testHostIdRoundTripsThroughTheBuilder() {
+        let url = KeyboardDictationURL.dictationURL(intent: .record, hostId: "com.apple.mobilenotes")
+        XCTAssertNotNil(url)
+        XCTAssertEqual(url.flatMap(KeyboardDictationURL.hostId(from:)), "com.apple.mobilenotes")
+        XCTAssertEqual(url.flatMap(KeyboardDictationURL.intent(from:)), .record)
+    }
+
+    /// Enterprise bundle identifiers can carry characters outside the query-safe set, and
+    /// hand-built URL strings are how that ships broken. The builder owns the encoding.
+    func testAHostIdNeedingEncodingSurvives() {
+        let awkward = "com.example.app+beta/ü"
+        let url = KeyboardDictationURL.dictationURL(intent: .record, hostId: awkward)
+        XCTAssertNotNil(url)
+        XCTAssertEqual(url.flatMap(KeyboardDictationURL.hostId(from:)), awkward)
+    }
+
+    /// The prepare hand-off carries no host: it opens Dictus for the user to watch a
+    /// model load, and hands nothing back.
+    func testPrepareCarriesNoHost() {
+        let url = KeyboardDictationURL.dictationURL(intent: .prepare)
+        XCTAssertEqual(url.flatMap(KeyboardDictationURL.intent(from:)), .prepare)
+        XCTAssertNil(url.flatMap(KeyboardDictationURL.hostId(from:)))
+    }
+
+    /// A hand-off whose host could not be resolved must parse as "no host", never as an
+    /// empty string a caller might treat as a bundle identifier.
+    func testAbsentAndEmptyHostsBothReadAsNil() {
+        // swiftlint:disable:next force_unwrapping
+        let noHost = URL(string: "dictus://dictate?source=keyboard")!
+        XCTAssertNil(KeyboardDictationURL.hostId(from: noHost))
+        // swiftlint:disable:next force_unwrapping
+        let emptyHost = URL(string: "dictus://dictate?source=keyboard&hostId=")!
+        XCTAssertNil(KeyboardDictationURL.hostId(from: emptyHost))
+    }
+
+    /// The widget's `dictus://dictate` is not a keyboard hand-off, so it has no host even
+    /// if something appends one.
+    func testAWidgetURLNeverYieldsAHost() {
+        // swiftlint:disable:next force_unwrapping
+        let widget = URL(string: "dictus://dictate?hostId=com.apple.mobilenotes")!
+        XCTAssertNil(KeyboardDictationURL.hostId(from: widget))
+    }
+}

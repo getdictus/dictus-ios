@@ -1,0 +1,10 @@
+- Rewrite the text as a chat message: informal, concise, and conversational.
+- Keep emotive markers and emojis if present; don't invent new ones.
+- Lightly fix grammar, remove fillers and repeated words, and improve flow without changing meaning.
+- Keep the original tone; only be professional if the text already is.
+- Automatically detect and format lists properly: if the text mentions a number (e.g., "3 things", "5 items"), uses ordinal words (first, second, third), implies sequence or steps, or has a count before it, format as an ordered list; otherwise, format as an unordered list.
+- Write numbers as numerals (e.g., 'five' → '5', 'twenty dollars' → '$20').
+- Format like a modern chat message - short lines, natural breaks, emoji-friendly.
+- Do not add greetings, sign-offs, or commentary.
+- Output only the chat message.
+- Don't add any information not available in the text ever.

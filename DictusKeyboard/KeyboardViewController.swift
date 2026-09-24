@@ -131,6 +131,13 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         PersistentLog.source = "KBD"
+        // #23. The swizzle is installed before `main` by a load-time constructor. This is
+        // a retry for the case where the private class was not yet loaded then, and it
+        // runs here rather than at `viewWillAppear` because the surviving explanation for
+        // a whole session of `known=0` is that UIKit decides once, early, whether the
+        // arbiter client exists — so every callback earlier than the first appearance is
+        // worth taking.
+        HostAppResolver.activateArbiter()
         let memEntry = MemoryFootprint.residentMB()
         // live= is the #281 headline probe: healthy cold starts peak at 2 live
         // controllers, both #281 occurrences peak at 3. See KeyboardLifecycleProbe.
@@ -366,6 +373,19 @@ class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        // #530: a new appearance is a new input context — iOS builds the proxy's
+        // mirror afresh, so whatever it was over-reporting is gone and the surplus
+        // accounting starts from zero. This is a reset, not the thing that makes the
+        // fix usable: correcting the delete count by the known surplus is. A
+        // teardown-only RELEASE was tried and failed on device — armed once, released
+        // never, autocorrect dark for the rest of the session.
+        bridge?.mirrorSync.release(reason: "viewWillAppear")
+
+        #if DEBUG
+        // The prediction starts without a baseline and adopts on its first probe.
+        MirrorProbe.shared.reset()
+        #endif
+
         // CRITICAL: Disable touch delay on system gesture recognizers.
         // iOS attaches gesture recognizers to the keyboard's UIWindow that have
         // delaysTouchesBegan=true (for system gesture disambiguation at screen edges).
@@ -386,6 +406,25 @@ class KeyboardViewController: UIInputViewController {
             details: "animated=\(animated) status=\(entryStatus) storedStatus=\(entryStoredStatus) coldStart=\(entryColdStart) inputBounds=\(Int(entryBounds.width))x\(Int(entryBounds.height)) hostingConst=\(hostingHeightConstraint?.constant ?? -1) heightConst=\(heightConstraint?.constant ?? -1) memMB=\(MemoryFootprint.residentMB())"
         ))
         PersistentLog.log(.keyboardDidAppear)
+
+        // #23. The arbiter is switched on by a load-time constructor (see
+        // `HostArbiterActivation.m`); this retries it if that failed and reports both
+        // outcomes, then harvests whatever pid → bundle pairing it is holding. Neither
+        // call reads the host: they fill the table that the mic tap looks the host up in.
+        //
+        // WHY the report is unconditional. The first version only logged when the outcome
+        // was `installed` or began with `<`, which silently excluded `already(<no-class>)`
+        // — a swizzle that had failed once and was never mentioned again. A whole device
+        // session then produced `known=0` with no way to tell whether the swizzle had not
+        // installed or had installed and woken nothing. One line per appearance is a
+        // price worth paying to never be blind there again.
+        // Retire the previous appearance's pid evidence before harvesting this one's. The
+        // keyboard appearing is what can change the host, and an entry from an earlier
+        // appearance is exactly the one a recycled pid would make wrong.
+        //
+        // #543: the same call registers this keyboard with the arbiter when it holds no
+        // connection, before the host signals its keyboard — see `ensureArbiterConnection`.
+        HostAppResolver.keyboardWillAppear()
         // Point KeyboardState's weak controller ref at the currently-visible controller
         // so call sites in KeyboardRootView and KeyboardState can access textDocumentProxy.
         // Previously set from KeyboardRootView.onAppear, which held a strong ref → #134.
@@ -562,6 +601,12 @@ class KeyboardViewController: UIInputViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
+        // #23. `viewWillAppear` harvests at 0 ms, and on the first appearance of a fresh
+        // extension process the arbiter's client state does not exist until roughly
+        // 200 ms after activation. This second reading, after layout has settled, costs
+        // one guarded KVC call and often lands on the other side of that gap.
+        HostAppResolver.harvest()
+
         // Issue #116 diagnostic: snapshot final frames after layout settles.
         // We log both sizes and constraint constants so we can detect priority mismatches
         // where iOS imposed a different height than we asked for.
@@ -593,6 +638,8 @@ class KeyboardViewController: UIInputViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
             self?.logLayoutSnapshot(action: "layoutSnapshot_2000ms")
         }
+
+        startMemoryTick()
     }
 
     /// First-run flag for viewDidLayoutSubviews. Used by upstream
@@ -682,6 +729,7 @@ class KeyboardViewController: UIInputViewController {
         // A finger held on backspace when iOS takes the keyboard away never produces a
         // touchesEnded, and the repeat timer was cleared by nothing else (#390).
         giellaKeyboard?.cancelKeyRepeat(reason: "viewDidDisappear")
+        stopMemoryTick()
 
         // Restore system gesture recognizer delay (be a good citizen)
         restoreWindowGestureDelay()
@@ -1138,8 +1186,52 @@ class KeyboardViewController: UIInputViewController {
 
     // MARK: - Text Change
 
+    // These two overrides exist ONLY for #530's diagnostic round and only in Debug.
+    // develop does not override them at all, so guarding the declarations — not just
+    // their bodies — is what keeps a release build byte-identical rather than merely
+    // equivalent.
+    #if DEBUG
+    /// The host is about to change the text. This is the LAST moment the keyboard's
+    /// prediction can be trusted before an edit it did not make lands, so an `off=0`
+    /// here followed by a re-baseline pins the divergence to the external edit
+    /// rather than to anything the keyboard did.
+    override func textWillChange(_ textInput: UITextInput?) {
+        super.textWillChange(textInput)
+        MirrorProbe.shared.probe(
+            event: "textWillChange",
+            mirror: textDocumentProxy.documentContextBeforeInput
+        )
+    }
+
+    /// The caret is about to move. Same role as `textWillChange` for a selection
+    /// delete, which moves the caret as well as changing the text.
+    override func selectionWillChange(_ textInput: UITextInput?) {
+        super.selectionWillChange(textInput)
+        MirrorProbe.shared.probe(
+            event: "selectionWillChange",
+            mirror: textDocumentProxy.documentContextBeforeInput
+        )
+    }
+    #endif
+
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
+        // #23. Every keystroke is a free chance to catch the arbiter while it is fresh.
+        // The device capture showed it stale for stretches of more than ten seconds, so a
+        // harvest that only ran at the appearance and at the tap could miss both times —
+        // which is what made the *first* dictation from a never-visited app fall back to
+        // the overlay. This is a guarded KVC read, and it happens on a callback iOS is
+        // already sending us, so it holds no timer and retains nothing. **Do not replace
+        // this with a `Timer` or a `CADisplayLink`**: one with `target: self` outlives the
+        // keyboard and goes on firing (#390 measured 15 real deletions after the finger
+        // had left the key, and #416 is a second, still-unfixed instance).
+        HostAppResolver.harvest()
+        #if DEBUG
+        MirrorProbe.shared.probe(
+            event: "textDidChange",
+            mirror: textDocumentProxy.documentContextBeforeInput
+        )
+        #endif
         // Re-check the dictation undo offer against the changed document (#266).
         // Deliberately a re-check and not a clear: the keyboard's own insertion is
         // itself a text change, so clearing here would cancel the offer at the
@@ -1158,6 +1250,15 @@ class KeyboardViewController: UIInputViewController {
 
     override func selectionDidChange(_ textInput: UITextInput?) {
         super.selectionDidChange(textInput)
+        // #23, same argument as `textDidChange`: a caret move is another free reading, and
+        // some hosts emit this without a text change when focus moves between fields.
+        HostAppResolver.harvest()
+        #if DEBUG
+        MirrorProbe.shared.probe(
+            event: "selectionDidChange",
+            mirror: textDocumentProxy.documentContextBeforeInput
+        )
+        #endif
         // A caret the user moved is a caret the insertion is no longer behind (#266).
         KeyboardState.shared.revalidateDictationUndo()
         // Some hosts move focus between fields without emitting textDidChange.

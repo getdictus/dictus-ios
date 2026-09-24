@@ -11,6 +11,7 @@
 		SS000001 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100001 /* SubscriptionManager.swift */; };
 		SS000002 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100002 /* PaywallView.swift */; };
 		AA361014 /* SmartModeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361013 /* SmartModeListView.swift */; };
+		AA800081 /* VocabularyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA800181 /* VocabularyListView.swift */; };
 		SS000009 /* PaywallPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100009 /* PaywallPresentation.swift */; };
 		AA700070 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA700170 /* HistoryView.swift */; };
 		AA700071 /* TranscriptionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA700171 /* TranscriptionDetailView.swift */; };
@@ -32,6 +33,7 @@
 		AA000006 /* DictationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000A /* DictationView.swift */; };
 		AA000007 /* KeyboardState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000B /* KeyboardState.swift */; };
 		AA0000F7 /* KeyboardLifecycleProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000F6 /* KeyboardLifecycleProbe.swift */; };
+		AA023002 /* HostAppResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA023001 /* HostAppResolver.swift */; };
 		AA483002 /* KeyboardCallGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA483001 /* KeyboardCallGuard.swift */; };
 		AA000008 /* MicButtonDisabled.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10000C /* MicButtonDisabled.swift */; };
 		AA000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA900010 /* DictusCore */; };
@@ -50,6 +52,7 @@
 		AA000045 /* UnifiedAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100045 /* UnifiedAudioEngine.swift */; };
 		AA000200 /* ObjCExceptionCatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = AA100200 /* ObjCExceptionCatcher.m */; };
 		AA361002 /* TextProxyIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = AA361001 /* TextProxyIdentity.m */; };
+		AA023004 /* HostArbiterActivation.m in Sources */ = {isa = PBXBuildFile; fileRef = AA023003 /* HostArbiterActivation.m */; };
 		AA361004 /* KeyboardPolishCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361003 /* KeyboardPolishCoordinator.swift */; };
 		AA361008 /* KeyboardPolishStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361007 /* KeyboardPolishStage.swift */; };
 		AA361010 /* KeyboardSmartModeFan.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361009 /* KeyboardSmartModeFan.swift */; };
@@ -57,6 +60,10 @@
 		AA423002 /* SmartModeDisplayName.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA423001 /* SmartModeDisplayName.swift */; };
 		AA000050 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100050 /* ModelManager.swift */; };
 		AA000052 /* ModelRepoDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100052 /* ModelRepoDownloader.swift */; };
+		AA055801 /* ParakeetCacheRepair.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155801 /* ParakeetCacheRepair.swift */; };
+		AA055803 /* NemotronEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155803 /* NemotronEngine.swift */; };
+		AA055804 /* FluidAudioDownloadRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA155804 /* FluidAudioDownloadRoute.swift */; };
+		AA055802 /* JointDecisionv3.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = AA155802 /* JointDecisionv3.mlmodelc */; };
 		AA000449 /* BackgroundModelDownloadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100449 /* BackgroundModelDownloadService.swift */; };
 		AA000492 /* DownloadConnectivityWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100492 /* DownloadConnectivityWatch.swift */; };
 		AA000051 /* ModelManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100051 /* ModelManagerView.swift */; };
@@ -210,6 +217,7 @@
 		AA10000A /* DictationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictationView.swift; sourceTree = "<group>"; };
 		AA10000B /* KeyboardState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardState.swift; sourceTree = "<group>"; };
 		AA1000F6 /* KeyboardLifecycleProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLifecycleProbe.swift; sourceTree = "<group>"; };
+		AA023001 /* HostAppResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostAppResolver.swift; sourceTree = "<group>"; };
 		AA483001 /* KeyboardCallGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardCallGuard.swift; sourceTree = "<group>"; };
 		AA10000C /* MicButtonDisabled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicButtonDisabled.swift; sourceTree = "<group>"; };
 		AA100030 /* InputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputView.swift; sourceTree = "<group>"; };
@@ -224,7 +232,9 @@
 		AA100045 /* UnifiedAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnifiedAudioEngine.swift; sourceTree = "<group>"; };
 		AA100200 /* ObjCExceptionCatcher.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCExceptionCatcher.m; sourceTree = "<group>"; };
 		AA361001 /* TextProxyIdentity.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextProxyIdentity.m; sourceTree = "<group>"; };
+		AA023003 /* HostArbiterActivation.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HostArbiterActivation.m; sourceTree = "<group>"; };
 		AA361005 /* TextProxyIdentity.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextProxyIdentity.h; sourceTree = "<group>"; };
+		AA023005 /* HostArbiterActivation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HostArbiterActivation.h; sourceTree = "<group>"; };
 		AA361003 /* KeyboardPolishCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPolishCoordinator.swift; sourceTree = "<group>"; };
 		AA361007 /* KeyboardPolishStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPolishStage.swift; sourceTree = "<group>"; };
 		AA361009 /* KeyboardSmartModeFan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSmartModeFan.swift; sourceTree = "<group>"; };
@@ -234,6 +244,10 @@
 		AA100202 /* DictusApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DictusApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		AA100050 /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
 		AA100052 /* ModelRepoDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelRepoDownloader.swift; sourceTree = "<group>"; };
+		AA155801 /* ParakeetCacheRepair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParakeetCacheRepair.swift; sourceTree = "<group>"; };
+		AA155803 /* NemotronEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NemotronEngine.swift; sourceTree = "<group>"; };
+		AA155804 /* FluidAudioDownloadRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FluidAudioDownloadRoute.swift; sourceTree = "<group>"; };
+		AA155802 /* JointDecisionv3.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = JointDecisionv3.mlmodelc; path = DictusApp/ParakeetMigration/JointDecisionv3.mlmodelc; sourceTree = SOURCE_ROOT; };
 		AA100449 /* BackgroundModelDownloadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModelDownloadService.swift; sourceTree = "<group>"; };
 		AA100492 /* DownloadConnectivityWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadConnectivityWatch.swift; sourceTree = "<group>"; };
 		AA100051 /* ModelManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManagerView.swift; sourceTree = "<group>"; };
@@ -294,6 +308,7 @@
 		SS100001 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		SS100002 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		AA361013 /* SmartModeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeListView.swift; sourceTree = "<group>"; };
+		AA800181 /* VocabularyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyListView.swift; sourceTree = "<group>"; };
 		SS100009 /* PaywallPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallPresentation.swift; sourceTree = "<group>"; };
 		AA700170 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		AA700171 /* TranscriptionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionDetailView.swift; sourceTree = "<group>"; };
@@ -421,6 +436,7 @@
 				AA1000C0 /* Assets.xcassets */,
 				AA1000C1 /* Settings.bundle */,
 				AA1000F4 /* Sounds */,
+				AA155802 /* JointDecisionv3.mlmodelc */,
 				AA100005 /* DictusApp.entitlements */,
 				AA100007 /* Info.plist */,
 				AA100P10 /* PrivacyInfo.xcprivacy */,
@@ -436,13 +452,16 @@
 				AA100004 /* KeyboardRootView.swift */,
 				AA10000B /* KeyboardState.swift */,
 				AA1000F6 /* KeyboardLifecycleProbe.swift */,
+				AA023001 /* HostAppResolver.swift */,
 				AA483001 /* KeyboardCallGuard.swift */,
 				AA361003 /* KeyboardPolishCoordinator.swift */,
 				AA361007 /* KeyboardPolishStage.swift */,
 				AA361009 /* KeyboardSmartModeFan.swift */,
 				AA423001 /* SmartModeDisplayName.swift */,
 				AA361005 /* TextProxyIdentity.h */,
+				AA023005 /* HostArbiterActivation.h */,
 				AA361001 /* TextProxyIdentity.m */,
+				AA023003 /* HostArbiterActivation.m */,
 				AA100030 /* InputView.swift */,
 				CC100030 /* KeyboardMetrics.swift */,
 				CC100050 /* KeySoundPolicy.swift */,
@@ -515,6 +534,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1000F1 /* ParakeetEngine.swift */,
+				AA155803 /* NemotronEngine.swift */,
 				AA1000F0 /* SpeechModelProtocol.swift */,
 				AA100041 /* TranscriptionService.swift */,
 				AA100045 /* UnifiedAudioEngine.swift */,
@@ -569,6 +589,7 @@
 				AA100484 /* ModelPreparationPresentation.swift */,
 				SS100002 /* PaywallView.swift */,
 				AA361013 /* SmartModeListView.swift */,
+				AA800181 /* VocabularyListView.swift */,
 				SS100009 /* PaywallPresentation.swift */,
 				AA700170 /* HistoryView.swift */,
 				AA700171 /* TranscriptionDetailView.swift */,
@@ -592,6 +613,8 @@
 			children = (
 				AA100050 /* ModelManager.swift */,
 				AA100052 /* ModelRepoDownloader.swift */,
+				AA155801 /* ParakeetCacheRepair.swift */,
+				AA155804 /* FluidAudioDownloadRoute.swift */,
 				AA100449 /* BackgroundModelDownloadService.swift */,
 				AA100492 /* DownloadConnectivityWatch.swift */,
 			);
@@ -895,6 +918,7 @@
 				AA0000C0 /* Assets.xcassets in Resources */,
 				AA0000C1 /* Settings.bundle in Resources */,
 				AA0000F4 /* Sounds in Resources */,
+				AA055802 /* JointDecisionv3.mlmodelc in Resources */,
 				AA000P10 /* PrivacyInfo.xcprivacy in Resources */,
 				AA0000L1 /* Localizable.xcstrings in Resources */,
 			);
@@ -1018,6 +1042,9 @@
 				AA000043 /* RecordingView.swift in Sources */,
 				AA000050 /* ModelManager.swift in Sources */,
 				AA000052 /* ModelRepoDownloader.swift in Sources */,
+				AA055801 /* ParakeetCacheRepair.swift in Sources */,
+				AA055803 /* NemotronEngine.swift in Sources */,
+				AA055804 /* FluidAudioDownloadRoute.swift in Sources */,
 				AA000449 /* BackgroundModelDownloadService.swift in Sources */,
 				AA000492 /* DownloadConnectivityWatch.swift in Sources */,
 				AA000051 /* ModelManagerView.swift in Sources */,
@@ -1053,6 +1080,7 @@
 				SS000001 /* SubscriptionManager.swift in Sources */,
 				SS000002 /* PaywallView.swift in Sources */,
 				AA361014 /* SmartModeListView.swift in Sources */,
+				AA800081 /* VocabularyListView.swift in Sources */,
 				SS000009 /* PaywallPresentation.swift in Sources */,
 				AA700070 /* HistoryView.swift in Sources */,
 				AA700071 /* TranscriptionDetailView.swift in Sources */,
@@ -1069,12 +1097,14 @@
 				AA000004 /* KeyboardRootView.swift in Sources */,
 				AA000007 /* KeyboardState.swift in Sources */,
 				AA0000F7 /* KeyboardLifecycleProbe.swift in Sources */,
+				AA023002 /* HostAppResolver.swift in Sources */,
 				AA483002 /* KeyboardCallGuard.swift in Sources */,
 				AA361004 /* KeyboardPolishCoordinator.swift in Sources */,
 				AA361008 /* KeyboardPolishStage.swift in Sources */,
 				AA361010 /* KeyboardSmartModeFan.swift in Sources */,
 				AA423002 /* SmartModeDisplayName.swift in Sources */,
 				AA361002 /* TextProxyIdentity.m in Sources */,
+				AA023004 /* HostArbiterActivation.m in Sources */,
 				AA000008 /* MicButtonDisabled.swift in Sources */,
 				AA000030 /* InputView.swift in Sources */,
 				AA000035 /* FullAccessBanner.swift in Sources */,
@@ -1183,6 +1213,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1243,6 +1274,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1469,7 +1501,7 @@
 			repositoryURL = "https://github.com/FluidInference/FluidAudio.git";
 			requirement = {
 				kind = upToNextMinorVersion;
-				minimumVersion = 0.12.3;
+				minimumVersion = 0.15.7;
 			};
 		};
 		CC800001 /* XCRemoteSwiftPackageReference "DeviceKit" */ = {

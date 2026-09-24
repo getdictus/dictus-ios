@@ -205,11 +205,22 @@ struct KeyboardRootView: View {
             GeometryReader { geo in
                 EmojiPickerView(
                     onEmojiInsert: { emoji in
+                        // #548: armed like every other keyboard edit.
+                        let mirrorBefore = bridge?.mirrorLength() ?? 0
                         state.controller?.textDocumentProxy.insertText(emoji)
+                        bridge?.observeMirror(before: mirrorBefore, inserted: emoji.count)
+                        #if DEBUG
+                        MirrorProbe.shared.record(.insert(emoji))
+                        #endif
                         HapticFeedback.keyTapped()
                     },
                     onDelete: {
+                        let mirrorBefore = bridge?.mirrorLength() ?? 0
                         state.controller?.textDocumentProxy.deleteBackward()
+                        bridge?.observeMirror(before: mirrorBefore, deleted: 1)
+                        #if DEBUG
+                        MirrorProbe.shared.record(.deleteBackward)
+                        #endif
                         HapticFeedback.keyTapped()
                     },
                     onDismiss: { state.presentAreaMode(.keys) },
@@ -466,7 +477,13 @@ struct KeyboardRootView: View {
         if suggestionState.mode == .corrections {
             if index == 0 {
                 suggestionState.rejectedWords.insert(suggestion.lowercased())
+                // #548: reported, but deliberately NOT treated as a settling boundary.
+                // Adding `noteBoundaryInserted` here would change when suspicion
+                // clears, which is behaviour, and #548 is only about what the detector
+                // is told. Which sites should settle is a separate question.
+                let mirrorBefore = bridge?.mirrorLength() ?? 0
                 proxy.insertText(" ")
+                bridge?.observeMirror(before: mirrorBefore, inserted: 1)
             } else {
                 replaceCurrentWord(
                     proxy: proxy,
@@ -555,6 +572,10 @@ struct KeyboardRootView: View {
         let matchLength = matchedWithSpace ? correctedWithSpace.count : undo.correctedWord.count
         let deleteCount = matchLength + afterCorrection.count
 
+        // #548: `deleteCount` is measured off `context`, the mirror read at the top of
+        // this function, so it can never exceed the mirror's length and a healthy undo
+        // is consistent by construction.
+        let mirrorBefore = bridge?.mirrorLength() ?? 0
         for _ in 0..<deleteCount {
             proxy.deleteBackward()
         }
@@ -564,8 +585,18 @@ struct KeyboardRootView: View {
             proxy.insertText(" ")
         }
         proxy.insertText(afterCorrection)
+        bridge?.observeMirror(
+            before: mirrorBefore,
+            deleted: deleteCount,
+            inserted: undo.originalWord.count + (matchedWithSpace ? 1 : 0) + afterCorrection.count
+        )
 
         #if DEBUG
+        MirrorProbe.shared.record(.replace(
+            deleted: deleteCount,
+            inserted: undo.originalWord + (matchedWithSpace ? " " : "") + afterCorrection
+        ))
+        MirrorProbe.shared.probe(event: "bar-undo", mirror: proxy.documentContextBeforeInput)
         AutocorrectDebugLog.autocorrectUndone(
             original: undo.originalWord, rejected: undo.correctedWord
         )
@@ -615,12 +646,22 @@ struct KeyboardRootView: View {
 
     /// Executes a validated replacement: deletes exactly `deleteCount` graphemes,
     /// then inserts. Only ever called with a count that a boundary check produced.
+    ///
+    /// Still a blind loop, deliberately (#530). The count comes from
+    /// AutocorrectReplacement.check, which reads the proxy — the only source of
+    /// truth an extension has, and so unable to catch itself lying. Clamping the
+    /// loop on a word boundary was tried and is dead code by construction; see
+    /// `WordBoundaryDelete`. #530's diagnostic round must not perturb what it
+    /// measures, so this site behaves exactly as it does on develop.
     private func applyReplacement(
         proxy: UITextDocumentProxy,
         deleteCount: Int,
         replacement: String,
         addSpace: Bool
     ) {
+        // #548: both callers derive `deleteCount` from AutocorrectReplacement.check
+        // over the live mirror, so it is never larger than the mirror holds.
+        let mirrorBefore = bridge?.mirrorLength() ?? 0
         for _ in 0..<deleteCount {
             proxy.deleteBackward()
         }
@@ -628,6 +669,17 @@ struct KeyboardRootView: View {
         if addSpace {
             proxy.insertText(" ")
         }
+        bridge?.observeMirror(
+            before: mirrorBefore,
+            deleted: deleteCount,
+            inserted: replacement.count + (addSpace ? 1 : 0)
+        )
+        #if DEBUG
+        MirrorProbe.shared.record(
+            .replace(deleted: deleteCount, inserted: replacement + (addSpace ? " " : ""))
+        )
+        MirrorProbe.shared.probe(event: "bar-replace", mirror: proxy.documentContextBeforeInput)
+        #endif
     }
 
     /// Logs a replacement the boundary check refused (#191). Debug builds only.

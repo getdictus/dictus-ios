@@ -25,14 +25,42 @@ public struct SmartModeFailure: Equatable, Sendable {
     /// `PolishFailureReason` wraps an `Error` and is not `Equatable`.
     public let reason: String
 
+    /// What the transcript was read as, as an `NLLanguage` raw code, or nil when
+    /// nothing was readable (#490).
+    ///
+    /// Here because one refusal has to name it: `unsupportedInputLanguage` means the
+    /// language the user spoke is one the model does not read, and a message that
+    /// says so without saying which language would leave them guessing. Every other
+    /// outcome ignores it.
+    public let detectedLanguage: String?
+
+    /// Which guardrail refused the engine's output (`PolishGuardrail.Check.rawValue`),
+    /// or nil when this refusal is not a guardrail rejection.
+    ///
+    /// Here because the refusal is otherwise unreadable after the fact (#580).
+    /// `outcome` says `rejectedGuardrail` and `reason` says "-" — nothing was thrown —
+    /// so a persistent log could not tell `length` from `segmentOverlap` from
+    /// `prefixAlignment`, and those are three different bugs. `PolishMetrics` has
+    /// carried the check to the app's debug export all along; this puts it on the
+    /// value the refusal itself travels on, which is what `smartModeRefused` prints.
+    ///
+    /// A `String` rather than the `Check` itself, matching `outcome` and `reason`:
+    /// this value crosses target boundaries and is read by surfaces that have no
+    /// business knowing the guardrail's type.
+    public let guardrailCheck: String?
+
     public init(modeIdentifier: String,
                 modeDisplayName: String,
                 outcome: String,
-                reason: String) {
+                reason: String,
+                detectedLanguage: String? = nil,
+                guardrailCheck: String? = nil) {
         self.modeIdentifier = modeIdentifier
         self.modeDisplayName = modeDisplayName
         self.outcome = outcome
         self.reason = reason
+        self.detectedLanguage = detectedLanguage
+        self.guardrailCheck = guardrailCheck
     }
 }
 
@@ -54,7 +82,7 @@ public struct SmartModeFailure: Equatable, Sendable {
 ///
 /// A mode may also come back with *text and a failure at once*: the transformation
 /// did not happen, but this mode declared that the untransformed floor is better
-/// than nothing for this particular refusal — see `SmartModeOverflowBehaviour`. The
+/// than nothing for this particular refusal — see `SmartModeFloorBehaviour`. The
 /// user is told in both failing shapes. Refusing in silence and degrading in silence
 /// are the same defect, which is why `smartModeFailure` is what a surface keys on
 /// and `text` only decides whether anything is typed.

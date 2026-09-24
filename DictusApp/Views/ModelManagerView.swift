@@ -250,6 +250,10 @@ struct ModelManagerView: View {
                         icon: "bolt",
                         text: "Parakeet — transcription engine developed by NVIDIA, optimized for speed. Parakeet TDT models."
                     )
+                    engineParagraph(
+                        icon: "character.bubble",
+                        text: "Nemotron: transcription engine developed by NVIDIA that transcribes in the language chosen in Settings. Nemotron 3.5 ASR model."
+                    )
                 }
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
@@ -356,7 +360,10 @@ struct ModelManagerView: View {
     // MARK: - Engine descriptions
 
     /// A single engine description paragraph with icon.
-    private func engineParagraph(icon: String, text: String) -> some View {
+    /// `LocalizedStringKey`, not `String` (#558): a `String` handed to `Text` is shown verbatim,
+    /// so these paragraphs never reached their French translations, which the catalogue has
+    /// carried all along. The literals at the call sites are the keys.
+    private func engineParagraph(icon: String, text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: icon)
                 .font(.dictusCaption)

@@ -25,8 +25,8 @@ public enum ModelPreparationWait: Equatable, Sendable {
 
     /// Nobody has timed this model's first preparation on a device, or the catalogue
     /// does not know this identifier at all — which is exactly what a model left over
-    /// from an older build looks like. The screen still says the wait happens once. It
-    /// invents no duration.
+    /// from an older build looks like. The screen still says when the wait comes back
+    /// (after each update, issue #542). It invents no duration.
     case unmeasured
 
     /// Under this, a first preparation is `.brief` and the copy names no figure.

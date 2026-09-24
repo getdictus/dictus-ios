@@ -386,6 +386,54 @@ final class TranscriptionLanguagePolicyTests: XCTestCase {
         )
     }
 
+    /// #518 put the shares on the persistent log's `polishEngineFailed` line as
+    /// well as in the OSLog metrics line, so the rendering became something two
+    /// call sites share. Leader first, because the reader of either line is asking
+    /// which language the engine was handed — and `-` rather than an empty string
+    /// when there is no mix, so the field keeps its shape for a grep.
+    func testTheSharesRenderLeaderFirstOnOneLine() {
+        let sut = policy(.followKeyboard, keyboard: .french, engine: .parakeet)
+        XCTAssertEqual(
+            PolishMetrics.LanguageResolution(policy: sut, mix: mixed(.english, 0.776, .french))
+                .mixDescription,
+            "en 0.78/fr 0.22"
+        )
+        XCTAssertEqual(
+            PolishMetrics.LanguageResolution(policy: sut, mix: wholly(.french)).mixDescription,
+            "fr 1.00"
+        )
+        XCTAssertEqual(
+            PolishMetrics.LanguageResolution(policy: sut).mixDescription, "-",
+            "no mix was supplied, so none is claimed"
+        )
+    }
+
+    /// The decimal separator is a dot under a French locale too.
+    ///
+    /// Raised on PR #519's review as a suspected `String(format:)` localisation bug —
+    /// `fr 0,78` instead of `fr 0.78`, which would break the agent that reads this
+    /// log (#255). It is not one: the `String(format:)` overload WITHOUT a `locale:`
+    /// argument is documented as non-localizing, and only the overload that takes one
+    /// localizes. Measured under `LC_ALL=fr_FR.UTF-8` with `Locale.current` reading
+    /// `fr_FR`: the no-locale call printed `0.78` and the explicit `fr_FR` call
+    /// printed `0,78`.
+    ///
+    /// Pinned rather than argued, because the cheap fix for a bug that does not exist
+    /// is a `locale:` argument nobody would ever remove — and this test fails loudly
+    /// if someone adds the localizing overload by accident.
+    func testTheSharesUseADotWhateverTheProcessLocale() {
+        let previous = setlocale(LC_ALL, nil).map { String(cString: $0) }
+        setlocale(LC_ALL, "fr_FR.UTF-8")
+        defer { setlocale(LC_ALL, previous ?? "C") }
+
+        let sut = policy(.followKeyboard, keyboard: .french, engine: .parakeet)
+        let rendered = PolishMetrics.LanguageResolution(
+            policy: sut, mix: mixed(.english, 0.776, .french)
+        ).mixDescription
+        XCTAssertEqual(rendered, "en 0.78/fr 0.22")
+        XCTAssertFalse(rendered.contains(","), "a decimal comma breaks the log's reader")
+    }
+
     func testLanguageResolutionTrailCarriesEachFactApart() {
         // The export must let a reader separate the mode, the keyboard, and
         // what STT was handed — the failure that made three device re-tests
@@ -533,5 +581,88 @@ final class PolishLanguageResolutionPersistenceTests: XCTestCase {
         XCTAssertNil(decoded.languageResolution,
                      "a missing key means 'written before the trail existed', not a failed decode")
         XCTAssertEqual(decoded.timings?.engineMs, 3180)
+    }
+}
+
+/// Nemotron 3.5 (#558): the "Transcription language" setting becomes real on this engine,
+/// through the three modes that already exist.
+final class NemotronLanguagePolicyTests: XCTestCase {
+
+    private func policy(_ mode: TranscriptionLanguageMode,
+                        keyboard: SupportedLanguage) -> TranscriptionLanguagePolicy {
+        TranscriptionLanguagePolicy(
+            mode: mode, keyboardLanguage: keyboard, engine: .nemotron,
+            modelIdentifier: "nemotron-3.5-asr-multilingual-2240ms"
+        )
+    }
+
+    /// `.followKeyboard` is the default and what "never set" means: forced to the keyboard.
+    func testFollowKeyboardForcesTheKeyboardLanguage() {
+        for keyboard in SupportedLanguage.allCases {
+            let sut = policy(.followKeyboard, keyboard: keyboard)
+            XCTAssertEqual(sut.sttLanguageCode, keyboard.rawValue)
+            XCTAssertEqual(NemotronLanguagePrompt.code(forSTTLanguageCode: sut.sttLanguageCode), keyboard.rawValue)
+            XCTAssertFalse(sut.insertsTranscriptionAsIs)
+        }
+        // The stored value nothing ever wrote resolves to the same thing.
+        XCTAssertEqual(TranscriptionLanguageMode(storedValue: nil), .followKeyboard)
+    }
+
+    /// `.explicit` forces the chosen language, whatever the keyboard says.
+    func testExplicitForcesTheChosenLanguage() {
+        let sut = policy(.explicit(.french), keyboard: .german)
+        XCTAssertEqual(sut.sttLanguageCode, "fr")
+        XCTAssertEqual(NemotronLanguagePrompt.code(forSTTLanguageCode: sut.sttLanguageCode), "fr")
+        XCTAssertFalse(sut.insertsTranscriptionAsIs)
+    }
+
+    /// `.autoDetect` passes the model's own `"auto"` prompt, and its output is inserted as-is,
+    /// like Whisper auto-detect, because it can land on any of the model's languages.
+    func testAutoDetectPassesTheAutoPromptAndInsertsAsIs() {
+        let sut = policy(.autoDetect, keyboard: .french)
+        XCTAssertNil(sut.sttLanguageCode, "nil is auto-detection in the policy, as on Whisper")
+        XCTAssertEqual(NemotronLanguagePrompt.code(forSTTLanguageCode: sut.sttLanguageCode), "auto")
+        XCTAssertEqual(sut.sttLanguageCodeDescription, "auto")
+        XCTAssertTrue(sut.insertsTranscriptionAsIs)
+    }
+
+    func testTheSettingIsEffectiveOnNemotronAndStillNotOnParakeet() {
+        XCTAssertTrue(policy(.followKeyboard, keyboard: .french).sttLanguageIsEffective)
+        let parakeet = TranscriptionLanguagePolicy(
+            mode: .explicit(.english), keyboardLanguage: .french, engine: .parakeet, modelIdentifier: "p"
+        )
+        XCTAssertFalse(parakeet.sttLanguageIsEffective)
+        XCTAssertEqual(parakeet.sttLanguageCode, "fr", "Parakeet keeps its pre-#226 code")
+        XCTAssertFalse(TranscriptionLanguagePolicy(
+            mode: .autoDetect, keyboardLanguage: .french, engine: .parakeet, modelIdentifier: "p"
+        ).insertsTranscriptionAsIs)
+    }
+
+    /// An empty code is not a language: FluidAudio would resolve it to its default prompt
+    /// silently, so the mapping says `"auto"` out loud instead.
+    func testAnEmptyCodeIsAutoOutLoud() {
+        XCTAssertEqual(NemotronLanguagePrompt.code(forSTTLanguageCode: ""), "auto")
+    }
+
+    /// The four keyboard languages are keys of the multilingual ship's `prompt_dictionary`,
+    /// transcribed from `multilingual/2240ms/metadata.json` read 2026-09-14. A new
+    /// `SupportedLanguage` whose code is not a key would silently run auto-detect.
+    func testEveryKeyboardLanguageIsAPromptDictionaryKey() {
+        let promptDictionaryShortKeys: Set<String> = [
+            "en", "es", "fr", "de", "hi", "ar", "ru", "pt", "ko", "it", "nl", "pl", "tr", "uk",
+            "ro", "el", "cs", "hu", "sv", "da", "fi", "no", "sk", "hr", "bg", "lt", "et", "lv",
+            "sl", "nb", "nn"
+        ]
+        for language in SupportedLanguage.allCases {
+            XCTAssertTrue(promptDictionaryShortKeys.contains(language.rawValue),
+                          "\(language.rawValue) is not a Nemotron prompt key")
+        }
+    }
+
+    /// Polish: the language is forced upstream, as on Whisper, so never Repair.
+    func testPolishModeIsNaturalWhateverWasDetected() {
+        for detected in SupportedLanguage.allCases {
+            XCTAssertEqual(PolishPipeline.mode(sttEngine: .nemotron, detected: detected, target: .french), .natural)
+        }
     }
 }

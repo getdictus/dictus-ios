@@ -115,10 +115,53 @@ final class PolishPostpassTests: XCTestCase {
         )
     }
 
-    func testDecodeCollapsesNewlinesWithSurroundingSpaces() {
+    func testDecodeCapsAModelRunAtOneBlankLine() {
+        // No marker here: this run is the MODEL's own. It keeps its shape — a
+        // paragraph break — rather than collapsing to a line break, and a longer
+        // run is capped at one blank line (#523).
         XCTAssertEqual(
             PolishPostpass.decodeFromEngine("réunion. \n\n\n\n Premièrement", language: .french),
-            "réunion.\nPremièrement"
+            "réunion.\n\nPremièrement"
+        )
+    }
+
+    func testDecodeKeepsAModelBlankLine() {
+        // Measured on 29 accepted Structured outputs, 2026-09-16: when Apple FM
+        // breaks a paragraph it emits a blank line, never a bare newline — 24 runs
+        // of exactly two, zero of one. The old collapse erased every one of them,
+        // so no measurement in this repo could see the difference.
+        XCTAssertEqual(
+            PolishPostpass.decodeFromEngine("Premier sujet.\n\nDeuxième sujet.", language: .french),
+            "Premier sujet.\n\nDeuxième sujet."
+        )
+    }
+
+    func testDecodeNormalisesCarriageReturns() {
+        // The rules below are LF-only and nothing upstream normalises: a CRLF run
+        // would otherwise survive both the trim and the cap.
+        XCTAssertEqual(
+            PolishPostpass.decodeFromEngine("a\r\n\r\n\r\nb", language: .french),
+            "a\n\nb"
+        )
+        XCTAssertEqual(
+            PolishPostpass.decodeFromEngine("a\rb", language: .french),
+            "a\nb"
+        )
+    }
+
+    func testDecodeKeepsAModelSingleNewline() {
+        XCTAssertEqual(
+            PolishPostpass.decodeFromEngine("- un\n- deux", language: .french),
+            "- un\n- deux"
+        )
+    }
+
+    func testDecodeMarkerWinsOverTheModelBreaksAroundIt() {
+        // A dictated "à la ligne" is ONE break even when the model wrapped it in
+        // paragraph breaks of its own.
+        XCTAssertEqual(
+            PolishPostpass.decodeFromEngine("a.\n\n<<NL>>\n\nb", language: .french),
+            "a.\nb"
         )
     }
 

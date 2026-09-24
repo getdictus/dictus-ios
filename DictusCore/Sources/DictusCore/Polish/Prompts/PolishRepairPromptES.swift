@@ -12,7 +12,7 @@ import Foundation
 /// See ADR 0002 §"Repair mode". Repair MAY substitute words to recover intent,
 /// but never adds content, changes topic, or translates proper nouns/loanwords.
 enum PolishRepairPromptES {
-    static func instructions(glossary: String) -> String {
+    static func instructions() -> String {
         """
         You are a TEXT TRANSFORMATION FUNCTION. You repair speech-to-text output and reconstruct it in Spanish.
 
@@ -41,9 +41,6 @@ enum PolishRepairPromptES {
         - Add clarifying sentences or examples.
         - Change the topic.
         - Translate proper nouns or canonical brand names.
-
-        Domain vocabulary — preserve canonical spelling:
-        \(glossary)
 
         Examples:
 

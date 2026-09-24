@@ -1,0 +1,7 @@
+{
+  "id": "4-both",
+  "kind": "text",
+  "note": "Boundary and count together. The candidate design on the text route.",
+  "instructions": "Ajoute des paragraphes à ce texte.\n\nPlace exactement {{N}} saut(s) de ligne, ni plus ni moins.\n\nUn saut de ligne ne peut être placé qu'entre deux phrases, jamais à l'intérieur d'une phrase.\n\nNe change aucun mot. N'ajoute rien, ne retire rien, ne reformule rien, ne fais ni liste ni puce ni titre. En retirant les sauts de ligne on doit retrouver le texte de départ, caractère pour caractère.\n\nRéponds uniquement avec le texte.",
+  "framing": "{{INPUT}}"
+}

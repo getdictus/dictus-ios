@@ -1,0 +1,2534 @@
+[
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 1061,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 1,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 356,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 2,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 364,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser.\nEt du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 3,
+    "sentenceCount" : 4,
+    "starts" : [
+      2,
+      4
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2,4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 350,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser.\nEt du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 4,
+    "sentenceCount" : 4,
+    "starts" : [
+      2,
+      4
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 323,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 5,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 369,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait.\nParce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser.\nEt du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 6,
+    "sentenceCount" : 4,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 347,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser.\nEt du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 7,
+    "sentenceCount" : 4,
+    "starts" : [
+      2,
+      4
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 397,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 8,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 329,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 9,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 409,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 10,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 4",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 394,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout.\nEt le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 1,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      4
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "breaks" : 0,
+    "engineOutput" : "2, 10",
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 372,
+    "parseFailure" : "sentence 10 does not exist (cut has 9)",
+    "run" : 2,
+    "sentenceCount" : 9,
+    "starts" : [
+
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 347,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 3,
+    "sentenceCount" : 9,
+    "starts" : [
+      2
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 6",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 391,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 4,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      6
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 7",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 381,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version.\nL'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 5,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      7
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 330,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 6,
+    "sentenceCount" : 9,
+    "starts" : [
+      2
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 6",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 373,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 7,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      6
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 5",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 374,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox. Il reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé.\nEt là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 8,
+    "sentenceCount" : 9,
+    "starts" : [
+      5
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 5",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 375,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé.\nEt là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 9,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      5
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 6",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 378,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code.\nCôté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 10,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      6
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 4, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 381,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait.\nSinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen.\nDis-moi ce qui t'arrange.",
+    "run" : 1,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      4,
+      6
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 5",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 339,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante.\nMais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 2,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      5
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 303,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 3,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 5,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 427,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait.\nDu coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait.\nSinon, je me débrouillerai pour suivre une visio depuis la salle à tante.\nMais ce sera moyen.\nDis-moi ce qui t'arrange.",
+    "run" : 4,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 4,
+    "engineOutput" : "2, 3, 4, 5",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 401,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait.\nDu coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait.\nSinon, je me débrouillerai pour suivre une visio depuis la salle à tante.\nMais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 5,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3,
+      4,
+      5
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 3",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 347,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait.\nDu coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 6,
+    "sentenceCount" : 6,
+    "starts" : [
+      3
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 308,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 7,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 3",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 330,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait.\nDu coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 8,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 4",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 347,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait.\nSinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 9,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      4
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 4",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 340,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait.\nSinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 10,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      4
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 4",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 415,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes. La première c'est la capture.\nLe micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 1,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      4
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 10",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 415,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme.\nLà, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 2,
+    "sentenceCount" : 11,
+    "starts" : [
+      10
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 10",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 403,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme.\nLà, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 3,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      10
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 9",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 408,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.\nEt la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 4,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      9
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 375,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 5,
+    "sentenceCount" : 11,
+    "starts" : [
+      2
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 10",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 418,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme.\nLà, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 6,
+    "sentenceCount" : 11,
+    "starts" : [
+      10
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 3",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 419,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 7,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 10",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 410,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme.\nLà, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 8,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      10
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 10",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 412,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme.\nLà, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 9,
+    "sentenceCount" : 11,
+    "starts" : [
+      10
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "2, 10",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 400,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes. La première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme.\nLà, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 10,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      10
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 10, 20",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 590,
+    "output" : "Bon alors, je me lance. Je voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable. Je l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement.\nQuoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine.\nCelui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 1,
+    "sentenceCount" : 26,
+    "starts" : [
+      10,
+      20
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 5, 9",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 582,
+    "output" : "Bon alors, je me lance. Je voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable. Je l'ai eu vendredi.\nC'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais.\nCe qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 2,
+    "sentenceCount" : 26,
+    "starts" : [
+      5,
+      9
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "4, 10, 14",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 634,
+    "output" : "Bon alors, je me lance. Je voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable.\nJe l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement.\nQuoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait.\nLes gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 3,
+    "sentenceCount" : 26,
+    "starts" : [
+      4,
+      10,
+      14
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 4, 11",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 598,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable.\nJe l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre?\nAh oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 4,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      4,
+      11
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 584,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait.\nDéjà, il faut que je répète le comptable. Je l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 5,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 574,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait.\nDéjà, il faut que je répète le comptable. Je l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 6,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 6, 24",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 568,
+    "output" : "Bon alors, je me lance. Je voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable. Je l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.\nBon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi.\nÇa, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 7,
+    "sentenceCount" : 26,
+    "starts" : [
+      6,
+      24
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 13, 25",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 601,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable. Je l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire.\nEnfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout.\nAh, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 8,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      13,
+      25
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "5, 10, 15",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 586,
+    "output" : "Bon alors, je me lance. Je voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable. Je l'ai eu vendredi.\nC'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement.\nQuoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent.\nDonc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 9,
+    "sentenceCount" : 26,
+    "starts" : [
+      5,
+      10,
+      15
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 6, 10",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 591,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable. Je l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.\nBon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement.\nQuoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 10,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      6,
+      10
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 469,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 1,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 487,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 2,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 3, 5",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 478,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement, l'idée ça va être de voir tout ça.\nEt ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 3,
+    "sentenceCount" : 6,
+    "starts" : [
+      3,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 4, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 470,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus. L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça.\nComme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 4,
+    "sentenceCount" : 6,
+    "starts" : [
+      4,
+      6
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 475,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 5,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 473,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 6,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 4",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 471,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus. L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 7,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 476,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 8,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 472,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus. L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement, l'idée ça va être de voir tout ça.\nEt ensuite, on va analyser tout ça.\nComme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 9,
+    "sentenceCount" : 6,
+    "starts" : [
+      5,
+      6
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 3, 5",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 474,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes. Et voilà, tout simplement, l'idée ça va être de voir tout ça.\nEt ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 10,
+    "sentenceCount" : 6,
+    "starts" : [
+      3,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 4, 7",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 477,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe. Alors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus.\nMais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 1,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      4,
+      7
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 486,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 2,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 4, 6",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 496,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe. Alors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça.\nEt ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 3,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      4,
+      6
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "3, 4, 5",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 493,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes. Ce que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré.\nLe but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 4,
+    "sentenceCount" : 8,
+    "starts" : [
+      3,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "3, 5, 7",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 493,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes. Ce que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces. Bref, on va avoir un truc qui va être beaucoup plus structuré.\nLe but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus.\nMais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 5,
+    "sentenceCount" : 8,
+    "starts" : [
+      3,
+      5,
+      7
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 4, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 484,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe. Alors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire.\nEncore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 6,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      4,
+      8
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 479,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 7,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "2, 4, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 496,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe. Alors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire.\nEncore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 8,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      4,
+      8
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "3, 4, 7",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 483,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes. Ce que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus.\nMais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 9,
+    "sentenceCount" : 8,
+    "starts" : [
+      3,
+      4,
+      7
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "6b-index-count",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 3, 5",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 493,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes. Ce que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces. Bref, on va avoir un truc qui va être beaucoup plus structuré.\nLe but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 10,
+    "sentenceCount" : 8,
+    "starts" : [
+      3,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 4, 3",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 381,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 1,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 382,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 2,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 378,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 3,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 362,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 4,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 383,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 5,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 362,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 6,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 373,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 7,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 355,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 8,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 414,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 9,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4",
+    "fidelity" : true,
+    "fixture" : "P1-free-form",
+    "listSyntax" : false,
+    "ms" : 368,
+    "output" : "Bon alors, je pensais à un truc ce matin en marchant.\nC'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.",
+    "run" : 10,
+    "sentenceCount" : 4,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 583,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs.\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 1,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 594,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs.\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 2,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 600,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs.\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 3,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 585,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs.\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 4,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 4, 5, 7, 9",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 480,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs. Le premier c'est l'historique des transcriptions qui n'est pas commencé du tout.\nEt le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 5,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      4
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 557,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs.\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 6,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 8, 9, 7",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 611,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs.\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 7,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 585,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs.\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 8,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 588,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs.\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 9,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9",
+    "fidelity" : true,
+    "fixture" : "P2-project-update",
+    "listSyntax" : false,
+    "ms" : 593,
+    "output" : "Alors point rapide sur le projet, on a basculé la partie abonnement lundi dernier, Thomas a fini l'intégration StoreKit et ça passe en sandbox.\nIl reste deux trucs.\nLe premier c'est l'historique des transcriptions qui n'est pas commencé du tout. Et le deuxième c'est le vocabulaire personnalisé. Et là dessus on a une spec mais pas de code. Côté chiffres, on est à 412 téléchargements depuis le lancement, avec un taux de rétention à 7 jours de 19%, ce qui est faible, mais pas catastrophique pour une première version. L'objectif, c'est de passer la barre des 1000 avant fin octobre. Je vois Sarah jeudi à 14h pour caler la partie Apple Store. Et si tout se passe bien, on soumet la semaine du 12.",
+    "run" : 10,
+    "sentenceCount" : 9,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 447,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 1,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 436,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 2,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 421,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 3,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 441,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 4,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 440,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 5,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 429,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 6,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 433,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 7,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1,2,3,4,5,6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 426,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 8,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1,2,3,4,5,6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 430,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 9,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 1,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P3-message-draft",
+    "listSyntax" : false,
+    "ms" : 445,
+    "output" : "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau.\nJ'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.",
+    "run" : 10,
+    "sentenceCount" : 6,
+    "starts" : [
+      2
+    ],
+    "targetN" : 1
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 684,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 1,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 735,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 2,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 680,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 3,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 699,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 4,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 705,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 5,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 689,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 6,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 682,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 7,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 703,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 8,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 714,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 9,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 2,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11",
+    "fidelity" : true,
+    "fixture" : "P4-explanation",
+    "listSyntax" : false,
+    "ms" : 692,
+    "output" : "Alors je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.\nEn gros, il y a trois étapes.\nLa première c'est la capture. Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaie de deviner quels sons ont été prononcés, puis quels mots ces sons forment. Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement, et on découpe en paragraphes le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. Le deuxième c'est 90 % du temps.",
+    "run" : 10,
+    "sentenceCount" : 11,
+    "starts" : [
+      2,
+      3
+    ],
+    "targetN" : 2
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 4, 5, 6, 7, 10, 11, 12, 13, 15, 16, 17, 18, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1383,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable.\nJe l'ai eu vendredi.\nC'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 1,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1526,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait.\nDéjà, il faut que je répète le comptable.\nJe l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 2,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 4, 5, 7, 8, 9, 11, 12, 14, 15, 16, 18, 19, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1326,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable.\nJe l'ai eu vendredi.\nC'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 3,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1513,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait.\nDéjà, il faut que je répète le comptable.\nJe l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 4,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1506,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait.\nDéjà, il faut que je répète le comptable.\nJe l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 5,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1490,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait.\nDéjà, il faut que je répète le comptable.\nJe l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 6,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1507,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait.\nDéjà, il faut que je répète le comptable.\nJe l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 7,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 5, 6, 10, 11, 12, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1314,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait. Déjà, il faut que je répète le comptable. Je l'ai eu vendredi.\nC'est l'assurance qu'il faut que je rappelle pour le truc de la voiture.\nBon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 8,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      5,
+      6
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1519,
+    "output" : "Bon alors, je me lance. Je voulais faire le point sur plein de choses en fait.\nDéjà, il faut que je répète le comptable.\nJe l'ai eu vendredi.\nC'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 9,
+    "sentenceCount" : 26,
+    "starts" : [
+      3,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26",
+    "fidelity" : true,
+    "fixture" : "P5-rambling",
+    "listSyntax" : false,
+    "ms" : 1513,
+    "output" : "Bon alors, je me lance.\nJe voulais faire le point sur plein de choses en fait.\nDéjà, il faut que je répète le comptable.\nJe l'ai eu vendredi. C'est l'assurance qu'il faut que je rappelle pour le truc de la voiture. Bon, ensuite, ça, c'est important. Il faut absolument que je réponde à Julien parce que ça fait une semaine et demie qu'il attend. Je crois qu'il commence un peu à se demander si je les zappais. Ce qui est un peu le cas, honnêtement. Quoi d'autre? Ah oui, le site, le site. Il faut le refaire. Enfin, pas le refaire, je changeais la page d'accueil parce que là, elle ne dit pas du tout ce qu'on fait. Les gens arrivent, ils lisent trois lignes, ils partent. Donc, changer la page d'accueil, mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon. Ça, c'est vraiment le sujet en fait. Enfin, bref. Ah, j'ai aussi. Il faut que je pense à annuler l'abonnement machine. Celui à 19 euros par mois qu'on n'utilise plus depuis février. Ça fait donc 6 mois qu'on paie pour rien. Super quoi. Et puis, la dernière chose, et là je note vraiment parce que sinon je vais oublier, c'est de préparer les questions pour l'entretien de mardi. Ça, c'est tout. Ah, non, il y avait un dernier truc. Ça m'échappe, mais ça me reviendra.",
+    "run" : 10,
+    "sentenceCount" : 26,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 575,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 1,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 539,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus. L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça.\nEt ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 2,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 564,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 3,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 569,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 4,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 535,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel. L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça.\nEt ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 5,
+    "sentenceCount" : 6,
+    "starts" : [
+      3,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 557,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 6,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1,2,3,4,5,6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 545,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 7,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 554,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus. L'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça.\nEt ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 8,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1,2,3,4,5,6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 544,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 9,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6",
+    "fidelity" : true,
+    "fixture" : "P6-unscripted",
+    "listSyntax" : false,
+    "ms" : 559,
+    "output" : "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix, c'est pas naturel.\nL'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus.\nL'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes, les organiser, s'il met éventuellement des listes, s'il met des espaces entre les lignes.\nEt voilà, tout simplement, l'idée ça va être de voir tout ça. Et ensuite, on va analyser tout ça. Comme ça, ça va nous permettre d'essayer de créer par la suite soit un mode différent, soit améliorer notre polish et je pense que ça ça peut être vraiment très intéressant parce que ça va vraiment améliorer l'expérience des utilisateurs et même les utilisateurs qui sont gratuits parce que c'est vrai que là pour l'instant quand tu lances un grand un grand audio comme je peux le faire là tout de suite ça fait un gros pavé sur dictus alors quand je fais du développement c'est pas dérangeant mais c'est vrai que si tu veux l'utiliser pour discuter avec quelqu'un c'est un peu moyen.",
+    "run" : 10,
+    "sentenceCount" : 6,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 623,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 1,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 4, 5, 7, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 564,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe. Alors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré.\nLe but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 2,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 4, 6, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 550,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe. Alors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça.\nEt ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 3,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      4,
+      6
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 3, 4, 5, 7, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 570,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes. Ce que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré.\nLe but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 4,
+    "sentenceCount" : 8,
+    "starts" : [
+      3,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 629,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 5,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 6, 7, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 587,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 6,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 4, 5, 6, 7, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 599,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe. Alors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré.\nLe but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 7,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 3, 4, 5, 6, 7, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 606,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes. Ce que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré.\nLe but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 8,
+    "sentenceCount" : 8,
+    "starts" : [
+      3,
+      4,
+      5
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 2, 3, 4, 5, 6, 7, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 641,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes.\nCe que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça. Et ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 9,
+    "sentenceCount" : 8,
+    "starts" : [
+      2,
+      3,
+      4
+    ],
+    "targetN" : 3
+  },
+  {
+    "arm" : "7-index-ranked",
+    "boundaryViolations" : 0,
+    "breaks" : 3,
+    "engineOutput" : "1, 3, 4, 6, 7, 8",
+    "fidelity" : true,
+    "fixture" : "P7-89s",
+    "listSyntax" : false,
+    "ms" : 577,
+    "output" : "Donc, l'idée est de faire un audio un peu long pour essayer de comprendre comment Type Lest arrive à structurer les paragraphes et à séparer en fait l'audio en plusieurs paragraphes. Ce que j'ai remarqué, c'est que concrètement, avec Gicus, quand on fait un audio de plusieurs secondes voire plusieurs minutes, on a un seul gros paragraphe.\nAlors qu'avec Tapeless, à contrario, on va avoir une sortie qui va être beaucoup plus structurée, avec deux ou trois paragraphes et parfois des puces.\nBref, on va avoir un truc qui va être beaucoup plus structuré. Le but, ce n'est pas forcément de faire exactement la même chose avec Dictus, parce que j'ai une petite idée en tête et peut-être qu'on fera un truc un peu équivalent à Type Lest, avec vraiment beaucoup de paragraphes, des puces, des choses comme ça.\nEt ça sera un mode intelligent de Dictus. Mais l'idée, c'est au moins peut-être d'aérer les outputs de Dictus, qui sont actuellement des gros pavés et qui ne sont pas forcément agréables à lire. Encore une fois, si on arrive à faire un truc qui nous sort juste plusieurs paragraphes avec une légère structure, ça peut être vraiment intéressant.",
+    "run" : 10,
+    "sentenceCount" : 8,
+    "starts" : [
+      3,
+      4,
+      6
+    ],
+    "targetN" : 3
+  }
+]

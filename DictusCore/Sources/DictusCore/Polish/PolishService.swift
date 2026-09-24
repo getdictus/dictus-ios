@@ -183,6 +183,7 @@ public final class PolishService {
                        languagePolicy: TranscriptionLanguagePolicy,
                        smartMode: SmartMode? = nil,
                        recordingDuration: TimeInterval,
+                       engineRaw: String? = nil,
                        onEngineWillRun: (() -> Void)? = nil) async -> PolishOutcome {
         let task = smartMode.map(PolishTask.smart)
         guard PolishGatePolicy.runsDespiteToggle(
@@ -221,6 +222,7 @@ public final class PolishService {
         // anything else is `nil` to it and falls through to its skip gate.
         let request = Request(
             raw: raw,
+            engineRaw: engineRaw,
             languagePolicy: languagePolicy,
             smartMode: smartMode,
             recordingDuration: recordingDuration,
@@ -257,6 +259,19 @@ public final class PolishService {
     /// the resolved target — stay separate arguments.
     private struct Request {
         let raw: String
+        /// The engine's own output, before the custom-vocabulary pass rewrote it
+        /// (#80), or nil when that pass changed nothing — which is every dictation
+        /// by a user who has stored no terms.
+        ///
+        /// It travels only to be recorded. `raw` above is what the polish runs on
+        /// and what the deterministic floor falls back to, and both must stay the
+        /// corrected text: the user asked for `Kubernetes` and inserting
+        /// `cubernetes` because the model refused would undo the correction they
+        /// paid for. What this fixes is the **export**, whose `raw` had silently
+        /// become post-vocabulary — and #80's own corpus has to be mined from those
+        /// exports, so the feature was corrupting the record its validation depends
+        /// on.
+        let engineRaw: String?
         let languagePolicy: TranscriptionLanguagePolicy
         /// The armed Smart Mode for this dictation, from the snapshot (#79).
         let smartMode: SmartMode?
@@ -305,7 +320,8 @@ public final class PolishService {
     private func finalOutcome(returned: String?,
                               bundle: PolishPipeline.Result,
                               job: PolishJob,
-                              raw: String) -> PolishOutcome {
+                              raw: String,
+                              detectedLanguage: String?) -> PolishOutcome {
         // `resolvedOutput` only withholds text for a Smart Mode, and only degrades
         // for one, so anything else is a plain success or a free-polish floor.
         guard let mode = job.task.smartMode, bundle.outcome != .success else {
@@ -313,17 +329,36 @@ public final class PolishService {
         }
         let reason = bundle.failureReason?.slug ?? "-"
         let degraded = PolishPipeline.degradesToFloor(mode, outcome: bundle.outcome)
-        PersistentLog.log(.smartModeRefused(
-            mode: mode.id,
-            outcome: bundle.outcome.rawValue,
-            reason: degraded ? "\(reason)|degraded" : reason
-        ))
+        // Built before the log line, and the log line reads it: the value the surfaces
+        // get and the sentence the export carries then cannot describe two different
+        // refusals (#580).
         let failure = SmartModeFailure(
             modeIdentifier: mode.id,
             modeDisplayName: mode.displayName,
             outcome: bundle.outcome.rawValue,
-            reason: reason
+            reason: reason,
+            // Only `unsupportedInputLanguage` says it out loud, but it travels on
+            // every failure: which of them names the language is the surface's
+            // decision, and re-deriving it there would mean detecting twice (#490).
+            //
+            // The MIX's leader, not the whole-blob code, with that as the fallback.
+            // The mix is what the pre-flight judged, so it is the only reading whose
+            // verdict the sentence can honestly report — and the whole-blob code
+            // weights the opening of the transcript (#456), which is the region
+            // Parakeet gets wrong most. A message naming a language the refusal was
+            // not about would be worse than the generic sentence it replaces.
+            detectedLanguage: detectedLanguage,
+            // Nil on every outcome but `rejectedGuardrail`, where `reason` is "-"
+            // because nothing was thrown and this is the only thing that names the
+            // cause.
+            guardrailCheck: bundle.rejectedCheck?.rawValue
         )
+        PersistentLog.log(.smartModeRefused(
+            mode: mode.id,
+            outcome: failure.outcome,
+            reason: degraded ? "\(reason)|degraded" : reason,
+            check: failure.guardrailCheck ?? "-"
+        ))
         guard degraded, let returned else { return PolishOutcome(failure: failure) }
         return PolishOutcome(degradedTo: returned, failure: failure)
     }
@@ -397,7 +432,7 @@ public final class PolishService {
                 timings: PolishTimings(preprocessMs: preprocessMs, engineMs: 0, postprocessMs: postMs),
                 languageResolution: resolution
             )
-            await emit(m, raw: raw, polished: finalShort)
+            await emit(m, raw: raw, engineRaw: request.engineRaw, polished: finalShort)
             return PolishOutcome(text: finalShort)
         }
 
@@ -442,7 +477,7 @@ public final class PolishService {
                 timings: PolishTimings(preprocessMs: preprocessMs, engineMs: 0, postprocessMs: postMs),
                 languageResolution: resolution
             )
-            await emit(m, raw: raw, polished: nil)
+            await emit(m, raw: raw, engineRaw: request.engineRaw, polished: nil)
             return PolishOutcome(text: fallback)
         }
 
@@ -451,7 +486,11 @@ public final class PolishService {
                 sttEngine: sttEngine, detected: request.detected ?? target, target: target
             )),
             promptLanguage: target,
-            languageAgnosticPath: false
+            languageAgnosticPath: false,
+            // What the pipeline's input-language pre-flight judges (#490). The whole
+            // mix, not the leader: it answers "is any of this readable", and the
+            // measurement is already in hand.
+            inputLanguageCodes: request.languageMix.countedCodes
         )
 
         // Resolve the engine for this call — see `activeEngine` doc-comment.
@@ -508,9 +547,12 @@ public final class PolishService {
             guardrailCheck: bundle.rejectedCheck,
             languageResolution: resolution
         )
-        await emit(m, raw: raw, polished: bundle.engineOutput)
+        await emit(m, raw: raw, engineRaw: request.engineRaw, polished: bundle.engineOutput)
 
-        return finalOutcome(returned: returned, bundle: bundle, job: job, raw: raw)
+        return finalOutcome(
+            returned: returned, bundle: bundle, job: job, raw: raw,
+            detectedLanguage: request.languageMix.dominantCode ?? request.detectedCode
+        )
     }
 
     // MARK: - Auto-detect path (#239)
@@ -565,7 +607,7 @@ public final class PolishService {
                 detectedLanguage: request.detectedCode, latencyMs: detectMs,
                 timings: PolishTimings(preprocessMs: detectMs, engineMs: 0, postprocessMs: 0)
             )
-            await emit(m, raw: raw, polished: nil)
+            await emit(m, raw: raw, engineRaw: request.engineRaw, polished: nil)
             return PolishOutcome(text: preprocessed)
         }
 
@@ -584,14 +626,15 @@ public final class PolishService {
                 latencyMs: detectMs,
                 timings: PolishTimings(preprocessMs: detectMs, engineMs: 0, postprocessMs: 0)
             )
-            await emit(m, raw: raw, polished: nil)
+            await emit(m, raw: raw, engineRaw: request.engineRaw, polished: nil)
             return PolishOutcome(text: raw)
         }
 
         let job = PolishJob(
             task: request.smartTask ?? .auto,
             promptLanguage: contextLanguage,
-            languageAgnosticPath: true
+            languageAgnosticPath: true,
+            inputLanguageCodes: request.languageMix.countedCodes
         )
         let currentEngine = activeEngine
         supersedeInflight()
@@ -626,8 +669,11 @@ public final class PolishService {
             failureReason: bundle.failureReason,
             guardrailCheck: bundle.rejectedCheck
         )
-        await emit(m, raw: raw, polished: bundle.engineOutput)
-        return finalOutcome(returned: returned, bundle: bundle, job: job, raw: raw)
+        await emit(m, raw: raw, engineRaw: request.engineRaw, polished: bundle.engineOutput)
+        return finalOutcome(
+            returned: returned, bundle: bundle, job: job, raw: raw,
+            detectedLanguage: request.languageMix.dominantCode ?? request.detectedCode
+        )
     }
 
     /// Metrics for one auto-path event. Defaults cover the skip exits (no
@@ -757,22 +803,51 @@ public final class PolishService {
     }
 
     /// Log one metrics event and hand it to whichever sink this process owns.
-    private func emit(_ m: PolishMetrics, raw: String, polished: String?) async {
+    private func emit(_ m: PolishMetrics,
+                      raw: String,
+                      engineRaw: String?,
+                      polished: String?) async {
         PolishMetrics.log(m)
         // An engine failure also goes to the persistent log (#315), where it can
         // be read against the dictation timeline around it. Keyed on the
         // outcome, not on the reason being present, so no failure can slip
         // through unlogged; "unclassified" would mean the engine returned no
         // reason at all, which no engine does today.
+        if m.outcome == .unsupportedInputLanguage {
+            // Its own event, not a `polishEngineFailed` with `engineMs=0` (#490):
+            // the engine was never asked, and a reader who finds this line knows the
+            // refusal is ours and is about the language the user spoke.
+            PersistentLog.log(.polishInputLanguageRefused(
+                engine: m.engine,
+                mode: m.mode ?? "-",
+                detected: m.detectedLanguage ?? "-",
+                mix: m.languageResolution?.mixDescription ?? "-"
+            ))
+        }
         if m.outcome == .engineFailed {
             PersistentLog.log(.polishEngineFailed(
                 reason: m.failureReason?.slug ?? "unclassified",
                 engine: m.engine,
                 mode: m.mode ?? "-",
-                engineMs: m.timings?.engineMs ?? 0
+                engineMs: m.timings?.engineMs ?? 0,
+                // What we read the transcript as, before the engine ever saw it
+                // (#518). Two opposite causes share the
+                // `unsupportedLanguageOrLocale` slug — a language outside Apple's
+                // set, and one inside it their classifier misread — and on iOS 26
+                // nothing in the error separates them. These two fields do.
+                detected: m.detectedLanguage ?? "-",
+                mix: m.languageResolution?.mixDescription ?? "-"
             ))
         }
-        await sink.record(PolishDebugEntry(raw: raw, polished: polished, metrics: m))
+        // `raw` on the entry is the ENGINE's output. When the vocabulary pass
+        // rewrote something, the text the polish actually saw goes beside it rather
+        // than over it (#80).
+        await sink.record(PolishDebugEntry(
+            raw: engineRaw ?? raw,
+            vocabularyCorrected: engineRaw == nil ? nil : raw,
+            polished: polished,
+            metrics: m
+        ))
     }
 
 }

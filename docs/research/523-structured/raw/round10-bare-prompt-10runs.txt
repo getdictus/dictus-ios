@@ -1,0 +1,164 @@
+Building for debugging...
+[0/3] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'polish-harness' complete! (0.17s)
+
+━━ [7-device-3steps] lang=fr stt=PK
+  raw:      Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  polished #1: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.
+
+La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.
+
+And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.
+
+Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+            (success, 3266ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #1: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.⏎⏎La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.⏎⏎Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  polished #2: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.
+
+1. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+2. La deuxième étape, c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.
+
+3. And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+            (success, 2639ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #2: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.⏎⏎1. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎2. La deuxième étape, c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎3. And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  polished #3: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.
+
+La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+La deuxième étape, c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.
+
+And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+            (success, 2536ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #3: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.⏎⏎La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape, c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  polished #4: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.
+
+La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.
+
+C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.
+
+Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+            (success, 2500ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #4: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.⏎⏎La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.⏎⏎Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  polished #5: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.
+
+En gros, il y a trois étapes.
+
+La première, c'est la capture.
+
+Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+La deuxième étape c'est le modèle.
+
+Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés.
+
+Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.
+
+And the three attack C'est une mise en forme.
+
+Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.
+
+Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul.
+
+Le deuxième, c'est 90% du temps.
+            (success, 2676ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #5: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.⏎⏎En gros, il y a trois étapes.⏎⏎La première, c'est la capture.⏎⏎Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle.⏎⏎Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés.⏎⏎Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎And the three attack C'est une mise en forme.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.⏎⏎Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul.⏎⏎Le deuxième, c'est 90% du temps.
+  polished #6: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.
+
+En gros, il y a trois étapes.
+
+La première, c'est la capture.
+
+Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+La deuxième étape c'est le modèle.
+
+Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés.
+
+Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.
+
+And the three attack C'est une mise en forme.
+
+Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.
+
+Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul.
+
+Le deuxième, c'est 90% du temps.
+            (success, 2664ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #6: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.⏎⏎En gros, il y a trois étapes.⏎⏎La première, c'est la capture.⏎⏎Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle.⏎⏎Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés.⏎⏎Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎And the three attack C'est une mise en forme.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.⏎⏎Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul.⏎⏎Le deuxième, c'est 90% du temps.
+  polished #7: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.
+
+En gros, il y a trois étapes.
+
+La première, c'est la capture.
+
+Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+La deuxième étape c'est le modèle.
+
+Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés.
+
+Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant.
+
+Parce que le contexte aide énormément à lever les ambiguïtés.
+
+And the three attack C'est une mise en forme.
+
+Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.
+
+Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul.
+
+Le deuxième, c'est 90% du temps.
+            (success, 2836ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #7: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.⏎⏎En gros, il y a trois étapes.⏎⏎La première, c'est la capture.⏎⏎Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle.⏎⏎Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés.⏎⏎Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant.⏎⏎Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎And the three attack C'est une mise en forme.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.⏎⏎Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul.⏎⏎Le deuxième, c'est 90% du temps.
+  polished #8: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.
+
+En gros, il y a trois étapes.
+
+La première, c'est la capture.
+
+Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+La deuxième étape c'est le modèle.
+
+Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés.
+
+Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant.
+
+Parce que le contexte aide énormément à lever les ambiguïtés.
+
+And the three attack C'est une mise en forme.
+
+Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.
+
+Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul.
+
+Le deuxième, c'est 90% du temps.
+            (success, 2840ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #8: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone.⏎⏎En gros, il y a trois étapes.⏎⏎La première, c'est la capture.⏎⏎Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle.⏎⏎Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés.⏎⏎Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant.⏎⏎Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎And the three attack C'est une mise en forme.⏎⏎Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.⏎⏎Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul.⏎⏎Le deuxième, c'est 90% du temps.
+  polished #9: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.
+
+La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.
+
+And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+            (success, 2587ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #9: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.⏎⏎La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  polished #10: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.
+
+La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.
+
+La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.
+
+And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.
+
+Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+            (success, 2610ms, detected=fr→smart.structured, contract=0.40–1.50/sameAsInput)
+  breaks #10: Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes.⏎⏎La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes.⏎⏎La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés.⏎⏎And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes.⏎⏎Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+
+── outcomes: 10/10 success

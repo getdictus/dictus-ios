@@ -1,0 +1,5 @@
+Polish this text, and paragraph it: start a new line each time the speaker moves to a different subject. Output only the polished version, nothing else.
+
+{{INPUT}}
+
+Polished output:

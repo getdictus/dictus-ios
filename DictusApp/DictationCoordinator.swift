@@ -175,9 +175,24 @@ class DictationCoordinator: ObservableObject {
     var initTaskEpoch = 0
 
     /// Set while a dictation is somewhere inside `ensureEngineReady`. On its own it says
-    /// nothing about whose work is blocking; `isQueuedForNeuralEngine` is the one the
+    /// nothing about whose work is blocking; `isWaitingForNeuralEngine` is the one the
     /// watchdog reads. Raised only by `waitingForNeuralEngine`, at the one call site.
-    var isInsideEngineLoadForDictation = false
+    ///
+    /// TASK-LOCAL, NOT A STORED FLAG, AND THAT IS THE WHOLE POINT (CodeRabbit on #542).
+    /// It used to be an instance property, which meant it answered "is *a* dictation
+    /// inside an engine load" to whoever asked — including callers that are not that
+    /// dictation. `ModelManager`'s two prewarm paths call `acquireNeuralEngine` from
+    /// their own tasks, by design and with a comment saying so, precisely to wait out
+    /// the dictation path's compile. Each of them read this flag as if the wait were
+    /// theirs, raised the shared deferral, and lowered it again on the way out — under a
+    /// dictation still parked in a wait of its own.
+    ///
+    /// A task-local answers the question that was actually meant: is **this** wait on a
+    /// dictation's call path. Every other caller reads false and raises nothing, which
+    /// also closes a hole that predates #542 — a prewarm queued behind the dictation's
+    /// OWN compile used to defer the watchdog around that compile's hang, which is the
+    /// unbounded failure `waitingForNeuralEngine` exists to prevent.
+    @TaskLocal static var isInsideEngineLoadForDictation = false
 
     /// Set while a dictation is parked waiting for the Neural Engine rather than doing
     /// any work of its own (fourth review, finding 2).
@@ -192,7 +207,37 @@ class DictationCoordinator: ObservableObject {
     /// The watchdog exists to catch a stage that will never hand over. A stage waiting
     /// for hardware WILL hand over, so this tells the two apart rather than shortening
     /// the wait or removing the guard.
-    var isWaitingForNeuralEngine = false
+    ///
+    /// TWO WAITS RAISE IT, and the second one is the common one (issue #542):
+    /// `acquireNeuralEngine`'s queue wait, and `awaitInFlightEngineInit`'s wait on the
+    /// init lock. A dictation started while the app process was dead parks on the second
+    /// and never reaches the first, so for a year the deferral covered the rarer of the
+    /// two paths. Both raise it only while the work being waited on belongs to somebody
+    /// else, and both lower it the moment this caller becomes responsible for its own
+    /// progress.
+    ///
+    /// A DEPTH AND NOT A BOOL (CodeRabbit on #542). An earlier version of this was a
+    /// Bool, justified by "there is at most one dictation, so the two waits can never be
+    /// raised at the same time". That argument was wrong, and the counter-example is in
+    /// this repository: a scope that raises a shared Bool also lowers it, so any second
+    /// scope that overlaps the first clears the deferral out from under a wait that is
+    /// still parked, and the watchdog then cancels a dictation whose audio is captured
+    /// and perfectly good. A depth cannot be cleared by somebody else's `defer`.
+    private var neuralEngineWaitDepth = 0
+
+    /// Whether any dictation-owned wait is currently parked. Read by the watchdog.
+    var isWaitingForNeuralEngine: Bool { neuralEngineWaitDepth > 0 }
+
+    /// Enter and leave a dictation-owned wait. Balanced by construction: both call sites
+    /// pair the entry with a `defer`, and the floor at zero means a stray exit cannot
+    /// push the depth negative and silently disarm every later deferral.
+    func enterNeuralEngineWait() {
+        neuralEngineWaitDepth += 1
+    }
+
+    func leaveNeuralEngineWait() {
+        neuralEngineWaitDepth = max(0, neuralEngineWaitDepth - 1)
+    }
 
     /// Who holds the Neural Engine for a Core ML compile right now, or nil if it is free.
     ///
@@ -320,6 +365,7 @@ class DictationCoordinator: ObservableObject {
             defaults.removeObject(forKey: SharedKeys.lastTranscription)
             defaults.removeObject(forKey: SharedKeys.lastTranscriptionTimestamp)
             defaults.removeObject(forKey: SharedKeys.lastTranscriptionPolicy)
+            defaults.removeObject(forKey: SharedKeys.lastTranscriptionEngineRaw)
             defaults.removeObject(forKey: SharedKeys.lastTranscriptionDuration)
             // Through the channel since #495: the polished text and the flag saying
             // whether it was typed are one answer, and a sweep that took only half of
@@ -874,9 +920,19 @@ class DictationCoordinator: ObservableObject {
                 // back with nothing saying why.
                 let smartMode = SmartModeStore.resolveArmedMode()
 
-                let rawText = try await transcriptionService.transcribe(
-                    audioSamples: samples,
-                    languagePolicy: languagePolicy
+                // Custom vocabulary (#80 decision 5), and this is the only place it
+                // can go. `transcribe` returns from more than one branch depending
+                // on the active engine, so a pass added inside it would be silently
+                // skipped by the other; here it is upstream of BOTH tails below, so
+                // one call serves the in-app dictation and the keyboard hand-off.
+                //
+                // It runs on the raw transcript, before `VerbalPunctuationPrepass`
+                // and before the polish — never after `PolishGuardrail`, which is
+                // the back door #414 and #466 closed. With an empty vocabulary the
+                // transcript is handed straight back, which is why this wraps the
+                // call instead of adding a step of its own.
+                let transcript = DictationTranscript.corrected(
+                    try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: languagePolicy)
                 )
 
                 // Where the tail of the dictation happens, since #361.
@@ -896,7 +952,7 @@ class DictationCoordinator: ObservableObject {
                     // Showing it in the keyboard, which runs the overwhelming
                     // majority of dictations, is #423's scope.
                     await finishInApp(
-                        rawText: rawText,
+                        transcript: transcript,
                         languagePolicy: languagePolicy,
                         smartMode: smartMode.mode,
                         audioDuration: audioDuration,
@@ -911,7 +967,7 @@ class DictationCoordinator: ObservableObject {
                     // (#267).
                     guard mayReport(session, "transcription result") else { return }
                     handOffToKeyboard(
-                        rawText: rawText,
+                        transcript: transcript,
                         languagePolicy: languagePolicy,
                         smartMode: smartMode,
                         audioDuration: audioDuration,
@@ -1182,7 +1238,6 @@ class DictationCoordinator: ObservableObject {
         defaults.set(false, forKey: SharedKeys.stopRequested)
         defaults.set(false, forKey: SharedKeys.cancelRequested)
         defaults.set(false, forKey: SharedKeys.coldStartActive)
-        defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
         defaults.synchronize()
     }
 
@@ -1390,7 +1445,6 @@ class DictationCoordinator: ObservableObject {
     func handleError(_ message: String) {
         DictationErrorChannel.record(message)
         defaults.set(false, forKey: SharedKeys.coldStartActive)
-        defaults.removeObject(forKey: SharedKeys.sourceAppScheme)
         defaults.synchronize()
         updateStatus(.failed)
         LiveActivityManager.shared.endWithFailure()
@@ -1471,7 +1525,7 @@ private extension DictationCoordinator {
     /// Initialize the appropriate STT engine based on the active model.
     ///
     /// WHY engine-aware:
-    /// The user can select either a WhisperKit or Parakeet model. This method
+    /// The user can select a WhisperKit, Parakeet or Nemotron model. This method
     /// checks the active model's engine type and initializes the correct engine.
     ///
     /// Falls back to the active model from App Group, then to "openai_whisper-small".
@@ -1486,6 +1540,10 @@ private extension DictationCoordinator {
         switch engine {
         case .parakeet:
             try await ensureParakeetReady(modelName: modelName)
+        case .nemotron:
+            // No iOS 16 fallback to write: the app's floor is iOS 17, which is also
+            // FluidAudio 0.15.7's, and the catalogue hides Nemotron below it (#558).
+            try await ensureNemotronReady(modelName: modelName)
         case .whisperKit:
             try await ensureWhisperKitEngineReady(modelName: modelName)
         }
@@ -1637,111 +1695,171 @@ private extension DictationCoordinator {
     /// `AsrModels.downloadAndLoad`, which starts a HuggingFace download when the cache is
     /// absent — during dictation, with no progress and no way to cancel. That is the
     /// asymmetry issue #249 removed for Whisper; downloading stays the model manager's job.
+    ///
+    /// The load itself is `ensureFluidAudioEngineReady`, shared with Nemotron since #558.
+    /// What is Parakeet's own is the bundle restore in front of it.
     func ensureParakeetReady(modelName: String) async throws {
         if currentModelName == modelName, whisperKit == nil {
             return
         }
 
         if #available(iOS 17.0, *) {
-            // Same rule, same hardware reason (finding 2).
-            if try await awaitInFlightEngineInit(
+            try await ensureFluidAudioEngineReady(
                 modelName: modelName,
                 component: "ParakeetLoad",
-                isAlreadyLoaded: { self.currentModelName == modelName && self.whisperKit == nil }
-            ) {
-                return
-            }
-
-            // Fail fast, before any task is created, when the cache is absent or partial —
-            // mirrors the WhisperKit guard above. `SharedKeys.modelReady` only reflects App
-            // Group bookkeeping; this checks the bundles FluidAudio will actually read.
-            guard let cacheDirectory = ParakeetEngine.installedModelCacheDirectory() else {
-                let error = SpeechModelError.modelNotInstalled(identifier: modelName)
-                PersistentLog.log(.diagnosticProbe(
-                    component: "ParakeetLoad",
-                    instanceID: modelName,
-                    action: "localModelMissing",
-                    details: error.diagnosticDescription
-                ))
-                throw error
-            }
-
-            // Same gate as the WhisperKit path: one compile on the ANE at a time.
-            let engineHolder = "ParakeetLoad:\(modelName)"
-            try await acquireNeuralEngine(for: engineHolder)
-            defer { releaseNeuralEngine(from: engineHolder) }
-
-            if currentModelName == modelName, whisperKit == nil { return }
-
-            PersistentLog.log(.diagnosticProbe(
-                component: "ParakeetLoad",
-                instanceID: modelName,
-                action: "localModelResolved",
-                details: "folder=\(cacheDirectory.lastPathComponent) download=false"
-            ))
-
-            // Same abandonment rule as the WhisperKit path (issue #428).
-            let epoch = modelLoadEpoch
-
-            // Same reason as the WhisperKit path: an unstructured task would carry on
-            // compiling for a caller that no longer exists (audit finding 1).
-            try Task.checkCancellation()
-
-            let task = Task<Void, Error> {
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("Initializing ParakeetEngine for model: \(modelName, privacy: .public)")
-                }
-
-                // Loaded and warmed before anything can reach it, same rule and same
-                // ordering as the WhisperKit path (issue #426). The warm inference is
-                // unmeasured on Parakeet — see `ParakeetEngine.runWarmInference` for
-                // what is known and what is not.
-                let parakeetEngine = try await self.warmedParakeetEngine(modelName: modelName)
-
-                guard self.shouldPublishLoad(
-                    epoch: epoch, component: "ParakeetLoad", modelName: modelName
-                ) else {
-                    // Throws for the same reason as the WhisperKit path above: this is
-                    // the shared lock, and a silent success would hand every awaiting
-                    // caller an engine that was discarded.
-                    throw self.abandonedLoadError(for: modelName)
-                }
-
-                self.whisperKit = nil
-                self.currentModelName = modelName
-                self.clearAbandonedModel(ifMatches: modelName)
-
-                transcriptionService.prepare(engine: parakeetEngine)
-
-                if #available(iOS 14.0, *) {
-                    DictusLogger.app.info("ParakeetEngine ready for model: \(modelName, privacy: .public)")
-                }
-            }
-            initTask = task
-            initTaskEpoch = epoch
-
-            do {
-                try await task.value
-                clearInitTask(ifStillCurrent: task)
-            } catch {
-                clearInitTask(ifStillCurrent: task)
-                // Wrap anything FluidAudio or Core ML raises (issue #249) — those
-                // messages are English and developer-facing, and `handleError` writes
-                // whatever reaches it into the keyboard's error banner.
-                let wrapped = Self.loadFailure(for: modelName, from: error)
-                PersistentLog.log(.diagnosticProbe(
-                    component: "ParakeetLoad",
-                    instanceID: modelName,
-                    action: "loadFailed",
-                    details: wrapped.diagnosticDescription
-                ))
-                throw wrapped
-            }
+                installedDirectory: {
+                    // Take from the app bundle whatever it carries that the cache lacks,
+                    // before judging the cache (#558). Launch already did this once; a file
+                    // can go missing between then and now, and the rule is "before any
+                    // Parakeet load".
+                    ParakeetCacheRepair.restoreFromBundleIfNeeded(context: "ParakeetLoad")
+                    return ParakeetEngine.installedModelCacheDirectory()
+                },
+                loadWarmedEngine: { try await self.warmedParakeetEngine(modelName: modelName) }
+            )
         } else {
             if #available(iOS 14.0, *) {
                 DictusLogger.app.warning("Parakeet not available on iOS 16 — falling back to WhisperKit small")
             }
             try await ensureWhisperKitEngineReady(modelName: "openai_whisper-small")
+        }
+    }
+
+    /// Initialize the Nemotron 3.5 engine (#558). Same local-only load as Parakeet (#252),
+    /// through the same serialized path, so its compile never meets another on the Neural
+    /// Engine.
+    @available(iOS 17.0, *)
+    func ensureNemotronReady(modelName: String) async throws {
+        if currentModelName == modelName, whisperKit == nil {
+            return
+        }
+        try await ensureFluidAudioEngineReady(
+            modelName: modelName,
+            component: "NemotronLoad",
+            installedDirectory: { NemotronEngine.installedModelDirectory() },
+            loadWarmedEngine: { try await self.warmedNemotronEngine(modelName: modelName) }
+        )
+    }
+
+    /// Load a FluidAudio engine (Parakeet or Nemotron) under the coordinator's rules.
+    ///
+    /// ONE PATH FOR BOTH (#558). It was Parakeet's alone, and every line of it answers an
+    /// issue: the init lock (finding 2), the fail-fast on a missing cache (#249, #252), the
+    /// Neural Engine gate, the abandonment epoch (#428), the warm inference before publishing
+    /// (#426). Nemotron needs every one of them, for the same hardware reasons, so it takes
+    /// this path rather than a copy of it.
+    ///
+    /// "Loaded" for a FluidAudio engine is spelled `currentModelName == modelName, whisperKit
+    /// == nil`, as it always was for Parakeet. It stays correct with two FluidAudio engines
+    /// because the model name tells them apart: publishing either sets `currentModelName`.
+    ///
+    /// - Parameters:
+    ///   - component: the log component, `ParakeetLoad` or `NemotronLoad`.
+    ///   - installedDirectory: the complete local model directory, or `nil` to fail fast.
+    ///   - loadWarmedEngine: builds, loads and warms the engine, ready to publish.
+    @available(iOS 17.0, *)
+    func ensureFluidAudioEngineReady(
+        modelName: String,
+        component: String,
+        installedDirectory: () -> URL?,
+        loadWarmedEngine: @escaping () async throws -> SpeechModelProtocol
+    ) async throws {
+        // Same rule, same hardware reason (finding 2).
+        if try await awaitInFlightEngineInit(
+            modelName: modelName,
+            component: component,
+            isAlreadyLoaded: { self.currentModelName == modelName && self.whisperKit == nil }
+        ) {
+            return
+        }
+
+        // Fail fast, before any task is created, when the cache is absent or partial —
+        // mirrors the WhisperKit guard above. `SharedKeys.modelReady` only reflects App
+        // Group bookkeeping; this checks the bundles FluidAudio will actually read.
+        guard let modelDirectory = installedDirectory() else {
+            // An incomplete model is not warm, whatever this install recorded about it
+            // (#558). Clearing the record sends the next keyboard mic tap to the preparation
+            // screen, the way #542 routes a cold model, instead of into a recording that
+            // fails here again. `ModelManager` completes the files.
+            ModelWarmth.clear(modelName, defaults: defaults)
+            let error = SpeechModelError.modelNotInstalled(identifier: modelName)
+            PersistentLog.log(.diagnosticProbe(
+                component: component,
+                instanceID: modelName,
+                action: "localModelMissing",
+                details: error.diagnosticDescription
+            ))
+            throw error
+        }
+
+        // Same gate as the WhisperKit path: one compile on the ANE at a time.
+        let engineHolder = "\(component):\(modelName)"
+        try await acquireNeuralEngine(for: engineHolder)
+        defer { releaseNeuralEngine(from: engineHolder) }
+
+        if currentModelName == modelName, whisperKit == nil { return }
+
+        PersistentLog.log(.diagnosticProbe(
+            component: component,
+            instanceID: modelName,
+            action: "localModelResolved",
+            details: "folder=\(modelDirectory.lastPathComponent) download=false"
+        ))
+
+        // Same abandonment rule as the WhisperKit path (issue #428).
+        let epoch = modelLoadEpoch
+
+        // Same reason as the WhisperKit path: an unstructured task would carry on
+        // compiling for a caller that no longer exists (audit finding 1).
+        try Task.checkCancellation()
+
+        let task = Task<Void, Error> {
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.info("Initializing \(component, privacy: .public) for model: \(modelName, privacy: .public)")
+            }
+
+            // Loaded and warmed before anything can reach it, same rule and same
+            // ordering as the WhisperKit path (issue #426).
+            let engine = try await loadWarmedEngine()
+
+            guard self.shouldPublishLoad(
+                epoch: epoch, component: component, modelName: modelName
+            ) else {
+                // Throws for the same reason as the WhisperKit path above: this is
+                // the shared lock, and a silent success would hand every awaiting
+                // caller an engine that was discarded.
+                throw self.abandonedLoadError(for: modelName)
+            }
+
+            self.whisperKit = nil
+            self.currentModelName = modelName
+            self.clearAbandonedModel(ifMatches: modelName)
+
+            transcriptionService.prepare(engine: engine)
+
+            if #available(iOS 14.0, *) {
+                DictusLogger.app.info("\(engine.engineName, privacy: .public) ready for model: \(modelName, privacy: .public)")
+            }
+        }
+        initTask = task
+        initTaskEpoch = epoch
+
+        do {
+            try await task.value
+            clearInitTask(ifStillCurrent: task)
+        } catch {
+            clearInitTask(ifStillCurrent: task)
+            // Wrap anything FluidAudio or Core ML raises (issue #249) — those
+            // messages are English and developer-facing, and `handleError` writes
+            // whatever reaches it into the keyboard's error banner.
+            let wrapped = Self.loadFailure(for: modelName, from: error)
+            PersistentLog.log(.diagnosticProbe(
+                component: component,
+                instanceID: modelName,
+                action: "loadFailed",
+                details: wrapped.diagnosticDescription
+            ))
+            throw wrapped
         }
     }
 }

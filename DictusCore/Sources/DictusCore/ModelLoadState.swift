@@ -33,9 +33,17 @@ public extension ModelLoadState {
     /// different model — on that launch and on every launch after it.
     ///
     /// WHY `ready` is deliberately left alone even though it is just as stale: it is
-    /// also a claim about RAM this process does not have, but believing it costs at
-    /// most one lazy load on the next dictation. Believing `loading` costs the whole
-    /// app. Only the value that can lock the user out is corrected here.
+    /// also a claim about RAM this process does not have, and correcting it here would
+    /// change what the KEYBOARD reads during the launch window, which is the one thing
+    /// this correction must not do. Believing `loading` costs the whole app, so only the
+    /// value that can lock the user out is corrected.
+    ///
+    /// WHAT BELIEVING THE STALE `ready` DOES COST (issue #579), because this comment used
+    /// to say "at most one lazy load on the next dictation" and that was measured false:
+    /// the preparation screen read it at `onAppear` on a launch from dead, called the load
+    /// finished before it had started, and dismissed itself two seconds into twenty. The
+    /// fix is not here — it is at the reader, which now asks whether a live process in
+    /// this launch wrote the value (`ModelPreparationOutcome.preparationWasAlreadyReady`).
     ///
     /// - Returns: whether a stale value was actually found and reset, so the caller
     ///   can log the correction rather than log on every launch.

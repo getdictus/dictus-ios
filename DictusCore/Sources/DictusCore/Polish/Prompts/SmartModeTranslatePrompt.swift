@@ -51,7 +51,7 @@ enum SmartModeTranslatePrompt {
         }
     }
 
-    static func instructions(target: SupportedLanguage, glossary: String) -> String {
+    static func instructions(target: SupportedLanguage) -> String {
         let name = englishName(of: target)
         return """
         You are a TEXT TRANSFORMATION FUNCTION. You translate speech-to-text output into \(name).
@@ -83,9 +83,6 @@ enum SmartModeTranslatePrompt {
         - Do NOT emit a bracketed placeholder of any kind — not `[Name]`, not `[Nom]`, not `[date]`, not any other word between square brackets. Banning a list of words does not work; nothing between square brackets belongs in the output.
         - Do NOT explain a term instead of translating it, and do NOT add a gloss in brackets.
         - Do NOT shift the register up. A casual message must not come back formal.
-
-        Domain vocabulary — preserve canonical spelling, do not translate these terms:
-        \(glossary)
 
         \(examples(target: target))
         """

@@ -1,0 +1,9 @@
+[
+ {
+  "id": "7-device-3steps",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "_note": "Device capture 2026-09-16, iOS 27, build 1.9.0 (34), mode smart.structured. Pierre's own test 2: a spoken explanation that enumerates three steps. Carries a Parakeet English drift ('And the three attack') the mode has to repair.",
+  "raw": "Alors, je t'explique comment fonctionne la reconnaissance vocale sur le téléphone. En gros, il y a trois étapes. La première, c'est la capture. Le micro enregistre le son et le système de découpe en petits morceaux de quelques millisecondes. La deuxième étape c'est le modèle. Il prend ses morceaux et il essaye de deviner quels son ont été prononcés, puis quels mots se sont formés. Et pour ça il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant. Parce que le contexte aide énormément à lever les ambiguïtés. And the three attack C'est une mise en forme. Là on prend le texte brut qui sort du modèle, on ajoute la ponctuation, le majuscule éventuellement, on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps."
+ }
+]

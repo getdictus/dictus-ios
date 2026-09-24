@@ -31,6 +31,15 @@ public struct PendingDictation: Codable, Equatable, Sendable {
     /// not the deterministic floor: this is the value that must survive.
     public let raw: String
 
+    /// The speech engine's own output, when the custom-vocabulary pass (#80) rewrote
+    /// it into `raw` above; nil when the two are the same.
+    ///
+    /// Carried only to be recorded in the polish export. `raw` stays what the
+    /// keyboard polishes and inserts — the user asked for their spelling and must
+    /// get it — but the export's `raw` has to be the engine's, or #80's own corpus
+    /// can no longer be mined from it.
+    public let engineRaw: String?
+
     /// The per-dictation language policy snapshot (#226), travelling with the text.
     ///
     /// WHY it travels instead of being re-read: without it each stage re-reads App
@@ -129,6 +138,7 @@ public struct PendingDictation: Codable, Equatable, Sendable {
     public static let recoveryWindow: TimeInterval = 30
 
     public init(raw: String,
+                engineRaw: String? = nil,
                 policy: TranscriptionLanguagePolicy,
                 smartMode: SmartMode? = nil,
                 skippedSmartMode: SmartModeSkipNotice? = nil,
@@ -136,6 +146,7 @@ public struct PendingDictation: Codable, Equatable, Sendable {
                 documentIdentifier: String?,
                 claimedAt: TimeInterval = Date().timeIntervalSince1970) {
         self.raw = raw
+        self.engineRaw = engineRaw
         self.policy = policy
         self.smartMode = smartMode
         self.skippedSmartMode = skippedSmartMode
