@@ -79,12 +79,7 @@
           "familyShareable" : false,
           "groupNumber" : 2,
           "internalID" : "D1C7B002",
-          "introductoryOffer" : {
-            "internalID" : "D1C7C001",
-            "numberOfPeriods" : 1,
-            "paymentMode" : "free",
-            "subscriptionPeriod" : "P1W"
-          },
+          "introductoryOffer" : null,
           "localizations" : [
             {
               "description" : "Unlock Smart Mode, History, and Vocabulary",

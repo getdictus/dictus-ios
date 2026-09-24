@@ -3,6 +3,53 @@
 import Foundation
 import SwiftUI
 
+/// What the reverse trial depends on, gathered so the tests can replace every input
+/// at once (#593).
+///
+/// WHY a value and not four init parameters: `ProStatusManager()` is built in a dozen
+/// places (the app, previews, tests) and every one of them wants production behaviour.
+/// One default, `.live`, keeps them all as they were, and a test builds one value that
+/// cannot mix a fake clock with a real Keychain by accident.
+public struct ProTrialEnvironment {
+    /// The clock. Injected so expiry is testable without waiting fourteen days.
+    public var now: () -> Date
+    /// `SmartModeAvailability.deviceIsCapable`, the decision-2 input. Read once per
+    /// manager: the definitive reasons it reflects (hardware, OS, SDK) cannot change
+    /// inside a process, and the live read asks `SystemLanguageModel`.
+    public var deviceIsCapable: () -> Bool
+    /// `PremiumFlags.paywallVisible`. With it down no trial starts and nothing about
+    /// one appears (#279).
+    public var paywallVisible: Bool
+    /// The App Group, or a test suite.
+    public var defaults: UserDefaults
+    /// Where the trial is recorded. Built from `defaults` in `.live`.
+    public var store: ProTrialStore
+
+    public init(now: @escaping () -> Date,
+                deviceIsCapable: @escaping () -> Bool,
+                paywallVisible: Bool,
+                defaults: UserDefaults,
+                store: ProTrialStore) {
+        self.now = now
+        self.deviceIsCapable = deviceIsCapable
+        self.paywallVisible = paywallVisible
+        self.defaults = defaults
+        self.store = store
+    }
+
+    /// Production: the real clock, the real device, the shipping flag, the App Group
+    /// and the Keychain.
+    public static var live: ProTrialEnvironment {
+        ProTrialEnvironment(
+            now: Date.init,
+            deviceIsCapable: { SmartModeAvailability.deviceIsCapable },
+            paywallVisible: PremiumFlags.paywallVisible,
+            defaults: AppGroup.defaults,
+            store: .live
+        )
+    }
+}
+
 /// Manages Pro subscription status in App Group UserDefaults.
 ///
 /// WHY ObservableObject with @Published:
@@ -15,22 +62,46 @@ import SwiftUI
 /// main app AND the keyboard extension can read Pro status. SubscriptionManager
 /// lives in DictusApp only (StoreKit is too heavy for the ~50MB keyboard extension).
 ///
-/// Pro status is driven entirely by StoreKit entitlements: no entitlement
-/// means free tier. Testing uses Apple's standard paths — the local
-/// StoreKitConfig.storekit in development, and the free sandbox environment
-/// on TestFlight.
+/// **Entitlement is "paid or trial running" since #593.** Paid is driven entirely by
+/// StoreKit entitlements, tested through the local StoreKitConfig.storekit in
+/// development and the free sandbox on TestFlight. The reverse trial is the other
+/// half: every user gets Pro for `ProTrial.durationDays` without subscribing, then
+/// the paywall. The two are published separately because they answer different
+/// questions: `isProActive` is what the user may use, `isPaid` is whether there is
+/// anything left to sell them. The paywall needs the second, or a user on trial could
+/// never subscribe before it ends.
 @MainActor
 public final class ProStatusManager: ObservableObject {
+    /// Entitled to Pro right now: paid, or a trial running. What every Pro surface reads.
     @Published public private(set) var isProActive: Bool
 
-    public init() {
+    /// A StoreKit entitlement exists. What the paywall reads to decide whether to sell.
+    @Published public private(set) var isPaid: Bool
+
+    /// Where the reverse trial stands, as of the last refresh.
+    @Published public private(set) var trialState: ProTrialState
+
+    private let environment: ProTrialEnvironment
+
+    /// Read once: see `ProTrialEnvironment.deviceIsCapable`.
+    public let deviceIsCapable: Bool
+
+    public init(environment: ProTrialEnvironment = .live) {
+        self.environment = environment
+        self.deviceIsCapable = environment.deviceIsCapable()
+
         // Runs at every app launch (DictusApp.init), which is what makes the
         // seeding idempotent and always ahead of the first read.
         ProStatusManager.seedFeatureTogglesIfNeeded()
 
-        // Through the static rather than reading the key directly, so the app's own
+        // Through the static rule rather than reading the key directly, so the app's own
         // observed value and every `FeatureGate` answer come from one expression (#460).
-        self.isProActive = ProStatusManager.isProActiveStatic
+        let now = environment.now()
+        self.isProActive = ProStatusManager.entitlement(
+            in: environment.defaults, now: now, trialsEnabled: environment.paywallVisible
+        )
+        self.isPaid = ProStatusManager.isPaid(in: environment.defaults)
+        self.trialState = ProTrialState(record: environment.store.mirroredRecord, now: now)
     }
 
     /// Writes the per-feature Pro toggles into the App Group the first time, so that
@@ -72,12 +143,17 @@ public final class ProStatusManager: ObservableObject {
 
     /// Called by SubscriptionManager after transaction updates (DictusApp only).
     ///
+    /// Writes the **paid** half of the entitlement only (#593). A trial running under it
+    /// is untouched, which is what keeps Pro on with no gap when someone subscribes
+    /// during or after the trial: StoreKit sets this, and `isProActive` was already
+    /// true or becomes true in the same refresh.
+    ///
     /// WHY write to App Group AND update @Published:
     /// App Group write makes it visible to keyboard extension on next read.
     /// @Published update triggers immediate SwiftUI refresh in the main app.
     public func setProActive(_ active: Bool) {
-        AppGroup.defaults.set(active, forKey: SharedKeys.proActive)
-        AppGroup.defaults.synchronize()
+        environment.defaults.set(active, forKey: SharedKeys.proActive)
+        environment.defaults.synchronize()
         // Re-read rather than assign `active` (#460 review). The stored value is what
         // was just written; the *entitlement* is what `isProActiveStatic` answers, and
         // since #460 those two can differ under the debug override. Assigning `active`
@@ -96,9 +172,143 @@ public final class ProStatusManager: ObservableObject {
     /// in Settings (#460), which must not write `SharedKeys.proActive` — a forced
     /// entitlement that persisted into the real key would outlive the switch being
     /// turned off, and would be indistinguishable from a genuine subscription.
+    ///
+    /// Also what makes the trial end on screen: expiry is a clock passing an instant,
+    /// which publishes nothing, so DictusApp calls this whenever it becomes active.
     public func refreshFromAppGroup() {
-        isProActive = ProStatusManager.isProActiveStatic
+        let now = environment.now()
+        isProActive = ProStatusManager.entitlement(
+            in: environment.defaults, now: now, trialsEnabled: environment.paywallVisible
+        )
+        isPaid = ProStatusManager.isPaid(in: environment.defaults)
+        trialState = ProTrialState(record: environment.store.mirroredRecord, now: now)
     }
+
+    // MARK: - Reverse trial (#593)
+
+    /// Bring the App Group mirror in line with the Keychain. DictusApp calls this once
+    /// per launch, before anything asks whether a trial may start, so a reinstall finds
+    /// its old trial rather than a fresh "never started".
+    public func reconcileTrial() {
+        environment.store.reconcile()
+        refreshFromAppGroup()
+    }
+
+    /// Whether a trial would start if `startTrialIfEligible()` were called now.
+    public var mayStartTrial: Bool {
+        ProTrialPolicy.mayStart(
+            paywallVisible: environment.paywallVisible,
+            deviceIsCapable: deviceIsCapable,
+            isPaid: isPaid,
+            trial: trialState
+        )
+    }
+
+    /// Start the reverse trial if this user may have one, and say whether it started.
+    ///
+    /// **The API onboarding calls** (#494): after the first successful dictation, once
+    /// the disclosure is on screen. DictusApp also calls it when the user dismisses the
+    /// trial announcement, which is how an existing user updated to the Pro version
+    /// gets theirs, and how a new user gets it until #494's screens exist.
+    ///
+    /// Refuses, and changes nothing, when `ProTrialPolicy.mayStart` does: paywall
+    /// hidden, a device that can never run Smart Modes (decision 2), a subscriber, or
+    /// any trial already recorded on this device, reinstalls included.
+    ///
+    /// - Parameter start: when the trial counts from. The announcement passes the
+    ///   instant it was shown, so the end date it printed is the end date stored, even
+    ///   if the user leaves it open past midnight. Defaults to now.
+    @discardableResult
+    public func startTrialIfEligible(from start: Date? = nil) -> Bool {
+        // Re-read first: a subscription or a trial may have landed since the last
+        // refresh, from StoreKit or from another launch of the flow.
+        refreshFromAppGroup()
+        guard mayStartTrial else {
+            PersistentLog.log(.diagnosticProbe(
+                component: "proTrial", instanceID: "0", action: "startRefused",
+                details: "paywallVisible=\(environment.paywallVisible) capable=\(deviceIsCapable) paid=\(isPaid) state=\(trialState.slug)"
+            ))
+            return false
+        }
+        let now = environment.now()
+        let from = min(start ?? now, now)
+        guard let record = environment.store.startIfNeverStarted(now: from) else {
+            PersistentLog.log(.diagnosticProbe(
+                component: "proTrial", instanceID: "0", action: "startFailed",
+                details: "reason=keychain-or-existing-record"
+            ))
+            refreshFromAppGroup()
+            return false
+        }
+        PersistentLog.log(.diagnosticProbe(
+            component: "proTrial", instanceID: "0", action: "started",
+            details: "days=\(ProTrial.durationDays) endsAt=\(Int(record.endsAt.timeIntervalSince1970))"
+        ))
+        refreshFromAppGroup()
+        return true
+    }
+
+    /// The number on the `Pro · N days left` badge, or nil for no badge.
+    public var trialBadgeDaysLeft: Int? {
+        ProTrialPolicy.badgeDaysLeft(
+            paywallVisible: environment.paywallVisible, isPaid: isPaid, trial: trialState, now: environment.now()
+        )
+    }
+
+    /// What the home banner shows (#279, #593 decisions 2 and 3).
+    public var promotionEntry: ProPromotionEntry {
+        ProPromotion.entry(
+            paywallVisible: environment.paywallVisible,
+            deviceIsCapable: deviceIsCapable,
+            isPaid: isPaid,
+            isEntitled: isProActive,
+            trial: trialState,
+            now: environment.now()
+        )
+    }
+
+    /// Whether the end-of-trial paywall should open now. Once, ever.
+    public var endOfTrialPaywallDue: Bool {
+        ProTrialPolicy.endOfTrialPaywallDue(
+            paywallVisible: environment.paywallVisible,
+            isPaid: isPaid,
+            trial: trialState,
+            alreadyShown: environment.defaults.bool(forKey: SharedKeys.proTrialEndPaywallShown)
+        )
+    }
+
+    /// Record that the end-of-trial paywall was shown, so it never opens by itself again.
+    public func markEndOfTrialPaywallShown() {
+        environment.defaults.set(true, forKey: SharedKeys.proTrialEndPaywallShown)
+    }
+
+    /// The end-of-trial recap's numbers.
+    public var trialUsage: ProTrialUsage.Snapshot {
+        ProTrialUsage.snapshot(in: environment.defaults)
+    }
+
+    #if DEBUG
+    /// DEBUG tooling: rewrite the trial so it ends `daysLeft` days from now (negative
+    /// for already ended). What lets the maintainer see the badge, the J-2 reminder
+    /// and the end-of-trial paywall on a device without waiting two weeks.
+    public func debugSetTrial(endingInDays daysLeft: Double) {
+        let now = environment.now()
+        let ends = now.addingTimeInterval(daysLeft * ProTrial.secondsPerDay)
+        environment.store.debugOverwrite(
+            ProTrialRecord(startedAt: ends.addingTimeInterval(-ProTrial.duration), endsAt: ends)
+        )
+        refreshFromAppGroup()
+    }
+
+    /// DEBUG tooling: forget the trial, its counters and its paywall, as on a device
+    /// that never had one.
+    public func debugResetTrial() {
+        environment.store.debugReset()
+        ProTrialUsage.debugReset(in: environment.defaults)
+        environment.defaults.removeObject(forKey: SharedKeys.proTrialEndPaywallShown)
+        refreshFromAppGroup()
+    }
+    #endif
 
     /// Lightweight static read for keyboard extension (no StoreKit, no ObservableObject).
     ///
@@ -109,8 +319,21 @@ public final class ProStatusManager: ObservableObject {
     /// **This is the one place entitlement is decided** (#460). `FeatureGate.isProActive`,
     /// the keyboard's toolbar and this class's own published property all come through
     /// here, which is what makes a single debug override possible instead of one force
-    /// path per surface.
+    /// path per surface. Since #593 it answers "paid or trial running", and no call site
+    /// had to change for it.
     nonisolated public static var isProActiveStatic: Bool {
+        entitlement(in: AppGroup.defaults, now: Date(), trialsEnabled: PremiumFlags.paywallVisible)
+    }
+
+    /// The entitlement rule against explicit inputs: which store, which instant, and
+    /// whether trials are enabled at all.
+    ///
+    /// `isProActiveStatic` is this with the App Group, the wall clock and the shipping
+    /// flag. The tests call it directly, because the shipping flag is a compile-time
+    /// `false` that would otherwise make the trial branch unreachable to them.
+    nonisolated public static func entitlement(in defaults: UserDefaults,
+                                               now: Date,
+                                               trialsEnabled: Bool) -> Bool {
         #if DEBUG
         // Compiled out of Release entirely, along with the flag and its key. See
         // `PremiumFlags.debugProEntitlementForced` for why it has to exist at all: #460
@@ -118,6 +341,52 @@ public final class ProStatusManager: ObservableObject {
         // feature is still being built.
         if PremiumFlags.debugProEntitlementForced { return true }
         #endif
-        return AppGroup.defaults.bool(forKey: SharedKeys.proActive)
+        return ProEntitlement.isActive(
+            isPaid: isPaid(in: defaults),
+            trial: ProTrialState(record: ProTrialStore.mirroredRecord(in: defaults), now: now),
+            trialsEnabled: trialsEnabled
+        )
+    }
+
+    /// The StoreKit half alone. Written only by `setProActive`.
+    nonisolated static func isPaid(in defaults: UserDefaults) -> Bool {
+        defaults.bool(forKey: SharedKeys.proActive)
+    }
+
+    /// Whether the keyboard's Pro surfaces carry their small `Pro` mark: a trial is
+    /// running and nothing is paid (#593). The mark is how a user on trial learns which
+    /// features they would lose; a subscriber loses nothing and gets no mark.
+    nonisolated public static func showsTrialProMarks(now: Date) -> Bool {
+        guard PremiumFlags.paywallVisible, !isPaid(in: AppGroup.defaults) else { return false }
+        return ProTrialState(record: ProTrialStore.mirroredRecord(in: AppGroup.defaults), now: now).isRunning
+    }
+
+    /// What the keyboard panel's Pro pill shows. The keyboard's twin of
+    /// `promotionEntry`, reading the App Group rather than a published cache.
+    ///
+    /// - Parameter deviceIsCapable: `SmartModeAvailability.deviceIsCapable`, passed in
+    ///   because it asks `SystemLanguageModel` and the caller decides when that read
+    ///   is affordable (once per panel open).
+    nonisolated public static func promotionEntryStatic(now: Date, deviceIsCapable: Bool) -> ProPromotionEntry {
+        let defaults = AppGroup.defaults
+        return ProPromotion.entry(
+            paywallVisible: PremiumFlags.paywallVisible,
+            deviceIsCapable: deviceIsCapable,
+            isPaid: isPaid(in: defaults),
+            isEntitled: isProActiveStatic,
+            trial: ProTrialState(record: ProTrialStore.mirroredRecord(in: defaults), now: now),
+            now: now
+        )
+    }
+}
+
+extension ProTrialState {
+    /// Stable name for logs.
+    var slug: String {
+        switch self {
+        case .neverStarted: return "neverStarted"
+        case .running: return "running"
+        case .expired: return "expired"
+        }
     }
 }

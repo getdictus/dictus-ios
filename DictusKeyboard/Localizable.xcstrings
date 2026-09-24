@@ -359,6 +359,47 @@
         }
       }
     },
+    "Pro · %lld days left" : {
+      "comment" : "Keyboard panel pill in the last two days of the free Dictus Pro trial. The number is the days left, 1 or 2.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · %lld day left"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · %lld days left"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · %lld jour restant"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pro · %lld jours restants"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "Processing..." : {
       "comment" : "Recording overlay caption while the LLM stage runs on the transcript (issue #267).",
       "localizations" : {

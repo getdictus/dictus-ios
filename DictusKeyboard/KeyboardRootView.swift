@@ -60,14 +60,26 @@ struct KeyboardRootView: View {
     /// layout is on screen.
     var onLayoutChanged: ((LayoutType, SupportedLanguage) -> Void)?
 
-    /// Whether the Pro entry is hidden from the panel bar.
+    /// What the panel bar's Pro entry shows (#593): nothing, the brand pill, or the
+    /// trial's two-day reminder.
     ///
     /// WHY @State refreshed on open rather than an observed ProStatusManager:
     /// the extension reads Pro status from the App Group, and a subscription
     /// cannot be bought while the keyboard is the frontmost surface — so a read
     /// each time the panel opens is both sufficient and cheaper than keeping an
     /// ObservableObject alive in a 50 MB process.
-    @State private var isProActive = false
+    @State private var proPromotion: ProPromotionEntry = .hidden
+
+    /// The panel's Pro entry as the App Group says it is now.
+    ///
+    /// The flag is checked first so a build with the paywall hidden never asks
+    /// `SystemLanguageModel` for a capability it would not use.
+    private static func readProPromotion() -> ProPromotionEntry {
+        guard PremiumFlags.paywallVisible else { return .hidden }
+        return ProStatusManager.promotionEntryStatic(
+            now: Date(), deviceIsCapable: SmartModeAvailability.deviceIsCapable
+        )
+    }
 
     /// WHY @Environment here: openURL is the SwiftUI way to open URLs.
     /// Keyboard extensions cannot access UIApplication.shared, but SwiftUI's
@@ -146,7 +158,7 @@ struct KeyboardRootView: View {
     /// anchor move synchronously in UIKit, in the same turn as the mode change,
     /// deliberately (#99, #142).
     private func togglePanel() {
-        isProActive = ProStatusManager.isProActiveStatic
+        proPromotion = Self.readProPromotion()
         state.togglePanelPresentation()
     }
 
@@ -174,7 +186,7 @@ struct KeyboardRootView: View {
             isPanelOpen: presentedMode == .panel,
             onPanelToggle: { togglePanel() },
             onSettingsTap: { leavePanel { state.openDictusApp(intent: .settings) } },
-            isProActive: isProActive,
+            proPromotion: proPromotion,
             onProTap: { leavePanel { state.openDictusApp(intent: .pro) } },
             armedSmartMode: smartModes.armedMode,
             effectiveSmartMode: smartModes.effectiveMode,
@@ -388,7 +400,7 @@ struct KeyboardRootView: View {
             // Also read here, not only in togglePanel(): iOS can hand the keyboard
             // to a fresh controller while the panel is open, and viewWillAppear
             // restores `.panel` — that path never goes through the toggle.
-            isProActive = ProStatusManager.isProActiveStatic
+            proPromotion = Self.readProPromotion()
 
             // Language is set in KeyboardViewController.viewWillAppear, which fires
             // on every keyboard appearance and picks up any App Group preference changes.

@@ -361,6 +361,11 @@ public final class PolishService {
         // `resolvedOutput` only withholds text for a Smart Mode, and only degrades
         // for one, so anything else is a plain success or a free-polish floor.
         guard let mode = job.task.smartMode, bundle.outcome != .success else {
+            // A Smart Mode that delivered is one line of the end-of-trial recap
+            // (#593). Counted here because both processes run this, and it is the
+            // one place a mode's success is known as such; the counter itself
+            // decides whether a trial is running.
+            if job.task.smartMode != nil { ProTrialUsage.recordSmartModeUse() }
             return PolishOutcome(text: returned ?? raw)
         }
         let reason = bundle.failureReason?.slug ?? "-"

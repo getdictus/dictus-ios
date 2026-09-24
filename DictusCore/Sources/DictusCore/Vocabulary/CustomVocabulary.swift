@@ -64,6 +64,9 @@ public enum CustomVocabulary {
             replacements: outcome.replacements,
             chars: text.count
         ))
+        // The other line of the end-of-trial recap (#593). Here and not in the
+        // replacer, which the tests and the harness call and which must stay pure.
+        ProTrialUsage.recordVocabularyFixes(outcome.replacements)
         return outcome.text
     }
 
