@@ -94,18 +94,18 @@ final class SmartModeSummaryTests: XCTestCase {
     }
 
     /// #587 decision 5: the rules are English and rule 1 is the language rule, naming
-    /// the **input** and nothing else.
+    /// the examples.
     ///
-    /// It named the examples until #587's follow-up, which is incoherent once the
-    /// examples are in the transcript's own language: obeyed literally, the clause
-    /// forbids the language the output must be in.
-    func testRuleOneIsTheLanguageRuleAndNamesOnlyTheInput() {
+    /// Naming them reads as a contradiction once the examples are in the transcript's
+    /// own language, and it stays: the reword was measured on 2026-09-24 and regressed
+    /// `Liste` into English on Traditional Chinese, 2 runs of 3
+    /// (`docs/research/587-language-clause/`).
+    func testRuleOneIsTheLanguageRuleAndNamesTheExamples() {
         guard let rule1 = instructions.components(separatedBy: "\n").first(where: { $0.hasPrefix("1. ") }) else {
             return XCTFail("no rule 1")
         }
         XCTAssertTrue(rule1.contains("language of the text you are given"))
-        XCTAssertTrue(rule1.contains("Read it, then write in that language and no other"))
-        XCTAssertFalse(instructions.contains("language of the examples"))
+        XCTAssertTrue(rule1.contains("never in the language of the examples"))
         XCTAssertTrue(instructions.contains("Never translate"))
     }
 

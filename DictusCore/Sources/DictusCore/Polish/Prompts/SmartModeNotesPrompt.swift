@@ -154,7 +154,7 @@ enum SmartModeNotesPrompt {
         - Do NOT emit a bracketed placeholder of any kind — not `[Name]`, not `[Nom]`, not `[date]`, not any other word between square brackets.
         - Do NOT interpret or editorialise. You compress what was said; you do not judge it.
 
-        Examples — the input language varies; the output language always matches the input's:
+        Examples — the input language varies; the output language always matches it, never the examples':
 
         INPUT: \(examples.meetingInput)
         OUTPUT:

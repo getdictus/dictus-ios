@@ -88,3 +88,34 @@ python3 $O/summarise.py
 4. **A clause that measures the same either way is a wording decision, not a measured
    improvement.** If the numbers are level, what this round buys is coherence — and the
    PR will say exactly that rather than claim a gain.
+
+## 7. Outcome, 2026-09-24: the clause STAYS
+
+The round ran as declared, 2 160 scored outputs, four modes, 16 languages, 3 runs per
+fixture. **The reword regressed `Liste` above the bar, so today's wording ships.**
+
+| Mode | Language refusals, `develop` | Language refusals, reworded | Wrong-language accepted |
+|---|---|---|---|
+| `Message` | 0 / 270 | 0 / 270 | 3 / 3 (the Danish sentence misread, both arms) |
+| **`Liste`** | **2 / 270** | **5 / 270** | 4 / 4 (Scandinavian misreads, both arms) |
+| `Structuré` | 0 / 269 | 0 / 269 | 3 / 3 (same) |
+| `Résumé` | 0 / 269 | 0 / 268 | 0 / 0 |
+
+Per language, the two that moved, both on `Liste`:
+
+- **Traditional Chinese: 0 of 18 refused → 2 of 18 (11.1 %)**, and these are **genuine**:
+  the output came back **in English** (`- Prepare for issue integration`) on a Chinese
+  dictation, twice of three runs, where the clause-carrying prompt answered in Chinese
+  3 of 3. Over the bar, and the exact failure the bar exists for.
+- **Spanish: 2 of 18 → 3 of 18 (16.7 %)**, the short-bullet misreading of #598, one run
+  worse.
+
+Everything else is level: English in, English out 18/18 for all four modes on both arms;
+`Liste` keeps bullets on every accepted output (257/257 reworded, 263/263 baseline);
+`Message` and `Résumé` unchanged.
+
+**So the rule declared in §4 applies: keeping today's wording is the outcome.** The clause
+is incoherent to read and measured better to ship, in the one place it matters. The
+finding is not dismissed — it is written into `SmartModeStructuredPrompt`'s doc comment
+and pinned by the two tests that assert the wording, so the next reader meets the
+measurement rather than the contradiction alone.

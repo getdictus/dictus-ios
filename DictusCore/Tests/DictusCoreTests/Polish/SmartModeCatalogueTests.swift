@@ -463,22 +463,19 @@ final class SmartModeCatalogueTests: XCTestCase {
         }
     }
 
-    /// The language rule in both prompts, and no rule renumbered.
+    /// The language clause in both prompts, and no rule renumbered.
     ///
-    /// It names the **input** and nothing else since #587's follow-up: the clause it
-    /// replaced forbade "the language of the examples below" while those examples are
-    /// the transcript's own language, so a model reading it literally was told to avoid
-    /// the language it must write in. Neither prompt may name the examples here again.
-    func testBothPromptsCarryTheInputLanguageRule() {
-        for instructions in [SmartModeCatalogue.message.prompt.instructions,
-                             SmartModeCatalogue.notes.prompt.instructions] {
-            XCTAssertFalse(instructions.contains("language of the examples"))
-            XCTAssertFalse(instructions.contains("never the examples'"))
-        }
+    /// **It names the examples, which reads as a contradiction now that the examples are
+    /// in the transcript's own language** (CodeRabbit, PR #597), and it stays anyway:
+    /// rewording all four modes so the input alone decides was measured on 2026-09-24
+    /// and regressed `Liste`, which answered a Traditional Chinese dictation in English
+    /// 2 runs of 3. Numbers in `docs/research/587-language-clause/`. This assertion is
+    /// what stops the reword being reapplied on the reading alone.
+    func testBothPromptsCarryTheMeasuredLanguageClause() {
         XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
-            .contains("Read it, then write in that language and no other"))
+            .contains("never in the language of the examples below"))
         XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
-            .contains("the output language always matches the input's"))
+            .contains("never the examples'"))
         XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
             .contains("1. Cut what only exists because they were speaking"))
         XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
