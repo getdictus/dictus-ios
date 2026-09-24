@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1-message",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus dès que dès que... dès que j'ai avancé un petit peu plus dessus, s'il te plaît. Enfin pardon, pas s'il te plaît je me suis planté."
+  },
+  {
+    "id": "2-message",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Salut Manu comment tu vas ? Est-ce que tu pourrais checker si tu as bien reçu le mail que je t'ai envoyé tout à l'heure s'il te plaît ? Des bisous."
+  },
+  {
+    "id": "3-message",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Je te tiens au jus, je vais tester ça rapidement. Il faut juste que je prenne l'abonnement pour pouvoir essayer. Mais honnêtement, de ce que j'ai cru comprendre, c'est peut-être un petit peu moins bien que Hermes et OpenClaw."
+  },
+  {
+    "id": "4-message",
+    "lang": "fr",
+    "sttEngine": "PK",
+    "raw": "Yo les gars, vous savez comment on peut voir les limites d'usage du modèle Astra. Parce que ce matin j'ai voulu le tester et visiblement j'ai atteint les limites. Mais quand je vais voir dans les dans les settings utilisation de ChatGPT, je vois juste l'usage global, je vois pas l'usage par modèle. Si vous avez l'info les gars, je suis preneur."
+  }
+]

@@ -78,10 +78,45 @@ enum SmartModeNotesPrompt {
 
     /// Deliberately shaped like the polish framing that measured 0/190, and
     /// deliberately free of the word "notes" — see this type's doc comment.
+    /// The four worked blocks in one language (#587 decision 9). A value rather than
+    /// text inside the prompt literal, so a set can be swapped whole without touching a
+    /// rule — see `SmartModeNotesExamples`, which holds one per Apple FM language.
+    struct ExampleSet: Equatable, Sendable {
+        let meetingInput: String
+        let meetingOutput: String
+        let buildInput: String
+        let buildOutput: String
+        let shortInput: String
+        let shortOutput: String
+        let counterInput: String
+        /// The wrong answer that translates the speaker.
+        let counterTranslated: String
+        /// The wrong answer that invents a second bullet.
+        let counterInvented: String
+        let counterRight: String
+    }
+
+    /// The French set: the three French blocks this prompt shipped with, plus the
+    /// build example translated. Sent when the transcript's language is unknown or has
+    /// no set, and warmed by a prewarm that has no transcript yet.
+    static var defaultExamples: ExampleSet {
+        // Force-unwrapped against a table this mode's own test asserts holds `fr`: a
+        // missing French set is a build-time mistake, and falling back to another
+        // language would hide it behind a wrong prompt.
+        // swiftlint:disable:next force_unwrapping
+        SmartModeNotesExamples.byLanguage["fr"]!
+    }
+
+    /// Step 2 of #587 decision 5: the whole prompt per transcript language, with that
+    /// language's blocks and every rule untouched.
+    static func localizedInstructions() -> [String: String] {
+        SmartModeNotesExamples.byLanguage.mapValues { instructions(examples: $0) }
+    }
+
     static let userInstruction = "Condense this text into a bulleted list. Output only the list, nothing else."
     static let outputMarker = "Condensed output:"
 
-    static func instructions() -> String {
+    static func instructions(examples: ExampleSet = defaultExamples) -> String {
         """
         You are a TEXT TRANSFORMATION FUNCTION. You condense speech-to-text output into a bulleted list.
 
@@ -119,32 +154,28 @@ enum SmartModeNotesPrompt {
         - Do NOT emit a bracketed placeholder of any kind — not `[Name]`, not `[Nom]`, not `[date]`, not any other word between square brackets.
         - Do NOT interpret or editorialise. You compress what was said; you do not judge it.
 
-        Examples — the input language varies; the output language always matches it:
+        Examples — the input language varies; the output language always matches it, never the examples':
 
-        INPUT: alors euh pour la réunion de jeudi il faut que je prépare les chiffres du trimestre et aussi euh le budget marketing et puis faut que j'appelle le comptable avant parce qu'il a les données manquantes
+        INPUT: \(examples.meetingInput)
         OUTPUT:
-        - Préparer les chiffres du trimestre pour la réunion de jeudi
-        - Préparer le budget marketing
-        - Appeler le comptable avant : il a les données manquantes
+        \(examples.meetingOutput)
 
-        INPUT: ok so uh the build is failing on ios twenty six we think it's the swift six mode thing and uh I'll try pinning the toolchain first and if that doesn't work we roll back the dependency
+        INPUT: \(examples.buildInput)
         OUTPUT:
-        - Build failing on iOS 26, suspected cause: Swift 6 mode
-        - First attempt: pin the toolchain
-        - Fallback: roll back the dependency
+        \(examples.buildOutput)
 
         Short-input example. One idea in, one bullet out — do not pad:
 
-        INPUT: pense à racheter du café demain matin
+        INPUT: \(examples.shortInput)
         OUTPUT:
-        - Racheter du café demain matin
+        \(examples.shortOutput)
 
         COUNTER-EXAMPLES — the WRONG outputs below invent content or translate. Never produce them.
 
-        INPUT: faut que j'arrose les plantes du hall avant de partir
-        WRONG (translated): - Water the lobby plants before leaving
-        WRONG (invented a second bullet): - Arroser les plantes du hall avant de partir / - Acheter un arrosoir
-        RIGHT: - Arroser les plantes du hall avant de partir
+        INPUT: \(examples.counterInput)
+        WRONG (translated): \(examples.counterTranslated)
+        WRONG (invented a second bullet): \(examples.counterInvented)
+        RIGHT: \(examples.counterRight)
         """
     }
 }

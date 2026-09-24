@@ -389,6 +389,67 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertTrue(instructions.contains("Never translate, not even partly"))
     }
 
+    /// #587 decision 9: `Liste` carries one example set per Apple FM language, and
+    /// nothing else about the mode moves. Its rebuild is #573.
+    func testListCarriesAnExampleSetPerLanguage() {
+        let prompt = SmartModeCatalogue.notes.prompt
+        XCTAssertEqual(prompt.localizedInstructions?.count, 15)
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "ja"),
+                       SmartModeNotesPrompt.localizedInstructions()["ja"])
+        XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions)
+    }
+
+    /// Every set of both modes is bullets for `Liste` and blocks for `Message`, and
+    /// no set loses its mode's shape in translation. #393 is why the first half is a
+    /// test: a translated example that came back as prose would have turned the bullet
+    /// mode into prose.
+    func testEveryListExampleSetStillShowsBullets() {
+        for (code, set) in SmartModeNotesExamples.byLanguage {
+            for output in [set.meetingOutput, set.buildOutput, set.shortOutput, set.counterRight] {
+                XCTAssertTrue(output.hasPrefix("- "), "\(code): an example output is not a bullet")
+            }
+            XCTAssertEqual(set.meetingOutput.components(separatedBy: "\n- ").count, 3, code)
+        }
+    }
+
+    /// The two languages whose sets are the originals rather than translations keep
+    /// their own text: `Message`'s French pair is what the mode shipped with, which is
+    /// what makes a French dictation identical to before (#587 decision 9).
+    func testMessageFrenchExamplesAreTheShippingPair() {
+        let french = SmartModeMessageExamples.byLanguage["fr"]
+        XCTAssertEqual(french?.casualInput.hasPrefix("coucou toi euh j'ai récupéré la tondeuse"), true)
+        XCTAssertEqual(french?.greetingInput, "Hello chef, comment tu vas ?")
+        XCTAssertEqual(french?.greetingOutput, "Hello chef, comment tu vas ?")
+        XCTAssertEqual(SmartModeMessagePrompt.instructions(), SmartModeMessagePrompt.instructions(
+            examples: SmartModeMessageExamples.byLanguage["fr"] ?? SmartModeMessagePrompt.defaultExamples
+        ))
+    }
+
+    /// Both tables hold the same 15 base subtags, so no mode silently covers fewer
+    /// languages than the other.
+    func testBothTablesCoverTheSameLanguages() {
+        let expected: Swift.Set<String> = ["da", "de", "en", "es", "fr", "it", "ja", "ko", "nb",
+                                           "nl", "pt", "sv", "tr", "vi", "zh"]
+        XCTAssertEqual(Swift.Set(SmartModeNotesExamples.byLanguage.keys), expected)
+        XCTAssertEqual(Swift.Set(SmartModeMessageExamples.byLanguage.keys), expected)
+        for code in expected {
+            XCTAssertNotNil(SmartModeNotesExamples.set(forLanguageCode: code + "-XX"), code)
+            XCTAssertNotNil(SmartModeMessageExamples.set(forLanguageCode: code + "-XX"), code)
+        }
+    }
+
+    /// The language clause PR 1 measured, in both prompts, and no rule renumbered.
+    func testBothPromptsCarryTheExamplesLanguageClause() {
+        XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
+            .contains("never in the language of the examples below"))
+        XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
+            .contains("never the examples'"))
+        XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
+            .contains("1. Cut what only exists because they were speaking"))
+        XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
+            .contains("1. Write one bullet per idea"))
+    }
+
     // MARK: - Message (#572)
 
     /// The identifier is a wire value from the day it ships: it keys the session
