@@ -58,6 +58,22 @@ import Foundation
 /// must not be copied onto prose off the end took it to 5 of 290. Do not swap them back
 /// without re-running the bench.
 ///
+/// ### Why rule 1 still names the examples, although that reads as a contradiction
+///
+/// Rule 1 says *"write in the language of the transcript… and never in the language of
+/// the examples below"*, and since step 2 those examples **are** in the transcript's
+/// language. Read literally the second half forbids the first, which CodeRabbit flagged
+/// on PR #597 and which is a fair reading of the text.
+///
+/// **It stays because removing it was measured worse**, 2026-09-24, on the same 16
+/// languages and fixtures as the rounds above (`docs/research/587-language-clause/`).
+/// Rewording all four modes so the input alone names the output language left
+/// `Structuré` unchanged, and regressed `Liste`: Traditional Chinese answered **in
+/// English** 2 runs of 3 where the clause-carrying prompt answered in Chinese 3 of 3,
+/// and Spanish refusals went from 2 of 18 to 3 of 18. Coherence for the reader is not
+/// worth a wrong-language output for the user, so the incoherent sentence ships and
+/// this paragraph is the explanation nobody has to rediscover.
+///
 /// ### Why rule 7 quotes no phrasing, and no example shows one
 ///
 /// Off-domain examples protect against a **content** leak — a house, a garden — and

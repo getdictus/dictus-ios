@@ -438,8 +438,40 @@ final class SmartModeCatalogueTests: XCTestCase {
         }
     }
 
-    /// The language clause PR 1 measured, in both prompts, and no rule renumbered.
-    func testBothPromptsCarryTheExamplesLanguageClause() {
+    /// **The table has to be on the catalogue row, not only in the examples file**
+    /// (found by CodeRabbit on PR #597): a mode whose wiring regressed would hand every
+    /// non-French transcript the fallback prompt, with the assertion above still green
+    /// because the examples themselves never moved.
+    ///
+    /// Asserted for every mode that carries one, and asserted absent for the modes that
+    /// do not: `Traduction` names its target inside its own instructions.
+    func testEveryLocalizedModeResolvesItsTableThroughTheCatalogue() {
+        let localized = [SmartModeCatalogue.message, SmartModeCatalogue.notes,
+                         SmartModeCatalogue.structured, SmartModeCatalogue.summary]
+        for mode in localized {
+            let prompt = mode.prompt
+            XCTAssertGreaterThanOrEqual(prompt.localizedInstructions?.count ?? 0, 15, mode.id)
+            for code in ["de", "ja", "pt-BR", "no"] {
+                XCTAssertNotEqual(prompt.instructions(forTranscriptLanguage: code), prompt.instructions,
+                                  "\(mode.id) sends the fallback for \(code)")
+            }
+            XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions, mode.id)
+        }
+        let localizedIdentifiers = Swift.Set(localized.map(\.id))
+        for mode in SmartModeCatalogue.builtIns where !localizedIdentifiers.contains(mode.id) {
+            XCTAssertNil(mode.prompt.localizedInstructions, mode.id)
+        }
+    }
+
+    /// The language clause in both prompts, and no rule renumbered.
+    ///
+    /// **It names the examples, which reads as a contradiction now that the examples are
+    /// in the transcript's own language** (CodeRabbit, PR #597), and it stays anyway:
+    /// rewording all four modes so the input alone decides was measured on 2026-09-24
+    /// and regressed `Liste`, which answered a Traditional Chinese dictation in English
+    /// 2 runs of 3. Numbers in `docs/research/587-language-clause/`. This assertion is
+    /// what stops the reword being reapplied on the reading alone.
+    func testBothPromptsCarryTheMeasuredLanguageClause() {
         XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
             .contains("never in the language of the examples below"))
         XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
