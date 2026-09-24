@@ -22,11 +22,15 @@ The Natural contract:
 9. Fix one-letter typos that do not rise to rule 8.
 
 **Preserve (the model MUST NOT change these):**
+- Meaning: every word that carries it. No word replaced by a different word (`preneur` ≠ `prêt`), no negation, number, name, date or other content word deleted.
+- Word choice (no synonym substitution: `bosser` ≠ `travailler`).
+
+**Tolerated, not encouraged** (amended 2026-09-24, #575 — see the amendment below). The prompts still ask the model to keep these, because the shipping prompts measurably suppress the lifts; the code no longer refuses an output that changed them:
 - Familiar register (`t'es`, `dispo`, `19h`, contractions, abbreviations).
 - Oral negation form (`je sais pas` stays; do NOT add `ne`).
 - Code-switched tech anglicisms (`today`, `ship`, `commit`, `push`, `merge`, `PR`, `feature`, `bug`, `release`, `deploy`, …).
-- Word choice (no synonym substitution: `bosser` ≠ `travailler`).
 - Tone and register.
+- Politeness formulas and sign-offs (`s'il te plaît`, `merci d'avance`, `Des bisous`).
 
 **Forbidden:**
 - Adding words or content that were not in the input (no inventing endings like "Merci.", no completing cut-off sentences).
@@ -215,3 +219,60 @@ prompt, including the ones that told the model it could structure. The Forbidden
 existing bans held throughout.
 
 Full numbers: `docs/research/437-longform-breaks/findings.md`.
+
+## Amendment — 2026-09-24 (#575)
+
+**The bar is meaning, not wording.** Decided by the maintainer on 2026-09-24, on
+#575's diagnosis (PR #596, `docs/research/575-normal-polish-damage/findings.md`).
+
+The Preserve list above used to protect register, oral negation, anglicisms and
+wording on the same footing as meaning. Three weeks after the deletion ban shipped,
+device captures still showed all of them broken, and the diagnosis located the cause
+in Apple FM's own prior toward standard written French — not in our code, and not
+removable by any prompt measured (a prompt that forbade changing any word damaged
+*more*: 27 outputs in 70). Two of the broken rows changed what the speaker said:
+`je suis preneur` → `je suis prêt`, `je te revaudrai ça` → `je te reviendrai ça`. The
+others did not: `comment vas-tu`, `vérifier`, a dropped `Des bisous`.
+
+So the contract now separates the two, and enforces one of them in code:
+
+| change | example | verdict |
+|---|---|---|
+| a dictated word replaced by a different word | `preneur` → `prêt`, `capte` → `voit` | **refused** |
+| a meaning-bearing word deleted | a negation, a number, a name, a date | **refused** |
+| register lifted | `t'as` → `tu as`, `ne` added, `comment vas-tu`, `checker` → `vérifier` | tolerated |
+| politeness formula or sign-off dropped | `s'il te plaît`, `Des bisous` | tolerated |
+
+**What enforces it: the `lostWord` guardrail** (`PolishLostWords`). A seventh output
+check, on Natural and Auto only, that refuses when a word the speaker dictated is gone
+from the output after every licence this contract grants — rule 3's digits, rule 4's
+verbal punctuation, rule 6's repeats (words and short phrases), rule 7's fillers, and
+the tolerated list above, which lives in `PolishLostWordsLexicon`. On refusal the free
+polish inserts the floor, as for every other guardrail, so a refusal costs the polish
+and never the words: on short Parakeet messages the floor equals the accepted output
+in 216 of 261 recorded cases.
+
+**What it does not enforce, stated so nobody reads the table as more than it is:**
+- **Long dictations.** The check reads input of at most 500 characters. A
+  bag-of-words check cannot tell a rule-8 repair from a loss on long input (#466);
+  the research detector refused 21 % of faithful long outputs. A substituted word in
+  a long dictation still reaches the user.
+- **Languages other than French.** The lexicon and every number behind it are French.
+  EN, ES and DE pass the check untested until each has its own lexicon and corpus.
+- **A dictation that mixes languages.** When the lost words include a run of three or
+  more that reads as another language, the output is rule 8 bringing a code-switched
+  clause back, and the check stands down for the whole output.
+- **Reordering and additions.** The Forbidden list is unchanged; the other checks
+  (prefix alignment, grounding, segment overlap) still carry what they carried.
+
+**Repair and the Smart Modes are outside it**, by the contract flag
+`refusesLostWords`: Repair reconstructs words by design (ADR 0002) and every Smart
+Mode rewrites on purpose.
+
+**The prompts do not change.** They still name the register items and politeness
+formulas as things to keep, because the diagnosis measured that the shipping prompts
+suppress the prior: 12 damaged outputs in 131 on French, against 15 in 68 with their
+worked examples removed and 27 in 70 under a minimal prompt. It also measured that
+adding a line naming more items made those items worse, so the list is not extended
+either. Only the enforcement moved: a lift the prompt fails to prevent is now accepted,
+and a change of meaning is now refused.

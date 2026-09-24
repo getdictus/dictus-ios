@@ -53,7 +53,7 @@ public struct PolishLanguageSegmentThresholds: Equatable, Sendable {
 
 /// Runtime sanity check on every polish output.
 ///
-/// Six complementary checks:
+/// Seven complementary checks:
 /// 1. `accepts(raw:polished:mode:)` — character-length ratio. Catches catastrophic
 ///    over- or under-generation (empty output, runaway generation).
 /// 2. `detectedLanguageMatches(polished:target:)` — language detection on the
@@ -78,9 +78,13 @@ public struct PolishLanguageSegmentThresholds: Equatable, Sendable {
 ///    keeps a speaker-flagged incompleteness has been seen inventing, and one check 4
 ///    passes on a long input because a generic sentence shares its ordinary words.
 ///    Runs only where the contract asks for it.
+/// 7. `PolishLostWords` — whether a word the speaker dictated is gone from the
+///    output, once the Natural contract's licences are applied (#575). The only check
+///    that sees one replaced word — `preneur` → `prêt` — which moves none of the six
+///    above. Free polish only, French only, short input only.
 public enum PolishGuardrail {
 
-    /// Which of the six refused an output.
+    /// Which of the seven refused an output.
     ///
     /// One `PolishMetrics.Outcome.rejectedGuardrail` covers five questions with five
     /// different answers — the band is mis-sized for the mode, the prompt drifted
@@ -109,6 +113,11 @@ public enum PolishGuardrail {
         /// not (#587). Named apart from `segmentOverlap`, which refuses some of the
         /// same outputs, so an export counts #581's shape under its own name.
         case incompleteness
+        /// A word the speaker dictated is gone, and no licence of the Natural contract
+        /// explains it (#575): `je suis preneur` → `je suis prêt`. Named apart from
+        /// every other check because it is the one that answers "the model changed
+        /// what the speaker said" rather than "the model added something".
+        case lostWord
 
         public var description: String { rawValue }
     }
