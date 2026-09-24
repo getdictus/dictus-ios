@@ -145,10 +145,10 @@ public enum PolishPipeline {
             }
             // Guardrail baseline is the preprocessed text — what the engine
             // actually saw (modulo the newline marker the post-pass undid).
-            // The six output checks, in the order they cost: a character ratio,
-            // then two `NaturalLanguage` passes, then three word-set comparisons. Each
-            // names itself in the result so an export can count the six apart
-            // (#466) — `rejectedGuardrail` is one outcome for six questions.
+            // The seven output checks, in the order they cost: a character ratio,
+            // then two `NaturalLanguage` passes, then four word-set comparisons. Each
+            // names itself in the result so an export can count the seven apart
+            // (#466) — `rejectedGuardrail` is one outcome for seven questions.
             //
             // The word-set checks are ordered by SPECIFICITY rather than by cost,
             // which is the same for all three. A chat preamble fails two of them, and
@@ -157,6 +157,9 @@ public enum PolishPipeline {
             // measures the rate #466 shipped against. `incompleteness` sits before it
             // for the same reason: #581's closing sentence often fails the overlap
             // check too, and it should be counted under the name that says what it is.
+            // `lostWord` (#575) runs last for the same reason, and has the widest reach
+            // of the four: a chat preamble or an invented line also loses the dictation's
+            // words, and each of those is already counted under its own name.
             let refused: PolishGuardrail.Check?
             if !PolishGuardrail.accepts(
                 raw: preprocessed, polished: polished, contract: job.task.contract
@@ -175,6 +178,8 @@ public enum PolishPipeline {
                 refused = .incompleteness
             } else if !segmentOverlapGuardrailPasses(polished: polished, preprocessed: preprocessed, job: job) {
                 refused = .segmentOverlap
+            } else if !lostWordGuardrailPasses(polished: polished, preprocessed: preprocessed, job: job) {
+                refused = .lostWord
             } else {
                 refused = nil
             }
@@ -257,15 +262,44 @@ public enum PolishPipeline {
                                                  preprocessed: String,
                                                  job: PolishJob) -> Bool {
         guard job.task.contract.requiresGroundedNames else { return true }
-        let outputCode: String?
-        switch job.task.contract.outputLanguage {
-        case .polishTarget: outputCode = job.promptLanguage.rawValue
-        case .fixed(let language): outputCode = language.rawValue
-        case .sameAsInput: outputCode = detectLanguageCode(in: preprocessed)
-        }
         return PolishGrounding.ungroundedAnchors(
-            in: polished, input: preprocessed, languageCode: outputCode
+            in: polished, input: preprocessed,
+            languageCode: expectedOutputLanguageCode(preprocessed: preprocessed, job: job)
         ).isEmpty
+    }
+
+    /// The `NLLanguage` code the output is expected to read as: the prompt's for
+    /// `.polishTarget`, the mode's target for `.fixed`, and the input's own detected
+    /// language for `.sameAsInput` — `nil` when that cannot be read confidently.
+    ///
+    /// Shared by the two checks that need a language to choose their tools with —
+    /// grounding's `NLTagger` hint and the lost-word check's lexicon — so the two can
+    /// never disagree about which language a dictation is in.
+    private static func expectedOutputLanguageCode(preprocessed: String, job: PolishJob) -> String? {
+        switch job.task.contract.outputLanguage {
+        case .polishTarget: return job.promptLanguage.rawValue
+        case .fixed(let language): return language.rawValue
+        case .sameAsInput: return detectLanguageCode(in: preprocessed)
+        }
+    }
+
+    /// Lost-word guardrail (#575): no word the speaker dictated disappears from the
+    /// free polish, apart from what the Natural contract licenses.
+    ///
+    /// Runs only where the task's contract says so — `refusesLostWords`, true on
+    /// Natural and Auto, false on Repair and every Smart Mode. Inside it,
+    /// `PolishLostWords` runs only on French and only on short input; everything else
+    /// passes untested. See that type for the licences and the numbers.
+    ///
+    /// The baseline is `preprocessed` for the reason every other check uses it.
+    private static func lostWordGuardrailPasses(polished: String,
+                                                preprocessed: String,
+                                                job: PolishJob) -> Bool {
+        guard job.task.contract.refusesLostWords else { return true }
+        return PolishLostWords.accepts(
+            polished: polished, raw: preprocessed,
+            languageCode: expectedOutputLanguageCode(preprocessed: preprocessed, job: job)
+        )
     }
 
     /// Worst-segment overlap guardrail (#414): every line of the output has to be

@@ -124,9 +124,10 @@ struct PolishDebugExport: Codable {
         let outcome: String
         /// Why the engine failed (#315) — present on `engineFailed` events only.
         let failureReason: String?
-        /// Which of the four output checks refused (#466) — `length`, `language`,
-        /// `grounding` or `prefixAlignment`. Present on `rejectedGuardrail` events
-        /// only, and absent on every event written before the field existed.
+        /// Which output check refused (#466) — `length`, `language`, `grounding`,
+        /// `prefixAlignment`, `segmentOverlap`, `incompleteness` or `lostWord` (#575).
+        /// Present on `rejectedGuardrail` events only, and absent on every event
+        /// written before the field existed.
         let guardrailCheck: String?
         /// On a `smartModeSkippedShortInput` event: which mode declined, on how many
         /// characters, against which floor (#587). Absent on every other event.
