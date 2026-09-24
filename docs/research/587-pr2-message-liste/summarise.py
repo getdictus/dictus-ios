@@ -25,11 +25,21 @@ ARMS = ("develop", "shipping")
 
 
 def load():
+    """Every capture in `CAPTURES`, or an exit.
+
+    A missing file is a capture command that failed, and skipping it produced a report
+    that looked complete while covering three of four rounds (found by CodeRabbit on
+    PR #597). Bars read off a silently short denominator are worse than no bars, so the
+    absence is an error here rather than a gap in a table nobody would notice.
+    """
+    missing = [capture for capture, _ in CAPTURES.values() if not (HERE / capture).exists()]
+    if missing:
+        print("error: missing capture(s), the round is incomplete: " + ", ".join(sorted(missing)))
+        print("       re-run the commands in bars.md §5; this script reports nothing partial.")
+        raise SystemExit(1)
     runs = []
     for (mode, part), (capture, fixture_file) in CAPTURES.items():
         path = HERE / capture
-        if not path.exists():
-            continue
         raws = {f["id"]: f["raw"] for f in json.loads((FIXTURES / fixture_file).read_text())}
         for record in json.loads(path.read_text()):
             record.setdefault("rejectedCheck", None)

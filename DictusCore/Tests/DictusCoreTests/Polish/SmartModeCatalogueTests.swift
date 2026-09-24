@@ -438,12 +438,47 @@ final class SmartModeCatalogueTests: XCTestCase {
         }
     }
 
-    /// The language clause PR 1 measured, in both prompts, and no rule renumbered.
-    func testBothPromptsCarryTheExamplesLanguageClause() {
+    /// **The table has to be on the catalogue row, not only in the examples file**
+    /// (found by CodeRabbit on PR #597): a mode whose wiring regressed would hand every
+    /// non-French transcript the fallback prompt, with the assertion above still green
+    /// because the examples themselves never moved.
+    ///
+    /// Asserted for every mode that carries one, and asserted absent for the modes that
+    /// do not: `Traduction` names its target inside its own instructions.
+    func testEveryLocalizedModeResolvesItsTableThroughTheCatalogue() {
+        let localized = [SmartModeCatalogue.message, SmartModeCatalogue.notes,
+                         SmartModeCatalogue.structured, SmartModeCatalogue.summary]
+        for mode in localized {
+            let prompt = mode.prompt
+            XCTAssertGreaterThanOrEqual(prompt.localizedInstructions?.count ?? 0, 15, mode.id)
+            for code in ["de", "ja", "pt-BR", "no"] {
+                XCTAssertNotEqual(prompt.instructions(forTranscriptLanguage: code), prompt.instructions,
+                                  "\(mode.id) sends the fallback for \(code)")
+            }
+            XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions, mode.id)
+        }
+        let localizedIdentifiers = Swift.Set(localized.map(\.id))
+        for mode in SmartModeCatalogue.builtIns where !localizedIdentifiers.contains(mode.id) {
+            XCTAssertNil(mode.prompt.localizedInstructions, mode.id)
+        }
+    }
+
+    /// The language rule in both prompts, and no rule renumbered.
+    ///
+    /// It names the **input** and nothing else since #587's follow-up: the clause it
+    /// replaced forbade "the language of the examples below" while those examples are
+    /// the transcript's own language, so a model reading it literally was told to avoid
+    /// the language it must write in. Neither prompt may name the examples here again.
+    func testBothPromptsCarryTheInputLanguageRule() {
+        for instructions in [SmartModeCatalogue.message.prompt.instructions,
+                             SmartModeCatalogue.notes.prompt.instructions] {
+            XCTAssertFalse(instructions.contains("language of the examples"))
+            XCTAssertFalse(instructions.contains("never the examples'"))
+        }
         XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
-            .contains("never in the language of the examples below"))
+            .contains("Read it, then write in that language and no other"))
         XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
-            .contains("never the examples'"))
+            .contains("the output language always matches the input's"))
         XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
             .contains("1. Cut what only exists because they were speaking"))
         XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
