@@ -91,15 +91,36 @@ python3 $O/summarise.py
 
 ## 7. Outcome, 2026-09-24: the clause STAYS
 
-The round ran as declared, 2 160 scored outputs, four modes, 16 languages, 3 runs per
-fixture. **The reword regressed `Liste` above the bar, so today's wording ships.**
+The round ran as declared, four modes, 16 languages, 3 runs per fixture: **2 160 runs
+loaded, 2 155 scored.** The five that are in no denominator produced no engine output at
+all — four on the candidate side (one `Structuré`, two `Résumé`) and one on the reused
+`Résumé` baseline — and a run the engine never answered has violated nothing, which is the
+rule every round of this campaign has filtered on.
 
-| Mode | Language refusals, `develop` | Language refusals, reworded | Wrong-language accepted |
-|---|---|---|---|
-| `Message` | 0 / 270 | 0 / 270 | 3 / 3 (the Danish sentence misread, both arms) |
-| **`Liste`** | **2 / 270** | **5 / 270** | 4 / 4 (Scandinavian misreads, both arms) |
-| `Structuré` | 0 / 269 | 0 / 269 | 3 / 3 (same) |
-| `Résumé` | 0 / 269 | 0 / 268 | 0 / 0 |
+**The reword regressed `Liste` above the bar, so today's wording ships.**
+
+| Mode | Language refusals, `develop` | Language refusals, reworded | Flagged by the detector, accepted | **Adjudicated wrong-language, accepted** |
+|---|---|---|---|---|
+| `Message` | 0 / 270 | 0 / 270 | 3 and 3 | **0 and 0** |
+| **`Liste`** | **2 / 270** | **5 / 270** | 4 and 4 | **0 and 0** |
+| `Structuré` | 0 / 269 | 0 / 269 | 3 and 3 | **0 and 0** |
+| `Résumé` | 0 / 269 | 0 / 268 | 0 and 0 | **0 and 0** |
+
+The two flag columns read `develop` and `reworded` in that order. **They are not the same
+measurement**, and B1a is the second one:
+
+- **Flagged by the detector** is what the code prints: an accepted output whose whole-text
+  reading, or one of whose sentences of 20 characters or more, is read as another language
+  at 0.85 or above. It is a screen, and it fires on things that are not defects.
+- **Adjudicated** is B1a: the flags read one by one against the output. All 20 of them, on
+  both arms, are cross-readings **inside** the Scandinavian set — `Jeg tror, jeg kan
+  eksportere loggene, som de er.` read as Norwegian, a Norwegian bullet read as Danish —
+  on outputs whose whole text reads as the language asked for. None is an output in a
+  language the speaker did not dictate.
+
+So the campaign's headline number is the second column: **0 wrong-language outputs
+accepted**, on either wording, in all 16 languages, for all four modes. The first column
+is kept beside it because a screen that is never shown is a screen nobody can check.
 
 Per language, the two that moved, both on `Liste`:
 

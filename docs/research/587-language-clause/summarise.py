@@ -67,14 +67,18 @@ def wrong_language(r):
 
 def main():
     runs = load()
-    print(f"{len(runs)} runs loaded")
+    scored_runs = [r for r in runs if scored(r)]
+    print(f"{len(runs)} runs loaded, {len(scored_runs)} scored "
+          f"({len(runs) - len(scored_runs)} produced no engine output and are in no denominator)")
     table = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     for r in runs:
         if scored(r):
             table[r["mode"]][r["expectedLanguage"]][r["armLabel"]].append(r)
 
     print("\n\n════ B1 — language, per mode, language and arm\n")
-    print(f"{'mode':11}{'lang':9}{'arm':10}{'outputs':9}{'refusedLang':13}{'%':7}{'wrongAccepted':15}{'wrongAny'}")
+    print("  wrongAccepted/wrongAny are the DETECTOR's flags, not B1a: every one of them has"
+          " to be read by hand before it counts (bars.md §4, §7).")
+    print(f"{'mode':11}{'lang':9}{'arm':10}{'outputs':9}{'refusedLang':13}{'%':7}{'flaggedAccepted':17}{'flaggedAny'}")
     for mode in sorted(table):
         for language in sorted(table[mode]):
             for arm in ("develop", "reworded"):
@@ -88,7 +92,7 @@ def main():
                       f"{sum(wrong_language(r) for r in cell)}")
 
     print("\n\n════ Totals, per mode and arm\n")
-    print(f"{'mode':11}{'arm':10}{'outputs':9}{'refusedLang':13}{'wrongAccepted':15}{'english':10}{'bullets'}")
+    print(f"{'mode':11}{'arm':10}{'outputs':9}{'refusedLang':13}{'flaggedAccepted':17}{'english':10}{'bullets'}")
     for mode in sorted(table):
         for arm in ("develop", "reworded"):
             rows = [r for language in table[mode] for r in table[mode][language].get(arm, [])]
@@ -104,6 +108,8 @@ def main():
                   f"/{len(english):<7}{bullets}/{len(accepted)}")
 
     print("\n\n════ Every flagged output on the reworded arm, for the hand read\n")
+    print("  A flag is a question, not a verdict. `read` == `expected` means the whole output"
+          " is in the right language and only a sentence was cross-read.\n")
     for r in runs:
         if scored(r) and r["armLabel"] == "reworded" and wrong_language(r):
             print(f"  [{r['mode']}] {r['fixture']}#{r['run']} {r['outcome']}"

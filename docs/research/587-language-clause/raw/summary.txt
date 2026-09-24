@@ -1,9 +1,10 @@
-2160 runs loaded
+2160 runs loaded, 2155 scored (5 produced no engine output and are in no denominator)
 
 
 ════ B1 — language, per mode, language and arm
 
-mode       lang     arm       outputs  refusedLang  %      wrongAccepted  wrongAny
+  wrongAccepted/wrongAny are the DETECTOR's flags, not B1a: every one of them has to be read by hand before it counts (bars.md §4, §7).
+mode       lang     arm       outputs  refusedLang  %      flaggedAccepted  flaggedAny
 message    da       develop   18       0            0.0    3              3
 message    da       reworded  18       0            0.0    3              3
 message    de       develop   18       0            0.0    0              0
@@ -128,7 +129,7 @@ summary    zh-Hant  reworded  18       0            0.0    0              0
 
 ════ Totals, per mode and arm
 
-mode       arm       outputs  refusedLang  wrongAccepted  english   bullets
+mode       arm       outputs  refusedLang  flaggedAccepted  english   bullets
 message    develop   270      0            3              18/18     0/270
 message    reworded  270      0            3              18/18     0/270
 notes      develop   270      2            4              18/18     263/263
@@ -140,6 +141,8 @@ summary    reworded  268      0            0              18/18     0/136
 
 
 ════ Every flagged output on the reworded arm, for the hand read
+
+  A flag is a question, not a verdict. `read` == `expected` means the whole output is in the right language and only a sentence was cross-read.
 
   [message] T4-structured-since.da#1 success read=da expected=da
       FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
