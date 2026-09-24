@@ -1,0 +1,120 @@
+1140 runs loaded
+
+
+════ B1 — output language, per mode, arm and language (bars.md §4)
+
+mode     lang     arm       outputs  refusedLang  %      wrongAccepted  wrongAny 
+message  da       develop   18       0            0.0    3              3        
+message  da       shipping  18       0            0.0    3              3        
+message  de       develop   18       0            0.0    0              0        
+message  de       shipping  18       0            0.0    0              0        
+message  en       develop   18       0            0.0    0              0        
+message  en       shipping  18       0            0.0    0              0        
+message  es       develop   18       0            0.0    0              0        
+message  es       shipping  18       0            0.0    0              0        
+message  fr       develop   12       0            0.0    0              0        
+message  fr       shipping  12       0            0.0    0              0        
+message  it       develop   18       0            0.0    0              0        
+message  it       shipping  18       0            0.0    0              0        
+message  ja       develop   18       0            0.0    0              3        
+message  ja       shipping  18       0            0.0    0              0        
+message  ko       develop   18       0            0.0    0              0        
+message  ko       shipping  18       0            0.0    0              0        
+message  nb       develop   18       0            0.0    0              0        
+message  nb       shipping  18       0            0.0    0              0        
+message  nl       develop   18       0            0.0    0              0        
+message  nl       shipping  18       0            0.0    0              0        
+message  pt       develop   18       0            0.0    0              0        
+message  pt       shipping  18       0            0.0    0              0        
+message  sv       develop   18       0            0.0    0              0        
+message  sv       shipping  18       0            0.0    0              0        
+message  tr       develop   18       0            0.0    0              0        
+message  tr       shipping  18       0            0.0    0              0        
+message  vi       develop   18       0            0.0    0              0        
+message  vi       shipping  18       0            0.0    0              0        
+message  zh-Hans  develop   18       0            0.0    0              5        
+message  zh-Hans  shipping  18       0            0.0    0              0        
+message  zh-Hant  develop   18       0            0.0    0              3        
+message  zh-Hant  shipping  18       0            0.0    0              0        
+notes    da       develop   18       0            0.0    3              3        
+notes    da       shipping  18       0            0.0    3              3        
+notes    de       develop   18       0            0.0    0              0        
+notes    de       shipping  18       0            0.0    0              0        
+notes    en       develop   21       8            38.1   0              8        
+notes    en       shipping  21       0            0.0    0              0        
+notes    es       develop   18       1            5.6    0              1        
+notes    es       shipping  18       2            11.1   0              2        
+notes    fr       develop   15       0            0.0    0              0        
+notes    fr       shipping  15       0            0.0    0              0        
+notes    it       develop   18       0            0.0    0              0        
+notes    it       shipping  18       0            0.0    0              0        
+notes    ja       develop   18       1            5.6    0              6        
+notes    ja       shipping  18       0            0.0    0              0        
+notes    ko       develop   18       2            11.1   0              3        
+notes    ko       shipping  18       0            0.0    0              0        
+notes    nb       develop   18       0            0.0    1              1        
+notes    nb       shipping  18       0            0.0    1              1        
+notes    nl       develop   18       0            0.0    0              0        
+notes    nl       shipping  18       0            0.0    0              0        
+notes    pt       develop   18       1            5.6    0              1        
+notes    pt       shipping  18       0            0.0    0              0        
+notes    sv       develop   18       0            0.0    0              0        
+notes    sv       shipping  18       0            0.0    0              0        
+notes    tr       develop   18       0            0.0    0              0        
+notes    tr       shipping  18       0            0.0    0              0        
+notes    vi       develop   18       0            0.0    0              0        
+notes    vi       shipping  18       0            0.0    0              0        
+notes    zh-Hans  develop   18       2            11.1   0              3        
+notes    zh-Hans  shipping  18       0            0.0    0              0        
+notes    zh-Hant  develop   18       1            5.6    1              5        
+notes    zh-Hant  shipping  18       0            0.0    0              0        
+
+Every flagged output on the shipping arm, for the hand read:
+  [message] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er
+  [message] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er
+  [message] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er
+  [notes] T4-structured-since.es#1 rejectedGuardrail(language) read=es expected=es
+      FOREIGN: - Parece bastante correcto
+  [notes] T4-structured-since.es#3 rejectedGuardrail(language) read=es expected=es
+      FOREIGN: - Parece bastante correcto
+  [notes] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: - Kan eksportere loggene som de er
+  [notes] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: - Eksportere loggene som de er
+  [notes] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: - Eksportere loggene som de er
+  [notes] T5-long-test.nb#3 success read=nb expected=nb
+      FOREIGN: - Forvente lav kvalitet på mikrofonen
+
+
+════ B2 — Liste still makes bullets (bars.md §4, #393)
+
+  notes/fr    develop    accepted=18   with bullets=18   WITHOUT=0
+  notes/fr    shipping   accepted=18   with bullets=18   WITHOUT=0
+  notes/i18n  develop    accepted=242  with bullets=242  WITHOUT=0
+  notes/i18n  shipping   accepted=263  with bullets=263  WITHOUT=0
+
+
+════ B3 — Message unchanged in French (bars.md §4)
+
+arm       runs  accepted  blocks   medianRatio  refusedBy
+develop   12    12        12       1.01         -
+shipping  12    12        12       1.01         -
+
+  blocks = outputs carrying a blank line, which is decision 6's shape.
+
+
+════ Reported, never barred
+
+mode     part  arm       runs  noOutput  success  withList  refusedBy
+message  fr    develop   12    0         12       0         -
+message  fr    shipping  12    0         12       0         -
+message  i18n  develop   270   0         259      0         length=11
+message  i18n  shipping  270   0         270      0         -
+notes    fr    develop   18    0         18       18        -
+notes    fr    shipping  18    0         18       18        -
+notes    i18n  develop   270   0         242      270       grounding=2, language=16, length=10
+notes    i18n  shipping  270   0         263      270       grounding=1, language=2, segmentOverlap=4

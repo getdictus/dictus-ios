@@ -1,0 +1,1370 @@
+[
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N1-field-commits",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1803,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- On a fait 5 commith au lieu de 4\n- On a acheté des yaourts au lieu de fraise\n- Cela fait 3 gros changements",
+    "outputChars" : 109,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 252,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N1-field-commits",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1764,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- On a fait 5 commith au lieu de 4\n- On a acheté des yaourts au lieu de fraise\n- Cela fait 3 gros changements",
+    "outputChars" : 109,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 252,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N1-field-commits",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1894,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- On a fait 5 commith au lieu de 4\n- On a acheté des yaourts au lieu de fraise\n- Cela fait 3 gros changements",
+    "outputChars" : 109,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 252,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N2-reunion-vrac",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 3430,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Récupérer les chiffres de janvier auprès de Marion, qui les aura mercredi\n- Faire le tableau comparatif avec ceux de l'année dernière\n- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé\n- Réserver la salle du deuxième étage, car l'autre est prise toute la semaine",
+    "outputChars" : 310,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 585,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N2-reunion-vrac",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2987,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Récupérer les chiffres de janvier auprès de Marion : ils seront disponibles mercredi\n- Faire le tableau comparatif avec ceux de l'année dernière\n- Appeler le prestataire : le devis est passé de 12000 à 15000 euros et personne ne l'a validé\n- Réserver la salle du deuxième étage parce que l'autre est prise toute la semaine",
+    "outputChars" : 324,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 585,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N2-reunion-vrac",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 3262,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Récupérer les chiffres de janvier auprès de Marion : ils seront disponibles mercredi\n- Faire le tableau comparatif avec les données de l'année dernière\n- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé\n- Réserver la salle du deuxième étage car l'autre est prise toute la semaine",
+    "outputChars" : 327,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 585,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N3-projet-fleuve",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 4422,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Faire le point général : côté design c'est bon, les maquettes ont été validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates et on est en train de voir si on décale la livraison au 15 mars au lieu du premier\n- Sur le budget : on est à peu près dans les clous, il reste 8000 euros mais faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai on est juste\n- Thomas part en congé trois semaines à partir du 20, donc si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date",
+    "outputChars" : 679,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 782,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N3-projet-fleuve",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 4425,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Point général : côté design c'est bon, les maquettes ont été validées vendredi, le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates, on est en train de voir si on décale la livraison au 15 mars au lieu du premier\n- Budget : 8000 euros restants, il faut compter les licences qui tombent en février et ça c'est 3000 de plus, donc en vrai on est juste\n- Thomas part en congé trois semaines à partir du 20, si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date",
+    "outputChars" : 617,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 782,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N3-projet-fleuve",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 4910,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Faire le point général : côté design c'est bon, les maquettes ont été validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates et on est en train de voir si on décale la livraison au 15 mars au lieu du premier\n- Budget : on est à peu près dans les clous, il reste 8000 euros mais il faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai on est juste\n- Thomas part en congé trois semaines à partir du 20, donc si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date",
+    "outputChars" : 675,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 782,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "N4-une-idee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 1369,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Rappeler le comptable avant vendredi pour la TVA du trimestre",
+    "outputChars" : 63,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 73,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "N4-une-idee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 1317,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Rappeler le comptable avant vendredi pour la TVA du trimestre",
+    "outputChars" : 63,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 73,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "N4-une-idee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 1368,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Rappeler le comptable avant vendredi pour la TVA du trimestre",
+    "outputChars" : 63,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 73,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "en",
+    "fixture" : "N5-en-ramble",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2210,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Deploy blocked because certificate expired on staging box\n- Sam will rotate certificate tomorrow morning\n- Bump node version because build image on eighteen and new package needs twenty\n- Do both in same window otherwise two freezes for nothing",
+    "outputChars" : 246,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 384,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "en",
+    "fixture" : "N5-en-ramble",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2148,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Deploy blocked because certificate expired on staging box\n- Sam will rotate certificate tomorrow morning\n- Bump node version because build image on eighteen and new package needs twenty\n- Do both in same window otherwise two freezes for nothing",
+    "outputChars" : 246,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 384,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "en",
+    "fixture" : "N5-en-ramble",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2187,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Deploy blocked because certificate expired on staging box\n- Sam said he'd rotate it tomorrow morning\n- Need to bump node version because build image is on eighteen and new package needs twenty\n- Suggest doing both in the same window otherwise two freezes for nothing",
+    "outputChars" : 268,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 384,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N6-ponctuation-dictee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 2,
+    "ms" : 1484,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Relancer l'agence : ils n'ont pas répondu depuis dix jours\n- Prévoir un plan B au cas où ça se confirme",
+    "outputChars" : 105,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 151,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N6-ponctuation-dictee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 2,
+    "ms" : 1619,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Relancer l'agence : ils n'ont pas répondu depuis dix jours\n- Prévoir un plan B au cas où ça se confirme",
+    "outputChars" : 105,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 151,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N6-ponctuation-dictee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 2,
+    "ms" : 1656,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Relancer l'agence : ils n'ont pas répondu depuis dix jours\n- Prévoir un plan B au cas où ça se confirme",
+    "outputChars" : 105,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 151,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N1-field-commits",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1815,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- On a fait 5 commith au lieu de 4\n- On a acheté des yaourts au lieu de fraise\n- Cela fait 3 gros changements",
+    "outputChars" : 109,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 252,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N1-field-commits",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1701,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- On a fait 5 commith au lieu de 4\n- On a acheté des yaourts au lieu de fraise\n- Cela fait 3 gros changements",
+    "outputChars" : 109,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 252,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N1-field-commits",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1925,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- On a fait 5 commith au lieu de 4\n- On a acheté des yaourts au lieu de fraise\n- Ça fait 3 gros changements",
+    "outputChars" : 107,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 252,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N2-reunion-vrac",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 3369,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Récupérer les chiffres de janvier auprès de Marion, attendus mercredi\n- Créer le tableau comparatif avec les données de l'année dernière\n- Appeler le prestataire : le devis est passé de 12000 à 15000 euros, non validé\n- Réserver la salle du deuxième étage, l'autre salle est prise toute la semaine",
+    "outputChars" : 299,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 585,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N2-reunion-vrac",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2851,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Récupérer les chiffres de janvier auprès de Marion, attendus mercredi\n- Faire le tableau comparatif avec ceux de l'année dernière\n- Appeler le prestataire, devis passé de 12000 à 15000 euros, non validé\n- Réserver la salle du deuxième étage, l'autre salle prise toute la semaine",
+    "outputChars" : 280,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 585,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N2-reunion-vrac",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 3058,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Récupérer les chiffres de janvier auprès de Marion : elle les aurait mercredi\n- Faire le tableau comparatif avec ceux de l'année dernière\n- Appeler le prestataire : leur devis est passé de 12000 à 15000 euros et personne ne l'a validé\n- Réserver la salle du deuxième étage : l'autre salle est prise toute la semaine",
+    "outputChars" : 317,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 585,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N3-projet-fleuve",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 4422,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Point général car ça part un peu dans tous les sens : côté design c'est bon, les maquettes ont été validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates et on est en train de voir si on décale la livraison au 15 mars au lieu du premier\n- Budget : 8000 euros mais il faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai\n- Thomas part en congé trois semaines à partir du 20, donc si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date",
+    "outputChars" : 648,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 782,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N3-projet-fleuve",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 4448,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Faire le point général : côté design c'est bon, les maquettes ont été validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates et on est en train de voir si on décale la livraison au 15 mars au lieu du premier\n- Sur le budget, on est à peu près dans les clous, il reste 8000 euros mais il faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai on est juste\n- Thomas part en congé trois semaines à partir du 20, si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date",
+    "outputChars" : 676,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 782,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N3-projet-fleuve",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 4630,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Point général car ça part en tous directions : côté design c'est bon, les maquettes validées vendredi, mais le dev a pris deux semaines de retard à cause de l'API du prestataire qui renvoie n'importe quoi sur les dates, donc on voit si on décale la livraison au 15 mars au lieu du premier\n- Budget : presque dans les clous, il reste 8000 euros mais il faut compter les licences qui tombent en février et ça c'est 3000 de plus donc en vrai on est juste\n- Thomas part en congé trois semaines à partir du 20, donc si on veut qu'il finisse la partie paiement faut que ce soit bouclé avant sinon ça repousse encore et là franchement je sais pas comment on tient la date",
+    "outputChars" : 666,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 782,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "N4-une-idee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 1413,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Rappeler le comptable avant vendredi pour la TVA du trimestre",
+    "outputChars" : 63,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 73,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "N4-une-idee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 1447,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Rappeler le comptable avant vendredi pour la TVA du trimestre",
+    "outputChars" : 63,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 73,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 1,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "N4-une-idee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 1420,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Rappeler le comptable avant vendredi pour la TVA du trimestre",
+    "outputChars" : 63,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 73,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "en",
+    "fixture" : "N5-en-ramble",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2350,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Deploy blocked because certificate expired on staging box\n- Sam will rotate certificate tomorrow morning\n- Bump node version because build image on eighteen and new package needs twenty\n- Do both in same window otherwise two freezes for nothing",
+    "outputChars" : 246,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 384,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "en",
+    "fixture" : "N5-en-ramble",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2219,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Deploy blocked because certificate expired on staging box\n- Sam said he'd rotate certificate tomorrow morning\n- Need to bump node version because build image on eighteen, new package needs twenty\n- Should do both in same window otherwise two freezes for nothing",
+    "outputChars" : 263,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 384,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "en",
+    "fixture" : "N5-en-ramble",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2395,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Deploy blocked because certificate expired on staging box\n- Sam will rotate certificate tomorrow morning\n- Bump node version because build image on eighteen and new package needs twenty\n- Do both in same window otherwise two freezes for nothing",
+    "outputChars" : 246,
+    "outputLanguage" : "en",
+    "personLost" : 0,
+    "rawChars" : 384,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N6-ponctuation-dictee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 2,
+    "ms" : 1742,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Relancer l'agence : ils n'ont pas répondu depuis dix jours\n- Prévoir un plan B au cas où ça se confirme",
+    "outputChars" : 105,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 151,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N6-ponctuation-dictee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 2,
+    "ms" : 1800,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Relancer l'agence : ils n'ont pas répondu depuis dix jours\n- Prévoir un plan B au cas où ça se confirme",
+    "outputChars" : 105,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 151,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "notes-develop",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "N6-ponctuation-dictee",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 1,
+    "labels" : [
+
+    ],
+    "listLines" : 2,
+    "ms" : 1583,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Relancer l'agence : ils n'ont pas répondu depuis dix jours\n- Prévoir un plan B au cas où ça se confirme",
+    "outputChars" : 105,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 151,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  }
+]

@@ -93,8 +93,13 @@ final class SmartModeSummaryTests: XCTestCase {
         XCTAssertTrue(framing.contains("\n\nTRANSCRIPT\n\n"))
     }
 
-    /// #587 decision 5, step 1: the rules are English and rule 1 is the language rule,
-    /// naming the examples.
+    /// #587 decision 5: the rules are English and rule 1 is the language rule, naming
+    /// the examples.
+    ///
+    /// Naming them reads as a contradiction once the examples are in the transcript's
+    /// own language, and it stays: the reword was measured on 2026-09-24 and regressed
+    /// `Liste` into English on Traditional Chinese, 2 runs of 3
+    /// (`docs/research/587-language-clause/`).
     func testRuleOneIsTheLanguageRuleAndNamesTheExamples() {
         guard let rule1 = instructions.components(separatedBy: "\n").first(where: { $0.hasPrefix("1. ") }) else {
             return XCTFail("no rule 1")

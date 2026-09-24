@@ -491,6 +491,11 @@ public enum LogEvent: Sendable {
     /// a condition that can never lift on its own (ineligible hardware, an OS too
     /// old); a model still downloading is recoverable, and a mode disarmed over it
     /// would be a setting silently lost to a temporary state.
+    ///
+    /// Since #587 round 4 it also records a mode skipped **by design**: a transcript
+    /// shorter than the mode's `minimumInputCharacters`, with the reason
+    /// `shortInput chars=<n> floor=<m>` and `disarmed=false`. Same outcome for the user
+    /// — Normal instead of the mode, and no notice — for a different cause.
     case smartModeSkipped(mode: String, reason: String, disarmed: Bool)
 
     // MARK: - Computed Properties

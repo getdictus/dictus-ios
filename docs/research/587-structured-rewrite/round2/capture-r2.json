@@ -1,0 +1,2059 @@
+[
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F1-test-logs",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 2,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3801,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal.\n\nJe te laisse analyser, me dire si des tests manquent ou si ça répond au contrat qu'on avait délimité ensemble.\n\nMais honnêtement, ça me paraît vraiment pas mal.",
+    "outputChars" : 275,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 273,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F1-test-logs",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 2,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3820,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal.\n\nJe te laisse analyser, me dire si des tests manquent ou si ça répond au contrat qu'on avait délimité ensemble.\n\nMais honnêtement, ça me paraît vraiment pas mal.",
+    "outputChars" : 275,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 273,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F1-test-logs",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 2,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4134,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal.\n\nJe te laisse analyser, me dire si ça manque des tests ou si ça répond au contrat qu'on avait délimité ensemble.\n\nMais honnêtement, ça me paraît vraiment pas mal.",
+    "outputChars" : 276,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 273,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F2-prod-bug",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : true,
+    "inversions" : 3,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 6849,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Il y a un petit bug en prod qui doit dater même de la version d'avant, parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.\n\nEt en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé. Mais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé. Et même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.\n\nJ'ai oublié un truc.",
+    "outputChars" : 842,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 829,
+    "rejectedCheck" : "incompleteness",
+    "run" : 1,
+    "speakerState" : "fabricated",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F2-prod-bug",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : true,
+    "inversions" : 3,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 7100,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "On a un petit bug en prod qui doit dater même de la version d'avant parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.\n\nEt en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé. Mais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé. Et même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.\n\nJ'ai oublié un truc.",
+    "outputChars" : 839,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 829,
+    "rejectedCheck" : "incompleteness",
+    "run" : 2,
+    "speakerState" : "fabricated",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F2-prod-bug",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : true,
+    "inversions" : 3,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 6974,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "On a un petit bug en prod qui doit dater même de la version d'avant parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.\n\nEt en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé. Mais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé.\n\nEt même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.\n\nJ'ai oublié un truc mais ça m'échappe.",
+    "outputChars" : 858,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 829,
+    "rejectedCheck" : "incompleteness",
+    "run" : 3,
+    "speakerState" : "fabricated",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F3-urgent-issue",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 2,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4149,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse te pleins analyser la situation et créer une issue. Elle est assez urgente.\n\nC'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.\n\nJe pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.",
+    "outputChars" : 356,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 368,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F3-urgent-issue",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 2,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4847,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse analyser la situation et créer une issue. Elle est assez urgente.\n\nC'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.\n\nJe pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.",
+    "outputChars" : 346,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 368,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F3-urgent-issue",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 2,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5018,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Il faut que tu analyses la situation et crées une issue. C'est assez urgent.\n\nCe bug est en prod et bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.\n\nJe pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.",
+    "outputChars" : 322,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 368,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Donc je te laisse te plaît analyser la situation et créer une issue."
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F4-paragraphs-pleasant",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4208,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "C'est toujours un plaisir de l'utiliser. Le mode structuré est quand même vraiment pas mal.\n\nLe fait que ça vienne faire des petits paragraphes comme ça est quand même super agréable.",
+    "outputChars" : 183,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 203,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F4-paragraphs-pleasant",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4258,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "C'est toujours un plaisir de l'utiliser.\n\nLe mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.",
+    "outputChars" : 186,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 203,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F4-paragraphs-pleasant",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4004,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "C'est toujours un plaisir de l'utiliser. Le mode structuré est quand même vraiment pas mal.\n\nLe fait que ça vienne faire des petits paragraphes comme ça est quand même super agréable.",
+    "outputChars" : 183,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 203,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 45,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F5-ideas-competitors",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 11,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5622,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "J'ai vraiment pas mal d'idées.\n\nAvoir la possibilité de transcrire des audios directement depuis ton application peut être vraiment intéressant.\n\nJe ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça. Je vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios. Whisperflow, je ne suis pas sûr non plus. Mac Whisper par contre, je sais que tu peux le faire dessus. Je ne sais pas si leur application a évolué depuis. En tout cas, il y a une époque, tu pouvais le faire.",
+    "outputChars" : 524,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 558,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Mais je pense qu'effectivement,"
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 45,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F5-ideas-competitors",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 11,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5661,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "J'ai vraiment pas mal d'idées. Mais j'ai l'impression qu'avoir la possibilité de transcrire des audios directement depuis ton application peut être vraiment intéressant. Je ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.\n\nJe vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios. Whisperflow, je ne suis pas sûr non plus. Mac Whisper, par contre, je sais que tu peux le faire dessus. Je ne sais pas si leur application a évolué depuis. En tout cas, il y a une époque où tu pouvais le faire.",
+    "outputChars" : 552,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 558,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Mais je pense qu'effectivement,"
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 9,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 36,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "F5-ideas-competitors",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 11,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 6201,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "J'ai vraiment pas mal d'idées. Mais j'ai le sentiment que la possibilité de transcrire des audios directement depuis l'application peut être vraiment intéressante. Je ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça. Je vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios. Whisperflow, je ne suis pas sûr non plus. Mac Whisper, par contre, je sais que tu peux le faire dessus. Je ne sais pas si leur application a évolué depuis. En tout cas, il y a une époque, tu pouvais le faire.",
+    "outputChars" : 543,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 558,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 1,
+    "unrecalled" : [
+      "Mais je pense qu'effectivement,"
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F6-structured-since",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 4804,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je suis sur le mode structuré depuis un petit moment. Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Je pense que je vais pouvoir exporter les logs tels quels.\n\nEn moi, ça a l'air d'être plutôt correct.\n\n- Je pense que je vais pouvoir exporter les logs tels quels.",
+    "outputChars" : 318,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 284,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F6-structured-since",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4544,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je suis sur le mode structuré depuis un petit moment. Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Je pense que je vais pouvoir exporter les logs tels quels.\n\nEn moi, ça a l'air d'être plutôt correct.",
+    "outputChars" : 256,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 284,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F6-structured-since",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 4969,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je suis sur le mode structuré depuis un petit moment. Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Je pense que je vais pouvoir exporter les logs tels quels.\n\nEn moi, ça a l'air d'être plutôt correct.\n\n- Je pense que je vais pouvoir exporter les logs tels quels.",
+    "outputChars" : 318,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 284,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 24,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 276,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F7-tests-english-refusals",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 24,
+    "labels" : [
+
+    ],
+    "listLines" : 1,
+    "ms" : 16745,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup. Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai. Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement, je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on va pas réécrire sans prompt par langue.\n\n- Il faut que le prompt soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte.",
+    "outputChars" : 1869,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 1772,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 24,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 276,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F7-tests-english-refusals",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 24,
+    "labels" : [
+
+    ],
+    "listLines" : 6,
+    "ms" : 17061,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup. Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai. Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on va pas réécrire sans prompt par langue.\n\n- Il faut que je vérifie le fonctionnement du mode structuré.\n- Il faut que je vérifie si le message dans la tourbar était bon ou pas.\n- Il faut que je refasse un test pour vérifier.\n- Il faut que je vérifie pourquoi le prompt en français ne fonctionne pas pour les autres langues.\n- Il faut que je vérifie si le prompt doit être dupliqué dans toutes les langues.\n- Il faut que je vérifie s'il faut partir sur un prompt en anglais pour s'adapter à toutes les langues.",
+    "outputChars" : 2213,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 1772,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 24,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 276,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F7-tests-english-refusals",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 24,
+    "labels" : [
+
+    ],
+    "listLines" : 10,
+    "ms" : 22413,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup. Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai. Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on ne va pas réécrire sans prompt par langue.\n\n- Je pense que le mot structuré est corrigé, du moins pour le français.\n- J'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais.\n- J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré.\n- Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais.\n- Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas.\n- Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai.\n- Les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.\n- Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte.\n- Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça.\n- Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on ne va pas réécrire sans prompt par langue.",
+    "outputChars" : 3237,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 1772,
+    "rejectedCheck" : "length",
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F8-long-test",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5010,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer.\n\nSachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone, la qualité du micro ne sera peut-être pas exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas.",
+    "outputChars" : 398,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 407,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F8-long-test",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5386,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer.\n\nSachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone, la qualité du micro ne sera peut-être pas exceptionnelle. J'ai aussi pas mal de brume à côté.\n\nDonc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas.",
+    "outputChars" : 399,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 407,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F8-long-test",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5368,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "On essaye un message long en mode structuré pour voir ce qui va se passer.\n\nSachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone, la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test.\n\nOn va voir le résultat s'il est intéressant ou pas.",
+    "outputChars" : 388,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 407,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F9-summary-and-stats",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5859,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.\n\nAutre chose qui pourrait être vraiment top, alors je sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.",
+    "outputChars" : 484,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 506,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F9-summary-and-stats",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5905,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal.\n\nEt aussi, autre chose qui pourrait être vraiment top, alors je sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.",
+    "outputChars" : 420,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 506,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : true,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F9-summary-and-stats",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : true,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 6123,
+    "negationDropped" : 0,
+    "outcome" : "rejectedGuardrail",
+    "output" : "Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.\n\nAutre chose qui pourrait être vraiment top, je ne sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, mais un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.\n\nIl y avait un autre truc, mais ça m'échappe.",
+    "outputChars" : 532,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 506,
+    "rejectedCheck" : "incompleteness",
+    "run" : 3,
+    "speakerState" : "fabricated",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F1-test-logs",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 2,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3967,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Écoute, je viens de faire un test. Je te partage les logs.\n\nHonnêtement, ça me paraît quand même vraiment pas mal.\n\nJe te laisse analyser, me dire si des tests manquent ou si ça répond au contrat qu'on avait délimité ensemble.\n\nMais honnêtement, ça me paraît vraiment pas mal.",
+    "outputChars" : 276,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 273,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F1-test-logs",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 2,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3384,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Écoute, je viens de faire un test. Je te partage les logs.\n\nJe te laisse analyser, me dire si des tests manquent ou si ça répond au contrat qu'on avait délimité ensemble.\n\nMais honnêtement, ça me paraît vraiment pas mal.",
+    "outputChars" : 220,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 273,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F1-test-logs",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 2,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4149,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Écoute, je viens de faire un test. Je te partage les logs.\n\nHonnêtement, ça me paraît quand même vraiment pas mal.\n\nJe te laisse analyser, me dire si des tests manquent ou si ça répond au contrat qu'on avait délimité ensemble.\n\nMais honnêtement, ça me paraît vraiment pas mal.",
+    "outputChars" : 276,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 273,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F2-prod-bug",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 3,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 6888,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "On a un petit bug en prod qui doit dater même de la version d'avant, parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose.\n\nEt en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.\n\nMais du coup si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé.\n\nMais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé.\n\nEt même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème",
+    "outputChars" : 820,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 829,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F2-prod-bug",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 3,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 6415,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "On a un petit bug en prod qui doit dater même de la version d'avant, parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.\n\nEt en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé. Mais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé.\n\nEt même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.",
+    "outputChars" : 819,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 829,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 8,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 28,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F2-prod-bug",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 3,
+    "judgeablePropositions" : 8,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 6665,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "On a un petit bug en prod qui doit dater même de la version d'avant parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.\n\nEt en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé. Mais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé.\n\nEt même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.",
+    "outputChars" : 818,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 829,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F3-urgent-issue",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3848,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse te plaire analyser la situation et créer une issue. Elle est assez urgente.\n\nJe pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte. Parce que c'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.",
+    "outputChars" : 365,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 368,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F3-urgent-issue",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3980,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse analyser la situation et créer une issue. Elle est assez urgente.\n\nJe pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.\n\nC'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.",
+    "outputChars" : 346,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 368,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F3-urgent-issue",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4129,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Je te laisse te plaît analyser la situation et créer une issue. Elle est assez urgente.\n\nJe pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.\n\nC'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.",
+    "outputChars" : 355,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 368,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F4-paragraphs-pleasant",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3557,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "C'est toujours un plaisir de l'utiliser.\n\nEt franchement, le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça est quand même super agréable.",
+    "outputChars" : 199,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 203,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F4-paragraphs-pleasant",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3190,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "C'est toujours un plaisir de l'utiliser.\n\nEt franchement, le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça est quand même super agréable.",
+    "outputChars" : 199,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 203,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F4-paragraphs-pleasant",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3338,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "C'est toujours un plaisir de l'utiliser.\n\nEt franchement, le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.",
+    "outputChars" : 202,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 203,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 11,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 55,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F5-ideas-competitors",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 11,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5061,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "J'ai vraiment pas mal d'idées.\n\nJe pense qu'effectivement, avoir la possibilité de transcrire des audios directement depuis ton application, ça peut être vraiment intéressant.\n\nJe ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.\n\nJe vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios. Whisperflow, je ne suis pas sûr non plus. Mac Whisper par contre, je sais que tu peux le faire dessus. Je ne sais pas si leur application a évolué depuis. En tout cas, il y a une époque, tu pouvais le faire.",
+    "outputChars" : 556,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 558,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 11,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 55,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F5-ideas-competitors",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 11,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5023,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "J'ai vraiment pas mal d'idées.\n\nJe pense qu'effectivement, avoir la possibilité de transcrire des audios directement depuis ton application, ça peut être vraiment intéressant.\n\nJe ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.\n\nJe vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios.\n\nWhisperflow, je ne suis pas sûr non plus.\n\nMac Whisper par contre, je sais que tu peux le faire dessus.\n\nJe ne sais pas si leur application a évolué depuis.\n\nEn tout cas, il y a une époque, tu pouvais le faire.",
+    "outputChars" : 560,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 558,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 11,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 55,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F5-ideas-competitors",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 11,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 5045,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "J'ai vraiment pas mal d'idées.\n\nJe pense qu'effectivement, avoir la possibilité de transcrire des audios directement depuis ton application, ça peut être vraiment intéressant.\n\nJe ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.\n\nJe vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios.\n\nWhisperflow, je ne suis pas sûr non plus.\n\nMac Whisper par contre, je sais que tu peux le faire dessus.\n\nJe ne sais pas si leur application a évolué depuis.\n\nEn tout cas, il y a une époque, tu pouvais le faire.",
+    "outputChars" : 560,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 558,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F6-structured-since",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4304,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "En fait, je suis sur le mode structuré depuis un petit moment. Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Je pense que je vais pouvoir exporter les logs tels quels.\n\nMais en moi, ça a l'air d'être plutôt correct.",
+    "outputChars" : 270,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 284,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F6-structured-since",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4269,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "En fait je suis sur le mode structuré depuis un petit moment.\n\nTous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné.\n\nJe pense que je vais pouvoir exporter les logs tels quels.\n\nEn moi ça a l'air d'être plutôt correct.",
+    "outputChars" : 265,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 284,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F6-structured-since",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 5,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4412,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "En fait je suis sur le mode structuré depuis un petit moment.\n\nTous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné.\n\nJe pense que je vais pouvoir exporter les logs tels quels.\n\nMais en moi ça a l'air d'être plutôt correct.",
+    "outputChars" : 270,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 284,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 24,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 276,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F7-tests-english-refusals",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 24,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 12523,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup.\n\nPar contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai.\n\nPar contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement, je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce qu'on ne va pas réécrire sans prompt par langue.",
+    "outputChars" : 1749,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 1772,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 24,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 276,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F7-tests-english-refusals",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 24,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 12416,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup.\n\nPar contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai.\n\nPar contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement, je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on ne va pas réécrire sans prompt par langue.",
+    "outputChars" : 1750,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 1772,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 24,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 276,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F7-tests-english-refusals",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 24,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 13732,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup. Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai. Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement, je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on va pas réécrire sans prompt par langue.\n\nLes modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça.\n\nIl faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on va pas réécrire sans prompt par langue.",
+    "outputChars" : 2146,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 1772,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F8-long-test",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3892,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer.\n\nSachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone, la qualité du micro va peut-être pas être exceptionnelle.\n\nJ'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test.\n\nOn va voir le résultat s'il est intéressant ou pas.",
+    "outputChars" : 400,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 407,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F8-long-test",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3997,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer.\n\nSachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. La qualité du micro va peut-être pas être exceptionnelle.\n\nJ'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test.\n\nOn va voir le résultat s'il est intéressant ou pas.",
+    "outputChars" : 400,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 407,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F8-long-test",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 3954,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer.\n\nSachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone, la qualité du micro va peut-être pas être exceptionnelle.\n\nJ'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test.\n\nOn va voir le résultat s'il est intéressant ou pas.",
+    "outputChars" : 400,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 407,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F9-summary-and-stats",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4349,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.\n\nAutre chose qui pourrait être vraiment top, je ne sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, mais un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.",
+    "outputChars" : 486,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 506,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F9-summary-and-stats",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4833,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.\n\nEt aussi, autre chose qui pourrait être vraiment top, je sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, mais un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.",
+    "outputChars" : 493,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 506,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 6,
+    "arm" : "C2",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 15,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "F9-summary-and-stats",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 4961,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.\n\nAutre chose qui pourrait être vraiment top, je ne sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, mais un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.",
+    "outputChars" : 486,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 506,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  }
+]

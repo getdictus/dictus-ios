@@ -1,0 +1,178 @@
+2160 runs loaded, 2155 scored (5 produced no engine output and are in no denominator)
+
+
+════ B1 — language, per mode, language and arm
+
+  wrongAccepted/wrongAny are the DETECTOR's flags, not B1a: every one of them has to be read by hand before it counts (bars.md §4, §7).
+mode       lang     arm       outputs  refusedLang  %      flaggedAccepted  flaggedAny
+message    da       develop   18       0            0.0    3              3
+message    da       reworded  18       0            0.0    3              3
+message    de       develop   18       0            0.0    0              0
+message    de       reworded  18       0            0.0    0              0
+message    en       develop   18       0            0.0    0              0
+message    en       reworded  18       0            0.0    0              0
+message    es       develop   18       0            0.0    0              0
+message    es       reworded  18       0            0.0    0              0
+message    it       develop   18       0            0.0    0              0
+message    it       reworded  18       0            0.0    0              0
+message    ja       develop   18       0            0.0    0              0
+message    ja       reworded  18       0            0.0    0              0
+message    ko       develop   18       0            0.0    0              0
+message    ko       reworded  18       0            0.0    0              0
+message    nb       develop   18       0            0.0    0              0
+message    nb       reworded  18       0            0.0    0              0
+message    nl       develop   18       0            0.0    0              0
+message    nl       reworded  18       0            0.0    0              0
+message    pt       develop   18       0            0.0    0              0
+message    pt       reworded  18       0            0.0    0              0
+message    sv       develop   18       0            0.0    0              0
+message    sv       reworded  18       0            0.0    0              0
+message    tr       develop   18       0            0.0    0              0
+message    tr       reworded  18       0            0.0    0              0
+message    vi       develop   18       0            0.0    0              0
+message    vi       reworded  18       0            0.0    0              0
+message    zh-Hans  develop   18       0            0.0    0              0
+message    zh-Hans  reworded  18       0            0.0    0              0
+message    zh-Hant  develop   18       0            0.0    0              0
+message    zh-Hant  reworded  18       0            0.0    0              0
+notes      da       develop   18       0            0.0    3              3
+notes      da       reworded  18       0            0.0    3              3
+notes      de       develop   18       0            0.0    0              0
+notes      de       reworded  18       0            0.0    0              0
+notes      en       develop   18       0            0.0    0              0
+notes      en       reworded  18       0            0.0    0              0
+notes      es       develop   18       2            11.1   0              2
+notes      es       reworded  18       3            16.7   0              3
+notes      it       develop   18       0            0.0    0              0
+notes      it       reworded  18       0            0.0    0              0
+notes      ja       develop   18       0            0.0    0              0
+notes      ja       reworded  18       0            0.0    0              0
+notes      ko       develop   18       0            0.0    0              0
+notes      ko       reworded  18       0            0.0    0              0
+notes      nb       develop   18       0            0.0    1              1
+notes      nb       reworded  18       0            0.0    1              1
+notes      nl       develop   18       0            0.0    0              0
+notes      nl       reworded  18       0            0.0    0              0
+notes      pt       develop   18       0            0.0    0              0
+notes      pt       reworded  18       0            0.0    0              0
+notes      sv       develop   18       0            0.0    0              0
+notes      sv       reworded  18       0            0.0    0              0
+notes      tr       develop   18       0            0.0    0              0
+notes      tr       reworded  18       0            0.0    0              0
+notes      vi       develop   18       0            0.0    0              0
+notes      vi       reworded  18       0            0.0    0              0
+notes      zh-Hans  develop   18       0            0.0    0              0
+notes      zh-Hans  reworded  18       0            0.0    0              0
+notes      zh-Hant  develop   18       0            0.0    0              0
+notes      zh-Hant  reworded  18       2            11.1   0              2
+structured da       develop   18       0            0.0    3              3
+structured da       reworded  18       0            0.0    3              3
+structured de       develop   18       0            0.0    0              1
+structured de       reworded  18       0            0.0    0              0
+structured en       develop   18       0            0.0    0              0
+structured en       reworded  18       0            0.0    0              0
+structured es       develop   18       0            0.0    0              0
+structured es       reworded  18       0            0.0    0              0
+structured it       develop   18       0            0.0    0              0
+structured it       reworded  18       0            0.0    0              0
+structured ja       develop   18       0            0.0    0              0
+structured ja       reworded  18       0            0.0    0              0
+structured ko       develop   18       0            0.0    0              0
+structured ko       reworded  18       0            0.0    0              0
+structured nb       develop   18       0            0.0    0              0
+structured nb       reworded  18       0            0.0    0              0
+structured nl       develop   18       0            0.0    0              0
+structured nl       reworded  18       0            0.0    0              0
+structured pt       develop   18       0            0.0    0              0
+structured pt       reworded  18       0            0.0    0              0
+structured sv       develop   18       0            0.0    0              0
+structured sv       reworded  18       0            0.0    0              0
+structured tr       develop   18       0            0.0    0              0
+structured tr       reworded  18       0            0.0    0              0
+structured vi       develop   18       0            0.0    0              0
+structured vi       reworded  18       0            0.0    0              0
+structured zh-Hans  develop   17       0            0.0    0              0
+structured zh-Hans  reworded  18       0            0.0    0              0
+structured zh-Hant  develop   18       0            0.0    0              0
+structured zh-Hant  reworded  17       0            0.0    0              0
+summary    da       develop   18       0            0.0    0              0
+summary    da       reworded  18       0            0.0    0              0
+summary    de       develop   18       0            0.0    0              0
+summary    de       reworded  18       0            0.0    0              0
+summary    en       develop   18       0            0.0    0              0
+summary    en       reworded  18       0            0.0    0              0
+summary    es       develop   18       0            0.0    0              0
+summary    es       reworded  18       0            0.0    0              0
+summary    it       develop   18       0            0.0    0              0
+summary    it       reworded  18       0            0.0    0              0
+summary    ja       develop   18       0            0.0    0              0
+summary    ja       reworded  18       0            0.0    0              0
+summary    ko       develop   18       0            0.0    0              1
+summary    ko       reworded  18       0            0.0    0              1
+summary    nb       develop   17       0            0.0    0              0
+summary    nb       reworded  17       0            0.0    0              0
+summary    nl       develop   18       0            0.0    0              0
+summary    nl       reworded  18       0            0.0    0              0
+summary    pt       develop   18       0            0.0    0              0
+summary    pt       reworded  18       0            0.0    0              0
+summary    sv       develop   18       0            0.0    0              0
+summary    sv       reworded  18       0            0.0    0              0
+summary    tr       develop   18       0            0.0    0              0
+summary    tr       reworded  17       0            0.0    0              0
+summary    vi       develop   18       0            0.0    0              0
+summary    vi       reworded  18       0            0.0    0              0
+summary    zh-Hans  develop   18       0            0.0    0              0
+summary    zh-Hans  reworded  18       0            0.0    0              0
+summary    zh-Hant  develop   18       0            0.0    0              2
+summary    zh-Hant  reworded  18       0            0.0    0              0
+
+
+════ Totals, per mode and arm
+
+mode       arm       outputs  refusedLang  flaggedAccepted  english   bullets
+message    develop   270      0            3              18/18     0/270
+message    reworded  270      0            3              18/18     0/270
+notes      develop   270      2            4              18/18     263/263
+notes      reworded  270      5            4              18/18     257/257
+structured develop   269      0            3              18/18     4/262
+structured reworded  269      0            3              18/18     6/265
+summary    develop   269      0            0              18/18     0/140
+summary    reworded  268      0            0              18/18     0/136
+
+
+════ Every flagged output on the reworded arm, for the hand read
+
+  A flag is a question, not a verdict. `read` == `expected` means the whole output is in the right language and only a sentence was cross-read.
+
+  [message] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+  [message] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er
+  [message] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+  [notes] T4-structured-since.es#1 rejectedGuardrail(language) read=es expected=es
+      FOREIGN: - Parece bastante correcto
+  [notes] T4-structured-since.es#2 rejectedGuardrail(language) read=es expected=es
+      FOREIGN: - Parece bastante correcto
+  [notes] T4-structured-since.es#3 rejectedGuardrail(language) read=es expected=es
+      FOREIGN: - Parece bastante correcto
+  [notes] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: - Eksportere loggene som de er
+  [notes] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: - Eksportere loggene som de er
+  [notes] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: - Kan eksportere loggene som de er
+  [notes] T5-long-test.nb#2 success read=nb expected=nb
+      FOREIGN: - Ser på testresultatets interesse
+  [notes] T3-plan-mode.zh-Hant#1 rejectedGuardrail(language) read=en expected=zh-Hant
+      FOREIGN: - Prepare for issue integration
+  [notes] T3-plan-mode.zh-Hant#2 rejectedGuardrail(language) read=en expected=zh-Hant
+      FOREIGN: - Prepare for integrating this issue
+  [structured] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+  [structured] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+  [structured] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: Jeg tror, jeg kan eksportere loggene, som de er.
+  [summary] T3-plan-mode.ko#2 rejectedGuardrail(length) read=en expected=ko
+      FOREIGN: I entrust the integration preparation to you, allowing a shift to plan mode and a full implementation plan, with my appr

@@ -14,7 +14,7 @@ Last reviewed: 2026-09-23.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Active** — reordered 2026-09-21, **cuts after 1.9.0** |
-| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | Builds 33 → 36 on TestFlight — **nothing left in the lane on 2026-09-22**, promotion of 36 decided 2026-09-24 |
+| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | Build 36 **submitted to App Store review on 2026-09-24**, `WAITING_FOR_REVIEW` |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
@@ -153,7 +153,17 @@ His verdict was that Normal polish is not at the level and wants work before the
 
     **Open after the merge: #570, which is now item 5 of this lane.** Two accepted outputs damaged meaning past every guardrail, and **it gates the 2.0.0 cut, not this merge**. #523 itself stays open until Pierre's verdict over time, per decision 12.
 
-5. **#587 — the Smart Mode prompt campaign, carrying #570, #581, #585 and #523's 2026-09-20 verdict. Grilled on 2026-09-21, twelve decisions, `ready-for-agent` — the issue body is the spec.** The delivery splits in three and the grilling decides the seams: a short rewrite of `Structuré`'s prompt, which carries its share of #585; the same language fix on `Message` and `Liste`; and #570's guardrail half — the protected-term anchor and the polarity check — re-measured on the rewritten prompt before any code, because #466 is what widening a check blind costs. The #570 paragraphs below still hold as that issue's diagnosis.
+5. **#587 — the Smart Mode prompt campaign, carrying #570, #581, #585 and #523's 2026-09-20 verdict. Grilled on 2026-09-21, twelve decisions, `ready-for-agent` — the issue body is the spec.**
+
+    **PR 1 MERGED on 2026-09-23 as `7cdbaca`, device-validated across four builds.** `Structuré`'s prompt is rewritten short (2 966 characters against 5 556) with one worked-example set per Apple FM language — **step 2 of decision 5's ladder, and the ladder stopped there**: step 1 alone failed in Danish, step 2 measured 0 wrong-language outputs across 16 languages against up to 29 % refusals on the shipping prompt, and step 3 (native prompts per language) was never needed. What else shipped with it: the incompleteness fabrication check (#581, 0 false alarms in 2 130 outputs), trailing fence-line stripping, bullets on prose down from 72/290 to 5/290, **name anchors tolerant of a near-spelling** (`airmes` → `Airmesh` accepted, an invented name still refused, #414's catches unchanged name by name), **`Structuré` skipped below 200 characters** with its own notice and export event, and a Scandinavian language-family exception in the language check.
+
+    **Three device rounds drove those last two.** The anchor tolerance exists because a clean English enumeration was refused whole over one name Parakeet mis-heard. The 200-character floor exists because two of three meaning deviations Pierre saw were on dictations of one or two sentences, where structuring has no purpose. Both were Pierre's calls, taken on device evidence rather than on the bench.
+
+    **PR 2 MERGED on 2026-09-24 as `127fed3`, device-validated the same day** (an English `Message` returns English, two French messages unchanged, an English `Liste` returns English bullets). `Message` was returning a Japanese dictation in French 3 times of 3 and 11 wrong-language outputs of 270; it is at **0 of 270**. `Liste` returned an English dictation in English 10 times of 18; it is at **18 of 18**. French `Message` output is unchanged to the character, which was the bar that mattered: Pierre uses it daily.
+
+    **#585 and #581 are closed.** A follow-up, PR #599 (`be846a1`), carries no prompt change: rule 1's clause still reads as a contradiction (it forbids "the language of the examples" while the examples are now in the transcript's language), and **rewording it was measured worse** — `Liste` answered Traditional Chinese in English 2 runs of 3. The clause ships with the numbers written above it, so the next reader does not re-derive the contradiction and "fix" it.
+
+    **Still open from the campaign:** the five prose-bullet failures on agent-translated Danish, Dutch and Swedish fixtures (an observable, never a bar), #598 (the language check refusing a correct output on a short line: `es` read as `pt`, `da` as `nb`), #570 (the meaning guardrail, parked on real-usage data) and #592 (warn instead of refusing on an ungrounded name). The delivery splits in three and the grilling decides the seams: a short rewrite of `Structuré`'s prompt, which carries its share of #585; the same language fix on `Message` and `Liste`; and #570's guardrail half — the protected-term anchor and the polarity check — re-measured on the rewritten prompt before any code, because #466 is what widening a check blind costs. The #570 paragraphs below still hold as that issue's diagnosis.
 
     **#570 — two `Structuré` outputs damaged meaning, and every guardrail passed them.** On the `6-unscripted` fixture, 2 of 28 accepted outputs: `mon application dictus` became `mon application dictée`, and `les autres c'est pas vraiment ma voix, c'est pas naturel` became `les autres tests ne reflètent pas vraiment ma voix, ce qui est naturel`. A product name replaced by a common noun, and a dropped negation that makes the sentence assert the opposite of what was said. Found by CodeRabbit on PR #557, verified against `docs/research/523-structured/corpus.json` on 2026-09-16. Promoted into the lane on 2026-09-16.
 
@@ -270,6 +280,14 @@ That last point is also why **CodeRabbit's review was declined**: it proposed ho
 **Build 35 went to both TestFlight groups on 2026-09-21** with #579's fix, device-checked by Pierre the same day. It also carries every polish-pipeline change merged since 34 (#523, #572, #580), and that pipeline runs on every dictation, subscriber or not — so 35 changes the free dictation path, not only Pro code, which stays unreachable (`paywallVisible = false`, the forced entitlement compiled out of Release). **Promotion of 35 to the App Store is to be decided on 2026-09-24**, after three days of tester use, by Pierre through `appstore-promote`.
 
 **Item 6: #564, T3 Code in the auto-return catalogue. SHIPPED on 2026-09-22** in PR #590, merged as `977ce75`. It had moved to `2.1` on 2026-09-21 because `t3code://` landed on T3 Code's home screen; upstream fixed that in t3code#12002, shipped in T3 Code 1.2.0 on 2026-09-16. Device-validated on build `48558db`, T3 Code 1.2.0: the Safari resume test passes, and a dictation from a T3 Code thread returns to that thread (`opening via=recording waitedMs=144` → `returned`). The recipe for adding any app now lives in `docs/auto-return-catalogue.md`. **Build 36 carries it**, cut and uploaded on 2026-09-22 (`build/36`, `c230730`): smoke-tested by Pierre from TestFlight, then put in both groups, `Team PIVI` and `Public Beta`; Apple approved the external distribution at once. The only behaviour change against 35 is this one. **The 2026-09-24 promotion is now of 36**, still by Pierre through `appstore-promote`.
+
+### Submitted to the App Store on 2026-09-24
+
+**1.9.0 (36) is with Apple**, submission `a3c9d0c9`, phased release armed `INACTIVE`, release type `MANUAL`. Pierre ran build 36 on device before submitting; no TestFlight feedback or crash report has arrived since 2026-09-08.
+
+**The git half is deliberately not done yet.** `promote-to-appstore.sh` merges into `main` before Apple answers, which would make `main` claim a version is on the App Store while it is still in review, and leave that claim standing for days on a rejection. Decided on 2026-09-24 to submit first and merge after approval: release branch pinned at `build/36`, PR to `main`, tag `v1.9.0`, GitHub Release, back-merge. `main` protection has `enforce_admins: true` and must be lowered for that merge and restored right after, with the restored value read back rather than assumed.
+
+**Two open bugs shipped knowingly, neither a 1.9.0 regression**: #575, Normal polish deletes and substitutes words, and #496, the Dictus keyboard is replaced by Apple's mid-recording on a cold start. Both are already in the 1.8.2 users have today, so shipping 1.9.0 does not make either worse.
 
 ## Lane C — the keyboard session
 

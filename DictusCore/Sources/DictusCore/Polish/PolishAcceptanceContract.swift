@@ -182,18 +182,35 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
     /// only *which segments get read* varies by mode.
     public let segmentOverlapThresholds: PolishSegmentOverlapThresholds
 
+    /// Whether an output reporting the speaker's memory failing is refused when the
+    /// transcript reports nothing of the kind (#581, #587 decision 6).
+    ///
+    /// ### Why a mode has to answer this
+    ///
+    /// Only a mode that tells the model to KEEP such a sentence teaches it that an
+    /// output may end on one, and only there has the model been seen writing one the
+    /// speaker never said. `Structuré` is that mode (#523, decision 7). `Message` keeps
+    /// the sentence too, but by default rather than as a bar, and #587 decision 9
+    /// forbids moving anything in its contract in the same PR; `List` and `Translate`
+    /// never asked for it. So the answer is `true` on one row and the default is off —
+    /// for the reason the two flags above default off: a check nobody measured on a
+    /// mode must not start refusing on it. See `PolishIncompleteness`.
+    public let refusesFabricatedIncompleteness: Bool
+
     public init(minimumLengthRatio: Double,
                 maximumLengthRatio: Double,
                 outputLanguage: PolishOutputLanguage,
                 requiresGroundedNames: Bool,
                 requiresAlignedPrefix: Bool,
-                segmentOverlapThresholds: PolishSegmentOverlapThresholds = .default) {
+                segmentOverlapThresholds: PolishSegmentOverlapThresholds = .default,
+                refusesFabricatedIncompleteness: Bool = false) {
         self.minimumLengthRatio = minimumLengthRatio
         self.maximumLengthRatio = maximumLengthRatio
         self.outputLanguage = outputLanguage
         self.requiresGroundedNames = requiresGroundedNames
         self.requiresAlignedPrefix = requiresAlignedPrefix
         self.segmentOverlapThresholds = segmentOverlapThresholds
+        self.refusesFabricatedIncompleteness = refusesFabricatedIncompleteness
     }
 
     // MARK: - Decoding
@@ -231,6 +248,11 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
         self.segmentOverlapThresholds = (try? container.decodeIfPresent(
             PolishSegmentOverlapThresholds.self, forKey: .segmentOverlapThresholds
         )) ?? .default
+        // Off when absent, for the reason the two check flags above are: a snapshot
+        // written by a build that never heard of the check gets that build's answer.
+        self.refusesFabricatedIncompleteness = try container.decodeIfPresent(
+            Bool.self, forKey: .refusesFabricatedIncompleteness
+        ) ?? false
     }
 
     /// The band as a range, for `PolishGuardrail.accepts(raw:polished:band:)`.
