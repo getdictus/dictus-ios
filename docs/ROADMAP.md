@@ -14,7 +14,7 @@ Last reviewed: 2026-09-23.
 | --- | --- | --- |
 | **A** | 1.8.2, the bug cycle | **Cut on 2026-09-07** as 1.8.2 (30) |
 | **B** | 2.0.0, the Pro launch | **Active** — reordered 2026-09-21, **cuts after 1.9.0** |
-| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | Build 36 **submitted to App Store review on 2026-09-24**, `WAITING_FOR_REVIEW` |
+| **A′** | 1.9.0 — #23, #542, #558 and #543 shipped | **On the App Store since 2026-09-24** as 1.9.0 (36), phased rollout, tag `v1.9.0` |
 | **C** | The keyboard session | After A′ |
 
 They are sequential on purpose. Lane C is the one Pierre most wants to do and the one most likely to swallow the others, so it goes last and it gets a preparation step it can start on today.
@@ -286,6 +286,8 @@ That last point is also why **CodeRabbit's review was declined**: it proposed ho
 **1.9.0 (36) is with Apple**, submission `a3c9d0c9`, phased release armed `INACTIVE`, release type `MANUAL`. Pierre ran build 36 on device before submitting; no TestFlight feedback or crash report has arrived since 2026-09-08.
 
 **The git half is deliberately not done yet.** `promote-to-appstore.sh` merges into `main` before Apple answers, which would make `main` claim a version is on the App Store while it is still in review, and leave that claim standing for days on a rejection. Decided on 2026-09-24 to submit first and merge after approval: release branch pinned at `build/36`, PR to `main`, tag `v1.9.0`, GitHub Release, back-merge. `main` protection has `enforce_admins: true` and must be lowered for that merge and restored right after, with the restored value read back rather than assumed.
+
+**Approved and released the same day.** Apple approved 1.9.0 on 2026-09-24 and Pierre released it; the phased rollout started at 20:11Z. The git half followed: PR #603 from `release/1.9.0` pinned at `build/36` (`c230730`), merged into `main` as `0fd7bad` with `enforce_admins` lowered for the merge and read back `true` afterwards, tag `v1.9.0`, GitHub Release, and `main` merged back into `develop`. **Lane A′ is closed.**
 
 **Two open bugs shipped knowingly, neither a 1.9.0 regression**: #575, Normal polish deletes and substitutes words, and #496, the Dictus keyboard is replaced by Apple's mid-recording on a cold start. Both are already in the 1.8.2 users have today, so shipping 1.9.0 does not make either worse.
 
