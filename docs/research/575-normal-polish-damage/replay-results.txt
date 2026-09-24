@@ -1,0 +1,145 @@
+## 1. This round's recorded outputs (`raw/`, 6 arms), shipped check
+
+- **refuse** (label under the 2026-09-24 bar): 26 outputs, refused by `lostWord` 26/26
+- **tolerate** (label under the 2026-09-24 bar): 89 outputs, refused by `lostWord` 0/89
+- **faithful** (label under the 2026-09-24 bar): 414 outputs, refused by `lostWord` 0/414
+
+  Refuse-labelled outputs, per defect (refused / total):
+  - `pourrais`: 9/9
+  - `revaudrai`: 6/6
+  - `reviendrai`: 1/1
+  - `revoilà`: 5/5
+  - `usage`: 11/11
+
+  Tolerate-labelled outputs, per defect (accepted / total):
+  - `+ne`: 22/22
+  - `18h30`: 2/2
+  - `checker`: 3/3
+  - `comment tu vas`: 8/8
+  - `dès`: 26/26
+  - `plaît`: 7/7
+  - `s'il te plaît`: 7/7
+  - `settings`: 15/15
+  - `t'as`: 20/20
+  - `vas-tu`: 8/8
+  - `vérifier`: 3/3
+
+  Refused by an EARLIER check on this replay (never reaches `lostWord`): language 5, prefixAlignment 1, length 1
+
+## 2. False refusals on faithful and tolerated outputs, per input length
+
+Faithful = no defect, or only defects the bar tolerates. `shipped` is the pipeline's verdict (French, Natural/Auto, ≤ 500 characters); `unscoped` is what the same check would refuse with no length gate.
+
+| corpus | chars | outputs | shipped: refused | unscoped: refused |
+|---|---|---|---|---|
+| round | 0–100 | 280 | 0 (0.0 %) | 0 (0.0 %) |
+| round | 101–200 | 114 | 0 (0.0 %) | 0 (0.0 %) |
+| round | 201–300 | 80 | 0 (0.0 %) | 0 (0.0 %) |
+| round | 301–400 | 29 | 0 (0.0 %) | 0 (0.0 %) |
+| freepol | 0–100 | 59 | 0 (0.0 %) | 0 (0.0 %) |
+| freepol | 101–200 | 20 | 0 (0.0 %) | 0 (0.0 %) |
+| freepol | 201–300 | 5 | 0 (0.0 %) | 0 (0.0 %) |
+| freepol | >500 | 2 | 0 (0.0 %) | 0 (0.0 %) |
+| longform | 301–400 | 20 | 0 (0.0 %) | 0 (0.0 %) |
+| longform | >500 | 22 | 0 (0.0 %) | 0 (0.0 %) |
+| heldout | 0–100 | 131 | 5 (3.8 %) | 5 (3.8 %) |
+| heldout | 101–200 | 121 | 3 (2.5 %) | 3 (2.5 %) |
+| heldout | 201–300 | 71 | 9 (12.7 %) | 9 (12.7 %) |
+| heldout | 301–400 | 30 | 0 (0.0 %) | 0 (0.0 %) |
+| heldout | 401–500 | 20 | 1 (5.0 %) | 1 (5.0 %) |
+| **all** | | | | |
+| all | 0–100 | 470 | 5 (1.1 %) | 5 (1.1 %) |
+| all | 101–200 | 255 | 3 (1.2 %) | 3 (1.2 %) |
+| all | 201–300 | 156 | 9 (5.8 %) | 9 (5.8 %) |
+| all | 301–400 | 79 | 0 (0.0 %) | 0 (0.0 %) |
+| all | 401–500 | 20 | 1 (5.0 %) | 1 (5.0 %) |
+| all | >500 | 24 | 0 (0.0 %) | 0 (0.0 %) |
+
+## 3. Damage the shipped check refuses on the legacy corpora and the held-out set
+
+- longform: 0/18 refuse-labelled outputs refused by `lostWord`, 0/18 by any check (unscoped `lostWord`: 18/18)
+- freepol: 0/4 refuse-labelled outputs refused by `lostWord`, 1/4 by any check (unscoped `lostWord`: 4/4)
+- heldout: 16/17 refuse-labelled outputs refused by `lostWord`, 17/17 by any check (unscoped `lostWord`: 17/17)
+
+## 4. Every faithful-labelled output the check flags (18), for the human read
+
+- `heldout/auto/seed/5-erreur-parakeet#1` (257 ch, shipped=REFUSED) lost=['arrive', 'error', 'traduise']
+    IN : Et moi je vais faire un autre test, c'est le test on va dire special paratite where sometimes it arrive que ça traduise de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par error.
+    OUT: Et moi je vais faire un autre test, c'est le test on va dire spécial paratite where sometimes it happens que ça traduit de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par erreur.
+- `heldout/auto/seed/5-erreur-parakeet#2` (257 ch, shipped=REFUSED) lost=['error', 'traduise']
+    IN : Et moi je vais faire un autre test, c'est le test on va dire special paratite where sometimes it arrive que ça traduise de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par error.
+    OUT: Et moi je vais faire un autre test, c'est le test on va dire spécial paratite where sometimes it arrives que ça traduit de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par erreur.
+- `heldout/auto/seed/5-erreur-parakeet#3` (257 ch, shipped=REFUSED) lost=['error', 'traduise']
+    IN : Et moi je vais faire un autre test, c'est le test on va dire special paratite where sometimes it arrive que ça traduise de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par error.
+    OUT: Et moi je vais faire un autre test, c'est le test on va dire spécial paratite where sometimes it arrives que ça traduit de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par erreur.
+- `heldout/auto/point-fr/N2-point-de-vue#1` (110 ch, shipped=REFUSED) lost=['apercoive']
+    IN : de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+    OUT: De mon point de vue, le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoit avant nous.
+- `heldout/auto/point-fr/N2-point-de-vue#2` (110 ch, shipped=REFUSED) lost=['apercoive']
+    IN : de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+    OUT: De mon point de vue, le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoit avant nous.
+- `heldout/auto/point-fr/N2-point-de-vue#3` (110 ch, shipped=REFUSED) lost=['apercoive']
+    IN : de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+    OUT: De mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoit avant nous
+- `heldout/auto/device-structured-fr/D7-mod-rejects#1` (246 ch, shipped=REFUSED) lost=['log']
+    IN : Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+    OUT: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on logue un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+- `heldout/auto/device-structured-fr/D7-mod-rejects#2` (246 ch, shipped=REFUSED) lost=['log']
+    IN : Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+    OUT: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on logue un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+- `heldout/auto/device-structured-fr/D7-mod-rejects#3` (246 ch, shipped=REFUSED) lost=['log']
+    IN : Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+    OUT: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on logue un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+- `heldout/natural/email-fr/E5-long-projet#1` (419 ch, shipped=REFUSED) lost=['contre']
+    IN : alors euh je fais le point sur le projet donc euh la partie design elle est finie on a validé les maquettes vendredi dernier par contre le dev il a pris du retard parce qu'on a eu un souci avec l'API du prestataire et euh du coup on est en train de voir si on peut décaler la livraison d'une semaine je sais pas si c'est jouable de ton côté et sinon faudrait qu'on en parle assez vite parce que là ça commence à presser
+    OUT: Alors, je fais le point sur le projet. La partie design est finie. On a validé les maquettes vendredi dernier, mais le dev a pris du retard parce qu’on a eu un souci avec l’API du prestataire, et du coup on est en train de voir si on peut décaler la livraison d’une semaine. Je sais pas si c’est jouable de ton côté, et sinon faudrait qu’on en parle assez vite, parce que là ça commence à presser.
+- `heldout/natural/nl-markers-fr/nl-1-liste-courses#1` (73 ch, shipped=REFUSED) lost=['points']
+    IN : Voici ce que j'ai besoin de points, retour à la ligne, des carottes, retour à la ligne, des patates, retour à la ligne, des pommes
+    OUT: Voici ce que j’ai besoin de : des carottes, des patates, des pommes.
+- `heldout/natural/nl-markers-fr/nl-1-liste-courses#3` (73 ch, shipped=REFUSED) lost=['points']
+    IN : Voici ce que j'ai besoin de points, retour à la ligne, des carottes, retour à la ligne, des patates, retour à la ligne, des pommes
+    OUT: Voici ce que j'ai besoin de : des carottes, des patates, des pommes.
+- `heldout/natural/nl-markers-fr/nl-4-identifiants#1` (43 ch, shipped=REFUSED) lost=['points']
+    IN : il me dit de points retour à la ligne copier les identifiants
+    OUT: Il me dit de copier les identifiants.
+- `heldout/natural/nl-markers-fr/nl-4-identifiants#2` (43 ch, shipped=REFUSED) lost=['points']
+    IN : il me dit de points retour à la ligne copier les identifiants
+    OUT: Il me dit de copier les identifiants.
+- `heldout/natural/nl-markers-fr/nl-4-identifiants#3` (43 ch, shipped=REFUSED) lost=['points']
+    IN : il me dit de points retour à la ligne copier les identifiants
+    OUT: Il me dit de copier les identifiants.
+- `heldout/natural/device-structured-fr/D7-mod-rejects#1` (246 ch, shipped=REFUSED) lost=['log']
+    IN : Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+    OUT: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on logue un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t’envoie les logs.
+- `heldout/natural/device-structured-fr/D7-mod-rejects#2` (246 ch, shipped=REFUSED) lost=['log']
+    IN : Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+    OUT: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on logue un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+- `heldout/natural/device-structured-fr/D7-mod-rejects#3` (246 ch, shipped=REFUSED) lost=['log']
+    IN : Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+    OUT: Alors je viens d’avoir à nouveau un problème avec toujours ce mod. Il faudrait qu’on fasse une issue et qu’on logue un peu tous ces rejets. Parce que là c’est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t’envoie les logs.
+
+## 5. Every refuse-labelled output the check lets through
+
+- `longform/short-auto/4-explanation#1` (838 ch) why=['calcul'] lost=['calcul']
+- `longform/short-auto/4-explanation#2` (838 ch) why=['calcul'] lost=['calcul']
+- `longform/short-auto/4-explanation#3` (838 ch) why=['calcul', 'explique'] lost=['calcul']
+- `longform/short-auto/4-explanation#4` (838 ch) why=['calcul'] lost=['calcul']
+- `longform/short-auto/5-rambling#1` (1281 ch) why=['machin', 'reviendra', 'échappe'] lost=['echappe', 'reviendra']
+- `longform/short-auto/5-rambling#2` (1281 ch) why=['machin', 'échappe'] lost=['echappe', 'machin', 'pas']
+- `longform/short-auto/5-rambling#4` (1281 ch) why=['machin'] lost=['pas']
+- `longform/short-auto/5-rambling#5` (1281 ch) why=['échappe'] lost=['echappe']
+- `longform/short-natural-fr/4-explanation#1` (838 ch) why=['calcul', 'explique'] lost=['calcul']
+- `longform/short-natural-fr/4-explanation#2` (838 ch) why=['calcul'] lost=['calcul']
+- `longform/short-natural-fr/4-explanation#3` (838 ch) why=['avant', 'calcul', 'explique'] lost=['avant', 'calcul']
+- `longform/short-natural-fr/4-explanation#4` (838 ch) why=['avant', 'calcul', 'explique'] lost=['avant', 'calcul']
+- `longform/short-natural-fr/4-explanation#5` (838 ch) why=['calcul', 'explique'] lost=['calcul']
+- `longform/short-natural-fr/5-rambling#1` (1281 ch) why=['machin', 'peut'] lost=['pas', 'peut']
+- `longform/short-natural-fr/5-rambling#2` (1281 ch) why=['machin'] lost=['machin']
+- `longform/short-natural-fr/5-rambling#3` (1281 ch) why=['machin', 'voilà', 'échappe'] lost=['echappe', 'machin', 'voila']
+- `longform/short-natural-fr/5-rambling#4` (1281 ch) why=['machin', 'voilà'] lost=['machin', 'pas', 'voila']
+- `longform/short-natural-fr/5-rambling#5` (1281 ch) why=['reviendra', 'échappe'] lost=['echappe', 'reviendra']
+- `freepol/3-long#1#10` (637 ch) why=['petit'] lost=['petit']
+- `freepol/3-long#2#11` (637 ch) why=['petit'] lost=['petit']
+- `freepol/3-long#4#13` (637 ch) why=['petit'] lost=['petit']
+- `freepol/auto-verbal-fr#3#90` (86 ch) why=['dossier'] lost=['demain', 'dis', 'dossier', 'envoie', 'fini', 'matin', 'moi', 'preparation']
+- `heldout/auto/seed/11-verbal-newlines#2` (48 ch) why=['`Line 1.`: the dictation is gone, translated; refused upstream by the length check'] lost=['ligne']
