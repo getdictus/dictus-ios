@@ -63,6 +63,9 @@ struct TrialEndedHeader: View {
                 tile(count: usage.vocabularyFixes, label: Text("Words fixed by Vocabulary"),
                      icon: ProFeature.vocabulary.icon, tint: .dictusAccentHighlight)
             }
+            // With `maxHeight: .infinity` on each tile, both take the taller one's
+            // height instead of each hugging its own label (one or two lines).
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -80,7 +83,7 @@ struct TrialEndedHeader: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(12)
         .dictusGlass()
         .accessibilityElement(children: .combine)

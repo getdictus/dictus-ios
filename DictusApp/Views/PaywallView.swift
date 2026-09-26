@@ -74,10 +74,16 @@ struct PaywallView: View {
                     TrialEndedHeader(usage: proStatus.trialUsage)
                 }
 
-                // Feature cards (3 cards: Smart Mode, History, Vocabulary)
-                VStack(spacing: 10) {
-                    ForEach(ProFeature.allCases, id: \.self) { feature in
-                        featureCard(feature)
+                // Feature cards (3 cards: Smart Mode, History, Vocabulary).
+                //
+                // Not on the end-of-trial screen: its header already names all three,
+                // and the ~290pt they take is what pushed the plans and the way out
+                // below the fold (#593, device test on an iPhone 15 Pro Max).
+                if framing == .standard {
+                    VStack(spacing: 10) {
+                        ForEach(ProFeature.allCases, id: \.self) { feature in
+                            featureCard(feature)
+                        }
                     }
                 }
 
@@ -94,15 +100,9 @@ struct PaywallView: View {
                     }
                     // Plan selector: yearly (preselected), monthly and lifetime
                     planSelector
-                    // Subscribe CTA following the selected plan
-                    subscribeCTA
-                    // Reassurance following the selected plan
-                    reassuranceLabel
-                        .font(.dictusCaption)
-                        .foregroundColor(.secondary)
 
-                    if framing == .trialEnded {
-                        continueForFreeButton
+                    if !pinsPurchaseActions {
+                        purchaseActions
                     }
                 }
 
@@ -111,6 +111,15 @@ struct PaywallView: View {
                     .padding(.bottom, 32)
             }
             .padding(.horizontal, 16)
+        }
+        .safeAreaInset(edge: .bottom) {
+            if pinsPurchaseActions {
+                purchaseActions
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+                    .background(Color.dictusBackground.ignoresSafeArea())
+            }
         }
         .background(Color.dictusBackground.ignoresSafeArea())
         // Empty bar title: the hero's gradient title is the screen title.
@@ -160,6 +169,34 @@ struct PaywallView: View {
         }
     }
 
+    // MARK: - Purchase actions
+
+    /// Whether the CTA and its way out sit in a bar pinned under the scroll view.
+    ///
+    /// WHY only on the end-of-trial screen: the app opened it, unasked, so
+    /// "Continue for free" has to be visible without scrolling (#593). With the
+    /// recap and three plan rows, no amount of trimming keeps it on screen on
+    /// every iPhone; pinning does. A paywall the user chose to open can scroll.
+    private var pinsPurchaseActions: Bool {
+        framing == .trialEnded && !proStatus.isPaid
+    }
+
+    /// CTA, fine print and, on the end-of-trial screen, the way out.
+    private var purchaseActions: some View {
+        VStack(spacing: pinsPurchaseActions ? 8 : 14) {
+            // Subscribe CTA following the selected plan
+            subscribeCTA
+            // Reassurance following the selected plan
+            reassuranceLabel
+                .font(.dictusCaption)
+                .foregroundColor(.secondary)
+
+            if framing == .trialEnded {
+                continueForFreeButton
+            }
+        }
+    }
+
     // MARK: - Close
 
     /// Dismisses the cover. Absent while the thank-you screen is up, so the
@@ -190,9 +227,10 @@ struct PaywallView: View {
         VStack(spacing: 12) {
             // Forcing the dark color scheme keeps DictusLogo's side bars
             // white on the dark tile in light mode too, matching the app icon.
-            DictusLogo(height: 48)
+            // Smaller on the end-of-trial screen, which has a recap to fit above the fold.
+            DictusLogo(height: framing == .trialEnded ? 32 : 48)
                 .environment(\.colorScheme, .dark)
-                .padding(20)
+                .padding(framing == .trialEnded ? 14 : 20)
                 .background(
                     RoundedRectangle(cornerRadius: 24)
                         .fill(
