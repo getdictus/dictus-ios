@@ -58,7 +58,12 @@ public struct SystemProTrialKeychain: ProTrialKeychain {
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
-        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        // Logged because a read that finds nothing is what hands out a second trial,
+        // and "not found" (-25300) must be told apart from a read that was refused
+        // (#593: a reinstall on an iOS 27 device found no record).
+        Self.log(action: "read", status: status)
+        guard status == errSecSuccess,
               let data = result as? Data else { return nil }
         return try? JSONDecoder().decode(ProTrialRecord.self, from: data)
     }
@@ -70,10 +75,19 @@ public struct SystemProTrialKeychain: ProTrialKeychain {
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
         ]
         let status = SecItemUpdate(baseQuery as CFDictionary, attributes as CFDictionary)
+        Self.log(action: "update", status: status)
         if status == errSecSuccess { return true }
         guard status == errSecItemNotFound else { return false }
         let add = baseQuery.merging(attributes) { _, new in new }
-        return SecItemAdd(add as CFDictionary, nil) == errSecSuccess
+        let addStatus = SecItemAdd(add as CFDictionary, nil)
+        Self.log(action: "add", status: addStatus)
+        return addStatus == errSecSuccess
+    }
+
+    private static func log(action: String, status: OSStatus) {
+        PersistentLog.log(.diagnosticProbe(
+            component: "proTrialKeychain", instanceID: "0", action: action, details: "status=\(status)"
+        ))
     }
 
     public func delete() {
