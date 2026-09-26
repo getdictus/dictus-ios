@@ -29,6 +29,7 @@ import DictusCore
 struct ProTrialAnnouncementView: View {
     let announcement: ProTrialCoordinator.Announcement
 
+    @EnvironmentObject var trialCoordinator: ProTrialCoordinator
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -45,6 +46,7 @@ struct ProTrialAnnouncementView: View {
                 disclosure
 
                 Button {
+                    trialCoordinator.announcementAccepted()
                     dismiss()
                 } label: {
                     Text("Start my free trial")

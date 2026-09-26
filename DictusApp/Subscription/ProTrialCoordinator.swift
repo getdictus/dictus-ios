@@ -1,6 +1,6 @@
 // DictusApp/Subscription/ProTrialCoordinator.swift
 // When the app itself raises something about the reverse trial: the announcement, the end (#593).
-import Foundation
+import SwiftUI
 import DictusCore
 
 /// Which of the two populations #593 names an announcement is for.
@@ -116,12 +116,33 @@ final class ProTrialCoordinator: ObservableObject {
         }
     }
 
+    /// The announcement's button was tapped. Starts the trial **before** the sheet
+    /// leaves, so Home swaps its "Unlock Dictus Pro" banner for the trial badge while
+    /// the sheet still covers it.
+    ///
+    /// WHY not on dismissal like the swipe: `onDismiss` runs once the sheet has
+    /// finished animating away, so the swap landed a frame after the screen settled
+    /// and read as a flash (#593 device test). Same failure, and same cure, as the
+    /// paywall's re-layout on the way back (#350).
+    func announcementAccepted() {
+        startPendingTrial()
+    }
+
     /// The announcement left the screen, whichever way: its button or a swipe. The
-    /// trial is a gift, not an opt-in, so both start it.
+    /// trial is a gift, not an opt-in, so both start it. After the button this finds
+    /// nothing pending and does nothing.
+    ///
+    /// On a swipe the sheet is already gone, so the swap is animated rather than cut.
     ///
     /// If the process dies with the sheet up, nothing started and the next launch
     /// shows it again, which is the right failure: the disclosure is never skipped.
     func announcementDismissed() {
+        withAnimation {
+            startPendingTrial()
+        }
+    }
+
+    private func startPendingTrial() {
         guard let pending = pendingStart else { return }
         pendingStart = nil
         proStatus.startTrialIfEligible(from: pending.shownAt)
