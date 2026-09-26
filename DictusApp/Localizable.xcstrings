@@ -1381,6 +1381,17 @@
         }
       }
     },
+    "Keep Dictus Pro" : {
+      "comment" : "End-of-trial recap button that leads to the plans (#593).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder Dictus Pro"
+          }
+        }
+      }
+    },
     "Keep your Smart Modes, History and Vocabulary with Dictus Pro. Everything you saved is still here." : {
       "comment" : "End-of-trial paywall subtitle (#593). Nothing is deleted at the end of the trial.",
       "localizations" : {
