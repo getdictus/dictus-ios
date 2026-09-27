@@ -81,6 +81,15 @@ public final class ProStatusManager: ObservableObject {
     /// Where the reverse trial stands, as of the last refresh.
     @Published public private(set) var trialState: ProTrialState
 
+    /// Whether StoreKit's first entitlement scan of this launch has landed, so `isPaid`
+    /// is StoreKit's answer and not the App Group's leftover (#593 review).
+    ///
+    /// WHY the trial screens wait for it: an existing subscriber whose scan is still
+    /// running reads as unpaid, and the announcement would go up over a subscription
+    /// and record a trial. Set by the first `setProActive`, which is what the scan
+    /// calls when it finishes.
+    @Published public private(set) var hasResolvedEntitlements = false
+
     private let environment: ProTrialEnvironment
 
     /// Read once: see `ProTrialEnvironment.deviceIsCapable`.
@@ -154,6 +163,7 @@ public final class ProStatusManager: ObservableObject {
     public func setProActive(_ active: Bool) {
         environment.defaults.set(active, forKey: SharedKeys.proActive)
         environment.defaults.synchronize()
+        hasResolvedEntitlements = true
         // Re-read rather than assign `active` (#460 review). The stored value is what
         // was just written; the *entitlement* is what `isProActiveStatic` answers, and
         // since #460 those two can differ under the debug override. Assigning `active`

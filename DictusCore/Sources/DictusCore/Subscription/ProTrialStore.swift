@@ -9,11 +9,28 @@ import Security
 /// Mac, where a keychain call from an unsigned test runner can block on the login
 /// keychain the way the guarded App Group container once hung the suite (#560).
 public protocol ProTrialKeychain {
-    func read() -> ProTrialRecord?
-    /// Returns whether the record is now durably stored.
+    func read() -> ProTrialKeychainRead
+    /// Stores the record, replacing any. Returns whether it is now durably stored.
+    /// DEBUG tooling and nothing else: a start must never overwrite a record.
     func write(_ record: ProTrialRecord) -> Bool
+    /// Stores the record only if no item exists. Returns whether it is now stored;
+    /// an existing item refuses it.
+    func add(_ record: ProTrialRecord) -> Bool
     /// DEBUG tooling only: the reset that lets the maintainer run the trial again.
     func delete()
+}
+
+/// What a Keychain read found.
+///
+/// Three cases because only one of them means "never started": a read the Keychain
+/// refused, or a record this build cannot decode, says nothing about whether a trial
+/// was granted, and treating it as absent would hand out a second one (#593 review).
+public enum ProTrialKeychainRead: Equatable {
+    case found(ProTrialRecord)
+    /// `errSecItemNotFound`, and nothing else.
+    case absent
+    /// Any other failure, including a record that does not decode.
+    case unreadable
 }
 
 /// The real Keychain, as a generic-password item private to DictusApp.
@@ -53,7 +70,7 @@ public struct SystemProTrialKeychain: ProTrialKeychain {
         ]
     }
 
-    public func read() -> ProTrialRecord? {
+    public func read() -> ProTrialKeychainRead {
         var query = baseQuery
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -63,9 +80,13 @@ public struct SystemProTrialKeychain: ProTrialKeychain {
         // and "not found" (-25300) must be told apart from a read that was refused
         // (#593: a reinstall on an iOS 27 device found no record).
         Self.log(action: "read", status: status)
+        if status == errSecItemNotFound { return .absent }
         guard status == errSecSuccess,
-              let data = result as? Data else { return nil }
-        return try? JSONDecoder().decode(ProTrialRecord.self, from: data)
+              let data = result as? Data,
+              let record = try? JSONDecoder().decode(ProTrialRecord.self, from: data) else {
+            return .unreadable
+        }
+        return .found(record)
     }
 
     public func write(_ record: ProTrialRecord) -> Bool {
@@ -82,6 +103,17 @@ public struct SystemProTrialKeychain: ProTrialKeychain {
         let addStatus = SecItemAdd(add as CFDictionary, nil)
         Self.log(action: "add", status: addStatus)
         return addStatus == errSecSuccess
+    }
+
+    public func add(_ record: ProTrialRecord) -> Bool {
+        guard let data = try? JSONEncoder().encode(record) else { return false }
+        let add = baseQuery.merging([
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+        ]) { _, new in new }
+        let status = SecItemAdd(add as CFDictionary, nil)
+        Self.log(action: "add", status: status)
+        return status == errSecSuccess
     }
 
     private static func log(action: String, status: OSStatus) {
@@ -164,25 +196,33 @@ public struct ProTrialStore {
     /// Returns the record now in force, if any.
     @discardableResult
     public func reconcile() -> ProTrialRecord? {
-        if let durable = keychain.read() {
+        switch keychain.read() {
+        case .found(let durable):
             if mirroredRecord != durable { writeMirror(durable) }
             return durable
+        case .unreadable:
+            // Nothing is known, so nothing is rewritten: the mirror stays as it is.
+            return mirroredRecord
+        case .absent:
+            guard let mirrored = mirroredRecord else { return nil }
+            _ = keychain.add(mirrored)
+            return mirrored
         }
-        guard let mirrored = mirroredRecord else { return nil }
-        _ = keychain.write(mirrored)
-        return mirrored
     }
 
     /// Record a trial starting at `now`, unless one was ever recorded.
     ///
     /// Returns the new record, or nil when nothing was started: a trial already
-    /// exists (no second trial, whatever the caller believed), or the Keychain
-    /// refused the write. The second case fails closed on purpose: a trial that
-    /// only the App Group knows about is one a reinstall would hand out again.
+    /// exists (no second trial, whatever the caller believed), the Keychain could not
+    /// say whether one exists, or it refused the write. Only a Keychain that answers
+    /// "not found" starts a trial, and the write is add-only, so even a read that
+    /// wrongly came back empty cannot replace a record that is there. Every failure
+    /// fails closed: a trial that only the App Group knows about is one a reinstall
+    /// would hand out again.
     public func startIfNeverStarted(now: Date) -> ProTrialRecord? {
-        guard reconcile() == nil else { return nil }
+        guard reconcile() == nil, keychain.read() == .absent else { return nil }
         let record = ProTrialRecord.starting(at: now)
-        guard keychain.write(record) else { return nil }
+        guard keychain.add(record) else { return nil }
         writeMirror(record)
         return record
     }

@@ -18,6 +18,7 @@ import DictusCore
 struct MainTabView: View {
     @EnvironmentObject var coordinator: DictationCoordinator
     @EnvironmentObject var trialCoordinator: ProTrialCoordinator
+    @EnvironmentObject var proStatus: ProStatusManager
     @StateObject private var modelManager = ModelManager()
 
     @State private var selectedTab: Int = 0
@@ -169,6 +170,11 @@ struct MainTabView: View {
                 .onAppear {
                     trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
                 }
+                // The trial screens wait for StoreKit's first scan; this is the
+                // evaluation that runs when it lands.
+                .onChange(of: proStatus.hasResolvedEntitlements) { _, resolved in
+                    if resolved { trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens) }
+                }
             }
 
             // Full-screen recording overlay covers everything including tab bar.
@@ -302,5 +308,6 @@ struct MainTabView: View {
     MainTabView()
         .environmentObject(DictationCoordinator.shared)
         .environmentObject(TranscriptionHistoryStore.shared)
+        .environmentObject(ProStatusManager())
         .environmentObject(ProTrialCoordinator(proStatus: ProStatusManager()))
 }

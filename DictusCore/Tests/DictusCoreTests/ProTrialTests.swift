@@ -14,11 +14,23 @@ import XCTest
 private final class InMemoryKeychain: ProTrialKeychain {
     var record: ProTrialRecord?
     var refusesWrites = false
+    /// Models a read the Keychain refuses (locked device, a record this build cannot
+    /// decode): the item may well be there.
+    var readFails = false
 
-    func read() -> ProTrialRecord? { record }
+    func read() -> ProTrialKeychainRead {
+        if readFails { return .unreadable }
+        return record.map(ProTrialKeychainRead.found) ?? .absent
+    }
 
     func write(_ record: ProTrialRecord) -> Bool {
         guard !refusesWrites else { return false }
+        self.record = record
+        return true
+    }
+
+    func add(_ record: ProTrialRecord) -> Bool {
+        guard !refusesWrites, self.record == nil else { return false }
         self.record = record
         return true
     }
@@ -270,6 +282,19 @@ final class ProTrialTests: XCTestCase {
 
     /// Fails closed: a trial only the App Group knew about is one a reinstall would
     /// hand out again.
+    /// A read that fails for any reason other than "not found" says nothing about a
+    /// trial granted earlier, so it must not start one over it (#593 review).
+    func testAnUnreadableKeychainStartsNothingAndKeepsTheOldRecord() {
+        let keychain = InMemoryKeychain()
+        keychain.record = .starting(at: t0)
+        keychain.readFails = true
+        let store = ProTrialStore(keychain: keychain, defaults: makeDefaults())
+
+        XCTAssertNil(store.startIfNeverStarted(now: t0.addingTimeInterval(30 * 86_400)))
+        XCTAssertEqual(keychain.record, .starting(at: t0), "the first trial is untouched")
+        XCTAssertNil(store.mirroredRecord)
+    }
+
     func testAKeychainThatRefusesTheWriteStartsNothing() {
         let keychain = InMemoryKeychain()
         keychain.refusesWrites = true

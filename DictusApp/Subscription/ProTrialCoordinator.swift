@@ -90,7 +90,10 @@ final class ProTrialCoordinator: ObservableObject {
     func evaluate(canPresent: Bool) {
         // Expiry is a clock passing an instant, which publishes nothing on its own.
         proStatus.refreshFromAppGroup()
-        guard canPresent, announcement == nil, !showsEndOfTrialPaywall else { return }
+        // Both screens depend on whether the user pays, which StoreKit only knows once
+        // its first scan of this launch has landed. `MainTabView` evaluates again then.
+        guard canPresent, proStatus.hasResolvedEntitlements,
+              announcement == nil, !showsEndOfTrialPaywall else { return }
 
         let onboarded = AppGroup.defaults.bool(forKey: SharedKeys.hasCompletedOnboarding)
         if onboarded && proStatus.mayStartTrial {
