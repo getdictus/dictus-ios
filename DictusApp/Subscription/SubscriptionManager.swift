@@ -132,7 +132,10 @@ final class SubscriptionManager: ObservableObject {
         do {
             try await AppStore.sync()
             await updateProStatus()
-            purchaseState = proStatus.isProActive ? .success : .idle
+            // `isPaid` and not `isProActive` (#593): during the reverse trial Pro is
+            // already active, and a restore that found nothing would otherwise
+            // celebrate a purchase that does not exist.
+            purchaseState = proStatus.isPaid ? .success : .idle
         } catch {
             purchaseState = .failed(error.localizedDescription)
             PersistentLog.log(.subscriptionError(action: "restore", error: error.localizedDescription))

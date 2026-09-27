@@ -206,16 +206,22 @@ public enum SmartModeFanLayout {
     ///    someone who never subscribed, and only one of them tells them anything they
     ///    can act on. #404 states it as the rule: `INACTIF` for a subscriber who
     ///    switched Smart Modes off, `PRO` for someone who has not subscribed.
-    /// 4. **`INACTIF` last**, for the armed mode that survived a condition it cannot run
+    /// 4. **`INACTIF`**, for the armed mode that survived a condition it cannot run
     ///    under (#423).
+    /// 5. **`PRO` during the reverse trial, last** (#593). The rows are armable and the
+    ///    mark only says which features the trial is lending, so the user learns what
+    ///    they would lose when it ends. It is the weakest statement on the row, so it
+    ///    yields to both the check and `INACTIF`, which describe what will happen now.
     public static func tag(for entry: SmartModeFanEntry,
                            armedIdentifier: String?,
                            effectiveIdentifier: String,
-                           modesRequirePro: Bool) -> SmartModeFanRowTag? {
+                           modesRequirePro: Bool,
+                           marksTrialPro: Bool) -> SmartModeFanRowTag? {
         if case .pro = entry { return nil }
         if entry.id == effectiveIdentifier { return .effective }
         if modesRequirePro, entry.smartMode != nil { return .pro }
         if entry.id == armedIdentifier { return .inactive }
+        if marksTrialPro, entry.smartMode != nil { return .pro }
         return nil
     }
 

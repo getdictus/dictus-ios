@@ -174,6 +174,12 @@ struct HomeView: View {
                             endPoint: .bottomTrailing
                         )
                     )
+                // During the reverse trial, the one indicator it gets on this screen
+                // (#593): discreet, never a nag, and honest about the wordmark above
+                // it, which would otherwise read as a subscription.
+                if let daysLeft = proStatus.trialBadgeDaysLeft {
+                    ProTrialBadge(daysLeft: daysLeft)
+                }
             } else {
                 Text("Dictus")
                     .font(.dictusHeading)

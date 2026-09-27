@@ -220,7 +220,12 @@ struct SettingsView: View {
                             Text("Dictus Pro")
                                 .foregroundColor(.primary)
                             Spacer()
-                            if proStatus.isProActive {
+                            // The trial's badge before the checkmark (#593): a checkmark
+                            // alone reads as a subscription, and the user on trial is
+                            // owed the date it stops.
+                            if let daysLeft = proStatus.trialBadgeDaysLeft {
+                                ProTrialBadge(daysLeft: daysLeft)
+                            } else if proStatus.isProActive {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.dictusSuccess)
                                     .accessibilityLabel("Pro active")
@@ -522,6 +527,10 @@ struct SettingsView: View {
                     Text("Grants Pro without a purchase, so hidden Pro features can be tested on device. Off by default.")
                 }
             }
+
+            // The reverse trial's states, reachable on a device without waiting two
+            // weeks or losing the Keychain record for good (#593).
+            ProTrialDebugSection()
             #endif
 
             // Section 4: A propos
