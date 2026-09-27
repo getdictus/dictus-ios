@@ -67,6 +67,17 @@
         }
       }
     },
+    "%@: dictation too short, text inserted as dictated." : {
+      "comment" : "Shown when an armed Smart Mode declined a dictation for being shorter than the mode's floor, so the text went in as dictated. The placeholder is the mode's name.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : dictée trop courte, texte inséré tel quel."
+          }
+        }
+      }
+    },
     "%@: too long, text inserted as dictated." : {
       "comment" : "Shown when a Smart Mode hit the context ceiling and the untransformed text was inserted instead. The placeholder is the mode's name.",
       "localizations" : {

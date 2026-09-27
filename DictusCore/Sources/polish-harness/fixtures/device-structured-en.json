@@ -1,0 +1,32 @@
+[
+  {
+    "id": "E1-structure-mode-english",
+    "lang": "en",
+    "sttEngine": "PK",
+    "raw": "Another thing that I want to test is if the structure mod uh works in English. Uh because I don't know if in the code we made made it for only the French or uh if we made also for the English or even German for Spanish people. Um right now I'm in uh detection language detection but uh I will try to put the English transcription in the settings to see if I obtain the same result."
+  },
+  {
+    "id": "E2-switched-to-english",
+    "lang": "en",
+    "sttEngine": "PK",
+    "raw": "Okay, another thing that I want to test is the structure mod in English because I don't know if the code we made made it for the English. I mean for the French or if it will work for English or even German or Spanish people right now I'm I'm switched to English transcription and I will try uh maybe Spanish just after that to see if the mod works."
+  },
+  {
+    "id": "E3-now-in-english",
+    "lang": "en",
+    "sttEngine": "PK",
+    "raw": "Okay, so now I speak in English and I will see if the transcription looks fine or if it's uh just a normal transcription without the structured mod."
+  },
+  {
+    "id": "E4-toolbar-refusal",
+    "lang": "en",
+    "sttEngine": "PK",
+    "raw": "Okay, so now I'm speaking in English to make a refus in the toolbar and uh thanks to that I will uh I will check if the error message in the toolbar is uh is correctly uh readable or not."
+  },
+  {
+    "id": "E5-should-not-work",
+    "lang": "en",
+    "sttEngine": "PK",
+    "raw": "And now I will make a structured message in English and uh it should not work."
+  }
+]

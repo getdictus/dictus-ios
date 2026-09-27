@@ -1,0 +1,266 @@
+
+
+████ ARM shipping — 3 run(s) × 9 fixture(s), floor 0.35
+
+━━ [F1-test-logs] 273 chars, lang=fr
+  #1 273→275 4365ms success recall=6/6 inversions=2/15
+     engineOut: Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal.⏎⏎Je te laisse analyser, me dire si des tests manquent ou si ça répond au contrat qu'on avait délimité ensemble.⏎⏎Mais honnêtement, ça me paraît vraiment pas mal.
+  #2 273→276 4695ms success recall=6/6 inversions=2/15
+     engineOut: Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal.⏎⏎Je te laisse analyser, me dire si ça manque des tests ou si ça répond au contrat qu'on avait délimité ensemble.⏎⏎Mais honnêtement, ça me paraît vraiment pas mal.
+  #3 273→274 4163ms success recall=6/6 inversions=2/15
+     engineOut: Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal.⏎⏎Je te laisse analyser, me dire si des tests manquent ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal.
+
+━━ [F2-prod-bug] 829 chars, lang=fr
+  #1 829→839 6867ms rejectedGuardrail(incompleteness) recall=8/8 inversions=3/28 INCOMPLETENESS-CHECK SPEAKER-STATE-FABRICATED(closing)
+     engineOut: On a un petit bug en prod qui doit dater même de la version d'avant parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.⏎⏎Et en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé. Mais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé. Et même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.⏎⏎J'ai oublié un truc.
+  #2 829→824 7286ms success recall=8/8 HEDGE-LOST=1 negationDropped=1 inversions=1/28
+     HEDGELOST: Et en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé.
+       → parce que moi sur la version que j'avais j'avais réussi à l'activer,
+     NEGATIONDROPPED: Et en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé.
+       → parce que moi sur la version que j'avais j'avais réussi à l'activer,
+     engineOut: On a un petit bug en prod qui doit dater même de la version d'avant, parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.⏎⏎Et en fait si tu veux, je m'en suis pas rendu compte, parce que moi sur la version que j'avais j'avais réussi à l'activer, donc du coup par défaut je pense qu'il était activé. Mais là en gros sur la version que j'ai actuellement, donc la dernière qui est en prod, c'est la 0.3.0 en fait, je n'ai pas l'onglet qui est activé.⏎⏎Et même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités, donc ça c'est un gros problème.
+  #3 829→857 7639ms rejectedGuardrail(incompleteness) recall=8/8 inversions=3/28 INCOMPLETENESS-CHECK SPEAKER-STATE-FABRICATED(closing)
+     engineOut: On a un petit bug en prod qui doit dater même de la version d'avant parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.⏎⏎Et en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé. Mais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé. Et même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.⏎⏎J'ai oublié un truc mais ça m'échappe.
+
+━━ [F3-urgent-issue] 368 chars, lang=fr
+  #1 368→346 4308ms success recall=5/5 inversions=2/10
+     engineOut: Je te laisse analyser la situation et créer une issue. Elle est assez urgente.⏎⏎C'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.⏎⏎Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.
+  #2 368→346 3977ms success recall=5/5 inversions=2/10
+     engineOut: Je laisse te analyser la situation et créer une issue. Elle est assez urgente.⏎⏎C'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.⏎⏎Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.
+  #3 368→348 6387ms success recall=4/5 UNRECALLED=1 inversions=2/6
+     UNRECALLED (whole 0.33, best 0.33): Donc je te laisse te plaît analyser la situation et créer une issue.
+     engineOut: Il faut que tu analyses la situation et crées une issue. Elle est assez urgente.⏎⏎C'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.⏎⏎Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.
+
+━━ [F4-paragraphs-pleasant] 203 chars, lang=fr
+  #1 203→183 6361ms success recall=4/4 inversions=0/6
+     engineOut: C'est toujours un plaisir de l'utiliser.⏎⏎Le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça est quand même super agréable.
+  #2 203→186 5344ms success recall=4/4 inversions=0/6
+     engineOut: C'est toujours un plaisir de l'utiliser.⏎⏎Le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+  #3 203→186 5526ms success recall=4/4 inversions=0/6
+     engineOut: C'est toujours un plaisir de l'utiliser.⏎⏎Le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+
+━━ [F5-ideas-competitors] 558 chars, lang=fr
+  #1 558→525 7287ms success recall=10/11 UNRECALLED=1 inversions=0/45
+     UNRECALLED (whole 0.00, best 0.00): Mais je pense qu'effectivement,
+     engineOut: J'ai vraiment pas mal d'idées.⏎⏎Avoir la possibilité de transcrire des audios directement depuis ton application peut être vraiment intéressant.⏎⏎Je ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.⏎⏎Je vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios. Whisperflow, je ne suis pas sûr non plus. Mac Whisper par contre, je sais que tu peux le faire dessus. Je ne sais pas si leur application a évolué depuis. En tout cas, il y a une époque, tu pouvais le faire.
+  #2 558→524 5925ms success recall=10/11 UNRECALLED=1 inversions=0/45
+     UNRECALLED (whole 0.00, best 0.00): Mais je pense qu'effectivement,
+     engineOut: J'ai vraiment pas mal d'idées.⏎⏎Avoir la possibilité de transcrire des audios directement depuis ton application peut être vraiment intéressant.⏎⏎Je ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça. Je vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios. Whisperflow, je ne suis pas sûr non plus. Mac Whisper par contre, je sais que tu peux le faire dessus. Je ne sais pas si leur application a évolué depuis. En tout cas, il y a une époque, tu pouvais le faire.
+  #3 558→525 5854ms success recall=10/11 UNRECALLED=1 inversions=0/45
+     UNRECALLED (whole 0.00, best 0.00): Mais je pense qu'effectivement,
+     engineOut: J'ai vraiment pas mal d'idées.⏎⏎Avoir la possibilité de transcrire des audios directement depuis ton application peut être vraiment intéressant.⏎⏎Je ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.⏎⏎Je vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios. Whisperflow, je ne suis pas sûr non plus. Mac Whisper par contre, je sais que tu peux le faire dessus. Je ne sais pas si leur application a évolué depuis. En tout cas, il y a une époque, tu pouvais le faire.
+
+━━ [F6-structured-since] 284 chars, lang=fr
+  #1 284→318 4995ms success recall=5/5 inversions=0/10 LIST=1
+     engineOut: Je suis sur le mode structuré depuis un petit moment. Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Je pense que je vais pouvoir exporter les logs tels quels.⏎⏎En moi, ça a l'air d'être plutôt correct.⏎⏎- Je pense que je vais pouvoir exporter les logs tels quels.
+  #2 284→318 4919ms success recall=5/5 inversions=0/10 LIST=1
+     engineOut: Je suis sur le mode structuré depuis un petit moment. Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Je pense que je vais pouvoir exporter les logs tels quels.⏎⏎En moi, ça a l'air d'être plutôt correct.⏎⏎- Je pense que je vais pouvoir exporter les logs tels quels.
+  #3 284→317 5142ms success recall=5/5 inversions=0/10 LIST=1
+     engineOut: Je suis sur le mode structuré depuis un petit moment. Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Je pense que je vais pouvoir exporter les logs tels quels. En moi, ça a l'air d'être plutôt correct.⏎⏎- Je pense que je vais pouvoir exporter les logs tels quels.
+
+━━ [F7-tests-english-refusals] 1772 chars, lang=fr
+  #1 1772→2236 20437ms success recall=24/24 inversions=0/276 LIST=6
+     engineOut: Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup. Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai. Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on ne va pas réécrire sans prompt par langue.⏎⏎- Les modes en cours ne fonctionnent pas pour les autres langues que le français.⏎- Il faut créer une issue à part pour cela, idéalement une issue pour tous les modes.⏎- Il faut analyser le code et expliquer pourquoi cela ne fonctionne pas.⏎- Il faut vérifier si les prompts en français pour chaque mode sont la cause.⏎- Il faut envisager de dupliquer le prompt dans toutes les langues supportées.⏎- Il faut envisager de passer à un prompt en anglais pour s'adapter à toutes les langues.
+  #2 1772→3353 26473ms rejectedGuardrail(length) recall=24/24 inversions=0/276 LIST=10
+     engineOut: Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup. Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai. Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on va pas réécrire sans prompt par langue.⏎⏎Je pense que le mot structuré est corrigé, du moins pour le français.⏎⏎- J'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais.⏎- J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré.⏎- Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais.⏎- Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon.⏎- Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas.⏎- Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai.⏎- Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.⏎- Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte.⏎- Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça.⏎- Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on va pas réécrire sans prompt par langue.
+  #3 1772→3337 26134ms rejectedGuardrail(length) recall=24/24 PERSON-LOST=1 HEDGE-LOST=1 negationDropped=1 inversions=0/276 LIST=11
+     PERSONLOST: c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.
+       → c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement,
+     HEDGELOST: c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.
+       → c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement,
+     NEGATIONDROPPED: c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.
+       → c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement,
+     engineOut: Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup. Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai. Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement, je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce qu'on va pas réécrire sans prompt par langue.⏎⏎- Je pense que le mot structuré est corrigé, du moins pour le français.⏎- J'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais.⏎- J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré.⏎- Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais.⏎- Et donc, je pense que tu vérifieras le fonctionnement si c'est bon.⏎- Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas.⏎- Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai.⏎- Ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement, je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.⏎- Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte.⏎- Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça.⏎- Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce qu'on va pas réécrire sans prompt par langue.
+
+━━ [F8-long-test] 407 chars, lang=fr
+  #1 407→396 7862ms success recall=6/6 inversions=0/15
+     engineOut: Et donc on essaye un message long en mode structuré pour voir ce qui va se passer.⏎⏎Sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone, la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté.⏎⏎Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas.
+  #2 407→389 8577ms success recall=6/6 HEDGE-LOST=1 inversions=0/15
+     HEDGELOST: Alors sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone.
+       → Sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio,
+     engineOut: On essaye un message long en mode structuré pour voir ce qui va se passer.⏎⏎Sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio, parce que je suis assez loin du téléphone, la qualité du micro ne sera peut-être pas exceptionnelle. J'ai aussi pas mal de brume à côté.⏎⏎Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas.
+  #3 407→388 6021ms success recall=6/6 inversions=0/15
+     engineOut: On essaye un message long en mode structuré pour voir ce qui va se passer.⏎⏎Sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone, la qualité du micro ne sera peut-être pas exceptionnelle. J'ai aussi pas mal de brume à côté.⏎⏎Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas.
+
+━━ [F9-summary-and-stats] 506 chars, lang=fr
+  #1 506→527 6415ms rejectedGuardrail(incompleteness) recall=6/6 inversions=0/15 INCOMPLETENESS-CHECK SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.⏎⏎Autre chose qui pourrait être vraiment top, je ne sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.⏎⏎Il y avait un autre truc, mais ça m'échappe.
+  #2 506→599 6904ms success recall=6/6 inversions=0/15 LIST=2
+     engineOut: Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.⏎⏎Autre chose qui pourrait être vraiment top, je ne sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, mais un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.⏎⏎- Il faut vraiment qu'on fasse un mode résumé aussi.⏎- Un truc qui permettrait d'avoir un écran avec tes stats.
+  #3 506→526 6745ms rejectedGuardrail(incompleteness) recall=6/6 inversions=0/15 INCOMPLETENESS-CHECK SPEAKER-STATE-FABRICATED(closing)
+     engineOut: Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand on discute avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.⏎⏎Autre chose qui pourrait être vraiment top, je ne sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.⏎⏎Il y avait un autre truc, mais ça m'échappe.
+
+
+████ ARM C1 — 3 run(s) × 9 fixture(s), floor 0.35
+     prompt: ../docs/research/587-structured-rewrite/arms/C1.txt
+
+━━ [F1-test-logs] 273 chars, lang=fr
+  #1 273→275 4559ms success recall=6/6 inversions=2/15
+     engineOut: Écoute, je viens de faire un test. Je te partage les logs.⏎⏎Honnêtement, ça me paraît quand même vraiment pas mal.⏎⏎Je te laisse analyser, me dire s'il manque des tests ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal.
+  #2 273→276 2780ms success recall=6/6 inversions=2/15
+     engineOut: Écoute, je viens de faire un test. Je te partage les logs.⏎⏎Honnêtement, ça me paraît quand même vraiment pas mal.⏎⏎Je te laisse analyser, me dire s'il manque des tests ou si ça répond au contrat qu'on avait délimité ensemble.⏎⏎Mais honnêtement, ça me paraît vraiment pas mal.
+  #3 273→276 3006ms success recall=6/6 inversions=2/15
+     engineOut: Écoute, je viens de faire un test. Je te partage les logs.⏎⏎Honnêtement, ça me paraît quand même vraiment pas mal.⏎⏎Je te laisse analyser, me dire s'il manque des tests ou si ça répond au contrat qu'on avait délimité ensemble.⏎⏎Mais honnêtement, ça me paraît vraiment pas mal.
+
+━━ [F2-prod-bug] 829 chars, lang=fr
+  #1 829→816 5761ms success recall=8/8 inversions=3/28
+     engineOut: On a un petit bug en prod qui doit dater même de la version d'avant parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Et en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.⏎⏎Mais en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé.⏎⏎Et là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé. Et même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.
+  #2 829→820 5366ms success recall=8/8 inversions=3/28
+     engineOut: On a un petit bug en prod qui doit dater même de la version d'avant parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose.⏎⏎Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.⏎⏎Et en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé.⏎⏎Mais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé.⏎⏎Et même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.
+  #3 829→818 5476ms success recall=8/8 inversions=3/28
+     engineOut: On a un petit bug en prod qui doit dater même de la version d'avant parce que c'est un truc que j'avais remarqué quand j'avais essayé de l'installer chez un ami puis j'étais passé à autre chose. Mais en fait je n'arrive pas à accéder à la fonctionnalité qui permet de gérer les LLM tu sais post-transcription.⏎⏎Et en fait si tu veux, je m'en suis pas rendu compte parce que moi sur la version que j'avais j'avais réussi à l'activer donc du coup par défaut je pense qu'il était activé. Mais là en gros sur la version que j'ai actuellement donc la dernière qui est en prod, c'est la 0.3.0 en fait je n'ai pas l'onglet qui est activé.⏎⏎Et même quand je lance le flag fonctionnalité expérimentale, quand je l'active, l'onglet ne s'affiche pas donc je ne peux pas accéder aux fonctionnalités donc ça c'est un gros problème.
+
+━━ [F3-urgent-issue] 368 chars, lang=fr
+  #1 368→360 3985ms success recall=5/5 inversions=0/10
+     engineOut: Donc je te laisse te plaît analyser la situation et créer une issue. Elle est assez urgente.⏎⏎Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.⏎⏎C'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+  #2 368→360 3455ms success recall=5/5 inversions=0/10
+     engineOut: Donc je te laisse te plaît analyser la situation et créer une issue. Elle est assez urgente.⏎⏎Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.⏎⏎C'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+  #3 368→360 3292ms success recall=5/5 inversions=0/10
+     engineOut: Donc je te laisse te plaît analyser la situation et créer une issue. Elle est assez urgente.⏎⏎Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte.⏎⏎C'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+
+━━ [F4-paragraphs-pleasant] 203 chars, lang=fr
+  #1 203→205 3258ms success recall=4/4 inversions=0/6
+     engineOut: C'est toujours un plaisir de l'utiliser.⏎⏎Et franchement le mode structuré il est quand même vraiment pas mal.⏎⏎Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+  #2 203→205 3367ms success recall=4/4 inversions=0/6
+     engineOut: C'est toujours un plaisir de l'utiliser.⏎⏎Et franchement le mode structuré il est quand même vraiment pas mal.⏎⏎Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+  #3 203→205 3228ms success recall=4/4 inversions=0/6
+     engineOut: C'est toujours un plaisir de l'utiliser.⏎⏎Et franchement le mode structuré il est quand même vraiment pas mal.⏎⏎Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+
+━━ [F5-ideas-competitors] 558 chars, lang=fr
+  #1 558→563 4727ms success recall=11/11 inversions=0/55
+     engineOut: J'ai vraiment pas mal d'idées.⏎⏎Mais je pense qu'effectivement, avoir la possibilité de transcrire des audios directement depuis ton application, ça peut être vraiment intéressant.⏎⏎Je ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.⏎⏎Je vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios. Whisperflow, je ne suis pas sûr non plus. Mac Whisper par contre, je sais que tu peux le faire dessus.⏎⏎Je ne sais pas si leur application a évolué depuis.⏎⏎En tout cas, il y a une époque, tu pouvais le faire.
+  #2 558→498 5148ms rejectedGuardrail(language) recall=4/11 UNRECALLED=7 HEDGE-LOST=1 STANCE-HARDENED=1 negationDropped=2 inversions=0/6 LANG=en≠fr FOREIGN-SENTENCES=8
+     UNRECALLED (whole 0.00, best 0.00): J'ai vraiment pas mal d'idées.
+     UNRECALLED (whole 0.00, best 0.00): Mais je pense qu'effectivement,
+     UNRECALLED (whole 0.00, best 0.00): ça peut être vraiment intéressant.
+     UNRECALLED (whole 0.33, best 0.33): Je vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios.
+     UNRECALLED (whole 0.00, best 0.00): je sais que tu peux le faire dessus.
+     UNRECALLED (whole 0.33, best 0.33): Je ne sais pas si leur application a évolué depuis.
+     UNRECALLED (whole 0.00, best 0.00): En tout cas, il y a une époque, tu pouvais le faire.
+     HEDGELOST: Je ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.
+       → I don't know if competitors like Whisperflow or Sper Whisper do this.
+     NEGATIONDROPPED: Je ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.
+       → I don't know if competitors like Whisperflow or Sper Whisper do this.
+     NEGATIONDROPPED: Whisperflow, je ne suis pas sûr non plus.
+       → I don't know if competitors like Whisperflow or Sper Whisper do this.
+     STANCEHARDENED: avoir la possibilité de transcrire des audios directement depuis ton application,
+       → having the possibility to transcribe audios directly from your application can be really interesting.
+     FOREIGN: I have really many ideas.
+     FOREIGN: I think, indeed, having the possibility to transcribe audios directly from your application can be really interesting.
+     FOREIGN: I don't know if competitors like Whisperflow or Sper Whisper do this.
+     FOREIGN: I will try to take the time to look if Super Whisper allows ingesting audios.
+     FOREIGN: Whisperflow, I'm not sure either.
+     FOREIGN: Mac Whisper, on the other hand, I know you can do it on it.
+     FOREIGN: I don't know if their application has evolved since then.
+     FOREIGN: In any case, there was a time when you could do it.
+     engineOut: I have really many ideas.⏎⏎I think, indeed, having the possibility to transcribe audios directly from your application can be really interesting.⏎⏎I don't know if competitors like Whisperflow or Sper Whisper do this. I will try to take the time to look if Super Whisper allows ingesting audios. Whisperflow, I'm not sure either. Mac Whisper, on the other hand, I know you can do it on it. I don't know if their application has evolved since then. In any case, there was a time when you could do it.
+  #3 558→565 4904ms success recall=11/11 inversions=0/55
+     engineOut: J'ai vraiment pas mal d'idées.⏎⏎Mais je pense qu'effectivement, avoir la possibilité de transcrire des audios directement depuis ton application, ça peut être vraiment intéressant.⏎⏎Je ne sais pas si les concurrents comme Whisperflow ou Sper Whisper font ça.⏎⏎Je vais essayer de prendre le temps de regarder si Super Whisper permet d'ingérer des audios.⏎⏎Whisperflow, je ne suis pas sûr non plus.⏎⏎Mac Whisper par contre, je sais que tu peux le faire dessus.⏎⏎Je ne sais pas si leur application a évolué depuis.⏎⏎En tout cas, il y a une époque, tu pouvais le faire.
+
+━━ [F6-structured-since] 284 chars, lang=fr
+  #1 284→270 3491ms success recall=5/5 inversions=0/10
+     engineOut: En fait, je suis sur le mode structuré depuis un petit moment. Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Je pense que je vais pouvoir exporter les logs tels quels.⏎⏎Mais en moi, ça a l'air d'être plutôt correct.
+  #2 284→270 5280ms success recall=5/5 inversions=0/10
+     engineOut: En fait, je suis sur le mode structuré depuis un petit moment. Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Je pense que je vais pouvoir exporter les logs tels quels.⏎⏎Mais en moi, ça a l'air d'être plutôt correct.
+  #3 284→270 5435ms success recall=5/5 inversions=0/10
+     engineOut: En fait je suis sur le mode structuré depuis un petit moment.⏎⏎Tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné.⏎⏎Je pense que je vais pouvoir exporter les logs tels quels.⏎⏎Mais en moi ça a l'air d'être plutôt correct.
+
+━━ [F7-tests-english-refusals] 1772 chars, lang=fr
+  #1 1772→2695 18320ms rejectedGuardrail(length) recall=24/24 inversions=0/276
+     engineOut: Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup. Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai. Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce qu'on ne va pas réécrire sans prompt par langue.⏎⏎Les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce qu'on ne va pas réécrire sans prompt par langue.
+  #2 1772→1748 13520ms success recall=24/24 PERSON-LOST=1 HEDGE-LOST=1 negationDropped=1 inversions=0/276
+     PERSONLOST: c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.
+       → c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement,
+     HEDGELOST: c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.
+       → c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement,
+     NEGATIONDROPPED: c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.
+       → c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement,
+     engineOut: Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup. Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai. Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement, je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on ne va pas réécrire sans prompt par langue.
+  #3 1772→1750 13416ms success recall=24/24 PERSON-LOST=1 HEDGE-LOST=1 negationDropped=1 inversions=0/276
+     PERSONLOST: c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.
+       → c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement,
+     HEDGELOST: c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.
+       → c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement,
+     NEGATIONDROPPED: c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas.
+       → c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement,
+     engineOut: Je viens de faire plusieurs tests, je pense que le mot structuré est corrigé, du moins pour le français. Je te laisserai quand même vérifier, j'en ai pas fait non plus beaucoup, beaucoup.⏎⏎Par contre, ce que j'ai fait, c'est que j'ai fait des tests avec en mettant détection automatique de langue et aussi en forçant la langue de sortie en anglais. J'ai fait des tests où j'ai parlé en anglais et là j'ai obtenu des refus du coup du mode structuré. Et j'ai eu j'ai le mode n'est pas appliqué à l'anglais. Et donc, bon, je pense que tu vérifieras le fonctionnement si c'est bon. Je vais vérifier, je ne m'en souviens plus si le message dans la tourbar était bon ou pas. Je crois qu'il était bon, mais je vais refaire un test pour vérifier, je te dirai.⏎⏎Par contre, ce que ça révèle du coup, c'est que les modes qu'on est en train de créer ne fonctionnent pas pour les autres langues que le français et ça c'est problématique donc il faut qu'on crée une issue à part pour ça idéalement, je pense une issue pour tous les modes là j'aurais besoin que tu m'aides à analyser le code et que tu m'expliques pourquoi ça ne fonctionne pas. Est-ce que c'est parce qu'on a fait un prompt en français pour chaque mode ? Si oui, du coup ça veut dire qu'il faut qu'on duplique notre prompt dans toutes les langues qu'on supporte. Et ça c'est assez problématique parce que potentiellement on en supporte plus de 100 si on se réfère aux langues de transcription des modèles, que ce soit le chinois ou les choses comme ça. Donc je pense qu'il faudrait qu'on essaye de partir, si c'est possible, sur un prompt qui soit en anglais si c'est possible pour qu'il puisse s'adapter à toutes les langues qu'on supporte. Parce que on ne va pas réécrire sans prompt par langue.
+
+━━ [F8-long-test] 407 chars, lang=fr
+  #1 407→400 5555ms success recall=6/6 inversions=0/15
+     engineOut: Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer.⏎⏎Sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. La qualité du micro va peut-être pas être exceptionnelle.⏎⏎J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test.⏎⏎On va voir le résultat s'il est intéressant ou pas.
+  #2 407→400 4209ms success recall=6/6 inversions=0/15
+     engineOut: Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer.⏎⏎Sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. La qualité du micro va peut-être pas être exceptionnelle.⏎⏎J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test.⏎⏎On va voir le résultat s'il est intéressant ou pas.
+  #3 407→400 4930ms success recall=6/6 inversions=0/15
+     engineOut: Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer.⏎⏎Sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. La qualité du micro va peut-être pas être exceptionnelle.⏎⏎J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test.⏎⏎On va voir le résultat s'il est intéressant ou pas.
+
+━━ [F9-summary-and-stats] 506 chars, lang=fr
+  #1 506→478 5269ms success recall=6/6 inversions=0/15
+     engineOut: Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.⏎⏎Autre chose qui pourrait être vraiment top, je sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.
+  #2 506→486 5255ms success recall=6/6 inversions=0/15
+     engineOut: Il faut vraiment qu'on fasse un mode résumé aussi, surtout quand tu discutes avec les LLM, ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.⏎⏎Autre chose qui pourrait être vraiment top, je ne sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, mais un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.
+  #3 506→498 8083ms success recall=6/6 inversions=0/15
+     engineOut: Il faut vraiment qu'on fasse un mode résumé aussi, parce que surtout quand tu discutes avec les LLM ça peut être vraiment intéressant d'avoir un mode comme ça qui vient résumer ta pensée après un gros vocal. Je pense vraiment que ça peut être au moins quelque chose d'intéressant.⏎⏎Autre chose qui pourrait être vraiment top, alors je sais pas si c'est dans Dictus Pro qu'il faut qu'on fasse ça, mais un truc qui permettrait d'avoir un écran avec tes stats, ça pourrait être vraiment pas mal aussi.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              27       4/27        1/27        3/27        0/27        4/27        0/27        16/27       0
+C1                    27       1/27        2/27        3/27        1/27        0/27        0/27        24/27       0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              19            0             2/27          0/27
+C1                    15            0             3/27          0/27
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              fr        27       0            0              0         7         4
+C1                    fr        27       1            0              1         0         0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   F1-test-logs            o2  o2  o2
+   F2-prod-bug             Fo3  Ho1  Fo3
+   F3-urgent-issue         o2  o2  U1o2
+   F4-paragraphs-pleasant  ·  ·  ·
+   F5-ideas-competitors    U1  U1  U1
+   F6-structured-since     ·  ·  ·
+   F7-tests-english-refusals ·  ·  PH
+   F8-long-test            ·  H  ·
+   F9-summary-and-stats    F  ·  F
+── C1
+   F1-test-logs            o2  o2  o2
+   F2-prod-bug             o3  o3  o3
+   F3-urgent-issue         ·  ·  ·
+   F4-paragraphs-pleasant  ·  ·  ·
+   F5-ideas-competitors    ·  U7HB  ·
+   F6-structured-since     ·  ·  ·
+   F7-tests-english-refusals ·  PH  PH
+   F8-long-test            ·  ·  ·
+   F9-summary-and-stats    ·  ·  ·
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 54 runs to ../docs/research/587-structured-rewrite/capture-r2.json

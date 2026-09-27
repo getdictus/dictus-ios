@@ -225,8 +225,7 @@ private struct EntryDetailView: View {
                 if let corrected = entry.vocabularyCorrected {
                     section("After custom vocabulary", text: corrected)
                 }
-                section("Engine output",
-                        text: entry.polished ?? "(engine did not run successfully)")
+                section("Engine output", text: entry.polished ?? engineOutputPlaceholder)
             }
             .padding()
         }
@@ -237,6 +236,21 @@ private struct EntryDetailView: View {
                 Button("Done") { dismiss() }
             }
         }
+    }
+
+    /// What stands in for an engine output there is none of.
+    ///
+    /// The default sentence says the engine failed, and on a skip that is a lie the
+    /// reader of an export has no way to check: the engine was never called, by design
+    /// (#587). That reader is usually an agent triaging a report (#255), so the line
+    /// carries the two numbers the decision was made on rather than only the verdict.
+    private var engineOutputPlaceholder: String {
+        guard let skip = entry.metrics.smartModeLengthSkip else {
+            return "(engine did not run successfully)"
+        }
+        // Commas rather than a dash: this repo keeps em dashes out of copy, and this
+        // string is read as often as any sentence on the screen.
+        return "(mode skipped: dictation too short, \(skip.characters) chars, floor \(skip.floor))"
     }
 
     private var metaRow: some View {
@@ -359,7 +373,7 @@ private extension PolishMetrics.Outcome {
     static var allDisplayCases: [PolishMetrics.Outcome] {
         [.success, .rejectedGuardrail, .skipped, .skippedShort, .skippedAutoMode,
          .cancelled, .engineFailed, .engineUnavailable, .exceededContextBudget,
-         .unsupportedInputLanguage]
+         .unsupportedInputLanguage, .smartModeSkippedShortInput]
     }
 
     var shortLabel: String {
@@ -374,6 +388,7 @@ private extension PolishMetrics.Outcome {
         case .engineUnavailable: return "unavailable"
         case .exceededContextBudget: return "too long"
         case .unsupportedInputLanguage: return "language"
+        case .smartModeSkippedShortInput: return "mode skipped"
         }
     }
 
@@ -383,7 +398,11 @@ private extension PolishMetrics.Outcome {
         // Orange, not red: an overflow is a refusal, not a breakage — the
         // engine was never called and the user still got their text (#270).
         case .rejectedGuardrail, .skipped, .skippedShort, .skippedAutoMode,
-             .exceededContextBudget, .unsupportedInputLanguage: return .orange
+             .exceededContextBudget, .unsupportedInputLanguage,
+             // A mode declining a dictation it has nothing to do with is the mildest
+             // entry on this list, and it belongs with the refusals rather than with
+             // the failures: the user got their text (#587).
+             .smartModeSkippedShortInput: return .orange
         // Red, with the failures rather than with the refusals above (#315):
         // nothing failed on this dictation, but the feature is off for the rest
         // of the process, which is the worst state on this list and the one that

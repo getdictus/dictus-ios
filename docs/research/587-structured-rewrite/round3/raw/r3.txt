@@ -1,0 +1,155 @@
+
+
+████ ARM shipping — 3 run(s) × 5 fixture(s), floor 0.35
+
+━━ [E1-structure-mode-english] 381 chars, lang=en
+  #1 381→355 2434ms success recall=3/3 inversions=0/3
+     engineOut: Another thing I want to test is whether the structure mod works in English. I don't know if in the code we made it for only the French or if we made it also for the English or even German for Spanish people.⏎⏎Right now I'm in detection language detection, and I will try to put the English transcription in the settings to see if I obtain the same result.
+  #2 381→355 2383ms success recall=3/3 inversions=0/3
+     engineOut: Another thing I want to test is whether the structure mod works in English. I don't know if in the code we made it for only the French or if we made it also for the English or even German for Spanish people.⏎⏎Right now I'm in detection language detection, and I will try to put the English transcription in the settings to see if I obtain the same result.
+  #3 381→355 2382ms success recall=3/3 inversions=0/3
+     engineOut: Another thing I want to test is if the structure mod works in English. Because I don't know if in the code we made it for only the French or if we made also for the English or even German for Spanish people.⏎⏎Right now I'm in detection language detection, and I will try to put the English transcription in the settings to see if I obtain the same result.
+
+━━ [E2-switched-to-english] 348 chars, lang=en
+  #1 348→584 3418ms rejectedGuardrail(length) recall=2/2 inversions=0/1 LIST=1
+     engineOut: Another thing I want to test is the structure mod in English, because I don't know if the code we made made it for the English. I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.⏎⏎Here the speaker began a new topic, so the technical consideration remains in their voice, with the same hesitation and timeline preserved.⏎⏎- I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.
+  #2 348→338 2289ms success recall=2/2 inversions=0/1
+     engineOut: Another thing that I want to test is the structure mod in English, because I don't know if the code we made made it for the English.⏎⏎I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.
+  #3 348→679 4018ms rejectedGuardrail(length) recall=2/2 inversions=0/1
+     engineOut: Another thing I want to test is the structure mod in English, because I don't know if the code we made made it for the English. I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.⏎⏎Here the speaker began with a personal test, so the focus remains on their own doubt and sequence of attempts:⏎⏎The code we made may not be ready for English, French, German or Spanish users right now, even though the speaker is now using English transcription. The intention is to test the structure mod in English first, then consider Spanish.
+
+━━ [E3-now-in-english] 148 chars, lang=en
+  #1 148→258 1938ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Now I speak in English, and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.⏎⏎I will see if the transcription looks fine.⏎⏎I will see if it's just a normal transcription without the structured mod.
+  #2 148→256 2126ms rejectedGuardrail(length) recall=1/1 inversions=0/0
+     engineOut: Now I speak in English, and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.⏎⏎It is not clear what to do with the output, and the structure remains unchanged.⏎⏎There is no further action to take.
+  #3 148→346 2401ms rejectedGuardrail(length) recall=1/1 inversions=0/0 LIST=2
+     engineOut: I now speak in English and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.⏎⏎Here the speaker stated their intention, so the observation remains in their voice:⏎⏎- I will see if the transcription looks fine.⏎- I will see if it is just a normal transcription without the structured mod.
+
+━━ [E4-toolbar-refusal] 187 chars, lang=en
+  #1 187→271 2104ms success recall=1/1 negationDropped=1 inversions=0/0
+     NEGATIONDROPPED: Okay, so now I'm speaking in English to make a refus in the toolbar and uh thanks to that I will uh I will check if the error message in the toolbar is uh is correctly uh readable or not.
+       → Now I'm speaking in English to make a refus in the toolbar,
+     engineOut: Now I'm speaking in English to make a refus in the toolbar, and I will check if the error message in the toolbar is correctly readable or not.⏎⏎It is necessary to make a refus in the toolbar.⏎⏎I will check if the error message in the toolbar is correctly readable or not.
+  #2 187→260 2111ms rejectedGuardrail(language) recall=1/1 negationDropped=1 inversions=0/0 FOREIGN-SENTENCES=1
+     NEGATIONDROPPED: Okay, so now I'm speaking in English to make a refus in the toolbar and uh thanks to that I will uh I will check if the error message in the toolbar is uh is correctly uh readable or not.
+       → Now I'm speaking in English to make a refus in the toolbar,
+     FOREIGN: Il faut que je vérifie si l'avis d'erreur dans la barre de commande est correctement readable ou non.
+     engineOut: Now I'm speaking in English to make a refus in the toolbar, and thanks to that I will check if the error message in the toolbar is correctly readable or not.⏎⏎Il faut que je vérifie si l'avis d'erreur dans la barre de commande est correctement readable ou non.
+  #3 187→253 2012ms success recall=1/1 negationDropped=1 inversions=0/0
+     NEGATIONDROPPED: Okay, so now I'm speaking in English to make a refus in the toolbar and uh thanks to that I will uh I will check if the error message in the toolbar is uh is correctly uh readable or not.
+       → Now I'm speaking in English to make a refus in the toolbar,
+     engineOut: Now I'm speaking in English to make a refus in the toolbar, and I will check if the error message in the toolbar is correctly readable or not.⏎⏎It is necessary to confirm the readability of the error message in the toolbar after the refus has been made.
+
+━━ [E5-should-not-work] 78 chars, lang=en
+  #1 78→169 1843ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0 LANG=fr≠en FOREIGN-SENTENCES=2
+     UNRECALLED (whole 0.14, best 0.14): And now I will make a structured message in English and uh it should not work.
+     FOREIGN: Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.
+     FOREIGN: Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.
+     engineOut: Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.⏎Il faut que je fasse un message structuré en anglais, et ce devrait pas fonctionner.
+  #2 78→76 1254ms success recall=1/1 inversions=0/0
+     engineOut: And now I will make a structured message in English, and it should not work.
+  #3 78→214 1960ms rejectedGuardrail(length) recall=0/1 UNRECALLED=1 inversions=0/0 LANG=fr≠en FOREIGN-SENTENCES=1
+     UNRECALLED (whole 0.14, best 0.14): And now I will make a structured message in English and uh it should not work.
+     FOREIGN: Il faut que je créer un message structuré en anglais, et cela ne devrait pas fonctionner.
+     engineOut: Il faut que je créer un message structuré en anglais, et cela ne devrait pas fonctionner.⏎⏎Here the speaker declared their intention and the condition for its execution, maintaining the original structure and tone.
+
+
+████ ARM C3 — 3 run(s) × 5 fixture(s), floor 0.35
+     prompt: ../docs/research/587-structured-rewrite/arms/C3
+
+━━ [E1-structure-mode-english] 381 chars, lang=en
+  #1 381→360 1796ms success recall=3/3 inversions=0/3
+     engineOut: Another thing that I want to test is if the structure mod works in English.⏎⏎Because I don't know if in the code we made it for only the French or if we made also for the English or even German for Spanish people.⏎⏎Right now I'm in detection language detection but I will try to put the English transcription in the settings to see if I obtain the same result.
+  #2 381→360 1810ms success recall=3/3 inversions=0/3
+     engineOut: Another thing that I want to test is if the structure mod works in English.⏎⏎Because I don't know if in the code we made it for only the French or if we made also for the English or even German for Spanish people.⏎⏎Right now I'm in detection language detection but I will try to put the English transcription in the settings to see if I obtain the same result.
+  #3 381→354 1750ms success recall=3/3 inversions=0/3
+     engineOut: Another thing I want to test is if the structure mod works in English. Because I don't know if in the code we made it for only the French or if we made also for the English or even German for Spanish people.⏎⏎Right now I'm in detection language detection but I will try to put the English transcription in the settings to see if I obtain the same result.
+
+━━ [E2-switched-to-english] 348 chars, lang=en
+  #1 348→334 1696ms success recall=2/2 inversions=0/1
+     engineOut: Another thing I want to test is the structure mod in English because I don't know if the code we made made it for the English. I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try uh maybe Spanish just after that to see if the mod works.
+  #2 348→331 1719ms success recall=2/2 inversions=0/1
+     engineOut: Another thing I want to test is the structure mod in English because I don't know if the code we made made it for the English. I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try maybe Spanish just after that to see if the mod works.
+  #3 348→335 1706ms success recall=2/2 inversions=0/1
+     engineOut: Another thing I want to test is the structure mod in English because I don't know if the code we made made it for the English.⏎⏎I mean for the French or if it will work for English or even German or Spanish people right now. I'm switched to English transcription and I will try uh maybe Spanish just after that to see if the mod works.
+
+━━ [E3-now-in-english] 148 chars, lang=en
+  #1 148→146 1156ms success recall=1/1 inversions=0/0
+     engineOut: Okay, so now I speak in English and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.⏎
+  #2 148→145 1057ms success recall=1/1 inversions=0/0
+     engineOut: Okay, so now I speak in English and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.
+  #3 148→146 1145ms success recall=1/1 inversions=0/0
+     engineOut: Okay, so now I speak in English and I will see if the transcription looks fine or if it's just a normal transcription without the structured mod.⏎
+
+━━ [E4-toolbar-refusal] 187 chars, lang=en
+  #1 187→165 1174ms success recall=1/1 inversions=0/0
+     engineOut: Okay, so now I'm speaking in English to make a refus in the toolbar and thanks to that I will check if the error message in the toolbar is correctly readable or not.
+  #2 187→245 1415ms success recall=1/1 inversions=0/0
+     engineOut: Okay, so now I'm speaking in English to make a refus in the toolbar and thanks to that I will check if the error message in the toolbar is correctly readable or not.⏎⏎I will check if the error message in the toolbar is correctly readable or not.
+  #3 187→165 1226ms success recall=1/1 inversions=0/0
+     engineOut: Okay, so now I'm speaking in English to make a refus in the toolbar and thanks to that I will check if the error message in the toolbar is correctly readable or not.
+
+━━ [E5-should-not-work] 78 chars, lang=en
+  #1 78→75 801ms success recall=1/1 inversions=0/0
+     engineOut: And now I will make a structured message in English and it should not work.
+  #2 78→75 798ms success recall=1/1 inversions=0/0
+     engineOut: And now I will make a structured message in English and it should not work.
+  #3 78→75 802ms success recall=1/1 inversions=0/0
+     engineOut: And now I will make a structured message in English and it should not work.
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              15       2/15        0/15        0/15        0/15        0/15        0/15        13/15       0
+C3                    15       0/15        0/15        0/15        0/15        0/15        0/15        15/15       0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             0             3/15          0/15
+C3                    0             0             0/15          0/15
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              en        15       1            0              3         2         0
+C3                    en        15       0            0              0         0         0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   E1-structure-mode-english ·  ·  ·
+   E2-switched-to-english  ·  ·  ·
+   E3-now-in-english       ·  ·  ·
+   E4-toolbar-refusal      ·  ·  ·
+   E5-should-not-work      U1  ·  U1
+── C3
+   E1-structure-mode-english ·  ·  ·
+   E2-switched-to-english  ·  ·  ·
+   E3-now-in-english       ·  ·  ·
+   E4-toolbar-refusal      ·  ·  ·
+   E5-should-not-work      ·  ·  ·
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 30 runs to ../docs/research/587-structured-rewrite/round3/capture-r3.json
