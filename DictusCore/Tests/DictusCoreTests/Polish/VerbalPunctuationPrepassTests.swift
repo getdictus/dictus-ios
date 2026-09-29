@@ -276,4 +276,53 @@ final class VerbalPunctuationPrepassTests: XCTestCase {
             "how are you? Hello"
         )
     }
+
+    // MARK: - Ellipsis (#600)
+
+    /// Parakeet writes a hesitation as a three-dot ellipsis. Collapsing it to one
+    /// period handed the engine "dès que. dès que", a sentence ending on a
+    /// conjunction the user never finished (#575 findings §3).
+    func testThreeDotEllipsisSurvives() {
+        let raw = "je te tiens au jus dès que... dès que j'ai avancé"
+        XCTAssertEqual(VerbalPunctuationPrepass.apply(raw, language: .french), raw)
+        XCTAssertEqual(VerbalPunctuationPrepass.apply(raw, language: .english), raw)
+    }
+
+    func testSingleCharacterEllipsisSurvives() {
+        let raw = "je te tiens au jus dès que… dès que j'ai avancé"
+        XCTAssertEqual(VerbalPunctuationPrepass.apply(raw, language: .french), raw)
+    }
+
+    /// The artefacts step 2 exists for still collapse.
+    func testDoubledWeakMarksStillCollapse() {
+        XCTAssertEqual(VerbalPunctuationPrepass.apply("c'est fini.. merci", language: .french), "c'est fini. merci")
+        XCTAssertEqual(VerbalPunctuationPrepass.apply("bon,, alors", language: .french), "bon, alors")
+    }
+
+    /// Only an exact three-dot run is an ellipsis; a longer run is an artefact.
+    func testFourDotsStillCollapse() {
+        XCTAssertEqual(VerbalPunctuationPrepass.apply("c'est fini.... merci", language: .french), "c'est fini. merci")
+    }
+
+    /// Decision: a strong mark does NOT absorb an ellipsis. `...?` is the
+    /// written form of a hesitant question, not a stray period beside a
+    /// converted command, so it passes through as dictated.
+    func testEllipsisBeforeStrongMarkIsKept() {
+        XCTAssertEqual(VerbalPunctuationPrepass.apply("tu viens...?", language: .french), "tu viens...?")
+        XCTAssertEqual(VerbalPunctuationPrepass.apply("tu viens...!", language: .french), "tu viens...!")
+        XCTAssertEqual(
+            VerbalPunctuationPrepass.apply("tu viens... point d'interrogation", language: .french),
+            "tu viens... ?"
+        )
+    }
+
+    /// #575's `D1-selfcorrect` fixture, the device dictation the defect was
+    /// traced on: what `polish-harness prompt` hands the engine must keep it.
+    func testFixtureD1SelfCorrectKeepsHesitation() {
+        let raw = "Yo man, j'espère que tu vas bien. Écoute, je suis en train de regarder le projet, "
+            + "je t'ai pas répondu mais je suis en train de travailler dessus, je te tiens au jus "
+            + "dès que dès que... dès que j'ai avancé un petit peu plus dessus, s'il te plaît. "
+            + "Enfin pardon, pas s'il te plaît je me suis planté."
+        XCTAssertEqual(VerbalPunctuationPrepass.apply(raw, language: .french), raw)
+    }
 }
