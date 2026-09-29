@@ -52,24 +52,54 @@ public struct DeviceCapabilities: Sendable, Equatable {
         )
     }
 
-    /// Whether this device is an A12- or A13-class iPhone (iPhone XS/XR through
-    /// iPhone 11 and iPhone SE 2nd gen).
+    /// Whether this device's chip predates the A14: an iPhone or iPad whose hardware
+    /// family number is below 13 (iPhone XS/XR through iPhone 11 and SE 2nd gen; iPad
+    /// Pro 2017-2020, iPad mini 5, iPad Air 3, iPad 6th-9th gen).
     ///
     /// WHY a hardware-family test and not a RAM test:
-    /// These devices ship 3-4 GB, the same tier as the A14 iPhone 12 family, so RAM
-    /// alone cannot tell them apart. Argmax's WhisperKit Core ML support matrix draws
-    /// the line on the chip, not the memory: A12/A13 list only Tiny and Base, while
-    /// A14 adds Small. Recommending or offering Small here traps the app in Core ML
-    /// optimization during onboarding and can jetsam it (issue #362).
+    /// These devices ship 3-6 GB, overlapping the A14 tier, so RAM alone cannot tell
+    /// them apart. Argmax's WhisperKit Core ML support matrix draws the line on the
+    /// chip, not the memory: A12/A13 list only Tiny and Base, while A14 adds Small.
+    /// Recommending or offering Small here traps the app in Core ML optimization
+    /// during onboarding and can jetsam it (issue #362).
+    ///
+    /// WHY a floor and not a list of families (issue #612):
+    /// the matrix names only some pre-A14 devices. The A12X/A12Z iPad Pros (`iPad8,*`),
+    /// the A12 iPads (`iPad11,*`) and the A10 iPads (`iPad7,*`) are absent from it
+    /// entirely, and the first version of this test matched `iPhone11,`/`iPhone12,`
+    /// only, so every iPad fell through to the RAM rule and was handed Small or
+    /// Parakeet. Argmax adds Small from A14 onward, and A14 is family 13 on both
+    /// product lines (`iPhone13,*`, `iPad13,1`), so everything below it gets the
+    /// Tiny/Base tier. Families below the current iOS 17 floor (`iPhone10,*`) also
+    /// match; they cannot install Dictus, so that costs nothing.
     ///
     /// WHY it lives on DeviceCapabilities rather than ModelInfo:
     /// This type states facts about the hardware; ModelInfo decides what those facts
-    /// mean for the catalog. Keeping the prefix list here gives the recommendation
-    /// rule and the per-device gate one shared definition instead of two copies.
+    /// mean for the catalog. Keeping the rule here gives the recommendation, the
+    /// per-device gate and the compute policy one shared definition.
     ///
     /// Source of truth: https://huggingface.co/argmaxinc/whisperkit-coreml/raw/main/config.json
-    public var isA12OrA13iPhone: Bool {
-        deviceModelIdentifier.hasPrefix("iPhone11,") || deviceModelIdentifier.hasPrefix("iPhone12,")
+    public var isPreA14: Bool {
+        guard let family = hardwareFamily(after: "iPhone") ?? hardwareFamily(after: "iPad") else {
+            // Not an iPhone or iPad identifier (a Mac, "arm64" on some simulators, a
+            // test placeholder): no chip-tier restriction applies.
+            return false
+        }
+        return family < 13
+    }
+
+    /// The family number of an identifier such as "iPad8,1" (→ 8), or nil when the
+    /// identifier does not start with `prefix` followed by digits and a comma.
+    ///
+    /// WHY parse the number instead of comparing prefixes: a floor needs an ordering,
+    /// and the comma bound keeps "iPhone1" from being read out of "iPhone13,2".
+    private func hardwareFamily(after prefix: String) -> Int? {
+        guard deviceModelIdentifier.hasPrefix(prefix) else { return nil }
+        let rest = deviceModelIdentifier.dropFirst(prefix.count)
+        guard let comma = rest.firstIndex(of: ","), comma > rest.startIndex else { return nil }
+        let digits = rest[rest.startIndex..<comma]
+        guard digits.allSatisfy(\.isASCII), digits.allSatisfy(\.isNumber) else { return nil }
+        return Int(digits)
     }
 
     /// Which Core ML compute units the Whisper audio encoder should be compiled for
@@ -92,8 +122,8 @@ public struct DeviceCapabilities: Sendable, Equatable {
 
     /// The compute policy this device needs.
     ///
-    /// WHY only A12/A13 deviate:
-    /// Argmax documents Tiny/Base on that tier as requiring `.cpuAndGPU`; with no
+    /// WHY only pre-A14 chips deviate:
+    /// Argmax documents Tiny/Base on the A12/A13 tier as requiring `.cpuAndGPU`; with no
     /// options supplied WhisperKit picks the Neural Engine on iOS 17+, which is the
     /// suspected reason Base can still stall in Core ML optimization there even after
     /// issue #362 stops those devices being handed Small. Every other device keeps
@@ -101,10 +131,14 @@ public struct DeviceCapabilities: Sendable, Equatable {
     /// transcription hot path for everyone at an unmeasured latency cost, to fix a
     /// problem two hardware generations old.
     ///
+    /// The pre-A14 iPads follow the same tier (issue #612): the A12X/A12Z and A10
+    /// iPads are absent from Argmax's matrix, and a chip older than the ones it
+    /// documents is not a reason to hand it the Neural Engine path those are denied.
+    ///
     /// NOTE: Argmax's requirement is documentation. It has not been measured on an
     /// iPhone 11 by anyone here, and only the reporter's device can confirm it.
     public var audioEncoderComputePolicy: AudioEncoderComputePolicy {
-        isA12OrA13iPhone ? .cpuAndGPU : .whisperKitDefault
+        isPreA14 ? .cpuAndGPU : .whisperKitDefault
     }
 
     /// Number of concurrent decoding workers WhisperKit should use for parallel

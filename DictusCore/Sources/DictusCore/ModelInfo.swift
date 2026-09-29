@@ -609,12 +609,14 @@ public struct ModelInfo: Identifiable {
     /// first, then device RAM.
     ///
     /// WHY compatibility before RAM:
-    /// Argmax only supports Tiny/Base on A12/A13 iPhones, while A14 devices with the
+    /// Argmax only supports Tiny/Base on A12/A13 chips, while A14 devices with the
     /// same 4 GB RAM tier support Small — so RAM alone cannot separate them, and
     /// recommending Small on an iPhone 11 traps onboarding in Core ML optimization
-    /// and can jetsam the app (issue #362). `DeviceCapabilities.isA12OrA13iPhone`
-    /// owns that test; `isSupported(on:)` reads the same predicate. After the
-    /// hardware exception, Parakeet v3 (~800 MB) remains the pick for >= 6 GB.
+    /// and can jetsam the app (issue #362). `DeviceCapabilities.isPreA14` owns that
+    /// test for iPhones and iPads alike; `isSupported(on:)` reads the same predicate.
+    /// The exception comes before the RAM rule, so a 6 GB A12X/A12Z iPad Pro gets
+    /// Base and never Parakeet (issue #612). After it, Parakeet v3 (~800 MB) remains
+    /// the pick for >= 6 GB.
     ///
     /// WHY in ModelInfo (not ModelManager):
     /// This is catalog-level logic — which model fits this device. It doesn't
@@ -627,9 +629,9 @@ public struct ModelInfo: Identifiable {
     /// reads the current device, same behaviour as before.
     /// Turbo is intentionally never recommended by default during Phase 37.
     public static func recommendedIdentifier(for capabilities: DeviceCapabilities) -> String {
-        if capabilities.isA12OrA13iPhone {
+        if capabilities.isPreA14 {
             // Base, not Tiny: it is the most accurate variant Argmax lists for this
-            // tier, and `a12a13SupportedIdentifiers` keeps the two consistent.
+            // tier, and `preA14SupportedIdentifiers` keeps the two consistent.
             return "openai_whisper-base"
         }
         return capabilities.physicalMemoryGB >= 6
@@ -662,7 +664,8 @@ public struct ModelInfo: Identifiable {
     /// "Available" section. Backend paths (ModelManager download/delete, already-
     /// downloaded list) intentionally do NOT filter by this, so a user who obtained
     /// Turbo under a more permissive build can still manage it.
-    /// The only Whisper variants Argmax lists as supported on A12/A13 iPhones.
+    /// The only Whisper variants Argmax lists as supported on A12/A13 chips, applied
+    /// to every pre-A14 device (`DeviceCapabilities.isPreA14`).
     ///
     /// WHY the `.en` variants are listed even though Dictus does not ship them:
     /// this set is a transcription of Argmax's published matrix, so it stays
@@ -670,7 +673,7 @@ public struct ModelInfo: Identifiable {
     /// never match a catalog entry today.
     ///
     /// Source of truth: https://huggingface.co/argmaxinc/whisperkit-coreml/raw/main/config.json
-    static let a12a13SupportedIdentifiers: Set<String> = [
+    static let preA14SupportedIdentifiers: Set<String> = [
         "openai_whisper-tiny",
         "openai_whisper-tiny.en",
         "openai_whisper-base",
@@ -697,14 +700,16 @@ public struct ModelInfo: Identifiable {
     /// "is it gated" and "why is it gated" would be visible as a greyed card with no
     /// explanation, or an explanation on a tappable card. One function, no drift.
     public func incompatibilityReason(on capabilities: DeviceCapabilities) -> IncompatibilityReason? {
-        // WHY this branch comes first: on A12/A13 the limit is the Core ML support
+        // WHY this branch comes first: before A14 the limit is the Core ML support
         // matrix, not memory. Falling through to the RAM rule would leave Small,
-        // Small (Quantized) and Medium selectable in Settings on an iPhone 11, and
-        // downloading any of them reproduces the issue #362 optimization hang.
-        // Parakeet is excluded here too — it is absent from Argmax's matrix and
-        // needs ~800 MB of headroom these 3-4 GB devices do not have.
-        if capabilities.isA12OrA13iPhone {
-            return Self.a12a13SupportedIdentifiers.contains(identifier) ? nil : .hardwareGeneration
+        // Small (Quantized) and Medium selectable in Settings on an iPhone 11 or an
+        // A12X iPad Pro, and downloading any of them reproduces the issue #362
+        // optimization hang. Parakeet is excluded here too — it is absent from
+        // Argmax's matrix, needs ~800 MB of headroom the 3-4 GB devices do not have,
+        // and was never validated on a pre-A14 Neural Engine, which is why the 6 GB
+        // A12X/A12Z iPads are excluded along with the rest (issue #612).
+        if capabilities.isPreA14 {
+            return Self.preA14SupportedIdentifiers.contains(identifier) ? nil : .hardwareGeneration
         }
         switch identifier {
         // Both quantized Turbo variants (issue #408): Argmax lists them for exactly
@@ -728,14 +733,14 @@ public struct ModelInfo: Identifiable {
     ///
     /// WHY incompatible models are NOT filtered out (issue #369, reversing #104):
     /// hiding them told the user nothing, and the absence read as a property of
-    /// Dictus rather than of their phone. On an A12/A13 iPhone the gating from
+    /// Dictus rather than of their phone. On a pre-A14 device the gating from
     /// issue #362 would collapse this list to a single entry. They stay in the list
     /// and the card renders them disabled with a reason; `incompatibilityReason(on:)`
     /// is what the view asks. Deprecation still filters — deprecated means superseded,
     /// not unrunnable, so those rows would have nothing to explain.
     ///
     /// WHY the recommendation is force-included (issue #362):
-    /// On A12/A13 iPhones the recommendation is Base, which is `.deprecated` and so
+    /// On pre-A14 devices the recommendation is Base, which is `.deprecated` and so
     /// absent from `all`. Without this exception the app has a reachable dead end:
     /// onboarding installs Base, the user downloads a second model, deleting Base
     /// then becomes permitted, and Base cannot be reinstalled from anywhere. Base
