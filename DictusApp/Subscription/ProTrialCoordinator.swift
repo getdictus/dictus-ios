@@ -107,7 +107,11 @@ final class ProTrialCoordinator: ObservableObject {
             return
         }
 
-        if proStatus.endOfTrialPaywallDue {
+        // Onboarded too, like the announcement. The Keychain gives a reinstall its old
+        // trial back, and when that trial has ended the paywall would otherwise open
+        // over a fresh install, before its onboarding (device test, 2026-09-29).
+        // `onboardingCompleted()` evaluates again once it is done.
+        if onboarded && proStatus.endOfTrialPaywallDue {
             // Marked on presentation, not on dismissal: "shown once" has to hold even
             // if the process dies with the paywall on screen.
             proStatus.markEndOfTrialPaywallShown()
