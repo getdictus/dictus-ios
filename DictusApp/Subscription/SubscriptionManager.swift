@@ -47,9 +47,15 @@ final class SubscriptionManager: ObservableObject {
         // while the app was killed, Transaction.updates delivers those
         // transactions on next launch. Missing them = stale Pro status.
         transactionListener = listenForTransactions()
-        Task { await loadProducts() }
-        // Check current entitlements on launch (passive, no sign-in prompt)
-        Task { await updateProStatus() }
+        // Products first, then the entitlement scan (passive, no sign-in prompt).
+        // WHY in that order: the scan's grace-period check reads the subscription
+        // status through a loaded product, and run in parallel it could find none
+        // and leave a subscriber in grace period unpaid until the next event.
+        // `loadProducts()` never throws, so the scan runs even when the fetch fails.
+        Task {
+            await loadProducts()
+            await updateProStatus()
+        }
     }
 
     deinit {
@@ -106,14 +112,18 @@ final class SubscriptionManager: ObservableObject {
             switch result {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
+                Self.logStoreKit(action: "purchaseSucceeded", details: Self.describe(transaction))
                 await updateProStatus()
                 await transaction.finish()
                 purchaseState = .success
             case .userCancelled:
+                Self.logStoreKit(action: "purchaseCancelled", details: "product=\(product.id)")
                 purchaseState = .idle
             case .pending:
+                Self.logStoreKit(action: "purchasePending", details: "product=\(product.id)")
                 purchaseState = .pending
             @unknown default:
+                Self.logStoreKit(action: "purchaseUnknownResult", details: "product=\(product.id)")
                 purchaseState = .idle
             }
         } catch {
@@ -159,6 +169,12 @@ final class SubscriptionManager: ObservableObject {
     private func listenForTransactions() -> Task<Void, Never> {
         Task.detached { [weak self] in
             for await result in Transaction.updates {
+                switch result {
+                case .verified(let transaction):
+                    Self.logStoreKit(action: "transactionUpdate", details: Self.describe(transaction))
+                case .unverified(let transaction, let error):
+                    Self.logStoreKit(action: "transactionUpdate", details: "UNVERIFIED \(transaction.productID) error=\(error)")
+                }
                 if let transaction = try? result.payloadValue {
                     await self?.updateProStatus()
                     await transaction.finish()
@@ -179,13 +195,69 @@ final class SubscriptionManager: ObservableObject {
     /// whole promise of a non-consumable.
     private func updateProStatus() async {
         var isActive = false
+        var seen: [String] = []
         for await result in Transaction.currentEntitlements {
-            if let transaction = try? result.payloadValue,
-               transaction.revocationDate == nil {
-                isActive = true
+            switch result {
+            case .verified(let transaction):
+                seen.append(Self.describe(transaction))
+                if transaction.revocationDate == nil { isActive = true }
+            case .unverified(let transaction, let error):
+                seen.append("UNVERIFIED \(transaction.productID) error=\(error)")
             }
         }
+        var source = isActive ? "currentEntitlements" : "none"
+        if !isActive, let other = await entitlementFromOtherSources() {
+            isActive = true
+            source = other
+        }
+        // Logged every scan: this is the only place that decides `isPaid`, and a
+        // purchase that did not unlock Pro is invisible without it (#593 device
+        // test, 2026-09-29: a sandbox purchase left the app unpaid).
+        Self.logStoreKit(
+            action: "entitlementScan",
+            details: "active=\(isActive) source=\(source) entitlements=\(seen.isEmpty ? "none" : seen.joined(separator: "; "))"
+        )
         proStatus.setProActive(isActive)
+    }
+
+    /// Whether the latest transaction of any Pro product, or the subscription
+    /// group's status, still grants Pro. Returns the source that did, or nil.
+    ///
+    /// WHY a second source at all: on iOS 27.0 in the sandbox,
+    /// `Transaction.currentEntitlements` came back empty for a verified, unexpired
+    /// monthly subscription, right after its purchase and at every scan after it,
+    /// while `Transaction.latest(for:)` returned that very transaction and the group
+    /// status read `subscribed` (#593 device test, 2026-09-29). A buyer who has paid
+    /// must never be refused Pro because one StoreKit view of the same fact is empty.
+    ///
+    /// WHY the status on top of the latest transaction: during a grace period the
+    /// latest transaction has expired while the subscription is still owed.
+    private func entitlementFromOtherSources() async -> String? {
+        for id in productIDs.sorted() {
+            guard case .verified(let transaction)? = await Transaction.latest(for: id),
+                  transaction.revocationDate == nil else { continue }
+            if let expires = transaction.expirationDate {
+                if expires > Date() { return "latestTransaction:\(id)" }
+            } else if transaction.productType == .nonConsumable {
+                return "latestTransaction:\(id)"
+            }
+        }
+        if let subscription = (yearlyProduct ?? monthlyProduct)?.subscription,
+           let statuses = try? await subscription.status,
+           statuses.contains(where: { $0.state == .subscribed || $0.state == .inGracePeriod }) {
+            return "subscriptionStatus"
+        }
+        return nil
+    }
+
+    nonisolated private static func describe(_ transaction: Transaction) -> String {
+        let expires = transaction.expirationDate.map { "\(Int($0.timeIntervalSince1970))" } ?? "none"
+        let revoked = transaction.revocationDate.map { "\(Int($0.timeIntervalSince1970))" } ?? "none"
+        return "product=\(transaction.productID) id=\(transaction.id) env=\(transaction.environment.rawValue) expires=\(expires) revoked=\(revoked)"
+    }
+
+    nonisolated private static func logStoreKit(action: String, details: String) {
+        PersistentLog.log(.diagnosticProbe(component: "storeKit", instanceID: "0", action: action, details: details))
     }
 
     /// Verify transaction signature (StoreKit 2 does this automatically).
