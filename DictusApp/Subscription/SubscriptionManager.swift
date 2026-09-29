@@ -106,14 +106,18 @@ final class SubscriptionManager: ObservableObject {
             switch result {
             case .success(let verification):
                 let transaction = try checkVerified(verification)
+                Self.logStoreKit(action: "purchaseSucceeded", details: Self.describe(transaction))
                 await updateProStatus()
                 await transaction.finish()
                 purchaseState = .success
             case .userCancelled:
+                Self.logStoreKit(action: "purchaseCancelled", details: "product=\(product.id)")
                 purchaseState = .idle
             case .pending:
+                Self.logStoreKit(action: "purchasePending", details: "product=\(product.id)")
                 purchaseState = .pending
             @unknown default:
+                Self.logStoreKit(action: "purchaseUnknownResult", details: "product=\(product.id)")
                 purchaseState = .idle
             }
         } catch {
@@ -159,6 +163,12 @@ final class SubscriptionManager: ObservableObject {
     private func listenForTransactions() -> Task<Void, Never> {
         Task.detached { [weak self] in
             for await result in Transaction.updates {
+                switch result {
+                case .verified(let transaction):
+                    Self.logStoreKit(action: "transactionUpdate", details: Self.describe(transaction))
+                case .unverified(let transaction, let error):
+                    Self.logStoreKit(action: "transactionUpdate", details: "UNVERIFIED \(transaction.productID) error=\(error)")
+                }
                 if let transaction = try? result.payloadValue {
                     await self?.updateProStatus()
                     await transaction.finish()
@@ -179,13 +189,34 @@ final class SubscriptionManager: ObservableObject {
     /// whole promise of a non-consumable.
     private func updateProStatus() async {
         var isActive = false
+        var seen: [String] = []
         for await result in Transaction.currentEntitlements {
-            if let transaction = try? result.payloadValue,
-               transaction.revocationDate == nil {
-                isActive = true
+            switch result {
+            case .verified(let transaction):
+                seen.append(Self.describe(transaction))
+                if transaction.revocationDate == nil { isActive = true }
+            case .unverified(let transaction, let error):
+                seen.append("UNVERIFIED \(transaction.productID) error=\(error)")
             }
         }
+        // Logged every scan: this is the only place that decides `isPaid`, and a
+        // purchase that did not unlock Pro is invisible without it (#593 device
+        // test, 2026-09-29: a sandbox purchase left the app unpaid).
+        Self.logStoreKit(
+            action: "entitlementScan",
+            details: "active=\(isActive) entitlements=\(seen.isEmpty ? "none" : seen.joined(separator: "; "))"
+        )
         proStatus.setProActive(isActive)
+    }
+
+    nonisolated private static func describe(_ transaction: Transaction) -> String {
+        let expires = transaction.expirationDate.map { "\(Int($0.timeIntervalSince1970))" } ?? "none"
+        let revoked = transaction.revocationDate.map { "\(Int($0.timeIntervalSince1970))" } ?? "none"
+        return "product=\(transaction.productID) id=\(transaction.id) env=\(transaction.environment.rawValue) expires=\(expires) revoked=\(revoked)"
+    }
+
+    nonisolated private static func logStoreKit(action: String, details: String) {
+        PersistentLog.log(.diagnosticProbe(component: "storeKit", instanceID: "0", action: action, details: details))
     }
 
     /// Verify transaction signature (StoreKit 2 does this automatically).
