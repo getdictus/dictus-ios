@@ -82,12 +82,23 @@ final class DeviceCapabilitiesTests: XCTestCase {
 
     // MARK: - Audio encoder compute policy (issue #370)
 
-    func testPreA14GetCpuAndGpuAudioEncoder() {
-        for identifier in ["iPhone11,2", "iPhone11,8", "iPhone12,1", "iPhone12,8",
-                           "iPad7,5", "iPad8,1", "iPad8,3", "iPad11,3", "iPad12,1"] {
+    func testPreA14IPhonesGetCpuAndGpuAudioEncoder() {
+        for identifier in ["iPhone11,2", "iPhone11,8", "iPhone12,1", "iPhone12,8"] {
             XCTAssertEqual(makeCapabilities(model: identifier).audioEncoderComputePolicy,
                            .cpuAndGPU,
                            "\(identifier) must keep the audio encoder off the Neural Engine")
+        }
+    }
+
+    /// Issue #612: pre-A14 iPads share the model gate but NOT the compute override.
+    /// On the A12X the CPU+GPU encoder tripled peak memory for no measurable gain,
+    /// while the default Neural Engine path prepared Base without stalling.
+    func testPreA14IPadsKeepTheWhisperKitDefault() {
+        for identifier in ["iPad7,5", "iPad8,1", "iPad8,3", "iPad8,9", "iPad11,3", "iPad12,1"] {
+            let device = makeCapabilities(model: identifier)
+            XCTAssertTrue(device.isPreA14, identifier)
+            XCTAssertEqual(device.audioEncoderComputePolicy, .whisperKitDefault,
+                           "\(identifier) must keep WhisperKit's default compute path")
         }
     }
 
@@ -103,15 +114,15 @@ final class DeviceCapabilitiesTests: XCTestCase {
         }
     }
 
-    /// The policy is a hardware-generation call, never a memory one. A pre-A14 chip
-    /// with plenty of RAM still needs it (the 6 GB A12Z iPad Pro); a 4 GB A14 still
-    /// must not get it.
+    /// The policy is a hardware call, never a memory one. A pre-A14 iPhone with
+    /// plenty of RAM still needs it; a 4 GB A14 still must not get it, and neither
+    /// does a 6 GB A12X iPad Pro.
     func testPolicyIgnoresRamAndThermalState() {
         for ram in [3, 4, 6, 8, 12] {
             XCTAssertEqual(makeCapabilities(ramGB: ram, model: "iPhone12,1").audioEncoderComputePolicy,
                            .cpuAndGPU)
             XCTAssertEqual(makeCapabilities(ramGB: ram, model: "iPad8,3").audioEncoderComputePolicy,
-                           .cpuAndGPU)
+                           .whisperKitDefault)
             XCTAssertEqual(makeCapabilities(ramGB: ram, model: "iPhone13,2").audioEncoderComputePolicy,
                            .whisperKitDefault)
         }
@@ -119,15 +130,19 @@ final class DeviceCapabilitiesTests: XCTestCase {
                        .cpuAndGPU)
     }
 
-    /// The policy and the catalog gate must key off the same hardware test, so a
-    /// device can never be handed Base by one rule and compiled for the ANE by the other.
-    func testPolicyTracksTheSamePredicateAsTheCatalogGate() {
-        for identifier in ["iPhone11,2", "iPhone12,1", "iPhone13,2", "iPhone16,2",
-                           "iPad8,1", "iPad12,1", "iPad13,1", "iPad13,4", "arm64"] {
+    /// On iPhones the policy and the catalog gate must key off the same hardware test,
+    /// so an iPhone can never be handed Base by one rule and compiled for the ANE by
+    /// the other. iPads are deliberately outside the policy (issue #612).
+    func testPolicyTracksTheCatalogGateOnIPhones() {
+        for identifier in ["iPhone11,2", "iPhone12,1", "iPhone13,2", "iPhone16,2"] {
             let device = makeCapabilities(model: identifier)
             XCTAssertEqual(device.audioEncoderComputePolicy == .cpuAndGPU,
                            device.isPreA14,
                            identifier)
+        }
+        for identifier in ["iPad8,1", "iPad12,1", "iPad13,1", "iPad13,4", "arm64"] {
+            XCTAssertEqual(makeCapabilities(model: identifier).audioEncoderComputePolicy,
+                           .whisperKitDefault, identifier)
         }
     }
 }

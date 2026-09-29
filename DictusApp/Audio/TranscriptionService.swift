@@ -118,7 +118,7 @@ class TranscriptionService {
 
         let config = WhisperKitConfig(
             modelFolder: modelPath,
-            // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
+            // Issue #370: pre-A14 iPhones need the audio encoder off the Neural Engine.
             computeOptions: WhisperComputeOptions.current(),
             verbose: false,
             prewarm: true,
