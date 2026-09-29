@@ -206,7 +206,41 @@ final class SubscriptionManager: ObservableObject {
             action: "entitlementScan",
             details: "active=\(isActive) entitlements=\(seen.isEmpty ? "none" : seen.joined(separator: "; "))"
         )
+        await logAlternativeEntitlementSources()
         proStatus.setProActive(isActive)
+    }
+
+    /// Diagnostic only (#593 device test, 2026-09-29): `currentEntitlements` came back
+    /// empty right after a verified sandbox purchase of an unexpired subscription.
+    /// Reads the other StoreKit sources for the same answer, to find which one holds.
+    private func logAlternativeEntitlementSources() async {
+        var parts: [String] = []
+        for id in productIDs.sorted() {
+            var perProduct = -1
+            if #available(iOS 18.4, *) {
+                perProduct = 0
+                for await _ in Transaction.currentEntitlements(for: id) { perProduct += 1 }
+            }
+            let latest = await Transaction.latest(for: id)
+            let latestText: String
+            switch latest {
+            case .verified(let transaction)?: latestText = Self.describe(transaction)
+            case .unverified(let transaction, let error)?: latestText = "UNVERIFIED \(transaction.productID) error=\(error)"
+            case nil: latestText = "none"
+            }
+            parts.append("\(id): entitlementsFor=\(perProduct) latest=[\(latestText)]")
+        }
+        if let subscription = (yearlyProduct ?? monthlyProduct)?.subscription {
+            let statuses = (try? await subscription.status) ?? []
+            let states = statuses.map { "\($0.state.rawValue)" }.joined(separator: ",")
+            parts.append("groupStatus=[\(states.isEmpty ? "none" : states)]")
+        } else {
+            parts.append("groupStatus=products-not-loaded")
+        }
+        var allCount = 0
+        for await _ in Transaction.all { allCount += 1 }
+        parts.append("all=\(allCount)")
+        Self.logStoreKit(action: "entitlementSources", details: parts.joined(separator: " | "))
     }
 
     nonisolated private static func describe(_ transaction: Transaction) -> String {
