@@ -47,9 +47,15 @@ final class SubscriptionManager: ObservableObject {
         // while the app was killed, Transaction.updates delivers those
         // transactions on next launch. Missing them = stale Pro status.
         transactionListener = listenForTransactions()
-        Task { await loadProducts() }
-        // Check current entitlements on launch (passive, no sign-in prompt)
-        Task { await updateProStatus() }
+        // Products first, then the entitlement scan (passive, no sign-in prompt).
+        // WHY in that order: the scan's grace-period check reads the subscription
+        // status through a loaded product, and run in parallel it could find none
+        // and leave a subscriber in grace period unpaid until the next event.
+        // `loadProducts()` never throws, so the scan runs even when the fetch fails.
+        Task {
+            await loadProducts()
+            await updateProStatus()
+        }
     }
 
     deinit {
