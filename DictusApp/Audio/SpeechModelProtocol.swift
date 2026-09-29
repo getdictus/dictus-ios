@@ -209,7 +209,7 @@ class WhisperKitEngine: SpeechModelProtocol {
         let config = WhisperKitConfig(
             model: modelIdentifier,
             modelFolder: modelFolder.path,
-            // Issue #370: A12/A13 need the audio encoder off the Neural Engine.
+            // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
             computeOptions: WhisperComputeOptions.current(),
             verbose: false,
             prewarm: true,
