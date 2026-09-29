@@ -1836,6 +1836,23 @@
         }
       }
     },
+    "Not supported on this iPad" : {
+      "comment" : "Reason shown on a disabled model card on an iPad whose chip is too old to run the model (issue #612). iPad counterpart of \"Not supported on this iPhone\".",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not supported on this iPad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non compatible avec cet iPad"
+          }
+        }
+      }
+    },
     "Not supported on this iPhone" : {
       "comment" : "Reason shown on a disabled model card when the device's chip is too old to run the model (issue #369). Names the hardware, not an error.",
       "localizations" : {
