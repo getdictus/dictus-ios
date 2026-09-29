@@ -6,7 +6,7 @@ The ordered queue. One list, one order, and the first unfinished item is what ha
 
 **How to use it.** Start a session by reading this file and taking the first unfinished item of the active lane. Do not re-derive the order from the tracker: the tracker sorts by how well an issue is written, not by how much it matters. When an item ships, tick it here. Revise the lanes at a version cut, not more often.
 
-Last reviewed: 2026-09-23.
+Last reviewed: 2026-09-29.
 
 ## The lanes, in order
 
@@ -201,13 +201,12 @@ His verdict was that Normal polish is not at the level and wants work before the
 10. **#593 — the reverse trial, then #494 — the onboarding that starts it. Pivot decided by Pierre on 2026-09-23.** Pro launches with a reverse trial: every user gets Pro for a fixed period without subscribing, then the paywall. It replaces the 7-day StoreKit trial on the yearly plan. The reason: nobody opens a Smart Mode that sits behind a subscription screen, and their value shows through a week of use from the keyboard, not in a demo. It also reaches the install base on the 2.0.0 update, which never sees onboarding. The accepted cost is a lower conversion rate per trial in exchange for everyone trying. #494 was rewritten from "offer Pro after the first dictation" to **start the trial and teach** the Smart Modes (on the user's own words), how to reach them from the keyboard, and Vocabulary. No price appears in onboarding. #593 carries four open decisions with proposed defaults (14 days, no-Apple-Intelligence behaviour, reminder, existing users included). Both are `needs-triage` until Pierre confirms them.
 11. **#215** — the ASC catalogue (see Lane 0; start it early, finish it here). **Since 2026-09-23 the yearly plan carries no introductory offer** (#593).
 12. ~~**#536**~~ — **shipped on 2026-09-10** in PR #540. See the paragraph above.
-13. **#279** — flip `PremiumFlags.paywallVisible`, in the same PR as the first reachable Pro feature. Walk all four entry points; the flag is compile-time, so a site that was never wired to it stays silently hidden.
+13. **#216 — the Pro hub. Moved into the lane on 2026-09-29.** The 2026-08-24 deferral waited for two or three Pro features; all three have shipped. The reverse trial (#593) raised the stakes: every user is Pro for the trial period, and the screen a trial user reaches from "Dictus Pro" today is the subscribed-state paywall — one "Dictus Pro Active" card over an empty half. The hub is where a trial user finds the features the trial is meant to sell. Its scope is being grilled with Pierre; the issue body will be the spec. It must land before #279.
+14. **#279** — flip `PremiumFlags.paywallVisible`, in the same PR as the first reachable Pro feature. Walk all four entry points; the flag is compile-time, so a site that was never wired to it stays silently hidden.
 
 ### What was deliberately cut from this lane
 
 **#450, onboarding v2.** It asked for two complete prototypes and a PiP spike, about a month of work, and it was written as a launch gate. It is not one: the App Store install base has already completed onboarding and will never see those screens, and it reaches Pro through the entry points #279 unhides. Its one launch-relevant point is now #494. The rest moved to 2.1 on 2026-09-05.
-
-**#216, the Pro hub.** Deferred on 2026-08-24: the hub's content *is* the feature list, so building it before the features exist means building it three times.
 
 ## Lane A′ — 1.9.0, auto-return and the French engine
 
