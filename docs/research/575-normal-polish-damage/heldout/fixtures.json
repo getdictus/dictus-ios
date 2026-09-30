@@ -1,0 +1,398 @@
+[
+ {
+  "id": "email-fr/E1-relance-devis",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "alors euh je voulais revenir sur le devis que j'ai envoyé la semaine dernière j'ai toujours pas eu de retour et là ça commence à être un peu juste par rapport au planning donc si vous pouvez me dire où ça en est ça m'arrangerait"
+ },
+ {
+  "id": "email-fr/E2-dispo",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "ouais alors moi je suis dispo mardi après-midi ou jeudi matin par contre le mercredi c'est mort j'ai un truc toute la journée dis moi ce qui t'arrange"
+ },
+ {
+  "id": "email-fr/E3-court",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "je confirme pour la réunion de lundi à 14h"
+ },
+ {
+  "id": "email-fr/E4-reclamation",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "donc en fait ça fait trois fois que j'appelle pour le même problème et à chaque fois on me dit que ça va être réglé sous 48h et ça fait deux semaines que ça dure là franchement j'en ai marre je veux qu'on me rappelle"
+ },
+ {
+  "id": "email-fr/E5-long-projet",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "alors euh je fais le point sur le projet donc euh la partie design elle est finie on a validé les maquettes vendredi dernier par contre le dev il a pris du retard parce qu'on a eu un souci avec l'API du prestataire et euh du coup on est en train de voir si on peut décaler la livraison d'une semaine je sais pas si c'est jouable de ton côté et sinon faudrait qu'on en parle assez vite parce que là ça commence à presser"
+ },
+ {
+  "id": "email-fr/E6-demande-fichier",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "est-ce que tu pourrais me renvoyer le fichier des chiffres du dernier trimestre j'arrive pas à le retrouver dans mes mails et j'en ai besoin pour demain matin"
+ },
+ {
+  "id": "email-fr/E7-controle-salutation-seule",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "bonjour alors je vous écris parce que j'ai besoin d'un renseignement sur ma facture du mois dernier il y a une ligne que je comprends pas"
+ },
+ {
+  "id": "email-fr/E8-controle-signature-seule",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "du coup je pense qu'on peut valider comme ça je te laisse me confirmer et on lance la prod merci d'avance"
+ },
+ {
+  "id": "email-fr/E9-controle-prenom",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "écoute Julien j'ai regardé ce que tu m'as envoyé et globalement c'est bon il y a juste deux trois trucs à reprendre sur la partie budget je te fais un retour détaillé demain"
+ },
+ {
+  "id": "email-fr/E10-controle-deja-formel",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "je vous prie de bien vouloir trouver ci-joint les documents demandés je reste à votre disposition pour toute information complémentaire"
+ },
+ {
+  "id": "seed/1-normal",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Salut ça va ? J'espère que tu es passé un bon week-end. Moi de mon côté c'était tranquille, j'ai bossé sur le projet et franchement ça avance bien. On devrait être dans les temps."
+ },
+ {
+  "id": "seed/2-bilingue",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Alors écoute, faut que je push le commit sur GitHub avant la deadline de today et ensuite je te laisse review la pull request. Normalement le merge va clôturer le slice et on pourra fermer l'issue."
+ },
+ {
+  "id": "seed/4-tricky-ponctuation",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Alors bonjour à tous, retour à la ligne. Voici le compte rendu de la réunion, retour à la ligne. Premièrement, on a validé le budget. Point d'exclamation. Retour à la ligne. Deuxièmement, est-ce que tout le monde est d'accord ? Point d'interrogation. Retour à la ligne. A très vite."
+ },
+ {
+  "id": "seed/5-erreur-parakeet",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Et moi je vais faire un autre test, c'est le test on va dire special paratite where sometimes it arrive que ça traduise de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par error."
+ },
+ {
+  "id": "seed/8-verbal-clean",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Ok, virgule, petit test, virgule, deuxième test, point."
+ },
+ {
+  "id": "seed/9-verbal-questions",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Salut, comment ça va ? Point d'interrogation. Génial. Point d'exclamation."
+ },
+ {
+  "id": "seed/10-verbal-list-parakeet-error",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Liste de point, pain, point virgule, les point virgule, oeuf, point."
+ },
+ {
+  "id": "seed/11-verbal-newlines",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Première ligne, retour à la ligne. Deuxième ligne, retour à la ligne, troisième ligne."
+ },
+ {
+  "id": "seed/12-point-noun-preserved",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Je mets un point final point."
+ },
+ {
+  "id": "seed/13-verbal-mixed",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Bonjour Pierre, tu vas bien. Point d'interrogation. A très vite. Point."
+ },
+ {
+  "id": "seed/14-verbal-long-mixed",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Donc là je fais un petit test de transcription, retour à la ligne. Je vais faire des tests avec de la ponctuation. Point. Ça marche. Point d'exclamation. Est-ce que c'est normal ? Point d'interrogation."
+ },
+ {
+  "id": "nl-markers-fr/nl-1-liste-courses",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Voici ce que j'ai besoin de points, retour à la ligne, des carottes, retour à la ligne, des patates, retour à la ligne, des pommes"
+ },
+ {
+  "id": "nl-markers-fr/nl-2-plus-de-retours",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Donc j'ai l'impression qu'il ne me fait plus les retours à la ligne, je sais pas pourquoi."
+ },
+ {
+  "id": "nl-markers-fr/nl-3-sous-paragraphes",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "sur des grands paragraphes des sous-paragraphes avec des retours à la ligne, des espaces blancs"
+ },
+ {
+  "id": "nl-markers-fr/nl-4-identifiants",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "il me dit de points retour à la ligne copier les identifiants"
+ },
+ {
+  "id": "probe-isolated/P1-salle",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Sinon je me débrouillerai pour suivre une visio depuis la salle à tante mais ce sera moyen"
+ },
+ {
+  "id": "probe-isolated/P2-morceaux",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaye de deviner quels sons ont été prononcés"
+ },
+ {
+  "id": "probe-isolated/P3-comptable",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Il faut que je répète le comptable, le comptable je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle"
+ },
+ {
+  "id": "probe-isolated/P4-appstore",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12"
+ },
+ {
+  "id": "probe-isolated/P5-zappe",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais"
+ },
+ {
+  "id": "probe-isolated/P6-calcul",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps"
+ },
+ {
+  "id": "point-fr/N1-point-final",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "je te propose qu'on mette un point final à cette discussion parce que là on tourne en rond depuis vingt minutes"
+ },
+ {
+  "id": "point-fr/N2-point-de-vue",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous"
+ },
+ {
+  "id": "point-fr/N3-faire-le-point",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "on peut faire le point demain matin avant le daily comme ça j'aurai le temps de relire tes chiffres tranquillement"
+ },
+ {
+  "id": "point-fr/N4-a-quel-point",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "tu sais à quel point ça m'énerve quand on change les specs la veille de la démo franchement c'est pénible"
+ },
+ {
+  "id": "point-fr/N5-deux-points-nommes",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push"
+ },
+ {
+  "id": "point-fr/N6-point-de-vue-bis",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite"
+ },
+ {
+  "id": "point-fr/N7-noun-at-a-boundary",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "on a réglé le dernier point on peut passer à la suite et je te renvoie le compte rendu ce soir"
+ },
+ {
+  "id": "point-fr/C1-bare-boundary",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "je passe au bureau demain matin vers 9h point on se voit directement en salle de réunion"
+ },
+ {
+  "id": "point-fr/C2-bare-boundary",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "j'ai fini la relecture du document point il reste juste deux coquilles à corriger page trois"
+ },
+ {
+  "id": "point-fr/C3-bare-boundary",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "le client a validé le devis hier soir point on peut lancer la production dès lundi matin"
+ },
+ {
+  "id": "point-fr/C4-parakeet-punctuated",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée."
+ },
+ {
+  "id": "point-fr/C5-parakeet-punctuated",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "On décale la réunion de lancement à jeudi, point, je préviens Thomas et Sarah de mon côté."
+ },
+ {
+  "id": "device-structured-fr/D3-plan-mode",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation."
+ },
+ {
+  "id": "device-structured-fr/D5-lets-go",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Vas-y let's go."
+ },
+ {
+  "id": "device-structured-fr/D6-issues-check",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point."
+ },
+ {
+  "id": "device-structured-fr/D7-mod-rejects",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs."
+ },
+ {
+  "id": "device-structured-fr/D8-last-transcription",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Je te laisserai regarder, il s'agit de la dernière transcription."
+ },
+ {
+  "id": "summary-device-r1/R1-date-word",
+  "lang": "fr",
+  "raw": "bon alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match",
+  "sttEngine": "PK"
+ },
+ {
+  "id": "summary-device-r1/R2-misrendered-product",
+  "lang": "fr",
+  "raw": "j'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version",
+  "sttEngine": "PK"
+ },
+ {
+  "id": "summary-device-r1/R3-no-qualifier",
+  "lang": "fr",
+  "raw": "je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux",
+  "sttEngine": "PK"
+ },
+ {
+  "id": "summary-device-r1/R4-on-not-nous",
+  "lang": "fr",
+  "raw": "alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider",
+  "sttEngine": "PK"
+ },
+ {
+  "id": "summary-device-r1/R5-telegraphic",
+  "lang": "fr",
+  "raw": "ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue",
+  "sttEngine": "PK"
+ },
+ {
+  "id": "summary-device-r1/R6-two-negations",
+  "lang": "fr",
+  "raw": "Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.",
+  "sttEngine": "PK"
+ },
+ {
+  "id": "shortprobe-fr/S1-synthetic-short",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Alors je voulais te dire que la réunion est décalée à quinze heures."
+ },
+ {
+  "id": "paragraph-fr/P1-free-form",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Bon alors, je pensais à un truc ce matin en marchant. C'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini."
+ },
+ {
+  "id": "paragraph-fr/P3-message-draft",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange."
+ },
+ {
+  "id": "summary-fr/S1-free-form",
+  "raw": "Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.",
+  "lang": "fr",
+  "sttEngine": "PK"
+ },
+ {
+  "id": "summary-fr/S6-one-line",
+  "raw": "faut que je rappelle le comptable avant vendredi pour la TVA du trimestre",
+  "lang": "fr",
+  "sttEngine": "PK"
+ },
+ {
+  "id": "device-structured-0918-fr/F1-test-logs",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal. Je te laisse analyser, me dire s'il manque des tests ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal."
+ },
+ {
+  "id": "device-structured-0918-fr/F3-urgent-issue",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Donc je te laisse te plaît analyser la situation et créer une issue. Elle est assez urgente. Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte. Parce que c'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité."
+ },
+ {
+  "id": "device-structured-0918-fr/F4-paragraphs-pleasant",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "C'est toujours un plaisir de l'utiliser. Et franchement le mode structuré il est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable."
+ },
+ {
+  "id": "device-structured-0918-fr/F6-structured-since",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "En fait je suis sur le mode structuré depuis un petit moment. Donc en fait tous les tests que j'ai fait hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Donc je pense que je vais pouvoir exporter les logs tels quels. Mais en moi ça a l'air d'être plutôt correct."
+ },
+ {
+  "id": "device-structured-0918-fr/F8-long-test",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer. Alors sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. Donc la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas"
+ },
+ {
+  "id": "probe-length-ladder/L1-tail-only",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps."
+ },
+ {
+  "id": "probe-length-ladder/L5-tail-punctuated",
+  "lang": "fr",
+  "sttEngine": "PK",
+  "raw": "Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules, éventuellement on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième c'est 90% du temps."
+ }
+]
