@@ -98,10 +98,10 @@ struct ProHubFeatureCard: View {
 /// decision 4, amended). Bound to `feature.settingsKey` in the App Group, so the
 /// keyboard reads the same answer (#401).
 ///
-/// WHY the binding comes from the screen rather than an `@AppStorage` of its own:
-/// the screen dims its content from the same value, and two property wrappers on one
-/// key did not redraw together on the simulator (the footer moved, the list did not).
-/// One owner, one redraw.
+/// WHY `ProFeatureSwitches` and not `@AppStorage`: the screen dims its content from
+/// the same value and the hub row shows it, and property wrappers on one key, each
+/// on its own `UserDefaults` instance, did not redraw together on the simulator.
+/// One owner, observed by all three.
 ///
 /// WHY the footer only speaks when the switch is off: on, the screen below says what
 /// the feature does. Off, the content under it is dimmed and locked
@@ -110,12 +110,22 @@ struct ProHubFeatureCard: View {
 struct ProFeatureSwitchSection: View {
     let feature: ProFeature
 
-    /// The screen's `@AppStorage` on `feature.settingsKey`.
-    @Binding var isOn: Bool
+    @ObservedObject private var switches = ProFeatureSwitches.shared
+
+    init(feature: ProFeature) {
+        self.feature = feature
+    }
+
+    private var isOn: Bool {
+        switches.isOn(feature)
+    }
 
     var body: some View {
         Section {
-            Toggle(isOn: $isOn) {
+            Toggle(isOn: Binding(
+                get: { switches.isOn(feature) },
+                set: { switches.set(feature, isOn: $0) }
+            )) {
                 Text(LocalizedStringKey(feature.displayName))
             }
             .tint(.dictusAccent)

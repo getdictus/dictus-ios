@@ -37,15 +37,15 @@ struct VocabularyListView: View {
     /// is the second-worst outcome after one that disappears and returns tomorrow.
     @State private var writeFailed = false
 
-    /// Observed so the list dims and unlocks as the switch above it moves (#216).
-    @AppStorage(SharedKeys.vocabularyEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var vocabularyEnabled = true
+    /// The feature's switch, observed so the content dims and unlocks as it moves
+    /// (#216). The same object the switch above writes and the hub row reads.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
 
     /// Whether the terms below the switch are live: `FeatureGate.isAvailable`, the one
     /// predicate. Off, they stay visible and cannot be edited, since the replacement
     /// pass applies none of them (#216 decision 5).
     private var isAvailable: Bool {
-        _ = vocabularyEnabled
+        _ = switches.isOn(.vocabulary)
         return FeatureGate.isAvailable(.vocabulary)
     }
 
@@ -53,7 +53,7 @@ struct VocabularyListView: View {
         List {
             // The feature's switch, first (#216): this screen is reached from the
             // Dictus Pro hub's Vocabulary row, which carries no switch of its own.
-            ProFeatureSwitchSection(feature: .vocabulary, isOn: $vocabularyEnabled)
+            ProFeatureSwitchSection(feature: .vocabulary)
 
             Section {
                 if store.isEmpty {

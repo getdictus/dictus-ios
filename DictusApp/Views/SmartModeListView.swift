@@ -44,15 +44,15 @@ struct SmartModeListView: View {
         pinnedIdentifiers.count >= SmartModeCatalogue.maximumPinnedModes
     }
 
-    /// Observed so the list dims and unlocks as the switch above it moves (#216).
-    @AppStorage(SharedKeys.smartModeEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var smartModeEnabled = true
+    /// The feature's switch, observed so the content dims and unlocks as it moves
+    /// (#216). The same object the switch above writes and the hub row reads.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
 
     /// Whether the list below the switch is live: `FeatureGate.isAvailable`, the one
     /// predicate. Off, the arrangement stays visible and cannot be edited, since the
     /// keyboard applies none of it (#216 decision 5).
     private var isAvailable: Bool {
-        _ = smartModeEnabled
+        _ = switches.isOn(.smartMode)
         return FeatureGate.isAvailable(.smartMode)
     }
 
@@ -60,7 +60,7 @@ struct SmartModeListView: View {
         List {
             // The feature's switch, first (#216): this screen is reached from the
             // Dictus Pro hub's Smart Mode row, which carries no switch of its own.
-            ProFeatureSwitchSection(feature: .smartMode, isOn: $smartModeEnabled)
+            ProFeatureSwitchSection(feature: .smartMode)
 
             if !deviceIsCapable {
                 Section {
