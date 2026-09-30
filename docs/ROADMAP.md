@@ -13,7 +13,7 @@ Last reviewed: 2026-09-30.
 
 ## Now — 2.0.0, the Pro launch
 
-Take the first line that is not struck through.
+Take the first line that is not struck through. Status (who is on what): [Project board](https://github.com/orgs/getdictus/projects/2).
 
 1. #587 — Smart Mode prompt campaign: its remaining threads
    - #598 — language check refuses a correct short line (`es` read as `pt`)
