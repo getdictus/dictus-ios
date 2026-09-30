@@ -1,0 +1,116 @@
+// DictusCore/Tests/DictusCoreTests/ProHubTests.swift
+// The Dictus Pro hub's state rule (#216): which block sits under the feature cards.
+import XCTest
+@testable import DictusCore
+
+final class ProHubTests: XCTestCase {
+
+    private let now = Date(timeIntervalSince1970: 1_800_000_000)
+    private var inThreeDays: Date { now.addingTimeInterval(3 * ProTrial.secondsPerDay) }
+
+    private func block(paywallVisible: Bool = true,
+                       isPaid: Bool = false,
+                       isEntitled: Bool = false,
+                       trial: ProTrialState = .neverStarted,
+                       ownership: ProOwnership? = nil) -> ProHubBottomBlock {
+        ProHub.bottomBlock(paywallVisible: paywallVisible, isPaid: isPaid, isEntitled: isEntitled,
+                           trial: trial, now: now, ownership: ownership)
+    }
+
+    private func subscription(_ id: String, renews: Bool? = true) -> ProActiveSubscription {
+        ProActiveSubscription(productID: id, periodEnd: inThreeDays, willAutoRenew: renews)
+    }
+
+    // MARK: - Free
+
+    func testFreeUserGetsTodaysPaywall() {
+        let result = block()
+        XCTAssertEqual(result, .offers(trialEndsAt: nil, daysLeft: nil))
+        XCTAssertFalse(result.cardsAreActive, "a free user's cards stay informational")
+        XCTAssertTrue(result.sellsPlans)
+    }
+
+    func testExpiredTrialIsFree() {
+        let result = block(trial: .expired(endedAt: now.addingTimeInterval(-60)))
+        XCTAssertEqual(result, .offers(trialEndsAt: nil, daysLeft: nil))
+        XCTAssertFalse(result.cardsAreActive)
+    }
+
+    // MARK: - Trial
+
+    func testRunningTrialActivatesCardsAndStillSells() {
+        let result = block(isEntitled: true, trial: .running(endsAt: inThreeDays))
+        XCTAssertEqual(result, .offers(trialEndsAt: inThreeDays, daysLeft: 3))
+        XCTAssertTrue(result.cardsAreActive)
+        XCTAssertTrue(result.sellsPlans, "subscribing during the trial is what the trial is for")
+    }
+
+    func testTrialIsIgnoredWithThePaywallHidden() {
+        // A record left by a development build with the flag up grants nothing (#279).
+        let result = block(paywallVisible: false, trial: .running(endsAt: inThreeDays))
+        XCTAssertEqual(result, .offers(trialEndsAt: nil, daysLeft: nil))
+    }
+
+    // MARK: - Paid
+
+    func testMonthlyAndYearlySubscribersSeeTheirPlan() {
+        for id in [ProProductID.monthly, ProProductID.yearly] {
+            let sub = subscription(id)
+            let result = block(isPaid: true, isEntitled: true,
+                               ownership: ProOwnership(ownsLifetime: false, subscription: sub))
+            XCTAssertEqual(result, .subscription(sub))
+            XCTAssertTrue(result.cardsAreActive)
+            XCTAssertFalse(result.sellsPlans)
+        }
+        XCTAssertEqual(subscription(ProProductID.monthly).period, .monthly)
+        XCTAssertEqual(subscription(ProProductID.yearly).period, .yearly)
+        XCTAssertEqual(subscription("some.future.plan").period, .unlabelled)
+    }
+
+    func testSubscriptionTakenDuringTheTrialWins() {
+        let sub = subscription(ProProductID.yearly)
+        let result = block(isPaid: true, isEntitled: true, trial: .running(endsAt: inThreeDays),
+                           ownership: ProOwnership(ownsLifetime: false, subscription: sub))
+        XCTAssertEqual(result, .subscription(sub))
+    }
+
+    func testLifetimeOwnerGetsNoManageButton() {
+        let result = block(isPaid: true, isEntitled: true,
+                           ownership: ProOwnership(ownsLifetime: true, subscription: nil))
+        XCTAssertEqual(result, .lifetime(alsoSubscribed: nil))
+        XCTAssertTrue(result.cardsAreActive)
+        XCTAssertFalse(result.sellsPlans)
+    }
+
+    func testLifetimeOwnerStillPayingASubscriptionCanManageIt() {
+        let sub = subscription(ProProductID.monthly, renews: true)
+        let result = block(isPaid: true, isEntitled: true,
+                           ownership: ProOwnership(ownsLifetime: true, subscription: sub))
+        XCTAssertEqual(result, .lifetime(alsoSubscribed: sub))
+    }
+
+    func testLifetimeOwnerWithACancelledSubscriptionHasNothingToManage() {
+        let sub = subscription(ProProductID.monthly, renews: false)
+        let result = block(isPaid: true, isEntitled: true,
+                           ownership: ProOwnership(ownsLifetime: true, subscription: sub))
+        XCTAssertEqual(result, .lifetime(alsoSubscribed: nil))
+    }
+
+    func testPaidBeforeTheScanLandsWaits() {
+        XCTAssertEqual(block(isPaid: true, isEntitled: true, ownership: nil), .paidPlanPending)
+    }
+
+    func testPaidWithNothingRecognisedStillOffersManage() {
+        XCTAssertEqual(block(isPaid: true, isEntitled: true, ownership: ProOwnership.none), .paidPlanUnknown)
+    }
+
+    // MARK: - DEBUG force
+
+    func testEntitledWithoutPurchaseSellsNothing() {
+        // The DEBUG forced entitlement, paywall hidden (#460, #577).
+        let result = block(paywallVisible: false, isEntitled: true)
+        XCTAssertEqual(result, .entitledWithoutPurchase)
+        XCTAssertTrue(result.cardsAreActive, "the forced entitlement must reach the feature screens")
+        XCTAssertFalse(result.sellsPlans)
+    }
+}
