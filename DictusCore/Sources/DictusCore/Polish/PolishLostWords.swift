@@ -129,8 +129,12 @@ public enum PolishLostWords {
         let inputCounts: [String: Int]
         let outputCounts: [String: Int]
         /// Whether the output carries more numbers than the dictation — rule 3 turned
-        /// a spoken number into digits, so its words may go.
+        /// a spoken number into digits, so the units around it may go.
         let gainedNumber: Bool
+        /// How many of each spoken-number word belong to a run whose value the output
+        /// carries as digits. Only those may go: `vingt` → `20` excuses `vingt`, never
+        /// a `trente` dropped beside it.
+        let convertedNumberWords: [String: Int]
 
         init(input: [Token], output: [Token], lexicon: PolishLostWordsLexicon) {
             self.input = input
@@ -141,14 +145,22 @@ public enum PolishLostWords {
             var inputCounts = PolishLostWords.counts(inputKeys)
             // Politeness and sign-offs first: they leave the dictation's bag entirely,
             // so nothing below can mistake one of their words for a loss.
+            // Longest first, and each match consumes its positions: `à plus tard` taken
+            // whole must not be counted again as `à plus`, which would subtract the
+            // `plus` of a negation elsewhere in the dictation.
+            var inputUsed = [Bool](repeating: false, count: inputKeys.count)
+            var outputUsed = [Bool](repeating: false, count: outputKeys.count)
             for phrase in lexicon.droppablePhrases {
-                let dropped = PolishLostWords.occurrences(of: phrase, in: inputKeys)
-                    - PolishLostWords.occurrences(of: phrase, in: outputKeys)
+                let dropped = PolishLostWords.consume(phrase, in: inputKeys, used: &inputUsed)
+                    - PolishLostWords.consume(phrase, in: outputKeys, used: &outputUsed)
                 guard dropped > 0 else { continue }
                 for word in phrase { inputCounts[word, default: 0] -= dropped }
             }
             self.inputCounts = inputCounts
             gainedNumber = PolishLostWords.numberCount(outputKeys) > PolishLostWords.numberCount(inputKeys)
+            convertedNumberWords = PolishLostWords.convertedNumberWords(input: inputKeys,
+                                                                        output: outputKeys,
+                                                                        values: lexicon.numberValues)
         }
 
         /// Dictated words the output carries fewer of, before any licence.
@@ -161,7 +173,15 @@ public enum PolishLostWords {
             // Elisions (`t'as` → `tu as` loses the `t`) and the ordinary grammar words.
             if key.count == 1 && !key.allSatisfy(\.isNumber) { return true }
             if lexicon.ignoredWords.contains(key) { return true }
-            if gainedNumber && lexicon.numberWords.contains(key) { return true }
+            if lexicon.numberWords.contains(key) {
+                if lexicon.numberValues[key] == nil {
+                    // A unit or a fraction (`heures`, `euros`, `demie`) carries no value
+                    // of its own: it goes with whichever number became digits.
+                    if gainedNumber { return true }
+                } else if (inputCounts[key] ?? 0) - (convertedNumberWords[key] ?? 0) <= (outputCounts[key] ?? 0) {
+                    return true
+                }
+            }
             // A negation is never forgiven by a pair or a prefix: `plus` → `plusieurs`
             // would otherwise read as an abbreviation growing into its full form.
             guard !lexicon.negations.contains(key) else { return false }
@@ -329,10 +349,96 @@ public enum PolishLostWords {
         keys.filter { $0.allSatisfy(\.isNumber) }.count
     }
 
-    fileprivate static func occurrences(of phrase: [String], in keys: [String]) -> Int {
+    /// How many times `phrase` occurs in `keys` over positions no longer phrase has
+    /// taken, marking each match's positions as taken.
+    fileprivate static func consume(_ phrase: [String], in keys: [String], used: inout [Bool]) -> Int {
         guard !phrase.isEmpty, keys.count >= phrase.count else { return 0 }
-        return (0...(keys.count - phrase.count)).filter { start in
-            keys[start..<(start + phrase.count)].elementsEqual(phrase)
-        }.count
+        var count = 0
+        var start = 0
+        while start + phrase.count <= keys.count {
+            let range = start..<(start + phrase.count)
+            if keys[range].elementsEqual(phrase), !used[range].contains(true) {
+                for index in range { used[index] = true }
+                count += 1
+                start += phrase.count
+            } else {
+                start += 1
+            }
+        }
+        return count
+    }
+
+    /// Longest run of dictated words read as one spoken number. Bounds the sub-run
+    /// search; `quatre-vingt-dix-sept mille neuf cent quatre-vingt-dix-neuf` is ten.
+    private static let spokenNumberMaximumWords = 12
+
+    /// For each spoken-number word, how many of its dictated occurrences sit in a run
+    /// whose value the output writes in digits.
+    ///
+    /// A run is consecutive dictated words that carry a value, joined by `et`
+    /// (`vingt et un`). Any sub-run may be the number: `zéro six douze` is dictated as
+    /// one run and written `06 12`. The output's numbers are its digit words, and two
+    /// or three of them side by side joined, so `1 000` is read as `1000`.
+    fileprivate static func convertedNumberWords(input: [String],
+                                                 output: [String],
+                                                 values: [String: Int]) -> [String: Int] {
+        guard !values.isEmpty else { return [:] }
+        var written: Set<Int> = []
+        var digitRun: [String] = []
+        for key in output + [""] {
+            if !key.isEmpty, key.allSatisfy(\.isNumber) {
+                digitRun.append(key)
+                continue
+            }
+            for start in digitRun.indices {
+                for width in 1...3 where start + width <= digitRun.count {
+                    if let value = Int(digitRun[start..<(start + width)].joined()) { written.insert(value) }
+                }
+            }
+            digitRun = []
+        }
+        guard !written.isEmpty else { return [:] }
+
+        var converted: Set<Int> = []
+        var runStart: Int?
+        for index in 0...input.count {
+            let continues = index < input.count && (values[input[index]] != nil || input[index] == "et")
+            if continues {
+                if runStart == nil { runStart = index }
+                continue
+            }
+            guard let start = runStart else { continue }
+            runStart = nil
+            for first in start..<index {
+                for last in first..<min(index, first + spokenNumberMaximumWords) {
+                    if let value = spokenValue(input[first...last], values: values), written.contains(value) {
+                        converted.formUnion(first...last)
+                    }
+                }
+            }
+        }
+        return converted.reduce(into: [:]) { counts, index in
+            if values[input[index]] != nil { counts[input[index], default: 0] += 1 }
+        }
+    }
+
+    /// The value of spoken-number words read left to right, or `nil` when none
+    /// carries one. `cent` multiplies what precedes it, `mille` and above close a
+    /// group, and a `vingt` after `quatre` makes `quatre-vingt`.
+    private static func spokenValue(_ words: ArraySlice<String>, values: [String: Int]) -> Int? {
+        var total = 0
+        var current = 0
+        var sawValue = false
+        for word in words {
+            guard let value = values[word] else { continue }
+            sawValue = true
+            switch value {
+            case 1000...: total += max(current, 1) * value; current = 0
+            case 100: current = max(current, 1) * 100
+            case 20 where current % 100 == 4: current += 76
+            default: current += value
+            }
+        }
+        return sawValue ? total + current : nil
     }
 }

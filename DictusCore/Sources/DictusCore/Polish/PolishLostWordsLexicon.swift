@@ -46,6 +46,11 @@ public struct PolishLostWordsLexicon: Sendable {
     /// Spoken numbers and their units, which rule 3 may turn into digits. Ignored only
     /// when the output gained a number.
     public let numberWords: Set<String>
+    /// The value of each word of `numberWords` that carries one, plus `un` and `une`
+    /// for `vingt et un`. A lost one is licensed only when a run of them adds up to a
+    /// number the output writes in digits. Units and fractions are absent: they go
+    /// with any number that became digits.
+    public let numberValues: [String: Int]
     /// Negations. Never licensed by a prefix or a pair, whatever else matches: a lost
     /// `pas` is the #570 shape, a meaning inverted.
     public let negations: Set<String>
@@ -67,6 +72,9 @@ public struct PolishLostWordsLexicon: Sendable {
     public static let french = PolishLostWordsLexicon(
         ignoredWords: words(frenchFunctionWords + frenchFillers + ["virgule", "point"]),
         numberWords: words(frenchNumberWords),
+        numberValues: Dictionary(uniqueKeysWithValues: frenchNumberValues.flatMap { value, written in
+            written.map { (PolishLostWords.keys(in: $0).joined(), value) }
+        }),
         negations: words(["pas", "plus", "non", "jamais", "rien", "personne", "aucun", "aucune"]),
         droppablePhrases: frenchDroppablePhrases
             .map { PolishLostWords.keys(in: $0) }
@@ -112,6 +120,18 @@ public struct PolishLostWordsLexicon: Sendable {
         "million", "millions", "milliard", "milliards", "premier", "première", "deuxième",
         "troisième", "quatrième", "cinquième", "demi", "demie", "quart",
         "heure", "heures", "euro", "euros", "pourcent"
+    ]
+
+    /// The words of `frenchNumberWords` that carry a value, by value, and `un`/`une`.
+    static let frenchNumberValues: [(Int, [String])] = [
+        (0, ["zéro"]), (1, ["un", "une", "premier", "première"]), (2, ["deux", "deuxième"]),
+        (3, ["trois", "troisième"]), (4, ["quatre", "quatrième"]), (5, ["cinq", "cinquième"]),
+        (6, ["six"]), (7, ["sept"]), (8, ["huit"]), (9, ["neuf"]), (10, ["dix"]),
+        (11, ["onze"]), (12, ["douze"]), (13, ["treize"]), (14, ["quatorze"]),
+        (15, ["quinze"]), (16, ["seize"]), (20, ["vingt", "vingts"]), (30, ["trente"]),
+        (40, ["quarante"]), (50, ["cinquante"]), (60, ["soixante"]), (100, ["cent", "cents"]),
+        (1000, ["mille"]), (1_000_000, ["million", "millions"]),
+        (1_000_000_000, ["milliard", "milliards"])
     ]
 
     /// Politeness formulas and sign-offs: tolerated when dropped (#575, the brief's

@@ -95,6 +95,16 @@ final class PolishLostWordsTests: XCTestCase {
         XCTAssertEqual(lost("il n'y a plus de pain", "Il n'y a de pain."), ["plus"])
     }
 
+    func testOverlappingSignOffsNeverSwallowANegation() {
+        // `à plus tard` taken whole must not be counted again as `à plus`.
+        XCTAssertEqual(lost("je mange plus de viande, à plus tard", "Je mange de la viande."), ["plus"])
+        XCTAssertEqual(lost("je mange plus de viande, à plus tard", "Je mange plus de viande."), [])
+    }
+
+    func testOneNumberBecomingDigitsDoesNotExcuseAnother() {
+        XCTAssertEqual(lost("ça coûte vingt euros et trente euros", "Ça coûte 20 €."), ["trente"])
+    }
+
     // MARK: - Row 3: register lifted → tolerated
 
     func testContractionExpandedIsTolerated() {
@@ -156,6 +166,11 @@ final class PolishLostWordsTests: XCTestCase {
         XCTAssertEqual(lost("rappelle-moi dans deux minutes", "Rappelle-moi dans 2 minutes."), [])
         XCTAssertEqual(lost("rendez-vous à dix-huit heures trente", "Rendez-vous à 18h30."), [])
         XCTAssertEqual(lost("je serai là vers 18h30", "Je serai là vers 18 h 30."), [])
+        XCTAssertEqual(lost("on sera vingt et un", "On sera 21."), [])
+        XCTAssertEqual(lost("il y avait mille personnes", "Il y avait 1 000 personnes."), [])
+        XCTAssertEqual(lost("il a quatre-vingt-dix-sept ans", "Il a 97 ans."), [])
+        XCTAssertEqual(lost("mon numéro c'est zéro six douze trente-quatre", "Mon numéro, c'est 06 12 34."), [])
+        XCTAssertEqual(lost("rendez-vous à une heure et demie", "Rendez-vous à 1h30."), [])
     }
 
     func testAbbreviationGrownIntoItsFullFormIsTolerated() {
