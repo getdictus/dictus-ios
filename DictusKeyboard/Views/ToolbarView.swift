@@ -65,9 +65,10 @@ struct ToolbarView: View {
     /// Gear, panel presentation only. Opens DictusApp.
     var onSettingsTap: (() -> Void)?
 
-    /// Hides the Pro entry. Read once when the panel opens rather than observed:
-    /// a subscription cannot change while the keyboard is the frontmost surface.
-    var isProActive: Bool = false
+    /// What the panel's Pro entry shows, if anything (#593). Read once when the panel
+    /// opens rather than observed: a subscription cannot change while the keyboard is
+    /// the frontmost surface, and a trial ends on a clock nobody is watching here.
+    var proPromotion: ProPromotionEntry = .hidden
 
     /// Pro entry, panel presentation only. Non-subscribers only.
     var onProTap: (() -> Void)?
@@ -584,8 +585,10 @@ struct ToolbarView: View {
             // Same gate as every other Pro entry point (#236): while the paywall
             // is hidden the product must look like it has no subscription at all,
             // and a pill leading to an unreachable paywall is exactly the kind of
-            // dead end that gate exists to prevent.
-            if PremiumFlags.paywallVisible && !isProActive {
+            // dead end that gate exists to prevent. `ProPromotion` owns that gate
+            // now, with #593's two additions: nothing on a device that can never run
+            // Smart Modes, and the trial's two-day reminder in the pill's place.
+            if proPromotion != .hidden {
                 proEntry
             }
 
@@ -784,7 +787,7 @@ struct ToolbarView: View {
             HapticFeedback.keyTapped()
             onProTap?()
         } label: {
-            Text(verbatim: "Dictus Pro")
+            proEntryLabel
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(
                     LinearGradient(
@@ -805,6 +808,20 @@ struct ToolbarView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(GlassPressStyle())
-        .accessibilityLabel(Text(verbatim: "Dictus Pro"))
+        .accessibilityLabel(proEntryLabel)
+    }
+
+    /// The pill's words. The brand name, or the trial's countdown in its last two days
+    /// (#593, decision 3): the one reminder a keyboard user gets, since Dictus sends
+    /// no push notification. Same pill, same place, same tap to the paywall, so the
+    /// gear still never moves.
+    private var proEntryLabel: Text {
+        guard case .trialEnding(let daysLeft) = proPromotion else {
+            return Text(verbatim: "Dictus Pro")
+        }
+        return Text(
+            "Pro · \(daysLeft) days left",
+            comment: "Keyboard panel pill in the last two days of the free Dictus Pro trial. The number is the days left, 1 or 2."
+        )
     }
 }

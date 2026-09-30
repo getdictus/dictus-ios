@@ -9,14 +9,23 @@ struct PaywallView: View {
     @EnvironmentObject var proStatus: ProStatusManager
     @Environment(\.dismiss) private var dismiss
 
+    /// Why this paywall is up (#593). `.standard` for every entry point the user
+    /// chose; `.trialEnded` for the one the app opens once when the trial is over.
+    var framing: PaywallFraming = .standard
+
     /// Selected plan, tracked by product ID (never by array index: StoreKit's
     /// product order is unspecified). Yearly is preselected per the pricing
     /// decision on #78, true from the first frame with no load-completion hook.
     @State private var selectedProductID = ProProductID.yearly
 
     /// Whether the user can still claim the yearly intro offer (7-day trial).
-    /// The offer exists in configuration for everyone, but StoreKit grants it
-    /// once per Apple ID. Defaults to false so the CTA never over-promises.
+    /// StoreKit grants it once per Apple ID. Defaults to false so the CTA never
+    /// over-promises.
+    ///
+    /// Since #593 the catalogue carries no introductory offer at all (#215), and
+    /// this stays false for anyone who ever had the reverse trial even if one
+    /// reappears in App Store Connect: a user who has just finished two free weeks
+    /// must never be offered "7 more days free".
     @State private var isEligibleForTrial = false
 
     /// Shows the thank-you screen after a successful purchase or restore.
@@ -60,6 +69,11 @@ struct PaywallView: View {
             VStack(spacing: 14) {
                 heroSection
 
+                // The end of the trial is stated before anything is sold (#593).
+                if showsTrialRecap {
+                    TrialEndedHeader(usage: proStatus.trialUsage)
+                }
+
                 // Feature cards (3 cards: Smart Mode, History, Vocabulary)
                 VStack(spacing: 10) {
                     ForEach(ProFeature.allCases, id: \.self) { feature in
@@ -67,18 +81,32 @@ struct PaywallView: View {
                     }
                 }
 
-                if proStatus.isProActive {
-                    // Already subscribed
-                    alreadyProBanner
-                } else {
-                    // Plan selector: yearly (preselected), monthly and lifetime
-                    planSelector
-                    // Subscribe CTA following the selected plan
-                    subscribeCTA
-                    // Reassurance following the selected plan
-                    reassuranceLabel
-                        .font(.dictusCaption)
-                        .foregroundColor(.secondary)
+                // The recap sells nothing itself: its button leads here.
+                if !showsTrialRecap {
+                    // `isPaid` and not `isProActive` (#593): during the reverse trial Pro is
+                    // active and nothing is paid, and subscribing then is exactly what the
+                    // trial is for. Keyed on the entitlement, this screen would tell a
+                    // trial user they already had Pro and offer them no way to keep it.
+                    if proStatus.isPaid {
+                        // Already subscribed
+                        alreadyProBanner
+                    } else {
+                        if case .running(let endsAt) = proStatus.trialState {
+                            TrialRunningNotice(endsAt: endsAt)
+                        }
+                        // Plan selector: yearly (preselected), monthly and lifetime
+                        planSelector
+                        // Subscribe CTA following the selected plan
+                        subscribeCTA
+                        // Reassurance following the selected plan
+                        reassuranceLabel
+                            .font(.dictusCaption)
+                            .foregroundColor(.secondary)
+
+                        if framing == .trialEnded {
+                            continueForFreeButton
+                        }
+                    }
                 }
 
                 // Bottom links: Restore + ToS + Privacy
@@ -86,6 +114,18 @@ struct PaywallView: View {
                     .padding(.bottom, 32)
             }
             .padding(.horizontal, 16)
+        }
+        // A new scroll view per step, so the offers open at their top rather than at
+        // the recap's scroll offset.
+        .id(showsTrialRecap)
+        .safeAreaInset(edge: .bottom) {
+            if showsTrialRecap {
+                trialRecapActions
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
+                    .background(Color.dictusBackground.ignoresSafeArea())
+            }
         }
         .background(Color.dictusBackground.ignoresSafeArea())
         // Empty bar title: the hero's gradient title is the screen title.
@@ -101,7 +141,10 @@ struct PaywallView: View {
             reconcileSelection()
             // Configuration describes the trial for everyone; eligibility is
             // per Apple ID. Ask StoreKit rather than assuming.
-            if let subscription = subscriptionManager.yearlyProduct?.subscription {
+            //
+            // Never after a reverse trial (#593): see `isEligibleForTrial`.
+            if !proStatus.trialState.hasEverStarted,
+               let subscription = subscriptionManager.yearlyProduct?.subscription {
                 isEligibleForTrial = await subscription.isEligibleForIntroOffer
             }
         }
@@ -129,6 +172,45 @@ struct PaywallView: View {
             Button("OK") { subscriptionManager.resetState() }
         } message: {
             Text(errorMessage)
+        }
+    }
+
+    // MARK: - End-of-trial recap
+
+    /// Whether the end-of-trial screen is on its first step, the recap (#593).
+    ///
+    /// WHY two steps and not the recap on top of the plans: recap, feature cards,
+    /// three plans and a way out do not fit one screen, and every way of making them
+    /// fit cost something the paywall needs (the features it reminds of, the three
+    /// plans side by side with the yearly highlighted). So the recap says what ended
+    /// and what it gave, with "Keep Dictus Pro" and "Continue for free" pinned under
+    /// it; the first leads to the ordinary paywall, unchanged, on the same screen.
+    private var showsTrialRecap: Bool {
+        framing == .trialEnded && !proStatus.isPaid && !showsOffers
+    }
+
+    /// Set by "Keep Dictus Pro": the end-of-trial screen moves on to the offers.
+    @State private var showsOffers = false
+
+    /// The recap's two ways forward, pinned so neither needs scrolling to find.
+    private var trialRecapActions: some View {
+        VStack(spacing: 8) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    showsOffers = true
+                }
+            } label: {
+                Text("Keep Dictus Pro")
+                    .font(.dictusSubheading)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.dictusAccent)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(GlassPressStyle())
+
+            continueForFreeButton
         }
     }
 
@@ -188,9 +270,13 @@ struct PaywallView: View {
                     )
                 )
 
-            Text("Your voice, unlimited")
-                .font(.dictusBody)
-                .foregroundColor(.secondary)
+            // The end-of-trial header below carries this screen's sentence, and a
+            // tagline above it would say a second, unrelated thing.
+            if !showsTrialRecap {
+                Text("Your voice, unlimited")
+                    .font(.dictusBody)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding(.top, 8)
         .accessibilityElement(children: .combine)
@@ -623,6 +709,28 @@ struct PaywallView: View {
         }
     }
 
+    // MARK: - Continue for free
+
+    /// The end-of-trial paywall's way out, as obvious as the way in (#593).
+    ///
+    /// WHY a full-width button and not only the close cross: this screen was not
+    /// asked for. The app opened it, so leaving has to read as a first-class choice
+    /// rather than a dismissal hunted for in a corner. The free tier keeps working,
+    /// and nothing the user saved is deleted.
+    private var continueForFreeButton: some View {
+        Button {
+            dismiss()
+        } label: {
+            Text("Continue for free")
+                .font(.dictusSubheading)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .foregroundColor(.dictusAccent)
+                .dictusGlass()
+        }
+        .buttonStyle(GlassPressStyle())
+    }
+
     // MARK: - Bottom Links
 
     // Apple requires functional Terms of Use and Privacy Policy links for
@@ -635,9 +743,10 @@ struct PaywallView: View {
 
     private var bottomLinks: some View {
         VStack(spacing: 8) {
-            // Hidden while Pro is active: Apple requires a restore mechanism
-            // to exist (guideline 3.1.1), not to be shown to subscribers.
-            if !proStatus.isProActive {
+            // Hidden once paid: Apple requires a restore mechanism to exist
+            // (guideline 3.1.1), not to be shown to subscribers. Shown during the
+            // reverse trial (#593), when a returning buyer is exactly who needs it.
+            if !proStatus.isPaid {
                 Button("Restore purchases") {
                     Task { await subscriptionManager.restorePurchases() }
                 }

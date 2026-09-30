@@ -117,8 +117,22 @@ public enum VerbalPunctuationPrepass {
     ///
     /// Strategy: stronger punctuation absorbs adjacent weaker punctuation.
     /// Priority high-to-low: `\n` > `?` `!` `;` `:` > `.` `,`.
+    ///
+    /// An ellipsis is outside that ladder (#600). Parakeet writes a hesitation
+    /// as `...`, and step 2 used to read it as a run of periods: "dès que... dès
+    /// que" reached the engine as "dès que. dès que", a sentence ending on a
+    /// conjunction the user never finished (#575 findings §3). So an exact
+    /// three-dot run is set aside before the steps and restored after them,
+    /// which also keeps `...?` / `...!` whole: that is how a hesitant question
+    /// is written, not a stray period beside a converted command. The single
+    /// character `…` needs no guard, no step matches it. Two dots, or four and
+    /// more, are still artefacts and still collapse.
     private static func normalize(_ s: String) -> String {
-        var out = s
+        // A private-use character: no speech engine emits it, and no step
+        // below treats it as punctuation or whitespace.
+        let ellipsisGuard = "\u{E000}"
+        var out = s.replacingOccurrences(of: #"(?<!\.)\.\.\.(?!\.)"#, with: ellipsisGuard,
+                                         options: [.regularExpression])
         // All horizontal-whitespace classes use [ \t]* explicitly so newline
         // characters introduced by the verbal-punctuation substitution don't
         // accidentally get swallowed by greedy `\s*` matches that span them.
@@ -141,6 +155,6 @@ public enum VerbalPunctuationPrepass {
         out = out.replacingOccurrences(of: #"[ \t]*\n[ \t]*"#, with: "\n", options: [.regularExpression])
         out = out.replacingOccurrences(of: #" +([,.])"#, with: "$1", options: [.regularExpression])
         out = out.trimmingCharacters(in: .whitespacesAndNewlines)
-        return out
+        return out.replacingOccurrences(of: ellipsisGuard, with: "...")
     }
 }
