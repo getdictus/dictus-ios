@@ -16,7 +16,6 @@ Last reviewed: 2026-09-30.
 Take the first line that is not struck through.
 
 1. #587 — Smart Mode prompt campaign: its remaining threads
-   - #570 — meaning guardrail (product name replaced, negation dropped). Gates the 2.0.0 cut. Needs a grilling.
    - #598 — language check refuses a correct short line (`es` read as `pt`)
    - #592 — warn instead of refusing on an ungrounded name
 2. #573 — rebuild `Liste`'s prompt (Pierre rates it the weakest mode). `needs-triage`
@@ -35,6 +34,8 @@ Milestone `Keyboard session` (`gh issue list --milestone "Keyboard session"`). S
 ## Later — 2.1
 
 Milestone `2.1 — after the Pro launch`, plus the unmilestoned open issues. Pick from there only after 2.0.0 ships.
+
+- #570 — meaning guardrail for the rewriting Smart Modes. Moved out of the 2.0.0 gate on Pierre's real-use verdict.
 
 ## Settled — do not reopen
 
