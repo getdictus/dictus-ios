@@ -92,13 +92,13 @@ struct HistoryView: View {
         return FeatureGate.isProActive
     }
 
-    /// Observed so the records dim and unlock as the switch moves (#216).
-    @AppStorage(SharedKeys.historyEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var historyEnabled = true
+    /// The feature's switch, observed so the content dims and unlocks as it moves
+    /// (#216). The same object the switch above writes and the hub row reads.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
 
     /// Whether the records are live: `FeatureGate.isAvailable`, the one predicate.
     private var isAvailable: Bool {
-        _ = historyEnabled
+        _ = switches.isOn(.history)
         _ = proStatus.isProActive
         return HistoryAvailability.isEntitled
     }
@@ -151,7 +151,7 @@ struct HistoryView: View {
     /// it. Turning a Pro feature on or off happens in one place, the hub.
     private var pushedList: some View {
         List {
-            ProFeatureSwitchSection(feature: .history, isOn: $historyEnabled)
+            ProFeatureSwitchSection(feature: .history)
 
             if history.records.isEmpty {
                 emptyState

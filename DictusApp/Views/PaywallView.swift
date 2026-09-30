@@ -56,16 +56,10 @@ struct PaywallView: View {
     /// The feature whose screen is pushed onto the hub's stack (#216 decision 4).
     @State private var openedFeature: ProFeature?
 
-    // The three per-feature switches, observed so the cards' "On" / "Off" values
-    // follow a switch flipped on a pushed screen (#216). The switches themselves live
-    // at the top of those screens (`ProFeatureSwitchSection`); a read through
-    // `AppGroup.defaults` alone would publish nothing and leave a stale value here.
-    @AppStorage(SharedKeys.smartModeEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var smartModeEnabled = true
-    @AppStorage(SharedKeys.historyEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var historyEnabled = true
-    @AppStorage(SharedKeys.vocabularyEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var vocabularyEnabled = true
+    /// The three per-feature switches, observed so the rows' "On" / "Off" values
+    /// follow a switch flipped on a pushed screen (#216). The same object that screen
+    /// writes through; see `ProFeatureSwitches` for why it is not `@AppStorage`.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
 
     /// Product matching the current selection. Nil disables the CTA.
     ///
@@ -256,11 +250,7 @@ struct PaywallView: View {
     /// entitlement are read first so SwiftUI redraws when either moves: the gate
     /// itself goes to the App Group, which publishes nothing.
     private func isAvailable(_ feature: ProFeature) -> Bool {
-        switch feature {
-        case .smartMode: _ = smartModeEnabled
-        case .history: _ = historyEnabled
-        case .vocabulary: _ = vocabularyEnabled
-        }
+        _ = switches.isOn(feature)
         _ = proStatus.isProActive
         return FeatureGate.isAvailable(feature)
     }
