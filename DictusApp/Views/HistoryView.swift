@@ -26,37 +26,53 @@ struct HistoryView: View {
     /// outside the card and take the row's tap area away from the card itself.
     @State private var selection: TranscriptionRecord?
 
+    /// Whether this screen is pushed onto someone else's stack, as the Dictus Pro hub
+    /// does (#216), rather than presented as the home screen's sheet.
+    ///
+    /// WHY the two shapes differ: the sheet owns its navigation, so it brings a stack
+    /// and a close chevron. Pushed, a second stack inside the hub's would nest two
+    /// navigation bars, and the back button already is the way out.
+    var isPushed = false
+
     var body: some View {
-        NavigationStack {
-            Group {
-                if !isEntitled {
-                    lockedState
-                } else if history.records.isEmpty {
-                    emptyState
-                } else {
-                    recordList
-                }
-            }
-            .background(Color.dictusBackground.ignoresSafeArea())
-            .navigationTitle("History")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.down")
+        if isPushed {
+            content
+        } else {
+            NavigationStack {
+                content
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button {
+                                dismiss()
+                            } label: {
+                                Image(systemName: "chevron.down")
+                            }
+                            .accessibilityLabel("Close")
+                        }
                     }
-                    .accessibilityLabel("Close")
-                }
             }
-            .navigationDestination(item: $selection) { record in
-                TranscriptionDetailView(record: record)
+            // The grabber says the sheet is draggable, which is the same statement the
+            // hint on the home screen makes about the swipe that opened it.
+            .presentationDragIndicator(.visible)
+        }
+    }
+
+    private var content: some View {
+        Group {
+            if !isEntitled {
+                lockedState
+            } else if history.records.isEmpty {
+                emptyState
+            } else {
+                recordList
             }
         }
-        // The grabber says the sheet is draggable, which is the same statement the
-        // hint on the home screen makes about the swipe that opened it.
-        .presentationDragIndicator(.visible)
+        .background(Color.dictusBackground.ignoresSafeArea())
+        .navigationTitle("History")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(item: $selection) { record in
+            TranscriptionDetailView(record: record)
+        }
     }
 
     /// Whether the user may read the history right now.
