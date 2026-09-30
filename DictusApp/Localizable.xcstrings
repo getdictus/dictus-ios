@@ -1541,17 +1541,6 @@
         }
       }
     },
-    "Keyboard modes" : {
-      "comment" : "Settings row opening the list of Smart Modes pinned to the keyboard.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modes du clavier"
-          }
-        }
-      }
-    },
     "Keyboards" : {
       "localizations" : {
         "fr" : {
@@ -1820,17 +1809,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le plus précis, et rapide"
-          }
-        }
-      }
-    },
-    "My terms" : {
-      "comment" : "Settings row opening the custom-vocabulary list (#80).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mes termes"
           }
         }
       }
@@ -2261,32 +2239,12 @@
         }
       }
     },
-    "Pro Features" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fonctions Pro"
-          }
-        }
-      }
-    },
     "Pro active" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pro actif"
-          }
-        }
-      }
-    },
-    "Pro feature" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fonction Pro"
           }
         }
       }
