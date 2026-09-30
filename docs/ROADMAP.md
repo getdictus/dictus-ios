@@ -8,6 +8,7 @@ Where we are going, and which issue to work on next. Nothing else.
 - When an item ships, strike it through. Delete struck lines at each version cut.
 - No paragraphs, no measurements, no dates beyond the "Last reviewed" line. If it needs a sentence of justification, write it on the issue and link it.
 - Whole file under 60 lines. If an edit pushes it past that, something belongs on an issue instead.
+- The [Project board](https://github.com/orgs/getdictus/projects/2) moves by itself on a branch push, a PR and a merge. Two moves are by hand: an issue added to **Now** is added to the board in the same edit (`gh project item-add 2 --owner getdictus --url <issue-url>`), and work with no branch (a grilling, a measurement) is set to In progress when it starts.
 
 Last reviewed: 2026-09-30.
 
