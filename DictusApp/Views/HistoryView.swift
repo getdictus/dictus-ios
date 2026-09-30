@@ -59,8 +59,10 @@ struct HistoryView: View {
 
     private var content: some View {
         Group {
-            if !isEntitled {
+            if !hasPro {
                 lockedState
+            } else if isPushed {
+                pushedList
             } else if history.records.isEmpty {
                 emptyState
             } else {
@@ -75,11 +77,28 @@ struct HistoryView: View {
         }
     }
 
-    /// Whether the user may read the history right now.
+    /// Whether the user has Dictus Pro at all. Without it the screen is locked.
+    ///
+    /// WHY Pro and not `HistoryAvailability.isEntitled`, which also folds in the
+    /// feature's switch (#216): a subscriber who switched History off is not being
+    /// sold anything, and "History is part of Dictus Pro" would be false to them.
+    /// Switched off, the records stay on screen, dimmed and locked, under the switch
+    /// that brings them back.
     ///
     /// Touching the observed Pro status is what makes this react: `FeatureGate` reads
     /// the App Group, which publishes nothing. Same device as `HomeView.entryPoint`.
-    private var isEntitled: Bool {
+    private var hasPro: Bool {
+        _ = proStatus.isProActive
+        return FeatureGate.isProActive
+    }
+
+    /// Observed so the records dim and unlock as the switch moves (#216).
+    @AppStorage(SharedKeys.historyEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var historyEnabled = true
+
+    /// Whether the records are live: `FeatureGate.isAvailable`, the one predicate.
+    private var isAvailable: Bool {
+        _ = historyEnabled
         _ = proStatus.isProActive
         return HistoryAvailability.isEntitled
     }
@@ -116,8 +135,41 @@ struct HistoryView: View {
 
     private var recordList: some View {
         List {
+            recordRows
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+    }
+
+    /// The Dictus Pro hub's version (#216): the feature's switch first, as in the
+    /// hub's other feature screens, then the records, dimmed and locked while it is
+    /// off.
+    ///
+    /// WHY the home screen's sheet has no switch: that sheet only opens while History
+    /// is on (`HistoryAvailability.entryPoint`), it is the place for reading, and a
+    /// switch there would remove, under the user's finger, the very swipe that opened
+    /// it. Turning a Pro feature on or off happens in one place, the hub.
+    private var pushedList: some View {
+        List {
+            ProFeatureSwitchSection(feature: .history, isOn: $historyEnabled)
+
+            if history.records.isEmpty {
+                emptyState
+                    .listRowBackground(Color.clear)
+            } else {
+                recordRows
+            }
+        }
+        .scrollContentBackground(.hidden)
+    }
+
+    private var recordRows: some View {
+        Group {
             ForEach(history.records) { record in
                 Button {
+                    // Guarded as well as locked below: a switched-off history is
+                    // shown, not opened (#216 decision 5).
+                    guard isAvailable else { return }
                     selection = record
                 } label: {
                     HistoryCard(record: record)
@@ -126,39 +178,45 @@ struct HistoryView: View {
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                // No action at all while History is switched off (#216): the
+                // `disabled` below stops taps, and an empty builder is what stops a
+                // swipe or a long-press from offering Delete on a locked list.
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    Button(role: .destructive) {
-                        delete(record)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+                    if isAvailable {
+                        Button(role: .destructive) {
+                            delete(record)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        // Explicit, because the destructive role is not enough here:
+                        // MainTabView tints the whole tab hierarchy `.dictusAccent`,
+                        // the sheet inherits that environment, and it wins over the
+                        // role. Measured on the simulator — the delete action drew
+                        // brand blue, which reads as an ordinary action.
+                        .tint(.red)
                     }
-                    // Explicit, because the destructive role is not enough here:
-                    // MainTabView tints the whole tab hierarchy `.dictusAccent`,
-                    // the sheet inherits that environment, and it wins over the
-                    // role. Measured on the simulator — the delete action drew
-                    // brand blue, which reads as an ordinary action.
-                    .tint(.red)
                 }
                 .contextMenu {
                     // The long-press half of the issue's "long-press or swipe to
                     // delete", with the copy the detail screen also offers: a
                     // long-press that only ever destroys is a trap to open by accident.
-                    Button {
-                        UIPasteboard.general.string = record.text
-                        HapticFeedback.recordingStopped()
-                    } label: {
-                        Label("Copy", systemImage: "doc.on.doc")
-                    }
-                    Button(role: .destructive) {
-                        delete(record)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+                    if isAvailable {
+                        Button {
+                            UIPasteboard.general.string = record.text
+                            HapticFeedback.recordingStopped()
+                        } label: {
+                            Label("Copy", systemImage: "doc.on.doc")
+                        }
+                        Button(role: .destructive) {
+                            delete(record)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
                 }
             }
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
+        .proFeatureContent(isAvailable: isAvailable)
     }
 
     private func delete(_ record: TranscriptionRecord) {

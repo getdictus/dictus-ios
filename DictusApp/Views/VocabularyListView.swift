@@ -37,8 +37,24 @@ struct VocabularyListView: View {
     /// is the second-worst outcome after one that disappears and returns tomorrow.
     @State private var writeFailed = false
 
+    /// Observed so the list dims and unlocks as the switch above it moves (#216).
+    @AppStorage(SharedKeys.vocabularyEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var vocabularyEnabled = true
+
+    /// Whether the terms below the switch are live: `FeatureGate.isAvailable`, the one
+    /// predicate. Off, they stay visible and cannot be edited, since the replacement
+    /// pass applies none of them (#216 decision 5).
+    private var isAvailable: Bool {
+        _ = vocabularyEnabled
+        return FeatureGate.isAvailable(.vocabulary)
+    }
+
     var body: some View {
         List {
+            // The feature's switch, first (#216): this screen is reached from the
+            // Dictus Pro hub's Vocabulary row, which carries no switch of its own.
+            ProFeatureSwitchSection(feature: .vocabulary, isOn: $vocabularyEnabled)
+
             Section {
                 if store.isEmpty {
                     Text("No terms yet. Add the words Dictus gets wrong.")
@@ -68,6 +84,7 @@ struct VocabularyListView: View {
                     Text("When Dictus writes one of these variants, it is replaced by your spelling.")
                 }
             }
+            .proFeatureContent(isAvailable: isAvailable)
 
             Section {
                 Button {
@@ -81,6 +98,7 @@ struct VocabularyListView: View {
                     Text("You have reached the limit of \(VocabularyStore.maxEntries) terms. Delete one to add another.")
                 }
             }
+            .proFeatureContent(isAvailable: isAvailable)
 
             if !store.isEmpty {
                 Section {
@@ -88,6 +106,7 @@ struct VocabularyListView: View {
                         showResetConfirmation = true
                     }
                 }
+                .proFeatureContent(isAvailable: isAvailable)
             }
         }
         .navigationTitle("Vocabulary")
@@ -95,6 +114,7 @@ struct VocabularyListView: View {
         .toolbar {
             if !store.isEmpty {
                 EditButton()
+                    .disabled(!isAvailable)
             }
         }
         .sheet(item: $editing) { subject in

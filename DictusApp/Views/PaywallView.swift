@@ -52,11 +52,10 @@ struct PaywallView: View {
     /// The feature whose screen is pushed onto the hub's stack (#216 decision 4).
     @State private var openedFeature: ProFeature?
 
-    // The three per-feature switches the active cards bind to. Moved here from the
-    // Settings section #216 removed; the same App Group keys, so the keyboard reads
-    // the same answer (#401). @AppStorage and not a hand-made Binding onto
-    // `AppGroup.defaults`: flipping one has to redraw the card's dimming, and a
-    // Binding onto UserDefaults publishes nothing.
+    // The three per-feature switches, observed so the cards' "On" / "Off" values
+    // follow a switch flipped on a pushed screen (#216). The switches themselves live
+    // at the top of those screens (`ProFeatureSwitchSection`); a read through
+    // `AppGroup.defaults` alone would publish nothing and leave a stale value here.
     @AppStorage(SharedKeys.smartModeEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
     private var smartModeEnabled = true
     @AppStorage(SharedKeys.historyEnabled, store: UserDefaults(suiteName: AppGroup.identifier))
@@ -112,7 +111,6 @@ struct PaywallView: View {
                             ProHubFeatureCard(
                                 feature: feature,
                                 isAvailable: isAvailable(feature),
-                                isOn: toggle(for: feature),
                                 open: { openedFeature = feature }
                             )
                         } else {
@@ -245,17 +243,13 @@ struct PaywallView: View {
     /// entitlement are read first so SwiftUI redraws when either moves: the gate
     /// itself goes to the App Group, which publishes nothing.
     private func isAvailable(_ feature: ProFeature) -> Bool {
-        _ = toggle(for: feature).wrappedValue
+        switch feature {
+        case .smartMode: _ = smartModeEnabled
+        case .history: _ = historyEnabled
+        case .vocabulary: _ = vocabularyEnabled
+        }
         _ = proStatus.isProActive
         return FeatureGate.isAvailable(feature)
-    }
-
-    private func toggle(for feature: ProFeature) -> Binding<Bool> {
-        switch feature {
-        case .smartMode: return $smartModeEnabled
-        case .history: return $historyEnabled
-        case .vocabulary: return $vocabularyEnabled
-        }
     }
 
     /// The screens the Settings "Pro Features" rows used to open, now reached here.

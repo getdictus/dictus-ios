@@ -4,16 +4,15 @@ import SwiftUI
 import DictusCore
 
 /// A feature card for someone who has the feature: trial, subscriber, or the DEBUG
-/// forced entitlement (#216 decisions 4 and 5).
+/// forced entitlement (#216 decisions 4 and 5, amended after the first device test).
 ///
-/// Two controls side by side rather than one: the toggle switches the feature, the
-/// rest of the card opens its screen. A toggle nested inside a tappable card would
-/// fire both on one tap, and VoiceOver would read one element doing two things.
+/// **A standard iOS Settings row**: the feature, its state as a value ("On" / "Off",
+/// as Settings > Bluetooth writes it), a chevron. No switch here. A chevron and a
+/// switch on one row is not an iOS pattern, and the maintainer's verdict on device
+/// was "don't reinvent the wheel". The switch lives at the top of the screen the
+/// row opens (`ProFeatureSwitchSection`).
 ///
-/// **Switched off, the card is dimmed and does not navigate**; only the toggle
-/// answers. That is the rule Settings applied before this screen took the rows over:
-/// a mode list under a switched-off Smart Mode arranges a fan the keyboard will not
-/// open, and a term list under a switched-off Vocabulary edits rules nothing applies.
+/// **Always opens**, switched off included: that screen is where the switch is.
 struct ProHubFeatureCard: View {
     let feature: ProFeature
 
@@ -21,78 +20,71 @@ struct ProHubFeatureCard: View {
     /// rather than read here so the caller decides when it is re-read.
     let isAvailable: Bool
 
-    /// The per-feature switch, bound to `feature.settingsKey`.
-    @Binding var isOn: Bool
-
     /// Pushes the feature's screen onto the hub's stack.
     let open: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
-            Button(action: open) {
-                HStack(spacing: 12) {
-                    Image(systemName: feature.icon)
-                        .font(.title3)
-                        .foregroundColor(iconColor)
-                        .frame(width: 28)
+        Button(action: open) {
+            HStack(spacing: 12) {
+                Image(systemName: feature.icon)
+                    .font(.title3)
+                    .foregroundColor(iconColor)
+                    .frame(width: 28)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(LocalizedStringKey(feature.displayName))
-                            .font(.dictusBody.weight(.semibold))
-                            .foregroundColor(.primary)
-                        Text(LocalizedStringKey(feature.paywallDescription))
-                            .font(.dictusCaption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.leading)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(LocalizedStringKey(feature.displayName))
+                        .font(.dictusBody.weight(.semibold))
+                        .foregroundColor(.primary)
+                    Text(LocalizedStringKey(feature.paywallDescription))
+                        .font(.dictusCaption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
 
-                        // Kept on the active card too: a user on a device that cannot
-                        // run Smart Modes still owns the switch and the mode list, which
-                        // is durable across phones (see `SmartModeListView`), and the
-                        // line is what says why nothing happens in the keyboard.
-                        if !feature.isSupportedByThisDevice {
-                            HStack(spacing: 4) {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .font(.system(size: 10))
-                                Text("Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)")
-                                    .font(.dictusCaption)
-                                    .lineLimit(2)
-                                    .multilineTextAlignment(.leading)
-                            }
-                            .foregroundColor(.secondary)
-                            .padding(.top, 2)
+                    // Kept on the active card too: a user on a device that cannot
+                    // run Smart Modes still owns the switch and the mode list, which
+                    // is durable across phones (see `SmartModeListView`), and the
+                    // line is what says why nothing happens in the keyboard.
+                    if !feature.isSupportedByThisDevice {
+                        HStack(spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 10))
+                            Text("Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)")
+                                .font(.dictusCaption)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
                         }
+                        .foregroundColor(.secondary)
+                        .padding(.top, 2)
                     }
-
-                    Spacer(minLength: 4)
-
-                    Image(systemName: "chevron.forward")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(.tertiary)
-                        .accessibilityHidden(true)
                 }
-                // The whole left part is the target, Spacer included.
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .disabled(!isAvailable)
-            .opacity(isAvailable ? 1 : Self.switchedOffOpacity)
-            .accessibilityElement(children: .combine)
-            .accessibilityHint(isAvailable ? Text("Opens the settings of this feature") : Text("Switched off"))
 
-            Toggle(isOn: $isOn) {
-                Text(LocalizedStringKey(feature.displayName))
+                Spacer(minLength: 8)
+
+                stateValue
+                    .font(.dictusBody)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .layoutPriority(1)
+
+                Image(systemName: "chevron.forward")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
             }
-            .labelsHidden()
-            .tint(.dictusAccent)
+            .padding(12)
+            .dictusGlass()
+            // The whole card is the target, Spacer included.
+            .contentShape(RoundedRectangle(cornerRadius: 16))
         }
-        .padding(12)
-        .dictusGlass()
+        .buttonStyle(GlassPressStyle(pressedScale: 0.97))
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
     }
 
-    /// How far a switched-off card fades. Lower than the unsupported-device dimming on
-    /// the sales cards (0.7), because this one also stops responding.
-    private static let switchedOffOpacity = 0.45
+    private var stateValue: Text {
+        isAvailable ? Text("On") : Text("Off")
+    }
 
     private var iconColor: Color {
         switch feature {
@@ -100,6 +92,71 @@ struct ProHubFeatureCard: View {
         case .history, .vocabulary: return .dictusAccentHighlight
         }
     }
+}
+
+/// The feature's switch, as the first section of the screen a hub card opens (#216
+/// decision 4, amended). Bound to `feature.settingsKey` in the App Group, so the
+/// keyboard reads the same answer (#401).
+///
+/// WHY the binding comes from the screen rather than an `@AppStorage` of its own:
+/// the screen dims its content from the same value, and two property wrappers on one
+/// key did not redraw together on the simulator (the footer moved, the list did not).
+/// One owner, one redraw.
+///
+/// WHY the footer only speaks when the switch is off: on, the screen below says what
+/// the feature does. Off, the content under it is dimmed and locked
+/// (`proFeatureContent(isAvailable:)`), and the user is owed why, and that nothing
+/// was deleted.
+struct ProFeatureSwitchSection: View {
+    let feature: ProFeature
+
+    /// The screen's `@AppStorage` on `feature.settingsKey`.
+    @Binding var isOn: Bool
+
+    var body: some View {
+        Section {
+            Toggle(isOn: $isOn) {
+                Text(LocalizedStringKey(feature.displayName))
+            }
+            .tint(.dictusAccent)
+        } footer: {
+            if !isOn {
+                offFooter
+            }
+        }
+    }
+
+    private var offFooter: Text {
+        switch feature {
+        case .smartMode:
+            return Text("Smart Modes are off. Your modes are kept for when you turn them back on.")
+        case .vocabulary:
+            return Text("Vocabulary is off. Your terms are kept, and replace nothing until you turn it back on.")
+        case .history:
+            return Text("History is off: new dictations are not saved. Those already saved are kept.")
+        }
+    }
+}
+
+extension View {
+    /// The content under a feature's switch: visible but dimmed and not editable while
+    /// the feature is off (#216 decision 5). A list under a switched-off feature
+    /// would edit rules nothing applies.
+    ///
+    /// - Parameter isAvailable: `FeatureGate.isAvailable(feature)`, the one predicate.
+    ///
+    /// WHY hit-testing as well as `disabled`: a row button drawn with a custom button
+    /// style still opened on tap under `disabled` alone (History, on the simulator).
+    func proFeatureContent(isAvailable: Bool) -> some View {
+        disabled(!isAvailable)
+            .allowsHitTesting(isAvailable)
+            .opacity(isAvailable ? 1 : ProFeatureDimming.opacity)
+    }
+}
+
+/// How far the content of a switched-off feature fades.
+enum ProFeatureDimming {
+    static let opacity = 0.45
 }
 
 /// The hub's bottom block for someone who is not being sold anything: what they own,
