@@ -19,7 +19,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 1. #587 — Smart Mode prompt campaign: its remaining threads
    - #598 — language check refuses a correct short line (`es` read as `pt`)
    - #592 — warn instead of refusing on an ungrounded name
-2. #573 — rebuild `Liste`'s prompt (Pierre rates it the weakest mode). `needs-triage`
+2. #573 — rebuild `Liste` as a summary in bullets (title, then every point). `ready-for-agent`
 3. #593 — reverse trial: Pro free for a fixed period, then the paywall. `ready-for-agent`
 4. #494 — onboarding that starts the trial and teaches the Smart Modes. `ready-for-agent`
 5. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
@@ -36,6 +36,7 @@ Milestone `Keyboard session` (`gh issue list --milestone "Keyboard session"`). S
 
 Milestone `2.1 — after the Pro launch`, plus the unmilestoned open issues. Pick from there only after 2.0.0 ships.
 
+- #619 — measure which paragraphs of the Smart Mode prompts do work
 - #570 — meaning guardrail for the rewriting Smart Modes. Moved out of the 2.0.0 gate on Pierre's real-use verdict.
 
 ## Settled — do not reopen
