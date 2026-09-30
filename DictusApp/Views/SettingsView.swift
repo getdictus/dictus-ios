@@ -163,10 +163,8 @@ struct SettingsView: View {
         // Read the revision so flipping the switch redraws this gate, the same
         // reason the binding below reads it.
         _ = proEntitlementRevision
-        return PremiumFlags.paywallVisible || PremiumFlags.debugProEntitlementForced
-        #else
-        return PremiumFlags.paywallVisible
         #endif
+        return ProHubEntry.isReachable
     }
 
     #if DEBUG

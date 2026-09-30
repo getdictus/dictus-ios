@@ -24,6 +24,10 @@ struct PaywallView: View {
     @EnvironmentObject var proStatus: ProStatusManager
     @Environment(\.dismiss) private var dismiss
 
+    /// The hub's own upward exit, when it came down from the top (#216). Nil for the
+    /// end-of-trial cover, which leaves the way it came, downward.
+    @Environment(\.proHubClose) private var proHubClose
+
     /// Why this paywall is up (#593). `.standard` for every entry point the user
     /// chose; `.trialEnded` for the one the app opens once when the trial is over.
     var framing: PaywallFraming = .standard
@@ -220,6 +224,15 @@ struct PaywallView: View {
         }
     }
 
+    /// Leaves the screen the way it arrived: up for the hub, down for a cover.
+    private func close() {
+        if let proHubClose {
+            proHubClose()
+        } else {
+            dismiss()
+        }
+    }
+
     // MARK: - Hub state (#216)
 
     /// What sits under the cards. Read from the published caches, so a purchase, a
@@ -327,7 +340,7 @@ struct PaywallView: View {
         ToolbarItem(placement: .topBarLeading) {
             if !showPurchaseSuccess {
                 Button {
-                    dismiss()
+                    close()
                 } label: {
                     Image(systemName: "xmark")
                         .font(.body.weight(.semibold))
@@ -806,7 +819,7 @@ struct PaywallView: View {
     /// and nothing the user saved is deleted.
     private var continueForFreeButton: some View {
         Button {
-            dismiss()
+            close()
         } label: {
             Text("Continue for free")
                 .font(.dictusSubheading)
@@ -898,7 +911,7 @@ struct PaywallView: View {
             Spacer()
 
             Button {
-                dismiss()
+                close()
             } label: {
                 Text("Continue")
                     .font(.dictusSubheading)
