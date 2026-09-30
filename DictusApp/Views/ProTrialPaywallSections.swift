@@ -99,14 +99,25 @@ struct TrialEndedHeader: View {
 struct TrialRunningNotice: View {
     let endsAt: Date
 
+    /// The count the home badge shows, repeated here as the line's headline (#216
+    /// decision 2): the hub is where a trial user looks for how long they have left.
+    /// Nil only if the trial ended between the state read and this render.
+    var daysLeft: Int?
+
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "gift.fill")
                 .foregroundColor(.dictusAccent)
-            Text("Your free trial ends on \(endsAt.formatted(date: .long, time: .omitted)). Subscribe now and Pro stays on with no interruption.")
-                .font(.dictusCaption)
-                .foregroundColor(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 2) {
+                if let daysLeft {
+                    Text("\(daysLeft) days left in your free trial")
+                        .font(.dictusBody.weight(.semibold))
+                }
+                Text("Your free trial ends on \(endsAt.formatted(date: .long, time: .omitted)). Subscribe now and Pro stays on with no interruption.")
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Spacer(minLength: 0)
         }
         .padding(12)

@@ -11,6 +11,7 @@
 		SS000001 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100001 /* SubscriptionManager.swift */; };
 		RT5930000004 /* ProTrialDebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100004 /* ProTrialDebugSection.swift */; };
 		RT5930000003 /* ProTrialPaywallSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100003 /* ProTrialPaywallSections.swift */; };
+		PH2160000001 /* ProHubSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = PH2160100001 /* ProHubSections.swift */; };
 		RT5930000002 /* ProTrialAnnouncementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100002 /* ProTrialAnnouncementView.swift */; };
 		RT5930000001 /* ProTrialCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100001 /* ProTrialCoordinator.swift */; };
 		SS000002 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100002 /* PaywallView.swift */; };
@@ -312,6 +313,7 @@
 		SS100001 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
 		RT5930100004 /* ProTrialDebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialDebugSection.swift; sourceTree = "<group>"; };
 		RT5930100003 /* ProTrialPaywallSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialPaywallSections.swift; sourceTree = "<group>"; };
+		PH2160100001 /* ProHubSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProHubSections.swift; sourceTree = "<group>"; };
 		RT5930100002 /* ProTrialAnnouncementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialAnnouncementView.swift; sourceTree = "<group>"; };
 		RT5930100001 /* ProTrialCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialCoordinator.swift; sourceTree = "<group>"; };
 		SS100002 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
@@ -605,6 +607,7 @@
 				SS100003 /* ProBannerView.swift */,
 				RT5930100004 /* ProTrialDebugSection.swift */,
 				RT5930100003 /* ProTrialPaywallSections.swift */,
+				PH2160100001 /* ProHubSections.swift */,
 				RT5930100002 /* ProTrialAnnouncementView.swift */,
 			);
 			path = Views;
@@ -1092,6 +1095,7 @@
 				SS000001 /* SubscriptionManager.swift in Sources */,
 				RT5930000004 /* ProTrialDebugSection.swift in Sources */,
 				RT5930000003 /* ProTrialPaywallSections.swift in Sources */,
+				PH2160000001 /* ProHubSections.swift in Sources */,
 				RT5930000002 /* ProTrialAnnouncementView.swift in Sources */,
 				RT5930000001 /* ProTrialCoordinator.swift in Sources */,
 				SS000002 /* PaywallView.swift in Sources */,
