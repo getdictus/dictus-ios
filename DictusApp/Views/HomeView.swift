@@ -23,8 +23,20 @@ struct HomeView: View {
     /// Drives the history sheet (#70).
     @State private var showHistory = false
 
-    /// Drives the paywall when a non-subscriber reaches for the history.
+    /// Drives the Dictus Pro hub: from the header (#216), or when a non-subscriber
+    /// reaches for the history.
     @State private var showPaywall = false
+
+    /// How far the header has been pulled down, after the rubber band (#216).
+    @State private var headerPull: CGFloat = 0
+
+    /// Whether the header opens the hub (#216 decision 9). Read through
+    /// `proStatus.isProActive` so flipping the DEBUG force redraws it; see
+    /// `ProHubEntry` for why the force counts.
+    private var headerOpensHub: Bool {
+        _ = proStatus.isProActive
+        return ProHubEntry.isReachable
+    }
 
     /// What the history offers this user (#70, corrected 2026-08-28): the feature is
     /// Pro, so the hint and the gesture are open, locked, or absent.
@@ -55,8 +67,12 @@ struct HomeView: View {
         VStack(spacing: 24) {
             Spacer()
 
-            // Logo mark
-            logoSection
+            // Logo mark, and the door to the hub (#216)
+            if headerOpensHub {
+                hubHeader
+            } else {
+                logoSection
+            }
 
             // Model status card
             modelStatusCard
@@ -95,6 +111,17 @@ struct HomeView: View {
             }
         }
         .padding()
+        // The whole dashboard follows the pull, not the header alone: moved on its
+        // own, the header slid under the model card's glass, which the system draws
+        // above its siblings whatever their order (measured on the simulator).
+        .offset(y: headerPull)
+        // Home dims as the header is pulled, announcing the hub before it arrives.
+        .overlay {
+            Color.black
+                .opacity(ProHubMotion.headerDimming * Double(headerPull / ProHubMotion.headerMaxTravel))
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+        }
         .background(Color.dictusBackground.ignoresSafeArea())
         // The swipe itself. Attached to the whole dashboard rather than to the hint,
         // because the issue asks for a swipe up "from the home screen" — the hint
@@ -187,6 +214,49 @@ struct HomeView: View {
             }
         }
         .padding(.bottom, 8)
+    }
+
+    // MARK: - Hub header (#216)
+
+    /// The header, answering a tap and a pull down by opening the Dictus Pro hub,
+    /// which comes down from the top (decisions 9 and 11).
+    ///
+    /// WHY the tap is not optional: a pull alone is undiscoverable, and unusable with
+    /// VoiceOver. Same reasoning as `SwipeUpHintView` for the history's swipe.
+    ///
+    /// WHY the pull starts on the header and nowhere else: a pull from the top edge
+    /// of the screen is iOS's, for Notification Center. On the header, the drag is
+    /// unambiguous and it is where the thing it opens will come from.
+    ///
+    /// Free users get the gesture too and land on the hub's sales state: whoever
+    /// pulls has asked for the thing (decision 11), as with the locked history swipe.
+    private var hubHeader: some View {
+        logoSection
+            .contentShape(Rectangle())
+            .onTapGesture { openHub() }
+            // A child's gesture wins over the dashboard's swipe-up below, so a drag
+            // that starts here is the header's, whatever its direction.
+            .gesture(
+                DragGesture(minimumDistance: 8)
+                    .onChanged { value in
+                        headerPull = ProHubMotion.rubberBand(value.translation.height)
+                    }
+                    .onEnded { value in
+                        let travelled = max(value.translation.height, value.predictedEndTranslation.height)
+                        if travelled >= ProHubMotion.headerPullThreshold {
+                            openHub()
+                        }
+                        withAnimation(ProHubMotion.spring) { headerPull = 0 }
+                    }
+            )
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityHint(Text("Opens Dictus Pro"))
+            .accessibilityAction { openHub() }
+    }
+
+    private func openHub() {
+        showPaywall = true
     }
 
     // MARK: - Model Status Card
