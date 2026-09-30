@@ -44,7 +44,7 @@ Milestone `2.1 — after the Pro launch`, plus the unmilestoned open issues. Pic
 - #138 wontfix: a keyboard extension cannot extend a key's hit area (measured).
 - The Smart Mode set is five modes on one axis; a Typeless-like mode is refused (#523).
 - Verbal `point` in French is not a feature: Parakeet already punctuates.
-- The bullet mode stays, renamed `Liste`.
+- The bullet mode stays, renamed `Liste`, re-centred on 2026-09-30 as a summary in bullets (#573).
 - Changing `KeyboardAreaMode` destroys SwiftUI gesture identity (hits #505).
 
 ## Someday
