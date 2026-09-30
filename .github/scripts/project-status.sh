@@ -81,7 +81,15 @@ for issue in "$@"; do
     continue
   fi
 
-  gh project item-edit --project-id "$PROJECT_ID" --id "$item_id" \
-    --field-id "$STATUS_FIELD_ID" --single-select-option-id "$target_opt" >/dev/null
+  # Raw GraphQL, not `gh project item-edit`: that command checks for classic
+  # token scopes and refuses the fine-grained PROJECT_TOKEN outright.
+  gh api graphql \
+    -f project="$PROJECT_ID" -f item="$item_id" -f field="$STATUS_FIELD_ID" -f option="$target_opt" \
+    -f query='mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
+      updateProjectV2ItemFieldValue(input: {
+        projectId: $project, itemId: $item, fieldId: $field,
+        value: { singleSelectOptionId: $option }
+      }) { projectV2Item { id } }
+    }' >/dev/null
   echo "#$issue: moved to $target"
 done
