@@ -134,36 +134,41 @@ read by its first line only by the research parser (fixed in `replay.py`); and a
 held-out set was added (`heldout/`: 66 short French dictations from the repo's other
 fixture sets, none in `fixtures.json`, 3 runs × 2 routes on macOS 27, captured with the
 check live), because every licence in the check was written after reading the three
-recorded corpora — their false-refusal numbers are in-sample.
+recorded corpora — their false-refusal numbers are in-sample. **12 of those 66 turned out
+not to be held out**: the `seed/` fixtures and `summary-fr/S1-free-form` are also in
+`freepolish.json` or #439's longform set, which the licences were written against.
+`replay.py` reports them apart as `heldout-seen`, and the held-out figures below cover
+the 54 unseen dictations only.
 
 | | refused by `lostWord` |
 |---|---|
 | round, refuse-labelled (`usage`, `pourrais`, `revaudrai` → `reviendrai`/`revoilà`) | **26/26** |
 | round, tolerate-labelled (register, anglicism translated, politeness dropped, format) | **0/89** |
 | round, faithful | 0/414 |
-| held-out, refuse-labelled | 16/17 (the 17th refused by `length`) |
+| held-out, refuse-labelled | 16/16 |
 
 False refusals on faithful + tolerated outputs, shipped check:
 
 | input chars | in-sample corpora (round, freepol, longform) | **held-out** |
 |---|---|---|
-| 0–100 | 0/339 | 5/131 (3.8 %) |
-| 101–200 | 0/134 | 3/121 (2.5 %) |
-| 201–300 | 0/85 | 9/71 (12.7 %) |
-| 301–400 | 0/49 | 0/30 |
+| 0–100 | 0/339 | 5/96 (5.2 %) |
+| 101–200 | 0/134 | 3/97 (3.1 %) |
+| 201–300 | 0/85 | 6/65 (9.2 %) |
+| 301–400 | 0/49 | 0/24 |
 | 401–500 | – | 1/20 (5.0 %) |
 | > 500 (not run; unscoped) | 0/24 | – |
 
-The 18 held-out false refusals are five shapes: `log` → `logue` (6, an anglicism spelled
-the French way, three letters so the abbreviation licence misses it), grammar repairs
-(`aperçoive` → `aperçoit` 3; `traduise` → `traduit` in `5-erreur-parakeet` 3, where the
-model KEPT the English clause so the stand-down never fired), `de points` (ASR for `deux
-points`) repaired (5), `par contre` → `mais` (1). Every read is in
+That is **15/302 (5.0 %)** overall. The 15 held-out false refusals are four shapes:
+`log` → `logue` (6, an anglicism spelled the French way, three letters so the
+abbreviation licence misses it), a grammar repair (`aperçoive` → `aperçoit`, 3), `de
+points` (ASR for `deux points`) repaired (5), `par contre` → `mais` (1). The
+`heldout-seen` rows add 3 more, `traduise` → `traduit` in `5-erreur-parakeet`, where the
+model KEPT the English clause so the stand-down never fired. Every read is in
 `heldout/labels.json`. Nothing here measures what the check MISSES on the held-out set:
 only the outputs it flagged were read.
 
 **The length gate, re-measured:** with the licences, the unscoped check refused **0 of
-42** faithful long outputs and all 18 damaged ones on #439's longform corpus (21 % false
+22** faithful outputs above 500 characters and all 18 damaged ones on #439's longform corpus (21 % false
 refusals for the research detector). That corpus is in-sample for the licences, and no
 held-out dictation is long, so the gate stays where the brief puts it.
 

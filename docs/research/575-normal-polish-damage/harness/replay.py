@@ -104,6 +104,11 @@ def label_legacy(raw, text):
 
 # ── Pairs ──────────────────────────────────────────────────────────────────────────
 
+# A line that opens or closes a record in a `show` capture: anything else under an
+# output is that output's next line.
+RECORD_LINE = re.compile(r"━━ \[|  raw:|  polished(?: #\d+)?: |  engineOut(?: #\d+)?: |  breaks|\s+\(\w+,")
+
+
 def parse_capture(path, fixtures=None, refused_too=False):
     """Yield (fixture_id, run, raw, text) for every `success` in a `show` capture.
 
@@ -113,15 +118,23 @@ def parse_capture(path, fixtures=None, refused_too=False):
     and which looks to a word count like every later word lost.
     """
     fid = raw = None
-    pending = held = None
+    pending = held = engine = None
     for line in open(path, encoding="utf-8"):
         line = line.rstrip("\n")
+        # An engine output spans lines like a polished one: read it to the next record
+        # line, or the check sees `Line 1.` where the model wrote three lines.
+        if engine is not None:
+            if not RECORD_LINE.match(line):
+                engine[3].append(line)
+                continue
+            yield engine[0], engine[1], engine[2], "\n".join(engine[3]).rstrip()
+            engine = None
         # `refused_too`: a run a guardrail refused prints the ENGINE's output beneath
         # it. The held-out captures were taken with the check live, so its own
         # refusals only exist there — and they are exactly what a human has to read.
         m = re.match(r"  engineOut(?: #(\d+))?: (.*)$", line)
         if m and held:
-            yield held[0], held[1], raw, m.group(2)
+            engine = [held[0], held[1], raw, [m.group(2)]]
             held = None
             continue
         m = re.match(r"━━ \[([^\]]+)\]", line)
@@ -148,6 +161,8 @@ def parse_capture(path, fixtures=None, refused_too=False):
             continue
         if pending is not None and not re.match(r"  (breaks|engineOut)", line):
             pending[1].append(line)
+    if engine is not None:
+        yield engine[0], engine[1], engine[2], "\n".join(engine[3]).rstrip()
 
 
 def pairs():
@@ -167,10 +182,16 @@ def pairs():
         if c.get("wasAccepted"):
             out.append({"key": f"freepol/{c['fixture']}#{c['run']}#{i}", "route": c["task"].split(".")[1],
                         "raw": c["raw"], "output": c["output"], "fid": c["fixture"], "lang": c["inputLang"]})
+    # A held-out fixture whose dictation is also in a corpus above was read while the
+    # licences were written, so it is not held out: 12 of the 66 are the seed and
+    # summary fixtures `freepolish.json` and #439's longform set replay. They are
+    # reported apart, as `heldout-seen`, and the held-out figures exclude them.
+    seen = {" ".join(p["raw"].split()) for p in out if p["raw"]}
     for path in sorted(glob.glob(os.path.join(HERE, "..", "heldout", "raw-*.txt"))):
         route = "auto" if "auto" in os.path.basename(path) else "natural"
         for fid, run, raw, text in parse_capture(path, HELD, refused_too=True):
-            out.append({"key": f"heldout/{route}/{fid}#{run}", "route": route, "raw": raw, "output": text,
+            corpus = "heldout-seen" if " ".join(raw.split()) in seen else "heldout"
+            out.append({"key": f"{corpus}/{route}/{fid}#{run}", "route": route, "raw": raw, "output": text,
                         "fid": fid})
     return out
 
@@ -208,8 +229,8 @@ def main():
         corpus = p["key"].split("/")[0]
         if corpus == "round":
             label, why = label_round(p["fid"], p["output"])
-        elif p["key"] in HAND:
-            label, why = HAND[p["key"]]["label"], [HAND[p["key"]]["reason"]]
+        elif (hand := HAND.get(p["key"].replace("heldout-seen/", "heldout/", 1))):
+            label, why = hand["label"], [hand["reason"]]
         elif corpus in ("longform", "freepol"):
             label, why = label_legacy(p["raw"], p["output"])
         else:
@@ -261,7 +282,7 @@ def main():
         table[k][0] += 1
         table[k][1] += r["refused"]
         table[k][2] += r["unscoped"]
-    order = {"round": 0, "freepol": 1, "longform": 2, "heldout": 3}
+    order = {"round": 0, "freepol": 1, "longform": 2, "heldout": 3, "heldout-seen": 4}
     for (corpus, b), (n, s, u) in sorted(table.items(), key=lambda kv: (order[kv[0][0]], BUCKETS.index(
             next(x for x in BUCKETS if bucket(x[0]) == kv[0][1])))):
         print(f"| {corpus} | {b} | {n} | {s} ({100 * s / n:.1f} %) | {u} ({100 * u / n:.1f} %) |")
@@ -276,7 +297,7 @@ def main():
             print(f"| all | {b} | {n} | {s} ({100 * s / n:.1f} %) | {u} ({100 * u / n:.1f} %) |")
 
     print("\n## 3. Damage the shipped check refuses on the legacy corpora and the held-out set\n")
-    for corpus in ("longform", "freepol", "heldout"):
+    for corpus in ("longform", "freepol", "heldout", "heldout-seen"):
         dmg = [r for r in rows if r["key"].startswith(corpus + "/") and r["label"] == "refuse"]
         anyc = sum(r["outcome"] != "success" for r in dmg)
         print(f"- {corpus}: {sum(r['refused'] for r in dmg)}/{len(dmg)} refuse-labelled outputs refused by "
