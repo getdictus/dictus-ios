@@ -930,6 +930,20 @@ class UnifiedAudioEngine: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + interval, execute: work)
     }
 
+    /// Re-arm the idle release from now, if one is armed (#620).
+    ///
+    /// A shared voice note transcribed in the background runs in this process only
+    /// because the warm engine keeps it alive (`UIBackgroundModes: audio`). Releasing
+    /// the engine mid-note would let iOS suspend the app with the note half done. A
+    /// voice note is the user using Dictus, so it earns the same window a dictation
+    /// does: the release is pushed back by one full idle interval, never pulled
+    /// forward, and nothing happens when the engine is not warm-idle — there is no
+    /// warm state to extend, and starting one from the background is what iOS forbids.
+    func extendWarmWindow() {
+        guard idleReleaseWorkItem != nil else { return }
+        scheduleIdleRelease(after: Self.idleReleaseInterval)
+    }
+
     /// Cancel a pending idle release. Safe to call when none is armed.
     ///
     /// WHY it also clears `lastIdleStartTime`: the anchor is only meaningful while
