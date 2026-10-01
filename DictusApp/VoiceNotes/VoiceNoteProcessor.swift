@@ -62,11 +62,12 @@ final class VoiceNoteProcessor: ObservableObject {
 
     /// The warm path: a note arrived while this process was alive to hear it.
     private func noteQueuedWhileAlive() {
-        let arrived = store.ingestInbox()
-        guard !arrived.isEmpty else { return }
-        // Written before the post, so the extension reads it when the post lands.
+        // Written before the ingest: the extension reads it as soon as its sidecar is
+        // gone, which the ingest does, possibly before the post below lands.
         AppGroup.defaults.set(LiveActivityManager.shared.hasLiveActivity, forKey: SharedKeys.voiceNoteAcceptedWithActivity)
         AppGroup.defaults.synchronize()
+        let arrived = store.ingestInbox()
+        guard !arrived.isEmpty else { return }
         DarwinNotificationCenter.post(DarwinNotificationName.voiceNoteAccepted)
         VoiceNoteIslandDriver.shared.arrived(arrived.map(\.id))
         let state = UIApplication.shared.applicationState
@@ -239,8 +240,10 @@ final class VoiceNoteProcessor: ObservableObject {
     /// stays `.transcribing` on disk and is recovered on the next run.
     private func beginBackgroundTask() {
         guard backgroundTask == .invalid else { return }
+        // The handler runs synchronously on the main thread and must end the task before
+        // it returns, or iOS kills the process; hence no hop (same pattern as #470).
         backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "dictus.voiceNote") { [weak self] in
-            Task { @MainActor in
+            MainActor.assumeIsolated {
                 self?.log("backgroundTimeExpired", "remaining=\(self?.store.queue.waitingCount ?? 0)")
                 self?.endBackgroundTask()
             }
