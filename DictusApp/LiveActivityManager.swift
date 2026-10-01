@@ -148,6 +148,15 @@ class LiveActivityManager {
     /// decision 5). Fired by the next return to standby.
     private var pendingVoiceNoteAlert = false
 
+    /// The voice note updates, one after another (see `enqueueVoiceNoteUpdate`).
+    private var voiceNoteUpdateChain: Task<Void, Never>?
+    /// Monotonic number of the voice note updates, for the log.
+    private var voiceNoteUpdateSequence = 0
+    /// Until when an alerting update must stay the last one sent (see `updateVoiceNote`).
+    private var voiceNoteAlertHoldUntil: Date?
+    /// A non-alert update held back during that window, sent when it ends.
+    private var voiceNoteHeldUpdate = false
+
     /// When the voice note ready state stops being shown (#620 decision 4). Used when
     /// the engine is released first: the activity then ends with its final content and
     /// `.after(this)`, so iOS removes it on time even though nothing is running.
@@ -1134,16 +1143,67 @@ extension LiveActivityManager {
             let state = standbyState
             let configuration = alertConfiguration
             alertLog("fired")
-            Task {
-                await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)),
-                                      alertConfiguration: configuration)
-            }
+            // The alert's expansion must not be overwritten by an ordinary update sent
+            // right behind it (device test of a5345688: alerts logged, island not
+            // expanded). For a few seconds, other updates are held and the newest one
+            // is sent when the window ends.
+            voiceNoteAlertHoldUntil = Date().addingTimeInterval(Self.alertHoldInterval)
+            enqueueVoiceNoteUpdate(activity, state, alert: configuration, context: "alert")
             scheduleAlertLayoutReset()
             return
         }
-        let state = standbyState
-        Task {
-            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
+        if let holdUntil = voiceNoteAlertHoldUntil, holdUntil > Date() {
+            if !voiceNoteHeldUpdate {
+                voiceNoteHeldUpdate = true
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: UInt64(min(max(holdUntil.timeIntervalSinceNow, 0), 10) * 1_000_000_000))
+                    self.flushHeldVoiceNoteUpdate()
+                }
+            }
+            return
+        }
+        enqueueVoiceNoteUpdate(activity, standbyState, alert: nil, context: "content")
+    }
+
+    /// How long an alerting update stays the last one sent. Long enough for the
+    /// system's expansion to play, short enough that a read made right after it
+    /// still shows within a few seconds.
+    private static let alertHoldInterval: TimeInterval = 4
+
+    /// Send the update held back during an alert's window, with the content as it is
+    /// now.
+    private func flushHeldVoiceNoteUpdate() {
+        voiceNoteHeldUpdate = false
+        voiceNoteAlertHoldUntil = nil
+        guard isEnabled, currentPhase == .standby, let activity = currentActivity else { return }
+        enqueueVoiceNoteUpdate(activity, standbyState, alert: nil, context: "held")
+    }
+
+    /// Send one voice note update after the previous one has finished, and log it.
+    ///
+    /// WHY serialized: each update used to be its own `Task`. A batch of fast notes
+    /// produces several updates within milliseconds, the last one carrying the
+    /// alert; unordered tasks let an earlier, non-alert update land after it and take
+    /// the expansion away. The sequence number in the log is what tells that case
+    /// from iOS throttling alerts on its own.
+    private func enqueueVoiceNoteUpdate(_ activity: Activity<DictusLiveActivityAttributes>,
+                                        _ state: DictusLiveActivityAttributes.ContentState,
+                                        alert: AlertConfiguration?, context: String) {
+        voiceNoteUpdateSequence += 1
+        let sequence = voiceNoteUpdateSequence
+        let previous = voiceNoteUpdateChain
+        let staleDate = Date().addingTimeInterval(staleInterval)
+        PersistentLog.log(.diagnosticProbe(
+            component: "VoiceNote", instanceID: "island", action: "update",
+            details: "seq=\(sequence) alert=\(alert != nil) context=\(context) ready=\(state.voiceNote?.readyCount ?? 0) segments=\(state.voiceNote?.segments.count ?? 0)"
+        ))
+        voiceNoteUpdateChain = Task {
+            await previous?.value
+            if let alert {
+                await activity.update(.init(state: state, staleDate: staleDate), alertConfiguration: alert)
+            } else {
+                await activity.update(.init(state: state, staleDate: staleDate))
+            }
         }
     }
 
@@ -1178,8 +1238,7 @@ extension LiveActivityManager {
             guard voiceNoteContent?.isAlerting == true else { return }
             voiceNoteContent?.isAlerting = false
             guard currentPhase == .standby, let activity = currentActivity else { return }
-            let state = standbyState
-            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
+            enqueueVoiceNoteUpdate(activity, standbyState, alert: nil, context: "layoutReset")
         }
     }
 

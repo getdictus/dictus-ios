@@ -22,6 +22,15 @@ final class VoiceNoteIslandDriver {
     /// Notes slower than `VoiceNoteIsland.receivedDelay`: the compact island says so.
     private var showsReceived = false
     private var receivedTask: Task<Void, Never>?
+    /// When the last note was shared, and the alert waiting for the share sheet to go.
+    private var lastArrivalAt: Date?
+    private var alertTask: Task<Void, Never>?
+
+    /// The success alert never fires sooner than this after a share (device test of
+    /// a5345688). Fast notes now finish within a second, while WhatsApp's share sheet
+    /// is still closing (1.2 s); an alert raised under it did not expand the island.
+    /// ASSUMED cause, see the PR; the update log tells it from the update-order one.
+    static let alertDelayAfterShare: TimeInterval = 2.5
     private var expiryTask: Task<Void, Never>?
 
     private init() {}
@@ -33,11 +42,14 @@ final class VoiceNoteIslandDriver {
         guard !ids.isEmpty else { return }
         let previousBatch = island.batch
         ids.forEach { island.add($0) }
+        lastArrivalAt = Date()
         // A new batch supersedes an alert the last one left waiting behind a dictation:
         // it would otherwise fire on the next return to standby for the old batch, and
         // the new batch would alert a second time when it drains.
         if island.batch != previousBatch {
             LiveActivityManager.shared.discardPendingVoiceNoteAlert()
+            alertTask?.cancel()
+            alertTask = nil
         }
         // A new note keeps the ring alive past an earlier batch's ready deadline.
         expiryTask?.cancel()
@@ -71,7 +83,20 @@ final class VoiceNoteIslandDriver {
         )
         if decision != .none { alertedBatch = island.batch }
         scheduleExpiry()
-        push(alert: decision != .none)
+        let wait = (lastArrivalAt?.addingTimeInterval(Self.alertDelayAfterShare).timeIntervalSinceNow) ?? 0
+        guard decision != .none, wait > 0 else {
+            push(alert: decision != .none)
+            return
+        }
+        // The ring fills now; the alert follows once the share sheet is gone.
+        push()
+        alertTask?.cancel()
+        alertTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
+            guard let self, !Task.isCancelled else { return }
+            self.alertTask = nil
+            self.push(alert: true)
+        }
     }
 
     /// The user read a note's outcome on its card.
