@@ -19,25 +19,77 @@ final class SmartModeShortInputSkipTests: XCTestCase {
         XCTAssertTrue(mode.runs(onInputOfLength: 1337))
     }
 
-    /// `Liste`'s floor (#573 decision 5), measured on the maintainer's own dictations:
-    /// under 100 characters nearly every run came back as a title over a lone bullet.
-    func testListSkipsBelowOneHundredCharacters() {
-        let mode = SmartModeCatalogue.notes
-        XCTAssertEqual(mode.minimumInputCharacters, 100)
-        XCTAssertFalse(mode.runs(onInputOfLength: 73), "notes-fr N4, one idea")
-        XCTAssertFalse(mode.runs(onInputOfLength: 99))
-        XCTAssertTrue(mode.runs(onInputOfLength: 100))
-        XCTAssertTrue(mode.runs(onInputOfLength: 124), "the device dictation that counts off four things")
-    }
-
-    /// Structuré and Liste only. `Message` exists for short text and must never skip it;
-    /// `Résumé` bounds itself through its band; `Traduction` has no reason to.
+    /// Structuré only. `Message` exists for short text and must never skip it;
+    /// `Résumé` bounds itself through its band; `Liste` checks its output instead
+    /// (#573, decision 5 amended); `Traduction` has no reason to.
     func testNoOtherModeSkipsShortInput() {
-        let skipping: Swift.Set = [SmartModeCatalogue.structuredIdentifier, SmartModeCatalogue.notesIdentifier]
-        for mode in SmartModeCatalogue.builtIns where !skipping.contains(mode.id) {
+        for mode in SmartModeCatalogue.builtIns where mode.id != SmartModeCatalogue.structuredIdentifier {
             XCTAssertNil(mode.minimumInputCharacters, mode.id)
             XCTAssertTrue(mode.runs(onInputOfLength: 1), mode.id)
         }
+    }
+
+    // MARK: - Liste's output check (#573, decision 5 amended)
+
+    /// The device case that killed the 100-character floor: 64 characters, four items.
+    /// `Liste` now runs on any length and judges the list it produced.
+    func testListRunsOnAnyLengthAndNeedsTwoItems() {
+        let mode = SmartModeCatalogue.notes
+        XCTAssertNil(mode.minimumInputCharacters)
+        XCTAssertTrue(mode.runs(onInputOfLength: 64))
+        XCTAssertEqual(mode.minimumListItems, 2)
+        XCTAssertTrue(mode.acceptsOutput("Liste de courses pour ce soir :\n- Tomates\n- Riz\n- Oignons\n- Yaourts"))
+        XCTAssertTrue(mode.acceptsOutput("Garage, facture :\n- Rappeler le garage\n- Payer la facture"))
+        XCTAssertFalse(mode.acceptsOutput("Café :\n- Racheter du café demain matin"), "a title over a lone bullet")
+        XCTAssertFalse(mode.acceptsOutput("Racheter du café demain matin"), "no list at all")
+    }
+
+    /// A list line is `- ` after any leading spaces; a hyphen inside a line is not one.
+    func testListItemsAreCountedOnLinePrefixesOnly() {
+        XCTAssertEqual(SmartMode.listItemCount(in: "Titre :\n  - un\n- deux"), 2)
+        XCTAssertEqual(SmartMode.listItemCount(in: "Vide-grenier - dimanche :\n- un"), 1)
+        XCTAssertEqual(SmartMode.listItemCount(in: ""), 0)
+    }
+
+    /// No other mode checks its output's shape: a one-paragraph `Résumé` or a one-line
+    /// `Message` is exactly what they exist to produce.
+    func testNoOtherModeChecksItsOutputShape() {
+        for mode in SmartModeCatalogue.builtIns where mode.id != SmartModeCatalogue.notesIdentifier {
+            XCTAssertNil(mode.minimumListItems, mode.id)
+            XCTAssertTrue(mode.acceptsOutput("one line"), mode.id)
+        }
+    }
+
+    /// The check survives example resolution and the App Group round trip, and a
+    /// snapshot written before it decodes to no check.
+    func testTheOutputCheckSurvivesResolutionAndDecoding() throws {
+        XCTAssertEqual(SmartModeCatalogue.notes.resolvingExamples(forTranscriptLanguage: "de").minimumListItems, 2)
+        let data = try JSONEncoder().encode(SmartModeCatalogue.notes)
+        XCTAssertEqual(try JSONDecoder().decode(SmartMode.self, from: data).minimumListItems, 2)
+        var object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        object.removeValue(forKey: "minimumListItems")
+        let old = try JSONDecoder().decode(SmartMode.self, from: JSONSerialization.data(withJSONObject: object))
+        XCTAssertNil(old.minimumListItems)
+        XCTAssertTrue(old.acceptsOutput("Café :\n- Racheter du café"))
+    }
+
+    /// The decline is the same event as the input skip, with the numbers of its own
+    /// rule in place of the floor, so an export says which rule fired.
+    func testTheOutputDeclineIsTheSameEventWithItsOwnNumbers() throws {
+        let metrics = PolishMetrics(
+            engine: "apple-fm", mode: "smart.notes", targetLanguage: nil, detectedLanguage: "fr",
+            rawCharCount: 38, polishedCharCount: 38, latencyMs: 0,
+            outcome: .smartModeSkippedShortInput,
+            smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip(
+                mode: "notes", characters: 38, listItems: 1, minimumListItems: 2
+            )
+        )
+        let decoded = try JSONDecoder().decode(PolishMetrics.self, from: JSONEncoder().encode(metrics))
+        XCTAssertEqual(decoded.outcome, .smartModeSkippedShortInput)
+        XCTAssertEqual(decoded.smartModeLengthSkip?.mode, "notes")
+        XCTAssertNil(decoded.smartModeLengthSkip?.floor)
+        XCTAssertEqual(decoded.smartModeLengthSkip?.listItems, 1)
+        XCTAssertEqual(decoded.smartModeLengthSkip?.minimumListItems, 2)
     }
 
     /// Resolving a mode's per-language examples keeps its floor: the pipeline sees the

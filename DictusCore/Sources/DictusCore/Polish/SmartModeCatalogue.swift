@@ -128,16 +128,14 @@ public enum SmartModeCatalogue {
         // Since #580 the same answer covers a guardrail rejection, which discards the
         // engine's output whole and so cannot put a half-transformation in the field.
         floorBehaviour: .insertRawText,
-        // Below 100 characters the mode is skipped: the dictation gets Normal polish and
-        // the keyboard says "Trop court pour une liste" (#573 decision 5). Measured, not
-        // guessed: the landed prompt run twice on each of the 227 distinct dictations of
-        // 300 characters or fewer in the maintainer's exports of 2026-09-13 to 09-30.
-        // Under 100 characters 88 to 98 % of runs came back as a title over a lone
-        // bullet, the shape #573 names as the defect; from 100 to 124 it drops to 37 %.
-        // The pre-registered rule (fewest lone bullets kept plus lists lost) picked 100
-        // out of a 50…300 grid: 76 lone-bullet runs still reach users above it, 17
-        // multi-bullet runs are lost below it. Curve in `docs/research/573-liste/floor/`.
-        minimumInputCharacters: 100
+        // An output with fewer than two bullets is declined: the dictation gets Normal
+        // polish and the keyboard says "Trop court pour une liste" (#573 decision 5, as
+        // amended on 2026-10-01). It replaced a 100-character input floor, which the
+        // device round caught skipping a 64-character, four-item shopping list: length
+        // cannot see how many items a sentence holds, the model's output can. See
+        // `SmartMode.minimumListItems`; the floor's measurement stays in
+        // `docs/research/573-liste/floor/` as the record of why it was dropped.
+        minimumListItems: 2
     )
 
     /// Structured: the long vocal message, rewritten as paragraphs that do not read

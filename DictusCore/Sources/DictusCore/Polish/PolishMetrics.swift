@@ -77,9 +77,11 @@ public struct PolishMetrics: Sendable, Codable {
         /// it means *we* read the transcript as a language the model does not
         /// publish, which is a fact about the dictation rather than about the model.
         case unsupportedInputLanguage
-        /// An armed Smart Mode declined the dictation for being shorter than its floor
-        /// (#587, round 4), so the engine was never asked to transform it and the
-        /// dictation took the path it takes with nothing armed.
+        /// An armed Smart Mode declined the dictation as too short for it, and the
+        /// dictation took the path it takes with nothing armed. Two rules write it:
+        /// `Structuré`'s input floor (#587, round 4), before the engine is asked, and
+        /// `Liste`'s output check (#573), after the engine returned a list of fewer
+        /// than two items. `SmartModeLengthSkip` says which.
         ///
         /// Its own outcome rather than a flag on the Normal event that follows: with
         /// the polish toggle off there IS no event that follows — `PolishService`
@@ -97,21 +99,35 @@ public struct PolishMetrics: Sendable, Codable {
     /// Why an armed Smart Mode declined a dictation for length (#587), on the event
     /// that records the skip.
     ///
-    /// Carries the two numbers the decision was made on rather than only the verdict:
-    /// a reader asking whether the floor is right needs to see what it refused, and
-    /// the floor travels with the mode's record, which an export does not hold.
+    /// Carries the numbers the decision was made on rather than only the verdict: a
+    /// reader asking whether the rule is right needs to see what it refused, and the
+    /// rule travels with the mode's record, which an export does not hold.
+    ///
+    /// Two rules write it. `Structuré` declines on the input's length, before the model
+    /// runs, and fills `floor`. `Liste` declines on its output's item count, after the
+    /// model ran (#573, decision 5 amended), and fills `listItems` and
+    /// `minimumListItems` instead. Same event and same outcome either way: from the
+    /// user's side it is one behaviour, the dictation was too short for the mode.
     public struct SmartModeLengthSkip: Sendable, Codable, Equatable {
         /// `SmartMode.id` of the mode that declined.
         public let mode: String
         /// Characters in the transcript it was handed.
         public let characters: Int
-        /// The mode's `minimumInputCharacters` at the time.
-        public let floor: Int
+        /// The mode's `minimumInputCharacters` at the time, on an input-length skip.
+        /// Optional since #573: an output check has no input floor to report.
+        public let floor: Int?
+        /// `- ` lines in the declined output, on an output check (#573).
+        public let listItems: Int?
+        /// The mode's `minimumListItems` at the time, on an output check (#573).
+        public let minimumListItems: Int?
 
-        public init(mode: String, characters: Int, floor: Int) {
+        public init(mode: String, characters: Int, floor: Int? = nil,
+                    listItems: Int? = nil, minimumListItems: Int? = nil) {
             self.mode = mode
             self.characters = characters
             self.floor = floor
+            self.listItems = listItems
+            self.minimumListItems = minimumListItems
         }
     }
 

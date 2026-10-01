@@ -205,14 +205,51 @@ public final class PolishService {
         // before the delegated call — with the toggle off that call writes nothing at
         // all, which is why Pierre's 2026-09-23 export showed his short dictation as no
         // event whatsoever.
+        let skipRequest = ShortInputSkip(raw: raw, languagePolicy: languagePolicy,
+                                         recordingDuration: recordingDuration, engineRaw: engineRaw)
         if let armed = smartMode, !armed.runs(onInputOfLength: raw.count) {
+            let floor = armed.minimumInputCharacters ?? 0
             return await skipForShortInput(
                 armed,
-                request: ShortInputSkip(raw: raw, languagePolicy: languagePolicy,
-                                        recordingDuration: recordingDuration, engineRaw: engineRaw),
+                request: skipRequest,
+                detail: PolishMetrics.SmartModeLengthSkip(mode: armed.id, characters: raw.count, floor: floor),
+                logReason: "shortInput chars=\(raw.count) floor=\(floor)",
                 onEngineWillRun: onEngineWillRun
             )
         }
+        let outcome = await polishDispatched(raw: raw, languagePolicy: languagePolicy, smartMode: smartMode,
+                                             recordingDuration: recordingDuration, engineRaw: engineRaw,
+                                             onEngineWillRun: onEngineWillRun)
+        // The same decline, read off the OUTPUT (#573, decision 5 amended): `Liste`
+        // always runs, and a list of fewer than two items is a title over a lone
+        // dash-line. Only a delivered transformation is checked; a refusal already has
+        // its own answer. `onEngineWillRun` is not passed on: the stage it announces
+        // was announced for the mode's call, and the Normal polish that replaces it is
+        // the same wait from the user's side.
+        if let armed = smartMode, outcome.smartModeFailure == nil, let text = outcome.text,
+           !armed.acceptsOutput(text) {
+            let items = SmartMode.listItemCount(in: text)
+            let minimum = armed.minimumListItems ?? 0
+            return await skipForShortInput(
+                armed,
+                request: skipRequest,
+                detail: PolishMetrics.SmartModeLengthSkip(mode: armed.id, characters: raw.count,
+                                                          listItems: items, minimumListItems: minimum),
+                logReason: "tooFewListItems items=\(items) minimum=\(minimum)",
+                onEngineWillRun: nil
+            )
+        }
+        return outcome
+    }
+
+    /// Everything `polish` did before #573's output check, unchanged: the toggle gate,
+    /// detection, and the branch to one of the two paths.
+    private func polishDispatched(raw: String,
+                                  languagePolicy: TranscriptionLanguagePolicy,
+                                  smartMode: SmartMode?,
+                                  recordingDuration: TimeInterval,
+                                  engineRaw: String?,
+                                  onEngineWillRun: (() -> Void)?) async -> PolishOutcome {
         let task = smartMode.map(PolishTask.smart)
         guard PolishGatePolicy.runsDespiteToggle(
             task: task ?? .natural,
@@ -365,7 +402,11 @@ public final class PolishService {
             // (#593). Counted here because both processes run this, and it is the
             // one place a mode's success is known as such; the counter itself
             // decides whether a trial is running.
-            if job.task.smartMode != nil { ProTrialUsage.recordSmartModeUse() }
+            // An output `polish` is about to decline for its shape (#573) did not
+            // deliver the mode, so it is not counted.
+            if let mode = job.task.smartMode, mode.acceptsOutput(returned ?? raw) {
+                ProTrialUsage.recordSmartModeUse()
+            }
             return PolishOutcome(text: returned ?? raw)
         }
         let reason = bundle.failureReason?.slug ?? "-"
@@ -856,19 +897,20 @@ public final class PolishService {
         let engineRaw: String?
     }
 
-    /// Record the skip, then run the dictation as if nothing were armed (#587).
+    /// Record the skip, then run the dictation as if nothing were armed (#587). Since
+    /// #573 the same answer serves an output that failed the mode's
+    /// `minimumListItems`, with `detail` and `logReason` saying which rule declined.
     ///
     /// The returned outcome carries the text of that run **and** a `SmartModeFailure`,
     /// which is what `isDegraded` already means everywhere else: text was inserted and
     /// the mode did not run. The keyboard's toolbar says so in one sentence.
     private func skipForShortInput(_ mode: SmartMode,
                                    request: ShortInputSkip,
+                                   detail: PolishMetrics.SmartModeLengthSkip,
+                                   logReason: String,
                                    onEngineWillRun: (() -> Void)?) async -> PolishOutcome {
         let raw = request.raw
-        let floor = mode.minimumInputCharacters ?? 0
-        PersistentLog.log(.smartModeSkipped(
-            mode: mode.id, reason: "shortInput chars=\(raw.count) floor=\(floor)", disarmed: false
-        ))
+        PersistentLog.log(.smartModeSkipped(mode: mode.id, reason: logReason, disarmed: false))
         await emit(
             PolishMetrics(
                 engine: activeEngine.identifier,
@@ -879,9 +921,7 @@ public final class PolishService {
                 polishedCharCount: raw.count,
                 latencyMs: 0,
                 outcome: .smartModeSkippedShortInput,
-                smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip(
-                    mode: mode.id, characters: raw.count, floor: floor
-                )
+                smartModeLengthSkip: detail
             ),
             raw: raw, engineRaw: request.engineRaw, polished: nil
         )

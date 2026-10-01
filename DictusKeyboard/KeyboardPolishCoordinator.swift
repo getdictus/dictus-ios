@@ -419,11 +419,13 @@ final class KeyboardPolishCoordinator {
            failure.modeIdentifier == SmartModeCatalogue.notesIdentifier {
             // `Liste` has its own sentence (#573 decision 5), worded by the maintainer:
             // the mode's name is already in it, so it needs no colon-label, and "too
-            // short for a list" says why in the terms of the shape the user armed. The
-            // text went in with Normal polish, which the field shows by itself.
+            // short for a list" says why in the terms of the shape the user armed. It
+            // fires when the mode's own output held fewer than two items (decision 5
+            // as amended: an output check, not an input floor). The text went in with
+            // Normal polish, which the field shows by itself.
             return String(
                 localized: "Too short for a list.",
-                comment: "Shown when the List Smart Mode declined a dictation for being shorter than its floor, so the text went in with the normal polish instead."
+                comment: "Shown when the List Smart Mode produced fewer than two items, so the dictation went in with the normal polish instead."
             )
         }
         if failure.outcome == PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue {

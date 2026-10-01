@@ -564,7 +564,7 @@
       }
     },
     "Too short for a list." : {
-      "comment" : "Shown when the List Smart Mode declined a dictation for being shorter than its floor, so the text went in with the normal polish instead.",
+      "comment" : "Shown when the List Smart Mode produced fewer than two items, so the dictation went in with the normal polish instead.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
