@@ -59,6 +59,11 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     /// `SmartMode.id` of the mode that produced `summary`, so the screen can name it.
     public private(set) var summaryModeIdentifier: String?
 
+    /// When the user first opened this voice note's result (#620). Nil for a voice
+    /// note nobody has looked at yet, and for every dictation, which has nothing to
+    /// open. An unread voice note is what the result screen stacks.
+    public private(set) var openedAt: Date?
+
     /// The value `language` carries when the user let the engine detect it (#226's
     /// auto-detect mode). Not a language code, deliberately: the record must not
     /// claim a language nobody chose and nothing measured.
@@ -80,6 +85,7 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
         self.sourceMarker = source == .dictation ? nil : source.rawValue
         self.summary = nil
         self.summaryModeIdentifier = nil
+        self.openedAt = nil
     }
 
     /// Build a record from the per-dictation snapshot the pipeline already carries.
@@ -114,7 +120,7 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     private enum CodingKeys: String, CodingKey {
         case id, text, language, durationSeconds, createdAt, sttProvider
         case sourceMarker = "source"
-        case summary, summaryModeIdentifier
+        case summary, summaryModeIdentifier, openedAt
     }
 
     /// What to record as the language of a dictation run under `policy`.
@@ -175,6 +181,18 @@ public struct TranscriptionRecord: Identifiable, Codable, Hashable, Sendable {
     }
 
     /// Attach the output of the mode that ran on a voice note's transcript.
+    /// Mark a voice note's result as seen.
+    func withOpened(at date: Date) -> TranscriptionRecord {
+        var copy = self
+        copy.openedAt = date
+        return copy
+    }
+
+    /// A shared voice note whose result has never been opened.
+    public var isUnreadVoiceNote: Bool {
+        source == .sharedFile && openedAt == nil
+    }
+
     func withSummary(_ newSummary: String, modeIdentifier: String) -> TranscriptionRecord {
         var copy = self
         copy.summary = newSummary

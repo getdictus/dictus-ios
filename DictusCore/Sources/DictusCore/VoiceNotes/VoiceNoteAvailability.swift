@@ -50,6 +50,23 @@ public enum VoiceNoteAvailability {
         isEntitled
     }
 
+    /// Shortest transcript, in characters, a voice note's summary runs on (#620
+    /// rework). Below it the result shows the transcript alone.
+    ///
+    /// **200, the floor `Structuré` already carries** (`SmartModeCatalogue.structured`,
+    /// #587 round 4), rather than a new number: it was read off 51 device dictations,
+    /// where everything under 200 characters was one or two sentences with nothing
+    /// to condense, and it is where the voice note device run failed too — both
+    /// `LanguageModelError` refusals of 2026-10-01 were on one 8-second, 132-character
+    /// note. 200 characters is about 30 to 35 words of French or English, the "roughly
+    /// 30 words" the maintainer asked for.
+    public static let summaryMinimumCharacters = 200
+
+    /// Whether a transcript is long enough to be worth summarising.
+    public static func summaryRuns(onTranscriptOfLength characters: Int) -> Bool {
+        characters >= summaryMinimumCharacters
+    }
+
     /// Whether the summary can run on this device right now. The transcript never
     /// depends on this; only the half of the result screen that needs Apple
     /// Intelligence does. Voice notes are their own Pro feature, so the Smart Mode

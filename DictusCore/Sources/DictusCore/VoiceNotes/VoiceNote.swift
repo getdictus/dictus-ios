@@ -104,6 +104,10 @@ public struct VoiceNote: Identifiable, Codable, Equatable, Sendable {
     public var summaryModeIdentifier: String?
     /// The transcription language code ("fr", "auto", …), for the result screen.
     public var language: String?
+    /// When the user first saw this note's outcome — its result, or why it failed.
+    /// A finished note the history did not take lives here until then; see
+    /// `VoiceNoteQueue.removeOpenedFinished`.
+    public var openedAt: Date?
 
     public init(id: UUID = UUID(),
                 receivedAt: Date = Date(),
@@ -221,6 +225,30 @@ public struct VoiceNoteQueue: Equatable, Sendable {
             if !failure.isRetryable { $0.audioFileName = nil }
         }
         trimFinished()
+    }
+
+    /// Record that the user has seen this note's outcome.
+    public mutating func markOpened(_ id: UUID, at date: Date = Date()) {
+        update(id) { if $0.openedAt == nil { $0.openedAt = date } }
+    }
+
+    /// Finished notes the user has seen, removed when the result screen closes.
+    ///
+    /// The queue only ever holds a finished note for one of two reasons: it failed,
+    /// or it succeeded while History was off. Either way the result screen is the
+    /// only place it can be read (#620 rework, 2026-10-01: no separate list). Once
+    /// read and closed, a failure has been reported and a History-off transcript has
+    /// been delivered to the user who chose not to keep transcripts, so both go —
+    /// audio included, which `VoiceNoteQueueStore` sweeps.
+    public mutating func removeOpenedFinished() {
+        notes.removeAll { $0.state.isFinished && $0.openedAt != nil }
+    }
+
+    /// Notes the result screen stacks, oldest first (the order they were shared):
+    /// those still pending, and finished ones not yet seen.
+    public var stackable: [VoiceNote] {
+        notes.filter { !$0.state.isFinished || $0.openedAt == nil }
+            .sorted { $0.receivedAt < $1.receivedAt }
     }
 
     /// Put a retryable failure back in the queue.

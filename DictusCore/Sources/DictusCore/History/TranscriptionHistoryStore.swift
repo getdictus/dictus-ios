@@ -174,6 +174,20 @@ public final class TranscriptionHistoryStore: ObservableObject {
         persist()
     }
 
+    /// Mark a voice note's result as opened (#620). Ungated for `updateText`'s reason.
+    /// Only the first opening is recorded.
+    public func markOpened(id: UUID, at date: Date = Date()) {
+        guard let index = records.firstIndex(where: { $0.id == id }),
+              records[index].openedAt == nil else { return }
+        records[index] = records[index].withOpened(at: date)
+        persist()
+    }
+
+    /// Voice notes never opened, oldest first: the order they were shared in.
+    public var unreadVoiceNotes: [TranscriptionRecord] {
+        records.filter(\.isUnreadVoiceNote).sorted { $0.createdAt < $1.createdAt }
+    }
+
     /// The record with this id, if it is still saved.
     public func record(id: UUID) -> TranscriptionRecord? {
         records.first { $0.id == id }
