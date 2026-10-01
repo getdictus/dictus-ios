@@ -51,7 +51,12 @@ struct HistoryView: View {
                 }
             }
             .navigationDestination(item: $selection) { record in
-                TranscriptionDetailView(record: record)
+                // A shared voice note opens on its Summary + Transcript screen (#620).
+                if record.source == .sharedFile {
+                    VoiceNoteResultView(noteID: record.id)
+                } else {
+                    TranscriptionDetailView(record: record)
+                }
             }
         }
         // The grabber says the sheet is draggable, which is the same statement the
@@ -191,6 +196,11 @@ private struct HistoryCard: View {
                 .multilineTextAlignment(.leading)
 
             HStack(spacing: 6) {
+                // Marked as a shared file, not a dictation (#620 decision 7).
+                if record.source == .sharedFile {
+                    Image(systemName: ProFeature.voiceNotes.icon)
+                        .accessibilityLabel(Text("Voice note"))
+                }
                 Text(dateLabel)
                 Text("·")
                 Text(record.languageBadge)

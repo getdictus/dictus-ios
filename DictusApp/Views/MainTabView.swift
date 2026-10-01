@@ -63,6 +63,10 @@ struct MainTabView: View {
     /// on stops mattering.
     @State private var showsPaywall = false
 
+    /// The shared voice notes (#620): what the Live Activity link or the cold path
+    /// asked to show.
+    @ObservedObject private var voiceNotes = VoiceNoteProcessor.shared
+
     @Environment(\.scenePhase) private var scenePhase
 
     /// Seeds the presentation state from the URL this process was launched with (issue #264).
@@ -107,6 +111,15 @@ struct MainTabView: View {
         !isColdStartMode && preparation == nil && coordinator.status == .idle && !showsPaywall
     }
 
+    /// The voice note sheet's presentation, read from and written back to the
+    /// processor, which is what the Live Activity link and the cold path set.
+    private var voiceNotePresentation: Binding<VoiceNotePresentation?> {
+        Binding(
+            get: { voiceNotes.presentation },
+            set: { voiceNotes.presentation = $0 }
+        )
+    }
+
     var body: some View {
         ZStack {
             if let preparation {
@@ -132,6 +145,13 @@ struct MainTabView: View {
                     NavigationStack {
                         HomeView(modelManager: modelManager)
                     }
+                    // On the Home stack rather than the TabView, which already carries
+                    // the trial's sheet: one sheet per view is what SwiftUI honours.
+                    // Shown only from the ordinary navigation — never over the cold
+                    // start overlay or the preparation screen, which replace it.
+                    .sheet(item: voiceNotePresentation) { presentation in
+                        VoiceNotesView(initial: presentation)
+                    }
                     .tabItem {
                         Label("Home", systemImage: "house.fill")
                     }
@@ -156,6 +176,12 @@ struct MainTabView: View {
                     .tag(2)
                 }
                 .tint(.dictusAccent)
+                // The voice note sheet hangs off the Home tab; a sheet on a tab that is
+                // not on screen does not present, so a Live Activity tap brings Home
+                // forward first.
+                .onChange(of: voiceNotes.presentation) { _, presentation in
+                    if presentation != nil { selectedTab = 0 }
+                }
                 // The reverse trial's two self-raised screens (#593). On the TabView and
                 // not on the ZStack below, which already carries the user's paywall
                 // cover: two full-screen covers on one view is a presentation SwiftUI

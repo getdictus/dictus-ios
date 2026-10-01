@@ -167,6 +167,11 @@
 		CC00000F /* DeviceKit in Frameworks */ = {isa = PBXBuildFile; productRef = CC900001 /* DeviceKit */; };
 		CC000020 /* DictusKeyboardBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100020 /* DictusKeyboardBridge.swift */; };
 		CC000040 /* HostInputTraits.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC100040 /* HostInputTraits.swift */; };
+		VN6200000001 /* VoiceNoteProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000001 /* VoiceNoteProcessor.swift */; };
+		VN6200000002 /* VoiceNoteCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000002 /* VoiceNoteCopy.swift */; };
+		VN6200000003 /* VoiceNoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000003 /* VoiceNoteSettingsView.swift */; };
+		VN6200000004 /* VoiceNoteResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000004 /* VoiceNoteResultView.swift */; };
+		VN6200000005 /* VoiceNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000005 /* VoiceNotesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -374,6 +379,11 @@
 		EE1ES002 /* es_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = es_ngrams.dict; sourceTree = "<group>"; };
 		EE1DE001 /* de_spellcheck.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = de_spellcheck.dict; sourceTree = "<group>"; };
 		EE1DE002 /* de_ngrams.dict */ = {isa = PBXFileReference; lastKnownFileType = "compiled"; path = de_ngrams.dict; sourceTree = "<group>"; };
+		VN6201000001 /* VoiceNoteProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteProcessor.swift; sourceTree = "<group>"; };
+		VN6201000002 /* VoiceNoteCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteCopy.swift; sourceTree = "<group>"; };
+		VN6201000003 /* VoiceNoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteSettingsView.swift; sourceTree = "<group>"; };
+		VN6201000004 /* VoiceNoteResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteResultView.swift; sourceTree = "<group>"; };
+		VN6201000005 /* VoiceNotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNotesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -436,6 +446,7 @@
 				AA400007 /* Audio */,
 				AA40000B /* Onboarding */,
 				AA40P200 /* Polish */,
+				VN6204000001 /* VoiceNotes */,
 				AA400008 /* Views */,
 				AA400009 /* Models */,
 				AA40000F /* Services */,
@@ -802,6 +813,18 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		VN6204000001 /* VoiceNotes */ = {
+			isa = PBXGroup;
+			children = (
+				VN6201000001 /* VoiceNoteProcessor.swift */,
+				VN6201000002 /* VoiceNoteCopy.swift */,
+				VN6201000003 /* VoiceNoteSettingsView.swift */,
+				VN6201000004 /* VoiceNoteResultView.swift */,
+				VN6201000005 /* VoiceNotesView.swift */,
+			);
+			path = VoiceNotes;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1102,6 +1125,11 @@
 				AA700071 /* TranscriptionDetailView.swift in Sources */,
 				AA700072 /* SwipeUpHintView.swift in Sources */,
 				SS000003 /* ProBannerView.swift in Sources */,
+				VN6200000001 /* VoiceNoteProcessor.swift in Sources */,
+				VN6200000002 /* VoiceNoteCopy.swift in Sources */,
+				VN6200000003 /* VoiceNoteSettingsView.swift in Sources */,
+				VN6200000004 /* VoiceNoteResultView.swift in Sources */,
+				VN6200000005 /* VoiceNotesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
