@@ -131,3 +131,46 @@ rather than one sentence cut in two.
    question.
 6. **A character floor misfires both ways**: a short enumeration loses its list (Structuré's known
    cost at 149 characters), a long single idea still gets one bullet. The curve says how often.
+
+---
+
+## 8. Round 2: after device round 1 (2026-10-01), two decisions amended
+
+> Written and committed **before the first model call of round 2**. Context: the comment of
+> 2026-10-01 21:19 on #573. C3 (shipped in PR #629 at `a03da9d`) failed on device on the
+> title: an announcement *sentence* opener ("Je te fais un petit récap de ce qu'on a fait ce
+> soir") made the model promote the first point to title and leave its bullet truncated
+> (`- J'ai fait`); past facts became tasks; a 64-character four-item list was skipped by the
+> 100-character floor.
+
+**Amended by Pierre:**
+- **Decision 2:** the title is a short summary of what the list is about, chosen by the model
+  from the whole transcript, in its own words when needed. Hard: no fact absent from the
+  transcript (day, time, name, number, place), never a generic label, never one of the points,
+  a bullet never loses words to the title.
+- **Decision 5:** the floor is replaced by a **post-check**. `Liste` always runs; an output with
+  fewer than two bullets is replaced by Normal polish with the same notice and export event.
+- **Decision 1, restated:** a past fact stays past (`- On a gardé les petits`, never `- Garder…`).
+
+**Fixtures:** `fixtures/liste-round2.json` (set **R**, 10, synthetic, written to reproduce the
+device shapes without their content, which is private). Pierre's device dictations are not
+committed.
+
+**Arms:** C3 (shipping in the branch) as baseline on R; candidate C4 onward on R, N, S, M, L, T.
+3 runs per fixture.
+
+| Bar | How it is read | Holds when |
+|---|---|---|
+| **T1 — the title is never one of the points** | Screen: the title's content words (4+ letters) are ≥ 70 % contained in one bullet, or a bullet starts with the title's words. Hand read of every flag. | 0 accepted outputs on R, N, S, M, L |
+| **T2 — no invented fact in the title** | Screen: a number, a day or month name, or a capitalised word in the title absent from the input. Hand read. | 0 accepted outputs on every set |
+| **T3 — never a generic label** | The title, colon stripped, is one of: Notes, Note, Résumé, Summary, Liste, List, Points, Récap, Récapitulatif, À faire, To do, Tâches, Tasks, Status, Current status, État actuel, Estado actual, Stato attuale, Status atual. Plus hand read for the other languages. | 0 accepted outputs on every set |
+| **T4 — no bullet truncated by the title** | Screen: a bullet of ≤ 2 words. Hand read: is it a fragment whose rest went into the title? | 0 on R, N, S, M, L |
+| **P1 — past facts stay past** | R1-R5 (recaps of past facts), every line read by hand: a past fact written as an infinitive task is a failure. | 0 accepted outputs |
+| **P2 — post-check inputs** | R6, R7 (four items, < 100 characters): ≥ 2 bullets, i.e. they pass the post-check. R10 (one idea): reported. | R6, R7: every run ≥ 2 bullets |
+| **Regression** | §5's B2 (language, 16), B3 (S, 0 tasks from statements), B4 (N1-N6), B5 (shape), B7 (band) on the candidate | as in §5 |
+
+**Not barred, reported:** filler (`uh`, `euh`) left in a bullet on R3, R9; a duplicated bullet
+on R9; title readings per language on T.
+
+**Decision rule:** the first candidate that holds every bar ships. A bar that no candidate holds
+after three is reported, not worked around.
