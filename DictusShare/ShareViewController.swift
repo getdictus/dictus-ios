@@ -343,7 +343,6 @@ final class ShareModel: ObservableObject {
         return .failure(failure)
     }
 
-
     private func log(_ action: String, _ details: String) {
         PersistentLog.log(.diagnosticProbe(component: "VoiceNoteShare", instanceID: "extension", action: action, details: details))
     }

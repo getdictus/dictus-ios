@@ -43,8 +43,8 @@ public enum MatroskaOpusDemuxer {
     static let blockGroup: UInt32 = 0xA0
     static let block: UInt32 = 0xA1
 
-    /// Masters whose children are read. Everything else is skipped by its size.
-    static let masters: Set<UInt32> = [segment, tracks, trackEntry, cluster, blockGroup]
+    /// Container elements whose children are read. Everything else is skipped by its size.
+    static let containers: Set<UInt32> = [segment, tracks, trackEntry, cluster, blockGroup]
 
     struct Track {
         var number: UInt64?
@@ -80,7 +80,7 @@ public enum MatroskaOpusDemuxer {
                     try walk(bodyStart..<bodyEnd)
                     if let finished = current { tracks.append(finished) }
                     current = nil
-                case _ where masters.contains(id):
+                case _ where containers.contains(id):
                     try walk(bodyStart..<bodyEnd)
                 case trackNumber:
                     current?.number = unsigned(bytes[bodyStart..<bodyEnd])
