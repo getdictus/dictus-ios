@@ -11,7 +11,8 @@ import Foundation
 /// neither of the other two carries: it rewrites the speaker's sentences rather than
 /// reshaping them, which is why it is a row of its own rather than a rendering option
 /// on List. Summary was cut in the design session because List already synthesises;
-/// #571 reopens that on the grounds that List synthesises into *actions*.
+/// #571 reopened that on the grounds that List synthesised into *actions*, and #573
+/// re-centred List as the bulleted twin of Summary: the same loss axis, two shapes.
 ///
 /// **SMS was cut in that same session, and #572 falsified the reason.** The cut read:
 /// the free polish already produces natural conversational text — that is literally
@@ -69,7 +70,9 @@ public enum SmartModeCatalogue {
 
     // MARK: - The rows
 
-    /// List: bullets, synthesised, filler removed, in the speaker's own language.
+    /// List: a title from the speaker's words, then every point they made, one line
+    /// each, in their own language (#573). Actions come out in the infinitive so they
+    /// can be ticked off; statements stay statements. `Summary` is the prose version.
     ///
     /// **Named `Notes` until 2026-08-27**, when the maintainer renamed the label —
     /// and only the label. `Notes` names an intention and reads equally well as
@@ -142,7 +145,8 @@ public enum SmartModeCatalogue {
     ///
     /// The rule that keeps the two apart on the input where they would otherwise
     /// collapse is in the prompt, not here: Structured keeps the speaker's
-    /// grammatical person, where `List` produces infinitive tasks. See
+    /// grammatical person in paragraphs, where `List` condenses each point to one
+    /// line and writes the actions as infinitive tasks. See
     /// `SmartModeStructuredPrompt`.
     ///
     /// ### The band is measured, unusually for this file
@@ -326,10 +330,12 @@ public enum SmartModeCatalogue {
     /// ### The axis, and why this is not `List` without bullets
     ///
     /// The #79 design session cut Summary because *List already synthesises*. True
-    /// of the axis, not of the shape: `List` compresses into **actions**, as
-    /// infinitive bullets, and a dictation with no action in it gets bullets invented
-    /// out of statements. This row compresses into **substance**, as prose, and the
-    /// difference is visible in one glance — #393's bar B, the one Email failed.
+    /// of the axis, not of the shape. When #571 shipped, `List` compressed into
+    /// **actions**, as infinitive bullets, and invented tasks out of statements; #573
+    /// re-centred it on every point, in bullets. The two now share the loss axis and
+    /// differ by shape: this row keeps the **substance**, as prose, to read or
+    /// forward; `List` keeps every point, as lines, to scan or tick off. The difference
+    /// is visible in one glance — #393's bar B, the one Email failed.
     ///
     /// ### The band is `0.1 … 0.75`: decision 1's shape, its ceiling raised once
     ///
