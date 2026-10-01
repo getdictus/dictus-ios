@@ -7,6 +7,8 @@ import DictusCore
 struct VoiceNoteStackRequest: Identifiable, Equatable {
     /// The note the Live Activity link named, if any.
     let focus: UUID?
+    /// What opened it, for the log: `auto`, `island` or `link`.
+    let source: String
     let id = UUID()
 }
 
@@ -38,6 +40,8 @@ struct VoiceNoteStackView: View {
 
     @State private var cards: [UUID] = []
     @State private var selection: UUID?
+    @State private var session = VoiceNoteStackSession(stackable: [])
+    @State private var loaded = false
 
     var body: some View {
         NavigationStack {
@@ -70,12 +74,17 @@ struct VoiceNoteStackView: View {
             }
         }
         .presentationDragIndicator(.visible)
-        .onAppear(perform: loadCards)
+        .onAppear {
+            loadCards()
+            loaded = true
+        }
         .onReceive(queueStore.$queue) { _ in appendArrivals() }
         .onReceive(history.$records) { _ in appendArrivals() }
         .onDisappear {
             // Failures and History-off results the user has now seen leave the queue.
             queueStore.mutate { $0.removeOpenedFinished() }
+            let unreadLeft = Set(stackable.map(\.id))
+            log("dismiss", "shown=\(cards.count) unreadLeft=\(unreadLeft.count)")
         }
     }
 
@@ -89,32 +98,41 @@ struct VoiceNoteStackView: View {
     }
 
     /// Unread and pending notes, oldest first. Without them, the note the link named.
-    private var stackable: [UUID] {
-        let queued = queueStore.queue.stackable.map { ($0.id, $0.receivedAt) }
-        let saved = history.unreadVoiceNotes.map { ($0.id, $0.createdAt) }
-        var seen = Set<UUID>()
-        return (queued + saved)
-            .sorted { $0.1 < $1.1 }
-            .compactMap { seen.insert($0.0).inserted ? $0.0 : nil }
+    /// Unread and running notes from both stores. The ordering, de-duplication and
+    /// append rules are `VoiceNoteStackSession`'s, tested in DictusCore.
+    private var stackable: [VoiceNoteStackSession.Entry] {
+        queueStore.queue.stackable.map { .init(id: $0.id, sharedAt: $0.receivedAt) }
+            + history.unreadVoiceNotes.map { .init(id: $0.id, sharedAt: $0.createdAt) }
     }
 
     private func loadCards() {
-        var ids = stackable
-        // A note already read is still what the link asked for: it opens alone.
-        if let focus = request.focus, !ids.contains(focus) { ids = [focus] }
-        cards = ids
+        session = VoiceNoteStackSession(stackable: stackable, focus: request.focus)
+        cards = session.cards
         // The stack opens on the oldest unread note, so a swipe to the left always
         // moves forward in the order things were shared.
-        selection = ids.first
+        selection = cards.first
+        log("present", "source=\(request.source) ids=\(Self.short(cards))")
     }
 
     private func appendArrivals() {
-        let fresh = stackable.filter { !cards.contains($0) }
+        // Before the first load, `onAppear` has not built the session yet.
+        guard loaded else { return }
+        let fresh = session.append(stackable: stackable)
         guard !fresh.isEmpty else { return }
         // An empty screen takes a note that arrives while it is open, and shows it.
         let wasEmpty = cards.isEmpty
-        cards.append(contentsOf: fresh)
+        cards = session.cards
         if wasEmpty { selection = cards.first }
+        log("append", "ids=\(Self.short(fresh))")
+    }
+
+    private func log(_ action: String, _ details: String) {
+        PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "stack", action: action, details: details))
+    }
+
+    /// Ids as 8-character prefixes, the same form the queue lines use.
+    static func short(_ ids: [UUID]) -> String {
+        ids.map { String($0.uuidString.prefix(8)) }.joined(separator: ",")
     }
 
     private var emptyState: some View {

@@ -119,8 +119,7 @@ final class VoiceNoteProcessor: ObservableObject {
         case .present:
             presentationRecheck?.cancel()
             presentationRecheck = nil
-            log("stackPresented", "unread=\(readyUnreadCount)")
-            presentation = VoiceNoteStackRequest(focus: nil)
+            presentation = VoiceNoteStackRequest(focus: nil, source: "auto")
         case .wait:
             guard presentationRecheck == nil else { return }
             presentationRecheck = Task { [weak self] in
@@ -147,13 +146,26 @@ final class VoiceNoteProcessor: ObservableObject {
 
     /// A card showed a note's outcome: the ring loses that segment (#620 decision 9).
     func noteRead(_ id: UUID) {
+        PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "stack", action: "markRead",
+                                           details: "id=\(id.uuidString.prefix(8))"))
         VoiceNoteIslandDriver.shared.read(id)
     }
 
     /// `dictus://voice-note[?id=…]`, from the Live Activity: the voice note screen,
     /// on the unread stack (see `VoiceNoteStackView`).
     func open(_ target: UUID?) {
-        presentation = VoiceNoteStackRequest(focus: target)
+        // The island's link names no note; the share extension's cold-path link does.
+        // A screen the activation already raised shows the same cards: keep it rather
+        // than close and reopen it (never two presentations in a row).
+        if target == nil, presentation != nil { return }
+        presentation = VoiceNoteStackRequest(focus: target, source: target == nil ? "island" : "link")
+    }
+
+    /// The app left the foreground: the voice note screen closes with it, so the next
+    /// activation opens a fresh one from what is unread then (`VoiceNoteStackSession`).
+    func appWentToBackground() {
+        guard presentation != nil else { return }
+        presentation = nil
     }
 
     /// Put a failed note back in the queue.

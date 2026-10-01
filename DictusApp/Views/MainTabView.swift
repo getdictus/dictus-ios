@@ -151,6 +151,8 @@ struct MainTabView: View {
                     // start overlay or the preparation screen, which replace it.
                     .sheet(item: voiceNotePresentation) { request in
                         VoiceNoteStackView(request: request)
+                            // A new request is a new screen, never the previous one kept.
+                            .id(request.id)
                     }
                     .tabItem {
                         Label("Home", systemImage: "house.fill")

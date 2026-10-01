@@ -107,7 +107,15 @@ final class VoiceNoteIslandDriver {
 
     // MARK: - Push
 
+    /// The last ready count logged, so the line is written only when it changes.
+    private var loggedReadyCount = 0
+
     private func push(alert: Bool = false) {
+        if island.readyCount != loggedReadyCount {
+            loggedReadyCount = island.readyCount
+            PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "island", action: "readyCount",
+                                               details: "ready=\(island.readyCount) segments=\(island.segments.count)"))
+        }
         guard !island.isEmpty else {
             LiveActivityManager.shared.updateVoiceNote(nil)
             return

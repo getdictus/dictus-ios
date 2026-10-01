@@ -304,6 +304,8 @@ struct DictusApp: App {
                         PersistentLog.log(.appWillResignActive)
                     case .background:
                         PersistentLog.log(.appDidEnterBackground)
+                        // The voice note screen lasts one activation (#620).
+                        VoiceNoteProcessor.shared.appWentToBackground()
 
                         // A cold start parked waiting for `.active` gets its last
                         // chance here (#311), because `.active` is not coming — the

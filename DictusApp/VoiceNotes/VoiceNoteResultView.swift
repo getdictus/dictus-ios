@@ -16,5 +16,9 @@ struct VoiceNoteResultView: View {
             .background(Color.dictusBackground.ignoresSafeArea())
             .navigationTitle("Voice note")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "stack", action: "present",
+                                                   details: "source=history ids=\(noteID.uuidString.prefix(8))"))
+            }
     }
 }
