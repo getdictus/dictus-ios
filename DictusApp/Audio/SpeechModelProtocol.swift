@@ -71,16 +71,23 @@ struct SpeechTranscription {
     /// The language tag the model emitted, when it emitted one (Nemotron, #558).
     let detectedLanguage: String?
 
+    /// What Parakeet's drift retry did to this transcript (#623): spans re-decoded, spans
+    /// replaced, time spent. `nil` on the engines that have no retry, and on a Parakeet
+    /// dictation whose retry failed and fell back to the first pass.
+    let retry: DriftRetryStats?
+
     init(text: String,
          confidence: Float?,
          language: String? = nil,
          promptId: Int? = nil,
-         detectedLanguage: String? = nil) {
+         detectedLanguage: String? = nil,
+         retry: DriftRetryStats? = nil) {
         self.text = text
         self.confidence = confidence
         self.language = language
         self.promptId = promptId
         self.detectedLanguage = detectedLanguage
+        self.retry = retry
     }
 }
 
