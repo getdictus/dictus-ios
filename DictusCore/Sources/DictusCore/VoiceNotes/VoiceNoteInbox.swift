@@ -172,17 +172,44 @@ public enum VoiceNoteInbox {
 
 extension JSONEncoder {
     /// Shared by every voice note file, so writer and reader cannot drift on dates.
+    ///
+    /// ISO 8601 **with fractional seconds**: the share time orders the queue and the
+    /// cards, and several notes shared at once fall in the same second (device test
+    /// of a5345688). The history file keeps its own whole-second format; it is older
+    /// than this and an older build must still read it.
     static var voiceNotes: JSONEncoder {
         let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
+        encoder.dateEncodingStrategy = .custom { date, encoder in
+            var container = encoder.singleValueContainer()
+            try container.encode(VoiceNoteDates.formatter(fractional: true).string(from: date))
+        }
         return encoder
     }
 }
 
 extension JSONDecoder {
+    /// Reads both forms: fractional, and the whole-second one earlier builds wrote.
     static var voiceNotes: JSONDecoder {
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let text = try container.decode(String.self)
+            if let date = VoiceNoteDates.formatter(fractional: true).date(from: text)
+                ?? VoiceNoteDates.formatter(fractional: false).date(from: text) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "not an ISO 8601 date: \(text)")
+        }
         return decoder
+    }
+}
+
+enum VoiceNoteDates {
+    /// A new formatter per use: `ISO8601DateFormatter` is not `Sendable`, and these
+    /// files are read and written a handful of times per note.
+    static func formatter(fractional: Bool) -> ISO8601DateFormatter {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = fractional ? [.withInternetDateTime, .withFractionalSeconds] : [.withInternetDateTime]
+        return formatter
     }
 }

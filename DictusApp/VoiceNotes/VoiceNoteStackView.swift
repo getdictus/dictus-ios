@@ -81,6 +81,7 @@ struct VoiceNoteStackView: View {
         .onReceive(queueStore.$queue) { _ in appendArrivals() }
         .onReceive(history.$records) { _ in appendArrivals() }
         .onDisappear {
+            markPresentedRead()
             // Failures and History-off results the user has now seen leave the queue.
             queueStore.mutate { $0.removeOpenedFinished() }
             let unreadLeft = Set(stackable.map(\.id))
@@ -124,6 +125,26 @@ struct VoiceNoteStackView: View {
         cards = session.cards
         if wasEmpty { selection = cards.first }
         log("append", "ids=\(Self.short(fresh))")
+    }
+
+    /// Closing marks every presented note read, swiped to or not (maintainer
+    /// decision, 2026-10-01; `VoiceNoteStackSession.readOnDismiss`). A note still
+    /// running is skipped: it has no result yet, and its result arrives unread.
+    private func markPresentedRead() {
+        var marked: [UUID] = []
+        for id in session.readOnDismiss {
+            if let record = history.record(id: id) {
+                guard record.openedAt == nil else { continue }
+                history.markOpened(id: id)
+            } else if let note = queueStore.queue.note(id: id), note.state.isFinished, note.openedAt == nil {
+                queueStore.mutate { $0.markOpened(id) }
+            } else {
+                continue
+            }
+            VoiceNoteIslandDriver.shared.read(id)
+            marked.append(id)
+        }
+        if !marked.isEmpty { log("markRead", "reason=dismiss ids=\(Self.short(marked))") }
     }
 
     private func log(_ action: String, _ details: String) {

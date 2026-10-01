@@ -12,6 +12,11 @@ import Foundation
 ///   ever removed under the user's finger, and there is never a second opening.
 /// - A note is read once its card has been on screen; read notes are never in a
 ///   later opening.
+/// - **Closing the screen marks every note it presented as read** (maintainer
+///   decision, 2026-10-01), including cards never swiped to and notes appended while
+///   it was open. So "four shared, four cards" always holds; the unopened ones are
+///   in History. A note still being transcribed has no result to read and stays
+///   unread until its result arrives.
 /// - **An opening lasts one activation.** When the app leaves the foreground the
 ///   screen is closed, and the next activation opens a fresh session from what is
 ///   unread then. The device test of af1985e5 showed why: a screen left open across
@@ -50,9 +55,18 @@ public struct VoiceNoteStackSession: Equatable, Sendable {
         return fresh
     }
 
-    /// Oldest first, each id once.
+    /// The notes closing this screen marks read: every card it presented. The caller
+    /// skips those still running (see the type's contract).
+    public var readOnDismiss: [UUID] { cards }
+
+    /// Oldest first, each id once. **Stable**: notes shared in the same instant keep
+    /// the order they are given in, which the callers make the share order (device
+    /// test of a5345688: three notes shared within one second came out newest first,
+    /// because the sort was not stable and the timestamps tied).
     public static func ordered(_ entries: [Entry]) -> [UUID] {
         var seen = Set<UUID>()
-        return entries.sorted { $0.sharedAt < $1.sharedAt }.compactMap { seen.insert($0.id).inserted ? $0.id : nil }
+        return entries.enumerated()
+            .sorted { $0.element.sharedAt == $1.element.sharedAt ? $0.offset < $1.offset : $0.element.sharedAt < $1.element.sharedAt }
+            .compactMap { seen.insert($0.element.id).inserted ? $0.element.id : nil }
     }
 }

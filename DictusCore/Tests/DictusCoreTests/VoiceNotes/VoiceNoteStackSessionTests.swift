@@ -26,22 +26,32 @@ final class VoiceNoteStackSessionTests: XCTestCase {
         XCTAssertEqual(VoiceNoteStackSession(stackable: world.unread).cards, batch)
     }
 
-    func testDismissingAfterTheFirstCardLeavesThreeForTheNextActivation() {
+    /// Maintainer decision (2026-10-01): closing marks every presented note read.
+    func testDismissingAfterTheFirstCardLeavesNothingFromThatBatch() {
         var world = World()
-        let batch = world.share(4)
+        _ = world.share(4)
         let first = VoiceNoteStackSession(stackable: world.unread)
-        world.read.insert(first.cards[0])       // the card on screen
-        XCTAssertEqual(VoiceNoteStackSession(stackable: world.unread).cards, Array(batch.dropFirst()))
+        world.read.insert(first.cards[0])            // the card on screen
+        first.readOnDismiss.forEach { world.read.insert($0) }  // closed
+        XCTAssertTrue(VoiceNoteStackSession(stackable: world.unread).cards.isEmpty)
     }
 
-    func testFourMoreAfterThreeGenuinelyUnseenMakesSevenAndNoMore() {
+    func testFourSharedAlwaysMeansFourCards() {
         var world = World()
-        let batch = world.share(4)
-        world.read.insert(batch[0])
+        _ = world.share(4)
+        let first = VoiceNoteStackSession(stackable: world.unread)
+        first.readOnDismiss.forEach { world.read.insert($0) }
         let next = world.share(4)
-        let session = VoiceNoteStackSession(stackable: world.unread)
-        XCTAssertEqual(session.cards, Array(batch.dropFirst()) + next)
-        XCTAssertEqual(session.cards.count, 7)
+        XCTAssertEqual(VoiceNoteStackSession(stackable: world.unread).cards, next)
+    }
+
+    func testNotesAppendedWhileOpenArePresentedTooAndReadOnClose() {
+        var world = World()
+        _ = world.share(1)
+        var session = VoiceNoteStackSession(stackable: world.unread)
+        let later = world.share(2)
+        session.append(stackable: world.unread)
+        XCTAssertTrue(Set(later).isSubset(of: Set(session.readOnDismiss)))
     }
 
     func testReadNotesNeverReappear() {
@@ -79,5 +89,40 @@ final class VoiceNoteStackSessionTests: XCTestCase {
         world.read.insert(batch[0])
         XCTAssertEqual(VoiceNoteStackSession(stackable: world.unread, focus: batch[0]).cards, [batch[0]])
         XCTAssertEqual(VoiceNoteStackSession(stackable: world.unread, focus: batch[1]).cards, [batch[1]])
+    }
+
+    /// Device test of a5345688: three notes shared within one second were stacked
+    /// newest first. Ties keep the order given, which is the share order.
+    func testNotesSharedInTheSameSecondStayInShareOrder() {
+        let sameSecond = Date(timeIntervalSince1970: 100)
+        let ids = [UUID(), UUID(), UUID()]
+        let session = VoiceNoteStackSession(stackable: ids.map { .init(id: $0, sharedAt: sameSecond) })
+        XCTAssertEqual(session.cards, ids)
+    }
+
+    @MainActor
+    func testHistoryBreaksSecondTiesByShareOrder() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("history-\(UUID()).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let store = TranscriptionHistoryStore(fileURL: url, isEntitled: { true })
+        let sameSecond = Date(timeIntervalSince1970: 100)
+        // Appended in the order the queue finishes them, which is the share order.
+        let shared = (0..<3).map { _ in
+            TranscriptionRecord(text: "t", language: "fr", durationSeconds: 1, createdAt: sameSecond,
+                                sttProvider: "PK", source: .sharedFile)
+        }
+        shared.forEach { store.append($0) }
+        XCTAssertEqual(store.unreadVoiceNotes.map(\.id), shared.map(\.id))
+        // Also after a reload, when the dates have been rounded to the second.
+        XCTAssertEqual(TranscriptionHistoryStore(fileURL: url, isEntitled: { true }).unreadVoiceNotes.map(\.id),
+                       shared.map(\.id))
+    }
+
+    func testVoiceNoteFilesKeepSubSecondShareTimesAndReadOldOnes() throws {
+        let drop = VoiceNoteDrop(receivedAt: Date(timeIntervalSince1970: 100.25), format: .ogg, durationSeconds: nil)
+        let decoded = try JSONDecoder.voiceNotes.decode(VoiceNoteDrop.self, from: JSONEncoder.voiceNotes.encode(drop))
+        XCTAssertEqual(decoded.receivedAt.timeIntervalSince1970, 100.25, accuracy: 0.001)
+        let old = #"{"id":"\#(UUID().uuidString)","receivedAt":"2026-10-01T20:50:37Z","format":"ogg"}"#
+        XCTAssertNoThrow(try JSONDecoder.voiceNotes.decode(VoiceNoteDrop.self, from: Data(old.utf8)))
     }
 }

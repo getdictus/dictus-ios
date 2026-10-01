@@ -184,8 +184,15 @@ public final class TranscriptionHistoryStore: ObservableObject {
     }
 
     /// Voice notes never opened, oldest first: the order they were shared in.
+    ///
+    /// The history stores dates to the second, so notes shared in the same second tie.
+    /// The tie goes to insertion order: `records` is newest first, and the queue
+    /// transcribes in share order, so a later index is an earlier share.
     public var unreadVoiceNotes: [TranscriptionRecord] {
-        records.filter(\.isUnreadVoiceNote).sorted { $0.createdAt < $1.createdAt }
+        records.enumerated()
+            .filter { $0.element.isUnreadVoiceNote }
+            .sorted { $0.element.createdAt == $1.element.createdAt ? $0.offset > $1.offset : $0.element.createdAt < $1.element.createdAt }
+            .map(\.element)
     }
 
     /// The record with this id, if it is still saved.
