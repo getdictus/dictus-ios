@@ -218,4 +218,21 @@ final class VoiceNoteQueueTests: XCTestCase {
         XCTAssertNotNil(store.queue.note(id: busy))
         XCTAssertNil(store.queue.note(id: idle))
     }
+
+    /// A failed queue write must not sweep audio the queue on disk still points at.
+    @MainActor
+    func testAFailedWriteSweepsNothing() throws {
+        let storage = try temporaryStorage()
+        try VoiceNoteInbox.drop(copying: try sourceAudio(), format: .ogg, durationSeconds: nil, storage: storage)
+        let store = VoiceNoteQueueStore(storage: storage)
+        let note = try XCTUnwrap(store.ingestInbox().first)
+        let audio = try XCTUnwrap(store.audioURL(for: note))
+
+        // Make the next write fail: a directory where the queue file goes.
+        try FileManager.default.removeItem(at: storage.queueFile)
+        try FileManager.default.createDirectory(at: storage.queueFile, withIntermediateDirectories: false)
+
+        store.mutate { $0.complete(note.id, transcript: "ok", language: "fr", savedToHistory: true) }
+        XCTAssertTrue(FileManager.default.fileExists(atPath: audio.path), "the audio survives a failed write")
+    }
 }

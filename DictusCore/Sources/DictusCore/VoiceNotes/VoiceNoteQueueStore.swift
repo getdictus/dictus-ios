@@ -49,7 +49,10 @@ public final class VoiceNoteQueueStore: ObservableObject {
     /// Change the queue and write it.
     public func mutate(_ change: (inout VoiceNoteQueue) -> Void) {
         change(&queue)
-        persist()
+        // Sweep only what the queue on disk no longer references: after a failed
+        // write the previous `queue.json` still points at audio the in-memory queue
+        // dropped, and deleting it would lose a note on the next launch.
+        guard persist() else { return }
         sweepUnreferencedAudio()
     }
 
