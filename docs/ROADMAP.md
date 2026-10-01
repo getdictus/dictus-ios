@@ -10,21 +10,22 @@ Where we are going, and which issue to work on next. Nothing else.
 - Whole file under 60 lines. If an edit pushes it past that, something belongs on an issue instead.
 - The [Project board](https://github.com/orgs/getdictus/projects/2) moves by itself on a branch push, a PR and a merge. Two moves are by hand: an issue added to **Now** is added to the board in the same edit (`gh project item-add 2 --owner getdictus --url <issue-url>`), and work with no branch (a grilling, a measurement) is set to In progress when it starts.
 
-Last reviewed: 2026-09-30.
+Last reviewed: 2026-10-01.
 
 ## Now — 2.0.0, the Pro launch
 
 Take the first line that is not struck through. Status (who is on what): [Project board](https://github.com/orgs/getdictus/projects/2).
 
 1. #587 — Smart Mode prompt campaign: its remaining threads
-   - #598 — language check refuses a correct short line (`es` read as `pt`)
-   - #592 — warn instead of refusing on an ungrounded name
-2. #573 — rebuild `Liste` as a summary in bullets (title, then every point). `ready-for-agent`
-3. #593 — reverse trial: Pro free for a fixed period, then the paywall. `ready-for-agent`
-4. #494 — onboarding that starts the trial and teaches the Smart Modes. `ready-for-agent`
-5. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
-6. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
-7. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
+   - #598 — language check refuses a correct short line (`es` read as `pt`); #592 — warn instead of refusing on an ungrounded name
+2. #620 — transcribe a shared voice message or audio file. Spike first: it is the launch's schedule risk.
+3. #573 — rebuild `Liste` as a summary in bullets (title, then every point). `ready-for-agent`
+4. #593 — reverse trial: Pro free for a fixed period, then the paywall. `ready-for-agent`
+5. #494 — onboarding that starts the trial and teaches the Smart Modes. `ready-for-agent`
+6. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
+7. #621 — search the history: the paywall already sells it. `ready-for-agent`. Must land before #279.
+8. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
+9. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
 Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215.
 
@@ -38,6 +39,9 @@ Milestone `2.1 — after the Pro launch`, plus the unmilestoned open issues. Pic
 
 - #619 — measure which paragraphs of the Smart Mode prompts do work
 - #570 — meaning guardrail for the rewriting Smart Modes. Moved out of the 2.0.0 gate on Pierre's real-use verdict.
+- #512 — analyze the history to suggest vocabulary
+- #622 — translation targets from Apple FM's languages, not the keyboard's
+- #269 — custom Smart Modes
 
 ## Settled — do not reopen
 
