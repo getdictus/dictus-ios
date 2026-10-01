@@ -139,6 +139,10 @@ class LiveActivityManager {
     /// Task for auto-dismiss after result/failure display.
     private var autoDismissTask: Task<Void, Never>?
 
+    /// What the standby pill says about the shared voice note queue (#620), or nil.
+    /// Carried by every standby state this manager pushes; see `standbyState`.
+    private var voiceNoteContent: VoiceNoteActivityContent?
+
     private init() {
         // End all Live Activities when the app is terminated (force-quit from app switcher).
         // WHY: Without this, the DI stays visible for up to 8 hours after a force-quit.
@@ -398,7 +402,7 @@ class LiveActivityManager {
         }
 
         let attributes = DictusLiveActivityAttributes()
-        let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
+        let state = standbyState
         // staleDate: if app is killed without willTerminate firing, iOS auto-removes
         // the DI after this interval. 30s is short enough to clear ghosts quickly (#84).
         let staleDate = Date().addingTimeInterval(staleInterval)
@@ -899,7 +903,7 @@ class LiveActivityManager {
         PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "standby"))
         currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
         syncStateMachine(to: .standby)
-        let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
+        let state = standbyState
         // Refresh staleDate on each return to standby (#84: 30s clears ghosts after force-quit)
         let staleDate = Date().addingTimeInterval(staleInterval)
         await activity.update(.init(state: state, staleDate: staleDate))
@@ -946,8 +950,8 @@ class LiveActivityManager {
 
         PersistentLog.log(.liveActivityTransition(from: abandoned.rawValue, to: "standby-abandoned"))
         currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
+        let state = standbyState
         Task {
-            let state = DictusLiveActivityAttributes.ContentState(phase: .standby)
             await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
             DictusLogger.app.info("Live Activity -> standby (abandoned \(abandoned.rawValue, privacy: .public))")
         }
@@ -1044,3 +1048,47 @@ class LiveActivityManager {
         }
     }
 }
+
+// MARK: - Shared voice notes (#620)
+
+/// The voice note queue on the standby pill.
+///
+/// WHY an extension in this file: it reads the manager's private state, and the
+/// type body is at the length budget #146 set for it. The rule it adds is narrow on
+/// purpose — **a voice note only ever writes content, never a phase** — so the #42 /
+/// #257 state machine sees exactly the transitions it saw before #620. A dictation
+/// that starts mid-note takes the pill through its own phases as always; the next
+/// return to standby brings the note's progress back, because every standby state is
+/// built by `standbyState`.
+extension LiveActivityManager {
+
+    /// The standby content, carrying the voice note queue when there is one.
+    fileprivate var standbyState: DictusLiveActivityAttributes.ContentState {
+        DictusLiveActivityAttributes.ContentState(phase: .standby, voiceNote: voiceNoteContent)
+    }
+
+    /// Whether a Live Activity is there to show progress on. What the share
+    /// extension is told when the app takes a note, so it can say where to look.
+    var hasLiveActivity: Bool {
+        currentActivity != nil && currentPhase != .idle
+    }
+
+    /// Set the voice note content, or clear it with nil, and push it if the pill is
+    /// in standby. During a dictation the content is only stored: the dictation's
+    /// phases own the pill until it comes home.
+    ///
+    /// Never creates an activity. Background requests fail ("Target is not
+    /// foreground"), and the cold path runs with the app in front, where the Dynamic
+    /// Island does not show Dictus anyway. The content is picked up by the standby
+    /// activity the next time one starts — which is when the user leaves the app.
+    func updateVoiceNote(_ content: VoiceNoteActivityContent?) {
+        guard content != voiceNoteContent else { return }
+        voiceNoteContent = content
+        guard isEnabled, currentPhase == .standby, let activity = currentActivity else { return }
+        let state = standbyState
+        Task {
+            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
+        }
+    }
+}
+
