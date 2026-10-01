@@ -78,19 +78,71 @@ final class VoiceNoteProcessor: ObservableObject {
     /// The cold path, and every return to the app.
     func appBecameActive() {
         VoiceNoteIslandDriver.shared.arrived(store.ingestInbox().map(\.id))
-        if store.queue.hasPendingWork {
-            // The user opened Dictus because the extension told them to: show them
-            // the note itself, turning from progress into its result. A Live Activity
-            // link that already chose a screen keeps it. Not without the entitlement:
-            // the queue would not run, and a screen raised on every launch to say so
-            // would be a nag (#593).
-            if presentation == nil && VoiceNoteAvailability.isEntitled {
-                presentation = VoiceNoteStackRequest(focus: nil)
+        if store.queue.hasPendingWork { processQueue() }
+        // Any door into the app — icon, island, link, switcher, launch — raises the
+        // stack when a note is ready and unread (smoke test of 7fdf2e1c). A finished
+        // note's ring stays until it is read or its five minutes are up (#620
+        // decision 4): opening the app is not reading the note.
+        evaluatePresentation()
+    }
+
+    // MARK: - Raising the stack on its own
+
+    private var presentationRecheck: Task<Void, Never>?
+
+    /// Set by `MainTabView` while a screen that replaces the tab bar is up — the model
+    /// preparation screen or the cold-start swipe-back overlay. Neither is a sheet, so
+    /// UIKit's presented controller does not see them.
+    var mainScreenBlocked = false {
+        didSet { if oldValue && !mainScreenBlocked { evaluatePresentation() } }
+    }
+
+    /// Results waiting to be read: unread in History, or held by the queue when History
+    /// is off. Notes still running do not count (`VoiceNoteStackPresentationPolicy`).
+    private var readyUnreadCount: Int {
+        TranscriptionHistoryStore.shared.unreadVoiceNotes.count
+            + store.queue.notes.filter { $0.state == .done && $0.openedAt == nil }.count
+    }
+
+    /// Raise the stack if a note is ready and unread and nothing is in the way; if
+    /// something is, ask again every two seconds while the app stays active.
+    func evaluatePresentation() {
+        guard UIApplication.shared.applicationState == .active else { return }
+        let decision = VoiceNoteStackPresentationPolicy.decide(
+            readyUnreadCount: readyUnreadCount,
+            onboardingCompleted: AppGroup.defaults.bool(forKey: SharedKeys.hasCompletedOnboarding),
+            dictationActive: DictationCoordinator.shared.status != .idle,
+            somethingPresented: Self.somethingIsPresented || mainScreenBlocked,
+            stackShowing: presentation != nil
+        )
+        switch decision {
+        case .present:
+            presentationRecheck?.cancel()
+            presentationRecheck = nil
+            log("stackPresented", "unread=\(readyUnreadCount)")
+            presentation = VoiceNoteStackRequest(focus: nil)
+        case .wait:
+            guard presentationRecheck == nil else { return }
+            presentationRecheck = Task { [weak self] in
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                guard let self, !Task.isCancelled else { return }
+                self.presentationRecheck = nil
+                self.evaluatePresentation()
             }
-            processQueue()
+        case .none:
+            presentationRecheck?.cancel()
+            presentationRecheck = nil
         }
-        // A finished note's ring stays until it is read or its five minutes are up
-        // (#620 decision 4): opening the app is not reading the note.
+    }
+
+    /// Whether a sheet or full-screen cover is up — the paywall, the trial screens,
+    /// History, a settings sheet. Asked of UIKit rather than of each view's own flag,
+    /// so a sheet added later is covered without anyone remembering to wire it here.
+    private static var somethingIsPresented: Bool {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .contains { $0.isKeyWindow && $0.rootViewController?.presentedViewController != nil }
     }
 
     /// A card showed a note's outcome: the ring loses that segment (#620 decision 9).
@@ -206,6 +258,8 @@ final class VoiceNoteProcessor: ObservableObject {
         }
         log("finished", "id=\(note.id.uuidString.prefix(8)) chars=\(transcript.count) savedToHistory=\(saved) elapsedMs=\(Int(Date().timeIntervalSince(started) * 1000))")
         VoiceNoteIslandDriver.shared.finished(note.id, succeeded: true)
+        // A result that lands while the app is in front is ready and unread too.
+        evaluatePresentation()
     }
 
     private func fail(_ note: VoiceNote, _ failure: VoiceNoteFailure, detail: String) {

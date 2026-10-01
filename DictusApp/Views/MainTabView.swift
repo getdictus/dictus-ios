@@ -182,6 +182,11 @@ struct MainTabView: View {
                 .onChange(of: voiceNotes.presentation) { _, presentation in
                     if presentation != nil { selectedTab = 0 }
                 }
+                // Dismissing a sheet is the app becoming idle again: a voice note that
+                // waited behind it may come up now (`VoiceNoteStackPresentationPolicy`).
+                .onChange(of: showsPaywall) { _, shown in
+                    if !shown { voiceNotes.evaluatePresentation() }
+                }
                 // The reverse trial's two self-raised screens (#593). On the TabView and
                 // not on the ZStack below, which already carries the user's paywall
                 // cover: two full-screen covers on one view is a presentation SwiftUI
@@ -220,6 +225,12 @@ struct MainTabView: View {
         // state is a no-op. It remains the only path for every URL that arrives while the
         // process is already alive.
         .paywallCover(isPresented: $showsPaywall)
+        // The preparation screen and the cold-start overlay replace the tab bar without
+        // being sheets; the voice note stack waits for them to go.
+        .onAppear { voiceNotes.mainScreenBlocked = preparation != nil || isColdStartMode }
+        .onChange(of: preparation != nil || isColdStartMode) { _, blocked in
+            voiceNotes.mainScreenBlocked = blocked
+        }
         .onOpenURL { url in
             // The keyboard's Pro entries (#241's panel pill, #404's fan row). Until
             // 2026-08-29 nothing routed on `dictus://open` at all, so both of them
