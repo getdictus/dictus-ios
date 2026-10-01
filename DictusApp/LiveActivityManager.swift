@@ -1154,6 +1154,11 @@ extension LiveActivityManager {
         return AlertConfiguration(title: "Dictus", body: LocalizedStringResource(stringLiteral: line), sound: .default)
     }
 
+    /// Drop an alert deferred for an earlier batch (see `VoiceNoteIslandDriver.arrived`).
+    func discardPendingVoiceNoteAlert() {
+        pendingVoiceNoteAlert = false
+    }
+
     /// The deferred alert, if one is waiting and there is still a ring to show.
     fileprivate func takePendingVoiceNoteAlert() -> AlertConfiguration? {
         guard pendingVoiceNoteAlert else { return nil }

@@ -31,7 +31,14 @@ final class VoiceNoteIslandDriver {
     /// Notes were shared and queued.
     func arrived(_ ids: [UUID]) {
         guard !ids.isEmpty else { return }
+        let previousBatch = island.batch
         ids.forEach { island.add($0) }
+        // A new batch supersedes an alert the last one left waiting behind a dictation:
+        // it would otherwise fire on the next return to standby for the old batch, and
+        // the new batch would alert a second time when it drains.
+        if island.batch != previousBatch {
+            LiveActivityManager.shared.discardPendingVoiceNoteAlert()
+        }
         // A new note keeps the ring alive past an earlier batch's ready deadline.
         expiryTask?.cancel()
         LiveActivityManager.shared.voiceNoteReadyDeadline = nil
