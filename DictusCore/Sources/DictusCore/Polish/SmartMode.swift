@@ -295,8 +295,8 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
 
     /// Shortest transcript, in characters, this mode runs on. Below it the mode is
     /// **skipped, not refused**: the dictation takes the path it would take with no
-    /// mode armed, and nothing is announced. `nil` — every mode but `Structuré` — runs
-    /// on any length.
+    /// mode armed, and the keyboard says so in one sentence. `nil` — every mode but
+    /// `Structuré` (200) and `Liste` (100, #573) — runs on any length.
     ///
     /// ### Why a mode can decline short input (#587, round 4)
     ///
@@ -308,7 +308,9 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     ///
     /// It is a property of the mode rather than a pipeline constant because it is a
     /// product answer about the mode: `Message` exists for short text and must never
-    /// skip it, and `Résumé` already bounds itself through its band.
+    /// skip it, and `Résumé` already bounds itself through its band. `Liste` declines a
+    /// sentence for a different reason than `Structuré`: one point makes a title over a
+    /// lone bullet, which is the defect #573 names.
     public let minimumInputCharacters: Int?
 
     public init(id: String,

@@ -19,10 +19,22 @@ final class SmartModeShortInputSkipTests: XCTestCase {
         XCTAssertTrue(mode.runs(onInputOfLength: 1337))
     }
 
-    /// Structuré only. `Message` exists for short text and must never skip it;
-    /// `Résumé` bounds itself through its band; `Liste` and `Traduction` have no reason to.
+    /// `Liste`'s floor (#573 decision 5), measured on the maintainer's own dictations:
+    /// under 100 characters nearly every run came back as a title over a lone bullet.
+    func testListSkipsBelowOneHundredCharacters() {
+        let mode = SmartModeCatalogue.notes
+        XCTAssertEqual(mode.minimumInputCharacters, 100)
+        XCTAssertFalse(mode.runs(onInputOfLength: 73), "notes-fr N4, one idea")
+        XCTAssertFalse(mode.runs(onInputOfLength: 99))
+        XCTAssertTrue(mode.runs(onInputOfLength: 100))
+        XCTAssertTrue(mode.runs(onInputOfLength: 124), "the device dictation that counts off four things")
+    }
+
+    /// Structuré and Liste only. `Message` exists for short text and must never skip it;
+    /// `Résumé` bounds itself through its band; `Traduction` has no reason to.
     func testNoOtherModeSkipsShortInput() {
-        for mode in SmartModeCatalogue.builtIns where mode.id != SmartModeCatalogue.structuredIdentifier {
+        let skipping: Swift.Set = [SmartModeCatalogue.structuredIdentifier, SmartModeCatalogue.notesIdentifier]
+        for mode in SmartModeCatalogue.builtIns where !skipping.contains(mode.id) {
             XCTAssertNil(mode.minimumInputCharacters, mode.id)
             XCTAssertTrue(mode.runs(onInputOfLength: 1), mode.id)
         }
