@@ -148,6 +148,7 @@ struct VoiceNoteCardView: View {
         } else {
             queueStore.mutate { $0.markOpened(noteID) }
         }
+        processor.noteRead(noteID)
     }
 
     // MARK: - Sections

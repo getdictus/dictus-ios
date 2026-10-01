@@ -55,6 +55,8 @@ final class VoiceNoteProcessor: ObservableObject {
         // Anything shared before this launch, and anything a dead process left
         // mid-transcription, is picked up now.
         store.ingestInbox()
+        // Every note still to transcribe joins the ring, interrupted ones included.
+        VoiceNoteIslandDriver.shared.arrived(store.queue.stackable.filter { !$0.state.isFinished }.map(\.id))
         log("launch", "pending=\(store.queue.hasPendingWork)")
     }
 
@@ -66,6 +68,7 @@ final class VoiceNoteProcessor: ObservableObject {
         AppGroup.defaults.set(LiveActivityManager.shared.hasLiveActivity, forKey: SharedKeys.voiceNoteAcceptedWithActivity)
         AppGroup.defaults.synchronize()
         DarwinNotificationCenter.post(DarwinNotificationName.voiceNoteAccepted)
+        VoiceNoteIslandDriver.shared.arrived(arrived.map(\.id))
         let state = UIApplication.shared.applicationState
         log("accepted", "count=\(arrived.count) appState=\(state.rawValue) activity=\(LiveActivityManager.shared.hasLiveActivity)")
         processQueue()
@@ -73,7 +76,7 @@ final class VoiceNoteProcessor: ObservableObject {
 
     /// The cold path, and every return to the app.
     func appBecameActive() {
-        store.ingestInbox()
+        VoiceNoteIslandDriver.shared.arrived(store.ingestInbox().map(\.id))
         if store.queue.hasPendingWork {
             // The user opened Dictus because the extension told them to: show them
             // the note itself, turning from progress into its result. A Live Activity
@@ -84,10 +87,14 @@ final class VoiceNoteProcessor: ObservableObject {
                 presentation = VoiceNoteStackRequest(focus: nil)
             }
             processQueue()
-        } else {
-            // The user is in the app; a finished note on the pill has done its job.
-            LiveActivityManager.shared.updateVoiceNote(nil)
         }
+        // A finished note's ring stays until it is read or its five minutes are up
+        // (#620 decision 4): opening the app is not reading the note.
+    }
+
+    /// A card showed a note's outcome: the ring loses that segment (#620 decision 9).
+    func noteRead(_ id: UUID) {
+        VoiceNoteIslandDriver.shared.read(id)
     }
 
     /// `dictus://voice-note[?id=…]`, from the Live Activity: the voice note screen,
@@ -121,18 +128,16 @@ final class VoiceNoteProcessor: ObservableObject {
             // Per note, not per queue: the trial can end while a queue runs (#593).
             guard VoiceNoteAvailability.mayTranscribe(isEntitled: VoiceNoteAvailability.isEntitled) else {
                 log("paused", "reason=notEntitled waiting=\(store.queue.waitingCount)")
-                LiveActivityManager.shared.updateVoiceNote(nil)
+                VoiceNoteIslandDriver.shared.paused()
                 return
             }
             await transcribe(note)
         }
-        publishActivity(finished: nil)
     }
 
     private func transcribe(_ note: VoiceNote) async {
         let started = Date()
         store.mutate { $0.update(note.id) { $0.state = .transcribing(progress: 0) } }
-        publishActivity(progress: 0, preview: nil)
         DictationCoordinator.shared.extendWarmWindowForVoiceNote()
 
         guard AppGroup.defaults.bool(forKey: SharedKeys.modelReady) else {
@@ -187,7 +192,6 @@ final class VoiceNoteProcessor: ObservableObject {
             }
             let progress = Double(index + 1) / Double(ranges.count)
             store.mutate { $0.update(note.id) { $0.state = .transcribing(progress: progress) } }
-            publishActivity(progress: progress, preview: parts.joined(separator: " "))
         }
 
         let transcript = parts.joined(separator: " ")
@@ -200,13 +204,13 @@ final class VoiceNoteProcessor: ObservableObject {
             $0.complete(note.id, transcript: transcript, language: record.language, savedToHistory: saved)
         }
         log("finished", "id=\(note.id.uuidString.prefix(8)) chars=\(transcript.count) savedToHistory=\(saved) elapsedMs=\(Int(Date().timeIntervalSince(started) * 1000))")
-        publishActivity(finished: .success(id: note.id, transcript: transcript))
+        VoiceNoteIslandDriver.shared.finished(note.id, succeeded: true)
     }
 
     private func fail(_ note: VoiceNote, _ failure: VoiceNoteFailure, detail: String) {
         store.mutate { $0.fail(note.id, failure) }
         log("failed", "id=\(note.id.uuidString.prefix(8)) failure=\(failure.rawValue) detail=\(detail)")
-        publishActivity(finished: .failure(note.id))
+        VoiceNoteIslandDriver.shared.finished(note.id, succeeded: false)
     }
 
     /// The queue never starts a chunk under a dictation. The gate would already serve
@@ -224,51 +228,6 @@ final class VoiceNoteProcessor: ObservableObject {
         case .unreadable: return .unreadable
         case .tooLong: return .tooLong
         case .empty: return .noSpeech
-        }
-    }
-
-    // MARK: - Live Activity
-
-    private enum Finished {
-        case success(id: UUID, transcript: String)
-        case failure(UUID)
-    }
-
-    /// While a note runs: progress, the queue line, and the first lines once known.
-    private func publishActivity(progress: Double, preview: String?) {
-        let counts = store.queue.activityCounts
-        LiveActivityManager.shared.updateVoiceNote(VoiceNoteActivityContent(
-            headline: String(localized: "Transcribing a voice note…",
-                             comment: "Live Activity headline while a shared voice note is transcribed (#620)."),
-            detail: counts.waiting > 0 ? VoiceNoteCopy.queueLine(inProgress: counts.inProgress, waiting: counts.waiting) : nil,
-            progress: progress,
-            preview: (preview?.isEmpty ?? true) ? nil : preview
-        ))
-    }
-
-    /// Once the queue has nothing left running, the outcome of the last note — and
-    /// nothing at all if the loop ended with no note finished.
-    private func publishActivity(finished: Finished?) {
-        if store.queue.hasPendingWork, let progressNote = store.queue.inProgress,
-           case .transcribing(let progress) = progressNote.state {
-            publishActivity(progress: progress, preview: nil)
-            return
-        }
-        switch finished {
-        case .success(let id, let transcript):
-            LiveActivityManager.shared.updateVoiceNote(VoiceNoteActivityContent(
-                headline: String(localized: "Voice note transcribed",
-                                 comment: "Live Activity headline once a shared voice note is transcribed. A tap opens it (#620)."),
-                preview: transcript, noteID: id, isDone: true
-            ))
-        case .failure(let failedID):
-            LiveActivityManager.shared.updateVoiceNote(VoiceNoteActivityContent(
-                headline: String(localized: "Voice note not transcribed",
-                                 comment: "Live Activity headline when a shared voice note failed. A tap opens the voice note screen, which says why (#620)."),
-                noteID: failedID, isDone: true
-            ))
-        case nil:
-            break
         }
     }
 

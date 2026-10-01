@@ -139,9 +139,19 @@ class LiveActivityManager {
     /// Task for auto-dismiss after result/failure display.
     private var autoDismissTask: Task<Void, Never>?
 
-    /// What the standby pill says about the shared voice note queue (#620), or nil.
-    /// Carried by every standby state this manager pushes; see `standbyState`.
+    /// The voice note ring (#620), or nil. Carried by every standby state this manager
+    /// pushes and by the dictation's `ready` flash; see `standbyState` and
+    /// `LiveActivityRenderOwner` for who draws what.
     private var voiceNoteContent: VoiceNoteActivityContent?
+
+    /// A voice note alert that arrived while a dictation owned the island (#620
+    /// decision 5). Fired by the next return to standby.
+    private var pendingVoiceNoteAlert = false
+
+    /// When the voice note ready state stops being shown (#620 decision 4). Used when
+    /// the engine is released first: the activity then ends with its final content and
+    /// `.after(this)`, so iOS removes it on time even though nothing is running.
+    var voiceNoteReadyDeadline: Date?
 
     private init() {
         // End all Live Activities when the app is terminated (force-quit from app switcher).
@@ -242,11 +252,20 @@ class LiveActivityManager {
         syncStateMachine(to: .idle)
         PersistentLog.log(.liveActivityEnded(reason: "warmStateReleased"))
 
+        // A voice note ring outlives the engine (#620 decision 4): the activity ends
+        // with the ring as its final content and stays until the ready deadline, so
+        // "N voice notes ready" is not wiped by an unrelated ten-minute timer. With
+        // no ring, the pill goes at once, as before.
+        let ring = voiceNoteContent.flatMap { $0.isEmpty ? nil : $0 }
+        let policy: ActivityUIDismissalPolicy = ring == nil
+            ? .immediate
+            : .after(voiceNoteReadyDeadline ?? Date().addingTimeInterval(VoiceNoteIsland.readyLifetime))
         Task {
-            let finalState = DictusLiveActivityAttributes.ContentState(phase: .standby)
+            var finalState = DictusLiveActivityAttributes.ContentState(phase: .standby, voiceNote: ring)
+            finalState.voiceNote?.isAlerting = false
             await activity.end(
                 .init(state: finalState, staleDate: nil),
-                dismissalPolicy: .immediate
+                dismissalPolicy: policy
             )
             DictusLogger.app.info("Live Activity ended -- warm state released after idle timeout")
         }
@@ -649,9 +668,13 @@ class LiveActivityManager {
         currentPhase = .ready  // Update BEFORE async work to prevent races (#49)
         Task {
             let truncatedPreview = preview.map { String($0.prefix(100)) }
+            // The ring rides along so a voice note failure can take the island over
+            // the success flash (#620 decision 1); with no failure the flash is drawn
+            // exactly as before. See `LiveActivityRenderOwner`.
             let state = DictusLiveActivityAttributes.ContentState(
                 phase: .ready,
-                transcriptionPreview: truncatedPreview
+                transcriptionPreview: truncatedPreview,
+                voiceNote: self.voiceNoteContent
             )
             await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
             DictusLogger.app.info("Live Activity -> ready")
@@ -903,10 +926,14 @@ class LiveActivityManager {
         PersistentLog.log(.liveActivityTransition(from: currentPhase.rawValue, to: "standby"))
         currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
         syncStateMachine(to: .standby)
-        let state = standbyState
         // Refresh staleDate on each return to standby (#84: 30s clears ghosts after force-quit)
         let staleDate = Date().addingTimeInterval(staleInterval)
-        await activity.update(.init(state: state, staleDate: staleDate))
+        if let alert = takePendingVoiceNoteAlert() {
+            await activity.update(.init(state: standbyState, staleDate: staleDate), alertConfiguration: alert)
+            scheduleAlertLayoutReset()
+        } else {
+            await activity.update(.init(state: standbyState, staleDate: staleDate))
+        }
         DictusLogger.app.info("Live Activity -> standby (auto-return)")
     }
 
@@ -950,9 +977,12 @@ class LiveActivityManager {
 
         PersistentLog.log(.liveActivityTransition(from: abandoned.rawValue, to: "standby-abandoned"))
         currentPhase = .standby  // Update BEFORE async work to prevent races (#49)
+        let alert = takePendingVoiceNoteAlert()
         let state = standbyState
+        if alert != nil { scheduleAlertLayoutReset() }
         Task {
-            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
+            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)),
+                                  alertConfiguration: alert)
             DictusLogger.app.info("Live Activity -> standby (abandoned \(abandoned.rawValue, privacy: .public))")
         }
     }
@@ -1051,18 +1081,16 @@ class LiveActivityManager {
 
 // MARK: - Shared voice notes (#620)
 
-/// The voice note queue on the standby pill.
+/// The voice note ring on the activity.
 ///
 /// WHY an extension in this file: it reads the manager's private state, and the
 /// type body is at the length budget #146 set for it. The rule it adds is narrow on
 /// purpose — **a voice note only ever writes content, never a phase** — so the #42 /
-/// #257 state machine sees exactly the transitions it saw before #620. A dictation
-/// that starts mid-note takes the pill through its own phases as always; the next
-/// return to standby brings the note's progress back, because every standby state is
-/// built by `standbyState`.
+/// #257 state machine sees exactly the transitions it saw before #620. Who draws the
+/// island for a given phase is `LiveActivityRenderOwner`'s answer, read by the widget.
 extension LiveActivityManager {
 
-    /// The standby content, carrying the voice note queue when there is one.
+    /// The standby content, carrying the voice note ring when there is one.
     fileprivate var standbyState: DictusLiveActivityAttributes.ContentState {
         DictusLiveActivityAttributes.ContentState(phase: .standby, voiceNote: voiceNoteContent)
     }
@@ -1073,21 +1101,85 @@ extension LiveActivityManager {
         currentActivity != nil && currentPhase != .idle
     }
 
-    /// Set the voice note content, or clear it with nil, and push it if the pill is
-    /// in standby. During a dictation the content is only stored: the dictation's
-    /// phases own the pill until it comes home.
+    /// Whether a dictation owns the island right now (#620 decision 1).
+    var isDictationShowing: Bool {
+        currentPhase != .standby && currentPhase != .idle
+    }
+
+    /// Set the ring, or clear it with nil, and push it if the pill is in standby.
+    ///
+    /// - Parameter alert: this update carries the batch's success alert (#620
+    ///   decision 3). Under a dictation it is kept and fired by the next return to
+    ///   standby (decision 5). Live Activity alerts need no notification permission:
+    ///   measured on device on 2026-10-01 with `notDetermined`, the island expanded.
     ///
     /// Never creates an activity. Background requests fail ("Target is not
     /// foreground"), and the cold path runs with the app in front, where the Dynamic
-    /// Island does not show Dictus anyway. The content is picked up by the standby
+    /// Island does not show Dictus anyway. The ring is picked up by the standby
     /// activity the next time one starts — which is when the user leaves the app.
-    func updateVoiceNote(_ content: VoiceNoteActivityContent?) {
-        guard content != voiceNoteContent else { return }
+    func updateVoiceNote(_ content: VoiceNoteActivityContent?, alert: Bool = false) {
+        var content = content.flatMap { $0.isEmpty ? nil : $0 }
+        content?.isAlerting = false
+        if alert && isDictationShowing {
+            pendingVoiceNoteAlert = true
+            alertLog("deferred")
+        }
+        let firesNow = alert && !isDictationShowing
+        guard content != voiceNoteContent || firesNow else { return }
         voiceNoteContent = content
+        // No pill to alert on: the user is in the app, which is the alert's job done.
         guard isEnabled, currentPhase == .standby, let activity = currentActivity else { return }
+        if firesNow {
+            voiceNoteContent?.isAlerting = true
+            let state = standbyState
+            let configuration = alertConfiguration
+            alertLog("fired")
+            Task {
+                await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)),
+                                      alertConfiguration: configuration)
+            }
+            scheduleAlertLayoutReset()
+            return
+        }
         let state = standbyState
         Task {
             await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
         }
+    }
+
+    /// The alert a drained batch raises. Its words are the ring's status line, the
+    /// same one the expanded island and the Lock Screen show (#620 decisions 10, 12).
+    private var alertConfiguration: AlertConfiguration {
+        let line = voiceNoteContent?.statusLine ?? String(localized: "Voice note transcribed")
+        return AlertConfiguration(title: "Dictus", body: LocalizedStringResource(stringLiteral: line), sound: .default)
+    }
+
+    /// The deferred alert, if one is waiting and there is still a ring to show.
+    fileprivate func takePendingVoiceNoteAlert() -> AlertConfiguration? {
+        guard pendingVoiceNoteAlert else { return nil }
+        pendingVoiceNoteAlert = false
+        guard let content = voiceNoteContent, content.readyCount > 0 else { return nil }
+        voiceNoteContent?.isAlerting = true
+        alertLog("fired-after-dictation")
+        return alertConfiguration
+    }
+
+    /// The alert expands the island for a time the system chooses; afterwards a
+    /// long-press must show the standby layout with the dictation buttons on top
+    /// (decision 13), so the alert flag is cleared a few seconds later.
+    fileprivate func scheduleAlertLayoutReset() {
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 6_000_000_000)
+            guard voiceNoteContent?.isAlerting == true else { return }
+            voiceNoteContent?.isAlerting = false
+            guard currentPhase == .standby, let activity = currentActivity else { return }
+            let state = standbyState
+            await activity.update(.init(state: state, staleDate: Date().addingTimeInterval(self.staleInterval)))
+        }
+    }
+
+    private func alertLog(_ action: String) {
+        PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "island", action: "alert-\(action)",
+                                           details: "phase=\(currentPhase.rawValue) ready=\(voiceNoteContent?.readyCount ?? 0)"))
     }
 }

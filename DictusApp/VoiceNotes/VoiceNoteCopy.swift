@@ -10,11 +10,31 @@ import DictusCore
 /// how #313 started.
 enum VoiceNoteCopy {
 
-    /// "1 in progress, 2 waiting" (#620 decision 6). Both words are invariable in
-    /// French and English, so no plural variants are needed.
-    static func queueLine(inProgress: Int, waiting: Int) -> String {
-        String(localized: "\(inProgress) in progress, \(waiting) waiting",
-               comment: "Voice note queue status on the Live Activity and the list. First number: notes being transcribed (0 or 1); second: notes waiting (#620).")
+    /// The compact island's line while a note takes longer than three seconds.
+    static var received: String {
+        String(localized: "Voice note received", comment: "Compact Dynamic Island line while a shared voice note is transcribed (#620).")
+    }
+
+    /// The ring's line on the expanded island and the Lock Screen (#620 decisions 10, 12):
+    /// what is ready, or, when nothing is, what failed.
+    static func islandStatus(ready: Int, failed: Int) -> String? {
+        if ready == 1 {
+            return String(localized: "1 voice note ready · Tap to read",
+                          comment: "Expanded Dynamic Island and Lock Screen: one transcribed voice note waiting to be read (#620).")
+        }
+        if ready > 1 {
+            return String(localized: "\(ready) voice notes ready · Tap to read",
+                          comment: "Expanded Dynamic Island and Lock Screen: several transcribed voice notes waiting to be read (#620).")
+        }
+        if failed == 1 {
+            return String(localized: "Voice note not transcribed · Tap to see why",
+                          comment: "Expanded Dynamic Island and Lock Screen: one voice note failed (#620).")
+        }
+        if failed > 1 {
+            return String(localized: "\(failed) voice notes not transcribed · Tap to see why",
+                          comment: "Expanded Dynamic Island and Lock Screen: several voice notes failed (#620).")
+        }
+        return nil
     }
 
     /// Why a note produced no transcript.

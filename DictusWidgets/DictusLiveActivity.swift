@@ -40,19 +40,24 @@ struct DictusLiveActivity: Widget {
         }
     }
 
-    /// Where a tap goes. On a standby pill carrying a shared voice note (#620), the
-    /// note's result or the list; everywhere else, the app as before.
-    private func tapURL(context: ActivityViewContext<DictusLiveActivityAttributes>) -> URL? {
-        if context.state.phase == .standby, let note = context.state.voiceNote, let url = note.url {
-            return url
+    // MARK: - Voice notes (#620)
+
+    /// The voice note ring, when it owns the island for this state. Nil means the
+    /// dictation draws, exactly as it did before #620: every region below asks this
+    /// first and otherwise falls through to its original switch, untouched. The rule
+    /// is `LiveActivityRenderOwner`, tested in DictusCore per state combination.
+    private func voiceNotes(_ context: ActivityViewContext<DictusLiveActivityAttributes>) -> VoiceNoteActivityContent? {
+        let phase = LiveActivityStateMachine.Phase(rawValue: context.state.phase.rawValue) ?? .idle
+        guard LiveActivityRenderOwner.resolve(phase: phase, voiceNote: context.state.voiceNote) == .voiceNotes else {
+            return nil
         }
-        return URL(string: "dictus://open")
+        return context.state.voiceNote
     }
 
-    /// The voice note content, only while the pill is in standby. Every dictation
-    /// phase draws exactly what it drew before #620.
-    private func standbyVoiceNote(_ context: ActivityViewContext<DictusLiveActivityAttributes>) -> VoiceNoteActivityContent? {
-        context.state.phase == .standby ? context.state.voiceNote : nil
+    /// Where a tap goes: the voice note screen when the ring owns the island, the app
+    /// as before otherwise.
+    private func tapURL(context: ActivityViewContext<DictusLiveActivityAttributes>) -> URL? {
+        voiceNotes(context)?.url ?? URL(string: "dictus://open")
     }
 
     // MARK: - Compact Views (Dynamic Island pill)
@@ -60,16 +65,16 @@ struct DictusLiveActivity: Widget {
     /// Compact leading: logo bars (static in standby, animated heights in recording)
     @ViewBuilder
     private func compactLeading(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
+        if voiceNotes(context) != nil {
+            // The Dictus logo, whatever the notes are doing (#620 decision 11).
+            MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
+                .frame(width: 20, height: 14)
+        } else {
         switch context.state.phase {
         case .standby:
-            if let note = standbyVoiceNote(context) {
-                VoiceNoteGlyph(note: note)
-                    .frame(width: 20, height: 14)
-            } else {
-                // Static 3-bar logo at mini size
-                MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
-                    .frame(width: 20, height: 14)
-            }
+            // Static 3-bar logo at mini size
+            MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
+                .frame(width: 20, height: 14)
         case .recording:
             // Animated bars driven by waveform data
             let levels = normalizedLevels(context.state.waveformLevels, count: 3)
@@ -95,20 +100,20 @@ struct DictusLiveActivity: Widget {
                 .foregroundColor(Color(hex: 0xEF4444))
                 .font(.system(size: 14))
         }
+        }
     }
 
     /// Compact trailing: "On" text in standby, timer in recording
     @ViewBuilder
     private func compactTrailing(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
+        if let note = voiceNotes(context) {
+            VoiceNoteCompactTrailing(note: note)
+        } else {
         switch context.state.phase {
         case .standby:
-            if let note = standbyVoiceNote(context) {
-                VoiceNoteStatusBadge(note: note)
-            } else {
-                Text("On")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white)
-            }
+            Text("On")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white)
         case .recording:
             Text("Rec")
                 .font(.system(size: 14, weight: .semibold))
@@ -135,22 +140,21 @@ struct DictusLiveActivity: Widget {
                 .foregroundColor(Color(hex: 0xEF4444))
                 .font(.system(size: 14))
         }
+        }
     }
 
     // MARK: - Minimal View
 
     @ViewBuilder
     private func minimalView(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
+        if let note = voiceNotes(context) {
+            VoiceNoteRing(note: note, diameter: 16, lineWidth: 2.5, countSize: 8)
+        } else {
         switch context.state.phase {
         case .standby:
-            if let note = standbyVoiceNote(context) {
-                VoiceNoteGlyph(note: note)
-                    .frame(width: 14, height: 12)
-            } else {
-                // Full 3-bar logo even in minimal — single bar was invisible
-                MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
-                    .frame(width: 14, height: 12)
-            }
+            // Full 3-bar logo even in minimal — single bar was invisible
+            MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
+                .frame(width: 14, height: 12)
         case .recording:
             let levels = normalizedLevels(context.state.waveformLevels, count: 3)
             MiniLogoBars(levels: levels, animated: true)
@@ -164,12 +168,24 @@ struct DictusLiveActivity: Widget {
                 .foregroundColor(.white.opacity(0.7))
                 .font(.system(size: 12))
         }
+        }
     }
 
     // MARK: - Expanded Views (long press)
 
     @ViewBuilder
     private func expandedLeading(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
+        if voiceNotes(context) != nil {
+            // Logo on the left, on the alert and on a long-press alike (decision 10).
+            HStack(spacing: 8) {
+                MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
+                    .frame(width: 24, height: 18)
+                Text("Dictus")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white)
+            }
+            .frame(maxHeight: .infinity, alignment: .center)
+        } else {
         HStack(spacing: 8) {
             // Logo bars
             MiniLogoBars(
@@ -189,16 +205,9 @@ struct DictusLiveActivity: Widget {
 
                 switch context.state.phase {
                 case .standby:
-                    if let note = standbyVoiceNote(context) {
-                        Text(note.headline)
-                            .font(.system(size: 12))
-                            .foregroundColor(note.isDone ? Color(hex: 0x22C55E) : Color(hex: 0x3D7EFF))
-                            .lineLimit(1)
-                    } else {
-                        Text("On")
-                            .font(.system(size: 12))
-                            .foregroundColor(.white.opacity(0.6))
-                    }
+                    Text("On")
+                        .font(.system(size: 12))
+                        .foregroundColor(.white.opacity(0.6))
                 case .recording:
                     Text("Recording...")
                         .font(.system(size: 12))
@@ -223,10 +232,16 @@ struct DictusLiveActivity: Widget {
             }
         }
         .frame(maxHeight: .infinity, alignment: .center)
+        }
     }
 
     @ViewBuilder
     private func expandedTrailing(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
+        if let note = voiceNotes(context), note.isAlerting {
+            // The alert's layout (#620 decision 10): the ring, large, on the right.
+            VoiceNoteRing(note: note, diameter: 44, lineWidth: 5, countSize: 18)
+                .frame(maxHeight: .infinity, alignment: .center)
+        } else {
         HStack(spacing: 10) {
             Spacer(minLength: 0) // Push trailing elements to the right edge
             switch context.state.phase {
@@ -284,16 +299,18 @@ struct DictusLiveActivity: Widget {
             }
         }
         .frame(maxHeight: .infinity, alignment: .center)
+        }
     }
 
     @ViewBuilder
     private func expandedBottom(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
+        if let note = voiceNotes(context) {
+            // Under the dictation buttons on a long-press (decision 13), alone under the
+            // logo and the large ring on the alert (decision 10).
+            VoiceNoteLine(note: note, showsRing: !note.isAlerting, fontSize: note.isAlerting ? 15 : 13)
+                .padding(.horizontal, 8)
+        } else {
         switch context.state.phase {
-        case .standby:
-            if let note = standbyVoiceNote(context) {
-                VoiceNoteDetail(note: note, fontSize: 13)
-                    .padding(.horizontal, 8)
-            }
         case .recording:
             EmptyView()
         case .ready:
@@ -307,12 +324,18 @@ struct DictusLiveActivity: Widget {
         default:
             EmptyView()
         }
+        }
     }
 
     // MARK: - Lock Screen Banner
 
     @ViewBuilder
     private func lockScreenView(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
+        if let note = voiceNotes(context) {
+            // iPhones without a Dynamic Island get the same design here (decision 12).
+            VoiceNoteLockScreen(note: note)
+                .widgetURL(tapURL(context: context))
+        } else {
         HStack(spacing: 12) {
             // Logo
             MiniLogoBars(
@@ -330,17 +353,9 @@ struct DictusLiveActivity: Widget {
 
                 switch context.state.phase {
                 case .standby:
-                    if let note = standbyVoiceNote(context) {
-                        Text(note.headline)
-                            .font(.system(size: 13))
-                            .foregroundColor(note.isDone ? Color(hex: 0x22C55E) : Color(hex: 0x3D7EFF))
-                            .lineLimit(1)
-                        VoiceNoteDetail(note: note, fontSize: 12)
-                    } else {
-                        Text("On")
-                            .font(.system(size: 13))
-                            .foregroundColor(.white.opacity(0.6))
-                    }
+                    Text("On")
+                        .font(.system(size: 13))
+                        .foregroundColor(.white.opacity(0.6))
                 case .recording:
                     if let startDate = context.state.recordingStartDate {
                         HStack(spacing: 4) {
@@ -416,9 +431,7 @@ struct DictusLiveActivity: Widget {
         }
         .padding(16)
         .background(Color(hex: 0x0A1628))
-        // The lock screen banner is the surface on an iPhone without a Dynamic
-        // Island (#620 decision 2), so its tap has to reach the note too.
-        .widgetURL(tapURL(context: context))
+        }
     }
 
     // MARK: - Helpers
@@ -459,65 +472,144 @@ struct DictusLiveActivity: Widget {
     }
 }
 
-// MARK: - Voice Note (#620)
+// MARK: - Voice note ring (#620)
 
-/// The compact glyph for a voice note: a waveform while it runs, a check when done.
-private struct VoiceNoteGlyph: View {
-    let note: VoiceNoteActivityContent
+/// Colours of the ring, from the brand kit.
+private enum RingColor {
+    static let pending = Color.white.opacity(0.35)
+    static let ready = Color(hex: 0x22C55E)
+    static let failed = Color(hex: 0xEF4444)
 
-    var body: some View {
-        Image(systemName: note.isDone ? "checkmark.circle.fill" : "waveform")
-            .resizable()
-            .scaledToFit()
-            .foregroundColor(note.isDone ? Color(hex: 0x22C55E) : Color(hex: 0x6BA3FF))
-    }
-}
-
-/// The compact trailing badge: the percentage while transcribing, digits only so
-/// the widget needs no string catalog; a check once done.
-private struct VoiceNoteStatusBadge: View {
-    let note: VoiceNoteActivityContent
-
-    var body: some View {
-        if note.isDone {
-            Image(systemName: "checkmark")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color(hex: 0x22C55E))
-        } else {
-            Text("\(Int(((note.progress ?? 0) * 100).rounded()))%")
-                .font(.system(size: 14, weight: .semibold))
-                .monospacedDigit()
-                .foregroundColor(.white)
+    static func of(_ segment: VoiceNoteSegment) -> Color {
+        switch segment {
+        case .pending: return pending
+        case .ready: return ready
+        case .failed: return failed
         }
     }
 }
 
-/// The queue line, the progress bar and the first lines of the transcript. Every
-/// string comes localised from DictusApp, see `VoiceNoteActivityContent`.
-private struct VoiceNoteDetail: View {
+/// The ring (#620 decision 9): one segment per note in share order, the number of
+/// ready unread notes in the centre, white, like a badge.
+///
+/// Motion (decision 14), all under 2 s and none when the screen is dimmed
+/// (`isLuminanceReduced`, the Always-On case): a segment that changes colour sweeps
+/// into its new colour, the number rolls with `numericText`, and the ring settles
+/// from a slightly smaller size when every note is finished. Live Activities run no
+/// timeline of their own — each animation is the transition between two pushed
+/// states — so the "pulse" is that one settling step, not a loop.
+private struct VoiceNoteRing: View {
     let note: VoiceNoteActivityContent
+    let diameter: CGFloat
+    let lineWidth: CGFloat
+    let countSize: CGFloat
+
+    @Environment(\.isLuminanceReduced) private var isLuminanceReduced
+
+    var body: some View {
+        let count = note.segments.count
+        // A small gap between segments so two of the same colour read as two notes.
+        let gap = count > 1 ? 0.035 : 0
+        ZStack {
+            ForEach(Array(note.segments.enumerated()), id: \.offset) { index, segment in
+                Circle()
+                    .trim(from: Double(index) / Double(count) + gap / 2,
+                          to: Double(index + 1) / Double(count) - gap / 2)
+                    .stroke(RingColor.of(segment), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+            }
+            if note.readyCount > 0 {
+                Text("\(note.readyCount)")
+                    .font(.system(size: countSize, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+            }
+        }
+        .frame(width: diameter, height: diameter)
+        .scaleEffect(note.allFinished || isLuminanceReduced ? 1 : 0.92)
+        .animation(isLuminanceReduced ? nil : .easeOut(duration: 0.6), value: note.segments)
+        .animation(isLuminanceReduced ? nil : .spring(duration: 0.8, bounce: 0.4), value: note.allFinished)
+        .animation(isLuminanceReduced ? nil : .default, value: note.readyCount)
+        .accessibilityLabel(Text(note.statusLine ?? note.receivedLine ?? "Dictus"))
+    }
+}
+
+/// Compact trailing: "Voice note received" entering from the top while a slow note
+/// runs (decision 6), the ring otherwise.
+private struct VoiceNoteCompactTrailing: View {
+    let note: VoiceNoteActivityContent
+
+    @Environment(\.isLuminanceReduced) private var isLuminanceReduced
+
+    var body: some View {
+        ZStack {
+            if let received = note.receivedLine {
+                Text(received)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            } else {
+                VoiceNoteRing(note: note, diameter: 20, lineWidth: 2.5, countSize: 10)
+                    .transition(.opacity)
+            }
+        }
+        .animation(isLuminanceReduced ? nil : .easeOut(duration: 0.5), value: note.receivedLine)
+    }
+}
+
+/// The voice notes line: "N voice notes ready · Tap to read" (decision 10), with a
+/// small ring in front of it on a long-press, where the dictation buttons hold the
+/// top of the expanded island (decision 13).
+private struct VoiceNoteLine: View {
+    let note: VoiceNoteActivityContent
+    let showsRing: Bool
     let fontSize: CGFloat
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if let detail = note.detail {
-                Text(detail)
-                    .font(.system(size: fontSize - 1))
-                    .foregroundColor(.white.opacity(0.6))
+        HStack(spacing: 8) {
+            if showsRing {
+                VoiceNoteRing(note: note, diameter: 18, lineWidth: 2.5, countSize: 9)
+            }
+            if let line = note.statusLine ?? note.receivedLine {
+                Text(line)
+                    .font(.system(size: fontSize, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.9))
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
             }
-            if let progress = note.progress, !note.isDone {
-                ProgressView(value: progress)
-                    .tint(Color(hex: 0x3D7EFF))
-            }
-            if let preview = note.preview {
-                Text(preview)
-                    .font(.system(size: fontSize))
-                    .foregroundColor(.white.opacity(0.8))
-                    .lineLimit(2)
-            }
+            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// The Lock Screen and the banner of an iPhone without a Dynamic Island: the same
+/// design, logo, line, ring (decision 12).
+private struct VoiceNoteLockScreen: View {
+    let note: VoiceNoteActivityContent
+
+    var body: some View {
+        HStack(spacing: 12) {
+            MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
+                .frame(width: 28, height: 20)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Dictus")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(.white)
+                if let line = note.statusLine ?? note.receivedLine {
+                    Text(line)
+                        .font(.system(size: 13))
+                        .foregroundColor(.white.opacity(0.8))
+                        .lineLimit(2)
+                }
+            }
+            Spacer()
+            VoiceNoteRing(note: note, diameter: 40, lineWidth: 4.5, countSize: 16)
+        }
+        .padding(16)
+        .background(Color(hex: 0x0A1628))
     }
 }
 

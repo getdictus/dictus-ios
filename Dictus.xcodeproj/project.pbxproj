@@ -179,6 +179,7 @@
 		DS6200000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = DS6209000010 /* DictusCore */; };
 		DS6200000020 /* DictusShare.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = DS6202000001 /* DictusShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		VN6200000006 /* VoiceNoteCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000006 /* VoiceNoteCardView.swift */; };
+		VN6200000007 /* VoiceNoteIslandDriver.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000007 /* VoiceNoteIslandDriver.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -407,6 +408,7 @@
 		DS6201000006 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DS6202000001 /* DictusShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		VN6201000006 /* VoiceNoteCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteCardView.swift; sourceTree = "<group>"; };
+		VN6201000007 /* VoiceNoteIslandDriver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteIslandDriver.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -855,6 +857,7 @@
 				VN6201000004 /* VoiceNoteResultView.swift */,
 				VN6201000005 /* VoiceNoteStackView.swift */,
 				VN6201000006 /* VoiceNoteCardView.swift */,
+				VN6201000007 /* VoiceNoteIslandDriver.swift */,
 			);
 			path = VoiceNotes;
 			sourceTree = "<group>";
@@ -1232,6 +1235,7 @@
 				VN6200000004 /* VoiceNoteResultView.swift in Sources */,
 				VN6200000005 /* VoiceNoteStackView.swift in Sources */,
 				VN6200000006 /* VoiceNoteCardView.swift in Sources */,
+				VN6200000007 /* VoiceNoteIslandDriver.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
