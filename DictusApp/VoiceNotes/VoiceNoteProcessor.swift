@@ -92,8 +92,9 @@ final class VoiceNoteProcessor: ObservableObject {
         if store.queue.hasPendingWork {
             // The user opened Dictus because the extension told them to: show them
             // the note going through. A Live Activity link that already chose a
-            // screen keeps it.
-            if presentation == nil { presentation = .list }
+            // screen keeps it. Not without the entitlement: the queue would not run,
+            // and a list raised on every launch to say so would be a nag (#593).
+            if presentation == nil && VoiceNoteAvailability.isEntitled { presentation = .list }
             processQueue()
         } else {
             // The user is in the app; a finished note on the pill has done its job.
