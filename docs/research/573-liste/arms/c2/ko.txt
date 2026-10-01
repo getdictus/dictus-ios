@@ -34,29 +34,29 @@ FORBIDDEN:
 
 Examples — the input language varies; the output language always matches it, never the examples':
 
-INPUT: bon alors pour le vide-grenier de dimanche euh il faut que je descende les cartons de la cave et que je trie les livres, ah et l'emplacement est payé, c'est quinze euros, non pardon dix euros, et euh faut que je prévoie de la monnaie parce que beaucoup paient en liquide
+INPUT: 어 그러니까 일요일 벼룩시장 때문에 지하실에서 상자들 꺼내고 책 정리해야 하고 아 그리고 자리값은 냈어 십오 유로 아니 미안 십 유로 그리고 어 현금 내는 사람이 많으니까 잔돈 준비해야 해
 OUTPUT:
-Vide-grenier de dimanche :
-- Descendre les cartons de la cave
-- Trier les livres
-- L'emplacement est payé : 10 euros
-- Prévoir de la monnaie : beaucoup paient en liquide
+일요일 벼룩시장:
+- 지하실에서 상자 꺼내기
+- 책 정리하기
+- 자리값은 냈음: 10유로
+- 잔돈 준비하기: 현금 내는 사람이 많음
 
-INPUT: alors le concert d'hier soir euh c'était vraiment bien, la salle était pleine, le son était un peu fort au début mais après ça s'est arrangé, et ils ont joué presque deux heures
+INPUT: 어 어젯밤 콘서트 어 진짜 좋았어 공연장은 꽉 찼고 소리가 처음엔 좀 컸는데 나중엔 괜찮아졌고 거의 두 시간 동안 연주했어
 OUTPUT:
-Concert d'hier soir :
-- C'était vraiment bien
-- La salle était pleine
-- Le son était un peu fort au début, puis ça s'est arrangé
-- Ils ont joué presque deux heures
+어젯밤 콘서트:
+- 진짜 좋았음
+- 공연장은 꽉 찼음
+- 소리가 처음엔 좀 컸다가 나중엔 괜찮아짐
+- 거의 두 시간 동안 연주함
 
 COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
 
-INPUT: faut que j'arrose les plantes du hall avant de partir, et le ficus a perdu des feuilles
-WRONG (translated): Hall plants: / - Water them before leaving / - The ficus has lost leaves
-WRONG (a statement turned into a task): Plantes du hall : / - Les arroser avant de partir / - Soigner le ficus
-WRONG (invented a line): Plantes du hall : / - Les arroser avant de partir / - Le ficus a perdu des feuilles / - Acheter un arrosoir
+INPUT: 나가기 전에 로비 화분에 물 줘야 하고 고무나무 잎이 몇 장 떨어졌어
+WRONG (translated): Lobby plants: / - Water them before leaving / - The ficus has lost a few leaves
+WRONG (a statement turned into a task): 로비 화분: / - 나가기 전에 물 주기 / - 고무나무 치료하기
+WRONG (invented a line): 로비 화분: / - 나가기 전에 물 주기 / - 고무나무 잎이 몇 장 떨어짐 / - 물뿌리개 사기
 RIGHT:
-Plantes du hall :
-- Les arroser avant de partir
-- Le ficus a perdu des feuilles
+로비 화분:
+- 나가기 전에 물 주기
+- 고무나무 잎이 몇 장 떨어짐

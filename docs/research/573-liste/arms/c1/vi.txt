@@ -34,29 +34,29 @@ FORBIDDEN:
 
 Examples — the input language varies; the output language always matches it, never the examples':
 
-INPUT: bon alors pour le vide-grenier de dimanche euh il faut que je descende les cartons de la cave et que je trie les livres, ah et l'emplacement est payé, c'est quinze euros, non pardon dix euros, et euh faut que je prévoie de la monnaie
+INPUT: ờ thì cho phiên chợ đồ cũ chủ nhật tôi phải mang mấy thùng dưới hầm lên và phân loại sách, à còn chỗ bán đã trả tiền rồi, mười lăm euro, à không xin lỗi mười euro, và ờ tôi phải chuẩn bị tiền lẻ
 OUTPUT:
-Vide-grenier de dimanche :
-- Descendre les cartons de la cave
-- Trier les livres
-- L'emplacement est payé : 10 euros
-- Prévoir de la monnaie
+Phiên chợ đồ cũ chủ nhật:
+- Mang mấy thùng dưới hầm lên
+- Phân loại sách
+- Chỗ bán đã trả tiền: 10 euro
+- Chuẩn bị tiền lẻ
 
-INPUT: alors le concert d'hier soir euh c'était vraiment bien, la salle était pleine, le son était un peu fort au début mais après ça s'est arrangé, et ils ont joué presque deux heures
+INPUT: ờ thì buổi hòa nhạc tối qua ờ hay thật sự, khán phòng kín chỗ, âm thanh lúc đầu hơi to nhưng sau đó ổn hơn, và họ chơi gần hai tiếng
 OUTPUT:
-Concert d'hier soir :
-- C'était vraiment bien
-- La salle était pleine
-- Le son était un peu fort au début, puis ça s'est arrangé
-- Ils ont joué presque deux heures
+Buổi hòa nhạc tối qua:
+- Hay thật sự
+- Khán phòng kín chỗ
+- Âm thanh lúc đầu hơi to, sau đó ổn hơn
+- Họ chơi gần hai tiếng
 
 COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
 
-INPUT: faut que j'arrose les plantes du hall avant de partir, et le ficus a perdu des feuilles
-WRONG (translated): Hall plants: / - Water them before leaving / - The ficus has lost leaves
-WRONG (a statement turned into a task): Plantes du hall : / - Les arroser avant de partir / - Soigner le ficus
-WRONG (invented a line): Plantes du hall : / - Les arroser avant de partir / - Le ficus a perdu des feuilles / - Acheter un arrosoir
+INPUT: tôi phải tưới cây ở sảnh trước khi đi, và cây đa đã rụng mấy chiếc lá
+WRONG (translated): Lobby plants: / - Water them before leaving / - The ficus has lost a few leaves
+WRONG (a statement turned into a task): Cây ở sảnh: / - Tưới trước khi đi / - Chữa cho cây đa
+WRONG (invented a line): Cây ở sảnh: / - Tưới trước khi đi / - Cây đa đã rụng mấy chiếc lá / - Mua một bình tưới
 RIGHT:
-Plantes du hall :
-- Les arroser avant de partir
-- Le ficus a perdu des feuilles
+Cây ở sảnh:
+- Tưới trước khi đi
+- Cây đa đã rụng mấy chiếc lá

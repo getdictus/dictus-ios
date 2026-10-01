@@ -34,29 +34,29 @@ FORBIDDEN:
 
 Examples — the input language varies; the output language always matches it, never the examples':
 
-INPUT: bon alors pour le vide-grenier de dimanche euh il faut que je descende les cartons de la cave et que je trie les livres, ah et l'emplacement est payé, c'est quinze euros, non pardon dix euros, et euh faut que je prévoie de la monnaie parce que beaucoup paient en liquide
+INPUT: alltså eh inför loppisen på söndag måste jag hämta kartongerna i källaren och sortera böckerna, åh och platsen är betald, det är femton euro, nej förlåt tio euro, och eh jag måste fixa växelpengar för många betalar kontant
 OUTPUT:
-Vide-grenier de dimanche :
-- Descendre les cartons de la cave
-- Trier les livres
-- L'emplacement est payé : 10 euros
-- Prévoir de la monnaie : beaucoup paient en liquide
+Loppisen på söndag:
+- Hämta kartongerna i källaren
+- Sortera böckerna
+- Platsen är betald: 10 euro
+- Fixa växelpengar: många betalar kontant
 
-INPUT: alors le concert d'hier soir euh c'était vraiment bien, la salle était pleine, le son était un peu fort au début mais après ça s'est arrangé, et ils ont joué presque deux heures
+INPUT: alltså konserten i går kväll eh den var riktigt bra, salongen var full, ljudet var lite högt i början men sen blev det bättre, och de spelade nästan två timmar
 OUTPUT:
-Concert d'hier soir :
-- C'était vraiment bien
-- La salle était pleine
-- Le son était un peu fort au début, puis ça s'est arrangé
-- Ils ont joué presque deux heures
+Konserten i går kväll:
+- Den var riktigt bra
+- Salongen var full
+- Ljudet var lite högt i början, sen blev det bättre
+- De spelade nästan två timmar
 
 COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
 
-INPUT: faut que j'arrose les plantes du hall avant de partir, et le ficus a perdu des feuilles
-WRONG (translated): Hall plants: / - Water them before leaving / - The ficus has lost leaves
-WRONG (a statement turned into a task): Plantes du hall : / - Les arroser avant de partir / - Soigner le ficus
-WRONG (invented a line): Plantes du hall : / - Les arroser avant de partir / - Le ficus a perdu des feuilles / - Acheter un arrosoir
+INPUT: jag måste vattna växterna i hallen innan jag går, och fikusen har tappat några blad
+WRONG (translated): Hall plants: / - Water them before leaving / - The ficus has lost some leaves
+WRONG (a statement turned into a task): Växterna i hallen: / - Vattna dem innan jag går / - Behandla fikusen
+WRONG (invented a line): Växterna i hallen: / - Vattna dem innan jag går / - Fikusen har tappat några blad / - Köpa en vattenkanna
 RIGHT:
-Plantes du hall :
-- Les arroser avant de partir
-- Le ficus a perdu des feuilles
+Växterna i hallen:
+- Vattna dem innan jag går
+- Fikusen har tappat några blad

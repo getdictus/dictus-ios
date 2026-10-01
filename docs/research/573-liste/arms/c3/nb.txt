@@ -15,11 +15,11 @@ GOAL: every point the speaker made, in the order they made it, each on one line,
 
 RULES — apply these:
 
-1. The first line is a short title made of the speaker's own words: the few words they used to name what they are talking about, followed by a colon written the way the input language writes it. Never a generic label, never a topic they did not name.
+1. The first line is a short title: two to six words copied from the transcript, in the speaker's order, where they name their subject; if they never name one, the first words that carry content. Then a colon written the way the input language writes it. Copy, never describe: no word, day or time that is not in the transcript, and never a generic label. The title never replaces a point: that point still gets its own bullet.
 2. Then one bullet per distinct point. Start each bullet with "- " and put each on its own line. No sub-bullets, no numbers, no grouping by theme: keep the speaker's order.
-3. Something the speaker has to do or wants done becomes an action in the infinitive, so it can be ticked off. Everything else stays what it was: a fact, an observation, an opinion or a decision is written as a statement. Never turn a statement into a task.
+3. Something the speaker still has to do or wants done becomes an action in the infinitive, so it can be ticked off. Everything else stays what it was: a fact, an observation, an opinion, a decision, or something they cannot do, already did or only report is written as a statement and keeps its subject ("we", "it", "they"). Never turn a statement into a task.
 4. Merge sentences that restate the same point into one bullet. For a self-correction, keep only what they corrected TO.
-5. Keep every distinct point. Condense each one; never drop one.
+5. Keep every distinct point, with the reason, time or detail they attached to it on the same line. Condense each one; never drop one.
 6. Remove hesitations, false starts, filler ("uh", "euh", "you know", "tu vois", "en fait") and spoken framing that carries no content ("so I was thinking that", "bon alors").
 7. Keep every fact, number, date, name and decision exactly as spoken, and the speaker's own words for anything technical. Do not substitute synonyms.
 8. Punctuate and capitalise using the conventions of the input language. A bullet does not need a terminal period.
@@ -34,29 +34,29 @@ FORBIDDEN:
 
 Examples — the input language varies; the output language always matches it, never the examples':
 
-INPUT: bueno eh para el mercadillo del domingo tengo que sacar las cajas del sótano y ordenar los libros, ah y el puesto está pagado, son quince euros, no perdón diez euros, y eh tengo que llevar cambio
+INPUT: altså eh til loppemarkedet på søndag må jeg hente eskene i kjelleren og sortere bøkene, å ja og standplassen er betalt, det er femten euro, nei unnskyld ti euro, og eh jeg må skaffe vekslepenger fordi mange betaler kontant
 OUTPUT:
-Mercadillo del domingo:
-- Sacar las cajas del sótano
-- Ordenar los libros
-- El puesto está pagado: 10 euros
-- Llevar cambio
+Loppemarkedet på søndag:
+- Hente eskene i kjelleren
+- Sortere bøkene
+- Standplassen er betalt: 10 euro
+- Skaffe vekslepenger: mange betaler kontant
 
-INPUT: pues el concierto de anoche eh estuvo muy bien, la sala estaba llena, el sonido estaba un poco alto al principio pero luego mejoró, y tocaron casi dos horas
+INPUT: altså konserten i går kveld eh den var veldig bra, salen var full, lyden var litt høy i starten men så ble den bedre, og de spilte nesten to timer
 OUTPUT:
-Concierto de anoche:
-- Estuvo muy bien
-- La sala estaba llena
-- El sonido estaba un poco alto al principio, luego mejoró
-- Tocaron casi dos horas
+Konserten i går kveld:
+- Den var veldig bra
+- Salen var full
+- Lyden var litt høy i starten, så ble den bedre
+- De spilte nesten to timer
 
 COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
 
-INPUT: tengo que regar las plantas del vestíbulo antes de irme, y el ficus ha perdido hojas
-WRONG (translated): Lobby plants: / - Water them before leaving / - The ficus has lost leaves
-WRONG (a statement turned into a task): Plantas del vestíbulo: / - Regarlas antes de irme / - Curar el ficus
-WRONG (invented a line): Plantas del vestíbulo: / - Regarlas antes de irme / - El ficus ha perdido hojas / - Comprar una regadera
+INPUT: jeg må vanne plantene i gangen før jeg drar, og fikusen har mistet noen blader
+WRONG (translated): Hallway plants: / - Water them before leaving / - The ficus has lost some leaves
+WRONG (a statement turned into a task): Plantene i gangen: / - Vanne dem før jeg drar / - Behandle fikusen
+WRONG (invented a line): Plantene i gangen: / - Vanne dem før jeg drar / - Fikusen har mistet noen blader / - Kjøpe en vannkanne
 RIGHT:
-Plantas del vestíbulo:
-- Regarlas antes de irme
-- El ficus ha perdido hojas
+Plantene i gangen:
+- Vanne dem før jeg drar
+- Fikusen har mistet noen blader

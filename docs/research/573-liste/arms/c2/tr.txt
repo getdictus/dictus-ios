@@ -34,29 +34,29 @@ FORBIDDEN:
 
 Examples — the input language varies; the output language always matches it, never the examples':
 
-INPUT: bon alors pour le vide-grenier de dimanche euh il faut que je descende les cartons de la cave et que je trie les livres, ah et l'emplacement est payé, c'est quinze euros, non pardon dix euros, et euh faut que je prévoie de la monnaie parce que beaucoup paient en liquide
+INPUT: şey ıı pazar günkü bit pazarı için bodrumdaki kolileri çıkarmam ve kitapları ayırmam lazım, ha bir de tezgâh parası ödendi, on beş euro, yok pardon on euro, ve ıı bozuk para ayarlamam lazım çünkü çoğu kişi nakit ödüyor
 OUTPUT:
-Vide-grenier de dimanche :
-- Descendre les cartons de la cave
-- Trier les livres
-- L'emplacement est payé : 10 euros
-- Prévoir de la monnaie : beaucoup paient en liquide
+Pazar günkü bit pazarı:
+- Bodrumdaki kolileri çıkarmak
+- Kitapları ayırmak
+- Tezgâh parası ödendi: 10 euro
+- Bozuk para ayarlamak: çoğu kişi nakit ödüyor
 
-INPUT: alors le concert d'hier soir euh c'était vraiment bien, la salle était pleine, le son était un peu fort au début mais après ça s'est arrangé, et ils ont joué presque deux heures
+INPUT: şey dün akşamki konser ıı gerçekten çok iyiydi, salon doluydu, ses başta biraz yüksekti ama sonra düzeldi, ve neredeyse iki saat çaldılar
 OUTPUT:
-Concert d'hier soir :
-- C'était vraiment bien
-- La salle était pleine
-- Le son était un peu fort au début, puis ça s'est arrangé
-- Ils ont joué presque deux heures
+Dün akşamki konser:
+- Gerçekten çok iyiydi
+- Salon doluydu
+- Ses başta biraz yüksekti, sonra düzeldi
+- Neredeyse iki saat çaldılar
 
 COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
 
-INPUT: faut que j'arrose les plantes du hall avant de partir, et le ficus a perdu des feuilles
-WRONG (translated): Hall plants: / - Water them before leaving / - The ficus has lost leaves
-WRONG (a statement turned into a task): Plantes du hall : / - Les arroser avant de partir / - Soigner le ficus
-WRONG (invented a line): Plantes du hall : / - Les arroser avant de partir / - Le ficus a perdu des feuilles / - Acheter un arrosoir
+INPUT: çıkmadan önce girişteki bitkileri sulamam lazım, bir de fikus birkaç yaprak döktü
+WRONG (translated): Entrance plants: / - Water them before leaving / - The ficus has lost a few leaves
+WRONG (a statement turned into a task): Girişteki bitkiler: / - Çıkmadan önce sulamak / - Fikusu tedavi etmek
+WRONG (invented a line): Girişteki bitkiler: / - Çıkmadan önce sulamak / - Fikus birkaç yaprak döktü / - Bir sulama kabı almak
 RIGHT:
-Plantes du hall :
-- Les arroser avant de partir
-- Le ficus a perdu des feuilles
+Girişteki bitkiler:
+- Çıkmadan önce sulamak
+- Fikus birkaç yaprak döktü

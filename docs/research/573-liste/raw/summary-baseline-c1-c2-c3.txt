@@ -1,4 +1,4 @@
-765 runs loaded, rounds: baseline, c1, c2
+1110 runs loaded, rounds: baseline, c1, c2, c3
 
 
 ════ B1 — invented facts or names, title included (bars.md §5)
@@ -162,6 +162,83 @@
        title: '구조화 모드 사용 후:'
    [T] T4-structured-since.ko#3 success: title words not in input: ['사용']
        title: '구조화 모드 사용 후:'
+── c3: refused by grounding/segmentOverlap: 0
+   [N] N2-reunion-vrac#3 success: title words not in input: ['preparation']
+       title: 'Préparation avant la réunion\xa0:'
+   [M] D1-fr-device-courses#1 success: title words not in input: ['autres']
+       title: 'Récap du lait et autres\xa0:'
+   [M] D1-fr-device-courses#2 success: title words not in input: ['autres']
+       title: 'Récap du lait et autres\xa0:'
+   [M] D2-en-device-hair#1 success: title words not in input: ['care']
+       title: 'Hair care:'
+   [M] D2-en-device-hair#2 success: title words not in input: ['care']
+       title: 'Hair care:'
+   [M] D2-en-device-hair#3 success: title words not in input: ['care']
+       title: 'Hair care:'
+   [L] 3-message-draft#2 success: title words not in input: ['probleme']
+       title: 'Problème du bureau\xa0:'
+   [T] T2-no-error.en#1 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.en#2 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.en#3 success: title words not in input: ['current', 'status']
+       title: 'Current status:'
+   [T] T2-no-error.es#3 success: title words not in input: ['estado', 'actual']
+       title: 'Estado actual:'
+   [T] T3-plan-mode.es#1 success: title words not in input: ['este']
+       title: 'Integración de este issue:'
+   [T] T3-plan-mode.es#3 success: title words not in input: ['este']
+       title: 'Integración de este issue:'
+   [T] T3-plan-mode.it#1 success: title words not in input: ['dell']
+       title: "Integrazione dell'issue:"
+   [T] T3-plan-mode.it#2 success: title words not in input: ['dell']
+       title: "Integrazione dell'issue:"
+   [T] T3-plan-mode.it#3 success: title words not in input: ['dell']
+       title: "Integrazione dell'issue:"
+   [T] T2-no-error.pt#1 success: title words not in input: ['status', 'atual']
+       title: 'Status atual:'
+   [T] T2-no-error.pt#2 success: title words not in input: ['atual']
+       title: 'Estado atual:'
+   [T] T3-plan-mode.pt#1 success: title words not in input: ['deste']
+       title: 'Integração deste issue:'
+   [T] T3-plan-mode.da#1 success: title words not in input: ['dette']
+       title: 'Integration af dette issue:'
+   [T] T3-plan-mode.da#3 success: title words not in input: ['dette']
+       title: 'Integration af dette issue:'
+   [T] T3-plan-mode.nb#1 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T3-plan-mode.nb#2 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T3-plan-mode.nb#3 success: title words not in input: ['dette', 'problemet']
+       title: 'Integrasjonen av dette problemet:'
+   [T] T4-structured-since.ja#3 success: title words not in input: ['方']
+       title: '構造化モードの使い方：'
+   [T] T6-project-update.ja#1 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗：'
+   [T] T6-project-update.ja#2 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗報告：'
+   [T] T6-project-update.ja#3 success: title words not in input: ['進', '捗']
+       title: 'プロジェクトの進捗：'
+   [T] T2-no-error.ko#1 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T2-no-error.ko#2 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T2-no-error.ko#3 success: title words not in input: ['없음']
+       title: '오류 메시지 없음:'
+   [T] T4-structured-since.ko#1 success: title words not in input: ['사용']
+       title: '구조화 모드 사용:'
+   [T] T4-structured-since.ko#2 success: title words not in input: ['사용']
+       title: '구조화 모드 사용:'
+   [T] T4-structured-since.ko#3 success: title words not in input: ['사용']
+       title: '구조화 모드 사용:'
+   [T] T2-no-error.zh-Hans#3 success: title words not in input: ['当', '状', '态']
+       title: '当前状态：'
+   [T] T2-no-error.zh-Hant#1 success: title words not in input: ['狀', '態']
+       title: '目前運作狀態：'
+   [T] T2-no-error.zh-Hant#2 success: title words not in input: ['狀', '況']
+       title: '目前運作狀況：'
+   [T] T2-no-error.zh-Hant#3 success: title words not in input: ['狀', '況']
+       title: '目前運作狀況：'
 
 
 ════ B2 — output language, per round and language (bars.md §5)
@@ -201,6 +278,22 @@ c2        tr       16       0            0.0    0              0
 c2        vi       18       0            0.0    0              0        
 c2        zh-Hans  18       0            0.0    0              0        
 c2        zh-Hant  18       0            0.0    0              0        
+c3        da       18       0            0.0    3              3        
+c3        de       18       0            0.0    0              0        
+c3        en       36       0            0.0    0              0        
+c3        es       18       0            0.0    0              0        
+c3        fr       57       0            0.0    0              0        
+c3        it       18       0            0.0    0              0        
+c3        ja       18       0            0.0    0              0        
+c3        ko       18       0            0.0    0              0        
+c3        nb       18       0            0.0    0              0        
+c3        nl       18       0            0.0    0              0        
+c3        pt       18       0            0.0    0              0        
+c3        sv       18       0            0.0    0              0        
+c3        tr       15       0            0.0    0              0        
+c3        vi       18       0            0.0    0              0        
+c3        zh-Hans  18       0            0.0    0              0        
+c3        zh-Hant  18       0            0.0    0              0        
 
 Every flagged output, for the hand read:
   [c1/T] T4-structured-since.da#1 success read=da expected=da
@@ -215,6 +308,12 @@ Every flagged output, for the hand read:
       FOREIGN: - Kan eksportere loggene, som de er
   [c2/T] T4-structured-since.da#3 success read=da expected=da
       FOREIGN: - Kan jeg eksportere loggene, som de er
+  [c3/T] T4-structured-since.da#1 success read=da expected=da
+      FOREIGN: - Eksportere loggene som de er
+  [c3/T] T4-structured-since.da#2 success read=da expected=da
+      FOREIGN: - Eksportere loggene som de er
+  [c3/T] T4-structured-since.da#3 success read=da expected=da
+      FOREIGN: - Eksportere loggene, som de er
 
 
 ════ B3 — tasks fabricated from a statement, set S, every line (bars.md §5)
@@ -297,6 +396,32 @@ Every flagged output, for the hand read:
          S8-en-opinion#2 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern but it feels crowded on a small screen ⏎ - The icons in the second one are clearer too
          S8-en-opinion#3 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern ⏎ - It feels crowded on a small screen ⏎ - The icons in the second one are clearer too
    screen: 0 outputs with a line opening on an infinitive or a task verb
+── c3: 24 outputs, 24 accepted
+         S1-fr-test-ok#1 success: Petit retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S1-fr-test-ok#2 success: Petit retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S1-fr-test-ok#3 success: Petit retour sur le test de ce matin : ⏎ - L'enregistrement a marché du premier coup ⏎ - La transcription est sortie en à peu près deux secondes ⏎ - La qualité est bonne ⏎ - La batterie a pris 5 % sur dix minutes ⏎ - Le micro capte un peu trop le bruit de la rue
+         S2-fr-voyage#1 success: Voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S2-fr-voyage#2 success: Voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S2-fr-voyage#3 success: Voyage s'est bien passé : ⏎ - Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet ⏎ - L'hôtel est à deux rues de la gare ⏎ - La chambre est petite mais propre ⏎ - Le petit-déjeuner est compris ⏎ - Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+         S3-fr-compte-rendu#1 success: Réunion de ce matin : ⏎ - Le budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#2 success: Réunion de ce matin : ⏎ - Le budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S3-fr-compte-rendu#3 success: Réunion de ce matin : ⏎ - Le budget de l'année prochaine est validé à 40 000 euros ⏎ - La date de lancement reste fixée au 15 mars ⏎ - Le client trouve la nouvelle maquette trop chargée, il préférait la première version ⏎ - L'équipe support est passée de trois à cinq personnes depuis septembre
+         S4-fr-avis#1 success: Restaurant d'hier soir : ⏎ - C'était pas terrible ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne : c'est cher pour ce que c'est
+         S4-fr-avis#2 success: Restaurant d'hier soir : ⏎ - C'était pas terrible ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne : c'est cher pour ce que c'est
+         S4-fr-avis#3 success: Restaurant d'hier soir : ⏎ - C'était pas terrible ⏎ - L'entrée était bonne ⏎ - Le plat est arrivé tiède et un peu trop salé ⏎ - Le service était sympa quand même ⏎ - 45 euros par personne : c'est cher pour ce que c'est
+         S5-fr-constat-appli#1 success: Observation sur l'appli depuis la mise à jour : ⏎ - Le clavier met deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S5-fr-constat-appli#2 success: Observation sur l'appli depuis la mise à jour : ⏎ - Le clavier met deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S5-fr-constat-appli#3 success: Observation sur l'appli depuis la mise à jour : ⏎ - Le clavier met deux secondes à apparaître quand j'ouvre Messages ⏎ - La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase ⏎ - Le mode sombre n'est plus appliqué sur l'écran des réglages
+         S6-en-weekend#1 success: Weekend: ⏎ - The weather was great on Saturday ⏎ - We spent most of the day at the lake ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S6-en-weekend#2 success: Weekend quiet: ⏎ - The weather was great on Saturday ⏎ - We spent most of the day at the lake ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S6-en-weekend#3 success: Weekend quiet: ⏎ - The weather was great on Saturday ⏎ - We spent most of the day at the lake ⏎ - Sunday it rained the whole afternoon ⏎ - The new bike works fine ⏎ - The brakes are much better than on the old one ⏎ - The battery lasted the whole ride
+         S7-en-standup#1 success: Migration update: ⏎ - The migration finished last night without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S7-en-standup#2 success: Migration update: ⏎ - The migration finished last night without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S7-en-standup#3 success: Migration update: ⏎ - The migration finished last night without errors ⏎ - The dashboard is about thirty percent faster since the cache change ⏎ - We still see a few timeouts on the export endpoint, maybe two or three a day ⏎ - The staging server is back on the old certificate
+         S8-en-opinion#1 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern ⏎ - It feels crowded on a small screen ⏎ - The icons in the second one are clearer too
+         S8-en-opinion#2 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern ⏎ - It feels crowded on a small screen ⏎ - The icons in the second one are clearer too
+         S8-en-opinion#3 success: Second design: ⏎ - The second design is the stronger one ⏎ - The colours are calmer ⏎ - The text is easier to read ⏎ - The first one looks more modern but it feels crowded on a small screen ⏎ - The icons in the second one are clearer too
+   screen: 0 outputs with a line opening on an infinitive or a task verb
 
 
 ════ B4 — no regression on N1-N6 against the baseline (bars.md §5)
@@ -305,6 +430,7 @@ round     runs  accepted  expectLost  wrongLang  refusedBy
 baseline  18    18        0           0          -
 c1        18    18        0           0          -
 c2        18    18        0           0          -
+c3        18    18        0           0          -
 
 
 ════ B5 — the shape: title, colon, flat bullets (bars.md §5)
@@ -324,12 +450,18 @@ c2        S    24        24       -
 c2        M    15        15       -
 c2        L    18        18       -
 c2        T    265       265      -
+c3        N    18        18       -
+c3        S    24        24       -
+c3        M    15        15       -
+c3        L    18        18       -
+c3        T    267       267      -
 
 Every accepted output off-shape on N, S, M, L (candidates only: the baseline has no title by design):
 
 T, shape OK per language (accepted only):
   c1: da 18/18  de 18/18  en 18/18  es 18/18  it 18/18  ja 18/18  ko 18/18  nb 18/18  nl 18/18  pt 18/18  sv 18/18  tr 17/17  vi 18/18  zh-Hans 17/17  zh-Hant 18/18
   c2: da 18/18  de 18/18  en 18/18  es 18/18  it 18/18  ja 17/17  ko 17/17  nb 18/18  nl 18/18  pt 18/18  sv 18/18  tr 15/15  vi 18/18  zh-Hans 18/18  zh-Hant 18/18
+  c3: da 18/18  de 18/18  en 18/18  es 18/18  it 18/18  ja 18/18  ko 18/18  nb 18/18  nl 18/18  pt 18/18  sv 18/18  tr 15/15  vi 18/18  zh-Hans 18/18  zh-Hant 18/18
 
 
 ════ B6 — nothing dropped: axis 1 on N + M + L, and L5's trailing line (bars.md §5)
@@ -338,6 +470,7 @@ round     outputs  withUnrecalled  unrecalledTotal  L5 trailing kept
 baseline  51       30              98               0/3
 c1        51       30              96               0/3
 c2        51       30              81               0/3
+c3        51       29              80               0/3
 
 
 ════ B7 — the band: refusals on check=length, and ratios (bars.md §5)
@@ -345,6 +478,7 @@ c2        51       30              81               0/3
   baseline: N+S+M+L refused on length 0/75, T 0; ratio min 0.26 median 0.69 max 0.99
   c1: N+S+M+L refused on length 0/75, T 0; ratio min 0.27 median 0.73 max 1.19
   c2: N+S+M+L refused on length 0/75, T 0; ratio min 0.29 median 0.78 max 1.19
+  c3: N+S+M+L refused on length 0/75, T 0; ratio min 0.32 median 0.78 max 1.19
 
 
 ════ Reported, never barred: outcomes by round and set
@@ -364,3 +498,8 @@ c2        S    24    0         24       -
 c2        M    15    0         15       -
 c2        L    18    0         18       -
 c2        T    270   2         265      segmentOverlap=3
+c3        N    18    0         18       -
+c3        S    24    0         24       -
+c3        M    15    0         15       -
+c3        L    18    0         18       -
+c3        T    270   3         267      -

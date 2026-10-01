@@ -34,29 +34,29 @@ FORBIDDEN:
 
 Examples — the input language varies; the output language always matches it, never the examples':
 
-INPUT: bon alors pour le vide-grenier de dimanche euh il faut que je descende les cartons de la cave et que je trie les livres, ah et l'emplacement est payé, c'est quinze euros, non pardon dix euros, et euh faut que je prévoie de la monnaie
+INPUT: also ähm für den Flohmarkt am Sonntag muss ich die Kartons aus dem Keller holen und die Bücher sortieren, ach und der Stand ist bezahlt, das sind fünfzehn Euro, nein Entschuldigung zehn Euro, und ähm ich muss Wechselgeld besorgen
 OUTPUT:
-Vide-grenier de dimanche :
-- Descendre les cartons de la cave
-- Trier les livres
-- L'emplacement est payé : 10 euros
-- Prévoir de la monnaie
+Flohmarkt am Sonntag:
+- Kartons aus dem Keller holen
+- Bücher sortieren
+- Der Stand ist bezahlt: 10 Euro
+- Wechselgeld besorgen
 
-INPUT: alors le concert d'hier soir euh c'était vraiment bien, la salle était pleine, le son était un peu fort au début mais après ça s'est arrangé, et ils ont joué presque deux heures
+INPUT: also das Konzert gestern Abend ähm das war richtig gut, der Saal war voll, der Sound war am Anfang ein bisschen laut aber dann wurde es besser, und sie haben fast zwei Stunden gespielt
 OUTPUT:
-Concert d'hier soir :
-- C'était vraiment bien
-- La salle était pleine
-- Le son était un peu fort au début, puis ça s'est arrangé
-- Ils ont joué presque deux heures
+Konzert gestern Abend:
+- Es war richtig gut
+- Der Saal war voll
+- Der Sound war am Anfang etwas laut, dann wurde es besser
+- Sie haben fast zwei Stunden gespielt
 
 COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
 
-INPUT: faut que j'arrose les plantes du hall avant de partir, et le ficus a perdu des feuilles
-WRONG (translated): Hall plants: / - Water them before leaving / - The ficus has lost leaves
-WRONG (a statement turned into a task): Plantes du hall : / - Les arroser avant de partir / - Soigner le ficus
-WRONG (invented a line): Plantes du hall : / - Les arroser avant de partir / - Le ficus a perdu des feuilles / - Acheter un arrosoir
+INPUT: ich muss die Pflanzen im Flur gießen bevor ich gehe, und der Ficus hat Blätter verloren
+WRONG (translated): Hallway plants: / - Water them before leaving / - The ficus has lost leaves
+WRONG (a statement turned into a task): Pflanzen im Flur: / - Vor dem Gehen gießen / - Den Ficus behandeln
+WRONG (invented a line): Pflanzen im Flur: / - Vor dem Gehen gießen / - Der Ficus hat Blätter verloren / - Eine Gießkanne kaufen
 RIGHT:
-Plantes du hall :
-- Les arroser avant de partir
-- Le ficus a perdu des feuilles
+Pflanzen im Flur:
+- Vor dem Gehen gießen
+- Der Ficus hat Blätter verloren

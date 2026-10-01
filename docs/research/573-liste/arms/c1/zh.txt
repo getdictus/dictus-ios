@@ -34,29 +34,29 @@ FORBIDDEN:
 
 Examples — the input language varies; the output language always matches it, never the examples':
 
-INPUT: bon alors pour le vide-grenier de dimanche euh il faut que je descende les cartons de la cave et que je trie les livres, ah et l'emplacement est payé, c'est quinze euros, non pardon dix euros, et euh faut que je prévoie de la monnaie
+INPUT: 那个 为了周日的跳蚤市场 我得把地下室的箱子搬上来 还要整理书 啊对了 摊位费已经交了 是十五欧 不对 不好意思 是十欧 然后 呃 还得准备零钱
 OUTPUT:
-Vide-grenier de dimanche :
-- Descendre les cartons de la cave
-- Trier les livres
-- L'emplacement est payé : 10 euros
-- Prévoir de la monnaie
+周日的跳蚤市场：
+- 把地下室的箱子搬上来
+- 整理书
+- 摊位费已交：10欧
+- 准备零钱
 
-INPUT: alors le concert d'hier soir euh c'était vraiment bien, la salle était pleine, le son était un peu fort au début mais après ça s'est arrangé, et ils ont joué presque deux heures
+INPUT: 那个 昨晚的音乐会 呃 真的很好 场子坐满了 声音一开始有点大 后来好了 他们演了差不多两个小时
 OUTPUT:
-Concert d'hier soir :
-- C'était vraiment bien
-- La salle était pleine
-- Le son était un peu fort au début, puis ça s'est arrangé
-- Ils ont joué presque deux heures
+昨晚的音乐会：
+- 真的很好
+- 场子坐满了
+- 声音一开始有点大，后来好了
+- 他们演了差不多两个小时
 
 COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
 
-INPUT: faut que j'arrose les plantes du hall avant de partir, et le ficus a perdu des feuilles
-WRONG (translated): Hall plants: / - Water them before leaving / - The ficus has lost leaves
-WRONG (a statement turned into a task): Plantes du hall : / - Les arroser avant de partir / - Soigner le ficus
-WRONG (invented a line): Plantes du hall : / - Les arroser avant de partir / - Le ficus a perdu des feuilles / - Acheter un arrosoir
+INPUT: 走之前得给大厅的植物浇水 还有那棵榕树掉了几片叶子
+WRONG (translated): Lobby plants: / - Water them before leaving / - The ficus has lost a few leaves
+WRONG (a statement turned into a task): 大厅的植物： / - 走之前浇水 / - 给榕树治病
+WRONG (invented a line): 大厅的植物： / - 走之前浇水 / - 榕树掉了几片叶子 / - 买一个浇水壶
 RIGHT:
-Plantes du hall :
-- Les arroser avant de partir
-- Le ficus a perdu des feuilles
+大厅的植物：
+- 走之前浇水
+- 榕树掉了几片叶子

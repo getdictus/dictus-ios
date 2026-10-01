@@ -34,29 +34,29 @@ FORBIDDEN:
 
 Examples — the input language varies; the output language always matches it, never the examples':
 
-INPUT: bon alors pour le vide-grenier de dimanche euh il faut que je descende les cartons de la cave et que je trie les livres, ah et l'emplacement est payé, c'est quinze euros, non pardon dix euros, et euh faut que je prévoie de la monnaie
+INPUT: えーっと 日曜のフリーマーケットのために地下室から段ボールを出して本を仕分けしないといけなくて あ それと出店料は払ってあって 十五ユーロ いや ごめん 十ユーロ で えーっと お釣りを用意しないと
 OUTPUT:
-Vide-grenier de dimanche :
-- Descendre les cartons de la cave
-- Trier les livres
-- L'emplacement est payé : 10 euros
-- Prévoir de la monnaie
+日曜のフリーマーケット：
+- 地下室から段ボールを出す
+- 本を仕分けする
+- 出店料は支払い済み：10ユーロ
+- お釣りを用意する
 
-INPUT: alors le concert d'hier soir euh c'était vraiment bien, la salle était pleine, le son était un peu fort au début mais après ça s'est arrangé, et ils ont joué presque deux heures
+INPUT: えっと 昨日の夜のコンサート えー 本当によかった 会場は満員で 音は最初ちょっと大きかったけど そのあとよくなって ほぼ二時間演奏してた
 OUTPUT:
-Concert d'hier soir :
-- C'était vraiment bien
-- La salle était pleine
-- Le son était un peu fort au début, puis ça s'est arrangé
-- Ils ont joué presque deux heures
+昨日の夜のコンサート：
+- 本当によかった
+- 会場は満員だった
+- 音は最初少し大きかったが、そのあとよくなった
+- ほぼ二時間演奏していた
 
 COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
 
-INPUT: faut que j'arrose les plantes du hall avant de partir, et le ficus a perdu des feuilles
-WRONG (translated): Hall plants: / - Water them before leaving / - The ficus has lost leaves
-WRONG (a statement turned into a task): Plantes du hall : / - Les arroser avant de partir / - Soigner le ficus
-WRONG (invented a line): Plantes du hall : / - Les arroser avant de partir / - Le ficus a perdu des feuilles / - Acheter un arrosoir
+INPUT: 出かける前にロビーの植物に水をやらないと あとフィカスの葉が何枚か落ちた
+WRONG (translated): Lobby plants: / - Water them before leaving / - The ficus has lost a few leaves
+WRONG (a statement turned into a task): ロビーの植物： / - 出かける前に水をやる / - フィカスを手当てする
+WRONG (invented a line): ロビーの植物： / - 出かける前に水をやる / - フィカスの葉が何枚か落ちた / - じょうろを買う
 RIGHT:
-Plantes du hall :
-- Les arroser avant de partir
-- Le ficus a perdu des feuilles
+ロビーの植物：
+- 出かける前に水をやる
+- フィカスの葉が何枚か落ちた

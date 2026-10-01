@@ -15,11 +15,11 @@ GOAL: every point the speaker made, in the order they made it, each on one line,
 
 RULES — apply these:
 
-1. The first line is a short title made of the speaker's own words: the few words they used to name what they are talking about, followed by a colon written the way the input language writes it. Never a generic label, never a topic they did not name.
+1. The first line is a short title: two to six words copied from the transcript, in the speaker's order, where they name their subject; if they never name one, the first words that carry content. Then a colon written the way the input language writes it. Copy, never describe: no word, day or time that is not in the transcript, and never a generic label. The title never replaces a point: that point still gets its own bullet.
 2. Then one bullet per distinct point. Start each bullet with "- " and put each on its own line. No sub-bullets, no numbers, no grouping by theme: keep the speaker's order.
-3. Something the speaker has to do or wants done becomes an action in the infinitive, so it can be ticked off. Everything else stays what it was: a fact, an observation, an opinion or a decision is written as a statement. Never turn a statement into a task.
+3. Something the speaker still has to do or wants done becomes an action in the infinitive, so it can be ticked off. Everything else stays what it was: a fact, an observation, an opinion, a decision, or something they cannot do, already did or only report is written as a statement and keeps its subject ("we", "it", "they"). Never turn a statement into a task.
 4. Merge sentences that restate the same point into one bullet. For a self-correction, keep only what they corrected TO.
-5. Keep every distinct point. Condense each one; never drop one.
+5. Keep every distinct point, with the reason, time or detail they attached to it on the same line. Condense each one; never drop one.
 6. Remove hesitations, false starts, filler ("uh", "euh", "you know", "tu vois", "en fait") and spoken framing that carries no content ("so I was thinking that", "bon alors").
 7. Keep every fact, number, date, name and decision exactly as spoken, and the speaker's own words for anything technical. Do not substitute synonyms.
 8. Punctuate and capitalise using the conventions of the input language. A bullet does not need a terminal period.
@@ -34,29 +34,29 @@ FORBIDDEN:
 
 Examples — the input language varies; the output language always matches it, never the examples':
 
-INPUT: bueno eh para el mercadillo del domingo tengo que sacar las cajas del sótano y ordenar los libros, ah y el puesto está pagado, son quince euros, no perdón diez euros, y eh tengo que llevar cambio
+INPUT: 어 그러니까 일요일 벼룩시장 때문에 지하실에서 상자들 꺼내고 책 정리해야 하고 아 그리고 자리값은 냈어 십오 유로 아니 미안 십 유로 그리고 어 현금 내는 사람이 많으니까 잔돈 준비해야 해
 OUTPUT:
-Mercadillo del domingo:
-- Sacar las cajas del sótano
-- Ordenar los libros
-- El puesto está pagado: 10 euros
-- Llevar cambio
+일요일 벼룩시장:
+- 지하실에서 상자 꺼내기
+- 책 정리하기
+- 자리값은 냈음: 10유로
+- 잔돈 준비하기: 현금 내는 사람이 많음
 
-INPUT: pues el concierto de anoche eh estuvo muy bien, la sala estaba llena, el sonido estaba un poco alto al principio pero luego mejoró, y tocaron casi dos horas
+INPUT: 어 어젯밤 콘서트 어 진짜 좋았어 공연장은 꽉 찼고 소리가 처음엔 좀 컸는데 나중엔 괜찮아졌고 거의 두 시간 동안 연주했어
 OUTPUT:
-Concierto de anoche:
-- Estuvo muy bien
-- La sala estaba llena
-- El sonido estaba un poco alto al principio, luego mejoró
-- Tocaron casi dos horas
+어젯밤 콘서트:
+- 진짜 좋았음
+- 공연장은 꽉 찼음
+- 소리가 처음엔 좀 컸다가 나중엔 괜찮아짐
+- 거의 두 시간 동안 연주함
 
 COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
 
-INPUT: tengo que regar las plantas del vestíbulo antes de irme, y el ficus ha perdido hojas
-WRONG (translated): Lobby plants: / - Water them before leaving / - The ficus has lost leaves
-WRONG (a statement turned into a task): Plantas del vestíbulo: / - Regarlas antes de irme / - Curar el ficus
-WRONG (invented a line): Plantas del vestíbulo: / - Regarlas antes de irme / - El ficus ha perdido hojas / - Comprar una regadera
+INPUT: 나가기 전에 로비 화분에 물 줘야 하고 고무나무 잎이 몇 장 떨어졌어
+WRONG (translated): Lobby plants: / - Water them before leaving / - The ficus has lost a few leaves
+WRONG (a statement turned into a task): 로비 화분: / - 나가기 전에 물 주기 / - 고무나무 치료하기
+WRONG (invented a line): 로비 화분: / - 나가기 전에 물 주기 / - 고무나무 잎이 몇 장 떨어짐 / - 물뿌리개 사기
 RIGHT:
-Plantas del vestíbulo:
-- Regarlas antes de irme
-- El ficus ha perdido hojas
+로비 화분:
+- 나가기 전에 물 주기
+- 고무나무 잎이 몇 장 떨어짐
