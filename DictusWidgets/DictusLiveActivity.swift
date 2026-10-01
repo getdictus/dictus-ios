@@ -532,7 +532,10 @@ private struct VoiceNoteRing: View {
         .animation(isLuminanceReduced ? nil : .easeOut(duration: 0.6), value: note.segments)
         .animation(isLuminanceReduced ? nil : .spring(duration: 0.8, bounce: 0.4), value: note.allFinished)
         .animation(isLuminanceReduced ? nil : .default, value: note.readyCount)
-        .accessibilityLabel(Text(note.statusLine ?? note.receivedLine ?? "Dictus"))
+        // The words come localised from DictusApp (the widget has no catalog). The brand
+        // is the fallback for the first seconds of a note, when there is no line yet; it
+        // is the same in every language, so it is spoken verbatim.
+        .accessibilityLabel(note.statusLine.map { Text($0) } ?? note.receivedLine.map { Text($0) } ?? Text(verbatim: "Dictus"))
     }
 }
 
@@ -557,7 +560,7 @@ private struct VoiceNoteCompactTrailing: View {
     var body: some View {
         ZStack {
             if note.receivedLine != nil {
-                VoiceNoteReceivedGlyph(diameter: 17)
+                VoiceNoteReceivedGlyph(diameter: 17, label: note.receivedLine)
                     .transition(.move(edge: .top).combined(with: .opacity))
             } else {
                 VoiceNoteRing(note: note, diameter: 17, lineWidth: 2.2, countSize: 9)
@@ -575,6 +578,8 @@ private struct VoiceNoteCompactTrailing: View {
 /// first frame: the arrow gives way to the count when the note is ready, in place.
 private struct VoiceNoteReceivedGlyph: View {
     let diameter: CGFloat
+    /// "Voice note received", localised by DictusApp.
+    let label: String?
 
     var body: some View {
         ZStack {
@@ -585,7 +590,7 @@ private struct VoiceNoteReceivedGlyph: View {
                 .foregroundColor(.white)
         }
         .frame(width: diameter, height: diameter)
-        .accessibilityLabel(Text("Dictus"))
+        .accessibilityLabel(label.map { Text($0) } ?? Text(verbatim: "Dictus"))
     }
 }
 
