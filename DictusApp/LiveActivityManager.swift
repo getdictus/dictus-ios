@@ -1091,4 +1091,3 @@ extension LiveActivityManager {
         }
     }
 }
-
