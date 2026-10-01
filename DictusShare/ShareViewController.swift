@@ -14,11 +14,9 @@ import DictusCore
 /// containers (#620 spike, finding 2), and a share extension's memory budget would
 /// not hold one anyway.
 ///
-/// It also cannot open DictusApp. `NSExtensionContext.open` is honoured for Today
-/// and iMessage extensions only (measured `false` from a share extension in the
-/// spike), and walking the responder chain to `UIApplication` is undocumented and
-/// rejected in App Review. So when the app is not alive to take the note, the
-/// extension says so and asks the user to open Dictus — #620's cold path, option A.
+/// When DictusApp is not alive to take the note (#620's cold path), the extension
+/// opens it on the note — see `openDictus(on:)` for how, and for the risk that way
+/// carries. If opening fails, it says "Open Dictus, your voice note is waiting".
 final class ShareViewController: UIViewController {
 
     private let model = ShareModel()
@@ -48,11 +46,82 @@ final class ShareViewController: UIViewController {
             await model.receive(providers)
             if model.closesByItself {
                 // The warm path: the note is in good hands, and the user goes straight
-                // back to the conversation they shared from (#620 decision 2).
-                try? await Task.sleep(nanoseconds: 1_800_000_000)
+                // back to the conversation they shared from (#620 decision 2). The
+                // haptic says "received"; 1.2 s is long enough to read the line and
+                // short enough to feel like the island took it (decision 6).
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+                try? await Task.sleep(nanoseconds: 1_200_000_000)
                 finish()
+            } else if case .waitingForApp = model.state {
+                // The cold path: open Dictus on the note. The "waiting" screen already
+                // on display stays as the fallback when opening fails.
+                if await openDictus(on: model.firstDropID) {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    finish()
+                }
             }
         }
+    }
+
+    // MARK: - Opening DictusApp
+
+    /// Open DictusApp on the voice note link. Returns whether iOS opened it.
+    ///
+    /// ### Measured on device, 2026-10-01 (iPhone 15 Pro Max, iOS 27.0.1, #620 probe)
+    ///
+    /// - `NSExtensionContext.open(_:completionHandler:)`, the documented API — the one
+    ///   the keyboard uses — returns `false` from a share extension. Apple documents it
+    ///   for Today and iMessage extensions only. It is still tried first, so the day
+    ///   iOS honours it here this path stops depending on the second one.
+    /// - Walking the responder chain from this controller to the `UIApplication`
+    ///   instance (8 hops on that device) and calling
+    ///   `open(_:options:completionHandler:)` on it returned `true` and Dictus opened.
+    ///
+    /// ### The risk, stated
+    ///
+    /// The second call is undocumented: `UIApplication` is unavailable to extensions at
+    /// compile time, so it is reached through the Objective-C runtime. That is an App
+    /// Review guideline 2.5.1 risk (public APIs only), and Apple DTS calls it
+    /// unsupported on the developer forums. MacWhisper and VivaDicta ship the same
+    /// behaviour. The maintainer chose it on 2026-10-01 over a notification-permission
+    /// prompt. If a review rejects it, deleting this method leaves the extension on the
+    /// "Open Dictus" screen, which works on its own.
+    private func openDictus(on noteID: UUID?) async -> Bool {
+        guard let url = VoiceNoteURL.url(for: noteID) else { return false }
+
+        if let context = extensionContext {
+            let opened: Bool = await withCheckedContinuation { continuation in
+                context.open(url) { success in continuation.resume(returning: success) }
+            }
+            if opened {
+                log("open", "via=extensionContext result=true")
+                return true
+            }
+        }
+
+        var responder: UIResponder? = self
+        while let current = responder, !current.isKind(of: UIApplication.self) {
+            responder = current.next
+        }
+        let selector = NSSelectorFromString("openURL:options:completionHandler:")
+        guard let application = responder, application.responds(to: selector),
+              let method = application.method(for: selector) else {
+            log("open", "via=responderChain result=applicationNotFound")
+            return false
+        }
+        typealias OpenFunction = @convention(c) (AnyObject, Selector, NSURL, NSDictionary,
+                                                 (@convention(block) (Bool) -> Void)?) -> Void
+        let open = unsafeBitCast(method, to: OpenFunction.self)
+        let opened: Bool = await withCheckedContinuation { continuation in
+            let completion: @convention(block) (Bool) -> Void = { success in continuation.resume(returning: success) }
+            open(application, selector, url as NSURL, NSDictionary(), completion)
+        }
+        log("open", "via=responderChain result=\(opened)")
+        return opened
+    }
+
+    private func log(_ action: String, _ details: String) {
+        PersistentLog.log(.diagnosticProbe(component: "VoiceNoteShare", instanceID: "extension", action: action, details: details))
     }
 
     private func finish() {
@@ -78,6 +147,9 @@ enum ShareState: Equatable {
 final class ShareModel: ObservableObject {
 
     @Published private(set) var state: ShareState = .sending
+
+    /// The first note this share dropped, which the cold path opens Dictus on.
+    private(set) var firstDropID: UUID?
 
     /// How long the extension waits for a live DictusApp to take the note. A live app
     /// answers in milliseconds — the Darwin post is delivered immediately and the
@@ -127,6 +199,7 @@ final class ShareModel: ObservableObject {
             return
         }
         log("dropped", "count=\(drops.count)")
+        firstDropID = drops.first?.id
 
         DarwinNotificationCenter.post(DarwinNotificationName.voiceNoteQueued)
         let taken = await waitForApp(drops, storage: storage)
