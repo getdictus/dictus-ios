@@ -27,6 +27,7 @@ SETS = {
     "M": "liste-mixed",
     "L": "longform-fr",
     "T": "translated-structured",
+    "R": "liste-round2",
 }
 
 # Content-free words a title may carry without them being "the speaker's words".
@@ -325,6 +326,60 @@ def reported(runs, rounds):
                   f"{', '.join(f'{k}={v}' for k, v in sorted(refused.items())) or '-'}")
 
 
+# Round 2 (bars.md §8). Screens only: every flag is adjudicated by hand.
+GENERIC = {"notes", "note", "résumé", "resume", "summary", "liste", "list", "points", "récap", "recap",
+           "récapitulatif", "à faire", "a faire", "to do", "todo", "tâches", "taches", "tasks", "status",
+           "current status", "état actuel", "estado actual", "stato attuale", "status atual"}
+TIME_WORDS = re.compile(r"(?i)\b(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|aujourd'hui|demain|hier|"
+                        r"matin|soir|midi|monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|"
+                        r"tomorrow|yesterday|morning|evening|tonight|week|semaine)\b")
+
+
+def content(text):
+    return {w for w in words(text) if len(w) >= 4 and w not in STOP}
+
+
+def round2(runs, rounds):
+    section("ROUND 2 — title bars T1-T4, past facts P1, post-check P2 (bars.md §8)")
+    for name, rows in by_round(runs, rounds):
+        cell = [r for r in rows if accepted(r) and r["set"] != "T"]
+        if not any(r["set"] == "R" for r in rows):
+            continue
+        t1 = t2 = t3 = t4 = 0
+        print(f"── {name}: {len(cell)} accepted outputs on N, S, M, L, R")
+        for r in cell:
+            title, bullets, _ = shape(r["output"])
+            if not title:
+                continue
+            bare = title.rstrip(":： ").strip()
+            flags = []
+            tc = content(bare)
+            if tc and any(len(tc & content(b)) / len(tc) >= 0.7 for b in bullets):
+                flags.append("T1 title≈a bullet"); t1 += 1
+            invented = [w for w in TIME_WORDS.findall(bare) if w.lower() not in r["raw"].lower()]
+            invented += numbers_unsupported(bare, r["raw"])
+            if invented:
+                flags.append(f"T2 not in input: {invented}"); t2 += 1
+            if fold(bare) in {fold(g) for g in GENERIC} or re.match(r"(?i)^(tasks|actions|to do|à faire|a faire)\b", bare):
+                flags.append("T3 generic"); t3 += 1
+            short = [b for b in bullets if len(b[2:].split()) <= 2]
+            if short and r["set"] in ("R", "M", "N"):
+                flags.append(f"T4? short bullets {short}"); t4 += 1
+            if flags:
+                print(f"   [{r['set']}] {r['fixture']}#{r['run']}: {title!r} — " + "; ".join(flags))
+        print(f"   screens: T1={t1} T2={t2} T3={t3} T4?={t4} (T4 lists every ≤ 2-word bullet; most are items, not fragments)")
+        print("   P1, past facts on R1-R5 (every bullet, read by hand):")
+        for r in rows:
+            if r["set"] == "R" and r["fixture"][:3] in ("R1-", "R2-", "R3-", "R4-", "R5-") and scored(r):
+                _, bullets, _ = shape(r["output"])
+                hits = [b for b in bullets if FR_INFINITIVE.match(b)]
+                print(f"     {'TASK?' if hits else '     '} {r['fixture']}#{r['run']}: " + " | ".join(bullets))
+        print("   P2, list items per run (R6, R7 must be ≥ 2; R10 reported):")
+        for r in rows:
+            if r["set"] == "R" and r["fixture"][:3] in ("R6-", "R7-", "R10") and scored(r):
+                print(f"     {r['fixture']}#{r['run']}: {len(shape(r['output'])[1])} bullet(s)")
+
+
 def main():
     rounds = sys.argv[1:] or ["baseline", "c1"]
     runs = [r for name in rounds for r in load_round(name)]
@@ -336,6 +391,7 @@ def main():
     b5(runs, rounds)
     b6(runs, rounds)
     b7(runs, rounds)
+    round2(runs, rounds)
     reported(runs, rounds)
 
 

@@ -1,0 +1,875 @@
+[
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "1-free-form",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 8406,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Un produit lancé tout seul :\n- Décider quoi ne pas faire\n- Sauter dessus\n- Avoir 15 trucs commencés et rien de fini",
+    "outputChars" : 115,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Bon alors je pensais à un truc ce matin en marchant,",
+      "le plus dur ce n'est pas de le coder,",
+      "Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 0,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 0,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "1-free-form",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : false,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 0,
+    "ms" : 6732,
+    "negationDropped" : 0,
+    "outcome" : "engineFailed",
+    "output" : "",
+    "outputChars" : 0,
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Bon alors je pensais à un truc ce matin en marchant,",
+      "c'est que finalement quand on lance un produit tout seul,",
+      "le plus dur ce n'est pas de le coder,",
+      "c'est de décider quoi ne pas faire en fait.",
+      "Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser.",
+      "Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "1-free-form",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 2432,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Lance un produit tout seul :\n- Décider quoi ne pas faire\n- Sauter dessus\n- Avoir 15 trucs commencés et rien de fini",
+    "outputChars" : 115,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 395,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Bon alors je pensais à un truc ce matin en marchant,",
+      "le plus dur ce n'est pas de le coder,",
+      "Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 11,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 55,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "2-project-update",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 5,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "listLines" : 10,
+    "ms" : 3951,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Projet :\n- Basculer la partie abonnement lundi dernier\n- Finir l'intégration StoreKit et ça passe en sandbox\n- Commencer l'historique des transcriptions\n- Travailler le vocabulaire personnalisé\n- Avoir une spec mais pas de code\n- Être à 412 téléchargements depuis le lancement\n- Avoir un taux de rétention à 7 jours de 19 %\n- Passer la barre des 1000 avant fin octobre\n- Voir Sarah jeudi à 14h pour caler la partie Apple Store\n- Soumettre la semaine du 12 si tout se passe bien",
+    "outputChars" : 477,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 698,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors point rapide sur le projet,",
+      "Il reste deux trucs.",
+      "Côté chiffres,",
+      "ce qui est faible, mais pas catastrophique pour une première version."
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 11,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 55,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "2-project-update",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 5,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "listLines" : 10,
+    "ms" : 3811,
+    "negationDropped" : 1,
+    "outcome" : "success",
+    "output" : "Projet :\n- Basculer la partie abonnement lundi dernier\n- Terminer l'intégration StoreKit et ça passe en sandbox\n- Commencer l'historique des transcriptions\n- Travailler le vocabulaire personnalisé\n- Avoir une spec mais pas de code\n- Être à 412 téléchargements depuis le lancement\n- Avoir un taux de rétention à 7 jours de 19%\n- Passer la barre des 1000 avant fin octobre\n- Voir Sarah jeudi à 14h pour caler la partie Apple Store\n- Soumettre la semaine du 12 si tout se passe bien",
+    "outputChars" : 479,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 698,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors point rapide sur le projet,",
+      "Il reste deux trucs.",
+      "Côté chiffres,",
+      "ce qui est faible, mais pas catastrophique pour une première version."
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 45,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "2-project-update",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 4,
+    "judgeablePropositions" : 15,
+    "labels" : [
+
+    ],
+    "listLines" : 9,
+    "ms" : 3798,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Projet :\n- Basculer la partie abonnement lundi dernier\n- Finir l'intégration StoreKit et ça passe en sandbox\n- Ne pas commencer l'historique des transcriptions\n- Ne pas avoir de code pour le vocabulaire personnalisé\n- Être à 412 téléchargements depuis le lancement\n- Avoir un taux de rétention à 7 jours de 19%\n- Passer la barre des 1000 avant fin octobre\n- Voir Sarah jeudi à 14h pour caler la partie Apple Store\n- Soumettre la semaine du 12 si tout se passe bien",
+    "outputChars" : 464,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 698,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors point rapide sur le projet,",
+      "Il reste deux trucs.",
+      "Et là dessus on a une spec mais pas de code.",
+      "Côté chiffres,",
+      "ce qui est faible, mais pas catastrophique pour une première version."
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333,
+      0,
+      0.3333333333333333,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "3-message-draft",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2595,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Aujourd'hui :\n- Je ne pourrais pas venir au bureau\n- J'ai un rendez-vous chez le dentiste à 11h et il va déborder\n- Je demande de décaler le point d'équipe à l'après-midi\n- Je me débrouillerai pour suivre une visio depuis la salle à tante",
+    "outputChars" : 238,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "ça m'arrangerait.",
+      "Mais ce sera moyen.",
+      "Dis-moi ce qui t'arrange."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "3-message-draft",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 5,
+    "ms" : 2470,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Avenir au bureau :\n- Je ne pourrais pas venir au bureau\n- J'ai un rendez-vous chez le dentiste à 11h\n- Il débordera\n- Décaler le point d'équipe à l'après-midi\n- Me débrouiller pour suivre une visio depuis la salle à tante",
+    "outputChars" : 221,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "ça m'arrangerait.",
+      "Mais ce sera moyen.",
+      "Dis-moi ce qui t'arrange."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "3-message-draft",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2589,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Aujourd'hui :\n- Je ne pourrais pas venir au bureau\n- J'ai un rendez-vous chez le dentiste à 11h et il va déborder\n- Si tu peux décaler le point d'équipe à l'après-midi, ça m'arrangerait\n- Sinon je me débrouillerai pour suivre une visio depuis la salle à tante",
+    "outputChars" : 259,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 353,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Mais ce sera moyen.",
+      "Dis-moi ce qui t'arrange."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "4-explanation",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 2902,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Fonctionnement de la reconnaissance vocale sur le téléphone :\n- Enregistre le son et découpe le micro en petits morceaux de quelques millisecondes\n- Essaye de deviner quels sons ont été prononcés et quels mots ces sons forment en utilisant ce qu'il entend et ce qu'il a déjà écrit avant\n- Ajoute la ponctuation, les majuscules éventuellement et découpe en paragraphes",
+    "outputChars" : 367,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 838,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "En gros il y a trois étapes.",
+      "La première c'est la capture.",
+      "La deuxième étape c'est le modèle.",
+      "Parce que le contexte aide énormément à lever les ambiguïtés.",
+      "Et la troisième étape,",
+      "c'est la mise en forme.",
+      "Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.2608695652173913
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "4-explanation",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2818,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Fonctionnement de la reconnaissance vocale sur le téléphone :\n- Enregistre le son et découpe le son en petits morceaux de quelques millisecondes\n- Essaye de deviner quels sons ont été prononcés et quels mots ces sons forment\n- Utilise ce qu'il entend et ce qu'il a déjà écrit avant\n- Ajoute la ponctuation, les majuscules éventuellement et découpe en paragraphes",
+    "outputChars" : 362,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 838,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "En gros il y a trois étapes.",
+      "La première c'est la capture.",
+      "La deuxième étape c'est le modèle.",
+      "Parce que le contexte aide énormément à lever les ambiguïtés.",
+      "Et la troisième étape,",
+      "c'est la mise en forme.",
+      "Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.2608695652173913
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "4-explanation",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 12,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 2351,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Fonctionnement de la reconnaissance vocale sur le téléphone :\n- Enregistre le son\n- Essaye de deviner quels sons ont été prononcés et quels mots ces sons forment\n- Ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes",
+    "outputChars" : 241,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 838,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "En gros il y a trois étapes.",
+      "La première c'est la capture.",
+      "Le micro enregistre le son et le système le découpe en petits morceaux de quelques millisecondes.",
+      "La deuxième étape c'est le modèle.",
+      "Et pour ça, il utilise à la fois ce qu'il entend et ce qu'il a déjà écrit avant.",
+      "Parce que le contexte aide énormément à lever les ambiguïtés.",
+      "Et la troisième étape,",
+      "c'est la mise en forme.",
+      "Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0.25,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.2608695652173913
+    ]
+  },
+  {
+    "alignedPairs" : 9,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 36,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "5-rambling",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "listLines" : 5,
+    "ms" : 3817,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Points à faire :\n- Rappeler le comptable pour l'assurance concernant la voiture\n- Répondre à Julien car il attend depuis peut-être une semaine et demie\n- Changer la page d'accueil du site car elle ne dit pas ce qu'on fait et les gens lisent trois lignes puis partent\n- Penser à annuler l'abonnement de 19 euros par mois qu'on n'utilise plus depuis février et qui coûte 6 mois pour rien\n- Préparer les questions pour l'entretien de mardi",
+    "outputChars" : 436,
+    "outputLanguage" : "fr",
+    "personLost" : 2,
+    "rawChars" : 1283,
+    "run" : 1,
+    "speakerState" : "dropped",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Bon alors je me lance.",
+      "Je voulais faire le point sur plein de choses en fait.",
+      "Je crois qu'il commence un peu à se demander si je les zappais.",
+      "Ce qui est un peu le cas honnête.",
+      "Quoi d'autre?",
+      "Ah oui,",
+      "il faut le refaire.",
+      "Enfin, pas le refaire,",
+      "mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon.",
+      "Ça c'est vraiment le sujet en fait.",
+      "Enfin bref.",
+      "Ah, j'ai aussi...",
+      "Super quoi.",
+      "Et puis la dernière chose,",
+      "et là je note vraiment parce que sinon je vais oublier c'est de préparer les questions pour l'entretien de mardi voilà je crois que c'est tout ah non il y avait un dernier truc ça m'échappe mais ça me reviendra"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0,
+      0.16666666666666666,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.2,
+      0,
+      0,
+      0,
+      0,
+      0.3333333333333333,
+      0.22727272727272727
+    ]
+  },
+  {
+    "alignedPairs" : 9,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 36,
+    "dispersed" : 2,
+    "expectedLanguage" : "fr",
+    "fixture" : "5-rambling",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 6,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "listLines" : 5,
+    "ms" : 3490,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point de suivi :\n- Rappeler le comptable pour l'assurance concernant la voiture\n- Répondre à Julien parce que ça fait peut-être une semaine et demie qu'il attend\n- Refaire le site en changeant la page d'accueil parce qu'elle ne dit pas du tout ce qu'on fait\n- Penser à annuler l'abonnement à 19 euros par mois qu'on n'utilise plus depuis février\n- Préparer les questions pour l'entretien de mardi",
+    "outputChars" : 396,
+    "outputLanguage" : "fr",
+    "personLost" : 3,
+    "rawChars" : 1283,
+    "run" : 2,
+    "speakerState" : "dropped",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Bon alors je me lance.",
+      "Je voulais faire le point sur plein de choses en fait.",
+      "Je crois qu'il commence un peu à se demander si je les zappais.",
+      "Ce qui est un peu le cas honnête.",
+      "Quoi d'autre?",
+      "Ah oui,",
+      "Les gens arrivent,",
+      "ils lisent trois lignes, ils partent.",
+      "Ça c'est vraiment le sujet en fait.",
+      "Enfin bref.",
+      "Ah, j'ai aussi...",
+      "Super quoi.",
+      "Et puis la dernière chose,",
+      "et là je note vraiment parce que sinon je vais oublier c'est de préparer les questions pour l'entretien de mardi voilà je crois que c'est tout ah non il y avait un dernier truc ça m'échappe mais ça me reviendra"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0.25,
+      0.16666666666666666,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.25,
+      0,
+      0,
+      0,
+      0,
+      0.3181818181818182
+    ]
+  },
+  {
+    "alignedPairs" : 10,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 45,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "5-rambling",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 2,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 25,
+    "labels" : [
+
+    ],
+    "listLines" : 5,
+    "ms" : 4101,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Point de suivi :\n- Rappeler le comptable pour l'assurance concernant la voiture\n- Répondre à Julien car il attend depuis une semaine et demie et commence à se demander si je les zappais\n- Changer la page d'accueil du site parce qu'elle ne dit pas du tout ce qu'on fait et que les gens lisent trois lignes avant de partir\n- Penser à annuler l'abonnement à 19 euros par mois qu'on n'utilise plus depuis février et qui coûte 6 mois pour rien\n- Préparer les questions pour l'entretien de mardi",
+    "outputChars" : 489,
+    "outputLanguage" : "fr",
+    "personLost" : 2,
+    "rawChars" : 1283,
+    "run" : 3,
+    "speakerState" : "dropped",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Bon alors je me lance.",
+      "Je voulais faire le point sur plein de choses en fait.",
+      "Ce qui est un peu le cas honnête.",
+      "Quoi d'autre?",
+      "Ah oui,",
+      "il faut le refaire.",
+      "Enfin, pas le refaire,",
+      "mais avant ça, il faut que je sache ce qu'on fait, ce qui est bon.",
+      "Ça c'est vraiment le sujet en fait.",
+      "Enfin bref.",
+      "Ah, j'ai aussi...",
+      "Super quoi.",
+      "Et puis la dernière chose,",
+      "et là je note vraiment parce que sinon je vais oublier c'est de préparer les questions pour l'entretien de mardi voilà je crois que c'est tout ah non il y avait un dernier truc ça m'échappe mais ça me reviendra"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0.25,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.2727272727272727
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 1,
+    "expectedLanguage" : "fr",
+    "fixture" : "6-unscripted",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "listLines" : 12,
+    "ms" : 3920,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Sixième test :\n- Faire un sixième test\n- Repérer la qualité de la transcription\n- Voir comment TypeLaiss découpe les paragraphes\n- Voir comment TypeLaiss organise les éléments\n- Voir si TypeLaiss met des listes\n- Voir si TypeLaiss met des espaces entre les lignes\n- Analyser tout cela\n- Essayer de créer un mode différent\n- Améliorer notre polish\n- Améliorer l'expérience des utilisateurs\n- Améliorer l'expérience des utilisateurs gratuits\n- Observer que le lancement d'un grand audio crée un gros pavé sur dictus",
+    "outputChars" : 513,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 1159,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix,",
+      "c'est pas naturel.",
+      "L'idée c'est vraiment de voir encore une fois comment se comporte type less vs mon application dictus l'idée ça va être vraiment de repérer déjà la qualité de la transcription éventuellement et aussi de voir comment Type Laiss arrive à découper les différents paragraphes,",
+      "Et voilà, tout simplement l,",
+      "'idée ça va être de voir tout ça.",
+      "Et ensuite, on va analyser tout ça."
+    ],
+    "unrecalledWholeRecall" : [
+      0.2857142857142857,
+      0,
+      0.34782608695652173,
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 2,
+    "expectedLanguage" : "fr",
+    "fixture" : "6-unscripted",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "listLines" : 12,
+    "ms" : 3775,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Un sixième test :\n- Faire un sixième test\n- Repérer la qualité de la transcription\n- Voir comment Type Laiss découpe les paragraphes\n- Voir comment Type Laiss organise les éléments\n- Voir si Type Laiss met des listes\n- Voir si Type Laiss met des espaces entre les lignes\n- Analyser tout cela\n- Essayer de créer un mode différent\n- Améliorer notre polish\n- Améliorer l'expérience des utilisateurs\n- Améliorer l'expérience des utilisateurs gratuits\n- Observer le gros pavé sur Dictus quand on lance un grand audio",
+    "outputChars" : 511,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 1159,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix,",
+      "c'est pas naturel.",
+      "Et voilà, tout simplement l,",
+      "'idée ça va être de voir tout ça.",
+      "Et ensuite, on va analyser tout ça."
+    ],
+    "unrecalledWholeRecall" : [
+      0.2857142857142857,
+      0,
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 3,
+    "expectedLanguage" : "fr",
+    "fixture" : "6-unscripted",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 10,
+    "labels" : [
+
+    ],
+    "listLines" : 12,
+    "ms" : 3837,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "Sixième test :\n- Faire un sixième test\n- Repérer la qualité de la transcription\n- Voir comment Type Laiss découpe les paragraphes\n- Voir comment Type Laiss organise les éléments\n- Voir si Type Laiss met des listes\n- Voir si Type Laiss met des espaces entre les lignes\n- Analyser tout ça\n- Essayer de créer un mode différent\n- Améliorer notre polish\n- Améliorer l'expérience des utilisateurs\n- Améliorer l'expérience des utilisateurs gratuits\n- Observer que le lancement d'un grand audio crée un gros pavé sur Dictus",
+    "outputChars" : 515,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 1159,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors je vais quand même faire un sixième test parce que les autres c'est pas vraiment ma voix,",
+      "c'est pas naturel.",
+      "Et voilà, tout simplement l,"
+    ],
+    "unrecalledWholeRecall" : [
+      0.2857142857142857,
+      0,
+      0.3333333333333333
+    ]
+  }
+]
