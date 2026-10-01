@@ -148,7 +148,8 @@ struct DictusLiveActivity: Widget {
     @ViewBuilder
     private func minimalView(context: ActivityViewContext<DictusLiveActivityAttributes>) -> some View {
         if let note = voiceNotes(context) {
-            VoiceNoteRing(note: note, diameter: 16, lineWidth: 2.5, countSize: 8)
+            // Smaller than the compact ring: the minimal circle is tighter still.
+            VoiceNoteRing(note: note, diameter: 14, lineWidth: 2, countSize: 7)
         } else {
         switch context.state.phase {
         case .standby:
@@ -535,8 +536,16 @@ private struct VoiceNoteRing: View {
     }
 }
 
-/// Compact trailing: "Voice note received" entering from the top while a slow note
+/// Compact trailing: the "received" glyph entering from the top while a slow note
 /// runs (decision 6), the ring otherwise.
+///
+/// No text here (device test, 2026-10-01): iOS fixes the compact island's height and
+/// grows its width with the content, so "Message vocal reçu" stretched the pill into
+/// a long thin bar. The words stay in the expanded view; the compact one keeps its
+/// normal size.
+///
+/// Sizes and the trailing inset are what keep the ring inside the pill: at 20 pt with
+/// no inset its right side was cut by the island's rounded edge on an iPhone 15 Pro Max.
 private struct VoiceNoteCompactTrailing: View {
     let note: VoiceNoteActivityContent
 
@@ -544,19 +553,36 @@ private struct VoiceNoteCompactTrailing: View {
 
     var body: some View {
         ZStack {
-            if let received = note.receivedLine {
-                Text(received)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+            if note.receivedLine != nil {
+                VoiceNoteReceivedGlyph(diameter: 17)
                     .transition(.move(edge: .top).combined(with: .opacity))
             } else {
-                VoiceNoteRing(note: note, diameter: 20, lineWidth: 2.5, countSize: 10)
+                VoiceNoteRing(note: note, diameter: 17, lineWidth: 2.2, countSize: 9)
                     .transition(.opacity)
             }
         }
+        .padding(.trailing, 4)
         .animation(isLuminanceReduced ? nil : .easeOut(duration: 0.5), value: note.receivedLine)
+    }
+}
+
+/// "A voice note came in": a pending ring, the shape the note is about to take,
+/// with a down arrow in its centre. Chosen over a bare SF Symbol (`arrow.down.circle`
+/// reads as "download", `waveform` alone as "recording") because it is the ring's own
+/// first frame: the arrow gives way to the count when the note is ready, in place.
+private struct VoiceNoteReceivedGlyph: View {
+    let diameter: CGFloat
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.white.opacity(0.35), lineWidth: 2.2)
+            Image(systemName: "arrow.down")
+                .font(.system(size: diameter * 0.5, weight: .bold))
+                .foregroundColor(.white)
+        }
+        .frame(width: diameter, height: diameter)
+        .accessibilityLabel(Text("Dictus"))
     }
 }
 
@@ -569,6 +595,8 @@ private struct VoiceNoteLine: View {
     let fontSize: CGFloat
 
     var body: some View {
+        // Centred in the expanded bottom region (device test, 2026-10-01): left-aligned
+        // under the logo and the buttons, it read as belonging to neither.
         HStack(spacing: 8) {
             if showsRing {
                 VoiceNoteRing(note: note, diameter: 18, lineWidth: 2.5, countSize: 9)
@@ -580,8 +608,8 @@ private struct VoiceNoteLine: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
-            Spacer(minLength: 0)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 
