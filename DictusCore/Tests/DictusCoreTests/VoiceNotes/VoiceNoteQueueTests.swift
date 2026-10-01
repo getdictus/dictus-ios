@@ -129,10 +129,35 @@ final class VoiceNoteQueueTests: XCTestCase {
         XCTAssertEqual(notes.map(\.id), [drop.id])
         XCTAssertEqual(notes.first?.durationSeconds, 42)
         XCTAssertEqual(notes.first?.audioFileName, "\(drop.id.uuidString).ogg")
-        // The extension's signal that a live app took it.
-        XCTAssertFalse(VoiceNoteInbox.isPending(drop, storage: storage))
         let moved = storage.audioDirectory.appendingPathComponent("\(drop.id.uuidString).ogg")
         XCTAssertTrue(FileManager.default.fileExists(atPath: moved.path))
+        // The sidecar is the staging marker: still there until the queue is on disk.
+        XCTAssertTrue(VoiceNoteInbox.isPending(drop, storage: storage))
+        VoiceNoteInbox.acknowledge(notes, storage: storage)
+        // The extension's signal that a live app took it.
+        XCTAssertFalse(VoiceNoteInbox.isPending(drop, storage: storage))
+    }
+
+    /// A process killed between the move and the queue write: the next ingest finds
+    /// the sidecar, the audio already in `Audio/`, and takes the note up again.
+    func testAnIngestInterruptedBeforeTheQueueWriteIsTakenUpAgain() throws {
+        let storage = try temporaryStorage()
+        let drop = try VoiceNoteInbox.drop(copying: try sourceAudio(), format: .ogg, durationSeconds: nil, storage: storage)
+        XCTAssertEqual(VoiceNoteInbox.ingest(storage: storage).map(\.id), [drop.id])
+        // No acknowledge: the "crash".
+        let retried = VoiceNoteInbox.ingest(storage: storage)
+        XCTAssertEqual(retried.map(\.id), [drop.id])
+        XCTAssertEqual(retried.first?.audioFileName, "\(drop.id.uuidString).ogg")
+    }
+
+    @MainActor
+    func testTheStoreAcknowledgesOnlyAfterItsWrite() throws {
+        let storage = try temporaryStorage()
+        let drop = try VoiceNoteInbox.drop(copying: try sourceAudio(), format: .ogg, durationSeconds: nil, storage: storage)
+        let store = VoiceNoteQueueStore(storage: storage)
+        XCTAssertEqual(store.ingestInbox().map(\.id), [drop.id])
+        XCTAssertFalse(VoiceNoteInbox.isPending(drop, storage: storage))
+        XCTAssertNotNil(VoiceNoteQueueStore(storage: storage).queue.note(id: drop.id), "the queue on disk holds it")
     }
 
     func testAudioWithoutASidecarIsNeverIngestedAndIsSweptWhenStale() throws {

@@ -102,7 +102,21 @@ public enum VoiceNoteInbox {
         FileManager.default.fileExists(atPath: storage.inboxDirectory.appendingPathComponent(drop.sidecarFileName).path)
     }
 
-    /// Move every committed drop into `Audio/` and hand back the notes to queue.
+    /// Remove the sidecars of notes the queue now holds on disk.
+    ///
+    /// The sidecar is the staging marker: while it exists, the note is not safely in
+    /// the queue yet, and the next ingest takes it up again. Removing it is also what
+    /// tells the share extension the app took the note, so it must come after the queue
+    /// write, never before — a process killed in between would otherwise lose a note
+    /// the extension had reported as accepted.
+    public static func acknowledge(_ notes: [VoiceNote], storage: VoiceNoteStorage) {
+        for note in notes {
+            try? FileManager.default.removeItem(at: storage.inboxDirectory.appendingPathComponent("\(note.id.uuidString).json"))
+        }
+    }
+
+    /// Move every committed drop into `Audio/` and hand back the notes to queue. Their
+    /// sidecars stay until `acknowledge`.
     /// Called by DictusApp. Audio left without a sidecar for more than an hour is a
     /// copy the extension never finished, and is deleted.
     public static func ingest(storage: VoiceNoteStorage, now: Date = Date()) -> [VoiceNote] {
@@ -125,15 +139,23 @@ public enum VoiceNoteInbox {
             let destination = storage.audioDirectory.appendingPathComponent(drop.audioFileName)
             claimedAudio.insert(drop.audioFileName)
             do {
-                if fileManager.fileExists(atPath: destination.path) { try fileManager.removeItem(at: destination) }
-                try fileManager.moveItem(at: source, to: destination)
+                if fileManager.fileExists(atPath: source.path) {
+                    if fileManager.fileExists(atPath: destination.path) { try fileManager.removeItem(at: destination) }
+                    try fileManager.moveItem(at: source, to: destination)
+                } else if !fileManager.fileExists(atPath: destination.path) {
+                    // Neither in the inbox nor already moved: nothing to transcribe.
+                    throw CocoaError(.fileNoSuchFile)
+                }
+                // Otherwise a previous ingest moved it and died before the queue was
+                // written: the audio is staged, the note is taken up again.
             } catch {
                 // No audio, nothing to transcribe. The sidecar goes too, or the note
                 // would be retried forever.
                 try? fileManager.removeItem(at: sidecar)
                 continue
             }
-            try? fileManager.removeItem(at: sidecar)
+            // The sidecar stays until the queue holding the note is on disk; see
+            // `acknowledge`.
             notes.append(VoiceNote(id: drop.id, receivedAt: drop.receivedAt, audioFileName: drop.audioFileName,
                                    format: drop.format, durationSeconds: drop.durationSeconds))
         }

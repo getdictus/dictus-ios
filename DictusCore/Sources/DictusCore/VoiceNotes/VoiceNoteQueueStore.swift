@@ -39,7 +39,10 @@ public final class VoiceNoteQueueStore: ObservableObject {
         let arrived = VoiceNoteInbox.ingest(storage: storage, now: now)
         guard !arrived.isEmpty else { return [] }
         queue.add(arrived)
-        persist()
+        // Only a note the queue holds on disk is acknowledged to the extension. If the
+        // write fails, the sidecars stay and the next ingest takes the notes up again.
+        guard persist() else { return [] }
+        VoiceNoteInbox.acknowledge(arrived, storage: storage)
         return arrived
     }
 
@@ -66,11 +69,17 @@ public final class VoiceNoteQueueStore: ObservableObject {
 
     // MARK: - Disk
 
-    private func persist() {
+    @discardableResult
+    private func persist() -> Bool {
         guard let url = storage?.queueFile,
-              let data = try? JSONEncoder.voiceNotes.encode(queue.notes) else { return }
-        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try? data.write(to: url, options: .atomic)
+              let data = try? JSONEncoder.voiceNotes.encode(queue.notes) else { return false }
+        do {
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try data.write(to: url, options: .atomic)
+            return true
+        } catch {
+            return false
+        }
     }
 
     static func read(from url: URL?) -> VoiceNoteQueue {
