@@ -109,10 +109,12 @@ struct VoiceNoteStackView: View {
     }
 
     private func appendArrivals() {
-        guard !cards.isEmpty else { return }
         let fresh = stackable.filter { !cards.contains($0) }
         guard !fresh.isEmpty else { return }
+        // An empty screen takes a note that arrives while it is open, and shows it.
+        let wasEmpty = cards.isEmpty
         cards.append(contentsOf: fresh)
+        if wasEmpty { selection = cards.first }
     }
 
     private var emptyState: some View {
