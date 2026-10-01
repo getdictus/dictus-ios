@@ -72,6 +72,20 @@ public enum SharedAudioDecoder {
         return seconds > 0 ? seconds : nil
     }
 
+    /// Whether the file carries a video track.
+    ///
+    /// The share extension accepts `public.mpeg` since the #620 rework, because Signal
+    /// hands a received voice note over as MP3 frames in a `.mpg` file, which iOS types
+    /// as video. A real film shares that type, so a candidate is checked for being
+    /// audio only before it is taken: an MPEG-4 container is asked for its tracks here,
+    /// and anything `SharedAudioFormat.sniff` does not recognise — an MPEG program
+    /// stream, which is what a real `.mpg` film is — never gets this far.
+    public static func hasVideoTrack(_ url: URL) async -> Bool {
+        let asset = AVURLAsset(url: url)
+        let video = (try? await asset.loadTracks(withMediaType: .video)) ?? []
+        return !video.isEmpty
+    }
+
     /// Whether a note of this length is over the cap.
     public static func exceedsCap(_ duration: TimeInterval,
                                   maximum: TimeInterval = maximumDuration) -> Bool {

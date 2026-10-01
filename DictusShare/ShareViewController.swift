@@ -177,7 +177,13 @@ final class ShareModel: ObservableObject {
     /// The identifiers that mark an attachment as audio. Ogg is named on its own:
     /// iOS 26 maps `.opus` and `.ogg` to `org.xiph.ogg-audio` (#620 spike), and on
     /// iOS 17/18 the declaration DictusApp imports makes it conform to `public.audio`.
-    private static let audioTypes = ["org.xiph.ogg-audio", "org.xiph.opus", UTType.audio.identifier]
+    ///
+    /// `public.mpeg` is a video type, and it is here anyway: Signal hands a received
+    /// voice note over as MP3 frames in a `.mpg` file, which iOS types that way
+    /// (measured on device, 2026-10-01). Such a candidate is only a candidate — `drop`
+    /// takes it only when its bytes are audio and it carries no video track.
+    private static let audioTypes = ["org.xiph.ogg-audio", "org.xiph.opus", UTType.audio.identifier,
+                                     UTType.mpeg.identifier]
 
     static func audioTypeIdentifier(of provider: NSItemProvider) -> String? {
         for identifier in provider.registeredTypeIdentifiers {
@@ -208,7 +214,11 @@ final class ShareModel: ObservableObject {
         guard let local else { return .failure(.unreadable) }
         defer { try? FileManager.default.removeItem(at: local) }
 
+        // The bytes decide, not the type the sender declared: a `.mpg` film sniffs as
+        // nothing (an MPEG program stream), and an MPEG-4 file that turns out to hold
+        // a picture is a video, whatever it was shared as.
         guard let format = SharedAudioFormat.sniff(contentsOf: local) else { return .failure(.notAudio) }
+        if format == .mpeg4, await SharedAudioDecoder.hasVideoTrack(local) { return .failure(.notAudio) }
         // Refused here when the container states its length, so a forty-minute
         // podcast is never copied into the App Group only to fail in the app.
         let duration = await SharedAudioDecoder.probeDuration(of: local, format: format)
