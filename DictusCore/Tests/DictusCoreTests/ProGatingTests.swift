@@ -32,7 +32,8 @@ final class ProGatingTests: XCTestCase {
         SharedKeys.proActive,
         SharedKeys.smartModeEnabled,
         SharedKeys.historyEnabled,
-        SharedKeys.vocabularyEnabled
+        SharedKeys.vocabularyEnabled,
+        SharedKeys.voiceNotesEnabled
     ]
 
     override func setUp() {
