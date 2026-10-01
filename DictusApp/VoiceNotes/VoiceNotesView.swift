@@ -92,7 +92,7 @@ struct VoiceNotesView: View {
                         NavigationLink(value: record.id) { SavedVoiceNoteRow(record: record) }
                     }
                 } header: {
-                    Text("Done")
+                    Text("Finished")
                 }
             }
 

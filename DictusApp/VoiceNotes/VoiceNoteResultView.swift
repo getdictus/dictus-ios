@@ -165,14 +165,15 @@ struct VoiceNoteResultView: View {
                     }
                 } label: {
                     Image(systemName: copiedTarget == target ? "checkmark" : "doc.on.doc")
+                        .foregroundColor(.dictusAccent)
                 }
                 .accessibilityLabel(copiedTarget == target ? Text("Copied!") : Text("Copy"))
                 ShareLink(item: text) {
                     Image(systemName: "square.and.arrow.up")
+                        .foregroundColor(.dictusAccent)
                 }
                 .accessibilityLabel(Text("Share"))
             }
-            .foregroundColor(.dictusAccent)
 
             Text(text)
                 .font(.dictusBody)

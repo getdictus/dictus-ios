@@ -1195,6 +1195,18 @@
         }
       }
     },
+    "Finished" : {
+      "comment" : "Voice note list: section of finished notes, transcribed or failed (#620).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminés"
+          }
+        }
+      }
+    },
     "Finishing the download…" : {
       "comment" : "Cycling phrase shown during model download (issue #144).",
       "localizations" : {
