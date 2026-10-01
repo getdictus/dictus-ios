@@ -916,7 +916,14 @@ class DictationCoordinator: ObservableObject {
                 // dictation nor run a second `transcribe` beside it (#144). A
                 // dictation is served first; the wait is at most the one chunk a
                 // voice note may be in the middle of. See `EngineAccessGate`.
+                //
+                // Waiting on the gate is waiting on someone else's work, so it defers the
+                // stage watchdog like the other two engine waits (#542): a voice note can
+                // hold the engine through a cold model load, and the 30 s watchdog would
+                // otherwise cancel a dictation whose audio is already captured.
+                enterNeuralEngineWait()
                 await EngineAccessGate.shared.acquire(.dictation)
+                leaveNeuralEngineWait()
                 var holdsEngine = true
                 let releaseEngine = {
                     guard holdsEngine else { return }
@@ -924,6 +931,9 @@ class DictationCoordinator: ObservableObject {
                     EngineAccessGate.shared.release()
                 }
                 defer { releaseEngine() }
+                // The gate does not observe cancellation: a dictation cancelled while it
+                // was parked must not go on to load and transcribe.
+                try Task.checkCancellation()
 
                 // Wrapped, not just called: this is the one place in a dictation that
                 // can queue on hardware someone else holds (finding 2).
