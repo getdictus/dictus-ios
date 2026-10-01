@@ -123,34 +123,23 @@ final class VoiceNoteRulesTests: XCTestCase {
         XCTAssertEqual(fixed.sttLanguageCode, "en")
     }
 
-    // MARK: - Live Activity content and link
-
-    func testPreviewIsCutOnAWordAndFlattened() {
-        let long = String(repeating: "mot ", count: 80)
-        let preview = VoiceNoteActivityContent.trimmedPreview("Bonjour\n" + long)
-        XCTAssertLessThanOrEqual(preview.count, VoiceNoteActivityContent.previewLength + 1)
-        XCTAssertTrue(preview.hasPrefix("Bonjour mot"))
-        XCTAssertTrue(preview.hasSuffix("mot…"))
-        XCTAssertEqual(VoiceNoteActivityContent.trimmedPreview("court"), "court")
-    }
-
-    func testProgressIsClampedAndThePayloadStaysSmall() throws {
-        let content = VoiceNoteActivityContent(headline: "Transcription d’un message vocal…",
-                                               detail: "1 en cours, 3 en attente", progress: 1.7,
-                                               preview: String(repeating: "é", count: 500), noteID: UUID())
-        XCTAssertEqual(content.progress, 1)
-        let state = DictusLiveActivityAttributesPayloadProbe.encodedSize(content)
-        XCTAssertLessThan(state, 1024, "ActivityKit caps a content update at 4 KB")
-    }
+    // MARK: - Link
 
     func testTheLinkRoundTrips() throws {
         let id = UUID()
-        let url = try XCTUnwrap(VoiceNoteActivityContent(headline: "x", noteID: id, isDone: true).url)
+        let url = try XCTUnwrap(VoiceNoteURL.url(for: id))
         XCTAssertEqual(url.absoluteString, "dictus://voice-note?id=\(id.uuidString)")
         XCTAssertEqual(VoiceNoteURL.target(of: url), .some(id))
-        let list = try XCTUnwrap(VoiceNoteActivityContent(headline: "x").url)
-        XCTAssertEqual(VoiceNoteURL.target(of: list), .some(nil))
+        let screen = try XCTUnwrap(VoiceNoteActivityContent(segments: [.ready]).url)
+        XCTAssertEqual(VoiceNoteURL.target(of: screen), .some(nil))
         XCTAssertNil(VoiceNoteURL.target(of: try XCTUnwrap(URL(string: "dictus://dictate"))))
+    }
+
+    func testThePayloadStaysSmall() throws {
+        let content = VoiceNoteActivityContent(segments: Array(repeating: .ready, count: 20),
+                                               receivedLine: "Message vocal reçu",
+                                               statusLine: "20 messages vocaux prêts · Touchez pour lire")
+        XCTAssertLessThan(try JSONEncoder().encode(content).count, 1024, "ActivityKit caps an update at 4 KB")
     }
 
     // MARK: - Pro gate
@@ -226,12 +215,5 @@ final class VoiceNoteRulesTests: XCTestCase {
         store.updateSummary(id: record.id, to: "s", modeIdentifier: "summary")
         XCTAssertEqual(store.record(id: record.id)?.summary, "s")
         XCTAssertNil(store.append(TranscriptionRecord(text: "u", language: "fr", durationSeconds: 1, sttProvider: "PK")))
-    }
-}
-
-/// Measures the encoded size of the content the way ActivityKit carries it.
-private enum DictusLiveActivityAttributesPayloadProbe {
-    static func encodedSize(_ content: VoiceNoteActivityContent) -> Int {
-        (try? JSONEncoder().encode(content).count) ?? .max
     }
 }

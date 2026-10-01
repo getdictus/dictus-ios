@@ -288,7 +288,10 @@ class UnifiedAudioEngine: ObservableObject {
     /// 10 minutes balances UX (warm starts feel instant within a normal
     /// "back-and-forth dictation session") against battery drain (3.3%/h
     /// baseline drops to ~0%/h after release).
-    private static let idleReleaseInterval: TimeInterval = 10 * 60
+    ///
+    /// Read from `WarmEngineTimeout` since #620, the one place #380's user setting
+    /// will plug into.
+    private static var idleReleaseInterval: TimeInterval { WarmEngineTimeout.interval }
 
     /// Idle window applied when the engine was warmed WITHOUT a preceding
     /// dictation: launch pre-load, `didBecomeActive` re-warm, explicit `warmUp()`.
@@ -298,7 +301,7 @@ class UnifiedAudioEngine: ObservableObject {
     /// than one who just dictated. That is a product call, not an implementation
     /// one, so this ships with the conservative answer (identical windows) and a
     /// single line to change if the maintainer decides otherwise.
-    private static let warmUpIdleReleaseInterval: TimeInterval = idleReleaseInterval
+    private static var warmUpIdleReleaseInterval: TimeInterval { idleReleaseInterval }
 
     /// Sample gating flag read from the audio thread.
     /// WHY nonisolated(unsafe): Read from audio callback thread (single reader pattern).
