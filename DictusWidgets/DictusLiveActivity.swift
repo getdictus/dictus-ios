@@ -544,8 +544,11 @@ private struct VoiceNoteRing: View {
 /// a long thin bar. The words stay in the expanded view; the compact one keeps its
 /// normal size.
 ///
-/// Sizes and the trailing inset are what keep the ring inside the pill: at 20 pt with
-/// no inset its right side was cut by the island's rounded edge on an iPhone 15 Pro Max.
+/// The ring is 17 pt and sits flush right behind invisible leading space. At 20 pt its
+/// right side was cut by the island's rounded edge; with a 4 pt trailing inset instead,
+/// its left side was cut, because the padding pushed it past the leading bound of the
+/// trailing region (both on an iPhone 15 Pro Max, 2026-10-01). Widening the region on
+/// its leading side is what leaves the ring whole.
 private struct VoiceNoteCompactTrailing: View {
     let note: VoiceNoteActivityContent
 
@@ -561,7 +564,7 @@ private struct VoiceNoteCompactTrailing: View {
                     .transition(.opacity)
             }
         }
-        .padding(.trailing, 4)
+        .padding(.leading, 6)
         .animation(isLuminanceReduced ? nil : .easeOut(duration: 0.5), value: note.receivedLine)
     }
 }

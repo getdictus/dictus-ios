@@ -17,21 +17,24 @@ enum VoiceNoteCopy {
 
     /// The ring's line on the expanded island and the Lock Screen (#620 decisions 10, 12):
     /// what is ready, or, when nothing is, what failed.
+    ///
+    /// No number in the words (device test, 2026-10-01): the ring beside the line
+    /// already carries it, and "(2) 2 messages vocaux prêts" said it twice.
     static func islandStatus(ready: Int, failed: Int) -> String? {
         if ready == 1 {
-            return String(localized: "1 voice note ready · Tap to read",
-                          comment: "Expanded Dynamic Island and Lock Screen: one transcribed voice note waiting to be read (#620).")
+            return String(localized: "Voice note ready · Tap to read",
+                          comment: "Expanded Dynamic Island and Lock Screen, next to the ring that shows the count: one transcribed voice note waiting to be read (#620).")
         }
         if ready > 1 {
-            return String(localized: "\(ready) voice notes ready · Tap to read",
-                          comment: "Expanded Dynamic Island and Lock Screen: several transcribed voice notes waiting to be read (#620).")
+            return String(localized: "Voice notes ready · Tap to read",
+                          comment: "Expanded Dynamic Island and Lock Screen, next to the ring that shows the count: several transcribed voice notes waiting to be read (#620).")
         }
         if failed == 1 {
             return String(localized: "Voice note not transcribed · Tap to see why",
                           comment: "Expanded Dynamic Island and Lock Screen: one voice note failed (#620).")
         }
         if failed > 1 {
-            return String(localized: "\(failed) voice notes not transcribed · Tap to see why",
+            return String(localized: "Voice notes not transcribed · Tap to see why",
                           comment: "Expanded Dynamic Island and Lock Screen: several voice notes failed (#620).")
         }
         return nil
