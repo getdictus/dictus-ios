@@ -164,6 +164,21 @@ public final class TranscriptionHistoryStore: ObservableObject {
         persist()
     }
 
+    /// Store the summary of a shared voice note (#620), computed when its result was
+    /// first opened. Ungated for `updateText`'s reason: it only ever touches a record
+    /// already on disk. A record that has gone in between is left alone.
+    public func updateSummary(id: UUID, to summary: String, modeIdentifier: String) {
+        guard !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        guard let index = records.firstIndex(where: { $0.id == id }) else { return }
+        records[index] = records[index].withSummary(summary, modeIdentifier: modeIdentifier)
+        persist()
+    }
+
+    /// The record with this id, if it is still saved.
+    public func record(id: UUID) -> TranscriptionRecord? {
+        records.first { $0.id == id }
+    }
+
     public func delete(id: UUID) {
         let remaining = records.filter { $0.id != id }
         guard remaining.count != records.count else { return }
