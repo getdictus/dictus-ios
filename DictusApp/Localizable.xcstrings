@@ -2350,6 +2350,18 @@
         }
       }
     },
+    "Processing…" : {
+      "comment" : "Voice note card: the Smart Mode (summary, translation, list…) is running on the transcript (#620).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traitement en cours…"
+          }
+        }
+      }
+    },
     "Purchase Error" : {
       "localizations" : {
         "fr" : {
@@ -2951,17 +2963,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les résumés nécessitent Apple Intelligence, que cet iPhone ne prend pas en charge. La transcription est ci-dessous."
-          }
-        }
-      }
-    },
-    "Summarising…" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Résumé en cours…"
           }
         }
       }
@@ -3580,6 +3581,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Langue de transcription"
+          }
+        }
+      }
+    },
+    "Translate %@" : {
+      "comment" : "List name of a translation Smart Mode; the placeholder is the arrow and target, e.g. \"→ EN\".",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Translate %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traduction %@"
           }
         }
       }

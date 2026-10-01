@@ -206,7 +206,9 @@ struct VoiceNoteCardView: View {
             case .idle, .running:
                 HStack(spacing: 8) {
                     ProgressView()
-                    Text("Summarising…")
+                    // Generic on purpose: the mode may be a translation or a list, not
+                    // only Résumé (device test, 2026-10-01).
+                    Text("Processing…")
                         .font(.dictusCaption)
                         .foregroundColor(.secondary)
                 }
