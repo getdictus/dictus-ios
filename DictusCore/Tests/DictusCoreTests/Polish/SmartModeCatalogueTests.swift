@@ -429,15 +429,32 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertTrue(SmartModeNotesExamples.byLanguage["ja"]?.mixedOutput.hasPrefix("日曜のフリーマーケット：\n") == true)
     }
 
-    /// Decision 1's other half, where the model reads it: the statements-only example has
-    /// no task in it, and the counter-example names the statement-turned-task as wrong.
-    func testListPromptShowsStatementsStayingStatements() {
+    /// Decision 1's other half, where the model reads it: the recap example keeps every
+    /// past fact past with its subject and holds no task, and the counter-example names
+    /// the statement-turned-task and the generic title as wrong (#573, device round 1).
+    func testListPromptShowsPastFactsStayingPast() {
         let french = SmartModeNotesPrompt.instructions(examples: SmartModeNotesPrompt.defaultExamples)
-        XCTAssertTrue(french.contains("- C'était vraiment bien"))
+        XCTAssertTrue(french.contains("Ce qu'on a fait au jardin ce week-end :\n- On a taillé la haie"))
         XCTAssertTrue(french.contains("WRONG (a statement turned into a task)"))
+        XCTAssertTrue(french.contains("WRONG (a title that fits any list): À faire :"))
         XCTAssertTrue(french.contains("Never turn a statement into a task."))
-        // The lone-bullet example is gone: short input is the catalogue floor's job.
+        // The lone-bullet example is gone: a one-item list is declined after the call.
         XCTAssertFalse(french.contains("Short-input example"))
+        for (code, set) in SmartModeNotesExamples.byLanguage {
+            XCTAssertNotEqual(set.counterGeneric.components(separatedBy: " / ").first,
+                              set.counterRight.components(separatedBy: "\n").first, code)
+        }
+    }
+
+    /// The tense and the one-item-per-line rule ride in the user turn, the position
+    /// #437 and #523 measured as the one that governs the output (#573, round 2).
+    func testListUserTurnAsksForOneLinePerItemAndKeepsPastFactsPast() {
+        let framing = PolishTask.smart(SmartModeCatalogue.notes).userTurn(raw: "x")
+        XCTAssertTrue(framing.contains("one line per point or item"))
+        // Past facts only. C6 asked for "each verb in the tense the speaker used" and
+        // turned plain statements into infinitives ("Apparaître le clavier…"), 6 of 24.
+        XCTAssertTrue(framing.contains("What the speaker says they already did stays in the past."))
+        XCTAssertFalse(framing.contains("each verb in the tense"))
     }
 
     /// The two languages whose sets are the originals rather than translations keep
@@ -507,7 +524,7 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
             .contains("1. Cut what only exists because they were speaking"))
         XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
-            .contains("1. The first line is a short title: two to six words copied from the transcript"))
+            .contains("1. The first line is a short title that says what the whole list is about"))
     }
 
     // MARK: - Message (#572)

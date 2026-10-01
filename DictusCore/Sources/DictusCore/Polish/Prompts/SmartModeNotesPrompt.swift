@@ -22,18 +22,22 @@ import Foundation
 /// 1. **A summary in bullets: the dictation's points, not only its tasks.** An action
 ///    stays an action, in the infinitive so it can be ticked off; a statement stays a
 ///    statement. `Summary` is the prose version of the same loss axis (#571).
-/// 2. **A title, a colon, then the bullets**, plain text. The title is always there and
-///    is made of the speaker's words, never a formula and never an invented topic. #414's
-///    grounding is what checks it. The colon follows the language's typography, which
-///    the examples show rather than the rules (`Titre :` in French, `Title:` in English).
+/// 2. **A title, a colon, then the bullets**, plain text. As amended after the first
+///    device round (2026-10-01): the title is a short summary of what the list is about,
+///    chosen from the whole transcript, in the model's own words when the speaker names
+///    no subject. It adds no fact (no day, time, name, number or place not said), is
+///    never a generic label, never one of the points, and takes no words from a bullet.
+///    The colon follows the language's typography, which the examples show rather than
+///    the rules (`Titre :` in French, `Title:` in English).
 /// 3. **Every distinct point is kept**, each condensed to one line; repetitions and
 ///    self-corrections merged. Keeping only the essentials is `Summary`'s job.
 /// 4. **Flat, in the speaker's order.** Grouping forces a reorder, and reordering is a
 ///    known Smart Mode defect (#570).
 ///
-/// Decision 5, short input, does not live in the prompt: below the catalogue's floor
-/// the mode does not run at all (`SmartModeCatalogue.notes`). So the one-idea example is
-/// gone rather than reworded, and nothing here teaches a single bullet.
+/// Decision 5, short input, does not live in the prompt: an output of fewer than two
+/// bullets is declined after the call and replaced by Normal polish
+/// (`SmartMode.minimumListItems`). So the one-idea example is gone rather than reworded,
+/// and nothing here teaches a single bullet.
 ///
 /// ### One English prompt, examples in the transcript's language
 ///
@@ -74,6 +78,32 @@ import Foundation
 /// (`Ne pas venir au bureau demain` for *je ne pourrai pas venir*): that is the defect
 /// this rebuild targets. C3 keeps it on that one message-shaped fixture, and nowhere on
 /// the statements-only set.
+///
+/// ### Round 2, after the first device round (2026-10-01)
+///
+/// C3 above failed on the phone on the title: when the speaker opened with a sentence
+/// announcing the list (*je te fais un petit récap de ce qu'on a fait ce soir*), the
+/// model took it as framing and promoted the first point to title, leaving its bullet
+/// truncated. Past facts came back as tasks too. Pierre amended decisions 2 and 5;
+/// bars in `bars.md` §8, synthetic fixtures in `fixtures/liste-round2.json` (set R):
+///
+/// - **C4** let the title summarise and replaced the concert example with an announced
+///   recap of things already done: R1, R3 and R5 hold, R4's past facts still became
+///   tasks, and lists without an announcement got `À faire :` / `Tasks:`.
+/// - **C5** moved the tense and one-line-per-item into the user turn (the position that
+///   governs the output, #437): every past fact on R stays past, every short
+///   enumeration splits into its items. The generic label stayed.
+/// - **C6** added *a title that fits any list* to the counter-example's wrong answers:
+///   French holds (`Garage, facture et train :`), English still answers `Tasks for the
+///   week:`. Then the full regression showed C5's user-turn wording, *each verb in the
+///   tense the speaker used*, breaking plain statements: `Apparaître le clavier en deux
+///   secondes`, `Say the colours are calmer`, 6 of 24 statements turned into tasks, and
+///   Spanish refused on language 3 times in 18. It does not ship.
+/// - **C7 — ships**: the user turn asks only that *what the speaker says they already
+///   did* stays in the past. Statements are clean again (0 of 24). What it still misses on
+///   the Mac: a past fact written as a task in 1 of 15 recap runs, `Garage :` over a
+///   three-subject list in 2 of 3, and the English generic label in 3 of 3. Three
+///   candidates was the declared limit for those bars; they are reported, not chased.
 ///
 /// ### What it must not do
 ///
@@ -145,6 +175,9 @@ enum SmartModeNotesPrompt {
         let counterTask: String
         /// The wrong answer that invents a line (#414).
         let counterInvented: String
+        /// The wrong answer whose title only says what kind of list it is (#573, device
+        /// round 1: a dictation with no announcement came back titled `À faire :`).
+        let counterGeneric: String
         let counterRight: String
     }
 
@@ -168,7 +201,7 @@ enum SmartModeNotesPrompt {
     /// in front of the transcript (#518). The user turn is the position #437 and #523
     /// measured as the one that governs the output's shape, so the title line is asked
     /// for here as well as in rule 1.
-    static let userInstruction = "Condense this text into a title line followed by a bulleted list of every point. Output only the title and the list, nothing else."
+    static let userInstruction = "Condense this text into a title line followed by a bulleted list with one line per point or item. What the speaker says they already did stays in the past. Output only the title and the list, nothing else."
     static let outputMarker = "Title and list:"
 
     static func instructions(examples: ExampleSet = defaultExamples) -> String {
@@ -190,9 +223,9 @@ enum SmartModeNotesPrompt {
 
         RULES — apply these:
 
-        1. The first line is a short title: two to six words copied from the transcript, in the speaker's order, where they name their subject; if they never name one, the first words that carry content. Then a colon written the way the input language writes it. Copy, never describe: no word, day or time that is not in the transcript, and never a generic label. The title never replaces a point: that point still gets its own bullet.
-        2. Then one bullet per distinct point. Start each bullet with "- " and put each on its own line. No sub-bullets, no numbers, no grouping by theme: keep the speaker's order.
-        3. Something the speaker still has to do or wants done becomes an action in the infinitive, so it can be ticked off. Everything else stays what it was: a fact, an observation, an opinion, a decision, or something they cannot do, already did or only report is written as a statement and keeps its subject ("we", "it", "they"). Never turn a statement into a task.
+        1. The first line is a short title that says what the whole list is about, then a colon written the way the input language writes it. Read the whole transcript first. When the speaker opens by announcing what follows (that they will recap, list or go through something), the title sums up that announcement. Use their words when they name the subject; when nothing is announced, name what the points are about in your own words, never what kind of points they are. The title is never one of the points and takes no words from a point: every point keeps its full bullet. The title adds no fact: no day, time, name, number or place that is not in the transcript. Never a label that would fit any list.
+        2. Then one bullet per distinct point. Start each bullet with "- " and put each on its own line. Each item of an enumeration is its own bullet, even when the speaker says them in one breath. No sub-bullets, no numbers, no grouping by theme: keep the speaker's order.
+        3. Something the speaker still has to do or wants done becomes an action in the infinitive, so it can be ticked off. Everything else stays what it was: a fact, an observation, an opinion, a decision, or something they cannot do or only report is written as a statement and keeps its subject ("we", "it", "they"). Something they say they already did is a fact, not a task: it keeps its past tense and its subject, as they said it. Never turn a statement into a task.
         4. Merge sentences that restate the same point into one bullet. For a self-correction, keep only what they corrected TO.
         5. Keep every distinct point, with the reason, time or detail they attached to it on the same line. Condense each one; never drop one.
         6. Remove hesitations, false starts, filler ("uh", "euh", "you know", "tu vois", "en fait") and spoken framing that carries no content ("so I was thinking that", "bon alors").
@@ -217,12 +250,13 @@ enum SmartModeNotesPrompt {
         OUTPUT:
         \(examples.statementsOutput)
 
-        COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, or invent a line. Never produce them.
+        COUNTER-EXAMPLE — the WRONG outputs below translate, turn a statement into a task, invent a line, or give a title that only says what kind of list it is. Never produce them.
 
         INPUT: \(examples.counterInput)
         WRONG (translated): \(examples.counterTranslated)
         WRONG (a statement turned into a task): \(examples.counterTask)
         WRONG (invented a line): \(examples.counterInvented)
+        WRONG (a title that fits any list): \(examples.counterGeneric)
         RIGHT:
         \(examples.counterRight)
         """
