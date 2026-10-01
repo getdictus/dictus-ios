@@ -172,6 +172,12 @@
 		VN6200000003 /* VoiceNoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000003 /* VoiceNoteSettingsView.swift */; };
 		VN6200000004 /* VoiceNoteResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000004 /* VoiceNoteResultView.swift */; };
 		VN6200000005 /* VoiceNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000005 /* VoiceNotesView.swift */; };
+		DS6200000001 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000001 /* ShareViewController.swift */; };
+		DS6200000002 /* ShareStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000002 /* ShareStatusView.swift */; };
+		DS6200000003 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000005 /* Localizable.xcstrings */; };
+		DS6200000004 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000006 /* PrivacyInfo.xcprivacy */; };
+		DS6200000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = DS6209000010 /* DictusCore */; };
+		DS6200000020 /* DictusShare.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = DS6202000001 /* DictusShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -189,6 +195,13 @@
 			remoteGlobalIDString = BB500001;
 			remoteInfo = DictusWidgets;
 		};
+		DS6205000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DS6250000001;
+			remoteInfo = DictusShare;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -200,6 +213,7 @@
 			files = (
 				AA000020 /* DictusKeyboard.appex in Embed App Extensions */,
 				BB000020 /* DictusWidgets.appex in Embed App Extensions */,
+				DS6200000020 /* DictusShare.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -384,6 +398,13 @@
 		VN6201000003 /* VoiceNoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteSettingsView.swift; sourceTree = "<group>"; };
 		VN6201000004 /* VoiceNoteResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteResultView.swift; sourceTree = "<group>"; };
 		VN6201000005 /* VoiceNotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNotesView.swift; sourceTree = "<group>"; };
+		DS6201000001 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		DS6201000002 /* ShareStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStatusView.swift; sourceTree = "<group>"; };
+		DS6201000003 /* DictusShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DictusShare.entitlements; sourceTree = "<group>"; };
+		DS6201000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DS6201000005 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		DS6201000006 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		DS6202000001 /* DictusShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -415,6 +436,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DS6230000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DS6200000010 /* DictusCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -424,6 +453,7 @@
 				AA400001 /* DictusApp */,
 				AA400002 /* DictusKeyboard */,
 				BB400001 /* DictusWidgets */,
+				DS6240000001 /* DictusShare */,
 				AA400003 /* DictusCore (local package) */,
 				AA400004 /* Products */,
 			);
@@ -515,6 +545,7 @@
 				AA200001 /* DictusApp.app */,
 				AA200002 /* DictusKeyboard.appex */,
 				BB200001 /* DictusWidgets.appex */,
+				DS6202000001 /* DictusShare.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -825,6 +856,19 @@
 			path = VoiceNotes;
 			sourceTree = "<group>";
 		};
+		DS6240000001 /* DictusShare */ = {
+			isa = PBXGroup;
+			children = (
+				DS6201000001 /* ShareViewController.swift */,
+				DS6201000002 /* ShareStatusView.swift */,
+				DS6201000005 /* Localizable.xcstrings */,
+				DS6201000006 /* PrivacyInfo.xcprivacy */,
+				DS6201000003 /* DictusShare.entitlements */,
+				DS6201000004 /* Info.plist */,
+			);
+			path = DictusShare;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -843,6 +887,7 @@
 			dependencies = (
 				AA070001 /* PBXTargetDependency */,
 				BB070001 /* PBXTargetDependency */,
+				DS6270000001 /* PBXTargetDependency */,
 			);
 			name = DictusApp;
 			packageProductDependencies = (
@@ -897,6 +942,27 @@
 			productReference = BB200001 /* DictusWidgets.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		DS6250000001 /* DictusShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DS6270000010 /* Build configuration list for PBXNativeTarget "DictusShare" */;
+			buildPhases = (
+				DS6260000001 /* Sources */,
+				DS6230000001 /* Frameworks */,
+				DS6260000002 /* Resources */,
+				DS6260000003 /* Generate build info */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DictusShare;
+			packageProductDependencies = (
+				DS6209000010 /* DictusCore */,
+			);
+			productName = DictusShare;
+			productReference = DS6202000001 /* DictusShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -915,6 +981,9 @@
 					};
 					BB500001 = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					DS6250000001 = {
+						CreatedOnToolsVersion = 26.4;
 					};
 				};
 			};
@@ -941,6 +1010,7 @@
 				AA500001 /* DictusApp */,
 				AA500002 /* DictusKeyboard */,
 				BB500001 /* DictusWidgets */,
+				DS6250000001 /* DictusShare */,
 			);
 		};
 /* End PBXProject section */
@@ -987,6 +1057,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DS6260000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DS6200000003 /* Localizable.xcstrings in Resources */,
+				DS6200000004 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -1029,6 +1108,25 @@
 			shellScript = "# Write the current git commit short SHA + branch into a generated resource inside\n# the built bundle, so PersistentLog can report at runtime which commit the binary\n# came from without any manual discipline.\n#\n# WHY a file of its own rather than the built Info.plist (#344): Info.plist is\n# produced by ProcessInfoPlistFile and nothing ordered this phase against it, so an\n# incremental build scheduled the two the other way round and the injected keys were\n# wiped. Nothing else produces DictusBuildInfo.plist, so no ordering question exists.\n#\n# The phase stays \"always out of date\" on purpose: HEAD moves without any input file\n# changing, so dependency analysis would skip it exactly when it matters.\nset -e\nGIT_COMMIT=$(cd \"$SRCROOT\" && git rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nGIT_BRANCH=$(cd \"$SRCROOT\" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"unknown\")\nBUILD_INFO=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DictusBuildInfo.plist\"\nmkdir -p \"$(dirname \"$BUILD_INFO\")\"\nrm -f \"$BUILD_INFO\"\n/usr/libexec/PlistBuddy \\\n  -c \"Add :GitCommitSHA string $GIT_COMMIT\" \\\n  -c \"Add :GitBranch string $GIT_BRANCH\" \\\n  \"$BUILD_INFO\" >/dev/null\necho \"note: build info ${GIT_COMMIT}@${GIT_BRANCH} -> ${BUILD_INFO}\"\n";
 		};
 		AA060012 /* Generate build info */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Generate build info";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Write the current git commit short SHA + branch into a generated resource inside\n# the built bundle, so PersistentLog can report at runtime which commit the binary\n# came from without any manual discipline.\n#\n# WHY a file of its own rather than the built Info.plist (#344): Info.plist is\n# produced by ProcessInfoPlistFile and nothing ordered this phase against it, so an\n# incremental build scheduled the two the other way round and the injected keys were\n# wiped. Nothing else produces DictusBuildInfo.plist, so no ordering question exists.\n#\n# The phase stays \"always out of date\" on purpose: HEAD moves without any input file\n# changing, so dependency analysis would skip it exactly when it matters.\nset -e\nGIT_COMMIT=$(cd \"$SRCROOT\" && git rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nGIT_BRANCH=$(cd \"$SRCROOT\" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo \"unknown\")\nBUILD_INFO=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/DictusBuildInfo.plist\"\nmkdir -p \"$(dirname \"$BUILD_INFO\")\"\nrm -f \"$BUILD_INFO\"\n/usr/libexec/PlistBuddy \\\n  -c \"Add :GitCommitSHA string $GIT_COMMIT\" \\\n  -c \"Add :GitBranch string $GIT_BRANCH\" \\\n  \"$BUILD_INFO\" >/dev/null\necho \"note: build info ${GIT_COMMIT}@${GIT_BRANCH} -> ${BUILD_INFO}\"\n";
+		};
+		DS6260000003 /* Generate build info */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -1205,6 +1303,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DS6260000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DS6200000001 /* ShareViewController.swift in Sources */,
+				DS6200000002 /* ShareStatusView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1217,6 +1324,11 @@
 			isa = PBXTargetDependency;
 			target = BB500001 /* DictusWidgets */;
 			targetProxy = BB050001 /* PBXContainerItemProxy */;
+		};
+		DS6270000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DS6250000001 /* DictusShare */;
+			targetProxy = DS6205000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1483,6 +1595,50 @@
 			};
 			name = Release;
 		};
+		DS6274000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = DictusShare/DictusShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = 9B8B36C2FA;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DictusShare/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pivi.dictus.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		DS6274000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = DictusShare/DictusShare.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_TEAM = 9B8B36C2FA;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = DictusShare/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.4;
+				PRODUCT_BUNDLE_IDENTIFIER = com.pivi.dictus.share;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1518,6 +1674,15 @@
 			buildConfigurations = (
 				BB740001 /* Debug */,
 				BB740002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DS6270000010 /* Build configuration list for PBXNativeTarget "DictusShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DS6274000001 /* Debug */,
+				DS6274000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1588,6 +1753,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CC800001 /* XCRemoteSwiftPackageReference "DeviceKit" */;
 			productName = DeviceKit;
+		};
+		DS6209000010 /* DictusCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA800001 /* XCLocalSwiftPackageReference "DictusCore" */;
+			productName = DictusCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
