@@ -171,13 +171,14 @@
 		VN6200000002 /* VoiceNoteCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000002 /* VoiceNoteCopy.swift */; };
 		VN6200000003 /* VoiceNoteSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000003 /* VoiceNoteSettingsView.swift */; };
 		VN6200000004 /* VoiceNoteResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000004 /* VoiceNoteResultView.swift */; };
-		VN6200000005 /* VoiceNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000005 /* VoiceNotesView.swift */; };
+		VN6200000005 /* VoiceNoteStackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000005 /* VoiceNoteStackView.swift */; };
 		DS6200000001 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000001 /* ShareViewController.swift */; };
 		DS6200000002 /* ShareStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DS6201000002 /* ShareStatusView.swift */; };
 		DS6200000003 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000005 /* Localizable.xcstrings */; };
 		DS6200000004 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DS6201000006 /* PrivacyInfo.xcprivacy */; };
 		DS6200000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = DS6209000010 /* DictusCore */; };
 		DS6200000020 /* DictusShare.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = DS6202000001 /* DictusShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		VN6200000006 /* VoiceNoteCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = VN6201000006 /* VoiceNoteCardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -397,7 +398,7 @@
 		VN6201000002 /* VoiceNoteCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteCopy.swift; sourceTree = "<group>"; };
 		VN6201000003 /* VoiceNoteSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteSettingsView.swift; sourceTree = "<group>"; };
 		VN6201000004 /* VoiceNoteResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteResultView.swift; sourceTree = "<group>"; };
-		VN6201000005 /* VoiceNotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNotesView.swift; sourceTree = "<group>"; };
+		VN6201000005 /* VoiceNoteStackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteStackView.swift; sourceTree = "<group>"; };
 		DS6201000001 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		DS6201000002 /* ShareStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareStatusView.swift; sourceTree = "<group>"; };
 		DS6201000003 /* DictusShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DictusShare.entitlements; sourceTree = "<group>"; };
@@ -405,6 +406,7 @@
 		DS6201000005 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		DS6201000006 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DS6202000001 /* DictusShare.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		VN6201000006 /* VoiceNoteCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteCardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -851,7 +853,8 @@
 				VN6201000002 /* VoiceNoteCopy.swift */,
 				VN6201000003 /* VoiceNoteSettingsView.swift */,
 				VN6201000004 /* VoiceNoteResultView.swift */,
-				VN6201000005 /* VoiceNotesView.swift */,
+				VN6201000005 /* VoiceNoteStackView.swift */,
+				VN6201000006 /* VoiceNoteCardView.swift */,
 			);
 			path = VoiceNotes;
 			sourceTree = "<group>";
@@ -1227,7 +1230,8 @@
 				VN6200000002 /* VoiceNoteCopy.swift in Sources */,
 				VN6200000003 /* VoiceNoteSettingsView.swift in Sources */,
 				VN6200000004 /* VoiceNoteResultView.swift in Sources */,
-				VN6200000005 /* VoiceNotesView.swift in Sources */,
+				VN6200000005 /* VoiceNoteStackView.swift in Sources */,
+				VN6200000006 /* VoiceNoteCardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

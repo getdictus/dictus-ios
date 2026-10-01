@@ -1195,18 +1195,6 @@
         }
       }
     },
-    "Finished" : {
-      "comment" : "Voice note list: section of finished notes, transcribed or failed (#620).",
-      "extractionState" : "manual",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terminés"
-          }
-        }
-      }
-    },
     "Finishing the download…" : {
       "comment" : "Cycling phrase shown during model download (issue #144).",
       "localizations" : {
@@ -1945,13 +1933,13 @@
         }
       }
     },
-    "No voice notes yet" : {
+    "No unread voice notes" : {
       "extractionState" : "manual",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun message vocal pour l’instant"
+            "value" : "Aucun message vocal non lu"
           }
         }
       }
@@ -2737,17 +2725,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Partager"
-          }
-        }
-      }
-    },
-    "Share a voice message or an audio file to Dictus from any app, and its transcript appears here." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Partagez un message vocal ou un fichier audio avec Dictus depuis n’importe quelle app, et sa transcription apparaît ici."
           }
         }
       }
@@ -3748,6 +3725,24 @@
         }
       }
     },
+    "Voice note %lld of %lld" : {
+      "comment" : "Title of the voice note screen when several unread notes are stacked; swipe to move between them (#620).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice note %lld of %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Message vocal %1$lld sur %2$lld"
+          }
+        }
+      }
+    },
     "Voice note not transcribed" : {
       "comment" : "Live Activity headline when a shared voice note failed. A tap opens the list, which says why (#620).",
       "extractionState" : "manual",
@@ -3790,6 +3785,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Messages vocaux jusqu’à 10 minutes. L’audio est supprimé dès qu’il est transcrit, et tout reste sur cet iPhone."
+          }
+        }
+      }
+    },
+    "Voice notes you have read are in History." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les messages vocaux déjà lus sont dans l’historique."
           }
         }
       }

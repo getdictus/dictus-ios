@@ -215,6 +215,8 @@ public struct VoiceNoteQueue: Equatable, Sendable {
             $0.transcript = transcript
             $0.language = language
             $0.audioFileName = nil
+            // A result is unread when it arrives, whatever was seen of the note before.
+            $0.openedAt = nil
         }
         trimFinished()
     }
@@ -222,6 +224,7 @@ public struct VoiceNoteQueue: Equatable, Sendable {
     public mutating func fail(_ id: UUID, _ failure: VoiceNoteFailure) {
         update(id) {
             $0.state = .failed(failure)
+            $0.openedAt = nil
             if !failure.isRetryable { $0.audioFileName = nil }
         }
         trimFinished()
@@ -256,6 +259,8 @@ public struct VoiceNoteQueue: Equatable, Sendable {
         update(id) {
             guard case .failed(let failure) = $0.state, failure.isRetryable, $0.audioFileName != nil else { return }
             $0.state = .waiting
+            // Seeing the failure must not hide the result the retry produces.
+            $0.openedAt = nil
         }
     }
 

@@ -92,6 +92,17 @@ final class VoiceNoteReworkTests: XCTestCase {
         XCTAssertEqual(Set(queue.notes.map(\.id)), [unseenDone.id, seenRunning.id])
     }
 
+    /// Seen while it ran, then finished: the result is still unread.
+    func testAResultIsUnreadWhenItArrivesEvenIfTheNoteWasSeenRunning() {
+        let running = note(1, .transcribing(progress: 0.5))
+        var queue = VoiceNoteQueue(notes: [running])
+        queue.markOpened(running.id)
+        queue.complete(running.id, transcript: "t", language: "fr", savedToHistory: false)
+        XCTAssertNil(queue.note(id: running.id)?.openedAt)
+        queue.removeOpenedFinished()
+        XCTAssertNotNil(queue.note(id: running.id), "an unread History-off result is never dropped")
+    }
+
     @MainActor
     func testHistoryTracksUnreadVoiceNotesOldestFirst() throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("history-\(UUID()).json")

@@ -4,21 +4,6 @@ import Foundation
 import UIKit
 import DictusCore
 
-/// What the voice note sheet should show when it opens.
-enum VoiceNotePresentation: Identifiable, Equatable {
-    /// The list: notes in the queue and recent results.
-    case list
-    /// One note's result.
-    case note(UUID)
-
-    var id: String {
-        switch self {
-        case .list: return "list"
-        case .note(let id): return id.uuidString
-        }
-    }
-}
-
 /// The voice note queue's engine room.
 ///
 /// ### The two paths of #620
@@ -47,9 +32,9 @@ final class VoiceNoteProcessor: ObservableObject {
 
     let store = VoiceNoteQueueStore.shared
 
-    /// The sheet the app should present, set by a Live Activity tap or by the cold
-    /// path. `MainTabView` binds to it.
-    @Published var presentation: VoiceNotePresentation?
+    /// The voice note screen the app should present, set by a Live Activity tap or by
+    /// the cold path. `MainTabView` binds to it.
+    @Published var presentation: VoiceNoteStackRequest?
 
     private var runTask: Task<Void, Never>?
     private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
@@ -91,10 +76,13 @@ final class VoiceNoteProcessor: ObservableObject {
         store.ingestInbox()
         if store.queue.hasPendingWork {
             // The user opened Dictus because the extension told them to: show them
-            // the note going through. A Live Activity link that already chose a
-            // screen keeps it. Not without the entitlement: the queue would not run,
-            // and a list raised on every launch to say so would be a nag (#593).
-            if presentation == nil && VoiceNoteAvailability.isEntitled { presentation = .list }
+            // the note itself, turning from progress into its result. A Live Activity
+            // link that already chose a screen keeps it. Not without the entitlement:
+            // the queue would not run, and a screen raised on every launch to say so
+            // would be a nag (#593).
+            if presentation == nil && VoiceNoteAvailability.isEntitled {
+                presentation = VoiceNoteStackRequest(focus: nil)
+            }
             processQueue()
         } else {
             // The user is in the app; a finished note on the pill has done its job.
@@ -102,9 +90,10 @@ final class VoiceNoteProcessor: ObservableObject {
         }
     }
 
-    /// `dictus://voice-note[?id=…]`, from the Live Activity.
+    /// `dictus://voice-note[?id=…]`, from the Live Activity: the voice note screen,
+    /// on the unread stack (see `VoiceNoteStackView`).
     func open(_ target: UUID?) {
-        presentation = target.map(VoiceNotePresentation.note) ?? .list
+        presentation = VoiceNoteStackRequest(focus: target)
     }
 
     /// Put a failed note back in the queue.
@@ -217,7 +206,7 @@ final class VoiceNoteProcessor: ObservableObject {
     private func fail(_ note: VoiceNote, _ failure: VoiceNoteFailure, detail: String) {
         store.mutate { $0.fail(note.id, failure) }
         log("failed", "id=\(note.id.uuidString.prefix(8)) failure=\(failure.rawValue) detail=\(detail)")
-        publishActivity(finished: .failure)
+        publishActivity(finished: .failure(note.id))
     }
 
     /// The queue never starts a chunk under a dictation. The gate would already serve
@@ -242,7 +231,7 @@ final class VoiceNoteProcessor: ObservableObject {
 
     private enum Finished {
         case success(id: UUID, transcript: String)
-        case failure
+        case failure(UUID)
     }
 
     /// While a note runs: progress, the queue line, and the first lines once known.
@@ -272,11 +261,11 @@ final class VoiceNoteProcessor: ObservableObject {
                                  comment: "Live Activity headline once a shared voice note is transcribed. A tap opens it (#620)."),
                 preview: transcript, noteID: id, isDone: true
             ))
-        case .failure:
+        case .failure(let failedID):
             LiveActivityManager.shared.updateVoiceNote(VoiceNoteActivityContent(
                 headline: String(localized: "Voice note not transcribed",
-                                 comment: "Live Activity headline when a shared voice note failed. A tap opens the list, which says why (#620)."),
-                isDone: true
+                                 comment: "Live Activity headline when a shared voice note failed. A tap opens the voice note screen, which says why (#620)."),
+                noteID: failedID, isDone: true
             ))
         case nil:
             break

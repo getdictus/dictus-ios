@@ -113,7 +113,7 @@ struct MainTabView: View {
 
     /// The voice note sheet's presentation, read from and written back to the
     /// processor, which is what the Live Activity link and the cold path set.
-    private var voiceNotePresentation: Binding<VoiceNotePresentation?> {
+    private var voiceNotePresentation: Binding<VoiceNoteStackRequest?> {
         Binding(
             get: { voiceNotes.presentation },
             set: { voiceNotes.presentation = $0 }
@@ -149,8 +149,8 @@ struct MainTabView: View {
                     // the trial's sheet: one sheet per view is what SwiftUI honours.
                     // Shown only from the ordinary navigation — never over the cold
                     // start overlay or the preparation screen, which replace it.
-                    .sheet(item: voiceNotePresentation) { presentation in
-                        VoiceNotesView(initial: presentation)
+                    .sheet(item: voiceNotePresentation) { request in
+                        VoiceNoteStackView(request: request)
                     }
                     .tabItem {
                         Label("Home", systemImage: "house.fill")
