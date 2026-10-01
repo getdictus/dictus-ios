@@ -415,6 +415,17 @@ final class KeyboardPolishCoordinator {
         let name = SmartMode.localizedDisplayName(
             identifier: failure.modeIdentifier, fallback: failure.modeDisplayName
         )
+        if failure.outcome == PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue,
+           failure.modeIdentifier == SmartModeCatalogue.notesIdentifier {
+            // `Liste` has its own sentence (#573 decision 5), worded by the maintainer:
+            // the mode's name is already in it, so it needs no colon-label, and "too
+            // short for a list" says why in the terms of the shape the user armed. The
+            // text went in with Normal polish, which the field shows by itself.
+            return String(
+                localized: "Too short for a list.",
+                comment: "Shown when the List Smart Mode declined a dictation for being shorter than its floor, so the text went in with the normal polish instead."
+            )
+        }
         if failure.outcome == PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue {
             // The mode declined the dictation for length (#587). It reads as the #580
             // sentence's sibling — same slot, same register, the text is in the field —

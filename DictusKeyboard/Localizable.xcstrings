@@ -563,6 +563,17 @@
         }
       }
     },
+    "Too short for a list." : {
+      "comment" : "Shown when the List Smart Mode declined a dictation for being shorter than its floor, so the text went in with the normal polish instead.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop court pour une liste."
+          }
+        }
+      }
+    },
     "Transcribing..." : {
       "localizations" : {
         "fr" : {
