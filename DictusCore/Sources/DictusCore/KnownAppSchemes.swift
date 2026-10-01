@@ -53,9 +53,9 @@ import Foundation
 /// - Safari: upstream maps `x-web-search://`, which opens a new search. Ours lists Safari
 ///   in `knownNoSchemeHosts`.
 ///
-/// Upstream also lists Claude as "state-losing" (`claude://` opening a new chat). Our own
-/// device check on 2026-09-11 found it resumes the conversation, so the entry stays.
-/// Re-measure if a Claude update changes that.
+/// Upstream is right about Claude, and we followed it: `claude://` opens a new chat. We
+/// had it marked verified on 2026-09-11; a re-test on 2026-10-01 contradicted that, so
+/// it moved to `knownNoSchemeHosts`.
 ///
 /// Their copyright notice and the full MIT text ship with the app, in `LicensesView`.
 /// That is the licence's condition for redistributing this table, not a courtesy, and
@@ -92,11 +92,11 @@ public enum KnownAppSchemes {
     ///
     /// **Verified to resume:** `com.apple.mobilenotes`, `com.apple.MobileSMS`,
     /// `net.whatsapp.WhatsApp`, `com.apple.mobilemail`, `com.github.stormbreaker.prod`,
-    /// `com.openai.chat`, `com.anthropic.claude`, `com.tinyspeck.chatlyio` (all on
-    /// device, 2026-09-11), plus
+    /// `com.openai.chat`, `com.tinyspeck.chatlyio` (all on device, 2026-09-11), plus
     /// `com.apple.reminders` on a simulator, and `com.t3tools.t3code` (on device, T3 Code
-    /// 1.2.0, 2026-09-22). **Rejected by measurement:** `com.apple.mobilesafari`, now in
-    /// `knownNoSchemeHosts`.
+    /// 1.2.0, 2026-09-22). `com.apple.MobileSMS` re-checked on device 2026-10-01.
+    /// **Rejected by measurement:** `com.apple.mobilesafari` and `com.anthropic.claude`,
+    /// both now in `knownNoSchemeHosts`.
     ///
     /// Four of those were inherited entries nobody had checked, and all four worked
     /// first time — which is mild evidence that the upstream catalogue is sound, and no
@@ -185,8 +185,6 @@ public enum KnownAppSchemes {
         // Verified on device.
         "com.openai.chat": "com.openai.chat://",
         "ai.perplexity.app": "perplexity-app://",
-        // Verified on device.
-        "com.anthropic.claude": "claude://",
         // Verified on device, T3 Code 1.2.0, 2026-09-22. The first entry added on purpose
         // rather than inherited, and it was in `knownNoSchemeHosts` until then. The scheme
         // always opened the app; up to 1.1.0 it also reset navigation to Home, measured on
@@ -378,6 +376,12 @@ public enum KnownAppSchemes {
         // swipe-back overlay, which leaves their page where it was, so Safari is listed
         // as having no way back rather than a bad one.
         "com.apple.mobilesafari",
+
+        // Claude, for the same reason as Safari: `claude://` opens it on a new chat, not
+        // the conversation the user was typing in. Measured on device 2026-10-01, and
+        // Wispr Flow does not auto-return to Claude either. A 2026-09-11 check had passed
+        // it, so retest on a Claude update rather than trusting either result forever.
+        "com.anthropic.claude",
 
         // Apple view services and system apps that register no URL types.
         "com.apple.SafariViewService",
