@@ -27,7 +27,7 @@
 		<key>NSExtensionAttributes</key>
 		<dict>
 			<key>NSExtensionActivationRule</key>
-			<string>SUBQUERY (extensionItems, $extensionItem, SUBQUERY ($extensionItem.attachments, $attachment, ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.audio" OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.xiph.ogg-audio" OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.xiph.opus" OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.mpeg").@count &gt;= 1).@count &gt;= 1</string>
+			<string>SUBQUERY (extensionItems, $extensionItem, SUBQUERY ($extensionItem.attachments, $attachment, ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.audio" OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.xiph.ogg-audio" OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.xiph.opus" OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.mpeg" OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "public.mpeg-4" OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.webmproject.webm" OR ANY $attachment.registeredTypeIdentifiers UTI-CONFORMS-TO "org.matroska.mkv").@count &gt;= 1).@count &gt;= 1</string>
 		</dict>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.share-services</string>

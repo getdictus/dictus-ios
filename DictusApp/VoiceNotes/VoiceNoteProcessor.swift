@@ -224,7 +224,7 @@ final class VoiceNoteProcessor: ObservableObject {
 
     static func failure(for error: VoiceNoteDecodeError) -> VoiceNoteFailure {
         switch error {
-        case .unrecognisedFormat: return .unsupportedFormat
+        case .unrecognisedFormat, .unsupportedCodec: return .unsupportedFormat
         case .unreadable: return .unreadable
         case .tooLong: return .tooLong
         case .empty: return .noSpeech

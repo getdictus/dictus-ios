@@ -32,6 +32,17 @@ public enum SharedAudioFormat: String, Codable, Sendable, CaseIterable {
     case flac
     /// AMR narrow-band, which some Android senders still produce.
     case amr
+    /// Raw AAC in ADTS frames, no container. What a received Signal voice note from an
+    /// Android sender is, under a `.m4a` name (measured, Radar, 2026-10-01). AVFoundation
+    /// reads it only when the file is named `.aac`, which is why the stored name follows
+    /// the content.
+    case adts
+    /// WebM / Matroska: what a browser's `MediaRecorder` writes. AVFoundation does not
+    /// open it; `MatroskaOpusDemuxer` takes Opus out of it.
+    case matroska
+    /// WeChat's SILK v3. Recognised so it can be refused by name: no Apple decoder reads
+    /// SILK and Dictus ships none.
+    case silk
 
     /// The extension the share extension stores the file under. Chosen so that
     /// `AVURLAsset`, which infers the container from the extension before it sniffs,
@@ -46,8 +57,14 @@ public enum SharedAudioFormat: String, Codable, Sendable, CaseIterable {
         case .aiff: return "aiff"
         case .flac: return "flac"
         case .amr: return "amr"
+        case .adts: return "aac"
+        case .matroska: return "webm"
+        case .silk: return "silk"
         }
     }
+
+    /// Whether Dictus can decode this container on some path. Only SILK is refused.
+    public var isSupported: Bool { self != .silk }
 
     /// How many leading bytes `sniff` needs. Twelve covers every signature below.
     public static let sniffLength = 12
@@ -68,7 +85,13 @@ public enum SharedAudioFormat: String, Codable, Sendable, CaseIterable {
         if ascii(0..<4) == "FORM", let kind = ascii(8..<12), kind == "AIFF" || kind == "AIFC" { return .aiff }
         if ascii(0..<4) == "fLaC" { return .flac }
         if ascii(0..<5) == "#!AMR" { return .amr }
+        if bytes.count >= 4, bytes[0] == 0x1A, bytes[1] == 0x45, bytes[2] == 0xDF, bytes[3] == 0xA3 { return .matroska }
+        // WeChat writes the SILK magic at offset 0 or after one 0x02 byte.
+        if ascii(0..<9) == "#!SILK_V3" || ascii(1..<10) == "#!SILK_V3" { return .silk }
         if ascii(0..<3) == "ID3" { return .mp3 }
+        // ADTS: the 12-bit sync word, then a layer field of 00 — the value MPEG audio
+        // reserves, and the one ADTS always carries. Checked before MP3 for that reason.
+        if bytes.count >= 2, bytes[0] == 0xFF, bytes[1] & 0xF6 == 0xF0 { return .adts }
         // A bare MPEG audio frame: an 11-bit sync word, then a layer field that is
         // not "reserved". Layer III is 01 in those two bits; layers I and II are
         // accepted too because AVFoundation decodes them by the same path.

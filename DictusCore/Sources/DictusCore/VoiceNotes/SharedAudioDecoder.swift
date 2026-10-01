@@ -1,5 +1,6 @@
 // DictusCore/Sources/DictusCore/VoiceNotes/SharedAudioDecoder.swift
 // Turns a shared audio file into the 16 kHz mono Float32 every engine reads (#620).
+import AudioToolbox
 import AVFoundation
 import Foundation
 
@@ -14,6 +15,8 @@ public enum VoiceNoteDecodeError: Error, Equatable, Sendable {
     case tooLong(seconds: Int)
     /// Decoded to nothing.
     case empty
+    /// A container Dictus recognises and cannot decode on any path (SILK).
+    case unsupportedCodec(String)
 
     public var diagnosticDescription: String {
         switch self {
@@ -21,6 +24,7 @@ public enum VoiceNoteDecodeError: Error, Equatable, Sendable {
         case .unreadable(let detail): return "unreadable: \(detail)"
         case .tooLong(let seconds): return "too long: \(seconds)s"
         case .empty: return "decoded to zero samples"
+        case .unsupportedCodec(let codec): return "unsupported codec: \(codec)"
         }
     }
 }
@@ -66,6 +70,10 @@ public enum SharedAudioDecoder {
         if format == .ogg, let duration = OggOpusDemuxer.duration(of: url) {
             return duration
         }
+        if format == .matroska {
+            return (try? Data(contentsOf: url, options: .mappedIfSafe))
+                .flatMap { try? MatroskaOpusDemuxer.demux($0) }?.duration
+        }
         let asset = AVURLAsset(url: url)
         guard let duration = try? await asset.load(.duration), duration.isNumeric else { return nil }
         let seconds = duration.seconds
@@ -109,13 +117,27 @@ public enum SharedAudioDecoder {
         }
         let maxSamples = Int((maximumDuration + capTolerance) * sampleRate)
 
+        guard format.isSupported else { throw VoiceNoteDecodeError.unsupportedCodec(format.rawValue) }
+
         let samples: [Float]
-        do {
-            samples = try await decodeWithAssetReader(url: url, maxSamples: maxSamples)
-        } catch let error as VoiceNoteDecodeError where error != .unrecognisedFormat && format == .ogg {
-            // The iOS 17/18 path. A cap refusal is not a reason to try again.
-            if case .tooLong = error { throw error }
-            samples = try decodeOggOpus(url: url, maxSamples: maxSamples)
+        if format == .matroska {
+            // AVFoundation does not open WebM at all (measured); straight to the demuxer.
+            samples = try decodeMatroskaOpus(url: url, maxSamples: maxSamples)
+        } else {
+            do {
+                samples = try await decodeWithAssetReader(url: url, maxSamples: maxSamples)
+            } catch let error as VoiceNoteDecodeError where error != .unrecognisedFormat {
+                // A cap refusal is not a reason to try again.
+                if case .tooLong = error { throw error }
+                if format == .ogg {
+                    // The iOS 17/18 path for Ogg Opus.
+                    samples = try decodeOggOpus(url: url, maxSamples: maxSamples)
+                } else {
+                    // AudioToolbox's file API reaches decoders AVAssetReader does not
+                    // offer for a bare file, AMR on iOS being the case in point.
+                    samples = try decodeWithExtAudioFile(url: url, maxSamples: maxSamples)
+                }
+            }
         }
         guard !samples.isEmpty else { throw VoiceNoteDecodeError.empty }
         return samples
@@ -206,6 +228,65 @@ public enum SharedAudioDecoder {
         }
         let pcm48k = try decodeOpusPackets(stream)
         return try resample(pcm48k, from: 48_000, to: sampleRate)
+    }
+
+    /// Demux a WebM / Matroska file and decode its Opus track with Apple's decoder.
+    static func decodeMatroskaOpus(url: URL, maxSamples: Int) throws -> [Float] {
+        let data: Data
+        do {
+            data = try Data(contentsOf: url, options: .mappedIfSafe)
+        } catch {
+            throw VoiceNoteDecodeError.unreadable("read: \(error.localizedDescription)")
+        }
+        let stream: OggOpusStream
+        do {
+            stream = try MatroskaOpusDemuxer.demux(data)
+        } catch MatroskaDemuxError.noOpusTrack {
+            throw VoiceNoteDecodeError.unsupportedCodec("matroska-non-opus")
+        } catch {
+            throw VoiceNoteDecodeError.unreadable("matroska: \(error)")
+        }
+        if let duration = stream.duration, Double(maxSamples) < duration * sampleRate {
+            throw VoiceNoteDecodeError.tooLong(seconds: Int(duration))
+        }
+        return try resample(try decodeOpusPackets(stream), from: 48_000, to: sampleRate)
+    }
+
+    /// Decode through `ExtAudioFile`, asking for 16 kHz mono Float32.
+    static func decodeWithExtAudioFile(url: URL, maxSamples: Int) throws -> [Float] {
+        var fileRef: ExtAudioFileRef?
+        var status = ExtAudioFileOpenURL(url as CFURL, &fileRef)
+        guard status == noErr, let file = fileRef else {
+            throw VoiceNoteDecodeError.unreadable("ExtAudioFileOpenURL \(status)")
+        }
+        defer { ExtAudioFileDispose(file) }
+        var client = AudioStreamBasicDescription(
+            mSampleRate: sampleRate, mFormatID: kAudioFormatLinearPCM,
+            mFormatFlags: kAudioFormatFlagIsFloat | kAudioFormatFlagIsPacked,
+            mBytesPerPacket: 4, mFramesPerPacket: 1, mBytesPerFrame: 4,
+            mChannelsPerFrame: 1, mBitsPerChannel: 32, mReserved: 0)
+        status = ExtAudioFileSetProperty(file, kExtAudioFileProperty_ClientDataFormat,
+                                         UInt32(MemoryLayout<AudioStreamBasicDescription>.size), &client)
+        guard status == noErr else { throw VoiceNoteDecodeError.unreadable("client format \(status)") }
+
+        var samples: [Float] = []
+        let chunk = 4096
+        var buffer = [Float](repeating: 0, count: chunk)
+        while true {
+            var frames = UInt32(chunk)
+            let read: OSStatus = buffer.withUnsafeMutableBytes { raw in
+                var list = AudioBufferList(mNumberBuffers: 1, mBuffers: AudioBuffer(
+                    mNumberChannels: 1, mDataByteSize: UInt32(raw.count), mData: raw.baseAddress))
+                return ExtAudioFileRead(file, &frames, &list)
+            }
+            guard read == noErr else { throw VoiceNoteDecodeError.unreadable("ExtAudioFileRead \(read)") }
+            if frames == 0 { break }
+            samples.append(contentsOf: buffer.prefix(Int(frames)))
+            if samples.count > maxSamples {
+                throw VoiceNoteDecodeError.tooLong(seconds: Int(Double(samples.count) / sampleRate))
+            }
+        }
+        return samples
     }
 
     /// Opus packets to mono Float32 at 48 kHz, priming and end padding removed.

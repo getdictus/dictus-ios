@@ -171,15 +171,18 @@ final class ShareModel: ObservableObject {
         case .accept:
             break
         case .refuseNeedsPro:
+            log("rejected", "reason=notEntitled detected=none type=none")
             state = .refused(String(localized: "Transcribing voice notes is part of Dictus Pro. Open Dictus to find out more.",
                                     comment: "Share extension: the user has no Pro entitlement and the paywall is visible (#620)."))
             return
         case .refuseUnavailable:
+            log("rejected", "reason=unavailable detected=none type=none")
             state = .refused(String(localized: "Transcribing voice notes is not available in this version of Dictus.",
                                     comment: "Share extension: no entitlement, and the paywall is hidden so no subscription may be named (#620, #236)."))
             return
         }
         guard let storage = VoiceNoteStorage.appGroup else {
+            log("rejected", "reason=noAppGroup detected=none type=none")
             state = .refused(Self.couldNotReceive)
             return
         }
@@ -195,6 +198,10 @@ final class ShareModel: ObservableObject {
             }
         }
         guard !drops.isEmpty else {
+            if audioProviders.isEmpty {
+                let types = providers.flatMap(\.registeredTypeIdentifiers).joined(separator: ",")
+                log("rejected", "reason=noAudioAttachment detected=none type=\(types.isEmpty ? "none" : types)")
+            }
             state = .refused(refusal ?? Self.couldNotReceive)
             return
         }
@@ -256,7 +263,8 @@ final class ShareModel: ObservableObject {
     /// (measured on device, 2026-10-01). Such a candidate is only a candidate — `drop`
     /// takes it only when its bytes are audio and it carries no video track.
     private static let audioTypes = ["org.xiph.ogg-audio", "org.xiph.opus", UTType.audio.identifier,
-                                     UTType.mpeg.identifier]
+                                     UTType.mpeg.identifier, UTType.mpeg4Movie.identifier,
+                                     "org.webmproject.webm", "org.matroska.mkv"]
 
     static func audioTypeIdentifier(of provider: NSItemProvider) -> String? {
         for identifier in provider.registeredTypeIdentifiers {
@@ -267,7 +275,9 @@ final class ShareModel: ObservableObject {
     }
 
     private static func drop(_ provider: NSItemProvider, storage: VoiceNoteStorage) async -> Result<VoiceNoteDrop, DropFailure> {
-        guard let identifier = audioTypeIdentifier(of: provider) else { return .failure(.notAudio) }
+        guard let identifier = audioTypeIdentifier(of: provider) else {
+            return reject(.notAudio, reason: "noAudioType", detected: nil, type: provider.registeredTypeIdentifiers.first)
+        }
         // The URL handed to the callback is valid only inside it, so the copy to a
         // file of our own happens there.
         let local: URL? = await withCheckedContinuation { continuation in
@@ -284,26 +294,55 @@ final class ShareModel: ObservableObject {
                 }
             }
         }
-        guard let local else { return .failure(.unreadable) }
+        guard let local else { return reject(.unreadable, reason: "loadFailed", detected: nil, type: identifier) }
         defer { try? FileManager.default.removeItem(at: local) }
 
-        // The bytes decide, not the type the sender declared: a `.mpg` film sniffs as
-        // nothing (an MPEG program stream), and an MPEG-4 file that turns out to hold
-        // a picture is a video, whatever it was shared as.
-        guard let format = SharedAudioFormat.sniff(contentsOf: local) else { return .failure(.notAudio) }
-        if format == .mpeg4, await SharedAudioDecoder.hasVideoTrack(local) { return .failure(.notAudio) }
+        // The bytes decide, not the type or the name the sender gave (#620 format
+        // audit): Radar names raw ADTS AAC `.m4a`, Signal puts MP3 in `.mpg`, a
+        // `.mpg` film sniffs as nothing (an MPEG program stream), and a container that
+        // turns out to hold a picture is a video, whatever it was shared as.
+        guard let format = SharedAudioFormat.sniff(contentsOf: local) else {
+            return reject(.notAudio, reason: "unrecognisedContainer", detected: nil, type: identifier)
+        }
+        guard format.isSupported else {
+            return reject(.notAudio, reason: "unsupportedCodec", detected: format, type: identifier)
+        }
+        if format == .mpeg4, await SharedAudioDecoder.hasVideoTrack(local) {
+            return reject(.notAudio, reason: "video", detected: format, type: identifier)
+        }
+        if format == .matroska,
+           let data = try? Data(contentsOf: local, options: .mappedIfSafe),
+           MatroskaOpusDemuxer.hasVideoTrack(data) {
+            return reject(.notAudio, reason: "video", detected: format, type: identifier)
+        }
         // Refused here when the container states its length, so a forty-minute
         // podcast is never copied into the App Group only to fail in the app.
         let duration = await SharedAudioDecoder.probeDuration(of: local, format: format)
-        if let duration, SharedAudioDecoder.exceedsCap(duration) { return .failure(.tooLong) }
+        if let duration, SharedAudioDecoder.exceedsCap(duration) {
+            return reject(.tooLong, reason: "tooLong", detected: format, type: identifier)
+        }
         do {
             let drop = try VoiceNoteInbox.drop(copying: local, format: format,
                                                durationSeconds: duration.map { Int($0.rounded()) }, storage: storage)
             return .success(drop)
         } catch {
-            return .failure(.unreadable)
+            return reject(.unreadable, reason: "copyFailed", detected: format, type: identifier)
         }
     }
+
+    /// Every refusal leaves one line in the debug log, so a note that "does not work"
+    /// can be told apart from one Dictus was never offered (#620 format audit). The
+    /// line names the reason, what the bytes were and what the sender called them —
+    /// never anything of the file's content.
+    private static func reject(_ failure: DropFailure, reason: String, detected: SharedAudioFormat?,
+                               type: String?) -> Result<VoiceNoteDrop, DropFailure> {
+        PersistentLog.log(.diagnosticProbe(
+            component: "VoiceNoteShare", instanceID: "extension", action: "rejected",
+            details: "reason=\(reason) detected=\(detected?.rawValue ?? "none") type=\(type ?? "none")"
+        ))
+        return .failure(failure)
+    }
+
 
     private func log(_ action: String, _ details: String) {
         PersistentLog.log(.diagnosticProbe(component: "VoiceNoteShare", instanceID: "extension", action: action, details: details))
