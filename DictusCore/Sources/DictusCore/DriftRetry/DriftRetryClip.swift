@@ -23,6 +23,10 @@ struct DriftRetryClip: Equatable {
     /// fact keeps the same tokens. The step-0 parity run checked that on every file.
     let emitFromFrame: Int?
 
+    /// The v2 edge rule cut audio off this clip's end: it cannot hear the span's last
+    /// 0.24 or 0.48 s, so selection requires its candidate to reach the span's end.
+    var endTrimmed = false
+
     /// The nine clips of `span`, in grid order: left context outer, right context inner.
     ///
     /// The v2 edge rule: a span that ends at the end of the call has no audio to its right,
@@ -37,15 +41,17 @@ struct DriftRetryClip: Equatable {
             for right in DriftRetryParameters.rightContexts {
                 let start = max(0, span.start - Int(left * rate) / frame * frame)
                 var end = min(totalSamples, span.end + Int(right * rate))
+                var endTrimmed = false
                 if span.end >= totalSamples {
                     let trim = right < 0.5 ? 0.0 : (right < 1.0 ? 0.24 : 0.48)
                     end = max(span.start + DriftRetryParameters.sampleRate / 2, totalSamples - Int(trim * rate) / frame * frame)
+                    endTrimmed = end < totalSamples
                 }
                 let startFrame = start / frame
                 let emitFrom = start < span.start
                     ? max(startFrame, span.start / frame - DriftRetryParameters.edgeToleranceFrames)
                     : nil
-                clips.append(DriftRetryClip(start: start, end: end, emitFromFrame: emitFrom))
+                clips.append(DriftRetryClip(start: start, end: end, emitFromFrame: emitFrom, endTrimmed: endTrimmed))
             }
         }
         return clips

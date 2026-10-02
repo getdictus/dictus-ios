@@ -43,6 +43,9 @@ final class DriftRetryClipTests: XCTestCase {
         let clips = DriftRetryClip.grid(for: DriftSpan(start: 12 * second, end: total), totalSamples: total)
         XCTAssertEqual(clips.map(\.end), [total, total - 3_840, total - 7_680, total, total - 3_840, total - 7_680,
                                           total, total - 3_840, total - 7_680])
+        XCTAssertEqual(clips.map(\.endTrimmed), [false, true, true, false, true, true, false, true, true])
+        let inside = DriftRetryClip.grid(for: DriftSpan(start: 2 * second, end: 6 * second), totalSamples: total)
+        XCTAssertFalse(inside.contains { $0.endTrimmed }, "only a span ending the call is trimmed")
     }
 
     func testAnEndTrimNeverLeavesLessThanHalfASecondOfSpan() {

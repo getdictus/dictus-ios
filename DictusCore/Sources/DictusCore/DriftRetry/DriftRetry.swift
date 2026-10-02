@@ -73,11 +73,13 @@ public enum DriftRetry {
             let range = DriftRetrySplice.firstPassRange(of: span, in: firstPass)
             let original = Array(firstPass[range])
             var candidates: [[DriftRetryPiece]] = []
+            var endTrimmed: Set<Int> = []
             for clip in DriftRetryClip.grid(for: span, totalSamples: samples.count) {
                 let timings = try await decode(clip.samples(from: samples))
+                if clip.endTrimmed { endTrimmed.insert(candidates.count) }
                 candidates.append(clip.candidate(from: timings, span: span))
             }
-            if let winner = DriftRetrySelection.winner(candidates: candidates, firstPass: original) {
+            if let winner = DriftRetrySelection.winner(candidates: candidates, firstPass: original, endTrimmed: endTrimmed) {
                 choices.append(DriftRetryChoice(range: range, pieces: candidates[winner], keepsFirstPass: false))
             } else {
                 choices.append(DriftRetryChoice(range: range, pieces: original, keepsFirstPass: true))

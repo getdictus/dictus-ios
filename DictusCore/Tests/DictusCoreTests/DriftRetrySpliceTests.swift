@@ -36,6 +36,31 @@ final class DriftRetrySpliceTests: XCTestCase {
         XCTAssertNil(DriftRetrySelection.winner(candidates: [padded], firstPass: firstPass))
     }
 
+    /// An end-trimmed clip (v2 edge rule) cannot hear the span's last words: a confident
+    /// candidate from it that stops early must not win, or the splice drops them (PR #630).
+    func testAnEndTrimmedCandidateStoppingEarlyCannotWin() {
+        let firstPass = [piece(" and", 10, 0.6), piece(" fin", 30, 0.6)]
+        let shortened = [piece(" et", 10, 0.99)]
+        XCTAssertNil(DriftRetrySelection.winner(candidates: [shortened], firstPass: firstPass, endTrimmed: [0]))
+        // Reaching within the 4-frame tolerance is enough.
+        let reaching = [piece(" et", 10, 0.99), piece(" la", 26, 0.99)]
+        XCTAssertEqual(DriftRetrySelection.winner(candidates: [shortened, reaching], firstPass: firstPass,
+                                                  endTrimmed: [0, 1]), 1)
+    }
+
+    /// An untrimmed candidate that stops before a hallucinated tail still wins: dropping
+    /// Natural2's trailing `ol` is a measured fix.
+    func testAnUntrimmedCandidateMayDropAHallucinatedTail() {
+        let firstPass = [piece(" recevoir", 10, 0.6), piece(" ça.ol", 30, 0.3)]
+        let clean = [piece(" recevoir", 10, 0.99), piece(" ça.", 14, 0.99)]
+        XCTAssertEqual(DriftRetrySelection.winner(candidates: [clean], firstPass: firstPass), 0)
+    }
+
+    /// A gap span has no first-pass word to reach: any scored candidate may win.
+    func testAGapSpanCandidateNeedsNoEnd() {
+        XCTAssertEqual(DriftRetrySelection.winner(candidates: [[piece(" retrouvé", 10, 0.9)]], firstPass: []), 0)
+    }
+
     // MARK: - Word range
 
     func testAWordRangeSkipsALeadingContinuationAndFinishesATrailingWord() {
