@@ -19,7 +19,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 1. #587 — Smart Mode prompt campaign: its remaining threads
    - #598 — language check refuses a correct short line (`es` read as `pt`); #592 — warn instead of refusing on an ungrounded name
 2. #627 — run a voice note's Smart Mode in the background (device probe first); then #628, notes over ~4 min, in 2.0.0 only if reliable and short
-3. #573 — rebuild `Liste` as a summary in bullets (title, then every point). `ready-for-agent`
+3. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; open until Pierre's verdict in real use
 4. #593 — reverse trial: Pro free for a fixed period, then the paywall. `ready-for-agent`
 5. #494 — onboarding that starts the trial and teaches the Smart Modes. `ready-for-agent`
 6. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
