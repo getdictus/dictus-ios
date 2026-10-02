@@ -114,3 +114,25 @@ final class ProHubTests: XCTestCase {
         XCTAssertFalse(result.sellsPlans)
     }
 }
+
+final class ProOwnershipRecheckTests: XCTestCase {
+
+    func testTheRecheckIsBoundedToAboutTenSeconds() {
+        let total = ProOwnershipRecheck.delays.reduce(0, +)
+        XCTAssertGreaterThanOrEqual(total, 8, "too short to catch a cancellation StoreKit delivers late")
+        XCTAssertLessThanOrEqual(total, 12, "a recheck, not a polling loop")
+        XCTAssertTrue(ProOwnershipRecheck.delays.allSatisfy { $0 > 0 })
+    }
+
+    func testItStopsAtTheFirstChange() {
+        let end = Date(timeIntervalSince1970: 1_800_000_000)
+        let renewing = ProOwnership(ownsLifetime: false, subscription:
+            ProActiveSubscription(productID: ProProductID.monthly, periodEnd: end, willAutoRenew: true))
+        let cancelled = ProOwnership(ownsLifetime: false, subscription:
+            ProActiveSubscription(productID: ProProductID.monthly, periodEnd: end, willAutoRenew: false))
+
+        XCTAssertFalse(ProOwnershipRecheck.isSettled(before: renewing, after: renewing))
+        XCTAssertTrue(ProOwnershipRecheck.isSettled(before: renewing, after: cancelled))
+        XCTAssertTrue(ProOwnershipRecheck.isSettled(before: renewing, after: ProOwnership.none))
+    }
+}

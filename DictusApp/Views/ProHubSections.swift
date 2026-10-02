@@ -179,10 +179,10 @@ enum ProFeatureDimming {
 struct ProHubMembershipCard: View {
     let block: ProHubBottomBlock
 
-    /// Re-reads StoreKit. Called when Apple's sheet closes: turning auto-renew off
-    /// there changes the renewal info without producing a transaction, so nothing
-    /// else would move "Renews on" to "Ends on".
-    let refresh: () async -> Void
+    /// Re-reads StoreKit when Apple's sheet closes: turning auto-renew off there
+    /// changes the renewal info without producing a transaction, and StoreKit can
+    /// hand it over a few seconds late (`SubscriptionManager.recheckAfterManageSheet`).
+    let refresh: () -> Void
 
     @State private var showsManageSheet = false
 
@@ -213,7 +213,7 @@ struct ProHubMembershipCard: View {
         .manageSubscriptionsSheet(isPresented: $showsManageSheet)
         .onChange(of: showsManageSheet) { _, isShown in
             if !isShown {
-                Task { await refresh() }
+                refresh()
             }
         }
     }

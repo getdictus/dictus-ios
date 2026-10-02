@@ -155,3 +155,28 @@ public enum ProHub {
     }
     // swiftlint:enable function_parameter_count
 }
+
+/// How the hub re-reads ownership after Apple's Manage subscription sheet closes
+/// (#216, device test of 2026-10-02).
+///
+/// ### Why a re-read at all
+///
+/// Cancelling in the sheet changes the renewal info and creates no transaction, so
+/// `Transaction.updates` stays silent. A single scan on dismissal read the renewal
+/// info before StoreKit had it: the hub kept "Renews on" until the sheet was opened
+/// and closed a second time. `Product.SubscriptionInfo.Status.updates` is the event
+/// source for that change and `SubscriptionManager` listens to it; this schedule is
+/// the bounded backstop for the case where it is late or silent (sandbox), not a
+/// polling loop: a few reads over about ten seconds, ending at the first change.
+public enum ProOwnershipRecheck {
+
+    /// Seconds to wait before each re-read, in order. About ten seconds in total,
+    /// front-loaded: a cancellation usually lands within the first seconds.
+    public static let delays: [Double] = [0.5, 1, 1.5, 3, 4]
+
+    /// Whether to stop re-reading: the ownership moved since the sheet closed, so the
+    /// hub is already showing the change the user made.
+    public static func isSettled(before: ProOwnership?, after: ProOwnership?) -> Bool {
+        before != after
+    }
+}
