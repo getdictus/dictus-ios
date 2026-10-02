@@ -733,7 +733,7 @@ class ModelManager: ObservableObject {
             let config = WhisperKitConfig(
                 model: identifier,
                 modelFolder: modelFolder.path,
-                // Issue #370: pre-A14 iPhones need the audio encoder off the Neural Engine.
+                // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
                 // This is the site the onboarding hang happens at (prewarm/compile).
                 computeOptions: WhisperComputeOptions.current(),
                 verbose: false,

@@ -131,24 +131,14 @@ public struct DeviceCapabilities: Sendable, Equatable {
     /// transcription hot path for everyone at an unmeasured latency cost, to fix a
     /// problem two hardware generations old.
     ///
-    /// WHY pre-A14 iPads keep the default even though they share the model gate
-    /// (issue #612): measured on an A12X iPad Pro (`iPad8,1`, 4 GB, iPadOS 26.0) on
-    /// 2026-09-29, the CPU+GPU encoder brought nothing measurable and roughly tripled
-    /// peak memory during transcription (~2.4 GB against ~0.8 GB), while the default
-    /// Neural Engine path prepared Base in ~22 s without stalling. So the iPads get
-    /// the #612 model gate (Base only) but not this compute override, and the policy
-    /// stays exactly what #370 shipped: pre-A14 iPhones only.
+    /// The pre-A14 iPads follow the same tier (issue #612): the A12X/A12Z and A10
+    /// iPads are absent from Argmax's matrix, and a chip older than the ones it
+    /// documents is not a reason to hand it the Neural Engine path those are denied.
     ///
     /// NOTE: Argmax's requirement is documentation. It has not been measured on an
     /// iPhone 11 by anyone here, and only the reporter's device can confirm it.
     public var audioEncoderComputePolicy: AudioEncoderComputePolicy {
-        isPreA14 && isIPhone ? .cpuAndGPU : .whisperKitDefault
-    }
-
-    /// Whether the identifier is a parsable iPhone one ("iPhone12,1"). Scopes the
-    /// compute policy above, which differs between iPhones and iPads of one tier.
-    private var isIPhone: Bool {
-        hardwareFamily(after: "iPhone") != nil
+        isPreA14 ? .cpuAndGPU : .whisperKitDefault
     }
 
     /// Number of concurrent decoding workers WhisperKit should use for parallel
