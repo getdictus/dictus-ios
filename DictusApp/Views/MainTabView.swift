@@ -63,6 +63,10 @@ struct MainTabView: View {
     /// on stops mattering.
     @State private var showsPaywall = false
 
+    /// The shared voice notes (#620): what the Live Activity link or the cold path
+    /// asked to show.
+    @ObservedObject private var voiceNotes = VoiceNoteProcessor.shared
+
     @Environment(\.scenePhase) private var scenePhase
 
     /// Seeds the presentation state from the URL this process was launched with (issue #264).
@@ -107,6 +111,15 @@ struct MainTabView: View {
         !isColdStartMode && preparation == nil && coordinator.status == .idle && !showsPaywall
     }
 
+    /// The voice note sheet's presentation, read from and written back to the
+    /// processor, which is what the Live Activity link and the cold path set.
+    private var voiceNotePresentation: Binding<VoiceNoteStackRequest?> {
+        Binding(
+            get: { voiceNotes.presentation },
+            set: { voiceNotes.presentation = $0 }
+        )
+    }
+
     var body: some View {
         ZStack {
             if let preparation {
@@ -132,6 +145,15 @@ struct MainTabView: View {
                     NavigationStack {
                         HomeView(modelManager: modelManager)
                     }
+                    // On the Home stack rather than the TabView, which already carries
+                    // the trial's sheet: one sheet per view is what SwiftUI honours.
+                    // Shown only from the ordinary navigation — never over the cold
+                    // start overlay or the preparation screen, which replace it.
+                    .sheet(item: voiceNotePresentation) { request in
+                        VoiceNoteStackView(request: request)
+                            // A new request is a new screen, never the previous one kept.
+                            .id(request.id)
+                    }
                     .tabItem {
                         Label("Home", systemImage: "house.fill")
                     }
@@ -156,6 +178,17 @@ struct MainTabView: View {
                     .tag(2)
                 }
                 .tint(.dictusAccent)
+                // The voice note sheet hangs off the Home tab; a sheet on a tab that is
+                // not on screen does not present, so a Live Activity tap brings Home
+                // forward first.
+                .onChange(of: voiceNotes.presentation) { _, presentation in
+                    if presentation != nil { selectedTab = 0 }
+                }
+                // Dismissing a sheet is the app becoming idle again: a voice note that
+                // waited behind it may come up now (`VoiceNoteStackPresentationPolicy`).
+                .onChange(of: showsPaywall) { _, shown in
+                    if !shown { voiceNotes.evaluatePresentation() }
+                }
                 // The reverse trial's two self-raised screens (#593). On the TabView and
                 // not on the ZStack below, which already carries the user's paywall
                 // cover: two full-screen covers on one view is a presentation SwiftUI
@@ -194,6 +227,12 @@ struct MainTabView: View {
         // state is a no-op. It remains the only path for every URL that arrives while the
         // process is already alive.
         .paywallCover(isPresented: $showsPaywall)
+        // The preparation screen and the cold-start overlay replace the tab bar without
+        // being sheets; the voice note stack waits for them to go.
+        .onAppear { voiceNotes.mainScreenBlocked = preparation != nil || isColdStartMode }
+        .onChange(of: preparation != nil || isColdStartMode) { _, blocked in
+            voiceNotes.mainScreenBlocked = blocked
+        }
         .onOpenURL { url in
             // The keyboard's Pro entries (#241's panel pill, #404's fan row). Until
             // 2026-08-29 nothing routed on `dictus://open` at all, so both of them

@@ -55,6 +55,14 @@ public enum DarwinNotificationName {
     /// request as a cold start. Used to dismiss the Dynamic Island standby indicator
     /// so the UI no longer suggests "ready to dictate" when the engine is asleep.
     public static let warmStateReleased = "com.pivi.dictus.warmStateReleased" as CFString
+
+    /// Share extension -> DictusApp: a voice note was dropped in the App Group inbox
+    /// (#620). Only a live app receives it, which is the point — see `VoiceNoteHandoff`.
+    public static let voiceNoteQueued = "com.pivi.dictus.voiceNoteQueued" as CFString
+
+    /// DictusApp -> share extension: the queued note was taken, and transcription
+    /// starts in the background (#620's warm path).
+    public static let voiceNoteAccepted = "com.pivi.dictus.voiceNoteAccepted" as CFString
 }
 
 /// Global callback registry for Darwin notifications.

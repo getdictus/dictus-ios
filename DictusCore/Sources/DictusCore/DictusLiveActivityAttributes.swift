@@ -60,16 +60,24 @@ public struct DictusLiveActivityAttributes: ActivityAttributes {
         /// nil except in .ready phase.
         public var transcriptionPreview: String?
 
+        /// The shared voice note queue (#620), shown only while `phase` is
+        /// `.standby` — a dictation's own phases replace it while they run. Optional,
+        /// so content an older build persisted still decodes. See
+        /// `VoiceNoteActivityContent` for why this is content and not a phase.
+        public var voiceNote: VoiceNoteActivityContent?
+
         public init(
             phase: Phase,
             recordingStartDate: Date? = nil,
             waveformLevels: [Float] = [],
-            transcriptionPreview: String? = nil
+            transcriptionPreview: String? = nil,
+            voiceNote: VoiceNoteActivityContent? = nil
         ) {
             self.phase = phase
             self.recordingStartDate = recordingStartDate
             self.waveformLevels = waveformLevels
             self.transcriptionPreview = transcriptionPreview
+            self.voiceNote = voiceNote
         }
     }
 

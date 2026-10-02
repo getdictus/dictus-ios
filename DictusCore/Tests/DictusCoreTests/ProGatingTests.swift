@@ -32,7 +32,8 @@ final class ProGatingTests: XCTestCase {
         SharedKeys.proActive,
         SharedKeys.smartModeEnabled,
         SharedKeys.historyEnabled,
-        SharedKeys.vocabularyEnabled
+        SharedKeys.vocabularyEnabled,
+        SharedKeys.voiceNotesEnabled
     ]
 
     override func setUp() {
@@ -47,14 +48,16 @@ final class ProGatingTests: XCTestCase {
 
     // MARK: - ProFeature
 
-    func testProFeatureHasExactlyThreeCases() {
-        XCTAssertEqual(ProFeature.allCases.count, 3)
+    /// Four since #620 added shared voice notes.
+    func testProFeatureHasExactlyFourCases() {
+        XCTAssertEqual(ProFeature.allCases.count, 4)
     }
 
     func testSettingsKeyMapping() {
         XCTAssertEqual(ProFeature.smartMode.settingsKey, SharedKeys.smartModeEnabled)
         XCTAssertEqual(ProFeature.history.settingsKey, SharedKeys.historyEnabled)
         XCTAssertEqual(ProFeature.vocabulary.settingsKey, SharedKeys.vocabularyEnabled)
+        XCTAssertEqual(ProFeature.voiceNotes.settingsKey, SharedKeys.voiceNotesEnabled)
     }
 
     func testDisplayMetadataNonEmpty() {

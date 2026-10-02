@@ -359,7 +359,7 @@ struct PaywallView: View {
     private func iconColor(for feature: ProFeature) -> Color {
         switch feature {
         case .smartMode: return .dictusSmartMode
-        case .history, .vocabulary: return .dictusAccentHighlight
+        case .history, .vocabulary, .voiceNotes: return .dictusAccentHighlight
         }
     }
 

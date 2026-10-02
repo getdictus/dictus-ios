@@ -304,6 +304,20 @@ public enum SharedKeys {
     public static let historyEnabled = "dictus.historyEnabled"
     /// Bool: per-feature toggle for Vocabulary. Seeded like `smartModeEnabled` above.
     public static let vocabularyEnabled = "dictus.vocabularyEnabled"
+    /// Bool: per-feature toggle for shared voice notes (#620). Seeded like
+    /// `smartModeEnabled` above, and read by the share extension.
+    public static let voiceNotesEnabled = "dictus.voiceNotesEnabled"
+
+    // MARK: - Shared voice notes (#620)
+    /// String: the language a shared voice note is transcribed in — "auto" or a
+    /// `SupportedLanguage` raw value. Absent reads as "auto". See `VoiceNoteSettings`.
+    public static let voiceNoteLanguage = "dictus.voiceNoteLanguage"
+    /// String: what runs on the transcript when the result opens — "none" or a Smart
+    /// Mode identifier. Absent reads as `Résumé`. See `VoiceNoteSettings`.
+    public static let voiceNoteMode = "dictus.voiceNoteMode"
+    /// Bool: whether a Live Activity was running when DictusApp last took a voice note
+    /// from the inbox, so the share extension can say where progress will be shown.
+    public static let voiceNoteAcceptedWithActivity = "dictus.voiceNoteAcceptedWithActivity"
 
     // MARK: - Reverse trial (#593)
     /// Double (seconds since 1970): when the reverse trial started. The App Group

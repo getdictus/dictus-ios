@@ -493,6 +493,23 @@ struct SettingsView: View {
                             }
                         }
                     }
+
+                    // The voice note defaults (#620 decision 4), gated like the two
+                    // rows above. Temporary home: the decision puts them in the Dictus
+                    // Pro hub (#216), which is not on `develop` yet. When it lands, this
+                    // row goes with the rest of this section and the hub's Voice notes
+                    // card pushes `VoiceNoteSettingsView` instead.
+                    if proStatus.isProActive && FeatureGate.isAvailable(.voiceNotes) {
+                        NavigationLink {
+                            VoiceNoteSettingsView()
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: ProFeature.voiceNotes.icon)
+                                    .foregroundColor(.dictusAccent)
+                                Text("Voice notes")
+                            }
+                        }
+                    }
                 }
             }
 
