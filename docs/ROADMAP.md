@@ -10,7 +10,7 @@ Where we are going, and which issue to work on next. Nothing else.
 - Whole file under 60 lines. If an edit pushes it past that, something belongs on an issue instead.
 - The [Project board](https://github.com/orgs/getdictus/projects/2) moves by itself on a branch push, a PR and a merge. Two moves are by hand: an issue added to **Now** is added to the board in the same edit (`gh project item-add 2 --owner getdictus --url <issue-url>`), and work with no branch (a grilling, a measurement) is set to In progress when it starts.
 
-Last reviewed: 2026-10-01.
+Last reviewed: 2026-10-02.
 
 ## Now — 2.0.0, the Pro launch
 
@@ -18,7 +18,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 
 1. #587 — Smart Mode prompt campaign: its remaining threads
    - #598 — language check refuses a correct short line (`es` read as `pt`); #592 — warn instead of refusing on an ungrounded name
-2. #620 — transcribe a shared voice message or audio file. Spike first: it is the launch's schedule risk.
+2. #627 — run a voice note's Smart Mode in the background (device probe first); then #628, notes over ~4 min, in 2.0.0 only if reliable and short
 3. #573 — rebuild `Liste` as a summary in bullets (title, then every point). `ready-for-agent`
 4. #593 — reverse trial: Pro free for a fixed period, then the paywall. `ready-for-agent`
 5. #494 — onboarding that starts the trial and teaches the Smart Modes. `ready-for-agent`
@@ -27,7 +27,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 8. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
 9. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
-Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215.
+Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215, #620 voice notes.
 
 ## Next — the keyboard session
 
