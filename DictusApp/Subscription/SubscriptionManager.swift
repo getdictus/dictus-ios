@@ -46,6 +46,14 @@ final class SubscriptionManager: ObservableObject {
     var lifetimeProduct: Product? { products.first { $0.id == ProProductID.lifetime } }
 
     private var transactionListener: Task<Void, Never>?
+
+    /// Listens to the subscription group's status changes (#216). See
+    /// `listenForStatusUpdates()`.
+    private var statusListener: Task<Void, Never>?
+
+    /// The re-read running after Apple's Manage subscription sheet closed, if any.
+    private var manageSheetRecheck: Task<Void, Never>?
+
     private let proStatus: ProStatusManager
 
     init(proStatus: ProStatusManager) {
@@ -55,6 +63,7 @@ final class SubscriptionManager: ObservableObject {
         // while the app was killed, Transaction.updates delivers those
         // transactions on next launch. Missing them = stale Pro status.
         transactionListener = listenForTransactions()
+        statusListener = listenForStatusUpdates()
         // Products first, then the entitlement scan (passive, no sign-in prompt).
         // WHY in that order: the scan's grace-period check reads the subscription
         // status through a loaded product, and run in parallel it could find none
@@ -68,6 +77,8 @@ final class SubscriptionManager: ObservableObject {
 
     deinit {
         transactionListener?.cancel()
+        statusListener?.cancel()
+        manageSheetRecheck?.cancel()
     }
 
     // MARK: - Public API
@@ -160,13 +171,32 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
-    /// Re-scan entitlements without contacting Apple's servers (no sign-in prompt).
+    /// Re-reads ownership after Apple's Manage subscription sheet closed (#216).
     ///
-    /// Called by the Pro hub when Apple's Manage subscription sheet closes (#216):
-    /// switching auto-renew off there produces no transaction, so the listener above
-    /// never hears of it, and "Renews on" would stay on screen after a cancellation.
-    func refreshEntitlements() async {
-        await updateProStatus()
+    /// WHY more than one read: switching auto-renew off in the sheet produces no
+    /// transaction, and on device (iOS 27.0.1 sandbox, 2026-10-02) the renewal info
+    /// StoreKit returned right after the sheet closed still said it would renew: the
+    /// hub kept "Renews on" until the sheet was opened and closed a second time.
+    /// `listenForStatusUpdates()` is the event source for that change; this is its
+    /// bounded backstop, `ProOwnershipRecheck.delays` (about ten seconds), stopping at
+    /// the first read that differs from the one before the sheet closed. Each read is
+    /// logged, so a device log shows which of the two delivered the cancellation.
+    func recheckAfterManageSheet() {
+        manageSheetRecheck?.cancel()
+        let before = ownership
+        manageSheetRecheck = Task { [weak self] in
+            for (index, delay) in ProOwnershipRecheck.delays.enumerated() {
+                try? await Task.sleep(for: .milliseconds(Int(delay * 1000)))
+                guard let self, !Task.isCancelled else { return }
+                await self.updateProStatus()
+                let settled = ProOwnershipRecheck.isSettled(before: before, after: self.ownership)
+                Self.logStoreKit(
+                    action: "manageSheetRecheck",
+                    details: "attempt=\(index + 1)/\(ProOwnershipRecheck.delays.count) settled=\(settled) willAutoRenew=\(self.ownership?.subscription?.willAutoRenew.map(String.init) ?? "unknown")"
+                )
+                if settled { return }
+            }
+        }
     }
 
     /// Reset purchaseState to idle — called by PaywallView after dismissing error alerts.
@@ -196,6 +226,27 @@ final class SubscriptionManager: ObservableObject {
                     await self?.updateProStatus()
                     await transaction.finish()
                 }
+            }
+        }
+    }
+
+    /// Listen for subscription status changes, renewal info included (#216).
+    ///
+    /// WHY on top of `Transaction.updates`: turning auto-renew off or on, in the
+    /// Manage subscription sheet or in the App Store, changes the renewal info without
+    /// creating a transaction, so the transaction listener never hears of it. This is
+    /// StoreKit's own event for that change. Each delivery triggers a full scan
+    /// rather than patching `ownership` from the one status received, so there stays
+    /// one place that decides what the user owns.
+    private func listenForStatusUpdates() -> Task<Void, Never> {
+        Task.detached { [weak self] in
+            for await status in Product.SubscriptionInfo.Status.updates {
+                let renews = (try? status.renewalInfo.payloadValue)?.willAutoRenew
+                Self.logStoreKit(
+                    action: "subscriptionStatusUpdate",
+                    details: "state=\(status.state.rawValue) willAutoRenew=\(renews.map(String.init) ?? "unknown")"
+                )
+                await self?.updateProStatus()
             }
         }
     }

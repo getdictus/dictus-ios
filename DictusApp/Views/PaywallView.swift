@@ -136,7 +136,7 @@ struct PaywallView: View {
                         }
                     } else {
                         ProHubMembershipCard(block: hubBlock) {
-                            await subscriptionManager.refreshEntitlements()
+                            subscriptionManager.recheckAfterManageSheet()
                         }
                     }
                 }
