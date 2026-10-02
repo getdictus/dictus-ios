@@ -186,7 +186,7 @@ class TranscriptionService {
                 PersistentLog.log(.transcriptionCompleted(
                     durationMs: durationMs, wordCount: wordCount, confidence: result.confidence,
                     language: result.language, promptId: result.promptId,
-                    detectedLanguage: result.detectedLanguage))
+                    detectedLanguage: result.detectedLanguage, retry: result.retry))
                 logPerformance(modelName: modelName, audioSamples: audioSamples, transcriptionDurationMs: durationMs)
                 return result.text
             } catch {

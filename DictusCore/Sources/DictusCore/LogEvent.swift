@@ -101,7 +101,13 @@ public enum LogEvent: Sendable {
     /// only way to see that an unknown code silently fell back to auto — and
     /// `detectedLanguage` the language tag the decoder emitted, when it emitted one. They are
     /// what the #558 device tests read to tell a forced French run from a drifting one.
-    case transcriptionCompleted(durationMs: Int, wordCount: Int, confidence: Float?, language: String? = nil, promptId: Int? = nil, detectedLanguage: String? = nil)
+    ///
+    /// `retry` is Parakeet's drift retry (#623): `retrySpans=`, `retryWins=`, `retryMs=`.
+    /// Present on every Parakeet dictation, `retrySpans=0` included, because a clean
+    /// dictation showing zero spans is exactly what its device validation reads. Nil on the
+    /// other engines, which prints no field. `confidence` stays the FIRST pass's score, so it
+    /// remains comparable with every line logged since #554.
+    case transcriptionCompleted(durationMs: Int, wordCount: Int, confidence: Float?, language: String? = nil, promptId: Int? = nil, detectedLanguage: String? = nil, retry: DriftRetryStats? = nil)
     case transcriptionFailed(error: String)
     case recordingTooShort(durationMs: Int)
     case transcriptionPerformance(modelName: String, audioDurationMs: Int, transcriptionDurationMs: Int, peakMemoryMB: Int)
@@ -857,13 +863,13 @@ public enum LogEvent: Sendable {
         // Transcription
         case .transcriptionStarted(let modelName):
             return "model=\(modelName)"
-        case .transcriptionCompleted(let durationMs, let wordCount, let confidence, let language, let promptId, let detected):
-            // Absent, not zero, when the engine has no score (#554), and absent when it has
-            // no language to report (#558).
+        case .transcriptionCompleted(let durationMs, let wordCount, let confidence, let language, let promptId, let detected, let retry):
+            // Absent, not zero, when the engine has no score (#554), when it has no
+            // language to report (#558), and when it runs no drift retry (#623).
             let confidenceField = confidence.map { " confidence=\(String(format: "%.3f", $0))" } ?? ""
             let languageFields = [language.map { "language=\($0)" }, promptId.map { "promptId=\($0)" }, detected.map { "detected=\($0)" }]
                 .compactMap { $0 }.map { " \($0)" }.joined()
-            return "duration=\(durationMs)ms words=\(wordCount)\(confidenceField)\(languageFields)"
+            return "duration=\(durationMs)ms words=\(wordCount)\(confidenceField)\(languageFields)\(retry.map { " \($0.logFields)" } ?? "")"
         case .transcriptionFailed(let error):
             return "error=\(error)"
         case .recordingTooShort(let durationMs):

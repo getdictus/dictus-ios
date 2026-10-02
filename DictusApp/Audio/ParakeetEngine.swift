@@ -167,7 +167,8 @@ class ParakeetEngine: SpeechModelProtocol {
     ///     a no-op either way. The "Transcription language" setting is therefore
     ///     only effective on Whisper models, which Settings documents via the
     ///     existing Parakeet caveat. Language forcing requires Qwen3-ASR (iOS 18+).
-    /// - Returns: Transcribed text, with FluidAudio's confidence score (#554).
+    /// - Returns: Transcribed text, with FluidAudio's confidence score (#554) and what the
+    ///   drift retry did (#623).
     func transcribe(audioSamples: [Float], language: String?) async throws -> SpeechTranscription {
         guard let asrManager else {
             throw TranscriptionError.notReady
@@ -204,19 +205,82 @@ class ParakeetEngine: SpeechModelProtocol {
             // script, it does not condition the decoder on a language (#552), and passing
             // nothing is what 0.12 did.
             let result = try await asrManager.transcribe(audioSamples, decoderState: &decoderState)
-            let text = result.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            let firstPassText = result.text.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            // Before the emptiness check, on purpose: a first pass that dropped every word
+            // over audible speech is a gap region, the retry's second trigger (#623).
+            let (text, retry) = await retryDriftedSpans(
+                of: result, firstPassText: firstPassText, audioSamples: audioSamples, using: asrManager)
 
             guard !text.isEmpty else {
                 throw TranscriptionError.noSpeechDetected(context: "empty Parakeet transcription result")
             }
 
             // The mean of the decoder's token probabilities, kept for the log only (#554):
-            // it is how a drift into pseudo-English shows up in a field report.
-            return SpeechTranscription(text: text, confidence: result.confidence)
+            // it is how a drift into pseudo-English shows up in a field report. The FIRST
+            // pass's score, so a line stays comparable with every one logged before #623.
+            return SpeechTranscription(text: text, confidence: result.confidence, retry: retry)
         } catch let error as TranscriptionError {
             throw error
         } catch {
             throw TranscriptionError.transcriptionFailed("Parakeet: \(error.localizedDescription)")
+        }
+    }
+}
+
+// MARK: - Drift retry (#623)
+
+@available(iOS 17.0, *)
+extension ParakeetEngine {
+
+    /// Re-decodes the spans of `result` that look drifted and splices back the re-decodes
+    /// that beat it; see `DriftRetry` in DictusCore for the whole method and its numbers.
+    ///
+    /// WHY HERE and not after the engine: the retry needs the audio, the first pass's token
+    /// timings and the same loaded model, and only this engine holds all three. Whisper and
+    /// Nemotron are untouched. The logic lives in DictusCore, where `swift test` covers it;
+    /// what stays here is the one thing DictusCore cannot do, calling FluidAudio.
+    ///
+    /// Each re-decode is the same public `transcribe` the first pass made, on a clip of at
+    /// most ~14 s, so one encoder run (a few more when FluidAudio 0.15.8's empty-decode
+    /// recovery engages on a clip that came back empty), on a FRESH decoder state for the
+    /// same reason as the first pass. They run one at a time on the one manager:
+    /// `parallelChunkConcurrency` stays 1, and so does the retry. A clean dictation triggers
+    /// nothing and costs only the detector's pass over the samples.
+    ///
+    /// A retry that fails never fails the dictation: the first pass is a complete
+    /// transcript, so the failure is logged and the first pass returned, with no retry
+    /// fields on `transcriptionCompleted`.
+    private func retryDriftedSpans(of result: ASRResult, firstPassText: String, audioSamples: [Float],
+                                   using asrManager: AsrManager) async -> (text: String, stats: DriftRetryStats?) {
+        let start = Date()
+        do {
+            let outcome = try await DriftRetry.run(
+                samples: audioSamples, firstPassText: firstPassText,
+                firstPassTimings: Self.driftRetryTimings(result)
+            ) { clip in
+                var clipState = try TdtDecoderState()
+                return Self.driftRetryTimings(try await asrManager.transcribe(clip, decoderState: &clipState))
+            }
+            let durationMs = Int(Date().timeIntervalSince(start) * 1000)
+            return (outcome.text, DriftRetryStats(spans: outcome.spans, wins: outcome.wins, durationMs: durationMs))
+        } catch {
+            // Counters and the error only: the log never carries transcript text.
+            PersistentLog.log(.diagnosticProbe(
+                component: "ParakeetEngine",
+                instanceID: "driftRetry",
+                action: "failedKeptFirstPass",
+                details: "error=\(DictationFailureMessage.diagnostic(for: error)) elapsedMs=\(Int(Date().timeIntervalSince(start) * 1000))"
+            ))
+            return (firstPassText, nil)
+        }
+    }
+
+    /// FluidAudio's token timings, copied field for field into DictusCore's mirror type.
+    private static func driftRetryTimings(_ result: ASRResult) -> [DriftRetryTokenTiming] {
+        (result.tokenTimings ?? []).map {
+            DriftRetryTokenTiming(tokenId: $0.tokenId, token: $0.token, startTime: $0.startTime,
+                                  endTime: $0.endTime, confidence: $0.confidence)
         }
     }
 }
