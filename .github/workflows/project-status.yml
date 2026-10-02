@@ -1,0 +1,68 @@
+name: Project board
+
+# Keeps the "Dictus 2.0.0" status board (getdictus/projects/2) in step with the
+# work, so nobody has to remember to drag a card:
+#   - a push to a branch named `<type>/<issue>-...` moves that issue to In progress
+#   - a PR that is opened or marked ready moves every issue it names to In review
+# Done is GitHub's own built-in workflow (issue closed, PR merged). The order of
+# the work is docs/ROADMAP.md; this board only shows where each issue stands.
+#
+# Needs the PROJECT_TOKEN secret: the default GITHUB_TOKEN cannot write to an
+# organisation project. Without it (a fork PR, or the secret expired) the job
+# logs a warning and passes, because a stale board must never block a PR.
+
+on:
+  push:
+    branches: ['feature/**', 'fix/**', 'research/**', 'chore/**']
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Move cards
+        env:
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          # Untrusted text goes through env, never interpolated into the script.
+          EVENT: ${{ github.event_name }}
+          BRANCH: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_DRAFT: ${{ github.event.pull_request.draft }}
+        run: |
+          if [[ -z "$GH_TOKEN" ]]; then
+            echo "::warning::PROJECT_TOKEN is not available; the project board was not updated"
+            exit 0
+          fi
+
+          # The issue number in the branch name: feature/216-pro-hub -> 216.
+          issues=$(grep -oE '^[a-z]+/[0-9]+' <<<"$BRANCH" | grep -oE '[0-9]+$' || true)
+
+          if [[ "$EVENT" == pull_request ]]; then
+            # Plus every issue the description names: refs #216, closes #612.
+            issues+=" $(grep -ioE '\b(refs|closes|fixes|resolves)[[:space:]]+#[0-9]+' <<<"$PR_BODY" \
+              | grep -oE '[0-9]+' || true)"
+          fi
+
+          issues=$(tr ' ' '\n' <<<"$issues" | grep -E '^[0-9]+$' | sort -un | tr '\n' ' ' || true)
+          if [[ -z "${issues// }" ]]; then
+            echo "No issue number in the branch name or the PR description; nothing to move"
+            exit 0
+          fi
+
+          if [[ "$EVENT" == pull_request && "$PR_DRAFT" != true ]]; then
+            target=in-review
+          else
+            target=in-progress
+          fi
+
+          # shellcheck disable=SC2086 # word splitting over issue numbers is intended
+          bash .github/scripts/project-status.sh "$target" $issues

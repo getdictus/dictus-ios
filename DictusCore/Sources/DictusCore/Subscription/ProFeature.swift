@@ -12,6 +12,9 @@ public enum ProFeature: String, CaseIterable {
     case smartMode
     case history
     case vocabulary
+    /// Voice messages and audio files shared to Dictus from the share sheet (#620).
+    /// Last, so the three cards every earlier screen was laid out for keep their order.
+    case voiceNotes
 
     /// Human-readable name for Settings rows and paywall cards.
     public var displayName: String {
@@ -19,6 +22,7 @@ public enum ProFeature: String, CaseIterable {
         case .smartMode: return "Smart Mode"
         case .history: return "History"
         case .vocabulary: return "Vocabulary"
+        case .voiceNotes: return "Voice notes"
         }
     }
 
@@ -28,6 +32,7 @@ public enum ProFeature: String, CaseIterable {
         case .smartMode: return "sparkles"
         case .history: return "clock.arrow.trianglehead.counterclockwise.rotate.90"
         case .vocabulary: return "character.book.closed"
+        case .voiceNotes: return "waveform"
         }
     }
 
@@ -37,6 +42,7 @@ public enum ProFeature: String, CaseIterable {
         case .smartMode: return "Reformulate your text with on-device AI"
         case .history: return "Search and export all your transcriptions"
         case .vocabulary: return "Teach Dictus your technical terms"
+        case .voiceNotes: return "Transcribe the voice messages you receive"
         }
     }
 
@@ -46,6 +52,7 @@ public enum ProFeature: String, CaseIterable {
         case .smartMode: return "Reformulez vos textes avec une IA embarqu\u{00E9}e"
         case .history: return "Recherchez et exportez toutes vos transcriptions"
         case .vocabulary: return "Apprenez \u{00E0} Dictus vos termes techniques"
+        case .voiceNotes: return "Transcrivez les messages vocaux que vous recevez"
         }
     }
 
@@ -55,6 +62,7 @@ public enum ProFeature: String, CaseIterable {
         case .smartMode: return SharedKeys.smartModeEnabled
         case .history: return SharedKeys.historyEnabled
         case .vocabulary: return SharedKeys.vocabularyEnabled
+        case .voiceNotes: return SharedKeys.voiceNotesEnabled
         }
     }
 
@@ -74,7 +82,10 @@ public enum ProFeature: String, CaseIterable {
     public var requiresAppleIntelligence: Bool {
         switch self {
         case .smartMode: return true
-        case .history, .vocabulary: return false
+        // Voice notes transcribe on every device. Their summary needs Apple
+        // Intelligence, and the result screen says so where it applies; the
+        // transcript, which is the feature, does not.
+        case .history, .vocabulary, .voiceNotes: return false
         }
     }
 

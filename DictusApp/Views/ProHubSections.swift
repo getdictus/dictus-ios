@@ -89,7 +89,7 @@ struct ProHubFeatureCard: View {
     private var iconColor: Color {
         switch feature {
         case .smartMode: return .dictusSmartMode
-        case .history, .vocabulary: return .dictusAccentHighlight
+        case .history, .vocabulary, .voiceNotes: return .dictusAccentHighlight
         }
     }
 }
@@ -144,6 +144,8 @@ struct ProFeatureSwitchSection: View {
             return Text("Vocabulary is off. Your terms are kept, and replace nothing until you turn it back on.")
         case .history:
             return Text("History is off: new dictations are not saved. Those already saved are kept.")
+        case .voiceNotes:
+            return Text("Voice notes are off: a voice message shared to Dictus is not transcribed. Your settings are kept.")
         }
     }
 }

@@ -267,6 +267,10 @@ struct DictusApp: App {
         // Warm up the polish engine for the current target language (#141).
         // No-op when the toggle is off or when the engine has nothing to warm.
         PolishCoordinator.shared.prewarm()
+
+        // Listen for voice notes shared to Dictus (#620), and pick up any the share
+        // extension dropped while this process was not running.
+        VoiceNoteProcessor.shared.start()
     }
 
     @Environment(\.scenePhase) private var scenePhase
@@ -293,10 +297,15 @@ struct DictusApp: App {
                     switch phase {
                     case .active:
                         PersistentLog.log(.appDidBecomeActive)
+                        // #620's cold path: a voice note shared while the app was not
+                        // running starts now, with the list on screen.
+                        VoiceNoteProcessor.shared.appBecameActive()
                     case .inactive:
                         PersistentLog.log(.appWillResignActive)
                     case .background:
                         PersistentLog.log(.appDidEnterBackground)
+                        // The voice note screen lasts one activation (#620).
+                        VoiceNoteProcessor.shared.appWentToBackground()
 
                         // A cold start parked waiting for `.active` gets its last
                         // chance here (#311), because `.active` is not coming — the
@@ -626,6 +635,11 @@ struct DictusApp: App {
         case "stop":
             // Stop recording from Dynamic Island expanded view button.
             coordinator.stopDictation()
+        case VoiceNoteURL.host:
+            // A tap on the Live Activity's voice note (#620): its result, or the list.
+            if case .some(let target) = VoiceNoteURL.target(of: url) {
+                VoiceNoteProcessor.shared.open(target)
+            }
         default:
             break
         }
