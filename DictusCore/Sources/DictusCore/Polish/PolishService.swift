@@ -64,6 +64,12 @@ public final class PolishService {
     /// the keyboard writes `PolishAvailabilityChannel` and raises its toolbar notice.
     private let onBecameUnavailable: (() -> Void)?
 
+    /// The engine every call uses instead of the availability rule, and the clock the
+    /// declined-list budget reads. Both exist for the test seam below and nothing else:
+    /// production leaves the engine nil and the clock on `Date.init`.
+    private var fixedEngine: PolishEngineProtocol?
+    private var now: () -> Date = Date.init
+
     public init(sink: PolishEventSink, onBecameUnavailable: (() -> Void)? = nil) {
         self.defaults = AppGroup.defaults
         self.sink = sink
@@ -79,10 +85,21 @@ public final class PolishService {
         #endif
     }
 
+    /// A service on a fixed engine and clock (PR #629 review). Internal, reached from
+    /// the test target through `@testable import`: the declined-list path decides on
+    /// elapsed time and on what the engine returned, and neither can be produced on
+    /// demand from Apple Intelligence.
+    convenience init(sink: PolishEventSink, engine: PolishEngineProtocol, now: @escaping () -> Date) {
+        self.init(sink: sink)
+        self.fixedEngine = engine
+        self.now = now
+    }
+
     /// Resolve the engine for this call. Re-checked on every `polish()` so a
     /// late availability flip (model finishes downloading, user toggles Apple
     /// Intelligence on) takes effect without an app relaunch.
     private var activeEngine: PolishEngineProtocol {
+        if let fixedEngine { return fixedEngine }
         if let appleFMEngine, PolishAvailability.isAppleFMAvailable {
             return appleFMEngine
         }
@@ -205,6 +222,10 @@ public final class PolishService {
         // before the delegated call — with the toggle off that call writes nothing at
         // all, which is why Pierre's 2026-09-23 export showed his short dictation as no
         // event whatsoever.
+        // When the keyboard's stage watchdog started, to within the call's own latency:
+        // it is armed right before this method is called. #573's declined list checks
+        // the remaining budget against it before any second model call.
+        let polishStart = now()
         let call = PolishCall(raw: raw, languagePolicy: languagePolicy,
                               recordingDuration: recordingDuration, engineRaw: engineRaw)
         if let armed = smartMode, !armed.runs(onInputOfLength: raw.count) {
@@ -218,26 +239,43 @@ public final class PolishService {
             )
         }
         let outcome = await polishDispatched(call, smartMode: smartMode, onEngineWillRun: onEngineWillRun)
-        // The same decline, read off the OUTPUT (#573, decision 5 amended): `Liste`
-        // always runs, and a list of fewer than two items is a title over a lone
-        // dash-line. Only a delivered transformation is checked; a refusal already has
-        // its own answer. `onEngineWillRun` is not passed on: the stage it announces
-        // was announced for the mode's call, and the Normal polish that replaces it is
-        // the same wait from the user's side.
-        if let armed = smartMode, outcome.smartModeFailure == nil, let text = outcome.text,
-           !armed.acceptsOutput(text) {
-            let items = SmartMode.listItemCount(in: text)
-            let minimum = armed.minimumListItems ?? 0
-            return await skipForShortInput(
-                armed,
-                request: call,
-                detail: PolishMetrics.SmartModeLengthSkip(mode: armed.id, characters: raw.count,
-                                                          listItems: items, minimumListItems: minimum),
-                logReason: "tooFewListItems items=\(items) minimum=\(minimum)",
-                onEngineWillRun: nil
-            )
+        guard let armed = smartMode, let failure = outcome.smartModeFailure,
+              failure.reason == Self.tooFewListItemsReason else { return outcome }
+        return await replaceDeclinedList(armed, outcome: outcome, failure: failure, call: call,
+                                         elapsed: now().timeIntervalSince(polishStart))
+    }
+
+    /// The `SmartModeFailure.reason` a path returns when #573's output check declined a
+    /// one-item list. The path has already recorded the event; `polish` only chooses
+    /// what replaces the output.
+    static let tooFewListItemsReason = "tooFewListItems"
+
+    /// What a declined `Liste` output is replaced with (#573, decision 5 amended).
+    ///
+    /// Normal polish when it can finish inside the keyboard's watchdog, the
+    /// deterministic floor the path already computed otherwise — see
+    /// `SmartModeListCheck.secondCallFits` for why the second call is gated at all
+    /// (PR #629 review, finding 1: an overrun loses the dictation). Either way the
+    /// outcome keeps the `smartModeSkippedShortInput` failure, so the keyboard shows
+    /// "Trop court pour une liste".
+    private func replaceDeclinedList(_ mode: SmartMode,
+                                     outcome: PolishOutcome,
+                                     failure: SmartModeFailure,
+                                     call: PolishCall,
+                                     elapsed: TimeInterval) async -> PolishOutcome {
+        let floor = outcome.text ?? call.raw
+        guard SmartModeListCheck.secondCallFits(elapsed: elapsed, characters: call.raw.count) else {
+            PersistentLog.log(.smartModeSkipped(
+                mode: mode.id,
+                reason: "\(Self.tooFewListItemsReason) floorInserted elapsedMs=\(Int(elapsed * 1000))",
+                disarmed: false
+            ))
+            return PolishOutcome(degradedTo: floor, failure: failure)
         }
-        return outcome
+        // `onEngineWillRun` is not passed on: the stage it announces was announced for
+        // the mode's call, and the Normal polish that replaces it is the same wait.
+        let normal = await polishDispatched(call, smartMode: nil, onEngineWillRun: nil)
+        return PolishOutcome(degradedTo: normal.text ?? floor, failure: failure)
     }
 
     /// Everything `polish` did before #573's output check, unchanged: the toggle gate,
@@ -399,11 +437,9 @@ public final class PolishService {
             // (#593). Counted here because both processes run this, and it is the
             // one place a mode's success is known as such; the counter itself
             // decides whether a trial is running.
-            // An output `polish` is about to decline for its shape (#573) did not
-            // deliver the mode, so it is not counted.
-            if let mode = job.task.smartMode, mode.acceptsOutput(returned ?? raw) {
-                ProTrialUsage.recordSmartModeUse()
-            }
+            // A one-item `Liste` output declined by #573's check never reaches this
+            // line: the path returns before it, so it is not counted as a use.
+            if job.task.smartMode != nil { ProTrialUsage.recordSmartModeUse() }
             return PolishOutcome(text: returned ?? raw)
         }
         let reason = bundle.failureReason?.slug ?? "-"
@@ -605,7 +641,8 @@ public final class PolishService {
         // polish falls back to the deterministic floor, never the literal raw (#185),
         // and a Smart Mode falls back to nothing at all (#79) — see
         // `PolishPipeline.resolvedOutput`.
-        let returned = PolishPipeline.resolvedOutput(bundle, preprocessed: preprocessed, job: job)
+        let list = checkList(bundle, preprocessed: preprocessed, job: job, engine: currentEngine, raw: raw)
+        let returned = list.returned
 
         let m = PolishMetrics(
             engine: currentEngine.identifier,
@@ -615,7 +652,7 @@ public final class PolishService {
             rawCharCount: raw.count,
             polishedCharCount: returned?.count ?? 0,
             latencyMs: totalMs,
-            outcome: bundle.outcome,
+            outcome: list.decline == nil ? bundle.outcome : .smartModeSkippedShortInput,
             sttEngine: sttEngine.rawValue,
             sttModelID: sttModelID,
             timings: PolishTimings(
@@ -625,9 +662,11 @@ public final class PolishService {
             ),
             failureReason: bundle.failureReason,
             guardrailCheck: bundle.rejectedCheck,
-            languageResolution: resolution
+            languageResolution: resolution,
+            smartModeLengthSkip: list.decline
         )
         await emit(m, raw: raw, engineRaw: request.engineRaw, polished: bundle.engineOutput)
+        if let declined = list.declinedOutcome { return declined }
 
         return finalOutcome(
             returned: returned, bundle: bundle, job: job, raw: raw,
@@ -736,9 +775,11 @@ public final class PolishService {
         clearInflight(inflightTask)
         recordAvailability(bundle, engine: currentEngine)
         let totalMs = Int(Date().timeIntervalSince(methodStart) * 1000)
-        let returned = PolishPipeline.resolvedOutput(bundle, preprocessed: preprocessed, job: job)
+        let list = checkList(bundle, preprocessed: preprocessed, job: job, engine: currentEngine, raw: raw)
+        let returned = list.returned
         let m = autoEventMetrics(
-            outcome: bundle.outcome, request: request, finalCount: returned?.count ?? 0,
+            outcome: list.decline == nil ? bundle.outcome : .smartModeSkippedShortInput,
+            request: request, finalCount: returned?.count ?? 0,
             engineID: currentEngine.identifier,
             mode: job.task.identifier, detectedLanguage: request.detectedCode,
             latencyMs: totalMs,
@@ -748,9 +789,11 @@ public final class PolishService {
                 postprocessMs: bundle.postprocessMs
             ),
             failureReason: bundle.failureReason,
-            guardrailCheck: bundle.rejectedCheck
+            guardrailCheck: bundle.rejectedCheck,
+            smartModeLengthSkip: list.decline
         )
         await emit(m, raw: raw, engineRaw: request.engineRaw, polished: bundle.engineOutput)
+        if let declined = list.declinedOutcome { return declined }
         return finalOutcome(
             returned: returned, bundle: bundle, job: job, raw: raw,
             detectedLanguage: request.languageMix.dominantCode ?? request.detectedCode
@@ -781,7 +824,8 @@ public final class PolishService {
                                   timings: PolishTimings =
                                       PolishTimings(preprocessMs: 0, engineMs: 0, postprocessMs: 0),
                                   failureReason: PolishFailureReason? = nil,
-                                  guardrailCheck: PolishGuardrail.Check? = nil
+                                  guardrailCheck: PolishGuardrail.Check? = nil,
+                                  smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip? = nil
     ) -> PolishMetrics {
         PolishMetrics(
             engine: engineID,
@@ -799,8 +843,62 @@ public final class PolishService {
             guardrailCheck: guardrailCheck,
             languageResolution: PolishMetrics.LanguageResolution(
                 policy: request.languagePolicy, mix: request.languageMix
-            )
+            ),
+            smartModeLengthSkip: smartModeLengthSkip
         )
+    }
+
+    // MARK: - #573's output check, shared by both paths
+
+    /// What a path does with its engine result once #573's list check has run.
+    private struct ListCheckResult {
+        /// The text to insert on acceptance: the output with normalised list markers.
+        let returned: String?
+        /// Set when a one-item list was declined, and recorded on the path's event in
+        /// place of `success`, so a discarded output is never counted as delivered
+        /// (PR #629 review, finding 3).
+        let decline: PolishMetrics.SmartModeLengthSkip?
+        /// What the path returns instead of `finalOutcome` on a decline: the
+        /// deterministic floor, with the failure the keyboard turns into the notice.
+        let declinedOutcome: PolishOutcome?
+    }
+
+    /// Run `SmartModeListCheck` on a successful transformation. Only a delivered
+    /// output of a mode with `minimumListItems`, from an engine that generates, is
+    /// judged; every other result passes through untouched.
+    private func checkList(_ bundle: PolishPipeline.Result,
+                           preprocessed: String,
+                           job: PolishJob,
+                           engine: PolishEngineProtocol,
+                           raw: String) -> ListCheckResult {
+        let returned = PolishPipeline.resolvedOutput(bundle, preprocessed: preprocessed, job: job)
+        guard let mode = job.task.smartMode, bundle.outcome == .success, let output = returned else {
+            return ListCheckResult(returned: returned, decline: nil, declinedOutcome: nil)
+        }
+        switch SmartModeListCheck.evaluate(output, mode: mode, engineIsModel: engine.announcesProcessingStage) {
+        case .accept(let text):
+            return ListCheckResult(returned: text, decline: nil, declinedOutcome: nil)
+        case .decline(let items, let minimum):
+            PersistentLog.log(.smartModeSkipped(
+                mode: mode.id,
+                reason: "\(Self.tooFewListItemsReason) items=\(items) minimum=\(minimum)",
+                disarmed: false
+            ))
+            let failure = SmartModeFailure(
+                modeIdentifier: mode.id,
+                modeDisplayName: mode.displayName,
+                outcome: PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue,
+                reason: Self.tooFewListItemsReason
+            )
+            let floor = PolishPipeline.deterministicFloor(preprocessed: preprocessed, job: job)
+            return ListCheckResult(
+                returned: nil,
+                decline: PolishMetrics.SmartModeLengthSkip(
+                    mode: mode.id, characters: raw.count, listItems: items, minimumListItems: minimum
+                ),
+                declinedOutcome: PolishOutcome(degradedTo: floor, failure: failure)
+            )
+        }
     }
 
     // MARK: - Serialisation (#361 decisions 10 and 15)

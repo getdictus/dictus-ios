@@ -312,10 +312,11 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     /// short input too, but after the model has run: see `minimumListItems`.
     public let minimumInputCharacters: Int?
 
-    /// Fewest `- ` lines this mode's output must carry to be inserted. Below it the
-    /// output is **declined, not refused**: the dictation is inserted with the path it
-    /// would take with no mode armed, exactly like an input under
-    /// `minimumInputCharacters`, with the same notice and the same export event. `nil`
+    /// Fewest list items this mode's output must carry to be inserted. A one-item list
+    /// is **declined, not refused**: the dictation gets the path it would take with no
+    /// mode armed, with the same notice and export event as an input under
+    /// `minimumInputCharacters`. An output with no list at all, or from an engine that
+    /// does not generate, is not judged. `SmartModeListCheck` holds the rule. `nil`
     /// — every mode but `Liste` — accepts any shape.
     ///
     /// ### Why `Liste` checks its output rather than its input (#573, decision 5 amended)
@@ -350,21 +351,6 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.isPinned = isPinned
         self.minimumInputCharacters = minimumInputCharacters
         self.minimumListItems = minimumListItems
-    }
-
-    /// Whether this mode's `output` may be inserted, on `minimumListItems`. A list line
-    /// is one opening on `- `, after any leading spaces: the shape the prompt asks for
-    /// and the only one `Liste` produces.
-    public func acceptsOutput(_ output: String) -> Bool {
-        guard let minimum = minimumListItems else { return true }
-        return Self.listItemCount(in: output) >= minimum
-    }
-
-    /// `- ` lines in `output`. Public so the decline can record how many there were.
-    public static func listItemCount(in output: String) -> Int {
-        output.split(separator: "\n").count { line in
-            line.drop { $0 == " " || $0 == "\t" }.hasPrefix("- ")
-        }
     }
 
     /// Whether this mode runs on a transcript of `characters` characters.

@@ -32,23 +32,12 @@ final class SmartModeShortInputSkipTests: XCTestCase {
     // MARK: - Liste's output check (#573, decision 5 amended)
 
     /// The device case that killed the 100-character floor: 64 characters, four items.
-    /// `Liste` now runs on any length and judges the list it produced.
+    /// `Liste` now runs on any length; `SmartModeListCheckTests` pins the output check.
     func testListRunsOnAnyLengthAndNeedsTwoItems() {
         let mode = SmartModeCatalogue.notes
         XCTAssertNil(mode.minimumInputCharacters)
         XCTAssertTrue(mode.runs(onInputOfLength: 64))
         XCTAssertEqual(mode.minimumListItems, 2)
-        XCTAssertTrue(mode.acceptsOutput("Liste de courses pour ce soir :\n- Tomates\n- Riz\n- Oignons\n- Yaourts"))
-        XCTAssertTrue(mode.acceptsOutput("Garage, facture :\n- Rappeler le garage\n- Payer la facture"))
-        XCTAssertFalse(mode.acceptsOutput("Café :\n- Racheter du café demain matin"), "a title over a lone bullet")
-        XCTAssertFalse(mode.acceptsOutput("Racheter du café demain matin"), "no list at all")
-    }
-
-    /// A list line is `- ` after any leading spaces; a hyphen inside a line is not one.
-    func testListItemsAreCountedOnLinePrefixesOnly() {
-        XCTAssertEqual(SmartMode.listItemCount(in: "Titre :\n  - un\n- deux"), 2)
-        XCTAssertEqual(SmartMode.listItemCount(in: "Vide-grenier - dimanche :\n- un"), 1)
-        XCTAssertEqual(SmartMode.listItemCount(in: ""), 0)
     }
 
     /// No other mode checks its output's shape: a one-paragraph `Résumé` or a one-line
@@ -56,7 +45,6 @@ final class SmartModeShortInputSkipTests: XCTestCase {
     func testNoOtherModeChecksItsOutputShape() {
         for mode in SmartModeCatalogue.builtIns where mode.id != SmartModeCatalogue.notesIdentifier {
             XCTAssertNil(mode.minimumListItems, mode.id)
-            XCTAssertTrue(mode.acceptsOutput("one line"), mode.id)
         }
     }
 
@@ -70,7 +58,8 @@ final class SmartModeShortInputSkipTests: XCTestCase {
         object.removeValue(forKey: "minimumListItems")
         let old = try JSONDecoder().decode(SmartMode.self, from: JSONSerialization.data(withJSONObject: object))
         XCTAssertNil(old.minimumListItems)
-        XCTAssertTrue(old.acceptsOutput("Café :\n- Racheter du café"))
+        XCTAssertEqual(SmartModeListCheck.evaluate("Café :\n- Racheter du café", mode: old, engineIsModel: true),
+                       .accept("Café :\n- Racheter du café"))
     }
 
     /// The decline is the same event as the input skip, with the numbers of its own

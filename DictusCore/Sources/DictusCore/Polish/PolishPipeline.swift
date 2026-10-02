@@ -400,6 +400,13 @@ public enum PolishPipeline {
         if let mode = job.task.smartMode, !degradesToFloor(mode, outcome: result.outcome) {
             return nil
         }
+        return deterministicFloor(preprocessed: preprocessed, job: job)
+    }
+
+    /// The text inserted when no model output can be: the pre-passed transcript, with
+    /// the language's typography decoded on the per-language path. Named so #573's
+    /// declined list can insert the same floor when no second call fits the budget.
+    public static func deterministicFloor(preprocessed: String, job: PolishJob) -> String {
         guard let typography = job.typographyLanguage else { return preprocessed }
         return PolishPostpass.decodeFromEngine(preprocessed, language: typography)
     }
