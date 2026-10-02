@@ -1,0 +1,928 @@
+[
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S1-fr-test-ok",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1889,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- L'enregistrement a marché du premier coup, la transcription est sortie en à peu près deux secondes et la qualité est bonne\n- La batterie a pris 5 % sur dix minutes, c'est plus que ce que je pensais\n- Le micro capte un peu trop le bruit de la rue",
+    "outputChars" : 247,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 318,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Bon alors petit retour sur le test de ce matin."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S1-fr-test-ok",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1830,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Enregistrement réussi du premier coup, transcription sortie en à peu près deux secondes, qualité bonne\n- Batterie consommée 5 % sur dix minutes, plus que prévu\n- Micro capte trop le bruit de la rue",
+    "outputChars" : 199,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 318,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Bon alors petit retour sur le test de ce matin.",
+      "c'est plus que ce que je pensais."
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S1-fr-test-ok",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1899,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- L'enregistrement a marché du premier coup, la transcription est sortie en à peu près deux secondes et la qualité est bonne\n- La batterie a pris 5 % sur dix minutes, c'est plus que ce que je pensais\n- Le micro capte un peu trop le bruit de la rue",
+    "outputChars" : 247,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 318,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Bon alors petit retour sur le test de ce matin."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S2-fr-voyage",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 6,
+    "ms" : 2177,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Le voyage s'est bien passé dans l'ensemble\n- Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet\n- L'hôtel est à deux rues de la gare\n- La chambre est petite mais propre\n- Le petit-déjeuner est compris\n- Il a plu toute la journée de samedi, du coup on a surtout fait des musées",
+    "outputChars" : 313,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 316,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S2-fr-voyage",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 6,
+    "ms" : 2153,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Le voyage s'est bien passé dans l'ensemble\n- Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet\n- L'hôtel est à deux rues de la gare\n- La chambre est petite mais propre\n- Le petit-déjeuner est compris\n- Il a plu toute la journée de samedi, du coup on a surtout fait des musées",
+    "outputChars" : 313,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 316,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S2-fr-voyage",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 2097,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Le voyage s'est bien passé dans l'ensemble\n- Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet\n- L'hôtel est à deux rues de la gare, la chambre est petite mais propre, et le petit-déjeuner est compris\n- Il a plu toute la journée de samedi, du coup on a surtout fait des musées",
+    "outputChars" : 314,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 316,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S3-fr-compte-rendu",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1782,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Budget de l'année prochaine validé à 40 000 euros\n- Date de lancement fixée au 15 mars\n- Le client préfère la première version de la maquette\n- Équipe support passée de trois à cinq personnes depuis septembre",
+    "outputChars" : 210,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 305,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Donc pour résumer la réunion de ce matin,",
+      "Le client trouve la nouvelle maquette trop chargée,"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S3-fr-compte-rendu",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1780,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Budget de l'année prochaine validé à 40 000 euros\n- Date de lancement fixée au 15 mars\n- Le client préfère la première version de la maquette\n- Équipe support passée de trois à cinq personnes depuis septembre",
+    "outputChars" : 210,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 305,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Donc pour résumer la réunion de ce matin,",
+      "Le client trouve la nouvelle maquette trop chargée,"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S3-fr-compte-rendu",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1767,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Budget de l'année prochaine validé à 40 000 euros\n- Date de lancement fixée au 15 mars\n- Le client préfère la première version de la maquette\n- Équipe support passée de trois à cinq personnes depuis septembre",
+    "outputChars" : 210,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 305,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Donc pour résumer la réunion de ce matin,",
+      "Le client trouve la nouvelle maquette trop chargée,"
+    ],
+    "unrecalledWholeRecall" : [
+      0,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S4-fr-avis",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1607,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- L'entrée était bonne mais le plat est arrivé tiède et un peu trop salé\n- Le service était sympa quand même\n- 45 euros par personne, je trouve que c'est cher pour ce que c'est",
+    "outputChars" : 176,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 265,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Franchement le restaurant d'hier soir c'était pas terrible.",
+      "ça c'est vrai."
+    ],
+    "unrecalledWholeRecall" : [
+      0.16666666666666666,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S4-fr-avis",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1579,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- L'entrée était bonne mais le plat est arrivé tiède et un peu trop salé\n- Le service était sympa quand même\n- 45 euros par personne, je trouve que c'est cher pour ce que c'est",
+    "outputChars" : 176,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 265,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Franchement le restaurant d'hier soir c'était pas terrible.",
+      "ça c'est vrai."
+    ],
+    "unrecalledWholeRecall" : [
+      0.16666666666666666,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S4-fr-avis",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1587,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- L'entrée était bonne mais le plat est arrivé tiède et un peu trop salé\n- Le service était sympa quand même\n- 45 euros par personne, je trouve que c'est cher pour ce que c'est",
+    "outputChars" : 176,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 265,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Franchement le restaurant d'hier soir c'était pas terrible.",
+      "ça c'est vrai."
+    ],
+    "unrecalledWholeRecall" : [
+      0.16666666666666666,
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S5-fr-constat-appli",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1678,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Le clavier prend deux secondes à apparaître quand j'ouvre Messages\n- La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase\n- Le mode sombre n'est plus appliqué sur l'écran des réglages",
+    "outputChars" : 216,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 272,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors ce que j'observe sur l'appli depuis la mise à jour."
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S5-fr-constat-appli",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1710,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Le clavier apparaît après deux secondes quand j'ouvre Messages\n- La dictée fonctionne bien en français mais coupe la dernière phrase en anglais\n- Le mode sombre n'est plus appliqué sur l'écran des réglages",
+    "outputChars" : 207,
+    "outputLanguage" : "fr",
+    "personLost" : 0,
+    "rawChars" : 272,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors ce que j'observe sur l'appli depuis la mise à jour."
+    ],
+    "unrecalledWholeRecall" : [
+      0.3333333333333333
+    ]
+  },
+  {
+    "alignedPairs" : 3,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 3,
+    "dispersed" : 0,
+    "expectedLanguage" : "fr",
+    "fixture" : "S5-fr-constat-appli",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1753,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Clavier apparaît après deux secondes lors de l'ouverture de Messages\n- Dictée fonctionne bien en français mais coupe la dernière phrase en anglais\n- Mode sombre non appliqué sur l'écran des réglages",
+    "outputChars" : 200,
+    "outputLanguage" : "fr",
+    "personLost" : 1,
+    "rawChars" : 272,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Alors ce que j'observe sur l'appli depuis la mise à jour."
+    ],
+    "unrecalledWholeRecall" : [
+      0.16666666666666666
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "S6-en-weekend",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 6,
+    "ms" : 1722,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Weekend quiet\n- Great weather on Saturday: spent most of the day at the lake\n- Rainy afternoon on Sunday\n- New bike works fine\n- Brakes much better than on the old one\n- Battery lasted the whole ride",
+    "outputChars" : 201,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 255,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "S6-en-weekend",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 6,
+    "ms" : 1711,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Weekend quiet\n- Great weather on Saturday: spent most of the day at the lake\n- Rainy afternoon on Sunday\n- New bike works fine\n- Brakes much better than on the old one\n- Battery lasted the whole ride",
+    "outputChars" : 201,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 255,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 7,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 21,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "S6-en-weekend",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 7,
+    "labels" : [
+
+    ],
+    "listLines" : 6,
+    "ms" : 1766,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Weekend quiet\n- Great weather on Saturday: spent most of the day at the lake\n- Rainy afternoon on Sunday\n- New bike works fine\n- Brakes much better than on the old one\n- Battery lasted the whole ride",
+    "outputChars" : 201,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 255,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "S7-en-standup",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1638,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Migration finished last night without errors\n- Dashboard about thirty percent faster since the cache change\n- Still see a few timeouts on the export endpoint, maybe two or three a day\n- Staging server back on the old certificate",
+    "outputChars" : 230,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 278,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Quick update from my side."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "S7-en-standup",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1660,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Migration finished last night without errors\n- Dashboard about thirty percent faster since the cache change\n- Still see a few timeouts on the export endpoint, maybe two or three a day\n- Staging server back on the old certificate",
+    "outputChars" : 230,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 278,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Quick update from my side."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 5,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 10,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "S7-en-standup",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 0,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 6,
+    "labels" : [
+
+    ],
+    "listLines" : 4,
+    "ms" : 1591,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- Migration finished last night without errors\n- Dashboard about thirty percent faster since cache change\n- Still see a few timeouts on export endpoint, maybe two or three a day\n- Staging server back on old certificate",
+    "outputChars" : 218,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 278,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+      "Quick update from my side."
+    ],
+    "unrecalledWholeRecall" : [
+      0
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "S8-en-opinion",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1524,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- The second design is the stronger one: colours are calmer and text is easier to read\n- The first design looks more modern but feels crowded on a small screen\n- The icons in the second design are clearer too",
+    "outputChars" : 208,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 231,
+    "run" : 1,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "S8-en-opinion",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1520,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- The second design is the stronger one: colours are calmer, text is easier to read\n- The first design looks more modern but feels crowded on a small screen\n- The icons in the second design are clearer too",
+    "outputChars" : 205,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 231,
+    "run" : 2,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  },
+  {
+    "alignedPairs" : 4,
+    "arm" : "shipping",
+    "closesOnSpeakerState" : false,
+    "comparablePairs" : 6,
+    "dispersed" : 0,
+    "expectedLanguage" : "en",
+    "fixture" : "S8-en-opinion",
+    "foreignSentences" : [
+
+    ],
+    "hasEngineOutput" : true,
+    "hedgeLost" : 1,
+    "incompletenessFabricated" : false,
+    "inversions" : 0,
+    "judgeablePropositions" : 4,
+    "labels" : [
+
+    ],
+    "listLines" : 3,
+    "ms" : 1524,
+    "negationDropped" : 0,
+    "outcome" : "success",
+    "output" : "- The second design is the stronger one: colours are calmer and text is easier to read\n- The first design looks more modern but feels crowded on a small screen\n- The icons in the second design are clearer too",
+    "outputChars" : 208,
+    "outputLanguage" : "en",
+    "personLost" : 1,
+    "rawChars" : 231,
+    "run" : 3,
+    "speakerState" : "absent",
+    "stanceHardened" : 0,
+    "unrecalled" : [
+
+    ],
+    "unrecalledWholeRecall" : [
+
+    ]
+  }
+]

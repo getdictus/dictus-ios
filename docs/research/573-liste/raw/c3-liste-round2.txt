@@ -1,0 +1,182 @@
+
+
+████ ARM shipping — 3 run(s) × 10 fixture(s), floor 0.35
+
+━━ [R1-fr-annonce-recap-matin] 166 chars, lang=fr
+  #1 166→114 5615ms success recall=3/3 PERSON-LOST=1 inversions=0/3 LIST=3
+     PERSONLOST: Je te fais un petit récap de ce qu'on a fait ce matin.
+       → Récap du matin :
+     engineOut: Récap du matin :⏎- Fini la maquette de la page d'accueil⏎- Corrigé le bug de connexion⏎- Envoyé le devis au client
+  #2 166→129 1603ms success recall=3/3 PERSON-LOST=1 inversions=0/3 LIST=3
+     PERSONLOST: Je te fais un petit récap de ce qu'on a fait ce matin.
+       → Récap du matin :
+     engineOut: Récap du matin :⏎- On a fini la maquette de la page d'accueil⏎- On a corrigé le bug de connexion⏎- On a envoyé le devis au client
+  #3 166→114 1687ms success recall=3/3 PERSON-LOST=1 inversions=0/3 LIST=3
+     PERSONLOST: Je te fais un petit récap de ce qu'on a fait ce matin.
+       → Récap du matin :
+     engineOut: Récap du matin :⏎- Fini la maquette de la page d'accueil⏎- Corrigé le bug de connexion⏎- Envoyé le devis au client
+
+━━ [R2-fr-annonce-liste-journee] 167 chars, lang=fr
+  #1 167→143 1632ms success recall=3/3 PERSON-LOST=2 inversions=0/3 LIST=3
+     PERSONLOST: J'ai réglé au moins trois ou quatre tickets sur le site,
+       → - Régler au moins trois ou quatre tickets sur le site
+     PERSONLOST: j'ai relu le contrat du fournisseur et j'ai rangé le garage.
+       → - Relu le contrat du fournisseur
+     engineOut: Liste de ce qu'on a fait aujourd'hui :⏎- Régler au moins trois ou quatre tickets sur le site⏎- Relu le contrat du fournisseur⏎- Rangé le garage
+  #2 167→149 1655ms success recall=3/3 dispersed=1 PERSON-LOST=1 inversions=0/1 LIST=3
+     PERSONLOST: J'ai réglé au moins trois ou quatre tickets sur le site,
+       → - Remplacer au moins trois ou quatre tickets sur le site
+     engineOut: Liste de ce qu'on a fait aujourd'hui :⏎- Remplacer au moins trois ou quatre tickets sur le site⏎- Relire le contrat du fournisseur⏎- Ranger le garage
+  #3 167→143 1586ms success recall=3/3 PERSON-LOST=2 inversions=0/3 LIST=3
+     PERSONLOST: J'ai réglé au moins trois ou quatre tickets sur le site,
+       → - Régler au moins trois ou quatre tickets sur le site
+     PERSONLOST: j'ai relu le contrat du fournisseur et j'ai rangé le garage.
+       → - Relu le contrat du fournisseur
+     engineOut: Liste de ce qu'on a fait aujourd'hui :⏎- Régler au moins trois ou quatre tickets sur le site⏎- Relu le contrat du fournisseur⏎- Rangé le garage
+
+━━ [R3-en-announcement-uh] 154 chars, lang=en
+  #1 154→103 1391ms success recall=2/3 UNRECALLED=1 PERSON-LOST=2 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.17, best 0.17): Okay so uh now we are going through what we did this morning.
+     PERSONLOST: Uh we fixed the login bug,
+       → - Fixed the login bug
+     PERSONLOST: uh we updated the docs and we tested the new build on two phones.
+       → - Tested the new build on two phones
+     engineOut: What we did this morning:⏎- Fixed the login bug⏎- Updated the docs⏎- Tested the new build on two phones
+  #2 154→103 1373ms success recall=2/3 UNRECALLED=1 PERSON-LOST=2 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.17, best 0.17): Okay so uh now we are going through what we did this morning.
+     PERSONLOST: Uh we fixed the login bug,
+       → - Fixed the login bug
+     PERSONLOST: uh we updated the docs and we tested the new build on two phones.
+       → - Tested the new build on two phones
+     engineOut: What we did this morning:⏎- Fixed the login bug⏎- Updated the docs⏎- Tested the new build on two phones
+  #3 154→103 1356ms success recall=2/3 UNRECALLED=1 PERSON-LOST=2 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.17, best 0.17): Okay so uh now we are going through what we did this morning.
+     PERSONLOST: Uh we fixed the login bug,
+       → - Fixed the login bug
+     PERSONLOST: uh we updated the docs and we tested the new build on two phones.
+       → - Tested the new build on two phones
+     engineOut: What we did this morning:⏎- Fixed the login bug⏎- Updated the docs⏎- Tested the new build on two phones
+
+━━ [R4-fr-point-journee-passe] 145 chars, lang=fr
+  #1 145→129 1602ms success recall=4/4 inversions=0/6 LIST=3
+     engineOut: Point de la journée :⏎- Promener le chien le matin⏎- Emmener la voiture au contrôle technique⏎- Faire les comptes du mois le soir
+  #2 145→129 1586ms success recall=4/4 inversions=0/6 LIST=3
+     engineOut: Point de la journée :⏎- Promener le chien le matin⏎- Emmener la voiture au contrôle technique⏎- Faire les comptes du mois le soir
+  #3 145→129 1560ms success recall=4/4 inversions=0/6 LIST=3
+     engineOut: Point de la journée :⏎- Promener le chien le matin⏎- Emmener la voiture au contrôle technique⏎- Faire les comptes du mois le soir
+
+━━ [R5-fr-annonce-recap-soir] 131 chars, lang=fr
+  #1 131→82 1543ms success recall=3/3 PERSON-LOST=1 inversions=0/3 LIST=3
+     PERSONLOST: Je te fais un petit récap de ce qu'on a fait ce soir,
+       → Récap ce soir :
+     engineOut: Récap ce soir :⏎- Regarder le match⏎- Finir les restes⏎- Réparer la lampe du salon
+  #2 131→85 1487ms success recall=3/3 PERSON-LOST=1 inversions=0/3 LIST=3
+     PERSONLOST: Je te fais un petit récap de ce qu'on a fait ce soir,
+       → Récap de ce soir :
+     engineOut: Récap de ce soir :⏎- Regarder le match⏎- Finir les restes⏎- Réparer la lampe du salon
+  #3 131→85 1488ms success recall=3/3 PERSON-LOST=1 inversions=0/3 LIST=3
+     PERSONLOST: Je te fais un petit récap de ce qu'on a fait ce soir,
+       → Récap de ce soir :
+     engineOut: Récap de ce soir :⏎- Regarder le match⏎- Finir les restes⏎- Réparer la lampe du salon
+
+━━ [R6-fr-courses-court] 63 chars, lang=fr
+  #1 63→74 1296ms success recall=2/2 inversions=0/1 LIST=1
+     engineOut: Liste de courses pour ce soir :⏎- Acheter tomates, riz, oignons et yaourts
+  #2 63→74 1315ms success recall=2/2 inversions=0/1 LIST=1
+     engineOut: Liste de courses pour ce soir :⏎- Acheter tomates, riz, oignons et yaourts
+  #3 63→74 1377ms success recall=2/2 inversions=0/1 LIST=1
+     engineOut: Liste de courses pour ce soir :⏎- Acheter tomates, riz, oignons et yaourts
+
+━━ [R7-en-short-list] 50 chars, lang=en
+  #1 50→59 1236ms success recall=2/2 inversions=0/1 LIST=1
+     engineOut: Shopping for tonight:⏎- Eggs, bread, apples and milk to buy
+  #2 50→57 1216ms success recall=2/2 inversions=0/1 LIST=1
+     engineOut: Tonight's shopping:⏎- Eggs, bread, apples and milk to buy
+  #3 50→59 1186ms success recall=2/2 inversions=0/1 LIST=1
+     engineOut: Shopping for tonight:⏎- Eggs, bread, apples and milk to buy
+
+━━ [R8-fr-sans-annonce] 110 chars, lang=fr
+  #1 110→93 1526ms success recall=1/2 UNRECALLED=1 dispersed=1 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.33, best 0.33): Il faut que je rappelle le garage,
+     engineOut: Garage :⏎- Rappeler le garage⏎- Payer la facture d'électricité⏎- Réserver le train pour lundi
+  #2 110→93 1545ms success recall=1/2 UNRECALLED=1 dispersed=1 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.33, best 0.33): Il faut que je rappelle le garage,
+     engineOut: Garage :⏎- Rappeler le garage⏎- Payer la facture d'électricité⏎- Réserver le train pour lundi
+  #3 110→93 1501ms success recall=1/2 UNRECALLED=1 dispersed=1 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.33, best 0.33): Il faut que je rappelle le garage,
+     engineOut: Garage :⏎- Rappeler le garage⏎- Payer la facture d'électricité⏎- Réserver le train pour lundi
+
+━━ [R9-en-duplicate] 127 chars, lang=en
+  #1 127→102 1509ms success recall=3/3 PERSON-LOST=1 inversions=0/3 LIST=3
+     PERSONLOST: So I need to call the bank,
+       → - Call the bank about the card
+     engineOut: Card and dentist:⏎- Call the bank about the card⏎- Email the landlord⏎- Book the dentist for next week
+  #2 127→109 1368ms success recall=3/3 PERSON-LOST=1 inversions=0/3 LIST=3
+     PERSONLOST: So I need to call the bank,
+       → - Call the bank about the card
+     engineOut: Bank, landlord, dentist:⏎- Call the bank about the card⏎- Email the landlord⏎- Book the dentist for next week
+  #3 127→99 1401ms success recall=3/3 PERSON-LOST=1 inversions=0/3 LIST=3
+     PERSONLOST: So I need to call the bank,
+       → Call the bank:
+     engineOut: Call the bank:⏎- Call the bank about the card⏎- Email the landlord⏎- Book the dentist for next week
+
+━━ [R10-fr-une-idee] 38 chars, lang=fr
+  #1 38→71 1169ms success recall=1/1 inversions=0/0 LIST=1
+     engineOut: Pense à racheter du café demain matin :⏎- Racheter du café demain matin
+  #2 38→63 1123ms success recall=1/1 inversions=0/0 LIST=1
+     engineOut: Racheter du café demain matin :⏎- Racheter du café demain matin
+  #3 38→71 1158ms success recall=1/1 inversions=0/0 LIST=1
+     engineOut: Pense à racheter du café demain matin :⏎- Racheter du café demain matin
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              30       6/30        15/30       0/30        0/30        0/30        0/30        12/30       0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             4             0/30          0/30
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              fr        21       0            0              0         21        0
+shipping              en        9        0            0              0         9         0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   R1-fr-annonce-recap-matin P  P  P
+   R2-fr-annonce-liste-journee P  P  P
+   R3-en-announcement-uh   U1P  U1P  U1P
+   R4-fr-point-journee-passe ·  ·  ·
+   R5-fr-annonce-recap-soir P  P  P
+   R6-fr-courses-court     ·  ·  ·
+   R7-en-short-list        ·  ·  ·
+   R8-fr-sans-annonce      U1  U1  U1
+   R9-en-duplicate         P  P  P
+   R10-fr-une-idee         ·  ·  ·
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 30 runs to ../docs/research/573-liste/captures/c3-liste-round2.json

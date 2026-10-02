@@ -250,7 +250,11 @@ private struct EntryDetailView: View {
         }
         // Commas rather than a dash: this repo keeps em dashes out of copy, and this
         // string is read as often as any sentence on the screen.
-        return "(mode skipped: dictation too short, \(skip.characters) chars, floor \(skip.floor))"
+        if let items = skip.listItems, let minimum = skip.minimumListItems {
+            // `Liste`'s output check (#573): the model ran, and its list was too short.
+            return "(mode declined: \(items) list item(s), minimum \(minimum), \(skip.characters) chars)"
+        }
+        return "(mode skipped: dictation too short, \(skip.characters) chars, floor \(skip.floor ?? 0))"
     }
 
     private var metaRow: some View {

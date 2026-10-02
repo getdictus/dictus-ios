@@ -627,8 +627,13 @@ func promptResolution(_ fx: Fixture, mode: SmartMode?) -> PromptResolution {
     if let mode {
         let preprocessed = fx.language.map { VerbalPunctuationPrepass.apply(fx.raw, language: $0) }
             ?? PolishPipeline.autoPreprocess(fx.raw, detectedCode: detectedCode)
+        // Since #587 a mode carries one prompt per transcript language, which
+        // `PolishPipeline.transform` resolves before the engine call. Printing the
+        // unresolved record showed the fallback for every fixture — found in #573,
+        // where a per-language dump came back as sixteen copies of the French prompt.
+        // Resolved here off the language `runOnce` passes, so this prints what is sent.
         return PromptResolution(
-            task: .smart(mode),
+            task: .smart(mode.resolvingExamples(forTranscriptLanguage: transcriptLanguage(of: fx))),
             preprocessed: preprocessed,
             language: fx.language ?? .english,
             detected: detectedCode
