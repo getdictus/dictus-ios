@@ -3922,6 +3922,17 @@
         }
       }
     },
+    "Voice notes are off: a voice message shared to Dictus is not transcribed. Your settings are kept." : {
+      "comment" : "Footer under the Voice notes switch at the top of the voice note settings, shown while it is off (#216).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les messages vocaux sont désactivés : un message vocal partagé vers Dictus n'est pas transcrit. Vos réglages sont conservés."
+          }
+        }
+      }
+    },
     "Voice notes not transcribed · Tap to see why" : {
       "comment" : "Expanded Dynamic Island and Lock Screen: several voice notes failed (#620).",
       "extractionState" : "manual",
