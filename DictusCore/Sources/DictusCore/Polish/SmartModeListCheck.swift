@@ -86,8 +86,15 @@ public enum SmartModeListCheck {
     /// loses the dictation. So the second call runs only when its worst measured cost
     /// fits in what is left; otherwise the caller inserts the deterministic floor, the
     /// punctuated transcript. Less polish beats lost text.
+    ///
+    /// **The second call is assumed at least as slow as the first** (re-review of PR
+    /// #629). A fixed rate alone is wrong on a throttled device: a 100-character Liste
+    /// call that took 9 s gave 9 + 3.1 + 2 = 14.1 s under the 15 s ceiling, the Normal
+    /// call then took 9 s too, and the dictation was lost. `elapsed` is the first call's
+    /// duration plus the deterministic passes around it, so it bounds that call from
+    /// above, which is the safe side.
     public static func secondCallFits(elapsed: TimeInterval, characters: Int) -> Bool {
-        let expected = Double(max(0, characters)) * expectedSecondsPerCharacter
+        let expected = max(Double(max(0, characters)) * expectedSecondsPerCharacter, elapsed)
         let ceiling = PolishTimeBudget.generationCeiling(forCharacters: characters)
         return elapsed + expected + safetyMargin <= ceiling
     }

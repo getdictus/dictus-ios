@@ -77,6 +77,14 @@ final class SmartModeListCheckTests: XCTestCase {
         XCTAssertFalse(SmartModeListCheck.secondCallFits(elapsed: 13, characters: 40))
     }
 
+    /// The re-review's counter-example: a short dictation on a throttled device. The
+    /// first call took 9 s, so the second is assumed to take 9 s too: 9 + 9 + 2 > 15.
+    func testAShortInputAfterASlowFirstCallLeavesNoRoom() {
+        XCTAssertFalse(SmartModeListCheck.secondCallFits(elapsed: 9, characters: 100))
+        XCTAssertFalse(SmartModeListCheck.secondCallFits(elapsed: 6.6, characters: 100))
+        XCTAssertTrue(SmartModeListCheck.secondCallFits(elapsed: 6, characters: 100))
+    }
+
     // MARK: - The service, end to end on a fake engine and clock (findings 1 and 3)
 
     private let policy = TranscriptionLanguagePolicy(
@@ -139,6 +147,24 @@ final class SmartModeListCheckTests: XCTestCase {
         XCTAssertEqual(outcome.smartModeFailure?.outcome, PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue)
         XCTAssertNotNil(outcome.text, "the floor is inserted: less polish beats lost text")
         XCTAssertTrue(outcome.text?.contains("budget est validé") == true)
+    }
+
+    /// The same counter-example end to end: 100 characters, a 9 s Liste call. No second
+    /// call, the punctuated transcript goes in, the notice is kept.
+    @MainActor
+    func testAShortInputWithASlowFirstCallInsertsTheFloorWithoutASecondCall() async {
+        let clock = FakeClock()
+        let engine = ScriptedEngine(clock: clock, secondsPerCall: 9,
+                                    listAnswer: "Café :\n- Racheter du café demain matin",
+                                    normalAnswer: "unused")
+        let service = PolishService(sink: RecordingSink(), engine: engine, now: clock.now)
+        let raw = "pense à racheter du café demain matin parce qu'il n'y en a plus du tout à la maison ce soir"
+
+        let outcome = await service.polish(raw: raw, languagePolicy: policy, smartMode: liste, recordingDuration: 6)
+
+        XCTAssertEqual(engine.calls, ["smart.notes"], "a 9 s second call would pass the 15 s watchdog")
+        XCTAssertEqual(outcome.smartModeFailure?.outcome, PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue)
+        XCTAssertTrue(outcome.text?.contains("racheter du café") == true, "the punctuated transcript is inserted")
     }
 
     /// Apple Intelligence unavailable: the passthrough returns the dictation unchanged.
