@@ -55,6 +55,11 @@ final class VoiceNoteProcessor: ObservableObject {
         // Anything shared before this launch, and anything a dead process left
         // mid-transcription, is picked up now.
         store.ingestInbox()
+        // A voice note History drops at its cap leaves the keyboard with it (#639,
+        // decision C): set before anything here can append.
+        TranscriptionHistoryStore.shared.onEvicted = { ids in
+            VoiceNoteProcessor.shared.withdrawKeyboardDeliveries(ids, reason: "evictedFromHistory")
+        }
         // And whatever the keyboard did with a transcript while this process was
         // not running (#637).
         reconcileKeyboardDeliveries(reason: "launch")
@@ -276,9 +281,13 @@ final class VoiceNoteProcessor: ObservableObject {
         let record = TranscriptionRecord(id: note.id, text: transcript, policy: policy, duration: duration,
                                          createdAt: note.receivedAt, source: .sharedFile)
         let saved = TranscriptionHistoryStore.shared.append(record) != nil
+        var evicted: [UUID] = []
         store.mutate {
-            $0.complete(note.id, transcript: transcript, language: record.language, savedToHistory: saved)
+            evicted = $0.complete(note.id, transcript: transcript, language: record.language, savedToHistory: saved)
         }
+        // History off: the queue's cap may have pushed an older transcript out, and the
+        // keyboard must not keep offering it (#639, decision C).
+        withdrawKeyboardDeliveries(evicted, reason: "evictedFromQueue")
         log("finished", "id=\(note.id.uuidString.prefix(8)) chars=\(transcript.count) savedToHistory=\(saved) elapsedMs=\(Int(Date().timeIntervalSince(started) * 1000))")
         publishToKeyboard(note: note, transcript: transcript, language: record.language,
                           durationSeconds: Int(duration.rounded()))
@@ -315,8 +324,9 @@ final class VoiceNoteProcessor: ObservableObject {
         keyboardLog("published", "id=\(note.id.uuidString.prefix(8)) chars=\(transcript.count)")
     }
 
-    /// Take notes out of the keyboard. Since #639 only for a delete in DictusApp — a
-    /// History row, or the whole History — the one way besides time a note leaves the
+    /// Take notes out of the keyboard. Since #639 for a delete in DictusApp — a History
+    /// row, or the whole History — and for a note evicted by History's or the queue's
+    /// cap (decision C): a note neither store holds any more must not live on in the
     /// keyboard. Reading or dismissing it here does not.
     func withdrawKeyboardDeliveries(_ ids: [UUID], reason: String) {
         guard let deliveries = VoiceNoteKeyboardDeliveryStore.appGroup else { return }
@@ -329,9 +339,9 @@ final class VoiceNoteProcessor: ObservableObject {
 
     /// Turn the keyboard's receipts into "read", and prune what outlived its window.
     ///
-    /// The keyboard never writes History or the queue (#637 decision 6): when the user
-    /// inserts a note there, it drops a receipt, and this is where the receipt
-    /// becomes "read" — the same `markOpened` a card in the app performs, plus the
+    /// The keyboard never writes History or the queue: when the reader shows a note,
+    /// or the user inserts it, the keyboard drops a receipt (#639 decision A), and
+    /// this is where the receipt becomes "read" — the same `markOpened` a card in the app performs, plus the
     /// island's segment. A History-off note is then removed from the queue, which is
     /// what the result screen does on close for a note it showed: the transcript has
     /// been delivered to a user who chose not to keep transcripts.
@@ -340,8 +350,9 @@ final class VoiceNoteProcessor: ObservableObject {
     /// withdraw a note because it was read here, or because it is in neither store.
     /// The keyboard keeps a note 15 minutes after its last use so a long one can be
     /// quoted in several passes, and a History-off note leaves the queue the moment it
-    /// is read — "in neither store" is that note, not a deleted one. A delete in
-    /// DictusApp withdraws it at the delete itself (`withdrawKeyboardDeliveries`).
+    /// is read — "in neither store" is that note too, so it cannot be the test. A
+    /// delete in DictusApp, and an eviction by either cap (decision C), withdraw at
+    /// the moment they happen instead (`withdrawKeyboardDeliveries`).
     func reconcileKeyboardDeliveries(reason: String) {
         guard let deliveries = VoiceNoteKeyboardDeliveryStore.appGroup else { return }
         let history = TranscriptionHistoryStore.shared
@@ -379,7 +390,9 @@ final class VoiceNoteProcessor: ObservableObject {
     }
 
     private func fail(_ note: VoiceNote, _ failure: VoiceNoteFailure, detail: String) {
-        store.mutate { $0.fail(note.id, failure) }
+        var evicted: [UUID] = []
+        store.mutate { evicted = $0.fail(note.id, failure) }
+        withdrawKeyboardDeliveries(evicted, reason: "evictedFromQueue")
         log("failed", "id=\(note.id.uuidString.prefix(8)) failure=\(failure.rawValue) detail=\(detail)")
         VoiceNoteIslandDriver.shared.finished(note.id, succeeded: false)
     }
