@@ -70,9 +70,19 @@ final class KeyboardVoiceNoteState: ObservableObject {
 
     private let instanceID = String(UUID().uuidString.prefix(8))
 
-    /// Recomputed each time: the container is unreachable without Full Access, and
-    /// toggling Full Access rebuilds the extension anyway.
-    private var store: VoiceNoteKeyboardDeliveryStore? { .appGroup }
+    /// Nil without Full Access, so nothing is offered: no chip, no reader.
+    ///
+    /// WHY explicit rather than left to the container: on a device the App Group is
+    /// unreachable without Full Access and this would be nil anyway, but the
+    /// simulator resolves the container regardless (`docs/agents/simulator.md`), and
+    /// it opened the reader under a toolbar saying "Full access required" (measured
+    /// 2026-10-03). The toolbar's own branch already hides the chip there; this keeps
+    /// the reader to the same rule on every runtime. Recomputed each time: toggling
+    /// Full Access rebuilds the extension anyway.
+    private var store: VoiceNoteKeyboardDeliveryStore? {
+        guard KeyboardState.shared.controller?.hasFullAccess == true else { return nil }
+        return .appGroup
+    }
 
     private init() {
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.voiceNoteResultReady) {
