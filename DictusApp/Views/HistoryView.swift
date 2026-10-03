@@ -154,6 +154,9 @@ struct HistoryView: View {
         withAnimation {
             history.delete(id: record.id)
         }
+        // A shared voice note deleted here leaves the keyboard too: a delete is the
+        // one way besides time it does (#639).
+        VoiceNoteProcessor.shared.withdrawKeyboardDeliveries([record.id], reason: "deletedInHistory")
         HapticFeedback.recordingStopped()
     }
 

@@ -1,5 +1,5 @@
 // DictusCore/Tests/DictusCoreTests/VoiceNotes/VoiceNoteKeyboardDeliveryTests.swift
-// The keyboard delivery of shared voice note transcripts, and when the reader opens (#637).
+// The keyboard delivery of shared voice note transcripts, how long it stays, and when the reader opens (#637, #639).
 import XCTest
 @testable import DictusCore
 
@@ -41,6 +41,7 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
         XCTAssertEqual(store.pending(at: now), [])
         XCTAssertEqual(store.acknowledgements(), [])
         XCTAssertEqual(store.presentedIDs(), [])
+        XCTAssertEqual(store.lastUsedDates(), [:])
     }
 
     /// Publishing the same note twice (a retry, a relaunch) leaves one delivery.
@@ -83,17 +84,17 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
 
     // MARK: - Acknowledgement
 
-    /// Insert hides the note from the keyboard at once, before the app has
-    /// run: the receipt is what `pending` filters on.
-    func testAnAcknowledgedNoteLeavesThePendingList() throws {
+    /// Since #639 an insertion no longer takes the note out of the keyboard: the user
+    /// can come back and quote another passage. The receipt is only what DictusApp
+    /// turns into "read".
+    func testAnInsertedNoteStaysPending() throws {
         let kept = delivery(sharedSecondsAgo: 100)
         let inserted = delivery(sharedSecondsAgo: 50)
         try store.publish(kept)
         try store.publish(inserted)
         XCTAssertTrue(store.acknowledge(inserted.id, action: .inserted, at: now))
-        XCTAssertEqual(store.pending(at: now), [kept])
-        // The delivery itself is the app's to delete; the keyboard only dropped a receipt.
-        XCTAssertEqual(store.allDeliveries().count, 2)
+        XCTAssertEqual(store.pending(at: now), [kept, inserted])
+        XCTAssertEqual(store.acknowledgements().map(\.id), [inserted.id])
     }
 
     /// A second receipt for the same note leaves one receipt, the latest.
@@ -108,57 +109,158 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
     }
 
     /// The build that had a `Copy` button (rev cd2d96b4) wrote `copied` receipts. One
-    /// left on a device still decodes, still hides its note, and still reaches the app.
-    func testAReceiptFromTheBuildWithCopyStillHidesItsNote() throws {
+    /// left on a device still decodes and still reaches the app; like any receipt
+    /// since #639, it no longer hides its note.
+    func testAReceiptFromTheBuildWithCopyStillDecodes() throws {
         let note = delivery(sharedSecondsAgo: 50)
         try store.publish(note)
         try FileManager.default.createDirectory(at: store.acknowledgementsDirectory, withIntermediateDirectories: true)
         let legacy = #"{"action":"copied","at":"2026-10-03T13:20:33.120Z","id":"\#(note.id.uuidString)"}"#
         try Data(legacy.utf8).write(to: store.acknowledgementsDirectory.appendingPathComponent("\(note.id.uuidString).json"))
         XCTAssertEqual(store.acknowledgements().map(\.action), [.copied])
-        XCTAssertEqual(store.pending(at: now), [])
+        XCTAssertEqual(store.pending(at: now), [note])
     }
 
-    /// The app reconciles a receipt by withdrawing the note: delivery, receipt and
-    /// presented marker all go, and a second withdrawal is harmless.
+    /// The app turns a receipt into "read" and drops the receipt; the delivery stays
+    /// in the keyboard (#639: reading in DictusApp no longer removes it).
+    func testClearingAReceiptKeepsTheDelivery() throws {
+        let note = delivery(sharedSecondsAgo: 50)
+        try store.publish(note)
+        store.acknowledge(note.id, action: .inserted, at: now)
+        store.clearAcknowledgement(note.id)
+        store.clearAcknowledgement(note.id)
+        XCTAssertEqual(store.acknowledgements(), [])
+        XCTAssertEqual(store.pending(at: now), [note])
+    }
+
+    /// Deleting the note in DictusApp withdraws it: delivery, receipt, presented
+    /// marker and last use all go, and a second withdrawal is harmless.
     func testWithdrawRemovesEverythingAndIsIdempotent() throws {
         let note = delivery(sharedSecondsAgo: 50)
         try store.publish(note)
         store.acknowledge(note.id, action: .inserted, at: now)
         store.markPresented([note.id])
+        store.noteUsed(note.id, at: now)
         store.withdraw(note.id)
         store.withdraw(note.id)
         XCTAssertEqual(store.allDeliveries(), [])
+        XCTAssertEqual(store.pending(at: now), [])
         XCTAssertEqual(store.acknowledgements(), [])
         XCTAssertEqual(store.presentedIDs(), [])
+        XCTAssertEqual(store.lastUsedDates(), [:])
     }
 
-    // MARK: - 24 h expiry (#637 decision 5)
+    // MARK: - 15 minutes after the last use (#639)
 
-    func testTheLifetimeIsTwentyFourHours() {
-        XCTAssertEqual(VoiceNoteKeyboardDelivery.lifetime, 86_400)
+    func testTheIdleWindowIsFifteenMinutes() {
+        XCTAssertEqual(VoiceNoteKeyboardDelivery.idleWindow, 900)
     }
 
-    /// Measured from the transcription. One second inside the day it is offered; at
-    /// the day it is not, History on or off.
-    func testANoteExpiresTwentyFourHoursAfterItsTranscription() throws {
-        let fresh = delivery(sharedSecondsAgo: 86_500, transcribedSecondsAgo: 86_399)
-        let expired = delivery(sharedSecondsAgo: 86_500, transcribedSecondsAgo: 86_400)
+    /// A note never opened: 15 minutes after it was transcribed. One second inside
+    /// the window it is offered; at the window it is not.
+    func testANeverOpenedNoteExpiresFifteenMinutesAfterItsTranscription() throws {
+        let fresh = delivery(sharedSecondsAgo: 1_000, transcribedSecondsAgo: 899)
+        let expired = delivery(sharedSecondsAgo: 1_000, transcribedSecondsAgo: 900)
         try store.publish(fresh)
         try store.publish(expired)
         XCTAssertEqual(store.pending(at: now), [fresh])
     }
 
-    /// The keyboard filters on read; the app deletes the file when it next runs.
+    /// Opening the reader on a note is a use: its 15 minutes start again from there.
+    func testOpeningANoteRestartsItsWindow() throws {
+        let note = delivery(sharedSecondsAgo: 1_000, transcribedSecondsAgo: 1_000)
+        try store.publish(note)
+        let openedAt = now.addingTimeInterval(-600)
+        XCTAssertTrue(store.noteUsed(note.id, at: openedAt))
+        XCTAssertEqual(store.pending(at: now), [note])
+        XCTAssertEqual(store.pending(at: openedAt.addingTimeInterval(899)), [note])
+        XCTAssertEqual(store.pending(at: openedAt.addingTimeInterval(900)), [])
+    }
+
+    /// Inserting is a use too, and a later one wins: the window slides.
+    func testInsertingExtendsTheWindowAgain() throws {
+        let note = delivery(sharedSecondsAgo: 2_000, transcribedSecondsAgo: 2_000)
+        try store.publish(note)
+        let opened = now.addingTimeInterval(-1_400)
+        let inserted = now.addingTimeInterval(-800)
+        store.noteUsed(note.id, at: opened)
+        store.acknowledge(note.id, action: .inserted, at: inserted)
+        store.noteUsed(note.id, at: inserted)
+        // The open alone would have expired 500 s ago; the insert keeps it 100 s more.
+        XCTAssertEqual(store.pending(at: now), [note])
+        XCTAssertEqual(store.pending(at: inserted.addingTimeInterval(900)), [])
+    }
+
+    /// A quoted passage (#640) is the same kind of use: it extends the window the
+    /// same way, through the same call.
+    func testQuotingExtendsTheWindow() throws {
+        let note = delivery(sharedSecondsAgo: 2_500, transcribedSecondsAgo: 2_500)
+        try store.publish(note)
+        // Untouched, it would have left 1 600 s ago.
+        let quotes = [now.addingTimeInterval(-1_700), now.addingTimeInterval(-900), now.addingTimeInterval(-100)]
+        for quote in quotes {
+            XCTAssertEqual(store.pending(at: quote), [note], "each quote lands inside the window the previous use opened")
+            store.noteUsed(note.id, at: quote)
+        }
+        XCTAssertEqual(store.lastUsedDates()[note.id], quotes[2])
+        XCTAssertEqual(store.pending(at: now), [note])
+        XCTAssertEqual(store.pending(at: quotes[2].addingTimeInterval(900)), [])
+    }
+
+    /// An older use written after a newer one never moves the clock back.
+    func testAnOlderUseNeverShortensTheWindow() throws {
+        let note = delivery(sharedSecondsAgo: 2_000, transcribedSecondsAgo: 2_000)
+        try store.publish(note)
+        store.noteUsed(note.id, at: now.addingTimeInterval(-100))
+        store.noteUsed(note.id, at: now.addingTimeInterval(-1_500))
+        XCTAssertEqual(store.lastUsedDates()[note.id], now.addingTimeInterval(-100))
+    }
+
+    /// Each note keeps its own clock.
+    func testUsesAreTrackedPerNote() throws {
+        let used = delivery(sharedSecondsAgo: 2_000, transcribedSecondsAgo: 2_000)
+        let untouched = delivery(sharedSecondsAgo: 2_000, transcribedSecondsAgo: 2_000)
+        try store.publish(used)
+        try store.publish(untouched)
+        store.noteUsed(used.id, at: now.addingTimeInterval(-60))
+        XCTAssertEqual(store.pending(at: now), [used])
+    }
+
+    /// The keyboard rereads at the earliest expiry so its ring and hint go with the note.
+    func testNextExpiryIsTheEarliestEffectiveOne() throws {
+        let early = delivery(sharedSecondsAgo: 600, transcribedSecondsAgo: 600)
+        let extended = delivery(sharedSecondsAgo: 800, transcribedSecondsAgo: 800)
+        try store.publish(early)
+        try store.publish(extended)
+        store.noteUsed(extended.id, at: now)
+        XCTAssertEqual(store.nextExpiry(of: store.pending(at: now)), now.addingTimeInterval(300))
+        XCTAssertNil(store.nextExpiry(of: []))
+    }
+
+    /// The keyboard filters on read; the app deletes the file when it next runs,
+    /// counting uses like the keyboard does.
     func testPruneExpiredDeletesOnlyExpiredDeliveries() throws {
-        let fresh = delivery(sharedSecondsAgo: 60)
-        let expired = delivery(sharedSecondsAgo: 90_000, transcribedSecondsAgo: 90_000)
+        let fresh = delivery(sharedSecondsAgo: 60, transcribedSecondsAgo: 60)
+        let expired = delivery(sharedSecondsAgo: 2_000, transcribedSecondsAgo: 2_000)
+        let keptByAUse = delivery(sharedSecondsAgo: 2_000, transcribedSecondsAgo: 2_000)
         try store.publish(fresh)
         try store.publish(expired)
+        try store.publish(keptByAUse)
         store.markPresented([expired.id])
+        store.noteUsed(expired.id, at: now.addingTimeInterval(-1_000))
+        store.noteUsed(keptByAUse.id, at: now.addingTimeInterval(-300))
         XCTAssertEqual(store.pruneExpired(now: now), [expired.id])
-        XCTAssertEqual(store.allDeliveries(), [fresh])
+        XCTAssertEqual(Set(store.allDeliveries().map(\.id)), [fresh.id, keptByAUse.id])
         XCTAssertEqual(store.presentedIDs(), [])
+        XCTAssertNil(store.lastUsedDates()[expired.id])
+    }
+
+    /// Uses survive a new process, like the markers: the keyboard is rebuilt constantly.
+    func testUsesAreReadBackByANewStoreValue() throws {
+        let note = delivery(sharedSecondsAgo: 2_000, transcribedSecondsAgo: 2_000)
+        try store.publish(note)
+        store.noteUsed(note.id, at: now.addingTimeInterval(-60))
+        XCTAssertEqual(VoiceNoteKeyboardDeliveryStore(root: root).pending(at: now), [note])
     }
 
     // MARK: - Header labels
@@ -188,10 +290,10 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
         XCTAssertEqual(decide(pending: [delivery(sharedSecondsAgo: 10)]), .openReader)
     }
 
-    /// Once per note: a note the reader already showed is the chip's.
-    func testANoteAlreadyShownIsOnlyReachableFromTheChip() {
+    /// Once per note: a note the reader already showed opens from a long press on ☰ only.
+    func testANoteAlreadyShownIsOnlyReachableFromTheLongPress() {
         let note = delivery(sharedSecondsAgo: 10)
-        XCTAssertEqual(decide(pending: [note], presented: [note.id]), .chipOnly)
+        XCTAssertEqual(decide(pending: [note], presented: [note.id]), .keysOnly)
     }
 
     /// A new note among shown ones is reason enough to open.
@@ -201,23 +303,23 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
         XCTAssertEqual(decide(pending: [shown, fresh], presented: [shown.id]), .openReader)
     }
 
-    func testNothingWaitingIsChipOnly() {
-        XCTAssertEqual(decide(pending: []), .chipOnly)
+    func testNothingWaitingLeavesTheKeys() {
+        XCTAssertEqual(decide(pending: []), .keysOnly)
     }
 
-    /// Decision 3's Debug switch: the same build, chip only.
+    /// Decision 3's Debug switch: the same build, long press only.
     func testTheDebugSwitchTurnsAutoOpenOff() {
-        XCTAssertEqual(decide(pending: [delivery(sharedSecondsAgo: 10)], autoOpen: false), .chipOnly)
+        XCTAssertEqual(decide(pending: [delivery(sharedSecondsAgo: 10)], autoOpen: false), .keysOnly)
     }
 
     /// Dictation stays first: nothing opens over a dictation that owns the area.
     func testNothingOpensOverADictation() {
-        XCTAssertEqual(decide(pending: [delivery(sharedSecondsAgo: 10)], dictation: true), .chipOnly)
+        XCTAssertEqual(decide(pending: [delivery(sharedSecondsAgo: 10)], dictation: true), .keysOnly)
     }
 
     /// Nor over a picker the user left open and the keyboard restores.
     func testNothingOpensOverARestoredPicker() {
-        XCTAssertEqual(decide(pending: [delivery(sharedSecondsAgo: 10)], mode: .emoji), .chipOnly)
+        XCTAssertEqual(decide(pending: [delivery(sharedSecondsAgo: 10)], mode: .emoji), .keysOnly)
     }
 
     /// Markers survive a new process: the keyboard is rebuilt constantly, and "once"
@@ -229,6 +331,6 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
         store.markPresented([note.id])
         let rebuilt = VoiceNoteKeyboardDeliveryStore(root: root)
         XCTAssertEqual(rebuilt.presentedIDs(), [note.id])
-        XCTAssertEqual(decide(pending: rebuilt.pending(at: now), presented: rebuilt.presentedIDs()), .chipOnly)
+        XCTAssertEqual(decide(pending: rebuilt.pending(at: now), presented: rebuilt.presentedIDs()), .keysOnly)
     }
 }
