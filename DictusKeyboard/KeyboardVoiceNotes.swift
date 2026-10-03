@@ -1,7 +1,6 @@
 // DictusKeyboard/KeyboardVoiceNotes.swift
 // Shared voice note transcripts waiting in the keyboard: the chip's count and the reader (issue #637).
 import Foundation
-import UIKit
 import Combine
 import DictusCore
 
@@ -36,13 +35,11 @@ final class KeyboardVoiceNoteState: ObservableObject {
 
     /// The reader's contents while it is open.
     ///
-    /// A snapshot taken when it opens rather than a live view of `waiting`: a copied
-    /// note is acknowledged at once and leaves `waiting`, and decision 7 keeps its
-    /// page on screen until the reader closes.
+    /// A snapshot taken when it opens rather than a live view of `waiting`, so a note
+    /// that lands while it is open is appended as a last page instead of reshuffling
+    /// the pages under the user's eyes.
     struct Reader: Equatable {
         var pages: [VoiceNoteKeyboardDelivery]
-        /// The page that just answered `Copy`, for its brief "Copied" state.
-        var copiedID: UUID?
     }
 
     /// Transcripts the keyboard may offer, oldest share first. Drives the chip.
@@ -66,7 +63,6 @@ final class KeyboardVoiceNoteState: ObservableObject {
 
     private var lastMode: KeyboardAreaMode = .keys
     private var modeCancellable: AnyCancellable?
-    private var copiedReset: DispatchWorkItem?
 
     private let instanceID = String(UUID().uuidString.prefix(8))
 
@@ -191,33 +187,12 @@ final class KeyboardVoiceNoteState: ObservableObject {
 
         // The page goes; the keys come back only with the last one (decision 7).
         reader.pages.removeAll { $0.id == id }
-        if reader.copiedID == id { reader.copiedID = nil }
         reload(reason: "inserted")
         if reader.pages.isEmpty {
             close(reason: "lastInserted")
         } else {
             self.reader = reader
         }
-    }
-
-    /// `Copy`: the visible page's transcript to the pasteboard. Marks the note read
-    /// and leaves the reader open on it, with a brief "Copied" (decision 7).
-    func copy(_ id: UUID) {
-        guard reader != nil, let page = reader?.pages.first(where: { $0.id == id }) else { return }
-        UIPasteboard.general.string = page.transcript
-        let receipt = store?.acknowledge(id, action: .copied) ?? false
-        HapticFeedback.keyTapped()
-        log("copied", "id=\(id.uuidString.prefix(8)) chars=\(page.transcript.count) receipt=\(receipt)")
-        reader?.copiedID = id
-        reload(reason: "copied")
-
-        copiedReset?.cancel()
-        let reset = DispatchWorkItem { [weak self] in
-            guard let self, self.reader?.copiedID == id else { return }
-            self.reader?.copiedID = nil
-        }
-        copiedReset = reset
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute: reset)
     }
 
     /// `Open in Dictus`: the app's result screen on this note.
@@ -275,7 +250,6 @@ final class KeyboardVoiceNoteState: ObservableObject {
     private func areaModeChanged(to mode: KeyboardAreaMode) {
         if mode != .voiceNoteResult, reader != nil {
             reader = nil
-            copiedReset?.cancel()
         }
         if lastMode == .recording, mode != .recording {
             reload(reason: "dictationEnded")

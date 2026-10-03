@@ -83,7 +83,7 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
 
     // MARK: - Acknowledgement
 
-    /// Insert and Copy hide the note from the keyboard at once, before the app has
+    /// Insert hides the note from the keyboard at once, before the app has
     /// run: the receipt is what `pending` filters on.
     func testAnAcknowledgedNoteLeavesThePendingList() throws {
         let kept = delivery(sharedSecondsAgo: 100)
@@ -96,15 +96,27 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
         XCTAssertEqual(store.allDeliveries().count, 2)
     }
 
-    /// A copy then an insert of the same note leave one receipt, the latest.
+    /// A second receipt for the same note leaves one receipt, the latest.
     func testASecondAcknowledgementReplacesTheFirst() throws {
         let note = delivery(sharedSecondsAgo: 50)
         try store.publish(note)
-        store.acknowledge(note.id, action: .copied, at: now)
+        store.acknowledge(note.id, action: .inserted, at: now)
         store.acknowledge(note.id, action: .inserted, at: now.addingTimeInterval(5))
         XCTAssertEqual(store.acknowledgements(), [
             VoiceNoteKeyboardAcknowledgement(id: note.id, action: .inserted, at: now.addingTimeInterval(5))
         ])
+    }
+
+    /// The build that had a `Copy` button (rev cd2d96b4) wrote `copied` receipts. One
+    /// left on a device still decodes, still hides its note, and still reaches the app.
+    func testAReceiptFromTheBuildWithCopyStillHidesItsNote() throws {
+        let note = delivery(sharedSecondsAgo: 50)
+        try store.publish(note)
+        try FileManager.default.createDirectory(at: store.acknowledgementsDirectory, withIntermediateDirectories: true)
+        let legacy = #"{"action":"copied","at":"2026-10-03T13:20:33.120Z","id":"\#(note.id.uuidString)"}"#
+        try Data(legacy.utf8).write(to: store.acknowledgementsDirectory.appendingPathComponent("\(note.id.uuidString).json"))
+        XCTAssertEqual(store.acknowledgements().map(\.action), [.copied])
+        XCTAssertEqual(store.pending(at: now), [])
     }
 
     /// The app reconciles a receipt by withdrawing the note: delivery, receipt and
@@ -112,7 +124,7 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
     func testWithdrawRemovesEverythingAndIsIdempotent() throws {
         let note = delivery(sharedSecondsAgo: 50)
         try store.publish(note)
-        store.acknowledge(note.id, action: .copied, at: now)
+        store.acknowledge(note.id, action: .inserted, at: now)
         store.markPresented([note.id])
         store.withdraw(note.id)
         store.withdraw(note.id)

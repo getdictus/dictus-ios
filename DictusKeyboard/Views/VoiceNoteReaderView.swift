@@ -13,7 +13,7 @@ import DictusCore
 ///   Salut, je voulais te dire que pour samedi
 ///   c'est bon de mon côté…              ← swipe
 ///
-///   [⧉]   [↗]   [========  Insert  ========]
+///   [↗]   [============  Insert  ============]
 /// ```
 ///
 /// ### No card, no panel
@@ -37,11 +37,8 @@ import DictusCore
 /// fade and rise live inside this body, where they stack nothing.
 struct VoiceNoteReaderView: View {
     let pages: [VoiceNoteKeyboardDelivery]
-    /// The page that just answered `Copy`, if any.
-    let copiedID: UUID?
     let onClose: () -> Void
     let onInsert: (UUID) -> Void
-    let onCopy: (UUID) -> Void
     let onOpenInDictus: (UUID) -> Void
 
     /// The page on screen. Nil until the first layout pass, which reads as page 0.
@@ -114,19 +111,10 @@ struct VoiceNoteReaderView: View {
         .frame(height: 52)
     }
 
-    /// `· 1:42 · FR`, or `Copied` for a moment after `Copy`.
+    /// `· 1:42 · FR`.
     @ViewBuilder
     private var metadata: some View {
-        if let page = visiblePage, page.id == copiedID {
-            Label {
-                Text("Copied", comment: "Shown briefly in the keyboard's voice note reader after the transcript was copied (#637).")
-            } icon: {
-                Image(systemName: "checkmark")
-            }
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundColor(.dictusSuccess)
-            .lineLimit(1)
-        } else if let page = visiblePage {
+        if let page = visiblePage {
             Text(([page.durationLabel, page.languageBadge].compactMap { $0 }).map { "· \($0)" }.joined(separator: " "))
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.secondary)
@@ -216,19 +204,14 @@ struct VoiceNoteReaderView: View {
 
     // MARK: - Actions
 
-    /// One key row tall. `Insert` is the primary and takes the width; `Copy` and
-    /// `Open in Dictus` are icon-only on its leading side. All three act on the
-    /// visible page.
+    /// One key row tall. `Insert` is the primary and takes the width; `Open in Dictus`
+    /// is icon-only on its leading side. Both act on the visible page.
+    ///
+    /// No `Copy` (device feedback on PR #638, 2026-10-03): `Insert` is the keyboard's
+    /// job, and the full result screen behind `Open in Dictus` already copies.
     private var actionRow: some View {
         HStack(spacing: 10) {
             if let page = visiblePage {
-                secondaryButton(
-                    systemName: page.id == copiedID ? "checkmark" : "doc.on.doc",
-                    tint: page.id == copiedID ? .dictusSuccess : .dictusPillIconSecondary,
-                    label: Text("Copy", comment: "Accessibility label of the keyboard voice note reader's copy button (#637)."),
-                    identifier: "voiceNoteReaderCopy"
-                ) { onCopy(page.id) }
-
                 secondaryButton(
                     systemName: "arrow.up.forward.app",
                     tint: .dictusPillIconSecondary,

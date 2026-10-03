@@ -69,6 +69,10 @@ public struct VoiceNoteKeyboardDelivery: Codable, Identifiable, Equatable, Senda
 /// (#637 decision 6): the app marks it so on its next foreground.
 public enum VoiceNoteKeyboardAction: String, Codable, Sendable {
     case inserted
+    /// Written only by the build that still had a `Copy` button (rev cd2d96b4, removed
+    /// after device feedback on PR #638). Kept so a receipt that build left on a device
+    /// still decodes: an undecodable receipt would stop hiding its note, and the note
+    /// the user already copied would come back to the keyboard.
     case copied
 }
 
@@ -194,9 +198,9 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
         return allDeliveries().filter { !acknowledged.contains($0.id) && !$0.isExpired(at: now) }
     }
 
-    /// Record that the user inserted or copied a note. Atomic and overwrites a
-    /// previous receipt for the same note (a copy, then an insert): the keyboard is
-    /// this file's only writer. Returns whether the receipt is on disk.
+    /// Record that the user inserted a note. Atomic, and overwrites a previous receipt
+    /// for the same note: the keyboard is this file's only writer. Returns whether the
+    /// receipt is on disk.
     @discardableResult
     public func acknowledge(_ id: UUID, action: VoiceNoteKeyboardAction, at date: Date = Date()) -> Bool {
         do {

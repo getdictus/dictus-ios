@@ -221,28 +221,6 @@
         }
       }
     },
-    "Copied" : {
-      "comment" : "Shown briefly in the keyboard's voice note reader after the transcript was copied (#637).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copié"
-          }
-        }
-      }
-    },
-    "Copy" : {
-      "comment" : "Accessibility label of the keyboard voice note reader's copy button (#637).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copier"
-          }
-        }
-      }
-    },
     "Dictus Pro" : {
       "comment" : "The Smart Mode fan row that leaves the keyboard for the paywall. A product name, so identical in French today, and in the catalog so a future locale can change it.",
       "localizations" : {

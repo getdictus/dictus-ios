@@ -311,10 +311,8 @@ struct KeyboardRootView: View {
                 // behind it is `.recording`'s, set by `KeyboardViewController`.
                 VoiceNoteReaderView(
                     pages: reader.pages,
-                    copiedID: reader.copiedID,
                     onClose: { voiceNotes.close(reason: "close") },
                     onInsert: { id in insertVoiceNote(id) },
-                    onCopy: { id in voiceNotes.copy(id) },
                     onOpenInDictus: { id in voiceNotes.openInDictus(id) }
                 )
             } else {

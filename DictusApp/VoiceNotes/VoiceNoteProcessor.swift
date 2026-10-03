@@ -326,7 +326,7 @@ final class VoiceNoteProcessor: ObservableObject {
     /// Bring the keyboard delivery directory and the two stores back into agreement.
     ///
     /// The keyboard never writes History or the queue (#637 decision 6): when the user
-    /// inserts or copies a note there, it drops a receipt, and this is where the receipt
+    /// inserts a note there, it drops a receipt, and this is where the receipt
     /// becomes "read" — the same `markOpened` a card in the app performs, plus the
     /// island's segment. A History-off note is then removed from the queue, which is
     /// what the result screen does on close for a note it showed: the transcript has
