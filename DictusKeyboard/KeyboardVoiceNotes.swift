@@ -34,8 +34,9 @@ import DictusCore
 ///
 /// ### What it never does
 ///
-/// Insert on its own, or write History or the queue. The user taps `Insert`; the
-/// keyboard then drops a receipt, and DictusApp turns it into "read" (decision 6).
+/// Insert on its own, or write History or the queue. When the reader shows a note,
+/// and when the user inserts it, the keyboard drops a receipt, and DictusApp turns it
+/// into "read" (#639 decision A, reversing #637's decision 6).
 @MainActor
 final class KeyboardVoiceNoteState: ObservableObject {
 
@@ -196,8 +197,8 @@ final class KeyboardVoiceNoteState: ObservableObject {
             return false
         }
         // Shown, so it never opens on its own for these notes again (decision 2), and
-        // the ☰ loses its ring. Viewing is not reading: nothing is acknowledged here
-        // (decision 6). The page on screen is a use, and restarts its 15 minutes.
+        // the ☰ loses its halo. The page on screen is a use and a read: `pageShown`
+        // restarts its 15 minutes and leaves the receipt (#639 decision A).
         markPresented(waiting.map(\.id))
         if let first = waiting.first { pageShown(first.id) }
         log("readerOpened", "source=\(source) pages=\(waiting.count) ids=\(Self.short(waiting))")
@@ -214,11 +215,18 @@ final class KeyboardVoiceNoteState: ObservableObject {
         KeyboardState.shared.presentAreaMode(.keys)
     }
 
-    /// The reader put this page on screen — on opening, or after a swipe. A use
-    /// (#639): its 15 minutes start again.
+    /// The reader put this page on screen — on opening, after a swipe, after a delete
+    /// moved to it, or when it replaced the empty state.
+    ///
+    /// A use (#639): its 15 minutes start again. And a read (#639 decision A): the
+    /// receipt makes DictusApp mark the note read and drop its island segment, the
+    /// same as an insertion would. Only the page actually on screen — a note the user
+    /// never swiped to stays unread in the app.
     func pageShown(_ id: UUID) {
         guard reader?.pages.contains(where: { $0.id == id }) == true else { return }
-        store?.noteUsed(id)
+        let used = store?.noteUsed(id) ?? false
+        let receipt = store?.acknowledge(id, action: .shown) ?? false
+        log("pageShown", "id=\(id.uuidString.prefix(8)) used=\(used) receipt=\(receipt)")
     }
 
     // MARK: - Actions
@@ -270,7 +278,9 @@ final class KeyboardVoiceNoteState: ObservableObject {
     /// It leaves the keyboard only. The keyboard cannot delete the delivery — it is
     /// DictusApp's file — so it drops a deletion marker the store filters on, and
     /// DictusApp withdraws the files on its next run; the note itself stays in
-    /// History or the queue by their own rules. No receipt: deleting is not reading.
+    /// History or the queue by their own rules. No receipt of its own (#639 decision
+    /// B): the button lives on a page on screen, so `pageShown` has already left the
+    /// note's "read" receipt by the time it can be tapped.
     /// No confirmation, per the brief: the transcript is still in Dictus.
     ///
     /// The reader stays open on the next page, or on its empty state when that was

@@ -79,10 +79,18 @@ public struct VoiceNoteKeyboardDelivery: Codable, Identifiable, Equatable, Senda
     }
 }
 
-/// What the keyboard did with a delivery. Either one means the note was read
-/// (#637 decision 6): the app marks it so on its next foreground. Since #639 a
-/// receipt no longer hides the note from the keyboard; only time does.
+/// What the keyboard did with a delivery. Every one means the note was read: the
+/// app marks it so — History or queue, and the island's segment — on its next
+/// foreground. Since #639 a receipt no longer hides the note from the keyboard; only
+/// time or the reader's Delete does.
+///
+/// #637 decision 6 said viewing was not reading, and only `Insert` left a receipt.
+/// Pierre reversed it on 2026-10-03 (#639, decision A): a note **shown** in the reader
+/// is read, so the unread cards in DictusApp are exactly what the user has seen
+/// nowhere.
 public enum VoiceNoteKeyboardAction: String, Codable, Sendable {
+    /// The reader put the note on screen (#639 decision A).
+    case shown
     case inserted
     /// Written only by the build that still had a `Copy` button (rev cd2d96b4, removed
     /// after device feedback on PR #638). Kept so a receipt that build left on a device
@@ -131,9 +139,10 @@ public struct VoiceNoteKeyboardAcknowledgement: Codable, Equatable, Sendable {
 /// One file per note and one writer per file, which is the whole of the
 /// concurrency story: there is no shared array for two processes to rewrite, so
 /// nothing to coordinate. DictusApp publishes and withdraws deliveries; the
-/// keyboard never touches a delivery, it drops files beside it. A receipt is what
-/// DictusApp turns into "read" when it next comes to the foreground — the keyboard
-/// does not mutate either store (#637 decision 6). A use is what keeps the note in
+/// keyboard never touches a delivery, it drops files beside it. A receipt — a note
+/// shown or inserted — is what DictusApp turns into "read" when it next comes to the
+/// foreground (#639 decision A) — the keyboard
+/// does not mutate either store. A use is what keeps the note in
 /// the keyboard 15 more minutes (#639). A deletion marker is what takes it out of
 /// the keyboard at once when the user deletes it from the reader (#639): the
 /// keyboard cannot delete the delivery, which is DictusApp's file, so it marks it
@@ -308,9 +317,10 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
         return dates
     }
 
-    /// Record that the user inserted a note. Atomic, and overwrites a previous receipt
-    /// for the same note: the keyboard is this file's only writer. Returns whether the
-    /// receipt is on disk.
+    /// Record that the user saw or inserted a note. Atomic, and overwrites a previous
+    /// receipt for the same note: the keyboard is this file's only writer, and every
+    /// action means the same thing to the app — read — so a later one losing an
+    /// earlier one loses nothing. Returns whether the receipt is on disk.
     @discardableResult
     public func acknowledge(_ id: UUID, action: VoiceNoteKeyboardAction, at date: Date = Date()) -> Bool {
         do {

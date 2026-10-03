@@ -97,6 +97,22 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
         XCTAssertEqual(store.acknowledgements().map(\.id), [inserted.id])
     }
 
+    /// #639 decision A: a note shown in the reader leaves a receipt too. Inserting it
+    /// afterwards replaces that receipt rather than adding a second, so DictusApp
+    /// marks it read once.
+    func testShownThenInsertedLeavesOneReceipt() throws {
+        let note = delivery(sharedSecondsAgo: 50)
+        try store.publish(note)
+        XCTAssertTrue(store.acknowledge(note.id, action: .shown, at: now))
+        XCTAssertEqual(store.acknowledgements().map(\.action), [.shown])
+        store.acknowledge(note.id, action: .inserted, at: now.addingTimeInterval(3))
+        XCTAssertEqual(store.acknowledgements(), [
+            VoiceNoteKeyboardAcknowledgement(id: note.id, action: .inserted, at: now.addingTimeInterval(3))
+        ])
+        // A receipt says "read"; it does not take the note out of the keyboard.
+        XCTAssertEqual(store.pending(at: now), [note])
+    }
+
     /// A second receipt for the same note leaves one receipt, the latest.
     func testASecondAcknowledgementReplacesTheFirst() throws {
         let note = delivery(sharedSecondsAgo: 50)
