@@ -7,9 +7,9 @@ import DictusCore
 ///
 /// WHY dynamic recommendation:
 /// ModelInfo.recommendedIdentifier() picks the best compatible model for the device:
-/// - A12/A13 iPhones → Whisper Base (Argmax-supported fallback)
+/// - Pre-A14 iPhones and iPads → Whisper Base (Argmax-supported fallback, #362/#612)
 /// - >=6 GB RAM → Parakeet v3 (fast, accurate, NVIDIA)
-/// - Other <6 GB iPhones → Whisper Small (compact, good accuracy)
+/// - Other <6 GB devices → Whisper Small (compact, good accuracy)
 /// The model card displays name, size, and description from the ModelInfo catalog.
 ///
 /// WHY @StateObject for ModelManager:

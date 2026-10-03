@@ -90,7 +90,7 @@ struct ModelManagerView: View {
     /// Available models — excludes downloaded, downloading, and prewarming models.
     /// Users won't see Tiny/Base here since they're deprecated, with one exception:
     /// `available(on:)` keeps the device's recommended model even when deprecated, so
-    /// an A12/A13 iPhone can always reinstall Base after deleting it (issue #362).
+    /// a pre-A14 device can always reinstall Base after deleting it (issue #362).
     ///
     /// Issue #369 REVERSES the Phase 37 (#104) decision quoted here before: per-device
     /// gated models are no longer hidden. They stay in this list and `ModelCardView`
