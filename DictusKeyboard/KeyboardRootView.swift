@@ -322,6 +322,7 @@ struct KeyboardRootView: View {
                     onClose: { voiceNotes.close(reason: "close") },
                     onInsert: { id in insertVoiceNote(id) },
                     onOpenInDictus: { id in voiceNotes.openInDictus(id) },
+                    onDelete: { id in voiceNotes.deleteFromKeyboard(id) },
                     onPageShown: { id in voiceNotes.pageShown(id) }
                 )
             } else {

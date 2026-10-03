@@ -265,6 +265,32 @@ final class KeyboardVoiceNoteState: ObservableObject {
         close(reason: "inserted")
     }
 
+    /// The reader's Delete (#639): the user is done with this note in the keyboard.
+    ///
+    /// It leaves the keyboard only. The keyboard cannot delete the delivery — it is
+    /// DictusApp's file — so it drops a deletion marker the store filters on, and
+    /// DictusApp withdraws the files on its next run; the note itself stays in
+    /// History or the queue by their own rules. No receipt: deleting is not reading.
+    /// No confirmation, per the brief: the transcript is still in Dictus.
+    ///
+    /// The reader stays open on the next page, or on its empty state when that was
+    /// the last one — the user is looking at the reader, and closing it under them
+    /// would hide what the delete did.
+    func deleteFromKeyboard(_ id: UUID) {
+        guard var reader, reader.pages.contains(where: { $0.id == id }) else {
+            log("deleteIgnored", "id=\(id.uuidString.prefix(8)) reason=notInReader")
+            return
+        }
+        let marked = store?.deleteFromKeyboard(id) ?? false
+        HapticFeedback.keyTapped()
+        reader.pages.removeAll { $0.id == id }
+        self.reader = reader
+        reload(reason: "deleted")
+        // The page that takes its place is recorded as a use by the view, when it
+        // moves `visibleID` there.
+        log("deletedFromKeyboard", "id=\(id.uuidString.prefix(8)) marked=\(marked) pagesLeft=\(reader.pages.count)")
+    }
+
     /// `Open in Dictus`: the app's result screen on this note.
     ///
     /// No receipt: the app marks the note read when it actually shows it. The note

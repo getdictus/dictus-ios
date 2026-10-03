@@ -362,9 +362,15 @@ final class VoiceNoteProcessor: ObservableObject {
             acknowledged.append("\(receipt.id.uuidString.prefix(8)):\(receipt.action.rawValue)")
         }
 
+        // Deleted from the keyboard's reader (#639): the keyboard already hides them;
+        // the files are this process's to remove. The note itself stays in History
+        // or the queue, by their own rules.
+        let deletedInKeyboard = Array(deliveries.deletedIDs())
+        deletedInKeyboard.forEach(deliveries.withdraw)
+
         let expired = deliveries.pruneExpired()
-        guard !acknowledged.isEmpty || !expired.isEmpty else { return }
-        keyboardLog("reconciled", "reason=\(reason) acknowledged=\(acknowledged.joined(separator: ",")) expired=\(expired.count) remaining=\(deliveries.allDeliveries().count)")
+        guard !acknowledged.isEmpty || !deletedInKeyboard.isEmpty || !expired.isEmpty else { return }
+        keyboardLog("reconciled", "reason=\(reason) acknowledged=\(acknowledged.joined(separator: ",")) deletedInKeyboard=\(deletedInKeyboard.count) expired=\(expired.count) remaining=\(deliveries.allDeliveries().count)")
     }
 
     /// Ids, counts and actions only. Never the transcript (#637).

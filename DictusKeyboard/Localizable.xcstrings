@@ -180,6 +180,17 @@
         }
       }
     },
+    "Delete voice note" : {
+      "comment" : "Accessibility label of the keyboard voice note reader's button that removes the note from the keyboard; it stays in the app (#639).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la note vocale"
+          }
+        }
+      }
+    },
     "Dictus Pro" : {
       "comment" : "The Smart Mode fan row that leaves the keyboard for the paywall. A product name, so identical in French today, and in the catalog so a future locale can change it.",
       "localizations" : {

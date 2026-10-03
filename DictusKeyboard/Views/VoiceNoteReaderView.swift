@@ -8,27 +8,26 @@ import DictusCore
 /// and one action row.
 ///
 /// ```
-/// [ ✕ ]            1:42  FR             [ ↗ ]
+/// [ ✕ ]            1:42  FR             [ 🗑 ]
 ///                   ● ○ ○
 ///   Salut, je voulais te dire que pour samedi
 ///   c'est bon de mon côté…              ← swipe
 ///
-///   [================  Insert  ================]
+///   (↗)  [=============  Insert  =============]
 /// ```
 ///
 /// ### The header is the toolbar it replaces (#639, after the device test)
 ///
 /// Three slots, the bar's own: the `✕` in the ☰'s place — the reader opens from a
-/// tap on ☰, and the control under the thumb becomes its own way back — `Open in
-/// Dictus` in the mic pill's place, at the mic pill's size, and the facts in the
-/// centre slot, in the centre slot's quiet register. No title and no logo: the
-/// surface says what it is, and a "Voice note" heading over a voice note was the
-/// one line on screen carrying nothing. What is left is what helps choose: how long
-/// the message was, what language it was read in, and, with several notes, where
-/// you are among them.
+/// tap on ☰, and the control under the thumb becomes its own way back — `Delete` in
+/// the mic pill's place, at the same capsule size, and the facts in the centre
+/// slot, in the centre slot's quiet register. No title and no logo: the surface
+/// says what it is. What is left is what helps choose: how long the message was,
+/// what language it was read in, and, with several notes, where you are among them.
 ///
-/// Moving `Open in Dictus` up leaves `Insert` alone in the bottom row, full width:
-/// one primary action, where a key row was, with nothing beside it to mistap.
+/// The two header controls both *leave* something — the reader, or the note — and
+/// the bottom row holds the two that *use* the note: `Open in Dictus` as a round
+/// button, and `Insert` taking the rest of the width (second device test of #641).
 ///
 /// With no page — a tap on ☰ when nothing is waiting — it shows an empty state
 /// instead, the one place the keyboard teaches the feature (#639).
@@ -57,6 +56,8 @@ struct VoiceNoteReaderView: View {
     let onClose: () -> Void
     let onInsert: (UUID) -> Void
     let onOpenInDictus: (UUID) -> Void
+    /// Delete: takes the note out of the keyboard only (#639).
+    let onDelete: (UUID) -> Void
     /// A page came on screen: a use, which restarts the note's 15 minutes (#639).
     let onPageShown: (UUID) -> Void
 
@@ -94,14 +95,18 @@ struct VoiceNoteReaderView: View {
             visibleID = pages.first?.id
             withAnimation(.easeOut(duration: 0.2)) { appeared = true }
         }
-        // `Insert` removes the visible page (#637 decision 7). Show the one that took
-        // its place — the next, or the previous when it was the last — rather than
-        // whatever the scroll view lands on.
-        // A note that lands while the reader is open is appended (#637). On the empty
-        // state that is the first page, and it is now the one on screen.
-        .onChange(of: pages.map(\.id)) { _, newIDs in
+        // Delete removes the visible page (#639). Show the one that took its place —
+        // the next, or the previous when it was the last — rather than whatever the
+        // scroll view lands on. A note that lands while the reader is open is
+        // appended (#637); on the empty state it becomes the page on screen.
+        .onChange(of: pages.map(\.id)) { oldIDs, newIDs in
             if let visibleID, newIDs.contains(visibleID) { return }
-            visibleID = newIDs.first
+            guard !newIDs.isEmpty else {
+                visibleID = nil
+                return
+            }
+            let removedAt = visibleID.flatMap { oldIDs.firstIndex(of: $0) } ?? 0
+            visibleID = newIDs[min(removedAt, newIDs.count - 1)]
         }
         // A swipe to another page is a use of that note (#639). The first page's use is
         // recorded by the state when the reader opens.
@@ -114,23 +119,25 @@ struct VoiceNoteReaderView: View {
     // MARK: - Header
 
     /// 52 pt, the toolbar's band, with its 12 pt sides and 4 pt top inset: the `✕`
-    /// lands exactly on the ☰ and `Open in Dictus` exactly on the mic pill, so nothing
-    /// jumps when the reader opens.
+    /// lands exactly on the ☰ and `Delete` exactly on the mic pill, so nothing jumps
+    /// when the reader opens.
+    ///
+    /// One layout for both states, built so the side controls cannot drift: the two
+    /// capsules sit at the ends of a full-width row held apart by a `Spacer`, and the
+    /// facts are laid *over* that row, centred, rather than between them. The first
+    /// version put the facts between the capsules as a `@ViewBuilder` that produced
+    /// `EmptyView` on the empty state — its `.frame(maxWidth: .infinity)` vanished
+    /// with it, and the lone `✕` was centred (second device test of #641).
     private var header: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 0) {
             closeButton
-
-            pageFacts
-                .frame(maxWidth: .infinity)
-
+            Spacer(minLength: 0)
             if let page = visiblePage {
-                openInDictusButton(page.id)
-            } else {
-                // The empty state has nothing to open; the slot stays, so the facts
-                // (none) and the `✕` do not move.
-                Color.clear.frame(width: Self.barControlWidth, height: 44)
+                deleteButton(page.id)
             }
         }
+        .frame(maxWidth: .infinity)
+        .overlay { pageFacts }
         .padding(.horizontal, 12)
         .padding(.top, 4)
         .frame(height: 52)
@@ -200,23 +207,25 @@ struct VoiceNoteReaderView: View {
         }
     }
 
-    /// `Open in Dictus`, in the mic pill's place: the same 56 × 36 glass capsule as
-    /// the `✕`, so the header is the bar's silhouette and its two ends match.
-    private func openInDictusButton(_ id: UUID) -> some View {
-        barButton(systemName: "arrow.up.forward.app",
-                  label: Text("Open in Dictus", comment: "Accessibility label of the keyboard voice note reader's button that opens the note in the app (#637)."),
-                  identifier: "voiceNoteReaderOpen") {
-            onOpenInDictus(id)
+    /// `Delete`, in the mic pill's place (#639): the same 56 × 36 glass capsule as the
+    /// `✕`, the glyph in red because it removes something. From the keyboard only —
+    /// the note stays in Dictus — so no confirmation.
+    private func deleteButton(_ id: UUID) -> some View {
+        barButton(systemName: "trash", tint: .red,
+                  label: Text("Delete voice note", comment: "Accessibility label of the keyboard voice note reader's button that removes the note from the keyboard; it stays in the app (#639)."),
+                  identifier: "voiceNoteReaderDelete") {
+            onDelete(id)
         }
     }
 
     /// A header control: 36 pt to the eye, 44 pt to a finger, `ToolbarView.barIcon`'s split.
-    private func barButton(systemName: String, label: Text, identifier: String,
+    private func barButton(systemName: String, tint: Color = .dictusPillIconSecondary,
+                           label: Text, identifier: String,
                            action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 17, weight: .medium))
-                .foregroundColor(.dictusPillIconSecondary)
+                .foregroundColor(tint)
                 .frame(width: Self.barControlWidth, height: 36)
                 .dictusGlass(in: Capsule())
                 .frame(width: Self.barControlWidth, height: 44)
@@ -271,17 +280,28 @@ struct VoiceNoteReaderView: View {
 
     /// Plain text, left-aligned, body size. Scrolls on its own; a long transcript
     /// never grows the keyboard, whose height is not this view's to change (#166).
+    ///
+    /// The text's frame is at least the page's height, with a full rectangle as its
+    /// hit shape: a horizontal swipe anywhere on the page — below a two-line note
+    /// included — turns it. Without that, the empty space under a short text was no
+    /// view's at all and only a swipe starting on the words worked (second device
+    /// test of #641). The buttons are outside the pager, so nothing is taken from them;
+    /// a long text is still taller than the minimum and scrolls.
     private func transcriptPage(_ page: VoiceNoteKeyboardDelivery) -> some View {
-        ScrollView(.vertical) {
-            Text(page.transcript)
-                .font(.body)
-                .foregroundColor(foregroundColor)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
+        GeometryReader { geo in
+            ScrollView(.vertical) {
+                Text(page.transcript)
+                    .font(.body)
+                    .foregroundColor(foregroundColor)
+                    .multilineTextAlignment(.leading)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity, minHeight: geo.size.height, alignment: .topLeading)
+                    .contentShape(Rectangle())
+            }
+            .scrollIndicators(.hidden)
         }
-        .scrollIndicators(.hidden)
+        .contentShape(Rectangle())
         .mask(edgeFade)
     }
 
@@ -301,14 +321,29 @@ struct VoiceNoteReaderView: View {
 
     // MARK: - Actions
 
-    /// One key row tall: `Insert`, alone and full width, on the visible page. The
-    /// keyboard's job is to write, and the bottom row is where a thumb already is.
+    /// One key row tall, on the visible page: `Open in Dictus` as a round glass button
+    /// on the leading side, `Insert` taking the rest of the width (#637's row,
+    /// restored after the second device test of #641).
     ///
     /// No `Copy` (device feedback on PR #638, 2026-10-03): `Insert` is the keyboard's
     /// job, and the full result screen behind `Open in Dictus` already copies.
     private var actionRow: some View {
-        Group {
+        HStack(spacing: 10) {
             if let page = visiblePage {
+                Button {
+                    onOpenInDictus(page.id)
+                } label: {
+                    Image(systemName: "arrow.up.forward.app")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(.dictusPillIconSecondary)
+                        .frame(width: 44, height: 44)
+                        .dictusGlass(in: Circle())
+                        .contentShape(Circle())
+                }
+                .buttonStyle(GlassPressStyle())
+                .accessibilityLabel(Text("Open in Dictus", comment: "Accessibility label of the keyboard voice note reader's button that opens the note in the app (#637)."))
+                .accessibilityIdentifier("voiceNoteReaderOpen")
+
                 Button {
                     onInsert(page.id)
                 } label: {

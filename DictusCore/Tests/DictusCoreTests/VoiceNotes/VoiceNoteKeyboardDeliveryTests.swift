@@ -150,6 +150,40 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
         XCTAssertEqual(store.lastUsedDates(), [:])
     }
 
+    // MARK: - Deleted from the keyboard (#639)
+
+    /// The reader's Delete takes the note out of the keyboard at once, before the app
+    /// has run, without touching the delivery file — that is the app's.
+    func testADeletedNoteLeavesThePendingListAtOnce() throws {
+        let kept = delivery(sharedSecondsAgo: 100)
+        let deleted = delivery(sharedSecondsAgo: 50)
+        try store.publish(kept)
+        try store.publish(deleted)
+        XCTAssertTrue(store.deleteFromKeyboard(deleted.id))
+        XCTAssertTrue(store.deleteFromKeyboard(deleted.id), "idempotent")
+        XCTAssertEqual(store.pending(at: now), [kept])
+        XCTAssertEqual(store.deletedIDs(), [deleted.id])
+        XCTAssertEqual(store.allDeliveries().count, 2)
+    }
+
+    /// A new store value (a new keyboard process) still hides it.
+    func testADeletionSurvivesANewProcess() throws {
+        let note = delivery(sharedSecondsAgo: 50)
+        try store.publish(note)
+        store.deleteFromKeyboard(note.id)
+        XCTAssertEqual(VoiceNoteKeyboardDeliveryStore(root: root).pending(at: now), [])
+    }
+
+    /// The app cleans up by withdrawing it, which removes the marker with the rest.
+    func testWithdrawingADeletedNoteClearsItsMarker() throws {
+        let note = delivery(sharedSecondsAgo: 50)
+        try store.publish(note)
+        store.deleteFromKeyboard(note.id)
+        store.withdraw(note.id)
+        XCTAssertEqual(store.deletedIDs(), [])
+        XCTAssertEqual(store.allDeliveries(), [])
+    }
+
     // MARK: - 15 minutes after the last use (#639)
 
     func testTheIdleWindowIsFifteenMinutes() {

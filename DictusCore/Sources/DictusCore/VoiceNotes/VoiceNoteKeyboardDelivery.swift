@@ -14,8 +14,9 @@ import Foundation
 /// app publishes a small envelope the keyboard rereads from disk every time it asks
 /// (#637, Option A), and the stores stay single-writer.
 ///
-/// It is an envelope, not a second History: it leaves the disk `idleWindow` after
-/// its last use, or when the note is deleted in DictusApp (#639).
+/// It is an envelope, not a second History: it leaves the keyboard `idleWindow` after
+/// its last use, when the user deletes it from the keyboard's reader, or when the
+/// note is deleted in DictusApp (#639).
 public struct VoiceNoteKeyboardDelivery: Codable, Identifiable, Equatable, Sendable {
     /// The voice note's id, which is also its History record's id.
     public let id: UUID
@@ -122,6 +123,7 @@ public struct VoiceNoteKeyboardAcknowledgement: Codable, Equatable, Sendable {
 ///   Acknowledgements/<id>.json  written by the keyboard, deleted by DictusApp
 ///   Presented/<id>              written by the keyboard, deleted by DictusApp
 ///   Uses/<id>.json              written by the keyboard, deleted by DictusApp
+///   Deleted/<id>                written by the keyboard, deleted by DictusApp
 /// ```
 ///
 /// ### Who writes what
@@ -132,7 +134,10 @@ public struct VoiceNoteKeyboardAcknowledgement: Codable, Equatable, Sendable {
 /// keyboard never touches a delivery, it drops files beside it. A receipt is what
 /// DictusApp turns into "read" when it next comes to the foreground — the keyboard
 /// does not mutate either store (#637 decision 6). A use is what keeps the note in
-/// the keyboard 15 more minutes (#639).
+/// the keyboard 15 more minutes (#639). A deletion marker is what takes it out of
+/// the keyboard at once when the user deletes it from the reader (#639): the
+/// keyboard cannot delete the delivery, which is DictusApp's file, so it marks it
+/// and DictusApp withdraws it on its next run.
 ///
 /// A value with no cache: every read goes to the disk, because the reader is a
 /// process that can be suspended for hours and resumed after the app wrote.
@@ -155,6 +160,7 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
     var acknowledgementsDirectory: URL { root.appendingPathComponent("Acknowledgements", isDirectory: true) }
     var presentedDirectory: URL { root.appendingPathComponent("Presented", isDirectory: true) }
     var usesDirectory: URL { root.appendingPathComponent("Uses", isDirectory: true) }
+    var deletedDirectory: URL { root.appendingPathComponent("Deleted", isDirectory: true) }
 
     private func deliveryFile(_ id: UUID) -> URL {
         deliveriesDirectory.appendingPathComponent("\(id.uuidString).json")
@@ -172,6 +178,10 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
         usesDirectory.appendingPathComponent("\(id.uuidString).json")
     }
 
+    private func deletedFile(_ id: UUID) -> URL {
+        deletedDirectory.appendingPathComponent(id.uuidString)
+    }
+
     // MARK: - DictusApp
 
     /// Offer a finished transcript to the keyboard. Atomic: the keyboard sees the
@@ -185,10 +195,11 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
     }
 
     /// Take a note out of the keyboard, with everything the keyboard wrote beside it.
-    /// Idempotent. Since #639 only two things call for it: the note's `idleWindow`
-    /// running out, and the user deleting the note in DictusApp.
+    /// Idempotent. Since #639 three things call for it: the note's `idleWindow`
+    /// running out, the user deleting the note in DictusApp, and DictusApp cleaning
+    /// up after a deletion from the keyboard (`deletedIDs`).
     public func withdraw(_ id: UUID) {
-        for url in [deliveryFile(id), acknowledgementFile(id), presentedFile(id), useFile(id)] {
+        for url in [deliveryFile(id), acknowledgementFile(id), presentedFile(id), useFile(id), deletedFile(id)] {
             try? FileManager.default.removeItem(at: url)
         }
     }
@@ -231,12 +242,35 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
 
     // MARK: - Keyboard
 
-    /// What the keyboard may offer right now: every delivery inside its `idleWindow`,
-    /// oldest share first. Inserted ones included (#639): a receipt says "read", and a
-    /// note read once can still be quoted from.
+    /// What the keyboard may offer right now: every delivery inside its `idleWindow`
+    /// that the user has not deleted from the keyboard, oldest share first. Inserted
+    /// ones included (#639): a receipt says "read", and a note read once can still be
+    /// quoted from.
     public func pending(at now: Date = Date()) -> [VoiceNoteKeyboardDelivery] {
         let uses = lastUsedDates()
-        return allDeliveries().filter { !$0.isExpired(at: now, lastUsedAt: uses[$0.id]) }
+        let deleted = deletedIDs()
+        return allDeliveries().filter { !deleted.contains($0.id) && !$0.isExpired(at: now, lastUsedAt: uses[$0.id]) }
+    }
+
+    /// The user deleted a note from the keyboard's reader (#639): it leaves the
+    /// keyboard at once, and only the keyboard. DictusApp keeps the note itself by its
+    /// own History and queue rules; it only withdraws the delivery on its next run.
+    /// An empty marker file: existence is the fact. Idempotent. Returns whether the
+    /// marker is on disk.
+    @discardableResult
+    public func deleteFromKeyboard(_ id: UUID) -> Bool {
+        if FileManager.default.fileExists(atPath: deletedFile(id).path) { return true }
+        do {
+            try FileManager.default.createDirectory(at: deletedDirectory, withIntermediateDirectories: true)
+            return FileManager.default.createFile(atPath: deletedFile(id).path, contents: Data())
+        } catch {
+            return false
+        }
+    }
+
+    /// The notes the user deleted from the keyboard and DictusApp has not withdrawn yet.
+    public func deletedIDs() -> Set<UUID> {
+        Set(files(in: deletedDirectory).compactMap { UUID(uuidString: $0.lastPathComponent) })
     }
 
     /// When the earliest of these deliveries leaves the keyboard, or nil for none. The
