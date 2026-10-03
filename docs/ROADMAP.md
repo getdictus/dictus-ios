@@ -24,8 +24,9 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 6. #494 — onboarding that starts the trial and teaches the Smart Modes. `ready-for-agent`
 7. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
 8. #621 — search the history: the paywall already sells it. `ready-for-agent`. Must land before #279.
-9. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
-10. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
+9. #643 — App Store listing for 2.0.0: screenshots that sell Pro, plus a French listing. Pierre picks direction A/B/C first.
+10. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
+11. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
 Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215, #620 voice notes.
 
