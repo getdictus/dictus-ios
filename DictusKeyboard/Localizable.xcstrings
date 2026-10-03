@@ -285,13 +285,13 @@
         }
       }
     },
-    "Long press: your voice notes" : {
-      "comment" : "Toolbar hint, right of the menu button, teaching that a long press on it opens the shared voice notes. An arrow pointing at the menu button precedes it (#639).",
+    "Long press: languages & settings" : {
+      "comment" : "Toolbar hint, right of the menu button, teaching that a long press on it opens the keyboard panel (languages, layouts, settings). An arrow pointing at the menu button precedes it (#639).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appui long : tes vocaux"
+            "value" : "Appui long : langues et réglages"
           }
         }
       }
@@ -703,17 +703,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "espace"
-          }
-        }
-      }
-    },
-    "Voice note" : {
-      "comment" : "Header of the keyboard's voice note reader (#637).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Note vocale"
           }
         }
       }

@@ -73,8 +73,8 @@ struct SettingsView: View {
     @AppStorage(SharedKeys.autocorrectDebugLogging, store: UserDefaults(suiteName: AppGroup.identifier))
     private var autocorrectDebugLogging = false
 
-    /// Debug-only: the keyboard never opens the voice note reader by itself; a long
-    /// press on ☰ still does (#637 decision 3, #639). Stored inverted — "disabled" —
+    /// Debug-only: the keyboard never opens the voice note reader by itself; a tap on
+    /// ☰ still does (#637 decision 3, #639). Stored inverted — "disabled" —
     /// so the key's absence, which is every Release build and every fresh install, is
     /// the default "auto-open". Read by the keyboard at each appearance.
     @AppStorage(SharedKeys.debugVoiceNoteAutoOpenDisabled, store: UserDefaults(suiteName: AppGroup.identifier))
@@ -565,10 +565,10 @@ struct SettingsView: View {
                 ))
             } footer: {
                 if voiceNoteAutoOpenDisabled {
-                    Text("Long press only: a waiting voice note opens from a long press on the keyboard's menu button. Debug builds only.")
+                    Text("Tap only: a waiting voice note opens from a tap on the keyboard's menu button. Debug builds only.")
                         .foregroundColor(.orange)
                 } else {
-                    Text("The keyboard opens a new voice note transcript the first time it appears. A long press on the menu button works either way.")
+                    Text("The keyboard opens a new voice note transcript the first time it appears. A tap on the menu button works either way.")
                 }
             }
             #endif

@@ -5,8 +5,9 @@ import Combine
 import DictusCore
 
 /// What the keyboard knows about voice notes shared to Dictus: which transcripts are
-/// waiting for it, which of them it has never shown, whether the long press on ☰
-/// still needs teaching, and the reader while it is open.
+/// waiting for it, which of them it has never shown, and the reader while it is open.
+/// It also holds the two facts behind the panel hint (#639), because one of them —
+/// "the reader was opened by a tap" — happens here.
 ///
 /// ### Why a separate object rather than properties on `KeyboardState`
 ///
@@ -44,7 +45,7 @@ final class KeyboardVoiceNoteState: ObservableObject {
     ///
     /// A snapshot taken when it opens rather than a live view of `waiting`, so a note
     /// that lands while it is open is appended as a last page instead of reshuffling
-    /// the pages under the user's eyes. Empty when the long press found nothing to
+    /// the pages under the user's eyes. Empty when the tap on ☰ found nothing to
     /// show: the reader then draws its empty state, the one place the keyboard
     /// explains the feature (#639).
     struct Reader: Equatable {
@@ -58,9 +59,11 @@ final class KeyboardVoiceNoteState: ObservableObject {
     /// any waiting note is not in here (#639).
     @Published private(set) var presentedIDs: Set<UUID> = []
 
-    /// Whether the user has ever long-pressed ☰ (#639). Cached: the flag only ever
-    /// moves once, and from this process.
-    @Published private(set) var longPressUsed = VoiceNoteDiscovery.hasUsedLongPress
+    /// Whether the reader was ever opened by a tap on ☰, and whether the panel was
+    /// ever opened by a long press on it (#639). Cached: each flag only ever moves
+    /// once, and from this process.
+    @Published private(set) var readerOpenedByTap = MenuPanelDiscovery.hasOpenedReaderByTap
+    @Published private(set) var menuLongPressUsed = MenuPanelDiscovery.hasUsedLongPress
 
     /// The reader, or nil when it is closed.
     @Published private(set) var reader: Reader?
@@ -71,9 +74,10 @@ final class KeyboardVoiceNoteState: ObservableObject {
         waiting.contains { !presentedIDs.contains($0.id) }
     }
 
-    /// Whether the toolbar still teaches the long press on ☰ (#639).
-    var offersLongPressHint: Bool {
-        VoiceNoteDiscovery.offersHint(notesWaiting: waiting.count, longPressUsed: longPressUsed)
+    /// Whether the toolbar still teaches that the panel moved to a long press on ☰
+    /// (#639).
+    var offersPanelHint: Bool {
+        MenuPanelDiscovery.offersHint(readerOpenedByTap: readerOpenedByTap, longPressUsed: menuLongPressUsed)
     }
 
     /// Ids that have already buzzed, or were already waiting when the keyboard
@@ -160,22 +164,23 @@ final class KeyboardVoiceNoteState: ObservableObject {
 
     // MARK: - Opening and closing
 
-    /// A long press on ☰ was recognised (#639): open the reader, whatever is waiting.
-    ///
-    /// Called at the **recognition**, not the release. The reader replaces the toolbar
-    /// in `KeyboardRootView.body`, so the view carrying the recogniser is destroyed by
-    /// this very call and nothing after it is delivered (the #79 identity trap). The
-    /// first long press ever retires the hint, whether the reader could open or not:
-    /// the user has found the gesture. Returns whether the reader is on screen.
-    @discardableResult
-    func openFromLongPress() -> Bool {
-        VoiceNoteDiscovery.noteLongPressUsed()
-        if !longPressUsed { longPressUsed = true }
-        return open(source: "longPress")
+    /// A tap on ☰ (#639): open the reader, whatever is waiting — the empty state when
+    /// nothing is. The first one that opens it arms the panel hint: this user now
+    /// knows the tap no longer opens the languages.
+    func openFromTap() {
+        guard open(source: "menuTap") else { return }
+        MenuPanelDiscovery.noteReaderOpenedByTap()
+        if !readerOpenedByTap { readerOpenedByTap = true }
+    }
+
+    /// A long press on ☰ opened the panel (#639): the panel hint retires for good.
+    func menuLongPressRecognised() {
+        MenuPanelDiscovery.noteLongPressUsed()
+        if !menuLongPressUsed { menuLongPressUsed = true }
     }
 
     /// Open the reader on every waiting note, or on its empty state when there is none
-    /// (#639). From a long press on ☰, or from an appearance.
+    /// (#639). From a tap on ☰, or from an appearance.
     @discardableResult
     func open(source: String) -> Bool {
         guard reader == nil else { return KeyboardState.shared.areaMode == .voiceNoteResult }
@@ -226,8 +231,7 @@ final class KeyboardVoiceNoteState: ObservableObject {
     /// to (#548). It returns whether it wrote.
     ///
     /// The note **stays** (#639): the receipt marks it read in DictusApp and the use
-    /// restarts its 15 minutes, so a long press on ☰ finds it again for another
-    /// passage. The reader closes rather than staying on the page it just inserted —
+    /// restarts its 15 minutes, so a tap on ☰ finds it again for another passage. The reader closes rather than staying on the page it just inserted —
     /// the user goes back to writing, and a second tap on the same `Insert` would
     /// only be a duplicate.
     ///

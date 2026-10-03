@@ -18,9 +18,9 @@ import DictusCore
 ///     closed:  [☰]  ← centre slot →  [🎤 pill]
 ///     open:    [✕]                   [Dictus Pro] [⚙]
 ///
-/// The ☰ has two gestures (#639): a tap opens the panel, a long press opens the
-/// voice note reader. It wears an accent ring while a shared voice note waits that
-/// the keyboard has never shown.
+/// The ☰ has two gestures (#639): a tap opens the voice note reader, a long press
+/// opens the panel. It wears an accent ring while a shared voice note waits that the
+/// keyboard has never shown.
 ///
 /// There is deliberately no mic while the panel is open: the panel is not a
 /// surface anyone dictates from, and the mic's absence is what makes the state
@@ -62,8 +62,9 @@ struct ToolbarView: View {
     /// Drives which of the two presentations above the bar renders.
     var isPanelOpen: Bool = false
 
-    /// Opens the panel from the hamburger, closes it from the ✕. Same callback:
-    /// both are the same control in the same 32 pt slot, just labelled by state.
+    /// Opens the panel from a long press on the hamburger, closes it from the ✕'s tap
+    /// (#639). Same callback: both are the same control in the same slot, labelled
+    /// by state.
     var onPanelToggle: (() -> Void)?
 
     /// Gear, panel presentation only. Opens DictusApp.
@@ -120,24 +121,26 @@ struct ToolbarView: View {
     /// ☰ capsule wears an accent ring, the way a selected control would.
     var ringsMenuForVoiceNotes: Bool = false
 
-    /// Whether the "← Long press: your voice notes" hint is still worth showing. The
-    /// policy is `VoiceNoteDiscovery`'s; this is only the answer.
-    var offersVoiceNoteHint: Bool = false
+    /// Whether the "← Long press: languages & settings" hint is still worth showing.
+    /// The policy is `MenuPanelDiscovery`'s; this is only the answer.
+    var offersPanelHint: Bool = false
 
-    /// A long press on ☰ was recognised: open the voice note reader (#639). Called at
-    /// the recognition, because the reader replaces this whole bar and nothing after
-    /// that is delivered here. Returns whether the reader opened.
-    var onMenuLongPress: (() -> Bool)?
+    /// A tap on ☰: open the voice note reader (#639).
+    var onMenuTap: (() -> Void)?
+
+    /// A long press on ☰ was recognised and the panel is opening (#639): retires the
+    /// panel hint. The panel itself opens through `onPanelToggle`.
+    var onMenuLongPress: (() -> Void)?
 
     /// Set when the long press on ☰ is recognised, cleared by the release it belongs
     /// to — the `fanGestureDidOpen` arrangement, for the ☰.
     ///
-    /// WHY it exists although the bar is usually gone by the release: the long press is
-    /// a `simultaneousGesture`, so the ☰ `Button` stays live and fires its tap action
-    /// on a release inside its bounds, which would open the panel right behind the
-    /// reader. When the reader opens, this view is destroyed and the release goes
-    /// nowhere. When it is refused — a dictation owns the area — the view survives,
-    /// and this flag is what keeps a long press from ever opening the panel.
+    /// WHY: the long press is a `simultaneousGesture`, so the ☰ `Button` stays live
+    /// and fires its tap action on a release inside its bounds — which would open the
+    /// reader over the panel the long press just opened. The panel swaps this bar's
+    /// presentation (`dictationBar` → `panelBar`), so the ☰ button is normally gone by
+    /// the release and the release goes nowhere; this flag is the guarantee for every
+    /// case where it is not.
     ///
     /// Reset when the press **begins** (`onChanged` delivers the finger landing), not
     /// on release, for `fanGestureWasRefused`'s reason: a release that never arrives
@@ -272,7 +275,7 @@ struct ToolbarView: View {
             polishUnavailable: showsPolishUnavailable,
             armedModeName: armedSmartMode?.localizedDisplayName,
             armedModeIsEffective: effectiveSmartMode != nil,
-            offersVoiceNoteHint: offersVoiceNoteHint,
+            offersPanelHint: offersPanelHint,
             offersDiscoveryHint: offersSmartModeHint
         )
     }
@@ -299,8 +302,8 @@ struct ToolbarView: View {
             armedModeLabel(name)
         case .armedModeInactive(let name):
             inactiveArmedModeLabel(name)
-        case .voiceNoteHint:
-            voiceNoteHint
+        case .panelHint:
+            panelHint
         case .discoveryHint:
             discoveryHint
         case .empty:
@@ -575,64 +578,65 @@ struct ToolbarView: View {
     /// The curve is still described above as the mic's own. That is now a statement
     /// about the app's recording screen, which is where the breathing survives.
     private var discoveryHint: some View {
-        HStack(spacing: 6) {
+        driftingHint(
             Text(
                 "Hold the mic for Smart Modes",
                 comment: "Toolbar hint teaching the long-press gesture that opens the Smart Mode fan."
-            )
-            .lineLimit(1)
-            .minimumScaleFactor(0.75)
-
+            ),
             // Toward the mic, which is the point of the sentence and sits to the
             // right of it in both presentations of this bar.
-            Image(systemName: "arrow.right")
-                .font(.system(size: 10, weight: .semibold))
-                .offset(x: hintDrift * 2.2)
+            pointing: .right
+        )
+    }
+
+    /// "← Long press: languages & settings", the panel hint (#639).
+    ///
+    /// Since #639 a tap on ☰ opens the voice notes and the panel moved behind a long
+    /// press; this tells the user who has met the new tap where the languages went.
+    /// Same rung as the Smart Mode hint, and drawn by the very same layout — same
+    /// leading inset, same centring in the slot, same breath — so the two never sit
+    /// differently in the bar (#639 device feedback: a first version was glued to
+    /// the ☰ and off-centre). Only the arrow's side differs: it points at the ☰.
+    private var panelHint: some View {
+        driftingHint(
+            Text(
+                "Long press: languages & settings",
+                comment: "Toolbar hint, right of the menu button, teaching that a long press on it opens the keyboard panel (languages, layouts, settings). An arrow pointing at the menu button precedes it (#639)."
+            ),
+            pointing: .left
+        )
+    }
+
+    /// Which way a hint's arrow points: at the control the sentence names.
+    private enum HintDirection { case left, right }
+
+    /// The one layout both discovery hints use. See `discoveryHint` for the motion.
+    ///
+    /// The arrow drifts toward what it names, a little further than the text: right
+    /// for the mic, left for the ☰. Everything else is shared, which is the point.
+    private func driftingHint(_ text: Text, pointing direction: HintDirection) -> some View {
+        let sign: CGFloat = direction == .right ? 1 : -1
+        let arrow = Image(systemName: direction == .right ? "arrow.right" : "arrow.left")
+            .font(.system(size: 10, weight: .semibold))
+            .offset(x: sign * hintDrift * 2.2)
+        let label = text
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+        return HStack(spacing: 6) {
+            if direction == .left { arrow }
+            label
+            if direction == .right { arrow }
         }
         .font(.caption2)
         .foregroundStyle(.secondary)
         .opacity(0.62 + hintDrift * 0.13)
-        .offset(x: hintDrift)
+        .offset(x: sign * hintDrift)
         .padding(.leading, 6)
         .frame(maxWidth: .infinity)
         .onAppear {
             // Assigned inside the animation and never reset: the hint has no other
             // states, so there is nothing here to cancel and stack the way
             // `AnimatedMicButton` has to.
-            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-                hintDrift = 3
-            }
-        }
-    }
-
-    /// "← Long press: your voice notes", the voice note hint (#639).
-    ///
-    /// The Smart Mode hint's register and its breath, mirrored: it points *left*, at
-    /// the ☰ it sits beside, so it is leading-aligned rather than centred — the arrow
-    /// has to be next to the thing it names — and the arrow reaches toward the ☰ the
-    /// way the other one reaches toward the mic. Same cost too, a repeating animation
-    /// in the extension, and the same bound on it: it is gone after the first long
-    /// press, and it only exists while a note waits.
-    private var voiceNoteHint: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "arrow.left")
-                .font(.system(size: 10, weight: .semibold))
-                .offset(x: -hintDrift * 2.2)
-
-            Text(
-                "Long press: your voice notes",
-                comment: "Toolbar hint, right of the menu button, teaching that a long press on it opens the shared voice notes. An arrow pointing at the menu button precedes it (#639)."
-            )
-            .lineLimit(1)
-            .minimumScaleFactor(0.75)
-        }
-        .font(.caption2)
-        .foregroundStyle(.secondary)
-        .opacity(0.62 + hintDrift * 0.13)
-        .offset(x: -hintDrift)
-        .padding(.leading, 2)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .onAppear {
             withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
                 hintDrift = 3
             }
@@ -694,12 +698,13 @@ struct ToolbarView: View {
     /// announces its language through the spacebar label and the key positions,
     /// and a variable-width label jitters the most contested 32 pt of the UI.
     ///
-    /// Two gestures on one control (#639): the tap opens the panel, unchanged — a
-    /// bilingual user keeps a one-tap language switch, and the panel stays a paywall
-    /// entry point — and a long press opens the voice note reader. Same glyph either
-    /// way. `simultaneousGesture` for the mic's reason: the tap must not pay a
-    /// long-press delay. See `menuLongPressDidFire` for how a long press is kept from
-    /// also being a tap.
+    /// Two gestures on one control (#639, amended after the device test): the tap
+    /// opens the voice note reader — reading a note and typing alternate many times in
+    /// a session — and a long press opens the panel (languages, layouts, Settings,
+    /// Pro). Accepted cost: the one-tap language switch, and the #279 paywall entry
+    /// point moves behind the long press. Same glyph either way. `simultaneousGesture`
+    /// for the mic's reason: the tap must not pay a long-press delay. See
+    /// `menuLongPressDidFire` for how a long press is kept from also being a tap.
     private var hamburgerButton: some View {
         Button {
             guard !menuLongPressDidFire else {
@@ -707,7 +712,7 @@ struct ToolbarView: View {
                 return
             }
             HapticFeedback.keyTapped()
-            onPanelToggle?()
+            onMenuTap?()
         } label: {
             barIcon(systemName: "line.3.horizontal", size: 17, width: Self.micPillWidth, shape: .capsule,
                     ringed: ringsMenuForVoiceNotes)
@@ -717,15 +722,15 @@ struct ToolbarView: View {
         .accessibilityLabel(Text("Keyboard menu"))
     }
 
-    /// The ☰ long press (#639): opens the reader **at recognition**, with the fan's
+    /// The ☰ long press (#639): opens the panel **at recognition**, with the fan's
     /// haptic, the same feel as the Smart Mode long press on the mic (#79).
     ///
     /// 0.35 s, the mic's duration, so the two long presses of this bar are one gesture
     /// to learn. A plain `LongPressGesture` ends — `onEnded` — the moment the duration
     /// is reached with the finger still down; that is the recognition, and it is the
-    /// last moment this view is guaranteed to exist: the reader replaces the toolbar
-    /// in `KeyboardRootView.body` (see the #79 comment there), so nothing is left to
-    /// receive the release.
+    /// last moment the ☰ button is guaranteed to exist: opening the panel swaps this
+    /// bar to `panelBar` (the #79 identity trap, one level down), so nothing is
+    /// expected to receive the release.
     private var menuLongPress: some Gesture {
         LongPressGesture(minimumDuration: 0.35)
             .onChanged { _ in
@@ -735,7 +740,8 @@ struct ToolbarView: View {
             .onEnded { _ in
                 menuLongPressDidFire = true
                 HapticFeedback.keyTapped()
-                _ = onMenuLongPress?()
+                onMenuLongPress?()
+                onPanelToggle?()
             }
     }
 
@@ -842,6 +848,9 @@ struct ToolbarView: View {
     /// visual echo of them, not a shared constant to be refactored away.
     private static let micPillWidth: CGFloat = 56
 
+    /// The ☰'s "voice note waiting" ring (#639). See `barIcon`.
+    private static let ringWidth: CGFloat = 3
+
     /// Diameter of the round icon buttons, and the height of every bar control.
     private var iconDiameter: CGFloat { 36 }
 
@@ -871,6 +880,12 @@ struct ToolbarView: View {
     /// control is drawn — the ☰'s "a voice note is waiting" state. On the backing
     /// rather than the touch frame, so it outlines what the eye already reads as the
     /// control, and inside its edge (`strokeBorder`) so nothing grows.
+    ///
+    /// 3 pt, not 2 (device feedback on #641): glass already draws a light rim of its
+    /// own, and 2 pt of accent on a 36 pt capsule read as part of that rim rather than
+    /// as a state. 3 pt is the thinnest that still reads as "selected" on both
+    /// keyboard appearances, and it costs nothing in geometry since it is drawn inside
+    /// the edge.
     private func barIcon(
         systemName: String,
         size: CGFloat,
@@ -886,9 +901,9 @@ struct ToolbarView: View {
             .overlay {
                 if ringed {
                     if shape == .capsule {
-                        Capsule().strokeBorder(Color.dictusAccent, lineWidth: 2)
+                        Capsule().strokeBorder(Color.dictusAccent, lineWidth: Self.ringWidth)
                     } else {
-                        Circle().strokeBorder(Color.dictusAccent, lineWidth: 2)
+                        Circle().strokeBorder(Color.dictusAccent, lineWidth: Self.ringWidth)
                     }
                 }
             }

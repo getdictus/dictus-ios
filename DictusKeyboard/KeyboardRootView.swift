@@ -207,8 +207,11 @@ struct KeyboardRootView: View {
             onSmartModeFanRelease: { smartModes.commit() },
             isSmartModeFanOpen: smartModes.fan != nil,
             ringsMenuForVoiceNotes: voiceNotes.hasUnshownNotes,
-            offersVoiceNoteHint: voiceNotes.offersLongPressHint,
-            onMenuLongPress: { voiceNotes.openFromLongPress() }
+            offersPanelHint: voiceNotes.offersPanelHint,
+            // #639: the ☰'s tap is the voice note reader; its long press opens the
+            // panel through `onPanelToggle` above and retires the panel hint here.
+            onMenuTap: { voiceNotes.openFromTap() },
+            onMenuLongPress: { voiceNotes.menuLongPressRecognised() }
         )
         .frame(height: toolbarHeight)
     }
@@ -310,10 +313,10 @@ struct KeyboardRootView: View {
                 // is a branch here and not a case of `areaBelowToolbar`. The layout
                 // behind it is `.recording`'s, set by `KeyboardViewController`.
                 //
-                // It opens from a long press on the ☰ (#639), and this branch destroys
-                // the toolbar that carried the recogniser — the trap described below.
-                // That is why the reader opens at the long press's *recognition*:
-                // nothing after it reaches the toolbar, the release included.
+                // It opens from a tap on the ☰ (#639), and this branch destroys the
+                // toolbar that carried it — the trap described below. The ☰'s long
+                // press, which opens the panel instead, is why the tap is latched in
+                // `ToolbarView.menuLongPressDidFire`.
                 VoiceNoteReaderView(
                     pages: reader.pages,
                     onClose: { voiceNotes.close(reason: "close") },

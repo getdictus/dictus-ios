@@ -331,7 +331,7 @@ public enum VoiceNoteKeyboardPresentation {
     public enum Decision: Equatable, Sendable {
         /// Take the surface over and show the reader.
         case openReader
-        /// Leave the keys. The ☰ ring says a note is waiting, and a long press on ☰
+        /// Leave the keys. The ☰ ring says a note is waiting, and a tap on ☰
         /// opens it (#639).
         case keysOnly
     }
@@ -346,11 +346,11 @@ public enum VoiceNoteKeyboardPresentation {
     ///
     /// At an appearance the user has just come back to the conversation and has not
     /// started typing, so the reader opens — once per note: a note the reader has
-    /// already shown is reachable from a long press on ☰ only (decision 2, #639). Nothing opens over
+    /// already shown is reachable from a tap on ☰ only (decision 2, #639). Nothing opens over
     /// a dictation, which owns the whole area, or over a picker the user left open.
     ///
     /// - Parameter autoOpenEnabled: decision 3's Debug switch, for the device
-    ///   comparison between "auto-open" and "long press on ☰ only".
+    ///   comparison between "auto-open" and "tap on ☰ only".
     public static func onAppearance(pending: [VoiceNoteKeyboardDelivery],
                                     presentedIDs: Set<UUID>,
                                     autoOpenEnabled: Bool,

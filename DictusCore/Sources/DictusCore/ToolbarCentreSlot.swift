@@ -41,14 +41,15 @@ import Foundation
 ///    demoting the inactive one would hide the very thing the user needs to see to
 ///    understand why their dictations changed.
 /// 6. **Discovery hints** — cost nothing, because they only render when there is
-///    nothing else at all to show. Two at this rung: the voice note one (#639),
-///    which teaches the long press on ☰ while a note waits, and the Smart Mode one
-///    (#79). When both apply the voice note one wins: it is tied to something that
-///    just happened, where the Smart Mode one would say the same thing tomorrow.
+///    nothing else at all to show. Two at this rung: the panel one (#639), which
+///    teaches that the panel moved to a long press on ☰, and the Smart Mode one
+///    (#79). When both apply the panel one wins: it answers a change the user has
+///    just run into — the tap on ☰ opened the voice notes, not the languages —
+///    where the Smart Mode one would say the same thing tomorrow.
 ///
 /// #637 had a voice note **chip** at 3b, below the suggestions. #639 took it out:
-/// the reader now opens from a long press on ☰, the ☰ carries the "something is
-/// waiting" ring, and the slot went back to suggestions, undo and hints.
+/// the reader now opens from a tap on ☰, the ☰ carries the "something is waiting"
+/// ring, and the slot went back to suggestions, undo and hints.
 public enum ToolbarCentreSlot: Equatable, Sendable {
 
     /// The Smart Mode fan is open: the bar titles it.
@@ -83,8 +84,8 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// the bar named the mode in accent blue while every dictation ran Normal.
     case armedModeInactive(String)
 
-    /// "← Long press: your voice notes" (#639), pointing at the ☰ beside it.
-    case voiceNoteHint
+    /// "← Long press: languages & settings" (#639), pointing at the ☰ beside it.
+    case panelHint
 
     /// "Long-press for Smart Modes".
     case discoveryHint
@@ -113,8 +114,8 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     ///   safe-looking answer is the one that produced the bug.
     /// - Parameter offersDiscoveryHint: whether the hint is still worth showing —
     ///   the caller owns that policy, see `SmartModeDiscovery`.
-    /// - Parameter offersVoiceNoteHint: whether the long press on ☰ is still worth
-    ///   teaching (#639) — the caller owns that policy, see `VoiceNoteDiscovery`.
+    /// - Parameter offersPanelHint: whether the long press on ☰ is still worth
+    ///   teaching (#639) — the caller owns that policy, see `MenuPanelDiscovery`.
     public static func resolve(isChoosingMode: Bool,
                                errorMessage: String?,
                                offersDictationUndo: Bool,
@@ -122,7 +123,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
                                polishUnavailable: Bool,
                                armedModeName: String?,
                                armedModeIsEffective: Bool,
-                               offersVoiceNoteHint: Bool,
+                               offersPanelHint: Bool,
                                offersDiscoveryHint: Bool) -> ToolbarCentreSlot {
         if isChoosingMode { return .choosingMode }
         if let errorMessage { return .error(errorMessage) }
@@ -132,7 +133,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
         if let armedModeName {
             return armedModeIsEffective ? .armedMode(armedModeName) : .armedModeInactive(armedModeName)
         }
-        if offersVoiceNoteHint { return .voiceNoteHint }
+        if offersPanelHint { return .panelHint }
         if offersDiscoveryHint { return .discoveryHint }
         return .empty
     }
@@ -144,13 +145,13 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// glance. The rest share the bar with the hamburger, at the cost — accepted
     /// since #241 — that the keyboard language cannot be changed mid-word.
     ///
-    /// The voice note hint (#639) least of all: it points at the ☰, and the long
-    /// press it teaches is on the ☰.
+    /// The panel hint (#639) least of all: it points at the ☰, and the long press it
+    /// teaches is on the ☰.
     public var evictsHamburger: Bool {
         switch self {
         case .error, .dictationUndo, .suggestions: return true
         case .choosingMode, .polishUnavailable, .armedMode, .armedModeInactive,
-             .voiceNoteHint, .discoveryHint, .empty:
+             .panelHint, .discoveryHint, .empty:
             return false
         }
     }

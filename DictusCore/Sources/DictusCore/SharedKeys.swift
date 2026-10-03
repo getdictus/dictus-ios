@@ -117,7 +117,7 @@ public enum SharedKeys {
     public static let debugProEntitlementForced = "dictus.debugProEntitlementForced"
 
     /// Bool: when true, the keyboard never opens the voice note reader on its own; it
-    /// opens from a long press on ☰ only (#637 decision 3, #639). Absent reads false,
+    /// opens from a tap on ☰ only (#637 decision 3, #639). Absent reads false,
     /// the default "auto-open". Exists for one device comparison between the two
     /// behaviours; the losing branch and this key are deleted in a follow-up. Inside
     /// the conditional for `debugProEntitlementForced`'s reason.
@@ -326,10 +326,14 @@ public enum SharedKeys {
     /// from the inbox, so the share extension can say where progress will be shown.
     public static let voiceNoteAcceptedWithActivity = "dictus.voiceNoteAcceptedWithActivity"
     /// Bool: whether the user has ever opened the keyboard's voice note reader with a
-    /// long press on ☰ (#639). Its only effect is to retire the toolbar hint that
-    /// teaches the gesture. Set once and never cleared, `smartModeGestureUsed`'s
-    /// reasoning. See `VoiceNoteDiscovery`.
-    public static let voiceNoteLongPressUsed = "dictus.voiceNoteLongPressUsed"
+    /// tap on ☰ (#639). Arms the toolbar hint that teaches where the panel went: a
+    /// user who has met the new tap is the one who needs telling. Set once, never
+    /// cleared. See `MenuPanelDiscovery`.
+    public static let voiceNoteReaderOpenedByTap = "dictus.voiceNoteReaderOpenedByTap"
+    /// Bool: whether the user has ever opened the keyboard panel with a long press on
+    /// ☰ (#639). Retires that hint. Set once and never cleared, `smartModeGestureUsed`'s
+    /// reasoning. See `MenuPanelDiscovery`.
+    public static let menuLongPressUsed = "dictus.menuLongPressUsed"
 
     // MARK: - Reverse trial (#593)
     /// Double (seconds since 1970): when the reverse trial started. The App Group

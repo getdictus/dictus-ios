@@ -49,7 +49,7 @@ public enum KeyboardAreaMode: String, Equatable, CaseIterable, Sendable {
     /// geometry exactly, and it is reached the same way — no new height, no new
     /// anchor, and the keyboard's declared height untouched (#166).
     ///
-    /// Opened only by the keyboard itself: from a long press on ☰ (#639), or on an
+    /// Opened only by the keyboard itself: from a tap on ☰ (#639), or on an
     /// appearance (`VoiceNoteKeyboardPresentation`). A dictation takes the area from it like from
     /// any other mode, and leaving the dictation returns to the keys.
     case voiceNoteResult
