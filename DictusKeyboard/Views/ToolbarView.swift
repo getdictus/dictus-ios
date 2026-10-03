@@ -848,8 +848,10 @@ struct ToolbarView: View {
     /// visual echo of them, not a shared constant to be refactored away.
     private static let micPillWidth: CGFloat = 56
 
-    /// The ☰'s "voice note waiting" ring (#639). See `barIcon`.
-    private static let ringWidth: CGFloat = 3
+    /// The ☰'s "voice note waiting" halo opacity (#639): the keyboard mic's resting
+    /// value (`AnimatedMicButton.startIdleAnimation`, static since #510), so the two
+    /// auras opposite each other in the bar are the same object.
+    private static let haloOpacity: Double = 0.45
 
     /// Diameter of the round icon buttons, and the height of every bar control.
     private var iconDiameter: CGFloat { 36 }
@@ -876,16 +878,17 @@ struct ToolbarView: View {
     /// bar, where a second wide pill would compete with the toggle rather than
     /// balance anything.
     ///
-    /// `ringed` (#639): an accent stroke on the glass backing, the way a selected
-    /// control is drawn — the ☰'s "a voice note is waiting" state. On the backing
-    /// rather than the touch frame, so it outlines what the eye already reads as the
-    /// control, and inside its edge (`strokeBorder`) so nothing grows.
+    /// `ringed` (#639): the ☰'s "a voice note is waiting" state wears the mic pill's
+    /// own aura — `DictusHalo`, the very view `AnimatedMicButton` draws behind its
+    /// pill, at the keyboard mic's resting values (accent, 2 pt, 0.45). Same geometry
+    /// and same layering: a 66 × 46 glass ring behind the 56 × 36 capsule, which stays
+    /// glass and neutral inside. Device feedback on #641: a stroke *inside* the
+    /// capsule made the ☰ read smaller than the mic opposite it, because the mic's
+    /// outer silhouette is its halo.
     ///
-    /// 3 pt, not 2 (device feedback on #641): glass already draws a light rim of its
-    /// own, and 2 pt of accent on a 36 pt capsule read as part of that rim rather than
-    /// as a state. 3 pt is the thinnest that still reads as "selected" on both
-    /// keyboard appearances, and it costs nothing in geometry since it is drawn inside
-    /// the edge.
+    /// A background, so the ☰'s layout frame does not move when the ring comes and
+    /// goes: its centre stays where the reader's and the panel's `✕` sit, and the
+    /// ring overhangs by 5 pt on each side the way the mic's does.
     private func barIcon(
         systemName: String,
         size: CGFloat,
@@ -898,13 +901,10 @@ struct ToolbarView: View {
             .foregroundColor(.dictusPillIconSecondary)
             .frame(width: width, height: iconDiameter)
             .dictusGlass(in: shape == .capsule ? AnyShape(Capsule()) : AnyShape(Circle()))
-            .overlay {
+            .background {
                 if ringed {
-                    if shape == .capsule {
-                        Capsule().strokeBorder(Color.dictusAccent, lineWidth: Self.ringWidth)
-                    } else {
-                        Circle().strokeBorder(Color.dictusAccent, lineWidth: Self.ringWidth)
-                    }
+                    DictusHalo(isPill: shape == .capsule, color: .dictusAccent,
+                               opacity: Self.haloOpacity, lineWidth: 2)
                 }
             }
             .frame(width: max(width, 44), height: 44)

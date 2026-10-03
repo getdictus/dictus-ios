@@ -87,8 +87,6 @@ public struct AnimatedMicButton: View {
     /// Circle mode: 72pt diameter. Pill mode: 56x36 capsule for keyboard toolbar.
     private var buttonWidth: CGFloat { isPill ? 56 : 72 }
     private var buttonHeight: CGFloat { isPill ? 36 : 72 }
-    private var ringWidth: CGFloat { isPill ? 66 : 92 }
-    private var ringHeight: CGFloat { isPill ? 46 : 92 }
 
     /// Returns Capsule or Circle based on isPill.
     /// WHY AnyShape: @ViewBuilder wraps conditionals in _ConditionalContent which
@@ -219,40 +217,16 @@ public struct AnimatedMicButton: View {
         switch status {
         case .idle, .ready, .failed:
             // Glass ring with soft glow pulsing 0.3-0.6 opacity over 2s
-            mainShape()
-                .fill(Color.clear)
-                .frame(width: ringWidth, height: ringHeight)
-                .dictusGlass(in: isPill ? AnyShape(Capsule()) : AnyShape(Circle()))
-                .overlay(
-                    mainShape()
-                        .stroke(Color.dictusAccent.opacity(glowOpacity), lineWidth: 2)
-                        .frame(width: ringWidth, height: ringHeight)
-                )
+            DictusHalo(isPill: isPill, color: .dictusAccent, opacity: glowOpacity, lineWidth: 2)
 
         case .recording:
             // Red pulse ring scaling 1.0-1.3 over 0.8s
-            mainShape()
-                .fill(Color.clear)
-                .frame(width: ringWidth, height: ringHeight)
-                .dictusGlass(in: isPill ? AnyShape(Capsule()) : AnyShape(Circle()))
-                .overlay(
-                    mainShape()
-                        .stroke(Color.dictusRecording.opacity(0.5), lineWidth: 3)
-                        .frame(width: ringWidth, height: ringHeight)
-                )
+            DictusHalo(isPill: isPill, color: .dictusRecording, opacity: 0.5, lineWidth: 3)
                 .scaleEffect(pulseScale)
 
         case .transcribing, .processing, .requested:
             // Static glass ring during transcription and the LLM stage
-            mainShape()
-                .fill(Color.clear)
-                .frame(width: ringWidth, height: ringHeight)
-                .dictusGlass(in: isPill ? AnyShape(Capsule()) : AnyShape(Circle()))
-                .overlay(
-                    mainShape()
-                        .stroke(Color.dictusAccent.opacity(0.4), lineWidth: 2)
-                        .frame(width: ringWidth, height: ringHeight)
-                )
+            DictusHalo(isPill: isPill, color: .dictusAccent, opacity: 0.4, lineWidth: 2)
         }
     }
 
@@ -368,6 +342,46 @@ public struct AnimatedMicButton: View {
         withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
             shimmerOffset = 2.0
         }
+    }
+}
+
+/// The glass ring drawn around the mic pill, as its own view so another control can
+/// wear exactly the same aura (#639: the ☰ wears it while a voice note waits).
+///
+/// A capsule (or circle) of glass 10 pt wider and taller than the button it sits
+/// behind — 66 × 46 around the 56 × 36 pill — with a coloured stroke on its edge.
+/// It is a *background*: the caller draws its button on top, centred, and the ring
+/// shows as a 5 pt rim around it.
+public struct DictusHalo: View {
+    public let isPill: Bool
+    public let color: Color
+    public let opacity: Double
+    public let lineWidth: CGFloat
+
+    /// The ring's size for each shape: 66 × 46 for the pill, 92 for the circle.
+    public static func size(isPill: Bool) -> CGSize {
+        isPill ? CGSize(width: 66, height: 46) : CGSize(width: 92, height: 92)
+    }
+
+    public init(isPill: Bool, color: Color, opacity: Double, lineWidth: CGFloat) {
+        self.isPill = isPill
+        self.color = color
+        self.opacity = opacity
+        self.lineWidth = lineWidth
+    }
+
+    public var body: some View {
+        let size = Self.size(isPill: isPill)
+        let shape = isPill ? AnyShape(Capsule()) : AnyShape(Circle())
+        shape
+            .fill(Color.clear)
+            .frame(width: size.width, height: size.height)
+            .dictusGlass(in: shape)
+            .overlay(
+                shape
+                    .stroke(color.opacity(opacity), lineWidth: lineWidth)
+                    .frame(width: size.width, height: size.height)
+            )
     }
 }
 
