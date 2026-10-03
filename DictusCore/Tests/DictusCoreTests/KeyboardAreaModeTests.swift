@@ -48,8 +48,8 @@ final class KeyboardAreaModeTests: XCTestCase {
     }
 
     /// Leaving the dictation returns to the keys, not to the reader. The notes are
-    /// still waiting — the keyboard rereads them on that transition and the chip is
-    /// back — but the surface is not taken over again under the user's thumb
+    /// still waiting — the keyboard rereads them on that transition and the ☰ ring
+    /// is back (#639) — but the surface is not taken over again under the user's thumb
     /// (#637 decision 1).
     func testLeavingADictationStartedFromTheReaderReturnsToTheKeys() {
         let during = KeyboardAreaMode.resolving(status: .recording, current: .voiceNoteResult)
