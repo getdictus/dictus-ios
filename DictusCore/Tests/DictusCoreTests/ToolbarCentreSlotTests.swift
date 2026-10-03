@@ -12,6 +12,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
                          errorMessage: String? = nil,
                          offersDictationUndo: Bool = false,
                          hasSuggestions: Bool = false,
+                         voiceNotesWaiting: Int = 0,
                          polishUnavailable: Bool = false,
                          armedModeName: String? = nil,
                          armedModeIsEffective: Bool = true,
@@ -21,6 +22,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
             errorMessage: errorMessage,
             offersDictationUndo: offersDictationUndo,
             hasSuggestions: hasSuggestions,
+            voiceNotesWaiting: voiceNotesWaiting,
             polishUnavailable: polishUnavailable,
             armedModeName: armedModeName,
             armedModeIsEffective: armedModeIsEffective,
@@ -61,6 +63,45 @@ final class ToolbarCentreSlotTests: XCTestCase {
             ),
             .dictationUndo
         )
+    }
+
+    /// Mid-word the suggestions win and the voice note chip yields (#637); it comes
+    /// back as soon as the slot is free.
+    func testSuggestionsOutrankTheVoiceNoteChip() {
+        XCTAssertEqual(
+            resolve(
+                hasSuggestions: true, voiceNotesWaiting: 2, polishUnavailable: true,
+                armedModeName: "List", offersDiscoveryHint: true
+            ),
+            .suggestions
+        )
+    }
+
+    /// And everything the chip yields to keeps winning over it: the fan, an error,
+    /// the dictation undo.
+    func testTheVoiceNoteChipYieldsToTheFanTheErrorAndTheUndo() {
+        XCTAssertEqual(resolve(isChoosingMode: true, voiceNotesWaiting: 1), .choosingMode)
+        XCTAssertEqual(resolve(errorMessage: "boom", voiceNotesWaiting: 1), .error("boom"))
+        XCTAssertEqual(resolve(offersDictationUndo: true, voiceNotesWaiting: 1), .dictationUndo)
+    }
+
+    /// Above the polish notice, the armed mode and the hint: a transcript waiting to
+    /// be used outranks a statement about a setting or a process.
+    func testTheVoiceNoteChipOutranksTheNoticeTheArmedModeAndTheHint() {
+        XCTAssertEqual(
+            resolve(
+                voiceNotesWaiting: 3, polishUnavailable: true,
+                armedModeName: "List", armedModeIsEffective: false, offersDiscoveryHint: true
+            ),
+            .voiceNotesWaiting(count: 3)
+        )
+        XCTAssertEqual(resolve(voiceNotesWaiting: 1, armedModeName: "List"), .voiceNotesWaiting(count: 1))
+    }
+
+    /// No notes, no chip: the slot falls through to what it showed before #637.
+    func testNoWaitingNoteMeansNoChip() {
+        XCTAssertEqual(resolve(voiceNotesWaiting: 0, polishUnavailable: true), .polishUnavailable)
+        XCTAssertEqual(resolve(voiceNotesWaiting: 0), .empty)
     }
 
     func testSuggestionsOutrankThePolishNotice() {
@@ -109,6 +150,9 @@ final class ToolbarCentreSlotTests: XCTestCase {
         XCTAssertTrue(ToolbarCentreSlot.suggestions.evictsHamburger)
 
         XCTAssertFalse(ToolbarCentreSlot.choosingMode.evictsHamburger)
+        // Beside the hamburger, not in its place (#637): a note can wait a day, and the
+        // panel must stay reachable for all of it.
+        XCTAssertFalse(ToolbarCentreSlot.voiceNotesWaiting(count: 2).evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.polishUnavailable.evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.armedMode("List").evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.discoveryHint.evictsHamburger)

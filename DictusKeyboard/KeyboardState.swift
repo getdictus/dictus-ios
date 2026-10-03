@@ -617,8 +617,8 @@ class KeyboardState: ObservableObject {
     /// Goes through `openDictusURL`, i.e. `extensionContext` first: that is the
     /// documented path for an app extension, and SwiftUI's `openURL` has no
     /// success result and can fail silently in a keyboard extension.
-    func openDictusApp(intent: KeyboardOpenIntent) {
-        guard let url = KeyboardOpenURL.url(intent: intent) else { return }
+    func openDictusApp(intent: KeyboardOpenIntent, voiceNoteID: UUID? = nil) {
+        guard let url = KeyboardOpenURL.url(intent: intent, voiceNoteID: voiceNoteID) else { return }
         logProbe("openDictusApp", details: "intent=\(intent.rawValue)")
         openDictusURL(url)
     }
