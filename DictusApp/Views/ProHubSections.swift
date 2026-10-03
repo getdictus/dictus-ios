@@ -184,19 +184,37 @@ struct ProHubMembershipCard: View {
     /// hand it over a few seconds late (`SubscriptionManager.recheckAfterManageSheet`).
     let refresh: () -> Void
 
+    /// The "Upgrade to lifetime" row (#216 decision 15), or nil. Decided by
+    /// `ProLifetimeUpgrade.offer`: monthly and yearly subscribers only.
+    var upgrade: ProLifetimeUpgrade?
+
+    /// The lifetime product's `displayPrice`, from StoreKit, never written here. The
+    /// row stays hidden while it has not loaded: a price-less upgrade cannot be bought.
+    var lifetimePrice: String?
+
+    /// Whether a purchase is in flight, to show progress in place of the chevron.
+    var isPurchasing = false
+
+    /// Starts the lifetime purchase. Apple's own sheet is the confirmation.
+    var buyLifetime: () -> Void = {}
+
     @State private var showsManageSheet = false
 
     var body: some View {
         Group {
             switch block {
             case .subscription(let subscription):
-                card(title: planTitle(subscription.period), detail: dateLine(subscription), managed: true)
+                card(title: planTitle(subscription.period), detail: dateLine(subscription), managed: true,
+                     showsUpgrade: true)
             case .lifetime(let alsoSubscribed):
+                // After an upgrade, or a lifetime bought elsewhere on top of a
+                // subscription: the subscription is still billed, said plainly, with
+                // the way to stop it. No refund or proration promised: that is Apple's.
                 card(
                     title: Text("Dictus Pro Lifetime"),
                     detail: alsoSubscribed == nil
                         ? Text("One-time purchase")
-                        : Text("You also have a subscription that keeps renewing. You can cancel it, your lifetime purchase stays."),
+                        : Text("Your subscription is still billed. To stop it, cancel it in Manage subscription. Your lifetime purchase stays."),
                     managed: alsoSubscribed != nil
                 )
             case .paidPlanPending:
@@ -218,7 +236,8 @@ struct ProHubMembershipCard: View {
         }
     }
 
-    private func card(title: Text, detail: Text?, managed: Bool, loading: Bool = false) -> some View {
+    private func card(title: Text, detail: Text?, managed: Bool, loading: Bool = false,
+                      showsUpgrade: Bool = false) -> some View {
         VStack(spacing: 14) {
             HStack(spacing: 14) {
                 Image(systemName: "checkmark.circle.fill")
@@ -260,10 +279,59 @@ struct ProHubMembershipCard: View {
                 }
                 .buttonStyle(GlassPressStyle())
             }
+
+            if showsUpgrade, let upgrade, let lifetimePrice {
+                upgradeRow(upgrade, price: lifetimePrice)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .dictusGlass()
+    }
+
+    /// The lifetime upgrade, under Manage subscription and quieter than it: a plain
+    /// row with a hairline above, no fill, no badge (decision 15). It is an option a
+    /// subscriber may want, not a banner in the middle of what they already own.
+    private func upgradeRow(_ upgrade: ProLifetimeUpgrade, price: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Divider()
+
+            Button(action: buyLifetime) {
+                HStack(spacing: 10) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Upgrade to lifetime")
+                            .font(.dictusBody.weight(.semibold))
+                            .foregroundColor(.dictusAccent)
+                        Text("\(price), one payment")
+                            .font(.dictusCaption)
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer(minLength: 8)
+                    if isPurchasing {
+                        ProgressView()
+                    } else {
+                        Image(systemName: "chevron.forward")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(isPurchasing)
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+
+            // Before the purchase, while the subscription may still renew: Apple
+            // does not cancel it when the lifetime is bought.
+            if upgrade.showsSubscriptionKeepsBillingNote {
+                Text("Your subscription is not cancelled automatically. Cancel it in Manage subscription.")
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 
     private func planTitle(_ period: ProPlanPeriod) -> Text {
