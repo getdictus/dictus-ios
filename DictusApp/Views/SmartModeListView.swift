@@ -44,8 +44,24 @@ struct SmartModeListView: View {
         pinnedIdentifiers.count >= SmartModeCatalogue.maximumPinnedModes
     }
 
+    /// The feature's switch, observed so the content dims and unlocks as it moves
+    /// (#216). The same object the switch above writes and the hub row reads.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
+
+    /// Whether the list below the switch is live: `FeatureGate.isAvailable`, the one
+    /// predicate. Off, the arrangement stays visible and cannot be edited, since the
+    /// keyboard applies none of it (#216 decision 5).
+    private var isAvailable: Bool {
+        _ = switches.isOn(.smartMode)
+        return FeatureGate.isAvailable(.smartMode)
+    }
+
     var body: some View {
         List {
+            // The feature's switch, first (#216): this screen is reached from the
+            // Dictus Pro hub's Smart Mode row, which carries no switch of its own.
+            ProFeatureSwitchSection(feature: .smartMode)
+
             if !deviceIsCapable {
                 Section {
                     unsupportedNotice
@@ -70,6 +86,7 @@ struct SmartModeListView: View {
                     "Hold the microphone on the keyboard to open these, then slide onto one. Up to \(SmartModeCatalogue.maximumPinnedModes), plus Normal."
                 )
             }
+            .proFeatureContent(isAvailable: isAvailable)
 
             if !unpinnedModes.isEmpty {
                 Section {
@@ -83,6 +100,7 @@ struct SmartModeListView: View {
                         Text("Remove one above to add another.")
                     }
                 }
+                .proFeatureContent(isAvailable: isAvailable)
             }
         }
         .navigationTitle("Smart Modes")
@@ -92,6 +110,7 @@ struct SmartModeListView: View {
             // row reads as an unfinished screen.
             if pinnedModes.count > 1 {
                 EditButton()
+                    .disabled(!isAvailable)
             }
         }
     }

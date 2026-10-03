@@ -1,9 +1,24 @@
 // DictusApp/Views/PaywallView.swift
-// Full-screen paywall pushed via NavigationStack: hero, feature cards, plan selector, CTA.
+// The Dictus Pro hub: hero, feature cards, then a block that follows the subscription state (#216).
 import SwiftUI
 import StoreKit
 import DictusCore
 
+/// The one Dictus Pro screen, for every user (#216).
+///
+/// It began as the paywall (#78) and kept the name: every entry point already opens
+/// it, and a second screen beside it is exactly what #216 decided against. One
+/// structure, and a bottom block chosen by `ProHub.bottomBlock`:
+///
+/// - **Free:** informational cards, then the plan selector and CTA, the paywall as
+///   validated in #78 and deliberately unchanged.
+/// - **Trial:** active cards, the days left, then the same offers.
+/// - **Subscriber:** active cards, the plan, its date, Manage subscription.
+/// - **Lifetime:** active cards, "Dictus Pro Lifetime", nothing to manage.
+///
+/// The end-of-trial presentation (`framing: .trialEnded`) stays a sales page: its
+/// cards remain informational whatever the state, because that screen exists to say
+/// what was lost, not to hand the features back.
 struct PaywallView: View {
     @EnvironmentObject var subscriptionManager: SubscriptionManager
     @EnvironmentObject var proStatus: ProStatusManager
@@ -33,6 +48,14 @@ struct PaywallView: View {
 
     /// Drives the staged entrance animation of the thank-you screen elements.
     @State private var successEntrance = false
+
+    /// The feature whose screen is pushed onto the hub's stack (#216 decision 4).
+    @State private var openedFeature: ProFeature?
+
+    /// The three per-feature switches, observed so the rows' "On" / "Off" values
+    /// follow a switch flipped on a pushed screen (#216). The same object that screen
+    /// writes through; see `ProFeatureSwitches` for why it is not `@AppStorage`.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
 
     /// Product matching the current selection. Nil disables the CTA.
     ///
@@ -74,25 +97,30 @@ struct PaywallView: View {
                     TrialEndedHeader(usage: proStatus.trialUsage)
                 }
 
-                // Feature cards (3 cards: Smart Mode, History, Vocabulary)
+                // Feature cards (3 cards: Smart Mode, History, Vocabulary): active for
+                // anyone who has Pro, informational for everyone being sold it.
                 VStack(spacing: 10) {
                     ForEach(ProFeature.allCases, id: \.self) { feature in
-                        featureCard(feature)
+                        if cardsAreActive {
+                            ProHubFeatureCard(
+                                feature: feature,
+                                isAvailable: isAvailable(feature),
+                                open: { openedFeature = feature }
+                            )
+                        } else {
+                            featureCard(feature)
+                        }
                     }
                 }
 
                 // The recap sells nothing itself: its button leads here.
                 if !showsTrialRecap {
-                    // `isPaid` and not `isProActive` (#593): during the reverse trial Pro is
-                    // active and nothing is paid, and subscribing then is exactly what the
-                    // trial is for. Keyed on the entitlement, this screen would tell a
-                    // trial user they already had Pro and offer them no way to keep it.
-                    if proStatus.isPaid {
-                        // Already subscribed
-                        alreadyProBanner
-                    } else {
-                        if case .running(let endsAt) = proStatus.trialState {
-                            TrialRunningNotice(endsAt: endsAt)
+                    // Keyed on `isPaid` and not `isProActive` inside `ProHub` (#593):
+                    // during the reverse trial Pro is active and nothing is paid, and
+                    // subscribing then is exactly what the trial is for.
+                    if hubBlock.sellsPlans {
+                        if case .offers(let endsAt?, let daysLeft) = hubBlock {
+                            TrialRunningNotice(endsAt: endsAt, daysLeft: daysLeft)
                         }
                         // Plan selector: yearly (preselected), monthly and lifetime
                         planSelector
@@ -106,6 +134,17 @@ struct PaywallView: View {
                         if framing == .trialEnded {
                             continueForFreeButton
                         }
+                    } else {
+                        ProHubMembershipCard(
+                            block: hubBlock,
+                            refresh: { subscriptionManager.recheckAfterManageSheet() },
+                            upgrade: ProLifetimeUpgrade.offer(
+                                for: hubBlock, paywallVisible: PremiumFlags.paywallVisible
+                            ),
+                            lifetimePrice: subscriptionManager.lifetimeProduct?.displayPrice,
+                            isPurchasing: subscriptionManager.purchaseState == .purchasing,
+                            buyLifetime: buyLifetime
+                        )
                     }
                 }
 
@@ -132,6 +171,11 @@ struct PaywallView: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { closeButton }
+        // Pushed inside this screen's own stack (decision 4), so the back button
+        // returns to the hub rather than closing it.
+        .navigationDestination(item: $openedFeature) { feature in
+            featureScreen(feature)
+        }
         .task {
             // Retry the product fetch if the launch-time load came back empty,
             // so a transient failure doesn't leave the CTA stuck on "...".
@@ -172,6 +216,67 @@ struct PaywallView: View {
             Button("OK") { subscriptionManager.resetState() }
         } message: {
             Text(errorMessage)
+        }
+    }
+
+    // MARK: - Hub state (#216)
+
+    /// The subscriber's upgrade (#216 decision 15): the lifetime, bought directly
+    /// through the same path as the plan selector. Apple's sheet confirms; on success
+    /// the thank-you screen shows, and the next scan lands on lifetime plus the
+    /// subscription still billed.
+    private func buyLifetime() {
+        guard let lifetime = subscriptionManager.lifetimeProduct else { return }
+        Task { await subscriptionManager.purchase(lifetime) }
+    }
+
+    /// What sits under the cards. Read from the published caches, so a purchase, a
+    /// renewal scan or the trial ending redraws it.
+    private var hubBlock: ProHubBottomBlock {
+        ProHub.bottomBlock(
+            paywallVisible: PremiumFlags.paywallVisible,
+            isPaid: proStatus.isPaid,
+            isEntitled: proStatus.isProActive,
+            trial: proStatus.trialState,
+            now: Date(),
+            ownership: subscriptionManager.ownership
+        )
+    }
+
+    /// Whether the cards carry toggles and open their screens (decision 4). Never on
+    /// the end-of-trial presentation (decision 3).
+    private var cardsAreActive: Bool {
+        framing == .standard && hubBlock.cardsAreActive
+    }
+
+    /// `FeatureGate.isAvailable`, the one predicate (decision 5). The switch and the
+    /// entitlement are read first so SwiftUI redraws when either moves: the gate
+    /// itself goes to the App Group, which publishes nothing.
+    private func isAvailable(_ feature: ProFeature) -> Bool {
+        _ = switches.isOn(feature)
+        _ = proStatus.isProActive
+        return FeatureGate.isAvailable(feature)
+    }
+
+    /// The screens the Settings "Pro Features" rows used to open, now reached here.
+    ///
+    /// History keeps its home-screen swipe (decision 7); this is a second way in, so
+    /// it is pushed rather than presented as the sheet the swipe opens. Its store is
+    /// handed over explicitly for the reason `HomeView` gives: this screen is itself a
+    /// cover, presented from elsewhere in the tree.
+    @ViewBuilder
+    private func featureScreen(_ feature: ProFeature) -> some View {
+        switch feature {
+        case .smartMode:
+            SmartModeListView()
+        case .vocabulary:
+            VocabularyListView()
+        case .voiceNotes:
+            VoiceNoteSettingsView()
+        case .history:
+            HistoryView(isPushed: true)
+                .environmentObject(TranscriptionHistoryStore.shared)
+                .environmentObject(proStatus)
         }
     }
 
@@ -361,22 +466,6 @@ struct PaywallView: View {
         case .smartMode: return .dictusSmartMode
         case .history, .vocabulary, .voiceNotes: return .dictusAccentHighlight
         }
-    }
-
-    // MARK: - Already Pro Banner
-
-    private var alreadyProBanner: some View {
-        HStack(spacing: 16) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.title2)
-                .foregroundColor(.dictusSuccess)
-
-            Text("Dictus Pro Active")
-                .font(.dictusSubheading)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .dictusGlass()
     }
 
     // MARK: - Plan Selector
@@ -746,7 +835,9 @@ struct PaywallView: View {
             // Hidden once paid: Apple requires a restore mechanism to exist
             // (guideline 3.1.1), not to be shown to subscribers. Shown during the
             // reverse trial (#593), when a returning buyer is exactly who needs it.
-            if !proStatus.isPaid {
+            // Follows the offers (#216): wherever plans are sold, and nowhere else,
+            // which also keeps it off the DEBUG forced-entitlement hub.
+            if hubBlock.sellsPlans {
                 Button("Restore purchases") {
                     Task { await subscriptionManager.restorePurchases() }
                 }

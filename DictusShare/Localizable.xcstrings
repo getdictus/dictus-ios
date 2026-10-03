@@ -190,6 +190,18 @@
           }
         }
       }
+    },
+    "Voice notes are switched off. Turn them back on in Dictus, under Dictus Pro." : {
+      "comment" : "Share extension: a Pro user switched voice notes off in the Dictus Pro hub (#216).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les messages vocaux sont désactivés. Réactivez-les dans Dictus, rubrique Dictus Pro."
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

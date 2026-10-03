@@ -4,7 +4,7 @@ import SwiftUI
 import UIKit
 import DictusCore
 
-/// Settings screen: Dictus Pro, Transcription, Keyboard, Pro Features, About.
+/// Settings screen: Dictus Pro, Transcription, Keyboard, About.
 ///
 /// WHY @AppStorage with App Group store:
 /// Preferences need to be readable by both the main app AND the keyboard extension.
@@ -135,11 +135,10 @@ struct SettingsView: View {
     /// Confirmation dialog for emptying the transcription history (#70).
     @State private var showClearHistoryConfirmation = false
 
-    /// Drives the paywall cover. Shared by the Dictus Pro row and every locked
-    /// feature row: they open the same screen, so one flag serves both.
+    /// Drives the Dictus Pro hub's cover, opened by the one Dictus Pro row (#216).
     @State private var showPaywall = false
 
-    /// Whether the `Pro Features` section renders at all (#236, #577).
+    /// Whether the Dictus Pro row renders at all (#236, #577, #216).
     ///
     /// `paywallVisible` decides what may be **sold**; this decides whether a user
     /// can **manage** what they already have. The two coincide in Release and part
@@ -147,16 +146,18 @@ struct SettingsView: View {
     /// grants the entitlement without opening the paywall.
     ///
     /// WHY that split has to exist: `SmartModeListView` is the only screen in the
-    /// app that pins or reorders a Smart Mode, and it hangs off this section. With
-    /// the fan capped at `SmartModeCatalogue.maximumPinnedModes` and a seed that
-    /// predates half the catalogue, a forced entitlement without this exception
-    /// grants a fan nobody can arrange — which is #460 blocking the work it exists
-    /// to protect, one screen further in.
+    /// app that pins or reorders a Smart Mode, and since #216 it hangs off the hub
+    /// this row opens. With the fan capped at `SmartModeCatalogue.maximumPinnedModes`
+    /// and a seed that predates half the catalogue, a forced entitlement without this
+    /// exception grants a fan nobody can arrange — which is #460 blocking the work it
+    /// exists to protect, one screen further in. Under the force the hub sells
+    /// nothing (`ProHubBottomBlock.entitledWithoutPurchase`), so opening the row does
+    /// not put anything on sale while the paywall is hidden.
     ///
-    /// WHY it is not just `proStatus.isProActive`: that would make the section
-    /// appear in Release for any future subscriber whose purchase predates the
-    /// paywall flip, which is the state #236 exists to forbid. The exception is
-    /// compiled out entirely, so Release has exactly one gate.
+    /// WHY it is not just `proStatus.isProActive`: that would make the row appear
+    /// in Release for any future subscriber whose purchase predates the paywall
+    /// flip, which is the state #236 exists to forbid. The exception is compiled out
+    /// entirely, so Release has exactly one gate.
     private var proManagementVisible: Bool {
         #if DEBUG
         // Read the revision so flipping the switch redraws this gate, the same
@@ -206,10 +207,13 @@ struct SettingsView: View {
 
     var body: some View {
         List {
-            // Section 0: Dictus Pro — always first.
+            // Section 0: Dictus Pro — always first, and since #216 the only Pro
+            // entry in Settings: the hub it opens owns the feature switches and
+            // their screens, which a "Pro Features" section used to hold here.
             // Gated behind PremiumFlags.paywallVisible until the first Pro
-            // feature ships and ASC setup is done (#236, #79, #215).
-            if PremiumFlags.paywallVisible {
+            // feature ships and ASC setup is done (#236, #79, #215), with the
+            // DEBUG exception `proManagementVisible` documents (#577).
+            if proManagementVisible {
                 Section {
                     Button {
                         showPaywall = true
@@ -400,119 +404,6 @@ struct SettingsView: View {
                 }
             }
 
-            // Section 3: Pro Features.
-            // Gated behind PremiumFlags.paywallVisible (#236): while hidden,
-            // the app must look like there is no subscription at all — no
-            // locked rows, no PRO pills, no navigation path to PaywallView.
-            // Pro toggles are also hidden: no user can be Pro while the
-            // paywall is unreachable (no ASC product exists yet, #215).
-            //
-            // ...with one DEBUG-only exception (#577): a forced entitlement has
-            // to be manageable. See `proManagementVisible`.
-            if proManagementVisible {
-                Section("Pro Features") {
-                    ForEach(ProFeature.allCases, id: \.self) { feature in
-                        if proStatus.isProActive {
-                            // Unlocked: show toggle
-                            Toggle(isOn: Binding(
-                                get: { AppGroup.defaults.bool(forKey: feature.settingsKey) },
-                                set: { AppGroup.defaults.set($0, forKey: feature.settingsKey) }
-                            )) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: feature.icon)
-                                        .foregroundColor(.dictusAccent)
-                                    Text(LocalizedStringKey(feature.displayName))
-                                }
-                            }
-                        } else if PremiumFlags.paywallVisible {
-                            // Locked: show lock + PRO pill, tap opens paywall.
-                            // Keyed on `paywallVisible` and not on the section's own
-                            // gate (#577): the DEBUG exception opens this section to
-                            // manage an entitlement already granted, and must never
-                            // put a row on sale while the paywall itself is hidden.
-                            Button {
-                                showPaywall = true
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: feature.icon)
-                                        .foregroundColor(.secondary)
-                                    Text(LocalizedStringKey(feature.displayName))
-                                        .foregroundColor(.primary)
-                                    Spacer()
-                                    Image(systemName: "lock.fill")
-                                        .font(.caption)
-                                        .foregroundColor(.dictusAccent)
-                                        .accessibilityHidden(true)
-                                    Text("PRO")
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundColor(.white)
-                                        .padding(.vertical, 2)
-                                        .padding(.horizontal, 6)
-                                        .background(Color.dictusAccent)
-                                        .clipShape(Capsule())
-                                        .accessibilityLabel("Pro feature")
-                                    listDisclosureIndicator
-                                }
-                            }
-                        }
-                    }
-
-                    // The fan's contents (#79). Subscribers only, and only when the
-                    // feature toggle above is on: a mode list under a switched-off
-                    // Smart Mode would arrange a fan the keyboard will not open.
-                    //
-                    // Deliberately NOT gated on device capability. The choice is
-                    // durable and the fan is the keyboard's, not this device's — a
-                    // user who arranges it here and changes phone next year should
-                    // find their arrangement waiting. `SmartModeListView` says so on
-                    // the screen instead of hiding the row.
-                    if proStatus.isProActive && FeatureGate.isAvailable(.smartMode) {
-                        NavigationLink {
-                            SmartModeListView()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "list.bullet.indent")
-                                    .foregroundColor(.dictusAccent)
-                                Text("Keyboard modes")
-                            }
-                        }
-                    }
-
-                    // The vocabulary's one screen (#80 decision 11), gated exactly
-                    // like the mode list above it: a subscriber who switched the
-                    // feature off in Settings has said what they want, and a list
-                    // under a switched-off toggle would edit rules nothing applies.
-                    if proStatus.isProActive && FeatureGate.isAvailable(.vocabulary) {
-                        NavigationLink {
-                            VocabularyListView()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: ProFeature.vocabulary.icon)
-                                    .foregroundColor(.dictusAccent)
-                                Text("My terms")
-                            }
-                        }
-                    }
-
-                    // The voice note defaults (#620 decision 4), gated like the two
-                    // rows above. Temporary home: the decision puts them in the Dictus
-                    // Pro hub (#216), which is not on `develop` yet. When it lands, this
-                    // row goes with the rest of this section and the hub's Voice notes
-                    // card pushes `VoiceNoteSettingsView` instead.
-                    if proStatus.isProActive && FeatureGate.isAvailable(.voiceNotes) {
-                        NavigationLink {
-                            VoiceNoteSettingsView()
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: ProFeature.voiceNotes.icon)
-                                    .foregroundColor(.dictusAccent)
-                                Text("Voice notes")
-                            }
-                        }
-                    }
-                }
-            }
-
             #if DEBUG
             // Section: Developer (visible ONLY in Debug builds — not in Release/TestFlight/App Store).
             // WHY #if DEBUG: Code inside is compile-time excluded from production builds.
@@ -538,7 +429,7 @@ struct SettingsView: View {
                 Toggle("Force Pro entitlement", isOn: proEntitlementForced)
             } footer: {
                 if proEntitlementForced.wrappedValue {
-                    Text("Smart Modes and every other Pro feature behave as if subscribed, and their settings appear above. The paywall stays hidden. Debug builds only.")
+                    Text("Smart Modes and every other Pro feature behave as if subscribed, and the Dictus Pro row above opens their settings. Nothing is for sale. Debug builds only.")
                         .foregroundColor(.orange)
                 } else {
                     Text("Grants Pro without a purchase, so hidden Pro features can be tested on device. Off by default.")
