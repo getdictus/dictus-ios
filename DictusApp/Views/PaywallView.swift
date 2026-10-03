@@ -139,9 +139,16 @@ struct PaywallView: View {
                             continueForFreeButton
                         }
                     } else {
-                        ProHubMembershipCard(block: hubBlock) {
-                            subscriptionManager.recheckAfterManageSheet()
-                        }
+                        ProHubMembershipCard(
+                            block: hubBlock,
+                            refresh: { subscriptionManager.recheckAfterManageSheet() },
+                            upgrade: ProLifetimeUpgrade.offer(
+                                for: hubBlock, paywallVisible: PremiumFlags.paywallVisible
+                            ),
+                            lifetimePrice: subscriptionManager.lifetimeProduct?.displayPrice,
+                            isPurchasing: subscriptionManager.purchaseState == .purchasing,
+                            buyLifetime: buyLifetime
+                        )
                     }
                 }
 
@@ -226,6 +233,15 @@ struct PaywallView: View {
     }
 
     // MARK: - Hub state (#216)
+
+    /// The subscriber's upgrade (#216 decision 15): the lifetime, bought directly
+    /// through the same path as the plan selector. Apple's sheet confirms; on success
+    /// the thank-you screen shows, and the next scan lands on lifetime plus the
+    /// subscription still billed.
+    private func buyLifetime() {
+        guard let lifetime = subscriptionManager.lifetimeProduct else { return }
+        Task { await subscriptionManager.purchase(lifetime) }
+    }
 
     /// What sits under the cards. Read from the published caches, so a purchase, a
     /// renewal scan or the trial ending redraws it.
