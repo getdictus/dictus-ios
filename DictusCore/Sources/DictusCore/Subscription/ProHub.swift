@@ -156,6 +156,37 @@ public enum ProHub {
     // swiftlint:enable function_parameter_count
 }
 
+/// The "Upgrade to lifetime" row a monthly or yearly subscriber gets in the hub
+/// (#216 decision 15).
+public struct ProLifetimeUpgrade: Equatable, Sendable {
+
+    /// Whether the row carries, before purchase, the line saying the subscription is
+    /// not cancelled automatically. Apple does not cancel it when the same person
+    /// buys the lifetime, so someone who upgrades without reading it keeps paying.
+    public let showsSubscriptionKeepsBillingNote: Bool
+
+    public init(showsSubscriptionKeepsBillingNote: Bool) {
+        self.showsSubscriptionKeepsBillingNote = showsSubscriptionKeepsBillingNote
+    }
+
+    /// The row for this block, or nil for no row.
+    ///
+    /// - **Only a monthly or yearly subscriber.** A lifetime owner has nothing to
+    ///   upgrade to; free, trial and end-of-trial users already see the lifetime in
+    ///   their plan selector; a paid state whose plan is unknown or pending is not
+    ///   known to be a subscription.
+    /// - **Only with the paywall visible.** The row sells; under the DEBUG forced
+    ///   entitlement with the flag down, a phone that owns a sandbox subscription
+    ///   reaches this block, and nothing may be sold there (#236, #577).
+    /// - **The note** shows unless the subscription is known to be cancelled already.
+    ///   An unreadable renewal status (`willAutoRenew == nil`) keeps it: claiming the
+    ///   subscription stops by itself is the one wrong answer.
+    public static func offer(for block: ProHubBottomBlock, paywallVisible: Bool) -> ProLifetimeUpgrade? {
+        guard paywallVisible, case .subscription(let subscription) = block else { return nil }
+        return ProLifetimeUpgrade(showsSubscriptionKeepsBillingNote: subscription.willAutoRenew != false)
+    }
+}
+
 /// How the hub re-reads ownership after Apple's Manage subscription sheet closes
 /// (#216, device test of 2026-10-02).
 ///

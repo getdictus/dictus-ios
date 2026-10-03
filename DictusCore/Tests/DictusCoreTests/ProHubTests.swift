@@ -136,3 +136,47 @@ final class ProOwnershipRecheckTests: XCTestCase {
         XCTAssertTrue(ProOwnershipRecheck.isSettled(before: renewing, after: ProOwnership.none))
     }
 }
+
+final class ProLifetimeUpgradeTests: XCTestCase {
+
+    private let end = Date(timeIntervalSince1970: 1_800_000_000)
+
+    private func subscriber(_ id: String, renews: Bool?) -> ProHubBottomBlock {
+        .subscription(ProActiveSubscription(productID: id, periodEnd: end, willAutoRenew: renews))
+    }
+
+    func testAMonthlyOrYearlySubscriberGetsTheRow() {
+        for id in [ProProductID.monthly, ProProductID.yearly] {
+            XCTAssertNotNil(ProLifetimeUpgrade.offer(for: subscriber(id, renews: true), paywallVisible: true))
+        }
+    }
+
+    func testTheNoteShowsOnlyWhileTheSubscriptionMayRenew() {
+        XCTAssertEqual(ProLifetimeUpgrade.offer(for: subscriber(ProProductID.monthly, renews: true), paywallVisible: true),
+                       ProLifetimeUpgrade(showsSubscriptionKeepsBillingNote: true))
+        XCTAssertEqual(ProLifetimeUpgrade.offer(for: subscriber(ProProductID.monthly, renews: false), paywallVisible: true),
+                       ProLifetimeUpgrade(showsSubscriptionKeepsBillingNote: false))
+        XCTAssertEqual(ProLifetimeUpgrade.offer(for: subscriber(ProProductID.monthly, renews: nil), paywallVisible: true),
+                       ProLifetimeUpgrade(showsSubscriptionKeepsBillingNote: true),
+                       "an unreadable renewal status must not claim the subscription stops")
+    }
+
+    func testNoRowForAnyoneElse() {
+        let others: [ProHubBottomBlock] = [
+            .offers(trialEndsAt: nil, daysLeft: nil),
+            .offers(trialEndsAt: end, daysLeft: 3),
+            .lifetime(alsoSubscribed: nil),
+            .lifetime(alsoSubscribed: ProActiveSubscription(productID: ProProductID.monthly, periodEnd: end, willAutoRenew: true)),
+            .paidPlanPending,
+            .paidPlanUnknown,
+            .entitledWithoutPurchase
+        ]
+        for block in others {
+            XCTAssertNil(ProLifetimeUpgrade.offer(for: block, paywallVisible: true), "\(block)")
+        }
+    }
+
+    func testNothingIsSoldWithThePaywallHidden() {
+        XCTAssertNil(ProLifetimeUpgrade.offer(for: subscriber(ProProductID.yearly, renews: true), paywallVisible: false))
+    }
+}
