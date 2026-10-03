@@ -157,7 +157,10 @@ struct SmartModeListView: View {
     /// rather than a mode. The catalogue's own doc comment leaves this to the app.
     static func listName(for mode: SmartMode) -> String {
         guard mode.id.hasPrefix("translate.") else { return mode.localizedDisplayName }
-        return "Translate \(mode.displayName)"
+        // Through the catalog since #620: the plain interpolation it was showed
+        // "Translate → EN" in a French UI, here and on the voice note card.
+        return String(localized: "Translate \(mode.displayName)",
+                      comment: "List name of a translation Smart Mode; the placeholder is the arrow and target, e.g. \"→ EN\".")
     }
 
     private func toggle(_ mode: SmartMode, isPinned: Bool) {

@@ -197,13 +197,27 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
     /// mode must not start refusing on it. See `PolishIncompleteness`.
     public let refusesFabricatedIncompleteness: Bool
 
+    /// Whether an output that loses a word the speaker dictated is refused (#575).
+    ///
+    /// ### Why a mode has to answer this
+    ///
+    /// The check counts the dictation's words in the output, so it is only sound where
+    /// the transformation promises to keep them. The free polish's Natural and Auto
+    /// prompts do — ADR 0003's Forbidden list bans deleting dictated content by name.
+    /// Repair reconstructs in another language, so its output keeps no word by
+    /// construction; every Smart Mode condenses, restructures, rewrites or translates
+    /// on purpose. So the answer is `true` on two rows and the default is off, for the
+    /// reason the flags above default off. See `PolishLostWords`.
+    public let refusesLostWords: Bool
+
     public init(minimumLengthRatio: Double,
                 maximumLengthRatio: Double,
                 outputLanguage: PolishOutputLanguage,
                 requiresGroundedNames: Bool,
                 requiresAlignedPrefix: Bool,
                 segmentOverlapThresholds: PolishSegmentOverlapThresholds = .default,
-                refusesFabricatedIncompleteness: Bool = false) {
+                refusesFabricatedIncompleteness: Bool = false,
+                refusesLostWords: Bool = false) {
         self.minimumLengthRatio = minimumLengthRatio
         self.maximumLengthRatio = maximumLengthRatio
         self.outputLanguage = outputLanguage
@@ -211,6 +225,7 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
         self.requiresAlignedPrefix = requiresAlignedPrefix
         self.segmentOverlapThresholds = segmentOverlapThresholds
         self.refusesFabricatedIncompleteness = refusesFabricatedIncompleteness
+        self.refusesLostWords = refusesLostWords
     }
 
     // MARK: - Decoding
@@ -253,6 +268,12 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
         self.refusesFabricatedIncompleteness = try container.decodeIfPresent(
             Bool.self, forKey: .refusesFabricatedIncompleteness
         ) ?? false
+        // Off when absent, for the same reason. The free-polish contracts are static
+        // values rather than decoded ones, so this only ever reads a Smart Mode's
+        // snapshot, and no Smart Mode sets it.
+        self.refusesLostWords = try container.decodeIfPresent(
+            Bool.self, forKey: .refusesLostWords
+        ) ?? false
     }
 
     /// The band as a range, for `PolishGuardrail.accepts(raw:polished:band:)`.
@@ -262,7 +283,7 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
         min(minimumLengthRatio, maximumLengthRatio)...maximumLengthRatio
     }
 
-    // MARK: - The free-polish contracts (ADR 0003, unchanged)
+    // MARK: - The free-polish contracts (ADR 0003)
 
     /// Natural polish. The ADR 0003 band, and the historical target-language check.
     ///
@@ -271,9 +292,14 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
     /// enforcement of that line. It is also the cheapest place in the codebase to
     /// be wrong: a rejection here hands back the deterministic floor, so the user
     /// keeps their words and loses only the polish.
+    ///
+    /// Refuses a lost dictated word since #575: the Forbidden list's ban on deleting
+    /// dictated content had no runtime enforcement, and the model's prior broke it on
+    /// device. A refusal costs the polish and never the words, for the reason above.
     public static let natural = PolishAcceptanceContract(
         minimumLengthRatio: 0.5, maximumLengthRatio: 2.0,
-        outputLanguage: .polishTarget, requiresGroundedNames: true, requiresAlignedPrefix: true
+        outputLanguage: .polishTarget, requiresGroundedNames: true, requiresAlignedPrefix: true,
+        refusesLostWords: true
     )
 
     /// Repair. Wider on both sides because reconstructing intent legitimately
@@ -301,9 +327,11 @@ public struct PolishAcceptanceContract: Equatable, Sendable, Codable {
 
     /// Auto-detect polish (#239): the Natural band, and the never-translate check
     /// against the input's own detected language. Same grounding answer as Natural,
-    /// for the same reason — the auto prompt is light-corrections-only.
+    /// for the same reason — the auto prompt is light-corrections-only. Refuses a lost
+    /// dictated word as Natural does (#575): the device rows that filed it ran here.
     public static let auto = PolishAcceptanceContract(
         minimumLengthRatio: 0.5, maximumLengthRatio: 2.0,
-        outputLanguage: .sameAsInput, requiresGroundedNames: true, requiresAlignedPrefix: true
+        outputLanguage: .sameAsInput, requiresGroundedNames: true, requiresAlignedPrefix: true,
+        refusesLostWords: true
     )
 }

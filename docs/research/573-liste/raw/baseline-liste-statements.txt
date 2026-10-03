@@ -1,0 +1,168 @@
+
+
+████ ARM shipping — 3 run(s) × 8 fixture(s), floor 0.35
+
+━━ [S1-fr-test-ok] 318 chars, lang=fr
+  #1 318→247 1889ms success recall=5/6 UNRECALLED=1 inversions=0/10 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Bon alors petit retour sur le test de ce matin.
+     engineOut: - L'enregistrement a marché du premier coup, la transcription est sortie en à peu près deux secondes et la qualité est bonne⏎- La batterie a pris 5 % sur dix minutes, c'est plus que ce que je pensais⏎- Le micro capte un peu trop le bruit de la rue
+  #2 318→199 1830ms success recall=4/6 UNRECALLED=2 HEDGE-LOST=1 inversions=0/6 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Bon alors petit retour sur le test de ce matin.
+     UNRECALLED (whole 0.00, best 0.00): c'est plus que ce que je pensais.
+     HEDGELOST: Et le micro capte un peu trop le bruit de la rue.
+       → - Micro capte trop le bruit de la rue
+     engineOut: - Enregistrement réussi du premier coup, transcription sortie en à peu près deux secondes, qualité bonne⏎- Batterie consommée 5 % sur dix minutes, plus que prévu⏎- Micro capte trop le bruit de la rue
+  #3 318→247 1899ms success recall=5/6 UNRECALLED=1 inversions=0/10 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Bon alors petit retour sur le test de ce matin.
+     engineOut: - L'enregistrement a marché du premier coup, la transcription est sortie en à peu près deux secondes et la qualité est bonne⏎- La batterie a pris 5 % sur dix minutes, c'est plus que ce que je pensais⏎- Le micro capte un peu trop le bruit de la rue
+
+━━ [S2-fr-voyage] 316 chars, lang=fr
+  #1 316→313 2177ms success recall=7/7 inversions=0/21 LIST=6
+     engineOut: - Le voyage s'est bien passé dans l'ensemble⏎- Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet⏎- L'hôtel est à deux rues de la gare⏎- La chambre est petite mais propre⏎- Le petit-déjeuner est compris⏎- Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+  #2 316→313 2153ms success recall=7/7 inversions=0/21 LIST=6
+     engineOut: - Le voyage s'est bien passé dans l'ensemble⏎- Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet⏎- L'hôtel est à deux rues de la gare⏎- La chambre est petite mais propre⏎- Le petit-déjeuner est compris⏎- Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+  #3 316→314 2097ms success recall=7/7 inversions=0/21 LIST=4
+     engineOut: - Le voyage s'est bien passé dans l'ensemble⏎- Le train avait vingt minutes de retard au départ mais on a rattrapé pendant le trajet⏎- L'hôtel est à deux rues de la gare, la chambre est petite mais propre, et le petit-déjeuner est compris⏎- Il a plu toute la journée de samedi, du coup on a surtout fait des musées
+
+━━ [S3-fr-compte-rendu] 305 chars, lang=fr
+  #1 305→210 1782ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Donc pour résumer la réunion de ce matin,
+     UNRECALLED (whole 0.33, best 0.33): Le client trouve la nouvelle maquette trop chargée,
+     engineOut: - Budget de l'année prochaine validé à 40 000 euros⏎- Date de lancement fixée au 15 mars⏎- Le client préfère la première version de la maquette⏎- Équipe support passée de trois à cinq personnes depuis septembre
+  #2 305→210 1780ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Donc pour résumer la réunion de ce matin,
+     UNRECALLED (whole 0.33, best 0.33): Le client trouve la nouvelle maquette trop chargée,
+     engineOut: - Budget de l'année prochaine validé à 40 000 euros⏎- Date de lancement fixée au 15 mars⏎- Le client préfère la première version de la maquette⏎- Équipe support passée de trois à cinq personnes depuis septembre
+  #3 305→210 1767ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Donc pour résumer la réunion de ce matin,
+     UNRECALLED (whole 0.33, best 0.33): Le client trouve la nouvelle maquette trop chargée,
+     engineOut: - Budget de l'année prochaine validé à 40 000 euros⏎- Date de lancement fixée au 15 mars⏎- Le client préfère la première version de la maquette⏎- Équipe support passée de trois à cinq personnes depuis septembre
+
+━━ [S4-fr-avis] 265 chars, lang=fr
+  #1 265→176 1607ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=3
+     UNRECALLED (whole 0.17, best 0.17): Franchement le restaurant d'hier soir c'était pas terrible.
+     UNRECALLED (whole 0.33, best 0.33): ça c'est vrai.
+     engineOut: - L'entrée était bonne mais le plat est arrivé tiède et un peu trop salé⏎- Le service était sympa quand même⏎- 45 euros par personne, je trouve que c'est cher pour ce que c'est
+  #2 265→176 1579ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=3
+     UNRECALLED (whole 0.17, best 0.17): Franchement le restaurant d'hier soir c'était pas terrible.
+     UNRECALLED (whole 0.33, best 0.33): ça c'est vrai.
+     engineOut: - L'entrée était bonne mais le plat est arrivé tiède et un peu trop salé⏎- Le service était sympa quand même⏎- 45 euros par personne, je trouve que c'est cher pour ce que c'est
+  #3 265→176 1587ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=3
+     UNRECALLED (whole 0.17, best 0.17): Franchement le restaurant d'hier soir c'était pas terrible.
+     UNRECALLED (whole 0.33, best 0.33): ça c'est vrai.
+     engineOut: - L'entrée était bonne mais le plat est arrivé tiède et un peu trop salé⏎- Le service était sympa quand même⏎- 45 euros par personne, je trouve que c'est cher pour ce que c'est
+
+━━ [S5-fr-constat-appli] 272 chars, lang=fr
+  #1 272→216 1678ms success recall=3/4 UNRECALLED=1 inversions=0/3 LIST=3
+     UNRECALLED (whole 0.33, best 0.17): Alors ce que j'observe sur l'appli depuis la mise à jour.
+     engineOut: - Le clavier prend deux secondes à apparaître quand j'ouvre Messages⏎- La dictée fonctionne bien en français mais en anglais elle coupe la dernière phrase⏎- Le mode sombre n'est plus appliqué sur l'écran des réglages
+  #2 272→207 1710ms success recall=3/4 UNRECALLED=1 inversions=0/3 LIST=3
+     UNRECALLED (whole 0.33, best 0.17): Alors ce que j'observe sur l'appli depuis la mise à jour.
+     engineOut: - Le clavier apparaît après deux secondes quand j'ouvre Messages⏎- La dictée fonctionne bien en français mais coupe la dernière phrase en anglais⏎- Le mode sombre n'est plus appliqué sur l'écran des réglages
+  #3 272→200 1753ms success recall=3/4 UNRECALLED=1 PERSON-LOST=1 inversions=0/3 LIST=3
+     UNRECALLED (whole 0.17, best 0.17): Alors ce que j'observe sur l'appli depuis la mise à jour.
+     PERSONLOST: Le clavier met deux secondes à apparaître quand j'ouvre Messages.
+       → - Clavier apparaît après deux secondes lors de l'ouverture de Messages
+     engineOut: - Clavier apparaît après deux secondes lors de l'ouverture de Messages⏎- Dictée fonctionne bien en français mais coupe la dernière phrase en anglais⏎- Mode sombre non appliqué sur l'écran des réglages
+
+━━ [S6-en-weekend] 255 chars, lang=en
+  #1 255→201 1722ms success recall=7/7 PERSON-LOST=1 inversions=0/21 LIST=6
+     PERSONLOST: we spent most of the day at the lake.
+       → spent most of the day at the lake
+     engineOut: - Weekend quiet⏎- Great weather on Saturday: spent most of the day at the lake⏎- Rainy afternoon on Sunday⏎- New bike works fine⏎- Brakes much better than on the old one⏎- Battery lasted the whole ride
+  #2 255→201 1711ms success recall=7/7 PERSON-LOST=1 inversions=0/21 LIST=6
+     PERSONLOST: we spent most of the day at the lake.
+       → spent most of the day at the lake
+     engineOut: - Weekend quiet⏎- Great weather on Saturday: spent most of the day at the lake⏎- Rainy afternoon on Sunday⏎- New bike works fine⏎- Brakes much better than on the old one⏎- Battery lasted the whole ride
+  #3 255→201 1766ms success recall=7/7 PERSON-LOST=1 inversions=0/21 LIST=6
+     PERSONLOST: we spent most of the day at the lake.
+       → spent most of the day at the lake
+     engineOut: - Weekend quiet⏎- Great weather on Saturday: spent most of the day at the lake⏎- Rainy afternoon on Sunday⏎- New bike works fine⏎- Brakes much better than on the old one⏎- Battery lasted the whole ride
+
+━━ [S7-en-standup] 278 chars, lang=en
+  #1 278→230 1638ms success recall=5/6 UNRECALLED=1 PERSON-LOST=1 inversions=0/10 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Quick update from my side.
+     PERSONLOST: We still see a few timeouts on the export endpoint,
+       → - Still see a few timeouts on the export endpoint,
+     engineOut: - Migration finished last night without errors⏎- Dashboard about thirty percent faster since the cache change⏎- Still see a few timeouts on the export endpoint, maybe two or three a day⏎- Staging server back on the old certificate
+  #2 278→230 1660ms success recall=5/6 UNRECALLED=1 PERSON-LOST=1 inversions=0/10 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Quick update from my side.
+     PERSONLOST: We still see a few timeouts on the export endpoint,
+       → - Still see a few timeouts on the export endpoint,
+     engineOut: - Migration finished last night without errors⏎- Dashboard about thirty percent faster since the cache change⏎- Still see a few timeouts on the export endpoint, maybe two or three a day⏎- Staging server back on the old certificate
+  #3 278→218 1591ms success recall=5/6 UNRECALLED=1 PERSON-LOST=1 inversions=0/10 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Quick update from my side.
+     PERSONLOST: We still see a few timeouts on the export endpoint,
+       → - Still see a few timeouts on export endpoint,
+     engineOut: - Migration finished last night without errors⏎- Dashboard about thirty percent faster since cache change⏎- Still see a few timeouts on export endpoint, maybe two or three a day⏎- Staging server back on old certificate
+
+━━ [S8-en-opinion] 231 chars, lang=en
+  #1 231→208 1524ms success recall=4/4 PERSON-LOST=1 HEDGE-LOST=1 inversions=0/6 LIST=3
+     PERSONLOST: Honestly I think the second design is the stronger one.
+       → - The second design is the stronger one:
+     HEDGELOST: Honestly I think the second design is the stronger one.
+       → - The second design is the stronger one:
+     engineOut: - The second design is the stronger one: colours are calmer and text is easier to read⏎- The first design looks more modern but feels crowded on a small screen⏎- The icons in the second design are clearer too
+  #2 231→205 1520ms success recall=4/4 PERSON-LOST=1 HEDGE-LOST=1 inversions=0/6 LIST=3
+     PERSONLOST: Honestly I think the second design is the stronger one.
+       → - The second design is the stronger one:
+     HEDGELOST: Honestly I think the second design is the stronger one.
+       → - The second design is the stronger one:
+     engineOut: - The second design is the stronger one: colours are calmer, text is easier to read⏎- The first design looks more modern but feels crowded on a small screen⏎- The icons in the second design are clearer too
+  #3 231→208 1524ms success recall=4/4 PERSON-LOST=1 HEDGE-LOST=1 inversions=0/6 LIST=3
+     PERSONLOST: Honestly I think the second design is the stronger one.
+       → - The second design is the stronger one:
+     HEDGELOST: Honestly I think the second design is the stronger one.
+       → - The second design is the stronger one:
+     engineOut: - The second design is the stronger one: colours are calmer and text is easier to read⏎- The first design looks more modern but feels crowded on a small screen⏎- The icons in the second design are clearer too
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              24       15/24       10/24       4/24        0/24        0/24        0/24        3/24        0
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              0             0             0/24          0/24
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              fr        15       0            0              0         15        0
+shipping              en        9        0            0              0         9         0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   S1-fr-test-ok           U1  U2H  U1
+   S2-fr-voyage            ·  ·  ·
+   S3-fr-compte-rendu      U2  U2  U2
+   S4-fr-avis              U2  U2  U2
+   S5-fr-constat-appli     U1  U1  U1P
+   S6-en-weekend           P  P  P
+   S7-en-standup           U1P  U1P  U1P
+   S8-en-opinion           PH  PH  PH
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 24 runs to ../docs/research/573-liste/captures/baseline-liste-statements.json

@@ -389,8 +389,8 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertTrue(instructions.contains("Never translate, not even partly"))
     }
 
-    /// #587 decision 9: `Liste` carries one example set per Apple FM language, and
-    /// nothing else about the mode moves. Its rebuild is #573.
+    /// #587 decision 9, kept through #573's rebuild: `Liste` carries one example set per
+    /// Apple FM language.
     func testListCarriesAnExampleSetPerLanguage() {
         let prompt = SmartModeCatalogue.notes.prompt
         XCTAssertEqual(prompt.localizedInstructions?.count, 15)
@@ -399,17 +399,62 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertEqual(prompt.instructions(forTranscriptLanguage: "cs"), prompt.instructions)
     }
 
-    /// Every set of both modes is bullets for `Liste` and blocks for `Message`, and
-    /// no set loses its mode's shape in translation. #393 is why the first half is a
-    /// test: a translated example that came back as prose would have turned the bullet
-    /// mode into prose.
-    func testEveryListExampleSetStillShowsBullets() {
+    /// Every `Liste` set shows #573's shape: a title line ending on the language's colon,
+    /// then flat `- ` lines. #587 measured that the examples, not the rules, set the
+    /// output's shape, so a set that lost its title or its bullets in translation would
+    /// teach the mode to stop producing them. #393 is why the bullets are a test at all.
+    func testEveryListExampleSetShowsATitleThenBullets() {
         for (code, set) in SmartModeNotesExamples.byLanguage {
-            for output in [set.meetingOutput, set.buildOutput, set.shortOutput, set.counterRight] {
-                XCTAssertTrue(output.hasPrefix("- "), "\(code): an example output is not a bullet")
+            for output in [set.mixedOutput, set.statementsOutput, set.counterRight] {
+                let lines = output.components(separatedBy: "\n")
+                let title = lines.first ?? ""
+                XCTAssertFalse(title.hasPrefix("- "), "\(code): an example opens without a title")
+                XCTAssertTrue(title.hasSuffix(":") || title.hasSuffix("："), "\(code): a title has no colon")
+                XCTAssertGreaterThanOrEqual(lines.count, 3, "\(code): fewer than two bullets")
+                for line in lines.dropFirst() {
+                    XCTAssertTrue(line.hasPrefix("- "), "\(code): a line after the title is not a bullet")
+                }
             }
-            XCTAssertEqual(set.meetingOutput.components(separatedBy: "\n- ").count, 3, code)
+            XCTAssertEqual(set.mixedOutput.components(separatedBy: "\n- ").count, 5, code)
+            XCTAssertEqual(set.statementsOutput.components(separatedBy: "\n- ").count, 5, code)
         }
+    }
+
+    /// French typography puts a space before the colon, every other Latin-script language
+    /// does not (#573 decision 2). The rules say "the way the input language writes it"
+    /// and leave the showing to the examples, so the examples are what is pinned.
+    func testListTitlesFollowEachLanguagesColon() {
+        XCTAssertTrue(SmartModeNotesExamples.byLanguage["fr"]?.mixedOutput.hasPrefix("Vide-grenier de dimanche :\n") == true)
+        XCTAssertTrue(SmartModeNotesExamples.byLanguage["en"]?.mixedOutput.hasPrefix("Sunday's yard sale:\n") == true)
+        XCTAssertTrue(SmartModeNotesExamples.byLanguage["ja"]?.mixedOutput.hasPrefix("日曜のフリーマーケット：\n") == true)
+    }
+
+    /// Decision 1's other half, where the model reads it: the recap example keeps every
+    /// past fact past with its subject and holds no task, and the counter-example names
+    /// the statement-turned-task and the generic title as wrong (#573, device round 1).
+    func testListPromptShowsPastFactsStayingPast() {
+        let french = SmartModeNotesPrompt.instructions(examples: SmartModeNotesPrompt.defaultExamples)
+        XCTAssertTrue(french.contains("Ce qu'on a fait au jardin ce week-end :\n- On a taillé la haie"))
+        XCTAssertTrue(french.contains("WRONG (a statement turned into a task)"))
+        XCTAssertTrue(french.contains("WRONG (a title that fits any list): À faire :"))
+        XCTAssertTrue(french.contains("Never turn a statement into a task."))
+        // The lone-bullet example is gone: a one-item list is declined after the call.
+        XCTAssertFalse(french.contains("Short-input example"))
+        for (code, set) in SmartModeNotesExamples.byLanguage {
+            XCTAssertNotEqual(set.counterGeneric.components(separatedBy: " / ").first,
+                              set.counterRight.components(separatedBy: "\n").first, code)
+        }
+    }
+
+    /// The tense and the one-item-per-line rule ride in the user turn, the position
+    /// #437 and #523 measured as the one that governs the output (#573, round 2).
+    func testListUserTurnAsksForOneLinePerItemAndKeepsPastFactsPast() {
+        let framing = PolishTask.smart(SmartModeCatalogue.notes).userTurn(raw: "x")
+        XCTAssertTrue(framing.contains("one line per point or item"))
+        // Past facts only. C6 asked for "each verb in the tense the speaker used" and
+        // turned plain statements into infinitives ("Apparaître le clavier…"), 6 of 24.
+        XCTAssertTrue(framing.contains("What the speaker says they already did stays in the past."))
+        XCTAssertFalse(framing.contains("each verb in the tense"))
     }
 
     /// The two languages whose sets are the originals rather than translations keep
@@ -479,7 +524,7 @@ final class SmartModeCatalogueTests: XCTestCase {
         XCTAssertTrue(SmartModeCatalogue.message.prompt.instructions
             .contains("1. Cut what only exists because they were speaking"))
         XCTAssertTrue(SmartModeCatalogue.notes.prompt.instructions
-            .contains("1. Write one bullet per idea"))
+            .contains("1. The first line is a short title that says what the whole list is about"))
     }
 
     // MARK: - Message (#572)

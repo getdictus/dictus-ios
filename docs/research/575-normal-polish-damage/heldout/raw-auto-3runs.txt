@@ -1,0 +1,819 @@
+
+━━ [email-fr/E1-relance-devis] lang=auto stt=PK
+  raw:      alors euh je voulais revenir sur le devis que j'ai envoyé la semaine dernière j'ai toujours pas eu de retour et là ça commence à être un peu juste par rapport au planning donc si vous pouvez me dire où ça en est ça m'arrangerait
+  polished #1: Alors, je voulais revenir sur le devis que j'ai envoyé la semaine dernière. Je n'ai toujours pas eu de retour et là, ça commence à être un peu juste par rapport au planning. Si vous pouvez me dire où ça en est, ça m'arrangerait.
+            (success, 2152ms, detected=fr→auto)
+  breaks #1: Alors, je voulais revenir sur le devis que j'ai envoyé la semaine dernière. Je n'ai toujours pas eu de retour et là, ça commence à être un peu juste par rapport au planning. Si vous pouvez me dire où ça en est, ça m'arrangerait.
+  polished #2: Alors, je voulais revenir sur le devis que j'ai envoyé la semaine dernière. Je n'ai toujours pas eu de retour et là, ça commence à être un peu juste par rapport au planning. Si vous pouvez me dire où ça en est, ça m'arrangerait.
+            (success, 2052ms, detected=fr→auto)
+  breaks #2: Alors, je voulais revenir sur le devis que j'ai envoyé la semaine dernière. Je n'ai toujours pas eu de retour et là, ça commence à être un peu juste par rapport au planning. Si vous pouvez me dire où ça en est, ça m'arrangerait.
+  polished #3: Alors, je voulais revenir sur le devis que j'ai envoyé la semaine dernière. Je n'ai toujours pas eu de retour et là, ça commence à être un peu juste par rapport au planning. Si vous pouvez me dire où ça en est, ça m'arrangerait.
+            (success, 2034ms, detected=fr→auto)
+  breaks #3: Alors, je voulais revenir sur le devis que j'ai envoyé la semaine dernière. Je n'ai toujours pas eu de retour et là, ça commence à être un peu juste par rapport au planning. Si vous pouvez me dire où ça en est, ça m'arrangerait.
+
+━━ [email-fr/E2-dispo] lang=auto stt=PK
+  raw:      ouais alors moi je suis dispo mardi après-midi ou jeudi matin par contre le mercredi c'est mort j'ai un truc toute la journée dis moi ce qui t'arrange
+  polished #1: Oui, alors moi je suis disponible mardi après-midi ou jeudi matin, par contre le mercredi c'est mort, j'ai un truc toute la journée, dis-moi ce qui t'arrange.
+            (success, 1888ms, detected=fr→auto)
+  breaks #1: Oui, alors moi je suis disponible mardi après-midi ou jeudi matin, par contre le mercredi c'est mort, j'ai un truc toute la journée, dis-moi ce qui t'arrange.
+  polished #2: Oui alors moi je suis disponible mardi après-midi ou jeudi matin par contre le mercredi c'est mort j'ai un truc toute la journée dis-moi ce qui t'arrange
+            (success, 1735ms, detected=fr→auto)
+  breaks #2: Oui alors moi je suis disponible mardi après-midi ou jeudi matin par contre le mercredi c'est mort j'ai un truc toute la journée dis-moi ce qui t'arrange
+  polished #3: Oui, alors moi je suis disponible mardi après-midi ou jeudi matin, par contre le mercredi c'est mort, j'ai un truc toute la journée, dis-moi ce qui t'arrange.
+            (success, 1839ms, detected=fr→auto)
+  breaks #3: Oui, alors moi je suis disponible mardi après-midi ou jeudi matin, par contre le mercredi c'est mort, j'ai un truc toute la journée, dis-moi ce qui t'arrange.
+
+━━ [email-fr/E3-court] lang=auto stt=PK
+  raw:      je confirme pour la réunion de lundi à 14h
+  polished #1: Je confirme pour la réunion de lundi à 14h.
+            (success, 1169ms, detected=fr→auto)
+  breaks #1: Je confirme pour la réunion de lundi à 14h.
+  polished #2: Je confirme pour la réunion de lundi à 14h.
+            (success, 1160ms, detected=fr→auto)
+  breaks #2: Je confirme pour la réunion de lundi à 14h.
+  polished #3: Je confirme pour la réunion de lundi à 14h.
+            (success, 1162ms, detected=fr→auto)
+  breaks #3: Je confirme pour la réunion de lundi à 14h.
+
+━━ [email-fr/E4-reclamation] lang=auto stt=PK
+  raw:      donc en fait ça fait trois fois que j'appelle pour le même problème et à chaque fois on me dit que ça va être réglé sous 48h et ça fait deux semaines que ça dure là franchement j'en ai marre je veux qu'on me rappelle
+  polished #1: Donc en fait ça fait trois fois que j'appelle pour le même problème et à chaque fois on me dit que ça va être réglé sous 48h et ça fait deux semaines que ça dure là franchement j'en ai marre je veux qu'on me rappelle.
+            (success, 1978ms, detected=fr→auto)
+  breaks #1: Donc en fait ça fait trois fois que j'appelle pour le même problème et à chaque fois on me dit que ça va être réglé sous 48h et ça fait deux semaines que ça dure là franchement j'en ai marre je veux qu'on me rappelle.
+  polished #2: Donc en fait ça fait trois fois que j'appelle pour le même problème et à chaque fois on me dit que ça va être réglé sous 48h et ça fait deux semaines que ça dure là franchement j'en ai marre je veux qu'on me rappelle
+            (success, 1980ms, detected=fr→auto)
+  breaks #2: Donc en fait ça fait trois fois que j'appelle pour le même problème et à chaque fois on me dit que ça va être réglé sous 48h et ça fait deux semaines que ça dure là franchement j'en ai marre je veux qu'on me rappelle
+  polished #3: Donc en fait ça fait trois fois que j'appelle pour le même problème et à chaque fois on me dit que ça va être réglé sous 48h et ça fait deux semaines que ça dure là franchement j'en ai marre je veux qu'on me rappelle.
+            (success, 1958ms, detected=fr→auto)
+  breaks #3: Donc en fait ça fait trois fois que j'appelle pour le même problème et à chaque fois on me dit que ça va être réglé sous 48h et ça fait deux semaines que ça dure là franchement j'en ai marre je veux qu'on me rappelle.
+
+━━ [email-fr/E5-long-projet] lang=auto stt=PK
+  raw:      alors euh je fais le point sur le projet donc euh la partie design elle est finie on a validé les maquettes vendredi dernier par contre le dev il a pris du retard parce qu'on a eu un souci avec l'API du prestataire et euh du coup on est en train de voir si on peut décaler la livraison d'une semaine je sais pas si c'est jouable de ton côté et sinon faudrait qu'on en parle assez vite parce que là ça commence à presser
+  polished #1: Alors, je fais le point sur le projet. La partie design elle est finie. On a validé les maquettes vendredi dernier. Par contre, le dev a pris du retard parce qu'on a eu un souci avec l'API du prestataire. Du coup, on est en train de voir si on peut décaler la livraison d'une semaine. Je sais pas si c'est jouable de ton côté et sinon faudrait qu'on en parle assez vite parce que là ça commence à presser.
+            (success, 3045ms, detected=fr→auto)
+  breaks #1: Alors, je fais le point sur le projet. La partie design elle est finie. On a validé les maquettes vendredi dernier. Par contre, le dev a pris du retard parce qu'on a eu un souci avec l'API du prestataire. Du coup, on est en train de voir si on peut décaler la livraison d'une semaine. Je sais pas si c'est jouable de ton côté et sinon faudrait qu'on en parle assez vite parce que là ça commence à presser.
+  polished #2: Alors, je fais le point sur le projet. La partie design est finie. On a validé les maquettes vendredi dernier. Par contre, le dev a pris du retard parce qu'on a eu un souci avec l'API du prestataire et du coup on est en train de voir si on peut décaler la livraison d'une semaine. Je ne sais pas si c'est jouable de ton côté et sinon faudrait qu'on en parle assez vite parce que là ça commence à presser.
+            (success, 2936ms, detected=fr→auto)
+  breaks #2: Alors, je fais le point sur le projet. La partie design est finie. On a validé les maquettes vendredi dernier. Par contre, le dev a pris du retard parce qu'on a eu un souci avec l'API du prestataire et du coup on est en train de voir si on peut décaler la livraison d'une semaine. Je ne sais pas si c'est jouable de ton côté et sinon faudrait qu'on en parle assez vite parce que là ça commence à presser.
+  polished #3: Alors, je fais le point sur le projet. La partie design est finie. On a validé les maquettes vendredi dernier. Par contre, le dev a pris du retard parce qu'on a eu un souci avec l'API du prestataire. Du coup, on est en train de voir si on peut décaler la livraison d'une semaine. Je ne sais pas si c'est jouable de ton côté et sinon, faudrait qu'on en parle assez vite parce que là, ça commence à presser.
+            (success, 3074ms, detected=fr→auto)
+  breaks #3: Alors, je fais le point sur le projet. La partie design est finie. On a validé les maquettes vendredi dernier. Par contre, le dev a pris du retard parce qu'on a eu un souci avec l'API du prestataire. Du coup, on est en train de voir si on peut décaler la livraison d'une semaine. Je ne sais pas si c'est jouable de ton côté et sinon, faudrait qu'on en parle assez vite parce que là, ça commence à presser.
+
+━━ [email-fr/E6-demande-fichier] lang=auto stt=PK
+  raw:      est-ce que tu pourrais me renvoyer le fichier des chiffres du dernier trimestre j'arrive pas à le retrouver dans mes mails et j'en ai besoin pour demain matin
+  polished #1: Est-ce que tu pourrais me renvoyer le fichier des chiffres du dernier trimestre ? J'arrive pas à le retrouver dans mes mails et j'en ai besoin pour demain matin.
+            (success, 1640ms, detected=fr→auto)
+  breaks #1: Est-ce que tu pourrais me renvoyer le fichier des chiffres du dernier trimestre ? J'arrive pas à le retrouver dans mes mails et j'en ai besoin pour demain matin.
+  polished #2: est-ce que tu pourrais me renvoyer le fichier des chiffres du dernier trimestre j'arrive pas à le retrouver dans mes mails et j'en ai besoin pour demain matin
+            (rejectedGuardrail, 1683ms, detected=fr→auto, check=lostWord)
+  engineOut #2: Est-ce que tu peux me renvoyer le fichier des chiffres du dernier trimestre? J'arrive pas à le retrouver dans mes mails et j'en ai besoin pour demain matin.
+  polished #3: est-ce que tu pourrais me renvoyer le fichier des chiffres du dernier trimestre j'arrive pas à le retrouver dans mes mails et j'en ai besoin pour demain matin
+            (rejectedGuardrail, 1676ms, detected=fr→auto, check=lostWord)
+  engineOut #3: Est-ce que tu peux me renvoyer le fichier des chiffres du dernier trimestre ? J'arrive pas à le retrouver dans mes mails et j'en ai besoin pour demain matin.
+
+━━ [email-fr/E7-controle-salutation-seule] lang=auto stt=PK
+  raw:      bonjour alors je vous écris parce que j'ai besoin d'un renseignement sur ma facture du mois dernier il y a une ligne que je comprends pas
+  polished #1: Bonjour, alors je vous écris parce que j'ai besoin d'un renseignement sur ma facture du mois dernier. Il y a une ligne que je ne comprends pas.
+            (success, 1659ms, detected=fr→auto)
+  breaks #1: Bonjour, alors je vous écris parce que j'ai besoin d'un renseignement sur ma facture du mois dernier. Il y a une ligne que je ne comprends pas.
+  polished #2: Bonjour, alors je vous écris parce que j'ai besoin d'un renseignement sur ma facture du mois dernier. Il y a une ligne que je ne comprends pas.
+            (success, 1643ms, detected=fr→auto)
+  breaks #2: Bonjour, alors je vous écris parce que j'ai besoin d'un renseignement sur ma facture du mois dernier. Il y a une ligne que je ne comprends pas.
+  polished #3: Bonjour, alors je vous écris parce que j'ai besoin d'un renseignement sur ma facture du mois dernier. Il y a une ligne que je ne comprends pas.
+            (success, 1644ms, detected=fr→auto)
+  breaks #3: Bonjour, alors je vous écris parce que j'ai besoin d'un renseignement sur ma facture du mois dernier. Il y a une ligne que je ne comprends pas.
+
+━━ [email-fr/E8-controle-signature-seule] lang=auto stt=PK
+  raw:      du coup je pense qu'on peut valider comme ça je te laisse me confirmer et on lance la prod merci d'avance
+  polished #1: Du coup, je pense qu'on peut valider comme ça. Je te laisse me confirmer et on lance la prod. Merci d'avance.
+            (success, 1484ms, detected=fr→auto)
+  breaks #1: Du coup, je pense qu'on peut valider comme ça. Je te laisse me confirmer et on lance la prod. Merci d'avance.
+  polished #2: Du coup, je pense qu'on peut valider comme ça. Je te laisse me confirmer et on lance la prod. Merci d'avance.
+            (success, 1497ms, detected=fr→auto)
+  breaks #2: Du coup, je pense qu'on peut valider comme ça. Je te laisse me confirmer et on lance la prod. Merci d'avance.
+  polished #3: Du coup, je pense qu'on peut valider comme ça. Je te laisse me confirmer et on lance la prod. Merci d'avance.
+            (success, 1491ms, detected=fr→auto)
+  breaks #3: Du coup, je pense qu'on peut valider comme ça. Je te laisse me confirmer et on lance la prod. Merci d'avance.
+
+━━ [email-fr/E9-controle-prenom] lang=auto stt=PK
+  raw:      écoute Julien j'ai regardé ce que tu m'as envoyé et globalement c'est bon il y a juste deux trois trucs à reprendre sur la partie budget je te fais un retour détaillé demain
+  polished #1: Écoute Julien, j'ai regardé ce que tu m'as envoyé et globalement c'est bon, il y a juste deux trois trucs à reprendre sur la partie budget, je te fais un retour détaillé demain.
+            (success, 1858ms, detected=fr→auto)
+  breaks #1: Écoute Julien, j'ai regardé ce que tu m'as envoyé et globalement c'est bon, il y a juste deux trois trucs à reprendre sur la partie budget, je te fais un retour détaillé demain.
+  polished #2: Écoute Julien, j'ai regardé ce que tu m'as envoyé et globalement c'est bon, il y a juste deux trois trucs à reprendre sur la partie budget, je te fais un retour détaillé demain.
+            (success, 1844ms, detected=fr→auto)
+  breaks #2: Écoute Julien, j'ai regardé ce que tu m'as envoyé et globalement c'est bon, il y a juste deux trois trucs à reprendre sur la partie budget, je te fais un retour détaillé demain.
+  polished #3: écoute Julien, j'ai regardé ce que tu m'as envoyé et globalement c'est bon, il y a juste deux trois trucs à reprendre sur la partie budget, je te fais un retour détaillé demain.
+            (success, 1728ms, detected=fr→auto)
+  breaks #3: écoute Julien, j'ai regardé ce que tu m'as envoyé et globalement c'est bon, il y a juste deux trois trucs à reprendre sur la partie budget, je te fais un retour détaillé demain.
+
+━━ [email-fr/E10-controle-deja-formel] lang=auto stt=PK
+  raw:      je vous prie de bien vouloir trouver ci-joint les documents demandés je reste à votre disposition pour toute information complémentaire
+  polished #1: Je vous prie de bien vouloir trouver ci-joint les documents demandés. Je reste à votre disposition pour toute information complémentaire.
+            (success, 1478ms, detected=fr→auto)
+  breaks #1: Je vous prie de bien vouloir trouver ci-joint les documents demandés. Je reste à votre disposition pour toute information complémentaire.
+  polished #2: Je vous prie de bien vouloir trouver ci-joint les documents demandés. Je reste à votre disposition pour toute information complémentaire.
+            (success, 1467ms, detected=fr→auto)
+  breaks #2: Je vous prie de bien vouloir trouver ci-joint les documents demandés. Je reste à votre disposition pour toute information complémentaire.
+  polished #3: Je vous prie de bien vouloir trouver ci-joint les documents demandés. Je reste à votre disposition pour toute information complémentaire.
+            (success, 1468ms, detected=fr→auto)
+  breaks #3: Je vous prie de bien vouloir trouver ci-joint les documents demandés. Je reste à votre disposition pour toute information complémentaire.
+
+━━ [seed/1-normal] lang=auto stt=PK
+  raw:      Salut ça va ? J'espère que tu es passé un bon week-end. Moi de mon côté c'était tranquille, j'ai bossé sur le projet et franchement ça avance bien. On devrait être dans les temps.
+  polished #1: Salut, ça va ? J'espère que tu es passé un bon week-end. Moi de mon côté c'était tranquille, j'ai bossé sur le projet et franchement ça avance bien. On devrait être dans les temps.
+            (success, 1871ms, detected=fr→auto)
+  breaks #1: Salut, ça va ? J'espère que tu es passé un bon week-end. Moi de mon côté c'était tranquille, j'ai bossé sur le projet et franchement ça avance bien. On devrait être dans les temps.
+  polished #2: Salut, ça va ? J'espère que tu es passé un bon week-end. Moi de mon côté, c'était tranquille, j'ai bossé sur le projet et franchement, ça avance bien. On devrait être dans les temps.
+            (success, 1898ms, detected=fr→auto)
+  breaks #2: Salut, ça va ? J'espère que tu es passé un bon week-end. Moi de mon côté, c'était tranquille, j'ai bossé sur le projet et franchement, ça avance bien. On devrait être dans les temps.
+  polished #3: Salut, ça va ? J'espère que tu es passé un bon week-end. Moi de mon côté c'était tranquille, j'ai bossé sur le projet et franchement ça avance bien. On devrait être dans les temps.
+            (success, 1866ms, detected=fr→auto)
+  breaks #3: Salut, ça va ? J'espère que tu es passé un bon week-end. Moi de mon côté c'était tranquille, j'ai bossé sur le projet et franchement ça avance bien. On devrait être dans les temps.
+
+━━ [seed/2-bilingue] lang=auto stt=PK
+  raw:      Alors écoute, faut que je push le commit sur GitHub avant la deadline de today et ensuite je te laisse review la pull request. Normalement le merge va clôturer le slice et on pourra fermer l'issue.
+  polished #1: Alors écoute, faut que je push le commit sur GitHub avant la deadline de today et ensuite je te laisse review la pull request. Normalement le merge va clôturer le slice et on pourra fermer l'issue.
+            (success, 1827ms, detected=fr→auto)
+  breaks #1: Alors écoute, faut que je push le commit sur GitHub avant la deadline de today et ensuite je te laisse review la pull request. Normalement le merge va clôturer le slice et on pourra fermer l'issue.
+  polished #2: Alors écoute, faut que je push le commit sur GitHub avant la deadline de today et ensuite je te laisse review la pull request. Normalement le merge va clôturer le slice et on pourra fermer l'issue.
+            (success, 1717ms, detected=fr→auto)
+  breaks #2: Alors écoute, faut que je push le commit sur GitHub avant la deadline de today et ensuite je te laisse review la pull request. Normalement le merge va clôturer le slice et on pourra fermer l'issue.
+  polished #3: Alors écoute, faut que je push le commit sur GitHub avant la deadline de aujourd'hui et ensuite je te laisse review la pull request. Normalement le merge va clôturer le slice et on pourra fermer l'issue.
+            (success, 1771ms, detected=fr→auto)
+  breaks #3: Alors écoute, faut que je push le commit sur GitHub avant la deadline de aujourd'hui et ensuite je te laisse review la pull request. Normalement le merge va clôturer le slice et on pourra fermer l'issue.
+
+━━ [seed/4-tricky-ponctuation] lang=auto stt=PK
+  raw:      Alors bonjour à tous, retour à la ligne. Voici le compte rendu de la réunion, retour à la ligne. Premièrement, on a validé le budget. Point d'exclamation. Retour à la ligne. Deuxièmement, est-ce que tout le monde est d'accord ? Point d'interrogation. Retour à la ligne. A très vite.
+  polished #1: Alors bonjour à tous,
+Voici le compte rendu de la réunion,
+Premièrement, on a validé le budget !
+Deuxièmement, est-ce que tout le monde est d'accord ?
+À très vite.
+            (success, 1989ms, detected=fr→auto)
+  breaks #1: Alors bonjour à tous,⏎Voici le compte rendu de la réunion,⏎Premièrement, on a validé le budget !⏎Deuxièmement, est-ce que tout le monde est d'accord ?⏎À très vite.
+  polished #2: Alors bonjour à tous,
+Voici le compte rendu de la réunion,
+Premièrement, on a validé le budget !
+Deuxièmement, est-ce que tout le monde est d'accord ?
+À très vite.
+            (success, 1979ms, detected=fr→auto)
+  breaks #2: Alors bonjour à tous,⏎Voici le compte rendu de la réunion,⏎Premièrement, on a validé le budget !⏎Deuxièmement, est-ce que tout le monde est d'accord ?⏎À très vite.
+  polished #3: Alors bonjour à tous,
+Voici le compte rendu de la réunion,
+Premièrement, on a validé le budget !
+Deuxièmement, est-ce que tout le monde est d'accord ?
+À très vite.
+            (success, 1977ms, detected=fr→auto)
+  breaks #3: Alors bonjour à tous,⏎Voici le compte rendu de la réunion,⏎Premièrement, on a validé le budget !⏎Deuxièmement, est-ce que tout le monde est d'accord ?⏎À très vite.
+
+━━ [seed/5-erreur-parakeet] lang=auto stt=PK
+  raw:      Et moi je vais faire un autre test, c'est le test on va dire special paratite where sometimes it arrive que ça traduise de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par error.
+  polished #1: Et moi je vais faire un autre test, c'est le test on va dire special paratite where sometimes it arrive que ça traduise de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par error.
+            (rejectedGuardrail, 2119ms, detected=fr→auto, check=lostWord)
+  engineOut #1: Et moi je vais faire un autre test, c'est le test on va dire spécial paratite where sometimes it happens que ça traduit de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par erreur.
+  polished #2: Et moi je vais faire un autre test, c'est le test on va dire special paratite where sometimes it arrive que ça traduise de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par error.
+            (rejectedGuardrail, 2070ms, detected=fr→auto, check=lostWord)
+  engineOut #2: Et moi je vais faire un autre test, c'est le test on va dire spécial paratite where sometimes it arrives que ça traduit de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par erreur.
+  polished #3: Et moi je vais faire un autre test, c'est le test on va dire special paratite where sometimes it arrive que ça traduise de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par error.
+            (rejectedGuardrail, 2114ms, detected=fr→auto, check=lostWord)
+  engineOut #3: Et moi je vais faire un autre test, c'est le test on va dire spécial paratite where sometimes it arrives que ça traduit de l'anglais en fait et donc l'idée c'est de voir comment se comporte le modèle where the language is switching in English but par erreur.
+
+━━ [seed/8-verbal-clean] lang=auto stt=PK
+  raw:      Ok, virgule, petit test, virgule, deuxième test, point.
+  polished #1: Ok, petit test, deuxième test, point.
+            (success, 1097ms, detected=fr→auto)
+  breaks #1: Ok, petit test, deuxième test, point.
+  polished #2: Ok, petit test, deuxième test, point.
+            (success, 1070ms, detected=fr→auto)
+  breaks #2: Ok, petit test, deuxième test, point.
+  polished #3: Ok, petit test, deuxième test, point.
+            (success, 1068ms, detected=fr→auto)
+  breaks #3: Ok, petit test, deuxième test, point.
+
+━━ [seed/9-verbal-questions] lang=auto stt=PK
+  raw:      Salut, comment ça va ? Point d'interrogation. Génial. Point d'exclamation.
+  polished #1: Salut, comment ça va ? Génial !
+            (success, 1066ms, detected=fr→auto)
+  breaks #1: Salut, comment ça va ? Génial !
+  polished #2: Salut, comment ça va ? Génial !
+            (success, 1068ms, detected=fr→auto)
+  breaks #2: Salut, comment ça va ? Génial !
+  polished #3: Salut, comment ça va ? Génial !
+            (success, 1072ms, detected=fr→auto)
+  breaks #3: Salut, comment ça va ? Génial !
+
+━━ [seed/10-verbal-list-parakeet-error] lang=auto stt=PK
+  raw:      Liste de point, pain, point virgule, les point virgule, oeuf, point.
+  polished #1: Liste de points, pain ; les ; oeuf, point.
+            (success, 1193ms, detected=fr→auto)
+  breaks #1: Liste de points, pain ; les ; oeuf, point.
+  polished #2: Liste de points, pain ; les ; oeuf, point.
+            (success, 1193ms, detected=fr→auto)
+  breaks #2: Liste de points, pain ; les ; oeuf, point.
+  polished #3: Liste de points, pain ; les ; oeuf, point.
+            (success, 1185ms, detected=fr→auto)
+  breaks #3: Liste de points, pain ; les ; oeuf, point.
+
+━━ [seed/11-verbal-newlines] lang=auto stt=PK
+  raw:      Première ligne, retour à la ligne. Deuxième ligne, retour à la ligne, troisième ligne.
+  polished #1: Première ligne,
+Deuxième ligne,
+troisième ligne.
+            (success, 1346ms, detected=fr→auto)
+  breaks #1: Première ligne,⏎Deuxième ligne,⏎troisième ligne.
+  polished #2: Première ligne,
+Deuxième ligne,
+troisième ligne.
+            (rejectedGuardrail, 1294ms, detected=fr→auto, check=length)
+  engineOut #2: Line 1.
+Line 2.
+Line 3.
+  polished #3: Première ligne,
+Deuxième ligne,
+troisième ligne.
+            (success, 1327ms, detected=fr→auto)
+  breaks #3: Première ligne,⏎Deuxième ligne,⏎troisième ligne.
+
+━━ [seed/12-point-noun-preserved] lang=auto stt=PK
+  raw:      Je mets un point final point.
+  polished #1: Je mets un point final.
+            (success, 1065ms, detected=fr→auto)
+  breaks #1: Je mets un point final.
+  polished #2: Je mets un point final.
+            (success, 1061ms, detected=fr→auto)
+  breaks #2: Je mets un point final.
+  polished #3: Je mets un point final.
+            (success, 1061ms, detected=fr→auto)
+  breaks #3: Je mets un point final.
+
+━━ [seed/13-verbal-mixed] lang=auto stt=PK
+  raw:      Bonjour Pierre, tu vas bien. Point d'interrogation. A très vite. Point.
+  polished #1: Bonjour Pierre, tu vas bien ? À très vite.
+            (success, 1193ms, detected=fr→auto)
+  breaks #1: Bonjour Pierre, tu vas bien ? À très vite.
+  polished #2: Bonjour Pierre, tu vas bien ? A très vite. .
+            (success, 1161ms, detected=fr→auto)
+  breaks #2: Bonjour Pierre, tu vas bien ? A très vite. .
+  polished #3: Bonjour Pierre, tu vas bien ? À très vite. .
+            (success, 1201ms, detected=fr→auto)
+  breaks #3: Bonjour Pierre, tu vas bien ? À très vite. .
+
+━━ [seed/14-verbal-long-mixed] lang=auto stt=PK
+  raw:      Donc là je fais un petit test de transcription, retour à la ligne. Je vais faire des tests avec de la ponctuation. Point. Ça marche. Point d'exclamation. Est-ce que c'est normal ? Point d'interrogation.
+  polished #1: Donc là je fais un petit test de transcription,
+Je vais faire des tests avec de la ponctuation. Point. Ça marche ! Est-ce que c'est normal ?
+            (success, 1604ms, detected=fr→auto)
+  breaks #1: Donc là je fais un petit test de transcription,⏎Je vais faire des tests avec de la ponctuation. Point. Ça marche ! Est-ce que c'est normal ?
+  polished #2: Donc là, je fais un petit test de transcription,
+Je vais faire des tests avec de la ponctuation. Point. Ça marche ! Est-ce que c'est normal ?
+            (success, 1716ms, detected=fr→auto)
+  breaks #2: Donc là, je fais un petit test de transcription,⏎Je vais faire des tests avec de la ponctuation. Point. Ça marche ! Est-ce que c'est normal ?
+  polished #3: Donc là je fais un petit test de transcription,
+Je vais faire des tests avec de la ponctuation. Point. Ça marche ! Est-ce que c'est normal ?
+            (success, 1600ms, detected=fr→auto)
+  breaks #3: Donc là je fais un petit test de transcription,⏎Je vais faire des tests avec de la ponctuation. Point. Ça marche ! Est-ce que c'est normal ?
+
+━━ [nl-markers-fr/nl-1-liste-courses] lang=auto stt=PK
+  raw:      Voici ce que j'ai besoin de points, retour à la ligne, des carottes, retour à la ligne, des patates, retour à la ligne, des pommes
+  polished #1: Voici ce que j'ai besoin de points, des carottes, des patates, des pommes.
+            (success, 1369ms, detected=fr→auto)
+  breaks #1: Voici ce que j'ai besoin de points, des carottes, des patates, des pommes.
+  polished #2: Voici ce que j'ai besoin de points, des carottes, des patates, des pommes.
+            (success, 1385ms, detected=fr→auto)
+  breaks #2: Voici ce que j'ai besoin de points, des carottes, des patates, des pommes.
+  polished #3: Voici ce que j'ai besoin de points, des carottes, des patates, des pommes
+            (success, 1283ms, detected=fr→auto)
+  breaks #3: Voici ce que j'ai besoin de points, des carottes, des patates, des pommes
+
+━━ [nl-markers-fr/nl-2-plus-de-retours] lang=auto stt=PK
+  raw:      Donc j'ai l'impression qu'il ne me fait plus les retours à la ligne, je sais pas pourquoi.
+  polished #1: Donc j'ai l'impression qu'il ne me fait plus les retours, je sais pas pourquoi.
+            (success, 1376ms, detected=fr→auto)
+  breaks #1: Donc j'ai l'impression qu'il ne me fait plus les retours, je sais pas pourquoi.
+  polished #2: Donc j'ai l'impression qu'il ne me fait plus les retours, je sais pas pourquoi.
+            (success, 1355ms, detected=fr→auto)
+  breaks #2: Donc j'ai l'impression qu'il ne me fait plus les retours, je sais pas pourquoi.
+  polished #3: Donc j'ai l'impression qu'il ne me fait plus les retours, je ne sais pas pourquoi.
+            (success, 1383ms, detected=fr→auto)
+  breaks #3: Donc j'ai l'impression qu'il ne me fait plus les retours, je ne sais pas pourquoi.
+
+━━ [nl-markers-fr/nl-3-sous-paragraphes] lang=auto stt=PK
+  raw:      sur des grands paragraphes des sous-paragraphes avec des retours à la ligne, des espaces blancs
+  polished #1: sur des grands paragraphes des sous-paragraphes avec des retours
+des espaces blancs
+            (success, 1346ms, detected=fr→auto)
+  breaks #1: sur des grands paragraphes des sous-paragraphes avec des retours⏎des espaces blancs
+  polished #2: sur des grands paragraphes des sous-paragraphes avec des retours
+des espaces blancs
+            (success, 1345ms, detected=fr→auto)
+  breaks #2: sur des grands paragraphes des sous-paragraphes avec des retours⏎des espaces blancs
+  polished #3: sur des grands paragraphes des sous-paragraphes avec des retours
+des espaces blancs
+            (success, 1340ms, detected=fr→auto)
+  breaks #3: sur des grands paragraphes des sous-paragraphes avec des retours⏎des espaces blancs
+
+━━ [nl-markers-fr/nl-4-identifiants] lang=auto stt=PK
+  raw:      il me dit de points retour à la ligne copier les identifiants
+  polished #1: Il me dit de points. Copier les identifiants
+            (success, 1188ms, detected=fr→auto)
+  breaks #1: Il me dit de points. Copier les identifiants
+  polished #2: Il me dit de points. Copier les identifiants.
+            (success, 1208ms, detected=fr→auto)
+  breaks #2: Il me dit de points. Copier les identifiants.
+  polished #3: Il me dit de points. Copier les identifiants.
+            (success, 1211ms, detected=fr→auto)
+  breaks #3: Il me dit de points. Copier les identifiants.
+
+━━ [probe-isolated/P1-salle] lang=auto stt=PK
+  raw:      Sinon je me débrouillerai pour suivre une visio depuis la salle à tante mais ce sera moyen
+  polished #1: Sinon je me débrouillerai pour suivre une visio depuis la salle à tante, mais ce sera moyen.
+            (success, 1340ms, detected=fr→auto)
+  breaks #1: Sinon je me débrouillerai pour suivre une visio depuis la salle à tante, mais ce sera moyen.
+  polished #2: Sinon je me débrouillerai pour suivre une visio depuis la salle à tante mais ce sera moyen.
+            (success, 1401ms, detected=fr→auto)
+  breaks #2: Sinon je me débrouillerai pour suivre une visio depuis la salle à tante mais ce sera moyen.
+  polished #3: Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante, mais ce sera moyen.
+            (success, 1408ms, detected=fr→auto)
+  breaks #3: Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante, mais ce sera moyen.
+
+━━ [probe-isolated/P2-morceaux] lang=auto stt=PK
+  raw:      Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaye de deviner quels sons ont été prononcés
+  polished #1: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaye de deviner quels sons ont été prononcés.
+            (success, 1405ms, detected=fr→auto)
+  breaks #1: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaye de deviner quels sons ont été prononcés.
+  polished #2: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaye de deviner quels sons ont été prononcés.
+            (success, 1425ms, detected=fr→auto)
+  breaks #2: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaye de deviner quels sons ont été prononcés.
+  polished #3: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaye de deviner quels sons ont été prononcés.
+            (success, 1397ms, detected=fr→auto)
+  breaks #3: Le système le découpe en petits morceaux. Le modèle prend ses morceaux et il essaye de deviner quels sons ont été prononcés.
+
+━━ [probe-isolated/P3-comptable] lang=auto stt=PK
+  raw:      Il faut que je répète le comptable, le comptable je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle
+  polished #1: Il faut que je répète le comptable, le comptable je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle.
+            (success, 1521ms, detected=fr→auto)
+  breaks #1: Il faut que je répète le comptable, le comptable je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle.
+  polished #2: Il faut que je répète le comptable, le comptable je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle.
+            (success, 1502ms, detected=fr→auto)
+  breaks #2: Il faut que je répète le comptable, le comptable je l'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle.
+  polished #3: Il faut que je répète le comptable, le comptable j'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle.
+            (success, 1505ms, detected=fr→auto)
+  breaks #3: Il faut que je répète le comptable, le comptable j'ai eu vendredi, c'est l'assurance qu'il faut que je rappelle.
+
+━━ [probe-isolated/P4-appstore] lang=auto stt=PK
+  raw:      Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12
+  polished #1: Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12.
+            (success, 1661ms, detected=fr→auto)
+  breaks #1: Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12.
+  polished #2: Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12.
+            (success, 1653ms, detected=fr→auto)
+  breaks #2: Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12.
+  polished #3: Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12.
+            (success, 1675ms, detected=fr→auto)
+  breaks #3: Thomas a fini l'intégration StoreKit et ça passe en sandbox, je vois Sarah jeudi pour caler la partie Apple Store et si tout se passe bien on soumet la semaine du 12.
+
+━━ [probe-isolated/P5-zappe] lang=auto stt=PK
+  raw:      Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais
+  polished #1: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais.
+            (success, 1395ms, detected=fr→auto)
+  breaks #1: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais.
+  polished #2: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais.
+            (success, 1402ms, detected=fr→auto)
+  breaks #2: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais.
+  polished #3: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais.
+            (success, 1388ms, detected=fr→auto)
+  breaks #3: Ça fait une semaine et demie qu'il attend, je crois qu'il commence à se demander si je les zappais.
+
+━━ [probe-isolated/P6-calcul] lang=auto stt=PK
+  raw:      Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps
+  polished #1: Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps.
+            (success, 1587ms, detected=fr→auto)
+  breaks #1: Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps.
+  polished #2: Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps.
+            (success, 1586ms, detected=fr→auto)
+  breaks #2: Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps.
+  polished #3: Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps.
+            (success, 1601ms, detected=fr→auto)
+  breaks #3: Le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul, la deuxième c'est 90% du temps.
+
+━━ [point-fr/N1-point-final] lang=auto stt=PK
+  raw:      je te propose qu'on mette un point final à cette discussion parce que là on tourne en rond depuis vingt minutes
+  polished #1: Je te propose qu'on mette un point final à cette discussion, parce que là on tourne en rond depuis vingt minutes.
+            (success, 1459ms, detected=fr→auto)
+  breaks #1: Je te propose qu'on mette un point final à cette discussion, parce que là on tourne en rond depuis vingt minutes.
+  polished #2: Je te propose qu'on mette un point final à cette discussion, parce que là on tourne en rond depuis vingt minutes.
+            (success, 1481ms, detected=fr→auto)
+  breaks #2: Je te propose qu'on mette un point final à cette discussion, parce que là on tourne en rond depuis vingt minutes.
+  polished #3: Je te propose qu'on mette un point final à cette discussion, parce que là on tourne en rond depuis vingt minutes.
+            (success, 1463ms, detected=fr→auto)
+  breaks #3: Je te propose qu'on mette un point final à cette discussion, parce que là on tourne en rond depuis vingt minutes.
+
+━━ [point-fr/N2-point-de-vue] lang=auto stt=PK
+  raw:      de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+  polished #1: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (rejectedGuardrail, 1500ms, detected=fr→auto, check=lostWord)
+  engineOut #1: De mon point de vue, le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoit avant nous.
+  polished #2: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (rejectedGuardrail, 1497ms, detected=fr→auto, check=lostWord)
+  engineOut #2: De mon point de vue, le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoit avant nous.
+  polished #3: de mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoive avant nous
+            (rejectedGuardrail, 1487ms, detected=fr→auto, check=lostWord)
+  engineOut #3: De mon point de vue le plus gros risque c'est qu'on livre en retard et que le client s'en aperçoit avant nous
+
+━━ [point-fr/N3-faire-le-point] lang=auto stt=PK
+  raw:      on peut faire le point demain matin avant le daily comme ça j'aurai le temps de relire tes chiffres tranquillement
+  polished #1: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1433ms, detected=fr→auto)
+  breaks #1: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+  polished #2: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1430ms, detected=fr→auto)
+  breaks #2: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+  polished #3: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+            (success, 1440ms, detected=fr→auto)
+  breaks #3: On peut faire le point demain matin avant le daily, comme ça j'aurai le temps de relire tes chiffres tranquillement.
+
+━━ [point-fr/N4-a-quel-point] lang=auto stt=PK
+  raw:      tu sais à quel point ça m'énerve quand on change les specs la veille de la démo franchement c'est pénible
+  polished #1: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo, franchement c'est pénible.
+            (success, 1572ms, detected=fr→auto)
+  breaks #1: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo, franchement c'est pénible.
+  polished #2: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo, franchement c'est pénible.
+            (success, 1565ms, detected=fr→auto)
+  breaks #2: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo, franchement c'est pénible.
+  polished #3: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo. Franchement, c'est pénible.
+            (success, 1592ms, detected=fr→auto)
+  breaks #3: Tu sais à quel point ça m'énerve quand on change les specs la veille de la démo. Franchement, c'est pénible.
+
+━━ [point-fr/N5-deux-points-nommes] lang=auto stt=PK
+  raw:      il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push
+  polished #1: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1410ms, detected=fr→auto)
+  breaks #1: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+  polished #2: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1355ms, detected=fr→auto)
+  breaks #2: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+  polished #3: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+            (success, 1349ms, detected=fr→auto)
+  breaks #3: Il reste un point bloquant sur la facturation et un deuxième point plus mineur sur les notifications push.
+
+━━ [point-fr/N6-point-de-vue-bis] lang=auto stt=PK
+  raw:      son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite
+  polished #1: Son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1406ms, detected=fr→auto)
+  breaks #1: Son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite.
+  polished #2: Son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1383ms, detected=fr→auto)
+  breaks #2: Son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite.
+  polished #3: Son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite.
+            (success, 1375ms, detected=fr→auto)
+  breaks #3: Son point de vue a changé depuis la réunion de lundi et je trouve que c'est plutôt bon signe pour la suite.
+
+━━ [point-fr/N7-noun-at-a-boundary] lang=auto stt=PK
+  raw:      on a réglé le dernier point on peut passer à la suite et je te renvoie le compte rendu ce soir
+  polished #1: On a réglé le dernier point, on peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1440ms, detected=fr→auto)
+  breaks #1: On a réglé le dernier point, on peut passer à la suite et je te renvoie le compte rendu ce soir.
+  polished #2: On a réglé le dernier point, on peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1438ms, detected=fr→auto)
+  breaks #2: On a réglé le dernier point, on peut passer à la suite et je te renvoie le compte rendu ce soir.
+  polished #3: On a réglé le dernier point, on peut passer à la suite et je te renvoie le compte rendu ce soir.
+            (success, 1446ms, detected=fr→auto)
+  breaks #3: On a réglé le dernier point, on peut passer à la suite et je te renvoie le compte rendu ce soir.
+
+━━ [point-fr/C1-bare-boundary] lang=auto stt=PK
+  raw:      je passe au bureau demain matin vers 9h point on se voit directement en salle de réunion
+  polished #1: Je passe au bureau demain matin vers 9h, point on se voit directement en salle de réunion
+            (success, 1296ms, detected=fr→auto)
+  breaks #1: Je passe au bureau demain matin vers 9h, point on se voit directement en salle de réunion
+  polished #2: Je passe au bureau demain matin vers 9h, on se voit directement en salle de réunion.
+            (success, 1300ms, detected=fr→auto)
+  breaks #2: Je passe au bureau demain matin vers 9h, on se voit directement en salle de réunion.
+  polished #3: Je passe au bureau demain matin vers 9h, point on se voit directement en salle de réunion
+            (success, 1294ms, detected=fr→auto)
+  breaks #3: Je passe au bureau demain matin vers 9h, point on se voit directement en salle de réunion
+
+━━ [point-fr/C2-bare-boundary] lang=auto stt=PK
+  raw:      j'ai fini la relecture du document point il reste juste deux coquilles à corriger page trois
+  polished #1: J'ai fini la relecture du document. Il reste juste deux coquilles à corriger page trois.
+            (success, 1402ms, detected=fr→auto)
+  breaks #1: J'ai fini la relecture du document. Il reste juste deux coquilles à corriger page trois.
+  polished #2: J'ai fini la relecture du document. Il reste juste deux coquilles à corriger page trois.
+            (success, 1401ms, detected=fr→auto)
+  breaks #2: J'ai fini la relecture du document. Il reste juste deux coquilles à corriger page trois.
+  polished #3: J'ai fini la relecture du document, il reste juste deux coquilles à corriger page trois.
+            (success, 1473ms, detected=fr→auto)
+  breaks #3: J'ai fini la relecture du document, il reste juste deux coquilles à corriger page trois.
+
+━━ [point-fr/C3-bare-boundary] lang=auto stt=PK
+  raw:      le client a validé le devis hier soir point on peut lancer la production dès lundi matin
+  polished #1: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+            (success, 1351ms, detected=fr→auto)
+  breaks #1: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+  polished #2: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+            (success, 1299ms, detected=fr→auto)
+  breaks #2: Le client a validé le devis hier soir. On peut lancer la production dès lundi matin.
+  polished #3: Le client a validé le devis hier soir, point on peut lancer la production dès lundi matin.
+            (success, 1374ms, detected=fr→auto)
+  breaks #3: Le client a validé le devis hier soir, point on peut lancer la production dès lundi matin.
+
+━━ [point-fr/C4-parakeet-punctuated] lang=auto stt=PK
+  raw:      J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+  polished #1: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+            (success, 1353ms, detected=fr→auto)
+  breaks #1: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+  polished #2: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+            (success, 1347ms, detected=fr→auto)
+  breaks #2: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+  polished #3: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+            (success, 1349ms, detected=fr→auto)
+  breaks #3: J'ai envoyé le mail à Sarah. Point. Elle devrait répondre avant la fin de la journée.
+
+━━ [point-fr/C5-parakeet-punctuated] lang=auto stt=PK
+  raw:      On décale la réunion de lancement à jeudi, point, je préviens Thomas et Sarah de mon côté.
+  polished #1: On décale la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+            (success, 1345ms, detected=fr→auto)
+  breaks #1: On décale la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+  polished #2: On décale la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+            (success, 1404ms, detected=fr→auto)
+  breaks #2: On décale la réunion de lancement à jeudi, point. Je préviens Thomas et Sarah de mon côté.
+  polished #3: On décale la réunion de lancement à jeudi, point, je préviens Thomas et Sarah de mon côté.
+            (success, 1347ms, detected=fr→auto)
+  breaks #3: On décale la réunion de lancement à jeudi, point, je préviens Thomas et Sarah de mon côté.
+
+━━ [device-structured-fr/D3-plan-mode] lang=auto stt=PK
+  raw:      Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  polished #1: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+            (success, 1822ms, detected=fr→auto)
+  breaks #1: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  polished #2: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+            (success, 1805ms, detected=fr→auto)
+  breaks #2: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+  polished #3: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+            (success, 1800ms, detected=fr→auto)
+  breaks #3: Ok, je te laisse préparer l'intégration de cette issue, s'il te plaît. Tu peux passer en mode plan pour faire ça et ensuite je validerai une fois que tu auras fait le plan de l'implémentation.
+
+━━ [device-structured-fr/D5-lets-go] lang=auto stt=PK
+  raw:      Vas-y let's go.
+  polished #1: Vas-y let's go.
+            (skipped, 0ms, detected=-→-)
+  polished #2: Vas-y let's go.
+            (skipped, 0ms, detected=-→-)
+  polished #3: Vas-y let's go.
+            (skipped, 0ms, detected=-→-)
+
+━━ [device-structured-fr/D6-issues-check] lang=auto stt=PK
+  raw:      J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+  polished #1: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+            (rejectedGuardrail, 3062ms, detected=fr→auto, check=lostWord)
+  engineOut #1: J'ai besoin de toi là pour faire un petit check au niveau des issues dictées iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. Alors avant de checker les issues, avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+  polished #2: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+            (rejectedGuardrail, 2913ms, detected=fr→auto, check=lostWord)
+  engineOut #2: J'ai besoin de toi là pour faire un petit check au niveau des issues dictées iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. Alors avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+  polished #3: J'ai besoin de toi là pour faire un petit check au niveau des issues dictus iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. alors avant de checker les Avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+            (rejectedGuardrail, 3033ms, detected=fr→auto, check=lostWord)
+  engineOut #3: J'ai besoin de toi là pour faire un petit check au niveau des issues dictées iOS. J'ai eu un retour d'utilisateur. Enfin tu regarderas dans le slide, on a pas mal discuté. Je pense qu'on a quasiment tout noté ses retours. Alors avant de checker les issues, avant de checker les issues, check notre conversation avec lui. Alors tu verras, il y a plusieurs postes. Dis-moi les retours qu'il a fait, liste-les-moi simplement et on fait un point.
+
+━━ [device-structured-fr/D7-mod-rejects] lang=auto stt=PK
+  raw:      Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  polished #1: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+            (rejectedGuardrail, 2088ms, detected=fr→auto, check=lostWord)
+  engineOut #1: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on logue un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  polished #2: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+            (rejectedGuardrail, 2115ms, detected=fr→auto, check=lostWord)
+  engineOut #2: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on logue un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+  polished #3: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on log un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+            (rejectedGuardrail, 2099ms, detected=fr→auto, check=lostWord)
+  engineOut #3: Alors je viens d'avoir à nouveau un problème avec toujours ce mod. Il faudrait qu'on fasse une issue et qu'on logue un peu tous ces rejets. Parce que là c'est quand même embêtant, il faudra analyser, analyser ça en profondeur. Je t'envoie les logs.
+
+━━ [device-structured-fr/D8-last-transcription] lang=auto stt=PK
+  raw:      Je te laisserai regarder, il s'agit de la dernière transcription.
+  polished #1: Je te laisserai regarder, il s'agit de la dernière transcription.
+            (success, 1281ms, detected=fr→auto)
+  breaks #1: Je te laisserai regarder, il s'agit de la dernière transcription.
+  polished #2: Je te laisserai regarder, il s'agit de la dernière transcription.
+            (success, 1281ms, detected=fr→auto)
+  breaks #2: Je te laisserai regarder, il s'agit de la dernière transcription.
+  polished #3: Je te laisserai regarder, il s'agit de la dernière transcription.
+            (success, 1268ms, detected=fr→auto)
+  breaks #3: Je te laisserai regarder, il s'agit de la dernière transcription.
+
+━━ [summary-device-r1/R1-date-word] lang=auto stt=PK
+  raw:      bon alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match
+  polished #1: Bon alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match.
+            (success, 1977ms, detected=fr→auto)
+  breaks #1: Bon alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match.
+  polished #2: Bon, alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match.
+            (success, 1990ms, detected=fr→auto)
+  breaks #2: Bon, alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match.
+  polished #3: Bon, alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match.
+            (success, 1963ms, detected=fr→auto)
+  breaks #3: Bon, alors pour demain il faut que je passe à la banque le matin, que je rende les livres à la médiathèque, que j'appelle le garage pour le contrôle technique, et le soir je dois préparer le sac de sport du petit parce qu'il a son match.
+
+━━ [summary-device-r1/R2-misrendered-product] lang=auto stt=PK
+  raw:      j'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version
+  polished #1: j'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version
+            (rejectedGuardrail, 2025ms, detected=fr→auto, check=lostWord)
+  engineOut #1: J'ai regardé les instructions dictées iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'application, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.
+  polished #2: j'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version
+            (rejectedGuardrail, 1982ms, detected=fr→auto, check=lostWord)
+  engineOut #2: J'ai regardé les instructions dictées iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'application, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.
+  polished #3: J'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.
+            (success, 2004ms, detected=fr→auto)
+  breaks #3: J'ai regardé les hue dictus iOS ce matin, il y en a trois qui parlent du clavier qui se fige quand on change d'appli, je voudrais qu'on les regroupe dans une seule et qu'on la mette en priorité pour la prochaine version.
+
+━━ [summary-device-r1/R3-no-qualifier] lang=auto stt=PK
+  raw:      je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux
+  polished #1: Je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.
+            (success, 1973ms, detected=fr→auto)
+  breaks #1: Je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.
+  polished #2: Je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.
+            (success, 1960ms, detected=fr→auto)
+  breaks #2: Je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.
+  polished #3: Je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.
+            (success, 1962ms, detected=fr→auto)
+  breaks #3: Je vais pas réinstaller le téléphone tout de suite parce que je veux pas perdre toute ma configuration, j'ai passé du temps à tout régler, donc je vais d'abord essayer de le redémarrer et de vider le cache et on verra demain si ça va mieux.
+
+━━ [summary-device-r1/R4-on-not-nous] lang=auto stt=PK
+  raw:      alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider
+  polished #1: Alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.
+            (success, 1979ms, detected=fr→auto)
+  breaks #1: Alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.
+  polished #2: Alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.
+            (success, 1957ms, detected=fr→auto)
+  breaks #2: Alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.
+  polished #3: Alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.
+            (success, 1964ms, detected=fr→auto)
+  breaks #3: Alors j'aimerais qu'on fasse un point rapide sur le budget de la sortie de fin d'année, parce que je trouve qu'on dépense beaucoup trop pour la salle, et je voudrais qu'on compare avec deux autres lieux avant vendredi pour pouvoir décider.
+
+━━ [summary-device-r1/R5-telegraphic] lang=auto stt=PK
+  raw:      ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue
+  polished #1: ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+            (success, 2074ms, detected=fr→auto)
+  breaks #1: ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+  polished #2: ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+            (success, 2001ms, detected=fr→auto)
+  breaks #2: ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+  polished #3: ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+            (success, 1991ms, detected=fr→auto)
+  breaks #3: ça fait une semaine que je suis passé à la nouvelle version du système sur mon téléphone et franchement j'ai des erreurs sans arrêt, les notifications arrivent en retard, la batterie se vide vite et deux applis plantent au démarrage, je pense revenir en arrière si ça continue.
+
+━━ [summary-device-r1/R6-two-negations] lang=auto stt=PK
+  raw:      Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+  polished #1: Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+            (success, 2010ms, detected=fr→auto)
+  breaks #1: Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+  polished #2: Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+            (success, 2026ms, detected=fr→auto)
+  breaks #2: Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+  polished #3: Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+            (success, 2012ms, detected=fr→auto)
+  breaks #3: Je n'ai pas encore envoyé le devis au client parce que les prix du fournisseur ne sont toujours pas stables depuis la semaine dernière. Je préfère attendre la nouvelle grille tarifaire qu'il doit publier lundi matin. Ensuite je mets tout à jour et je l'envoie dans la journée.
+
+━━ [shortprobe-fr/S1-synthetic-short] lang=auto stt=PK
+  raw:      Alors je voulais te dire que la réunion est décalée à quinze heures.
+  polished #1: Alors je voulais te dire que la réunion est décalée à quinze heures.
+            (success, 1280ms, detected=fr→auto)
+  breaks #1: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  polished #2: Alors je voulais te dire que la réunion est décalée à quinze heures.
+            (success, 1269ms, detected=fr→auto)
+  breaks #2: Alors je voulais te dire que la réunion est décalée à quinze heures.
+  polished #3: Alors je voulais te dire que la réunion est décalée à quinze heures.
+            (success, 1262ms, detected=fr→auto)
+  breaks #3: Alors je voulais te dire que la réunion est décalée à quinze heures.
+
+━━ [paragraph-fr/P1-free-form] lang=auto stt=PK
+  raw:      Bon alors, je pensais à un truc ce matin en marchant. C'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.
+  polished #1: Bon alors, je pensais à un truc ce matin en marchant. C'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.
+            (success, 2999ms, detected=fr→auto)
+  breaks #1: Bon alors, je pensais à un truc ce matin en marchant. C'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.
+  polished #2: Bon alors, je pensais à un truc ce matin en marchant. C'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.
+            (success, 3044ms, detected=fr→auto)
+  breaks #2: Bon alors, je pensais à un truc ce matin en marchant. C'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.
+  polished #3: Bon alors, je pensais à un truc ce matin en marchant. C'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.
+            (success, 2982ms, detected=fr→auto)
+  breaks #3: Bon alors, je pensais à un truc ce matin en marchant. C'est que, finalement, quand on lance un produit tout seul, le plus dur, ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup, on saute dessus et, au bout de 6 mois, en fait, on a 15 trucs commencés et rien de fini.
+
+━━ [paragraph-fr/P3-message-draft] lang=auto stt=PK
+  raw:      Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.
+  polished #1: Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.
+            (success, 2756ms, detected=fr→auto)
+  breaks #1: Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.
+  polished #2: Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.
+            (success, 2765ms, detected=fr→auto)
+  breaks #2: Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.
+  polished #3: Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.
+            (success, 2753ms, detected=fr→auto)
+  breaks #3: Je voulais juste te dire pour demain que je ne pourrais pas venir au bureau. J'ai un rendez-vous chez le dentiste à 11h, et je pense que cela déborderait. Du coup, si tu peux décaler le point d'équipe à l'après-midi, cela m'arrangerait. Sinon, je me débrouillerai pour suivre une visio depuis la salle à tante. Mais ce sera moyen. Dis-moi ce qui t'arrange.
+
+━━ [summary-fr/S1-free-form] lang=auto stt=PK
+  raw:      Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+  polished #1: Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+            (success, 2834ms, detected=fr→auto)
+  breaks #1: Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+  polished #2: Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+            (success, 2836ms, detected=fr→auto)
+  breaks #2: Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+  polished #3: Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+            (success, 2849ms, detected=fr→auto)
+  breaks #3: Bon alors je pensais à un truc ce matin en marchant, c'est que finalement quand on lance un produit tout seul, le plus dur ce n'est pas de le coder, c'est de décider quoi ne pas faire en fait. Parce qu'il y a toujours une idée qui a l'air meilleure que celle sur laquelle on est en train de bosser. Et du coup on saute dessus et au bout de 6 mois en fait on a 15 trucs commencés et rien de fini.
+
+━━ [summary-fr/S6-one-line] lang=auto stt=PK
+  raw:      faut que je rappelle le comptable avant vendredi pour la TVA du trimestre
+  polished #1: Faut que je rappelle le comptable avant vendredi pour la TVA du trimestre.
+            (success, 1306ms, detected=fr→auto)
+  breaks #1: Faut que je rappelle le comptable avant vendredi pour la TVA du trimestre.
+  polished #2: faut que je rappelle le comptable avant vendredi pour la TVA du trimestre.
+            (success, 1304ms, detected=fr→auto)
+  breaks #2: faut que je rappelle le comptable avant vendredi pour la TVA du trimestre.
+  polished #3: Faut que je rappelle le comptable avant vendredi pour la TVA du trimestre.
+            (success, 1295ms, detected=fr→auto)
+  breaks #3: Faut que je rappelle le comptable avant vendredi pour la TVA du trimestre.
+
+━━ [device-structured-0918-fr/F1-test-logs] lang=auto stt=PK
+  raw:      Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal. Je te laisse analyser, me dire s'il manque des tests ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal.
+  polished #1: Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal. Je te laisse analyser, me dire si ça manque des tests ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal.
+            (success, 2166ms, detected=fr→auto)
+  breaks #1: Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal. Je te laisse analyser, me dire si ça manque des tests ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal.
+  polished #2: Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal. Je te laisse analyser, me dire si ça manque des tests ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal.
+            (success, 2173ms, detected=fr→auto)
+  breaks #2: Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal. Je te laisse analyser, me dire si ça manque des tests ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal.
+  polished #3: Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal. Je te laisse analyser, me dire si ça manque des tests ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal.
+            (success, 2183ms, detected=fr→auto)
+  breaks #3: Écoute, je viens de faire un test. Je te partage les logs. Honnêtement, ça me paraît quand même vraiment pas mal. Je te laisse analyser, me dire si ça manque des tests ou si ça répond au contrat qu'on avait délimité ensemble. Mais honnêtement, ça me paraît vraiment pas mal.
+
+━━ [device-structured-0918-fr/F3-urgent-issue] lang=auto stt=PK
+  raw:      Donc je te laisse te plaît analyser la situation et créer une issue. Elle est assez urgente. Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte. Parce que c'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+  polished #1: Donc je te laisse, s'il te plaît, analyser la situation et créer une issue. Elle est assez urgente. Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte. Parce que c'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+            (success, 2584ms, detected=fr→auto)
+  breaks #1: Donc je te laisse, s'il te plaît, analyser la situation et créer une issue. Elle est assez urgente. Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte. Parce que c'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+  polished #2: Donc je te laisse, s'il te plaît, analyser la situation et créer une issue. Elle est assez urgente. Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte. Parce que c'est un bug qui est en prod du coup et qui bloque complètement l'utilisation, parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+            (success, 2575ms, detected=fr→auto)
+  breaks #2: Donc je te laisse, s'il te plaît, analyser la situation et créer une issue. Elle est assez urgente. Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte. Parce que c'est un bug qui est en prod du coup et qui bloque complètement l'utilisation, parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+  polished #3: Donc je te laisse, s'il te plaît, analyser la situation et créer une issue. Elle est assez urgente. Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte. Parce que c'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+            (success, 2588ms, detected=fr→auto)
+  breaks #3: Donc je te laisse, s'il te plaît, analyser la situation et créer une issue. Elle est assez urgente. Je pense que tu pourras la mettre en ready for agents une fois que tu auras compris, que tu auras pris tout le contexte. Parce que c'est un bug qui est en prod du coup et qui bloque complètement l'utilisation parce que moi j'arrive même pas à l'utiliser cette fonctionnalité.
+
+━━ [device-structured-0918-fr/F4-paragraphs-pleasant] lang=auto stt=PK
+  raw:      C'est toujours un plaisir de l'utiliser. Et franchement le mode structuré il est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+  polished #1: C'est toujours un plaisir de l'utiliser. Et franchement, le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+            (success, 1823ms, detected=fr→auto)
+  breaks #1: C'est toujours un plaisir de l'utiliser. Et franchement, le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+  polished #2: C'est toujours un plaisir de l'utiliser. Et franchement, le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+            (success, 1894ms, detected=fr→auto)
+  breaks #2: C'est toujours un plaisir de l'utiliser. Et franchement, le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+  polished #3: C'est toujours un plaisir de l'utiliser. Et franchement, le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+            (success, 1838ms, detected=fr→auto)
+  breaks #3: C'est toujours un plaisir de l'utiliser. Et franchement, le mode structuré est quand même vraiment pas mal. Le fait que ça vienne faire des petits paragraphes comme ça, c'est quand même super agréable.
+
+━━ [device-structured-0918-fr/F6-structured-since] lang=auto stt=PK
+  raw:      En fait je suis sur le mode structuré depuis un petit moment. Donc en fait tous les tests que j'ai fait hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Donc je pense que je vais pouvoir exporter les logs tels quels. Mais en moi ça a l'air d'être plutôt correct.
+  polished #1: En fait je suis sur le mode structuré depuis un petit moment. Donc en fait tous les tests que j'ai fait hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Donc je pense que je vais pouvoir exporter les logs tels quels. Mais en moi ça a l'air d'être plutôt correct.
+            (rejectedGuardrail, 2265ms, detected=fr→auto, check=lostWord)
+  engineOut #1: En fait, je suis sur le mode structuré depuis un petit moment. Donc, en fait, tous les tests que j'ai faits hier, notamment sur les tests un peu plus longs, ont fonctionné. Donc, je pense que je vais pouvoir exporter les logs tels quels. Mais, en moi, ça a l'air d'être plutôt correct.
+  polished #2: En fait, je suis sur le mode structuré depuis un petit moment. Donc, en fait, tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Donc, je pense que je vais pouvoir exporter les logs tels quels. Mais, en moi, ça a l'air d'être plutôt correct.
+            (success, 2267ms, detected=fr→auto)
+  breaks #2: En fait, je suis sur le mode structuré depuis un petit moment. Donc, en fait, tous les tests que j'ai faits hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Donc, je pense que je vais pouvoir exporter les logs tels quels. Mais, en moi, ça a l'air d'être plutôt correct.
+  polished #3: En fait je suis sur le mode structuré depuis un petit moment. Donc en fait tous les tests que j'ai fait hier, notamment sur les tests un petit peu plus longs, ont fonctionné. Donc je pense que je vais pouvoir exporter les logs tels quels. Mais en moi ça a l'air d'être plutôt correct.
+            (rejectedGuardrail, 2259ms, detected=fr→auto, check=lostWord)
+  engineOut #3: En fait, je suis sur le mode structuré depuis un petit moment. Donc, en fait, tous les tests que j'ai faits hier, notamment sur les tests un peu plus longs, ont fonctionné. Donc, je pense que je vais pouvoir exporter les logs tels quels. Mais, en moi, ça a l'air d'être plutôt correct.
+
+━━ [device-structured-0918-fr/F8-long-test] lang=auto stt=PK
+  raw:      Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer. Alors sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. Donc la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas
+  polished #1: Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer. Alors sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. Donc la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas
+            (success, 2662ms, detected=fr→auto)
+  breaks #1: Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer. Alors sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. Donc la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas
+  polished #2: Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer. Alors sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. Donc la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas.
+            (success, 2691ms, detected=fr→auto)
+  breaks #2: Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer. Alors sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. Donc la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas.
+  polished #3: Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer. Alors sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. Donc la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas.
+            (success, 2707ms, detected=fr→auto)
+  breaks #3: Et donc là on essaye un message long en mode structuré pour voir ce qui va se passer. Alors sachant que je ne suis pas forcément dans les bonnes conditions en termes d'audio parce que je suis assez loin du téléphone. Donc la qualité du micro va peut-être pas être exceptionnelle. J'ai aussi pas mal de brume à côté. Donc à voir ce que ça donne sur le test. On va voir le résultat s'il est intéressant ou pas.
+
+━━ [probe-length-ladder/L1-tail-only] lang=auto stt=PK
+  raw:      Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation les majuscules éventuellement on découpe en paragraphes le truc important à comprendre c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul le deuxième c'est 90% du temps.
+  polished #1: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement. On découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. En calcul, le deuxième c'est 90% du temps.
+            (success, 2576ms, detected=fr→auto)
+  breaks #1: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement. On découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. En calcul, le deuxième c'est 90% du temps.
+  polished #2: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement. On découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. En calcul, le deuxième c'est 90% du temps.
+            (success, 2563ms, detected=fr→auto)
+  breaks #2: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement. On découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix. En calcul, le deuxième c'est 90% du temps.
+  polished #3: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement. On découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90 % du temps.
+            (success, 2634ms, detected=fr→auto)
+  breaks #3: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules éventuellement. On découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90 % du temps.
+
+━━ [probe-length-ladder/L5-tail-punctuated] lang=auto stt=PK
+  raw:      Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules, éventuellement on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième c'est 90% du temps.
+  polished #1: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules, éventuellement on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+            (success, 2412ms, detected=fr→auto)
+  breaks #1: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules, éventuellement on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  polished #2: Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules, éventuellement on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+            (success, 2466ms, detected=fr→auto)
+  breaks #2: Et la troisième étape, c'est la mise en forme. Là, on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules, éventuellement on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième, c'est 90% du temps.
+  polished #3: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules, éventuellement on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième c'est 90% du temps.
+            (success, 2400ms, detected=fr→auto)
+  breaks #3: Et la troisième étape, c'est la mise en forme. Là on prend le texte brut qui sort du modèle et on ajoute la ponctuation, les majuscules, éventuellement on découpe en paragraphes. Le truc important à comprendre, c'est que ces trois étapes ne coûtent pas du tout le même prix en calcul. Le deuxième c'est 90% du temps.
+
+── outcomes: 176/198 success
+   rejectedGuardrail: 19/198 — device-structured-0918-fr/F6-structured-since×2, device-structured-fr/D6-issues-check×3, device-structured-fr/D7-mod-rejects×3, email-fr/E6-demande-fichier×2, point-fr/N2-point-de-vue×3, seed/11-verbal-newlines×1, seed/5-erreur-parakeet×3, summary-device-r1/R2-misrendered-product×2
+   skipped: 3/198 — device-structured-fr/D5-lets-go×3

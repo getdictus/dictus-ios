@@ -3,7 +3,7 @@
 #
 # What it does (deterministic, no room to forget a step):
 #   1. Verify we are on a clean `develop`, in sync with origin.
-#   2. Increment CFBundleVersion (build number) across the 3 Info.plists.
+#   2. Increment CFBundleVersion (build number) across the 4 Info.plists (the share extension joined in #620).
 #   3. Optionally set CFBundleShortVersionString (marketing version) if passed.
 #   4. Commit `chore: bump to X.Y.Z (build N)`.
 #   5. Create the lightweight `build/N` tag on that commit.
@@ -22,7 +22,7 @@ set -eu
 REPO_ROOT=$(cd "$(dirname "$0")/.." && pwd)
 cd "$REPO_ROOT"
 
-PLISTS="DictusApp/Info.plist DictusKeyboard/Info.plist DictusWidgets/Info.plist"
+PLISTS="DictusApp/Info.plist DictusKeyboard/Info.plist DictusWidgets/Info.plist DictusShare/Info.plist"
 PB=/usr/libexec/PlistBuddy
 NEW_VERSION="${1:-}"
 
@@ -75,7 +75,7 @@ printf "Proceed? [y/N] "
 read -r ANSWER
 case "$ANSWER" in [yY]*) : ;; *) echo "Aborted."; exit 1 ;; esac
 
-# --- Apply to all three plists ----------------------------------------------
+# --- Apply to every plist ----------------------------------------------------
 for P in $PLISTS; do
   $PB -c "Set :CFBundleVersion $NEW_BUILD" "$P"
   $PB -c "Set :CFBundleShortVersionString $VERSION" "$P"

@@ -329,6 +329,27 @@ class DictationCoordinator: ObservableObject {
         return currentModelName ?? "unknown"
     }
 
+    /// Transcribe one chunk of a shared voice note (#620), on the same engine and with
+    /// the same custom vocabulary pass as a dictation.
+    ///
+    /// The caller holds `EngineAccessGate` for the duration; this seam exists because
+    /// `ensureEngineReady` and `transcriptionService` are private to this file, and
+    /// one named entry point is cheaper to expose than either (the reasoning
+    /// `loadActiveModelIntoMemory` gives). Nothing here touches the dictation's
+    /// status, its session or the App Group keys the keyboard reads: a voice note is
+    /// invisible to the keyboard by construction.
+    func transcribeVoiceNoteChunk(_ samples: [Float], languagePolicy: TranscriptionLanguagePolicy) async throws -> String {
+        try await ensureEngineReady()
+        let text = try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: languagePolicy)
+        return DictationTranscript.corrected(text).text
+    }
+
+    /// Keep the warm audio engine, and with it the process, alive while a voice note
+    /// transcribes in the background (#620). See `UnifiedAudioEngine.extendWarmWindow`.
+    func extendWarmWindowForVoiceNote() {
+        audioEngine.extendWarmWindow()
+    }
+
     private init() {
         // Forward UnifiedAudioEngine's energy levels and seconds to coordinator.
         // NOTE: App Group forwarding for the keyboard is handled directly from
@@ -889,6 +910,31 @@ class DictationCoordinator: ObservableObject {
                 LiveActivityManager.shared.startRecordingWatchdog()
                 SoundFeedbackService.playRecordStop()
 
+                // The engine is shared with the voice note queue since #620. Taken
+                // before the model load and handed back once the transcript exists, so
+                // a voice note can neither swap the model out from under this
+                // dictation nor run a second `transcribe` beside it (#144). A
+                // dictation is served first; the wait is at most the one chunk a
+                // voice note may be in the middle of. See `EngineAccessGate`.
+                //
+                // Waiting on the gate is waiting on someone else's work, so it defers the
+                // stage watchdog like the other two engine waits (#542): a voice note can
+                // hold the engine through a cold model load, and the 30 s watchdog would
+                // otherwise cancel a dictation whose audio is already captured.
+                enterNeuralEngineWait()
+                await EngineAccessGate.shared.acquire(.dictation)
+                leaveNeuralEngineWait()
+                var holdsEngine = true
+                let releaseEngine = {
+                    guard holdsEngine else { return }
+                    holdsEngine = false
+                    EngineAccessGate.shared.release()
+                }
+                defer { releaseEngine() }
+                // The gate does not observe cancellation: a dictation cancelled while it
+                // was parked must not go on to load and transcribe.
+                try Task.checkCancellation()
+
                 // Wrapped, not just called: this is the one place in a dictation that
                 // can queue on hardware someone else holds (finding 2).
                 try await waitingForNeuralEngine { try await self.ensureEngineReady() }
@@ -934,6 +980,8 @@ class DictationCoordinator: ObservableObject {
                 let transcript = DictationTranscript.corrected(
                     try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: languagePolicy)
                 )
+                // Polish and the hand-off below do not touch the speech engine.
+                releaseEngine()
 
                 // Where the tail of the dictation happens, since #361.
                 //

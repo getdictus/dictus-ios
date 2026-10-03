@@ -295,8 +295,8 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
 
     /// Shortest transcript, in characters, this mode runs on. Below it the mode is
     /// **skipped, not refused**: the dictation takes the path it would take with no
-    /// mode armed, and nothing is announced. `nil` — every mode but `Structuré` — runs
-    /// on any length.
+    /// mode armed, and the keyboard says so in one sentence. `nil` — every mode but
+    /// `Structuré` — runs on any length.
     ///
     /// ### Why a mode can decline short input (#587, round 4)
     ///
@@ -308,8 +308,28 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     ///
     /// It is a property of the mode rather than a pipeline constant because it is a
     /// product answer about the mode: `Message` exists for short text and must never
-    /// skip it, and `Résumé` already bounds itself through its band.
+    /// skip it, and `Résumé` already bounds itself through its band. `Liste` declines
+    /// short input too, but after the model has run: see `minimumListItems`.
     public let minimumInputCharacters: Int?
+
+    /// Fewest list items this mode's output must carry to be inserted. A one-item list
+    /// is **declined, not refused**: the dictation gets the path it would take with no
+    /// mode armed, with the same notice and export event as an input under
+    /// `minimumInputCharacters`. An output with no list at all, or from an engine that
+    /// does not generate, is not judged. `SmartModeListCheck` holds the rule. `nil`
+    /// — every mode but `Liste` — accepts any shape.
+    ///
+    /// ### Why `Liste` checks its output rather than its input (#573, decision 5 amended)
+    ///
+    /// A list of one item is a title over a lone dash-line, which is the defect the
+    /// maintainer named. The first answer was a 100-character input floor, measured on
+    /// his exports; the device round of 2026-10-01 showed its cost on the mode's most
+    /// natural use: `Liste de courses pour ce midi carottes, patates, choux et quino.`,
+    /// 64 characters and four items, was skipped. Length cannot see how many items a
+    /// sentence holds; the model's own output can. The price is one model call (about
+    /// three seconds) on a one-sentence dictation armed in `Liste`, accepted by the
+    /// maintainer.
+    public let minimumListItems: Int?
 
     public init(id: String,
                 displayName: String,
@@ -319,7 +339,8 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
                 contract: PolishAcceptanceContract,
                 floorBehaviour: SmartModeFloorBehaviour,
                 isPinned: Bool = false,
-                minimumInputCharacters: Int? = nil) {
+                minimumInputCharacters: Int? = nil,
+                minimumListItems: Int? = nil) {
         self.id = id
         self.displayName = displayName
         self.icon = icon
@@ -329,6 +350,7 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.floorBehaviour = floorBehaviour
         self.isPinned = isPinned
         self.minimumInputCharacters = minimumInputCharacters
+        self.minimumListItems = minimumListItems
     }
 
     /// Whether this mode runs on a transcript of `characters` characters.
@@ -375,6 +397,9 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
         self.minimumInputCharacters = try container.decodeIfPresent(
             Int.self, forKey: .minimumInputCharacters
         )
+        // Absent means no check: a snapshot written before #573's amendment inserts
+        // whatever shape the mode returned, which is what that build did.
+        self.minimumListItems = try container.decodeIfPresent(Int.self, forKey: .minimumListItems)
     }
 
     /// Written out rather than synthesised for one key only: `floorBehaviour` is
@@ -393,6 +418,7 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     /// the same obligation.
     private enum CodingKeys: String, CodingKey {
         case id, displayName, icon, badge, prompt, contract, isPinned, minimumInputCharacters
+        case minimumListItems
         case floorBehaviour = "overflowBehaviour"
     }
 
@@ -416,7 +442,8 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
                 localizedInstructions: prompt.localizedInstructions
             ),
             contract: contract, floorBehaviour: floorBehaviour, isPinned: isPinned,
-            minimumInputCharacters: minimumInputCharacters
+            minimumInputCharacters: minimumInputCharacters,
+            minimumListItems: minimumListItems
         )
     }
 

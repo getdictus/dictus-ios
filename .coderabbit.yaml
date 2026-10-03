@@ -16,6 +16,11 @@ reviews:
     # Generated / mechanical files: no review value, lots of noise.
     - "!Dictus.xcodeproj/**"
     - "!**/*.xcstrings"
+    # Bench runs and captures from prompt campaigns: committed measurement data,
+    # often hundreds of files, which would push a PR past the review file limit.
+    - "!docs/research/**/raw/**"
+    - "!docs/research/**/arms/**"
+    - "!docs/research/**/*.json"
   path_instructions:
     - path: "DictusKeyboard/**"
       instructions: |
