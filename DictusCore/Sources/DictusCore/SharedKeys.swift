@@ -116,9 +116,9 @@ public enum SharedKeys {
     /// lose.
     public static let debugProEntitlementForced = "dictus.debugProEntitlementForced"
 
-    /// Bool: when true, the keyboard never opens the voice note reader on its own and
-    /// only shows the toolbar chip (#637 decision 3). Absent reads false, the default
-    /// "chip + auto-open". Exists for one device comparison between the two
+    /// Bool: when true, the keyboard never opens the voice note reader on its own; it
+    /// opens from a long press on ☰ only (#637 decision 3, #639). Absent reads false,
+    /// the default "auto-open". Exists for one device comparison between the two
     /// behaviours; the losing branch and this key are deleted in a follow-up. Inside
     /// the conditional for `debugProEntitlementForced`'s reason.
     public static let debugVoiceNoteAutoOpenDisabled = "dictus.debugVoiceNoteAutoOpenDisabled"
@@ -325,6 +325,11 @@ public enum SharedKeys {
     /// Bool: whether a Live Activity was running when DictusApp last took a voice note
     /// from the inbox, so the share extension can say where progress will be shown.
     public static let voiceNoteAcceptedWithActivity = "dictus.voiceNoteAcceptedWithActivity"
+    /// Bool: whether the user has ever opened the keyboard's voice note reader with a
+    /// long press on ☰ (#639). Its only effect is to retire the toolbar hint that
+    /// teaches the gesture. Set once and never cleared, `smartModeGestureUsed`'s
+    /// reasoning. See `VoiceNoteDiscovery`.
+    public static let voiceNoteLongPressUsed = "dictus.voiceNoteLongPressUsed"
 
     // MARK: - Reverse trial (#593)
     /// Double (seconds since 1970): when the reverse trial started. The App Group

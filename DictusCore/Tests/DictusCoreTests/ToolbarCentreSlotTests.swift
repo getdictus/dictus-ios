@@ -1,5 +1,5 @@
 // DictusCore/Tests/DictusCoreTests/ToolbarCentreSlotTests.swift
-// The centre slot's priority table (#79, #241, #266, #315).
+// The centre slot's priority table (#79, #241, #266, #315, #639).
 import XCTest
 @testable import DictusCore
 
@@ -12,20 +12,20 @@ final class ToolbarCentreSlotTests: XCTestCase {
                          errorMessage: String? = nil,
                          offersDictationUndo: Bool = false,
                          hasSuggestions: Bool = false,
-                         voiceNotesWaiting: Int = 0,
                          polishUnavailable: Bool = false,
                          armedModeName: String? = nil,
                          armedModeIsEffective: Bool = true,
+                         offersVoiceNoteHint: Bool = false,
                          offersDiscoveryHint: Bool = false) -> ToolbarCentreSlot {
         ToolbarCentreSlot.resolve(
             isChoosingMode: isChoosingMode,
             errorMessage: errorMessage,
             offersDictationUndo: offersDictationUndo,
             hasSuggestions: hasSuggestions,
-            voiceNotesWaiting: voiceNotesWaiting,
             polishUnavailable: polishUnavailable,
             armedModeName: armedModeName,
             armedModeIsEffective: armedModeIsEffective,
+            offersVoiceNoteHint: offersVoiceNoteHint,
             offersDiscoveryHint: offersDiscoveryHint
         )
     }
@@ -65,43 +65,41 @@ final class ToolbarCentreSlotTests: XCTestCase {
         )
     }
 
-    /// Mid-word the suggestions win and the voice note chip yields (#637); it comes
-    /// back as soon as the slot is free.
-    func testSuggestionsOutrankTheVoiceNoteChip() {
+    /// Mid-word the suggestions win and the voice note hint yields (#639 device
+    /// validation 1); it comes back as soon as the slot is free.
+    func testSuggestionsOutrankTheVoiceNoteHint() {
         XCTAssertEqual(
-            resolve(
-                hasSuggestions: true, voiceNotesWaiting: 2, polishUnavailable: true,
-                armedModeName: "List", offersDiscoveryHint: true
-            ),
+            resolve(hasSuggestions: true, offersVoiceNoteHint: true, offersDiscoveryHint: true),
             .suggestions
         )
     }
 
-    /// And everything the chip yields to keeps winning over it: the fan, an error,
-    /// the dictation undo.
-    func testTheVoiceNoteChipYieldsToTheFanTheErrorAndTheUndo() {
-        XCTAssertEqual(resolve(isChoosingMode: true, voiceNotesWaiting: 1), .choosingMode)
-        XCTAssertEqual(resolve(errorMessage: "boom", voiceNotesWaiting: 1), .error("boom"))
-        XCTAssertEqual(resolve(offersDictationUndo: true, voiceNotesWaiting: 1), .dictationUndo)
-    }
-
-    /// Above the polish notice, the armed mode and the hint: a transcript waiting to
-    /// be used outranks a statement about a setting or a process.
-    func testTheVoiceNoteChipOutranksTheNoticeTheArmedModeAndTheHint() {
+    /// Same rung as the Smart Mode hint, and everything above that rung keeps
+    /// winning over it.
+    func testTheVoiceNoteHintYieldsToEverythingAboveTheHintRung() {
+        XCTAssertEqual(resolve(isChoosingMode: true, offersVoiceNoteHint: true), .choosingMode)
+        XCTAssertEqual(resolve(errorMessage: "boom", offersVoiceNoteHint: true), .error("boom"))
+        XCTAssertEqual(resolve(offersDictationUndo: true, offersVoiceNoteHint: true), .dictationUndo)
+        XCTAssertEqual(resolve(polishUnavailable: true, offersVoiceNoteHint: true), .polishUnavailable)
+        XCTAssertEqual(resolve(armedModeName: "List", offersVoiceNoteHint: true), .armedMode("List"))
         XCTAssertEqual(
-            resolve(
-                voiceNotesWaiting: 3, polishUnavailable: true,
-                armedModeName: "List", armedModeIsEffective: false, offersDiscoveryHint: true
-            ),
-            .voiceNotesWaiting(count: 3)
+            resolve(armedModeName: "List", armedModeIsEffective: false, offersVoiceNoteHint: true),
+            .armedModeInactive("List")
         )
-        XCTAssertEqual(resolve(voiceNotesWaiting: 1, armedModeName: "List"), .voiceNotesWaiting(count: 1))
     }
 
-    /// No notes, no chip: the slot falls through to what it showed before #637.
-    func testNoWaitingNoteMeansNoChip() {
-        XCTAssertEqual(resolve(voiceNotesWaiting: 0, polishUnavailable: true), .polishUnavailable)
-        XCTAssertEqual(resolve(voiceNotesWaiting: 0), .empty)
+    /// When both hints apply, the voice note one wins: it is tied to something that
+    /// just happened (#639).
+    func testTheVoiceNoteHintOutranksTheSmartModeHint() {
+        XCTAssertEqual(resolve(offersVoiceNoteHint: true, offersDiscoveryHint: true), .voiceNoteHint)
+        XCTAssertEqual(resolve(offersVoiceNoteHint: true), .voiceNoteHint)
+    }
+
+    /// No hint to give: the slot falls through to the Smart Mode hint, then nothing.
+    /// There is no voice note occupant left besides the hint — #637's chip is gone.
+    func testNoVoiceNoteHintFallsThrough() {
+        XCTAssertEqual(resolve(offersVoiceNoteHint: false, offersDiscoveryHint: true), .discoveryHint)
+        XCTAssertEqual(resolve(offersVoiceNoteHint: false), .empty)
     }
 
     func testSuggestionsOutrankThePolishNotice() {
@@ -150,9 +148,8 @@ final class ToolbarCentreSlotTests: XCTestCase {
         XCTAssertTrue(ToolbarCentreSlot.suggestions.evictsHamburger)
 
         XCTAssertFalse(ToolbarCentreSlot.choosingMode.evictsHamburger)
-        // Beside the hamburger, not in its place (#637): a note can wait a day, and the
-        // panel must stay reachable for all of it.
-        XCTAssertFalse(ToolbarCentreSlot.voiceNotesWaiting(count: 2).evictsHamburger)
+        // It points at the ☰, and teaches a long press on the ☰ (#639).
+        XCTAssertFalse(ToolbarCentreSlot.voiceNoteHint.evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.polishUnavailable.evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.armedMode("List").evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.discoveryHint.evictsHamburger)

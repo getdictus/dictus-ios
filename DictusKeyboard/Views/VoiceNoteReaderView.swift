@@ -1,5 +1,5 @@
 // DictusKeyboard/Views/VoiceNoteReaderView.swift
-// The full-surface reader for shared voice note transcripts (issue #637).
+// The full-surface reader for shared voice note transcripts (issues #637, #639).
 import SwiftUI
 import DictusCore
 
@@ -8,13 +8,19 @@ import DictusCore
 /// and one action row.
 ///
 /// ```
-/// ▍▌▍ Voice note · 1:42 · FR       ● ○ ○    ✕
+/// [✕]  ▍▌▍ Voice note · 1:42 · FR        ● ○ ○
 ///
 ///   Salut, je voulais te dire que pour samedi
 ///   c'est bon de mon côté…              ← swipe
 ///
 ///   [↗]   [============  Insert  ============]
 /// ```
+///
+/// The `✕` sits where the ☰ was (#639): the reader opens from a long press on ☰, and
+/// the control under the thumb becomes its own way back, the panel's ☰ → ✕ morph.
+///
+/// With no page — a long press on ☰ when nothing is waiting — it shows an empty state
+/// instead, the one place the keyboard teaches the feature (#639).
 ///
 /// ### No card, no panel
 ///
@@ -40,6 +46,8 @@ struct VoiceNoteReaderView: View {
     let onClose: () -> Void
     let onInsert: (UUID) -> Void
     let onOpenInDictus: (UUID) -> Void
+    /// A page came on screen: a use, which restarts the note's 15 minutes (#639).
+    let onPageShown: (UUID) -> Void
 
     /// The page on screen. Nil until the first layout pass, which reads as page 0.
     @State private var visibleID: UUID?
@@ -61,8 +69,12 @@ struct VoiceNoteReaderView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            pager
-            actionRow
+            if pages.isEmpty {
+                emptyState
+            } else {
+                pager
+                actionRow
+            }
         }
         .opacity(appeared ? 1 : 0)
         .offset(y: appeared ? 0 : 8)
@@ -74,22 +86,32 @@ struct VoiceNoteReaderView: View {
         // `Insert` removes the visible page (#637 decision 7). Show the one that took
         // its place — the next, or the previous when it was the last — rather than
         // whatever the scroll view lands on.
-        .onChange(of: pages.map(\.id)) { oldIDs, newIDs in
-            guard let visibleID, !newIDs.contains(visibleID) else { return }
-            let removedAt = oldIDs.firstIndex(of: visibleID) ?? 0
-            self.visibleID = newIDs.isEmpty ? nil : newIDs[min(removedAt, newIDs.count - 1)]
+        // A note that lands while the reader is open is appended (#637). On the empty
+        // state that is the first page, and it is now the one on screen.
+        .onChange(of: pages.map(\.id)) { _, newIDs in
+            if let visibleID, newIDs.contains(visibleID) { return }
+            visibleID = newIDs.first
+        }
+        // A swipe to another page is a use of that note (#639). The first page's use is
+        // recorded by the state when the reader opens.
+        .onChange(of: visibleID) { oldID, newID in
+            guard let newID, oldID != nil, newID != oldID else { return }
+            onPageShown(newID)
         }
     }
 
     // MARK: - Header
 
-    /// 52 pt, the toolbar's band: the same 4 pt top inset `ToolbarView` uses, so the
-    /// controls sit where the bar's did and nothing jumps when the reader opens.
+    /// 52 pt, the toolbar's band: the same 12 pt sides and 4 pt top inset `ToolbarView`
+    /// uses, so the `✕` lands exactly on the ☰ it replaces and nothing jumps when the
+    /// reader opens. Order (#639): `✕`, the mark, `Voice note · 1:42 · FR`, the dots.
     private var header: some View {
         HStack(spacing: 8) {
+            closeButton
+
             VoiceNoteMark(height: 16)
 
-            Text("Voice note", comment: "Header of the keyboard's voice note reader, and the toolbar chip when one note is waiting (#637).")
+            Text("Voice note", comment: "Header of the keyboard's voice note reader (#637).")
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(foregroundColor)
                 .lineLimit(1)
@@ -101,12 +123,10 @@ struct VoiceNoteReaderView: View {
 
             if pages.count > 1 {
                 pageDots
+                    .padding(.trailing, 4)
             }
-
-            closeButton
         }
-        .padding(.leading, 16)
-        .padding(.trailing, 12)
+        .padding(.horizontal, 12)
         .padding(.top, 4)
         .frame(height: 52)
     }
@@ -135,23 +155,51 @@ struct VoiceNoteReaderView: View {
     }
 
     /// `✕`: closes the reader, the notes stay waiting (#637 decision 4).
+    ///
+    /// The ☰'s exact object (#639) — `ToolbarView.panelToggleButton`'s 56 × 36 glass
+    /// capsule and 17 pt glyph — so the morph happens in place, the way the panel's
+    /// does.
     private var closeButton: some View {
         Button {
             HapticFeedback.keyTapped()
             onClose()
         } label: {
             Image(systemName: "xmark")
-                .font(.system(size: 15, weight: .medium))
+                .font(.system(size: 17, weight: .medium))
                 .foregroundColor(.dictusPillIconSecondary)
-                .frame(width: 36, height: 36)
-                .dictusGlass(in: Circle())
+                .frame(width: 56, height: 36)
+                .dictusGlass(in: Capsule())
                 // Same split as `ToolbarView.barIcon`: 36 pt to the eye, 44 pt to a finger.
-                .frame(width: 44, height: 44)
+                .frame(width: 56, height: 44)
                 .contentShape(Rectangle())
         }
         .buttonStyle(GlassPressStyle())
         .accessibilityLabel(Text("Close", comment: "Accessibility label of the keyboard voice note reader's close button (#637)."))
         .accessibilityIdentifier("voiceNoteReaderClose")
+    }
+
+    // MARK: - Empty state
+
+    /// A long press on ☰ with nothing waiting (#639): what the feature is and how to
+    /// feed it, since this is the only place the keyboard says so.
+    private var emptyState: some View {
+        VStack(spacing: 8) {
+            Text("No recent voice note", comment: "Keyboard voice note reader, opened by a long press on the menu button when no shared voice note is waiting (#639).")
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundColor(foregroundColor)
+
+            Text("Share a voice message to Dictus from WhatsApp or any other app, and its transcript shows up here.",
+                 comment: "Keyboard voice note reader's empty state: how a voice note gets here (#639).")
+                .font(.system(size: 14))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.horizontal, 32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Lifted a little off the centre, where the action row would otherwise sit.
+        .padding(.bottom, 24)
+        .accessibilityIdentifier("voiceNoteReaderEmpty")
     }
 
     // MARK: - Pages
@@ -261,8 +309,8 @@ struct VoiceNoteReaderView: View {
 /// the middle one in the brand gradient.
 ///
 /// Its own view rather than `DictusLogo` scaled down: that one's bar width and spacing
-/// are sized for a home screen hero, and at chip size they would merge into a block.
-/// Used by the reader's header and the toolbar chip (#637).
+/// are sized for a home screen hero, and at 16 pt they would merge into a block.
+/// Used by the reader's header (#637).
 struct VoiceNoteMark: View {
     var height: CGFloat = 14
 

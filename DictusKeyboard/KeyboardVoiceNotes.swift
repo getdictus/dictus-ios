@@ -1,11 +1,12 @@
 // DictusKeyboard/KeyboardVoiceNotes.swift
-// Shared voice note transcripts waiting in the keyboard: the chip's count and the reader (issue #637).
+// Shared voice note transcripts waiting in the keyboard: the ☰ ring, the hint and the reader (issues #637, #639).
 import Foundation
 import Combine
 import DictusCore
 
 /// What the keyboard knows about voice notes shared to Dictus: which transcripts are
-/// waiting for it, and the reader while it is open.
+/// waiting for it, which of them it has never shown, whether the long press on ☰
+/// still needs teaching, and the reader while it is open.
 ///
 /// ### Why a separate object rather than properties on `KeyboardState`
 ///
@@ -21,8 +22,14 @@ import DictusCore
 /// Darwin signal is only a hint that a keyboard on screen should look now: iOS
 /// suspends this process freely, and a note that lands while it is suspended is found
 /// on the next appearance instead (#637, "persist first, signal second"). Nothing in
-/// here survives the process, and nothing has to — the receipts and the presented
-/// markers are files too.
+/// here survives the process, and nothing has to — the receipts, the presented
+/// markers and the last uses are files too.
+///
+/// ### How long a note stays (#639)
+///
+/// 15 minutes after its last use: shown in the reader, inserted, quoted. Each use is
+/// written to disk here, and the store filters on it; `Insert` no longer removes the
+/// note, so a long one can be quoted in several passes (#640).
 ///
 /// ### What it never does
 ///
@@ -37,42 +44,67 @@ final class KeyboardVoiceNoteState: ObservableObject {
     ///
     /// A snapshot taken when it opens rather than a live view of `waiting`, so a note
     /// that lands while it is open is appended as a last page instead of reshuffling
-    /// the pages under the user's eyes.
+    /// the pages under the user's eyes. Empty when the long press found nothing to
+    /// show: the reader then draws its empty state, the one place the keyboard
+    /// explains the feature (#639).
     struct Reader: Equatable {
         var pages: [VoiceNoteKeyboardDelivery]
     }
 
-    /// Transcripts the keyboard may offer, oldest share first. Drives the chip.
+    /// Transcripts the keyboard may offer, oldest share first.
     @Published private(set) var waiting: [VoiceNoteKeyboardDelivery] = []
+
+    /// The waiting notes the reader has already shown. The ☰ wears its ring while
+    /// any waiting note is not in here (#639).
+    @Published private(set) var presentedIDs: Set<UUID> = []
+
+    /// Whether the user has ever long-pressed ☰ (#639). Cached: the flag only ever
+    /// moves once, and from this process.
+    @Published private(set) var longPressUsed = VoiceNoteDiscovery.hasUsedLongPress
 
     /// The reader, or nil when it is closed.
     @Published private(set) var reader: Reader?
 
-    /// Bumped once per arrival on a visible keyboard, so the chip pulses once.
-    @Published private(set) var arrivalPulse = 0
+    /// At least one waiting note has never been shown in the keyboard: the ☰ capsule
+    /// gets its accent ring (#639). No count — the reader's dots say how many.
+    var hasUnshownNotes: Bool {
+        waiting.contains { !presentedIDs.contains($0.id) }
+    }
 
-    /// Ids that have already pulsed, or were already waiting when the keyboard
+    /// Whether the toolbar still teaches the long press on ☰ (#639).
+    var offersLongPressHint: Bool {
+        VoiceNoteDiscovery.offersHint(notesWaiting: waiting.count, longPressUsed: longPressUsed)
+    }
+
+    /// Ids that have already buzzed, or were already waiting when the keyboard
     /// appeared. In memory on purpose: "never repeated" is about one arrival, and the
-    /// signal that causes the pulse is delivered once.
+    /// signal that causes the haptic is delivered once.
     private var announced: Set<UUID> = []
 
-    /// Ids inserted by this process. The receipt on disk is what hides a note from
-    /// every later read; this covers a receipt that failed to write, so a second tap
-    /// can never insert the same transcript twice.
-    private var inserted: Set<UUID> = []
+    /// Ids inserted since the reader last opened. `Insert` closes the reader, so a
+    /// second tap normally finds nothing to act on; this is the guarantee that one
+    /// opening can never write the same transcript twice, whatever order the taps and
+    /// the close are delivered in. Reset on every opening: since #639 a note can be
+    /// inserted again from a later one.
+    private var insertedThisOpening: Set<UUID> = []
+
+    /// Rereads the directory when the earliest waiting note leaves its window, so the
+    /// ring and the hint do not outlive the note while the keyboard sits on screen.
+    /// A suspended keyboard misses it and rereads on its next appearance instead.
+    private var expiryRefresh: DispatchWorkItem?
 
     private var lastMode: KeyboardAreaMode = .keys
     private var modeCancellable: AnyCancellable?
 
     private let instanceID = String(UUID().uuidString.prefix(8))
 
-    /// Nil without Full Access, so nothing is offered: no chip, no reader.
+    /// Nil without Full Access, so nothing is offered: no ring, no hint, no reader.
     ///
     /// WHY explicit rather than left to the container: on a device the App Group is
     /// unreachable without Full Access and this would be nil anyway, but the
     /// simulator resolves the container regardless (`docs/agents/simulator.md`), and
     /// it opened the reader under a toolbar saying "Full access required" (measured
-    /// 2026-10-03). The toolbar's own branch already hides the chip there; this keeps
+    /// 2026-10-03). The toolbar's own branch already hides the ☰ there; this keeps
     /// the reader to the same rule on every runtime. Recomputed each time: toggling
     /// Full Access rebuilds the extension anyway.
     private var store: VoiceNoteKeyboardDeliveryStore? {
@@ -107,11 +139,11 @@ final class KeyboardVoiceNoteState: ObservableObject {
         }
         reload(reason: "appearance")
         // Waiting when the keyboard appears is not an arrival under the user's thumb:
-        // nothing to pulse for.
+        // nothing to buzz for.
         announced.formUnion(waiting.map(\.id))
         guard !waiting.isEmpty else { return }
 
-        let presented = store?.presentedIDs() ?? []
+        let presented = presentedIDs
         let autoOpen = VoiceNoteKeyboardPresentation.autoOpenEnabled
         let decision = VoiceNoteKeyboardPresentation.onAppearance(
             pending: waiting,
@@ -128,11 +160,27 @@ final class KeyboardVoiceNoteState: ObservableObject {
 
     // MARK: - Opening and closing
 
-    /// Open the reader on every waiting note. From the chip, or from an appearance.
-    func open(source: String) {
-        guard reader == nil else { return }
+    /// A long press on ☰ was recognised (#639): open the reader, whatever is waiting.
+    ///
+    /// Called at the **recognition**, not the release. The reader replaces the toolbar
+    /// in `KeyboardRootView.body`, so the view carrying the recogniser is destroyed by
+    /// this very call and nothing after it is delivered (the #79 identity trap). The
+    /// first long press ever retires the hint, whether the reader could open or not:
+    /// the user has found the gesture. Returns whether the reader is on screen.
+    @discardableResult
+    func openFromLongPress() -> Bool {
+        VoiceNoteDiscovery.noteLongPressUsed()
+        if !longPressUsed { longPressUsed = true }
+        return open(source: "longPress")
+    }
+
+    /// Open the reader on every waiting note, or on its empty state when there is none
+    /// (#639). From a long press on ☰, or from an appearance.
+    @discardableResult
+    func open(source: String) -> Bool {
+        guard reader == nil else { return KeyboardState.shared.areaMode == .voiceNoteResult }
         reload(reason: "open")
-        guard !waiting.isEmpty else { return }
+        insertedThisOpening = []
         // Before the mode, so the first body evaluated in `.voiceNoteResult` has pages.
         reader = Reader(pages: waiting)
         KeyboardState.shared.presentAreaMode(.voiceNoteResult)
@@ -140,16 +188,18 @@ final class KeyboardVoiceNoteState: ObservableObject {
             // Refused: a dictation owns the area. Nothing was shown.
             reader = nil
             log("openRefused", "source=\(source) status=\(KeyboardState.shared.dictationStatus.rawValue)")
-            return
+            return false
         }
-        // Shown, so it never opens on its own for these notes again (decision 2).
-        // Viewing is not reading: nothing is acknowledged here (decision 6).
-        store?.markPresented(waiting.map(\.id))
+        // Shown, so it never opens on its own for these notes again (decision 2), and
+        // the ☰ loses its ring. Viewing is not reading: nothing is acknowledged here
+        // (decision 6). The page on screen is a use, and restarts its 15 minutes.
+        markPresented(waiting.map(\.id))
+        if let first = waiting.first { pageShown(first.id) }
         log("readerOpened", "source=\(source) pages=\(waiting.count) ids=\(Self.short(waiting))")
+        return true
     }
 
-    /// `✕`, and every way out that is not an insertion of the last page. The notes
-    /// stay waiting (decision 4).
+    /// `✕`, and every other way out. The notes stay waiting (decision 4).
     ///
     /// The mode change is what clears `reader`, in `areaModeChanged`: one path, so a
     /// dictation taking the area and a `✕` leave the same state behind.
@@ -159,48 +209,64 @@ final class KeyboardVoiceNoteState: ObservableObject {
         KeyboardState.shared.presentAreaMode(.keys)
     }
 
+    /// The reader put this page on screen — on opening, or after a swipe. A use
+    /// (#639): its 15 minutes start again.
+    func pageShown(_ id: UUID) {
+        guard reader?.pages.contains(where: { $0.id == id }) == true else { return }
+        store?.noteUsed(id)
+    }
+
     // MARK: - Actions
 
-    /// `Insert`: hand the visible page's transcript to `write`, once.
+    /// `Insert`: hand the visible page's transcript to `write`, once per opening, then
+    /// give the keys back.
     ///
     /// `write` is the caller's, because the caller is the view that knows which
     /// controller it belongs to and holds the bridge the insertion has to be reported
     /// to (#548). It returns whether it wrote.
     ///
-    /// The receipt is written **after** the text, deliberately. A process killed
-    /// between the two shows the note again on the next appearance, which the user can
-    /// dismiss; the other order would lose a transcript that never reached the field.
+    /// The note **stays** (#639): the receipt marks it read in DictusApp and the use
+    /// restarts its 15 minutes, so a long press on ☰ finds it again for another
+    /// passage. The reader closes rather than staying on the page it just inserted —
+    /// the user goes back to writing, and a second tap on the same `Insert` would
+    /// only be a duplicate.
+    ///
+    /// A note whose window ran out while the reader sat open is refused: the reader
+    /// shows a snapshot, and the disk is what says whether the text may still be
+    /// offered.
     func insert(_ id: UUID, write: (String) -> Bool) {
-        guard var reader, let page = reader.pages.first(where: { $0.id == id }),
-              !inserted.contains(id) else {
-            log("insertIgnored", "id=\(id.uuidString.prefix(8)) reason=consumedOrClosed")
+        guard let reader, let page = reader.pages.first(where: { $0.id == id }),
+              !insertedThisOpening.contains(id) else {
+            log("insertIgnored", "id=\(id.uuidString.prefix(8)) reason=insertedOrClosed")
+            return
+        }
+        reload(reason: "insert")
+        guard waiting.contains(where: { $0.id == id }) else {
+            log("insertIgnored", "id=\(id.uuidString.prefix(8)) reason=expired")
+            close(reason: "expired")
             return
         }
         guard write(page.transcript) else {
             log("insertIgnored", "id=\(id.uuidString.prefix(8)) reason=notWritten")
             return
         }
-        inserted.insert(id)
+        insertedThisOpening.insert(id)
+        // After the text, deliberately: a process killed between the two leaves the
+        // note unread in DictusApp, which is the safe failure.
         let receipt = store?.acknowledge(id, action: .inserted) ?? false
+        let used = store?.noteUsed(id) ?? false
         HapticFeedback.textInserted()
-        log("inserted", "id=\(id.uuidString.prefix(8)) chars=\(page.transcript.count) receipt=\(receipt)")
-
-        // The page goes; the keys come back only with the last one (decision 7).
-        reader.pages.removeAll { $0.id == id }
+        log("inserted", "id=\(id.uuidString.prefix(8)) chars=\(page.transcript.count) receipt=\(receipt) used=\(used)")
         reload(reason: "inserted")
-        if reader.pages.isEmpty {
-            close(reason: "lastInserted")
-        } else {
-            self.reader = reader
-        }
+        close(reason: "inserted")
     }
 
     /// `Open in Dictus`: the app's result screen on this note.
     ///
-    /// No receipt: the note leaves the keyboard when the app actually shows it, which
-    /// withdraws the delivery (decisions 5 and 6). If the app never gets there, the
-    /// note is still waiting here, which is the safe failure. The reader closes first
-    /// for the panel's reason (#241): the trip out of the keyboard ends the task.
+    /// No receipt: the app marks the note read when it actually shows it. The note
+    /// stays in the keyboard for the rest of its window either way (#639). The reader
+    /// closes first for the panel's reason (#241): the trip out of the keyboard ends
+    /// the task.
     func openInDictus(_ id: UUID) {
         log("openInDictus", "id=\(id.uuidString.prefix(8))")
         close(reason: "openInDictus")
@@ -209,44 +275,72 @@ final class KeyboardVoiceNoteState: ObservableObject {
 
     // MARK: - Disk and signal
 
-    /// Reread the delivery directory.
+    /// Reread the delivery directory: what is waiting, what was already shown, and
+    /// when the next one leaves.
     private func reload(reason: String) {
-        let pending = (store?.pending() ?? []).filter { !inserted.contains($0.id) }
+        let pending = store?.pending() ?? []
+        let presented = store?.presentedIDs() ?? []
+        if presented != presentedIDs { presentedIDs = presented }
+        scheduleExpiryRefresh(for: pending)
         guard pending.map(\.id) != waiting.map(\.id) else { return }
         log("waitingChanged", "reason=\(reason) from=\(waiting.count) to=\(pending.count) ids=\(Self.short(pending))")
         waiting = pending
     }
 
-    /// DictusApp wrote a delivery. A keyboard on screen shows the chip — never the
-    /// reader (decision 1) — and says so once: one pulse, one light haptic.
+    /// Write the presented markers and mirror them in memory, so the ring goes at once.
+    private func markPresented(_ ids: [UUID]) {
+        guard !ids.isEmpty else { return }
+        store?.markPresented(ids)
+        presentedIDs.formUnion(ids)
+    }
+
+    /// One pending work item, at the earliest expiry among `pending`. Replaced on
+    /// every reload, so a use that pushed the expiry back moves it too.
+    private func scheduleExpiryRefresh(for pending: [VoiceNoteKeyboardDelivery]) {
+        expiryRefresh?.cancel()
+        expiryRefresh = nil
+        guard let next = store?.nextExpiry(of: pending) else { return }
+        let item = DispatchWorkItem { [weak self] in
+            MainActor.assumeIsolated { self?.reload(reason: "expiry") }
+        }
+        expiryRefresh = item
+        // A second past the boundary, so the reread is on the far side of it.
+        DispatchQueue.main.asyncAfter(deadline: .now() + max(0, next.timeIntervalSinceNow) + 1, execute: item)
+    }
+
+    /// DictusApp wrote a delivery. A keyboard on screen rings the ☰ — never takes the
+    /// surface over (decision 1) — and says so once with one light haptic.
     ///
-    /// An open reader takes the new note as a last page rather than leaving it to the
-    /// chip behind it: appended, so the page under the user's eyes does not move.
+    /// An open reader takes the new note as a last page rather than leaving it behind
+    /// the ring: appended, so the page under the user's eyes does not move. An empty
+    /// reader shows it in place of the empty state.
     private func resultReadySignalled() {
         reload(reason: "signal")
         let fresh = waiting.filter { !announced.contains($0.id) }
         announced.formUnion(fresh.map(\.id))
         guard !fresh.isEmpty else { return }
         if var reader {
+            let wasEmpty = reader.pages.isEmpty
             let shown = Set(reader.pages.map(\.id))
             reader.pages.append(contentsOf: fresh.filter { !shown.contains($0.id) })
             self.reader = reader
-            store?.markPresented(fresh.map(\.id))
+            markPresented(fresh.map(\.id))
+            // It replaced the empty state, so it is the page on screen: a use.
+            if wasEmpty, let first = reader.pages.first { pageShown(first.id) }
         }
         let visible = KeyboardState.shared.isKeyboardVisible
         log("arrived", "count=\(fresh.count) ids=\(Self.short(fresh)) visible=\(visible) readerOpen=\(reader != nil)")
         guard visible else { return }
-        arrivalPulse += 1
         HapticFeedback.voiceNoteArrived()
     }
 
     /// Follow the area mode, whoever moved it.
     ///
-    /// Leaving `.voiceNoteResult` clears the reader — `✕`, the last `Insert`, and a
-    /// dictation taking the area all arrive here. Leaving `.recording` rereads the
-    /// directory: a note may have landed during the dictation, and the chip comes back
-    /// with the keys. The reader does not reopen on its own then; the user is looking
-    /// at the keyboard (decision 1).
+    /// Leaving `.voiceNoteResult` clears the reader — `✕`, `Insert`, and a dictation
+    /// taking the area all arrive here. Leaving `.recording` rereads the directory: a
+    /// note may have landed during the dictation, and the ring comes back with the
+    /// keys. The reader does not reopen on its own then; the user is looking at the
+    /// keyboard (decision 1).
     private func areaModeChanged(to mode: KeyboardAreaMode) {
         if mode != .voiceNoteResult, reader != nil {
             reader = nil
