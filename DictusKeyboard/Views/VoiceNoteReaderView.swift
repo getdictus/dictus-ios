@@ -87,7 +87,10 @@ struct VoiceNoteReaderView: View {
     /// controls sit where the bar's did and nothing jumps when the reader opens.
     private var header: some View {
         HStack(spacing: 8) {
-            VoiceNoteMark(height: 16)
+            // The logo, drawn by the same view as the app's Home: its sizes derive
+            // from the height, so it holds its shape at chip size too (#636).
+            DictusLogo(height: 16)
+                .accessibilityHidden(true)
 
             Text("Voice note", comment: "Header of the keyboard's voice note reader, and the toolbar chip when one note is waiting (#637).")
                 .font(.system(size: 15, weight: .semibold))
@@ -254,41 +257,5 @@ struct VoiceNoteReaderView: View {
         .buttonStyle(GlassPressStyle())
         .accessibilityLabel(label)
         .accessibilityIdentifier(identifier)
-    }
-}
-
-/// The Dictus mark, small: three bars at the brand kit's proportions (18 / 42 / 27),
-/// the middle one in the brand gradient.
-///
-/// Its own view rather than `DictusLogo` scaled down: that one's bar width and spacing
-/// are sized for a home screen hero, and at chip size they would merge into a block.
-/// Used by the reader's header and the toolbar chip (#637).
-struct VoiceNoteMark: View {
-    var height: CGFloat = 14
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    private let proportions: [CGFloat] = [0.43, 1.0, 0.64]
-    private let opacities: [Double] = [0.45, 1.0, 0.65]
-
-    var body: some View {
-        let barWidth = max(2, height * 0.2)
-        HStack(alignment: .center, spacing: barWidth * 0.6) {
-            ForEach(0..<3, id: \.self) { index in
-                let shape = RoundedRectangle(cornerRadius: barWidth / 2)
-                if index == 1 {
-                    shape
-                        .fill(LinearGradient(colors: [.dictusGradientStart, .dictusGradientEnd],
-                                             startPoint: .top, endPoint: .bottom))
-                        .frame(width: barWidth, height: height * proportions[index])
-                } else {
-                    shape
-                        .fill((colorScheme == .dark ? Color.white : Color.gray).opacity(opacities[index]))
-                        .frame(width: barWidth, height: height * proportions[index])
-                }
-            }
-        }
-        .frame(height: height)
-        .accessibilityHidden(true)
     }
 }
