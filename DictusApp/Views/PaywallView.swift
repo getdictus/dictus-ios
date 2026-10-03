@@ -242,21 +242,9 @@ struct PaywallView: View {
     /// Glow uses the double-shadow pattern (tight + wide) from SwipeBackOverlayView.
     private var heroSection: some View {
         VStack(spacing: 12) {
-            // Forcing the dark color scheme keeps DictusLogo's side bars
-            // white on the dark tile in light mode too, matching the app icon.
-            DictusLogo(height: 48)
-                .environment(\.colorScheme, .dark)
-                .padding(20)
-                .background(
-                    RoundedRectangle(cornerRadius: 24)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(hex: 0x0D2040), Color(hex: 0x071020)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                )
+            // The tile is the app icon itself (square, continuous corners, same
+            // ratios); only the glow below belongs to this screen.
+            DictusIconTile(logoHeight: 48)
                 .shadow(color: Color.dictusAccent.opacity(0.7), radius: 10)
                 .shadow(color: Color.dictusAccent.opacity(0.4), radius: 20)
 
