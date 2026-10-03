@@ -38,6 +38,9 @@ struct KeyboardRootView: View {
     /// fan while the mic is held. A second observed object beside `KeyboardState`,
     /// exactly as the waveform driver above is — see `KeyboardSmartModeState`.
     @ObservedObject private var smartModes = KeyboardSmartModeState.shared
+    /// Shared voice note transcripts waiting for this keyboard: the toolbar chip and
+    /// the reader (#637). A third observed object, for `smartModes`' reason.
+    @ObservedObject private var voiceNotes = KeyboardVoiceNoteState.shared
     @State private var instanceID = String(UUID().uuidString.prefix(8))
     /// Observable state for the suggestion bar, owned by KeyboardViewController.
     /// WHY @ObservedObject (not @StateObject): The controller creates and owns SuggestionState,
@@ -93,7 +96,8 @@ struct KeyboardRootView: View {
     /// What this view presents.
     ///
     /// The mode is owned by KeyboardState; what this adds is the presenter check
-    /// on `.recording` only. iOS caches UIInputViewController instances and their
+    /// on the two full-surface modes, `.recording` and `.voiceNoteResult`
+    /// (`KeyboardAreaMode.requiresVisibleOwner`). iOS caches UIInputViewController instances and their
     /// KeyboardRootViews keep receiving updates long after they leave the window
     /// (#128 / #134) — a stale view that rendered the overlay produced the
     /// duplicate grey panel in #116.
@@ -114,12 +118,19 @@ struct KeyboardRootView: View {
     ///
     /// The legacy `activeControllerID == nil` fallback that used to mask #128 is
     /// deliberately not reinstated: with #128 fixed, stale controllers are dormant.
+    ///
+    /// The voice note reader (#637) takes the same gate for a different reason: it
+    /// can open from a keyboard appearance, while cached controllers are alive, and
+    /// it carries an `Insert` that writes into a text field. Only the controller the
+    /// user is looking at may draw that; a stale instance falls back to `.keys`.
     private var presentedMode: KeyboardAreaMode {
         let mode = state.areaMode
-        guard mode == .recording else { return mode }
+        guard mode.requiresVisibleOwner else { return mode }
         guard state.activeControllerID == controllerID, state.isKeyboardVisible else {
             return .keys
         }
+        // The stage check below is about the dictation's own overlay only.
+        guard mode == .recording else { return mode }
         // Owning the area is not the same as having checked what to draw (#361). A
         // stage this process set on its own authority outlives the controller that
         // justified it, and a freshly mounted one would otherwise render it before
@@ -194,7 +205,10 @@ struct KeyboardRootView: View {
             onSmartModeFanOpen: { smartModes.open() },
             onSmartModeFanDrag: { y in smartModes.track(y: y) },
             onSmartModeFanRelease: { smartModes.commit() },
-            isSmartModeFanOpen: smartModes.fan != nil
+            isSmartModeFanOpen: smartModes.fan != nil,
+            voiceNotesWaiting: voiceNotes.waiting.count,
+            onVoiceNotesTap: { voiceNotes.open(source: "chip") },
+            voiceNoteArrivalPulse: voiceNotes.arrivalPulse
         )
         .frame(height: toolbarHeight)
     }
@@ -266,7 +280,7 @@ struct KeyboardRootView: View {
                 SmartModeFanView(state: fan, availableHeight: smartModes.areaHeight)
             }
 
-        case .keys, .recording:
+        case .keys, .recording, .voiceNoteResult:
             EmptyView()
         }
     }
@@ -289,6 +303,17 @@ struct KeyboardRootView: View {
                     // run is the one thing it must never do. It already draws
                     // nothing for Normal, and a mode that will not run *is* Normal.
                     armedSmartMode: smartModes.effectiveMode
+                )
+            } else if presentedMode == .voiceNoteResult, let reader = voiceNotes.reader {
+                // The voice note reader (#637): the whole surface, toolbar band
+                // included, exactly like the recording overlay above — which is why it
+                // is a branch here and not a case of `areaBelowToolbar`. The layout
+                // behind it is `.recording`'s, set by `KeyboardViewController`.
+                VoiceNoteReaderView(
+                    pages: reader.pages,
+                    onClose: { voiceNotes.close(reason: "close") },
+                    onInsert: { id in insertVoiceNote(id) },
+                    onOpenInDictus: { id in voiceNotes.openInDictus(id) }
                 )
             } else {
                 // ONE toolbar, outside the switch, for every non-recording mode.
@@ -444,6 +469,37 @@ struct KeyboardRootView: View {
             energyLevels: state.waveformEnergy,
             isVisible: !forceHidden && presentedMode == .recording
         )
+    }
+
+    // MARK: - Voice note insertion (#637)
+
+    /// `Insert` in the voice note reader: the visible page's transcript into the field
+    /// this keyboard is attached to, once.
+    ///
+    /// Only from the controller the user is looking at — the same gate that let the
+    /// reader be drawn, re-checked at the tap because ownership can move between the
+    /// two. Mirrors the emoji insert above, #548's arming included: the bridge has to
+    /// hear about every edit the keyboard makes, or its mirror drifts.
+    private func insertVoiceNote(_ id: UUID) {
+        guard state.activeControllerID == controllerID, state.isKeyboardVisible,
+              let proxy = state.controller?.textDocumentProxy else {
+            PersistentLog.log(.diagnosticProbe(
+                component: "KeyboardRootView",
+                instanceID: instanceID,
+                action: "voiceNoteInsertRefused",
+                details: "id=\(id.uuidString.prefix(8)) owner=\(state.activeControllerID ?? "none") controllerID=\(controllerID) visible=\(state.isKeyboardVisible)"
+            ))
+            return
+        }
+        voiceNotes.insert(id) { transcript in
+            let mirrorBefore = bridge?.mirrorLength() ?? 0
+            proxy.insertText(transcript)
+            bridge?.observeMirror(before: mirrorBefore, inserted: transcript.count)
+            #if DEBUG
+            MirrorProbe.shared.record(.insert(transcript))
+            #endif
+            return true
+        }
     }
 
     // MARK: - Suggestion Handling

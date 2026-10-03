@@ -39,6 +39,42 @@ public enum KeyboardAreaMode: String, Equatable, CaseIterable, Sendable {
     case smartModeFan
     /// The recording overlay fills the whole area, toolbar included.
     case recording
+    /// The voice note reader fills the whole area, toolbar included (#637): the
+    /// transcripts of voice notes shared to Dictus, one page each, with an explicit
+    /// `Insert`.
+    ///
+    /// WHY the whole area and not the area below the bar, like the pickers: the
+    /// reader's header takes the toolbar's 52 pt band, so the keyboard *becomes* the
+    /// transcript for a moment rather than hosting a panel. That is `.recording`'s
+    /// geometry exactly, and it is reached the same way — no new height, no new
+    /// anchor, and the keyboard's declared height untouched (#166).
+    ///
+    /// Opened only by the keyboard itself: from the toolbar chip, or on an appearance
+    /// (`VoiceNoteKeyboardPresentation`). A dictation takes the area from it like from
+    /// any other mode, and leaving the dictation returns to the keys.
+    case voiceNoteResult
+
+    /// Whether only the controller that owns the keyboard area and is visible may
+    /// present this mode; any other instance falls back to `.keys`.
+    ///
+    /// `KeyboardRootView.presentedMode` and `KeyboardViewController.applyAreaMode`
+    /// both ask this, so the two layers cannot disagree about which modes are gated.
+    /// `.recording` is pushed from another process and can arrive while no controller
+    /// owns the keyboard (#260). `.voiceNoteResult` can open from a keyboard
+    /// appearance, where iOS keeps several cached controllers alive (#128), and it
+    /// carries an `Insert` that writes into a text field — the last thing a stale
+    /// instance may be allowed to draw. The pickers are opened by a key the user just
+    /// touched on the visible keyboard, and are not gated (see `presentedMode`).
+    ///
+    /// An exhaustive switch so a new mode has to answer.
+    public var requiresVisibleOwner: Bool {
+        switch self {
+        case .recording, .voiceNoteResult:
+            return true
+        case .keys, .emoji, .panel, .smartModeFan:
+            return false
+        }
+    }
 
     /// The mode after a dictation status change.
     ///
@@ -47,6 +83,10 @@ public enum KeyboardAreaMode: String, Equatable, CaseIterable, Sendable {
     /// emoji picker (or, later, the #241 panel). Leaving it returns to the key
     /// grid: a picker the user had open before dictating is not restored, which
     /// is what the pre-#271 code did by clearing its emoji flag on overlay show.
+    ///
+    /// The voice note reader (#637) follows the same rule. Its notes are not lost —
+    /// nothing is consumed by a dictation — and the keyboard rereads them when the
+    /// dictation leaves, so the toolbar chip is back with the keys.
     public static func resolving(
         status: DictationStatus,
         current: KeyboardAreaMode

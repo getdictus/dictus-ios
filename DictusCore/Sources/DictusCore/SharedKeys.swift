@@ -115,6 +115,13 @@ public enum SharedKeys {
     /// to find. Every reader is `#if DEBUG` too, so the constant has no Release caller to
     /// lose.
     public static let debugProEntitlementForced = "dictus.debugProEntitlementForced"
+
+    /// Bool: when true, the keyboard never opens the voice note reader on its own and
+    /// only shows the toolbar chip (#637 decision 3). Absent reads false, the default
+    /// "chip + auto-open". Exists for one device comparison between the two
+    /// behaviours; the losing branch and this key are deleted in a follow-up. Inside
+    /// the conditional for `debugProEntitlementForced`'s reason.
+    public static let debugVoiceNoteAutoOpenDisabled = "dictus.debugVoiceNoteAutoOpenDisabled"
     #endif
 
     // Live Activity preference

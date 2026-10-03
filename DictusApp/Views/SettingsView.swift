@@ -72,6 +72,13 @@ struct SettingsView: View {
     /// either this @AppStorage or the AutocorrectDebugLog code that reads it.
     @AppStorage(SharedKeys.autocorrectDebugLogging, store: UserDefaults(suiteName: AppGroup.identifier))
     private var autocorrectDebugLogging = false
+
+    /// Debug-only: the keyboard shows the voice note chip but never opens the reader
+    /// by itself (#637 decision 3). Stored inverted — "disabled" — so the key's
+    /// absence, which is every Release build and every fresh install, is the default
+    /// "chip + auto-open". Read by the keyboard at each appearance.
+    @AppStorage(SharedKeys.debugVoiceNoteAutoOpenDisabled, store: UserDefaults(suiteName: AppGroup.identifier))
+    private var voiceNoteAutoOpenDisabled = false
     #endif
 
     /// The keyboard language the pickers below operate on.
@@ -548,6 +555,22 @@ struct SettingsView: View {
             // The reverse trial's states, reachable on a device without waiting two
             // weeks or losing the Keychain record for good (#593).
             ProTrialDebugSection()
+
+            // #637 decision 3: one build, both behaviours, for the device verdict.
+            // Deleted with the losing branch once the verdict is in.
+            Section {
+                Toggle("Keyboard opens voice notes by itself", isOn: Binding(
+                    get: { !voiceNoteAutoOpenDisabled },
+                    set: { voiceNoteAutoOpenDisabled = !$0 }
+                ))
+            } footer: {
+                if voiceNoteAutoOpenDisabled {
+                    Text("Chip only: a waiting voice note is opened from the keyboard toolbar. Debug builds only.")
+                        .foregroundColor(.orange)
+                } else {
+                    Text("The keyboard opens a new voice note transcript the first time it appears. The toolbar chip works either way.")
+                }
+            }
             #endif
 
             // Section 4: A propos

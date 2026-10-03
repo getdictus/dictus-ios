@@ -63,6 +63,13 @@ public enum DarwinNotificationName {
     /// DictusApp -> share extension: the queued note was taken, and transcription
     /// starts in the background (#620's warm path).
     public static let voiceNoteAccepted = "com.pivi.dictus.voiceNoteAccepted" as CFString
+
+    /// DictusApp -> keyboard: a voice note transcript was written to the keyboard
+    /// delivery directory (#637). Payload-free and best-effort: a suspended keyboard
+    /// misses it, so the keyboard rereads the directory on every appearance anyway.
+    /// The post only shortens the wait for a keyboard that is already on screen.
+    /// Never `transcriptionReady`: that one means "insert this dictation now".
+    public static let voiceNoteResultReady = "com.pivi.dictus.voiceNoteResultReady" as CFString
 }
 
 /// Global callback registry for Darwin notifications.

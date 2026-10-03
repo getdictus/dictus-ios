@@ -27,6 +27,12 @@ import Foundation
 ///    only alternative to holding backspace on a two-minute dictation.
 /// 3. **Suggestions** — the keyboard's core job, and the reason the left slot yields
 ///    at all (`ToolbarView` needs the width for three legible slots).
+/// 3b. **Voice notes waiting** (#637) — a transcript shared to Dictus is ready to be
+///    inserted. Below the suggestions so a user mid-word keeps them: the chip yields
+///    and comes back the moment the slot is free. Above everything that describes a
+///    *setting* or a *process state*, because this is the only occupant below the
+///    suggestions that carries something of the user's own, waiting to be used — and
+///    it expires (24 h), where the notice and the armed mode do not.
 /// 4. **Polish unavailable** (#315) — not in #79's table, which predates it. It sits
 ///    here rather than higher because it can last the whole process, and above the
 ///    suggestions it would suppress completions for that entire time. It sits above
@@ -56,6 +62,10 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// The autocorrect suggestion bar.
     case suggestions
 
+    /// Shared voice note transcripts are waiting for the keyboard (#637). Tapping it
+    /// opens the reader. `count` is at least 1.
+    case voiceNotesWaiting(count: Int)
+
     /// The #315 notice: this process has stopped calling the polish engine.
     case polishUnavailable
 
@@ -84,9 +94,9 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     case empty
 
     // swiftlint:disable function_parameter_count
-    // Eight parameters because there are seven competitors and one of them needs a
-    // second fact to pick between its two shapes (#423). A table with seven rows
-    // needs seven inputs. Wrapping them in a struct would move the seven names
+    // Nine parameters because there are eight competitors and one of them needs a
+    // second fact to pick between its two shapes (#423). A table with eight rows
+    // needs eight inputs. Wrapping them in a struct would move the seven names
     // one line up and add a type whose only job is to be unpacked here; the
     // alternative that would genuinely reduce the count — resolving some of them in
     // here — is worse, because it would put UserDefaults and Apple Intelligence reads
@@ -103,10 +113,13 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     ///   safe-looking answer is the one that produced the bug.
     /// - Parameter offersDiscoveryHint: whether the hint is still worth showing —
     ///   the caller owns that policy, see `SmartModeDiscovery`.
+    /// - Parameter voiceNotesWaiting: how many shared voice note transcripts the
+    ///   keyboard may offer (#637). Zero for none.
     public static func resolve(isChoosingMode: Bool,
                                errorMessage: String?,
                                offersDictationUndo: Bool,
                                hasSuggestions: Bool,
+                               voiceNotesWaiting: Int,
                                polishUnavailable: Bool,
                                armedModeName: String?,
                                armedModeIsEffective: Bool,
@@ -115,6 +128,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
         if let errorMessage { return .error(errorMessage) }
         if offersDictationUndo { return .dictationUndo }
         if hasSuggestions { return .suggestions }
+        if voiceNotesWaiting > 0 { return .voiceNotesWaiting(count: voiceNotesWaiting) }
         if polishUnavailable { return .polishUnavailable }
         if let armedModeName {
             return armedModeIsEffective ? .armedMode(armedModeName) : .armedModeInactive(armedModeName)
@@ -129,11 +143,15 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// The three that do are the three that arrive mid-task and are read at a
     /// glance. The rest share the bar with the hamburger, at the cost — accepted
     /// since #241 — that the keyboard language cannot be changed mid-word.
+    ///
+    /// The voice note chip shares it (#637) for the polish notice's reason (#315): it
+    /// can last as long as a note waits, up to a day, and in the hamburger's place it
+    /// would make the panel unreachable for all of that time.
     public var evictsHamburger: Bool {
         switch self {
         case .error, .dictationUndo, .suggestions: return true
-        case .choosingMode, .polishUnavailable, .armedMode, .armedModeInactive,
-             .discoveryHint, .empty:
+        case .choosingMode, .voiceNotesWaiting, .polishUnavailable, .armedMode,
+             .armedModeInactive, .discoveryHint, .empty:
             return false
         }
     }

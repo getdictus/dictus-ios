@@ -112,6 +112,20 @@ struct ToolbarView: View {
     /// inert from then on.
     var isSmartModeFanOpen: Bool = false
 
+    /// How many shared voice note transcripts are waiting for this keyboard (#637).
+    /// Zero shows no chip.
+    var voiceNotesWaiting: Int = 0
+
+    /// Opens the voice note reader. The chip's only action.
+    var onVoiceNotesTap: (() -> Void)?
+
+    /// Bumped by `KeyboardVoiceNoteState` once per arrival on a visible keyboard: the
+    /// chip pulses once each time it moves, and never otherwise.
+    var voiceNoteArrivalPulse: Int = 0
+
+    /// The chip's pulse, at its peak or at rest.
+    @State private var voiceNoteChipPulsing = false
+
     /// Coordinate space the fan gesture reports in. Declared here and named by
     /// `KeyboardRootView`, which owns the view it is attached to: the drag has to be
     /// measured against the whole keyboard area, not against the 52 pt bar the
@@ -237,6 +251,7 @@ struct ToolbarView: View {
             errorMessage: statusMessage,
             offersDictationUndo: showsDictationUndo,
             hasSuggestions: !suggestions.isEmpty,
+            voiceNotesWaiting: voiceNotesWaiting,
             polishUnavailable: showsPolishUnavailable,
             armedModeName: armedSmartMode?.localizedDisplayName,
             armedModeIsEffective: effectiveSmartMode != nil,
@@ -260,6 +275,8 @@ struct ToolbarView: View {
                 mode: suggestionMode,
                 onTap: { index in onSuggestionTap?(index) }
             )
+        case .voiceNotesWaiting(let count):
+            voiceNotesChip(count: count)
         case .polishUnavailable:
             polishUnavailableNotice
         case .armedMode(let name):
@@ -668,6 +685,67 @@ struct ToolbarView: View {
         }
         .buttonStyle(GlassPressStyle())
         .accessibilityLabel(Text("Undo dictation insertion"))
+    }
+
+    /// A shared voice note transcript is waiting (#637): the Dictus mark and
+    /// `Voice note` / `2 voice notes` in an accent-tinted capsule. Tapping it opens the
+    /// reader over the whole keyboard.
+    ///
+    /// Beside the hamburger, never in its place — see `evictsHamburger` — and below the
+    /// suggestions, so it steps aside mid-word and comes back on the next boundary.
+    ///
+    /// Accent, not the grey of the notice or the inactive mode: this is not a state to
+    /// read past but something of the user's own, ready to use. It pulses once when a
+    /// note lands while the keyboard is on screen, alongside one light haptic, and
+    /// then it is still: a chip that keeps moving for a day would be the discovery
+    /// hint's cost with none of its excuse.
+    private func voiceNotesChip(count: Int) -> some View {
+        Button {
+            HapticFeedback.keyTapped()
+            onVoiceNotesTap?()
+        } label: {
+            HStack(spacing: 6) {
+                VoiceNoteMark(height: 12)
+
+                voiceNotesChipLabel(count: count)
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundColor(.dictusAccent)
+            .padding(.horizontal, 12)
+            .frame(height: 30)
+            .background(Capsule().fill(Color.dictusAccent.opacity(0.14)))
+            .scaleEffect(voiceNoteChipPulsing ? 1.08 : 1)
+            // Same split as `barIcon`: the capsule is what the eye sees, the 44 pt frame
+            // is what a finger hits.
+            .frame(height: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(GlassPressStyle())
+        .accessibilityIdentifier("voiceNoteChip")
+        .padding(.leading, 6)
+        .frame(maxWidth: .infinity)
+        .onChange(of: voiceNoteArrivalPulse) { _, _ in
+            // Out and back once. Two explicit steps rather than `repeatCount`, so there
+            // is nothing left running if the chip leaves the slot mid-pulse.
+            withAnimation(.easeOut(duration: 0.16)) { voiceNoteChipPulsing = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
+                withAnimation(.easeIn(duration: 0.22)) { voiceNoteChipPulsing = false }
+            }
+        }
+    }
+
+    /// `Voice note` for one, `3 voice notes` beyond. Two keys rather than one plural
+    /// entry because the singular carries no number at all (#637 visual direction).
+    private func voiceNotesChipLabel(count: Int) -> Text {
+        guard count > 1 else {
+            return Text("Voice note", comment: "Header of the keyboard's voice note reader, and the toolbar chip when one note is waiting (#637).")
+        }
+        return Text(
+            "\(count) voice notes",
+            comment: "Keyboard toolbar chip when several shared voice note transcripts are waiting. The number is at least 2 (#637)."
+        )
     }
 
     /// Polish is not running, and will not run again until DictusApp restarts (#315).

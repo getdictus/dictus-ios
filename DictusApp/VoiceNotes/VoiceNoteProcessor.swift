@@ -55,6 +55,9 @@ final class VoiceNoteProcessor: ObservableObject {
         // Anything shared before this launch, and anything a dead process left
         // mid-transcription, is picked up now.
         store.ingestInbox()
+        // And whatever the keyboard did with a transcript while this process was
+        // not running (#637).
+        reconcileKeyboardDeliveries(reason: "launch")
         // Every note still to transcribe joins the ring, interrupted ones included.
         VoiceNoteIslandDriver.shared.arrived(store.queue.stackable.filter { !$0.state.isFinished }.map(\.id))
         log("launch", "pending=\(store.queue.hasPendingWork)")
@@ -77,6 +80,9 @@ final class VoiceNoteProcessor: ObservableObject {
 
     /// The cold path, and every return to the app.
     func appBecameActive() {
+        // Before anything can raise the stack: a note the user inserted from the
+        // keyboard is read, and must not come back up as unread (#637).
+        reconcileKeyboardDeliveries(reason: "active")
         VoiceNoteIslandDriver.shared.arrived(store.ingestInbox().map(\.id))
         if store.queue.hasPendingWork { processQueue() }
         // Any door into the app — icon, island, link, switcher, launch — raises the
@@ -149,6 +155,8 @@ final class VoiceNoteProcessor: ObservableObject {
         PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "stack", action: "markRead",
                                            details: "id=\(id.uuidString.prefix(8))"))
         VoiceNoteIslandDriver.shared.read(id)
+        // Read here, so the keyboard no longer offers it (#637 decision 6).
+        withdrawKeyboardDelivery(id, reason: "readInApp")
     }
 
     /// `dictus://voice-note[?id=…]`, from the Live Activity: the voice note screen,
@@ -164,6 +172,9 @@ final class VoiceNoteProcessor: ObservableObject {
     /// The app left the foreground: the voice note screen closes with it, so the next
     /// activation opens a fresh one from what is unread then (`VoiceNoteStackSession`).
     func appWentToBackground() {
+        // The keyboard is about to be the surface in front of the user: whatever was
+        // read in here leaves it first (#637).
+        reconcileKeyboardDeliveries(reason: "background")
         guard presentation != nil else { return }
         presentation = nil
     }
@@ -269,9 +280,97 @@ final class VoiceNoteProcessor: ObservableObject {
             $0.complete(note.id, transcript: transcript, language: record.language, savedToHistory: saved)
         }
         log("finished", "id=\(note.id.uuidString.prefix(8)) chars=\(transcript.count) savedToHistory=\(saved) elapsedMs=\(Int(Date().timeIntervalSince(started) * 1000))")
+        publishToKeyboard(note: note, transcript: transcript, language: record.language,
+                          durationSeconds: Int(duration.rounded()))
         VoiceNoteIslandDriver.shared.finished(note.id, succeeded: true)
         // A result that lands while the app is in front is ready and unread too.
         evaluatePresentation()
+    }
+
+    // MARK: - The keyboard (#637)
+
+    /// Offer a finished transcript to the keyboard, then tell a keyboard on screen.
+    ///
+    /// After the transcript is durable in History or the queue, so the keyboard can
+    /// never hold the only copy; and the post comes after the file, so a keyboard that
+    /// hears it always finds it. The post is best-effort — a suspended keyboard misses
+    /// it and rereads the directory on its next appearance instead.
+    ///
+    /// Whatever the Pro status (#637 decision 9): `VoiceNoteAvailability` locks
+    /// nothing already produced away.
+    private func publishToKeyboard(note: VoiceNote, transcript: String, language: String, durationSeconds: Int) {
+        guard let deliveries = VoiceNoteKeyboardDeliveryStore.appGroup else { return }
+        let delivery = VoiceNoteKeyboardDelivery(
+            id: note.id, transcript: transcript, sharedAt: note.receivedAt, transcribedAt: Date(),
+            language: language, durationSeconds: durationSeconds
+        )
+        do {
+            try deliveries.publish(delivery)
+        } catch {
+            // The note is still in History or the queue, and readable in the app.
+            keyboardLog("publishFailed", "id=\(note.id.uuidString.prefix(8)) error=\(error.localizedDescription)")
+            return
+        }
+        DarwinNotificationCenter.post(DarwinNotificationName.voiceNoteResultReady)
+        keyboardLog("published", "id=\(note.id.uuidString.prefix(8)) chars=\(transcript.count)")
+    }
+
+    /// Take a note out of the keyboard.
+    func withdrawKeyboardDelivery(_ id: UUID, reason: String) {
+        guard let deliveries = VoiceNoteKeyboardDeliveryStore.appGroup,
+              deliveries.allDeliveries().contains(where: { $0.id == id }) else { return }
+        deliveries.withdraw(id)
+        keyboardLog("withdrawn", "id=\(id.uuidString.prefix(8)) reason=\(reason)")
+    }
+
+    /// Bring the keyboard delivery directory and the two stores back into agreement.
+    ///
+    /// The keyboard never writes History or the queue (#637 decision 6): when the user
+    /// inserts a note there, it drops a receipt, and this is where the receipt
+    /// becomes "read" — the same `markOpened` a card in the app performs, plus the
+    /// island's segment. A History-off note is then removed from the queue, which is
+    /// what the result screen does on close for a note it showed: the transcript has
+    /// been delivered to a user who chose not to keep transcripts.
+    ///
+    /// The other direction too: a note read in here, deleted from History, or evicted
+    /// by its cap leaves the keyboard, and so does everything past its 24 hours.
+    func reconcileKeyboardDeliveries(reason: String) {
+        guard let deliveries = VoiceNoteKeyboardDeliveryStore.appGroup else { return }
+        let history = TranscriptionHistoryStore.shared
+
+        var acknowledged: [String] = []
+        for receipt in deliveries.acknowledgements() {
+            if history.record(id: receipt.id) != nil {
+                history.markOpened(id: receipt.id, at: receipt.at)
+            } else if let note = store.queue.note(id: receipt.id), note.state == .done {
+                store.mutate {
+                    $0.markOpened(receipt.id, at: receipt.at)
+                    $0.remove(receipt.id)
+                }
+            }
+            VoiceNoteIslandDriver.shared.read(receipt.id)
+            deliveries.withdraw(receipt.id)
+            acknowledged.append("\(receipt.id.uuidString.prefix(8)):\(receipt.action.rawValue)")
+        }
+
+        var stale: [String] = []
+        for delivery in deliveries.allDeliveries() {
+            let unreadInHistory = history.record(id: delivery.id).map { $0.openedAt == nil }
+            let unreadInQueue = store.queue.note(id: delivery.id).map { $0.state == .done && $0.openedAt == nil }
+            // Unread in either store keeps it; read in both, or in neither, withdraws it.
+            guard unreadInHistory != true, unreadInQueue != true else { continue }
+            deliveries.withdraw(delivery.id)
+            stale.append(String(delivery.id.uuidString.prefix(8)))
+        }
+
+        let expired = deliveries.pruneExpired()
+        guard !acknowledged.isEmpty || !stale.isEmpty || !expired.isEmpty else { return }
+        keyboardLog("reconciled", "reason=\(reason) acknowledged=\(acknowledged.joined(separator: ",")) readOrGone=\(stale.joined(separator: ",")) expired=\(expired.count) remaining=\(deliveries.allDeliveries().count)")
+    }
+
+    /// Ids, counts and actions only. Never the transcript (#637).
+    private func keyboardLog(_ action: String, _ details: String) {
+        PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "keyboard", action: action, details: details))
     }
 
     private func fail(_ note: VoiceNote, _ failure: VoiceNoteFailure, detail: String) {
