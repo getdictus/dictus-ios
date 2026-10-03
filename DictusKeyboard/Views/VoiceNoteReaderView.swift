@@ -8,18 +8,29 @@ import DictusCore
 /// and one action row.
 ///
 /// ```
-/// [✕]  ▍▌▍ Voice note · 1:42 · FR        ● ○ ○
-///
+/// [ ✕ ]            1:42  FR             [ ↗ ]
+///                   ● ○ ○
 ///   Salut, je voulais te dire que pour samedi
 ///   c'est bon de mon côté…              ← swipe
 ///
-///   [↗]   [============  Insert  ============]
+///   [================  Insert  ================]
 /// ```
 ///
-/// The `✕` sits where the ☰ was (#639): the reader opens from a long press on ☰, and
-/// the control under the thumb becomes its own way back, the panel's ☰ → ✕ morph.
+/// ### The header is the toolbar it replaces (#639, after the device test)
 ///
-/// With no page — a long press on ☰ when nothing is waiting — it shows an empty state
+/// Three slots, the bar's own: the `✕` in the ☰'s place — the reader opens from a
+/// tap on ☰, and the control under the thumb becomes its own way back — `Open in
+/// Dictus` in the mic pill's place, at the mic pill's size, and the facts in the
+/// centre slot, in the centre slot's quiet register. No title and no logo: the
+/// surface says what it is, and a "Voice note" heading over a voice note was the
+/// one line on screen carrying nothing. What is left is what helps choose: how long
+/// the message was, what language it was read in, and, with several notes, where
+/// you are among them.
+///
+/// Moving `Open in Dictus` up leaves `Insert` alone in the bottom row, full width:
+/// one primary action, where a key row was, with nothing beside it to mistap.
+///
+/// With no page — a tap on ☰ when nothing is waiting — it shows an empty state
 /// instead, the one place the keyboard teaches the feature (#639).
 ///
 /// ### No card, no panel
@@ -102,28 +113,22 @@ struct VoiceNoteReaderView: View {
 
     // MARK: - Header
 
-    /// 52 pt, the toolbar's band: the same 12 pt sides and 4 pt top inset `ToolbarView`
-    /// uses, so the `✕` lands exactly on the ☰ it replaces and nothing jumps when the
-    /// reader opens. Order (#639): `✕`, the mark, `Voice note · 1:42 · FR`, the dots.
+    /// 52 pt, the toolbar's band, with its 12 pt sides and 4 pt top inset: the `✕`
+    /// lands exactly on the ☰ and `Open in Dictus` exactly on the mic pill, so nothing
+    /// jumps when the reader opens.
     private var header: some View {
         HStack(spacing: 8) {
             closeButton
 
-            VoiceNoteMark(height: 16)
+            pageFacts
+                .frame(maxWidth: .infinity)
 
-            Text("Voice note", comment: "Header of the keyboard's voice note reader (#637).")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(foregroundColor)
-                .lineLimit(1)
-
-            metadata
-                .layoutPriority(-1)
-
-            Spacer(minLength: 4)
-
-            if pages.count > 1 {
-                pageDots
-                    .padding(.trailing, 4)
+            if let page = visiblePage {
+                openInDictusButton(page.id)
+            } else {
+                // The empty state has nothing to open; the slot stays, so the facts
+                // (none) and the `✕` do not move.
+                Color.clear.frame(width: Self.barControlWidth, height: 44)
             }
         }
         .padding(.horizontal, 12)
@@ -131,14 +136,38 @@ struct VoiceNoteReaderView: View {
         .frame(height: 52)
     }
 
-    /// `· 1:42 · FR`.
+    /// The centre slot: duration and language on one line, the page dots under them
+    /// when there is more than one note.
+    ///
+    /// The duration in the secondary grey of the toolbar's hints, with tabular digits
+    /// so `0:59` → `1:02` does not shimmy between pages. The language as a small tinted
+    /// capsule rather than a `· FR` suffix: it is a different kind of fact — a code,
+    /// not a quantity — and a joined string of facts reads like a log line.
     @ViewBuilder
-    private var metadata: some View {
+    private var pageFacts: some View {
         if let page = visiblePage {
-            Text(([page.durationLabel, page.languageBadge].compactMap { $0 }).map { "· \($0)" }.joined(separator: " "))
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.secondary)
+            VStack(spacing: 5) {
+                HStack(spacing: 6) {
+                    if let duration = page.durationLabel {
+                        Text(verbatim: duration)
+                            .font(.system(size: 13, weight: .medium).monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                    if let language = page.languageBadge {
+                        Text(verbatim: language)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Capsule().fill(foregroundColor.opacity(0.1)))
+                    }
+                }
                 .lineLimit(1)
+
+                if pages.count > 1 {
+                    pageDots
+                }
+            }
         }
     }
 
@@ -154,28 +183,48 @@ struct VoiceNoteReaderView: View {
         .accessibilityHidden(true)
     }
 
+    /// The width of the bar's two side controls, ☰ and the mic pill (both 56 pt).
+    private static let barControlWidth: CGFloat = 56
+
     /// `✕`: closes the reader, the notes stay waiting (#637 decision 4).
     ///
     /// The ☰'s exact object (#639) — `ToolbarView.panelToggleButton`'s 56 × 36 glass
     /// capsule and 17 pt glyph — so the morph happens in place, the way the panel's
     /// does.
     private var closeButton: some View {
-        Button {
+        barButton(systemName: "xmark",
+                  label: Text("Close", comment: "Accessibility label of the keyboard voice note reader's close button (#637)."),
+                  identifier: "voiceNoteReaderClose") {
             HapticFeedback.keyTapped()
             onClose()
-        } label: {
-            Image(systemName: "xmark")
+        }
+    }
+
+    /// `Open in Dictus`, in the mic pill's place: the same 56 × 36 glass capsule as
+    /// the `✕`, so the header is the bar's silhouette and its two ends match.
+    private func openInDictusButton(_ id: UUID) -> some View {
+        barButton(systemName: "arrow.up.forward.app",
+                  label: Text("Open in Dictus", comment: "Accessibility label of the keyboard voice note reader's button that opens the note in the app (#637)."),
+                  identifier: "voiceNoteReaderOpen") {
+            onOpenInDictus(id)
+        }
+    }
+
+    /// A header control: 36 pt to the eye, 44 pt to a finger, `ToolbarView.barIcon`'s split.
+    private func barButton(systemName: String, label: Text, identifier: String,
+                           action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
                 .font(.system(size: 17, weight: .medium))
                 .foregroundColor(.dictusPillIconSecondary)
-                .frame(width: 56, height: 36)
+                .frame(width: Self.barControlWidth, height: 36)
                 .dictusGlass(in: Capsule())
-                // Same split as `ToolbarView.barIcon`: 36 pt to the eye, 44 pt to a finger.
-                .frame(width: 56, height: 44)
+                .frame(width: Self.barControlWidth, height: 44)
                 .contentShape(Rectangle())
         }
         .buttonStyle(GlassPressStyle())
-        .accessibilityLabel(Text("Close", comment: "Accessibility label of the keyboard voice note reader's close button (#637)."))
-        .accessibilityIdentifier("voiceNoteReaderClose")
+        .accessibilityLabel(label)
+        .accessibilityIdentifier(identifier)
     }
 
     // MARK: - Empty state
@@ -252,21 +301,14 @@ struct VoiceNoteReaderView: View {
 
     // MARK: - Actions
 
-    /// One key row tall. `Insert` is the primary and takes the width; `Open in Dictus`
-    /// is icon-only on its leading side. Both act on the visible page.
+    /// One key row tall: `Insert`, alone and full width, on the visible page. The
+    /// keyboard's job is to write, and the bottom row is where a thumb already is.
     ///
     /// No `Copy` (device feedback on PR #638, 2026-10-03): `Insert` is the keyboard's
     /// job, and the full result screen behind `Open in Dictus` already copies.
     private var actionRow: some View {
-        HStack(spacing: 10) {
+        Group {
             if let page = visiblePage {
-                secondaryButton(
-                    systemName: "arrow.up.forward.app",
-                    tint: .dictusPillIconSecondary,
-                    label: Text("Open in Dictus", comment: "Accessibility label of the keyboard voice note reader's button that opens the note in the app (#637)."),
-                    identifier: "voiceNoteReaderOpen"
-                ) { onOpenInDictus(page.id) }
-
                 Button {
                     onInsert(page.id)
                 } label: {
@@ -285,58 +327,5 @@ struct VoiceNoteReaderView: View {
         .padding(.horizontal, 12)
         .padding(.top, 4)
         .padding(.bottom, 8)
-    }
-
-    private func secondaryButton(systemName: String, tint: Color, label: Text, identifier: String,
-                                 action: @escaping () -> Void) -> some View {
-        Button {
-            action()
-        } label: {
-            Image(systemName: systemName)
-                .font(.system(size: 17, weight: .medium))
-                .foregroundColor(tint)
-                .frame(width: 44, height: 44)
-                .dictusGlass(in: Circle())
-                .contentShape(Circle())
-        }
-        .buttonStyle(GlassPressStyle())
-        .accessibilityLabel(label)
-        .accessibilityIdentifier(identifier)
-    }
-}
-
-/// The Dictus mark, small: three bars at the brand kit's proportions (18 / 42 / 27),
-/// the middle one in the brand gradient.
-///
-/// Its own view rather than `DictusLogo` scaled down: that one's bar width and spacing
-/// are sized for a home screen hero, and at 16 pt they would merge into a block.
-/// Used by the reader's header (#637).
-struct VoiceNoteMark: View {
-    var height: CGFloat = 14
-
-    @Environment(\.colorScheme) private var colorScheme
-
-    private let proportions: [CGFloat] = [0.43, 1.0, 0.64]
-    private let opacities: [Double] = [0.45, 1.0, 0.65]
-
-    var body: some View {
-        let barWidth = max(2, height * 0.2)
-        HStack(alignment: .center, spacing: barWidth * 0.6) {
-            ForEach(0..<3, id: \.self) { index in
-                let shape = RoundedRectangle(cornerRadius: barWidth / 2)
-                if index == 1 {
-                    shape
-                        .fill(LinearGradient(colors: [.dictusGradientStart, .dictusGradientEnd],
-                                             startPoint: .top, endPoint: .bottom))
-                        .frame(width: barWidth, height: height * proportions[index])
-                } else {
-                    shape
-                        .fill((colorScheme == .dark ? Color.white : Color.gray).opacity(opacities[index]))
-                        .frame(width: barWidth, height: height * proportions[index])
-                }
-            }
-        }
-        .frame(height: height)
-        .accessibilityHidden(true)
     }
 }
