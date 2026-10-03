@@ -18,7 +18,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 
 1. #587 — Smart Mode prompt campaign, remaining threads: #598 (`es` read as `pt` on a short line), #592 (warn, not refuse, on an ungrounded name)
 2. #627 — run a voice note's Smart Mode in the background (device probe first); then #628, notes over ~4 min, in 2.0.0 only if reliable and short
-3. #637 — finished voice-note transcripts in the keyboard: a chip, then a full-surface reader. `ready-for-agent`
+3. ~~#637 — voice-note transcripts in the keyboard~~ — merged in PR #638; then #639 (long press on ☰, keep notes 15 min), then #640 (research: quote a passage)
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; open until Pierre's verdict in real use
 5. #593 — reverse trial: Pro free for a fixed period, then the paywall. `ready-for-agent`
 6. #494 — onboarding that starts the trial and teaches the Smart Modes. `ready-for-agent`
