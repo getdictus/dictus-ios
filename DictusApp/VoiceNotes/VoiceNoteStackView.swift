@@ -142,6 +142,8 @@ struct VoiceNoteStackView: View {
                 continue
             }
             VoiceNoteIslandDriver.shared.read(id)
+            // Read here, so the keyboard no longer offers it (#637 decision 6).
+            VoiceNoteProcessor.shared.withdrawKeyboardDelivery(id, reason: "dismissedInApp")
             marked.append(id)
         }
         if !marked.isEmpty { log("markRead", "reason=dismiss ids=\(Self.short(marked))") }
