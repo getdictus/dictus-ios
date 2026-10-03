@@ -705,7 +705,8 @@ struct ToolbarView: View {
             onVoiceNotesTap?()
         } label: {
             HStack(spacing: 6) {
-                VoiceNoteMark(height: 12)
+                DictusLogo(height: 12)
+                    .accessibilityHidden(true)
 
                 voiceNotesChipLabel(count: count)
                     .font(.system(size: 13, weight: .semibold))
