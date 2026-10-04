@@ -21,8 +21,8 @@ public struct VoiceNoteKeyboardDelivery: Codable, Identifiable, Equatable, Senda
     /// The voice note's id, which is also its History record's id.
     public let id: UUID
     public let transcript: String
-    /// When the note was shared. Orders the reader's pages: oldest first, the order
-    /// the user shared them in.
+    /// When the note was shared. Orders the reader's pages: newest first, so page 1 is
+    /// the note the user just shared (#639, seventh round).
     public let sharedAt: Date
     /// When the transcript was produced. Starts the `idleWindow` clock for a note the
     /// keyboard has never used.
@@ -219,7 +219,7 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
         try? FileManager.default.removeItem(at: acknowledgementFile(id))
     }
 
-    /// Every delivery on disk, expired or acknowledged ones included, oldest share
+    /// Every delivery on disk, expired or acknowledged ones included, newest share
     /// first. The app's view; the keyboard reads `pending(at:)`.
     public func allDeliveries() -> [VoiceNoteKeyboardDelivery] {
         Self.ordered(files(in: deliveriesDirectory).compactMap { url in
@@ -252,7 +252,7 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
     // MARK: - Keyboard
 
     /// What the keyboard may offer right now: every delivery inside its `idleWindow`
-    /// that the user has not deleted from the keyboard, oldest share first. Inserted
+    /// that the user has not deleted from the keyboard, newest share first. Inserted
     /// ones included (#639): a receipt says "read", and a note read once can still be
     /// quoted from.
     public func pending(at now: Date = Date()) -> [VoiceNoteKeyboardDelivery] {
@@ -352,13 +352,16 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
 
     // MARK: - Helpers
 
-    /// Oldest share first. Two notes shared in the same instant fall back to the
-    /// transcription order, which is the queue's — it runs oldest first — and then
-    /// to the id, so the order is total and never flickers between two reads.
+    /// Newest share first: page 1 of the reader, the page it opens on, is the note the
+    /// user just shared (#639, seventh round). #637 had the share order, oldest first,
+    /// and with notes now staying 15 minutes after their last use, a fresh note ended
+    /// up behind the ones already read. Two notes shared in the same instant fall back
+    /// to the transcription order, newest first too, and then to the id, so the order
+    /// is total and never flickers between two reads.
     static func ordered(_ deliveries: [VoiceNoteKeyboardDelivery]) -> [VoiceNoteKeyboardDelivery] {
         deliveries.sorted {
-            if $0.sharedAt != $1.sharedAt { return $0.sharedAt < $1.sharedAt }
-            if $0.transcribedAt != $1.transcribedAt { return $0.transcribedAt < $1.transcribedAt }
+            if $0.sharedAt != $1.sharedAt { return $0.sharedAt > $1.sharedAt }
+            if $0.transcribedAt != $1.transcribedAt { return $0.transcribedAt > $1.transcribedAt }
             return $0.id.uuidString < $1.id.uuidString
         }
     }

@@ -44,16 +44,17 @@ final class KeyboardVoiceNoteState: ObservableObject {
 
     /// The reader's contents while it is open.
     ///
-    /// A snapshot taken when it opens rather than a live view of `waiting`, so a note
-    /// that lands while it is open is appended as a last page instead of reshuffling
-    /// the pages under the user's eyes. Empty when the tap on ☰ found nothing to
+    /// A snapshot taken when it opens rather than a live view of `waiting`, newest
+    /// first, opening on page 1. A note that lands while it is open is appended as a
+    /// last page instead of reshuffling the pages under the user's eyes — the one
+    /// exception to newest-first, and only until the next opening. Empty when the tap on ☰ found nothing to
     /// show: the reader then draws its empty state, the one place the keyboard
     /// explains the feature (#639).
     struct Reader: Equatable {
         var pages: [VoiceNoteKeyboardDelivery]
     }
 
-    /// Transcripts the keyboard may offer, oldest share first.
+    /// Transcripts the keyboard may offer, newest share first: the reader's page order.
     @Published private(set) var waiting: [VoiceNoteKeyboardDelivery] = []
 
     /// The notes the reader has already shown: the reader never opens on its own for

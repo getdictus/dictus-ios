@@ -62,24 +62,34 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
 
     // MARK: - Order
 
-    /// Oldest share first, whatever order the files were written in: the reader's
-    /// pages are in the order the user shared the notes.
-    func testPendingIsOldestShareFirst() throws {
+    /// Newest share first, whatever order the files were written in: page 1 of the
+    /// reader, the page it opens on, is the note the user just shared (#639).
+    func testPendingIsNewestShareFirst() throws {
         let newest = delivery(sharedSecondsAgo: 10)
         let oldest = delivery(sharedSecondsAgo: 300)
         let middle = delivery(sharedSecondsAgo: 120)
-        for note in [newest, oldest, middle] { try store.publish(note) }
-        XCTAssertEqual(store.pending(at: now).map(\.id), [oldest.id, middle.id, newest.id])
+        for note in [middle, oldest, newest] { try store.publish(note) }
+        XCTAssertEqual(store.pending(at: now).map(\.id), [newest.id, middle.id, oldest.id])
+    }
+
+    /// Pierre's case: two notes already read, four new ones shared after them. The new
+    /// ones come first, the latest at the top.
+    func testFreshNotesComeBeforeOlderReadOnes() throws {
+        let read = [delivery(sharedSecondsAgo: 600), delivery(sharedSecondsAgo: 590)]
+        let fresh = (1...4).map { delivery(sharedSecondsAgo: TimeInterval(50 - $0 * 10)) }
+        for note in read + fresh { try store.publish(note) }
+        for note in read { store.acknowledge(note.id, action: .shown, at: now) }
+        XCTAssertEqual(store.pending(at: now).map(\.id), (fresh.reversed() + read.reversed()).map(\.id))
     }
 
     /// Several notes shared in the same instant fall back to the transcription order,
-    /// which is the queue's own.
+    /// newest first too.
     func testASameInstantShareFallsBackToTranscriptionOrder() throws {
         let second = delivery(sharedSecondsAgo: 60, transcribedSecondsAgo: 5)
         let first = delivery(sharedSecondsAgo: 60, transcribedSecondsAgo: 30)
-        try store.publish(second)
         try store.publish(first)
-        XCTAssertEqual(store.pending(at: now).map(\.id), [first.id, second.id])
+        try store.publish(second)
+        XCTAssertEqual(store.pending(at: now).map(\.id), [second.id, first.id])
     }
 
     // MARK: - Acknowledgement
@@ -93,7 +103,7 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
         try store.publish(kept)
         try store.publish(inserted)
         XCTAssertTrue(store.acknowledge(inserted.id, action: .inserted, at: now))
-        XCTAssertEqual(store.pending(at: now), [kept, inserted])
+        XCTAssertEqual(store.pending(at: now), [inserted, kept])
         XCTAssertEqual(store.acknowledgements().map(\.id), [inserted.id])
     }
 
