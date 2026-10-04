@@ -525,6 +525,12 @@ struct DictusApp: App {
     private func handleIncomingURL(_ url: URL) {
         guard url.scheme == "dictus" else { return }
 
+        // Before anything this URL raises: the island's link opens the voice note
+        // cards, and `onOpenURL` may run before the `.active` transition that also
+        // reconciles. A note already read in the keyboard must not come up as unread
+        // (#639).
+        VoiceNoteProcessor.shared.reconcileKeyboardDeliveries(reason: "url")
+
         // Temporary diagnostic: log all URL components for cold start investigation.
         // This captures what information IS available from the URL itself (host, query params).
         // Combined with AppDelegate.sourceApplication logging, this lets us confirm empirically

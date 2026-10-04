@@ -49,8 +49,8 @@ public enum KeyboardAreaMode: String, Equatable, CaseIterable, Sendable {
     /// geometry exactly, and it is reached the same way — no new height, no new
     /// anchor, and the keyboard's declared height untouched (#166).
     ///
-    /// Opened only by the keyboard itself: from the toolbar chip, or on an appearance
-    /// (`VoiceNoteKeyboardPresentation`). A dictation takes the area from it like from
+    /// Opened only by the keyboard itself: from a tap on ☰ (#639), or on an
+    /// appearance (`VoiceNoteKeyboardPresentation`). A dictation takes the area from it like from
     /// any other mode, and leaving the dictation returns to the keys.
     case voiceNoteResult
 
@@ -86,7 +86,7 @@ public enum KeyboardAreaMode: String, Equatable, CaseIterable, Sendable {
     ///
     /// The voice note reader (#637) follows the same rule. Its notes are not lost —
     /// nothing is consumed by a dictation — and the keyboard rereads them when the
-    /// dictation leaves, so the toolbar chip is back with the keys.
+    /// dictation leaves, so the ☰ halo is back with the keys (#639).
     public static func resolving(
         status: DictationStatus,
         current: KeyboardAreaMode

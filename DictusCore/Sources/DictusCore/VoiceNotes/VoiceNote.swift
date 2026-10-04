@@ -205,10 +205,15 @@ public struct VoiceNoteQueue: Equatable, Sendable {
     ///   and two copies of the text would mean deleting one leaves the other. When it
     ///   did not — History switched off — the note stays here, done, so the result
     ///   is never lost to a setting about something else.
-    public mutating func complete(_ id: UUID, transcript: String, language: String, savedToHistory: Bool) {
+    /// - Returns: the finished notes the 20-note cap pushed out to make room (#639),
+    ///   so the caller can take them out of the keyboard too. Never a note read and
+    ///   removed by the user's own action — those leave through `remove` and
+    ///   `removeOpenedFinished`, which report nothing.
+    @discardableResult
+    public mutating func complete(_ id: UUID, transcript: String, language: String, savedToHistory: Bool) -> [UUID] {
         if savedToHistory {
             remove(id)
-            return
+            return []
         }
         update(id) {
             $0.state = .done
@@ -218,16 +223,20 @@ public struct VoiceNoteQueue: Equatable, Sendable {
             // A result is unread when it arrives, whatever was seen of the note before.
             $0.openedAt = nil
         }
-        trimFinished()
+        return trimFinished()
     }
 
-    public mutating func fail(_ id: UUID, _ failure: VoiceNoteFailure) {
+    /// - Returns: the finished notes the cap pushed out, as `complete` does: a failure
+    ///   takes a finished slot too, and the oldest one may be a transcript the
+    ///   keyboard still offers.
+    @discardableResult
+    public mutating func fail(_ id: UUID, _ failure: VoiceNoteFailure) -> [UUID] {
         update(id) {
             $0.state = .failed(failure)
             $0.openedAt = nil
             if !failure.isRetryable { $0.audioFileName = nil }
         }
-        trimFinished()
+        return trimFinished()
     }
 
     /// Record that the user has seen this note's outcome.
@@ -265,12 +274,15 @@ public struct VoiceNoteQueue: Equatable, Sendable {
     }
 
     /// Drop the oldest finished notes past `maxFinished`. Pending ones are never
-    /// dropped: they are work the user asked for.
-    mutating func trimFinished() {
+    /// dropped: they are work the user asked for. Returns the ids dropped.
+    @discardableResult
+    mutating func trimFinished() -> [UUID] {
         // `notes` is newest first, so the first `maxFinished` finished ones are kept.
-        let dropped = Set(notes.filter(\.state.isFinished).dropFirst(Self.maxFinished).map(\.id))
-        guard !dropped.isEmpty else { return }
-        notes.removeAll { dropped.contains($0.id) }
+        let dropped = notes.filter(\.state.isFinished).dropFirst(Self.maxFinished).map(\.id)
+        guard !dropped.isEmpty else { return [] }
+        let droppedSet = Set(dropped)
+        notes.removeAll { droppedSet.contains($0.id) }
+        return dropped
     }
 
     /// The status line for the Live Activity and the list header: "1 in progress,
