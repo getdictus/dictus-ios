@@ -11,8 +11,10 @@ shows its chip; tapping the chip (axe tap --tap-style physical) opens the real
 reader. A simulator cannot receive a WhatsApp voice message, so this is the only
 way to show the reader there; the UI on screen is the shipping one.
 
---hide writes the keyboard's own receipt for the demo note (the file `Insert`
-writes), which takes it out of the keyboard without deleting anything.
+--hide writes the marker the reader's delete button writes
+(VoiceNoteKeyboardDeliveryStore.deleteFromKeyboard, Deleted/<id>, #639), which
+takes the demo note out of the keyboard without deleting any file. Since #639 a
+receipt alone no longer hides a note.
 """
 import datetime
 import json
@@ -42,10 +44,9 @@ def main():
     root = group_root(udid)
     now = datetime.datetime.now(datetime.timezone.utc)
     if sys.argv[2] == "--hide":
-        folder = os.path.join(root, "Acknowledgements")
+        folder = os.path.join(root, "Deleted")
         os.makedirs(folder, exist_ok=True)
-        with open(os.path.join(folder, f"{DEMO_ID}.json"), "w") as f:
-            json.dump({"id": DEMO_ID, "action": "inserted", "at": iso(now)}, f)
+        open(os.path.join(folder, DEMO_ID), "w").close()
         return
     language, duration, transcript = sys.argv[2], int(sys.argv[3]), sys.argv[4]
     folder = os.path.join(root, "Deliveries")
