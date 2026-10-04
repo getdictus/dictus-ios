@@ -67,6 +67,10 @@ struct VoiceNoteReaderView: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
+    /// The opacity of the reader's invisible fill: the least that still makes every
+    /// pixel of the surface take a touch in the keyboard extension. See `body`.
+    private static let touchableClear: Double = 0.001
+
     /// `RecordingOverlay`'s adaptive foreground, so the two full-surface modes read as
     /// one system.
     private var foregroundColor: Color {
@@ -90,7 +94,13 @@ struct VoiceNoteReaderView: View {
         }
         .opacity(appeared ? 1 : 0)
         .offset(y: appeared ? 0 : 8)
-        .background(Color.clear)
+        // Not `Color.clear`: in a keyboard extension a touch on a pixel with no alpha
+        // at all is not delivered to the extension, so the empty page under a short
+        // transcript took no swipe — only a finger starting on the glyphs or a filled
+        // button worked (device test of e9095f5d). The vendored keys solve the same
+        // problem the same way (`KeyView`, `UIColor(white: 0.001, alpha: 0.001)`).
+        // Invisible, and the reader stays `RecordingOverlay`'s "no fill" surface.
+        .background(Color.black.opacity(Self.touchableClear))
         .onAppear {
             visibleID = pages.first?.id
             withAnimation(.easeOut(duration: 0.2)) { appeared = true }
@@ -282,11 +292,13 @@ struct VoiceNoteReaderView: View {
     /// never grows the keyboard, whose height is not this view's to change (#166).
     ///
     /// The text's frame is at least the page's height, with a full rectangle as its
-    /// hit shape: a horizontal swipe anywhere on the page — below a two-line note
-    /// included — turns it. Without that, the empty space under a short text was no
-    /// view's at all and only a swipe starting on the words worked (second device
-    /// test of #641). The buttons are outside the pager, so nothing is taken from them;
-    /// a long text is still taller than the minimum and scrolls.
+    /// hit shape, so SwiftUI treats the whole page as the page — below a two-line note
+    /// included. Necessary and, on device, not sufficient: the pixels there must also
+    /// not be fully transparent, which is the reader's invisible fill (see `body`).
+    /// Measured in a plain app on iOS 26.5 and 27 (sixth round of #641): with both, a
+    /// swipe below a short text turns the page. The buttons are outside the pager, so
+    /// nothing is taken from them; a long text is still taller than the minimum and
+    /// scrolls.
     private func transcriptPage(_ page: VoiceNoteKeyboardDelivery) -> some View {
         GeometryReader { geo in
             ScrollView(.vertical) {
