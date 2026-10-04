@@ -52,6 +52,11 @@ final class VoiceNoteProcessor: ObservableObject {
         DarwinNotificationCenter.addObserver(for: DarwinNotificationName.voiceNoteQueued) {
             Task { @MainActor in VoiceNoteProcessor.shared.noteQueuedWhileAlive() }
         }
+        // The keyboard just showed or inserted a note (#639): mark it read now, so the
+        // island and the cards follow while this process is alive in the background.
+        DarwinNotificationCenter.addObserver(for: DarwinNotificationName.voiceNoteKeyboardReceipt) {
+            Task { @MainActor in VoiceNoteProcessor.shared.reconcileKeyboardDeliveries(reason: "keyboardSignal") }
+        }
         // Anything shared before this launch, and anything a dead process left
         // mid-transcription, is picked up now.
         store.ingestInbox()
@@ -337,14 +342,15 @@ final class VoiceNoteProcessor: ObservableObject {
         keyboardLog("withdrawn", "ids=\(withdrawn.map { String($0.uuidString.prefix(8)) }.joined(separator: ",")) reason=\(reason)")
     }
 
-    /// Turn the keyboard's receipts into "read", and prune what outlived its window.
+    /// Turn the keyboard's receipts into "read" (`VoiceNoteKeyboardReceipts`, plus the
+    /// island's segment), and prune what outlived its window.
     ///
-    /// The keyboard never writes History or the queue: when the reader shows a note,
-    /// or the user inserts it, the keyboard drops a receipt (#639 decision A), and
-    /// this is where the receipt becomes "read" — the same `markOpened` a card in the app performs, plus the
-    /// island's segment. A History-off note is then removed from the queue, which is
-    /// what the result screen does on close for a note it showed: the transcript has
-    /// been delivered to a user who chose not to keep transcripts.
+    /// Called from every way in (#639): launch, every activation and every background,
+    /// every `dictus://` URL before it is handled, the keyboard's Darwin recording
+    /// start, and the keyboard's own receipt signal while this process is alive. The
+    /// device test of 5f27a393 is why: two notes read in the keyboard stayed unread in
+    /// the island because the app, alive in the background since a mic-tap dictation,
+    /// went through none of the three transitions that used to be the only callers.
     ///
     /// What this no longer does (#639): withdraw the delivery with the receipt, or
     /// withdraw a note because it was read here, or because it is in neither store.
@@ -357,19 +363,10 @@ final class VoiceNoteProcessor: ObservableObject {
         guard let deliveries = VoiceNoteKeyboardDeliveryStore.appGroup else { return }
         let history = TranscriptionHistoryStore.shared
 
+        let applied = VoiceNoteKeyboardReceipts.apply(from: deliveries, history: history, queue: store)
         var acknowledged: [String] = []
-        for receipt in deliveries.acknowledgements() {
-            if history.record(id: receipt.id) != nil {
-                history.markOpened(id: receipt.id, at: receipt.at)
-            } else if let note = store.queue.note(id: receipt.id), note.state == .done {
-                store.mutate {
-                    $0.markOpened(receipt.id, at: receipt.at)
-                    $0.remove(receipt.id)
-                }
-            }
+        for receipt in applied {
             VoiceNoteIslandDriver.shared.read(receipt.id)
-            // The receipt is spent; the delivery stays for the rest of its window.
-            deliveries.clearAcknowledgement(receipt.id)
             acknowledged.append("\(receipt.id.uuidString.prefix(8)):\(receipt.action.rawValue)")
         }
 

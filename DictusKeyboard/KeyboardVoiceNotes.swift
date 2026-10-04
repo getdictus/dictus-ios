@@ -228,7 +228,15 @@ final class KeyboardVoiceNoteState: ObservableObject {
         guard reader?.pages.contains(where: { $0.id == id }) == true else { return }
         let used = store?.noteUsed(id) ?? false
         let receipt = store?.acknowledge(id, action: .shown) ?? false
+        if receipt { signalReceipt() }
         log("pageShown", "id=\(id.uuidString.prefix(8)) used=\(used) receipt=\(receipt)")
+    }
+
+    /// Tell a live DictusApp a receipt is on disk, so it marks the note read now —
+    /// cards and island — rather than at its next foreground (#639). Best-effort: a
+    /// suspended app misses it and reconciles on its next way in.
+    private func signalReceipt() {
+        DarwinNotificationCenter.post(DarwinNotificationName.voiceNoteKeyboardReceipt)
     }
 
     // MARK: - Actions
@@ -268,6 +276,7 @@ final class KeyboardVoiceNoteState: ObservableObject {
         // After the text, deliberately: a process killed between the two leaves the
         // note unread in DictusApp, which is the safe failure.
         let receipt = store?.acknowledge(id, action: .inserted) ?? false
+        if receipt { signalReceipt() }
         let used = store?.noteUsed(id) ?? false
         HapticFeedback.textInserted()
         log("inserted", "id=\(id.uuidString.prefix(8)) chars=\(page.transcript.count) receipt=\(receipt) used=\(used)")
