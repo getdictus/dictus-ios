@@ -38,8 +38,8 @@ struct KeyboardRootView: View {
     /// fan while the mic is held. A second observed object beside `KeyboardState`,
     /// exactly as the waveform driver above is — see `KeyboardSmartModeState`.
     @ObservedObject private var smartModes = KeyboardSmartModeState.shared
-    /// Shared voice note transcripts waiting for this keyboard: the toolbar chip and
-    /// the reader (#637). A third observed object, for `smartModes`' reason.
+    /// Shared voice note transcripts waiting for this keyboard: the ☰ ring, the hint
+    /// and the reader (#637, #639). A third observed object, for `smartModes`' reason.
     @ObservedObject private var voiceNotes = KeyboardVoiceNoteState.shared
     @State private var instanceID = String(UUID().uuidString.prefix(8))
     /// Observable state for the suggestion bar, owned by KeyboardViewController.
@@ -206,9 +206,12 @@ struct KeyboardRootView: View {
             onSmartModeFanDrag: { y in smartModes.track(y: y) },
             onSmartModeFanRelease: { smartModes.commit() },
             isSmartModeFanOpen: smartModes.fan != nil,
-            voiceNotesWaiting: voiceNotes.waiting.count,
-            onVoiceNotesTap: { voiceNotes.open(source: "chip") },
-            voiceNoteArrivalPulse: voiceNotes.arrivalPulse
+            ringsMenuForVoiceNotes: voiceNotes.showsMenuHalo,
+            offersPanelHint: voiceNotes.offersPanelHint,
+            // #639: the ☰'s tap is the voice note reader; its long press opens the
+            // panel through `onPanelToggle` above and retires the panel hint here.
+            onMenuTap: { voiceNotes.openFromTap() },
+            onMenuLongPress: { voiceNotes.menuLongPressRecognised() }
         )
         .frame(height: toolbarHeight)
     }
@@ -309,11 +312,18 @@ struct KeyboardRootView: View {
                 // included, exactly like the recording overlay above — which is why it
                 // is a branch here and not a case of `areaBelowToolbar`. The layout
                 // behind it is `.recording`'s, set by `KeyboardViewController`.
+                //
+                // It opens from a tap on the ☰ (#639), and this branch destroys the
+                // toolbar that carried it — the trap described below. The ☰'s long
+                // press, which opens the panel instead, is why the tap is latched in
+                // `ToolbarView.menuLongPressDidFire`.
                 VoiceNoteReaderView(
                     pages: reader.pages,
                     onClose: { voiceNotes.close(reason: "close") },
                     onInsert: { id in insertVoiceNote(id) },
-                    onOpenInDictus: { id in voiceNotes.openInDictus(id) }
+                    onOpenInDictus: { id in voiceNotes.openInDictus(id) },
+                    onDelete: { id in voiceNotes.deleteFromKeyboard(id) },
+                    onPageShown: { id in voiceNotes.pageShown(id) }
                 )
             } else {
                 // ONE toolbar, outside the switch, for every non-recording mode.
@@ -474,7 +484,8 @@ struct KeyboardRootView: View {
     // MARK: - Voice note insertion (#637)
 
     /// `Insert` in the voice note reader: the visible page's transcript into the field
-    /// this keyboard is attached to, once.
+    /// this keyboard is attached to, once per opening of the reader (#639: the note
+    /// stays, and a later opening may insert it again).
     ///
     /// Only from the controller the user is looking at — the same gate that let the
     /// reader be drawn, re-checked at the tap because ownership can move between the

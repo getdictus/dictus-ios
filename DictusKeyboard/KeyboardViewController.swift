@@ -517,8 +517,8 @@ class KeyboardViewController: UIInputViewController {
         // closed, like the panel above; then, for a note this keyboard has never
         // shown, the reader opens by itself — here, at the appearance, because that is
         // when the user has come back to the conversation and has not started typing.
-        // A note that lands while the keyboard is already on screen only ever shows
-        // the chip (decision 1). Ordered after registration and the subscription, so
+        // A note that lands while the keyboard is already on screen only ever rings
+        // the ☰ (decision 1, #639). Ordered after registration and the subscription, so
         // the mode change it may make is applied by this controller like any other.
         KeyboardVoiceNoteState.shared.keyboardWillAppear(controllerID: controllerID)
 

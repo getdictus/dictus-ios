@@ -1179,6 +1179,11 @@ class DictationCoordinator: ObservableObject {
                     engineRunning: self.audioEngine.isEngineRunning
                 ))
                 self.startDictation(origin: .keyboard)
+                // A warm start from the keyboard never brings the app forward, so none
+                // of the lifecycle reconciliations run: catch up on the voice note
+                // receipts here too (#639). After the start, so it costs the recording
+                // nothing.
+                VoiceNoteProcessor.shared.reconcileKeyboardDeliveries(reason: "darwinStart")
             }
         }
 
