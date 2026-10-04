@@ -498,13 +498,13 @@
         }
       }
     },
-    "Share a voice message to Dictus from WhatsApp or any other app, and its transcript shows up here." : {
+    "Share a voice message to Dictus from a messaging app, and its transcript will show up here." : {
       "comment" : "Keyboard voice note reader's empty state: how a voice note gets here (#639).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Partage un message vocal vers Dictus depuis WhatsApp ou une autre app, et sa transcription apparaîtra ici."
+            "value" : "Partage un message vocal vers Dictus depuis une app de messagerie, et sa transcription apparaîtra ici."
           }
         }
       }

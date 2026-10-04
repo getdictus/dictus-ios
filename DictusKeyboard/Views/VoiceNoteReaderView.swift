@@ -84,16 +84,27 @@ struct VoiceNoteReaderView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // Never animated (seventh round of #641): the `✕` takes the ☰'s place the
+            // way the panel's does — the bar swaps in place, in one frame, at the same
+            // 56 × 36 frame (`togglePanel()` in `KeyboardRootView` explains why the
+            // swap itself is not a transition). The first version faded and lifted the
+            // whole reader, header included, so the ☰ seemed to vanish and a `✕` to
+            // rise from below. Closing is the same swap back: the toolbar branch
+            // returns with the ☰ where the `✕` was.
             header
-            if pages.isEmpty {
-                emptyState
-            } else {
-                pager
-                actionRow
+            // Only what is below the bar comes in: the short fade and rise live here,
+            // like the panel's content.
+            Group {
+                if pages.isEmpty {
+                    emptyState
+                } else {
+                    pager
+                    actionRow
+                }
             }
+            .opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 8)
         }
-        .opacity(appeared ? 1 : 0)
-        .offset(y: appeared ? 0 : 8)
         // Not `Color.clear`: in a keyboard extension a touch on a pixel with no alpha
         // at all is not delivered to the extension, so the empty page under a short
         // transcript took no swipe — only a finger starting on the glyphs or a filled
@@ -256,7 +267,7 @@ struct VoiceNoteReaderView: View {
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundColor(foregroundColor)
 
-            Text("Share a voice message to Dictus from WhatsApp or any other app, and its transcript shows up here.",
+            Text("Share a voice message to Dictus from a messaging app, and its transcript will show up here.",
                  comment: "Keyboard voice note reader's empty state: how a voice note gets here (#639).")
                 .font(.system(size: 14))
                 .foregroundStyle(.secondary)
