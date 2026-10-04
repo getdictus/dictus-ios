@@ -18,14 +18,15 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 
 1. #587 — Smart Mode prompt campaign, remaining threads: #598 (`es` read as `pt` on a short line), #592 (warn, not refuse, on an ungrounded name)
 2. #627 — run a voice note's Smart Mode in the background (device probe first); then #628, notes over ~4 min, in 2.0.0 only if reliable and short
-3. #637 — finished voice-note transcripts in the keyboard: a chip, then a full-surface reader. `ready-for-agent`
+3. ~~#637 — voice-note transcripts in the keyboard~~ — merged in PR #638; then #639 (long press on ☰, keep notes 15 min), then #640 (research: quote a passage)
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; open until Pierre's verdict in real use
 5. #593 — reverse trial: Pro free for a fixed period, then the paywall. `ready-for-agent`
 6. #494 — onboarding that starts the trial and teaches the Smart Modes. `ready-for-agent`
 7. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
 8. #621 — search the history: the paywall already sells it. `ready-for-agent`. Must land before #279.
-9. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
-10. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
+9. #643 — App Store listing for 2.0.0: screenshots that sell Pro, en + fr. Direction B. `ready-for-agent`
+10. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
+11. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
 Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215, #620 voice notes.
 
