@@ -10,7 +10,7 @@ Where we are going, and which issue to work on next. Nothing else.
 - Whole file under 60 lines. If an edit pushes it past that, something belongs on an issue instead.
 - The [Project board](https://github.com/orgs/getdictus/projects/2) moves by itself on a branch push, a PR and a merge. Two moves are by hand: an issue added to **Now** is added to the board in the same edit (`gh project item-add 2 --owner getdictus --url <issue-url>`), and work with no branch (a grilling, a measurement) is set to In progress when it starts.
 
-Last reviewed: 2026-10-03.
+Last reviewed: 2026-10-04.
 
 ## Now — 2.0.0, the Pro launch
 
@@ -20,8 +20,8 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 2. #627 — run a voice note's Smart Mode in the background (device probe first); then #628, notes over ~4 min, in 2.0.0 only if reliable and short
 3. ~~#637 — voice-note transcripts in the keyboard~~ — merged in PR #638; #639 (tap ☰ for notes, keep them 15 min) merged in PR #641; then #640 (research: quote a passage)
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; open until Pierre's verdict in real use
-5. #593 — reverse trial: Pro free for a fixed period, then the paywall. `ready-for-agent`
-6. #494 — onboarding that starts the trial and teaches the Smart Modes. `ready-for-agent`
+5. ~~#593 — reverse trial: Pro free for a fixed period, then the paywall~~ — merged in PR #595; two device checks left (iPad, EN strings)
+6. #649 — onboarding rebuild: redesign, Smart Modes, voice notes, setup videos. Replaces #450, #494, #451. Grilling first
 7. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
 8. #621 — search the history: the paywall already sells it. `ready-for-agent`. Must land before #279.
 9. #643 — App Store listing for 2.0.0: screenshots that sell Pro, en + fr. Direction B. `ready-for-agent`
