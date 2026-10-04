@@ -134,7 +134,7 @@ public enum HapticFeedback {
     }
 
     /// Light impact when a shared voice note transcript reaches a keyboard on screen
-    /// (#637). Once per note, as the ☰ takes its ring (#639): something arrived,
+    /// (#637). Once per note, as the ☰ takes its halo (#639): something arrived,
     /// nothing is asked of the user.
     public static func voiceNoteArrived() {
         #if canImport(UIKit) && !os(macOS)

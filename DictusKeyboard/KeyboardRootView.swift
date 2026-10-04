@@ -206,7 +206,7 @@ struct KeyboardRootView: View {
             onSmartModeFanDrag: { y in smartModes.track(y: y) },
             onSmartModeFanRelease: { smartModes.commit() },
             isSmartModeFanOpen: smartModes.fan != nil,
-            ringsMenuForVoiceNotes: voiceNotes.hasUnshownNotes,
+            ringsMenuForVoiceNotes: voiceNotes.showsMenuHalo,
             offersPanelHint: voiceNotes.offersPanelHint,
             // #639: the ☰'s tap is the voice note reader; its long press opens the
             // panel through `onPanelToggle` above and retires the panel hint here.

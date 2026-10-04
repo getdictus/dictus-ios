@@ -283,7 +283,7 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
     }
 
     /// When the earliest of these deliveries leaves the keyboard, or nil for none. The
-    /// keyboard rereads then, so its ring and hint do not outlive the note.
+    /// keyboard rereads then, so the ☰ halo does not outlive the last note.
     public func nextExpiry(of deliveries: [VoiceNoteKeyboardDelivery]) -> Date? {
         let uses = lastUsedDates()
         return deliveries.map { $0.expiresAt(lastUsedAt: uses[$0.id]) }.min()
@@ -334,7 +334,8 @@ public struct VoiceNoteKeyboardDeliveryStore: Sendable {
     }
 
     /// Record that the reader has shown these notes, so it never opens on its own
-    /// for them again (#637 decision 2), and the ☰ loses its ring (#639). Empty marker
+    /// for them again (#637 decision 2). Not what the ☰ halo reads: that one shows for
+    /// every offered note, shown or not (#639, 2026-10-04). Empty marker
     /// files: existence is the fact.
     public func markPresented(_ ids: [UUID]) {
         guard !ids.isEmpty else { return }
@@ -375,7 +376,7 @@ public enum VoiceNoteKeyboardPresentation {
     public enum Decision: Equatable, Sendable {
         /// Take the surface over and show the reader.
         case openReader
-        /// Leave the keys. The ☰ ring says a note is waiting, and a tap on ☰
+        /// Leave the keys. The ☰ halo says a note is waiting, and a tap on ☰
         /// opens it (#639).
         case keysOnly
     }
@@ -402,6 +403,18 @@ public enum VoiceNoteKeyboardPresentation {
                                     currentMode: KeyboardAreaMode) -> Decision {
         guard autoOpenEnabled, !dictationOwnsArea, currentMode == .keys else { return .keysOnly }
         return pending.contains { !presentedIDs.contains($0.id) } ? .openReader : .keysOnly
+    }
+
+    /// Whether the ☰ wears its halo: while the keyboard offers at least one note.
+    ///
+    /// `pending` is the store's answer — inside its 15-minute window, not deleted from
+    /// the keyboard — and nothing else counts (Pierre, 2026-10-04). The first version
+    /// lit it only for a note never shown, but auto-open on appearance shows a new
+    /// note at once, so that halo was almost never on screen. Shown or not, a note
+    /// still in the keyboard is what the halo announces; it goes when the last one
+    /// expires or is deleted.
+    public static func showsMenuHalo(pending: [VoiceNoteKeyboardDelivery]) -> Bool {
+        !pending.isEmpty
     }
 
     /// Decision 3's switch, read at each appearance. On unless a Debug build turned

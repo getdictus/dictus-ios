@@ -86,7 +86,7 @@ public enum KeyboardAreaMode: String, Equatable, CaseIterable, Sendable {
     ///
     /// The voice note reader (#637) follows the same rule. Its notes are not lost —
     /// nothing is consumed by a dictation — and the keyboard rereads them when the
-    /// dictation leaves, so the ☰ ring is back with the keys (#639).
+    /// dictation leaves, so the ☰ halo is back with the keys (#639).
     public static func resolving(
         status: DictationStatus,
         current: KeyboardAreaMode

@@ -325,6 +325,40 @@ final class VoiceNoteKeyboardDeliveryTests: XCTestCase {
         XCTAssertNil(auto.durationLabel)
     }
 
+    // MARK: - The ☰ halo (#639, 2026-10-04)
+
+    /// The halo says "there are voice notes in the keyboard": a note already shown
+    /// lights it as much as a new one. Auto-open shows a new note at once, so a halo
+    /// for unseen notes only was almost never on screen.
+    func testTheHaloShowsForAnOfferedNoteWhetherShownOrNot() throws {
+        let note = delivery(sharedSecondsAgo: 60, transcribedSecondsAgo: 60)
+        try store.publish(note)
+        store.markPresented([note.id])
+        store.acknowledge(note.id, action: .shown, at: now)
+        XCTAssertTrue(VoiceNoteKeyboardPresentation.showsMenuHalo(pending: store.pending(at: now)))
+    }
+
+    /// It goes with the last note: when its window runs out…
+    func testTheHaloGoesWhenTheLastNoteExpires() throws {
+        let note = delivery(sharedSecondsAgo: 60, transcribedSecondsAgo: 60)
+        try store.publish(note)
+        XCTAssertTrue(VoiceNoteKeyboardPresentation.showsMenuHalo(pending: store.pending(at: now)))
+        let later = now.addingTimeInterval(VoiceNoteKeyboardDelivery.idleWindow)
+        XCTAssertFalse(VoiceNoteKeyboardPresentation.showsMenuHalo(pending: store.pending(at: later)))
+    }
+
+    /// …or when the reader's Delete takes it out. Another note keeps it lit.
+    func testTheHaloGoesWhenTheLastNoteIsDeletedFromTheKeyboard() throws {
+        let first = delivery(sharedSecondsAgo: 60)
+        let second = delivery(sharedSecondsAgo: 30)
+        try store.publish(first)
+        try store.publish(second)
+        store.deleteFromKeyboard(first.id)
+        XCTAssertTrue(VoiceNoteKeyboardPresentation.showsMenuHalo(pending: store.pending(at: now)))
+        store.deleteFromKeyboard(second.id)
+        XCTAssertFalse(VoiceNoteKeyboardPresentation.showsMenuHalo(pending: store.pending(at: now)))
+    }
+
     // MARK: - When the reader opens by itself (#637 decisions 1 to 3)
 
     private func decide(pending: [VoiceNoteKeyboardDelivery], presented: Set<UUID> = [],

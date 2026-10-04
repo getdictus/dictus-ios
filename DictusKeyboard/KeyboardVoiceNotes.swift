@@ -1,11 +1,11 @@
 // DictusKeyboard/KeyboardVoiceNotes.swift
-// Shared voice note transcripts waiting in the keyboard: the ☰ ring, the hint and the reader (issues #637, #639).
+// Shared voice note transcripts waiting in the keyboard: the ☰ halo, the hint and the reader (issues #637, #639).
 import Foundation
 import Combine
 import DictusCore
 
 /// What the keyboard knows about voice notes shared to Dictus: which transcripts are
-/// waiting for it, which of them it has never shown, and the reader while it is open.
+/// waiting for it, which of them it has already shown, and the reader while it is open.
 /// It also holds the two facts behind the panel hint (#639), because one of them —
 /// "the reader was opened by a tap" — happens here.
 ///
@@ -56,9 +56,10 @@ final class KeyboardVoiceNoteState: ObservableObject {
     /// Transcripts the keyboard may offer, oldest share first.
     @Published private(set) var waiting: [VoiceNoteKeyboardDelivery] = []
 
-    /// The waiting notes the reader has already shown. The ☰ wears its ring while
-    /// any waiting note is not in here (#639).
-    @Published private(set) var presentedIDs: Set<UUID> = []
+    /// The notes the reader has already shown: the reader never opens on its own for
+    /// them again (#637 decision 2). Not published — nothing on screen reads it since
+    /// the ☰ halo stopped depending on it (#639, 2026-10-04).
+    private(set) var presentedIDs: Set<UUID> = []
 
     /// Whether the reader was ever opened by a tap on ☰, and whether the panel was
     /// ever opened by a long press on it (#639). Cached: each flag only ever moves
@@ -69,10 +70,11 @@ final class KeyboardVoiceNoteState: ObservableObject {
     /// The reader, or nil when it is closed.
     @Published private(set) var reader: Reader?
 
-    /// At least one waiting note has never been shown in the keyboard: the ☰ capsule
-    /// gets its accent ring (#639). No count — the reader's dots say how many.
-    var hasUnshownNotes: Bool {
-        waiting.contains { !presentedIDs.contains($0.id) }
+    /// The keyboard offers at least one note: the ☰ wears the mic's halo (#639). Shown
+    /// or not — see `VoiceNoteKeyboardPresentation.showsMenuHalo`. No count; the
+    /// reader's dots say how many.
+    var showsMenuHalo: Bool {
+        VoiceNoteKeyboardPresentation.showsMenuHalo(pending: waiting)
     }
 
     /// Whether the toolbar still teaches that the panel moved to a long press on ☰
@@ -94,7 +96,7 @@ final class KeyboardVoiceNoteState: ObservableObject {
     private var insertedThisOpening: Set<UUID> = []
 
     /// Rereads the directory when the earliest waiting note leaves its window, so the
-    /// ring and the hint do not outlive the note while the keyboard sits on screen.
+    /// ☰ halo does not outlive the last note while the keyboard sits on screen.
     /// A suspended keyboard misses it and rereads on its next appearance instead.
     private var expiryRefresh: DispatchWorkItem?
 
@@ -103,7 +105,7 @@ final class KeyboardVoiceNoteState: ObservableObject {
 
     private let instanceID = String(UUID().uuidString.prefix(8))
 
-    /// Nil without Full Access, so nothing is offered: no ring, no hint, no reader.
+    /// Nil without Full Access, so nothing is offered: no halo, no reader.
     ///
     /// WHY explicit rather than left to the container: on a device the App Group is
     /// unreachable without Full Access and this would be nil anyway, but the
@@ -196,8 +198,8 @@ final class KeyboardVoiceNoteState: ObservableObject {
             log("openRefused", "source=\(source) status=\(KeyboardState.shared.dictationStatus.rawValue)")
             return false
         }
-        // Shown, so it never opens on its own for these notes again (decision 2), and
-        // the ☰ loses its halo. The page on screen is a use and a read: `pageShown`
+        // Shown, so it never opens on its own for these notes again (decision 2). The
+        // ☰ keeps its halo while they are in the keyboard. The page on screen is a use and a read: `pageShown`
         // restarts its 15 minutes and leaves the receipt (#639 decision A).
         markPresented(waiting.map(\.id))
         if let first = waiting.first { pageShown(first.id) }
@@ -327,7 +329,8 @@ final class KeyboardVoiceNoteState: ObservableObject {
         waiting = pending
     }
 
-    /// Write the presented markers and mirror them in memory, so the ring goes at once.
+    /// Write the presented markers and mirror them in memory, so the next appearance
+    /// decision sees them.
     private func markPresented(_ ids: [UUID]) {
         guard !ids.isEmpty else { return }
         store?.markPresented(ids)
@@ -352,7 +355,7 @@ final class KeyboardVoiceNoteState: ObservableObject {
     /// surface over (decision 1) — and says so once with one light haptic.
     ///
     /// An open reader takes the new note as a last page rather than leaving it behind
-    /// the ring: appended, so the page under the user's eyes does not move. An empty
+    /// the halo: appended, so the page under the user's eyes does not move. An empty
     /// reader shows it in place of the empty state.
     private func resultReadySignalled() {
         reload(reason: "signal")
@@ -378,7 +381,7 @@ final class KeyboardVoiceNoteState: ObservableObject {
     ///
     /// Leaving `.voiceNoteResult` clears the reader — `✕`, `Insert`, and a dictation
     /// taking the area all arrive here. Leaving `.recording` rereads the directory: a
-    /// note may have landed during the dictation, and the ring comes back with the
+    /// note may have landed during the dictation, and the halo comes back with the
     /// keys. The reader does not reopen on its own then; the user is looking at the
     /// keyboard (decision 1).
     private func areaModeChanged(to mode: KeyboardAreaMode) {

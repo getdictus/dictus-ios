@@ -19,8 +19,8 @@ import DictusCore
 ///     open:    [✕]                   [Dictus Pro] [⚙]
 ///
 /// The ☰ has two gestures (#639): a tap opens the voice note reader, a long press
-/// opens the panel. It wears an accent ring while a shared voice note waits that the
-/// keyboard has never shown.
+/// opens the panel. It wears the mic's halo while the keyboard offers at least one
+/// shared voice note.
 ///
 /// There is deliberately no mic while the panel is open: the panel is not a
 /// surface anyone dictates from, and the mic's absence is what makes the state
@@ -117,8 +117,8 @@ struct ToolbarView: View {
     /// inert from then on.
     var isSmartModeFanOpen: Bool = false
 
-    /// Whether a waiting voice note has never been shown in the keyboard (#639): the
-    /// ☰ capsule wears an accent ring, the way a selected control would.
+    /// Whether the keyboard offers at least one voice note (#639): the ☰ capsule wears
+    /// the mic pill's halo. Shown or not, until the last one expires or is deleted.
     var ringsMenuForVoiceNotes: Bool = false
 
     /// Whether the "← Long press: languages & settings" hint is still worth showing.
@@ -878,7 +878,7 @@ struct ToolbarView: View {
     /// bar, where a second wide pill would compete with the toggle rather than
     /// balance anything.
     ///
-    /// `ringed` (#639): the ☰'s "a voice note is waiting" state wears the mic pill's
+    /// `ringed` (#639): the ☰'s "voice notes are in the keyboard" state wears the mic pill's
     /// own aura — `DictusHalo`, the very view `AnimatedMicButton` draws behind its
     /// pill, at the keyboard mic's resting values (accent, 2 pt, 0.45). Same geometry
     /// and same layering: a 66 × 46 glass ring behind the 56 × 36 capsule, which stays
