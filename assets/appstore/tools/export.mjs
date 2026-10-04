@@ -4,10 +4,12 @@
 //   npm run export -- --locale en-GB       one locale
 //   npm run export -- --theme navy         one theme
 //
-// Output: export/<locale>/<theme>/<NN-id>.png, 1320×2868, opaque sRGB (App Store
-// Connect rejects screenshots with an alpha channel), plus
-// export/<locale>/montage-<theme>.jpg, the six side by side for review (JPEG:
-// it is only looked at, and a PNG montage weighs 4.6 MB in git).
+// Output: export/<locale>/<iteration>/<theme>/<NN-id>.png, 1320×2868, opaque sRGB
+// (App Store Connect rejects screenshots with an alpha channel), plus
+// export/<locale>/<iteration>/montage-<theme>.jpg, the six side by side for review
+// (JPEG: it is only looked at, and a PNG montage weighs 4.6 MB in git).
+// <iteration> is window.ITERATION in screenshots.html, so a new design iteration
+// never overwrites the previous one.
 //
 // Headless Chromium through Playwright, from a file:// URL: no server, no window.
 import { chromium } from "playwright";
@@ -48,8 +50,9 @@ for (const locale of locales) {
     const ok = await page.evaluate(() => window.whenReady);
     if (!ok) throw new Error("screenshots.html reports the bezel is missing");
     const ids = await page.evaluate(() => window.SLIDE_IDS);
+    const iteration = await page.evaluate(() => window.ITERATION);
 
-    const out = join(ROOT, "export", locale, theme);
+    const out = join(ROOT, "export", locale, iteration, theme);
     mkdirSync(out, { recursive: true });
     const files = [];
     for (const [i, id] of ids.entries()) {
@@ -63,10 +66,10 @@ for (const locale of locales) {
         "-colorspace", "sRGB", "-strip", file]);
       files.push(file);
     }
-    const montage = join(ROOT, "export", locale, `montage-${theme}.jpg`);
+    const montage = join(ROOT, "export", locale, iteration, `montage-${theme}.jpg`);
     execFileSync("magick", ["montage", ...files, "-tile", "6x1", "-geometry", "440x956+12+12",
       "-background", "#1C1F26", "-quality", "90", montage]);
-    console.log(`${locale}/${theme}: ${files.length} slides, montage ${montage}`);
+    console.log(`${locale}/${iteration}/${theme}: ${files.length} slides, montage ${montage}`);
   }
 }
 await browser.close();

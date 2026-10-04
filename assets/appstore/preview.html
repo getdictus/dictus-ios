@@ -8,8 +8,9 @@
   side by side, rounded corners, on the App Store's light and dark backgrounds,
   and the first three as they appear in search results.
 
-  Reads export/<locale>/<theme>/. Re-export (npm run export), then reload.
+  Reads export/<locale>/<iteration>/<theme>/. Re-export (npm run export), then reload.
     ?locale=en-GB   (default)
+    ?iteration=v2   design iteration (default v2; v1 is the first round)
     ?theme=navy     show one theme only (default: navy and light, one after the other)
 -->
 <style>
@@ -36,12 +37,13 @@
 <script>
 const params = new URLSearchParams(location.search);
 const locale = params.get("locale") || "en-GB";
+const iteration = params.get("iteration") || "v2";
 const themes = params.get("theme") ? [params.get("theme")] : ["navy", "light"];
-const ids = ["01-dictate", "02-smart-modes", "03-voice-notes", "04-keyboard", "05-private", "06-languages"];
-const imgs = (theme, list) => list.map((id) => `<img src="export/${locale}/${theme}/${id}.png" alt="">`).join("");
+const ids = ["01-dictate", "02-smart-modes", "03-voice-notes", "04-keyboard", "05-private", "06-languages"];  // same ids in v1 and v2
+const imgs = (theme, list) => list.map((id) => `<img src="export/${locale}/${iteration}/${theme}/${id}.png" alt="">`).join("");
 for (const theme of themes) {
   document.write(`
-    <h1>${locale} · Pro slides: ${theme}</h1>
+    <h1>${locale} · ${iteration} · Pro slides: ${theme}</h1>
     <section class="light">
       <h2>Product page, light mode</h2>
       <p class="sub">iPhone gallery, 16 px gap, rounded corners as on the App Store</p>

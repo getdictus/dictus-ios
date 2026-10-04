@@ -2,15 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dictus · App Store screenshots 2.0 (Direction B, Panorama)</title>
+<title>Dictus · App Store screenshots 2.0 (Direction B, Panorama, iteration 2)</title>
 <!--
-  Dictus App Store screenshot template, 2.0 (issue #643, Direction B "Panorama").
-  The 1.7.1 template (#189) is in git history: e5018943:assets/appstore/screenshots.html.
+  Dictus App Store screenshot template, 2.0 (issue #643, Direction B "Panorama",
+  design iteration 2). Iteration 1 is commit 171c93b0; the 1.7.1 template is
+  e5018943.
 
   ONE scene, 6 × 1320 = 7920 px wide, 2868 px tall. Every element is placed in
-  strip coordinates; the exporter cuts the strip into six 1320×2868 PNGs. That is
-  what makes the set continuous: the background, the colour transitions and the
-  waveform are one drawing, not six that happen to line up.
+  strip coordinates; the exporter cuts the strip into six 1320×2868 PNGs, so the
+  background, the colour change at the Pro slides and the waveform are one
+  drawing, not six that happen to line up.
+
+  Iteration 2, after studying the Wispr Flow, Superwhisper and Typeless sets:
+  - one short headline per slide (no subtitle); at most one small footnote where
+    honesty needs it (Apple Intelligence, the language counts);
+  - a different screen on every slide;
+  - bigger phones, cropped by the bottom edge;
+  - the point of the slide lifted out of the phone, enlarged: a crop of the
+    real capture ("lift"), or a card that shows content the product produces
+    (Smart Mode before/after, measured). Neither is a label pinned on the UI.
 
   Parameters (query string):
     ?locale=en-GB     copy from strings/<locale>.js, captures from captures/<locale>/
@@ -18,13 +28,9 @@
                       decision 1 asks for; the layout is identical in both)
     ?preview          scale the strip to the window
 
-  Layout lives here (SLIDES below). Copy lives in strings/<locale>.js. Captures
-  live in captures/<locale>/. Adding a locale = a strings file + its captures.
-
   Device frame: Apple's official iPhone 17 Pro Max bezel (Apple Design
   Resources). Its license forbids redistribution, so it is NOT in git: run
   `npm run bezel` (tools/fetch-bezel.sh) once per machine.
-
   Export: `npm run export` (tools/export.mjs, headless Playwright).
 
   Locked constraints (#189, #643): waveform = BrandWaveform.swift
@@ -35,136 +41,122 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300..600&display=block" rel="stylesheet">
 <style>
-  :root {
-    --panel-w: 1320px;
-    --panel-h: 2868px;
-    --navy: #0A1628;
-    --accent: #3D7EFF;
-    --accent-deep: #2563EB;
-    --highlight: #6BA3FF;
-  }
+  :root { --panel-w: 1320px; --panel-h: 2868px; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #06090f; }
-
-  #strip {
-    position: relative;
-    width: calc(var(--panel-w) * 6);
-    height: var(--panel-h);
-    overflow: hidden;
-    transform-origin: top left;
-  }
+  #strip { position: relative; width: calc(var(--panel-w) * 6); height: var(--panel-h); overflow: hidden; transform-origin: top left; }
   #bg { position: absolute; inset: 0; }
 
-  /* ── Copy ───────────────────────────────────── */
+  .free { --ink: #0A1628; --sub: rgba(10, 22, 40, 0.55); }
+  .pro-slide { --ink: var(--pro-ink); --sub: var(--pro-sub); }
+
+  /* ── Headline: the only text a slide needs ───────── */
   .copy {
-    position: absolute;
-    top: 196px;
-    width: var(--panel-w);
-    padding: 0 110px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 38px;
-    z-index: 3;
+    position: absolute; top: 150px; width: var(--panel-w); padding: 0 90px;
+    display: flex; flex-direction: column; align-items: center; text-align: center; z-index: 6;
   }
-  .eyebrow-row { display: flex; align-items: center; gap: 22px; height: 64px; }
-  .eyebrow {
-    font-family: "DM Mono", monospace;
-    font-weight: 500;
-    font-size: 38px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--eyebrow);
-  }
-  /* The Pro badge: a label, flush with the eyebrow, not a callout over the UI. */
+  .badge-row { height: 92px; display: flex; align-items: flex-start; }
   .pro {
-    font-family: "DM Sans", sans-serif;
-    font-weight: 600;
-    font-size: 36px;
-    letter-spacing: 0.02em;
-    line-height: 1;
-    color: #fff;
-    padding: 13px 24px 14px;
-    border-radius: 16px;
+    font: 600 40px/1 "DM Sans", sans-serif; letter-spacing: 0.02em; color: #fff;
+    padding: 15px 30px 16px; border-radius: 18px;
     background: linear-gradient(135deg, #6BA3FF 0%, #2563EB 100%);
-    box-shadow: 0 10px 28px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
   }
   .headline {
-    font-family: "DM Sans", sans-serif;
-    font-weight: 350;
-    font-size: 112px;
-    line-height: 1.06;
-    letter-spacing: -0.035em;
-    color: var(--ink);
-    text-wrap: balance;
+    font-family: "DM Sans", sans-serif; font-weight: 400; font-size: 146px; line-height: 1.0;
+    letter-spacing: -0.045em; color: var(--ink); text-wrap: balance; max-width: 1160px;
   }
-  .subtext {
-    font-family: "DM Sans", sans-serif;
-    font-weight: 400;
-    font-size: 44px;
-    line-height: 1.42;
-    max-width: 1060px;
-    color: var(--sub);
-    text-wrap: balance;
+  .footnote {
+    margin-top: 34px; font: 400 38px/1.3 "DM Sans", sans-serif; color: var(--sub);
+    letter-spacing: -0.005em;
   }
-  .free { --ink: #0A1628; --sub: rgba(10, 22, 40, 0.62); --eyebrow: #2563EB; }
-  .pro-slide { --ink: var(--pro-ink); --sub: var(--pro-sub); --eyebrow: var(--pro-eyebrow); }
 
   /* ── Device: real Apple bezel over the capture ───── */
   .device {
-    position: absolute;
-    z-index: 2;
-    aspect-ratio: 1470 / 3000;
-    transform-style: preserve-3d;
-    filter: drop-shadow(0 70px 90px var(--shadow)) drop-shadow(0 18px 30px var(--shadow-near));
+    position: absolute; z-index: 2; aspect-ratio: 1470 / 3000;
+    filter: drop-shadow(0 60px 90px var(--shadow)) drop-shadow(0 16px 28px var(--shadow-near));
   }
   .device .screen {
     position: absolute;
     /* The bezel PNG's screen opening: 1320×2868 at (75, 66) in a 1470×3000 image. */
-    left: calc(75 / 1470 * 100%);
-    top: calc(66 / 3000 * 100%);
-    width: calc(1320 / 1470 * 100%);
-    height: calc(2868 / 3000 * 100%);
-    object-fit: cover;
-    /* Only has to stay inside the phone body: the opaque bezel covers the rest. */
-    border-radius: 13% / 6%;
+    left: calc(75 / 1470 * 100%); top: calc(66 / 3000 * 100%);
+    width: calc(1320 / 1470 * 100%); height: calc(2868 / 3000 * 100%);
+    border-radius: 13% / 6%; overflow: hidden;
   }
+  .device .screen > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* Overlays drawn in capture pixels (1320×2868), scaled with the screen. */
+  .device .layer { position: absolute; left: 0; top: 0; width: 1320px; height: 2868px; transform-origin: 0 0; }
   .device .bezel { position: absolute; inset: 0; width: 100%; height: 100%; }
 
+  /* ── Lift: a crop of the real capture, enlarged, floating over the phone ── */
+  .lift {
+    position: absolute; z-index: 4; overflow: hidden; background: #fff;
+    border-radius: 64px;
+    box-shadow: 0 70px 120px var(--lift-shadow), 0 18px 36px rgba(10, 22, 40, 0.14),
+                0 0 0 2px rgba(255, 255, 255, 0.85);
+  }
+  .lift img { position: absolute; display: block; }
+
+  /* ── Smart Mode before / after card ─────────────── */
+  .ba {
+    position: absolute; z-index: 4; border-radius: 64px; padding: 64px 70px 70px;
+    background: #FFFFFF;
+    box-shadow: 0 70px 120px var(--lift-shadow), 0 18px 36px rgba(10, 22, 40, 0.14);
+    font-family: "DM Sans", sans-serif; color: #0A1628;
+  }
+  .ba .label { font: 500 34px/1 "DM Mono", monospace; letter-spacing: 0.1em; text-transform: uppercase; color: #6B7A90; }
+  .ba .before { margin-top: 26px; font-size: 48px; line-height: 1.38; color: #4A5568; letter-spacing: -0.01em; }
+  .ba .before s { text-decoration: line-through; text-decoration-thickness: 4px; text-decoration-color: #EF4444; color: #A0AEC0; }
+  .ba .divider { display: flex; align-items: center; gap: 24px; margin: 46px 0 40px; }
+  .ba .divider::before, .ba .divider::after { content: ""; flex: 1; height: 3px; background: #E2E8F0; border-radius: 2px; }
+  .ba .mode {
+    display: flex; align-items: center; gap: 16px; padding: 16px 30px; border-radius: 40px;
+    font: 500 40px/1 "DM Sans", sans-serif; color: #fff; background: #8B5CF6;
+    box-shadow: 0 10px 24px rgba(139, 92, 246, 0.35);
+  }
+  .ba .mode svg { width: 40px; height: 40px; }
+  .ba .after { display: flex; flex-direction: column; gap: 22px; }
+  .ba .after p { font-size: 54px; line-height: 1.32; letter-spacing: -0.015em; color: #0A1628; font-weight: 450; }
+
+  /* ── iMessage received audio bubble, drawn in capture pixels ──
+     The simulator cannot receive a voice message (docs/agents/simulator.md),
+     so this one bubble is drawn to match iOS 26's received audio message.
+     A device capture with a real bubble replaces it (Pierre's capture list). */
+  .voice-bubble {
+    position: absolute; left: 48px; height: 132px; width: 600px; border-radius: 66px;
+    background: #E9E9EB; display: flex; align-items: center; gap: 26px; padding: 0 40px 0 30px;
+    font: 500 44px/1 -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; color: #000;
+  }
+  .voice-bubble .play { width: 64px; height: 64px; flex: none; }
+  .voice-bubble .bars { display: flex; align-items: center; gap: 7px; flex: 1; height: 64px; }
+  .voice-bubble .bars i { display: block; width: 7px; border-radius: 4px; background: #8E8E93; }
+  .voice-bubble .dur { font-size: 40px; color: #3C3C43; font-variant-numeric: tabular-nums; }
+
   /* ── Keyboard cards (slide 4): real captures cropped to the keyboard ── */
-  .kb {
-    position: absolute;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-    align-items: flex-start;
-  }
-  .kb .label {
-    font-family: "DM Mono", monospace;
-    font-weight: 500;
-    font-size: 34px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #2563EB;
-    padding-left: 8px;
-  }
+  .kb { position: absolute; z-index: 3; }
   .kb .crop {
-    overflow: hidden;
-    border-radius: 54px;
+    position: relative; overflow: hidden; border-radius: 60px; background: #fff;
     box-shadow: 0 50px 90px rgba(10, 22, 40, 0.20), 0 12px 26px rgba(10, 22, 40, 0.10),
                 0 0 0 2px rgba(255, 255, 255, 0.9);
-    background: #fff;
   }
-  .kb .crop img { display: block; }
-
-  .missing {
-    position: absolute; inset: 0; z-index: 10; display: none;
-    align-items: center; justify-content: center; text-align: center;
-    font: 600 120px/1.3 "DM Sans", sans-serif; color: #EF4444; background: rgba(255,255,255,0.9);
+  .kb .crop img { position: absolute; display: block; }
+  .kb .tag {
+    position: absolute; top: -34px; z-index: 2; padding: 16px 28px; border-radius: 22px;
+    font: 500 34px/1 "DM Mono", monospace; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #fff; background: #0A1628; box-shadow: 0 10px 24px rgba(10, 22, 40, 0.25);
   }
 
+  /* ── Greetings field (slide 6) ─────────────────── */
+  /* Fallback order matters: Hiragino carries Cyrillic and Greek in full-width
+     glyphs, so Helvetica Neue must come before it. */
+  .greet {
+    position: absolute; z-index: 3; width: 1220px; display: flex; flex-wrap: wrap;
+    justify-content: center; align-items: baseline; column-gap: 54px; row-gap: 26px;
+    font-family: "DM Sans", "Helvetica Neue", "Hiragino Sans", "Apple SD Gothic Neo", "Geeza Pro", sans-serif;
+    letter-spacing: -0.025em; line-height: 1.15;
+  }
+
+  .missing { position: absolute; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; text-align: center; font: 600 120px/1.3 "DM Sans", sans-serif; color: #EF4444; background: rgba(255,255,255,0.9); }
   body.preview { padding: 24px; }
 </style>
 </head>
@@ -186,53 +178,50 @@ document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
    ════════════════════════════════════════════════════════════ */
 const THEMES = {
   navy: {
-    proTop: [13, 32, 64],      // #0D2040, brand icon gradient start
-    proBottom: [7, 16, 32],    // #071020, brand icon gradient end
-    proInk: "#FFFFFF",
-    proSub: "rgba(255, 255, 255, 0.70)",
-    proEyebrow: "#6BA3FF",
-    proDot: "rgba(255, 255, 255, 0.05)",
-    proEdgeRGB: [150, 170, 205],
-    proShadow: "rgba(0, 0, 0, 0.55)",
+    proTop: [13, 32, 64], proBottom: [7, 16, 32],          // brand icon gradient #0D2040 → #071020
+    proInk: "#FFFFFF", proSub: "rgba(255, 255, 255, 0.62)",
+    proDot: "rgba(255, 255, 255, 0.05)", proEdgeRGB: [150, 170, 205],
+    proShadow: "rgba(0, 0, 0, 0.55)", proLift: "rgba(0, 0, 0, 0.55)",
   },
   light: {
-    proTop: [236, 242, 255],   // #ECF2FF
-    proBottom: [214, 226, 250],// #D6E2FA
-    proInk: "#0A1628",
-    proSub: "rgba(10, 22, 40, 0.62)",
-    proEyebrow: "#2563EB",
-    proDot: "rgba(37, 99, 235, 0.07)",
-    proEdgeRGB: [110, 122, 145],
-    proShadow: "rgba(10, 22, 40, 0.26)",
+    proTop: [236, 242, 255], proBottom: [214, 226, 250],    // #ECF2FF → #D6E2FA
+    proInk: "#0A1628", proSub: "rgba(10, 22, 40, 0.55)",
+    proDot: "rgba(37, 99, 235, 0.07)", proEdgeRGB: [110, 122, 145],
+    proShadow: "rgba(10, 22, 40, 0.26)", proLift: "rgba(10, 22, 40, 0.28)",
   },
 };
 const T = THEMES[THEME] || THEMES.navy;
 const FREE = {
-  top: [245, 247, 251],        // #F5F7FB
-  bottom: [231, 236, 245],     // #E7ECF5
-  dot: "rgba(10, 22, 40, 0.05)",
-  edgeRGB: [110, 122, 145],
-  shadow: "rgba(10, 22, 40, 0.26)",
+  top: [245, 247, 251], bottom: [231, 236, 245],            // #F5F7FB → #E7ECF5
+  dot: "rgba(10, 22, 40, 0.05)", edgeRGB: [110, 122, 145],
+  shadow: "rgba(10, 22, 40, 0.26)", lift: "rgba(10, 22, 40, 0.28)",
 };
-const root = document.documentElement.style;
-root.setProperty("--pro-ink", T.proInk);
-root.setProperty("--pro-sub", T.proSub);
-root.setProperty("--pro-eyebrow", T.proEyebrow);
+const rootStyle = document.documentElement.style;
+rootStyle.setProperty("--pro-ink", T.proInk);
+rootStyle.setProperty("--pro-sub", T.proSub);
 
-/* ════════════════════════════════════════════════════════════
-   SLIDES: layout only. Copy comes from strings/<locale>.js.
-   x / top / width are in strip coordinates (panel i starts at i × 1320).
-   ════════════════════════════════════════════════════════════ */
 const PANEL_W = 1320, PANEL_H = 2868, PANELS = 6, STRIP_W = PANEL_W * PANELS;
 const BEZEL = ".bezels/iPhone 17 Pro Max - Deep Blue - Portrait.png";
 
+/* Phone geometry shared by every phone slide: big, cropped by the bottom edge. */
+const PHONE = { width: 1160, top: 640 };
+/* Keyboard band of a capture, in capture pixels: from the top of the keyboard
+   panel to just under the space row. */
+const KEYBOARD_BAND = { y: 1762, h: 896 };
+
+/* ════════════════════════════════════════════════════════════
+   SLIDES: layout only. Copy comes from strings/<locale>.js.
+   ════════════════════════════════════════════════════════════ */
 const SLIDES = [
   { id: "01-dictate", key: "dictate", pro: false,
-    devices: [{ capture: "01-recording-messages.png", cx: 660, top: 790, width: 1040, tilt: 7 }] },
+    phone: { capture: "01-recording-reminders.png" },
+    lift: { band: KEYBOARD_BAND, width: 1240, raise: 90 } },
   { id: "02-smart-modes", key: "smartModes", pro: true,
-    devices: [{ capture: "02-smart-mode-fan.png", cx: 660, top: 790, width: 1040, tilt: -7 }] },
+    phone: { capture: "02-smart-mode-fan.png" },
+    beforeAfter: { top: 820, width: 1200 } },
   { id: "03-voice-notes", key: "voiceNotes", pro: true,
-    devices: [{ capture: "03-voice-note-reader.png", cx: 660, top: 790, width: 1040, tilt: 7 }] },
+    phone: { capture: "03-voice-note-reader.png", voiceBubble: { top: 930 } },
+    lift: { band: KEYBOARD_BAND, width: 1240, raise: 90 } },
   { id: "04-keyboard", key: "keyboard", pro: false,
     keyboards: [
       { capture: "04-keyboard-azerty-fr.png", label: "fr" },
@@ -240,151 +229,181 @@ const SLIDES = [
       { capture: "04-keyboard-qwertz-de.png", label: "de" },
     ] },
   { id: "05-private", key: "private", pro: false,
-    devices: [{ capture: "05-offline-reminders.png", cx: 660, top: 790, width: 1040, tilt: -7 }] },
-  { id: "06-languages", key: "languages", pro: false,
-    devices: [
-      { capture: "06-whisper-languages.png", cx: 985, top: 900, width: 640, tilt: -10, z: 1 },
-      { capture: "06-parakeet-languages.png", cx: 335, top: 900, width: 640, tilt: 10, z: 2 },
-    ] },
+    phone: { capture: "05-models-offline.png" },
+    lift: { band: { x: 40, y: 1955, w: 1240, h: 410 }, width: 1240 } },
+  { id: "06-languages", key: "languages", pro: false, greetings: true },
 ];
 
-/* Captures: the locale's own folder, else en-GB. A missing file falls back once. */
 function captureSrc(file) { return `captures/${LOCALE}/${file}`; }
-function fallback(img, file) {
-  img.onerror = null;
-  img.src = `captures/en-GB/${file}`;
+function loadImg(img, file) {
+  img.onerror = () => { img.onerror = null; img.src = `captures/en-GB/${file}`; };
+  img.src = captureSrc(file);
 }
 
 const S = window.DICTUS_STRINGS;
 const strip = document.getElementById("strip");
+const el = (cls, html) => { const d = document.createElement("div"); d.className = cls; if (html) d.innerHTML = html; return d; };
 
-function addDevice(d, panelIndex, pro) {
-  const el = document.createElement("div");
-  el.className = "device";
-  const x = panelIndex * PANEL_W + d.cx - d.width / 2;
-  el.style.left = `${x}px`;
-  el.style.top = `${d.top}px`;
-  el.style.width = `${d.width}px`;
-  if (d.z) el.style.zIndex = 2 + d.z;
-  el.style.transform = `perspective(5200px) rotateY(${d.tilt || 0}deg)`;
-  el.style.setProperty("--shadow", pro ? T.proShadow : FREE.shadow);
-  el.style.setProperty("--shadow-near", pro ? T.proShadow : "rgba(10, 22, 40, 0.12)");
-  el.innerHTML = `<img class="screen" alt=""><img class="bezel" alt="">`;
-  const screen = el.querySelector(".screen");
-  screen.onerror = () => fallback(screen, d.capture);
-  screen.src = captureSrc(d.capture);
-  const bezel = el.querySelector(".bezel");
+/* Phone; returns the capture → strip mapping so lifts can sit exactly over their source. */
+function addPhone(p, i, pro) {
+  const scale = PHONE.width / 1470;            // bezel pixels → strip pixels
+  const left = i * PANEL_W + (PANEL_W - PHONE.width) / 2;
+  const d = el("device");
+  Object.assign(d.style, { left: `${left}px`, top: `${PHONE.top}px`, width: `${PHONE.width}px` });
+  d.style.setProperty("--shadow", pro ? T.proShadow : FREE.shadow);
+  d.style.setProperty("--shadow-near", pro ? T.proShadow : "rgba(10, 22, 40, 0.12)");
+  d.innerHTML = `<div class="screen"><img alt=""><div class="layer"></div></div><img class="bezel" alt="">`;
+  loadImg(d.querySelector(".screen > img"), p.capture);
+  const bezel = d.querySelector(".bezel");
   bezel.onerror = () => { document.getElementById("missing").style.display = "flex"; };
   bezel.src = BEZEL;
-  strip.appendChild(el);
+  // The layer works in capture pixels: 1320 capture px = 1320 bezel px.
+  d.querySelector(".layer").style.transform = `scale(${scale})`;
+  if (p.voiceBubble) d.querySelector(".layer").appendChild(voiceBubble(p.voiceBubble));
+  strip.appendChild(d);
+  // Capture pixel (x, y) → strip coordinates.
+  return (x, y) => [left + (75 + x) * scale, PHONE.top + (66 + y) * scale];
 }
 
-/* Slide 4: the keyboard band of each capture (toolbar + keys), stacked. */
-const KB_CROP = { y: 1770, h: 880 };   // capture pixels: suggestion bar to the space row
-const KB_SCALE = 0.64;
-function addKeyboards(list, panelIndex, labels) {
-  const w = Math.round(PANEL_W * KB_SCALE), h = Math.round(KB_CROP.h * KB_SCALE);
-  list.forEach((k, i) => {
-    const el = document.createElement("div");
-    el.className = "kb";
-    // A gentle cascade: alternating offsets read as three objects, not a list.
-    const dx = [-70, 70, -70][i];
-    el.style.left = `${panelIndex * PANEL_W + (PANEL_W - w) / 2 + dx}px`;
-    el.style.top = `${770 + i * (h + 112)}px`;
-    el.innerHTML = `<div class="label">${labels[k.label]}</div>
-      <div class="crop" style="width:${w}px;height:${h}px">
-        <img alt="" style="width:${w}px;margin-top:${-KB_CROP.y * KB_SCALE}px">
-      </div>`;
-    const img = el.querySelector("img");
-    img.onerror = () => fallback(img, k.capture);
-    img.src = captureSrc(k.capture);
-    strip.appendChild(el);
+function voiceBubble(b) {
+  const heights = [18, 30, 44, 28, 52, 38, 60, 46, 24, 40, 56, 34, 22, 48, 36, 26, 42, 20, 32, 18];
+  const v = el("voice-bubble", `
+    <svg class="play" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#8E8E93"/><path d="M26 20 L46 32 L26 44 Z" fill="#fff"/></svg>
+    <span class="bars">${heights.map((h) => `<i style="height:${h}px"></i>`).join("")}</span>
+    <span class="dur">${S.slides.voiceNotes.bubbleDuration}</span>`);
+  v.style.top = `${b.top}px`;
+  return v;
+}
+
+/* A crop of the capture, enlarged, centred on where it sits in the phone (or at centerY). */
+function addLift(l, toStrip, file, pro, i) {
+  const band = { x: 0, w: 1320, ...l.band };
+  const k = l.width / band.w;
+  const [, y0] = toStrip(band.x, band.y);
+  const [, y1] = toStrip(band.x, band.y + band.h);
+  const h = band.h * k;
+  // `raise` lifts the crop above its source, so it reads as coming out of the phone.
+  const cy = (l.centerY ?? (y0 + y1) / 2) - (l.raise || 0);
+  const d = el("lift", `<img alt="">`);
+  Object.assign(d.style, {
+    left: `${i * PANEL_W + (PANEL_W - l.width) / 2}px`, top: `${cy - h / 2}px`,
+    width: `${l.width}px`, height: `${h}px`,
+  });
+  d.style.setProperty("--lift-shadow", pro ? T.proLift : FREE.lift);
+  const img = d.querySelector("img");
+  Object.assign(img.style, { width: `${1320 * k}px`, left: `${-band.x * k}px`, top: `${-band.y * k}px` });
+  loadImg(img, file);
+  strip.appendChild(d);
+}
+
+function addBeforeAfter(b, copy, i, pro) {
+  const before = copy.before.replace(/~([^~]+)~/g, "<s>$1</s>");
+  const d = el("ba", `
+    <div class="label">${copy.beforeLabel}</div>
+    <div class="before">${before}</div>
+    <div class="divider"><span class="mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>
+      ${copy.modeName}</span></div>
+    <div class="after">${copy.after.map((t) => `<p>${t}</p>`).join("")}</div>`);
+  Object.assign(d.style, { left: `${i * PANEL_W + (PANEL_W - b.width) / 2}px`, top: `${b.top}px`, width: `${b.width}px` });
+  d.style.setProperty("--lift-shadow", pro ? T.proLift : FREE.lift);
+  strip.appendChild(d);
+}
+
+function addKeyboards(list, i, labels) {
+  // The suggestion bar to the space row: what a keyboard is judged on.
+  const band = { y: 1790, h: 860 };
+  const w = 1080, k = w / 1320, h = Math.round(band.h * k);
+  const tops = [640, 640 + h + 56, 640 + 2 * (h + 56)];
+  list.forEach((kb, n) => {
+    const d = el("kb", `<div class="tag">${labels[kb.label]}</div><div class="crop"><img alt=""></div>`);
+    const dx = [-30, 30, -30][n];
+    Object.assign(d.style, { left: `${i * PANEL_W + (PANEL_W - w) / 2 + dx}px`, top: `${tops[n]}px` });
+    d.querySelector(".tag").style[n % 2 ? "right" : "left"] = "46px";
+    const crop = d.querySelector(".crop");
+    Object.assign(crop.style, { width: `${w}px`, height: `${h}px` });
+    const img = crop.querySelector("img");
+    Object.assign(img.style, { width: `${1320 * k}px`, top: `${-band.y * k}px`, left: "0" });
+    loadImg(img, kb.capture);
+    strip.appendChild(d);
+  });
+}
+
+/* Greetings: two wrapped blocks, above and below the waveform. Deterministic
+   sizes and tints, so the slide looks the same on every export. */
+function addGreetings(list, i) {
+  const half = Math.ceil(list.length / 2);
+  [[list.slice(0, half), 660], [list.slice(half), 1930]].forEach(([words, top], b) => {
+    const block = el("greet", words.map(([word], n) => {
+      const k = n + b;
+      const strong = k % 4 === 0;
+      const size = strong ? 124 : [96, 84, 104][k % 3];
+      const color = strong ? "#2563EB" : `rgba(10, 22, 40, ${[0.82, 0.48, 0.64][k % 3]})`;
+      const span = `<span style="font-size:${size}px;font-weight:${strong ? 500 : 400};color:${color}">${word}</span>`;
+      // Three words per line: a wrap left to chance leaves one word alone on a line.
+      return span + ((n + 1) % 3 === 0 && n + 1 < words.length ? '<i style="flex-basis:100%;height:0"></i>' : "");
+    }).join(""));
+    Object.assign(block.style, { left: `${i * PANEL_W + (PANEL_W - 1220) / 2}px`, top: `${top}px` });
+    strip.appendChild(block);
   });
 }
 
 SLIDES.forEach((s, i) => {
   const copy = S.slides[s.key];
-  const c = document.createElement("div");
-  c.className = `copy ${s.pro ? "pro-slide" : "free"}`;
-  c.style.left = `${i * PANEL_W}px`;
-  c.innerHTML = `
-    <div class="eyebrow-row">
-      <span class="eyebrow">${copy.eyebrow}</span>
-      ${s.pro ? `<span class="pro">${S.proBadge}</span>` : ""}
-    </div>
+  const c = el(`copy ${s.pro ? "pro-slide" : "free"}`, `
+    <div class="badge-row">${s.pro ? `<span class="pro">${S.proBadge}</span>` : ""}</div>
     <div class="headline">${copy.headline}</div>
-    <div class="subtext">${copy.subtext}</div>`;
+    ${copy.footnote ? `<div class="footnote">${copy.footnote}</div>` : ""}`);
+  c.style.left = `${i * PANEL_W}px`;
   strip.appendChild(c);
-  (s.devices || []).forEach((d) => addDevice(d, i, s.pro));
+  let toStrip;
+  if (s.phone) toStrip = addPhone(s.phone, i, s.pro);
+  if (s.lift) addLift(s.lift, toStrip, s.phone.capture, s.pro, i);
+  if (s.beforeAfter) addBeforeAfter(s.beforeAfter, copy, i, s.pro);
   if (s.keyboards) addKeyboards(s.keyboards, i, copy.labels);
+  if (s.greetings) addGreetings(copy.greetings, i);
 });
 
 /* ════════════════════════════════════════════════════════════
    Background + continuous waveform, drawn once across the strip.
    ════════════════════════════════════════════════════════════ */
 const canvas = document.getElementById("bg");
-canvas.width = STRIP_W;
-canvas.height = PANEL_H;
+canvas.width = STRIP_W; canvas.height = PANEL_H;
 const ctx = canvas.getContext("2d");
 
-/* How "Pro" a column is, 0..1. TRANSITION is the half-width of the light/Pro
-   blend around a seam. 0 = a clean change exactly at the cut (issue #643: "the
-   navy-to-light transition happens at the slide 1 to 2 cut"); a soft blend was
-   tried at 300 and 160 px and read as a stain on the edge of a standalone slide. */
-const TRANSITION = 0;
-const smooth = (t) => t * t * (3 - 2 * t);
-function proWeight(x) {
-  const edges = [];
-  SLIDES.forEach((s, i) => {
-    const prev = SLIDES[i - 1];
-    if (prev && prev.pro !== s.pro) edges.push({ at: i * PANEL_W, entering: s.pro });
-  });
-  let w = SLIDES[Math.min(Math.floor(x / PANEL_W), PANELS - 1)].pro ? 1 : 0;
-  for (const e of edges) {
-    const d = x - e.at;
-    if (TRANSITION > 0 && Math.abs(d) < TRANSITION) {
-      const t = smooth((d + TRANSITION) / (2 * TRANSITION));
-      w = e.entering ? t : 1 - t;
-    }
-  }
-  return w;
-}
+/* Pro or not, per column: a clean change exactly at the cut (issue #643). */
+const proAt = (x) => SLIDES[Math.min(Math.floor(x / PANEL_W), PANELS - 1)].pro;
 const mix = (a, b, t) => a.map((v, k) => Math.round(v + (b[k] - v) * t));
-
-for (let x = 0; x < STRIP_W; x += 2) {
-  const t = proWeight(x + 1);
+SLIDES.forEach((s, i) => {
   const g = ctx.createLinearGradient(0, 0, 0, PANEL_H);
-  g.addColorStop(0, `rgb(${mix(FREE.top, T.proTop, t)})`);
-  g.addColorStop(1, `rgb(${mix(FREE.bottom, T.proBottom, t)})`);
+  g.addColorStop(0, `rgb(${s.pro ? T.proTop : FREE.top})`);
+  g.addColorStop(1, `rgb(${s.pro ? T.proBottom : FREE.bottom})`);
   ctx.fillStyle = g;
-  ctx.fillRect(x, 0, 2, PANEL_H);
-}
-
-/* Dot grid, uniform spacing so it never shows a seam. */
+  ctx.fillRect(i * PANEL_W, 0, PANEL_W, PANEL_H);
+});
 const DOT = 64;
 for (let gy = DOT / 2; gy < PANEL_H; gy += DOT) {
   for (let gx = DOT / 2; gx < STRIP_W; gx += DOT) {
-    ctx.fillStyle = proWeight(gx) > 0.5 ? T.proDot : FREE.dot;
-    ctx.beginPath();
-    ctx.arc(gx, gy, 2, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = proAt(gx) ? T.proDot : FREE.dot;
+    ctx.beginPath(); ctx.arc(gx, gy, 2, 0, Math.PI * 2); ctx.fill();
   }
 }
 
 /* Waveform: BrandWaveform.swift processingEnergy,
      energy = 0.2 + 0.25 * (sin(2π · t) + 1)
    one continuous function over the whole strip. Colour follows the app's rule:
-   the inner 40 % of every PANEL is the blue gradient, the rest fades to grey,
-   so blue sits at each screen's centre and never on a seam. */
-const BAR_W = 30, BAR_GAP = 16, MIN_H = 14, MAX_H = 560;
-const WAVE_Y = 2400;
+   the inner 40 % of every PANEL is the blue gradient, the rest fades to grey, so
+   blue sits at each screen's centre and never on a seam. It runs behind the
+   phones and shows in their margins, and in full on the slides without one. */
+const BAR_W = 30, BAR_GAP = 16, MIN_H = 14, MAX_H = 640;
+const WAVE_Y = 1600;
 const WAVE_PERIOD = STRIP_W / 4;
 const pitch = BAR_W + BAR_GAP;
 const bars = Math.floor((STRIP_W - BAR_GAP) / pitch);
 const x0 = (STRIP_W - (bars * pitch - BAR_GAP)) / 2;
 ctx.globalAlpha = 0.62;
-for (let i = 0; i < bars; i++) {
-  const x = x0 + i * pitch, cx = x + BAR_W / 2;
+for (let n = 0; n < bars; n++) {
+  const x = x0 + n * pitch, cx = x + BAR_W / 2;
   const energy = 0.2 + 0.25 * (Math.sin(2 * Math.PI * (cx / WAVE_PERIOD + 0.25)) + 1);
   const h = Math.max(MIN_H + energy * (MAX_H - MIN_H), MIN_H);
   const y = WAVE_Y - h / 2;
@@ -393,28 +412,27 @@ for (let i = 0; i < bars; i++) {
   let fill;
   if (dCenter < 0.4) {
     fill = ctx.createLinearGradient(0, y, 0, y + h);
-    fill.addColorStop(0, "#6BA3FF");
-    fill.addColorStop(1, "#2563EB");
+    fill.addColorStop(0, "#6BA3FF"); fill.addColorStop(1, "#2563EB");
   } else {
-    const rgb = mix(FREE.edgeRGB, T.proEdgeRGB, proWeight(cx));
+    const rgb = proAt(cx) ? T.proEdgeRGB : FREE.edgeRGB;
     fill = `rgba(${rgb},${((1 - dCenter) * 0.9 + 0.15).toFixed(3)})`;
   }
-  ctx.beginPath();
-  ctx.roundRect(x, y, BAR_W, h, BAR_W / 2);
-  ctx.fillStyle = fill;
-  ctx.fill();
+  ctx.beginPath(); ctx.roundRect(x, y, BAR_W, h, BAR_W / 2); ctx.fillStyle = fill; ctx.fill();
 }
 ctx.globalAlpha = 1;
 
-/* Signals the exporter waits for: every image decoded, fonts loaded. */
+/* Signals the exporter waits for: every image decoded, fonts loaded, rows centred. */
 window.whenReady = Promise.all([
   document.fonts.ready,
   ...[...document.images].map((im) => im.decode().catch(() => new Promise((r) => {
     im.addEventListener("load", r, { once: true });
     im.addEventListener("error", r, { once: true });
   }))),
-]).then(() => document.getElementById("missing").style.display !== "flex");
+]).then(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))))
+  .then(() => document.getElementById("missing").style.display !== "flex");
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
+/* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
+window.ITERATION = "v2";
 
 if (params.has("preview")) {
   document.body.classList.add("preview");
