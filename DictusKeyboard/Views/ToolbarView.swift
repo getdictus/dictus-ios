@@ -889,6 +889,12 @@ struct ToolbarView: View {
     /// A background, so the ☰'s layout frame does not move when the ring comes and
     /// goes: its centre stays where the reader's and the panel's `✕` sit, and the
     /// ring overhangs by 5 pt on each side the way the mic's does.
+    ///
+    /// While ringed, the glyph itself takes the accent too (trial approved by Pierre,
+    /// fifth round of #641): the three lines in the halo's blue say "notes are here"
+    /// even where the glass ring reads faintly. Not animated, like the halo it goes
+    /// with. Only the ☰ ever passes `ringed`: the panel's `✕` and the reader's `✕`
+    /// are drawn without it, so the blue never carries over the ☰ → ✕ morph.
     private func barIcon(
         systemName: String,
         size: CGFloat,
@@ -898,7 +904,7 @@ struct ToolbarView: View {
     ) -> some View {
         Image(systemName: systemName)
             .font(.system(size: size, weight: .medium))
-            .foregroundColor(.dictusPillIconSecondary)
+            .foregroundColor(ringed ? .dictusAccent : .dictusPillIconSecondary)
             .frame(width: width, height: iconDiameter)
             .dictusGlass(in: shape == .capsule ? AnyShape(Capsule()) : AnyShape(Circle()))
             .background {
