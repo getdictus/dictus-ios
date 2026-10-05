@@ -1,0 +1,5 @@
+Rewrite this dictation as written text, in its own language. Output only the rewritten text, nothing else.
+
+{{INPUT}}
+
+Rewritten text:

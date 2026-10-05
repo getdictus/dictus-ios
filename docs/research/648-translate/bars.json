@@ -1,0 +1,142 @@
+[
+  {
+    "id": "*",
+    "_note": "Applies to every fixture. Bar (c): nothing the speaker did not say. A bracketed placeholder and an e-mail sign-off are the two invention shapes PR #388 measured; the per-fixture lists below add the inventions seen on device.",
+    "add": [
+      { "label": "bracketed placeholder", "forbid": "\\[[^\\]]*\\]" },
+      { "label": "sign-off", "forbid": "(?i)(best regards|kind regards|sincerely|yours truly|cheers,?\\s*$)" },
+      { "label": "newline marker leak", "forbid": "<<NL>>" }
+    ]
+  },
+  {
+    "id": "translate-fr-00",
+    "register": "familiar, tutoiement, a message to a friend",
+    "drop": [
+      { "label": "`aussi` opener rendered", "forbid": "(?i)\\balso\\b" },
+      { "label": "`enfin` self-correction rendered", "forbid": "(?i)\\b(finally|in the end|at last)\\b" },
+      { "label": "false start `je voulais parler,` kept", "forbid": "(?i)wanted to (talk|speak|chat)\\b" }
+    ],
+    "keep": [
+      { "label": "addressee Hugo", "require": "Hugo" },
+      { "label": "asks for an opinion", "require": "(?i)(opinion|thoughts|what you think|feedback|your take)" },
+      { "label": "a new feature", "require": "(?i)new feature" },
+      { "label": "that the speaker is developing", "require": "(?i)(develop|build|working on)" },
+      { "label": "as I told you", "require": "(?i)((as|like) I (told|said|mentioned)|I('d| had)? (told|mentioned))" },
+      { "label": "premium features", "require": "(?i)premium" },
+      { "label": "to fund the work", "require": "(?i)(fund|financ|pay for)" }
+    ],
+    "add": [],
+    "critical": []
+  },
+  {
+    "id": "translate-fr-01",
+    "register": "familiar, tutoiement, a message to a friend",
+    "drop": [
+      { "label": "`Aussi` opener rendered", "forbid": "(?i)\\balso\\b" },
+      { "label": "`enfin` self-correction rendered", "forbid": "(?i)\\b(finally|in the end|at last)\\b" },
+      { "label": "restart `discuter avec toi d'une, enfin pour te parler d'une` kept twice", "forbid": "(?i)(about something|\\b(chat|talk|discuss)\\b[^.]{0,40}\\b(talk|tell) (to )?you)" }
+    ],
+    "keep": [
+      { "label": "addressee Hugo", "require": "Hugo" },
+      { "label": "a new feature", "require": "(?i)new feature" },
+      { "label": "for Dictus", "require": "Dictus" },
+      { "label": "via a subscription", "require": "(?i)subscription" },
+      { "label": "wants his opinion on the idea", "require": "(?i)(what you think|your (opinion|thoughts|take))" },
+      { "label": "Telegram", "require": "Telegram" },
+      { "label": "WhatsApp", "require": "WhatsApp" },
+      { "label": "no built-in transcription", "require": "(?i)(transcription|transcri)" },
+      { "label": "transcription lands in the keyboard", "require": "(?i)keyboard" },
+      { "label": "closing question", "require": "\\?\\s*$" }
+    ],
+    "add": [
+      { "label": "`a tool` invented from the garble `avec un qui`", "forbid": "(?i)\\btools?\\b" }
+    ],
+    "critical": [
+      { "label": "`fonctionnalités pros` keeps the product word Pro", "require": "(?i)\\bpro\\b", "forbid": "(?i)professional" },
+      { "label": "`vocaux` = voice messages, not vowels", "require": "(?i)(voice|audio)[ -]?(messages?|notes?|memos?|recordings?|clips?)", "forbid": "(?i)vowel" }
+    ]
+  },
+  {
+    "id": "translate-fr-03",
+    "register": "familiar, spoken note to self / to a collaborator",
+    "drop": [
+      { "label": "tic `concrètement` rendered literally", "forbid": "(?i)\\bconcretely\\b" },
+      { "label": "tic `à ce moment-là` rendered literally", "forbid": "(?i)\\bat that (moment|point)\\b" }
+    ],
+    "keep": [
+      { "label": "is testing", "require": "(?i)\\btest" },
+      { "label": "the Dictaphone / voice-memo source", "require": "(?i)(dictaphone|voice memos?|recorder)" },
+      { "label": "smart mode", "require": "(?i)smart mode" },
+      { "label": "translation into English", "require": "(?i)english" },
+      { "label": "it does not work", "require": "(?i)(not work|n't work|isn't working|doesn't work|fails)" },
+      { "label": "maybe too short", "require": "(?i)too short" },
+      { "label": "a filter we put in place", "require": "(?i)filter" },
+      { "label": "needs digging into", "require": "(?i)(dig|look into|investigate|check)" },
+      { "label": "it is a bug", "require": "(?i)\\bbug\\b" }
+    ],
+    "add": [
+      { "label": "`piedus` (ASR for Dictus) invented into `keypad`", "forbid": "(?i)keypad" }
+    ],
+    "critical": [
+      { "label": "`vocaux` / `vocal` = voice message, not vowel", "require": "(?i)(voice|audio)[ -]?(messages?|notes?|memos?|recordings?|clips?)", "forbid": "(?i)vowel" }
+    ]
+  },
+  {
+    "id": "translate-fr-04",
+    "register": "familiar, tutoiement, quick update to a colleague",
+    "drop": [
+      { "label": "`bah écoute, euh` rendered", "forbid": "(?i)\\b(listen|well,? listen|yeah,? listen|uh|um)\\b" }
+    ],
+    "keep": [
+      { "label": "Jean-Claude", "require": "Jean-Claude" },
+      { "label": "went rather well", "require": "(?i)(went|go|gone) (pretty|quite|rather|fairly|really)? ?well" },
+      { "label": "I'll keep you posted", "require": "(?i)(keep you (posted|updated|in the loop)|let you know)" },
+      { "label": "he seems motivated", "require": "(?i)motivated" },
+      { "label": "for the training", "require": "(?i)training" },
+      { "label": "it is a good thing", "require": "(?i)good" }
+    ],
+    "add": [],
+    "critical": [
+      { "label": "`faire le rendez-vous` = had the meeting, not made/booked it", "require": "(?i)\\b(had|finished|wrapped up|got out of|came out of|done with|met)\\b", "forbid": "(?i)(made|booked|scheduled|set up|arranged) (the|an|a) (appointment|meeting)" }
+    ]
+  },
+  {
+    "id": "translate-fr-05",
+    "_note": "PRIVATE FIXTURE (a personal opinion). Only the spans the issue comment already quotes are listed here. Its full drop/keep lists live in .local-corpus/648-translate/bench/bars-private.json, whose SHA-256 is recorded in bars.md so the commit still proves they were written before the first model call.",
+    "register": "familiar, a reply in a conversation",
+    "drop": [],
+    "keep": [],
+    "add": [],
+    "critical": [
+      { "label": "`plus de 60 %` = more than 60 %, not `no longer`", "require": "(?i)(more than|over|above) 60", "forbid": "(?i)no longer" },
+      { "label": "English grammar of the `C'est pas les riches…` sentence", "forbid": "(?i)who's the problem" }
+    ]
+  },
+  {
+    "id": "translate-fr-06",
+    "register": "familiar, a spoken note, first person",
+    "drop": [
+      { "label": "`enfin` self-correction rendered", "forbid": "(?i)\\b(finally|in the end|at last)\\b" },
+      { "label": "tic `donc voilà` rendered literally", "forbid": "(?i)\\b(so there you go|there you have it|so voilà|so yeah)\\b" }
+    ],
+    "keep": [
+      { "label": "a last recording in French with lots of hesitation", "require": "(?i)hesitat" },
+      { "label": "to see how the transcription copes", "require": "(?i)transcription" },
+      { "label": "Dictus version 2.0", "require": "2\\.0" },
+      { "label": "the developers' classic perfectionism problem", "require": "(?i)perfect" },
+      { "label": "has set a scope", "require": "(?i)(scope|perimeter|boundar|limit)" },
+      { "label": "keeps adding features / small things", "require": "(?i)(adding|add) (new )?(features|things|stuff)" },
+      { "label": "the marketing phase", "require": "(?i)marketing" },
+      { "label": "App Store screenshots", "require": "(?i)screenshots?" },
+      { "label": "onboarding to rework", "require": "(?i)onboarding" },
+      { "label": "smart modes", "require": "(?i)smart modes?" }
+    ],
+    "add": [],
+    "critical": [
+      { "label": "`passer sur la phase de marketing` = move on to, not skip", "require": "(?i)(move|moving|get|getting|go|going|switch|switching|transition|transitioning|start|starting|begin|beginning|onto|on to|into)\\b[^.]{0,25}marketing", "forbid": "(?i)skip(ping)?[^.]{0,15}marketing" },
+      { "label": "`c'est toujours de sortir` = still, not always", "require": "(?i)\\bstill\\b", "forbid": "(?i)\\balways\\b" },
+      { "label": "`sentir ça` (ASR for `sortir`) = ship / release, not feel", "forbid": "(?i)\\b(feel|sense|smell)\\b" },
+      { "label": "`transcrire des vocales` = voice messages, not vowels", "forbid": "(?i)vowel" }
+    ]
+  }
+]
