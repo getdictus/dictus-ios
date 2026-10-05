@@ -26,7 +26,7 @@
     ?locale=en-GB     copy from strings/<locale>.js, captures from captures/<locale>/
     ?theme=light      background of the Pro slides: light (default since V3) | navy.
                       The ONE variable decision 1 asks for; the layout is identical.
-    ?variant=message  slide 2 sells `message` (default) or `translate`
+    ?variant=translate  slide 2 sells `translate` (default, chosen by Pierre) or `message`
     ?preview          scale the strip to the window
 
   Device frame: Apple's official iPhone 17 Pro Max bezel (Apple Design
@@ -60,7 +60,7 @@
   .pro {
     font: 600 40px/1 "DM Sans", sans-serif; letter-spacing: 0.02em; color: #fff;
     padding: 15px 30px 16px; border-radius: 18px;
-    background: linear-gradient(135deg, #6BA3FF 0%, #2563EB 100%);
+    background: linear-gradient(135deg, #3D7EFF 0%, #2563EB 100%);   /* white text stays legible */
     box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
   }
   .headline {
@@ -112,8 +112,11 @@
   .ba .divider::before, .ba .divider::after { content: ""; flex: 1; height: 3px; background: #E2E8F0; border-radius: 2px; }
   .ba .mode {
     display: flex; align-items: center; gap: 16px; padding: 16px 30px; border-radius: 40px;
-    font: 500 40px/1 "DM Sans", sans-serif; color: #fff; background: #8B5CF6;
-    box-shadow: 0 10px 24px rgba(139, 92, 246, 0.35);
+    font: 500 40px/1 "DM Sans", sans-serif; color: #fff;
+    /* Dictus blue: there is no purple in the app. Accent #3D7EFF to #2563EB rather
+       than the brand gradient's #6BA3FF, so white text keeps a 3:1 contrast. */
+    background: linear-gradient(135deg, #3D7EFF 0%, #2563EB 100%);
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
   }
   .ba .mode svg { width: 40px; height: 40px; }
   .ba .after { display: flex; flex-direction: column; gap: 22px; }
@@ -182,7 +185,7 @@ const params = new URLSearchParams(location.search);
 const LOCALE = params.get("locale") || "en-GB";
 const THEME = params.get("theme") || "light";
 /* Slide 2 sells one Smart Mode: ?variant=message (default) or translate. */
-const VARIANT = params.get("variant") || "message";
+const VARIANT = params.get("variant") || "translate";   // Pierre chose Translate, 2026-10-05
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -220,9 +223,14 @@ const BEZEL = ".bezels/iPhone 17 Pro Max - Deep Blue - Portrait.png";
    baseline everywhere, with a margin below. Dictus is a keyboard and the keyboard
    is the bottom of the screen: a bottom crop hid the product (V2). */
 const PHONE = { width: 1000, top: 737 };   // 2041 px tall, 90 px margin below
-/* Keyboard band of a capture, in capture pixels: from the top of the keyboard
-   panel to just under the space row. */
-const KEYBOARD_BAND = { y: 1762, h: 896 };
+/* Keyboard band of a capture, in capture pixels: from the top edge of the
+   keyboard panel to just under the space row. Measured on the captures
+   (2026-10-05): the panel starts at y = 1767, spans the full width, and its top
+   corners have a radius of about 85 px (circle fit, 84.4 to 86.5 across three
+   captures). The band starts exactly on that edge, so a lifted card with
+   radius 85 × zoom has the panel's own corners as its top corners. */
+const PANEL_RADIUS = 85;
+const KEYBOARD_BAND = { y: 1767, h: 891, radius: PANEL_RADIUS, fill: "#E2E3E7" };
 
 /* ════════════════════════════════════════════════════════════
    SLIDES: layout only. Copy comes from strings/<locale>.js.
@@ -250,7 +258,11 @@ const SLIDES = [
   { id: "05-private", key: "private", pro: false,
     phone: { capture: "05-models-downloaded.png" },
     // The whole "Downloaded" section: the point is that the models live on the phone.
-    lift: { band: { x: 40, y: 525, w: 1240, h: 990 }, width: 1180 } },
+    // Measured model cards: x 45 to 1274, radius 46.5 px (plain) and 49.9 px (the
+    // active card's blue border). Cropped with a 40 px margin around them, so the
+    // card's radius is the inner radius + the margin (50 + 40) and the corners
+    // read as concentric.
+    lift: { band: { x: 5, y: 538, w: 1309, h: 1005, radius: 90, fill: "#F0F0F5" }, width: 1180 } },
   { id: "06-languages", key: "languages", pro: false, greetings: true },
 ];
 
@@ -316,6 +328,8 @@ function addLift(l, toStrip, file, pro, i) {
   // `raise` lifts the crop above its source, so it reads as coming out of the phone.
   const cy = (l.centerY ?? (y0 + y1) / 2) - (l.raise || 0);
   const d = el("lift", `<img alt="">`);
+  if (band.radius) d.style.borderRadius = `${band.radius * k}px`;
+  if (band.fill) d.style.background = band.fill;
   Object.assign(d.style, {
     left: `${i * PANEL_W + (PANEL_W - l.width) / 2}px`, top: `${cy - h / 2}px`,
     width: `${l.width}px`, height: `${h}px`,
@@ -346,8 +360,11 @@ function addBeforeAfter(b, slideCopy, i, pro) {
 
 function addKeyboards(list, i, labels) {
   // The suggestion bar to the space row: what a keyboard is judged on.
-  const band = { y: 1790, h: 860 };
-  const w = 1080, k = w / 1320, h = Math.round(band.h * k);
+  // From the panel's top edge (see KEYBOARD_BAND), so the card's top corners are
+  // the panel's own: radius 85 × zoom.
+  const band = { y: KEYBOARD_BAND.y, h: 883 };
+  // 1020 wide: three cards from the panel edge fit above the bottom margin.
+  const w = 1020, k = w / 1320, h = Math.round(band.h * k);
   const tops = [640, 640 + h + 56, 640 + 2 * (h + 56)];
   list.forEach((kb, n) => {
     const d = el("kb", `<div class="tag">${labels[kb.label]}</div><div class="crop"><img alt=""></div>`);
@@ -355,7 +372,7 @@ function addKeyboards(list, i, labels) {
     Object.assign(d.style, { left: `${i * PANEL_W + (PANEL_W - w) / 2 + dx}px`, top: `${tops[n]}px` });
     d.querySelector(".tag").style[n % 2 ? "right" : "left"] = "46px";
     const crop = d.querySelector(".crop");
-    Object.assign(crop.style, { width: `${w}px`, height: `${h}px` });
+    Object.assign(crop.style, { width: `${w}px`, height: `${h}px`, borderRadius: `${PANEL_RADIUS * k}px`, background: KEYBOARD_BAND.fill });
     const img = crop.querySelector("img");
     Object.assign(img.style, { width: `${1320 * k}px`, top: `${-band.y * k}px`, left: "0" });
     loadImg(img, kb.capture);
@@ -472,7 +489,7 @@ window.ITERATION = "v3";
 window.EXPORT_THEMES = ["light"];
 window.VARIANT = VARIANT;
 /* Slide 2 variants; the first is the main set, the others only swap slide 2. */
-window.VARIANTS = ["message", "translate"];
+window.VARIANTS = ["translate", "message"];
 
 if (params.has("preview")) {
   document.body.classList.add("preview");

@@ -12,7 +12,7 @@
     ?locale=en-GB   (default)
     ?iteration=v3   design iteration (default v3; v1 and v2 are earlier rounds)
     ?theme=navy     show one theme only (v1/v2: navy and light by default; v3: light only)
-    v3 also shows slide 2's second variant (translate) in a gallery of its own.
+    v3 also shows slide 2's alternate variant (message) in a gallery of its own.
 -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -41,9 +41,9 @@ const locale = params.get("locale") || "en-GB";
 const iteration = params.get("iteration") || "v3";
 const themes = params.get("theme") ? [params.get("theme")] : iteration === "v3" ? ["light"] : ["navy", "light"];
 const ids = ["01-dictate", "02-smart-modes", "03-voice-notes", "04-keyboard", "05-private", "06-languages"];
-// From v3, slide 2 has two variants; the main set uses message.
-if (iteration === "v3") ids[1] = "02-message";
-const variants = iteration === "v3" ? [["main", ids], ["translate", ids.map((id) => id === "02-message" ? "02-translate" : id)]] : [["main", ids]];
+// From v3, slide 2 has two variants; the main set uses translate (Pierre, 2026-10-05).
+if (iteration === "v3") ids[1] = "02-translate";
+const variants = iteration === "v3" ? [["main", ids], ["message", ids.map((id) => id === "02-translate" ? "02-message" : id)]] : [["main", ids]];
 const imgs = (theme, list) => list.map((id) => `<img src="export/${locale}/${iteration}/${theme}/${id}.png" alt="">`).join("");
 for (const theme of themes) {
   for (const [variant, list] of variants) {
