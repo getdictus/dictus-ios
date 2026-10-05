@@ -82,3 +82,13 @@ final class ProFeatureSwitchesTests: XCTestCase {
         XCTAssertFalse(switches.isOn(.smartMode))
     }
 }
+
+extension ProFeatureSwitchesTests {
+    func testOnCountFollowsTheSwitches() {
+        let switches = ProFeatureSwitches(defaults: defaults(makeSuite()))
+        XCTAssertEqual(switches.onCount, ProFeature.allCases.count)
+        switches.set(.vocabulary, isOn: false)
+        switches.set(.history, isOn: false)
+        XCTAssertEqual(switches.onCount, ProFeature.allCases.count - 2)
+    }
+}

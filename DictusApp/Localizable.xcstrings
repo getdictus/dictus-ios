@@ -126,6 +126,47 @@
         }
       }
     },
+    "%lld features on" : {
+      "comment" : "Home Pro card for a subscriber: how many Pro features are switched on (#216 decision 16).",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld feature on"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld features on"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld fonctionnalité active"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld fonctionnalités actives"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld MB of %lld MB" : {
       "comment" : "Byte counter shown under the download percentage (issue #207). Arguments are downloaded and total megabytes.",
       "localizations" : {
@@ -239,6 +280,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reformulation IA, historique et plus"
+          }
+        }
+      }
+    },
+    "All Pro features are off" : {
+      "comment" : "Home Pro card for a subscriber who switched every Pro feature off in the hub (#216 decision 16).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes les fonctionnalités Pro sont désactivées"
           }
         }
       }

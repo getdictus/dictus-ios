@@ -72,8 +72,9 @@ struct HomeView: View {
                 testDictationLink
             }
 
-            // Pro banner (hidden when subscribed).
-            // Gated behind PremiumFlags.paywallVisible until the first Pro
+            // The Home Pro card: the offer, the trial reminder, or since #216 decision
+            // 16 a subscriber's way into the hub. Gated behind
+            // PremiumFlags.paywallVisible until the first Pro
             // feature ships and ASC setup is done (#236, #79, #215).
             if PremiumFlags.paywallVisible {
                 ProBannerView { showPaywall = true }

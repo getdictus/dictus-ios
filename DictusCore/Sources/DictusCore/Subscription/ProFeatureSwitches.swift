@@ -51,6 +51,11 @@ public final class ProFeatureSwitches: ObservableObject {
         values[feature] ?? true
     }
 
+    /// How many Pro features are switched on: the Home Pro card's subtitle (#216).
+    public var onCount: Int {
+        ProFeature.allCases.filter(isOn).count
+    }
+
     /// Flips the switch: writes the App Group key, then publishes.
     public func set(_ feature: ProFeature, isOn: Bool) {
         defaults.set(isOn, forKey: feature.settingsKey)
