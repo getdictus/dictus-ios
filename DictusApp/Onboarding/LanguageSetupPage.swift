@@ -149,6 +149,9 @@ struct LanguageSetupPage: View {
                     Text("Dictus has no keyboard in this language yet. Choose the language you type in.")
                         .font(.dictusCaption)
                         .foregroundStyle(.secondary)
+                        // Without this the card's leading-aligned stack lets the caption
+                        // collapse to one truncated line (seen on the simulator).
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
