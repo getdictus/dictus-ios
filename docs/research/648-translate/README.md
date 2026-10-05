@@ -120,8 +120,8 @@ these fixtures, so it is in-sample (`bars.md` §7), and even so it did not move 
 
 - **(a) 04, arm A runs 1 and 2:** `Yes, look,` renders `bah écoute`. The regex knew `listen`
   only. Added.
-- **(b) 05, arm A run 3:** `I'm not necessarily with you` still disagrees; the regex wanted
-  `agree`. Overturned (the fact is kept).
+- **(b) 05, arm A run 3:** the output keeps the fact in words the regex did not foresee (the
+  private bar wanted a form of `agree`). Overturned. The span stays private with the fixture.
 - **(c) 03, every arm:** `directly from the foot` (`du piedus`, ASR for "Dictus") gives a garble
   a meaning. It is the same class as the device's `keypad`, and the 13:29 comment's bar is "not
   worse than raw". Added, 3/18 per arm.
