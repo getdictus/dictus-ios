@@ -223,10 +223,14 @@ struct PaywallView: View {
 
     /// The subscriber's upgrade (#216 decision 15): the lifetime, bought directly
     /// through the same path as the plan selector. Apple's sheet confirms; on success
-    /// the thank-you screen shows, and the next scan lands on lifetime plus the
-    /// subscription still billed.
+    /// the thank-you screen shows, and the next scan lands on plain lifetime, since the
+    /// row only buys once the subscription no longer renews.
+    ///
+    /// The rule is checked again here and not only by which shape the row draws: this
+    /// is the one function that can sell the lifetime over a subscription.
     private func buyLifetime() {
-        guard let lifetime = subscriptionManager.lifetimeProduct else { return }
+        guard ProLifetimeUpgrade.offer(for: hubBlock, paywallVisible: PremiumFlags.paywallVisible)?.isPurchasable == true,
+              let lifetime = subscriptionManager.lifetimeProduct else { return }
         Task { await subscriptionManager.purchase(lifetime) }
     }
 

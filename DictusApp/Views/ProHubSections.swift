@@ -195,7 +195,8 @@ struct ProHubMembershipCard: View {
     /// Whether a purchase is in flight, to show progress in place of the chevron.
     var isPurchasing = false
 
-    /// Starts the lifetime purchase. Apple's own sheet is the confirmation.
+    /// Starts the lifetime purchase. Apple's own sheet is the confirmation. Only ever
+    /// called from the purchasable shape of the row.
     var buyLifetime: () -> Void = {}
 
     @State private var showsManageSheet = false
@@ -290,46 +291,57 @@ struct ProHubMembershipCard: View {
     }
 
     /// The lifetime upgrade, under Manage subscription and quieter than it: a plain
-    /// row with a hairline above, no fill, no badge (decision 15). It is an option a
-    /// subscriber may want, not a banner in the middle of what they already own.
+    /// row with a hairline above, no fill, no badge (decision 15).
+    ///
+    /// Two shapes (decision 15, amended 2026-10-05). While the subscription renews it
+    /// is a line, not a button: the lifetime is never sold over a subscription that
+    /// would keep billing, and the way forward is the Manage subscription button right
+    /// above. Once the subscription is cancelled it becomes the purchase, with the
+    /// price. The switch between the two follows `ownership`, so a cancellation made
+    /// in Apple's sheet turns the row into a button with nothing reopened.
+    @ViewBuilder
     private func upgradeRow(_ upgrade: ProLifetimeUpgrade, price: String) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Divider()
 
-            Button(action: buyLifetime) {
-                HStack(spacing: 10) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Upgrade to lifetime")
-                            .font(.dictusBody.weight(.semibold))
-                            .foregroundColor(.dictusAccent)
-                        Text("\(price), one payment")
-                            .font(.dictusCaption)
-                            .foregroundColor(.secondary)
+            if upgrade.isPurchasable {
+                Button(action: buyLifetime) {
+                    HStack(spacing: 10) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Upgrade to lifetime")
+                                .font(.dictusBody.weight(.semibold))
+                                .foregroundColor(.dictusAccent)
+                            Text("\(price), one payment")
+                                .font(.dictusCaption)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer(minLength: 8)
+                        if isPurchasing {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "chevron.forward")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                                .accessibilityHidden(true)
+                        }
                     }
-                    Spacer(minLength: 8)
-                    if isPurchasing {
-                        ProgressView()
-                    } else {
-                        Image(systemName: "chevron.forward")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.tertiary)
-                            .accessibilityHidden(true)
-                    }
+                    .contentShape(Rectangle())
                 }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .disabled(isPurchasing)
-            .accessibilityElement(children: .combine)
-            .accessibilityAddTraits(.isButton)
-
-            // Before the purchase, while the subscription may still renew: Apple
-            // does not cancel it when the lifetime is bought.
-            if upgrade.showsSubscriptionKeepsBillingNote {
-                Text("Your subscription is not cancelled automatically. Cancel it in Manage subscription.")
-                    .font(.dictusCaption)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                .buttonStyle(.plain)
+                .disabled(isPurchasing)
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isButton)
+            } else {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Upgrade to lifetime")
+                        .font(.dictusBody.weight(.semibold))
+                        .foregroundColor(.secondary)
+                    Text("To switch to lifetime, first cancel your subscription in Manage subscription.")
+                        .font(.dictusCaption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .accessibilityElement(children: .combine)
             }
         }
     }

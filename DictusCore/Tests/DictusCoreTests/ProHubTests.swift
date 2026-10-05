@@ -151,14 +151,35 @@ final class ProLifetimeUpgradeTests: XCTestCase {
         }
     }
 
-    func testTheNoteShowsOnlyWhileTheSubscriptionMayRenew() {
+    /// Decision 15 as amended on 2026-10-05: never sold over a renewing subscription.
+    func testPurchasableOnlyOnceTheSubscriptionNoLongerRenews() {
         XCTAssertEqual(ProLifetimeUpgrade.offer(for: subscriber(ProProductID.monthly, renews: true), paywallVisible: true),
-                       ProLifetimeUpgrade(showsSubscriptionKeepsBillingNote: true))
-        XCTAssertEqual(ProLifetimeUpgrade.offer(for: subscriber(ProProductID.monthly, renews: false), paywallVisible: true),
-                       ProLifetimeUpgrade(showsSubscriptionKeepsBillingNote: false))
+                       ProLifetimeUpgrade(isPurchasable: false))
+        XCTAssertEqual(ProLifetimeUpgrade.offer(for: subscriber(ProProductID.yearly, renews: false), paywallVisible: true),
+                       ProLifetimeUpgrade(isPurchasable: true))
         XCTAssertEqual(ProLifetimeUpgrade.offer(for: subscriber(ProProductID.monthly, renews: nil), paywallVisible: true),
-                       ProLifetimeUpgrade(showsSubscriptionKeepsBillingNote: true),
-                       "an unreadable renewal status must not claim the subscription stops")
+                       ProLifetimeUpgrade(isPurchasable: false),
+                       "an unreadable renewal status counts as renewing")
+    }
+
+    /// The live transition: cancelling in Apple's sheet moves the block from renewing
+    /// to cancelled, and the same row turns purchasable with no other input.
+    func testCancellingTurnsTheRowPurchasable() {
+        let renewing = subscriber(ProProductID.monthly, renews: true)
+        let cancelled = subscriber(ProProductID.monthly, renews: false)
+        XCTAssertEqual(ProLifetimeUpgrade.offer(for: renewing, paywallVisible: true)?.isPurchasable, false)
+        XCTAssertEqual(ProLifetimeUpgrade.offer(for: cancelled, paywallVisible: true)?.isPurchasable, true)
+    }
+
+    /// Buying from the purchasable row lands on plain lifetime: the subscription it
+    /// leaves behind no longer renews, so the hub offers nothing to manage.
+    func testBuyingFromTheRowLandsOnPlainLifetime() {
+        let afterPurchase = ProHub.bottomBlock(
+            paywallVisible: true, isPaid: true, isEntitled: true, trial: .neverStarted, now: end,
+            ownership: ProOwnership(ownsLifetime: true, subscription:
+                ProActiveSubscription(productID: ProProductID.monthly, periodEnd: end, willAutoRenew: false))
+        )
+        XCTAssertEqual(afterPurchase, .lifetime(alsoSubscribed: nil))
     }
 
     func testNoRowForAnyoneElse() {

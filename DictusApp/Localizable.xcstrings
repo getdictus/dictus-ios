@@ -3626,6 +3626,17 @@
         }
       }
     },
+    "To switch to lifetime, first cancel your subscription in Manage subscription." : {
+      "comment" : "Dictus Pro hub: under 'Upgrade to lifetime' while the subscription still renews; the lifetime is not sold until it is cancelled (#216 decision 15).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour passer à vie, résiliez d'abord votre abonnement dans Gérer l'abonnement."
+          }
+        }
+      }
+    },
     "To transcribe your voice, Dictus needs a voice model. The download may take a few minutes." : {
       "localizations" : {
         "fr" : {
@@ -4264,17 +4275,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vos transcriptions enregistrées restent sur cet appareil et ne sont envoyées nulle part. Vous pouvez les supprimer à tout moment depuis Réglages."
-          }
-        }
-      }
-    },
-    "Your subscription is not cancelled automatically. Cancel it in Manage subscription." : {
-      "comment" : "Dictus Pro hub: note under 'Upgrade to lifetime' while the subscription still renews; Apple does not cancel it on a lifetime purchase (#216).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre abonnement n'est pas résilié automatiquement. Résiliez-le dans Gérer l'abonnement."
           }
         }
       }

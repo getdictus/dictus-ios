@@ -157,16 +157,22 @@ public enum ProHub {
 }
 
 /// The "Upgrade to lifetime" row a monthly or yearly subscriber gets in the hub
-/// (#216 decision 15).
+/// (#216 decision 15, amended 2026-10-05).
 public struct ProLifetimeUpgrade: Equatable, Sendable {
 
-    /// Whether the row carries, before purchase, the line saying the subscription is
-    /// not cancelled automatically. Apple does not cancel it when the same person
-    /// buys the lifetime, so someone who upgrades without reading it keeps paying.
-    public let showsSubscriptionKeepsBillingNote: Bool
+    /// Whether the row can start the lifetime purchase.
+    ///
+    /// **Only once the subscription no longer renews.** Apple does not cancel a
+    /// subscription when the same person buys the lifetime, and no app may cancel it
+    /// for them. A customer who buys "lifetime" expects to stop paying, so while the
+    /// subscription renews the row only says to cancel it first, in Manage
+    /// subscription; a warning next to a buy button was refused on device. Once it is
+    /// cancelled, the remaining days run out and nothing more is billed, so the
+    /// purchase lands on plain lifetime.
+    public let isPurchasable: Bool
 
-    public init(showsSubscriptionKeepsBillingNote: Bool) {
-        self.showsSubscriptionKeepsBillingNote = showsSubscriptionKeepsBillingNote
+    public init(isPurchasable: Bool) {
+        self.isPurchasable = isPurchasable
     }
 
     /// The row for this block, or nil for no row.
@@ -178,12 +184,12 @@ public struct ProLifetimeUpgrade: Equatable, Sendable {
     /// - **Only with the paywall visible.** The row sells; under the DEBUG forced
     ///   entitlement with the flag down, a phone that owns a sandbox subscription
     ///   reaches this block, and nothing may be sold there (#236, #577).
-    /// - **The note** shows unless the subscription is known to be cancelled already.
-    ///   An unreadable renewal status (`willAutoRenew == nil`) keeps it: claiming the
-    ///   subscription stops by itself is the one wrong answer.
+    /// - **Purchasable only when the renewal is known to be off.** An unreadable
+    ///   renewal status (`willAutoRenew == nil`) counts as renewing: selling the
+    ///   lifetime over a subscription that may still bill is the outcome to avoid.
     public static func offer(for block: ProHubBottomBlock, paywallVisible: Bool) -> ProLifetimeUpgrade? {
         guard paywallVisible, case .subscription(let subscription) = block else { return nil }
-        return ProLifetimeUpgrade(showsSubscriptionKeepsBillingNote: subscription.willAutoRenew != false)
+        return ProLifetimeUpgrade(isPurchasable: subscription.willAutoRenew == false)
     }
 }
 
