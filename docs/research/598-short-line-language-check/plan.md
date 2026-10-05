@@ -81,7 +81,7 @@ house, no production change):
   `PolishGuardrail.detectedLanguageMatches(polished:inputLanguageCode:)`;
 - records the raw readings the verdict is made of: whole output top code + confidence, and
   each segment's text, length, top code + confidence;
-- writes them to `readings.json`, committed.
+- writes them to `readings.jsonl`, committed.
 
 `summarise.py` then derives every variant **from the stored readings only**, and first
 re-implements the shipping rule and asserts it reproduces the Swift verdict on **every**
