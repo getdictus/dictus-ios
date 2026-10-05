@@ -6,8 +6,9 @@
 # NEVER committed. They land in assets/appstore/.icons/ (git-ignored), and each
 # machine that exports the screenshots fetches its own copy.
 #
-# Apple's own apps (Messages, Mail, Notes) are left out on purpose: Apple's
-# marketing guidelines restrict their icons in third-party marketing.
+# Apple's Messages and Mail are included (V5, Pierre's call): Apple's marketing
+# guidelines are cautious about its icons in third-party marketing, but Wispr
+# Flow ships them and passed review. The no-logos fallback covers the risk.
 #
 # Usage: assets/appstore/tools/fetch-icons.sh
 set -euo pipefail
@@ -18,18 +19,20 @@ mkdir -p "$OUT"
 
 # slug:App Store id. Order = order on the ribbon.
 APPS=(
+  "messages:1146560473"
   "whatsapp:310633997"
+  "mail:1108187098"
   "gmail:422689480"
-  "slack:618783545"
-  "instagram:389801252"
-  "notion:1232780281"
-  "messenger:454638411"
-  "outlook:951937596"
-  "linkedin:288429040"
-  "telegram:686449807"
-  "docs:842842640"
-  "x:333903271"
   "chatgpt:6448311069"
+  "claude:6473753684"
+  "slack:618783545"
+  "notion:1232780281"
+  "instagram:389801252"
+  "linkedin:288429040"
+  "messenger:454638411"
+  "telegram:686449807"
+  "outlook:951937596"
+  "docs:842842640"
 )
 
 for entry in "${APPS[@]}"; do
