@@ -186,8 +186,9 @@ def measurement_one(c587, v0, segment_labels, whole_labels):
     # The rate, per expected language and segment length, over outputs a human would call
     # correct-language: not refused at all, or refused only on labelled misreadings.
     clean = [r for r in c587 if V0.refusal(r) is None] + v0["false"]
+    multi = sum(1 for r in clean if len(r["segments"]) > 1)
     print(f"\nRate of confident misreading (≥ {SEGMENT_FLOOR}, any other code) per segment length, "
-          f"over the {len(clean)} correct-language C587 outputs of more than one segment:")
+          f"over the {multi} of the {len(clean)} correct-language C587 outputs that have more than one segment:")
     print("  lang  " + "".join(f"{f'{lo}-{hi}' if hi < 10**6 else f'{lo}+':>14}" for lo, hi in BUCKETS))
     for language in ("es", "pt", "da", "nb", "sv", "fr", "en", "it", "de"):
         row = f"  {language:<5} "

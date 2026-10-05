@@ -118,7 +118,7 @@
    "read": "nb",
    "text": "Jeg kan ikke skrive det selv",
    "label": "misread",
-   "reason": "Danish, from the Danish transcript (\"Så jeg tror, jeg kan eksportere loggene, som de er\"). The Norwegian translation of the same fixture reads \"Så jeg tror jeg kan eksportere loggene som de er\": the two languages write this sentence identically but for a comma. Accepted today by the Scandinavian family rule (#588)"
+   "reason": "Danish (\"I cannot write it myself\"), spelled identically in Bokmål. From a T3-plan-mode.da output. Accepted today by the Scandinavian family rule (#588)"
   },
   {
    "expected": "da",
