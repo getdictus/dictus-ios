@@ -80,6 +80,28 @@ final class SmartModeShortInputSkipTests: XCTestCase {
         XCTAssertEqual(skip, PolishMetrics.SmartModeLengthSkip(mode: "summary", characters: raw.count, floor: 200))
     }
 
+    /// The voice note's record (#650): the card decides before calling `polish`, and
+    /// writes the same event the keyboard's branch writes, without touching the engine.
+    @MainActor
+    func testRecordingASkipWritesTheKeyboardsEventAndCallsNothing() async throws {
+        let clock = FakeClock()
+        let engine = ScriptedEngine(clock: clock, secondsPerCall: 1, listAnswer: "unused", normalAnswer: "unused")
+        let sink = RecordingSink()
+        let service = PolishService(sink: sink, engine: engine, now: clock.now)
+        let transcript = String(repeating: "a", count: 132)
+
+        await service.recordSkippedForLength(SmartModeCatalogue.summary, raw: transcript)
+
+        XCTAssertEqual(engine.calls, [])
+        let entries = await sink.entries()
+        XCTAssertEqual(entries.count, 1)
+        let metrics = try XCTUnwrap(entries.first?.metrics)
+        XCTAssertEqual(metrics.outcome, .smartModeSkippedShortInput)
+        XCTAssertEqual(metrics.mode, PolishTask.smart(SmartModeCatalogue.summary).identifier)
+        XCTAssertEqual(metrics.smartModeLengthSkip,
+                       PolishMetrics.SmartModeLengthSkip(mode: "summary", characters: 132, floor: 200))
+    }
+
     /// `Traduction` on the same sentence runs: the floor belongs to the mode, and this
     /// mode has none.
     @MainActor

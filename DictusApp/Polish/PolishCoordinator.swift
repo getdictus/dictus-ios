@@ -70,6 +70,13 @@ public final class PolishCoordinator {
         )
     }
 
+    /// Record that a voice note's mode declined its transcript for length (#650). See
+    /// `PolishService.recordSkippedForLength`: the voice note card decides before
+    /// calling `polish`, and this is how its decision still reaches the export.
+    public func recordSkippedForLength(_ mode: SmartMode, raw: String) async {
+        await service.recordSkippedForLength(mode, raw: raw)
+    }
+
     // MARK: - Debug ring
 
     /// Recent polish events for the debug screen — both processes' events, read
