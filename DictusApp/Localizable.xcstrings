@@ -1893,6 +1893,17 @@
       }
     },
     "No polish events yet. Toggle on, dictate something, then come back." : {},
+    "No results" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun résultat"
+          }
+        }
+      }
+    },
     "No terms yet. Add the words Dictus gets wrong." : {
       "comment" : "Shown when the vocabulary is empty.",
       "localizations" : {
@@ -1900,6 +1911,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun terme pour l’instant. Ajoutez les mots que Dictus écrit mal."
+          }
+        }
+      }
+    },
+    "No transcription contains “%@”." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune transcription ne contient « %@ »."
           }
         }
       }
@@ -2653,6 +2675,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recherchez et exportez toutes vos transcriptions"
+          }
+        }
+      }
+    },
+    "Search transcriptions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher dans les transcriptions"
           }
         }
       }
