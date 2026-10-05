@@ -21,9 +21,10 @@ final class ProHomeCardTests: XCTestCase {
         XCTAssertEqual(content(promotion: .upgrade), .upgrade)
         XCTAssertEqual(content(promotion: .trialEnding(daysLeft: 2), isEntitled: true,
                                trial: .running(endsAt: now.addingTimeInterval(86_400))), .trialEnding(daysLeft: 2))
-        // Early trial: hidden today, hidden still.
+        // Early trial: the calm card (decision 16, answered 2026-10-05).
         XCTAssertEqual(content(promotion: .hidden, isEntitled: true,
-                               trial: .running(endsAt: now.addingTimeInterval(10 * 86_400))), .hidden)
+                               trial: .running(endsAt: now.addingTimeInterval(10 * 86_400)), activeFeatures: 4),
+                       .member(activeFeatures: 4))
         // A device that can never run Smart Modes, nothing owned: no promotion (#593).
         XCTAssertEqual(content(promotion: .hidden), .hidden)
     }

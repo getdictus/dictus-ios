@@ -5,8 +5,8 @@ import Foundation
 /// The Home Pro card's content.
 public enum ProHomeCardContent: Equatable, Sendable {
 
-    /// Nothing: the paywall is hidden, the reverse trial still has days to spare, or
-    /// the device can never run Smart Modes and nothing is owned (#593 decision 2).
+    /// Nothing: the paywall is hidden, or the device can never run Smart Modes and
+    /// nothing is owned (#593 decision 2).
     case hidden
 
     /// The sales card, as before #216.
@@ -15,8 +15,9 @@ public enum ProHomeCardContent: Equatable, Sendable {
     /// The trial's last-days reminder, as before #216.
     case trialEnding(daysLeft: Int)
 
-    /// A paying user's way into the hub: "Dictus Pro" and how many of the features
-    /// are switched on. No price, no sales copy.
+    /// The way into the hub for anyone who has Pro (paid, or a trial before its last
+    /// days): "Dictus Pro" and how many of the features are switched on. No price,
+    /// no sales copy.
     case member(activeFeatures: Int)
 }
 
@@ -46,9 +47,15 @@ public enum ProHomeCard {
                                activeFeatures: Int) -> ProHomeCardContent {
         // The flag gates the whole card, the DEBUG force included (#236).
         guard paywallVisible else { return .hidden }
-        // Owned, by purchase or by the DEBUG force outside a trial: the calm card.
-        // Shown on any device; it sells nothing, so #593 decision 2 does not apply.
-        if isPaid || (isEntitled && !trial.isRunning) {
+        // The trial's last-days reminder stays exactly as #593 made it. The promotion
+        // only returns it for an unpaid user, so a subscriber never sees it.
+        if case .trialEnding(let daysLeft) = promotion {
+            return .trialEnding(daysLeft: daysLeft)
+        }
+        // Pro in hand, by purchase, by a trial with days to spare (decision 16, as
+        // answered on 2026-10-05) or by the DEBUG force: the calm card. Shown on any
+        // device; it sells nothing, so #593 decision 2 does not apply.
+        if isPaid || isEntitled {
             return .member(activeFeatures: activeFeatures)
         }
         switch promotion {

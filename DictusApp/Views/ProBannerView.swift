@@ -9,12 +9,12 @@ import DictusCore
 /// Keeps HomeView clean and makes the banner independently testable.
 /// The banner has its own visibility logic and navigation target (the paywall).
 ///
-/// What it shows is `ProStatusManager.homeCardContent`, decided in DictusCore:
-/// for free and trial users the promotion #593 settled, unchanged (nothing during most
-/// of the reverse trial or on a device that can never run Smart Modes; the trial's
-/// reminder in its last two days; the ordinary offer otherwise). Since #216 decision
-/// 16 a paying user keeps a card too, a calm one: Home's visible way into the hub,
-/// where the rejected pull-down on the header was not discoverable.
+/// What it shows is `ProStatusManager.homeCardContent`, decided in DictusCore: the
+/// ordinary offer for a free user (nothing on a device that can never run Smart
+/// Modes), the trial's reminder in its last two days, as #593 settled them. Since #216
+/// decision 16, anyone who has Pro otherwise (paid, or a trial before its last days)
+/// gets a calm card: Home's visible way into the hub, where the rejected pull-down on
+/// the header was not discoverable.
 struct ProBannerView: View {
     @EnvironmentObject var proStatus: ProStatusManager
 
