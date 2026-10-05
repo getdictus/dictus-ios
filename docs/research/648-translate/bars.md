@@ -162,3 +162,20 @@ FM, because of §1: the framework needs the right source and refuses `en → en`
   six French raws. A reader who disagrees with a list can re-read every output: the capture
   stores them all, with the flags each one raised.
 - **n = 3.** A rate of 1/18 is a discovery, not a measurement, as #412 said of its own samples.
+
+## 7. Round 2 — `clean-v2`, added after round 1 and committed before it ran
+
+Round 1 (arms A to E, `runs/arm-*.txt`) showed `clean-v1` barely cleaning: it removed a
+self-correction only when `enfin` marked it, kept an unmarked false start, kept every opener tic,
+repaired no speech-to-text slip, and added the `ne` of a negation in fixture 05 (3/3) and 06
+(1/3), against its own rule 7. `prompts/clean-v2.txt` targets those four failure classes and
+nothing else: false starts without a marker (rule 2), opener tics (rule 3), the sound-alike /
+dropped-short-word repair (rule 5), and a counter-example for the added `ne` (rule 7).
+
+**v2 is in-sample.** It was written after reading v1's outputs on these six fixtures, and its
+lists name tics that occur in them (`aussi`, `écoute`, `concrètement`, `à ce moment-là`) and a
+short word one of them dropped (`à`). Its examples and counter-examples share no sentence with the
+fixtures. A gain measured here is an upper bound on what v2 would do on unseen dictations, and is
+reported as such.
+
+Arms D2 and E2 are D and E with `clean-v2`; the bars, thresholds and fixtures are unchanged.
