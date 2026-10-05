@@ -1,0 +1,872 @@
+[
+  {
+    "arm" : "412-E",
+    "cleanMs" : 2284,
+    "cleaned" : "Salut Sophie, pour le rendez-vous de jeudi je peux pas avant quinze heures, j'ai un truc qui traîne le matin, par contre après je suis libre toute l'après-midi, dis-moi si ça te va.",
+    "engineMs" : 4110,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, for Thursday's meeting, I can't before fifteen o'clock, I have something hanging over from the morning, but after that I'm free all afternoon, let me know if that works for you.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1826
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1751,
+    "cleaned" : "Salut Sophie, pour le rendez-vous de jeudi je peux pas avant quinze heures, j'ai un truc qui traîne le matin. Par contre, après je suis libre toute l'après-midi. Dis-moi si ça te va.",
+    "engineMs" : 3456,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, for Thursday's appointment, I can't before fifteen o'clock, I have something hanging over from the morning. But after that, I'm free all afternoon. Let me know if that works for you.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1704
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1802,
+    "cleaned" : "Salut Sophie, pour le rendez-vous de jeudi, je peux pas avant quinze heures. J'ai un truc qui traîne le matin. Par contre, après, je suis libre toute l'après-midi. Dis-moi si ça te va.",
+    "engineMs" : 3516,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, for Thursday's appointment, I can't before ten thirty. I have something dragging in the morning. On the other hand, afterwards, I'm free all afternoon. Let me know if that works for you.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1713
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1738,
+    "cleaned" : "Salut Sophie, pour le rendez-vous de jeudi, je peux pas avant quinze heures. J'ai un truc qui traîne le matin. Par contre, après, je suis libre toute l'après-midi. Dis-moi si ça te va.",
+    "engineMs" : 3547,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, for Thursday's meeting, I can't before ten in the morning. I've got something hanging over from the morning. On the other hand, after that, I'm free all afternoon. Let me know if that works for you.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1809
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1699,
+    "cleaned" : "Salut Sophie, pour le rendez-vous de jeudi, je ne peux pas avant quinze heures, j'ai un truc qui traîne le matin, par contre après je suis libre toute l'après-midi, dis-moi si ça te va.",
+    "engineMs" : 3315,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, for the Thursday meeting, I can't before 15, I have something dragging in the morning, but afterwards I'm free all afternoon, let me know if that works for you.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1615
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1611,
+    "cleaned" : "Bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on tient pas.",
+    "engineMs" : 3300,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, during this morning's call, the client asked if we could push the deadline back by a week, and I said it was doable only if we did a rollback on the search part because otherwise we wouldn't hold it.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1689
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1625,
+    "cleaned" : "Bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on ne tient pas.",
+    "engineMs" : 3367,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, during this morning's call, the client asked if we could push back the deadline by a week, and I said it was doable only if we did a rollback on the search part because otherwise we wouldn't hold it.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1742
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1702,
+    "cleaned" : "Bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on ne tient pas.",
+    "engineMs" : 3450,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, during this morning's call, the client asked if we could push the deadline by a week and I said it was possible only if we did a rollback on the search part because otherwise we wouldn't hold it.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1748
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1629,
+    "cleaned" : "Bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on ne tient pas.",
+    "engineMs" : 3410,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, during this morning's call, the client asked if we could push the deadline back by a week, and I said it was possible only if we did a rollback on the search part because otherwise we wouldn't hold up.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1781
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1705,
+    "cleaned" : "Bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on ne tient pas.",
+    "engineMs" : 3450,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, during this morning's call, the client asked if we could push back the deadline by a week, and I said that it was doable only if we did a rollback on the search part because otherwise we wouldn't hold it.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1745
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1596,
+    "cleaned" : "Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi, ci sentiamo verso le tre.",
+    "engineMs" : 3358,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, I wanted to let you know that I can't make it to the office tomorrow because I have an appointment with the dentist at eleven, but I'm available in the afternoon. If you want, we can catch up around three.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1762
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 2072,
+    "cleaned" : "Alors, tu me diresti, volevo dirti che domani non riesco a venire in ufficio parce que j'ai une chose du dentiste alle undici, mais le pomeriggio je suis là si tu veux, on peut se parler vers les trois.",
+    "engineMs" : 4061,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, you tell me, I wanted to tell you that I can't make it to the office tomorrow because I have something with the dentist at eleven, but in the afternoon I'll be there if you want, we can talk around three.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1989
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 2188,
+    "cleaned" : "Alors, tu sais, volevo dirti che domani non riesco a venire in ufficio parce que j'ai une chose du dentiste à onze heures, mais l'après-midi je suis là si tu veux, on se retrouve vers les trois.",
+    "engineMs" : 3945,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, you know, I had to skip the office tomorrow because I have a dental appointment at eleven, but I'll be there in the afternoon if you want, we'll meet around three.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+        "missing \"dentist\""
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1756
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 2157,
+    "cleaned" : "Alors, tu me diresti, volevo dirti che domani non riesco a venire in ufficio parce que j'ai une chose du dentiste à onze, mais l'après-midi je suis là si tu veux, on peut se parler vers trois.",
+    "engineMs" : 4055,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, can you tell me, I was told I can't come to the office tomorrow because I have a dentist appointment at eleven, but in the afternoon I'll be there if you want, we can talk around three.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1897
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 2140,
+    "cleaned" : "Alors, tu sais, volevo dirti che domani non riesco a venire in ufficio parce que j'ai une chose au dentiste à onze, mais l'après-midi je suis là si tu veux, on peut se parler vers les trois.",
+    "engineMs" : 4061,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, you know, I had to dirti that I can't make it to the office tomorrow because I have something at the dentist at eleven, but in the afternoon I'm there if you want, we can talk around three.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1920
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1502,
+    "cleaned" : "Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi ci sentiamo verso le tre.",
+    "engineMs" : 3387,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, I wanted to let you know that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but I'll be there in the afternoon, if you want to catch up, we can talk around three.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1884
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1487,
+    "cleaned" : "Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi ci sentiamo verso le tre.",
+    "engineMs" : 3273,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, I wanted to let you know that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but I'm available in the afternoon. If you want, we can catch up around three.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1786
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1506,
+    "cleaned" : "Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi ci sentiamo verso le tre.",
+    "engineMs" : 3296,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, I wanted to let you know that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but I'm there in the afternoon. If you want, we can catch up around three.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1790
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 2026,
+    "cleaned" : "Alors, tu sais, volevo dirti che domani non riesco a venire in ufficio parce que j'ai une chose du dentiste à onze, mais en après-midi je suis là si tu veux, on se retrouve vers trois.",
+    "engineMs" : 3773,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, you know, I texted you that I can't make it to the office tomorrow because I have a thing at the dentist at eleven, but in the afternoon I'll be there if you want, we'll meet around three.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1746
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1482,
+    "cleaned" : "Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi ci sentiamo verso le tre.",
+    "engineMs" : 3312,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but I'm there in the afternoon. If you want, we can catch up around three.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1830
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1075,
+    "cleaned" : "On se voit demain matin devant l'entrée. Prends les badges au passage.",
+    "engineMs" : 2136,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We'll meet tomorrow morning in front of the entrance. Grab the badges on the way.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+        "missing \"\n\""
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1061
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1071,
+    "cleaned" : "On se voit demain matin devant l'entrée. Prends les badges au passage.",
+    "engineMs" : 2045,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We'll meet tomorrow morning in front of the entrance. Pick up the badges on the way.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+        "missing \"\n\""
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 974
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1066,
+    "cleaned" : "On se voit demain matin devant l'entrée. Prends les badges au passage.",
+    "engineMs" : 2033,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We'll meet tomorrow morning in front of the entrance. Pick up the badges on the way.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+        "missing \"\n\""
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 967
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1060,
+    "cleaned" : "On se voit demain matin devant l'entrée. Prends les badges au passage.",
+    "engineMs" : 2069,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We'll meet tomorrow morning in front of the entrance. Grab the badges on the way.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+        "missing \"\n\""
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1008
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1056,
+    "cleaned" : "On se voit demain matin devant l'entrée. Prends les badges au passage.",
+    "engineMs" : 2029,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We'll meet tomorrow morning in front of the entrance. Pick up the badges on the way.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+        "missing \"\n\""
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 972
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1755,
+    "cleaned" : "Hey, je viens d'avoir la conversation avec le fournisseur et ils peuvent expédier le douze, mais seulement si on confirme la quantité avant vendredi, sinon ça passe à la prochaine livraison.",
+    "engineMs" : 3057,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, I just had a chat with the supplier and they can ship the twelve, but only if we confirm the quantity before Friday, otherwise it goes to the next delivery.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1301
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1715,
+    "cleaned" : "Hey, je viens d'avoir parlé avec le fournisseur et ils peuvent expédier le douze, mais seulement si on confirme la quantité avant vendredi, sinon ça passe à la prochaine livraison.",
+    "engineMs" : 2965,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, I just talked to the supplier and they can ship the twelfth, but only if we confirm the quantity before Friday, otherwise it goes to the next delivery.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1250
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1767,
+    "cleaned" : "Hey, je viens d'avoir parlé avec le fournisseur et ils peuvent expédier le douze mais seulement si on confirme la quantité avant vendredi, sinon ça passe à la prochaine livraison.",
+    "engineMs" : 3076,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, I just talked to the supplier and they can ship the twelve, but only if we confirm the quantity before Friday, otherwise it goes to the next delivery.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1308
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1744,
+    "cleaned" : "Hey, je viens d'avoir parlé avec le fournisseur et ils peuvent expédier le douze, mais seulement si on confirme la quantité avant vendredi, sinon ça passe à la prochaine livraison.",
+    "engineMs" : 3075,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, I just talked to the supplier and they can ship the twelve, but only if we confirm the quantity before Friday, otherwise it goes to the next delivery.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1330
+  },
+  {
+    "arm" : "412-E",
+    "cleanMs" : 1773,
+    "cleaned" : "Hey, je viens d'avoir parlé avec le fournisseur et ils peuvent expédier le douze, mais seulement si on confirme la quantité avant vendredi, sinon ça passe à la prochaine livraison.",
+    "engineMs" : 3039,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, I just spoke with the supplier and they can ship the twelfth, but only if we confirm the quantity before Friday, otherwise it goes to the next delivery.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1266
+  }
+]

@@ -1,0 +1,92 @@
+████ ARM 412-A — engine apple-fm, mode translate.en, 5 run(s) × 6 fixture(s)
+     bars: 1 file(s), 7 entries
+
+━━ [T1-fr-casual] 182 chars, lang=fr
+  raw: salut Sophie alors pour le rendez-vous de jeudi je peux pas avant quinze heures j'ai un truc qui traîne le matin par contre après je suis libre toute l'après-midi dis moi si ça te va
+  #1 success 2391ms source=-
+     out:   Hey Sophie, so for the Thursday appointment, I can't before 3 PM, I have something hanging over from the morning. But after that, I'm free all afternoon. Let me know if that works for you.
+  #2 success 1643ms source=-
+     out:   Hey Sophie, so for the Thursday appointment, I can't before fifteen. I've got something hanging over the morning, but after that, I'm free all afternoon. Let me know if that works for you.
+  #3 success 1731ms source=-
+     out:   Hey Sophie, so for the Thursday appointment, I can't before fifteen o'clock—I've got something dragging from the morning. But after that, I'm free all afternoon. Let me know if that works for you.
+  #4 success 1754ms source=-
+     out:   Hey Sophie, so for the Thursday appointment, I can't before fifteen o'clock—I've got something hanging over the morning. But after that, I'm free all afternoon. Let me know if that works for you.
+  #5 success 1850ms source=-
+     out:   Hey Sophie, so for the Thursday appointment, I can't before fifteen o'clock, I've got something hanging over the morning, but afterwards I'm free all afternoon—let me know if that works for you.
+
+━━ [T2-fr-deja-partiellement-en] 228 chars, lang=fr
+  raw: bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et euh moi j'ai dit que c'était jouable seulement si on fait un rollback sur la partie search parce que sinon on tient pas
+  #1 success 1820ms source=-
+     out:   Alright, during this morning's call, the client asked if we could push the deadline back by a week and, well, I said it was doable only if we did a rollback on the search part because otherwise we can't hold it.
+  #2 success 1754ms source=-
+     out:   Well, during this morning's call, the client asked if we could push back the deadline by a week, and I said it was doable only if we did a rollback on the search part because otherwise we won't hold it
+  #3 success 1826ms source=-
+     out:   Well, during this morning's call, the client asked if we could push the deadline back by a week and, well, I said it was doable only if we did a rollback on the search part because otherwise we won't hold it.
+  #4 success 1753ms source=-
+     out:   Alright, during this morning's call, the client asked if we could push the deadline back by a week, and I said it was doable only if we did a rollback on the search part because otherwise we can't keep up.
+  #5 success 1951ms source=-
+     out:   Well, during this morning's call, the client asked if we could push the deadline back by a week and, well, I said it was doable only if we did a rollback on the search part because otherwise we wouldn't hold it together.
+
+━━ [T3-it-clavier-fr] 172 chars, lang=fr
+  raw: allora senti volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici però nel pomeriggio ci sono se vuoi ci sentiamo verso le tre
+  #1 success 1954ms source=-
+     out:   So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, there's something—if you want, we can catch up around three.
+  #2 success 1954ms source=-
+     out:   So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but I'm free in the afternoon. If you want, we can catch up around three.
+  #3 success 1888ms source=-
+     out:   So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, there's something — if you want, we can catch up around three.
+  #4 success 1954ms source=-
+     out:   So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, I'm free if you want to catch up, we can talk around three.
+  #5 success 1951ms source=-
+     out:   So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but I'm free in the afternoon. If you want, we can catch up around three.
+
+━━ [T4-it-auto] 172 chars, lang=it
+  raw: allora senti volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici però nel pomeriggio ci sono se vuoi ci sentiamo verso le tre
+  #1 success 1917ms source=-
+     out:   So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment with the dentist at eleven, but I'm free in the afternoon. If you want, we can catch up around three.
+  #2 success 1884ms source=-
+     out:   So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, there's something — if you want, we can catch up around three.
+  #3 success 1913ms source=-
+     out:   So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, I'm available—if you want, we can catch up around three.
+  #4 success 1902ms source=-
+     out:   So, listen, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment with the dentist at eleven, but I'm free in the afternoon—if you want, we can catch up around three.
+  #5 success 1909ms source=-
+     out:   So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, I'm available if you want to get in touch around three.
+
+━━ [T5-saut-de-ligne] 68 chars, lang=fr
+  raw: on se voit demain matin devant l'entrée
+prends les badges au passage
+  #1 success 1093ms source=-
+     out:   We'll meet tomorrow morning in front of the entrance⏎pick up the badges on the way
+  #2 success 1049ms source=-
+     out:   We meet tomorrow morning in front of the entrance⏎pick up the badges on the way
+  #3 success 1089ms source=-
+     out:   We'll meet tomorrow morning in front of the entrance⏎pick up the badges on the way
+  #4 success 1099ms source=-
+     out:   We'll meet tomorrow morning in front of the entrance⏎pick up the badges on the way
+  #5 success 1043ms source=-
+     out:   We meet tomorrow morning in front of the entrance⏎pick up the badges on the way
+
+━━ [T6-deja-en] 169 chars, lang=en
+  raw: hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch
+  #1 success 1197ms source=-
+     out:   Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday, otherwise it slips to the next batch
+  #2 success 1195ms source=-
+     out:   Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday otherwise it slips to the next batch.
+  #3 success 1195ms source=-
+     out:   Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday otherwise it slips to the next batch.
+  #4 success 1174ms source=-
+     out:   Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday otherwise it slips to the next batch
+  #5 success 1205ms source=-
+     out:   Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday, otherwise it slips to the next batch.
+
+══ arm 412-A: runs with at least one flag, per bar (engine outputs)
+fixture | runs | accepted | (a) drop | (b) keep | (c) add | (d) not en | (e) critical | #412 expect | median ms | max ms
+T1-fr-casual | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1754 | 2391
+T2-fr-deja-partiellement-en | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1820 | 1951
+T3-it-clavier-fr | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1954 | 1954
+T4-it-auto | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1909 | 1917
+T5-saut-de-ligne | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1089 | 1099
+T6-deja-en | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1195 | 1205
+ALL | 30 | 30 | 0 | 0 | 0 | 0 | 0 | 0 | 1820 | 2391
+not accepted: none

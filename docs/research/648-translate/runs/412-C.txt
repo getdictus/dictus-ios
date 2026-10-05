@@ -1,0 +1,94 @@
+████ ARM 412-C — engine translation-framework.highFidelity, mode translate.en, 5 run(s) × 6 fixture(s)
+     bars: 1 file(s), 7 entries
+     availability highFidelity fr → en: installed
+     availability highFidelity it → en: installed
+
+━━ [T1-fr-casual] 182 chars, lang=fr
+  raw: salut Sophie alors pour le rendez-vous de jeudi je peux pas avant quinze heures j'ai un truc qui traîne le matin par contre après je suis libre toute l'après-midi dis moi si ça te va
+  #1 success 1416ms source=fr
+     out:   Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.
+  #2 success 782ms source=fr
+     out:   Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.
+  #3 success 787ms source=fr
+     out:   Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.
+  #4 success 774ms source=fr
+     out:   Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.
+  #5 success 785ms source=fr
+     out:   Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.
+
+━━ [T2-fr-deja-partiellement-en] 228 chars, lang=fr
+  raw: bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et euh moi j'ai dit que c'était jouable seulement si on fait un rollback sur la partie search parce que sinon on tient pas
+  #1 success 840ms source=fr
+     out:   Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.
+  #2 success 830ms source=fr
+     out:   Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.
+  #3 success 819ms source=fr
+     out:   Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.
+  #4 success 822ms source=fr
+     out:   Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.
+  #5 success 827ms source=fr
+     out:   Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.
+
+━━ [T3-it-clavier-fr] 172 chars, lang=fr
+  raw: allora senti volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici però nel pomeriggio ci sono se vuoi ci sentiamo verso le tre
+  #1 success 1083ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+  #2 success 811ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+  #3 success 814ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+  #4 success 817ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+  #5 success 825ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+
+━━ [T4-it-auto] 172 chars, lang=it
+  raw: allora senti volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici però nel pomeriggio ci sono se vuoi ci sentiamo verso le tre
+  #1 success 812ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+  #2 success 812ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+  #3 success 809ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+  #4 success 807ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+  #5 success 814ms source=it
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.
+
+━━ [T5-saut-de-ligne] 68 chars, lang=fr
+  raw: on se voit demain matin devant l'entrée
+prends les badges au passage
+  #1 success 490ms source=fr
+     out:   See you tomorrow morning in front of the entrance⏎Take the badges along the way
+  #2 success 480ms source=fr
+     out:   See you tomorrow morning in front of the entrance⏎Take the badges along the way
+  #3 success 504ms source=fr
+     out:   See you tomorrow morning in front of the entrance⏎Take the badges along the way
+  #4 success 480ms source=fr
+     out:   See you tomorrow morning in front of the entrance⏎Take the badges along the way
+  #5 success 480ms source=fr
+     out:   See you tomorrow morning in front of the entrance⏎Take the badges along the way
+
+━━ [T6-deja-en] 169 chars, lang=en
+  raw: hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch
+  #1 success 1ms source=en
+     out:   hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch
+  #2 success 1ms source=en
+     out:   hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch
+  #3 success 1ms source=en
+     out:   hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch
+  #4 success 1ms source=en
+     out:   hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch
+  #5 success 1ms source=en
+     out:   hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch
+
+══ arm 412-C: runs with at least one flag, per bar (engine outputs)
+fixture | runs | accepted | (a) drop | (b) keep | (c) add | (d) not en | (e) critical | #412 expect | median ms | max ms
+T1-fr-casual | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 785 | 1416
+T2-fr-deja-partiellement-en | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 827 | 840
+T3-it-clavier-fr | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 817 | 1083
+T4-it-auto | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 812 | 814
+T5-saut-de-ligne | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 480 | 504
+T6-deja-en | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1
+ALL | 30 | 30 | 0 | 0 | 0 | 0 | 0 | 0 | 809 | 1416
+not accepted: none

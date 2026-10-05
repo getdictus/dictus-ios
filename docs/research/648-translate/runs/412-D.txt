@@ -1,0 +1,136 @@
+████ ARM 412-D — engine clean+translation-framework.highFidelity, mode translate.en, 5 run(s) × 6 fixture(s)
+     clean prompt: ../docs/research/648-translate/prompts/clean-v1.txt
+     bars: 1 file(s), 7 entries
+     availability highFidelity fr → en: installed
+     availability highFidelity it → en: installed
+
+━━ [T1-fr-casual] 182 chars, lang=fr
+  raw: salut Sophie alors pour le rendez-vous de jeudi je peux pas avant quinze heures j'ai un truc qui traîne le matin par contre après je suis libre toute l'après-midi dis moi si ça te va
+  #1 success clean 2293ms + translate 1345ms source=fr
+     clean: Salut Sophie, pour le rendez-vous de jeudi, je peux pas avant quinze heures. J'ai un truc qui traîne le matin. Par contre, après, je suis libre toute l'après-midi. Dis-moi si ça te va.
+     out:   Hi Sophie, for Thursday's appointment, I can't before 3 PM. I have something that's running late in the morning. However, after that, I'm free all afternoon. Let me know if that works for you.
+  #2 success clean 1612ms + translate 703ms source=fr
+     clean: Salut Sophie, pour le rendez-vous de jeudi je peux pas avant quinze heures, j'ai un truc qui traîne le matin, par contre après je suis libre toute l'après-midi, dis-moi si ça te va.
+     out:   Hi Sophie, for Thursday's appointment I can't before 3 PM, I have something that's running late in the morning, but after that I'm free all afternoon, let me know if that works for you.
+  #3 success clean 1656ms + translate 808ms source=fr
+     clean: Salut Sophie, pour le rendez-vous de jeudi je peux pas avant quinze heures. J'ai un truc qui traîne le matin. Par contre, après je suis libre toute l'après-midi. Dis-moi si ça te va.
+     out:   Hi Sophie, for Thursday's appointment I can't before 3 PM. I have something that's running late in the morning. However, after that I'm free all afternoon. Let me know if that works for you.
+  #4 success clean 1619ms + translate 765ms source=fr
+     clean: Salut Sophie, pour le rendez-vous de jeudi je peux pas avant quinze heures. J'ai un truc qui traîne le matin. Par contre après je suis libre toute l'après-midi. Dis-moi si ça te va.
+     out:   Hi Sophie, for Thursday's appointment I can't before 3 PM. I have something that's running late in the morning. However, after that I'm free all afternoon. Let me know if that works for you.
+  #5 success clean 1736ms + translate 729ms source=fr
+     clean: Salut Sophie, pour le rendez-vous de jeudi, je peux pas avant quinze heures. J'ai un truc qui traîne le matin. Par contre, après, je suis libre toute l'après-midi. Dis-moi si ça te va.
+     out:   Hi Sophie, for Thursday's appointment, I can't before 3 PM. I have something that's running late in the morning. However, after that, I'm free all afternoon. Let me know if that works for you.
+
+━━ [T2-fr-deja-partiellement-en] 228 chars, lang=fr
+  raw: bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et euh moi j'ai dit que c'était jouable seulement si on fait un rollback sur la partie search parce que sinon on tient pas
+  #1 success clean 1640ms + translate 766ms source=fr
+     clean: Bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on ne tient pas.
+     out:   Well, so during this morning's call the client asked if we could move the deadline by a week and I said that it was only possible if we did a rollback on the search part because otherwise we wouldn't be able to keep up.
+  #2 success clean 1695ms + translate 743ms source=fr
+     clean: Bon alors, pendant le call de ce matin, le client a demandé si on pouvait avancer la deadline d'une semaine et j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on ne tient pas.
+     out:   Well then, during this morning's call, the client asked if we could move the deadline by a week and I said that it was only feasible if we did a rollback on the search part because otherwise we wouldn't be able to keep it.
+  #3 success clean 1577ms + translate 788ms source=fr
+     clean: Bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et moi j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on tient pas.
+     out:   Well, so during this morning's call, the client asked if we could move the deadline by a week, and I said that it was only feasible if we did a rollback on the search part, because otherwise we wouldn't be able to make it.
+  #4 success clean 1649ms + translate 761ms source=fr
+     clean: Bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on ne tient pas.
+     out:   Well, so during this morning's call the client asked if we could move the deadline by a week and I said that it was only possible if we did a rollback on the search part because otherwise we wouldn't be able to keep up.
+  #5 success clean 1577ms + translate 751ms source=fr
+     clean: Bon alors pendant le call de ce matin le client a demandé si on pouvait avancer la deadline d'une semaine et j'ai dit que c'était jouable seulement si on faisait un rollback sur la partie search parce que sinon on tient pas.
+     out:   Well, so during this morning's call the client asked if we could move the deadline by a week and I said that it was only possible if we did a rollback on the search part because otherwise we wouldn't be able to keep up.
+
+━━ [T3-it-clavier-fr] 172 chars, lang=fr
+  raw: allora senti volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici però nel pomeriggio ci sono se vuoi ci sentiamo verso le tre
+  #1 success clean 1486ms + translate 1072ms source=it
+     clean: Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi ci sentiamo verso le tre.
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon, if you want we can talk around three.
+  #2 success clean 2203ms + translate 929ms source=it
+     clean: Alors, tu me diresti, volevo dirti che domani non riesco a venire in ufficio parce que j'ai une chose du dentiste alle undici, mais dans l'après-midi je suis là si tu veux, on peut se parler vers les trois.
+     out:   So, would you tell me, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but in the afternoon I'm there if you want, we can talk around three.
+  #3 success clean 1531ms + translate 852ms source=it
+     clean: Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi ci sentiamo verso le tre.
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon, if you want we can talk around three.
+  #4 success clean 1999ms + translate 736ms source=fr
+     clean: Alors, tu sais, volevo dirti che domani non riesco a venire in ufficio parce que j'ai une chose du dentiste alle undici, mais nel pomeriggio ci sono, si tu veux, on peut se parler vers les trois.
+     out:   So, you know, I wanted to tell you that tomorrow I can't come to the office because I have something with the dentist at eleven, but in the afternoon I'll be there, if you want, we can talk around three.
+  #5 success clean 1591ms + translate 844ms source=it
+     clean: Allora, senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi, ci sentiamo verso le tre.
+     out:   So, listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon, if you want, we can talk around three.
+
+━━ [T4-it-auto] 172 chars, lang=it
+  raw: allora senti volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici però nel pomeriggio ci sono se vuoi ci sentiamo verso le tre
+  #1 success clean 1506ms + translate 870ms source=it
+     clean: Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi ci sentiamo verso le tre.
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon, if you want we can talk around three.
+  #2 success clean 1542ms + translate 911ms source=it
+     clean: Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi ci sentiamo verso le tre.
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon, if you want we can talk around three.
+  #3 success clean 2078ms + translate 814ms source=fr
+     clean: Alors, tu sais, volevo dirti che domani non riesco a venire in ufficio parce que j'ai une chose du dentiste alle undici, mais en pomeriggio je suis là si tu veux, on se contacte vers les trois.
+     out:   So, you know, I wanted to tell you that tomorrow I can't come to the office because I have something with the dentist at eleven, but in the afternoon I'm there if you want, we'll get in touch around three.
+  #4 success clean 1614ms + translate 848ms source=it
+     clean: Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi, ci sentiamo verso le tre.
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon, if you want, we can talk around three.
+  #5 success clean 1547ms + translate 868ms source=it
+     clean: Allora senti, volevo dirti che domani non riesco a venire in ufficio perché ho una cosa dal dentista alle undici, però nel pomeriggio ci sono, se vuoi ci sentiamo verso le tre.
+     out:   So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon, if you want we can talk around three.
+
+━━ [T5-saut-de-ligne] 68 chars, lang=fr
+  raw: on se voit demain matin devant l'entrée
+prends les badges au passage
+  #1 success clean 1129ms + translate 415ms source=fr  ⚑ #412×1
+     clean: On se voit demain matin devant l'entrée. Prends les badges au passage.
+     out:   See you tomorrow morning in front of the entrance. Take the badges by the way.
+     (412) missing "
+"
+  #2 success clean 1107ms + translate 410ms source=fr  ⚑ #412×1
+     clean: On se voit demain matin devant l'entrée. Prends les badges au passage.
+     out:   See you tomorrow morning in front of the entrance. Take the badges by the way.
+     (412) missing "
+"
+  #3 success clean 1152ms + translate 421ms source=fr  ⚑ #412×1
+     clean: On se voit demain matin devant l'entrée. Prends les badges au passage.
+     out:   See you tomorrow morning in front of the entrance. Take the badges by the way.
+     (412) missing "
+"
+  #4 success clean 1125ms + translate 420ms source=fr  ⚑ #412×1
+     clean: On se voit demain matin devant l'entrée. Prends les badges au passage.
+     out:   See you tomorrow morning in front of the entrance. Take the badges by the way.
+     (412) missing "
+"
+  #5 success clean 1128ms + translate 404ms source=fr  ⚑ #412×1
+     clean: On se voit demain matin devant l'entrée. Prends les badges au passage.
+     out:   See you tomorrow morning in front of the entrance. Take the badges by the way.
+     (412) missing "
+"
+
+━━ [T6-deja-en] 169 chars, lang=en
+  raw: hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch
+  #1 success clean 1756ms + translate 483ms source=fr
+     clean: Hey, je viens d'avoir parlé avec le fournisseur et ils peuvent expédier le douze, mais seulement si on confirme la quantité avant vendredi, sinon ça passe à la prochaine livraison.
+     out:   Hey, I just spoke with the supplier and they can ship on the twelfth, but only if we confirm the quantity before Friday, otherwise it will be moved to the next delivery.
+  #2 success clean 1771ms + translate 486ms source=fr
+     clean: Hey, je viens d'avoir une conversation avec le fournisseur et ils peuvent expédier le douze, mais seulement si nous confirmons la quantité avant vendredi, sinon cela passe à la prochaine livraison.
+     out:   Hey, I just had a conversation with the supplier and they can ship on the twelfth, but only if we confirm the quantity before Friday, otherwise it will be moved to the next delivery.
+  #3 success clean 1965ms + translate 503ms source=fr
+     clean: Hey, je viens d'avoir parlé avec le fournisseur et ils peuvent expédier le 12ème mais seulement si on confirme la quantité avant vendredi, sinon ça passe à la prochaine fournée.
+     out:   Hey, I just spoke with the supplier and they can ship on the 12th but only if we confirm the quantity before Friday, otherwise it will be moved to the next shipment.
+  #4 success clean 1726ms + translate 500ms source=fr
+     clean: Hey, je viens d'avoir parlé avec le fournisseur et ils peuvent expédier le douze, mais seulement si on confirme la quantité avant vendredi, sinon ça passe à la prochaine fournée.
+     out:   Hey, I just spoke with the supplier and they can ship on the twelfth, but only if we confirm the quantity before Friday, otherwise it will be moved to the next shipment.
+  #5 success clean 1866ms + translate 525ms source=fr
+     clean: Hey, je viens juste du téléphone avec le fournisseur et ils peuvent expédier le douze, mais seulement si on confirme la quantité avant vendredi, sinon ça passe à la prochaine série.
+     out:   Hey, I just got a call from the supplier and they can ship on the twelfth, but only if we confirm the quantity before Friday, otherwise it will go to the next batch.
+
+══ arm 412-D: runs with at least one flag, per bar (engine outputs)
+fixture | runs | accepted | (a) drop | (b) keep | (c) add | (d) not en | (e) critical | #412 expect | median ms | max ms
+T1-fr-casual | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 2465 | 3638
+T2-fr-deja-partiellement-en | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 2406 | 2438
+T3-it-clavier-fr | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 2558 | 3132
+T4-it-auto | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 2453 | 2892
+T5-saut-de-ligne | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 5 | 1544 | 1574
+T6-deja-en | 5 | 5 | 0 | 0 | 0 | 0 | 0 | 0 | 2257 | 2468
+ALL | 30 | 30 | 0 | 0 | 0 | 0 | 0 | 5 | 2406 | 3638
+pass latency: clean median 1619ms max 2293ms; translate median 761ms max 1345ms
+not accepted: none

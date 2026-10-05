@@ -1,0 +1,812 @@
+[
+  {
+    "arm" : "412-A",
+    "engineMs" : 2391,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, so for the Thursday appointment, I can't before 3 PM, I have something hanging over from the morning. But after that, I'm free all afternoon. Let me know if that works for you.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 2391
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1643,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, so for the Thursday appointment, I can't before fifteen. I've got something hanging over the morning, but after that, I'm free all afternoon. Let me know if that works for you.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1643
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1731,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, so for the Thursday appointment, I can't before fifteen o'clock—I've got something dragging from the morning. But after that, I'm free all afternoon. Let me know if that works for you.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1731
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1754,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, so for the Thursday appointment, I can't before fifteen o'clock—I've got something hanging over the morning. But after that, I'm free all afternoon. Let me know if that works for you.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1754
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1850,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hey Sophie, so for the Thursday appointment, I can't before fifteen o'clock, I've got something hanging over the morning, but afterwards I'm free all afternoon—let me know if that works for you.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1850
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1820,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Alright, during this morning's call, the client asked if we could push the deadline back by a week and, well, I said it was doable only if we did a rollback on the search part because otherwise we can't hold it.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1820
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1754,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, during this morning's call, the client asked if we could push back the deadline by a week, and I said it was doable only if we did a rollback on the search part because otherwise we won't hold it",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1754
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1826,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, during this morning's call, the client asked if we could push the deadline back by a week and, well, I said it was doable only if we did a rollback on the search part because otherwise we won't hold it.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1826
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1753,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Alright, during this morning's call, the client asked if we could push the deadline back by a week, and I said it was doable only if we did a rollback on the search part because otherwise we can't keep up.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1753
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1951,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, during this morning's call, the client asked if we could push the deadline back by a week and, well, I said it was doable only if we did a rollback on the search part because otherwise we wouldn't hold it together.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1951
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1954,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, there's something—if you want, we can catch up around three.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1954
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1954,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but I'm free in the afternoon. If you want, we can catch up around three.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1954
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1888,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, there's something — if you want, we can catch up around three.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1888
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1954,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, I'm free if you want to catch up, we can talk around three.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1954
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1951,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but I'm free in the afternoon. If you want, we can catch up around three.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1951
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1917,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment with the dentist at eleven, but I'm free in the afternoon. If you want, we can catch up around three.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1917
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1884,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, there's something — if you want, we can catch up around three.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1884
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1913,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, I'm available—if you want, we can catch up around three.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1913
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1902,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, listen, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment with the dentist at eleven, but I'm free in the afternoon—if you want, we can catch up around three.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1902
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1909,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So, you know, I wanted to tell you that I can't make it to the office tomorrow because I have an appointment at the dentist at eleven, but in the afternoon, I'm available if you want to get in touch around three.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1909
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1093,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We'll meet tomorrow morning in front of the entrance\npick up the badges on the way",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1093
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1049,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We meet tomorrow morning in front of the entrance\npick up the badges on the way",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1049
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1089,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We'll meet tomorrow morning in front of the entrance\npick up the badges on the way",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1089
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1099,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We'll meet tomorrow morning in front of the entrance\npick up the badges on the way",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1099
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1043,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "We meet tomorrow morning in front of the entrance\npick up the badges on the way",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1043
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1197,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday, otherwise it slips to the next batch",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1197
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1195,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday otherwise it slips to the next batch.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1195
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1195,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday otherwise it slips to the next batch.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1195
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1174,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday otherwise it slips to the next batch",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1174
+  },
+  {
+    "arm" : "412-A",
+    "engineMs" : 1205,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "Hey, so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before Friday, otherwise it slips to the next batch.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "translateMs" : 1205
+  }
+]

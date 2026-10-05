@@ -1,0 +1,842 @@
+[
+  {
+    "arm" : "412-C",
+    "engineMs" : 1416,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 1416
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 782,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 782
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 787,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 787
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 774,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 774
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 785,
+    "fixture" : "T1-fr-casual",
+    "outcome" : "success",
+    "output" : "Hi Sophie, so for Thursday's appointment I can't before 3 PM, I have something running in the morning, but after that I'm free all afternoon. Let me know if that works for you.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 785
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 840,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 840
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 830,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 830
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 819,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 819
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 822,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 822
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 827,
+    "fixture" : "T2-fr-deja-partiellement-en",
+    "outcome" : "success",
+    "output" : "Well, so during this morning's call the client asked if we could move the deadline by a week, and uh I said that it was only feasible if we do a rollback on the search part, because otherwise we won't make it.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 827
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 1083,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 1083
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 811,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 811
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 814,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 814
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 817,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 817
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 825,
+    "fixture" : "T3-it-clavier-fr",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 825
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 812,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 812
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 812,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 812
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 809,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 809
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 807,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 807
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 814,
+    "fixture" : "T4-it-auto",
+    "outcome" : "success",
+    "output" : "So listen, I wanted to tell you that I can't come to the office tomorrow because I have something at the dentist at eleven, but I'll be there in the afternoon. If you want, we can talk around three.",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "it",
+    "translateMs" : 814
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 490,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "See you tomorrow morning in front of the entrance\nTake the badges along the way",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 490
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 480,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "See you tomorrow morning in front of the entrance\nTake the badges along the way",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 480
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 504,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "See you tomorrow morning in front of the entrance\nTake the badges along the way",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 504
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 480,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "See you tomorrow morning in front of the entrance\nTake the badges along the way",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 480
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 480,
+    "fixture" : "T5-saut-de-ligne",
+    "outcome" : "success",
+    "output" : "See you tomorrow morning in front of the entrance\nTake the badges along the way",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 480
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 1,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "en",
+    "translateMs" : 1
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 1,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "en",
+    "translateMs" : 1
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 1,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "en",
+    "translateMs" : 1
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 1,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch",
+    "run" : 4,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "en",
+    "translateMs" : 1
+  },
+  {
+    "arm" : "412-C",
+    "engineMs" : 1,
+    "fixture" : "T6-deja-en",
+    "outcome" : "success",
+    "output" : "hey so I just got off the phone with the supplier and they can ship on the twelfth but only if we confirm the quantity before friday otherwise it slips to the next batch",
+    "run" : 5,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "en",
+    "translateMs" : 1
+  }
+]
