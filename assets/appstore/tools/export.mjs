@@ -1,15 +1,20 @@
 // Export the App Store screenshots from screenshots.html (issue #643).
 //
-//   npm run export                         every locale in strings/, both themes
+//   npm run export                         every locale in strings/
 //   npm run export -- --locale en-GB       one locale
-//   npm run export -- --theme navy         one theme
+//   npm run export -- --theme navy         force one theme
 //
 // Output: export/<locale>/<iteration>/<theme>/<NN-id>.png, 1320×2868, opaque sRGB
-// (App Store Connect rejects screenshots with an alpha channel), plus
-// export/<locale>/<iteration>/montage-<theme>.jpg, the six side by side for review
-// (JPEG: it is only looked at, and a PNG montage weighs 4.6 MB in git).
-// <iteration> is window.ITERATION in screenshots.html, so a new design iteration
-// never overwrites the previous one.
+// (App Store Connect rejects screenshots with an alpha channel), plus review
+// montages (JPEG: they are only looked at, and a PNG montage weighs 4.6 MB in git).
+//
+// The template decides what an iteration renders:
+// - window.ITERATION: the output folder, so an iteration never overwrites another;
+// - window.EXPORT_THEMES: the themes rendered unless --theme forces one;
+// - window.VARIANTS: slide variants. The first is the main set (all six slides,
+//   montage.jpg); every other one exports only the slides it changes, and a
+//   montage-<variant>.jpg with those slides swapped in.
+// With several themes, montages are suffixed with the theme.
 //
 // Headless Chromium through Playwright, from a file:// URL: no server, no window.
 import { chromium } from "playwright";
@@ -29,7 +34,6 @@ const opt = (name) => {
 const locales = opt("locale")
   ? [opt("locale")]
   : readdirSync(join(ROOT, "strings")).filter((f) => f.endsWith(".js")).map((f) => f.slice(0, -3));
-const themes = opt("theme") ? [opt("theme")] : ["navy", "light"];
 
 if (!existsSync(join(ROOT, ".bezels"))) {
   console.error("Apple bezel missing. Run `npm run bezel` first (see tools/fetch-bezel.sh).");
@@ -37,39 +41,49 @@ if (!existsSync(join(ROOT, ".bezels"))) {
 }
 
 const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage({
-  viewport: { width: PANEL_W * 6, height: PANEL_H },
-  deviceScaleFactor: 1,
-});
+const page = await browser.newPage({ viewport: { width: PANEL_W * 6, height: PANEL_H }, deviceScaleFactor: 1 });
+
+async function load(locale, theme, variant) {
+  const url = pathToFileURL(join(ROOT, "screenshots.html"));
+  url.search = `?locale=${locale}${theme ? `&theme=${theme}` : ""}${variant ? `&variant=${variant}` : ""}`;
+  await page.goto(url.href, { waitUntil: "networkidle" });
+  if (!(await page.evaluate(() => window.whenReady))) throw new Error("screenshots.html reports the bezel is missing");
+  return page.evaluate(() => ({
+    ids: window.SLIDE_IDS, iteration: window.ITERATION,
+    themes: window.EXPORT_THEMES || ["navy", "light"], variants: window.VARIANTS || [undefined],
+  }));
+}
+
+const shoot = async (file, i) => {
+  await page.screenshot({ path: file, clip: { x: i * PANEL_W, y: 0, width: PANEL_W, height: PANEL_H } });
+  // Flatten: no alpha channel, sRGB.
+  execFileSync("magick", [file, "-background", "white", "-alpha", "remove", "-alpha", "off", "-colorspace", "sRGB", "-strip", file]);
+};
+const montage = (files, out) => execFileSync("magick", ["montage", ...files, "-tile", `${files.length}x1`,
+  "-geometry", "440x956+12+12", "-background", "#1C1F26", "-quality", "90", out]);
 
 for (const locale of locales) {
+  const meta = await load(locale);
+  const themes = opt("theme") ? [opt("theme")] : meta.themes;
   for (const theme of themes) {
-    const url = pathToFileURL(join(ROOT, "screenshots.html"));
-    url.search = `?locale=${locale}&theme=${theme}`;
-    await page.goto(url.href, { waitUntil: "networkidle" });
-    const ok = await page.evaluate(() => window.whenReady);
-    if (!ok) throw new Error("screenshots.html reports the bezel is missing");
-    const ids = await page.evaluate(() => window.SLIDE_IDS);
-    const iteration = await page.evaluate(() => window.ITERATION);
-
-    const out = join(ROOT, "export", locale, iteration, theme);
+    const out = join(ROOT, "export", locale, meta.iteration, theme);
     mkdirSync(out, { recursive: true });
-    const files = [];
-    for (const [i, id] of ids.entries()) {
-      const file = join(out, `${id}.png`);
-      await page.screenshot({
-        path: file,
-        clip: { x: i * PANEL_W, y: 0, width: PANEL_W, height: PANEL_H },
-      });
-      // Flatten: no alpha channel, sRGB.
-      execFileSync("magick", [file, "-background", "white", "-alpha", "remove", "-alpha", "off",
-        "-colorspace", "sRGB", "-strip", file]);
-      files.push(file);
+    const suffix = themes.length > 1 || opt("theme") ? `-${theme}` : "";
+    let mainFiles = [];
+    for (const [v, variant] of meta.variants.entries()) {
+      const { ids } = await load(locale, theme, variant);
+      const files = [];
+      for (const [i, id] of ids.entries()) {
+        const file = join(out, `${id}.png`);
+        // A secondary variant only re-exports the slides it changes.
+        if (v === 0 || !mainFiles.includes(file)) await shoot(file, i);
+        files.push(file);
+      }
+      if (v === 0) mainFiles = files;
+      const name = v === 0 ? `montage${suffix}.jpg` : `montage-${variant}${suffix}.jpg`;
+      montage(files, join(ROOT, "export", locale, meta.iteration, name));
+      console.log(`${locale}/${meta.iteration}/${theme}${variant ? `/${variant}` : ""}: ${files.length} slides, ${name}`);
     }
-    const montage = join(ROOT, "export", locale, iteration, `montage-${theme}.jpg`);
-    execFileSync("magick", ["montage", ...files, "-tile", "6x1", "-geometry", "440x956+12+12",
-      "-background", "#1C1F26", "-quality", "90", montage]);
-    console.log(`${locale}/${iteration}/${theme}: ${files.length} slides, montage ${montage}`);
   }
 }
 await browser.close();

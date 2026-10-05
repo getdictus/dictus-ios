@@ -12,12 +12,18 @@
  * unverifiable superlatives ("the only app that…"); dictation = 25+ languages,
  * keyboard = 4 languages and 3 layouts.
  *
- * Every word a floating card shows must be something the product produces:
- * - smartModes.before / after: `after` is the measured output of the shipping
- *   `Message` prompt on Apple Foundation Models for `before`, run through
- *   `swift run polish-harness show … --mode message --runs 3` on 2026-10-04,
- *   identical on all three runs (two blocks, no closing punctuation). A locale
- *   needs its own measured pair; never translate `after` by hand.
+ * Every word a floating card shows must be something the product produces.
+ * The Smart Mode pairs below are measured with
+ *   swift run polish-harness show <fixtures> --mode <id> --runs 3   (Apple FM, Mac)
+ * and `after` is shown verbatim. A locale needs its own measured pairs; never
+ * translate `after` by hand. Measured on 2026-10-05:
+ * - message: 9 English dictations, 3 runs each. None became a clean, punctuated,
+ *   stable message: stable outputs stay close to the input and end without
+ *   punctuation (the mode writes in texting style); the cleaner outputs appear
+ *   in 1 run of 3, and one dictation swapped a fact in 2 runs of 3. The pair
+ *   below is the stable one (3/3 identical) that removes the most.
+ * - translate.fr: 5/5 runs identical but one word (4/5 "coincé", 1/5 "bloqué").
+ *   translate.es was rejected: it rendered "ten minutes" as "quince minutos".
  * - voiceNotes: the transcript comes from the capture, not from here.
  */
 window.DICTUS_STRINGS = {
@@ -28,20 +34,34 @@ window.DICTUS_STRINGS = {
       headline: "Dictate in any app",
     },
     smartModes: {
-      headline: "Speak freely, send it clean",
       footnote: "Smart Modes need Apple Intelligence",
       beforeLabel: "You said",
       // `~text~` is struck through: words the mode removed.
-      before: "About tomorrow's meeting, ~um,~ I think we should, ~like,~ move it to ten, because, ~uh,~ half the team is still travelling. ~And~ can you, ~um,~ send me the slides before?",
-      modeName: "Message",
-      after: [
-        "About tomorrow's meeting, I think we should move it to ten, because half the team is still travelling",
-        "Can you send me the slides before",
-      ],
+      message: {
+        headline: "Speak freely, send it clean",
+        before: "So basically I'm going to be late, like twenty minutes, sorry, ~the train is, uh,~ the train is stuck. Start without me and ~I'll, um,~ I'll catch up when I get there.",
+        modeName: "Message",
+        after: [
+          "So basically I'm going to be late, like twenty minutes, sorry",
+          "The train is stuck",
+          "Start without me and I'll catch up when I get there",
+        ],
+      },
+      translate: {
+        headline: "Translate as you speak",
+        before: "I'm running about ten minutes late, the train is stuck outside the station. Start without me and order the burrata for me.",
+        // The fan's own label for the mode (SmartModeDisplayName.swift).
+        modeName: "\u2192 FR",
+        after: [
+          "Je suis en retard d'environ dix minutes, le train est coincé devant la gare. Commence sans moi et commande la burrata pour moi.",
+        ],
+      },
     },
     voiceNotes: {
       headline: "Read voice notes in your keyboard",
       bubbleDuration: "0:24",
+      // The first name in the conversation header (slide 3).
+      contactName: "Emma",
     },
     keyboard: {
       headline: "A real keyboard in your language",
@@ -53,7 +73,7 @@ window.DICTUS_STRINGS = {
     },
     private: {
       headline: "Your voice never leaves your iPhone",
-      footnote: "On-device models · No account · Open source",
+      footnote: "The models live on your iPhone. No account, open source.",
     },
     languages: {
       headline: "Dictate in 25+ languages",

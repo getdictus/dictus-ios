@@ -10,8 +10,9 @@
 
   Reads export/<locale>/<iteration>/<theme>/. Re-export (npm run export), then reload.
     ?locale=en-GB   (default)
-    ?iteration=v2   design iteration (default v2; v1 is the first round)
-    ?theme=navy     show one theme only (default: navy and light, one after the other)
+    ?iteration=v3   design iteration (default v3; v1 and v2 are earlier rounds)
+    ?theme=navy     show one theme only (v1/v2: navy and light by default; v3: light only)
+    v3 also shows slide 2's second variant (translate) in a gallery of its own.
 -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,28 +38,33 @@
 <script>
 const params = new URLSearchParams(location.search);
 const locale = params.get("locale") || "en-GB";
-const iteration = params.get("iteration") || "v2";
-const themes = params.get("theme") ? [params.get("theme")] : ["navy", "light"];
-const ids = ["01-dictate", "02-smart-modes", "03-voice-notes", "04-keyboard", "05-private", "06-languages"];  // same ids in v1 and v2
+const iteration = params.get("iteration") || "v3";
+const themes = params.get("theme") ? [params.get("theme")] : iteration === "v3" ? ["light"] : ["navy", "light"];
+const ids = ["01-dictate", "02-smart-modes", "03-voice-notes", "04-keyboard", "05-private", "06-languages"];
+// From v3, slide 2 has two variants; the main set uses message.
+if (iteration === "v3") ids[1] = "02-message";
+const variants = iteration === "v3" ? [["main", ids], ["translate", ids.map((id) => id === "02-message" ? "02-translate" : id)]] : [["main", ids]];
 const imgs = (theme, list) => list.map((id) => `<img src="export/${locale}/${iteration}/${theme}/${id}.png" alt="">`).join("");
 for (const theme of themes) {
-  document.write(`
-    <h1>${locale} · ${iteration} · Pro slides: ${theme}</h1>
-    <section class="light">
-      <h2>Product page, light mode</h2>
-      <p class="sub">iPhone gallery, 16 px gap, rounded corners as on the App Store</p>
-      <div class="gallery">${imgs(theme, ids)}</div>
-    </section>
-    <section class="dark">
-      <h2>Product page, dark mode</h2>
-      <p class="sub">The same gallery on black</p>
-      <div class="gallery">${imgs(theme, ids)}</div>
-    </section>
-    <section class="light">
-      <h2>Search results, the first three</h2>
-      <p class="sub">Only about three screenshots show in search results: they carry the 2.0.0 story</p>
-      <div class="gallery small">${imgs(theme, ids.slice(0, 3))}</div>
-    </section>`);
+  for (const [variant, list] of variants) {
+    document.write(`
+      <h1>${locale} · ${iteration} · Pro slides: ${theme}${variant === "main" ? "" : ` · slide 2: ${variant}`}</h1>
+      <section class="light">
+        <h2>Product page, light mode</h2>
+        <p class="sub">iPhone gallery, 16 px gap, rounded corners as on the App Store</p>
+        <div class="gallery">${imgs(theme, list)}</div>
+      </section>
+      <section class="dark">
+        <h2>Product page, dark mode</h2>
+        <p class="sub">The same gallery on black</p>
+        <div class="gallery">${imgs(theme, list)}</div>
+      </section>
+      <section class="light">
+        <h2>Search results, the first three</h2>
+        <p class="sub">Only about three screenshots show in search results: they carry the 2.0.0 story</p>
+        <div class="gallery small">${imgs(theme, list.slice(0, 3))}</div>
+      </section>`);
+  }
 }
 </script>
 </body>

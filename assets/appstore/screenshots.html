@@ -24,8 +24,9 @@
 
   Parameters (query string):
     ?locale=en-GB     copy from strings/<locale>.js, captures from captures/<locale>/
-    ?theme=navy       background of the Pro slides: navy | light (the ONE variable
-                      decision 1 asks for; the layout is identical in both)
+    ?theme=light      background of the Pro slides: light (default since V3) | navy.
+                      The ONE variable decision 1 asks for; the layout is identical.
+    ?variant=message  slide 2 sells `message` (default) or `translate`
     ?preview          scale the strip to the window
 
   Device frame: Apple's official iPhone 17 Pro Max bezel (Apple Design
@@ -132,6 +133,16 @@
   .voice-bubble .bars i { display: block; width: 7px; border-radius: 4px; background: #8E8E93; }
   .voice-bubble .dur { font-size: 40px; color: #3C3C43; font-variant-numeric: tabular-nums; }
 
+  /* Soft-edged patch: a hard rectangle showed against the header's own glow. */
+  .name-cover { position: absolute; background: #FEFEFE; border-radius: 70px; filter: blur(13px); }
+  .name-pill {
+    position: absolute; left: 50%; transform: translateX(-50%); height: 94px; padding: 0 30px 0 38px;
+    display: flex; align-items: center; gap: 14px; border-radius: 47px; background: #fff;
+    box-shadow: 0 6px 26px rgba(0, 0, 0, 0.08);
+    font: 700 54px/1 -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif; color: #000; letter-spacing: -0.01em;
+  }
+  .name-pill span { font-weight: 600; font-size: 46px; color: #B0B0B5; }
+
   /* ── Keyboard cards (slide 4): real captures cropped to the keyboard ── */
   .kb { position: absolute; z-index: 3; }
   .kb .crop {
@@ -169,7 +180,9 @@
 <script>
 const params = new URLSearchParams(location.search);
 const LOCALE = params.get("locale") || "en-GB";
-const THEME = params.get("theme") || "navy";
+const THEME = params.get("theme") || "light";
+/* Slide 2 sells one Smart Mode: ?variant=message (default) or translate. */
+const VARIANT = params.get("variant") || "message";
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -184,7 +197,7 @@ const THEMES = {
     proShadow: "rgba(0, 0, 0, 0.55)", proLift: "rgba(0, 0, 0, 0.55)",
   },
   light: {
-    proTop: [236, 242, 255], proBottom: [214, 226, 250],    // #ECF2FF → #D6E2FA
+    proTop: [228, 237, 255], proBottom: [203, 219, 250],    // #E4EDFF → #CBDBFA: a shade deeper than the free slides
     proInk: "#0A1628", proSub: "rgba(10, 22, 40, 0.55)",
     proDot: "rgba(37, 99, 235, 0.07)", proEdgeRGB: [110, 122, 145],
     proShadow: "rgba(10, 22, 40, 0.26)", proLift: "rgba(10, 22, 40, 0.28)",
@@ -203,8 +216,10 @@ rootStyle.setProperty("--pro-sub", T.proSub);
 const PANEL_W = 1320, PANEL_H = 2868, PANELS = 6, STRIP_W = PANEL_W * PANELS;
 const BEZEL = ".bezels/iPhone 17 Pro Max - Deep Blue - Portrait.png";
 
-/* Phone geometry shared by every phone slide: big, cropped by the bottom edge. */
-const PHONE = { width: 1160, top: 640 };
+/* Phone geometry shared by every phone slide: the WHOLE phone, same size and
+   baseline everywhere, with a margin below. Dictus is a keyboard and the keyboard
+   is the bottom of the screen: a bottom crop hid the product (V2). */
+const PHONE = { width: 1000, top: 737 };   // 2041 px tall, 90 px margin below
 /* Keyboard band of a capture, in capture pixels: from the top of the keyboard
    panel to just under the space row. */
 const KEYBOARD_BAND = { y: 1762, h: 896 };
@@ -215,13 +230,17 @@ const KEYBOARD_BAND = { y: 1762, h: 896 };
 const SLIDES = [
   { id: "01-dictate", key: "dictate", pro: false,
     phone: { capture: "01-recording-reminders.png" },
-    lift: { band: KEYBOARD_BAND, width: 1240, raise: 90 } },
-  { id: "02-smart-modes", key: "smartModes", pro: true,
-    phone: { capture: "02-smart-mode-fan.png" },
-    beforeAfter: { top: 820, width: 1200 } },
+    lift: { band: KEYBOARD_BAND, width: 1180, raise: 60 } },
+  { id: `02-${VARIANT}`, key: "smartModes", pro: true,
+    phone: { capture: `02-smart-mode-fan-${VARIANT}.png` },
+    beforeAfter: { top: 860, width: 1180 } },
   { id: "03-voice-notes", key: "voiceNotes", pro: true,
-    phone: { capture: "03-voice-note-reader.png", voiceBubble: { top: 930 } },
-    lift: { band: KEYBOARD_BAND, width: 1240, raise: 90 } },
+    // The simulator's demo threads show the raw number in the header even with a
+    // matching contact (the avatar initials resolve, the name does not), and its
+    // compose sheet cannot create a new thread. So the name pill is drawn over it.
+    phone: { capture: "03-voice-note-reader.png", voiceBubble: { top: 930 },
+             namePill: { cover: { x: 326, y: 340, w: 668, h: 132 }, cy: 397 } },
+    lift: { band: KEYBOARD_BAND, width: 1180, raise: 60 } },
   { id: "04-keyboard", key: "keyboard", pro: false,
     keyboards: [
       { capture: "04-keyboard-azerty-fr.png", label: "fr" },
@@ -229,8 +248,9 @@ const SLIDES = [
       { capture: "04-keyboard-qwertz-de.png", label: "de" },
     ] },
   { id: "05-private", key: "private", pro: false,
-    phone: { capture: "05-models-offline.png" },
-    lift: { band: { x: 40, y: 1955, w: 1240, h: 410 }, width: 1240 } },
+    phone: { capture: "05-models-downloaded.png" },
+    // The whole "Downloaded" section: the point is that the models live on the phone.
+    lift: { band: { x: 40, y: 525, w: 1240, h: 990 }, width: 1180 } },
   { id: "06-languages", key: "languages", pro: false, greetings: true },
 ];
 
@@ -260,9 +280,20 @@ function addPhone(p, i, pro) {
   // The layer works in capture pixels: 1320 capture px = 1320 bezel px.
   d.querySelector(".layer").style.transform = `scale(${scale})`;
   if (p.voiceBubble) d.querySelector(".layer").appendChild(voiceBubble(p.voiceBubble));
+  if (p.namePill) namePill(p.namePill).forEach((n) => d.querySelector(".layer").appendChild(n));
   strip.appendChild(d);
   // Capture pixel (x, y) → strip coordinates.
   return (x, y) => [left + (75 + x) * scale, PHONE.top + (66 + y) * scale];
+}
+
+/* Messages' header name pill, in capture pixels: a patch of the header background
+   over the number, then the contact's first name in the pill's own style. */
+function namePill(n) {
+  const cover = el("name-cover");
+  Object.assign(cover.style, { left: `${n.cover.x}px`, top: `${n.cover.y}px`, width: `${n.cover.w}px`, height: `${n.cover.h}px` });
+  const pill = el("name-pill", `${S.slides.voiceNotes.contactName}<span>\u203A</span>`);
+  pill.style.top = `${n.cy - 47}px`;
+  return [cover, pill];
 }
 
 function voiceBubble(b) {
@@ -296,14 +327,17 @@ function addLift(l, toStrip, file, pro, i) {
   strip.appendChild(d);
 }
 
-function addBeforeAfter(b, copy, i, pro) {
+function addBeforeAfter(b, slideCopy, i, pro) {
+  const copy = { ...slideCopy, ...slideCopy[VARIANT] };
+  const icon = VARIANT === "translate"
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.8 2.6 15.2 0 18M12 3c-2.6 2.8-2.6 15.2 0 18"/></svg>'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>';
   const before = copy.before.replace(/~([^~]+)~/g, "<s>$1</s>");
   const d = el("ba", `
     <div class="label">${copy.beforeLabel}</div>
     <div class="before">${before}</div>
     <div class="divider"><span class="mode">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>
-      ${copy.modeName}</span></div>
+      ${icon}${copy.modeName}</span></div>
     <div class="after">${copy.after.map((t) => `<p>${t}</p>`).join("")}</div>`);
   Object.assign(d.style, { left: `${i * PANEL_W + (PANEL_W - b.width) / 2}px`, top: `${b.top}px`, width: `${b.width}px` });
   d.style.setProperty("--lift-shadow", pro ? T.proLift : FREE.lift);
@@ -350,9 +384,10 @@ function addGreetings(list, i) {
 
 SLIDES.forEach((s, i) => {
   const copy = S.slides[s.key];
+  const headline = copy.headline ?? copy[VARIANT].headline;
   const c = el(`copy ${s.pro ? "pro-slide" : "free"}`, `
     <div class="badge-row">${s.pro ? `<span class="pro">${S.proBadge}</span>` : ""}</div>
-    <div class="headline">${copy.headline}</div>
+    <div class="headline">${headline}</div>
     ${copy.footnote ? `<div class="footnote">${copy.footnote}</div>` : ""}`);
   c.style.left = `${i * PANEL_W}px`;
   strip.appendChild(c);
@@ -432,7 +467,12 @@ window.whenReady = Promise.all([
   .then(() => document.getElementById("missing").style.display !== "flex");
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
 /* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
-window.ITERATION = "v2";
+window.ITERATION = "v3";
+/* Themes the exporter renders for this iteration (V3: light only, decided by Pierre). */
+window.EXPORT_THEMES = ["light"];
+window.VARIANT = VARIANT;
+/* Slide 2 variants; the first is the main set, the others only swap slide 2. */
+window.VARIANTS = ["message", "translate"];
 
 if (params.has("preview")) {
   document.body.classList.add("preview");
