@@ -122,29 +122,45 @@
   .ba .after { display: flex; flex-direction: column; gap: 22px; }
   .ba .after p { font-size: 54px; line-height: 1.32; letter-spacing: -0.015em; color: #0A1628; font-weight: 450; }
 
-  /* ── iMessage received audio bubble, drawn in capture pixels ──
-     The simulator cannot receive a voice message (docs/agents/simulator.md),
-     so this one bubble is drawn to match iOS 26's received audio message.
-     A device capture with a real bubble replaces it (Pierre's capture list). */
-  .voice-bubble {
-    position: absolute; left: 48px; height: 132px; width: 600px; border-radius: 66px;
-    background: #E9E9EB; display: flex; align-items: center; gap: 26px; padding: 0 40px 0 30px;
-    font: 500 44px/1 -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; color: #000;
+  /* ── Slide 3: a generic chat screen, drawn in capture pixels ──
+     Voice notes reach Dictus from chat apps through the share sheet (#620), but
+     WhatsApp and Telegram do not install on the simulator, and drawing either
+     would be third-party trade dress in App Store metadata (guideline 5.2). Apple
+     Messages is the wrong host too: iOS already transcribes its audio messages.
+     So the conversation is an unbranded chat in Dictus's own restrained style:
+     no Apple header or bubble colours, no WhatsApp/Telegram wallpaper, header or
+     green. The status bar above and the keyboard reader below stay real. */
+  .chat {
+    position: absolute; left: 0; top: 150px; width: 1320px; height: 1617px; background: #FFFFFF;
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; color: #0A1628;
   }
-  .voice-bubble .play { width: 64px; height: 64px; flex: none; }
-  .voice-bubble .bars { display: flex; align-items: center; gap: 7px; flex: 1; height: 64px; }
-  .voice-bubble .bars i { display: block; width: 7px; border-radius: 4px; background: #8E8E93; }
-  .voice-bubble .dur { font-size: 40px; color: #3C3C43; font-variant-numeric: tabular-nums; }
-
-  /* Soft-edged patch: a hard rectangle showed against the header's own glow. */
-  .name-cover { position: absolute; background: #FEFEFE; border-radius: 70px; filter: blur(13px); }
-  .name-pill {
-    position: absolute; left: 50%; transform: translateX(-50%); height: 94px; padding: 0 30px 0 38px;
-    display: flex; align-items: center; gap: 14px; border-radius: 47px; background: #fff;
-    box-shadow: 0 6px 26px rgba(0, 0, 0, 0.08);
-    font: 700 54px/1 -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif; color: #000; letter-spacing: -0.01em;
+  .chat .head {
+    position: absolute; left: 0; right: 0; top: 0; height: 236px; display: flex; align-items: center;
+    gap: 34px; padding: 0 56px; border-bottom: 2px solid #ECEEF3;
   }
-  .name-pill span { font-weight: 600; font-size: 46px; color: #B0B0B5; }
+  .chat .head svg { width: 44px; height: 44px; flex: none; }
+  .chat .avatar {
+    width: 116px; height: 116px; border-radius: 50%; flex: none; display: flex; align-items: center;
+    justify-content: center; background: #E4ECFF; color: #2563EB; font-size: 54px; font-weight: 600;
+  }
+  .chat .name { font-size: 56px; font-weight: 600; letter-spacing: -0.01em; }
+  .chat .day { position: absolute; left: 0; right: 0; top: 300px; text-align: center; font-size: 36px; color: #8A94A6; }
+  .chat .out {
+    position: absolute; right: 56px; top: 390px; max-width: 860px; padding: 30px 42px;
+    border-radius: 46px 46px 14px 46px; background: #E6EEFF; font-size: 48px; line-height: 1.3;
+  }
+  .chat .voice {
+    position: absolute; left: 56px; top: 640px; width: 760px; height: 150px; padding: 0 44px 0 26px;
+    display: flex; align-items: center; gap: 30px; border-radius: 46px 46px 46px 14px; background: #F1F3F7;
+  }
+  .chat .voice .play { width: 100px; height: 100px; flex: none; }
+  .chat .voice .bars { display: flex; align-items: center; gap: 8px; flex: 1; height: 80px; }
+  .chat .voice .bars i { display: block; width: 8px; border-radius: 4px; background: #9AA3B5; }
+  .chat .voice .dur { font-size: 40px; color: #5B6577; font-variant-numeric: tabular-nums; }
+  .chat .compose {
+    position: absolute; left: 56px; right: 56px; top: 1470px; height: 112px; border-radius: 56px;
+    background: #F1F3F7; display: flex; align-items: center; padding: 0 44px; font-size: 46px; color: #9AA3B5;
+  }
 
   /* ── Keyboard cards (slide 4): real captures cropped to the keyboard ── */
   .kb { position: absolute; z-index: 3; }
@@ -243,11 +259,9 @@ const SLIDES = [
     phone: { capture: `02-smart-mode-fan-${VARIANT}.png` },
     beforeAfter: { top: 860, width: 1180 } },
   { id: "03-voice-notes", key: "voiceNotes", pro: true,
-    // The simulator's demo threads show the raw number in the header even with a
-    // matching contact (the avatar initials resolve, the name does not), and its
-    // compose sheet cannot create a new thread. So the name pill is drawn over it.
-    phone: { capture: "03-voice-note-reader.png", voiceBubble: { top: 930 },
-             namePill: { cover: { x: 326, y: 340, w: 668, h: 132 }, cy: 397 } },
+    // Real capture (status bar, keyboard reader); the conversation above is the
+    // generic chat drawn by chatScreen().
+    phone: { capture: "03-voice-note-reader.png", chat: true },
     lift: { band: KEYBOARD_BAND, width: 1180, raise: 60 } },
   { id: "04-keyboard", key: "keyboard", pro: false,
     keyboards: [
@@ -291,31 +305,30 @@ function addPhone(p, i, pro) {
   bezel.src = BEZEL;
   // The layer works in capture pixels: 1320 capture px = 1320 bezel px.
   d.querySelector(".layer").style.transform = `scale(${scale})`;
-  if (p.voiceBubble) d.querySelector(".layer").appendChild(voiceBubble(p.voiceBubble));
-  if (p.namePill) namePill(p.namePill).forEach((n) => d.querySelector(".layer").appendChild(n));
+  if (p.chat) d.querySelector(".layer").appendChild(chatScreen());
   strip.appendChild(d);
   // Capture pixel (x, y) → strip coordinates.
   return (x, y) => [left + (75 + x) * scale, PHONE.top + (66 + y) * scale];
 }
 
-/* Messages' header name pill, in capture pixels: a patch of the header background
-   over the number, then the contact's first name in the pill's own style. */
-function namePill(n) {
-  const cover = el("name-cover");
-  Object.assign(cover.style, { left: `${n.cover.x}px`, top: `${n.cover.y}px`, width: `${n.cover.w}px`, height: `${n.cover.h}px` });
-  const pill = el("name-pill", `${S.slides.voiceNotes.contactName}<span>\u203A</span>`);
-  pill.style.top = `${n.cy - 47}px`;
-  return [cover, pill];
-}
-
-function voiceBubble(b) {
-  const heights = [18, 30, 44, 28, 52, 38, 60, 46, 24, 40, 56, 34, 22, 48, 36, 26, 42, 20, 32, 18];
-  const v = el("voice-bubble", `
-    <svg class="play" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#8E8E93"/><path d="M26 20 L46 32 L26 44 Z" fill="#fff"/></svg>
-    <span class="bars">${heights.map((h) => `<i style="height:${h}px"></i>`).join("")}</span>
-    <span class="dur">${S.slides.voiceNotes.bubbleDuration}</span>`);
-  v.style.top = `${b.top}px`;
-  return v;
+/* The generic chat above the real reader (slide 3), in capture pixels. */
+function chatScreen() {
+  const v = S.slides.voiceNotes;
+  const heights = [22, 36, 54, 30, 66, 46, 74, 56, 28, 50, 70, 40, 26, 60, 44, 30, 52, 24, 38, 58, 34, 22, 44, 30];
+  return el("chat", `
+    <div class="head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0A1628" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4 7 12l8 8"/></svg>
+      <div class="avatar">${v.contactName[0]}</div>
+      <div class="name">${v.contactName}</div>
+    </div>
+    <div class="day">${v.chatDay}</div>
+    <div class="out">${v.chatSent}</div>
+    <div class="voice">
+      <svg class="play" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#3D7EFF"/><path d="M41 32 L69 50 L41 68 Z" fill="#fff"/></svg>
+      <span class="bars">${heights.map((h) => `<i style="height:${h}px"></i>`).join("")}</span>
+      <span class="dur">${v.bubbleDuration}</span>
+    </div>
+    <div class="compose">${v.chatPlaceholder}</div>`);
 }
 
 /* A crop of the capture, enlarged, centred on where it sits in the phone (or at centerY). */

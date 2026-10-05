@@ -60,8 +60,12 @@ window.DICTUS_STRINGS = {
     voiceNotes: {
       headline: "Read voice notes in your keyboard",
       bubbleDuration: "0:24",
-      // The first name in the conversation header (slide 3).
+      // The generic chat above the reader (slide 3): not Apple Messages, not a
+      // WhatsApp or Telegram look-alike.
       contactName: "Emma",
+      chatDay: "Today",
+      chatSent: "Are we still on for dinner at Nonna's tonight?",
+      chatPlaceholder: "Message",
     },
     keyboard: {
       headline: "A real keyboard in your language",
