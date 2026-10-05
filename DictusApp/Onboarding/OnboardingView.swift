@@ -4,49 +4,50 @@ import SwiftUI
 import DictusCore
 
 /// Onboarding flow presented as a fullScreenCover on first launch.
-/// Steps: Welcome, Mic, Keyboard setup, Transcription polish opt-in (when the
-/// device supports Apple Foundation Models), Model download, Globe tutorial.
+/// Steps (#649): Welcome, Language, Microphone, Keyboard setup, Model preparation (only
+/// while the model is still downloading or compiling), first dictation through the globe
+/// key. The order is `OnboardingStep.allCases`.
 ///
 /// WHY switch/case instead of TabView:
 /// TabView(.page) allows the user to swipe between pages, which means they could
 /// skip required steps (mic permission, keyboard setup, model download).
-/// Using a manual switch/case with @State currentPage ensures the user can ONLY
+/// Using a manual switch/case on the current step ensures the user can ONLY
 /// advance via each page's completion button — no swiping. This guarantees every
 /// prerequisite is properly set up before the user reaches the test recording step.
 ///
 /// WHY @Binding isComplete:
 /// The parent (DictusApp.swift) owns `hasCompletedOnboarding` via @AppStorage.
-/// When the last page (TestRecordingPage) finishes, it sets isComplete = true,
+/// When the last page (GlobeKeyTutorialPage) finishes, it sets isComplete = true,
 /// which writes to App Group UserDefaults and dismisses the fullScreenCover.
+///
+/// WHY THE POLISH PAGE IS GONE (#649 decision 2): polish adds seconds to every dictation,
+/// Parakeet's output is already clean, and a new user judges Dictus on speed. Polish stays
+/// off by default and is found in Settings; a user who already turned it on keeps it.
 struct OnboardingView: View {
     @Binding var isComplete: Bool
 
-    /// WHY @AppStorage instead of @SceneStorage:
-    /// @SceneStorage relies on iOS scene restoration which can fail when the
-    /// process is forcibly terminated. When the user enables "Allow Full Access"
-    /// in iOS Settings, iOS's TCC daemon kills the main app because the
-    /// kTCCServiceKeyboardNetwork permission changes. We need the onboarding
-    /// step to survive this termination so the user resumes at the right step.
-    /// @AppStorage writes to UserDefaults (App Group) which is always persisted
-    /// across any app termination.
-    @AppStorage(SharedKeys.onboardingCurrentPage, store: UserDefaults(suiteName: AppGroup.identifier))
-    private var currentPage: Int = 0
-
-    /// Track which steps have been completed to show in the step indicator.
-    @State private var completedSteps: Set<Int> = []
-
-    /// Whether the transcription polish opt-in page is part of the flow (#213).
+    /// The step on screen, persisted on every change.
     ///
-    /// WHY computed once at init: PolishAvailability queries the Foundation
-    /// Models SDK; the answer can't meaningfully change mid-onboarding, and a
-    /// stable value keeps the page indices coherent for the whole flow.
-    /// When false (device can never run Apple FM), the page is skipped entirely
-    /// so we never show a toggle that does nothing.
-    private let showsPolishPage = PolishAvailability.isToggleVisible
+    /// WHY persisted, and in the App Group: when the user enables "Allow Full Access" in
+    /// iOS Settings, iOS's TCC daemon kills the main app because the
+    /// kTCCServiceKeyboardNetwork permission changes. The step has to survive that
+    /// termination so the user resumes at the right place. `OnboardingStep.current()` also
+    /// places an install that was mid-onboarding on the pre-#649 page numbering.
+    ///
+    /// WHY @State + an explicit save instead of @AppStorage: the stored value is a step
+    /// name with a one-time migration in front of it, which @AppStorage cannot express.
+    @State private var step: OnboardingStep = OnboardingStep.current()
 
-    /// Total number of onboarding steps shown in the indicator
-    /// (Welcome, Mic, Keyboard, [Polish], Model, Test).
-    private var totalSteps: Int { showsPolishPage ? 6 : 5 }
+    /// One `ModelManager` for the whole flow, shared by the language page that starts the
+    /// download and the preparation page that waits for it (#649).
+    ///
+    /// WHY HERE and not in the pages: the download now starts two pages before anybody
+    /// watches it. A manager owned by the language page would be released with that page,
+    /// and the preparation page would build a second one that only learns about the
+    /// transfer through the peer broadcast. One owner for the length of the flow keeps a
+    /// single source of truth for "is the model ready", which is also what decides whether
+    /// the preparation step is shown at all.
+    @StateObject private var modelManager = ModelManager()
 
     var body: some View {
         ZStack {
@@ -55,39 +56,27 @@ struct OnboardingView: View {
 
             VStack(spacing: 0) {
                 // Current page content — only one page visible at a time
-                // WHY Group instead of ZStack: Group avoids stacking all 5 pages
+                // WHY Group instead of ZStack: Group avoids stacking every page
                 // on top of each other (unnecessary view hierarchy). Only the
                 // matched case is instantiated.
                 Group {
-                    switch currentPage {
-                    case 0:
-                        WelcomePage(onNext: { advanceToPage(1) })
-                    case 1:
-                        MicPermissionPage(onNext: { advanceToPage(2) })
-                    case 2:
-                        // Skip the polish page index when the device can't run
-                        // Apple Foundation Models at all.
-                        KeyboardSetupPage(onNext: { advanceToPage(showsPolishPage ? 3 : 4) })
-                    case 3 where showsPolishPage:
-                        PolishTogglePage(onNext: { advanceToPage(4) })
-                    case 3:
-                        // Stale persisted index: a user mid-onboarding on the old
-                        // flow (layer choice lived at index 3) relaunching on a
-                        // device without polish support resumes at model download.
-                        ModelDownloadPage(onNext: { advanceToPage(5) })
-                    case 4:
-                        ModelDownloadPage(onNext: { advanceToPage(5) })
-                    case 5:
-                        GlobeKeyTutorialPage(onComplete: {
-                            // Reset currentPage to 0 on completion so a future
-                            // onboarding reset (e.g., via Settings → Reset) starts
-                            // cleanly from the first step instead of resuming here.
-                            currentPage = 0
-                            isComplete = true
-                        })
-                    default:
-                        // Safety fallback — should never happen
-                        WelcomePage(onNext: { advanceToPage(1) })
+                    switch step {
+                    case .welcome:
+                        WelcomePage(onNext: advance)
+                    case .language:
+                        LanguageSetupPage(onConfirm: confirmLanguage)
+                    case .microphone:
+                        MicPermissionPage(onNext: advance)
+                    case .keyboardSetup:
+                        KeyboardSetupPage(onNext: advance)
+                    case .modelPreparation:
+                        ModelDownloadPage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .firstDictation:
+                        GlobeKeyTutorialPage(onComplete: finish)
                     }
                 }
                 // Slide transition: new page slides in from trailing edge,
@@ -96,7 +85,7 @@ struct OnboardingView: View {
                     insertion: .move(edge: .trailing),
                     removal: .move(edge: .leading)
                 ))
-                .id(currentPage) // Force SwiftUI to treat each page as a unique view for transitions
+                .id(step) // Force SwiftUI to treat each page as a unique view for transitions
 
                 // Step indicator dots at the bottom
                 stepIndicator
@@ -105,7 +94,7 @@ struct OnboardingView: View {
         }
         // Prevent interactive dismiss (swipe down) on the fullScreenCover
         .interactiveDismissDisabled()
-        .animation(.easeInOut(duration: 0.3), value: currentPage)
+        .animation(.easeInOut(duration: 0.3), value: step)
     }
 
     // MARK: - Step Indicator
@@ -114,46 +103,106 @@ struct OnboardingView: View {
     ///
     /// WHY custom dots instead of TabView's built-in page indicator:
     /// Since we replaced TabView with manual switch/case, we need our own dots.
-    /// Filled dot = current or completed step. Outlined dot = future step.
-    /// This gives the user a clear sense of progress through the flow.
+    /// Filled dot = current step, half-filled = behind the user, outlined = ahead.
+    /// The preparation step keeps its dot even when it is skipped, so the row does not
+    /// change length depending on how fast the download was.
     private var stepIndicator: some View {
         HStack(spacing: 8) {
-            ForEach(0..<totalSteps, id: \.self) { step in
+            ForEach(OnboardingStep.allCases, id: \.self) { dotStep in
                 Circle()
-                    .fill(dotColor(for: step))
+                    .fill(dotColor(for: dotStep))
                     .frame(width: 8, height: 8)
             }
         }
         .padding(.top, 16)
     }
 
-    /// Map a page index to its dot position in the step indicator.
-    ///
-    /// WHY: when the polish page is hidden the flow skips index 3, so the pages
-    /// after it map to one dot earlier (page 4 → dot 3, page 5 → dot 4). With
-    /// the polish page visible this is the identity mapping.
-    private func displayStep(for page: Int) -> Int {
-        guard !showsPolishPage && page > 3 else { return page }
-        return page - 1
-    }
-
-    /// Determine dot color based on step state.
-    private func dotColor(for step: Int) -> Color {
-        if step == displayStep(for: currentPage) {
+    private func dotColor(for dotStep: OnboardingStep) -> Color {
+        if dotStep == step {
             return .dictusAccent
-        } else if completedSteps.contains(where: { displayStep(for: $0) == step }) {
+        } else if dotStep.position < step.position {
             return .dictusAccent.opacity(0.5)
         } else {
             return .gray.opacity(0.3)
         }
     }
 
+    // MARK: - Model
+
+    /// The model the onboarding installs: the recommendation for the language the user
+    /// confirmed and this device.
+    ///
+    /// Read from the settings the language page wrote, not held in memory, so it is still
+    /// the same model after iOS kills the app during keyboard setup and the flow resumes.
+    private var onboardingModel: String {
+        ModelInfo.recommendedIdentifier()
+    }
+
+    /// Whether `identifier` has finished preparing, so the preparation step has nothing to
+    /// show. Same test the preparation page applies (#433): files listed AND some model
+    /// active, because a listed model whose compile was interrupted cannot transcribe yet.
+    private func isReady(_ identifier: String) -> Bool {
+        modelManager.downloadedModels.contains(identifier) && modelManager.isModelReady
+    }
+
     // MARK: - Navigation
 
-    private func advanceToPage(_ page: Int) {
-        completedSteps.insert(currentPage)
-        withAnimation {
-            currentPage = page
+    private func advance() {
+        guard var next = step.next else { return }
+        // The preparation step is shown only while there is something to wait for
+        // (#649 decision 1.7). A download that finished while the user was in Settings
+        // goes straight to the first dictation.
+        if next == .modelPreparation, isReady(onboardingModel), let after = next.next {
+            next = after
         }
+        go(to: next)
+    }
+
+    private func go(to newStep: OnboardingStep) {
+        OnboardingStep.save(newStep)
+        withAnimation {
+            step = newStep
+        }
+    }
+
+    /// Writes the language setup and starts the model download, then moves on (#649).
+    ///
+    /// WHY THE DOWNLOAD STARTS HERE: the microphone and keyboard steps take the user a
+    /// minute or two, much of it in iOS Settings. Starting the transfer now spends that
+    /// time downloading instead of making the user wait for it afterwards. It runs on the
+    /// background `URLSession` (#449), on any network and without asking (decision 5),
+    /// survives the trip to Settings and the kill that enabling Full Access causes, and
+    /// its compile waits for the foreground (`ModelManager.waitForForegroundToCompile`).
+    private func confirmLanguage(_ setup: LanguageSetup) {
+        setup.apply()
+        startDownloadIfNeeded(setup.recommendedModel(on: DeviceCapabilities.current()))
+        advance()
+    }
+
+    /// Starts the download of `identifier` unless it is already ready or already moving.
+    ///
+    /// WHY THE GUARD: this screen can be confirmed again after a relaunch, and by then the
+    /// launch adoption (#449) may already be driving the transfer from this same manager.
+    /// A second `downloadModel` would join the transfer but run its own compile after it.
+    private func startDownloadIfNeeded(_ identifier: String) {
+        guard !isReady(identifier) else { return }
+        switch modelManager.modelStates[identifier] {
+        case .downloading, .prewarming:
+            return
+        case .notDownloaded, .ready, .error, nil:
+            break
+        }
+        Task {
+            // Failures are recorded on the model's state by `downloadModel` itself, and
+            // the preparation page shows them with a retry. Nothing to do here.
+            try? await modelManager.downloadModel(identifier)
+        }
+    }
+
+    private func finish() {
+        // Reset to the first step on completion so a future onboarding reset starts
+        // cleanly from the welcome screen instead of resuming here.
+        OnboardingStep.save(.welcome)
+        isComplete = true
     }
 }
