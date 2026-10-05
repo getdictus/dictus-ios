@@ -76,18 +76,23 @@ window.DICTUS_STRINGS = {
       footnote: "The models live on your iPhone. No account, open source.",
     },
     languages: {
-      headline: "Dictate in 25+ languages",
-      footnote: "Parakeet: 25 European languages. Whisper: close to 100.",
-      // Only languages a shipped model transcribes: Parakeet v3's 25, plus Whisper's
-      // "good quality" tier (ModelLanguageSupport.swift). No Chinese: Whisper Small
-      // marks it imprecise (#409).
+      // 40+: Whisper's good tier (25) and fair tier (19) in ModelLanguageSupport.swift,
+      // plus Maltese, which only Parakeet covers well: 45 at good or fair quality.
+      // Written 40+ so the claim survives small catalogue changes. Not "100": the
+      // long tail is poor (Bengali about 50% WER), the reason #488 refused it.
+      headline: "Dictate in 40+ languages",
+      footnote: "Close to 100 with Whisper. Quality varies by language.",
+      // Only languages in Whisper's good or fair tier, plus Maltese (Parakeet).
+      // No Chinese: Whisper Small marks it imprecise (#409).
       greetings: [
         ["Hello", "en"], ["Bonjour", "fr"], ["Hallo", "de"], ["Hola", "es"],
         ["Ciao", "it"], ["Olá", "pt"], ["Hej", "sv"], ["Cześć", "pl"],
         ["Привет", "ru"], ["Ahoj", "cs"], ["Γεια σου", "el"], ["Szia", "hu"],
-        ["Salut", "ro"], ["Hei", "fi"], ["Привіт", "uk"], ["Merhaba", "tr"],
-        ["Xin chào", "vi"], ["Halo", "id"], ["こんにちは", "ja"], ["Bok", "hr"],
-        ["안녕하세요", "ko"], ["Goedendag", "nl"], ["مرحبا", "ar"], ["Labas", "lt"],
+        // Ordered so each line of three fits at its size (the bold blue ones are
+        // every fourth word: Labas, Bonġu, Bok).
+        ["Salut", "ro"], ["Привіт", "uk"], ["नमस्ते", "hi"], ["Labas", "lt"],
+        ["こんにちは", "ja"], ["Hei", "fi"], ["Merhaba", "tr"], ["Bonġu", "mt"],
+        ["مرحبا", "ar"], ["안녕하세요", "ko"], ["สวัสดี", "th"], ["Bok", "hr"],
       ],
     },
   },

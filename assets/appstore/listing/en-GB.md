@@ -63,9 +63,9 @@ A REAL KEYBOARD, IN YOUR LANGUAGE
 
 Dictus is a complete keyboard, not just a mic button. AZERTY, QWERTY and QWERTZ layouts, with autocorrect and suggestions in French, English, German and Spanish. Type when you want, talk when you do not.
 
-DICTATION IN 25+ LANGUAGES
+DICTATION IN 40+ LANGUAGES
 
-Parakeet, the default model, transcribes 25 European languages and detects which one you are speaking. The Whisper models reach close to a hundred. Every model tells you which languages it handles well before you download it.
+Dictation works in more than 40 languages at good or fair quality, and close to 100 with the Whisper models, where quality varies by language. Parakeet, the default model, transcribes 25 European languages and detects which one you are speaking. Every model tells you which languages it handles well before you download it.
 
 PRIVATE, OFFLINE, OPEN SOURCE
 
@@ -93,7 +93,7 @@ Each sentence above makes a claim the build has to back. These were checked agai
 | Apple Intelligence: iPhone 15 Pro or later, iOS 26 or later | #79 ("Pro gating"); to confirm against Apple's current device list |
 | 14-day reverse trial, nothing renews, data kept, no trial on ineligible devices | #593 decisions 1, 2 and the acceptance list |
 | Voice notes: share sheet, transcript in the keyboard, one-tap insert | #620, #637 (PR #638) |
-| Parakeet 25 European languages, Whisper about 99 | `ModelLanguageSupport.swift`, #488; also visible on screenshot 6 |
+| 40+ languages at good or fair quality (Whisper good 25 + fair 19, plus Maltese via Parakeet = 45); Parakeet 25 European languages; Whisper close to 100 | `ModelLanguageSupport.swift` (`whisperTierGroups`, `parakeetV3`), #488; also screenshot 6 |
 | Keyboard: 4 languages, 3 layouts | `SupportedLanguage.swift`, `KeyboardLayouts.swift` |
 | "Pro also keeps a history … vocabulary" | `ProFeature`; the issue keeps both out of the screenshots and allows them here |
 
@@ -116,4 +116,4 @@ Each sentence above makes a claim the build has to back. These were checked agai
 | Subtitle (alternative) | 30 | 30 |
 | Promotional text | 170 | 161 |
 | Keywords (bytes) | 100 | 99 |
-| Description | 4000 | 2310 |
+| Description | 4000 | 2408 |
