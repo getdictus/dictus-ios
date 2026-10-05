@@ -113,7 +113,7 @@ func corpusPaths(in args: [String], valuedOptions: Set<String> = []) -> [String]
 }
 
 let args = Array(CommandLine.arguments.dropFirst())
-guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "summary", "guardrail", "target", "vocabulary", "lostword"].contains(command), args.count >= 2 else {
+guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "fidelity", "summary", "guardrail", "target", "vocabulary", "lostword", "translate"].contains(command), args.count >= 2 else {
     print("""
     polish-harness — off-device polish eval (macOS + Apple Intelligence)
 
@@ -126,6 +126,10 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "f
       fidelity  <corpus.json> --replay [--floor N] [--sweep] [--json <out.json>]
       fidelity  --rescore <capture.json> --fixtures <fixtures.json> [--floor N] [--json <out.json>]
       summary   <fixtures.json> [--mode <id>] [--runs N] [--arm <prompt.txt> …] [--json <out.json>]
+      translate <fixtures.json> --mode translate.<x> [--translator apple-fm|translation-framework]
+                [--strategy lowLatency|highFidelity] [--clean <prompt.txt> --clean-framing <file>]
+                [--bars <bars.json> …] [--runs N] [--label <arm>] [--json <out.json>]
+                [--redact <fixtureID> …] [--public-json <out.json>] [--public-log <out.txt>]
       guardrail <corpus.json> [<corpus.json> …] [--segments] [--sweep] [--anchors]
       target    <corpus.json> [<corpus.json> …] [--sweep] [--floor N]
       vocabulary <corpus.json> [<corpus.json> …]
@@ -164,6 +168,13 @@ guard let command = args.first, ["show", "eval", "ab", "prompt", "paragraph", "f
     vocabulary (#80) replays the custom-vocabulary replacement pass over committed
     term/transcript pairs and checks idempotence. Deterministic, drives no model.
     Corpus in docs/research/80-vocabulary/.
+
+    translate (#648) runs ONE arm of the Translate bench through the real pipeline
+    under a shipped translate mode, and scores bars (a)-(e) from --bars. The arm is
+    the translator (Apple FM's shipped prompt, or Apple's Translation framework at a
+    strategy) and an optional Apple FM cleaning pass first. Bars, arms and the
+    cleaning prompt live in docs/research/648-translate/. --redact keeps a private
+    fixture's text out of --public-json and --public-log.
 
     target (#456) scores the polish TARGET election — which language the model is
     told to write in — against committed, hand-labelled raw transcripts, and
@@ -211,6 +222,15 @@ let armPaths: [String] = args.indices.compactMap { index in
     return args[index + 1]
 }
 let paragraphJSONOut = optionValue("--json", in: args)
+
+/// Every value given for a repeatable flag, in order. `optionValue` returns the first
+/// match only.
+func repeatedOption(_ name: String, in args: [String]) -> [String] {
+    args.indices.compactMap { index in
+        guard args[index] == name, index + 1 < args.count else { return nil }
+        return args[index + 1]
+    }
+}
 // #570. The recall floor axes 1 and 2 are read at. Its default is the value
 // calibrated on the hand-labelled device corpus (`bars.md` §6); `--floor` re-runs the
 // bench at another one, and `--sweep` on a replay prints the whole grid the default
@@ -1029,6 +1049,28 @@ case "fidelity" where rescorePath != nil:
     runFidelityRescore()
 case "fidelity" where isReplay:
     runFidelityReplay()
+// #648. The Translate bench, one arm per invocation: bars in
+// docs/research/648-translate/bars.md. Dispatched here for the reason `summary` is.
+case "translate":
+    if #available(macOS 26.0, *) {
+        let options = TranslateRoundOptions(
+            label: optionValue("--label", in: args) ?? "arm",
+            translator: optionValue("--translator", in: args) ?? "apple-fm",
+            strategy: optionValue("--strategy", in: args),
+            cleanPrompt: optionValue("--clean", in: args),
+            cleanFraming: optionValue("--clean-framing", in: args),
+            barPaths: repeatedOption("--bars", in: args),
+            runs: runs,
+            redacted: Set(repeatedOption("--redact", in: args)),
+            jsonOut: paragraphJSONOut,
+            publicJSONOut: optionValue("--public-json", in: args),
+            publicLogOut: optionValue("--public-log", in: args)
+        )
+        await runTranslateRound(fixtures: fixtures, mode: loadSmartMode(modeIdentifier), options: options)
+    } else {
+        print("error: this command drives Apple Foundation Models and needs macOS 26.")
+        exit(1)
+    }
 // #571. The Résumé bench: bars in docs/research/571-summary/bars.md. Dispatched here
 // rather than inside `runHarness`, whose switch is at the complexity ceiling.
 case "summary":

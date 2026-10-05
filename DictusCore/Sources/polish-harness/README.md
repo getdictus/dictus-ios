@@ -202,6 +202,41 @@ Fixture set: `fixtures/device-structured-fr.json`, the nine `Structuré` dictati
 characters and every device defect but one was on input **shorter than its shortest
 fixture** — 65, 192, 246, 578.
 
+## Translate bench (#648)
+
+`translate` runs **one arm** of the Translate bench through the real `PolishPipeline`
+under a shipped `translate.*` mode, so the shipped contract judges every output whatever
+produced it, and scores bars (a) to (e) of `docs/research/648-translate/bars.md`. An arm
+is a translator plus an optional cleaning pass:
+
+```sh
+# A — the shipped route: Apple FM, shipped Translate prompt.
+swift run polish-harness translate <fixtures.json> --mode translate.en --runs 3 \
+  --label A --bars ../docs/research/648-translate/bars.json --json /tmp/A.json
+
+# C — Apple's Translation framework. lowLatency needs the classic language model
+# installed (System Settings); highFidelity runs on Apple Intelligence.
+swift run polish-harness translate <fixtures.json> --mode translate.en --runs 3 \
+  --translator translation-framework --strategy highFidelity --label C …
+
+# D — an Apple FM cleaning pass in the source language, then the translator.
+swift run polish-harness translate <fixtures.json> --mode translate.en --runs 3 \
+  --translator translation-framework --strategy highFidelity \
+  --clean ../docs/research/648-translate/prompts/clean-v1.txt \
+  --clean-framing ../docs/research/648-translate/prompts/clean-v1-framing.txt --label D …
+```
+
+`--bars` repeats and merges entries by fixture id, which is how a private fixture keeps
+its lists out of the repository. `--redact <fixtureID>` keeps that fixture's text out of
+`--public-json` and `--public-log` while `--json` keeps everything; the redaction is
+`TranslateScore.redacted()` in `PolishFidelity`, pinned by `TranslateBarsTests`.
+
+The Translation-framework engine passes the source language the pipeline already
+measures (a session handed the wrong one returns the text untranslated, silently),
+returns the input when source and target are the same, and splits on `<<NL>>` because
+the framework turns a newline into a blank line. Each capture starts with the
+framework's own availability verdict for the pair it measured.
+
 ## Guardrail corpora (#413, #414, #466)
 
 `guardrail` scores the three output-inspection checks — the per-segment language
