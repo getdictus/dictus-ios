@@ -86,7 +86,7 @@ for (const locale of locales) {
       }
       if (v === 0) mainFiles = files;
       const vname = asVariant(variant).name;
-      const name = v === 0 ? `montage${suffix}.jpg` : `montage-${vname}${suffix}.jpg`;
+      const name = asVariant(variant).montage ?? (v === 0 ? `montage${suffix}.jpg` : `montage-${vname}${suffix}.jpg`);
       montage(files, join(ROOT, "export", locale, meta.iteration, name));
       console.log(`${locale}/${meta.iteration}/${theme}/${vname}: ${files.length} slides, ${name}`);
     }

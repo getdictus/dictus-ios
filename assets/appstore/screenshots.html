@@ -259,6 +259,9 @@ const VARIANT = params.get("smart") || params.get("variant") || "translate";
    tiles (neutral Dictus-blue tiles, the fallback if App Review objects, 5.2). */
 const RIBBON = params.get("ribbon") || "logos";
 const NOLOGO = RIBBON === "tiles" ? "-nologos" : "";
+/* The hero's illustration style (V5): ?hero=comic (marker comic, default) or paper
+   (cut-paper collage). Both are drawn in code with anidoodle (art/v5/). */
+const HERO = params.get("hero") || "comic";
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -311,10 +314,12 @@ const KEYBOARD_BAND = { y: 1767, h: 891, radius: PANEL_RADIUS, fill: "#E2E3E7" }
 const SLIDES = [
   // V4: a hero with no phone. Illustration, brand, headline; the voice becomes the
   // BrandWaveform and the app-icon ribbon, which cross the cut into slide 2 together.
-  { id: `01-hero${NOLOGO}`, key: "hero", pro: false, hero: true },
+  { id: `01-hero-${HERO}${NOLOGO}`, key: "hero", pro: false, hero: true },
   { id: `02-dictate${NOLOGO}`, key: "dictate", pro: false,
     // Real capture (status bar, recording panel); the email above is drawn by composeScreen().
-    phone: { capture: "01-recording-reminders.png", compose: true },
+    // V5: smaller and higher than the other phones, so the waveform and the icon
+    // ribbon run below it across the cut without touching it.
+    phone: { capture: "01-recording-reminders.png", compose: true, size: { width: 840, top: 580 } },
     lift: { band: KEYBOARD_BAND, width: 1180, raise: 60 } },
   { id: `03-${VARIANT}`, key: "smartModes", pro: true,
     phone: { capture: `02-smart-mode-fan-${VARIANT}.png` },
@@ -356,10 +361,11 @@ const el = (cls, html) => { const d = document.createElement("div"); d.className
 
 /* Phone; returns the capture → strip mapping so lifts can sit exactly over their source. */
 function addPhone(p, i, pro) {
-  const scale = PHONE.width / 1470;            // bezel pixels → strip pixels
-  const left = i * PANEL_W + (PANEL_W - PHONE.width) / 2;
+  const G = { ...PHONE, ...(p.size || {}) };
+  const scale = G.width / 1470;                // bezel pixels → strip pixels
+  const left = i * PANEL_W + (PANEL_W - G.width) / 2;
   const d = el("device");
-  Object.assign(d.style, { left: `${left}px`, top: `${PHONE.top}px`, width: `${PHONE.width}px` });
+  Object.assign(d.style, { left: `${left}px`, top: `${G.top}px`, width: `${G.width}px` });
   d.style.setProperty("--shadow", pro ? T.proShadow : FREE.shadow);
   d.style.setProperty("--shadow-near", pro ? T.proShadow : "rgba(10, 22, 40, 0.12)");
   d.innerHTML = `<div class="screen"><img alt=""><div class="layer"></div></div><img class="bezel" alt="">`;
@@ -373,7 +379,7 @@ function addPhone(p, i, pro) {
   if (p.compose) d.querySelector(".layer").appendChild(composeScreen());
   strip.appendChild(d);
   // Capture pixel (x, y) → strip coordinates.
-  return (x, y) => [left + (75 + x) * scale, PHONE.top + (66 + y) * scale];
+  return (x, y) => [left + (75 + x) * scale, G.top + (66 + y) * scale];
 }
 
 /* The generic email compose above the real recording panel (slide 1), in capture pixels. */
@@ -497,37 +503,34 @@ function addGreetings(list, i) {
    ════════════════════════════════════════════════════════════ */
 /* The illustration (art/hero-illustration.png, drawn in code with anidoodle:
    art/dictusHero.ts) and where its voice line ends, in its own pixels. */
-const ILLU = { src: "art/hero-illustration.png", w: 1320, h: 1500, x: 20, y: 680, scale: 0.85, voiceEnd: [900, 1420] };
+const ILLU = { src: `art/hero-${HERO}.png`, w: 1320, h: 2000, x: 10, y: 560, scale: 0.9, voiceEnd: [1190, 1990] };
 const VOICE = [ILLU.x + ILLU.voiceEnd[0] * ILLU.scale, ILLU.y + ILLU.voiceEnd[1] * ILLU.scale];
-/* The ribbon's track: one straight diagonal (slope 0.5) that crosses the cut low,
-   so on slide 2 it passes under the lifted recording card and only grazes the
-   phone's bottom corner. The waveform leaves the voice, falls along a curve and
-   runs parallel just above it: one gesture across the cut. */
-const TRACK = (x) => 2600 + 0.5 * (x - PANEL_W);
-const WAVE_JOIN = [PANEL_W + 70, TRACK(PANEL_W + 70) - 235];
-const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return [0, 1].map((k) => u*u*u*p0[k] + 3*u*u*t*p1[k] + 3*u*t*t*p2[k] + t*t*t*p3[k]); };
-const HERO_WAVE = Array.from({ length: 400 }, (_, n) => bez(VOICE, [VOICE[0] + 230, VOICE[1] + 110], [WAVE_JOIN[0] - 300, WAVE_JOIN[1] - 150], WAVE_JOIN, n / 399));
-const heroWaveY = (x) => { for (let n = 1; n < HERO_WAVE.length; n++) { const [a, b] = [HERO_WAVE[n - 1], HERO_WAVE[n]]; if (x <= b[0]) return a[1] + (b[1] - a[1]) * ((x - a[0]) / ((b[0] - a[0]) || 1)); } return HERO_WAVE.at(-1)[1]; };
+/* V5: the bottom band of slides 1 and 2. The voice lands level at VOICE and runs on as
+   the BrandWaveform, horizontal, across the cut, under slide 2's phone; the icon
+   ribbon runs below it. At slide 2's right edge the wave rises to the height it keeps
+   behind the phones of slides 3 to 7, so the strip stays one line. */
+const BAND = { waveY: VOICE[1], waveMax: 300, ribbonY: 2735, riseFrom: 2 * PANEL_W - 240, riseTo: 2 * PANEL_W + 170 };
 
 /* App icons on the ribbon. Real icons are fetched by tools/fetch-icons.sh into the
    git-ignored .icons/ (third-party marks, never committed). The fallback draws
    neutral tiles in Dictus blues with simple writing glyphs. */
-const RIBBON_APPS = ["whatsapp", "gmail", "slack", "instagram", "notion", "messenger", "outlook", "linkedin", "telegram", "docs", "x", "chatgpt"];
+// V5 order (Pierre): Apple Messages and Mail included, AI chats added.
+const RIBBON_APPS = ["messages", "whatsapp", "mail", "gmail", "chatgpt", "claude", "slack", "notion", "instagram", "linkedin", "messenger", "telegram", "outlook", "docs"];
 const TILE_GLYPHS = [
   '<path d="M5 6h14v9H10l-5 4z"/>', '<path d="M4 7h16v11H4zM4 7l8 6 8-6"/>', '<path d="M7 4h7l4 4v12H7zM14 4v4h4M10 12h5M10 15h5"/>',
   '<circle cx="12" cy="12" r="3.5"/><path d="M15.5 12v1.5a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.4 6.8"/>', '<path d="M4 12l16-7-6 15-3-6z"/>', '<path d="M5 19l1-4L16 5l3 3L9 18z"/>',
 ];
 const TILE_COLOURS = [["#3D7EFF", "#fff"], ["#DCE8FF", "#2563EB"], ["#0A1628", "#fff"], ["#6BA3FF", "#fff"], ["#2563EB", "#fff"], ["#EEF3FF", "#3D7EFF"]];
-// startX puts icon 6 exactly on the cut, straddling slides 1 and 2 as in Wispr's set.
-const ICON = { size: 150, step: 172, startX: PANEL_W - 6 * 172 };
+// A row along the very bottom of slides 1 and 2, below everything. startX puts icon 7
+// exactly on the cut, straddling the two slides as in Wispr's set.
+const ICON = { size: 128, step: 176, startX: PANEL_W - 7 * 176 };
 
 function addRibbon() {
   RIBBON_APPS.forEach((slug, n) => {
-    const x = ICON.startX + n * ICON.step, y = TRACK(x);
-    if (y - ICON.size / 2 > PANEL_H) return;
+    const x = ICON.startX + n * ICON.step, y = BAND.ribbonY + 16 * Math.sin(n * 1.3);
     const d = el("ribbon-icon");
     Object.assign(d.style, { left: `${x - ICON.size / 2}px`, top: `${y - ICON.size / 2}px`, width: `${ICON.size}px`, height: `${ICON.size}px`,
-      transform: `rotate(${n % 2 ? 9 : 14}deg)` });
+      transform: `rotate(${[-6, 4, -2, 7, -4][n % 5]}deg)` });
     if (RIBBON === "tiles") {
       const [bg, fg] = TILE_COLOURS[n % TILE_COLOURS.length];
       d.style.background = bg;
@@ -613,12 +616,6 @@ const BAR_W = 30, BAR_GAP = 16, MIN_H = 14, MAX_H = 640;
 const WAVE_Y = 1600;
 const WAVE_PERIOD = STRIP_W / 4;
 const pitch = BAR_W + BAR_GAP;
-const bars = Math.floor((STRIP_W - BAR_GAP) / pitch);
-const x0 = (STRIP_W - (bars * pitch - BAR_GAP)) / 2;
-/* V4: the strip's wave starts where slide 2's phone ends (its right margin); before
-   that, the hero's wave leaves the voice, falls along a curve and runs above the
-   ribbon across the cut, then goes under slide 2's phone. */
-const STRIP_WAVE_FROM = PANEL_W + PHONE.width + (PANEL_W - PHONE.width) / 2;
 const barFill = (x, y, h, cx) => {
   const p = Math.min(Math.floor(cx / PANEL_W), PANELS - 1);
   const dCenter = Math.abs(cx - (p * PANEL_W + PANEL_W / 2)) / (PANEL_W / 2);
@@ -628,32 +625,20 @@ const barFill = (x, y, h, cx) => {
 };
 ctx.globalAlpha = 0.62;
 {
-  // The hero's wave follows its path: the curve out of the voice, then the straight
-  // run parallel to the ribbon, past the cut and under slide 2's phone. Bars sit at a
-  // constant pitch along the arc and stand perpendicular to it, so the waveform keeps
-  // its shape on a slope (upright bars on a slope read as a dotted staircase).
-  const path = HERO_WAVE.concat(Array.from({ length: 60 }, (_, n) => [WAVE_JOIN[0] + (n + 1) * 10, WAVE_JOIN[1] + 0.5 * (n + 1) * 10]));
-  const cum = [0];
-  for (let n = 1; n < path.length; n++) cum.push(cum[n - 1] + Math.hypot(path[n][0] - path[n - 1][0], path[n][1] - path[n - 1][1]));
-  const at = (d) => { let n = 1; while (n < cum.length - 1 && cum[n] < d) n++; const t = (d - cum[n - 1]) / ((cum[n] - cum[n - 1]) || 1); const [a, b] = [path[n - 1], path[n]];
-    return { p: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], ang: Math.atan2(b[1] - a[1], b[0] - a[0]) }; };
-  for (let d = 14; d < cum.at(-1); d += pitch) {
-    const { p: [cx, cy], ang } = at(d);
-    const energy = 0.2 + 0.25 * (Math.sin(2 * Math.PI * (d / 520 + 0.25)) + 1);   // BrandWaveform processingEnergy, a period short enough to read on this run
-    const ramp = Math.min(1, 0.16 + d / 300);   // the voice opens into the wave
-    const h = Math.max((MIN_H + energy * (460 - MIN_H)) * ramp, MIN_H);
-    ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang);
-    ctx.beginPath(); ctx.roundRect(-BAR_W / 2, -h / 2, BAR_W, h, BAR_W / 2);
-    ctx.fillStyle = barFill(-BAR_W / 2, -h / 2, h, cx); ctx.fill(); ctx.restore();
+  // One wave from the voice to the end of the strip. Level along slides 1 and 2's bottom
+  // band (smaller bars), a smooth rise at slide 2's right edge, then the strip's height.
+  const ease = (t) => t * t * (3 - 2 * t);
+  for (let x = VOICE[0] + 6; x < STRIP_W - BAR_W; x += pitch) {
+    const cx = x + BAR_W / 2;
+    const t = Math.max(0, Math.min(1, (cx - BAND.riseFrom) / (BAND.riseTo - BAND.riseFrom)));
+    const yc = BAND.waveY + (WAVE_Y - BAND.waveY) * ease(t);
+    const maxH = BAND.waveMax + (MAX_H - BAND.waveMax) * ease(t);
+    const energy = 0.2 + 0.25 * (Math.sin(2 * Math.PI * (cx / WAVE_PERIOD + 0.25)) + 1);
+    const ramp = Math.min(1, 0.2 + (cx - VOICE[0]) / 220);   // the voice opens into the wave
+    const h = Math.max((MIN_H + energy * (maxH - MIN_H)) * ramp, MIN_H);
+    const y = yc - h / 2;
+    ctx.beginPath(); ctx.roundRect(x, y, BAR_W, h, BAR_W / 2); ctx.fillStyle = barFill(x, y, h, cx); ctx.fill();
   }
-}
-for (let n = 0; n < bars; n++) {
-  const x = x0 + n * pitch, cx = x + BAR_W / 2;
-  if (cx < STRIP_WAVE_FROM) continue;
-  const energy = 0.2 + 0.25 * (Math.sin(2 * Math.PI * (cx / WAVE_PERIOD + 0.25)) + 1);
-  const h = Math.max(MIN_H + energy * (MAX_H - MIN_H), MIN_H);
-  const y = WAVE_Y - h / 2;
-  ctx.beginPath(); ctx.roundRect(x, y, BAR_W, h, BAR_W / 2); ctx.fillStyle = barFill(x, y, h, cx); ctx.fill();
 }
 ctx.globalAlpha = 1;
 
@@ -668,13 +653,14 @@ window.whenReady = Promise.all([
   .then(() => document.getElementById("missing").style.display !== "flex");
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
 /* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
-window.ITERATION = "v4";
+window.ITERATION = "v5";
 /* Themes the exporter renders for this iteration (light only since V3, Pierre). */
 window.EXPORT_THEMES = ["light"];
 /* Variants: the first is the main set; the others re-export only the slides whose
    id they change, and get a montage-<name>.jpg of their own. */
 window.VARIANTS = [
-  { name: "main", query: "" },
+  { name: "comic", query: "", montage: "montage-comic.jpg" },
+  { name: "paper", query: "hero=paper" },
   { name: "nologos", query: "ribbon=tiles" },
   { name: "message", query: "smart=message" },
 ];

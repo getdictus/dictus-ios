@@ -10,7 +10,7 @@
 
   Reads export/<locale>/<iteration>/<theme>/. Re-export (npm run export), then reload.
     ?locale=en-GB   (default)
-    ?iteration=v4   design iteration (default v4; v1 to v3 are earlier rounds)
+    ?iteration=v5   design iteration (default v5; v1 to v4 are earlier rounds)
     ?theme=navy     show one theme only (v1/v2: navy and light by default; v3: light only)
     v3 and v4 also show their alternate variants in galleries of their own.
 -->
@@ -38,8 +38,8 @@
 <script>
 const params = new URLSearchParams(location.search);
 const locale = params.get("locale") || "en-GB";
-const iteration = params.get("iteration") || "v4";
-const themes = params.get("theme") ? [params.get("theme")] : ["v3", "v4"].includes(iteration) ? ["light"] : ["navy", "light"];
+const iteration = params.get("iteration") || "v5";
+const themes = params.get("theme") ? [params.get("theme")] : ["v3", "v4", "v5"].includes(iteration) ? ["light"] : ["navy", "light"];
 const ids = ["01-dictate", "02-smart-modes", "03-voice-notes", "04-keyboard", "05-private", "06-languages"];
 // v3: slide 2 has two variants, the main set uses translate (Pierre, 2026-10-05).
 // v4: seven slides, a hero first; variants without logos (slides 1-2) and with Message.
@@ -53,6 +53,13 @@ if (iteration === "v4") {
   const v4 = ["01-hero", "02-dictate", "03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"];
   variants = [["main", v4], ["nologos", v4.map((id) => ["01-hero", "02-dictate"].includes(id) ? `${id}-nologos` : id)],
               ["message", v4.map((id) => id === "03-translate" ? "03-message" : id)]];
+}
+if (iteration === "v5") {
+  // v5: two hero styles (comic is the main set), no-logos fallback, Message alternate.
+  const v5 = ["01-hero-comic", "02-dictate", "03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"];
+  variants = [["comic", v5], ["paper", v5.map((id) => id === "01-hero-comic" ? "01-hero-paper" : id)],
+              ["nologos", v5.map((id) => ["01-hero-comic", "02-dictate"].includes(id) ? `${id}-nologos` : id)],
+              ["message", v5.map((id) => id === "03-translate" ? "03-message" : id)]];
 }
 for (const theme of themes) {
   for (const [variant, list] of variants) {
