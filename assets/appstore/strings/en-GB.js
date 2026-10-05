@@ -32,6 +32,15 @@ window.DICTUS_STRINGS = {
   slides: {
     dictate: {
       headline: "Dictate in any app",
+      // The generic email compose above the real recording panel (slide 1).
+      emailToLabel: "To",
+      emailTo: "Sam",
+      emailSubject: "Slides for Thursday's review",
+      // The last paragraph ends at the caret, where the dictation is going.
+      emailBody: [
+        "Hi Sam,",
+        "Thanks for the notes on the draft. I've moved the budget to the end so the main story comes first, and added the figures from last quarter.",
+      ],
     },
     smartModes: {
       footnote: "Smart Modes need Apple Intelligence",

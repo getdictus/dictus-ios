@@ -122,6 +122,41 @@
   .ba .after { display: flex; flex-direction: column; gap: 22px; }
   .ba .after p { font-size: 54px; line-height: 1.32; letter-spacing: -0.015em; color: #0A1628; font-weight: 450; }
 
+  /* ── Slide 1: a generic email compose screen, drawn in capture pixels ──
+     Dictation saves the most time on long text, and an email differs from the
+     chats of slides 2 and 3. The simulator has no Mail app, and copying Apple
+     Mail, Gmail or Outlook would be someone else's trade dress, so this is an
+     unbranded compose screen in Dictus's restrained style. It stops above the
+     keyboard panel's own shadow; the status bar and the recording panel stay real. */
+  .compose-screen {
+    position: absolute; left: 0; top: 150px; width: 1320px; height: 1590px; background: #FFFFFF;
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; color: #0A1628;
+  }
+  .compose-screen .bar {
+    height: 190px; display: flex; align-items: center; justify-content: space-between; padding: 0 56px;
+  }
+  .compose-screen .bar .close { width: 46px; height: 46px; }
+  .compose-screen .bar .send {
+    width: 104px; height: 104px; border-radius: 50%; background: #3D7EFF; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .compose-screen .bar .send svg { width: 50px; height: 50px; }
+  .compose-screen .field {
+    margin: 0 56px; height: 128px; display: flex; align-items: center; gap: 26px;
+    border-bottom: 2px solid #ECEEF3; font-size: 48px;
+  }
+  .compose-screen .field .label { color: #8A94A6; }
+  .compose-screen .field .chip {
+    padding: 14px 30px; border-radius: 40px; background: #E6EEFF; color: #2563EB; font-weight: 500;
+  }
+  .compose-screen .field.subject { font-weight: 600; }
+  .compose-screen .body { margin: 54px 56px 0; font-size: 50px; line-height: 1.45; }
+  .compose-screen .body p + p { margin-top: 40px; }
+  .compose-screen .caret {
+    display: inline-block; width: 5px; height: 62px; margin-left: 4px; vertical-align: -12px;
+    background: #3D7EFF; border-radius: 3px;
+  }
+
   /* ── Slide 3: a generic chat screen, drawn in capture pixels ──
      Voice notes reach Dictus from chat apps through the share sheet (#620), but
      WhatsApp and Telegram do not install on the simulator, and drawing either
@@ -253,7 +288,8 @@ const KEYBOARD_BAND = { y: 1767, h: 891, radius: PANEL_RADIUS, fill: "#E2E3E7" }
    ════════════════════════════════════════════════════════════ */
 const SLIDES = [
   { id: "01-dictate", key: "dictate", pro: false,
-    phone: { capture: "01-recording-reminders.png" },
+    // Real capture (status bar, recording panel); the email above is drawn by composeScreen().
+    phone: { capture: "01-recording-reminders.png", compose: true },
     lift: { band: KEYBOARD_BAND, width: 1180, raise: 60 } },
   { id: `02-${VARIANT}`, key: "smartModes", pro: true,
     phone: { capture: `02-smart-mode-fan-${VARIANT}.png` },
@@ -306,9 +342,25 @@ function addPhone(p, i, pro) {
   // The layer works in capture pixels: 1320 capture px = 1320 bezel px.
   d.querySelector(".layer").style.transform = `scale(${scale})`;
   if (p.chat) d.querySelector(".layer").appendChild(chatScreen());
+  if (p.compose) d.querySelector(".layer").appendChild(composeScreen());
   strip.appendChild(d);
   // Capture pixel (x, y) → strip coordinates.
   return (x, y) => [left + (75 + x) * scale, PHONE.top + (66 + y) * scale];
+}
+
+/* The generic email compose above the real recording panel (slide 1), in capture pixels. */
+function composeScreen() {
+  const e = S.slides.dictate;
+  const paragraphs = e.emailBody.map((t, n) =>
+    `<p>${t}${n === e.emailBody.length - 1 ? '<span class="caret"></span>' : ""}</p>`).join("");
+  return el("compose-screen", `
+    <div class="bar">
+      <svg class="close" viewBox="0 0 24 24" fill="none" stroke="#0A1628" stroke-width="2.4" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>
+      <span class="send"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
+    </div>
+    <div class="field"><span class="label">${e.emailToLabel}</span><span class="chip">${e.emailTo}</span></div>
+    <div class="field subject">${e.emailSubject}</div>
+    <div class="body">${paragraphs}</div>`);
 }
 
 /* The generic chat above the real reader (slide 3), in capture pixels. */
