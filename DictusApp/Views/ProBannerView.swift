@@ -16,7 +16,13 @@ import DictusCore
 struct ProBannerView: View {
     @EnvironmentObject var proStatus: ProStatusManager
 
-    @State private var showPaywall = false
+    /// Opens the Dictus Pro hub, presented by `HomeView`.
+    ///
+    /// WHY the banner does not present it itself (#216): a purchase made in the hub
+    /// turns `promotionEntry` to `.hidden`, the banner becomes `EmptyView`, and a cover
+    /// attached to a view that leaves the hierarchy is dismissed with it, under the
+    /// thank-you screen the purchase had just raised. Home stays on screen.
+    let open: () -> Void
 
     var body: some View {
         Group {
@@ -38,12 +44,11 @@ struct ProBannerView: View {
             }
         }
         .animation(.easeOut(duration: 0.3), value: proStatus.promotionEntry)
-        .paywallCover(isPresented: $showPaywall)
     }
 
     private func banner(icon: String, title: Text, subtitle: Text) -> some View {
         Button {
-            showPaywall = true
+            open()
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: icon)
