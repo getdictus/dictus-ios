@@ -191,6 +191,17 @@
         }
       }
     },
+    "Dictation unavailable on this device" : {
+      "comment" : "Keyboard toolbar note beside the disabled mic on a device whose chip is too old to dictate from the keyboard (#635).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictée indisponible sur cet appareil"
+          }
+        }
+      }
+    },
     "Dictus Pro" : {
       "comment" : "The Smart Mode fan row that leaves the keyboard for the paywall. A product name, so identical in French today, and in the catalog so a future locale can change it.",
       "localizations" : {
