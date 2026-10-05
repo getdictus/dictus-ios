@@ -332,7 +332,7 @@ class ModelManager: ObservableObject {
     /// mid-file.
     ///
     /// WHY SEEDING AND DRIVING ARE SEPARATE: both `ModelManager` instances have to SHOW
-    /// the download — `MainTabView` builds one and onboarding's `ModelDownloadPage`
+    /// the download — `MainTabView` builds one and `OnboardingView` (#649)
     /// builds another, and a first-run user who force-quits mid-download comes back to
     /// the onboarding one. Only one of them may DRIVE it, because driving ends in a Core
     /// ML compile and two compiles of the same model would queue on the Neural Engine for
@@ -614,6 +614,49 @@ class ModelManager: ObservableObject {
         }
     }
 
+    /// Holds a finished download back from its Core ML compile until the app is in the
+    /// foreground (#472).
+    ///
+    /// WHY THIS IS NEEDED NOW (#649): the onboarding starts the download on the language
+    /// screen and then sends the user to iOS Settings to add the keyboard. The transfer
+    /// runs on in a background `URLSession` (#449), so it routinely finishes while Dictus
+    /// is in the background, and this method used to go straight from the last byte to the
+    /// compile. #472 measured what that costs: a compile throttled to 270 s instead of 17,
+    /// timed against a wall clock that also counted the suspension, and reported as a
+    /// failure after it had succeeded. Holding the compile until the foreground is option 1
+    /// of #472. It closes the path where the compile STARTS in the background; a compile
+    /// already running when the user leaves is still #472's open half.
+    ///
+    /// WHY `.background` and not "not `.active`": `.inactive` is also the state of a visible
+    /// app under a system alert, such as the microphone prompt the onboarding raises right
+    /// after the download starts. Waiting through that would delay a compile the user is
+    /// watching for nothing. The same test guards the launch-time adoption above.
+    ///
+    /// The notification sequence is created BEFORE the state is read, so a return to the
+    /// foreground that lands between the two is still delivered. Cancellation ends the wait
+    /// and is rethrown, like every other suspension point of a download.
+    private func waitForForegroundToCompile(_ identifier: String) async throws {
+        let becameActive = NotificationCenter.default.notifications(
+            named: UIApplication.didBecomeActiveNotification
+        )
+        guard UIApplication.shared.applicationState == .background else { return }
+        PersistentLog.log(.diagnosticProbe(
+            component: "ModelPrewarm",
+            instanceID: identifier,
+            action: "deferredUntilForeground",
+            details: "reason=appInBackground"
+        ))
+        let waitStart = Date()
+        for await _ in becameActive { break }
+        try Task.checkCancellation()
+        PersistentLog.log(.diagnosticProbe(
+            component: "ModelPrewarm",
+            instanceID: identifier,
+            action: "resumedInForeground",
+            details: "waitedMs=\(Int(Date().timeIntervalSince(waitStart) * 1000))"
+        ))
+    }
+
     /// Download a WhisperKit model variant from HuggingFace.
     ///
     /// WHY prewarm after download:
@@ -672,6 +715,10 @@ class ModelManager: ObservableObject {
 
             PersistentLog.log(.modelDownloadCompleted(name: identifier))
             downloadPhaseCompleted = true
+
+            // The transfer may have finished while the app was in the background; the
+            // compile waits for the foreground (#472, #649). See `waitForForegroundToCompile`.
+            try await waitForForegroundToCompile(identifier)
 
             // Prewarm: compile Core ML model for this device's Neural Engine/GPU.
             // Serialized — only one model compiles at a time. Multiple simultaneous
@@ -1014,6 +1061,9 @@ class ModelManager: ObservableObject {
                 }
             }
 
+            // Same foreground gate as the WhisperKit path (#472, #649).
+            try await waitForForegroundToCompile(identifier)
+
             // Same guard as the WhisperKit path, captured before the wait (finding 1).
             let prewarmEpoch = DictationCoordinator.shared.modelLoadEpoch
 
@@ -1306,10 +1356,11 @@ class ModelManager: ObservableObject {
         PersistentLog.log(.modelDeleted(name: identifier, engine: engine.displayName))
     }
 
-    /// Checks if a model is the device-recommended variant.
+    /// Checks if a model is the variant recommended for this device and the user's
+    /// language (#649), the same one the onboarding installed.
     ///
     /// WHY delegate to ModelInfo:
-    /// The recommendation logic is RAM-based and belongs in the catalog layer
+    /// The recommendation logic is catalogue-level and belongs in the catalog layer
     /// (ModelInfo), not the state manager. This instance method preserves the
     /// call-site signature so views don't need to change.
     func isRecommended(_ identifier: String) -> Bool {
