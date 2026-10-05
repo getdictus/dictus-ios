@@ -89,10 +89,27 @@ public enum SharedKeys {
     public static let hapticsEnabled = "dictus.hapticsEnabled"
     /// Whether the user has completed onboarding, default false
     public static let hasCompletedOnboarding = "dictus.hasCompletedOnboarding"
-    /// Current onboarding step index (0-5). Persisted to UserDefaults so the user
-    /// resumes at the right step even after iOS TCC-triggered terminations
-    /// (e.g., when "Allow Full Access" is toggled during keyboard setup).
+    /// LEGACY. The onboarding step as an integer index (0-5) in the flow before #649.
+    /// Since #649 the step is `onboardingStep` below; this key is only read once, by
+    /// `OnboardingStep.current`, to place an install that was mid-onboarding on the old
+    /// numbering, and is removed right after.
     public static let onboardingCurrentPage = "dictus.onboardingCurrentPage"
+    /// Current onboarding step, stored as an `OnboardingStep` raw value (#649). Persisted
+    /// so the user resumes at the right step even after iOS TCC-triggered terminations
+    /// (e.g., when "Allow Full Access" is toggled during keyboard setup).
+    ///
+    /// WHY a name instead of the old index: the index meant a different page every time
+    /// a page was added or removed, so a persisted value had to be reinterpreted on every
+    /// change to the flow. A step name means the same thing for as long as the step exists.
+    public static let onboardingStep = "dictus.onboardingStep"
+    /// The language the user said they speak, as an ISO 639-1 code (#649). Written by the
+    /// onboarding language screen. Can be a language with no Dictus keyboard ("zh").
+    ///
+    /// It is the input the model recommendation needs when the transcription language is
+    /// Auto-detect, the one mode where the settings alone do not say which language comes
+    /// out of the user's mouth. Absent on installs that onboarded before #649, where the
+    /// recommendation falls back to the iPhone's language — see `SpokenLanguage`.
+    public static let spokenLanguage = "dictus.spokenLanguage"
 
     // Text prediction preferences (added for Phase 08)
     /// Whether autocorrect is enabled, default true
