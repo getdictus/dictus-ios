@@ -1,0 +1,488 @@
+[
+  {
+    "arm" : "B",
+    "engineMs" : 8,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-00",
+    "outcome" : "engineFailed",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 8
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 7,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-00",
+    "outcome" : "engineFailed",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 7
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 6,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-00",
+    "outcome" : "engineFailed",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 6
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 9,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-01",
+    "outcome" : "engineFailed",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 9
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 9,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-01",
+    "outcome" : "engineFailed",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 9
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 10,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-01",
+    "outcome" : "engineFailed",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 10
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 5,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-03",
+    "outcome" : "engineFailed",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 5
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 5,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-03",
+    "outcome" : "engineFailed",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 5
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 5,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-03",
+    "outcome" : "engineFailed",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 5
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 5,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-04",
+    "outcome" : "engineFailed",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 5
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 5,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-04",
+    "outcome" : "engineFailed",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 5
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 5,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-04",
+    "outcome" : "engineFailed",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 5
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 8,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-05",
+    "outcome" : "engineFailed",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 8
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 9,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-05",
+    "outcome" : "engineFailed",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 9
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 9,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-05",
+    "outcome" : "engineFailed",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 9
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 14,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-06",
+    "outcome" : "engineFailed",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 14
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 14,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-06",
+    "outcome" : "engineFailed",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 14
+  },
+  {
+    "arm" : "B",
+    "engineMs" : 16,
+    "failure" : "translator: TranslationError(cause: Translation.TranslationError.Cause.notInstalled, sourceLanguage: nil, targetLanguage: nil)",
+    "fixture" : "translate-fr-06",
+    "outcome" : "engineFailed",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ]
+    },
+    "source" : "fr",
+    "translateMs" : 16
+  }
+]

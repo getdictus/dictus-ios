@@ -1,0 +1,515 @@
+[
+  {
+    "arm" : "C",
+    "engineMs" : 1634,
+    "fixture" : "translate-fr-00",
+    "outcome" : "success",
+    "output" : "Hi Hugo, I also wanted to talk, finally I wanted to get your opinion on a new feature that I'm developing. You know, as I told you, I'm working on premium features to try to finance the work.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+        "`aussi` opener rendered [found \"also\"]",
+        "`enfin` self-correction rendered [found \"finally\"]",
+        "false start `je voulais parler,` kept [found \"wanted to talk\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 1634
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 716,
+    "fixture" : "translate-fr-00",
+    "outcome" : "success",
+    "output" : "Hi Hugo, I also wanted to talk, finally I wanted to get your opinion on a new feature that I'm developing. You know, as I told you, I'm working on premium features to try to finance the work.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+        "`aussi` opener rendered [found \"also\"]",
+        "`enfin` self-correction rendered [found \"finally\"]",
+        "false start `je voulais parler,` kept [found \"wanted to talk\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 716
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 718,
+    "fixture" : "translate-fr-00",
+    "outcome" : "success",
+    "output" : "Hi Hugo, I also wanted to talk, finally I wanted to get your opinion on a new feature that I'm developing. You know, as I told you, I'm working on premium features to try to finance the work.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+
+      ],
+      "drop" : [
+        "`aussi` opener rendered [found \"also\"]",
+        "`enfin` self-correction rendered [found \"finally\"]",
+        "false start `je voulais parler,` kept [found \"wanted to talk\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 718
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 2110,
+    "fixture" : "translate-fr-01",
+    "outcome" : "success",
+    "output" : "Hi Hugo! I also wanted to get in touch with you to discuss a new feature I'm developing for Dictus. As I mentioned, I'm working on professional features that will be available via a subscription. So I wanted to share the idea with you so you can let me know what you think. There's one in particular that I find pretty cool: the ability to send voice messages that you receive on Telegram or WhatsApp, which don't necessarily have transcription integrated directly into the app, and you can share them with Dictus and receive the transcription directly on your keyboard. What do you think?",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`fonctionnalités pros` keeps the product word Pro [found \"professional\"]"
+      ],
+      "drop" : [
+        "`Aussi` opener rendered [found \"also\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 2110
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 1978,
+    "fixture" : "translate-fr-01",
+    "outcome" : "success",
+    "output" : "Hi Hugo! I also wanted to get in touch with you to discuss a new feature I'm developing for Dictus. As I mentioned, I'm working on professional features that will be available via a subscription. So I wanted to share the idea with you so you can let me know what you think. There's one in particular that I find pretty cool: the ability to send voice messages that you receive on Telegram or WhatsApp, which don't necessarily have transcription integrated directly into the app, and you can share them with Dictus and receive the transcription directly on your keyboard. What do you think?",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`fonctionnalités pros` keeps the product word Pro [found \"professional\"]"
+      ],
+      "drop" : [
+        "`Aussi` opener rendered [found \"also\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 1978
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 2093,
+    "fixture" : "translate-fr-01",
+    "outcome" : "success",
+    "output" : "Hi Hugo! I also wanted to get in touch with you to discuss a new feature I'm developing for Dictus. As I mentioned, I'm working on professional features that will be available via a subscription. So I wanted to share the idea with you so you can let me know what you think. There's one in particular that I find pretty cool: the ability to send voice messages that you receive on Telegram or WhatsApp, which don't necessarily have transcription integrated directly into the app, and you can share them with Dictus and receive the transcription directly on your keyboard. What do you think?",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`fonctionnalités pros` keeps the product word Pro [found \"professional\"]"
+      ],
+      "drop" : [
+        "`Aussi` opener rendered [found \"also\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 2093
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 1720,
+    "fixture" : "translate-fr-03",
+    "outcome" : "success",
+    "output" : "Ok, so in practice I'm testing the voice transcription on the dictaphone, with the potential of using the smart mode for translation into English directly from the foot, and it doesn't work. I don't know why, so maybe the voice was too short and at that moment it didn't do anything. It might be because we set up some kind of filter that prevents applying it if the mode is too short. I don't know. I should look into this, but for me it's a bug that we need to look into.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`vocaux` / `vocal` = voice message, not vowel [missing]"
+      ],
+      "drop" : [
+        "tic `à ce moment-là` rendered literally [found \"at that moment\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 1720
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 1750,
+    "fixture" : "translate-fr-03",
+    "outcome" : "success",
+    "output" : "Ok, so in practice I'm testing the voice transcription on the dictaphone, with the potential of using the smart mode for translation into English directly from the foot, and it doesn't work. I don't know why, so maybe the voice was too short and at that moment it didn't do anything. It might be because we set up some kind of filter that prevents applying it if the mode is too short. I don't know. I should look into this, but for me it's a bug that we need to look into.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`vocaux` / `vocal` = voice message, not vowel [missing]"
+      ],
+      "drop" : [
+        "tic `à ce moment-là` rendered literally [found \"at that moment\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 1750
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 1675,
+    "fixture" : "translate-fr-03",
+    "outcome" : "success",
+    "output" : "Ok, so in practice I'm testing the voice transcription on the dictaphone, with the potential of using the smart mode for translation into English directly from the foot, and it doesn't work. I don't know why, so maybe the voice was too short and at that moment it didn't do anything. It might be because we set up some kind of filter that prevents applying it if the mode is too short. I don't know. I should look into this, but for me it's a bug that we need to look into.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`vocaux` / `vocal` = voice message, not vowel [missing]"
+      ],
+      "drop" : [
+        "tic `à ce moment-là` rendered literally [found \"at that moment\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 1675
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 795,
+    "fixture" : "translate-fr-04",
+    "outcome" : "success",
+    "output" : "Yes, well listen, uh I just made the appointment with Jean-Claude, it went pretty well, I'll keep you posted but honestly he seems motivated for the training, that's quite a good thing.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`faire le rendez-vous` = had the meeting, not made/booked it [found \"made the appointment\"]"
+      ],
+      "drop" : [
+        "`bah écoute, euh` rendered [found \"well listen\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 795
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 769,
+    "fixture" : "translate-fr-04",
+    "outcome" : "success",
+    "output" : "Yes, well listen, uh I just made the appointment with Jean-Claude, it went pretty well, I'll keep you posted but honestly he seems motivated for the training, that's quite a good thing.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`faire le rendez-vous` = had the meeting, not made/booked it [found \"made the appointment\"]"
+      ],
+      "drop" : [
+        "`bah écoute, euh` rendered [found \"well listen\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 769
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 781,
+    "fixture" : "translate-fr-04",
+    "outcome" : "success",
+    "output" : "Yes, well listen, uh I just made the appointment with Jean-Claude, it went pretty well, I'll keep you posted but honestly he seems motivated for the training, that's quite a good thing.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`faire le rendez-vous` = had the meeting, not made/booked it [found \"made the appointment\"]"
+      ],
+      "drop" : [
+        "`bah écoute, euh` rendered [found \"well listen\"]"
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 781
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 1153,
+    "fixture" : "translate-fr-05",
+    "outcome" : "success",
+    "output" : "<private fixture: text kept in .local-corpus/648-translate/>",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`plus de 60 %` = more than 60 %, not `no longer` [found \"no longer\"]"
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 1153
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 1292,
+    "fixture" : "translate-fr-05",
+    "outcome" : "success",
+    "output" : "<private fixture: text kept in .local-corpus/648-translate/>",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`plus de 60 %` = more than 60 %, not `no longer` [found \"no longer\"]"
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 1292
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 1221,
+    "fixture" : "translate-fr-05",
+    "outcome" : "success",
+    "output" : "<private fixture: text kept in .local-corpus/648-translate/>",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`plus de 60 %` = more than 60 %, not `no longer` [found \"no longer\"]"
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 1221
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 4027,
+    "fixture" : "translate-fr-06",
+    "outcome" : "success",
+    "output" : "Well, I'm going to do one last audio in French with a lot of hesitation because I don't know what to say, so the idea is to see how the transcription turns out. Basically, the project is always to release the 2.0 version of Dictus as quickly as possible, but right now I'm falling into the classic problem of app developers who want to perfect the app at all costs. I've still set a scope, but I'm constantly adding new features, little things. It bothers me because I'm really motivated to try to get a feel for it as quickly as possible to move on to the marketing phase, which I think will be interesting. So, here's the thing, I've kind of had an idea in my head; I think I've done not too bad, I've worked on the screenshots of the Apple Store. I still have onboarding that I want to rework before starting to communicate about it. I don't know if it's a good idea; I'm thinking that the current onboarding could potentially have been enough. The only thing that's missing is really showing how to use the new voice feature, which allows voice transcription, which can be really interesting. And there's also the smart modes feature, of course, which can really be very cool.",
+    "run" : 1,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`c'est toujours de sortir` = still, not always [found \"always\"]",
+        "`sentir ça` (ASR for `sortir`) = ship / release, not feel [found \"feel\"]"
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 4027
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 3977,
+    "fixture" : "translate-fr-06",
+    "outcome" : "success",
+    "output" : "Well, I'm going to do one last audio in French with a lot of hesitation because I don't know what to say, so the idea is to see how the transcription turns out. Basically, the project is always to release the 2.0 version of Dictus as quickly as possible, but right now I'm falling into the classic problem of app developers who want to perfect the app at all costs. I've still set a scope, but I'm constantly adding new features, little things. It bothers me because I'm really motivated to try to get a feel for it as quickly as possible to move on to the marketing phase, which I think will be interesting. So, here's the thing, I've kind of had an idea in my head; I think I've done not too bad, I've worked on the screenshots of the Apple Store. I still have onboarding that I want to rework before starting to communicate about it. I don't know if it's a good idea; I'm thinking that the current onboarding could potentially have been enough. The only thing that's missing is really showing how to use the new voice feature, which allows voice transcription, which can be really interesting. And there's also the smart modes feature, of course, which can really be very cool.",
+    "run" : 2,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`c'est toujours de sortir` = still, not always [found \"always\"]",
+        "`sentir ça` (ASR for `sortir`) = ship / release, not feel [found \"feel\"]"
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 3977
+  },
+  {
+    "arm" : "C",
+    "engineMs" : 4445,
+    "fixture" : "translate-fr-06",
+    "outcome" : "success",
+    "output" : "Well, I'm going to do one last audio in French with a lot of hesitation because I don't know what to say, so the idea is to see how the transcription turns out. Basically, the project is always to release the 2.0 version of Dictus as quickly as possible, but right now I'm falling into the classic problem of app developers who want to perfect the app at all costs. I've still set a scope, but I'm constantly adding new features, little things. It bothers me because I'm really motivated to try to get a feel for it as quickly as possible to move on to the marketing phase, which I think will be interesting. So, here's the thing, I've kind of had an idea in my head; I think I've done not too bad, I've worked on the screenshots of the Apple Store. I still have onboarding that I want to rework before starting to communicate about it. I don't know if it's a good idea; I'm thinking that the current onboarding could potentially have been enough. The only thing that's missing is really showing how to use the new voice feature, which allows voice transcription, which can be really interesting. And there's also the smart modes feature, of course, which can really be very cool.",
+    "run" : 3,
+    "score" : {
+      "add" : [
+
+      ],
+      "critical" : [
+        "`c'est toujours de sortir` = still, not always [found \"always\"]",
+        "`sentir ça` (ASR for `sortir`) = ship / release, not feel [found \"feel\"]"
+      ],
+      "drop" : [
+
+      ],
+      "expect" : [
+
+      ],
+      "keep" : [
+
+      ],
+      "outputLanguage" : "en"
+    },
+    "source" : "fr",
+    "translateMs" : 4445
+  }
+]
