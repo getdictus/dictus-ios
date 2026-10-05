@@ -29,7 +29,14 @@
 window.DICTUS_STRINGS = {
   locale: "en-GB",
   proBadge: "Pro",
+  // The wordmark of the hero (brand kit: DM Sans 200, lowercase).
+  wordmark: "dictus",
   slides: {
+    hero: {
+      // Options proposed to Pierre (V4): "Speak instead of typing" (kept),
+      // "Your voice, typed in any app", "Talk. Dictus types."
+      headline: "Speak instead of typing",
+    },
     dictate: {
       headline: "Dictate in any app",
       // The generic email compose above the real recording panel (slide 1).

@@ -11,9 +11,10 @@
 // The template decides what an iteration renders:
 // - window.ITERATION: the output folder, so an iteration never overwrites another;
 // - window.EXPORT_THEMES: the themes rendered unless --theme forces one;
-// - window.VARIANTS: slide variants. The first is the main set (all six slides,
-//   montage.jpg); every other one exports only the slides it changes, and a
-//   montage-<variant>.jpg with those slides swapped in.
+// - window.VARIANTS: [{ name, query }]. The first is the main set (every slide,
+//   montage.jpg); every other one exports only the slides whose id it changes, and
+//   a montage-<name>.jpg with those slides swapped in. (A plain string is read as
+//   the V3 form, ?variant=<name>.)
 // With several themes, montages are suffixed with the theme.
 //
 // Headless Chromium through Playwright, from a file:// URL: no server, no window.
@@ -41,11 +42,15 @@ if (!existsSync(join(ROOT, ".bezels"))) {
 }
 
 const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage({ viewport: { width: PANEL_W * 6, height: PANEL_H }, deviceScaleFactor: 1 });
+// Wide enough for any strip: the template sets its own width from its slides.
+const page = await browser.newPage({ viewport: { width: PANEL_W * 8, height: PANEL_H }, deviceScaleFactor: 1 });
+
+const asVariant = (v) => (typeof v === "string" ? { name: v, query: `variant=${v}` } : v || { name: "main", query: "" });
 
 async function load(locale, theme, variant) {
   const url = pathToFileURL(join(ROOT, "screenshots.html"));
-  url.search = `?locale=${locale}${theme ? `&theme=${theme}` : ""}${variant ? `&variant=${variant}` : ""}`;
+  const q = asVariant(variant).query;
+  url.search = `?locale=${locale}${theme ? `&theme=${theme}` : ""}${q ? `&${q}` : ""}`;
   await page.goto(url.href, { waitUntil: "networkidle" });
   if (!(await page.evaluate(() => window.whenReady))) throw new Error("screenshots.html reports the bezel is missing");
   return page.evaluate(() => ({
@@ -80,9 +85,10 @@ for (const locale of locales) {
         files.push(file);
       }
       if (v === 0) mainFiles = files;
-      const name = v === 0 ? `montage${suffix}.jpg` : `montage-${variant}${suffix}.jpg`;
+      const vname = asVariant(variant).name;
+      const name = v === 0 ? `montage${suffix}.jpg` : `montage-${vname}${suffix}.jpg`;
       montage(files, join(ROOT, "export", locale, meta.iteration, name));
-      console.log(`${locale}/${meta.iteration}/${theme}${variant ? `/${variant}` : ""}: ${files.length} slides, ${name}`);
+      console.log(`${locale}/${meta.iteration}/${theme}/${vname}: ${files.length} slides, ${name}`);
     }
   }
 }

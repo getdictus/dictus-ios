@@ -221,6 +221,23 @@
     letter-spacing: -0.025em; line-height: 1.15;
   }
 
+  /* ── Hero (slide 1, V4) ─────────────────────────── */
+  .hero-brand { position: absolute; top: 150px; z-index: 6; display: flex; align-items: center; gap: 26px; }
+  .hero-brand .bars { width: 92px; height: 92px; }
+  .hero-brand span { font: 200 104px/1 "DM Sans", sans-serif; letter-spacing: -0.04em; color: #0A1628; }
+  .hero-headline {
+    position: absolute; top: 330px; z-index: 6; width: 1110px;
+    font: 400 168px/0.98 "DM Sans", sans-serif; letter-spacing: -0.045em; color: #0A1628; text-wrap: balance;
+  }
+  .hero-illu { position: absolute; z-index: 3; }
+  .ribbon-icon {
+    position: absolute; z-index: 8; overflow: hidden; border-radius: 22.4%;
+    box-shadow: 0 18px 36px rgba(10, 22, 40, 0.22), 0 4px 10px rgba(10, 22, 40, 0.10);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ribbon-icon img { width: 100%; height: 100%; display: block; }
+  .ribbon-icon svg { width: 54%; height: 54%; }
+
   .missing { position: absolute; inset: 0; z-index: 10; display: none; align-items: center; justify-content: center; text-align: center; font: 600 120px/1.3 "DM Sans", sans-serif; color: #EF4444; background: rgba(255,255,255,0.9); }
   body.preview { padding: 24px; }
 </style>
@@ -235,8 +252,13 @@
 const params = new URLSearchParams(location.search);
 const LOCALE = params.get("locale") || "en-GB";
 const THEME = params.get("theme") || "light";
-/* Slide 2 sells one Smart Mode: ?variant=message (default) or translate. */
-const VARIANT = params.get("variant") || "translate";   // Pierre chose Translate, 2026-10-05
+/* The Smart Mode slide sells one mode: ?smart=translate (default, Pierre's choice,
+   2026-10-05) or message. ?variant= is the V3 name of the same switch. */
+const VARIANT = params.get("smart") || params.get("variant") || "translate";
+/* The app-icon ribbon of slides 1 and 2: ?ribbon=logos (default, real icons) or
+   tiles (neutral Dictus-blue tiles, the fallback if App Review objects, 5.2). */
+const RIBBON = params.get("ribbon") || "logos";
+const NOLOGO = RIBBON === "tiles" ? "-nologos" : "";
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -267,7 +289,7 @@ const rootStyle = document.documentElement.style;
 rootStyle.setProperty("--pro-ink", T.proInk);
 rootStyle.setProperty("--pro-sub", T.proSub);
 
-const PANEL_W = 1320, PANEL_H = 2868, PANELS = 6, STRIP_W = PANEL_W * PANELS;
+const PANEL_W = 1320, PANEL_H = 2868;   // PANELS and STRIP_W follow SLIDES, below
 const BEZEL = ".bezels/iPhone 17 Pro Max - Deep Blue - Portrait.png";
 
 /* Phone geometry shared by every phone slide: the WHOLE phone, same size and
@@ -287,25 +309,28 @@ const KEYBOARD_BAND = { y: 1767, h: 891, radius: PANEL_RADIUS, fill: "#E2E3E7" }
    SLIDES: layout only. Copy comes from strings/<locale>.js.
    ════════════════════════════════════════════════════════════ */
 const SLIDES = [
-  { id: "01-dictate", key: "dictate", pro: false,
+  // V4: a hero with no phone. Illustration, brand, headline; the voice becomes the
+  // BrandWaveform and the app-icon ribbon, which cross the cut into slide 2 together.
+  { id: `01-hero${NOLOGO}`, key: "hero", pro: false, hero: true },
+  { id: `02-dictate${NOLOGO}`, key: "dictate", pro: false,
     // Real capture (status bar, recording panel); the email above is drawn by composeScreen().
     phone: { capture: "01-recording-reminders.png", compose: true },
     lift: { band: KEYBOARD_BAND, width: 1180, raise: 60 } },
-  { id: `02-${VARIANT}`, key: "smartModes", pro: true,
+  { id: `03-${VARIANT}`, key: "smartModes", pro: true,
     phone: { capture: `02-smart-mode-fan-${VARIANT}.png` },
     beforeAfter: { top: 860, width: 1180 } },
-  { id: "03-voice-notes", key: "voiceNotes", pro: true,
+  { id: "04-voice-notes", key: "voiceNotes", pro: true,
     // Real capture (status bar, keyboard reader); the conversation above is the
     // generic chat drawn by chatScreen().
     phone: { capture: "03-voice-note-reader.png", chat: true },
     lift: { band: KEYBOARD_BAND, width: 1180, raise: 60 } },
-  { id: "04-keyboard", key: "keyboard", pro: false,
+  { id: "05-keyboard", key: "keyboard", pro: false,
     keyboards: [
       { capture: "04-keyboard-azerty-fr.png", label: "fr" },
       { capture: "04-keyboard-qwerty-en.png", label: "en" },
       { capture: "04-keyboard-qwertz-de.png", label: "de" },
     ] },
-  { id: "05-private", key: "private", pro: false,
+  { id: "06-private", key: "private", pro: false,
     phone: { capture: "05-models-downloaded.png" },
     // The whole "Downloaded" section: the point is that the models live on the phone.
     // Measured model cards: x 45 to 1274, radius 46.5 px (plain) and 49.9 px (the
@@ -313,8 +338,10 @@ const SLIDES = [
     // card's radius is the inner radius + the margin (50 + 40) and the corners
     // read as concentric.
     lift: { band: { x: 5, y: 538, w: 1309, h: 1005, radius: 90, fill: "#F0F0F5" }, width: 1180 } },
-  { id: "06-languages", key: "languages", pro: false, greetings: true },
+  { id: "07-languages", key: "languages", pro: false, greetings: true },
 ];
+
+const PANELS = SLIDES.length, STRIP_W = PANEL_W * PANELS;
 
 function captureSrc(file) { return `captures/${LOCALE}/${file}`; }
 function loadImg(img, file) {
@@ -324,6 +351,7 @@ function loadImg(img, file) {
 
 const S = window.DICTUS_STRINGS;
 const strip = document.getElementById("strip");
+strip.style.width = `${STRIP_W}px`;
 const el = (cls, html) => { const d = document.createElement("div"); d.className = cls; if (html) d.innerHTML = html; return d; };
 
 /* Phone; returns the capture → strip mapping so lifts can sit exactly over their source. */
@@ -464,8 +492,77 @@ function addGreetings(list, i) {
   });
 }
 
+/* ════════════════════════════════════════════════════════════
+   HERO (slide 1, V4): no phone.
+   ════════════════════════════════════════════════════════════ */
+/* The illustration (art/hero-illustration.png, drawn in code with anidoodle:
+   art/dictusHero.ts) and where its voice line ends, in its own pixels. */
+const ILLU = { src: "art/hero-illustration.png", w: 1320, h: 1500, x: 20, y: 680, scale: 0.85, voiceEnd: [900, 1420] };
+const VOICE = [ILLU.x + ILLU.voiceEnd[0] * ILLU.scale, ILLU.y + ILLU.voiceEnd[1] * ILLU.scale];
+/* The ribbon's track: one straight diagonal (slope 0.5) that crosses the cut low,
+   so on slide 2 it passes under the lifted recording card and only grazes the
+   phone's bottom corner. The waveform leaves the voice, falls along a curve and
+   runs parallel just above it: one gesture across the cut. */
+const TRACK = (x) => 2600 + 0.5 * (x - PANEL_W);
+const WAVE_JOIN = [PANEL_W + 70, TRACK(PANEL_W + 70) - 235];
+const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return [0, 1].map((k) => u*u*u*p0[k] + 3*u*u*t*p1[k] + 3*u*t*t*p2[k] + t*t*t*p3[k]); };
+const HERO_WAVE = Array.from({ length: 400 }, (_, n) => bez(VOICE, [VOICE[0] + 230, VOICE[1] + 110], [WAVE_JOIN[0] - 300, WAVE_JOIN[1] - 150], WAVE_JOIN, n / 399));
+const heroWaveY = (x) => { for (let n = 1; n < HERO_WAVE.length; n++) { const [a, b] = [HERO_WAVE[n - 1], HERO_WAVE[n]]; if (x <= b[0]) return a[1] + (b[1] - a[1]) * ((x - a[0]) / ((b[0] - a[0]) || 1)); } return HERO_WAVE.at(-1)[1]; };
+
+/* App icons on the ribbon. Real icons are fetched by tools/fetch-icons.sh into the
+   git-ignored .icons/ (third-party marks, never committed). The fallback draws
+   neutral tiles in Dictus blues with simple writing glyphs. */
+const RIBBON_APPS = ["whatsapp", "gmail", "slack", "instagram", "notion", "messenger", "outlook", "linkedin", "telegram", "docs", "x", "chatgpt"];
+const TILE_GLYPHS = [
+  '<path d="M5 6h14v9H10l-5 4z"/>', '<path d="M4 7h16v11H4zM4 7l8 6 8-6"/>', '<path d="M7 4h7l4 4v12H7zM14 4v4h4M10 12h5M10 15h5"/>',
+  '<circle cx="12" cy="12" r="3.5"/><path d="M15.5 12v1.5a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.4 6.8"/>', '<path d="M4 12l16-7-6 15-3-6z"/>', '<path d="M5 19l1-4L16 5l3 3L9 18z"/>',
+];
+const TILE_COLOURS = [["#3D7EFF", "#fff"], ["#DCE8FF", "#2563EB"], ["#0A1628", "#fff"], ["#6BA3FF", "#fff"], ["#2563EB", "#fff"], ["#EEF3FF", "#3D7EFF"]];
+// startX puts icon 6 exactly on the cut, straddling slides 1 and 2 as in Wispr's set.
+const ICON = { size: 150, step: 172, startX: PANEL_W - 6 * 172 };
+
+function addRibbon() {
+  RIBBON_APPS.forEach((slug, n) => {
+    const x = ICON.startX + n * ICON.step, y = TRACK(x);
+    if (y - ICON.size / 2 > PANEL_H) return;
+    const d = el("ribbon-icon");
+    Object.assign(d.style, { left: `${x - ICON.size / 2}px`, top: `${y - ICON.size / 2}px`, width: `${ICON.size}px`, height: `${ICON.size}px`,
+      transform: `rotate(${n % 2 ? 9 : 14}deg)` });
+    if (RIBBON === "tiles") {
+      const [bg, fg] = TILE_COLOURS[n % TILE_COLOURS.length];
+      d.style.background = bg;
+      d.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${fg}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${TILE_GLYPHS[n % TILE_GLYPHS.length]}</svg>`;
+    } else {
+      d.innerHTML = `<img alt="" src=".icons/${slug}.png">`;
+      d.querySelector("img").onerror = () => { document.getElementById("missing").innerHTML = "App icons missing<br>run: tools/fetch-icons.sh"; document.getElementById("missing").style.display = "flex"; };
+    }
+    strip.appendChild(d);
+  });
+}
+
+/* The Dictus mark from assets/brand/appicon-dark.svg (#636): bars 9 wide, 18 / 42 / 27
+   tall, capsule ends, 7.5 apart; centre bar #6BA3FF → #2563EB. On a light background
+   the side bars are grey, as DictusLogo does in light mode. Never redrawn by hand. */
+const LOGO_BARS = `<svg class="bars" viewBox="19 19 42 42"><defs><linearGradient id="hb" x1="0" y1="19" x2="0" y2="61" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6BA3FF"/><stop offset="1" stop-color="#2563EB"/></linearGradient></defs>
+  <rect x="19" y="31" width="9" height="18" rx="4.5" fill="#8E8E93" opacity="0.45"/><rect x="35.5" y="19" width="9" height="42" rx="4.5" fill="url(#hb)"/><rect x="52" y="26" width="9" height="27" rx="4.5" fill="#8E8E93" opacity="0.65"/></svg>`;
+
+function addHero(copy, i) {
+  const brand = el("hero-brand", `${LOGO_BARS}<span>${S.wordmark}</span>`);
+  brand.style.left = `${i * PANEL_W + 110}px`;
+  strip.appendChild(brand);
+  const h = el("hero-headline", copy.headline);
+  h.style.left = `${i * PANEL_W + 110}px`;
+  strip.appendChild(h);
+  const img = document.createElement("img");
+  img.className = "hero-illu"; img.alt = ""; img.src = ILLU.src;
+  Object.assign(img.style, { left: `${i * PANEL_W + ILLU.x}px`, top: `${ILLU.y}px`, width: `${ILLU.w * ILLU.scale}px` });
+  strip.appendChild(img);
+  addRibbon();
+}
+
 SLIDES.forEach((s, i) => {
   const copy = S.slides[s.key];
+  if (s.hero) { addHero(copy, i); return; }
   const headline = copy.headline ?? copy[VARIANT].headline;
   const c = el(`copy ${s.pro ? "pro-slide" : "free"}`, `
     <div class="badge-row">${s.pro ? `<span class="pro">${S.proBadge}</span>` : ""}</div>
@@ -518,23 +615,45 @@ const WAVE_PERIOD = STRIP_W / 4;
 const pitch = BAR_W + BAR_GAP;
 const bars = Math.floor((STRIP_W - BAR_GAP) / pitch);
 const x0 = (STRIP_W - (bars * pitch - BAR_GAP)) / 2;
+/* V4: the strip's wave starts where slide 2's phone ends (its right margin); before
+   that, the hero's wave leaves the voice, falls along a curve and runs above the
+   ribbon across the cut, then goes under slide 2's phone. */
+const STRIP_WAVE_FROM = PANEL_W + PHONE.width + (PANEL_W - PHONE.width) / 2;
+const barFill = (x, y, h, cx) => {
+  const p = Math.min(Math.floor(cx / PANEL_W), PANELS - 1);
+  const dCenter = Math.abs(cx - (p * PANEL_W + PANEL_W / 2)) / (PANEL_W / 2);
+  if (dCenter < 0.4) { const f = ctx.createLinearGradient(0, y, 0, y + h); f.addColorStop(0, "#6BA3FF"); f.addColorStop(1, "#2563EB"); return f; }
+  const rgb = proAt(cx) ? T.proEdgeRGB : FREE.edgeRGB;
+  return `rgba(${rgb},${((1 - dCenter) * 0.9 + 0.15).toFixed(3)})`;
+};
 ctx.globalAlpha = 0.62;
+{
+  // The hero's wave follows its path: the curve out of the voice, then the straight
+  // run parallel to the ribbon, past the cut and under slide 2's phone. Bars sit at a
+  // constant pitch along the arc and stand perpendicular to it, so the waveform keeps
+  // its shape on a slope (upright bars on a slope read as a dotted staircase).
+  const path = HERO_WAVE.concat(Array.from({ length: 60 }, (_, n) => [WAVE_JOIN[0] + (n + 1) * 10, WAVE_JOIN[1] + 0.5 * (n + 1) * 10]));
+  const cum = [0];
+  for (let n = 1; n < path.length; n++) cum.push(cum[n - 1] + Math.hypot(path[n][0] - path[n - 1][0], path[n][1] - path[n - 1][1]));
+  const at = (d) => { let n = 1; while (n < cum.length - 1 && cum[n] < d) n++; const t = (d - cum[n - 1]) / ((cum[n] - cum[n - 1]) || 1); const [a, b] = [path[n - 1], path[n]];
+    return { p: [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t], ang: Math.atan2(b[1] - a[1], b[0] - a[0]) }; };
+  for (let d = 14; d < cum.at(-1); d += pitch) {
+    const { p: [cx, cy], ang } = at(d);
+    const energy = 0.2 + 0.25 * (Math.sin(2 * Math.PI * (d / 520 + 0.25)) + 1);   // BrandWaveform processingEnergy, a period short enough to read on this run
+    const ramp = Math.min(1, 0.16 + d / 300);   // the voice opens into the wave
+    const h = Math.max((MIN_H + energy * (460 - MIN_H)) * ramp, MIN_H);
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang);
+    ctx.beginPath(); ctx.roundRect(-BAR_W / 2, -h / 2, BAR_W, h, BAR_W / 2);
+    ctx.fillStyle = barFill(-BAR_W / 2, -h / 2, h, cx); ctx.fill(); ctx.restore();
+  }
+}
 for (let n = 0; n < bars; n++) {
   const x = x0 + n * pitch, cx = x + BAR_W / 2;
+  if (cx < STRIP_WAVE_FROM) continue;
   const energy = 0.2 + 0.25 * (Math.sin(2 * Math.PI * (cx / WAVE_PERIOD + 0.25)) + 1);
   const h = Math.max(MIN_H + energy * (MAX_H - MIN_H), MIN_H);
   const y = WAVE_Y - h / 2;
-  const p = Math.min(Math.floor(cx / PANEL_W), PANELS - 1);
-  const dCenter = Math.abs(cx - (p * PANEL_W + PANEL_W / 2)) / (PANEL_W / 2);
-  let fill;
-  if (dCenter < 0.4) {
-    fill = ctx.createLinearGradient(0, y, 0, y + h);
-    fill.addColorStop(0, "#6BA3FF"); fill.addColorStop(1, "#2563EB");
-  } else {
-    const rgb = proAt(cx) ? T.proEdgeRGB : FREE.edgeRGB;
-    fill = `rgba(${rgb},${((1 - dCenter) * 0.9 + 0.15).toFixed(3)})`;
-  }
-  ctx.beginPath(); ctx.roundRect(x, y, BAR_W, h, BAR_W / 2); ctx.fillStyle = fill; ctx.fill();
+  ctx.beginPath(); ctx.roundRect(x, y, BAR_W, h, BAR_W / 2); ctx.fillStyle = barFill(x, y, h, cx); ctx.fill();
 }
 ctx.globalAlpha = 1;
 
@@ -549,12 +668,16 @@ window.whenReady = Promise.all([
   .then(() => document.getElementById("missing").style.display !== "flex");
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
 /* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
-window.ITERATION = "v3";
-/* Themes the exporter renders for this iteration (V3: light only, decided by Pierre). */
+window.ITERATION = "v4";
+/* Themes the exporter renders for this iteration (light only since V3, Pierre). */
 window.EXPORT_THEMES = ["light"];
-window.VARIANT = VARIANT;
-/* Slide 2 variants; the first is the main set, the others only swap slide 2. */
-window.VARIANTS = ["translate", "message"];
+/* Variants: the first is the main set; the others re-export only the slides whose
+   id they change, and get a montage-<name>.jpg of their own. */
+window.VARIANTS = [
+  { name: "main", query: "" },
+  { name: "nologos", query: "ribbon=tiles" },
+  { name: "message", query: "smart=message" },
+];
 
 if (params.has("preview")) {
   document.body.classList.add("preview");
