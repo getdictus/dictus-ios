@@ -55,11 +55,18 @@ struct KeyboardSetupPage: View {
         VStack(spacing: 0) {
             Spacer(minLength: 40)
 
-            // Keyboard icon
-            Image(systemName: "keyboard")
-                .font(.system(size: 64))
-                .foregroundColor(.dictusAccent)
-                .padding(.bottom, 24)
+            // Keyboard icon.
+            //
+            // Dropped on a pre-A14 device to make room for the notice below (#635):
+            // this page does not scroll, and on a 667 pt screen (the iPhone SE 2, and
+            // every iPad in compatibility mode) the notice pushed the restart caption
+            // into truncation and left no room for "Keyboard detected" + Continue.
+            if device.supportsKeyboardDictation {
+                Image(systemName: "keyboard")
+                    .font(.system(size: 64))
+                    .foregroundColor(.dictusAccent)
+                    .padding(.bottom, 24)
+            }
 
             // Title
             Text("Add keyboard")
@@ -95,6 +102,9 @@ struct KeyboardSetupPage: View {
                 .font(.dictusCaption)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
+                // Never truncated (#635): with the pre-A14 notice below, this page
+                // is tight in a 667 pt window, and SwiftUI clipped this line first.
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 32)
                 .padding(.bottom, 16)
 
