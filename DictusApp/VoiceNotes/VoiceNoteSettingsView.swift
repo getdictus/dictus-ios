@@ -20,10 +20,16 @@ struct VoiceNoteSettingsView: View {
     /// (#216). The same object the switch above writes and the hub row reads.
     @ObservedObject private var switches = ProFeatureSwitches.shared
 
+    /// Observed so an entitlement that changes while this screen is open (Pro lapsing,
+    /// the DEBUG force flipped) relocks or unlocks it: `FeatureGate` reads the App
+    /// Group, which publishes nothing.
+    @EnvironmentObject private var proStatus: ProStatusManager
+
     /// Whether the defaults are live: `FeatureGate.isAvailable`, the one predicate,
     /// which the share extension reads too (`VoiceNoteAvailability`).
     private var isAvailable: Bool {
         _ = switches.isOn(.voiceNotes)
+        _ = proStatus.isProActive
         return FeatureGate.isAvailable(.voiceNotes)
     }
 
@@ -97,5 +103,6 @@ struct VoiceNoteSettingsSections: View {
 #Preview {
     NavigationStack {
         VoiceNoteSettingsView()
+            .environmentObject(ProStatusManager())
     }
 }

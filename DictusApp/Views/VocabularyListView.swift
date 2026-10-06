@@ -41,11 +41,17 @@ struct VocabularyListView: View {
     /// (#216). The same object the switch above writes and the hub row reads.
     @ObservedObject private var switches = ProFeatureSwitches.shared
 
+    /// Observed so an entitlement that changes while this screen is open (Pro lapsing,
+    /// the DEBUG force flipped) relocks or unlocks it: `FeatureGate` reads the App
+    /// Group, which publishes nothing.
+    @EnvironmentObject private var proStatus: ProStatusManager
+
     /// Whether the terms below the switch are live: `FeatureGate.isAvailable`, the one
     /// predicate. Off, they stay visible and cannot be edited, since the replacement
     /// pass applies none of them (#216 decision 5).
     private var isAvailable: Bool {
         _ = switches.isOn(.vocabulary)
+        _ = proStatus.isProActive
         return FeatureGate.isAvailable(.vocabulary)
     }
 

@@ -48,11 +48,17 @@ struct SmartModeListView: View {
     /// (#216). The same object the switch above writes and the hub row reads.
     @ObservedObject private var switches = ProFeatureSwitches.shared
 
+    /// Observed so an entitlement that changes while this screen is open (Pro lapsing,
+    /// the DEBUG force flipped) relocks or unlocks it: `FeatureGate` reads the App
+    /// Group, which publishes nothing.
+    @EnvironmentObject private var proStatus: ProStatusManager
+
     /// Whether the list below the switch is live: `FeatureGate.isAvailable`, the one
     /// predicate. Off, the arrangement stays visible and cannot be edited, since the
     /// keyboard applies none of it (#216 decision 5).
     private var isAvailable: Bool {
         _ = switches.isOn(.smartMode)
+        _ = proStatus.isProActive
         return FeatureGate.isAvailable(.smartMode)
     }
 

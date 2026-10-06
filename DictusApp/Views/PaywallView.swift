@@ -267,16 +267,20 @@ struct PaywallView: View {
     /// History keeps its home-screen swipe (decision 7); this is a second way in, so
     /// it is pushed rather than presented as the sheet the swipe opens. Its store is
     /// handed over explicitly for the reason `HomeView` gives: this screen is itself a
-    /// cover, presented from elsewhere in the tree.
+    /// cover, presented from elsewhere in the tree. `proStatus` likewise, for every
+    /// screen: each one observes it to relock when the entitlement changes.
     @ViewBuilder
     private func featureScreen(_ feature: ProFeature) -> some View {
         switch feature {
         case .smartMode:
             SmartModeListView()
+                .environmentObject(proStatus)
         case .vocabulary:
             VocabularyListView()
+                .environmentObject(proStatus)
         case .voiceNotes:
             VoiceNoteSettingsView()
+                .environmentObject(proStatus)
         case .history:
             HistoryView(isPushed: true)
                 .environmentObject(TranscriptionHistoryStore.shared)
