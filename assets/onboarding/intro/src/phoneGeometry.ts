@@ -1,9 +1,8 @@
 import type { P } from "./core";
 
 // The giant iPhone of the App Store hero V10-A (branch chore/643-hero-a,
-// assets/appstore/art/v10-A/heroSpeak10.ts), lying screen-up in perspective. Shared by scene B,
-// which places the woman and aims her voice by it although the phone itself is not drawn there,
-// and scene C, which draws it. V10-A's numbers, unchanged.
+// assets/appstore/art/v10-A/heroSpeak10.ts), lying screen-up in perspective, drawn by scene C.
+// V10-A's numbers, unchanged.
 //
 // An iPhone 17 Pro Max-shaped slab (163 x 78 mm, display corners ~12 mm), top end away from us,
 // seen from above in true perspective: a homography from the phone's millimetres to the strip.
@@ -38,6 +37,5 @@ export const rrect = (x0: number, y0: number, x1: number, y1: number, r: number,
 // is about 50 degrees above the ground, so a vertical edge reads at ~0.75 of its length)
 export const drop = (x: number, y: number) => MM.thick * ppm(x, y) * 0.75;
 
-// the keyboard's waveform, in phone millimetres: its centre is where scene B's voice is aimed
+// the keyboard's waveform, in phone millimetres: the run of its bars and their width (V10-A's)
 export const WAVE = { x0: 7, x1: 71, cy: 123, h: 25, w: 2.7 };
-export const WAVE_MM: P = [39, WAVE.cy];
