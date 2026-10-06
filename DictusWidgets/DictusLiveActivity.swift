@@ -204,6 +204,11 @@ struct DictusLiveActivity: Widget {
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.white)
 
+                // One line, whatever the language (#664): the leading region is
+                // narrow, and « Enregistrement... » wrapped inside its dots on an
+                // iPhone 15 Pro Max. A label that does not fit shrinks a little,
+                // then truncates, rather than spilling onto a second line.
+                Group {
                 switch context.state.phase {
                 case .standby:
                     Text("On")
@@ -230,6 +235,9 @@ struct DictusLiveActivity: Widget {
                         .font(.system(size: 12))
                         .foregroundColor(Color(hex: 0xEF4444))
                 }
+                }
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             }
         }
         .frame(maxHeight: .infinity, alignment: .center)
@@ -370,13 +378,18 @@ struct DictusLiveActivity: Widget {
                         }
                     }
                 case .transcribing:
+                    // Same one-line rule as the expanded island (#664).
                     Text("Transcribing...")
                         .font(.system(size: 13))
                         .foregroundColor(Color(hex: 0x3D7EFF))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 case .processing:
                     Text("Processing...")
                         .font(.system(size: 13))
                         .foregroundColor(Color(hex: 0x8B5CF6))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 case .ready:
                     // Two Texts, not `Text(preview ?? "...")`: a `??` turns the fallback
                     // into a plain String, which Text prints without looking it up.
