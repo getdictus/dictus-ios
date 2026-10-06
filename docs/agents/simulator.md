@@ -352,8 +352,10 @@ A menu opened that way **stays open after the release**, so there is no race —
 
 ```bash
 axe describe-ui --udid <udid>
-axe tap --label "Dictus, français" --udid <udid>
+axe tap --label "Dictus, multilingue" --udid <udid>
 ```
+
+The row reads `Dictus, <declared language>` in the device's language. Since #653 the keyboard declares `PrimaryLanguage = mul`, so it is `Dictus, multilingue` on a French device and `Dictus, Multiple languages` on an English one; a build from before #653 still shows `Dictus, français`.
 
 **Never tap the globe to change keyboard.** A tap cycles through the enabled keyboards and skips the third-party ones, so it never lands on Dictus. That single mistake is what produced the wrong conclusion this file carried until 2026-08-23 (section 8).
 
@@ -511,6 +513,8 @@ exits 0 and raises an `Ouvrir dans « Dictus » ?` confirmation alert, which nee
 No transcription model is installed, and installing one means the Models tab — a tap — plus a download. Recording never starts, so nothing is proven about capture. `xcrun simctl privacy <udid> grant microphone com.pivi.dictus` exits 0, but it was never put to use.
 
 Two things to know before trying: the simulator captures the **Mac's** input device, so a recording started here records the room Pierre is sitting in; and transcription runs on Mac silicon, so any timing measured in a simulator says nothing about the phone.
+
+**A host app's spell-check underlines are not a usable probe.** Measured 2026-10-05 for #653 in Reminders' inline title field, typing with the Dictus keyboard: the first session underlined a nonsense word (`xqzvb`) in red. After a reinstall of Dictus, the same field underlined nothing — with the old `fr-FR` build as with the new one, with the simulated hardware keyboard too, and still after a reboot. A missing underline here says nothing about the keyboard; that check belongs on a physical iPhone.
 
 **StoreKit is inert.** The paywall and subscription state cannot be exercised without a StoreKit configuration:
 

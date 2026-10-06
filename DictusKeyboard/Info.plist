@@ -29,7 +29,7 @@
 			<key>IsASCIICapable</key>
 			<true/>
 			<key>PrimaryLanguage</key>
-			<string>fr-FR</string>
+			<string>mul</string>
 			<key>RequestsOpenAccess</key>
 			<true/>
 		</dict>
