@@ -1,5 +1,6 @@
 // DictusApp/Polish/PolishCoordinator.swift
 import Foundation
+import UIKit
 import DictusCore
 
 /// DictusApp's polish entry point: one `PolishService` for dictations started
@@ -29,7 +30,18 @@ public final class PolishCoordinator {
         // describes the keyboard's gate since #361. When an in-app dictation exhausts
         // the app's budget, the user is looking at DictusApp, and telling them through
         // a surface in another process would be both late and wrong.
-        self.service = PolishService(sink: metricsRing)
+        // `appState` feeds the `translateEngineCall` line (#648). The app translates for
+        // voice notes and for dictations started inside it; the keyboard does the rest.
+        self.service = PolishService(sink: metricsRing, appState: {
+            await MainActor.run {
+                switch UIApplication.shared.applicationState {
+                case .active: return "active"
+                case .inactive: return "inactive"
+                case .background: return "background"
+                @unknown default: return "unknown"
+                }
+            }
+        })
     }
 
     // MARK: - Public API

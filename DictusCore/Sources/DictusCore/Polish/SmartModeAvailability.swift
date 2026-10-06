@@ -352,7 +352,7 @@ public enum SmartModeNotice: Equatable, Sendable {
     public var englishDescription: String {
         switch self {
         case .translationLanguageNotInstalled:
-            return "Download this language for better translations. Until then, Translate uses Apple Intelligence."
+            return "Download this language for more accurate translations. Until then, translations use Apple Intelligence."
         }
     }
 }
