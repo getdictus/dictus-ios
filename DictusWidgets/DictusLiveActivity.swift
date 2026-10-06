@@ -181,7 +181,7 @@ struct DictusLiveActivity: Widget {
             HStack(spacing: 8) {
                 MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
                     .frame(width: 24, height: 18)
-                Text("Dictus")
+                Text(verbatim: "Dictus")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.white)
             }
@@ -200,7 +200,7 @@ struct DictusLiveActivity: Widget {
             .frame(width: 24, height: 18)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Dictus")
+                Text(verbatim: "Dictus")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(.white)
 
@@ -316,7 +316,7 @@ struct DictusLiveActivity: Widget {
             EmptyView()
         case .ready:
             if let preview = context.state.transcriptionPreview {
-                Text(preview)
+                Text(verbatim: preview)
                     .font(.system(size: 13))
                     .foregroundColor(.white.opacity(0.8))
                     .lineLimit(2)
@@ -348,7 +348,7 @@ struct DictusLiveActivity: Widget {
             .frame(width: 28, height: 20)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Dictus")
+                Text(verbatim: "Dictus")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.white)
 
@@ -378,7 +378,10 @@ struct DictusLiveActivity: Widget {
                         .font(.system(size: 13))
                         .foregroundColor(Color(hex: 0x8B5CF6))
                 case .ready:
-                    Text(context.state.transcriptionPreview ?? "Transcription ready")
+                    // Two Texts, not `Text(preview ?? "...")`: a `??` turns the fallback
+                    // into a plain String, which Text prints without looking it up.
+                    // The preview is the user's own words, so it is shown verbatim.
+                    (context.state.transcriptionPreview.map { Text(verbatim: $0) } ?? Text("Transcription ready"))
                         .font(.system(size: 13))
                         .foregroundColor(Color(hex: 0x22C55E))
                         .lineLimit(1)
@@ -520,7 +523,7 @@ private struct VoiceNoteRing: View {
                     .rotationEffect(.degrees(-90))
             }
             if note.readyCount > 0 {
-                Text("\(note.readyCount)")
+                Text(verbatim: "\(note.readyCount)")
                     .font(.system(size: countSize, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                     .monospacedDigit()
@@ -532,10 +535,11 @@ private struct VoiceNoteRing: View {
         .animation(isLuminanceReduced ? nil : .easeOut(duration: 0.6), value: note.segments)
         .animation(isLuminanceReduced ? nil : .spring(duration: 0.8, bounce: 0.4), value: note.allFinished)
         .animation(isLuminanceReduced ? nil : .default, value: note.readyCount)
-        // The words come localised from DictusApp (the widget has no catalog). The brand
-        // is the fallback for the first seconds of a note, when there is no line yet; it
-        // is the same in every language, so it is spoken verbatim.
-        .accessibilityLabel(note.statusLine.map { Text($0) } ?? note.receivedLine.map { Text($0) } ?? Text(verbatim: "Dictus"))
+        // The words come localised from DictusApp, which builds them with its own catalog
+        // (`VoiceNoteCopy`), so they are printed verbatim here. The brand is the fallback
+        // for the first seconds of a note, when there is no line yet; it is the same in
+        // every language, so it is spoken verbatim.
+        .accessibilityLabel(note.statusLine.map { Text(verbatim: $0) } ?? note.receivedLine.map { Text(verbatim: $0) } ?? Text(verbatim: "Dictus"))
     }
 }
 
@@ -590,7 +594,7 @@ private struct VoiceNoteReceivedGlyph: View {
                 .foregroundColor(.white)
         }
         .frame(width: diameter, height: diameter)
-        .accessibilityLabel(label.map { Text($0) } ?? Text(verbatim: "Dictus"))
+        .accessibilityLabel(label.map { Text(verbatim: $0) } ?? Text(verbatim: "Dictus"))
     }
 }
 
@@ -609,8 +613,9 @@ private struct VoiceNoteLine: View {
             if showsRing {
                 VoiceNoteRing(note: note, diameter: 18, lineWidth: 2.5, countSize: 9)
             }
+            // Localised by DictusApp (`VoiceNoteCopy`), printed as is.
             if let line = note.statusLine ?? note.receivedLine {
-                Text(line)
+                Text(verbatim: line)
                     .font(.system(size: fontSize, weight: .semibold))
                     .foregroundColor(.white.opacity(0.9))
                     .lineLimit(1)
@@ -631,11 +636,12 @@ private struct VoiceNoteLockScreen: View {
             MiniLogoBars(levels: [0.43, 1.0, 0.64], animated: false)
                 .frame(width: 28, height: 20)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Dictus")
+                Text(verbatim: "Dictus")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundColor(.white)
+                // Localised by DictusApp (`VoiceNoteCopy`), printed as is.
                 if let line = note.statusLine ?? note.receivedLine {
-                    Text(line)
+                    Text(verbatim: line)
                         .font(.system(size: 13))
                         .foregroundColor(.white.opacity(0.8))
                         .lineLimit(2)
