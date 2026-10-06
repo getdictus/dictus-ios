@@ -561,6 +561,28 @@
         }
       }
     },
+    "Because of its chip, this iPad cannot dictate from the keyboard. Dictation inside the Dictus app works." : {
+      "comment" : "Onboarding notice on the keyboard setup page, shown only on an iPad whose chip predates the A14 (#635).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À cause de sa puce, cet iPad ne peut pas dicter depuis le clavier. La dictée dans l’app Dictus fonctionne."
+          }
+        }
+      }
+    },
+    "Because of its chip, this iPhone cannot dictate from the keyboard. Dictation inside the Dictus app works." : {
+      "comment" : "Onboarding notice on the keyboard setup page, shown only on an iPhone whose chip predates the A14 (#635).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À cause de sa puce, cet iPhone ne peut pas dicter depuis le clavier. La dictée dans l’app Dictus fonctionne."
+          }
+        }
+      }
+    },
     "Best accuracy" : {
       "localizations" : {
         "fr" : {
@@ -3893,6 +3915,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Activez Apple Intelligence dans les Réglages de l'iPhone pour utiliser les modes intelligents."
+          }
+        }
+      }
+    },
+    "Type a few words to try the keyboard" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tapez quelques mots pour essayer le clavier"
+          }
+        }
+      }
+    },
+    "Type something!" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tapez quelque chose !"
           }
         }
       }

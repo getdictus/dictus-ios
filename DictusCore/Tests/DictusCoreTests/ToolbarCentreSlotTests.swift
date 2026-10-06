@@ -12,6 +12,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
                          errorMessage: String? = nil,
                          offersDictationUndo: Bool = false,
                          hasSuggestions: Bool = false,
+                         dictationUnavailable: Bool = false,
                          polishUnavailable: Bool = false,
                          armedModeName: String? = nil,
                          armedModeIsEffective: Bool = true,
@@ -22,6 +23,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
             errorMessage: errorMessage,
             offersDictationUndo: offersDictationUndo,
             hasSuggestions: hasSuggestions,
+            dictationUnavailable: dictationUnavailable,
             polishUnavailable: polishUnavailable,
             armedModeName: armedModeName,
             armedModeIsEffective: armedModeIsEffective,
@@ -148,6 +150,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
         XCTAssertTrue(ToolbarCentreSlot.suggestions.evictsHamburger)
 
         XCTAssertFalse(ToolbarCentreSlot.choosingMode.evictsHamburger)
+        XCTAssertFalse(ToolbarCentreSlot.dictationUnavailable.evictsHamburger)
         // It points at the ☰, and teaches a long press on the ☰ (#639).
         XCTAssertFalse(ToolbarCentreSlot.panelHint.evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.polishUnavailable.evictsHamburger)
@@ -195,5 +198,48 @@ final class ToolbarCentreSlotTests: XCTestCase {
     func testNeitherArmedModeShapeEvictsTheHamburger() {
         XCTAssertFalse(ToolbarCentreSlot.armedMode("List").evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.armedModeInactive("List").evictsHamburger)
+    }
+
+    // MARK: - Dictation unavailable on a pre-A14 device (#635)
+
+    /// The brief's one explicit precedence: suggestions win over the message.
+    func testSuggestionsOutrankTheDictationUnavailableMessage() {
+        XCTAssertEqual(
+            resolve(hasSuggestions: true, dictationUnavailable: true),
+            .suggestions
+        )
+    }
+
+    /// It takes the idle bar's place, and everything about dictation below it would
+    /// describe a feature the device does not have.
+    func testTheMessageOutranksEveryDictationOccupantOfTheIdleBar() {
+        XCTAssertEqual(
+            resolve(
+                dictationUnavailable: true, polishUnavailable: true,
+                armedModeName: "List", offersDiscoveryHint: true
+            ),
+            .dictationUnavailable
+        )
+        XCTAssertEqual(
+            resolve(dictationUnavailable: true, armedModeName: "List", armedModeIsEffective: false),
+            .dictationUnavailable
+        )
+        XCTAssertEqual(resolve(dictationUnavailable: true), .dictationUnavailable)
+    }
+
+    /// The menu still works on these devices, so the hint teaching it may finish its
+    /// job first; it retires after one long press and the message takes over.
+    func testThePanelHintStillTeachesTheMenuBeforeTheMessage() {
+        XCTAssertEqual(
+            resolve(dictationUnavailable: true, offersPanelHint: true, offersDiscoveryHint: true),
+            .panelHint
+        )
+    }
+
+    /// Nothing changes for a device that can dictate.
+    func testADeviceThatCanDictateKeepsTheUsualLadder() {
+        XCTAssertEqual(resolve(polishUnavailable: true), .polishUnavailable)
+        XCTAssertEqual(resolve(offersDiscoveryHint: true), .discoveryHint)
+        XCTAssertEqual(resolve(), .empty)
     }
 }

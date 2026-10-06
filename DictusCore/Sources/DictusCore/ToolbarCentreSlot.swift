@@ -1,5 +1,5 @@
 // DictusCore/Sources/DictusCore/ToolbarCentreSlot.swift
-// What the keyboard toolbar's centre slot shows, by priority (issues #79, #241, #266, #639).
+// What the keyboard toolbar's centre slot shows, by priority (issues #79, #241, #266, #635, #639).
 import Foundation
 
 /// The one occupant of the toolbar's centre slot.
@@ -27,6 +27,15 @@ import Foundation
 ///    only alternative to holding backspace on a two-minute dictation.
 /// 3. **Suggestions** — the keyboard's core job, and the reason the left slot yields
 ///    at all (`ToolbarView` needs the width for three legible slots).
+/// 3b. **Dictation unavailable** (#635) — a pre-A14 device, where the keyboard cannot
+///    dictate at all. It takes the idle bar's place for as long as the keyboard is
+///    open, because it explains the greyed mic beside it; it yields only to the
+///    suggestions, which are the keyboard's core job and the one thing that still
+///    works the same there. Every rung below it is about dictation (the polish
+///    notice, the armed mode, the Smart Mode hint) and would describe a feature this
+///    device does not have, so they never show. The one exception is the panel hint
+///    (#639): it teaches the menu, which still works, and it retires itself after
+///    the first long press, so it is allowed to win until then.
 /// 4. **Polish unavailable** (#315) — not in #79's table, which predates it. It sits
 ///    here rather than higher because it can last the whole process, and above the
 ///    suggestions it would suppress completions for that entire time. It sits above
@@ -64,6 +73,10 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// The autocorrect suggestion bar.
     case suggestions
 
+    /// "Dictation unavailable on this device" (#635): a pre-A14 chip, where the mic
+    /// beside it is disabled.
+    case dictationUnavailable
+
     /// The #315 notice: this process has stopped calling the polish engine.
     case polishUnavailable
 
@@ -95,9 +108,9 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     case empty
 
     // swiftlint:disable function_parameter_count
-    // Nine parameters because there are eight competitors and one of them needs a
-    // second fact to pick between its two shapes (#423). A table with eight rows
-    // needs eight inputs. Wrapping them in a struct would move the seven names
+    // Ten parameters because there are nine competitors and one of them needs a
+    // second fact to pick between its two shapes (#423). A table with nine rows
+    // needs nine inputs. Wrapping them in a struct would move the seven names
     // one line up and add a type whose only job is to be unpacked here; the
     // alternative that would genuinely reduce the count — resolving some of them in
     // here — is worse, because it would put UserDefaults and Apple Intelligence reads
@@ -114,12 +127,15 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     ///   safe-looking answer is the one that produced the bug.
     /// - Parameter offersDiscoveryHint: whether the hint is still worth showing —
     ///   the caller owns that policy, see `SmartModeDiscovery`.
+    /// - Parameter dictationUnavailable: whether this device cannot dictate from the
+    ///   keyboard — `DeviceCapabilities.supportsKeyboardDictation`, negated (#635).
     /// - Parameter offersPanelHint: whether the long press on ☰ is still worth
     ///   teaching (#639) — the caller owns that policy, see `MenuPanelDiscovery`.
     public static func resolve(isChoosingMode: Bool,
                                errorMessage: String?,
                                offersDictationUndo: Bool,
                                hasSuggestions: Bool,
+                               dictationUnavailable: Bool,
                                polishUnavailable: Bool,
                                armedModeName: String?,
                                armedModeIsEffective: Bool,
@@ -129,6 +145,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
         if let errorMessage { return .error(errorMessage) }
         if offersDictationUndo { return .dictationUndo }
         if hasSuggestions { return .suggestions }
+        if dictationUnavailable { return offersPanelHint ? .panelHint : .dictationUnavailable }
         if polishUnavailable { return .polishUnavailable }
         if let armedModeName {
             return armedModeIsEffective ? .armedMode(armedModeName) : .armedModeInactive(armedModeName)
@@ -150,7 +167,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     public var evictsHamburger: Bool {
         switch self {
         case .error, .dictationUndo, .suggestions: return true
-        case .choosingMode, .polishUnavailable, .armedMode, .armedModeInactive,
+        case .choosingMode, .dictationUnavailable, .polishUnavailable, .armedMode, .armedModeInactive,
              .panelHint, .discoveryHint, .empty:
             return false
         }

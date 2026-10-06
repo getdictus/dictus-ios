@@ -181,6 +181,7 @@ struct KeyboardRootView: View {
         ToolbarView(
             hasFullAccess: state.controller?.hasFullAccess ?? false,
             dictationStatus: state.dictationStatus,
+            supportsDictation: KeyboardState.deviceSupportsDictation,
             onMicTap: { state.startRecording() },
             statusMessage: state.statusMessage,
             messageProbeRootViewID: instanceID,
