@@ -9,7 +9,7 @@
   and the first three as they appear in search results.
 
   Reads export/<locale>/<iteration>/<theme>/. Re-export (npm run export), then reload.
-    ?locale=en-GB   (default)
+    ?locale=en-GB   (default; fr-FR has its own v15-B set)
     ?iteration=v8   design iteration (default v15-B, the approved set; v1 to v8 are earlier rounds)
     ?theme=navy     show one theme only (v1/v2: navy and light by default; v3: light only)
     v3 and v4 also show their alternate variants in galleries of their own.
@@ -82,7 +82,8 @@ if (iteration === "v8") {
 if (iteration === "v15-B") {
   // v15-B: the final hero (walking woman, voice becoming the background waveform) and slide 2
   // without the zoom; slides 3 to 7 are V6's. Approved by Pierre on 2026-10-06.
-  const rest = ["03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"].map((id) => `v6:${id}`);
+  // Another locale (fr-FR) renders all seven slides in v15-B itself.
+  const rest = ["03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"].map((id) => locale === "en-GB" ? `v6:${id}` : id);
   variants = [["main", ["01-hero", "02-dictate", ...rest]], ["nologos", ["01-hero-nologos", "02-dictate-nologos", ...rest]]];
 }
 for (const theme of themes) {

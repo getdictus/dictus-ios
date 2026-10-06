@@ -549,7 +549,7 @@ function addGreetings(list, i) {
    art/dictusHero.ts) and where its voice line ends, in its own pixels. */
 const ILLU = ART === "v8"
   ? { src: "art/v8/hero.png", w: 2640, h: 2000, panelIn: [1400, 1387] }   // V7 cast: art/v7/hero-${CAST}.png
-  : { src: ART === "v15-B" ? "art/v15-B/hero.png" : ART === "v14-B" ? "art/v14-B/hero.png" : ART === "v13-B" ? "art/v13-B/hero.png" : ART === "v12-B" ? `art/v12-B/hero-${S2}.png` : `art/${ART}/hero.png`, w: 2640, h: 2868, panelIn: [1396, 1838.5] };
+  : { src: S.heroArt?.[ART] ?? (ART === "v15-B" ? "art/v15-B/hero.png" : ART === "v14-B" ? "art/v14-B/hero.png" : ART === "v13-B" ? "art/v13-B/hero.png" : ART === "v12-B" ? `art/v12-B/hero-${S2}.png` : `art/${ART}/hero.png`), w: 2640, h: 2868, panelIn: [1396, 1838.5] };   // S.heroArt: a locale's own lettering (fr-FR)
 /* The waveform's centre in the recording capture (measured: blue bars from y 2052 to 2410). */
 const CAPTURE_WAVE_Y = 2231;
 /* The icon row along the very bottom of slides 1 and 2. */
@@ -853,6 +853,8 @@ window.CUT_TRIPLE = ART === "v14-B" || ART === "v15-B" ? { slides: [0, 1, 2], wi
    Slides 3 to 7 are V6's exported files. */
 window.EXPORT_SLIDES = [0, 1];
 window.REUSE_FROM = "v6";
+/* fr-FR (and any later locale) has no earlier iteration to reuse: every slide is rendered. */
+if (LOCALE !== "en-GB") window.EXPORT_SLIDES = null;
 window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg" };
 /* V10-B: each slide alone at search-result size, a gap between them, as the store shows them. */
 /* V13-B: one waveform made of apps. It rises out of slide 1's bottom edge, crosses the cut with
