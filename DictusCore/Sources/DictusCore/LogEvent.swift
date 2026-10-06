@@ -504,6 +504,23 @@ public enum LogEvent: Sendable {
     /// — Normal instead of the mode, and no notice — for a different cause.
     case smartModeSkipped(mode: String, reason: String, disarmed: Bool)
 
+    /// Issue #648: one Translate call, whatever became of it. Translate runs on Apple's
+    /// Translation framework and falls back to Apple FM, and this line is the only
+    /// place that says which, and why.
+    ///
+    /// Emitted on every Translate dictation and on no other. `outcome` is
+    /// `translated` (the framework's output was used) or `fallback` (Apple FM ran
+    /// instead, for `reason`: `noSourceLanguage`, `sameLanguage`, `osBelow26.4`,
+    /// `notInstalled`, `deadline8s` or `error:<cause>`). `status` is
+    /// `LanguageAvailability`'s verdict for the pair under the strategy, read before
+    /// the call, `-` when the call stopped before reading it. `process` is `KBD` or `APP`, `appState` the
+    /// caller's state (`extension` in the keyboard, which has no application state).
+    /// Memory is the process's resident footprint in MB, before / peak while the
+    /// framework ran / after. Codes, timings and counters only: no text.
+    case translateEngineCall(strategy: String, status: String, source: String, target: String,
+                             outcome: String, reason: String, ms: Int, process: String,
+                             appState: String, memBeforeMB: Int, memPeakMB: Int, memAfterMB: Int)
+
     // MARK: - Computed Properties
 
     /// The subsystem this event belongs to, derived from the case.
@@ -572,7 +589,8 @@ public enum LogEvent: Sendable {
         case .polishEngineFailed, .polishEngineUnavailable, .polishHandoff,
              .polishInputLanguageRefused,
              .polishInsertionRefused, .polishCallSuperseded,
-             .smartModeRefused, .smartModeSkipped, .vocabularyApplied:
+             .smartModeRefused, .smartModeSkipped, .vocabularyApplied,
+             .translateEngineCall:
             return .transcription
         }
     }
@@ -690,133 +708,11 @@ public enum LogEvent: Sendable {
         // a capture for "why did nothing happen" needs to see.
         case .smartModeRefused, .smartModeSkipped:
             return .warning
-        }
-    }
 
-    /// Event name as it appears in the log line (matches the enum case name).
-    public var name: String {
-        switch self {
-        case .dictationStarted: return "dictationStarted"
-        case .dictationCompleted: return "dictationCompleted"
-        case .dictationFailed: return "dictationFailed"
-        case .dictationDeferred: return "dictationDeferred"
-        case .dictationStateReconciled: return "dictationStateReconciled"
-        case .audioEngineStarted: return "audioEngineStarted"
-        case .audioEngineStopped: return "audioEngineStopped"
-        case .audioSessionConfigured: return "audioSessionConfigured"
-        case .audioSessionFailed: return "audioSessionFailed"
-        case .audioInterruptionBegan: return "audioInterruptionBegan"
-        case .audioInterruptionEnded: return "audioInterruptionEnded"
-        case .audioRouteChanged: return "audioRouteChanged"
-        case .audioMediaServicesReset: return "audioMediaServicesReset"
-        case .warmStateReleased: return "warmStateReleased"
-        case .warmStateRestored: return "warmStateRestored"
-        case .audioHapticsAllowance: return "audioHapticsAllowance"
-        case .audioHapticsAllowanceFailed: return "audioHapticsAllowanceFailed"
-        case .transcriptionStarted: return "transcriptionStarted"
-        case .transcriptionCompleted: return "transcriptionCompleted"
-        case .transcriptionFailed: return "transcriptionFailed"
-        case .recordingTooShort: return "recordingTooShort"
-        case .modelDownloadStarted: return "modelDownloadStarted"
-        case .modelDownloadCompleted: return "modelDownloadCompleted"
-        case .modelDownloadFailed: return "modelDownloadFailed"
-        case .modelSelected: return "modelSelected"
-        case .modelCompilationStarted: return "modelCompilationStarted"
-        case .modelCompilationCompleted: return "modelCompilationCompleted"
-        case .modelDeleted: return "modelDeleted"
-        case .modelDeleteFailed: return "modelDeleteFailed"
-        case .modelPrewarmStarted: return "modelPrewarmStarted"
-        case .modelCleanupPerformed: return "modelCleanupPerformed"
-        case .modelReconciledFromDisk: return "modelReconciledFromDisk"
-        case .keyboardDidAppear: return "keyboardDidAppear"
-        case .keyboardDidDisappear: return "keyboardDidDisappear"
-        case .keyboardMicTapped: return "keyboardMicTapped"
-        case .hostReturn: return "hostReturn"
-        case .dictationMessageSet: return "dictationMessageSet"
-        case .dictationMessageDisplayed: return "dictationMessageDisplayed"
-        case .dictationMessageCleared: return "dictationMessageCleared"
-        case .keyboardTextInserted: return "keyboardTextInserted"
-        case .keyRepeatStarted: return "keyRepeatStarted"
-        case .keyRepeatStopped: return "keyRepeatStopped"
-        case .engineWarmUpAttempt: return "engineWarmUpAttempt"
-        case .engineWarmUpSuccess: return "engineWarmUpSuccess"
-        case .engineWarmUpFailed: return "engineWarmUpFailed"
-        case .engineStateSnapshot: return "engineStateSnapshot"
-        case .engineCollectResult: return "engineCollectResult"
-        case .engineDarwinStartReceived: return "engineDarwinStartReceived"
-        case .onboardingScenePhaseChanged: return "onboardingScenePhaseChanged"
-        case .onboardingKeyboardCheckStarted: return "onboardingKeyboardCheckStarted"
-        case .onboardingKeyboardDetected: return "onboardingKeyboardDetected"
-        case .onboardingKeyboardNotFound: return "onboardingKeyboardNotFound"
-        case .onboardingKeyboardCheckSkipped: return "onboardingKeyboardCheckSkipped"
-        case .onboardingKeyboardRetry: return "onboardingKeyboardRetry"
-        case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
-        case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
-        case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
-        case .liveActivityStarted: return "liveActivityStarted"
-        case .liveActivityTransition: return "liveActivityTransition"
-        case .liveActivityFailed: return "liveActivityFailed"
-        case .liveActivityEnded: return "liveActivityEnded"
-        case .liveActivityStandbySkipped: return "liveActivityStandbySkipped"
-        case .appLaunched: return "appLaunched"
-        case .appDidBecomeActive: return "appDidBecomeActive"
-        case .appWillResignActive: return "appWillResignActive"
-        case .appDidEnterBackground: return "appDidEnterBackground"
-        case .appWhisperKitLoaded: return "appWhisperKitLoaded"
-        case .overlayShown: return "overlayShown"
-        case .overlayHidden: return "overlayHidden"
-        case .statusChanged: return "statusChanged"
-        case .watchdogReset: return "watchdogReset"
-        case .idleInvariantViolation: return "idleInvariantViolation"
-        case .rapidTapRejected: return "rapidTapRejected"
-        case .waveformAppeared: return "waveformAppeared"
-        case .waveformDisappeared: return "waveformDisappeared"
-        case .waveformHeartbeat: return "waveformHeartbeat"
-        case .waveformStall: return "waveformStall"
-        case .waveformRefreshIDChanged: return "waveformRefreshIDChanged"
-        case .waveformEnergyTransition: return "waveformEnergyTransition"
-        case .waveformTimelineNotFiring: return "waveformTimelineNotFiring"
-        case .diagnosticProbe: return "diagnosticProbe"
-        case .overlayBodyEvaluated: return "overlayBodyEvaluated"
-        case .overlayTimerStarted: return "overlayTimerStarted"
-        case .overlayTimerStopped: return "overlayTimerStopped"
-        case .overlayRecreated: return "overlayRecreated"
-        case .coldStartURLReceived: return "coldStartURLReceived"
-        case .coldStartFlagSet: return "coldStartFlagSet"
-        case .coldStartRetry: return "coldStartRetry"
-        case .coldStartDarwinFallback: return "coldStartDarwinFallback"
-        case .coldStartStranded: return "coldStartStranded"
-        case .subscriptionError: return "subscriptionError"
-        case .logExportCompleted: return "logExportCompleted"
-        case .transcriptionPerformance: return "transcriptionPerformance"
-        case .modelPrewarmPeakMemory: return "modelPrewarmPeakMemory"
-        case .modelPrewarmTimeout: return "modelPrewarmTimeout"
-        case .deviceCapabilitySnapshot: return "deviceCapabilitySnapshot"
-        case .modelLoadStateChanged: return "modelLoadStateChanged"
-        case .modelDownloadProgress: return "modelDownloadProgress"
-        case .modelDownloadStalled: return "modelDownloadStalled"
-        case .modelDownloadSizeMismatch: return "modelDownloadSizeMismatch"
-        case .modelDownloadResumed: return "modelDownloadResumed"
-        case .modelDownloadRangeRejected: return "modelDownloadRangeRejected"
-        case .modelDownloadChunk: return "modelDownloadChunk"
-        case .modelDownloadIntegrityFailed: return "modelDownloadIntegrityFailed"
-        case .modelDownloadSessionRestored: return "modelDownloadSessionRestored"
-        case .modelDownloadOffline: return "modelDownloadOffline"
-        case .polishEngineFailed: return "polishEngineFailed"
-        case .vocabularyApplied: return "vocabularyApplied"
-        case .polishEngineUnavailable: return "polishEngineUnavailable"
-        case .polishInputLanguageRefused: return "polishInputLanguageRefused"
-        case .polishHandoff: return "polishHandoff"
-        case .polishInsertionRefused: return "polishInsertionRefused"
-        case .polishCallSuperseded: return "polishCallSuperseded"
-        case .smartModeRefused: return "smartModeRefused"
-        case .smartModeSkipped: return "smartModeSkipped"
-        case .userDictionaryWordLearned: return "userDictionaryWordLearned"
-        case .userDictionaryEvicted: return "userDictionaryEvicted"
-        case .userDictionaryReset: return "userDictionaryReset"
-        case .userDictionaryMigrated: return "userDictionaryMigrated"
-        case .userDictionaryStaleDiscarded: return "userDictionaryStaleDiscarded"
-        case .userDictionaryPruned: return "userDictionaryPruned"
+        // Notice: a Translate report is triaged from these lines after the keyboard
+        // process is gone, and `notice` is the lowest level the unified log persists.
+        case .translateEngineCall:
+            return .notice
         }
     }
 
@@ -1092,6 +988,12 @@ public enum LogEvent: Sendable {
             return "mode=\(mode) outcome=\(outcome) reason=\(reason) check=\(check)"
         case .smartModeSkipped(let mode, let reason, let disarmed):
             return "mode=\(mode) reason=\(reason) disarmed=\(disarmed)"
+        case .translateEngineCall(let strategy, let status, let source, let target, let outcome,
+                                  let reason, let ms, let process, let appState,
+                                  let memBeforeMB, let memPeakMB, let memAfterMB):
+            return "engine=translation strategy=\(strategy) status=\(status) source=\(source) "
+                + "target=\(target) outcome=\(outcome) reason=\(reason) ms=\(ms) process=\(process) "
+                + "appState=\(appState) memMB=\(memBeforeMB)/\(memPeakMB)/\(memAfterMB)"
         case .polishEngineUnavailable(let engine, let reason, let consecutiveRefusals):
             return "engine=\(engine) reason=\(reason) consecutiveRefusals=\(consecutiveRefusals)"
         case .polishInputLanguageRefused(let engine, let mode, let detected, let mix):
@@ -1136,5 +1038,138 @@ public enum LogEvent: Sendable {
     /// rather than at the moment of the write — the write is queued.
     static func timestamp(for date: Date = Date()) -> String {
         isoFormatter.string(from: date)
+    }
+}
+
+// The case-name table lives in an extension, not the enum body, for the reason the
+// keyboard's large types do it: the body is at SwiftLint's `type_body_length` budget
+// (650), and #648's `translateEngineCall` put it over. Same file, same table.
+extension LogEvent {
+    /// Event name as it appears in the log line (matches the enum case name).
+    public var name: String {
+        switch self {
+        case .dictationStarted: return "dictationStarted"
+        case .dictationCompleted: return "dictationCompleted"
+        case .dictationFailed: return "dictationFailed"
+        case .dictationDeferred: return "dictationDeferred"
+        case .dictationStateReconciled: return "dictationStateReconciled"
+        case .audioEngineStarted: return "audioEngineStarted"
+        case .audioEngineStopped: return "audioEngineStopped"
+        case .audioSessionConfigured: return "audioSessionConfigured"
+        case .audioSessionFailed: return "audioSessionFailed"
+        case .audioInterruptionBegan: return "audioInterruptionBegan"
+        case .audioInterruptionEnded: return "audioInterruptionEnded"
+        case .audioRouteChanged: return "audioRouteChanged"
+        case .audioMediaServicesReset: return "audioMediaServicesReset"
+        case .warmStateReleased: return "warmStateReleased"
+        case .warmStateRestored: return "warmStateRestored"
+        case .audioHapticsAllowance: return "audioHapticsAllowance"
+        case .audioHapticsAllowanceFailed: return "audioHapticsAllowanceFailed"
+        case .transcriptionStarted: return "transcriptionStarted"
+        case .transcriptionCompleted: return "transcriptionCompleted"
+        case .transcriptionFailed: return "transcriptionFailed"
+        case .recordingTooShort: return "recordingTooShort"
+        case .modelDownloadStarted: return "modelDownloadStarted"
+        case .modelDownloadCompleted: return "modelDownloadCompleted"
+        case .modelDownloadFailed: return "modelDownloadFailed"
+        case .modelSelected: return "modelSelected"
+        case .modelCompilationStarted: return "modelCompilationStarted"
+        case .modelCompilationCompleted: return "modelCompilationCompleted"
+        case .modelDeleted: return "modelDeleted"
+        case .modelDeleteFailed: return "modelDeleteFailed"
+        case .modelPrewarmStarted: return "modelPrewarmStarted"
+        case .modelCleanupPerformed: return "modelCleanupPerformed"
+        case .modelReconciledFromDisk: return "modelReconciledFromDisk"
+        case .keyboardDidAppear: return "keyboardDidAppear"
+        case .keyboardDidDisappear: return "keyboardDidDisappear"
+        case .keyboardMicTapped: return "keyboardMicTapped"
+        case .hostReturn: return "hostReturn"
+        case .dictationMessageSet: return "dictationMessageSet"
+        case .dictationMessageDisplayed: return "dictationMessageDisplayed"
+        case .dictationMessageCleared: return "dictationMessageCleared"
+        case .keyboardTextInserted: return "keyboardTextInserted"
+        case .keyRepeatStarted: return "keyRepeatStarted"
+        case .keyRepeatStopped: return "keyRepeatStopped"
+        case .engineWarmUpAttempt: return "engineWarmUpAttempt"
+        case .engineWarmUpSuccess: return "engineWarmUpSuccess"
+        case .engineWarmUpFailed: return "engineWarmUpFailed"
+        case .engineStateSnapshot: return "engineStateSnapshot"
+        case .engineCollectResult: return "engineCollectResult"
+        case .engineDarwinStartReceived: return "engineDarwinStartReceived"
+        case .onboardingScenePhaseChanged: return "onboardingScenePhaseChanged"
+        case .onboardingKeyboardCheckStarted: return "onboardingKeyboardCheckStarted"
+        case .onboardingKeyboardDetected: return "onboardingKeyboardDetected"
+        case .onboardingKeyboardNotFound: return "onboardingKeyboardNotFound"
+        case .onboardingKeyboardCheckSkipped: return "onboardingKeyboardCheckSkipped"
+        case .onboardingKeyboardRetry: return "onboardingKeyboardRetry"
+        case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
+        case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
+        case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
+        case .liveActivityStarted: return "liveActivityStarted"
+        case .liveActivityTransition: return "liveActivityTransition"
+        case .liveActivityFailed: return "liveActivityFailed"
+        case .liveActivityEnded: return "liveActivityEnded"
+        case .liveActivityStandbySkipped: return "liveActivityStandbySkipped"
+        case .appLaunched: return "appLaunched"
+        case .appDidBecomeActive: return "appDidBecomeActive"
+        case .appWillResignActive: return "appWillResignActive"
+        case .appDidEnterBackground: return "appDidEnterBackground"
+        case .appWhisperKitLoaded: return "appWhisperKitLoaded"
+        case .overlayShown: return "overlayShown"
+        case .overlayHidden: return "overlayHidden"
+        case .statusChanged: return "statusChanged"
+        case .watchdogReset: return "watchdogReset"
+        case .idleInvariantViolation: return "idleInvariantViolation"
+        case .rapidTapRejected: return "rapidTapRejected"
+        case .waveformAppeared: return "waveformAppeared"
+        case .waveformDisappeared: return "waveformDisappeared"
+        case .waveformHeartbeat: return "waveformHeartbeat"
+        case .waveformStall: return "waveformStall"
+        case .waveformRefreshIDChanged: return "waveformRefreshIDChanged"
+        case .waveformEnergyTransition: return "waveformEnergyTransition"
+        case .waveformTimelineNotFiring: return "waveformTimelineNotFiring"
+        case .diagnosticProbe: return "diagnosticProbe"
+        case .overlayBodyEvaluated: return "overlayBodyEvaluated"
+        case .overlayTimerStarted: return "overlayTimerStarted"
+        case .overlayTimerStopped: return "overlayTimerStopped"
+        case .overlayRecreated: return "overlayRecreated"
+        case .coldStartURLReceived: return "coldStartURLReceived"
+        case .coldStartFlagSet: return "coldStartFlagSet"
+        case .coldStartRetry: return "coldStartRetry"
+        case .coldStartDarwinFallback: return "coldStartDarwinFallback"
+        case .coldStartStranded: return "coldStartStranded"
+        case .subscriptionError: return "subscriptionError"
+        case .logExportCompleted: return "logExportCompleted"
+        case .transcriptionPerformance: return "transcriptionPerformance"
+        case .modelPrewarmPeakMemory: return "modelPrewarmPeakMemory"
+        case .modelPrewarmTimeout: return "modelPrewarmTimeout"
+        case .deviceCapabilitySnapshot: return "deviceCapabilitySnapshot"
+        case .modelLoadStateChanged: return "modelLoadStateChanged"
+        case .modelDownloadProgress: return "modelDownloadProgress"
+        case .modelDownloadStalled: return "modelDownloadStalled"
+        case .modelDownloadSizeMismatch: return "modelDownloadSizeMismatch"
+        case .modelDownloadResumed: return "modelDownloadResumed"
+        case .modelDownloadRangeRejected: return "modelDownloadRangeRejected"
+        case .modelDownloadChunk: return "modelDownloadChunk"
+        case .modelDownloadIntegrityFailed: return "modelDownloadIntegrityFailed"
+        case .modelDownloadSessionRestored: return "modelDownloadSessionRestored"
+        case .modelDownloadOffline: return "modelDownloadOffline"
+        case .polishEngineFailed: return "polishEngineFailed"
+        case .vocabularyApplied: return "vocabularyApplied"
+        case .polishEngineUnavailable: return "polishEngineUnavailable"
+        case .polishInputLanguageRefused: return "polishInputLanguageRefused"
+        case .polishHandoff: return "polishHandoff"
+        case .polishInsertionRefused: return "polishInsertionRefused"
+        case .polishCallSuperseded: return "polishCallSuperseded"
+        case .smartModeRefused: return "smartModeRefused"
+        case .smartModeSkipped: return "smartModeSkipped"
+        case .translateEngineCall: return "translateEngineCall"
+        case .userDictionaryWordLearned: return "userDictionaryWordLearned"
+        case .userDictionaryEvicted: return "userDictionaryEvicted"
+        case .userDictionaryReset: return "userDictionaryReset"
+        case .userDictionaryMigrated: return "userDictionaryMigrated"
+        case .userDictionaryStaleDiscarded: return "userDictionaryStaleDiscarded"
+        case .userDictionaryPruned: return "userDictionaryPruned"
+        }
     }
 }

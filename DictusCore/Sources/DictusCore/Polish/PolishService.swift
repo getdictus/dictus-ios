@@ -70,13 +70,21 @@ public final class PolishService {
     private var fixedEngine: PolishEngineProtocol?
     private var now: () -> Date = Date.init
 
-    public init(sink: PolishEventSink, onBecameUnavailable: (() -> Void)? = nil) {
+    /// `appState` names the caller's application state in the `translateEngineCall` log
+    /// line (#648); the keyboard extension, which has none, keeps the default.
+    public init(sink: PolishEventSink,
+                onBecameUnavailable: (() -> Void)? = nil,
+                appState: @escaping @Sendable () async -> String = { "extension" }) {
         self.defaults = AppGroup.defaults
         self.sink = sink
         self.onBecameUnavailable = onBecameUnavailable
         #if canImport(FoundationModels)
         if #available(iOS 26.0, macOS 26.0, *) {
-            self.appleFMEngine = AppleFoundationModelsPolishEngine()
+            // Translate runs on Apple's Translation framework, with this Apple FM engine
+            // as its fallback; every other task goes straight through (#648).
+            self.appleFMEngine = TranslateRoutingPolishEngine(
+                wrapping: AppleFoundationModelsPolishEngine(), appState: appState
+            )
         } else {
             self.appleFMEngine = nil
         }
@@ -638,7 +646,9 @@ public final class PolishService {
         let returned = list.returned
 
         let m = PolishMetrics(
-            engine: currentEngine.identifier,
+            // The engine that wrote the output, not the one called (#648): Translate
+            // runs on the Translation framework and falls back to Apple FM.
+            engine: bundle.producedBy ?? currentEngine.identifier,
             mode: job.task.identifier,
             targetLanguage: target,
             detectedLanguage: request.detectedCode,
@@ -773,7 +783,7 @@ public final class PolishService {
         let m = autoEventMetrics(
             outcome: list.decline == nil ? bundle.outcome : .smartModeSkippedShortInput,
             request: request, finalCount: returned?.count ?? 0,
-            engineID: currentEngine.identifier,
+            engineID: bundle.producedBy ?? currentEngine.identifier,
             mode: job.task.identifier, detectedLanguage: request.detectedCode,
             latencyMs: totalMs,
             timings: PolishTimings(
