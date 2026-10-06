@@ -2,7 +2,7 @@
 
 Draft for issue #643, the French wave of the approved English set (`export/fr-FR/v15-B/`, slides in the same order). It mirrors `listing/en-GB.md`; the claims and their sources are the same, re-read below. **Nothing here is in App Store Connect.**
 
-Register: **tu**, decided by Pierre on 2026-10-06 (the keyboard already says "tu"; DictusApp follows in #662). French typography: a non-breaking space (U+00A0) before `: ; ! ?` and inside « », typographic apostrophes, no em dashes.
+Register: **vous** (Pierre, 2026-10-06, final): DictusApp already says it, and so does Apple's French copy. The keyboard's own strings still say "tu" until #662. French typography: a non-breaking space (U+00A0) before `: ; ! ?` and inside « », typographic apostrophes, no em dashes.
 
 Limits checked with `python3` (characters; keywords counted in UTF-8 bytes, where an accented letter weighs 2): see the table at the end.
 
@@ -22,7 +22,7 @@ The English subtitle, `Private dictation, voice notes`, for the same reasons: it
 
 For launch week:
 
-> Nouveau dans la 2.0 : Dictus Pro. Traduis en parlant et lis les vocaux de tes discussions dans ton clavier. Gratuit 14 jours sur les iPhone avec Apple Intelligence.
+> Nouveau dans la 2.0 : Dictus Pro. Traduisez en parlant et lisez les vocaux de vos discussions dans votre clavier. Gratuit 14 jours sur les iPhone avec Apple Intelligence.
 
 "Sur les iPhone avec Apple Intelligence" is load-bearing, as in English: the trial never starts on a device that cannot run Smart Modes (#593 decision 2).
 
@@ -43,46 +43,46 @@ For launch week:
 Follows the seven V15-B slides, in order and with their headlines.
 
 ```
-Parle au lieu de taper. Dictus est un clavier qui écrit ce que tu dis : touche le micro, parle, et tes mots s’affichent dans n’importe quelle app. La reconnaissance vocale tourne sur ton iPhone, même sans connexion.
+Parlez au lieu de taper. Dictus est un clavier qui écrit ce que vous dites : touchez le micro, parlez, et vos mots s’affichent dans n’importe quelle app. La reconnaissance vocale tourne sur votre iPhone, même sans connexion.
 
-DICTE DANS TOUTES TES APPS
+DICTEZ DANS TOUTES VOS APPS
 
-Messages, e-mails, notes, rappels : partout où tu peux écrire, Dictus est à portée de doigt. Parle naturellement, et le texte arrive là où se trouve ton curseur.
+Messages, e-mails, notes, rappels : partout où vous pouvez écrire, Dictus est à portée de doigt. Parlez naturellement, et le texte arrive là où se trouve votre curseur.
 
-TRADUIS EN PARLANT (PRO)
+TRADUISEZ EN PARLANT (PRO)
 
-Les modes intelligents transforment ta dictée en texte prêt à envoyer, avant même qu’il soit tapé. Maintiens le micro, choisis un mode, et parle :
+Les modes intelligents transforment votre dictée en texte prêt à envoyer, avant même qu’il soit tapé. Maintenez le micro, choisissez un mode, et parlez :
 - Traduction : vers le français, l’anglais, l’allemand ou l’espagnol
-- Message : le message court que tu aurais tapé
-- Liste : tes idées sous forme de puces
+- Message : le message court que vous auriez tapé
+- Liste : vos idées sous forme de puces
 - Structuré : une longue dictée en paragraphes clairs
-- Résumé : l’essentiel de ce que tu as dit
+- Résumé : l’essentiel de ce que vous avez dit
 
-Les modes intelligents tournent sur ton iPhone avec Apple Intelligence (iPhone 15 Pro ou plus récent, iOS 26 ou plus récent). Tes mots ne partent vers aucun serveur.
+Les modes intelligents tournent sur votre iPhone avec Apple Intelligence (iPhone 15 Pro ou plus récent, iOS 26 ou plus récent). Vos mots ne partent vers aucun serveur.
 
-LIS TES VOCAUX DANS LE CLAVIER (PRO)
+LISEZ VOS VOCAUX DANS LE CLAVIER (PRO)
 
-Un message vocal que tu ne peux pas écouter tout de suite ? Partage-le vers Dictus depuis ton app de messagerie. Il est transcrit sur ton iPhone, et la transcription t’attend dans le clavier quand tu reviens dans la conversation. Lis-la, puis insère-la d’un geste si tu veux la citer.
+Un message vocal que vous ne pouvez pas écouter tout de suite ? Partagez-le vers Dictus depuis votre app de messagerie. Il est transcrit sur votre iPhone, et la transcription vous attend dans le clavier quand vous revenez dans la conversation. Lisez-la, puis insérez-la d’un geste si vous voulez la citer.
 
-UN VRAI CLAVIER DANS TA LANGUE
+UN VRAI CLAVIER DANS VOTRE LANGUE
 
-Dictus est un clavier complet, pas seulement un bouton micro. Dispositions AZERTY, QWERTY et QWERTZ, avec correction automatique et suggestions en français, en anglais, en allemand et en espagnol. Tape quand tu veux, parle quand tu préfères.
+Dictus est un clavier complet, pas seulement un bouton micro. Dispositions AZERTY, QWERTY et QWERTZ, avec correction automatique et suggestions en français, en anglais, en allemand et en espagnol. Tapez quand vous voulez, parlez quand vous préférez.
 
-TA VOIX RESTE SUR TON IPHONE
+VOTRE VOIX RESTE SUR VOTRE IPHONE
 
-La reconnaissance vocale se fait sur l’appareil. Pas de compte, pas de pistage, pas de statistiques d’usage. Dicte en avion, dans le métro, partout. Les modèles sont sur ton iPhone : télécharges-en un une fois, puis utilise-le hors ligne, du plus compact et rapide au plus précis.
+La reconnaissance vocale se fait sur l’appareil. Pas de compte, pas de pistage, pas de statistiques d’usage. Dictez en avion, dans le métro, partout. Les modèles sont sur votre iPhone : téléchargez-en un une fois, puis utilisez-le hors ligne, du plus compact et rapide au plus précis.
 
 Dictus est open source (licence MIT). Chacun peut lire le code et vérifier ces engagements de confidentialité : github.com/getdictus/dictus-ios
 
-DICTE DANS PLUS DE 40 LANGUES
+DICTEZ DANS PLUS DE 40 LANGUES
 
-La dictée fonctionne dans plus de 40 langues avec une qualité bonne ou correcte, et dans près de 100 avec les modèles Whisper, où la qualité varie selon la langue. Parakeet, le modèle par défaut, transcrit 25 langues européennes et reconnaît celle que tu parles. Chaque modèle indique les langues qu’il gère bien avant que tu le télécharges.
+La dictée fonctionne dans plus de 40 langues avec une qualité bonne ou correcte, et dans près de 100 avec les modèles Whisper, où la qualité varie selon la langue. Parakeet, le modèle par défaut, transcrit 25 langues européennes et reconnaît celle que vous parlez. Chaque modèle indique les langues qu’il gère bien avant que vous le téléchargiez.
 
 DICTUS PRO
 
-Pro ajoute les modes intelligents, les messages vocaux dans le clavier, l’historique de tes dictées et ton propre vocabulaire pour les noms et les termes techniques.
+Pro ajoute les modes intelligents, les messages vocaux dans le clavier, l’historique de vos dictées et votre propre vocabulaire pour les noms et les termes techniques.
 
-Essaie Pro gratuitement pendant 14 jours. Il n’y a rien à souscrire et rien ne se renouvelle : à la fin des 14 jours, Dictus repasse en version gratuite et te demande si tu veux garder Pro. Ton historique et ton vocabulaire sont conservés. L’essai est proposé sur les iPhone capables de faire tourner les modes intelligents. La dictée et le clavier restent gratuits.
+Essayez Pro gratuitement pendant 14 jours. Il n’y a rien à souscrire et rien ne se renouvelle : à la fin des 14 jours, Dictus repasse en version gratuite et vous demande si vous voulez garder Pro. Votre historique et votre vocabulaire sont conservés. L’essai est proposé sur les iPhone capables de faire tourner les modes intelligents. La dictée et le clavier restent gratuits.
 
 Dictus ne collecte aucune donnée. Politique de confidentialité : getdictus.com/privacy
 ```
@@ -110,6 +110,6 @@ Measured with `python3` on this file's fenced and quoted texts (`len()` for char
 |---|---|---|
 | Name | 30 | 25 |
 | Subtitle | 30 | 30 |
-| Promotional text | 170 | 164 |
+| Promotional text | 170 | 170 |
 | Keywords (bytes) | 100 | 100 |
-| Description | 4000 | 3066 |
+| Description | 4000 | 3162 |
