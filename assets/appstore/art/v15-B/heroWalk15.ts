@@ -163,6 +163,13 @@ const GLYPHS: Record<string, { w: number; s: P[][] }> = {
   I: { w: 0.08, s: [[[0.04, 1], [0.04, 0]]] },
   P: { w: 0.54, s: [[[0, 0], [0, 1], [0.32, 1], [0.49, 0.92], [0.54, 0.77], [0.49, 0.62], [0.32, 0.54], [0, 0.54]]] },
   U: { w: 0.6, s: [[[0, 1], [0, 0.32], [0.05, 0.11], [0.16, 0.01], [0.3, -0.01], [0.44, 0.01], [0.55, 0.11], [0.6, 0.32], [0.6, 1]]] },
+  // de-DE ("DANKE FÜR DIE NOTIZEN...") and es-ES ("GRACIAS POR LAS NOTAS..."): D, Ü, Z, G, L
+  D: { w: 0.6, s: [[[0, 0], [0, 1], [0.26, 1], [0.46, 0.92], [0.58, 0.72], [0.6, 0.5], [0.58, 0.28], [0.46, 0.08], [0.26, 0], [0, 0]]] },
+  Ü: { w: 0.6, s: [[[0, 0.86], [0, 0.32], [0.05, 0.11], [0.16, 0.01], [0.3, -0.01], [0.44, 0.01], [0.55, 0.11], [0.6, 0.32], [0.6, 0.86]],
+    [[0.15, 1.08], [0.18, 1.04], [0.21, 1.08], [0.18, 1.12], [0.15, 1.08]], [[0.39, 1.08], [0.42, 1.04], [0.45, 1.08], [0.42, 1.12], [0.39, 1.08]]] },
+  Z: { w: 0.56, s: [[[0, 1], [0.56, 1], [0, 0], [0.56, 0]]] },
+  G: { w: 0.66, s: [[...Array.from({ length: 10 }, (_, i) => { const a = Math.PI * (0.24 + (i / 9) * 1.58); return [0.34 + Math.cos(a) * 0.34, 0.5 + Math.sin(a) * 0.5] as P; }), [0.66, 0.44], [0.4, 0.44]]] },
+  L: { w: 0.48, s: [[[0, 1], [0, 0], [0.48, 0]]] },
 };
 const SPACE = 0.42, TRACK = 0.17;
 const textWidth = (t: string) => [...t].reduce((a, ch, i) => a + (ch === " " ? SPACE : GLYPHS[ch].w + (i < t.length - 1 ? TRACK : 0)), 0);
@@ -299,6 +306,8 @@ const voiceFor = (end: P) => pathOf([[MOUTH[0] + 14, MOUTH[1] - 16], [630, 950],
 // Her words, per locale: they are the first words of slide 2's email (strings/<locale>.js).
 const TEXT = "THANKS FOR THE NOTES...", CAP = 44, TEXT_AT = 76;
 export const TEXT_FR_FR = "MERCI POUR TES NOTES...";
+export const TEXT_DE_DE = "DANKE FÜR DIE NOTIZEN...";
+export const TEXT_ES_ES = "GRACIAS POR LAS NOTAS...";
 const spread = (s: number) => { const t = Math.min(1, s / 700), e = t * t * (3 - 2 * t); return 4 + 16 * e; };
 
 // ---------------------------------------------------------------- the head (V7 "woman, curves", V7 coordinates)
@@ -466,4 +475,14 @@ export const heroWalk15: Film = {
 export const heroWalk15FrFR: Film = {
   meta: { title: "Dictus hero V15-B · hands full, round 7, fr-FR", W, H, fps: 30, bpm: 120, durationFrames: 1 }, assets: { images: {} },
   shots: [{ id: "heroWalk15FrFR", start: 0, end: 1, draw: drawFor(PANEL_IN, TEXT_FR_FR) }],
+};
+
+// de-DE and es-ES, built the same way (film files heroWalk15DeDE.ts / heroWalk15EsES.ts re-exporting these).
+export const heroWalk15DeDE: Film = {
+  meta: { title: "Dictus hero V15-B · hands full, round 7, de-DE", W, H, fps: 30, bpm: 120, durationFrames: 1 }, assets: { images: {} },
+  shots: [{ id: "heroWalk15DeDE", start: 0, end: 1, draw: drawFor(PANEL_IN, TEXT_DE_DE) }],
+};
+export const heroWalk15EsES: Film = {
+  meta: { title: "Dictus hero V15-B · hands full, round 7, es-ES", W, H, fps: 30, bpm: 120, durationFrames: 1 }, assets: { images: {} },
+  shots: [{ id: "heroWalk15EsES", start: 0, end: 1, draw: drawFor(PANEL_IN, TEXT_ES_ES) }],
 };
