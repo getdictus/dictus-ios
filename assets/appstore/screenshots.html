@@ -225,6 +225,12 @@
   .hero-brand { position: absolute; top: 150px; z-index: 6; display: flex; align-items: center; gap: 26px; }
   .hero-brand .bars { width: 92px; height: 92px; }
   .hero-brand span { font: 200 104px/1 "DM Sans", sans-serif; letter-spacing: -0.04em; color: #0A1628; }
+  /* V15-B: the app's Home header, Text("Dictus").font(.dictusHeading).foregroundColor(.dictusAccent),
+     dictusHeading = .system(.title, design: .rounded, weight: .bold). Headless Chromium has no
+     ui-rounded, so SF Pro Rounded is loaded from the macOS system file (never copied, never
+     committed); the page reports the font missing if it fails, and the export stops. */
+  @font-face { font-family: "Dictus Rounded"; src: url("file:///System/Library/Fonts/SFNSRounded.ttf"); font-weight: 1 1000; }
+  .hero-brand.rounded span { font: 700 100px/1 "Dictus Rounded"; letter-spacing: 0; color: #3D7EFF; }
   .hero-headline {
     position: absolute; top: 330px; z-index: 6; width: 1110px;
     font: 400 168px/0.98 "DM Sans", sans-serif; letter-spacing: -0.045em; color: #0A1628; text-wrap: balance;
@@ -288,9 +294,13 @@ window.ITERATION_CAST = false;
    phone is flat again, without the zoomed card; the voice's strokes turn into BrandWaveform bars
    between the cut and the phone (art/v14-B/heroWalk14.ts), and the strip's band carries on from
    there, behind the phone, into slides 3 to 7. The ribbon holds 20 apps on one regular wave. */
-const ART = params.get("art") || "v14-B";
+/* V15-B (round 7, default): the strokes stop at slide 1's right edge and slide 2's band grows
+   from small blue bars at its left edge; an airier ribbon from slide 1's left edge to slide 2's
+   right edge, icons squarely on the curve; the wordmark is the app's: "Dictus", SF Pro Rounded
+   Bold, accent blue (art/v15-B/heroWalk15.ts). */
+const ART = params.get("art") || "v15-B";
 const S2 = params.get("s2") || "turned";
-const STRIP_ART = ["v9-B", "v10-B", "v11-B", "v12-B", "v13-B", "v14-B"].includes(ART);   // canvases drawn at strip scale, placed at (0, 0)
+const STRIP_ART = ["v9-B", "v10-B", "v11-B", "v12-B", "v13-B", "v14-B", "v15-B"].includes(ART);   // canvases drawn at strip scale, placed at (0, 0)
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -350,7 +360,7 @@ const SLIDES = [
     // ribbon run below it across the cut without touching it.
     phone: { capture: "01-recording-reminders.png", compose: true, size: { width: 840, top: 580 } },
     // V11-B: a narrower panel, shifted right, so the voice runs 250 px on slide 2 before entering it
-    lift: ART === "v13-B" || ART === "v14-B" ? null : { band: KEYBOARD_BAND, width: ART === "v11-B" ? 1030 : 1180, shiftX: ART === "v11-B" ? 105 : 0, raise: 60 } },
+    lift: ["v13-B", "v14-B", "v15-B"].includes(ART) ? null : { band: KEYBOARD_BAND, width: ART === "v11-B" ? 1030 : 1180, shiftX: ART === "v11-B" ? 105 : 0, raise: 60 } },
   { id: `03-${VARIANT}`, key: "smartModes", pro: true,
     phone: { capture: `02-smart-mode-fan-${VARIANT}.png` },
     beforeAfter: { top: 860, width: 1180 } },
@@ -537,7 +547,7 @@ function addGreetings(list, i) {
    art/dictusHero.ts) and where its voice line ends, in its own pixels. */
 const ILLU = ART === "v8"
   ? { src: "art/v8/hero.png", w: 2640, h: 2000, panelIn: [1400, 1387] }   // V7 cast: art/v7/hero-${CAST}.png
-  : { src: ART === "v14-B" ? "art/v14-B/hero.png" : ART === "v13-B" ? "art/v13-B/hero.png" : ART === "v12-B" ? `art/v12-B/hero-${S2}.png` : `art/${ART}/hero.png`, w: 2640, h: 2868, panelIn: [1396, 1838.5] };
+  : { src: ART === "v15-B" ? "art/v15-B/hero.png" : ART === "v14-B" ? "art/v14-B/hero.png" : ART === "v13-B" ? "art/v13-B/hero.png" : ART === "v12-B" ? `art/v12-B/hero-${S2}.png` : `art/${ART}/hero.png`, w: 2640, h: 2868, panelIn: [1396, 1838.5] };
 /* The waveform's centre in the recording capture (measured: blue bars from y 2052 to 2410). */
 const CAPTURE_WAVE_Y = 2231;
 /* The icon row along the very bottom of slides 1 and 2. */
@@ -553,7 +563,33 @@ const RIBBON_APPS_14 = ["messages", "gmail", "whatsapp", "mail", "chatgpt", "mes
 const RIBBON_APPS_OLD = ["messages", "whatsapp", "mail", "gmail", "chatgpt", "claude", "slack", "notion", "instagram", "linkedin", "messenger", "telegram", "outlook", "docs"];
 /* 20 at 130 px do not fit one wave from her feet to slide 2's right edge (about 17 gaps of path),
    so, as the brief allows, X then Signal are dropped: 18 icons. */
-const RIBBON_APPS = ART === "v14-B" ? RIBBON_APPS_14.filter((a) => a !== "x" && a !== "signal") : RIBBON_APPS_OLD;
+/* V15-B: V14-B's single cosine stretched from outside slide 1's left edge to outside slide 2's
+   right edge. Icons 124 px with a gap of about 45 % of that (pitch ~180 px along the curve), the
+   first centred on slide 1's left edge and the last on slide 2's right edge, both clipped by the
+   frame; each turned EXACTLY to the curve's tangent (analytic derivative), no cap, no offset. */
+const RIBBON15 = (() => {
+  const X0 = -70, X1 = 2720, A = 160, Y0 = 2630, P = X1 - X0, SIZE = 124;
+  const Y = (x) => Y0 + A * Math.cos(2 * Math.PI * (x - X0) / P);
+  const dY = (x) => -A * (2 * Math.PI / P) * Math.sin(2 * Math.PI * (x - X0) / P);
+  const pts = []; for (let x = -100; x <= 2760; x += 2) pts.push([x, Y(x)]);
+  const len = [0]; for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const sAt = (x) => len[Math.round((x + 100) / 2)];
+  const xAt = (s) => { let i = 1; while (i < len.length - 1 && len[i] < s) i++; const f = (s - len[i - 1]) / (len[i] - len[i - 1] || 1); return pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * f; };
+  // the most icons whose pitch keeps a gap of at least 40 % of their size
+  const span = sAt(2 * PANEL_W) - sAt(0);
+  const fit = Math.min(20, Math.floor(span / (SIZE * 1.4)) + 1), pitch = span / (fit - 1);
+  const slots = Array.from({ length: fit }, (_, n) => { const x = xAt(sAt(0) + n * pitch);
+    return { x, y: Y(x), size: SIZE, rot: Math.atan2(dY(x), 1) * 180 / Math.PI, behind: false }; });
+  return { fit, pitch, gap: pitch - SIZE, slots };
+})();
+window.RIBBON15 = { fit: RIBBON15.fit, pitch: RIBBON15.pitch, gap: RIBBON15.gap };
+/* V15-B: V14-B's order, Signal and X added back at the end, and as many as the airy spacing
+   allows: ribbonSlots15 says how many fit; the rest are dropped in the order X, Signal,
+   Perplexity, Vibe (Le Chat). */
+const RIBBON_15_ALL = [...RIBBON_APPS_14.filter((a) => a !== "x" && a !== "signal"), "signal", "x"];
+const RIBBON_15_DROP = ["x", "signal", "perplexity", "lechat"];
+const RIBBON_APPS = ART === "v15-B" ? (() => { let list = RIBBON_15_ALL, k = 0; while (list.length > RIBBON15.fit && k < RIBBON_15_DROP.length) { const drop = RIBBON_15_DROP[k++]; list = list.filter((a) => a !== drop); } return list.slice(0, RIBBON15.fit); })()
+  : ART === "v14-B" ? RIBBON_APPS_14.filter((a) => a !== "x" && a !== "signal") : RIBBON_APPS_OLD;
 const TILE_GLYPHS = [
   '<path d="M5 6h14v9H10l-5 4z"/>', '<path d="M4 7h16v11H4zM4 7l8 6 8-6"/>', '<path d="M7 4h7l4 4v12H7zM14 4v4h4M10 12h5M10 15h5"/>',
   '<circle cx="12" cy="12" r="3.5"/><path d="M15.5 12v1.5a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.4 6.8"/>', '<path d="M4 12l16-7-6 15-3-6z"/>', '<path d="M5 19l1-4L16 5l3 3L9 18z"/>',
@@ -619,7 +655,7 @@ function ribbonSlots() {
 }
 
 function addRibbon() {
-  const slots = ART === "v11-B" ? ribbonSlots() : ART === "v12-B" ? ribbonSlots12() : ART === "v13-B" ? ribbonSlots13() : ART === "v14-B" ? ribbonSlots14(RIBBON_APPS.length) : null;
+  const slots = ART === "v11-B" ? ribbonSlots() : ART === "v12-B" ? ribbonSlots12() : ART === "v13-B" ? ribbonSlots13() : ART === "v14-B" ? ribbonSlots14(RIBBON_APPS.length) : ART === "v15-B" ? RIBBON15.slots : null;
   RIBBON_APPS.forEach((slug, n) => {
     const x = slots ? slots[n].x : ICON_X(n), y = slots ? slots[n].y : BAND.ribbonY + 16 * Math.sin(n * 1.3);
     const size = slots ? slots[n].size : ICON_SIZE, rot = slots ? slots[n].rot : [-6, 4, -2, 7, -4][n % 5];
@@ -647,7 +683,7 @@ const LOGO_BARS = `<svg class="bars" viewBox="19 19 42 42"><defs><linearGradient
   <rect x="19" y="31" width="9" height="18" rx="4.5" fill="#8E8E93" opacity="0.45"/><rect x="35.5" y="19" width="9" height="42" rx="4.5" fill="url(#hb)"/><rect x="52" y="26" width="9" height="27" rx="4.5" fill="#8E8E93" opacity="0.65"/></svg>`;
 
 function addHero(copy, i) {
-  const brand = el("hero-brand", `${LOGO_BARS}<span>${S.wordmark}</span>`);
+  const brand = el(`hero-brand${ART === "v15-B" ? " rounded" : ""}`, `${LOGO_BARS}<span>${ART === "v15-B" ? "Dictus" : S.wordmark}</span>`);
   brand.style.left = `${i * PANEL_W + 110}px`;
   strip.appendChild(brand);
   const h = el("hero-headline", copy.headline);
@@ -685,7 +721,7 @@ SLIDES.forEach((s, i) => {
    their own centre, so their left edges recede; the voice enters the panel's receding edge. */
 const TURN = "perspective(2600px) rotateY(-13deg)";
 if (ART === "v12-B" && S2 === "turned") [DEVICES[1], LIFTS[1].el].forEach((d) => { d.style.transform = TURN; d.style.transformOrigin = "50% 50%"; });
-if (ART === "v14-B") {
+if (ART === "v14-B" || ART === "v15-B") {
   Object.assign(document.getElementById("hero-illu").style, { left: "0px", top: "0px" });
 } else if (ART === "v13-B") {
   // the phone alone, turned; the voice lands on its own keyboard's waveform, at the screen's left
@@ -762,14 +798,21 @@ ctx.globalAlpha = 0.62;
   // V14-B: the band is born from her voice. The hero canvas draws the first bars (her strokes
   // turning into bars); the band takes over at x = 1480, on the same grid as before (from - 20
   // pitches), at full height, so everything from slide 2's right margin on is unchanged.
-  const start = ART === "v14-B" ? from - 20 * pitch : from;
+  // V15-B: no strokes on slide 2; the band starts at its left edge (first grid bar, x 1342) with
+  // small blue bars that grow, and turn grey and full height, by x ~1580 (behind the phone)
+  const start = ART === "v14-B" ? from - 20 * pitch : ART === "v15-B" ? from - 23 * pitch : from;
   for (let x = start; x < STRIP_W - BAR_W; x += pitch) {
     const cx = x + BAR_W / 2;
     const energy = 0.2 + 0.25 * (Math.sin(2 * Math.PI * (cx / WAVE_PERIOD + 0.25)) + 1);
-    const ramp = ART === "v14-B" ? 1 : Math.min(1, 0.3 + (cx - from) / 260);
+    const grow = ART === "v15-B" ? Math.min(1, Math.max(0, (cx - 1357) / 230)) : 1;
+    const ramp = ART === "v14-B" ? 1 : ART === "v15-B" ? 0.22 + 0.78 * grow : Math.min(1, 0.3 + (cx - from) / 260);
     const h = Math.max((MIN_H + energy * (MAX_H - MIN_H)) * ramp, MIN_H);
     const y = WAVE_Y - h / 2;
     ctx.beginPath(); ctx.roundRect(x, y, BAR_W, h, BAR_W / 2); ctx.fillStyle = barFill(x, y, h, cx); ctx.fill();
+    if (grow < 1) {   // the young bars are the app's blue, fading into the band's grey as they grow
+      const f = ctx.createLinearGradient(0, y, 0, y + h); f.addColorStop(0, "#6BA3FF"); f.addColorStop(1, "#2563EB");
+      ctx.save(); ctx.globalAlpha = (1 - grow) / 0.62 > 1 ? 1 : (1 - grow); ctx.fillStyle = f; ctx.beginPath(); ctx.roundRect(x, y, BAR_W, h, BAR_W / 2); ctx.fill(); ctx.restore();
+    }
   }
 }
 ctx.globalAlpha = 1;
@@ -782,7 +825,12 @@ window.whenReady = Promise.all([
     im.addEventListener("error", r, { once: true });
   }))),
 ]).then(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))))
-  .then(() => document.getElementById("missing").style.display !== "flex");
+  .then(() => {
+    if (ART === "v15-B" && !document.fonts.check('700 100px "Dictus Rounded"')) {
+      document.getElementById("missing").innerHTML = "SF Pro Rounded missing<br>/System/Library/Fonts/SFNSRounded.ttf"; document.getElementById("missing").style.display = "flex";
+    }
+    return document.getElementById("missing").style.display !== "flex";
+  });
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
 /* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
 window.ITERATION = ART;
@@ -793,12 +841,12 @@ window.EXPORT_THEMES = ["light"];
 window.VARIANTS = ART === "v8" ? [
   { name: "main", query: "art=v8" },
   { name: "nologos", query: "art=v8&ribbon=tiles" },
-] : ART === "v14-B" ? [
+] : ART === "v14-B" || ART === "v15-B" ? [
   { name: "main", query: "" },
   { name: "nologos", query: "ribbon=tiles" },
 ] : [{ name: "main", query: "" }];
 /* V14-B: slides 1 to 3 cut apart, to judge the band's continuity into slide 3. */
-window.CUT_TRIPLE = ART === "v14-B" ? { slides: [0, 1, 2], width: 300, gap: 24, file: "slides-1-2-3-cut.jpg" } : null;
+window.CUT_TRIPLE = ART === "v14-B" || ART === "v15-B" ? { slides: [0, 1, 2], width: 300, gap: 24, file: "slides-1-2-3-cut.jpg" } : null;
 /* V8, V9-B and V10-B change slide 1 only; slide 2 is re-rendered because the voice strokes end on it.
    Slides 3 to 7 are V6's exported files. */
 window.EXPORT_SLIDES = [0, 1];
@@ -856,7 +904,7 @@ function ribbonSlots13() {
 }
 /* V12-B: the other slide-2 layout, for Pierre to compare, as a second cut view. */
 window.CUT_ALT = ART === "v12-B" ? { query: `art=v12-B&s2=${S2 === "turned" ? "flat" : "turned"}`, file: "slides-1-2-cut-alt.jpg" } : null;
-window.CUT_PAIR = ["v10-B", "v11-B", "v12-B", "v13-B", "v14-B"].includes(ART) ? { slides: [0, 1], width: 300, gap: 24, file: "slides-1-2-cut.jpg" } : null;
+window.CUT_PAIR = ["v10-B", "v11-B", "v12-B", "v13-B", "v14-B", "v15-B"].includes(ART) ? { slides: [0, 1], width: 300, gap: 24, file: "slides-1-2-cut.jpg" } : null;
 
 if (params.has("preview")) {
   document.body.classList.add("preview");
