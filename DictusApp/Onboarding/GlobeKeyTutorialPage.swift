@@ -41,6 +41,13 @@ struct GlobeKeyTutorialPage: View {
     /// key taps while still allowing short dictation ("oui", "non", "ok").
     private let minTextLength = 3
 
+    /// Whether the keyboard can dictate on this device (#635). False on a pre-A14
+    /// chip, where the Dictus keyboard draws its mic disabled everywhere, this page's
+    /// text field included: the keyboard cannot tell that its host is DictusApp in
+    /// the foreground, so it has no safe way to make an exception here. The page then
+    /// asks for typing instead, and the same 3-character rule advances it.
+    private let keyboardCanDictate = DeviceCapabilities.current().supportsKeyboardDictation
+
     var body: some View {
         ZStack {
             Color.dictusBackground
@@ -63,8 +70,10 @@ struct GlobeKeyTutorialPage: View {
                 Group {
                     if !dictusKeyboardActive {
                         Text("Hold \(Image(systemName: "globe")) and select Dictus")
-                    } else {
+                    } else if keyboardCanDictate {
                         Text("Tap the mic and start dictating")
+                    } else {
+                        Text("Type a few words to try the keyboard")
                     }
                 }
                 .font(.dictusHeading)
@@ -82,7 +91,9 @@ struct GlobeKeyTutorialPage: View {
                     // scrolls internally if the dictation is longer than that.
                     KeyboardDetectingTextField(
                         text: $textFieldContent,
-                        placeholder: String(localized: "Say something!"),
+                        placeholder: keyboardCanDictate
+                            ? String(localized: "Say something!")
+                            : String(localized: "Type something!"),
                         autoFocus: true,
                         onKeyboardChange: { _ in }
                     )
@@ -424,11 +435,11 @@ private struct KeyboardSwitchAnimation: View {
     /// Keyboard picker popup matching iOS style.
     private func fakeKeyboardPicker(dictusHighlighted: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            pickerRow("Keyboard Settings...", dimmed: true)
+            pickerRow(String(localized: "Keyboard Settings..."), dimmed: true)
             Divider().opacity(0.2)
             pickerRow(systemKeyboardName, highlighted: !dictusHighlighted)
             Divider().opacity(0.2)
-            pickerRow("Emoji")
+            pickerRow(String(localized: "Emoji"))
             Divider().opacity(0.2)
             pickerRow("Dictus", highlighted: dictusHighlighted, accent: dictusHighlighted)
 
@@ -451,6 +462,8 @@ private struct KeyboardSwitchAnimation: View {
         )
     }
 
+    /// Takes a `String`, so it is shown verbatim: callers localize literals with
+    /// `String(localized:)` (issue #661 found "Keyboard Settings..." in English here).
     private func pickerRow(_ text: String, dimmed: Bool = false, highlighted: Bool = false, accent: Bool = false) -> some View {
         Text(text)
             .font(.callout)

@@ -153,6 +153,16 @@ final class VoiceNoteRulesTests: XCTestCase {
         XCTAssertFalse(VoiceNoteAvailability.mayTranscribe(isEntitled: false))
     }
 
+    /// A Pro user who switched voice notes off in the hub is not told it is part of
+    /// Dictus Pro (#216): they have it, and the switch is the way back.
+    func testASwitchedOffProUserIsToldTheFeatureIsOff() {
+        XCTAssertEqual(VoiceNoteAvailability.shareDecision(isEntitled: false, hasPro: true, paywallVisible: true), .refuseSwitchedOff)
+        XCTAssertEqual(VoiceNoteAvailability.shareDecision(isEntitled: false, hasPro: true, paywallVisible: false), .refuseSwitchedOff)
+        XCTAssertEqual(VoiceNoteAvailability.shareDecision(isEntitled: true, hasPro: true, paywallVisible: true), .accept)
+        XCTAssertEqual(VoiceNoteAvailability.shareDecision(isEntitled: false, hasPro: false, paywallVisible: true), .refuseNeedsPro)
+        XCTAssertEqual(VoiceNoteAvailability.shareDecision(isEntitled: false, hasPro: false, paywallVisible: false), .refuseUnavailable)
+    }
+
     func testTheSummaryDependsOnAppleIntelligenceAndNothingElse() {
         XCTAssertNil(VoiceNoteAvailability.summaryUnavailableReason(engineState: .available))
         XCTAssertEqual(VoiceNoteAvailability.summaryUnavailableReason(engineState: .deviceNotEligible), .deviceNotEligible)

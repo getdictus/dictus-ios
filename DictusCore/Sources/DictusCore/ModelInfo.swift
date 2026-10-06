@@ -42,7 +42,26 @@ public struct ModelInfo: Identifiable {
     /// `ModelManager.updateDownloadProgress` does for the `mbTotal` it logs and
     /// for the MB counter under the progress bar, so the size promised on the
     /// card and the total counted during the download print the same number.
-    public var sizeLabel: String { "~\(sizeBytes / 1_000_000) MB" }
+    ///
+    /// WHY the unit goes through a formatter (issue #661): a hard-coded "MB"
+    /// showed on French iPhones, where the unit is "Mo". The figure stays the
+    /// truncated one above; only the unit and its spacing follow the locale.
+    public var sizeLabel: String { sizeLabel(locale: .autoupdatingCurrent) }
+
+    /// `sizeLabel` rendered for an explicit locale. Tests pin the locale through
+    /// this, since `swift test` runs in whatever locale the Mac is set to.
+    public func sizeLabel(locale: Locale) -> String {
+        let formatter = MeasurementFormatter()
+        formatter.locale = locale
+        // `.providedUnit` keeps megabytes even where the formatter would pick GB.
+        formatter.unitOptions = .providedUnit
+        formatter.unitStyle = .medium
+        formatter.numberFormatter.maximumFractionDigits = 0
+        // No grouping, to match the "%lld MB of %lld MB" download counter.
+        formatter.numberFormatter.usesGroupingSeparator = false
+        let megabytes = Measurement(value: Double(sizeBytes / 1_000_000), unit: UnitInformationStorage.megabytes)
+        return "~" + formatter.string(from: megabytes)
+    }
 
     /// Speech-to-text engine this model uses (WhisperKit or Parakeet).
     public let engine: SpeechEngine
@@ -627,7 +646,12 @@ public struct ModelInfo: Identifiable {
     /// Phase 37 introduces per-device gating that needs deterministic inputs for
     /// unit testing. The caller-less overload still exists for convenience — it
     /// reads the current device, same behaviour as before.
-    /// Turbo is intentionally never recommended by default during Phase 37.
+    ///
+    /// SINCE #649 this is the device half of the rule only: the recommendation for a
+    /// language Parakeet speaks, which includes all four Dictus keyboard languages.
+    /// `recommendedIdentifier(forSpokenLanguage:on:)` is the whole rule and calls this.
+    /// `available(on:)` still calls it directly, because the only thing it asks of the
+    /// recommendation is the pre-A14 exception, which does not depend on language.
     public static func recommendedIdentifier(for capabilities: DeviceCapabilities) -> String {
         if capabilities.isPreA14 {
             // Base, not Tiny: it is the most accurate variant Argmax lists for this
@@ -639,11 +663,68 @@ public struct ModelInfo: Identifiable {
             : "openai_whisper-small"
     }
 
-    public static func recommendedIdentifier() -> String {
-        recommendedIdentifier(for: DeviceCapabilities.current())
+    /// The Turbo variant the catalogue offers (issue #408).
+    static let turboIdentifier = "openai_whisper-large-v3-v20240930_turbo_632MB"
+
+    /// The model to recommend to someone who speaks `spokenLanguage` on `capabilities`
+    /// (#649).
+    ///
+    /// WHY THE LANGUAGE IS AN INPUT NOW: until #649 the rule read the device only, so a
+    /// Chinese speaker on a 6 GB iPhone was recommended Parakeet, which does not speak
+    /// Chinese (NVIDIA documents 25 European languages, `ModelLanguageSupport.parakeetV3`).
+    ///
+    /// The rule, in order:
+    /// 1. A pre-A14 device gets today's answer, Base, whatever the language: the Argmax
+    ///    matrix allows nothing else there, and Base is multilingual.
+    /// 2. A language Parakeet speaks gets today's answer too: Parakeet on 6 GB or more,
+    ///    Small below. All four Dictus keyboard languages land here, so nobody who
+    ///    onboarded before #649 sees their recommendation move.
+    /// 3. Any other language gets the best Whisper the device runs reliably: Turbo where
+    ///    Argmax lists it AND the catalogue's own Turbo gate (6 GB) lets it run, Small
+    ///    everywhere else.
+    ///
+    /// WHY TURBO AND NOT MEDIUM for rule 3: Medium is in no iPhone entry of Argmax's
+    /// matrix, and it is the larger download (1.53 GB against 646 MB). Turbo is listed from
+    /// the A15 on, it is the variant #408 chose after the #171 corpus run (won or tied four
+    /// clips of five), it transcribes at 8.78x real time on an iPhone 15 Pro Max against
+    /// Medium's 4.16-6.10x, and on the one Mandarin capture taken (18.6 s, poor audio,
+    /// 2026-08-25) it came back mostly right where Medium returned only a subtitle
+    /// artefact. One noisy clip is an anecdote, not a CER run; it is cited because it is
+    /// the only Chinese evidence there is, and it does not point the other way. The history #144
+    /// recorded belongs to the `_954MB` variant and to dictation reaching an unloaded
+    /// model; #408 replaced the first and #164 gated the second.
+    ///
+    /// WHAT TURBO STILL COSTS, stated rather than hidden: its first preparation takes
+    /// about four minutes on an iPhone 15 Pro Max (236 s, the slowest of four cold
+    /// readings), and nobody has timed one on an A15. Small is the fallback rule 3 uses on
+    /// every device that is not inside both gates.
+    public static func recommendedIdentifier(
+        forSpokenLanguage spokenLanguage: String,
+        on capabilities: DeviceCapabilities
+    ) -> String {
+        if capabilities.isPreA14 || ModelLanguageSupport.parakeetV3LanguageCodes.contains(spokenLanguage) {
+            return recommendedIdentifier(for: capabilities)
+        }
+        if capabilities.isA15OrLater,
+           let turbo = forIdentifier(turboIdentifier),
+           turbo.isSupported(on: capabilities) {
+            return turboIdentifier
+        }
+        return "openai_whisper-small"
     }
 
-    /// Whether the given model identifier matches the device-recommended model.
+    /// The recommendation for this device and the language the current settings say the
+    /// user speaks (see `SpokenLanguage.forRecommendation()`).
+    public static func recommendedIdentifier() -> String {
+        recommendedIdentifier(
+            forSpokenLanguage: SpokenLanguage.forRecommendation(),
+            on: DeviceCapabilities.current()
+        )
+    }
+
+    /// Whether the given model identifier is the one recommended for this device and the
+    /// user's language. Drives the "Recommended" mark on the Models screen, which has to
+    /// agree with the model onboarding installed (#649).
     public static func isRecommended(_ identifier: String) -> Bool {
         identifier == recommendedIdentifier()
     }

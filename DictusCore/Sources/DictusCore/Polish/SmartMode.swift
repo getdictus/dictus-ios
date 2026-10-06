@@ -308,8 +308,11 @@ public struct SmartMode: Equatable, Sendable, Codable, Identifiable {
     ///
     /// It is a property of the mode rather than a pipeline constant because it is a
     /// product answer about the mode: `Message` exists for short text and must never
-    /// skip it, and `Résumé` already bounds itself through its band. `Liste` declines
-    /// short input too, but after the model has run: see `minimumListItems`.
+    /// skip it, and `Traduction` of a short message is the reason to share one.
+    /// `Résumé` carries the same 200 since #650: one sentence has no gist to extract,
+    /// and the voice note path, which had its own global floor, now reads this one.
+    /// `Liste` declines short input too, but after the model has run: see
+    /// `minimumListItems`.
     public let minimumInputCharacters: Int?
 
     /// Fewest list items this mode's output must carry to be inserted. A one-item list

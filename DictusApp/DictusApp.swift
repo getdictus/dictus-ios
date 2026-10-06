@@ -685,7 +685,7 @@ extension Notification.Name {
     /// Posted by a `ModelManager` whenever a model's preparation state or download
     /// progress changes, so the other instance in this process draws the same thing
     /// (issue #449). Process-local: `MainTabView` builds one `ModelManager` and
-    /// onboarding's `ModelDownloadPage` builds another, and after a relaunch the
+    /// `OnboardingView` builds another (#649), and after a relaunch the
     /// download is resumed by whichever of them was created first.
     static let dictusModelPreparationChanged = Notification.Name(
         "DictusModelPreparationChanged"

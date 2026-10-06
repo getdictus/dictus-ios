@@ -88,6 +88,34 @@ public struct DeviceCapabilities: Sendable, Equatable {
         return family < 13
     }
 
+    /// Whether this device's chip is an A15 or later (or an M2 or later iPad): an iPhone
+    /// or iPad whose hardware family number is 14 or above.
+    ///
+    /// WHY this exact line (#649): it is where Argmax's support matrix starts listing the
+    /// quantized Turbo the catalogue ships (`openai_whisper-large-v3-v20240930_turbo_632MB`).
+    /// Read 2026-10-05 from the source below, that variant is listed for `iPhone14` (A15),
+    /// `iPhone15`-`iPhone18` (A16-A19), `iPad14,*` (A15 mini, M2), `iPad15,*` and `iPad16,*`,
+    /// and for nothing in family 13 or below: not the A14 (`iPhone13`, `iPad13,1-2`,
+    /// `iPad13,18-19`, which list Small only) and not the M1 iPads (`iPad13,4-17`, whose
+    /// M1 entry omits it). So "family >= 14" on both product lines is the matrix, not an
+    /// approximation of it.
+    ///
+    /// WHY it is not folded into `ModelInfo.incompatibilityReason`: that gate decides what
+    /// Settings lets a user PICK, and it predates this reading (it gates Turbo on RAM only,
+    /// which leaves a 6 GB A14 iPhone 12 Pro able to select it). Tightening what a user may
+    /// choose is a separate decision; this only keeps the RECOMMENDATION inside the matrix.
+    ///
+    /// Identifiers that are neither iPhone nor iPad (a Mac, a placeholder) answer false:
+    /// with no matrix entry to read, the recommendation stays on the conservative side.
+    ///
+    /// Source of truth: https://huggingface.co/argmaxinc/whisperkit-coreml/raw/main/config.json
+    public var isA15OrLater: Bool {
+        guard let family = hardwareFamily(after: "iPhone") ?? hardwareFamily(after: "iPad") else {
+            return false
+        }
+        return family >= 14
+    }
+
     /// The family number of an identifier such as "iPad8,1" (→ 8), or nil when the
     /// identifier does not start with `prefix` followed by digits and a comma.
     ///

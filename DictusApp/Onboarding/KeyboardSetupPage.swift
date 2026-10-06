@@ -42,6 +42,10 @@ struct KeyboardSetupPage: View {
     @State private var fullAccessToggleOn = false
     @State private var animationTimer: Timer?
 
+    /// The device's capabilities, read once: only the hardware identifier is used, and
+    /// it cannot change while the page is on screen.
+    private let device = DeviceCapabilities.current()
+
     var body: some View {
         // WHY VStack(spacing:0) at root instead of ScrollView:
         // The Continue button should always sit at the bottom of the screen
@@ -51,11 +55,18 @@ struct KeyboardSetupPage: View {
         VStack(spacing: 0) {
             Spacer(minLength: 40)
 
-            // Keyboard icon
-            Image(systemName: "keyboard")
-                .font(.system(size: 64))
-                .foregroundColor(.dictusAccent)
-                .padding(.bottom, 24)
+            // Keyboard icon.
+            //
+            // Dropped on a pre-A14 device to make room for the notice below (#635):
+            // this page does not scroll, and on a 667 pt screen (the iPhone SE 2, and
+            // every iPad in compatibility mode) the notice pushed the restart caption
+            // into truncation and left no room for "Keyboard detected" + Continue.
+            if device.supportsKeyboardDictation {
+                Image(systemName: "keyboard")
+                    .font(.system(size: 64))
+                    .foregroundColor(.dictusAccent)
+                    .padding(.bottom, 24)
+            }
 
             // Title
             Text("Add keyboard")
@@ -91,8 +102,17 @@ struct KeyboardSetupPage: View {
                 .font(.dictusCaption)
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
+                // Never truncated (#635): with the pre-A14 notice below, this page
+                // is tight in a 667 pt window, and SwiftUI clipped this line first.
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 32)
                 .padding(.bottom, 16)
+
+            if !device.supportsKeyboardDictation {
+                keyboardDictationNotice
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 16)
+            }
 
             // Detection feedback (green checkmark) stays just above the content
             if keyboardDetected {
@@ -210,6 +230,45 @@ struct KeyboardSetupPage: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: keyboardDetected)
+    }
+
+    // MARK: - Pre-A14 notice (#635)
+
+    /// Tells a pre-A14 user, before they finish onboarding, that the keyboard they are
+    /// adding will type but not dictate, and that dictating in the app still works.
+    ///
+    /// WHY here: this is the page that introduces the keyboard, so the limit is read
+    /// at the moment the user decides what the keyboard is for, not discovered later
+    /// as a greyed mic. Kept to one block that the onboarding rebuild (#649) can carry
+    /// over as it is.
+    ///
+    /// WHY the device word comes from the hardware identifier and not
+    /// `userInterfaceIdiom`: DictusApp is iPhone-only and runs on an iPad in
+    /// compatibility mode, where the idiom reports `.phone` (same rule as
+    /// `IncompatibilityReason.localizedText`, #612).
+    private var keyboardDictationNotice: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "info.circle")
+                .font(.dictusBody)
+                .foregroundColor(.dictusAccent)
+
+            Text(device.deviceModelIdentifier.hasPrefix("iPad")
+                 ? String(
+                    localized: "Because of its chip, this iPad cannot dictate from the keyboard. Dictation inside the Dictus app works.",
+                    comment: "Onboarding notice on the keyboard setup page, shown only on an iPad whose chip predates the A14 (#635)."
+                 )
+                 : String(
+                    localized: "Because of its chip, this iPhone cannot dictate from the keyboard. Dictation inside the Dictus app works.",
+                    comment: "Onboarding notice on the keyboard setup page, shown only on an iPhone whose chip predates the A14 (#635)."
+                 ))
+                .font(.dictusCaption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .dictusGlass(in: RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: - Fake Settings Card

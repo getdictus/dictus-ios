@@ -19,14 +19,107 @@ final class SmartModeShortInputSkipTests: XCTestCase {
         XCTAssertTrue(mode.runs(onInputOfLength: 1337))
     }
 
-    /// Structuré only. `Message` exists for short text and must never skip it;
-    /// `Résumé` bounds itself through its band; `Liste` checks its output instead
-    /// (#573, decision 5 amended); `Traduction` has no reason to.
+    /// `Résumé` carries the same floor since #650 (decision 3): one sentence has no
+    /// gist, and the voice note path reads this floor instead of its own.
+    func testSummarySkipsBelowTwoHundredCharacters() {
+        let mode = SmartModeCatalogue.summary
+        XCTAssertEqual(mode.minimumInputCharacters, 200)
+        XCTAssertFalse(mode.runs(onInputOfLength: 132), "the 8-second voice note Apple FM refused twice")
+        XCTAssertFalse(mode.runs(onInputOfLength: 199))
+        XCTAssertTrue(mode.runs(onInputOfLength: 200))
+    }
+
+    /// `Structuré` and `Résumé` only. `Message` exists for short text and must never
+    /// skip it; `Liste` checks its output instead (#573, decision 5 amended);
+    /// `Traduction` of a short message is the reason to share one (#650).
     func testNoOtherModeSkipsShortInput() {
-        for mode in SmartModeCatalogue.builtIns where mode.id != SmartModeCatalogue.structuredIdentifier {
+        let floored: Set = [SmartModeCatalogue.structuredIdentifier, SmartModeCatalogue.summaryIdentifier]
+        for mode in SmartModeCatalogue.builtIns where !floored.contains(mode.id) {
             XCTAssertNil(mode.minimumInputCharacters, mode.id)
             XCTAssertTrue(mode.runs(onInputOfLength: 1), mode.id)
         }
+        // Named, so a catalogue that dropped one of them cannot pass by omission.
+        let unfloored = [SmartModeCatalogue.message, SmartModeCatalogue.notes,
+                         SmartModeCatalogue.translate(to: .english)]
+        for mode in unfloored {
+            XCTAssertTrue(SmartModeCatalogue.builtIns.contains { $0.id == mode.id }, mode.id)
+            XCTAssertNil(mode.minimumInputCharacters, mode.id)
+        }
+    }
+
+    // MARK: - The service, on a fake engine (#650)
+
+    /// The keyboard path for `Résumé` below its floor: no model call for the mode, one
+    /// skip event carrying the numbers, Normal polish in its place, and the failure the
+    /// toolbar turns into "Résumé : dictée trop courte".
+    @MainActor
+    func testAShortSummaryDictationTakesTheShortInputPath() async throws {
+        AppGroup.defaults.set(true, forKey: SharedKeys.polishEnabled)
+        defer { AppGroup.defaults.removeObject(forKey: SharedKeys.polishEnabled) }
+        let clock = FakeClock()
+        let engine = ScriptedEngine(clock: clock, secondsPerCall: 1, listAnswer: "unused",
+                                    normalAnswer: "Je serai en retard de dix minutes.")
+        let sink = RecordingSink()
+        let service = PolishService(sink: sink, engine: engine, now: clock.now)
+        let raw = "je serai en retard de dix minutes"
+        let policy = TranscriptionLanguagePolicy(mode: .explicit(.french), keyboardLanguage: .french,
+                                                 engine: .parakeet, modelIdentifier: "parakeet-tdt-0.6b-v3")
+
+        let outcome = await service.polish(raw: raw, languagePolicy: policy,
+                                           smartMode: SmartModeCatalogue.summary, recordingDuration: 3)
+
+        XCTAssertEqual(engine.calls, ["natural"], "the mode never reaches the engine")
+        XCTAssertTrue(outcome.isDegraded)
+        XCTAssertEqual(outcome.text, "Je serai en retard de dix minutes.")
+        XCTAssertEqual(outcome.smartModeFailure?.modeIdentifier, SmartModeCatalogue.summaryIdentifier)
+        XCTAssertEqual(outcome.smartModeFailure?.outcome, PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue)
+        let outcomes = await sink.outcomes()
+        XCTAssertEqual(outcomes.first, .smartModeSkippedShortInput)
+        let entries = await sink.entries()
+        let skip = try XCTUnwrap(entries.first?.metrics.smartModeLengthSkip)
+        XCTAssertEqual(skip, PolishMetrics.SmartModeLengthSkip(mode: "summary", characters: raw.count, floor: 200))
+    }
+
+    /// The voice note's record (#650): the card decides before calling `polish`, and
+    /// writes the same event the keyboard's branch writes, without touching the engine.
+    @MainActor
+    func testRecordingASkipWritesTheKeyboardsEventAndCallsNothing() async throws {
+        let clock = FakeClock()
+        let engine = ScriptedEngine(clock: clock, secondsPerCall: 1, listAnswer: "unused", normalAnswer: "unused")
+        let sink = RecordingSink()
+        let service = PolishService(sink: sink, engine: engine, now: clock.now)
+        let transcript = String(repeating: "a", count: 132)
+
+        await service.recordSkippedForLength(SmartModeCatalogue.summary, raw: transcript)
+
+        XCTAssertEqual(engine.calls, [])
+        let entries = await sink.entries()
+        XCTAssertEqual(entries.count, 1)
+        let metrics = try XCTUnwrap(entries.first?.metrics)
+        XCTAssertEqual(metrics.outcome, .smartModeSkippedShortInput)
+        XCTAssertEqual(metrics.mode, PolishTask.smart(SmartModeCatalogue.summary).identifier)
+        XCTAssertEqual(metrics.smartModeLengthSkip,
+                       PolishMetrics.SmartModeLengthSkip(mode: "summary", characters: 132, floor: 200))
+    }
+
+    /// `Traduction` on the same sentence runs: the floor belongs to the mode, and this
+    /// mode has none.
+    @MainActor
+    func testAShortTranslationRuns() async {
+        let clock = FakeClock()
+        let engine = ScriptedEngine(clock: clock, secondsPerCall: 1,
+                                    listAnswer: "I will be ten minutes late.", normalAnswer: "unused")
+        let sink = RecordingSink()
+        let service = PolishService(sink: sink, engine: engine, now: clock.now)
+        let policy = TranscriptionLanguagePolicy(mode: .explicit(.french), keyboardLanguage: .french,
+                                                 engine: .parakeet, modelIdentifier: "parakeet-tdt-0.6b-v3")
+
+        _ = await service.polish(raw: "je serai en retard de dix minutes", languagePolicy: policy,
+                                 smartMode: SmartModeCatalogue.translate(to: .english), recordingDuration: 3)
+
+        XCTAssertEqual(engine.calls, [PolishTask.smart(SmartModeCatalogue.translate(to: .english)).identifier])
+        let outcomes = await sink.outcomes()
+        XCTAssertFalse(outcomes.contains(.smartModeSkippedShortInput))
     }
 
     // MARK: - Liste's output check (#573, decision 5 amended)
@@ -84,8 +177,9 @@ final class SmartModeShortInputSkipTests: XCTestCase {
     /// Resolving a mode's per-language examples keeps its floor: the pipeline sees the
     /// resolved record, and a copy that lost the field would run on a sentence again.
     func testTheFloorSurvivesExampleResolution() {
-        let resolved = SmartModeCatalogue.structured.resolvingExamples(forTranscriptLanguage: "de")
-        XCTAssertEqual(resolved.minimumInputCharacters, 200)
+        for mode in [SmartModeCatalogue.structured, SmartModeCatalogue.summary] {
+            XCTAssertEqual(mode.resolvingExamples(forTranscriptLanguage: "de").minimumInputCharacters, 200, mode.id)
+        }
     }
 
     /// The record crosses the App Group inside the per-dictation snapshot: a snapshot

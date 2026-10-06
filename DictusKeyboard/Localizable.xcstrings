@@ -62,7 +62,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ : n’a pas pu s’appliquer. Réessaie."
+            "value" : "%@ : n’a pas pu s’appliquer. Réessayez."
           }
         }
       }
@@ -95,7 +95,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ : trop long. Essaie une dictée plus courte."
+            "value" : "%@ : trop long. Essayez une dictée plus courte."
           }
         }
       }
@@ -154,7 +154,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisis un mode"
+            "value" : "Choisissez un mode"
           }
         }
       }
@@ -191,6 +191,17 @@
         }
       }
     },
+    "Dictation unavailable on this device" : {
+      "comment" : "Keyboard toolbar note beside the disabled mic on a device whose chip is too old to dictate from the keyboard (#635).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictée indisponible sur cet appareil"
+          }
+        }
+      }
+    },
     "Dictus Pro" : {
       "comment" : "The Smart Mode fan row that leaves the keyboard for the paywall. A product name, so identical in French today, and in the catalog so a future locale can change it.",
       "localizations" : {
@@ -207,7 +218,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active l’Accès complet dans Réglages > Claviers > Dictus pour utiliser la dictée."
+            "value" : "Activez l’Accès complet dans Réglages > Claviers > Dictus pour utiliser la dictée."
           }
         }
       }
@@ -228,7 +239,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maintiens le micro pour les modes"
+            "value" : "Maintenez le micro pour les modes"
           }
         }
       }
@@ -409,7 +420,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisis tes modes dans Dictus."
+            "value" : "Choisissez vos modes dans Dictus."
           }
         }
       }
@@ -504,7 +515,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Partage un message vocal vers Dictus depuis une app de messagerie, et sa transcription apparaîtra ici."
+            "value" : "Partagez un message vocal vers Dictus depuis une app de messagerie, et sa transcription apparaîtra ici."
           }
         }
       }
@@ -537,7 +548,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les modes sont désactivés. Réactive-les dans Dictus."
+            "value" : "Les modes sont désactivés. Réactivez-les dans Dictus."
           }
         }
       }
@@ -581,7 +592,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les modes exigent Apple Intelligence. Active-le dans Réglages."
+            "value" : "Les modes exigent Apple Intelligence. Activez-le dans Réglages."
           }
         }
       }
