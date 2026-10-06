@@ -3,22 +3,21 @@ import type { Film } from "./film";
 import { fillShape } from "./gallery";
 import { BPM, FPS, FRAME, LOOP_A, loop, place, THEMES, type Theme } from "./theme";
 import {
-  ARM_NEAR, BAG_D, bobAt, drawScreenText, drawVoice, drawWoman, FIG, LEG_FAR, LEG_NEAR, legAt, MARKER, mouthOpen, setTheme, stroke, type Pose,
+  ARM_NEAR, BAG_D, bobAt, drawVoice, drawWoman, FIG, LEG_FAR, LEG_NEAR, legAt, MARKER, mouthOpen, setTheme, stroke, type Pose,
 } from "./woman";
 
 // ONBOARDING INTRO, SCENE A · "walking" (issue #667, headline "Parlez. Dictus écrit.").
 // The App Store hero V15-B set in motion: she walks in place on a pavement that slides back
-// under her, the phone up at her chin, talking. Her voice leaves her lips as the three blue
-// strokes and goes INTO the phone, and on its screen a line of scribbled handwriting writes
-// itself as the strokes arrive (woman.ts draws her, the voice and the writing).
+// under her, the phone up at her mouth (seen from the back, as V15-B drew it), talking. Her
+// voice leaves her lips as the three blue strokes and goes INTO the phone (woman.ts draws her
+// and the voice).
 //
 // What moves, all of it periodic over the 5.5 s loop:
 // - the legs: five walk cycles (1.1 s each, about 109 steps a minute), the planted foot sliding
 //   back at the pavement's speed, the slab joints running at that speed at the feet's depth;
 // - the body rises at the passing positions and sinks at contact; the tote arm swings against
 //   the near leg and the tote follows the fist a beat late; the hair's ends sway; the phone rocks;
-// - the mouth talks; the voice's pulses travel from her lips into the screen, eleven a loop; the
-//   screen writes three scribbled lines, then clears them before the seam.
+// - the mouth talks; the voice's pulses travel from her lips into the phone, eleven a loop.
 
 // The source canvas is the App Store strip (2640 x 2868); the frame shows x 0..1466, y 750..2861
 // of it, the crop of the #649 mock-up (designs/onboarding-649-assets/intro-walk.png).
@@ -96,11 +95,10 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   ctx.fillStyle = fade(0, EDGE_FADE.bottom[0], 0, EDGE_FADE.bottom[1], 0, 1); ctx.fillRect(-10, EDGE_FADE.bottom[0], GROUND_R + 20, H - EDGE_FADE.bottom[0] + 10);
   ctx.restore();
 
-  // 2. her, the writing on her screen, and her voice going into it
+  // 2. her, and her voice going into her phone
   const pose = poseAt(frame);
   g.push(FIG.at[0], FIG.at[1], FIG.s);
-  drawWoman(g, theme, pose, (ph) => drawScreenText(g, ph, LP, frame, -50));
-  g.group("plain", () => drawVoice(g, pose, LP, frame, 11));
+  drawWoman(g, theme, pose, () => drawVoice(g, pose, LP, frame, 11));
   g.pop();
 };
 

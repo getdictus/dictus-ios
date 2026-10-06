@@ -1,17 +1,16 @@
 import { Gfx, type Ctx, type Env, type P } from "./core";
 import type { Film } from "./film";
 import { clipped, fillShape } from "./gallery";
-import { drawNoSignal } from "./scribble";
 import { BPM, FPS, FRAME, LOOP_B, loop, place, THEMES, type Theme } from "./theme";
 import {
-  ARM_NEAR, BAG_D, cel, drawScreenText, drawVoice, drawWoman, FIG, LEG_FAR, LEG_NEAR, legFrom, MARKER, mouthOpen, outline, setTheme, stroke, twoBone, type Pose,
+  ARM_NEAR, BAG_D, cel, drawVoice, drawWoman, FIG, LEG_FAR, LEG_NEAR, legFrom, MARKER, mouthOpen, outline, setTheme, stroke, twoBone, type Pose,
 } from "./woman";
 
 // ONBOARDING INTRO, SCENE B · "the metro, no network" (issue #667, headline "Même sans réseau.").
 // The same woman as scene A (woman.ts), now standing in a metro carriage. One hand holds the
-// grab pole, the other her phone, whose screen shows NO NETWORK: the signal bars, struck
-// through, drawn as an icon and never as words. She talks, her voice goes into the phone, and
-// the scribbled text still writes itself: dictation does not need the network.
+// grab pole, the other her phone at her mouth. A badge in the frame's top-right corner says NO
+// NETWORK: the signal bars struck through in the recording red, drawn, never written. She talks
+// and her voice still goes into the phone: dictation does not need the network.
 //
 // New art, drawn for this scene in the same marker comic: the carriage wall and floor, a bench
 // under a window on the dark tunnel with its lights streaking past, the overhead rail and the pole.
@@ -20,8 +19,7 @@ import {
 //
 // What moves, periodic over the 5.5 s loop: the tunnel lights stream past the window (three
 // speeds, nearer lights faster); the carriage rocks and she sways with it, feet planted and the
-// hand closed on the pole; she talks; the voice's pulses run into the screen; the text writes and
-// clears. Noise around her (a neighbour) was optional in the brief and is left out: at this
+// hand closed on the pole; she talks; the voice's pulses run into the phone; the badge pops twice. Noise around her (a neighbour) was optional in the brief and is left out: at this
 // size a second figure takes the eye from her phone.
 
 // Same source frame and placement as scene A, so she stands where she walked: the carousel
@@ -127,16 +125,41 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   ctx.fillStyle = fade(0, FRAME_BOTTOM, 0, FRAME_BOTTOM - 300); ctx.fillRect(-30, FRAME_BOTTOM - 300, 1600, 400);
   ctx.restore();
 
-  // 2. her, the screen (no network, and the text still writing), her voice going in
+  // 2. her, and her voice going into her phone
   const pose = poseAt(frame);
   g.push(FIG.at[0], FIG.at[1], FIG.s);
-  drawWoman(g, theme, pose, (ph) => {
-    // the status corner of the screen: the bars, struck through
-    drawNoSignal(g, 22, ([x, y]) => ph([[-36 + x, -72 + y]])[0], { line: 2.2, color: theme.screenInk, strike: "#EF4444", seed: 700 });
-    drawScreenText(g, ph, LP, frame, -44);
-  });
-  g.group("plain", () => drawVoice(g, pose, LP, frame, 11));
+  drawWoman(g, theme, pose, () => drawVoice(g, pose, LP, frame, 11));
   g.pop();
+
+  // 3. no network, over the picture
+  g.group("plain", () => noNetwork(g, theme, frame));
+};
+
+// ---------------------------------------------------------------- the no-network badge
+// A disc in the frame's top-right corner, about 48 pt across on the phone, with the four signal
+// bars (the mobile network is what a tunnel takes away) struck through in the app's recording red.
+// The disc carries its own fill and contour, so it reads the same over the wall, the window or
+// the page, in both appearances. Drawn in FRAME pixels (FX maps them to the source canvas), so its
+// size on screen does not depend on the scene's scale. It swells a little twice a loop.
+const BADGE = { cx: 890, cy: 112, r: 72 };
+const RED = "#EF4444";
+const FX = ([x, y]: P): P => [PLACE.o[0] + x / PLACE.k, PLACE.o[1] + y / PLACE.k];
+const noNetwork = (g: Gfx, t: Theme, frame: number) => {
+  const pop = 1 + 0.06 * Math.max(0, LP.cyc(frame, 2, -0.4)) ** 2, r = BADGE.r * pop;
+  const at = (dx: number, dy: number): P => FX([BADGE.cx + dx * pop, BADGE.cy + dy * pop]), px = (w: number) => w / PLACE.k;
+  const disc = Array.from({ length: 40 }, (_, i) => FX([BADGE.cx + Math.cos((i / 40) * Math.PI * 2) * r, BADGE.cy + Math.sin((i / 40) * Math.PI * 2) * r]));
+  fillShape(g, disc, t.badge);
+  outline(g, disc, px(5), 710);
+  // four bars, rising left to right, standing on one baseline
+  [20, 34, 48, 62].forEach((h, i) => {
+    const x0 = -39 + i * 21, bar: P[] = [at(x0, 33), at(x0, 33 - h), at(x0 + 15, 33 - h), at(x0 + 15, 33)];
+    fillShape(g, bar, t.line);
+  });
+  // the strike, falling left to right across the rising bars: a disc-coloured channel cut
+  // through them, then the red slash in it
+  const a = at(-48, -44), b = at(48, 46);
+  g.pen([a, b], { w: px(13), color: t.badge, seed: 711, closed: false, wobble: 0, boil: 0, taper: 0, opacity: 1, retrace: false });
+  g.pen([a, b], { w: px(8.5), color: RED, seed: 712, closed: false, wobble: 0.2, boil: 0, taper: 0.15, opacity: 1, retrace: false });
 };
 
 const film = (theme: Theme, title: string): Film => ({

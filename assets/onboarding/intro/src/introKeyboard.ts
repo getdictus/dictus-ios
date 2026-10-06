@@ -9,8 +9,8 @@ import { BPM, FPS, FRAME, LOOP_C, loop, place, THEMES, type Theme } from "./them
 // clavier."). The giant drawn iPhone of the App Store hero V10-A (branch chore/643-hero-a), its
 // screen now a note above the Dictus keyboard, and one whole dictation on it, in nine seconds:
 //
-//   1. a finger types a few keys (each key flashes as it is hit); scribbled letters appear;
-//   2. it taps the blue mic in the keyboard's top bar;
+//   1. her hand types a few keys (each key flashes as it is hit); scribbled letters appear;
+//   2. the index taps the blue mic in the keyboard's top bar;
 //   3. RECORDING: the bars follow the voice, the timer runs, the x and check pills are up;
 //   4. it taps the check;
 //   5. TRANSCRIBING: the pills are gone, the bars stop following the voice and a sine runs
@@ -134,10 +134,14 @@ const CAPTION_REC = scribbleLine(13, 1.6, 871), CAPTION_TRANS = scribbleLine(17,
 const SUGGEST = [scribbleLine(12, 2, 881), scribbleLine(11, 2, 883), scribbleLine(10, 2, 885)];
 const NOTE = { x: 7, line0: 32, lead: 7 };
 
-// ---------------------------------------------------------------- the finger
-// an index finger from the bottom right, pointing up and to the left onto the glass; drawn flat,
-// in her skin and lines. `tip` is where the pad touches; lifted, it hovers up and to the right
-const FINGER_DIR: P = [0.42, 0.91];   // from the tip back toward the hand
+// ---------------------------------------------------------------- the hand
+// Her right hand, seen from the back, palm down over the glass: the index stretched out to tap,
+// the other three fingers folded (rolled over the hand's front edge), the thumb out to the
+// side, her blue sleeve at the wrist. Drawn flat, in her skin and lines. It
+// comes from the bottom right and every target sits at the tip of the index, up and to the left
+// of the hand, so the hand never covers the key, the mic or the check it is tapping. `tip` is
+// where the pad touches; lifted, the hand hovers up and to the right.
+const HAND_DIR: P = [0.42, 0.91];   // from the fingertip back toward the wrist
 const AWAY: P = [1500, 3000];
 const fingerAt = (f: number): { tip: P; press: number } => {
   let a = FINGER[0], b = FINGER[FINGER.length - 1];
@@ -146,18 +150,39 @@ const fingerAt = (f: number): { tip: P; press: number } => {
   const t = ease((f - a[0]) / Math.max(1, b[0] - a[0]));
   return { tip: lerp(where(a[1], a[2]), where(b[1], b[2]), t), press: (a[2] ? 1 - t : 0) + (b[2] ? t : 0) };
 };
-const drawFinger = (g: Gfx, tip: P, press: number) => {
+// the hand's shapes in its own frame: `a` runs from the fingertip back toward the wrist, `b`
+// across it, positive on the thumb side
+const BACK: P[] = [[186, 34], [178, -22], [198, -84], [232, -142], [296, -172], [420, -170], [560, -126], [700, -70], [740, 70], [560, 112], [400, 112], [270, 84]];
+const FOLDED: [P, P, number][] = [[[246, -44], [212, -54], 23], [[272, -94], [236, -106], 22], [[300, -140], [266, -152], 19]];
+const SLEEVE: P[] = [[640, -112], [1100, -150], [1100, 160], [660, 120]];
+const drawHand = (g: Gfx, tip: P, press: number) => {
   if (tip[1] > 2900) return;
-  const [dx, dy] = FINGER_DIR, back: P = [tip[0] + dx * 900, tip[1] + dy * 900];
-  // its shadow on the glass, closer as it presses
-  const sh = 26 - 18 * press;
-  fillShape(g, tube([[tip[0] + sh, tip[1] + sh * 0.6], [back[0] + sh, back[1]]], 34, 52, true), T.shadow, 0.12 + 0.1 * press);
-  const finger = tube([tip, [tip[0] + dx * 200, tip[1] + dy * 200], back], 33, 50, true);
-  cel(g, finger, SKIN, SKIN_SH, 8); outline(g, finger, 5.5, 900);
-  // the nail, and the creases of the first two joints
-  const nail = tube([[tip[0] + dx * 10, tip[1] + dy * 10], [tip[0] + dx * 52, tip[1] + dy * 52]], 18, 20, true);
-  cel(g, nail, "#F8D9C4", "#E8B9A0", 3); outline(g, nail, 3, 901);
-  [120, 250].forEach((d, k) => stroke(g, [[tip[0] + dx * d - 26, tip[1] + dy * d + 10], [tip[0] + dx * d + 2, tip[1] + dy * d - 4], [tip[0] + dx * d + 24, tip[1] + dy * d - 14]], 3, 902 + k, T.line, 0.8, 0.6));
+  const [dx, dy] = HAND_DIR, nx = -dy, ny = dx;
+  const H = ([a, b]: P): P => [tip[0] + dx * a + nx * b, tip[1] + dy * a + ny * b];
+  const Hs = (pts: P[]) => pts.map(H);
+  // its shadow on the glass, closer as the finger presses
+  const sh = 24 - 16 * press, shadow = (pts: P[]) => pts.map(([x, y]) => [x + sh, y + sh * 0.6] as P);
+  fillShape(g, shadow(tube(Hs([[0, 0], [200, -2]]), 27, 31, true)), T.shadow, 0.12 + 0.1 * press);
+  fillShape(g, shadow(sm(Hs(BACK))), T.shadow, 0.12 + 0.1 * press);
+  // the sleeve at the wrist
+  const sleeve = Hs(SLEEVE);
+  cel(g, sleeve, ACCENT, DEEP, 10); outline(g, sleeve, 5.5, 910);
+  stroke(g, Hs([[660, -110], [680, 116]]), 4, 911, HIGH, 0.4, 0.9);
+  // the back of the hand, then the three folded fingers rolled over its front edge
+  const back = sm(Hs(BACK));
+  cel(g, back, SKIN, SKIN_SH, 10); outline(g, back, 5.5, 930);
+  FOLDED.forEach(([p0, p1, r], k) => { const f = tube(Hs([p0, p1]), r, r * 0.95, true); cel(g, f, SKIN, SKIN_SH, 5); outline(g, f, 4.5, 920 + k); });
+  // the index, stretched out to the glass, its nail and the creases of its joints
+  const index = tube(Hs([[0, 0], [120, -1], [215, -6]]), 26, 31, true);
+  cel(g, index, SKIN, SKIN_SH, 6); outline(g, index, 5.5, 940);
+  const nail = tube(Hs([[8, 0], [42, 0]]), 14, 16, true);
+  cel(g, nail, "#F8D9C4", "#E8B9A0", 3); outline(g, nail, 3, 941);
+  [72, 140].forEach((a, k) => stroke(g, Hs([[a, -16], [a - 3, 0], [a, 16]]), 3, 942 + k, T.line, 0.8, 0.6));
+  // the thumb, out to the side of the index
+  const thumb = tube(Hs([[380, 92], [292, 124], [236, 158]]), 28, 22, true);
+  cel(g, thumb, SKIN, SKIN_SH, 6); outline(g, thumb, 5, 945);
+  const tnail = tube(Hs([[244, 154], [266, 141]]), 11, 12, true);
+  cel(g, tnail, "#F8D9C4", "#E8B9A0", 2); outline(g, tnail, 2.6, 946);
 };
 
 // ---------------------------------------------------------------- the picture
@@ -288,8 +313,8 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
     outline(g, top, 9, 6);
   });
 
-  // the finger, over everything
-  g.group("plain", () => drawFinger(g, finger.tip, finger.press));
+  // the hand, over everything
+  g.group("plain", () => drawHand(g, finger.tip, finger.press));
 };
 
 const film = (theme: Theme, title: string): Film => ({

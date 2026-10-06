@@ -3,12 +3,11 @@ import { rng, type Gfx, type P } from "./core";
 // WRITING THAT IS NOT WORDS (issue #667). Every "line of text" in the intro is a marker scribble
 // that reads as handwriting and spells nothing, so one render serves French, English, German and
 // Spanish: the only real words on the intro screen are the SwiftUI headline and subtitle. Also
-// here: the timer's digits (numerals, the same in every language the app ships) and the
-// no-network icon (bars struck through, never the words "No service").
+// here: the timer's digits (numerals, the same in every language the app ships).
 //
 // Everything is drawn in a LOCAL frame and mapped by the caller (`map`): x along the line from
-// 0, baseline at y = 0, up is -y. That is how the same scribble lies flat on a phone held in a
-// hand (scenes A, B) or in perspective on the giant phone (scene C).
+// 0, baseline at y = 0, up is -y. That is how the same scribble lies in perspective on scene C's
+// giant phone.
 
 export type Map = (p: P) => P;
 
@@ -67,16 +66,4 @@ export const drawDigits = (g: Gfx, text: string, h: number, map: Map, o: { w: nu
     x += h * (ch === ":" ? 0.32 : 0.7);
   });
   return x;
-};
-
-// ---------------------------------------------------------------- no network
-/** four signal bars, the empty ones outlined, struck through: `s` wide, bottom-left at the origin */
-export const drawNoSignal = (g: Gfx, s: number, map: Map, o: { line: number; color: string; strike: string; seed: number }) => {
-  const bw = s * 0.17, gap = s * 0.1;
-  [0.35, 0.55, 0.75, 1].forEach((hk, i) => {
-    const x0 = i * (bw + gap), hh = s * 0.8 * hk;
-    const bar: P[] = [[x0, 0], [x0, -hh], [x0 + bw, -hh], [x0 + bw, 0]];
-    g.pen(bar.map(map), { w: o.line, color: o.color, seed: o.seed + i, closed: true, wobble: 0.2, boil: 0, taper: 0.2, opacity: 1, retrace: false });
-  });
-  g.pen([[-s * 0.08, s * 0.08], [s * 1.02, -s * 0.9]].map((p) => map(p as P)), { w: o.line * 1.5, color: o.strike, seed: o.seed + 9, closed: false, wobble: 0.2, boil: 0, taper: 0.3, opacity: 1, retrace: false });
 };

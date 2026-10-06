@@ -1,21 +1,17 @@
 import { Gfx, softBox, tube, turn, type Medium, type P } from "./core";
 import { clipped, fillShape, smooth } from "./gallery";
-import { drawScribble, scribbleLine } from "./scribble";
 import { THEMES, type Loop, type Theme } from "./theme";
 
 // THE WOMAN (issue #667): the App Store hero V15-B's character (assets/appstore/art/v15-B/
 // heroWalk15.ts, untouched), drawn once and posed by the scenes. Scene A walks her, scene B
 // stands her in a metro carriage holding a pole. Her face, hair, top, trousers, trainers and
 // hands are V15-B's lines and colours; what a scene chooses is the pose (legs, the near arm, what
-// that hand carries, the body's bob and sway) and what her phone's screen shows.
+// that hand carries, the body's bob and sway).
 //
-// Two things differ from V15-B, both for the story (the voice goes INTO the phone and comes out
-// as text):
-// - the phone faces us. V15-B showed its back, which put the screen out of sight. Her hand is the
-//   same pieces, laid behind it: the fingertips show past the phone's left edge, the heel of the
-//   hand below it, and the thumb comes round over the right edge.
-// - the trousers are two legs and a seat instead of one silhouette, because one outline round
-//   both legs cannot survive them crossing in the walk.
+// One thing differs from V15-B: the trousers are two legs and a seat instead of one silhouette,
+// because one outline round both legs cannot survive them crossing in the walk. Her phone is
+// V15-B's, seen from the back as she holds it to her mouth (the way anyone talks into a phone);
+// her voice goes into it.
 //
 // The walk (legAt): a leg is its hip, its foot (heel point, sole angle, toe bend) and two bone
 // lengths; the knee is solved from them. V15-B's pose is the cycle's CONTACT position (Richard
@@ -259,10 +255,9 @@ const shoe = (g: Gfx, leg: Leg, k: number) => {
 const CREASE_FAR: P[][] = [[[-26, -20], [2, 0], [28, -6]]];
 const CREASE_NEAR: P[][] = [[[-34, -20], [-6, 14], [28, 8]], [[-30, 36], [-10, 50]]];
 // ---------------------------------------------------------------- the phone, front
-// the phone's screen, in phone-local coordinates (u across, v down from the centre)
-export const SCREEN = { u0: -45, u1: 45, v0: -97, v1: 97 };
-// her voice enters the screen here, under the Dynamic Island
-export const SCREEN_IN: P = [-6, -66];
+// her voice goes into the phone here, phone-local (u across, v down from the centre): past its
+// top edge, so the strokes end behind the phone
+export const PHONE_IN: P = [-4, -60];
 
 /** what a scene asks of her: the posed legs, the body's bob (down) and lean (forward), the walk
  *  phase her hair trails, the mouth's opening, the near arm (shoulder, elbow, wrist) and what its
@@ -275,10 +270,10 @@ export const phoneMap = (pose: Pose) => (pts: P[]): P[] => turn(pts.map(([x, y])
 export const mouthAt = (pose: Pose): P => [MOUTH_F[0] + pose.lean, MOUTH_F[1] + pose.bob];
 
 /**
- * Draw her, in figure space: the caller has pushed FIG. `screen` draws on the phone's screen
- * (clipped to it) through the phone's mapping.
+ * Draw her, in figure space: the caller has pushed FIG. `voice` is drawn just before the phone
+ * and the hand holding it, so the voice's strokes end behind the phone: they are seen going in.
  */
-export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, screen: (ph: (pts: P[]) => P[]) => void) => {
+export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) => {
   T = theme;
   const { far, near, bob, lean } = pose, bodyFig = (pts: P[]) => shift(pts, lean, bob);
   const layer = (fn: () => void) => g.group("plain", fn);
@@ -341,42 +336,40 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, screen: (ph: (pts: P
   });
   // the head, talking
   layer(() => { g.push(lean, bob, 1); inHead(g, () => head(g, pose.open)); g.pop(); });
-  // the phone arm in front of her chest: forearm up, her hand behind the phone, the phone's
-  // screen toward us, the thumb over its edge
+  // her voice, then the phone arm in front of her chest: forearm up, the iPhone's back, her hand
+  // on it (V15-B's)
+  layer(voice);
   layer(() => {
     const ph = phoneMap(pose);
     const [e, w] = bodyFig([ARM_FAR[1], ARM_FAR[2]]);
     piece(g, limbTube([e, w], 36, 31), ACCENT, DEEP, 12, 5.5, 150);
     { const l = Math.hypot(w[0] - e[0], w[1] - e[1]), d: P = [(w[0] - e[0]) / l, (w[1] - e[1]) / l];
       piece(g, limbTube([[w[0] - d[0] * 40, w[1] - d[1] * 40], [w[0] - d[0] * 8, w[1] - d[1] * 8]], 32, 31), HIGH, DEEP, 4, 4, 162); }
+    const { w: pw, h: phh } = PHONE;
+    // the phone's edge shows its thickness on the side turned from us
+    fillShape(g, ph(shift(softBox(0, 0, pw, phh, 6, 40), -8, 3)), "#121D33");
+    piece(g, ph(softBox(0, 0, pw, phh, 6, 40)), "#3B5584", "#24365A", 8, 4.5, 151);
+    // the camera module, top corner on the far side from her hand: three lenses and a flash
+    piece(g, ph(softBox(-20, -66, 50, 50, 4, 24)), "#4A6496", "#2C3F66", 4, 3.5, 152);
+    ([[-31, -77], [-31, -55], [-9, -66]] as P[]).forEach((c, j) => { const l = ph(circle(c, 9.5, 16)); fillShape(g, l, T.ink); outline(g, l, 2.4, 153 + j, T.ink); fillShape(g, ph(circle([c[0] + 2.5, c[1] - 2.5], 2.6, 8)), "#9DB6E0"); });
+    fillShape(g, ph(circle([-8, -84], 3.6, 10)), "#E8F0FF");
     const ch = phoneHand(ph);
     piece(g, ch.back, SKIN, SKIN_SH, 6, 4.5, 156);
     ch.fingers.forEach((s, j) => piece(g, s, SKIN, SKIN_SH, 4, 3.4, 157 + j));
-    const { w: pw, h: phh } = PHONE;
-    // the phone's edge shows its thickness on the side turned from us
-    fillShape(g, ph(shift(softBox(0, 0, pw, phh, 6, 40), 7, 3)), "#121D33");
-    // the frame, the black glass, the screen
-    piece(g, ph(softBox(0, 0, pw, phh, 6, 40)), "#3B5584", "#24365A", 6, 4.5, 151);
-    fillShape(g, ph(softBox(0, 0, pw - 6, phh - 6, 6, 40)), "#0B1220");
-    const scr = ph(softBox(0, 0, SCREEN.u1 - SCREEN.u0, SCREEN.v1 - SCREEN.v0, 6, 40));
-    fillShape(g, scr, T.screen);
-    clipped(g, scr, () => screen(ph));
-    // the Dynamic Island
-    fillShape(g, ph(softBox(0, -86, 30, 8, 2.4, 20)), "#0B1220");
     piece(g, ch.thumb, SKIN, SKIN_SH, 4, 3.8, 161);
   });
 };
 
 // ---------------------------------------------------------------- her voice, into the phone
 /** the path of her voice, figure space: out of her lips and up to the right, over in an arch,
- *  and back down into the top of the screen, so the voice is seen to go in */
+ *  and back down into the top of the phone, ending behind it */
 export const voicePath = (pose: Pose): Path => {
-  const m = mouthAt(pose), ph = phoneMap(pose), [inP] = ph([SCREEN_IN]);
+  const m = mouthAt(pose), ph = phoneMap(pose), [inP] = ph([PHONE_IN]);
   const d = (x: number, y: number): P => [m[0] + x, m[1] + y];
   return pathOf([d(14, -14), d(56, -86), d(140, -146), d(236, -140), d(262, -72), d(214, -14), [inP[0] + 30, inP[1] - 40], inP], 20);
 };
 /**
- * Three thin marker strokes from her lips into the screen, broken into pulses that travel along
+ * Three thin marker strokes from her lips into the phone, broken into pulses that travel along
  * them toward the phone: `n` pulses reach it per loop, so the stream is periodic. The strokes
  * fan out a little over the arch and gather again as they enter.
  */
@@ -385,7 +378,7 @@ export const drawVoice = (g: Gfx, pose: Pose, lp: Loop, frame: number, n: number
   [-1, 0, 1].forEach((o, j) => {
     const lane = (s: number) => o * 9 * Math.sin(Math.PI * clamp(s / L)) + Math.sin((s / L) * Math.PI * [3, 4, 3.4][j] + j - flow * 2 * Math.PI) * 3 * Math.sin(Math.PI * clamp(s / L));
     // pulse k covers [start, start + 0.62 period]; starts advance with the flow, and a pulse is
-    // cut at both ends of the path, so pulses are born at her lips and swallowed by the screen
+    // cut at both ends of the path, so pulses are born at her lips and swallowed by the phone
     for (let k = -1; k <= 3; k++) {
       const a = (k + flow + j * 0.12) * period, b = a + period * 0.62, s0 = Math.max(0, a), s1 = Math.min(L, b);
       if (s1 - s0 < 6) continue;
@@ -393,21 +386,5 @@ export const drawVoice = (g: Gfx, pose: Pose, lp: Loop, frame: number, n: number
       for (let s = s0; s <= s1 + 0.01; s += 5) pts.push(off(path, s, lane(s)));
       g.pen(pts, { w: [4.4, 5.6, 3.8][j], color: [HIGH, ACCENT, DEEP][j], seed: 170 + j, closed: false, wobble: 0.5, boil: 0, taper: 0.8, opacity: 1, retrace: false });
     }
-  });
-};
-
-// ---------------------------------------------------------------- what the screen says
-// Three lines of scribbled handwriting, written as her voice goes in. They write between 6 % and
-// 80 % of the loop, at a speed that wavers with her speech (the wobble turns eleven times a loop
-// and never stops the pen going forward), then slide up and fade before the seam, so every loop
-// starts on an empty screen. `top` is where the first line's baseline sits (phone v).
-const SCREEN_LINES = [0, 1, 2].map((i) => scribbleLine([70, 72, 44][i], 6, 400 + i * 17));
-export const drawScreenText = (g: Gfx, ph: (pts: P[]) => P[], lp: Loop, frame: number, top: number) => {
-  const t = lp.tau(frame), written = 3 * clamp((t - 0.06) / 0.74 + 0.012 * Math.sin(2 * Math.PI * 11 * t));
-  const clear = clamp((t - 0.86) / 0.11), lift = -14 * clear * clear, fade = 1 - clear;
-  if (fade <= 0) return;
-  SCREEN_LINES.forEach((words, i) => {
-    const map = ([x, y]: P): P => ph([[SCREEN.u0 + 9 + x, top + i * 17 + lift + y]])[0];
-    drawScribble(g, words, clamp(written - i), map, { w: 3, color: T.screenInk, seed: 420 + i * 9, opacity: fade });
   });
 };
