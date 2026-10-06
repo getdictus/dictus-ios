@@ -61,12 +61,39 @@ final class VoiceNoteReworkTests: XCTestCase {
 
     // MARK: - Short notes
 
-    func testShortNotesGetNoSummary() {
-        XCTAssertEqual(VoiceNoteAvailability.summaryMinimumCharacters, 200)
+    /// The floor is the armed mode's, read through the same resolution the card uses:
+    /// the stored setting → `VoiceNoteMode.smartMode` → `runs(onInputOfLength:)` (#650).
+    private func voiceNoteModeRuns(_ storedValue: String, on characters: Int,
+                                   file: StaticString = #filePath, line: UInt = #line) throws -> Bool {
+        let mode = try XCTUnwrap(VoiceNoteMode(storedValue: storedValue).smartMode, storedValue,
+                                 file: file, line: line)
+        return mode.runs(onInputOfLength: characters)
+    }
+
+    /// `Résumé`, the default, keeps the behaviour it had under the old global floor.
+    func testAShortNoteGetsNoSummary() throws {
         // The device failure: an 8-second, 132-character note.
-        XCTAssertFalse(VoiceNoteAvailability.summaryRuns(onTranscriptOfLength: 132))
-        XCTAssertFalse(VoiceNoteAvailability.summaryRuns(onTranscriptOfLength: 199))
-        XCTAssertTrue(VoiceNoteAvailability.summaryRuns(onTranscriptOfLength: 200))
+        XCTAssertFalse(try voiceNoteModeRuns(SmartModeCatalogue.summaryIdentifier, on: 132))
+        XCTAssertFalse(try voiceNoteModeRuns(SmartModeCatalogue.summaryIdentifier, on: 199))
+        XCTAssertTrue(try voiceNoteModeRuns(SmartModeCatalogue.summaryIdentifier, on: 200))
+        XCTAssertEqual(VoiceNoteMode.defaultMode.smartMode?.minimumInputCharacters, 200)
+    }
+
+    /// The #650 case: a 7-second French note with `→ EN` armed is translated. So is
+    /// any short note in `Message` or `Liste`, which carry no input floor.
+    func testAShortNoteRunsEveryModeWithoutAFloor() throws {
+        let unfloored = [SmartModeCatalogue.translateIdentifier(target: .english),
+                         SmartModeCatalogue.messageIdentifier, SmartModeCatalogue.notesIdentifier]
+        for identifier in unfloored {
+            XCTAssertTrue(try voiceNoteModeRuns(identifier, on: 90), identifier)
+            XCTAssertTrue(try voiceNoteModeRuns(identifier, on: 1), identifier)
+        }
+    }
+
+    /// `Structuré` declines a short note as it declines a short dictation.
+    func testAShortNoteSkipsStructured() throws {
+        XCTAssertFalse(try voiceNoteModeRuns(SmartModeCatalogue.structuredIdentifier, on: 132))
+        XCTAssertTrue(try voiceNoteModeRuns(SmartModeCatalogue.structuredIdentifier, on: 200))
     }
 
     // MARK: - Unread stack

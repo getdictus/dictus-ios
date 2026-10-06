@@ -28,6 +28,12 @@ import DictusCore
 struct ToolbarView: View {
     let hasFullAccess: Bool
     let dictationStatus: DictationStatus
+
+    /// Whether this device can dictate from the keyboard at all (#635). False on a
+    /// pre-A14 chip: the mic is drawn disabled and the centre slot says why. Defaulted
+    /// to true so a call site that does not care keeps today's keyboard.
+    var supportsDictation: Bool = true
+
     var onMicTap: () -> Void
 
     // Suggestion bar integration parameters (default to idle/empty)
@@ -259,7 +265,13 @@ struct ToolbarView: View {
 
             centreSlotContent
 
-            micPill
+            // #635: a pre-A14 device gets the Full Access bar's disabled mic, and with
+            // it no fan gesture — the long press is a dictation path too.
+            if supportsDictation {
+                micPill
+            } else {
+                disabledMic
+            }
         }
     }
 
@@ -272,6 +284,7 @@ struct ToolbarView: View {
             errorMessage: statusMessage,
             offersDictationUndo: showsDictationUndo,
             hasSuggestions: !suggestions.isEmpty,
+            dictationUnavailable: !supportsDictation,
             polishUnavailable: showsPolishUnavailable,
             armedModeName: armedSmartMode?.localizedDisplayName,
             armedModeIsEffective: effectiveSmartMode != nil,
@@ -296,6 +309,8 @@ struct ToolbarView: View {
                 mode: suggestionMode,
                 onTap: { index in onSuggestionTap?(index) }
             )
+        case .dictationUnavailable:
+            dictationUnavailableNotice
         case .polishUnavailable:
             polishUnavailableNotice
         case .armedMode(let name):
@@ -685,11 +700,42 @@ struct ToolbarView: View {
             HStack {
                 Spacer()
 
-                AnimatedMicButton(status: .idle, isPill: true, animatesIdleGlow: false, onTap: {})
-                    .disabled(true)
-                    .opacity(0.4)
+                disabledMic
             }
         }
+    }
+
+    /// The mic as a control that cannot be used: no action, no gesture, greyed.
+    ///
+    /// Shared by the Full Access bar and by a pre-A14 device (#635) so the two refusals
+    /// look the same. `.disabled` alone would not be enough for the second: the live
+    /// pill carries the Smart Mode fan's long press, which starts a dictation on
+    /// release. This one carries nothing.
+    private var disabledMic: some View {
+        AnimatedMicButton(status: .idle, isPill: true, animatesIdleGlow: false, onTap: {})
+            .disabled(true)
+            .opacity(0.4)
+    }
+
+    /// Why the mic is greyed on a pre-A14 device (#635).
+    ///
+    /// The Full Access bar's footnote, secondary, minus its icon: this bar keeps the ☰
+    /// on its left, so the sentence has the width between two pills and no more. One
+    /// line that shrinks a little rather than wraps, so the bar keeps its 52 pt (#166).
+    ///
+    /// The copy names the device, not the chip: the user cannot act on "A12", and the
+    /// onboarding already told them the reason when they added the keyboard.
+    private var dictationUnavailableNotice: some View {
+        Text(
+            "Dictation unavailable on this device",
+            comment: "Keyboard toolbar note beside the disabled mic on a device whose chip is too old to dictate from the keyboard (#635)."
+        )
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+        .padding(.leading, 6)
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: - Controls

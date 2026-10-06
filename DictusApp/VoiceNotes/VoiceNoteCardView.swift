@@ -45,6 +45,13 @@ struct VoiceNoteCardView: View {
         case idle
         case running
         case failed(String)
+        /// The armed mode declined this transcript as too short for it (#650): under
+        /// its `minimumInputCharacters` before anything ran, or, for `Liste`, a list of
+        /// one item after the model ran. Not a failure, so no "Try again": the card
+        /// shows the transcript alone, as it does for a short `Résumé`. Kept for the
+        /// card's lifetime so the decline is neither recomputed nor logged again on
+        /// every activation of a stack.
+        case declined
     }
 
     /// A finished result, from either store.
@@ -175,10 +182,13 @@ struct VoiceNoteCardView: View {
     private func summarySection(_ content: Content) -> some View {
         if let summary = content.summary {
             textBlock(title: Text(modeTitle(content.summaryModeIdentifier)), text: summary, target: "summary")
-        } else if let mode = VoiceNoteSettings.load().mode.smartMode,
-                  VoiceNoteAvailability.summaryRuns(onTranscriptOfLength: content.transcript.count) {
-            // A short note shows its transcript alone, with no card announcing a
-            // summary that would only restate it (#620 rework).
+        } else if summaryState != .declined,
+                  let mode = VoiceNoteSettings.load().mode.smartMode,
+                  mode.runs(onInputOfLength: content.transcript.count) {
+            // A note too short for its mode shows its transcript alone, with no card
+            // announcing a result that would only restate it (#620 rework). "Too short"
+            // is the mode's answer since #650, not a voice note constant: a short
+            // `Résumé` hides this card, a short `→ EN` translates.
             VStack(alignment: .leading, spacing: 8) {
                 Text(modeTitle(mode.id))
                     .font(.dictusSubheading)
@@ -222,6 +232,9 @@ struct VoiceNoteCardView: View {
                     }
                     .font(.dictusCaption.weight(.semibold))
                 }
+            case .declined:
+                // `summarySection` does not draw this card at all once declined.
+                EmptyView()
             }
         }
     }
@@ -344,10 +357,20 @@ struct VoiceNoteCardView: View {
 
     private func summariseIfNeeded(_ content: Content) async {
         guard content.summary == nil, summaryState == .idle,
-              VoiceNoteSettings.load().mode.smartMode != nil,
-              VoiceNoteAvailability.summaryRuns(onTranscriptOfLength: content.transcript.count),
+              let mode = VoiceNoteSettings.load().mode.smartMode,
               summaryUnavailableReason == nil,
               VoiceNoteAvailability.isEntitled else { return }
+        // The mode's own floor, the one the keyboard applies (#650). Checked here,
+        // before `polish`, rather than left to `PolishService`'s short-input branch:
+        // that branch runs a Normal polish in the mode's place, which a voice note
+        // would spend Apple Intelligence on and then not show. The skip is still
+        // recorded, with the same event the keyboard writes, so an export tells a
+        // short note that skipped its mode from one that never tried.
+        guard mode.runs(onInputOfLength: content.transcript.count) else {
+            summaryState = .declined
+            await PolishCoordinator.shared.recordSkippedForLength(mode, raw: content.transcript)
+            return
+        }
         await summarise(content)
     }
 
@@ -369,9 +392,15 @@ struct VoiceNoteCardView: View {
         )
         // A degraded outcome hands back the transcript itself: never shown as a summary.
         if let failure = outcome.smartModeFailure {
-            PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "summary", action: "failed",
+            // A decline is not a failure (#650). On a voice note it is `Liste`'s output
+            // check, now reachable since short notes run their mode: a one-item list
+            // was turned down, and the service has already recorded why. "Could not
+            // be produced" with a "Try again" would invite the same decline again.
+            let declined = failure.outcome == PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue
+            PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "summary",
+                                               action: declined ? "declined" : "failed",
                                                details: "mode=\(mode.id) outcome=\(failure.outcome) reason=\(failure.reason)"))
-            summaryState = .failed(VoiceNoteCopy.summaryFailed(failure))
+            summaryState = declined ? .declined : .failed(VoiceNoteCopy.summaryFailed(failure))
             return
         }
         guard let summary = outcome.text?.trimmingCharacters(in: .whitespacesAndNewlines), !summary.isEmpty else {

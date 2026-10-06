@@ -277,6 +277,22 @@ public final class ProStatusManager: ObservableObject {
         )
     }
 
+    /// What the Home Pro card shows (#216 decision 16): today's promotion for free
+    /// and trial users, the calm "Dictus Pro" card once Pro is owned.
+    ///
+    /// - Parameter activeFeatures: how many Pro features are switched on, from
+    ///   `ProFeatureSwitches` so the count follows a switch flipped in the hub.
+    public func homeCardContent(activeFeatures: Int) -> ProHomeCardContent {
+        ProHomeCard.content(
+            paywallVisible: environment.paywallVisible,
+            promotion: promotionEntry,
+            isPaid: isPaid,
+            isEntitled: isProActive,
+            trial: trialState,
+            activeFeatures: activeFeatures
+        )
+    }
+
     /// Whether the end-of-trial paywall should open now. Once, ever.
     public var endOfTrialPaywallDue: Bool {
         ProTrialPolicy.endOfTrialPaywallDue(

@@ -229,14 +229,7 @@ public final class PolishService {
         let call = PolishCall(raw: raw, languagePolicy: languagePolicy,
                               recordingDuration: recordingDuration, engineRaw: engineRaw)
         if let armed = smartMode, !armed.runs(onInputOfLength: raw.count) {
-            let floor = armed.minimumInputCharacters ?? 0
-            return await skipForShortInput(
-                armed,
-                request: call,
-                detail: PolishMetrics.SmartModeLengthSkip(mode: armed.id, characters: raw.count, floor: floor),
-                logReason: "shortInput chars=\(raw.count) floor=\(floor)",
-                onEngineWillRun: onEngineWillRun
-            )
+            return await skipForShortInput(armed, request: call, onEngineWillRun: onEngineWillRun)
         }
         let outcome = await polishDispatched(call, smartMode: smartMode, onEngineWillRun: onEngineWillRun)
         guard let armed = smartMode, let failure = outcome.smartModeFailure,
@@ -993,20 +986,24 @@ public final class PolishService {
         let engineRaw: String?
     }
 
-    /// Record the skip, then run the dictation as if nothing were armed (#587). Since
-    /// #573 the same answer serves an output that failed the mode's
-    /// `minimumListItems`, with `detail` and `logReason` saying which rule declined.
+    /// Record that `mode` declined `raw` for being under its `minimumInputCharacters`,
+    /// without running anything: the persistent log line and the
+    /// `smartModeSkippedShortInput` metrics event, with the length and the floor.
     ///
-    /// The returned outcome carries the text of that run **and** a `SmartModeFailure`,
-    /// which is what `isDegraded` already means everywhere else: text was inserted and
-    /// the mode did not run. The keyboard's toolbar says so in one sentence.
-    private func skipForShortInput(_ mode: SmartMode,
-                                   request: PolishCall,
-                                   detail: PolishMetrics.SmartModeLengthSkip,
-                                   logReason: String,
-                                   onEngineWillRun: (() -> Void)?) async -> PolishOutcome {
-        let raw = request.raw
-        PersistentLog.log(.smartModeSkipped(mode: mode.id, reason: logReason, disarmed: false))
+    /// ### Why this is public (#650)
+    ///
+    /// `polish` writes it on its own short-input branch, below. The voice note result
+    /// card decides the same question **before** calling `polish`, because a voice note
+    /// whose mode declined shows its transcript alone, and calling `polish` anyway would
+    /// spend a Normal polish on a text nobody reads. Before #650 that early return wrote
+    /// nothing at all, so a 7-second note that never ran its mode left no trace in the
+    /// export, and "skipped" could not be told from "never tried". The card now calls
+    /// this, and the event is byte for byte the keyboard's.
+    public func recordSkippedForLength(_ mode: SmartMode, raw: String, engineRaw: String? = nil) async {
+        let floor = mode.minimumInputCharacters ?? 0
+        PersistentLog.log(.smartModeSkipped(
+            mode: mode.id, reason: "shortInput chars=\(raw.count) floor=\(floor)", disarmed: false
+        ))
         await emit(
             PolishMetrics(
                 engine: activeEngine.identifier,
@@ -1017,10 +1014,26 @@ public final class PolishService {
                 polishedCharCount: raw.count,
                 latencyMs: 0,
                 outcome: .smartModeSkippedShortInput,
-                smartModeLengthSkip: detail
+                smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip(
+                    mode: mode.id, characters: raw.count, floor: floor
+                )
             ),
-            raw: raw, engineRaw: request.engineRaw, polished: nil
+            raw: raw, engineRaw: engineRaw, polished: nil
         )
+    }
+
+    /// Record the skip, then run the dictation as if nothing were armed (#587).
+    /// `Liste`'s output check (#573) records its own decline in `checkList` and
+    /// replaces the output in `replaceDeclinedList`; it does not come through here.
+    ///
+    /// The returned outcome carries the text of that run **and** a `SmartModeFailure`,
+    /// which is what `isDegraded` already means everywhere else: text was inserted and
+    /// the mode did not run. The keyboard's toolbar says so in one sentence.
+    private func skipForShortInput(_ mode: SmartMode,
+                                   request: PolishCall,
+                                   onEngineWillRun: (() -> Void)?) async -> PolishOutcome {
+        let raw = request.raw
+        await recordSkippedForLength(mode, raw: raw, engineRaw: request.engineRaw)
         let outcome = await polish(
             raw: raw, languagePolicy: request.languagePolicy, smartMode: nil,
             recordingDuration: request.recordingDuration, engineRaw: request.engineRaw,

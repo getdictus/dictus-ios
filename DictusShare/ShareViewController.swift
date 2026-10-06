@@ -175,6 +175,11 @@ final class ShareModel: ObservableObject {
             state = .refused(String(localized: "Transcribing voice notes is part of Dictus Pro. Open Dictus to find out more.",
                                     comment: "Share extension: the user has no Pro entitlement and the paywall is visible (#620)."))
             return
+        case .refuseSwitchedOff:
+            log("rejected", "reason=switchedOff detected=none type=none")
+            state = .refused(String(localized: "Voice notes are switched off. Turn them back on in Dictus, under Dictus Pro.",
+                                    comment: "Share extension: a Pro user switched voice notes off in the Dictus Pro hub (#216)."))
+            return
         case .refuseUnavailable:
             log("rejected", "reason=unavailable detected=none type=none")
             state = .refused(String(localized: "Transcribing voice notes is not available in this version of Dictus.",

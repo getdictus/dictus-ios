@@ -23,7 +23,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 5. ~~#593 — reverse trial: Pro free for a fixed period, then the paywall~~ — merged in PR #595; two device checks left (iPad, EN strings)
 6. #649 — onboarding rebuild, grilled 2026-10-05: PR A (language + model) `ready-for-agent`, then mock-ups, PR B, PR C. #653 alongside
 7. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
-8. #621 — search the history: the paywall already sells it. `ready-for-agent`. Must land before #279.
+8. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
 9. #643 — App Store listing for 2.0.0: screenshots that sell Pro, en + fr. Direction B. `ready-for-agent`
 10. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
 11. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp

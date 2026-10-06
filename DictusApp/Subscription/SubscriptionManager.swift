@@ -26,6 +26,14 @@ final class SubscriptionManager: ObservableObject {
     @Published private(set) var products: [Product] = []
     @Published private(set) var purchaseState: PurchaseState = .idle
 
+    /// What the user owns, for the Pro hub's subscriber block (#216): the lifetime,
+    /// and the auto-renewable plan with its renewal date. `nil` until the first
+    /// entitlement scan of this launch lands, so the hub can wait rather than guess.
+    ///
+    /// Refreshed by every scan, alongside `isPaid`, so a renewal, a cancellation made
+    /// in Apple's sheet or a refund moves it without the hub asking.
+    @Published private(set) var ownership: ProOwnership?
+
     /// Identifiers live in `DictusCore.ProProductID`, which the DictusCore test
     /// suite checks against the local StoreKit configuration — this target has
     /// no tests of its own and an identifier typo is unrecoverable (#215).
@@ -38,7 +46,18 @@ final class SubscriptionManager: ObservableObject {
     var lifetimeProduct: Product? { products.first { $0.id == ProProductID.lifetime } }
 
     private var transactionListener: Task<Void, Never>?
+
+    /// Listens to the subscription group's status changes (#216). See
+    /// `listenForStatusUpdates()`.
+    private var statusListener: Task<Void, Never>?
+
+    /// The re-read running after Apple's Manage subscription sheet closed, if any.
+    private var manageSheetRecheck: Task<Void, Never>?
+
     private let proStatus: ProStatusManager
+
+    /// Numbers overlapping entitlement scans so only the latest publishes (#216).
+    private var scanGenerations = ProScanGeneration()
 
     init(proStatus: ProStatusManager) {
         self.proStatus = proStatus
@@ -47,6 +66,7 @@ final class SubscriptionManager: ObservableObject {
         // while the app was killed, Transaction.updates delivers those
         // transactions on next launch. Missing them = stale Pro status.
         transactionListener = listenForTransactions()
+        statusListener = listenForStatusUpdates()
         // Products first, then the entitlement scan (passive, no sign-in prompt).
         // WHY in that order: the scan's grace-period check reads the subscription
         // status through a loaded product, and run in parallel it could find none
@@ -60,6 +80,8 @@ final class SubscriptionManager: ObservableObject {
 
     deinit {
         transactionListener?.cancel()
+        statusListener?.cancel()
+        manageSheetRecheck?.cancel()
     }
 
     // MARK: - Public API
@@ -152,6 +174,34 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
+    /// Re-reads ownership after Apple's Manage subscription sheet closed (#216).
+    ///
+    /// WHY more than one read: switching auto-renew off in the sheet produces no
+    /// transaction, and on device (iOS 27.0.1 sandbox, 2026-10-02) the renewal info
+    /// StoreKit returned right after the sheet closed still said it would renew: the
+    /// hub kept "Renews on" until the sheet was opened and closed a second time.
+    /// `listenForStatusUpdates()` is the event source for that change; this is its
+    /// bounded backstop, `ProOwnershipRecheck.delays` (about ten seconds), stopping at
+    /// the first read that differs from the one before the sheet closed. Each read is
+    /// logged, so a device log shows which of the two delivered the cancellation.
+    func recheckAfterManageSheet() {
+        manageSheetRecheck?.cancel()
+        let before = ownership
+        manageSheetRecheck = Task { [weak self] in
+            for (index, delay) in ProOwnershipRecheck.delays.enumerated() {
+                try? await Task.sleep(for: .milliseconds(Int(delay * 1000)))
+                guard let self, !Task.isCancelled else { return }
+                await self.updateProStatus()
+                let settled = ProOwnershipRecheck.isSettled(before: before, after: self.ownership)
+                Self.logStoreKit(
+                    action: "manageSheetRecheck",
+                    details: "attempt=\(index + 1)/\(ProOwnershipRecheck.delays.count) settled=\(settled) willAutoRenew=\(self.ownership?.subscription?.willAutoRenew.map(String.init) ?? "unknown")"
+                )
+                if settled { return }
+            }
+        }
+    }
+
     /// Reset purchaseState to idle — called by PaywallView after dismissing error alerts.
     func resetState() {
         purchaseState = .idle
@@ -183,6 +233,27 @@ final class SubscriptionManager: ObservableObject {
         }
     }
 
+    /// Listen for subscription status changes, renewal info included (#216).
+    ///
+    /// WHY on top of `Transaction.updates`: turning auto-renew off or on, in the
+    /// Manage subscription sheet or in the App Store, changes the renewal info without
+    /// creating a transaction, so the transaction listener never hears of it. This is
+    /// StoreKit's own event for that change. Each delivery triggers a full scan
+    /// rather than patching `ownership` from the one status received, so there stays
+    /// one place that decides what the user owns.
+    private func listenForStatusUpdates() -> Task<Void, Never> {
+        Task.detached { [weak self] in
+            for await status in Product.SubscriptionInfo.Status.updates {
+                let renews = (try? status.renewalInfo.payloadValue)?.willAutoRenew
+                Self.logStoreKit(
+                    action: "subscriptionStatusUpdate",
+                    details: "state=\(status.state.rawValue) willAutoRenew=\(renews.map(String.init) ?? "unknown")"
+                )
+                await self?.updateProStatus()
+            }
+        }
+    }
+
     /// Scan current entitlements to determine Pro status.
     ///
     /// WHY Transaction.currentEntitlements instead of storing expiry dates:
@@ -194,13 +265,19 @@ final class SubscriptionManager: ObservableObject {
     /// with no code of its own (#350). Restore lands here too, which is the
     /// whole promise of a non-consumable.
     private func updateProStatus() async {
+        // Only the latest scan publishes: see `ProScanGeneration`.
+        let generation = scanGenerations.begin()
         var isActive = false
         var seen: [String] = []
+        var owned: [Transaction] = []
         for await result in Transaction.currentEntitlements {
             switch result {
             case .verified(let transaction):
                 seen.append(Self.describe(transaction))
-                if transaction.revocationDate == nil { isActive = true }
+                if transaction.revocationDate == nil {
+                    isActive = true
+                    owned.append(transaction)
+                }
             case .unverified(let transaction, let error):
                 seen.append("UNVERIFIED \(transaction.productID) error=\(error)")
             }
@@ -217,7 +294,73 @@ final class SubscriptionManager: ObservableObject {
             action: "entitlementScan",
             details: "active=\(isActive) source=\(source) entitlements=\(seen.isEmpty ? "none" : seen.joined(separator: "; "))"
         )
+        let scannedOwnership = isActive ? await readOwnership(entitlements: owned) : ProOwnership.none
+        // A newer scan started while this one was suspended: its result is at least
+        // as fresh, so this one publishes nothing, neither the App Group entitlement
+        // nor `ownership`.
+        guard scanGenerations.mayPublish(generation) else {
+            Self.logStoreKit(action: "entitlementScanSuperseded", details: "generation=\(generation) active=\(isActive)")
+            return
+        }
+        // Before `setProActive`, so the hub never renders a paid state with the
+        // previous scan's plan under it.
+        ownership = scannedOwnership
         proStatus.setProActive(isActive)
+    }
+
+    /// What the user owns, read for the hub (#216).
+    ///
+    /// WHY the latest transactions on top of `entitlements`: the same iOS 27.0 sandbox
+    /// gap `entitlementFromOtherSources` documents. `currentEntitlements` can come back
+    /// empty for a subscription that is paid, and the hub must still name the plan
+    /// rather than fall back to "unknown".
+    ///
+    /// WHY the renewal date comes from the group status and not from the transaction:
+    /// `expirationDate` is the end of the period, and whether that is a renewal or the
+    /// last day of Pro is in the renewal info alone. A subscriber who cancelled in
+    /// Apple's sheet has to read "Ends on", not "Renews on".
+    private func readOwnership(entitlements: [Transaction]) async -> ProOwnership {
+        var transactions = entitlements
+        for id in productIDs.sorted() where !transactions.contains(where: { $0.productID == id }) {
+            guard case .verified(let transaction)? = await Transaction.latest(for: id),
+                  transaction.revocationDate == nil else { continue }
+            if let expires = transaction.expirationDate, expires <= Date() { continue }
+            transactions.append(transaction)
+        }
+
+        let ownsLifetime = transactions.contains { $0.productID == ProProductID.lifetime }
+
+        // The subscription group's status: which plan is live, and its renewal info.
+        var subscription: ProActiveSubscription?
+        if let group = (yearlyProduct ?? monthlyProduct)?.subscription,
+           let statuses = try? await group.status {
+            for status in statuses where status.state == .subscribed || status.state == .inGracePeriod {
+                guard case .verified(let transaction) = status.transaction else { continue }
+                let renewal = try? status.renewalInfo.payloadValue
+                subscription = ProActiveSubscription(
+                    productID: transaction.productID,
+                    periodEnd: renewal?.renewalDate ?? transaction.expirationDate,
+                    willAutoRenew: renewal?.willAutoRenew
+                )
+                break
+            }
+        }
+        // No status (products not loaded, or StoreKit refused): the transaction still
+        // names the plan and its period end. Renewal left unknown, not assumed.
+        if subscription == nil,
+           let transaction = transactions.first(where: { $0.productType == .autoRenewable }) {
+            subscription = ProActiveSubscription(
+                productID: transaction.productID,
+                periodEnd: transaction.expirationDate,
+                willAutoRenew: nil
+            )
+        }
+
+        Self.logStoreKit(
+            action: "ownershipScan",
+            details: "lifetime=\(ownsLifetime) subscription=\(subscription?.productID ?? "none") willAutoRenew=\(subscription?.willAutoRenew.map(String.init) ?? "unknown")"
+        )
+        return ProOwnership(ownsLifetime: ownsLifetime, subscription: subscription)
     }
 
     /// Whether the latest transaction of any Pro product, or the subscription
