@@ -189,7 +189,8 @@ struct ProHubMembershipCard: View {
     var upgrade: ProLifetimeUpgrade?
 
     /// The lifetime product's `displayPrice`, from StoreKit, never written here. The
-    /// row stays hidden while it has not loaded: a price-less upgrade cannot be bought.
+    /// purchasable row stays hidden while it has not loaded (a price-less upgrade
+    /// cannot be bought); the "cancel first" line does not need it.
     var lifetimePrice: String?
 
     /// Whether a purchase is in flight, to show progress in place of the chevron.
@@ -281,7 +282,10 @@ struct ProHubMembershipCard: View {
                 .buttonStyle(GlassPressStyle())
             }
 
-            if showsUpgrade, let upgrade, let lifetimePrice {
+            // The purchasable row needs the lifetime price; the "cancel first" line
+            // does not, and must not vanish with a product that failed to load: it is
+            // the renewing subscriber's only guidance toward the lifetime.
+            if showsUpgrade, let upgrade, !upgrade.isPurchasable || lifetimePrice != nil {
                 upgradeRow(upgrade, price: lifetimePrice)
             }
         }
@@ -300,11 +304,11 @@ struct ProHubMembershipCard: View {
     /// price. The switch between the two follows `ownership`, so a cancellation made
     /// in Apple's sheet turns the row into a button with nothing reopened.
     @ViewBuilder
-    private func upgradeRow(_ upgrade: ProLifetimeUpgrade, price: String) -> some View {
+    private func upgradeRow(_ upgrade: ProLifetimeUpgrade, price: String?) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Divider()
 
-            if upgrade.isPurchasable {
+            if upgrade.isPurchasable, let price {
                 Button(action: buyLifetime) {
                     HStack(spacing: 10) {
                         VStack(alignment: .leading, spacing: 2) {
