@@ -2,6 +2,9 @@
 import SwiftUI
 import UIKit
 import DictusCore
+#if canImport(Translation)
+import Translation
+#endif
 
 /// Hidden screen surfacing recent polish invocations. Reached by long-pressing
 /// the Version row in Settings for 3 seconds. Round-1 debugging tool — no
@@ -18,6 +21,7 @@ struct PolishDebugView: View {
 
     var body: some View {
         List {
+            TranslateEngineDebugSection()
             if !entries.isEmpty {
                 Section {
                     BreakdownRow(entries: entries)
@@ -415,3 +419,139 @@ private extension PolishMetrics.Outcome {
         }
     }
 }
+
+// MARK: - #648 device test: Translate engine switch
+
+/// Which engine the Translate Smart Mode runs on, for the #648 device test, and the
+/// one place a Translation language download can be started.
+///
+/// The choice is written to the App Group because the keyboard runs Translate since
+/// #361 and reads it there. Apple FM is the default and the shipped behaviour.
+///
+/// Downloads happen HERE and only here: `prepareTranslation()` may present system UI,
+/// which a keyboard extension cannot host. The pairs are fr → en, plus fr → the armed
+/// Translate mode's target when that is another language.
+private struct TranslateEngineDebugSection: View {
+    @State private var choice = TranslateEngineChoice.current
+    @State private var statuses: [String] = []
+    @State private var preparing: [(source: String, target: String)] = []
+    @State private var prepareMessage: String?
+
+    var body: some View {
+        Section {
+            Picker("Translate engine", selection: $choice) {
+                ForEach(TranslateEngineChoice.allCases, id: \.self) { option in
+                    Text(option.displayName).tag(option)
+                }
+            }
+            .onChange(of: choice) { _, newValue in
+                TranslateEngineChoice.store(newValue)
+            }
+            ForEach(statuses, id: \.self) { line in
+                Text(line).font(.caption.monospaced())
+            }
+            if #available(iOS 26.4, *) {
+                PrepareTranslationButton(pairs: pairs, message: $prepareMessage) {
+                    Task { await refreshStatuses() }
+                }
+            } else {
+                Text("Translation framework strategies need iOS 26.4.").font(.caption)
+            }
+            if let prepareMessage {
+                Text(prepareMessage).font(.caption).foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Translate engine (#648 test)")
+        } footer: {
+            Text("Apple FM is the shipped engine. A Translation strategy falls back to Apple FM, "
+                 + "with a translateEngineCall line in the debug log saying why.")
+                .font(.caption2)
+        }
+        .task { await refreshStatuses() }
+    }
+
+    /// fr → en, plus fr → the armed Translate target when it is neither.
+    private var pairs: [(source: String, target: String)] {
+        var pairs = [(source: "fr", target: "en")]
+        if let armed = SmartModeStore.armedIdentifier,
+           let target = SupportedLanguage.allCases.first(where: {
+               SmartModeCatalogue.translateIdentifier(target: $0) == armed
+           }),
+           target != .english, target != .french {
+            pairs.append((source: "fr", target: target.rawValue))
+        }
+        return pairs
+    }
+
+    private func refreshStatuses() async {
+        #if canImport(Translation)
+        guard #available(iOS 26.4, *) else { return }
+        var lines: [String] = []
+        for pair in pairs {
+            for (name, strategy) in [("highFidelity", TranslationSession.Strategy.highFidelity),
+                                     ("lowLatency", .lowLatency)] {
+                let status = await LanguageAvailability(preferredStrategy: strategy).status(
+                    from: Locale.Language(identifier: pair.source), to: Locale.Language(identifier: pair.target)
+                )
+                let word: String
+                switch status {
+                case .installed: word = "installed"
+                case .supported: word = "supported (not installed)"
+                case .unsupported: word = "unsupported"
+                @unknown default: word = "unknown"
+                }
+                lines.append("\(pair.source)→\(pair.target) \(name): \(word)")
+            }
+        }
+        statuses = lines
+        #endif
+    }
+}
+
+#if canImport(Translation)
+/// Prepares each pair in turn through `.translationTask`, the framework's only path to
+/// a download prompt. Both strategies are asked for, lowLatency last, so the classic
+/// model the Mac could not install headless (#648) is the one a tap here fetches.
+@available(iOS 26.4, *)
+private struct PrepareTranslationButton: View {
+    let pairs: [(source: String, target: String)]
+    @Binding var message: String?
+    let onFinished: () -> Void
+
+    @State private var queue: [TranslationSession.Configuration] = []
+    @State private var configuration: TranslationSession.Configuration?
+
+    var body: some View {
+        Button("Download / prepare languages") {
+            queue = pairs.flatMap { pair in
+                [TranslationSession.Strategy.highFidelity, .lowLatency].map { strategy in
+                    TranslationSession.Configuration(
+                        source: Locale.Language(identifier: pair.source),
+                        target: Locale.Language(identifier: pair.target),
+                        preferredStrategy: strategy
+                    )
+                }
+            }
+            advance()
+        }
+        .translationTask(configuration) { session in
+            do {
+                try await session.prepareTranslation()
+                await MainActor.run { message = "Prepared." }
+            } catch {
+                await MainActor.run { message = "Prepare failed: \(TranslateRoutingPolishEngine.slug(of: error))" }
+            }
+            await MainActor.run { advance() }
+        }
+    }
+
+    private func advance() {
+        guard !queue.isEmpty else {
+            configuration = nil
+            onFinished()
+            return
+        }
+        configuration = queue.removeFirst()
+    }
+}
+#endif
