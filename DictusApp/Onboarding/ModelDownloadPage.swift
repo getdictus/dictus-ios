@@ -289,16 +289,25 @@ struct ModelDownloadPage: View {
     private var modelCard: some View {
         let info = ModelInfo.forIdentifier(recommendedModel)
         return VStack(alignment: .leading, spacing: 12) {
-            Text(info?.displayName ?? "Voice model")
+            // WHY `String(localized:)` on the fallbacks (issue #661): a `String` passed
+            // to `Text` or `Label` is shown verbatim, so a bare literal here bypassed
+            // the string catalog.
+            Text(info?.displayName ?? String(localized: "Voice model"))
                 .font(.dictusSubheading)
                 .foregroundStyle(.primary)
 
             HStack(spacing: 16) {
-                Label(info?.sizeLabel ?? "~500 Mo", systemImage: "internaldrive")
-                    .font(.dictusCaption)
-                    .foregroundStyle(.secondary)
+                // No size without a catalogue entry: the old fallback was a guessed
+                // "~500 Mo", in French whatever the language.
+                if let size = info?.sizeLabel {
+                    Label(size, systemImage: "internaldrive")
+                        .font(.dictusCaption)
+                        .foregroundStyle(.secondary)
+                }
 
-                Label(info?.description ?? "Accurate and balanced", systemImage: "waveform")
+                // `localizedDescription`, not `description`: the latter is the
+                // catalogue's English text and read in English on a French iPhone.
+                Label(info?.localizedDescription ?? String(localized: "Accurate and balanced"), systemImage: "waveform")
                     .font(.dictusCaption)
                     .foregroundStyle(.secondary)
             }
