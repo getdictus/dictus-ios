@@ -9,9 +9,9 @@ every language.
 
 | File | Scene (headline) | What it shows | Drawn from |
 |---|---|---|---|
-| `intro-a-{light,dark}.mp4` | A, walking ("Parlez. Dictus écrit.") | She walks and talks into her phone. The blue strokes leave her lips and go into it, and a scribbled line writes itself on its screen. 5.5 s. | `assets/appstore/art/v15-B/heroWalk15.ts` |
-| `intro-b-{light,dark}.mp4` | B, the metro ("Même sans réseau.") | The same woman stands in a metro carriage, one hand on the pole, before a window where the tunnel's lights streak past. Her phone shows no network (struck-through bars), and the text still writes itself. 5.5 s. | Her: V15-B. The carriage: new, same style. |
-| `intro-c-{light,dark}.mp4` | C, the keyboard ("Dans votre clavier.") | The drawn iPhone, a note above the Dictus keyboard, through one whole dictation: a few keys typed, the blue mic tapped, recording (waveform, timer, ✕ and ✓), ✓ tapped, transcribing (the sweep), the text lands, then the note clears. 9 s. | `assets/appstore/art/v10-A/heroSpeak10.ts`, the phone (branch `chore/643-hero-a`) |
+| `intro-a-{light,dark}.mp4` | A, walking ("Parlez. Dictus écrit.") | She walks and talks into her phone, held to her mouth and seen from the back, as on the App Store art. The blue strokes leave her lips and go into it. 5.5 s. | `assets/appstore/art/v15-B/heroWalk15.ts` |
+| `intro-b-{light,dark}.mp4` | B, the metro ("Même sans réseau.") | The same woman stands in a metro carriage, one hand on the pole, before a window where the tunnel's lights streak past. A badge in the top-right corner says no network (signal bars struck through in red). Her voice still goes into the phone. 5.5 s. | Her: V15-B. The carriage: new, same style. |
+| `intro-c-{light,dark}.mp4` | C, the keyboard ("Dans votre clavier.") | The drawn iPhone, a note above the Dictus keyboard, through one whole dictation by her hand: a few keys typed, the blue mic tapped, recording (waveform, timer, ✕ and ✓), ✓ tapped, transcribing (the sweep), the text lands, then the note clears. 9 s. | `assets/appstore/art/v10-A/heroSpeak10.ts`, the phone (branch `chore/643-hero-a`) |
 
 Every video is 1000 × 1440 px (the 330 × 476 pt art area at 3×), 30 fps, HEVC Main, 4:2:0,
 BT.709, tagged `hvc1`. There is no audio track and one keyframe per loop. The light page is
@@ -56,13 +56,12 @@ Chromium build may antialias some pixels differently.
 - `src/theme.ts`: the frame, the three loops, and the two appearances.
 - `src/woman.ts`: her, posed by the scenes (V15-B's lines and colours), with:
   - the walk rig: a leg is its hip, its foot and two bones, and the knee is solved. The walk's contact position is V15-B's pose;
-  - the phone in her hand, now facing us;
-  - her voice going into the phone;
-  - the scribbled text that writes on its screen.
-- `src/scribble.ts`: handwriting that spells nothing, the timer's digits, and the no-network icon.
+  - V15-B's phone, seen from the back;
+  - her voice going into the phone, its strokes ending behind it.
+- `src/scribble.ts`: handwriting that spells nothing, and the timer's digits.
 - `src/introWalk.ts`: scene A, the pavement sliding back one slab joint per step.
-- `src/introMetro.ts`: scene B. The carriage (wall, bench, tunnel window, rail, pole), the lights streaking past, the carriage rocking and her swaying with it.
-- `src/introKeyboard.ts`: scene C, driven by one cue table (taps, mic, check, landing, clearing) that is checked against the 5-frame grid when the module loads.
+- `src/introMetro.ts`: scene B. The carriage (wall, bench, tunnel window, rail, pole), the lights streaking past, the carriage rocking and her swaying with it, and the no-network badge.
+- `src/introKeyboard.ts`: scene C, her hand typing, driven by one cue table (taps, mic, check, landing, clearing) that is checked against the 5-frame grid when the module loads.
 - `src/phoneGeometry.ts`: V10-A's phone in perspective.
 
 The App Store art files are untouched: these sources are copies, adapted.
@@ -73,11 +72,13 @@ The App Store art files are untouched: these sources are copies, adapted.
   - A fills the 330 × 476 pt frame (strip x 0–1466, y 750–2861).
   - B uses the same frame and the same placement as A, so she stands where she walked and the carousel does not jump.
   - C places the phone where its mock-up does: 300 pt wide, at (15, 83) pt.
-- **Her phone faces us** in A and B. V15-B showed its back, which kept the screen out of sight. Her hand is the same pieces, laid behind the phone: the fingertips show past its left edge and the thumb comes over its right edge.
+- **The phone is seen from the back** in A and B, as V15-B drew it. People talk into the back of a phone they hold to their mouth, not into a screen they show. The idea rides on the voice's strokes going into the phone; no screen text is drawn.
+- **No network is a badge, not a mark on the phone.** It sits in the frame's top-right corner, about 48 pt across on the device, with its own fill and contour so it reads over the wall, the window or the page in both appearances. Inside: the four signal bars (the mobile network is what a tunnel takes away), struck through in the recording red `#EF4444`. It swells a little twice a loop.
+- **Scene C's taps are made by a hand**, not a lone finger. Her right hand, seen from the back: the index stretched out to tap, the other three fingers folded, the thumb out to the side, her blue sleeve at the wrist. It comes from the bottom right and every target sits at the tip of the index, up and to the left, so the rest of the hand never covers what is being tapped. Two thumbs typing would need a second hand and a held phone, which this phone, lying flat, does not have.
 - **Scene C follows the real keyboard.** Recording draws the bars on a voice (`.micLevels`), with the ✕ and ✓ pills and the timer. Transcribing draws `.sweep`, the code's `0.2 + 0.25 (sin(2π (i/(n−1) + phase)) + 1)`, with an empty top bar of the same height, so the waveform does not move. The brief's "bright band" rides the sine's crest. The layout is read off the captures, in the phone's millimetres.
-- **No readable text.** The keys are blank caps with their icons only: shift, delete, emoji, return, globe, mic. The suggestions, the caption and the note are scribbles, and the no-network signal is the struck-through bars icon. The one exception is the timer's digits, `00:00` to `00:03`: numerals, the same in every language the app ships, and a timer is what the brief asks for.
+- **No readable text.** The keys are blank caps with their icons only: shift, delete, emoji, return, globe, mic. The suggestions, the caption and the note are scribbles, and scene B's no-network badge is an icon. The one exception is the timer's digits, `00:00` to `00:03`: numerals, the same in every language the app ships, and a timer is what the brief asks for.
 - **Scene B leaves out the optional noise** (a neighbour). At this size a second figure takes the eye away from her phone, which is the point of the scene. The carriage's rocking stays.
-- **Dark.** The art's ink is `#0A1628`, which is the dark page's colour. In dark, the contours turn to `#9FB0D0`, while the marks on skin and cloth (eyes, brows, mouth, pupils, lenses) stay navy. The ground, the carriage and the phones get dark tones of their own. The phones' screens and the keyboard follow the system's dark appearance. The tunnel is dark in both appearances.
+- **Dark.** The art's ink is `#0A1628`, which is the dark page's colour. In dark, the contours turn to `#9FB0D0`, while the marks on skin and cloth (eyes, brows, mouth, pupils, lenses) stay navy. The ground, the carriage and the phones get dark tones of their own. Scene C's screen and keyboard follow the system's dark appearance. The tunnel is dark in both appearances.
 - **No HEVC with alpha.** On this machine, only VideoToolbox (`hevc_videotoolbox`, `-alpha_quality`) writes it. Measured on the first version of scene A light:
 
   | Encode | Luma PSNR | Size |
