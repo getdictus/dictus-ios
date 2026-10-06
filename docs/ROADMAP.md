@@ -10,7 +10,7 @@ Where we are going, and which issue to work on next. Nothing else.
 - Whole file under 60 lines. If an edit pushes it past that, something belongs on an issue instead.
 - The [Project board](https://github.com/orgs/getdictus/projects/2) moves by itself on a branch push, a PR and a merge. Two moves are by hand: an issue added to **Now** is added to the board in the same edit (`gh project item-add 2 --owner getdictus --url <issue-url>`), and work with no branch (a grilling, a measurement) is set to In progress when it starts.
 
-Last reviewed: 2026-10-05.
+Last reviewed: 2026-10-06.
 
 ## Now — 2.0.0, the Pro launch
 
@@ -21,7 +21,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 3. ~~#637 — voice-note transcripts in the keyboard~~ — merged in PR #638; #639 (tap ☰ for notes, keep them 15 min) merged in PR #641; then #640 (research: quote a passage)
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; open until Pierre's verdict in real use
 5. ~~#593 — reverse trial: Pro free for a fixed period, then the paywall~~ — merged in PR #595; two device checks left (iPad, EN strings)
-6. #649 — onboarding rebuild, grilled 2026-10-05: PR A (language + model) `ready-for-agent`, then mock-ups, PR B, PR C. #653 alongside
+6. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); next competitor analysis, mock-ups, PR B, PR C
 7. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
 8. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
 9. #643 — App Store listing for 2.0.0: en design approved (PR #645), fr in progress. Then #661 (English leaks in the French UI) and #662 ("vous" everywhere), in sequence; recapture fr slide 6 after #661
