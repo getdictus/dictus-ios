@@ -21,7 +21,8 @@
 // Headless Chromium through Playwright, from a file:// URL: no server, no window.
 import { chromium } from "playwright";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -58,7 +59,7 @@ async function load(locale, theme, variant) {
     ids: window.SLIDE_IDS, iteration: window.ITERATION,
     themes: window.EXPORT_THEMES || ["navy", "light"], variants: window.VARIANTS || [undefined],
     pair: window.PAIR || null, only: window.EXPORT_SLIDES || null, reuse: window.REUSE_FROM || null,
-    sheet: window.SHEET || null, cut: window.CUT_PAIR || null,
+    sheet: window.SHEET || null, cut: window.CUT_PAIR || null, cutAlt: window.CUT_ALT || null,
   }));
 }
 
@@ -110,6 +111,16 @@ for (const locale of locales) {
       const name = asVariant(variant).montage ?? (v === 0 ? `montage${suffix}.jpg` : `montage-${vname}${suffix}.jpg`);
       montage(files, join(ROOT, "export", locale, meta.iteration, name));
       console.log(`${locale}/${meta.iteration}/${theme}/${vname}: ${files.length} slides, ${name}`);
+    }
+    // The same cut view for an alternative layout (window.CUT_ALT), shot to a temporary folder:
+    // its slides are only for the comparison, never delivered.
+    if (meta.cutAlt && meta.cut) {
+      const tmp = mkdtempSync(join(tmpdir(), "dictus-cut-alt-"));
+      await load(locale, theme, { name: "alt", query: meta.cutAlt.query });
+      const alt = meta.cut.slides.map((n) => join(tmp, `${n}.png`));
+      for (const [k, n] of meta.cut.slides.entries()) await shoot(alt[k], n);
+      execFileSync("magick", [...alt, "-resize", `${meta.cut.width}x`, "-bordercolor", "#FFFFFF", "-border", `${meta.cut.gap / 2}`,
+        "+append", "-quality", "92", join(ROOT, "export", locale, meta.iteration, meta.cutAlt.file)]);
     }
     // One sheet of the same slide across every variant (window.SHEET), side by side.
     if (meta.sheet) execFileSync("magick", [...sheetFiles, "-bordercolor", "#1C1F26", "-border", "12", "+append", "-resize", "2100x",

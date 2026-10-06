@@ -277,8 +277,13 @@ window.ITERATION_CAST = false;
 /* V11-B (round 3, default): the icon ribbon is one gesture, rising across slide 1, straddling the
    cut and diving out through slide 2's bottom edge; the voice crosses the cut level with the
    waveform, so slide 2's panel sits 250 px in from its left edge (art/v11-B/heroWalk11.ts). */
-const ART = params.get("art") || "v11-B";
-const STRIP_ART = ["v9-B", "v10-B", "v11-B"].includes(ART);   // canvases drawn at strip scale, placed at (0, 0)
+/* V12-B (round 4, default): everything flows left to right into slide 2's phone. Slide 2 is back
+   to its validated, centred layout; ?s2=turned (default) turns its phone and panel a little in
+   depth so the panel's left edge recedes, ?s2=flat keeps them flat. The hero canvas has one
+   rendering per layout, its voice ending on that layout's panel edge (art/v12-B/heroWalk12.ts). */
+const ART = params.get("art") || "v12-B";
+const S2 = params.get("s2") || "turned";
+const STRIP_ART = ["v9-B", "v10-B", "v11-B", "v12-B"].includes(ART);   // canvases drawn at strip scale, placed at (0, 0)
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -396,6 +401,7 @@ function addPhone(p, i, pro) {
   if (p.chat) d.querySelector(".layer").appendChild(chatScreen());
   if (p.compose) d.querySelector(".layer").appendChild(composeScreen());
   strip.appendChild(d);
+  DEVICES[i] = d;
   // Capture pixel (x, y) → strip coordinates.
   return (x, y) => [left + (75 + x) * scale, G.top + (66 + y) * scale];
 }
@@ -524,12 +530,12 @@ function addGreetings(list, i) {
    art/dictusHero.ts) and where its voice line ends, in its own pixels. */
 const ILLU = ART === "v8"
   ? { src: "art/v8/hero.png", w: 2640, h: 2000, panelIn: [1400, 1387] }   // V7 cast: art/v7/hero-${CAST}.png
-  : { src: `art/${ART}/hero.png`, w: 2640, h: 2868, panelIn: [1396, 1838.5] };
+  : { src: ART === "v12-B" ? `art/v12-B/hero-${S2}.png` : `art/${ART}/hero.png`, w: 2640, h: 2868, panelIn: [1396, 1838.5] };
 /* The waveform's centre in the recording capture (measured: blue bars from y 2052 to 2410). */
 const CAPTURE_WAVE_Y = 2231;
 /* The icon row along the very bottom of slides 1 and 2. */
 const BAND = { ribbonY: 2735 };
-const LIFTS = [];
+const LIFTS = [], DEVICES = [];
 
 /* App icons on the ribbon. Real icons are fetched by tools/fetch-icons.sh into the
    git-ignored .icons/ (third-party marks, never committed). The fallback draws
@@ -553,6 +559,32 @@ const ICON_SIZE = ART === "v10-B" ? 112 : ICON.size;
 /* V11-B: one smooth path. Ten icons on slide 1, rising from in front of her feet; the eleventh
    centred on the cut (half on each slide, the cue that the picture continues); the last three
    dive down and out through slide 2's bottom edge, a little larger as they come at the viewer. */
+/* V12-B: the apps travel with her. From behind her on the left, along the pavement toward its
+   right-hand vanishing point (so they shrink as they go), with a small wave; ten on slide 1, one
+   on the cut, three slipping behind the lower edge of slide 2's phone, as if entering it. */
+const RIBBON_PATH_12 = [[0, 2800], [400, 2700], [800, 2562], [1100, 2454], [1320, 2382], [1500, 2328], [1700, 2300], [1960, 2288]];
+function ribbonSlots12() {
+  const cr = (p0, p1, p2, p3, t) => p1.map((_, k) => 0.5 * (2 * p1[k] + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t * t + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t * t * t));
+  const P = RIBBON_PATH_12, pts = [];
+  for (let i = 0; i < P.length - 1; i++) for (let j = 0; j < 40; j++) pts.push(cr(P[Math.max(0, i - 1)], P[i], P[i + 1], P[Math.min(P.length - 1, i + 2)], j / 40));
+  pts.push(P[P.length - 1]);
+  const len = [0]; for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const at = (s) => { let i = 1; while (i < len.length - 1 && len[i] < s) i++; const f = (s - len[i - 1]) / (len[i] - len[i - 1] || 1), a = pts[i - 1], b = pts[i];
+    const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return { x: a[0] + dx * f, y: a[1] + dy * f, deg: Math.atan2(dy, dx) * 180 / Math.PI, nx: -dy / l, ny: dx / l }; };
+  let sCut = 0; for (let i = 1; i < pts.length; i++) if (pts[i][0] >= PANEL_W) { sCut = len[i - 1] + (PANEL_W - pts[i - 1][0]) / (pts[i][0] - pts[i - 1][0]) * (len[i] - len[i - 1]); break; }
+  const size = (n) => (n <= 10 ? 134 - 3.6 * n : [86, 76, 68][n - 11]);
+  const s0 = 84, steps = [];
+  for (let n = 1; n <= 10; n++) steps.push((size(n - 1) + size(n)) / 2);
+  const k = (sCut - s0) / steps.reduce((a, b) => a + b, 0);
+  const out = []; let sNow = s0;
+  for (let n = 0; n < 14; n++) {
+    // past the cut they speed up toward the phone, as if drawn into it
+    if (n > 0) sNow += (size(n - 1) + size(n)) / 2 * k * (n > 10 ? 1.9 : 1);
+    const p = at(sNow), wave = 10 * Math.sin(n * 1.25);
+    out.push({ x: p.x + p.nx * wave, y: p.y + p.ny * wave, size: size(n), rot: p.deg * 0.5 + [-5, 3, -2, 5, -3][n % 5], behind: n > 10 });
+  }
+  return out;
+}
 const RIBBON_PATH = [[24, 2796], [380, 2740], [760, 2668], [1080, 2606], [1320, 2574], [1420, 2586], [1500, 2646], [1556, 2760], [1592, 2900], [1612, 3060]];
 function ribbonSlots() {
   const cr = (p0, p1, p2, p3, t) => p1.map((_, k) => 0.5 * (2 * p1[k] + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t * t + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t * t * t));
@@ -575,13 +607,15 @@ function ribbonSlots() {
 }
 
 function addRibbon() {
-  const slots = ART === "v11-B" ? ribbonSlots() : null;
+  const slots = ART === "v11-B" ? ribbonSlots() : ART === "v12-B" ? ribbonSlots12() : null;
   RIBBON_APPS.forEach((slug, n) => {
     const x = slots ? slots[n].x : ICON_X(n), y = slots ? slots[n].y : BAND.ribbonY + 16 * Math.sin(n * 1.3);
     const size = slots ? slots[n].size : ICON_SIZE, rot = slots ? slots[n].rot : [-6, 4, -2, 7, -4][n % 5];
     const d = el("ribbon-icon");
     Object.assign(d.style, { left: `${x - size / 2}px`, top: `${y - size / 2}px`, width: `${size}px`, height: `${size}px`,
       transform: `rotate(${rot}deg)` });
+    // V12-B: the icons past the cut pass under slide 2's phone (z-index 2), entering it
+    if (slots && slots[n].behind) d.style.zIndex = "1";
     if (RIBBON === "tiles") {
       const [bg, fg] = TILE_COLOURS[n % TILE_COLOURS.length];
       d.style.background = bg;
@@ -635,8 +669,18 @@ SLIDES.forEach((s, i) => {
 /* Place the hero canvas so the voice strokes end exactly at the left edge of slide 2's
    lifted recording panel, at the height of its waveform: they slip under the panel's
    edge there and the real waveform carries on inside it. */
+/* V12-B, ?s2=turned: slide 2's phone and its zoomed panel turned a little in depth, both about
+   their own centre, so their left edges recede; the voice enters the panel's receding edge. */
+const TURN = "perspective(2600px) rotateY(-13deg)";
+if (ART === "v12-B" && S2 === "turned") [DEVICES[1], LIFTS[1].el].forEach((d) => { d.style.transform = TURN; d.style.transformOrigin = "50% 50%"; });
 {
   const lift = LIFTS[1], illu = document.getElementById("hero-illu");
+  // the panel's left edge at the waveform's height, as drawn (after any 3D turn)
+  const mark = document.createElement("i");
+  Object.assign(mark.style, { position: "absolute", left: "0px", width: "1px", height: "1px", top: `${(CAPTURE_WAVE_Y - lift.band.y) * lift.k}px` });
+  lift.el.appendChild(mark);
+  const mr = mark.getBoundingClientRect(), sr = strip.getBoundingClientRect();
+  window.PANEL_EDGE = [mr.left - sr.left, mr.top - sr.top];
   const waveY = lift.top + (CAPTURE_WAVE_Y - lift.band.y) * lift.k;
   Object.assign(illu.style, STRIP_ART && ART !== "v9-B" && ART !== "v10-B" ? { left: "0px", top: "0px" }
     : { left: `${lift.left + 6 - ILLU.panelIn[0]}px`, top: `${waveY - ILLU.panelIn[1]}px` });
@@ -727,7 +771,9 @@ window.EXPORT_SLIDES = [0, 1];
 window.REUSE_FROM = "v6";
 window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg" };
 /* V10-B: each slide alone at search-result size, a gap between them, as the store shows them. */
-window.CUT_PAIR = ART === "v10-B" || ART === "v11-B" ? { slides: [0, 1], width: 300, gap: 24, file: "slides-1-2-cut.jpg" } : null;
+/* V12-B: the other slide-2 layout, for Pierre to compare, as a second cut view. */
+window.CUT_ALT = ART === "v12-B" ? { query: `art=v12-B&s2=${S2 === "turned" ? "flat" : "turned"}`, file: "slides-1-2-cut-alt.jpg" } : null;
+window.CUT_PAIR = ART === "v10-B" || ART === "v11-B" || ART === "v12-B" ? { slides: [0, 1], width: 300, gap: 24, file: "slides-1-2-cut.jpg" } : null;
 
 if (params.has("preview")) {
   document.body.classList.add("preview");
