@@ -16,7 +16,7 @@ Last reviewed: 2026-10-06.
 
 Take the first line that is not struck through. Status (who is on what): [Project board](https://github.com/orgs/getdictus/projects/2).
 
-1. #587 — Smart Mode prompt campaign, remaining thread: #592 (warn, not refuse, on an ungrounded name)
+1. ~~#587 — Smart Mode prompt campaign~~ — last thread #592 (warn on an ungrounded name) parked in 2.1, near-spelling tolerance covers its case
 2. #627 — run a voice note's Smart Mode in the background (device probe first); then #628, notes over ~4 min, in 2.0.0 only if reliable and short
 3. ~~#637 — voice-note transcripts in the keyboard~~ — merged in PR #638; #639 (tap ☰ for notes, keep them 15 min) merged in PR #641; then #640 (research: quote a passage)
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; open until Pierre's verdict in real use
