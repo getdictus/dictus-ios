@@ -126,7 +126,8 @@ public enum PolishPipeline {
         let engineStart = Date()
         do {
             let polishedRaw = try await engine.polish(
-                raw: engineInput, targetLanguage: job.promptLanguage, task: job.task
+                raw: engineInput, targetLanguage: job.promptLanguage, task: job.task,
+                sourceLanguageCode: job.transcriptLanguageCode
             )
             let engineMs = Int(Date().timeIntervalSince(engineStart) * 1000)
             let postStart = Date()

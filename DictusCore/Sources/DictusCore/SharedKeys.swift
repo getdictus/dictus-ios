@@ -149,6 +149,10 @@ public enum SharedKeys {
     /// Whether the polish layer runs between STT final output and App Group write, default false.
     /// Off by default — round 1 is opt-in measurement. See ADR 0002.
     public static let polishEnabled = "dictus.polishEnabled"
+    /// Debug-only (#648 test build): which engine the Translate Smart Mode runs on.
+    /// Absent or unknown reads as Apple FM, the shipped engine. Read through
+    /// `TranslateEngineChoice.current`; set only from `PolishDebugView`.
+    public static let debugTranslateEngine = "dictus.debug.translateEngine"
     /// Bool: whether polish has stopped calling its engine for the rest of this app
     /// process (#315). Written only by DictusApp, read by whichever surface has to
     /// say so — the keyboard toolbar today. Absent reads false, which is the

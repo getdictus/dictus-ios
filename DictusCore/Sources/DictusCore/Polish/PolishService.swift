@@ -70,13 +70,21 @@ public final class PolishService {
     private var fixedEngine: PolishEngineProtocol?
     private var now: () -> Date = Date.init
 
-    public init(sink: PolishEventSink, onBecameUnavailable: (() -> Void)? = nil) {
+    /// `appState` names the caller's application state in the #648 Translate debug
+    /// log line; the keyboard extension, which has none, keeps the default.
+    public init(sink: PolishEventSink,
+                onBecameUnavailable: (() -> Void)? = nil,
+                appState: @escaping @Sendable () async -> String = { "extension" }) {
         self.defaults = AppGroup.defaults
         self.sink = sink
         self.onBecameUnavailable = onBecameUnavailable
         #if canImport(FoundationModels)
         if #available(iOS 26.0, macOS 26.0, *) {
-            self.appleFMEngine = AppleFoundationModelsPolishEngine()
+            // Wrapped for the #648 device test: inert unless the debug switch routes
+            // Translate to Apple's Translation framework. See the wrapper.
+            self.appleFMEngine = TranslateRoutingPolishEngine(
+                wrapping: AppleFoundationModelsPolishEngine(), appState: appState
+            )
         } else {
             self.appleFMEngine = nil
         }

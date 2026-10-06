@@ -30,6 +30,20 @@ public protocol PolishEngineProtocol: Sendable {
                 targetLanguage: SupportedLanguage,
                 task: PolishTask) async throws -> String
 
+    /// The same call, told the language the dictation is in (#648).
+    ///
+    /// `sourceLanguageCode` is `PolishJob.transcriptLanguageCode`: the transcription
+    /// language the user forced, else the one detected in the transcript. A prompt-
+    /// driven engine has no use for it — its prompt is written for every input
+    /// language — so the default drops it and calls the method above. A dedicated
+    /// translation engine cannot do without it: Apple's Translation framework handed
+    /// the wrong source returns the text untranslated, without an error (measured on
+    /// the Mac for #648). `PolishPipeline` calls this one.
+    func polish(raw: String,
+                targetLanguage: SupportedLanguage,
+                task: PolishTask,
+                sourceLanguageCode: String?) async throws -> String
+
     /// Warm up backend state for `(task, targetLanguage)` (e.g. preload
     /// weights, prime the session with the matching instructions). Called at
     /// app launch and at recording start by `PolishService`, which passes
@@ -93,6 +107,13 @@ public protocol PolishEngineProtocol: Sendable {
 
 public extension PolishEngineProtocol {
     var announcesProcessingStage: Bool { true }
+
+    func polish(raw: String,
+                targetLanguage: SupportedLanguage,
+                task: PolishTask,
+                sourceLanguageCode: String?) async throws -> String {
+        try await polish(raw: raw, targetLanguage: targetLanguage, task: task)
+    }
 
     func prewarm(task: PolishTask, targetLanguage: SupportedLanguage) async {}
 
