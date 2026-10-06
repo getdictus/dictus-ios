@@ -56,7 +56,8 @@ async function load(locale, theme, variant) {
   return page.evaluate(() => ({
     ids: window.SLIDE_IDS, iteration: window.ITERATION,
     themes: window.EXPORT_THEMES || ["navy", "light"], variants: window.VARIANTS || [undefined],
-    pair: window.PAIR || null,
+    pair: window.PAIR || null, only: window.EXPORT_SLIDES || null, reuse: window.REUSE_FROM || null,
+    sheet: window.SHEET || null,
   }));
 }
 
@@ -76,26 +77,39 @@ for (const locale of locales) {
     mkdirSync(out, { recursive: true });
     const suffix = themes.length > 1 || opt("theme") ? `-${theme}` : "";
     let mainFiles = [];
+    const sheetFiles = [];
     for (const [v, variant] of meta.variants.entries()) {
       const { ids } = await load(locale, theme, variant);
       const files = [];
       for (const [i, id] of ids.entries()) {
+        // window.EXPORT_SLIDES limits an iteration to the slides it changes; the others are
+        // taken as they were exported in window.REUSE_FROM.
+        if (meta.only && !meta.only.includes(i)) {
+          const kept = join(ROOT, "export", locale, meta.reuse, theme, `${id}.png`);
+          if (!existsSync(kept)) throw new Error(`Missing ${kept} to reuse`);
+          files.push(kept);
+          continue;
+        }
         const file = join(out, `${id}.png`);
         // A secondary variant only re-exports the slides it changes.
         if (v === 0 || !mainFiles.includes(file)) await shoot(file, i);
         files.push(file);
       }
-      if (v === 0) {
-        mainFiles = files;
-        // A side-by-side of two slides of the main set (window.PAIR), for judging a cut.
-        if (meta.pair) execFileSync("magick", [...meta.pair.slides.map((n) => files[n]), "+append", "-resize", `${meta.pair.width}x`,
-          "-quality", "90", join(ROOT, "export", locale, meta.iteration, meta.pair.file)]);
-      }
+      if (meta.sheet) sheetFiles.push(files[meta.sheet.slide]);
+      // A side-by-side of two slides (window.PAIR), for judging a cut: the main set's, or
+      // every variant's when PAIR.everyVariant.
+      if (meta.pair && (v === 0 || meta.pair.everyVariant)) execFileSync("magick", [...meta.pair.slides.map((n) => files[n]), "+append", "-resize", `${meta.pair.width}x`,
+        "-quality", "90", join(ROOT, "export", locale, meta.iteration, meta.pair.file.replace("{name}", asVariant(variant).name))]);
+      if (v === 0) mainFiles = files;
+      if (meta.only && v > 0) { console.log(`${locale}/${meta.iteration}/${theme}/${asVariant(variant).name}: slide(s) ${meta.only.join(",")}`); continue; }
       const vname = asVariant(variant).name;
       const name = asVariant(variant).montage ?? (v === 0 ? `montage${suffix}.jpg` : `montage-${vname}${suffix}.jpg`);
       montage(files, join(ROOT, "export", locale, meta.iteration, name));
       console.log(`${locale}/${meta.iteration}/${theme}/${vname}: ${files.length} slides, ${name}`);
     }
+    // One sheet of the same slide across every variant (window.SHEET), side by side.
+    if (meta.sheet) execFileSync("magick", [...sheetFiles, "-bordercolor", "#1C1F26", "-border", "12", "+append", "-resize", "2100x",
+      "-quality", "90", join(ROOT, "export", locale, meta.iteration, meta.sheet.file)]);
   }
 }
 await browser.close();
