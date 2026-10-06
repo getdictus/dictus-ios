@@ -230,7 +230,9 @@
      ui-rounded, so SF Pro Rounded is loaded from the macOS system file (never copied, never
      committed); the page reports the font missing if it fails, and the export stops. */
   @font-face { font-family: "Dictus Rounded"; src: url("file:///System/Library/Fonts/SFNSRounded.ttf"); font-weight: 1 1000; }
-  .hero-brand.rounded span { font: 700 100px/1 "Dictus Rounded"; letter-spacing: 0; color: #3D7EFF; }
+  .hero-brand.rounded span { font: 700 78px/1 "Dictus Rounded"; letter-spacing: 0; color: #3D7EFF; }
+  .hero-brand.rounded .bars { width: 72px; height: 72px; }
+  .hero-brand.rounded { gap: 20px; }
   .hero-headline {
     position: absolute; top: 330px; z-index: 6; width: 1110px;
     font: 400 168px/0.98 "DM Sans", sans-serif; letter-spacing: -0.045em; color: #0A1628; text-wrap: balance;
