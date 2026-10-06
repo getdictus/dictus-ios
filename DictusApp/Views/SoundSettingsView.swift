@@ -92,8 +92,11 @@ struct SoundSettingsView: View {
     /// Without a fixed width, longer labels like "Début d'enregistrement" push the
     /// value text further right, misaligning it with shorter labels. A fixed leading
     /// column ensures all value texts start at the same horizontal position.
+    ///
+    /// WHY `LocalizedStringKey` (issue #661): a `String` label is shown verbatim, so
+    /// "Start" and "End" stayed English on a French iPhone despite their translations.
     @ViewBuilder
-    private func soundNavigationRow(label: String, selection: Binding<String>) -> some View {
+    private func soundNavigationRow(label: LocalizedStringKey, selection: Binding<String>) -> some View {
         NavigationLink {
             SoundPickerListView(title: label, selection: selection)
         } label: {
@@ -116,7 +119,7 @@ struct SoundSettingsView: View {
 /// auto-preview on selection. This is the same pattern as iOS ringtone picker:
 /// tap a row → checkmark moves + sound plays.
 private struct SoundPickerListView: View {
-    let title: String
+    let title: LocalizedStringKey
     @Binding var selection: String
 
     var body: some View {
