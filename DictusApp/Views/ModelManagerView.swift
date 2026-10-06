@@ -285,7 +285,7 @@ struct ModelManagerView: View {
                 }
             }
         } message: { model in
-            Text("Delete \(model.displayName)? The model will be removed from your device.")
+            Text("Delete \(model.localizedDisplayName)? The model will be removed from your device.")
         }
         // Partial-download delete confirmation alert (issue #235).
         // WHY no ModelManager error handling here: cleanupFailedModel cannot
@@ -297,7 +297,7 @@ struct ModelManagerView: View {
                 modelManager.cleanupFailedModel(model.identifier)
             }
         } message: { model in
-            Text("Delete the partially downloaded files for \(model.displayName)? The next download will start from the beginning.")
+            Text("Delete the partially downloaded files for \(model.localizedDisplayName)? The next download will start from the beginning.")
         }
         // Error alert
         .alert("Error", isPresented: $showErrorAlert) {

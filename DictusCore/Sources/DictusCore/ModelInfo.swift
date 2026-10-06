@@ -25,6 +25,10 @@ public struct ModelInfo: Identifiable {
     public var id: String { identifier }
 
     public let identifier: String
+
+    /// English name, unlocalized: DictusCore ships no string catalog. The app shows
+    /// `localizedDisplayName` (DictusApp), which translates the qualifier in
+    /// "Small (Quantized)" and "Turbo (Legacy)" and falls back to this (issue #665).
     public let displayName: String
 
     /// Total bytes the downloader will pull for this model. See the measurement

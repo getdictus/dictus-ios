@@ -684,6 +684,19 @@ final class ModelInfoTests: XCTestCase {
         XCTAssertEqual(ModelInfo.forIdentifier(turbo954)?.displayName, "Turbo (Legacy)")
     }
 
+    /// Issue #665: DictusApp's `localizedDisplayName` translates the qualifier by
+    /// matching these two identifiers, and uses these exact English names as its
+    /// string catalog keys. A renamed identifier would silently drop the French name
+    /// (the switch falls back to `displayName`); a reworded name would orphan the
+    /// translation. `displayName` itself stays the unlocalized English form.
+    func testQualifiedNamesKeepTheIdentifiersAndKeysTheAppTranslates() {
+        XCTAssertEqual(ModelInfo.forIdentifier("openai_whisper-small_216MB")?.displayName, "Small (Quantized)")
+        XCTAssertEqual(ModelInfo.forIdentifier(turbo954)?.displayName, "Turbo (Legacy)")
+        // No other entry carries a qualifier the app would need to translate.
+        let qualified = ModelInfo.allIncludingDeprecated.filter { $0.displayName.contains("(") }
+        XCTAssertEqual(Set(qualified.map(\.identifier)), ["openai_whisper-small_216MB", turbo954])
+    }
+
     /// The predicate behind the `modelDownloadSizeMismatch` log line. The 250 MB case
     /// is the bug this issue was filed for: that was the announced size while the
     /// repository served 486 MB, and it has to read as drift.

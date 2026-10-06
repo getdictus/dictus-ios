@@ -210,7 +210,7 @@ struct HomeView: View {
                         Text("Active model")
                             .font(.dictusCaption)
                             .foregroundColor(.secondary)
-                        Text(info?.displayName ?? modelName)
+                        Text(info?.localizedDisplayName ?? modelName)
                             .font(.dictusSubheading)
                         if let size = info?.sizeLabel {
                             Text(size)

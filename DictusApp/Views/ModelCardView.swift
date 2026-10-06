@@ -240,7 +240,7 @@ struct ModelCardView: View {
         VStack(alignment: .leading, spacing: 8) {
             // Row 1: Name + engine badge + recommended badge
             HStack(spacing: 6) {
-                Text(model.displayName)
+                Text(model.localizedDisplayName)
                     .font(.dictusSubheading)
 
                 // Engine badge pill (e.g. "WK" or "PK")

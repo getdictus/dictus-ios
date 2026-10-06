@@ -160,7 +160,7 @@ struct ModelLoadingOverlay: View {
 
         return VStack(spacing: 8) {
             if let info = ModelInfo.forIdentifier(modelIdentifier) {
-                Text(info.displayName)
+                Text(info.localizedDisplayName)
                     .font(.dictusSubheading)
                     .foregroundStyle(.primary)
                     .frame(maxWidth: .infinity)

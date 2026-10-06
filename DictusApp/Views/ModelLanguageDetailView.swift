@@ -94,7 +94,7 @@ struct ModelLanguageDetailView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.dictusBackground.ignoresSafeArea())
-            .navigationTitle(model.displayName)
+            .navigationTitle(model.localizedDisplayName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

@@ -292,7 +292,7 @@ struct ModelDownloadPage: View {
             // WHY `String(localized:)` on the fallbacks (issue #661): a `String` passed
             // to `Text` or `Label` is shown verbatim, so a bare literal here bypassed
             // the string catalog.
-            Text(info?.displayName ?? String(localized: "Voice model"))
+            Text(info?.localizedDisplayName ?? String(localized: "Voice model"))
                 .font(.dictusSubheading)
                 .foregroundStyle(.primary)
 
