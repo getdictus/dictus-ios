@@ -26,6 +26,15 @@ struct HistoryView: View {
     /// outside the card and take the row's tap area away from the card itself.
     @State private var selection: TranscriptionRecord?
 
+    /// What the search field holds (#621). Empty shows every record.
+    @State private var query = ""
+
+    /// The records the query finds, newest first. Recomputed on every body pass,
+    /// which is a linear scan of a capped in-memory list; see `TranscriptionSearch`.
+    private var visibleRecords: [TranscriptionRecord] {
+        TranscriptionSearch.filter(history.records, query: query)
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -103,9 +112,19 @@ struct HistoryView: View {
 
     // MARK: - List
 
+    /// WHY `.searchable` sits on the list and not on the whole screen: the field has
+    /// nothing to search on the locked and empty states, and a search bar above
+    /// "No transcriptions yet" would promise something the screen cannot do.
+    ///
+    /// WHY the no-results state is an overlay on the empty `List` rather than a
+    /// view swapped in for it: swapping would tear down the view that owns the
+    /// search field, and the field would lose focus on the keystroke that empties
+    /// the results.
     private var recordList: some View {
         List {
-            ForEach(history.records) { record in
+            // Rows act on the record's id, never on its position, so swipe-to-delete
+            // and the context menu work the same on a filtered list.
+            ForEach(visibleRecords) { record in
                 Button {
                     selection = record
                 } label: {
@@ -148,6 +167,12 @@ struct HistoryView: View {
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .searchable(text: $query, prompt: Text("Search transcriptions"))
+        .overlay {
+            if visibleRecords.isEmpty {
+                noResultsState
+            }
+        }
     }
 
     private func delete(_ record: TranscriptionRecord) {
@@ -158,6 +183,26 @@ struct HistoryView: View {
         // one way besides time it does (#639).
         VoiceNoteProcessor.shared.withdrawKeyboardDeliveries([record.id], reason: "deletedInHistory")
         HapticFeedback.recordingStopped()
+    }
+
+    // MARK: - No results
+
+    /// Shown when the query finds nothing. It repeats the query so a typo is visible
+    /// without reading the field again.
+    private var noResultsState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 40))
+                .foregroundColor(.dictusAccent.opacity(0.7))
+            Text("No results")
+                .font(.dictusSubheading)
+            Text("No transcription contains “\(query.trimmingCharacters(in: .whitespacesAndNewlines))”.")
+                .font(.dictusCaption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Empty state
