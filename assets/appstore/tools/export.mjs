@@ -3,6 +3,7 @@
 //   npm run export                         every locale in strings/
 //   npm run export -- --locale en-GB       one locale
 //   npm run export -- --theme navy         force one theme
+//   npm run export -- --art v8             slide 1's art (screenshots.html ?art=, default v9-B)
 //
 // Output: export/<locale>/<iteration>/<theme>/<NN-id>.png, 1320×2868, opaque sRGB
 // (App Store Connect rejects screenshots with an alpha channel), plus review
@@ -50,7 +51,7 @@ const asVariant = (v) => (typeof v === "string" ? { name: v, query: `variant=${v
 async function load(locale, theme, variant) {
   const url = pathToFileURL(join(ROOT, "screenshots.html"));
   const q = asVariant(variant).query;
-  url.search = `?locale=${locale}${theme ? `&theme=${theme}` : ""}${q ? `&${q}` : ""}`;
+  url.search = `?locale=${locale}${theme ? `&theme=${theme}` : ""}${opt("art") ? `&art=${opt("art")}` : ""}${q ? `&${q}` : ""}`;
   await page.goto(url.href, { waitUntil: "networkidle" });
   if (!(await page.evaluate(() => window.whenReady))) throw new Error("screenshots.html reports the bezel is missing");
   return page.evaluate(() => ({

@@ -268,6 +268,10 @@ const HERO = params.get("hero") || "comic";
 const CAST = params.get("cast") || "woman-curves";
 /* V8: Pierre chose the woman with curves; one character again, so file names drop it. */
 window.ITERATION_CAST = false;
+/* V9-B: ?art=v9-B (default) is concept B, "hands full" (art/v9-B/heroWalk9.ts): she walks with
+   a coffee and a tote, her words a lettered ribbon into slide 2's panel. Its canvas is the strip
+   itself (2640 x 2868 at 0, 0). ?art=v8 renders and exports V8 exactly as committed. */
+const ART = params.get("art") || "v9-B";
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -510,7 +514,9 @@ function addGreetings(list, i) {
    ════════════════════════════════════════════════════════════ */
 /* The illustration (art/hero-illustration.png, drawn in code with anidoodle:
    art/dictusHero.ts) and where its voice line ends, in its own pixels. */
-const ILLU = { src: "art/v8/hero.png", w: 2640, h: 2000, panelIn: [1400, 1387] };   // V7 cast: art/v7/hero-${CAST}.png
+const ILLU = ART === "v8"
+  ? { src: "art/v8/hero.png", w: 2640, h: 2000, panelIn: [1400, 1387] }   // V7 cast: art/v7/hero-${CAST}.png
+  : { src: "art/v9-B/hero.png", w: 2640, h: 2868, panelIn: [1396, 1838.5] };
 /* The waveform's centre in the recording capture (measured: blue bars from y 2052 to 2410). */
 const CAPTURE_WAVE_Y = 2231;
 /* The icon row along the very bottom of slides 1 and 2. */
@@ -665,17 +671,17 @@ window.whenReady = Promise.all([
   .then(() => document.getElementById("missing").style.display !== "flex");
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
 /* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
-window.ITERATION = "v8";
+window.ITERATION = ART;
 /* Themes the exporter renders for this iteration (light only since V3, Pierre). */
 window.EXPORT_THEMES = ["light"];
 /* Variants: the first is the main set; the others re-export only the slides whose
    id they change, and get a montage-<name>.jpg of their own. */
-window.VARIANTS = [
-  { name: "main", query: "" },
-  { name: "nologos", query: "ribbon=tiles" },
-];
-/* V8 changes slide 1 only; slide 2 is re-rendered because the voice strokes end on it (her
-   mouth did not move, so they are V7's). Slides 3 to 7 are V6's exported files. */
+window.VARIANTS = ART === "v8" ? [
+  { name: "main", query: "art=v8" },
+  { name: "nologos", query: "art=v8&ribbon=tiles" },
+] : [{ name: "main", query: "" }];
+/* V8 and V9-B change slide 1 only; slide 2 is re-rendered because the voice strokes end on it.
+   Slides 3 to 7 are V6's exported files. */
 window.EXPORT_SLIDES = [0, 1];
 window.REUSE_FROM = "v6";
 window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg" };
