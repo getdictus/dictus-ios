@@ -59,7 +59,7 @@ async function load(locale, theme, variant) {
     ids: window.SLIDE_IDS, iteration: window.ITERATION,
     themes: window.EXPORT_THEMES || ["navy", "light"], variants: window.VARIANTS || [undefined],
     pair: window.PAIR || null, only: window.EXPORT_SLIDES || null, reuse: window.REUSE_FROM || null,
-    sheet: window.SHEET || null, cut: window.CUT_PAIR || null, cutAlt: window.CUT_ALT || null,
+    sheet: window.SHEET || null, cut: window.CUT_PAIR || null, cutAlt: window.CUT_ALT || null, cut3: window.CUT_TRIPLE || null,
   }));
 }
 
@@ -103,8 +103,8 @@ for (const locale of locales) {
       if (meta.pair && (v === 0 || meta.pair.everyVariant)) execFileSync("magick", [...meta.pair.slides.map((n) => files[n]), "+append", "-resize", `${meta.pair.width}x`,
         "-quality", "90", join(ROOT, "export", locale, meta.iteration, meta.pair.file.replace("{name}", asVariant(variant).name))]);
       // Slides cut apart at store size (window.CUT_PAIR): each one alone, a gap between them.
-      if (meta.cut && v === 0) execFileSync("magick", [...meta.cut.slides.map((n) => files[n]), "-resize", `${meta.cut.width}x`, "-bordercolor", "#FFFFFF", "-border", `${meta.cut.gap / 2}`,
-        "+append", "-quality", "92", join(ROOT, "export", locale, meta.iteration, meta.cut.file)]);
+      for (const c of [meta.cut, meta.cut3]) if (c && v === 0) execFileSync("magick", [...c.slides.map((n) => files[n]), "-resize", `${c.width}x`, "-bordercolor", "#FFFFFF", "-border", `${c.gap / 2}`,
+        "+append", "-quality", "92", join(ROOT, "export", locale, meta.iteration, c.file)]);
       if (v === 0) mainFiles = files;
       // (V7 skipped the montage of secondary variants here; every variant now gets one.)
       const vname = asVariant(variant).name;

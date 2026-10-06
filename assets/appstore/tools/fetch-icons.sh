@@ -1,5 +1,5 @@
 #!/bin/bash
-# Fetch the app icons of the slide 1-2 ribbon (issue #643, V4).
+# Fetch the app icons of the slide 1-2 ribbon (issue #643, V4; 20 icons since V14-B).
 #
 # Real icons of apps where people write, at 1024 px, from Apple's public iTunes
 # lookup API. They are third-party trademarks: like the Apple bezel they are
@@ -17,7 +17,9 @@ HERE="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$HERE/.icons"
 mkdir -p "$OUT"
 
-# slug:App Store id. Order = order on the ribbon.
+# slug:App Store id. The ribbon's order lives in screenshots.html (RIBBON_APPS); this is
+# every icon any iteration uses. V14-B added the last eight (Mistral's "Le Chat" is listed as
+# "Vibe by Mistral (ex-Le Chat)" on the store since its rename).
 APPS=(
   "messages:1146560473"
   "whatsapp:310633997"
@@ -33,6 +35,14 @@ APPS=(
   "telegram:686449807"
   "outlook:951937596"
   "docs:842842640"
+  "obsidian:1557175442"
+  "gemini:6477489729"
+  "perplexity:1668000334"
+  "lechat:6740410176"
+  "notes:1110145109"
+  "discord:985746746"
+  "signal:874139669"
+  "x:333903271"
 )
 
 for entry in "${APPS[@]}"; do
