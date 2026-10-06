@@ -6,9 +6,9 @@
  * a non-breaking space ( ) before ? ! : ; and inside « », typographic
  * apostrophes (’), no em dashes.
  *
- * Register: "vous". DictusApp's French strings use it (49 strings against one
- * stray "Tes"); the keyboard's own strings say "tu" ("Choisis un mode"), and
- * that real text shows in the slide 3 capture.
+ * Register: "tu", decided by Pierre on 2026-10-06. The keyboard already says
+ * "tu" ("Choisis un mode", visible in the slide 3 capture); DictusApp still
+ * says "vous" and follows in #662.
  *
  * The email (slide 2) is the user's own message to a colleague, so it says
  * "tu" to Sam; its first words are the hero's lettering ("MERCI POUR TES
@@ -33,11 +33,11 @@ window.DICTUS_STRINGS = {
   heroArt: { "v15-B": "art/v15-B/hero-fr-FR.png" },
   slides: {
     hero: {
-      // "au lieu de taper" held together, so the break falls after "Parlez" (as "Speak instead / of typing")
-      headline: "Parlez au\u00a0lieu\u00a0de\u00a0taper",
+      // "au lieu de taper" held together, so the break falls after "Parle" (as "Speak instead / of typing")
+      headline: "Parle au\u00a0lieu\u00a0de\u00a0taper",
     },
     dictate: {
-      headline: "Dictez dans toutes vos apps",
+      headline: "Dicte dans toutes tes apps",
       emailToLabel: "À",
       emailTo: "Sam",
       emailSubject: "Slides pour la revue de jeudi",
@@ -48,9 +48,9 @@ window.DICTUS_STRINGS = {
     },
     smartModes: {
       footnote: "Les modes intelligents nécessitent Apple Intelligence",
-      beforeLabel: "Vous avez dit",
+      beforeLabel: "Tu as dit",
       translate: {
-        headline: "Traduisez en parlant",
+        headline: "Traduis en parlant",
         // fr-late-e, verbatim.
         before: "Je vais avoir dix minutes de retard, le train est bloqué devant la gare. Ne m’attendez pas et commandez la burrata pour moi.",
         // The fan's own label for the mode (SmartModeDisplayName.swift).
@@ -62,7 +62,7 @@ window.DICTUS_STRINGS = {
       },
     },
     voiceNotes: {
-      headline: "Lisez vos vocaux dans le clavier",
+      headline: "Lis tes vocaux dans le clavier",
       bubbleDuration: "0:24",
       contactName: "Emma",
       chatDay: "Aujourd’hui",
@@ -70,7 +70,7 @@ window.DICTUS_STRINGS = {
       chatPlaceholder: "Message",
     },
     keyboard: {
-      headline: "Un vrai clavier dans votre langue",
+      headline: "Un vrai clavier dans ta langue",
       // iOS names keyboards in the interface language (Réglages › Claviers: "Anglais (R.-U.)").
       labels: {
         fr: "Français · AZERTY",
@@ -79,12 +79,12 @@ window.DICTUS_STRINGS = {
       },
     },
     private: {
-      headline: "Votre voix reste sur votre iPhone",
-      footnote: "Les modèles sont sur votre iPhone. Sans compte, open source.",
+      headline: "Ta voix reste sur ton iPhone",
+      footnote: "Les modèles sont sur ton iPhone. Sans compte, open source.",
     },
     languages: {
       // 40+: see en-GB.js (Whisper good + fair tiers, plus Maltese with Parakeet).
-      headline: "Dictez dans plus de 40 langues",
+      headline: "Dicte dans plus de 40 langues",
       footnote: "Près de 100 avec Whisper. La qualité varie selon la langue.",
       // Unchanged from en-GB: each greeting is in its own language.
       greetings: [
