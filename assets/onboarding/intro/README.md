@@ -2,26 +2,28 @@
 
 The three looping videos of the onboarding's intro carousel (issue #667, decision 15 of #649).
 They replace the static Welcome screen. Each one plays in place, muted and looping, until the
-user swipes or taps **Commencer**. The headline and subtitle are SwiftUI text under the video,
-so there is no text in the art.
+user swipes or taps **Commencer**. The three scenes tell one story: **the voice goes into the
+phone and comes out as text.** The headline and subtitle are SwiftUI text under the video. The
+art contains no readable words: every line of "text" is a marker scribble, so one render serves
+every language.
 
-| File | Scene | Drawn from |
-|---|---|---|
-| `intro-a-{light,dark}.mp4` | A, walking: she walks, phone up at her chin, and talks; her voice leaves as the three blue strokes and turns into three waveform bars | `assets/appstore/art/v15-B/heroWalk15.ts` |
-| `intro-b-{light,dark}.mp4` | B, dictating: seated, she speaks; the strokes flow out of her | `assets/appstore/art/v10-A/heroSpeak10.ts`, the woman (branch `chore/643-hero-a`) |
-| `intro-c-{light,dark}.mp4` | C, keyboard: the drawn iPhone with the Dictus keyboard recording; its waveform reacts | `heroSpeak10.ts`, the phone |
+| File | Scene (headline) | What it shows | Drawn from |
+|---|---|---|---|
+| `intro-a-{light,dark}.mp4` | A, walking ("Parlez. Dictus écrit.") | She walks and talks into her phone. The blue strokes leave her lips and go into it, and a scribbled line writes itself on its screen. 5.5 s. | `assets/appstore/art/v15-B/heroWalk15.ts` |
+| `intro-b-{light,dark}.mp4` | B, the metro ("Même sans réseau.") | The same woman stands in a metro carriage, one hand on the pole, before a window where the tunnel's lights streak past. Her phone shows no network (struck-through bars), and the text still writes itself. 5.5 s. | Her: V15-B. The carriage: new, same style. |
+| `intro-c-{light,dark}.mp4` | C, the keyboard ("Dans votre clavier.") | The drawn iPhone, a note above the Dictus keyboard, through one whole dictation: a few keys typed, the blue mic tapped, recording (waveform, timer, ✕ and ✓), ✓ tapped, transcribing (the sweep), the text lands, then the note clears. 9 s. | `assets/appstore/art/v10-A/heroSpeak10.ts`, the phone (branch `chore/643-hero-a`) |
 
-Every video is 1000 × 1440 px (the 330 × 476 pt art area at 3×). Each one is a 4.5 s loop at
-30 fps (135 frames), HEVC Main, 4:2:0, BT.709, tagged `hvc1`, with no audio track and one
-keyframe per loop. The light page is `#FFFFFF` and the dark page `#0A1628`, exact to the code
-value after decoding, so the video's edge does not show against the screen behind it.
+Every video is 1000 × 1440 px (the 330 × 476 pt art area at 3×), 30 fps, HEVC Main, 4:2:0,
+BT.709, tagged `hvc1`. There is no audio track and one keyframe per loop. The light page is
+`#FFFFFF` and the dark page `#0A1628`, exact to the code value after decoding, so the video's
+edge does not show against the screen behind it.
 
 ## Re-rendering
 
 ```sh
 node assets/onboarding/intro/render.mjs                 # all six
 node assets/onboarding/intro/render.mjs --only b-dark   # some of them, comma-separated
-node assets/onboarding/intro/render.mjs --frames 0,67   # a few frames as PNG, into .build/frames/, no video
+node assets/onboarding/intro/render.mjs --frames 0,90   # a few frames as PNG, into .build/frames/, no video
 ```
 
 No manual step is needed. The script:
@@ -46,29 +48,37 @@ The script reads nothing outside this folder except the following:
 
 A frame is a pure function of its number and appearance: no clock, no `Math.random`, no assets.
 Two renders on the same machine and engine give byte-identical frames and byte-identical
-videos. Frame 135 renders to the same pixels as frame 0, so every loop closes exactly. Another
+videos. The frame one loop after frame 0 renders to the same PNG as frame 0, so every loop closes exactly. Another
 Chromium build may antialias some pixels differently.
 
 ## Sources
 
-- `src/theme.ts`: the frame, the loop, and the two appearances.
-- `src/introWalk.ts`: scene A. V15-B's drawing with a walk rig. A leg is its hip, its foot and two bone lengths, and the knee is solved. Frame 0 is the App Store pose, the walk cycle's contact position. The pavement slides back one slab joint per step at the feet's speed.
-- `src/introSpeak.ts`: scene B. V10-A's woman: the mouth talks, the head nods, the sound arcs are emitted, the ripple travels along the strokes, and the open hand gestures.
-- `src/introKeyboard.ts`: scene C. V10-A's phone: the waveform follows a speech-like level and the phone hovers.
-- `src/phoneGeometry.ts`: V10-A's phone in perspective, shared by B (which is placed and aimed by it) and C (which draws it).
+- `src/theme.ts`: the frame, the three loops, and the two appearances.
+- `src/woman.ts`: her, posed by the scenes (V15-B's lines and colours), with:
+  - the walk rig: a leg is its hip, its foot and two bones, and the knee is solved. The walk's contact position is V15-B's pose;
+  - the phone in her hand, now facing us;
+  - her voice going into the phone;
+  - the scribbled text that writes on its screen.
+- `src/scribble.ts`: handwriting that spells nothing, the timer's digits, and the no-network icon.
+- `src/introWalk.ts`: scene A, the pavement sliding back one slab joint per step.
+- `src/introMetro.ts`: scene B. The carriage (wall, bench, tunnel window, rail, pole), the lights streaking past, the carriage rocking and her swaying with it.
+- `src/introKeyboard.ts`: scene C, driven by one cue table (taps, mic, check, landing, clearing) that is checked against the 5-frame grid when the module loads.
+- `src/phoneGeometry.ts`: V10-A's phone in perspective.
 
 The App Store art files are untouched: these sources are copies, adapted.
 
 ## Decisions
 
-- **Framing.** The art of the #649 mock-ups (`designs/onboarding-649-png/01{A,B,C}-intro-*.png`, local to the maintainer) is the App Store renders cropped to the drawing. Each scene sits in the 330 × 476 pt frame where the mock-up puts it:
-  - A fills the frame (strip x 0–1466, y 750–2861).
-  - B is 289.5 pt wide at (20.5, 34) pt.
-  - C is 300 pt wide at (15, 83) pt.
-  
-  For B and C the frame's top is inferred from the layout, because their two-line headline raises everything by about 55 pt.
-- **Dark.** The art's ink is `#0A1628`, which is the dark page's colour. In dark, the contours turn to `#9FB0D0`, while the marks on skin and cloth (eyes, brows, mouth, pupils, lenses) stay navy. The pavement, the shadows and the drawn phone get dark tones of their own. The phone's screen shows the keyboard in the system's dark appearance, since the onboarding follows it.
-- **No HEVC with alpha.** On this machine, only VideoToolbox (`hevc_videotoolbox`, `-alpha_quality`) writes it. Measured on scene A light:
+- **Framing.** The art of the #649 mock-ups (`designs/onboarding-649-png/01{A,B,C}-intro-*.png`, local to the maintainer) is the App Store renders cropped to the drawing.
+  - A fills the 330 × 476 pt frame (strip x 0–1466, y 750–2861).
+  - B uses the same frame and the same placement as A, so she stands where she walked and the carousel does not jump.
+  - C places the phone where its mock-up does: 300 pt wide, at (15, 83) pt.
+- **Her phone faces us** in A and B. V15-B showed its back, which kept the screen out of sight. Her hand is the same pieces, laid behind the phone: the fingertips show past its left edge and the thumb comes over its right edge.
+- **Scene C follows the real keyboard.** Recording draws the bars on a voice (`.micLevels`), with the ✕ and ✓ pills and the timer. Transcribing draws `.sweep`, the code's `0.2 + 0.25 (sin(2π (i/(n−1) + phase)) + 1)`, with an empty top bar of the same height, so the waveform does not move. The brief's "bright band" rides the sine's crest. The layout is read off the captures, in the phone's millimetres.
+- **No readable text.** The keys are blank caps with their icons only: shift, delete, emoji, return, globe, mic. The suggestions, the caption and the note are scribbles, and the no-network signal is the struck-through bars icon. The one exception is the timer's digits, `00:00` to `00:03`: numerals, the same in every language the app ships, and a timer is what the brief asks for.
+- **Scene B leaves out the optional noise** (a neighbour). At this size a second figure takes the eye away from her phone, which is the point of the scene. The carriage's rocking stays.
+- **Dark.** The art's ink is `#0A1628`, which is the dark page's colour. In dark, the contours turn to `#9FB0D0`, while the marks on skin and cloth (eyes, brows, mouth, pupils, lenses) stay navy. The ground, the carriage and the phones get dark tones of their own. The phones' screens and the keyboard follow the system's dark appearance. The tunnel is dark in both appearances.
+- **No HEVC with alpha.** On this machine, only VideoToolbox (`hevc_videotoolbox`, `-alpha_quality`) writes it. Measured on the first version of scene A light:
 
   | Encode | Luma PSNR | Size |
   |---|---|---|
@@ -79,7 +89,5 @@ The App Store art files are untouched: these sources are copies, adapted.
   | Opaque x265, CRF 26 (used) | 43.3 dB | about 0.9 MB |
 
   At equal quality, alpha costs about twice the bytes and goes over the 1.5 MB budget. The videos are therefore opaque, and each one carries the page colour of its appearance.
-- **Scene C has no entrance.** A loop that closes on itself cannot show the phone arriving without also showing it leave every 4.5 s, so the phone is there from frame 0 and hovers. If the screen wants an entrance, that is a SwiftUI transition on the video view (#649, PR B).
-- **No lettering.** V15-B's "Thanks for the notes" along the strokes is gone.
 
 Wiring the videos into the onboarding is #649's PR B, not this folder.

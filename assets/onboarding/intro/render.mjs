@@ -31,7 +31,7 @@ const run = (cmd, args, opts = {}) => execFileSync(cmd, args, { stdio: "inherit"
 
 // ---------------------------------------------------------------- the six videos
 // scene letter -> the film module's export prefix; the file is intro-<scene>-<theme>.mp4
-const SCENES = { a: "introWalk", b: "introSpeak", c: "introKeyboard" };
+const SCENES = { a: "introWalk", b: "introMetro", c: "introKeyboard" };
 const ALL = Object.keys(SCENES).flatMap((s) => ["light", "dark"].map((t) => `${s}-${t}`));
 const only = arg("only")?.split(",") ?? ALL;
 only.forEach((id) => ALL.includes(id) || die(`unknown video '${id}', expected one of ${ALL.join(", ")}`));
@@ -61,13 +61,17 @@ const { buildPage } = await import(pathToFileURL(join(BUILD, "tools/build-page.m
 const playwright = await import(pathToFileURL(join(BUILD, "tools/adapters/playwright.mjs")).href);
 
 // ---------------------------------------------------------------- 2. the art, next to the engine's core
-const core = join(BUILD, "src/canvas-core");
+const core = join(BUILD, "src/canvas-core"), hosts = join(BUILD, "src/hosts");
+// anything left from an earlier render that the engine does not ship goes first, so a scene
+// that was renamed or removed cannot linger in the build
+const shipped = (dir) => new Set(readdirSync(join(ENGINE, "src", dir)));
+for (const [dir, abs] of [["canvas-core", core], ["hosts", hosts]]) { const keep = shipped(dir); for (const f of readdirSync(abs)) if (!keep.has(f)) rmSync(join(abs, f), { recursive: true, force: true }); }
 for (const f of readdirSync(join(HERE, "src"))) if (f.endsWith(".ts")) cpSync(join(HERE, "src", f), join(core, f));
 // the engine's page builder wants one module and one host page per film, both named after it
 for (const id of ALL) {
   const name = filmName(id), [s] = id.split("-");
   writeFileSync(join(core, `${name}.ts`), `export { ${name} } from "./${SCENES[s]}";\n`);
-  writeFileSync(join(BUILD, "src/hosts", `page-${name}.ts`), `import { ${name} } from "../canvas-core/${name}";\nimport { mountFilm } from "./page";\nmountFilm(${name});\n`);
+  writeFileSync(join(hosts, `page-${name}.ts`), `import { ${name} } from "../canvas-core/${name}";\nimport { mountFilm } from "./page";\nmountFilm(${name});\n`);
 }
 
 // ---------------------------------------------------------------- 3. frames, then the video
