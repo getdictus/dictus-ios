@@ -35,12 +35,12 @@
       }
     },
     "Processing..." : {
-      "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the Smart mode runs on the transcript (#267, #664).",
+      "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the Smart mode runs on the transcript (#267, #664). Translations end on the single ellipsis character (…), which never splits across two lines.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Traitement..."
+            "value" : "Traitement…"
           }
         }
       }
@@ -57,12 +57,12 @@
       }
     },
     "Recording..." : {
-      "comment" : "Live Activity, expanded Dynamic Island: recording in progress (#664).",
+      "comment" : "Live Activity, expanded Dynamic Island: recording in progress (#664). Translations end on the single ellipsis character (…), which never splits across two lines.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enregistrement..."
+            "value" : "Enregistrement…"
           }
         }
       }
@@ -79,12 +79,12 @@
       }
     },
     "Transcribing..." : {
-      "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the recording is being transcribed (#664).",
+      "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the recording is being transcribed (#664). Translations end on the single ellipsis character (…), which never splits across two lines.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Transcription..."
+            "value" : "Transcription…"
           }
         }
       }
