@@ -230,6 +230,22 @@
     font: 400 168px/0.98 "DM Sans", sans-serif; letter-spacing: -0.045em; color: #0A1628; text-wrap: balance;
   }
   .hero-illu { position: absolute; z-index: 3; }
+  /* V9-A: the giant phone's screen, laid out in phone millimetres × 10 (780 × 1630) and
+     mapped onto the drawn phone by a homography (heroScreen()). */
+  .hero-layer { position: absolute; left: 0; top: 0; pointer-events: none; }
+  .giant-screen {
+    position: absolute; left: 0; top: 0; width: 780px; height: 1630px; transform-origin: 0 0; z-index: 3;
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; color: #0A1628;
+  }
+  .giant-screen .status { position: absolute; top: 40px; left: 92px; font-weight: 600; font-size: 50px; letter-spacing: -0.01em; }
+  .giant-screen .field { position: absolute; left: 92px; width: 600px; height: 110px; display: flex; align-items: center; gap: 22px; border-bottom: 3px solid #ECEEF3; font-size: 52px; }
+  .giant-screen .field .label { color: #8A94A6; }
+  .giant-screen .field .chip { padding: 10px 28px; border-radius: 40px; background: #E6EEFF; color: #2563EB; font-weight: 500; }
+  .giant-screen .field.subject { font-weight: 600; font-size: 43px; white-space: nowrap; }
+  .giant-screen .text { position: absolute; left: 92px; top: 900px; width: 620px; font-size: 70px; line-height: 1.3; letter-spacing: -0.012em; }
+  .giant-screen .text p + p { margin-top: 30px; }
+  .giant-screen .caret { display: inline-block; width: 7px; height: 84px; margin-left: 6px; vertical-align: -14px; background: #3D7EFF; border-radius: 4px; }
+  .giant-screen .home { position: absolute; left: 260px; width: 260px; top: 1586px; height: 12px; border-radius: 6px; background: #0A1628; }
   .ribbon-icon {
     position: absolute; z-index: 8; overflow: hidden; border-radius: 22.4%;
     box-shadow: 0 18px 36px rgba(10, 22, 40, 0.22), 0 4px 10px rgba(10, 22, 40, 0.10);
@@ -266,6 +282,10 @@ const HERO = params.get("hero") || "comic";
    slide 2's recording panel. V7: ?cast=woman-curves (default) | woman | man picks the
    character (art/v7/). */
 const CAST = params.get("cast") || "woman-curves";
+/* V9: the hero scene. ?scene=v9a (default): concept A, "the voice that writes", the woman
+   sitting on a giant phone, her voice written on its screen (art/v9-A/). ?scene=v8 renders V8
+   exactly as exported (art/v8/hero.png, voice strokes into slide 2's panel). */
+const SCENE = params.get("scene") || "v9a";
 /* V8: Pierre chose the woman with curves; one character again, so file names drop it. */
 window.ITERATION_CAST = false;
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
@@ -562,11 +582,83 @@ function addHero(copy, i) {
   const h = el("hero-headline", copy.headline);
   h.style.left = `${i * PANEL_W + 110}px`;
   strip.appendChild(h);
+  if (SCENE === "v9a") { addHeroA(copy); return; }
   const img = document.createElement("img");
   img.className = "hero-illu"; img.id = "hero-illu"; img.alt = ""; img.src = ILLU.src;
   img.style.width = `${ILLU.w}px`;
   strip.appendChild(img);
   addRibbon();
+}
+
+/* ── V9-A: the voice that writes ─────────────────────
+   Two layers drawn with anidoodle (art/v9-A/heroSpeak.ts), both 2640 × 2868 on the strip's
+   origin: `back` (the phone and its ground shadow) under the screen text, `front` (the woman,
+   her shadow, the voice) over it. QUAD is the phone's top face, corners top-left, top-right,
+   bottom-right, bottom-left: the SAME numbers as QUAD in heroSpeak.ts. */
+const HERO_A = {
+  back: "art/v9-A/hero-back.png", front: "art/v9-A/hero-front.png", w: 2640, h: 2868,
+  quad: [[40, 1660], [760, 1420], [1310, 2560], [500, 3010]], mm: [78, 163],
+};
+/* The unit square → quad homography, as the CSS matrix3d of a box of size bw × bh. */
+function quadMatrix(q, bw, bh) {
+  const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = q;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3, dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+  const den = dx1 * dy2 - dx2 * dy1, g = (dx3 * dy2 - dx2 * dy3) / den, h = (dx1 * dy3 - dx3 * dy1) / den;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + h * x3, d = y1 - y0 + g * y1, e = y3 - y0 + h * y3;
+  return `matrix3d(${a / bw},${d / bw},0,${g / bw},${b / bh},${e / bh},0,${h / bh},0,0,1,0,${x0},${y0},0,1)`;
+}
+function addHeroA(copy) {
+  const layer = (src, z) => {
+    const img = document.createElement("img");
+    img.className = "hero-layer"; img.alt = ""; img.src = src;
+    Object.assign(img.style, { width: `${HERO_A.w}px`, zIndex: z });
+    strip.appendChild(img);
+  };
+  layer(HERO_A.back, 2);
+  // The screen: status bar, the message being written, the caret where the voice lands.
+  const lines = copy.screen.map((t, n) => `<p>${t}${n === copy.screen.length - 1 ? '<span class="caret"></span>' : ""}</p>`).join("");
+  // The same email as slide 2, its first words: the story carries across the cut.
+  const e = S.slides.dictate;
+  const scr = el("giant-screen", `<div class="status">9:41</div>
+    <div class="field" style="top:540px"><span class="label">${e.emailToLabel}</span><span class="chip">${e.emailTo}</span></div>
+    <div class="field subject" style="top:660px">${e.emailSubject}</div>
+    <div class="text">${lines}</div><div class="home"></div>`);
+  scr.style.transform = quadMatrix(HERO_A.quad, 780, 1630);
+  strip.appendChild(scr);
+  layer(HERO_A.front, 4);
+  addRibbonA();
+}
+/* The app icons as a wave: out of the giant phone's bottom end, across the cut, and along the
+   bottom of slide 2, under its phone and recording panel. Points in strip pixels; the icons sit
+   at equal arc length along the smoothed path, growing as they leave the phone. */
+const WAVE_A = { pts: [[960, 2500], [1140, 2600], [1340, 2650], [1700, 2580], [2100, 2660], [2560, 2570]], size: [100, 116] };
+function addRibbonA() {
+  // Catmull-Rom through the points, then resample by arc length
+  const P = WAVE_A.pts, dense = [];
+  for (let i = 0; i < P.length - 1; i++) {
+    const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
+    for (let t = 0; t < 1; t += 0.02) {
+      const t2 = t * t, t3 = t2 * t, f = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+      dense.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]);
+    }
+  }
+  dense.push(P[P.length - 1]);
+  const cum = [0];
+  for (let i = 1; i < dense.length; i++) cum.push(cum[i - 1] + Math.hypot(dense[i][0] - dense[i - 1][0], dense[i][1] - dense[i - 1][1]));
+  const L = cum[cum.length - 1], n = RIBBON_APPS.length;
+  RIBBON_APPS.forEach((slug, k) => {
+    const target = (k / (n - 1)) * L;
+    let i = cum.findIndex((c) => c >= target); if (i < 1) i = 1;
+    const f = (target - cum[i - 1]) / (cum[i] - cum[i - 1] || 1);
+    const x = dense[i - 1][0] + (dense[i][0] - dense[i - 1][0]) * f, y = dense[i - 1][1] + (dense[i][1] - dense[i - 1][1]) * f;
+    const size = WAVE_A.size[0] + (WAVE_A.size[1] - WAVE_A.size[0]) * Math.min(1, k / 3);
+    const d = el("ribbon-icon");
+    Object.assign(d.style, { left: `${x - size / 2}px`, top: `${y - size / 2}px`, width: `${size}px`, height: `${size}px`,
+      transform: `rotate(${[-6, 4, -2, 7, -4][k % 5]}deg)` });
+    d.innerHTML = `<img alt="" src=".icons/${slug}.png">`;
+    d.querySelector("img").onerror = () => { document.getElementById("missing").innerHTML = "App icons missing<br>run: tools/fetch-icons.sh"; document.getElementById("missing").style.display = "flex"; };
+    strip.appendChild(d);
+  });
 }
 
 SLIDES.forEach((s, i) => {
@@ -590,7 +682,7 @@ SLIDES.forEach((s, i) => {
 /* Place the hero canvas so the voice strokes end exactly at the left edge of slide 2's
    lifted recording panel, at the height of its waveform: they slip under the panel's
    edge there and the real waveform carries on inside it. */
-{
+if (SCENE === "v8") {
   const lift = LIFTS[1], illu = document.getElementById("hero-illu");
   const waveY = lift.top + (CAPTURE_WAVE_Y - lift.band.y) * lift.k;
   Object.assign(illu.style, { left: `${lift.left + 6 - ILLU.panelIn[0]}px`, top: `${waveY - ILLU.panelIn[1]}px` });
@@ -665,17 +757,19 @@ window.whenReady = Promise.all([
   .then(() => document.getElementById("missing").style.display !== "flex");
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
 /* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
-window.ITERATION = "v8";
+window.ITERATION = SCENE === "v9a" ? "v9-A" : "v8";
 /* Themes the exporter renders for this iteration (light only since V3, Pierre). */
 window.EXPORT_THEMES = ["light"];
 /* Variants: the first is the main set; the others re-export only the slides whose
    id they change, and get a montage-<name>.jpg of their own. */
-window.VARIANTS = [
+window.VARIANTS = SCENE === "v9a" ? [{ name: "main", query: "" }] : [
   { name: "main", query: "" },
   { name: "nologos", query: "ribbon=tiles" },
 ];
 /* V8 changes slide 1 only; slide 2 is re-rendered because the voice strokes end on it (her
-   mouth did not move, so they are V7's). Slides 3 to 7 are V6's exported files. */
+   mouth did not move, so they are V7's). Slides 3 to 7 are V6's exported files.
+   V9-A likewise: slide 2 is re-rendered because the icon wave and the phone's shadow cross onto
+   it (and V8's voice strokes no longer reach its panel). */
 window.EXPORT_SLIDES = [0, 1];
 window.REUSE_FROM = "v6";
 window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg" };

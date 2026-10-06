@@ -36,6 +36,9 @@ window.DICTUS_STRINGS = {
       // Options proposed to Pierre (V4): "Speak instead of typing" (kept),
       // "Your voice, typed in any app", "Talk. Dictus types."
       headline: "Speak instead of typing",
+      // V9-A: what the giant phone's screen shows being written. The start of slide 2's
+      // email, so the two slides tell one story; the caret ends the last line.
+      screen: ["Hi Sam,", "Thanks for the notes on the draft."],
     },
     dictate: {
       headline: "Dictate in any app",
