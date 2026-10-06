@@ -262,6 +262,8 @@ const NOLOGO = RIBBON === "tiles" ? "-nologos" : "";
 /* The hero's illustration style (V5): ?hero=comic (marker comic, default) or paper
    (cut-paper collage). Both are drawn in code with anidoodle (art/v5/). */
 const HERO = params.get("hero") || "comic";
+/* V6: the hero canvas spans slides 1 and 2 (marker comic, art/v6/), so the voice strokes
+   can reach slide 2's recording panel. */
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -314,7 +316,7 @@ const KEYBOARD_BAND = { y: 1767, h: 891, radius: PANEL_RADIUS, fill: "#E2E3E7" }
 const SLIDES = [
   // V4: a hero with no phone. Illustration, brand, headline; the voice becomes the
   // BrandWaveform and the app-icon ribbon, which cross the cut into slide 2 together.
-  { id: `01-hero-${HERO}${NOLOGO}`, key: "hero", pro: false, hero: true },
+  { id: `01-hero${NOLOGO}`, key: "hero", pro: false, hero: true },
   { id: `02-dictate${NOLOGO}`, key: "dictate", pro: false,
     // Real capture (status bar, recording panel); the email above is drawn by composeScreen().
     // V5: smaller and higher than the other phones, so the waveform and the icon
@@ -438,6 +440,7 @@ function addLift(l, toStrip, file, pro, i) {
   Object.assign(img.style, { width: `${1320 * k}px`, left: `${-band.x * k}px`, top: `${-band.y * k}px` });
   loadImg(img, file);
   strip.appendChild(d);
+  LIFTS[i] = { el: d, left: i * PANEL_W + (PANEL_W - l.width) / 2, top: cy - h / 2, k, band };
 }
 
 function addBeforeAfter(b, slideCopy, i, pro) {
@@ -503,13 +506,12 @@ function addGreetings(list, i) {
    ════════════════════════════════════════════════════════════ */
 /* The illustration (art/hero-illustration.png, drawn in code with anidoodle:
    art/dictusHero.ts) and where its voice line ends, in its own pixels. */
-const ILLU = { src: `art/hero-${HERO}.png`, w: 1320, h: 2000, x: 10, y: 560, scale: 0.9, voiceEnd: [1190, 1990] };
-const VOICE = [ILLU.x + ILLU.voiceEnd[0] * ILLU.scale, ILLU.y + ILLU.voiceEnd[1] * ILLU.scale];
-/* V5: the bottom band of slides 1 and 2. The voice lands level at VOICE and runs on as
-   the BrandWaveform, horizontal, across the cut, under slide 2's phone; the icon
-   ribbon runs below it. At slide 2's right edge the wave rises to the height it keeps
-   behind the phones of slides 3 to 7, so the strip stays one line. */
-const BAND = { waveY: VOICE[1], waveMax: 300, ribbonY: 2735, riseFrom: 2 * PANEL_W - 240, riseTo: 2 * PANEL_W + 170 };
+const ILLU = { src: "art/hero-comic-v6.png", w: 2640, h: 2000, panelIn: [1400, 1387] };
+/* The waveform's centre in the recording capture (measured: blue bars from y 2052 to 2410). */
+const CAPTURE_WAVE_Y = 2231;
+/* The icon row along the very bottom of slides 1 and 2. */
+const BAND = { ribbonY: 2735 };
+const LIFTS = [];
 
 /* App icons on the ribbon. Real icons are fetched by tools/fetch-icons.sh into the
    git-ignored .icons/ (third-party marks, never committed). The fallback draws
@@ -557,8 +559,8 @@ function addHero(copy, i) {
   h.style.left = `${i * PANEL_W + 110}px`;
   strip.appendChild(h);
   const img = document.createElement("img");
-  img.className = "hero-illu"; img.alt = ""; img.src = ILLU.src;
-  Object.assign(img.style, { left: `${i * PANEL_W + ILLU.x}px`, top: `${ILLU.y}px`, width: `${ILLU.w * ILLU.scale}px` });
+  img.className = "hero-illu"; img.id = "hero-illu"; img.alt = ""; img.src = ILLU.src;
+  img.style.width = `${ILLU.w}px`;
   strip.appendChild(img);
   addRibbon();
 }
@@ -580,6 +582,15 @@ SLIDES.forEach((s, i) => {
   if (s.keyboards) addKeyboards(s.keyboards, i, copy.labels);
   if (s.greetings) addGreetings(copy.greetings, i);
 });
+
+/* Place the hero canvas so the voice strokes end exactly at the left edge of slide 2's
+   lifted recording panel, at the height of its waveform: they slip under the panel's
+   edge there and the real waveform carries on inside it. */
+{
+  const lift = LIFTS[1], illu = document.getElementById("hero-illu");
+  const waveY = lift.top + (CAPTURE_WAVE_Y - lift.band.y) * lift.k;
+  Object.assign(illu.style, { left: `${lift.left + 6 - ILLU.panelIn[0]}px`, top: `${waveY - ILLU.panelIn[1]}px` });
+}
 
 /* ════════════════════════════════════════════════════════════
    Background + continuous waveform, drawn once across the strip.
@@ -625,18 +636,15 @@ const barFill = (x, y, h, cx) => {
 };
 ctx.globalAlpha = 0.62;
 {
-  // One wave from the voice to the end of the strip. Level along slides 1 and 2's bottom
-  // band (smaller bars), a smooth rise at slide 2's right edge, then the strip's height.
-  const ease = (t) => t * t * (3 - 2 * t);
-  for (let x = VOICE[0] + 6; x < STRIP_W - BAR_W; x += pitch) {
+  // V6: on slides 1 and 2 the BrandWaveform lives only in the recording panel. The strip's
+  // wave resumes in slide 2's right margin, at the height it keeps behind slides 3 to 7.
+  const from = 2 * PANEL_W - (PANEL_W - 840) / 2;
+  for (let x = from; x < STRIP_W - BAR_W; x += pitch) {
     const cx = x + BAR_W / 2;
-    const t = Math.max(0, Math.min(1, (cx - BAND.riseFrom) / (BAND.riseTo - BAND.riseFrom)));
-    const yc = BAND.waveY + (WAVE_Y - BAND.waveY) * ease(t);
-    const maxH = BAND.waveMax + (MAX_H - BAND.waveMax) * ease(t);
     const energy = 0.2 + 0.25 * (Math.sin(2 * Math.PI * (cx / WAVE_PERIOD + 0.25)) + 1);
-    const ramp = Math.min(1, 0.2 + (cx - VOICE[0]) / 220);   // the voice opens into the wave
-    const h = Math.max((MIN_H + energy * (maxH - MIN_H)) * ramp, MIN_H);
-    const y = yc - h / 2;
+    const ramp = Math.min(1, 0.3 + (cx - from) / 260);
+    const h = Math.max((MIN_H + energy * (MAX_H - MIN_H)) * ramp, MIN_H);
+    const y = WAVE_Y - h / 2;
     ctx.beginPath(); ctx.roundRect(x, y, BAR_W, h, BAR_W / 2); ctx.fillStyle = barFill(x, y, h, cx); ctx.fill();
   }
 }
@@ -653,17 +661,18 @@ window.whenReady = Promise.all([
   .then(() => document.getElementById("missing").style.display !== "flex");
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
 /* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
-window.ITERATION = "v5";
+window.ITERATION = "v6";
 /* Themes the exporter renders for this iteration (light only since V3, Pierre). */
 window.EXPORT_THEMES = ["light"];
 /* Variants: the first is the main set; the others re-export only the slides whose
    id they change, and get a montage-<name>.jpg of their own. */
 window.VARIANTS = [
-  { name: "comic", query: "", montage: "montage-comic.jpg" },
-  { name: "paper", query: "hero=paper" },
+  { name: "main", query: "" },
   { name: "nologos", query: "ribbon=tiles" },
   { name: "message", query: "smart=message" },
 ];
+/* Also export slides 1 and 2 side by side, 1400 px wide, to judge the hand-off at a glance. */
+window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg" };
 
 if (params.has("preview")) {
   document.body.classList.add("preview");

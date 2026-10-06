@@ -56,6 +56,7 @@ async function load(locale, theme, variant) {
   return page.evaluate(() => ({
     ids: window.SLIDE_IDS, iteration: window.ITERATION,
     themes: window.EXPORT_THEMES || ["navy", "light"], variants: window.VARIANTS || [undefined],
+    pair: window.PAIR || null,
   }));
 }
 
@@ -84,7 +85,12 @@ for (const locale of locales) {
         if (v === 0 || !mainFiles.includes(file)) await shoot(file, i);
         files.push(file);
       }
-      if (v === 0) mainFiles = files;
+      if (v === 0) {
+        mainFiles = files;
+        // A side-by-side of two slides of the main set (window.PAIR), for judging a cut.
+        if (meta.pair) execFileSync("magick", [...meta.pair.slides.map((n) => files[n]), "+append", "-resize", `${meta.pair.width}x`,
+          "-quality", "90", join(ROOT, "export", locale, meta.iteration, meta.pair.file)]);
+      }
       const vname = asVariant(variant).name;
       const name = asVariant(variant).montage ?? (v === 0 ? `montage${suffix}.jpg` : `montage-${vname}${suffix}.jpg`);
       montage(files, join(ROOT, "export", locale, meta.iteration, name));
