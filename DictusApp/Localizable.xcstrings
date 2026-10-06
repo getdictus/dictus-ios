@@ -72,7 +72,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ : n’a pas pu s’appliquer. Réessaie."
+            "value" : "%@ : n’a pas pu s’appliquer. Réessayez."
           }
         }
       }
@@ -1591,7 +1591,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maintiens le micro du clavier pour les ouvrir, puis glisse sur l’un d’eux. Jusqu’à %lld, plus Normal."
+            "value" : "Maintenez le micro du clavier pour les ouvrir, puis glissez sur l’un d’eux. Jusqu’à %lld, plus Normal."
           }
         }
       }
@@ -2687,7 +2687,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Retire-en un ci-dessus pour en ajouter un autre."
+            "value" : "Retirez-en un ci-dessus pour en ajouter un autre."
           }
         }
       }
@@ -3037,7 +3037,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les modes exigent Apple Intelligence, que cet iPhone ne gère pas. Tes choix sont conservés pour un appareil compatible."
+            "value" : "Les modes exigent Apple Intelligence, que cet iPhone ne gère pas. Vos choix sont conservés pour un appareil compatible."
           }
         }
       }
