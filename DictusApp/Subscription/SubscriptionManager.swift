@@ -56,6 +56,9 @@ final class SubscriptionManager: ObservableObject {
 
     private let proStatus: ProStatusManager
 
+    /// Numbers overlapping entitlement scans so only the latest publishes (#216).
+    private var scanGenerations = ProScanGeneration()
+
     init(proStatus: ProStatusManager) {
         self.proStatus = proStatus
         // Start listening IMMEDIATELY at init — before any view renders.
@@ -262,6 +265,8 @@ final class SubscriptionManager: ObservableObject {
     /// with no code of its own (#350). Restore lands here too, which is the
     /// whole promise of a non-consumable.
     private func updateProStatus() async {
+        // Only the latest scan publishes: see `ProScanGeneration`.
+        let generation = scanGenerations.begin()
         var isActive = false
         var seen: [String] = []
         var owned: [Transaction] = []
@@ -289,9 +294,17 @@ final class SubscriptionManager: ObservableObject {
             action: "entitlementScan",
             details: "active=\(isActive) source=\(source) entitlements=\(seen.isEmpty ? "none" : seen.joined(separator: "; "))"
         )
+        let scannedOwnership = isActive ? await readOwnership(entitlements: owned) : ProOwnership.none
+        // A newer scan started while this one was suspended: its result is at least
+        // as fresh, so this one publishes nothing, neither the App Group entitlement
+        // nor `ownership`.
+        guard scanGenerations.mayPublish(generation) else {
+            Self.logStoreKit(action: "entitlementScanSuperseded", details: "generation=\(generation) active=\(isActive)")
+            return
+        }
         // Before `setProActive`, so the hub never renders a paid state with the
         // previous scan's plan under it.
-        ownership = isActive ? await readOwnership(entitlements: owned) : ProOwnership.none
+        ownership = scannedOwnership
         proStatus.setProActive(isActive)
     }
 
