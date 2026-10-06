@@ -511,7 +511,7 @@ public enum LogEvent: Sendable {
     /// Emitted on every Translate dictation and on no other. `outcome` is
     /// `translated` (the framework's output was used) or `fallback` (Apple FM ran
     /// instead, for `reason`: `noSourceLanguage`, `sameLanguage`, `osBelow26.4`,
-    /// `notInstalled`, `deadline8s` or `error:<cause>`). `status` is
+    /// `notInstalled`, `deadline8s`, `untranslated` or `error:<cause>`). `status` is
     /// `LanguageAvailability`'s verdict for the pair under the strategy, read before
     /// the call, `-` when the call stopped before reading it. `process` is `KBD` or `APP`, `appState` the
     /// caller's state (`extension` in the keyboard, which has no application state).

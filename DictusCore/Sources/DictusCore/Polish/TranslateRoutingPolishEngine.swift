@@ -26,7 +26,8 @@ import Translation
 ///
 /// Each way the framework can decline falls back to the Apple FM prompt Translate
 /// shipped with, and the `translateEngineCall` line says why: no known source, source
-/// equal to target, an OS below 26.4, a pair not installed, an error, or the deadline.
+/// equal to target, an OS below 26.4, a pair not installed, an error, the deadline, or
+/// an answer identical to the input.
 /// The availability check is read first, and an error is still caught after it,
 /// because the device test saw the framework throw `notInstalled` on a pair it had just
 /// reported `installed`. Returning the input untouched is never an outcome: the
@@ -114,6 +115,10 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
         case notInstalled(TranslationPairStatus)
         case deadline(Int)
         case error(String)
+        /// The framework answered with the input itself. It does that, without an error,
+        /// when told the wrong source: an English dictation transcribed under a forced
+        /// French setting arrives labelled `fr`.
+        case untranslated
 
         var slug: String {
             switch self {
@@ -123,6 +128,7 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
             case .notInstalled: return "notInstalled"
             case .deadline(let seconds): return "deadline\(seconds)s"
             case .error(let slug): return slug
+            case .untranslated: return "untranslated"
             }
         }
     }
@@ -173,6 +179,9 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
                 try await framework.translate(raw, pair)
             }
             line.memPeakMB = await sampler.peakMB
+            guard Self.normalised(output) != Self.normalised(raw) else {
+                return .failure(DeclineError(.untranslated))
+            }
             return .success(output)
         } catch let expired as DeadlineExpired {
             line.memPeakMB = await sampler.peakMB
@@ -187,6 +196,14 @@ public struct TranslateRoutingPolishEngine: PolishEngineProtocol {
     struct DeclineError: Error {
         let decline: Decline
         init(_ decline: Decline) { self.decline = decline }
+    }
+
+    /// Case, surrounding whitespace and the line-break marker set aside, for the
+    /// untranslated check.
+    static func normalised(_ text: String) -> String {
+        text.replacingOccurrences(of: PolishPostpass.newlineMarker, with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
     }
 
     /// A log-safe name for an error: the framework's `Cause.<name>` when it has one,

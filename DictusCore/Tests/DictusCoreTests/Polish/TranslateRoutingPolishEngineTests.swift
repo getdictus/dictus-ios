@@ -111,6 +111,17 @@ final class TranslateRoutingPolishEngineTests: XCTestCase {
         try await assertFallsBackToAppleFM(source: "fr") { $0.error = NotInstalledAfterAll() }
     }
 
+    /// The framework returns its input, without an error, when told the wrong source.
+    func testAnAnswerIdenticalToTheInputFallsBackInsteadOfInsertingTheRaw() async throws {
+        let inner = InnerEngine()
+        let echo = TranslationFrameworkCall(status: { _ in .installed }, translate: { raw, _ in "  \(raw.uppercased()) " })
+        let engine = TranslateRoutingPolishEngine(wrapping: inner, appState: { "test" }, framework: echo)
+        let output = try await engine.polishLabelled(
+            raw: "hello there<<NL>>see you", targetLanguage: .french, task: translateEN, sourceLanguageCode: "fr"
+        )
+        XCTAssertEqual(output, PolishEngineOutput(text: "FM(hello there<<NL>>see you)", engine: "apple-fm"))
+    }
+
     func testEachDeclineHasTheLogSlugTheReadersGrepFor() {
         typealias Decline = TranslateRoutingPolishEngine.Decline
         XCTAssertEqual(Decline.noSourceLanguage.slug, "noSourceLanguage")
@@ -119,6 +130,7 @@ final class TranslateRoutingPolishEngineTests: XCTestCase {
         XCTAssertEqual(Decline.notInstalled(.notInstalled).slug, "notInstalled")
         XCTAssertEqual(Decline.deadline(8).slug, "deadline8s")
         XCTAssertEqual(Decline.error("error:notInstalled").slug, "error:notInstalled")
+        XCTAssertEqual(Decline.untranslated.slug, "untranslated")
     }
 
     func testAnErrorBecomesASlugWithoutItsMessage() {
