@@ -1,0 +1,116 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Done" : {
+      "comment" : "Dynamic Island, compact pill: the dictation finished and its text was inserted. Shown for about a second; keep it short, the pill grows with the text (#664).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt"
+          }
+        }
+      }
+    },
+    "Error" : {
+      "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the dictation failed (#664).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur"
+          }
+        }
+      }
+    },
+    "On" : {
+      "comment" : "Live Activity, compact pill, expanded Dynamic Island and Lock Screen: Dictus standby is on, ready to record. Keep it short, the pill grows with the text (#664).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actif"
+          }
+        }
+      }
+    },
+    "Processing..." : {
+      "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the Smart mode runs on the transcript (#267, #664). Translations end on the single ellipsis character (…), which never splits across two lines.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traitement…"
+          }
+        }
+      }
+    },
+    "Rec" : {
+      "comment" : "Dynamic Island, compact pill: recording in progress. An abbreviation; keep it short, the pill grows with the text (#664).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enr."
+          }
+        }
+      }
+    },
+    "Recording..." : {
+      "comment" : "Live Activity, expanded Dynamic Island: recording in progress (#664). Translations end on the single ellipsis character (…), which never splits across two lines.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrement…"
+          }
+        }
+      }
+    },
+    "Stop Standby" : {
+      "comment" : "Title of the Live Activity intent behind the power button: turns Dictus standby off (#664).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêter la veille"
+          }
+        }
+      }
+    },
+    "Transcribing..." : {
+      "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the recording is being transcribed (#664). Translations end on the single ellipsis character (…), which never splits across two lines.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcription…"
+          }
+        }
+      }
+    },
+    "Transcription ready" : {
+      "comment" : "Live Activity, expanded Dynamic Island and Lock Screen: the transcription is done. On the Lock Screen it is replaced by the text itself when there is one (#664).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcription prête"
+          }
+        }
+      }
+    },
+    "Turn off Dictus standby mode" : {
+      "comment" : "Description of the Live Activity intent behind the power button (#664).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactiver le mode veille de Dictus"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

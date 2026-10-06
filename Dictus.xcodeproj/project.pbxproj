@@ -134,6 +134,7 @@
 		BB000001 /* DictusWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100001 /* DictusWidgetBundle.swift */; };
 		BB000002 /* DictusLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100002 /* DictusLiveActivity.swift */; };
 		BB000003 /* StopStandbyIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB100005 /* StopStandbyIntent.swift */; };
+		BB000004 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = BB100006 /* Localizable.xcstrings */; };
 		BB000010 /* DictusCore in Frameworks */ = {isa = PBXBuildFile; productRef = BB900010 /* DictusCore */; };
 		BB000020 /* DictusWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = BB200001 /* DictusWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EE000001 /* dictus_trie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE100001 /* dictus_trie.cpp */; };
@@ -359,6 +360,7 @@
 		BB100003 /* DictusWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DictusWidgets.entitlements; sourceTree = "<group>"; };
 		BB100004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BB100005 /* StopStandbyIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopStandbyIntent.swift; sourceTree = "<group>"; };
+		BB100006 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		BB200001 /* DictusWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DictusWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC100030 /* KeyboardMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardMetrics.swift; sourceTree = "<group>"; };
 		CC100050 /* KeySoundPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySoundPolicy.swift; sourceTree = "<group>"; };
@@ -754,6 +756,7 @@
 				BB100001 /* DictusWidgetBundle.swift */,
 				BB100002 /* DictusLiveActivity.swift */,
 				BB100005 /* StopStandbyIntent.swift */,
+				BB100006 /* Localizable.xcstrings */,
 				BB100003 /* DictusWidgets.entitlements */,
 				BB100004 /* Info.plist */,
 			);
@@ -1069,6 +1072,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB000004 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
