@@ -14,7 +14,7 @@ import Foundation
 /// |---|---|---|
 /// | Normal | every word, cleaned | — |
 /// | `Structured` | the same content as written prose; its prompt says *do not summarise* | 0.4 … 1.5 |
-/// | `List` | **actions**, as infinitive bullets | 0.1 … 2.0 |
+/// | `List` | **actions**, as infinitive bullets (since #573: every point, under a title) | 0.1 … 2.0 |
 /// | **`Summary`** | **the substance**, as prose, in the speaker's person | **0.1 … 0.6** |
 ///
 /// `List` is the nearest row and still the wrong shape: a user who wants the gist gets

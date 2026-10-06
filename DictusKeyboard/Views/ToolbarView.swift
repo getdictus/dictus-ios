@@ -18,6 +18,10 @@ import DictusCore
 ///     closed:  [☰]  ← centre slot →  [🎤 pill]
 ///     open:    [✕]                   [Dictus Pro] [⚙]
 ///
+/// The ☰ has two gestures (#639): a tap opens the voice note reader, a long press
+/// opens the panel. It wears the mic's halo while the keyboard offers at least one
+/// shared voice note.
+///
 /// There is deliberately no mic while the panel is open: the panel is not a
 /// surface anyone dictates from, and the mic's absence is what makes the state
 /// unambiguous.
@@ -58,8 +62,9 @@ struct ToolbarView: View {
     /// Drives which of the two presentations above the bar renders.
     var isPanelOpen: Bool = false
 
-    /// Opens the panel from the hamburger, closes it from the ✕. Same callback:
-    /// both are the same control in the same 32 pt slot, just labelled by state.
+    /// Opens the panel from a long press on the hamburger, closes it from the ✕'s tap
+    /// (#639). Same callback: both are the same control in the same slot, labelled
+    /// by state.
     var onPanelToggle: (() -> Void)?
 
     /// Gear, panel presentation only. Opens DictusApp.
@@ -111,6 +116,36 @@ struct ToolbarView: View {
     /// the finger is still down, and a guard on the flag would leave the long press
     /// inert from then on.
     var isSmartModeFanOpen: Bool = false
+
+    /// Whether the keyboard offers at least one voice note (#639): the ☰ capsule wears
+    /// the mic pill's halo. Shown or not, until the last one expires or is deleted.
+    var ringsMenuForVoiceNotes: Bool = false
+
+    /// Whether the "← Long press: languages & settings" hint is still worth showing.
+    /// The policy is `MenuPanelDiscovery`'s; this is only the answer.
+    var offersPanelHint: Bool = false
+
+    /// A tap on ☰: open the voice note reader (#639).
+    var onMenuTap: (() -> Void)?
+
+    /// A long press on ☰ was recognised and the panel is opening (#639): retires the
+    /// panel hint. The panel itself opens through `onPanelToggle`.
+    var onMenuLongPress: (() -> Void)?
+
+    /// Set when the long press on ☰ is recognised, cleared by the release it belongs
+    /// to — the `fanGestureDidOpen` arrangement, for the ☰.
+    ///
+    /// WHY: the long press is a `simultaneousGesture`, so the ☰ `Button` stays live
+    /// and fires its tap action on a release inside its bounds — which would open the
+    /// reader over the panel the long press just opened. The panel swaps this bar's
+    /// presentation (`dictationBar` → `panelBar`), so the ☰ button is normally gone by
+    /// the release and the release goes nowhere; this flag is the guarantee for every
+    /// case where it is not.
+    ///
+    /// Reset when the press **begins** (`onChanged` delivers the finger landing), not
+    /// on release, for `fanGestureWasRefused`'s reason: a release that never arrives
+    /// would otherwise leave the next tap swallowed.
+    @State private var menuLongPressDidFire = false
 
     /// Coordinate space the fan gesture reports in. Declared here and named by
     /// `KeyboardRootView`, which owns the view it is attached to: the drag has to be
@@ -240,6 +275,7 @@ struct ToolbarView: View {
             polishUnavailable: showsPolishUnavailable,
             armedModeName: armedSmartMode?.localizedDisplayName,
             armedModeIsEffective: effectiveSmartMode != nil,
+            offersPanelHint: offersPanelHint,
             offersDiscoveryHint: offersSmartModeHint
         )
     }
@@ -266,6 +302,8 @@ struct ToolbarView: View {
             armedModeLabel(name)
         case .armedModeInactive(let name):
             inactiveArmedModeLabel(name)
+        case .panelHint:
+            panelHint
         case .discoveryHint:
             discoveryHint
         case .empty:
@@ -540,24 +578,59 @@ struct ToolbarView: View {
     /// The curve is still described above as the mic's own. That is now a statement
     /// about the app's recording screen, which is where the breathing survives.
     private var discoveryHint: some View {
-        HStack(spacing: 6) {
+        driftingHint(
             Text(
                 "Hold the mic for Smart Modes",
                 comment: "Toolbar hint teaching the long-press gesture that opens the Smart Mode fan."
-            )
-            .lineLimit(1)
-            .minimumScaleFactor(0.75)
-
+            ),
             // Toward the mic, which is the point of the sentence and sits to the
             // right of it in both presentations of this bar.
-            Image(systemName: "arrow.right")
-                .font(.system(size: 10, weight: .semibold))
-                .offset(x: hintDrift * 2.2)
+            pointing: .right
+        )
+    }
+
+    /// "← Long press: languages & settings", the panel hint (#639).
+    ///
+    /// Since #639 a tap on ☰ opens the voice notes and the panel moved behind a long
+    /// press; this tells the user who has met the new tap where the languages went.
+    /// Same rung as the Smart Mode hint, and drawn by the very same layout — same
+    /// leading inset, same centring in the slot, same breath — so the two never sit
+    /// differently in the bar (#639 device feedback: a first version was glued to
+    /// the ☰ and off-centre). Only the arrow's side differs: it points at the ☰.
+    private var panelHint: some View {
+        driftingHint(
+            Text(
+                "Long press: languages & settings",
+                comment: "Toolbar hint, right of the menu button, teaching that a long press on it opens the keyboard panel (languages, layouts, settings). An arrow pointing at the menu button precedes it (#639)."
+            ),
+            pointing: .left
+        )
+    }
+
+    /// Which way a hint's arrow points: at the control the sentence names.
+    private enum HintDirection { case left, right }
+
+    /// The one layout both discovery hints use. See `discoveryHint` for the motion.
+    ///
+    /// The arrow drifts toward what it names, a little further than the text: right
+    /// for the mic, left for the ☰. Everything else is shared, which is the point.
+    private func driftingHint(_ text: Text, pointing direction: HintDirection) -> some View {
+        let sign: CGFloat = direction == .right ? 1 : -1
+        let arrow = Image(systemName: direction == .right ? "arrow.right" : "arrow.left")
+            .font(.system(size: 10, weight: .semibold))
+            .offset(x: sign * hintDrift * 2.2)
+        let label = text
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+        return HStack(spacing: 6) {
+            if direction == .left { arrow }
+            label
+            if direction == .right { arrow }
         }
         .font(.caption2)
         .foregroundStyle(.secondary)
         .opacity(0.62 + hintDrift * 0.13)
-        .offset(x: hintDrift)
+        .offset(x: sign * hintDrift)
         .padding(.leading, 6)
         .frame(maxWidth: .infinity)
         .onAppear {
@@ -624,11 +697,52 @@ struct ToolbarView: View {
     /// Bare hamburger, no language code on it (#241): the keyboard already
     /// announces its language through the spacebar label and the key positions,
     /// and a variable-width label jitters the most contested 32 pt of the UI.
+    ///
+    /// Two gestures on one control (#639, amended after the device test): the tap
+    /// opens the voice note reader — reading a note and typing alternate many times in
+    /// a session — and a long press opens the panel (languages, layouts, Settings,
+    /// Pro). Accepted cost: the one-tap language switch, and the #279 paywall entry
+    /// point moves behind the long press. Same glyph either way. `simultaneousGesture`
+    /// for the mic's reason: the tap must not pay a long-press delay. See
+    /// `menuLongPressDidFire` for how a long press is kept from also being a tap.
     private var hamburgerButton: some View {
-        panelToggleButton(
-            systemName: "line.3.horizontal",
-            label: Text("Keyboard menu")
-        )
+        Button {
+            guard !menuLongPressDidFire else {
+                menuLongPressDidFire = false
+                return
+            }
+            HapticFeedback.keyTapped()
+            onMenuTap?()
+        } label: {
+            barIcon(systemName: "line.3.horizontal", size: 17, width: Self.micPillWidth, shape: .capsule,
+                    ringed: ringsMenuForVoiceNotes)
+        }
+        .buttonStyle(GlassPressStyle())
+        .simultaneousGesture(menuLongPress)
+        .accessibilityLabel(Text("Keyboard menu"))
+    }
+
+    /// The ☰ long press (#639): opens the panel **at recognition**, with the fan's
+    /// haptic, the same feel as the Smart Mode long press on the mic (#79).
+    ///
+    /// 0.35 s, the mic's duration, so the two long presses of this bar are one gesture
+    /// to learn. A plain `LongPressGesture` ends — `onEnded` — the moment the duration
+    /// is reached with the finger still down; that is the recognition, and it is the
+    /// last moment the ☰ button is guaranteed to exist: opening the panel swaps this
+    /// bar to `panelBar` (the #79 identity trap, one level down), so nothing is
+    /// expected to receive the release.
+    private var menuLongPress: some Gesture {
+        LongPressGesture(minimumDuration: 0.35)
+            .onChanged { _ in
+                // The finger landing: a new press starts with a clean latch.
+                menuLongPressDidFire = false
+            }
+            .onEnded { _ in
+                menuLongPressDidFire = true
+                HapticFeedback.keyTapped()
+                onMenuLongPress?()
+                onPanelToggle?()
+            }
     }
 
     /// Removes the dictation that was just inserted (#266).
@@ -734,6 +848,11 @@ struct ToolbarView: View {
     /// visual echo of them, not a shared constant to be refactored away.
     private static let micPillWidth: CGFloat = 56
 
+    /// The ☰'s "voice note waiting" halo opacity (#639): the keyboard mic's resting
+    /// value (`AnimatedMicButton.startIdleAnimation`, static since #510), so the two
+    /// auras opposite each other in the bar are the same object.
+    private static let haloOpacity: Double = 0.45
+
     /// Diameter of the round icon buttons, and the height of every bar control.
     private var iconDiameter: CGFloat { 36 }
 
@@ -758,17 +877,42 @@ struct ToolbarView: View {
     /// pill footprint. The gear never faces the mic — it appears only in the panel
     /// bar, where a second wide pill would compete with the toggle rather than
     /// balance anything.
+    ///
+    /// `ringed` (#639): the ☰'s "voice notes are in the keyboard" state wears the mic pill's
+    /// own aura — `DictusHalo`, the very view `AnimatedMicButton` draws behind its
+    /// pill, at the keyboard mic's resting values (accent, 2 pt, 0.45). Same geometry
+    /// and same layering: a 66 × 46 glass ring behind the 56 × 36 capsule, which stays
+    /// glass and neutral inside. Device feedback on #641: a stroke *inside* the
+    /// capsule made the ☰ read smaller than the mic opposite it, because the mic's
+    /// outer silhouette is its halo.
+    ///
+    /// A background, so the ☰'s layout frame does not move when the ring comes and
+    /// goes: its centre stays where the reader's and the panel's `✕` sit, and the
+    /// ring overhangs by 5 pt on each side the way the mic's does.
+    ///
+    /// While ringed, the glyph itself takes the accent too (trial approved by Pierre,
+    /// fifth round of #641): the three lines in the halo's blue say "notes are here"
+    /// even where the glass ring reads faintly. Not animated, like the halo it goes
+    /// with. Only the ☰ ever passes `ringed`: the panel's `✕` and the reader's `✕`
+    /// are drawn without it, so the blue never carries over the ☰ → ✕ morph.
     private func barIcon(
         systemName: String,
         size: CGFloat,
         width: CGFloat,
-        shape: BarIconShape
+        shape: BarIconShape,
+        ringed: Bool = false
     ) -> some View {
         Image(systemName: systemName)
             .font(.system(size: size, weight: .medium))
-            .foregroundColor(.dictusPillIconSecondary)
+            .foregroundColor(ringed ? .dictusAccent : .dictusPillIconSecondary)
             .frame(width: width, height: iconDiameter)
             .dictusGlass(in: shape == .capsule ? AnyShape(Capsule()) : AnyShape(Circle()))
+            .background {
+                if ringed {
+                    DictusHalo(isPill: shape == .capsule, color: .dictusAccent,
+                               opacity: Self.haloOpacity, lineWidth: 2)
+                }
+            }
             .frame(width: max(width, 44), height: 44)
             .contentShape(Rectangle())
     }

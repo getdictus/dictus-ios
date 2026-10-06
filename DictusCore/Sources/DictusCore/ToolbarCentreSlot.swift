@@ -1,5 +1,5 @@
 // DictusCore/Sources/DictusCore/ToolbarCentreSlot.swift
-// What the keyboard toolbar's centre slot shows, by priority (issues #79, #241, #266).
+// What the keyboard toolbar's centre slot shows, by priority (issues #79, #241, #266, #639).
 import Foundation
 
 /// The one occupant of the toolbar's centre slot.
@@ -40,8 +40,16 @@ import Foundation
 ///    not. Same rung because it is the same fact — this is what you armed — and
 ///    demoting the inactive one would hide the very thing the user needs to see to
 ///    understand why their dictations changed.
-/// 6. **Discovery hint** (#79) — costs nothing, because it only renders when there
-///    is nothing else at all to show.
+/// 6. **Discovery hints** — cost nothing, because they only render when there is
+///    nothing else at all to show. Two at this rung: the panel one (#639), which
+///    teaches that the panel moved to a long press on ☰, and the Smart Mode one
+///    (#79). When both apply the panel one wins: it answers a change the user has
+///    just run into — the tap on ☰ opened the voice notes, not the languages —
+///    where the Smart Mode one would say the same thing tomorrow.
+///
+/// #637 had a voice note **chip** at 3b, below the suggestions. #639 took it out:
+/// the reader now opens from a tap on ☰, the ☰ carries the "something is waiting"
+/// ring, and the slot went back to suggestions, undo and hints.
 public enum ToolbarCentreSlot: Equatable, Sendable {
 
     /// The Smart Mode fan is open: the bar titles it.
@@ -76,6 +84,9 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// the bar named the mode in accent blue while every dictation ran Normal.
     case armedModeInactive(String)
 
+    /// "← Long press: languages & settings" (#639), pointing at the ☰ beside it.
+    case panelHint
+
     /// "Long-press for Smart Modes".
     case discoveryHint
 
@@ -84,9 +95,9 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     case empty
 
     // swiftlint:disable function_parameter_count
-    // Eight parameters because there are seven competitors and one of them needs a
-    // second fact to pick between its two shapes (#423). A table with seven rows
-    // needs seven inputs. Wrapping them in a struct would move the seven names
+    // Nine parameters because there are eight competitors and one of them needs a
+    // second fact to pick between its two shapes (#423). A table with eight rows
+    // needs eight inputs. Wrapping them in a struct would move the seven names
     // one line up and add a type whose only job is to be unpacked here; the
     // alternative that would genuinely reduce the count — resolving some of them in
     // here — is worse, because it would put UserDefaults and Apple Intelligence reads
@@ -103,6 +114,8 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     ///   safe-looking answer is the one that produced the bug.
     /// - Parameter offersDiscoveryHint: whether the hint is still worth showing —
     ///   the caller owns that policy, see `SmartModeDiscovery`.
+    /// - Parameter offersPanelHint: whether the long press on ☰ is still worth
+    ///   teaching (#639) — the caller owns that policy, see `MenuPanelDiscovery`.
     public static func resolve(isChoosingMode: Bool,
                                errorMessage: String?,
                                offersDictationUndo: Bool,
@@ -110,6 +123,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
                                polishUnavailable: Bool,
                                armedModeName: String?,
                                armedModeIsEffective: Bool,
+                               offersPanelHint: Bool,
                                offersDiscoveryHint: Bool) -> ToolbarCentreSlot {
         if isChoosingMode { return .choosingMode }
         if let errorMessage { return .error(errorMessage) }
@@ -119,6 +133,7 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
         if let armedModeName {
             return armedModeIsEffective ? .armedMode(armedModeName) : .armedModeInactive(armedModeName)
         }
+        if offersPanelHint { return .panelHint }
         if offersDiscoveryHint { return .discoveryHint }
         return .empty
     }
@@ -129,11 +144,14 @@ public enum ToolbarCentreSlot: Equatable, Sendable {
     /// The three that do are the three that arrive mid-task and are read at a
     /// glance. The rest share the bar with the hamburger, at the cost — accepted
     /// since #241 — that the keyboard language cannot be changed mid-word.
+    ///
+    /// The panel hint (#639) least of all: it points at the ☰, and the long press it
+    /// teaches is on the ☰.
     public var evictsHamburger: Bool {
         switch self {
         case .error, .dictationUndo, .suggestions: return true
         case .choosingMode, .polishUnavailable, .armedMode, .armedModeInactive,
-             .discoveryHint, .empty:
+             .panelHint, .discoveryHint, .empty:
             return false
         }
     }

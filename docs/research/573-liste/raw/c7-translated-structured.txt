@@ -1,0 +1,1383 @@
+
+
+████ ARM shipping — 3 run(s) × 90 fixture(s), floor 0.35
+
+━━ [T1-last-transcription.en] 56 chars, lang=en
+  #1 56→54 1145ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): I'll let you take a look,
+     engineOut: Latest transcription:⏎- It is the latest transcription
+  #2 56→54 1118ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): I'll let you take a look,
+     engineOut: Latest transcription:⏎- It is the latest transcription
+  #3 56→54 1117ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): I'll let you take a look,
+     engineOut: Latest transcription:⏎- It is the latest transcription
+
+━━ [T2-no-error.en] 153 chars, lang=en
+  #1 153→43 1148ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): For now I don't have any error message,
+     UNRECALLED (whole 0.00, best 0.00): So we're going to keep going for a little while,
+     UNRECALLED (whole 0.00, best 0.00): but for now it's working pretty well.
+     engineOut: Current status:⏎- Everything seems to be OK
+  #2 153→43 1142ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): For now I don't have any error message,
+     UNRECALLED (whole 0.00, best 0.00): So we're going to keep going for a little while,
+     UNRECALLED (whole 0.00, best 0.00): but for now it's working pretty well.
+     engineOut: Current status:⏎- Everything seems to be OK
+  #3 153→43 1161ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): For now I don't have any error message,
+     UNRECALLED (whole 0.00, best 0.00): So we're going to keep going for a little while,
+     UNRECALLED (whole 0.00, best 0.00): but for now it's working pretty well.
+     engineOut: Current status:⏎- Everything seems to be OK
+
+━━ [T3-plan-mode.en] 170 chars, lang=en
+  #1 170→153 1701ms success recall=3/3 PERSON-LOST=2 inversions=0/3 LIST=3
+     PERSONLOST: OK, I'll let you prepare the integration of this issue, please.
+       → - Prepare the integration of this issue
+     PERSONLOST: and then I'll approve it once you've made the implementation plan.
+       → - Approve it once you've made the implementation plan
+     engineOut: Integration of this issue:⏎- Prepare the integration of this issue⏎- Switch to plan mode to do that⏎- Approve it once you've made the implementation plan
+  #2 170→133 1611ms success recall=3/3 PERSON-LOST=2 inversions=0/3 LIST=3
+     PERSONLOST: OK, I'll let you prepare the integration of this issue, please.
+       → - Prepare the integration of this issue
+     PERSONLOST: and then I'll approve it once you've made the implementation plan.
+       → - Approve the implementation plan
+     engineOut: Integration of this issue:⏎- Prepare the integration of this issue⏎- Switch to plan mode to do that⏎- Approve the implementation plan
+  #3 170→122 1489ms success recall=3/3 PERSON-LOST=2 inversions=0/3 LIST=3
+     PERSONLOST: OK, I'll let you prepare the integration of this issue, please.
+       → - Prepare the integration of this issue
+     PERSONLOST: and then I'll approve it once you've made the implementation plan.
+       → - Approve the implementation plan
+     engineOut: Integration of this issue:⏎- Prepare the integration of this issue⏎- Switch to plan mode⏎- Approve the implementation plan
+
+━━ [T4-structured-since.en] 249 chars, lang=en
+  #1 249→128 1569ms success recall=3/5 UNRECALLED=2 PERSON-LOST=1 HEDGE-LOST=1 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.33, best 0.33): Actually I've been on structured mode for a little while.
+     UNRECALLED (whole 0.00, best 0.00): But for me it seems to be pretty much correct.
+     PERSONLOST: So I think I'll be able to export the logs as they are.
+       → - Export the logs as they are
+     HEDGELOST: So I think I'll be able to export the logs as they are.
+       → - Export the logs as they are
+     engineOut: Structured mode:⏎- Did all the tests I did yesterday, especially the slightly longer tests, worked⏎- Export the logs as they are
+  #2 249→124 1474ms success recall=3/5 UNRECALLED=2 PERSON-LOST=1 HEDGE-LOST=1 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.33, best 0.33): Actually I've been on structured mode for a little while.
+     UNRECALLED (whole 0.00, best 0.00): But for me it seems to be pretty much correct.
+     PERSONLOST: So I think I'll be able to export the logs as they are.
+       → - Export the logs as they are
+     HEDGELOST: So I think I'll be able to export the logs as they are.
+       → - Export the logs as they are
+     engineOut: Structured mode:⏎- All the tests I did yesterday, especially the slightly longer tests, worked⏎- Export the logs as they are
+  #3 249→128 1677ms success recall=3/5 UNRECALLED=2 PERSON-LOST=1 HEDGE-LOST=1 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.33, best 0.33): Actually I've been on structured mode for a little while.
+     UNRECALLED (whole 0.00, best 0.00): But for me it seems to be pretty much correct.
+     PERSONLOST: So I think I'll be able to export the logs as they are.
+       → - Export the logs as they are
+     HEDGELOST: So I think I'll be able to export the logs as they are.
+       → - Export the logs as they are
+     engineOut: Structured mode:⏎- Did all the tests I did yesterday, especially the slightly longer tests, worked⏎- Export the logs as they are
+
+━━ [T5-long-test.en] 380 chars, lang=en
+  #1 380→283 2558ms success recall=6/7 UNRECALLED=1 PERSON-LOST=5 inversions=0/15 LIST=5
+     UNRECALLED (whole 0.29, best 0.29): Knowing that I'm not necessarily in the right conditions audio-wise,
+     PERSONLOST: And so now we're trying a long message in structured mode to see what's going to happen.
+       → - Try a long message in structured mode
+     PERSONLOST: because I'm quite far from the phone.
+       → far from the phone
+     PERSONLOST: There's also quite a lot of noise next to me.
+       → - Know there is a lot of noise next to
+     PERSONLOST: So we'll see what it gives on the test.
+       → - See what the test gives on the result
+     PERSONLOST: We'll see if the result is interesting or not.
+       → -See if the result is interesting or not
+     engineOut: Structured mode test:⏎- Try a long message in structured mode⏎- Know audio conditions are not ideal: far from the phone⏎- Know mic quality might not be exceptional⏎- Know there is a lot of noise next to⏎- See what the test gives on the result⏎-See if the result is interesting or not
+  #2 380→349 2631ms success recall=7/7 PERSON-LOST=1 inversions=0/21 LIST=6
+     PERSONLOST: And so now we're trying a long message in structured mode to see what's going to happen.
+       → - Trying a long message in structured mode
+     engineOut: Structured mode test:⏎- Trying a long message in structured mode⏎- Knowing I'm not necessarily in the right conditions audio-wise because I'm quite far from the phone⏎- The quality of the mic might not be exceptional⏎- There's also quite a lot of noise next to me⏎- We'll see what it gives on the test⏎- We'll see if the result is interesting or not
+  #3 380→349 2680ms success recall=7/7 PERSON-LOST=1 inversions=0/21 LIST=6
+     PERSONLOST: And so now we're trying a long message in structured mode to see what's going to happen.
+       → - Trying a long message in structured mode
+     engineOut: Structured mode test:⏎- Trying a long message in structured mode⏎- Knowing I'm not necessarily in the right conditions audio-wise because I'm quite far from the phone⏎- The quality of the mic might not be exceptional⏎- There's also quite a lot of noise next to me⏎- We'll see what it gives on the test⏎- We'll see if the result is interesting or not
+
+━━ [T6-project-update.en] 686 chars, lang=en
+  #1 686→501 3404ms success recall=14/17 UNRECALLED=3 PERSON-LOST=1 inversions=0/91 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): There are two things left.
+     UNRECALLED (whole 0.00, best 0.00): On the numbers side,
+     UNRECALLED (whole 0.00, best 0.00): which is low, but not catastrophic for a first version.
+     PERSONLOST: And on that one we have a spec but no code.
+       → - The custom vocabulary has a spec but no code
+     engineOut: Project update:⏎- We switched over the subscription part last Monday⏎- Thomas finished the StoreKit integration and it works in sandbox⏎- The transcription history hasn't been started at all⏎- The custom vocabulary has a spec but no code⏎- We're at 412 downloads since launch, with a 7-day retention rate of 19%⏎- The goal is to pass the 1,000 mark before the end of October⏎- I'm seeing Sarah on Thursday at 2 pm to sort out the App Store part⏎- We submit the week of the 12th if everything goes well
+  #2 686→502 3421ms success recall=14/17 UNRECALLED=3 PERSON-LOST=1 inversions=0/91 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): There are two things left.
+     UNRECALLED (whole 0.00, best 0.00): On the numbers side,
+     UNRECALLED (whole 0.00, best 0.00): which is low, but not catastrophic for a first version.
+     PERSONLOST: And on that one we have a spec but no code.
+       → - The custom vocabulary has a spec but no code
+     engineOut: Project update:⏎- We switched over the subscription part last Monday⏎- Thomas finished the StoreKit integration and it works in sandbox⏎- The transcription history hasn't been started at all⏎- The custom vocabulary has a spec but no code⏎- We're at 412 downloads since launch, with a 7-day retention rate of 19%⏎- The goal is to pass the 1,000 mark before the end of October⏎- I'm seeing Sarah on Thursday at 2 pm to sort out the App Store part⏎- If everything goes well, we submit the week of the 12th
+  #3 686→502 3453ms success recall=14/17 UNRECALLED=3 PERSON-LOST=1 inversions=0/91 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): There are two things left.
+     UNRECALLED (whole 0.00, best 0.00): On the numbers side,
+     UNRECALLED (whole 0.00, best 0.00): which is low, but not catastrophic for a first version.
+     PERSONLOST: And on that one we have a spec but no code.
+       → - The custom vocabulary has a spec but no code
+     engineOut: Project update:⏎- We switched over the subscription part last Monday⏎- Thomas finished the StoreKit integration and it works in sandbox⏎- The transcription history hasn't been started at all⏎- The custom vocabulary has a spec but no code⏎- We're at 412 downloads since launch, with a 7-day retention rate of 19%⏎- The goal is to pass the 1,000 mark before the end of October⏎- I'm seeing Sarah on Thursday at 2 pm to sort out the App Store part⏎- If everything goes well, we submit the week of the 12th
+
+━━ [T1-last-transcription.de] 60 chars, lang=de
+  #1 60→50 1439ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: letzte Transkription:⏎- Ich lasse dich mal schauen
+  #2 60→41 1353ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.33, best 0.33): Ich lasse dich mal schauen,
+     engineOut: letzte Transkription:⏎- Lass dich schauen
+  #3 60→50 1420ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Letzte Transkription:⏎- Ich lasse dich mal schauen
+
+━━ [T2-no-error.de] 158 chars, lang=de
+  #1 158→52 1337ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Also machen wir noch eine Weile weiter,
+     UNRECALLED (whole 0.25, best 0.25): aber im Moment funktioniert es ziemlich gut.
+     engineOut: Status im Moment:⏎- Alles scheint in Ordnung zu sein
+  #2 158→55 1360ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Im Moment habe ich keine Fehlermeldung,
+     UNRECALLED (whole 0.00, best 0.00): Also machen wir noch eine Weile weiter,
+     UNRECALLED (whole 0.00, best 0.00): aber im Moment funktioniert es ziemlich gut.
+     engineOut: Zustand des Systems:⏎- Alles scheint in Ordnung zu sein
+  #3 158→55 1354ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Im Moment habe ich keine Fehlermeldung,
+     UNRECALLED (whole 0.00, best 0.00): Also machen wir noch eine Weile weiter,
+     UNRECALLED (whole 0.00, best 0.00): aber im Moment funktioniert es ziemlich gut.
+     engineOut: Zustand des Systems:⏎- Alles scheint in Ordnung zu sein
+
+━━ [T3-plan-mode.de] 187 chars, lang=de
+  #1 187→66 1278ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Du kannst dafür in den Plan-Modus wechseln,
+     UNRECALLED (whole 0.00, best 0.00): und dann bestätige ich,
+     engineOut: Integration dieses Issues:⏎- Die Implementierungsplan gemacht habe
+  #2 187→66 1269ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Du kannst dafür in den Plan-Modus wechseln,
+     UNRECALLED (whole 0.00, best 0.00): und dann bestätige ich,
+     engineOut: Integration dieses Issues:⏎- Die Implementierungsplan gemacht habe
+  #3 187→61 1247ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Du kannst dafür in den Plan-Modus wechseln,
+     UNRECALLED (whole 0.00, best 0.00): und dann bestätige ich,
+     engineOut: Integration dieses Issues:⏎- Die Implementierungsplan gemacht
+
+━━ [T4-structured-since.de] 288 chars, lang=de
+  #1 288→151 1698ms success recall=5/7 UNRECALLED=2 inversions=0/10 LIST=2
+     UNRECALLED (whole 0.20, best 0.20): Eigentlich bin ich schon eine Weile im strukturierten Modus.
+     UNRECALLED (whole 0.00, best 0.00): Aber für mich sieht es ziemlich korrekt aus.
+     engineOut: Strukturierte Modus:⏎- Tests, die ich gestern gemacht habe, vor allem die etwas längeren Tests, funktioniert⏎- Logs so exportieren können, wie sie sind
+  #2 288→167 1863ms success recall=4/7 UNRECALLED=3 inversions=0/6 LIST=2
+     UNRECALLED (whole 0.20, best 0.20): Eigentlich bin ich schon eine Weile im strukturierten Modus.
+     UNRECALLED (whole 0.25, best 0.25): Also denke ich, dass ich die Logs so exportieren kann,
+     UNRECALLED (whole 0.00, best 0.00): Aber für mich sieht es ziemlich korrekt aus.
+     engineOut: Strukturiertes Modus:⏎- Die Tests, die ich gestern gemacht habe, vor allem die etwas längeren Tests, funktionieren⏎- Die Logs können so exportiert werden, wie sie sind
+  #3 288→154 1655ms success recall=5/7 UNRECALLED=2 inversions=0/10 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Eigentlich bin ich schon eine Weile im strukturierten Modus.
+     UNRECALLED (whole 0.00, best 0.00): Aber für mich sieht es ziemlich korrekt aus.
+     engineOut: Tests gestern:⏎- Alle Tests, die ich gestern gemacht habe, vor allem die etwas längeren Tests, funktioniert haben⏎- Logs so exportieren kann, wie sie sind
+
+━━ [T5-long-test.de] 416 chars, lang=de
+  #1 416→221 2208ms success recall=3/9 UNRECALLED=6 inversions=0/3 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): um zu sehen, was passiert.
+     UNRECALLED (whole 0.00, best 0.00): Wobei ich audiomäßig nicht unbedingt unter guten Bedingungen bin,
+     UNRECALLED (whole 0.14, best 0.14): weil ich ziemlich weit vom Handy weg bin.
+     UNRECALLED (whole 0.00, best 0.00): Mal sehen,
+     UNRECALLED (whole 0.33, best 0.33): was das beim Test ergibt.
+     UNRECALLED (whole 0.00, best 0.00): Wir werden sehen, ob das Ergebnis interessant ist oder nicht.
+     engineOut: Test der strukturierte Modus-Nachricht:⏎- Test einer langen Nachricht im strukturierten Modus⏎- Mikroqualität ist möglicherweise nicht besonders gut⏎- Es gibt ziemlich viel Lärm neben mir⏎- Qualität des Tests ist ungewiss
+  #2 416→318 2500ms success recall=6/9 UNRECALLED=3 inversions=0/15 LIST=5
+     UNRECALLED (whole 0.33, best 0.33): um zu sehen, was passiert.
+     UNRECALLED (whole 0.00, best 0.00): Wobei ich audiomäßig nicht unbedingt unter guten Bedingungen bin,
+     UNRECALLED (whole 0.14, best 0.14): weil ich ziemlich weit vom Handy weg bin.
+     engineOut: Test einer langen Nachricht im strukturierten Modus:⏎- Ich probiere eine lange Nachricht im strukturierten Modus⏎- Die Qualität des Mikros ist vielleicht nicht besonders gut⏎- Es gibt auch ziemlich viel Lärm neben mir⏎- Mal sehen, was das beim Test ergibt⏎- Wir werden sehen, ob das Ergebnis interessant ist oder nicht
+  #3 416→325 2435ms success recall=6/9 UNRECALLED=3 inversions=0/15 LIST=5
+     UNRECALLED (whole 0.33, best 0.33): um zu sehen, was passiert.
+     UNRECALLED (whole 0.00, best 0.00): Wobei ich audiomäßig nicht unbedingt unter guten Bedingungen bin,
+     UNRECALLED (whole 0.14, best 0.14): weil ich ziemlich weit vom Handy weg bin.
+     engineOut: Test einer langen Nachricht im strukturierten Modus:⏎- Ich probiere eine lange Nachricht im strukturierten Modus⏎- Die Qualität des Mikros ist vielleicht nicht besonders gut⏎- Es gibt auch ziemlich viel Lärm neben mir⏎- Wir werden sehen, was das beim Test ergibt⏎- Wir werden sehen, ob das Ergebnis interessant ist oder nicht
+
+━━ [T6-project-update.de] 716 chars, lang=de
+  #1 716→595 4013ms success recall=16/17 UNRECALLED=1 inversions=0/120 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Es bleiben noch zwei Sachen.
+     engineOut: Update zum Projekt:⏎- Den Abo-Teil letzten Montag umgestellt⏎- Thomas hat die StoreKit-Integration fertig und sie läuft in der Sandbox⏎- Der Transkriptionsverlauf noch gar nicht angefangen⏎- Das eigene Vokabular mit Spezifikation, aber keinen Code⏎- Bei den Zahlen sind wir bei 412 Downloads seit dem Start, mit einer 7-Tage-Retention von 19 %, was wenig ist, aber für eine erste Version nicht katastrophal⏎- Das Ziel ist, die Marke von 1000 vor Ende Oktober zu knacken⏎- Sarah am Donnerstag um 14 Uhr, um den App-Store-Teil zu klären⏎- Wenn alles gut läuft, reichen wir in der Woche vom 12. ein
+  #2 716→595 4031ms success recall=16/17 UNRECALLED=1 inversions=0/120 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Es bleiben noch zwei Sachen.
+     engineOut: Update zum Projekt:⏎- Den Abo-Teil letzten Montag umgestellt⏎- Thomas hat die StoreKit-Integration fertig und sie läuft in der Sandbox⏎- Der Transkriptionsverlauf noch gar nicht angefangen⏎- Das eigene Vokabular mit Spezifikation, aber keinen Code⏎- Bei den Zahlen sind wir bei 412 Downloads seit dem Start, mit einer 7-Tage-Retention von 19 %, was wenig ist, aber für eine erste Version nicht katastrophal⏎- Das Ziel ist, die Marke von 1000 vor Ende Oktober zu knacken⏎- Sarah am Donnerstag um 14 Uhr, um den App-Store-Teil zu klären⏎- Wenn alles gut läuft, reichen wir in der Woche vom 12. ein
+  #3 716→595 4012ms success recall=16/17 UNRECALLED=1 inversions=0/120 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Es bleiben noch zwei Sachen.
+     engineOut: Update zum Projekt:⏎- Den Abo-Teil letzten Montag umgestellt⏎- Thomas hat die StoreKit-Integration fertig und sie läuft in der Sandbox⏎- Der Transkriptionsverlauf noch gar nicht angefangen⏎- Das eigene Vokabular mit Spezifikation, aber keinen Code⏎- Bei den Zahlen sind wir bei 412 Downloads seit dem Start, mit einer 7-Tage-Retention von 19 %, was wenig ist, aber für eine erste Version nicht katastrophal⏎- Das Ziel ist, die Marke von 1000 vor Ende Oktober zu knacken⏎- Sarah am Donnerstag um 14 Uhr, um den App-Store-Teil zu klären⏎- Wenn alles gut läuft, reichen wir in der Woche vom 12. ein
+
+━━ [T1-last-transcription.es] 49 chars, lang=es
+  #1 49→44 1239ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Última transcripción:⏎- Te dejo que lo mires
+  #2 49→44 1225ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Última transcripción:⏎- Te dejo que lo mires
+  #3 49→44 1233ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Última transcripción:⏎- Te dejo que lo mires
+
+━━ [T2-no-error.es] 140 chars, lang=es
+  #1 140→74 1292ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Así que vamos a seguir un rato,
+     UNRECALLED (whole 0.00, best 0.00): pero de momento funciona bastante bien.
+     engineOut: Estado actual:⏎- No tengo ningún mensaje de error⏎- Todo parece estar bien
+  #2 140→74 1289ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Así que vamos a seguir un rato,
+     UNRECALLED (whole 0.00, best 0.00): pero de momento funciona bastante bien.
+     engineOut: Estado actual:⏎- No tengo ningún mensaje de error⏎- Todo parece estar bien
+  #3 140→74 1287ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Así que vamos a seguir un rato,
+     UNRECALLED (whole 0.00, best 0.00): pero de momento funciona bastante bien.
+     engineOut: Estado actual:⏎- No tengo ningún mensaje de error⏎- Todo parece estar bien
+
+━━ [T3-plan-mode.es] 173 chars, lang=es
+  #1 173→98 1381ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=2
+     UNRECALLED (whole 0.17, best 0.17): Puedes pasar al modo plan para hacerlo y luego lo validaré una vez que hayas hecho el plan de implementación.
+     engineOut: Integración del issue:⏎- Preparar la integración de esta issue⏎- Validar el plan de implementación
+  #2 173→98 1372ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=2
+     UNRECALLED (whole 0.17, best 0.17): Puedes pasar al modo plan para hacerlo y luego lo validaré una vez que hayas hecho el plan de implementación.
+     engineOut: Integración del issue:⏎- Preparar la integración de este issue⏎- Validar el plan de implementación
+  #3 173→58 1220ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.33, best 0.33): Vale, te dejo preparar la integración de esta issue, por favor.
+     UNRECALLED (whole 0.17, best 0.17): Puedes pasar al modo plan para hacerlo y luego lo validaré una vez que hayas hecho el plan de implementación.
+     engineOut: Integración del issue:⏎- Validar el plan de implementación
+
+━━ [T4-structured-since.es] 256 chars, lang=es
+  #1 256→131 1642ms success recall=4/5 UNRECALLED=1 inversions=0/6 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Pero para mí parece bastante correcto.
+     engineOut: Modo estructurado:⏎- Las pruebas que hice ayer, sobre todo las pruebas un poco más largas, funcionaron⏎- Exportar los logs tal cual
+  #2 256→131 1637ms success recall=4/5 UNRECALLED=1 inversions=0/6 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Pero para mí parece bastante correcto.
+     engineOut: Modo estructurado:⏎- Las pruebas que hice ayer, sobre todo las pruebas un poco más largas, funcionaron⏎- Exportar los logs tal cual
+  #3 256→131 1639ms success recall=4/5 UNRECALLED=1 inversions=0/6 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Pero para mí parece bastante correcto.
+     engineOut: Modo estructurado:⏎- Las pruebas que hice ayer, sobre todo las pruebas un poco más largas, funcionaron⏎- Exportar los logs tal cual
+
+━━ [T5-long-test.es] 369 chars, lang=es
+  #1 369→202 1995ms success recall=4/6 UNRECALLED=2 dispersed=1 negationDropped=1 inversions=0/3 LIST=4
+     UNRECALLED (whole 0.10, best 0.10): Sabiendo que no estoy necesariamente en buenas condiciones de audio porque estoy bastante lejos del teléfono.
+     UNRECALLED (whole 0.33, best 0.33): Así que puede que la calidad del micro no sea excepcional.
+     NEGATIONDROPPED: Veremos si el resultado es interesante o no.
+       → - Ver si el resultado es interesante
+     engineOut: Prueba de mensaje estructurado:⏎- Probar un mensaje largo en modo estructurado⏎- Ver la calidad del micro por la distancia del teléfono⏎- Observar el ruido a mi lado⏎- Ver si el resultado es interesante
+  #2 369→183 1879ms success recall=4/6 UNRECALLED=2 dispersed=1 negationDropped=1 inversions=0/3 LIST=4
+     UNRECALLED (whole 0.00, best 0.00): Sabiendo que no estoy necesariamente en buenas condiciones de audio porque estoy bastante lejos del teléfono.
+     UNRECALLED (whole 0.33, best 0.33): Así que puede que la calidad del micro no sea excepcional.
+     NEGATIONDROPPED: Veremos si el resultado es interesante o no.
+       → - Ver si el resultado es interesante
+     engineOut: Prueba de mensaje largo en modo estructurado:⏎- Probar un mensaje largo en modo estructurado⏎- Saber la calidad del micro⏎- Ver el ruido a mi lado⏎- Ver si el resultado es interesante
+  #3 369→200 1907ms success recall=4/6 UNRECALLED=2 negationDropped=1 inversions=0/6 LIST=4
+     UNRECALLED (whole 0.10, best 0.10): Sabiendo que no estoy necesariamente en buenas condiciones de audio porque estoy bastante lejos del teléfono.
+     UNRECALLED (whole 0.25, best 0.25): Así que a ver qué da en la prueba.
+     NEGATIONDROPPED: Veremos si el resultado es interesante o no.
+       → - Veremos si el resultado es interesante
+     engineOut: Prueba de mensaje estructurado:⏎- Probamos un mensaje largo en modo estructurado⏎- La calidad del micro puede no ser excepcional⏎- Hay bastante ruido a mi lado⏎- Veremos si el resultado es interesante
+
+━━ [T6-project-update.es] 695 chars, lang=es
+  #1 695→531 3516ms success recall=11/15 UNRECALLED=4 inversions=0/55 LIST=8
+     UNRECALLED (whole 0.25, best 0.25): Bueno, un repaso rápido del proyecto:
+     UNRECALLED (whole 0.00, best 0.00): Quedan dos cosas.
+     UNRECALLED (whole 0.00, best 0.00): En cuanto a cifras,
+     UNRECALLED (whole 0.20, best 0.20): que es baja, pero no catastrófica para una primera versión.
+     engineOut: Proyecto:⏎- El lunes pasado cambiamos la parte de suscripciones⏎- Thomas terminó la integración de StoreKit y funciona en sandbox⏎- El historial de transcripciones no está empezado para nada⏎- El vocabulario personalizado tiene una especificación pero nada de código⏎- Llevamos 412 descargas desde el lanzamiento, con una retención a 7 días del 19 %⏎- El objetivo es superar las 1000 antes de finales de octubre⏎- Veo a Sarah el jueves a las 14 h para cerrar la parte de la App Store⏎- Si todo va bien, lo enviamos la semana del 12
+  #2 695→531 3475ms success recall=11/15 UNRECALLED=4 inversions=0/55 LIST=8
+     UNRECALLED (whole 0.25, best 0.25): Bueno, un repaso rápido del proyecto:
+     UNRECALLED (whole 0.00, best 0.00): Quedan dos cosas.
+     UNRECALLED (whole 0.00, best 0.00): En cuanto a cifras,
+     UNRECALLED (whole 0.20, best 0.20): que es baja, pero no catastrófica para una primera versión.
+     engineOut: Proyecto:⏎- Cambiamos la parte de suscripciones el lunes pasado⏎- Thomas terminó la integración de StoreKit y funciona en sandbox⏎- El historial de transcripciones no está empezado para nada⏎- El vocabulario personalizado tiene una especificación pero nada de código⏎- Llevamos 412 descargas desde el lanzamiento, con una retención a 7 días del 19 %⏎- El objetivo es superar las 1000 antes de finales de octubre⏎- Veo a Sarah el jueves a las 14 h para cerrar la parte de la App Store⏎- Si todo va bien, lo enviamos la semana del 12
+  #3 695→531 3503ms success recall=11/15 UNRECALLED=4 inversions=0/55 LIST=8
+     UNRECALLED (whole 0.25, best 0.25): Bueno, un repaso rápido del proyecto:
+     UNRECALLED (whole 0.00, best 0.00): Quedan dos cosas.
+     UNRECALLED (whole 0.00, best 0.00): En cuanto a cifras,
+     UNRECALLED (whole 0.20, best 0.20): que es baja, pero no catastrófica para una primera versión.
+     engineOut: Proyecto:⏎- El lunes pasado cambiamos la parte de suscripciones⏎- Thomas terminó la integración de StoreKit y funciona en sandbox⏎- El historial de transcripciones no está empezado para nada⏎- El vocabulario personalizado tiene una especificación pero nada de código⏎- Llevamos 412 descargas desde el lanzamiento, con una retención a 7 días del 19 %⏎- El objetivo es superar las 1000 antes de finales de octubre⏎- Veo a Sarah el jueves a las 14 h para cerrar la parte de la App Store⏎- Si todo va bien, lo enviamos la semana del 12
+
+━━ [T1-last-transcription.it] 52 chars, lang=it
+  #1 52→42 1291ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.25, best 0.25): Ti lascio dare un'occhiata,
+     engineOut: Ultima trascrizione:⏎- Ho dato un'occhiata
+  #2 52→44 1286ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.25, best 0.25): Ti lascio dare un'occhiata,
+     engineOut: L'ultima trascrizione:⏎- Ho dato un'occhiata
+  #3 52→42 1276ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.25, best 0.25): Ti lascio dare un'occhiata,
+     engineOut: Ultima trascrizione:⏎- Ho dato un'occhiata
+
+━━ [T2-no-error.it] 137 chars, lang=it
+  #1 137→73 1398ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Quindi andiamo avanti ancora un po',
+     UNRECALLED (whole 0.00, best 0.00): ma per ora funziona piuttosto bene.
+     engineOut: Stato attuale:⏎- Non ho nessun messaggio di errore⏎- Sembra tutto a posto
+  #2 137→73 1400ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Quindi andiamo avanti ancora un po',
+     UNRECALLED (whole 0.00, best 0.00): ma per ora funziona piuttosto bene.
+     engineOut: Stato attuale:⏎- Non ho nessun messaggio di errore⏎- Sembra tutto a posto
+  #3 137→72 1347ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Quindi andiamo avanti ancora un po',
+     UNRECALLED (whole 0.00, best 0.00): ma per ora funziona piuttosto bene.
+     engineOut: Stato attuale:⏎- Non ho nessun messaggio di errore, sembra tutto a posto
+
+━━ [T3-plan-mode.it] 177 chars, lang=it
+  #1 177→129 1627ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): per favore.
+     engineOut: Integrazione dell'issue:⏎- Preparare l'integrazione di questa issue⏎- Convaliderla quando avrai fatto il piano di implementazione
+  #2 177→142 1739ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): per favore.
+     engineOut: Preparazione dell'integrazione dell'issue:⏎- Preparare l'integrazione dell'issue⏎- Convaliderla quando avrai fatto il piano di implementazione
+  #3 177→67 1383ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): per favore.
+     UNRECALLED (whole 0.07, best 0.07): Puoi passare in modalità piano per farlo e poi lo convaliderò quando avrai fatto il piano di implementazione.
+     engineOut: Integrazione dell'issue:⏎- Preparare l'integrazione di questa issue
+
+━━ [T4-structured-since.it] 250 chars, lang=it
+  #1 250→138 1768ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=2
+     UNRECALLED (whole 0.29, best 0.14): In realtà sono sulla modalità strutturata da un po'.
+     UNRECALLED (whole 0.00, best 0.00): Ma per me sembra abbastanza corretto.
+     engineOut: Test fatti ieri:⏎- Tutti i test che ho fatto ieri, soprattutto quelli un po' più lunghi, hanno funzionato⏎- Esportare i log così come sono
+  #2 250→143 1768ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=2
+     UNRECALLED (whole 0.29, best 0.14): In realtà sono sulla modalità strutturata da un po'.
+     UNRECALLED (whole 0.00, best 0.00): Ma per me sembra abbastanza corretto.
+     engineOut: Test effettuati ieri:⏎- Tutti i test che ho fatto ieri, soprattutto quelli un po' più lunghi, hanno funzionato⏎- Esportare i log così come sono
+  #3 250→143 1770ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=2
+     UNRECALLED (whole 0.29, best 0.14): In realtà sono sulla modalità strutturata da un po'.
+     UNRECALLED (whole 0.00, best 0.00): Ma per me sembra abbastanza corretto.
+     engineOut: Test effettuati ieri:⏎- Tutti i test che ho fatto ieri, soprattutto quelli un po' più lunghi, hanno funzionato⏎- Esportare i log così come sono
+
+━━ [T5-long-test.it] 382 chars, lang=it
+  #1 382→372 2602ms success recall=7/7 dispersed=1 inversions=0/15 LIST=6
+     engineOut: Messaggio lungo in modalità strutturata:⏎- Provare un messaggio lungo in modalità strutturata⏎- Sapendo che non sono per forza nelle condizioni giuste per l'audio, perché sono abbastanza lontano dal telefono⏎- La qualità del microfono forse non sarà eccezionale⏎- C'è anche parecchio rumore qui accanto⏎- Vedere cosa dà il test⏎- Vedere se il risultato è interessante o no
+  #2 382→399 2740ms success recall=7/7 dispersed=1 inversions=0/15 LIST=6
+     engineOut: Messaggio lungo in modalità strutturata:⏎- Provare un messaggio lungo in modalità strutturata⏎- Sapere che non sono per forza nelle condizioni giuste per l'audio, perché sono abbastanza lontano dal telefono⏎- Pensare che la qualità del microfono forse non sarà eccezionale⏎- Considerare che c'è anche parecchio rumore qui accanto⏎- Vedere cosa dà il test⏎- Vedere se il risultato è interessante o no
+  #3 382→372 2604ms success recall=7/7 dispersed=1 inversions=0/15 LIST=6
+     engineOut: Messaggio lungo in modalità strutturata:⏎- Provare un messaggio lungo in modalità strutturata⏎- Sapendo che non sono per forza nelle condizioni giuste per l'audio, perché sono abbastanza lontano dal telefono⏎- La qualità del microfono forse non sarà eccezionale⏎- C'è anche parecchio rumore qui accanto⏎- Vedere cosa dà il test⏎- Vedere se il risultato è interessante o no
+
+━━ [T6-project-update.it] 698 chars, lang=it
+  #1 698→524 3495ms success recall=14/17 UNRECALLED=3 dispersed=1 inversions=0/78 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Restano due cose.
+     UNRECALLED (whole 0.25, best 0.25): Per quanto riguarda i numeri,
+     UNRECALLED (whole 0.33, best 0.33): che è bassa,
+     engineOut: Aggiornamento sul progetto:⏎- Lunedì scorso abbiamo passato la parte degli abbonamenti⏎- Thomas ha finito l'integrazione di StoreKit e funziona in sandbox⏎- La cronologia delle trascrizioni non è stata iniziata⏎- Il vocabolario personalizzato ha una specifica ma niente codice⏎- Siamo a 412 download dal lancio, con una retention a 7 giorni del 19%⏎- L'obiettivo è superare la soglia dei 1000 entro fine ottobre⏎- Vedo Sarah giovedì alle 14 per sistemare la parte App Store⏎- Se va tutto bene, lo inviamo la settimana del 12
+  #2 698→524 3508ms success recall=14/17 UNRECALLED=3 dispersed=1 inversions=0/78 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Restano due cose.
+     UNRECALLED (whole 0.25, best 0.25): Per quanto riguarda i numeri,
+     UNRECALLED (whole 0.33, best 0.33): che è bassa,
+     engineOut: Aggiornamento sul progetto:⏎- Lunedì scorso abbiamo passato la parte degli abbonamenti⏎- Thomas ha finito l'integrazione di StoreKit e funziona in sandbox⏎- La cronologia delle trascrizioni non è stata iniziata⏎- Il vocabolario personalizzato ha una specifica ma niente codice⏎- Siamo a 412 download dal lancio, con una retention a 7 giorni del 19%⏎- L'obiettivo è superare la soglia dei 1000 entro fine ottobre⏎- Vedo Sarah giovedì alle 14 per sistemare la parte App Store⏎- Se va tutto bene, lo inviamo la settimana del 12
+  #3 698→587 3800ms success recall=15/17 UNRECALLED=2 inversions=0/105 LIST=7
+     UNRECALLED (whole 0.00, best 0.00): Restano due cose.
+     UNRECALLED (whole 0.25, best 0.25): Per quanto riguarda i numeri,
+     engineOut: Aggiornamento sul progetto:⏎- Lunedì scorso abbiamo passato la parte degli abbonamenti, Thomas ha finito l'integrazione di StoreKit e funziona in sandbox.⏎- La cronologia delle trascrizioni non è stata iniziata.⏎- Il vocabolario personalizzato ha una specifica ma niente codice.⏎- Siamo a 412 download dal lancio, con una retention a 7 giorni del 19%, che è bassa, ma non catastrofica per una prima versione.⏎- L'obiettivo è superare la soglia dei 1000 entro fine ottobre.⏎- Vedo Sarah giovedì alle 14 per sistemare la parte App Store.⏎- Se va tutto bene, lo inviamo la settimana del 12.
+
+━━ [T1-last-transcription.pt] 55 chars, lang=pt
+  #1 55→52 1354ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Última transcrição:⏎- Vou deixar você dar uma olhada
+  #2 55→51 1291ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Última transcrição:⏎- Já deixou você dar uma olhada
+  #3 55→46 1226ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Vou deixar você dar uma olhada,
+     engineOut: Última transcrição:⏎- Foi a última transcrição
+
+━━ [T2-no-error.pt] 146 chars, lang=pt
+  #1 146→36 1174ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Por enquanto não tenho nenhuma mensagem de erro,
+     UNRECALLED (whole 0.00, best 0.00): Então vamos continuar mais um pouco,
+     UNRECALLED (whole 0.00, best 0.00): mas por enquanto está funcionando bem.
+     engineOut: Estado atual:⏎- Tudo parece estar ok
+  #2 146→73 1365ms success recall=2/4 UNRECALLED=2 inversions=1/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Então vamos continuar mais um pouco,
+     UNRECALLED (whole 0.00, best 0.00): mas por enquanto está funcionando bem.
+     engineOut: Status atual:⏎- Tudo parece estar ok⏎- Não tenho nenhuma mensagem de erro
+  #3 146→73 1357ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Então vamos continuar mais um pouco,
+     UNRECALLED (whole 0.00, best 0.00): mas por enquanto está funcionando bem.
+     engineOut: Status atual:⏎- Não tenho nenhuma mensagem de erro⏎- Tudo parece estar ok
+
+━━ [T3-plan-mode.pt] 185 chars, lang=pt
+  #1 185→158 1762ms success recall=2/2 inversions=0/1 LIST=3
+     engineOut: Integração do issue:⏎- Preparar a integração desta issue⏎- Passar para o modo plano para fazer isso⏎- Validar quando você tiver feito o plano de implementação
+  #2 185→83 1473ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=2
+     UNRECALLED (whole 0.20, best 0.20): Você pode passar para o modo plano para fazer isso e depois eu valido quando você tiver feito o plano de implementação.
+     engineOut: Integração do issue:⏎- Preparar a integração desta issue⏎- Passar para o modo plano
+  #3 185→158 1770ms success recall=2/2 inversions=0/1 LIST=3
+     engineOut: Integração do issue:⏎- Preparar a integração desta issue⏎- Passar para o modo plano para fazer isso⏎- Validar quando você tiver feito o plano de implementação
+
+━━ [T4-structured-since.pt] 263 chars, lang=pt
+  #1 263→154 1679ms success recall=3/6 UNRECALLED=3 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.12, best 0.12): Na verdade estou no modo estruturado há um tempinho.
+     UNRECALLED (whole 0.00, best 0.00): Então, na verdade,
+     UNRECALLED (whole 0.00, best 0.00): Mas para mim parece estar bem correto.
+     engineOut: Testes realizados ontem:⏎- Todos os testes que fiz ontem, principalmente os testes um pouco mais longos, funcionaram⏎- Exportar os logs do jeito que estão
+  #2 263→150 1665ms success recall=3/6 UNRECALLED=3 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.12, best 0.12): Na verdade estou no modo estruturado há um tempinho.
+     UNRECALLED (whole 0.00, best 0.00): Então, na verdade,
+     UNRECALLED (whole 0.00, best 0.00): Mas para mim parece estar bem correto.
+     engineOut: Testes feitos ontem:⏎- Todos os testes que fiz ontem, principalmente os testes um pouco mais longos, funcionaram⏎- Exportar os logs do jeito que estão
+  #3 263→150 1675ms success recall=3/6 UNRECALLED=3 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.12, best 0.12): Na verdade estou no modo estruturado há um tempinho.
+     UNRECALLED (whole 0.00, best 0.00): Então, na verdade,
+     UNRECALLED (whole 0.00, best 0.00): Mas para mim parece estar bem correto.
+     engineOut: Testes feitos ontem:⏎- Todos os testes que fiz ontem, principalmente os testes um pouco mais longos, funcionaram⏎- Exportar os logs do jeito que estão
+
+━━ [T5-long-test.pt] 389 chars, lang=pt
+  #1 389→271 2249ms success recall=5/7 UNRECALLED=2 inversions=0/10 LIST=5
+     UNRECALLED (whole 0.12, best 0.12): Sabendo que não estou necessariamente nas melhores condições de áudio,
+     UNRECALLED (whole 0.00, best 0.00): porque estou bem longe do celular.
+     engineOut: Teste de mensagem longa no modo estruturado:⏎- Estamos testando uma mensagem longa no modo estruturado⏎- A qualidade do microfone talvez não seja excepcional⏎- Tem bastante barulho do meu lado⏎- Vamos ver o que dá no teste⏎- Vamos ver se o resultado é interessante ou não
+  #2 389→389 2466ms success recall=7/7 inversions=0/21 LIST=6
+     engineOut: Testando uma mensagem longa no modo estruturado:⏎- Estamos testando uma mensagem longa no modo estruturado⏎- Sabendo que não estou necessariamente nas melhores condições de áudio, porque estou bem longe do celular⏎- A qualidade do microfone talvez não seja excepcional⏎- Também tem bastante barulho do meu lado⏎- Vamos ver o que dá no teste⏎- Vamos ver se o resultado é interessante ou não
+  #3 389→414 2584ms success recall=7/7 inversions=0/21 LIST=6
+     engineOut: Teste de mensagem longa no modo estruturado:⏎- Estamos testando uma mensagem longa no modo estruturado para ver o que vai acontecer⏎- Sabendo que não estou necessariamente nas melhores condições de áudio, porque estou bem longe do celular⏎- A qualidade do microfone talvez não seja excepcional⏎- Também tem bastante barulho do meu lado⏎- Vamos ver o que dá no teste⏎- Vamos ver se o resultado é interessante ou não
+
+━━ [T6-project-update.pt] 684 chars, lang=pt
+  #1 684→593 3832ms success recall=16/18 UNRECALLED=2 dispersed=1 inversions=0/105 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Faltam duas coisas.
+     UNRECALLED (whole 0.00, best 0.00): Em números,
+     engineOut: Atualização sobre o projeto:⏎- Migramos a parte de assinaturas na segunda-feira passada⏎- O Thomas terminou a integração do StoreKit e está funcionando no sandbox⏎- O histórico de transcrições ainda não foi começado⏎- O vocabulário personalizado tem especificação, mas nenhum código⏎- Estamos com 412 downloads desde o lançamento, com retenção de 7 dias de 19%, o que é baixo, mas não catastrófico para uma primeira versão⏎- A meta é passar dos 1000 antes do fim de outubro⏎- Vou ver a Sarah na quinta às 14h para acertar a parte da App Store⏎- Se tudo correr bem, enviamos na semana do dia 12
+  #2 684→593 3778ms success recall=16/18 UNRECALLED=2 dispersed=1 inversions=0/105 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Faltam duas coisas.
+     UNRECALLED (whole 0.00, best 0.00): Em números,
+     engineOut: Atualização sobre o projeto:⏎- Migramos a parte de assinaturas na segunda-feira passada⏎- O Thomas terminou a integração do StoreKit e está funcionando no sandbox⏎- O histórico de transcrições ainda não foi começado⏎- O vocabulário personalizado tem especificação, mas nenhum código⏎- Estamos com 412 downloads desde o lançamento, com retenção de 7 dias de 19%, o que é baixo, mas não catastrófico para uma primeira versão⏎- A meta é passar dos 1000 antes do fim de outubro⏎- Vou ver a Sarah na quinta às 14h para acertar a parte da App Store⏎- Se tudo correr bem, enviamos na semana do dia 12
+  #3 684→531 3962ms success recall=15/18 UNRECALLED=3 dispersed=1 inversions=6/91 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Faltam duas coisas.
+     UNRECALLED (whole 0.00, best 0.00): Em números,
+     UNRECALLED (whole 0.20, best 0.20): mas não catastrófico para uma primeira versão.
+     engineOut: Atualização sobre o projeto:⏎- Migramos a parte de assinaturas na segunda-feira passada⏎- O Thomas terminou a integração do StoreKit e está funcionando no sandbox⏎- O histórico de transcrições ainda não foi começado⏎- O vocabulário personalizado tem especificação, mas nenhum código⏎- Estamos com 412 downloads desde o lançamento, com retenção de 7 dias de 19%⏎- A meta é passar dos 1000 antes do fim de outubro⏎- Vou ver a Sarah na quinta às 14h para acertar a parte da App Store⏎- Se tudo correr bem, enviamos na semana do dia 12
+
+━━ [T1-last-transcription.nl] 55 chars, lang=nl
+  #1 55→54 1597ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Ik laat je even kijken,
+     engineOut: Laatste transcriptie:⏎- Het is de laatste transcriptie
+  #2 55→54 1639ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Ik laat je even kijken,
+     engineOut: Laatste transcriptie:⏎- Het is de laatste transcriptie
+  #3 55→53 1509ms success recall=2/2 inversions=0/1 LIST=1
+     engineOut: Laat je even kijken:⏎- Het is de laatste transcriptie
+
+━━ [T2-no-error.nl] 126 chars, lang=nl
+  #1 126→40 1205ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): Voorlopig heb ik geen foutmelding,
+     UNRECALLED (whole 0.00, best 0.00): Dus we gaan nog even door,
+     UNRECALLED (whole 0.17, best 0.17): maar voorlopig werkt het best goed.
+     engineOut: Voorlopig:⏎- Alles lijkt in orde te zijn
+  #2 126→40 1192ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): Voorlopig heb ik geen foutmelding,
+     UNRECALLED (whole 0.00, best 0.00): Dus we gaan nog even door,
+     UNRECALLED (whole 0.17, best 0.17): maar voorlopig werkt het best goed.
+     engineOut: Voorlopig:⏎- Alles lijkt in orde te zijn
+  #3 126→40 1194ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): Voorlopig heb ik geen foutmelding,
+     UNRECALLED (whole 0.00, best 0.00): Dus we gaan nog even door,
+     UNRECALLED (whole 0.17, best 0.17): maar voorlopig werkt het best goed.
+     engineOut: Voorlopig:⏎- Alles lijkt in orde te zijn
+
+━━ [T3-plan-mode.nl] 184 chars, lang=nl
+  #1 184→55 1258ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.30, best 0.30): Oké, ik laat jou de integratie van deze issue voorbereiden, alsjeblieft.
+     UNRECALLED (whole 0.14, best 0.14): Je kunt daarvoor naar de planmodus gaan en daarna keur ik het goed zodra je het implementatieplan hebt gemaakt.
+     engineOut: Integratie van dit issue:⏎- Het implementatieplan maken
+  #2 184→55 1250ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.30, best 0.30): Oké, ik laat jou de integratie van deze issue voorbereiden, alsjeblieft.
+     UNRECALLED (whole 0.14, best 0.14): Je kunt daarvoor naar de planmodus gaan en daarna keur ik het goed zodra je het implementatieplan hebt gemaakt.
+     engineOut: Integratie van dit issue:⏎- Het implementatieplan maken
+  #3 184→55 1248ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.30, best 0.30): Oké, ik laat jou de integratie van deze issue voorbereiden, alsjeblieft.
+     UNRECALLED (whole 0.14, best 0.14): Je kunt daarvoor naar de planmodus gaan en daarna keur ik het goed zodra je het implementatieplan hebt gemaakt.
+     engineOut: Integratie van dit issue:⏎- Het implementatieplan maken
+
+━━ [T4-structured-since.nl] 256 chars, lang=nl
+  #1 256→151 1731ms success recall=4/5 UNRECALLED=1 dispersed=1 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Maar voor mij lijkt het vrij correct.
+     engineOut: Gestructureerde modus:⏎- De tests die ik gisteren heb gedaan, vooral de iets langere tests, hebben gewerkt⏎- De logs zo kunnen exporteren zoals ze zijn
+  #2 256→151 1724ms success recall=4/5 UNRECALLED=1 dispersed=1 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Maar voor mij lijkt het vrij correct.
+     engineOut: Gestructureerde modus:⏎- De tests die ik gisteren heb gedaan, vooral de iets langere tests, hebben gewerkt⏎- De logs zo kunnen exporteren zoals ze zijn
+  #3 256→151 1726ms success recall=4/5 UNRECALLED=1 dispersed=1 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Maar voor mij lijkt het vrij correct.
+     engineOut: Gestructureerde modus:⏎- De tests die ik gisteren heb gedaan, vooral de iets langere tests, hebben gewerkt⏎- De logs zo kunnen exporteren zoals ze zijn
+
+━━ [T5-long-test.nl] 401 chars, lang=nl
+  #1 401→394 2775ms success recall=7/7 PERSON-LOST=1 inversions=0/21 LIST=6
+     PERSONLOST: En dus proberen we nu een lang bericht in de gestructureerde modus om te zien wat er gebeurt.
+       → - Proberen een lang bericht in de gestructureerde modus
+     engineOut: Test in de gestructureerde modus:⏎- Proberen een lang bericht in de gestructureerde modus⏎- Wetende dat ik qua audio niet per se in de goede omstandigheden zit, want ik zit vrij ver van de telefoon⏎- De kwaliteit van de microfoon is misschien niet geweldig⏎- Er is ook best veel lawaai naast me⏎- Eens kijken wat het oplevert bij de test⏎- We zullen zien of het resultaat interessant is of niet
+  #2 401→310 2465ms success recall=5/7 UNRECALLED=2 inversions=0/10 LIST=5
+     UNRECALLED (whole 0.10, best 0.10): Wetende dat ik qua audio niet per se in de goede omstandigheden zit,
+     UNRECALLED (whole 0.14, best 0.14): want ik zit vrij ver van de telefoon.
+     engineOut: Proberen we een lang bericht in de gestructureerde modus:⏎- Proberen een lang bericht in de gestructureerde modus⏎- De kwaliteit van de microfoon is misschien niet geweldig⏎- Er is ook best veel lawaai naast me⏎- Eens kijken wat het oplevert bij de test⏎- We zullen zien of het resultaat interessant is of niet
+  #3 401→271 2427ms success recall=5/7 UNRECALLED=2 PERSON-LOST=2 inversions=0/10 LIST=5
+     UNRECALLED (whole 0.10, best 0.10): Wetende dat ik qua audio niet per se in de goede omstandigheden zit,
+     UNRECALLED (whole 0.14, best 0.14): want ik zit vrij ver van de telefoon.
+     PERSONLOST: En dus proberen we nu een lang bericht in de gestructureerde modus om te zien wat er gebeurt.
+       → - Proberen een lang bericht in de gestructureerde modus
+     PERSONLOST: We zullen zien of het resultaat interessant is of niet.
+       → - Zien of het resultaat interessant is of niet
+     engineOut: Test in de gestructureerde modus:⏎- Proberen een lang bericht in de gestructureerde modus⏎- De kwaliteit van de microfoon is misschien niet geweldig⏎- Er is ook best veel lawaai naast me⏎- Kijken wat het oplevert bij de test⏎- Zien of het resultaat interessant is of niet
+
+━━ [T6-project-update.nl] 723 chars, lang=nl
+  #1 723→550 4082ms success recall=13/16 UNRECALLED=3 dispersed=2 PERSON-LOST=4 inversions=0/55 LIST=8
+     UNRECALLED (whole 0.20, best 0.20): Dus, snelle update over het project:
+     UNRECALLED (whole 0.00, best 0.00): Er blijven twee dingen over.
+     UNRECALLED (whole 0.00, best 0.00): wat laag is,
+     PERSONLOST: we hebben vorige maandag het abonnementsgedeelte omgezet,
+       → - Het abonnementsgedeelte omzetten vorige maandag
+     PERSONLOST: En daarvoor hebben we een specificatie maar geen code.
+       → - De eigen woordenlijst nog geen code hebben,
+     PERSONLOST: Qua cijfers zitten we op 412 downloads sinds de lancering,
+       → - Qua cijfers 412 downloads sinds de lancering met een retentie na 7 dagen van 19%
+     PERSONLOST: dienen we het in de week van de 12e in.
+       → - Het in de week van de 12e dienen als alles goed gaat
+     engineOut: Projectupdate:⏎- Het abonnementsgedeelte omzetten vorige maandag⏎- Thomas de StoreKit-integratie afgerond hebben en het werkend hebben in de sandbox⏎- De transcriptiegeschiedenis nog helemaal niet aan beginnen⏎- De eigen woordenlijst nog geen code hebben, wel een specificatie⏎- Qua cijfers 412 downloads sinds de lancering met een retentie na 7 dagen van 19%⏎- Het doel hebben om vóór eind oktober de grens van 1000 te halen⏎- Sarah donderdag om 14 uur zien om het App Store-gedeelte te regelen⏎- Het in de week van de 12e dienen als alles goed gaat
+  #2 723→510 4160ms success recall=13/16 UNRECALLED=3 dispersed=2 PERSON-LOST=4 inversions=1/55 LIST=8
+     UNRECALLED (whole 0.20, best 0.20): Dus, snelle update over het project:
+     UNRECALLED (whole 0.00, best 0.00): Er blijven twee dingen over.
+     UNRECALLED (whole 0.00, best 0.00): wat laag is,
+     PERSONLOST: we hebben vorige maandag het abonnementsgedeelte omgezet,
+       → - Het abonnementsgedeelte omzetten vorige maandag
+     PERSONLOST: En daarvoor hebben we een specificatie maar geen code.
+       → - De eigen woordenlijst nog geen code hebben,
+     PERSONLOST: Qua cijfers zitten we op 412 downloads sinds de lancering,
+       → - 412 downloads sinds de lancering,
+     PERSONLOST: dienen we het in de week van de 12e in.
+       → - Het inleveren in de week van de 12e,
+     engineOut: Projectupdate:⏎- Het abonnementsgedeelte omzetten vorige maandag⏎- De StoreKit-integratie afronden, het werkt in de sandbox⏎- De transcriptiegeschiedenis nog helemaal niet aan beginnen⏎- De eigen woordenlijst nog geen code hebben, wel een specificatie⏎- 412 downloads sinds de lancering, retentie na 7 dagen van 19%⏎- Het doel hebben om vóór eind oktober de grens van 1000 te halen⏎- Sarah donderdag om 14 uur zien om het App Store-gedeelte te regelen⏎- Het inleveren in de week van de 12e, als alles goed gaat
+  #3 723→612 4448ms success recall=13/16 UNRECALLED=3 dispersed=2 inversions=0/55 LIST=8
+     UNRECALLED (whole 0.20, best 0.20): Dus, snelle update over het project:
+     UNRECALLED (whole 0.00, best 0.00): Er blijven twee dingen over.
+     UNRECALLED (whole 0.25, best 0.25): En het tweede is de eigen woordenlijst.
+     engineOut: Projectupdate:⏎- We hebben vorige maandag het abonnementsgedeelte omgezet⏎- Thomas heeft de StoreKit-integratie afgerond en het werkt in de sandbox⏎- De transcriptiegeschiedenis wordt nog helemaal niet aangepakt⏎- De eigenwoordenlijst wordt nog niet aangepakt⏎- Qua cijfers zitten we op 412 downloads sinds de lancering, met een retentie na 7 dagen van 19%, wat laag is, maar niet rampzalig voor een eerste versie⏎- Het doel is om vóór eind oktober de grens van 1000 te halen⏎- Ik zie Sarah donderdag om 14 uur om het App Store-gedeelte te regelen⏎- Indien alles goed gaat, dienen we het in de week van de 12e in
+
+━━ [T1-last-transcription.da] 62 chars, lang=da
+  #1 62→51 1372ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Den seneste transskription:⏎- Lade dig kigge på det
+  #2 62→51 1393ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Den seneste transskription:⏎- Lade dig kigge på det
+  #3 62→51 1375ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Den seneste transskription:⏎- Lade dig kigge på det
+
+━━ [T2-no-error.da] 143 chars, lang=da
+  #1 143→76 1352ms success recall=2/4 UNRECALLED=2 dispersed=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Så vi fortsætter lidt endnu,
+     UNRECALLED (whole 0.29, best 0.29): men indtil videre virker det ret godt.
+     engineOut: Indtil videre:⏎- Der er ingen fejlmeddelelse, alt ser ud til at være i orden
+  #2 143→142 1703ms success recall=4/4 dispersed=1 inversions=0/3 LIST=2
+     engineOut: Indtil videre:⏎- Der er ingen fejlmeddelelse, alt ser ud til at være i orden⏎- Vi fortsætter lidt endnu, men indtil videre virker det ret godt
+  #3 143→75 1469ms success recall=2/4 UNRECALLED=2 dispersed=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Så vi fortsætter lidt endnu,
+     UNRECALLED (whole 0.14, best 0.14): men indtil videre virker det ret godt.
+     engineOut: Intil videre:⏎- Der er ingen fejlmeddelelse, alt ser ud til at være i orden
+
+━━ [T3-plan-mode.da] 177 chars, lang=da
+  #1 177→122 1743ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.30, best 0.30): Okay, jeg lader dig forberede integrationen af denne issue, tak.
+     UNRECALLED (whole 0.25, best 0.25): og så godkender jeg det,
+     engineOut: Integrationen af dette issue:⏎- Skifte til plantilstand for at gøre det⏎- Godkende implementeringsplanen, når den er lavet
+  #2 177→125 1695ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.30, best 0.30): Okay, jeg lader dig forberede integrationen af denne issue, tak.
+     UNRECALLED (whole 0.25, best 0.25): og så godkender jeg det,
+     engineOut: Integrationen af dette issue:⏎- Skifte til plantilstand for at gøre det⏎- Godkende implementeringsplanen når du har lavet den
+  #3 177→126 1693ms success recall=3/4 UNRECALLED=1 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.25, best 0.25): og så godkender jeg det,
+     engineOut: Integrationen af denne issue:⏎- Skifte til plantilstand for at gøre det⏎- Godkende implementeringsplanen, når du har lavet den
+
+━━ [T4-structured-since.da] 231 chars, lang=da
+  #1 231→178 1965ms success recall=6/7 UNRECALLED=1 inversions=1/15 FOREIGN-SENTENCES=1 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Men for mig ser det ret korrekt ud.
+     FOREIGN: - Eksportere loggene, som de er
+     engineOut: Den strukturerede tilstand:⏎- Brugt den strukturerede tilstand i et stykke tid⏎- Virkede alle de test, jeg lavede i går, især de lidt længere test⏎- Eksportere loggene, som de er
+  #2 231→178 1954ms success recall=6/7 UNRECALLED=1 inversions=1/15 FOREIGN-SENTENCES=1 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Men for mig ser det ret korrekt ud.
+     FOREIGN: - Eksportere loggene, som de er
+     engineOut: Den strukturerede tilstand:⏎- Brugt den strukturerede tilstand i et stykke tid⏎- Virkede alle de test, jeg lavede i går, især de lidt længere test⏎- Eksportere loggene, som de er
+  #3 231→178 1966ms success recall=6/7 UNRECALLED=1 inversions=1/15 FOREIGN-SENTENCES=1 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Men for mig ser det ret korrekt ud.
+     FOREIGN: - Eksportere loggene, som de er
+     engineOut: Den strukturerede tilstand:⏎- Brugt den strukturerede tilstand i et stykke tid⏎- Virkede alle de test, jeg lavede i går, især de lidt længere test⏎- Eksportere loggene, som de er
+
+━━ [T5-long-test.da] 384 chars, lang=da
+  #1 384→255 2436ms success recall=6/10 UNRECALLED=4 inversions=2/15 LIST=5
+     UNRECALLED (whole 0.12, best 0.12): Vel vidende at jeg ikke nødvendigvis er under de rette forhold lydmæssigt,
+     UNRECALLED (whole 0.00, best 0.00): fordi jeg er ret langt fra telefonen.
+     UNRECALLED (whole 0.00, best 0.00): Så lad os se,
+     UNRECALLED (whole 0.00, best 0.00): Vi får at se,
+     engineOut: En lang besked i struktureret tilstand:⏎- Prøve en lang besked i struktureret tilstand⏎- Mærke kvaliteten af mikrofonen er måske ikke enestående⏎- Mærke en del støj ved siden af mig⏎- Se, hvad det giver i testen⏎- Se, om resultatet er interessant eller ej
+  #2 384→214 2345ms success recall=6/10 UNRECALLED=4 inversions=2/15 LIST=5
+     UNRECALLED (whole 0.00, best 0.00): Vel vidende at jeg ikke nødvendigvis er under de rette forhold lydmæssigt,
+     UNRECALLED (whole 0.00, best 0.00): fordi jeg er ret langt fra telefonen.
+     UNRECALLED (whole 0.00, best 0.00): Så lad os se,
+     UNRECALLED (whole 0.00, best 0.00): Vi får at se,
+     engineOut: En lang besked i struktureret tilstand:⏎- Prøve en lang besked i struktureret tilstand⏎- Mærke kvaliteten af mikrofonen⏎- Mærke støj ved siden af mig⏎- Se, hvad det giver i testen⏎- Se, om resultatet er interessant
+  #3 384→267 2394ms success recall=6/10 UNRECALLED=4 inversions=2/15 LIST=5
+     UNRECALLED (whole 0.12, best 0.12): Vel vidende at jeg ikke nødvendigvis er under de rette forhold lydmæssigt,
+     UNRECALLED (whole 0.00, best 0.00): fordi jeg er ret langt fra telefonen.
+     UNRECALLED (whole 0.00, best 0.00): Så lad os se,
+     UNRECALLED (whole 0.00, best 0.00): Vi får at se,
+     engineOut: Prøve en lang besked i struktureret tilstand:⏎- Prøve en lang besked i struktureret tilstand⏎- Kvaliteten af mikrofonen er måske ikke enestående⏎- Der er også en del støj ved siden af mig⏎- Se, hvad det giver i testen⏎- Få at se, om resultatet er interessant eller ej
+
+━━ [T6-project-update.da] 667 chars, lang=da
+  #1 667→499 3739ms success recall=15/19 UNRECALLED=4 dispersed=1 inversions=0/91 LIST=8
+     UNRECALLED (whole 0.25, best 0.25): Så, en hurtig status på projektet:
+     UNRECALLED (whole 0.00, best 0.00): Der er to ting tilbage.
+     UNRECALLED (whole 0.00, best 0.00): Hvad tallene angår,
+     UNRECALLED (whole 0.00, best 0.00): hvilket er lavt,
+     engineOut: Projektstatus:⏎- Vi skiftede abonnementsdelen over i mandags⏎- Thomas er færdig med StoreKit-integrationen, og den virker i sandbox⏎- Transskriptionshistorikken er slet ikke påbegyndt⏎- Det personlige ordforråd har en specifikation, men ingen kode⏎- Der er 412 downloads siden lanceringen, med en fastholdelse efter 7 dage på 19 %⏎- Målet er at runde 1000 inden udgangen af oktober⏎- Jeg ser Sarah torsdag kl. 14 for at få styr på App Store-delen⏎- Hvis alt går godt, indsender vi i ugen med den 12.
+  #2 667→499 3713ms success recall=15/19 UNRECALLED=4 dispersed=1 inversions=0/91 LIST=8
+     UNRECALLED (whole 0.25, best 0.25): Så, en hurtig status på projektet:
+     UNRECALLED (whole 0.00, best 0.00): Der er to ting tilbage.
+     UNRECALLED (whole 0.00, best 0.00): Hvad tallene angår,
+     UNRECALLED (whole 0.00, best 0.00): hvilket er lavt,
+     engineOut: Projektstatus:⏎- Vi skiftede abonnementsdelen over i mandags⏎- Thomas er færdig med StoreKit-integrationen, og den virker i sandbox⏎- Transskriptionshistorikken er slet ikke påbegyndt⏎- Det personlige ordforråd har en specifikation, men ingen kode⏎- Der er 412 downloads siden lanceringen, med en fastholdelse efter 7 dage på 19 %⏎- Målet er at runde 1000 inden udgangen af oktober⏎- Jeg ser Sarah torsdag kl. 14 for at få styr på App Store-delen⏎- Hvis alt går godt, indsender vi i ugen med den 12.
+  #3 667→499 3697ms success recall=15/19 UNRECALLED=4 dispersed=1 inversions=0/91 LIST=8
+     UNRECALLED (whole 0.25, best 0.25): Så, en hurtig status på projektet:
+     UNRECALLED (whole 0.00, best 0.00): Der er to ting tilbage.
+     UNRECALLED (whole 0.00, best 0.00): Hvad tallene angår,
+     UNRECALLED (whole 0.00, best 0.00): hvilket er lavt,
+     engineOut: Projektstatus:⏎- Vi skiftede abonnementsdelen over i mandags⏎- Thomas er færdig med StoreKit-integrationen, og den virker i sandbox⏎- Transskriptionshistorikken er slet ikke påbegyndt⏎- Det personlige ordforråd har en specifikation, men ingen kode⏎- Der er 412 downloads siden lanceringen, med en fastholdelse efter 7 dage på 19 %⏎- Målet er at runde 1000 inden udgangen af oktober⏎- Jeg ser Sarah torsdag kl. 14 for at få styr på App Store-delen⏎- Hvis alt går godt, indsender vi i ugen med den 12.
+
+━━ [T1-last-transcription.nb] 57 chars, lang=nb
+  #1 57→46 1319ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Den siste transkripsjonen:⏎- La deg ta en titt
+  #2 57→46 1309ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Den siste transkripsjonen:⏎- La deg ta en titt
+  #3 57→46 1306ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Den siste transkripsjonen:⏎- La deg ta en titt
+
+━━ [T2-no-error.nb] 137 chars, lang=nb
+  #1 137→42 1261ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): Foreløpig har jeg ingen feilmelding,
+     UNRECALLED (whole 0.25, best 0.25): Så vi fortsetter en stund til,
+     UNRECALLED (whole 0.17, best 0.17): men foreløpig fungerer det ganske bra.
+     engineOut: Foreløpig:⏎- Alt ser ut til å være i orden
+  #2 137→78 1389ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.20, best 0.20): Foreløpig har jeg ingen feilmelding,
+     UNRECALLED (whole 0.25, best 0.25): Så vi fortsetter en stund til,
+     engineOut: Foreløpig:⏎- Alt ser ut til å være i orden⏎- Foreløpig fungerer det ganske bra
+  #3 137→42 1256ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): Foreløpig har jeg ingen feilmelding,
+     UNRECALLED (whole 0.25, best 0.25): Så vi fortsetter en stund til,
+     UNRECALLED (whole 0.17, best 0.17): men foreløpig fungerer det ganske bra.
+     engineOut: Foreløpig:⏎- Alt ser ut til å være i orden
+
+━━ [T3-plan-mode.nb] 167 chars, lang=nb
+  #1 167→88 1573ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): Ok, jeg lar deg forberede integrasjonen av denne issuen, takk.
+     UNRECALLED (whole 0.00, best 0.00): Du kan bytte til planmodus for å gjøre det,
+     engineOut: Integrasjonen av dette problemet:⏎- Godkjenne implementasjonsplanen når du har laget den
+  #2 167→173 1954ms success recall=3/3 inversions=0/3 LIST=3
+     engineOut: Integrasjonen av dette problemet:⏎- La deg forberede integrasjonen av dette problemet⏎- Bytt til planmodus for å gjøre det⏎- Godkjenne når du har laget implementasjonsplanen
+  #3 167→84 1578ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): Ok, jeg lar deg forberede integrasjonen av denne issuen, takk.
+     UNRECALLED (whole 0.00, best 0.00): Du kan bytte til planmodus for å gjøre det,
+     engineOut: Integrasjonen av dette problemet:⏎- Godkjenne implementasjonsplanen når den er laget
+
+━━ [T4-structured-since.nb] 231 chars, lang=nb
+  #1 231→97 1537ms success recall=3/5 UNRECALLED=2 dispersed=1 inversions=0/1 LIST=1
+     UNRECALLED (whole 0.17, best 0.17): Så jeg tror jeg kan eksportere loggene som de er.
+     UNRECALLED (whole 0.00, best 0.00): Men for meg ser det ganske riktig ut.
+     engineOut: Den strukturerte modusen:⏎- Fungerte alle testene jeg gjorde i går, særlig de litt lengre testene
+  #2 231→173 1922ms success recall=4/5 UNRECALLED=1 inversions=0/6 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Men for meg ser det ganske riktig ut.
+     engineOut: Den strukturerte modusen:⏎- Brukt den strukturerte modusen en stund nå⏎- Fungerte alle testene jeg gjorde i går, særlig de litt lengre testene⏎- Eksportere loggene som de er
+  #3 231→97 1533ms success recall=3/5 UNRECALLED=2 dispersed=1 inversions=0/1 LIST=1
+     UNRECALLED (whole 0.17, best 0.17): Så jeg tror jeg kan eksportere loggene som de er.
+     UNRECALLED (whole 0.00, best 0.00): Men for meg ser det ganske riktig ut.
+     engineOut: Den strukturerte modusen:⏎- Fungerte alle testene jeg gjorde i går, særlig de litt lengre testene
+
+━━ [T5-long-test.nb] 397 chars, lang=nb
+  #1 397→276 2594ms success recall=7/7 dispersed=2 inversions=0/10 LIST=5
+     engineOut: Testen:⏎- Prøve en lang melding i strukturert modus⏎- Ha dårlige forhold når det gjelder lyd fordi jeg er ganske langt unna telefonen⏎- Ha lav kvalitet på mikrofonen fordi det er mye støy ved siden av meg⏎- Se hva det gir på testen⏎- Se om resultatet er interessant eller ikke
+  #2 397→271 2564ms success recall=7/7 dispersed=2 inversions=0/10 LIST=6
+     engineOut: Testen:⏎- Prøve en lang melding i strukturert modus⏎- Ha dårlige forhold når det gjelder lyd fordi jeg er ganske langt unna telefonen⏎- Få dårlig kvalitet på mikrofonen⏎- Ha mye støy ved siden av meg⏎- Se hva det gir på testen⏎- Se om resultatet er interessant eller ikke
+  #3 397→271 2572ms success recall=7/7 dispersed=2 inversions=0/10 LIST=6
+     engineOut: Testen:⏎- Prøve en lang melding i strukturert modus⏎- Ha dårlige forhold når det gjelder lyd fordi jeg er ganske langt unna telefonen⏎- Få dårlig kvalitet på mikrofonen⏎- Ha mye støy ved siden av meg⏎- Se hva det gir på testen⏎- Se om resultatet er interessant eller ikke
+
+━━ [T6-project-update.nb] 686 chars, lang=nb
+  #1 686→516 3938ms success recall=15/19 UNRECALLED=4 dispersed=1 inversions=0/91 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Altså, en rask oppdatering om prosjektet:
+     UNRECALLED (whole 0.33, best 0.33): Det gjenstår to ting.
+     UNRECALLED (whole 0.25, best 0.25): Når det gjelder tallene,
+     UNRECALLED (whole 0.00, best 0.00): noe som er lavt,
+     engineOut: Prosjektoppdatering:⏎- Vi byttet over abonnementsdelen forrige mandag⏎- Thomas er ferdig med StoreKit-integrasjonen, og den fungerer i sandkassen⏎- Transkripsjonshistorikken er ikke påbegynt i det hele tatt⏎- Det tilpassede ordforrådet har en spesifikasjon, men ingen kode⏎- Vi er på 412 nedlastinger siden lanseringen, med en sjudagers oppbevaring på 19 %⏎- Målet er å passere 1000 før slutten av oktober⏎- Jeg møter Sarah torsdag klokken 14 for å ordne App Store-delen⏎- Hvis alt går bra, sender vi inn uka den 12.
+  #2 686→578 4188ms success recall=16/19 UNRECALLED=3 inversions=0/120 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Altså, en rask oppdatering om prosjektet:
+     UNRECALLED (whole 0.33, best 0.33): Det gjenstår to ting.
+     UNRECALLED (whole 0.25, best 0.25): Når det gjelder tallene,
+     engineOut: Prosjektoppdatering:⏎- Vi byttet over abonnementsdelen forrige mandag⏎- Thomas er ferdig med StoreKit-integrasjonen, og den fungerer i sandkassen⏎- Transkripsjonshistorikken er ikke påbegynt i det hele tatt⏎- Det tilpassede ordforrådet har en spesifikasjon, men ingen kode⏎- Vi er på 412 nedlastinger siden lanseringen, med en sjudagers oppbevaring på 19 %, noe som er lavt, men ikke katastrofalt for en første versjon⏎- Målet er å passere 1000 før slutten av oktober⏎- Jeg møter Sarah torsdag klokken 14 for å ordne App Store-delen⏎- Hvis alt går bra, sender vi inn uka den 12.
+  #3 686→500 3850ms success recall=15/19 UNRECALLED=4 dispersed=2 inversions=0/78 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Altså, en rask oppdatering om prosjektet:
+     UNRECALLED (whole 0.33, best 0.33): Det gjenstår to ting.
+     UNRECALLED (whole 0.25, best 0.25): Når det gjelder tallene,
+     UNRECALLED (whole 0.00, best 0.00): noe som er lavt,
+     engineOut: Prosjektoppdatering:⏎- Vi byttet over abonnementsdelen forrige mandag⏎- Thomas er ferdig med StoreKit-integrasjonen, og den fungerer i sandkassen⏎- Transkripsjonshistorikken er ikke påbegynt⏎- Det tilpassede ordforrådet har en spesifikasjon, men ingen kode⏎- Vi er på 412 nedlastinger siden lanseringen, med en sjudagers oppbevaring på 19 %⏎- Målet er å passere 1000 før slutten av oktober⏎- Jeg møter Sarah torsdag klokken 14 for å ordne App Store-delen⏎- Hvis alt går bra, sender vi inn uka den 12.
+
+━━ [T1-last-transcription.sv] 57 chars, lang=sv
+  #1 57→51 1329ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Den senaste transkriberingen:⏎- Jag låter dig titta
+  #2 57→51 1547ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Den senaste transkriberingen:⏎- Jag låter dig titta
+  #3 57→51 1324ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Den senaste transkriberingen:⏎- Jag låter dig titta
+
+━━ [T2-no-error.sv] 147 chars, lang=sv
+  #1 147→39 1304ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): För tillfället har jag inget felmeddelande,
+     UNRECALLED (whole 0.00, best 0.00): Så vi fortsätter ett litet tag till,
+     UNRECALLED (whole 0.17, best 0.17): men för tillfället fungerar det ganska bra.
+     engineOut: För tillfället:⏎- Allt verkar vara okej
+  #2 147→39 1304ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): För tillfället har jag inget felmeddelande,
+     UNRECALLED (whole 0.00, best 0.00): Så vi fortsätter ett litet tag till,
+     UNRECALLED (whole 0.17, best 0.17): men för tillfället fungerar det ganska bra.
+     engineOut: För tillfället:⏎- Allt verkar vara okej
+  #3 147→39 1334ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.20, best 0.20): För tillfället har jag inget felmeddelande,
+     UNRECALLED (whole 0.00, best 0.00): Så vi fortsätter ett litet tag till,
+     UNRECALLED (whole 0.17, best 0.17): men för tillfället fungerar det ganska bra.
+     engineOut: För tillfället:⏎- Allt verkar vara okej
+
+━━ [T3-plan-mode.sv] 181 chars, lang=sv
+  #1 181→78 1545ms success recall=2/3 UNRECALLED=1 dispersed=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Du kan gå över till planläget för att göra det,
+     engineOut: Integrationen av ärendet:⏎- Godkänn implementeringsplanen när du har gjort den
+  #2 181→69 1555ms success recall=0/3 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.27, best 0.27): Okej, jag låter dig förbereda integrationen av det här ärendet, tack.
+     UNRECALLED (whole 0.00, best 0.00): Du kan gå över till planläget för att göra det,
+     UNRECALLED (whole 0.25, best 0.25): och sedan godkänner jag när du har gjort implementeringsplanen.
+     engineOut: Integrationen av ärendet:⏎- Godkänn när implementeringsplanen är klar
+  #3 181→67 1517ms success recall=0/3 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.18, best 0.18): Okej, jag låter dig förbereda integrationen av det här ärendet, tack.
+     UNRECALLED (whole 0.00, best 0.00): Du kan gå över till planläget för att göra det,
+     UNRECALLED (whole 0.25, best 0.25): och sedan godkänner jag när du har gjort implementeringsplanen.
+     engineOut: Integration av ärendet:⏎- Godkänn när implementeringsplanen är klar
+
+━━ [T4-structured-since.sv] 253 chars, lang=sv
+  #1 253→149 1937ms success recall=3/5 UNRECALLED=2 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.10, best 0.10): Faktiskt har jag kört det strukturerade läget ett tag nu.
+     UNRECALLED (whole 0.00, best 0.00): Men för mig verkar det ganska korrekt.
+     engineOut: Strukturerat läge:⏎- Fungerade alla tester som jag gjorde i går, särskilt de lite längre testerna⏎- Jag kommer att kunna exportera loggarna som de är
+  #2 253→190 2179ms success recall=4/5 UNRECALLED=1 inversions=0/6 LIST=3
+     UNRECALLED (whole 0.20, best 0.10): Faktiskt har jag kört det strukturerade läget ett tag nu.
+     engineOut: Strukturerat läge:⏎- Fungerade alla tester som jag gjorde i går, särskilt de lite längre testerna⏎- Jag tror att jag kommer att kunna exportera loggarna som de är⏎- Det verkar ganska korrekt
+  #3 253→103 1544ms success recall=3/5 UNRECALLED=2 dispersed=1 inversions=0/1 LIST=1
+     UNRECALLED (whole 0.22, best 0.22): Så jag tror att jag kommer att kunna exportera loggarna som de är.
+     UNRECALLED (whole 0.17, best 0.17): Men för mig verkar det ganska korrekt.
+     engineOut: Det strukturerade läget:⏎- Fungerade alla tester som jag gjorde i går, särskilt de lite längre testerna
+
+━━ [T5-long-test.sv] 396 chars, lang=sv
+  #1 396→281 2508ms success recall=6/7 UNRECALLED=1 dispersed=1 inversions=0/10 LIST=5
+     UNRECALLED (whole 0.09, best 0.09): Med tanke på att jag inte nödvändigtvis har rätt förhållanden ljudmässigt,
+     engineOut: Test av långt meddelande i strukturerat läge:⏎- Vi testar ett långt meddelande i strukturerat läge⏎- Mikrofonens kvalitet kanske inte blir enastående⏎- Det är också ganska mycket oväsen bredvid mig⏎- Vi får se vad det ger i testet⏎- Vi får se om resultatet är intressant eller inte
+  #2 396→271 2413ms success recall=6/7 UNRECALLED=1 dispersed=1 inversions=0/10 LIST=5
+     UNRECALLED (whole 0.09, best 0.09): Med tanke på att jag inte nödvändigtvis har rätt förhållanden ljudmässigt,
+     engineOut: Test av strukturerat meddelande i läge:⏎- Testa ett långt meddelande i strukturerat läge⏎- Mikrofonens kvalitet kanske inte blir enastående⏎- Det är också ganska mycket oväsen bredvid mig⏎- Vi får se vad det ger i testet⏎- Vi får se om resultatet är intressant eller inte
+  #3 396→281 2511ms success recall=6/7 UNRECALLED=1 dispersed=1 inversions=0/10 LIST=5
+     UNRECALLED (whole 0.09, best 0.09): Med tanke på att jag inte nödvändigtvis har rätt förhållanden ljudmässigt,
+     engineOut: Test av långt meddelande i strukturerat läge:⏎- Vi testar ett långt meddelande i strukturerat läge⏎- Mikrofonens kvalitet kanske inte blir enastående⏎- Det är också ganska mycket oväsen bredvid mig⏎- Vi får se vad det ger i testet⏎- Vi får se om resultatet är intressant eller inte
+
+━━ [T6-project-update.sv] 694 chars, lang=sv
+  #1 694→524 3941ms success recall=13/14 UNRECALLED=1 dispersed=1 inversions=0/66 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Det återstår två saker.
+     engineOut: Lägesrapport om projektet:⏎- Vi bytte över prenumerationsdelen i måndags⏎- Thomas har gjort klart StoreKit-integrationen och den fungerar i sandlådan⏎- Transkriberingshistoriken är inte påbörjad alls⏎- Den anpassade ordlistan har en specifikation men ingen kod⏎- Vi ligger på 412 nedladdningar sedan lanseringen, med en kvarhållning efter 7 dagar på 19 %⏎- Målet är att passera 1000 före slutet av oktober⏎- Jag träffar Sarah på torsdag klockan 14 för att fixa App Store-delen⏎- Om allt går bra skickar vi in veckan den 12:e
+  #2 694→518 4923ms success recall=12/14 UNRECALLED=2 dispersed=1 inversions=0/55 LIST=8
+     UNRECALLED (whole 0.20, best 0.20): Alltså, en snabb lägesrapport om projektet:
+     UNRECALLED (whole 0.00, best 0.00): Det återstår två saker.
+     engineOut: Projektlägesrapport:⏎- Vi bytte över prenumerationsdelen i måndags⏎- Thomas har gjort klart StoreKit-integrationen och den fungerar i sandlådan⏎- Transkriberingshistoriken är inte påbörjad alls⏎- Den anpassade ordlistan har en specifikation men ingen kod⏎- Vi ligger på 412 nedladdningar sedan lanseringen, med en kvarhållning efter 7 dagar på 19 %⏎- Målet är att passera 1000 före slutet av oktober⏎- Jag träffar Sarah på torsdag klockan 14 för att fixa App Store-delen⏎- Om allt går bra skickar vi in veckan den 12:e
+  #3 694→524 3931ms success recall=13/14 UNRECALLED=1 dispersed=1 inversions=0/66 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): Det återstår två saker.
+     engineOut: Lägesrapport om projektet:⏎- Vi bytte över prenumerationsdelen i måndags⏎- Thomas har gjort klart StoreKit-integrationen och den fungerar i sandlådan⏎- Transkriberingshistoriken är inte påbörjad alls⏎- Den anpassade ordlistan har en specifikation men ingen kod⏎- Vi ligger på 412 nedladdningar sedan lanseringen, med en kvarhållning efter 7 dagar på 19 %⏎- Målet är att passera 1000 före slutet av oktober⏎- Jag träffar Sarah på torsdag klockan 14 för att fixa App Store-delen⏎- Om allt går bra skickar vi in veckan den 12:e
+
+━━ [T1-last-transcription.tr] 52 chars, lang=tr
+  #1 52→0 1214ms engineFailed recall=0/2 UNRECALLED=2 inversions=0/0 LANG=?≠tr
+     UNRECALLED (whole 0.00, best 0.00): Bakman için sana bırakıyorum,
+     UNRECALLED (whole 0.00, best 0.00): bu son transkripsiyon.
+     engineOut: 
+  #2 52→74 1525ms success recall=2/2 inversions=0/1 LIST=2
+     engineOut: son transkripsiyon için:⏎- Bakman için bırakıyorum⏎- Bu son transkripsiyon
+  #3 52→0 1198ms engineFailed recall=0/2 UNRECALLED=2 inversions=0/0 LANG=?≠tr
+     UNRECALLED (whole 0.00, best 0.00): Bakman için sana bırakıyorum,
+     UNRECALLED (whole 0.00, best 0.00): bu son transkripsiyon.
+     engineOut: 
+
+━━ [T2-no-error.tr] 130 chars, lang=tr
+  #1 130→94 1746ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.18, best 0.18): Yani bir süre daha devam edeceğiz ama şimdilik oldukça iyi çalışıyor.
+     engineOut: Hata mesajları olmadan:⏎- Hiçbir hata mesajım yok⏎- Her şey yolunda görünüyor⏎- Devam edeceğiz
+  #2 130→114 1993ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=4
+     UNRECALLED (whole 0.27, best 0.18): Yani bir süre daha devam edeceğiz ama şimdilik oldukça iyi çalışıyor.
+     engineOut: Hata mesajları olmayan durum:⏎- Hiçbir hata mesajı yok⏎- Her şey yolunda görünüyor⏎- Devam etmekte⏎- İyi çalışıyor
+  #3 130→133 1826ms success recall=3/3 inversions=0/3 LIST=2
+     engineOut: Durumun özeti:⏎- Hiçbir hata mesajım yok, her şey yolunda görünüyor⏎- Bir süre daha devam edeceğiz ama şimdilik oldukça iyi çalışıyor
+
+━━ [T3-plan-mode.tr] 154 chars, lang=tr
+  #1 154→88 1624ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Tamam, bu issue'nun entegrasyonunu hazırlamayı sana bırakıyorum, lütfen.
+     engineOut: Entegrasyonunun hazırlanması:⏎- Plan moduna geçmek⏎- Uygulama planını yapmak⏎- Onaylamak
+  #2 154→81 1621ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Tamam, bu issue'nun entegrasyonunu hazırlamayı sana bırakıyorum, lütfen.
+     engineOut: Entegrasyon hazırlığı:⏎- Plan moduna geçmek⏎- Uygulama planını yapmak⏎- Onaylamak
+  #3 154→83 1653ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=3
+     UNRECALLED (whole 0.00, best 0.00): Tamam, bu issue'nun entegrasyonunu hazırlamayı sana bırakıyorum, lütfen.
+     engineOut: Entegrasyon hazırlığını:⏎- Plan moduna geçmek⏎- Uygulama planını yapmak⏎- Onaylamak
+
+━━ [T4-structured-since.tr] 227 chars, lang=tr
+  #1 227→135 1690ms success recall=3/5 UNRECALLED=2 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Aslında bir süredir yapılandırılmış moddayım.
+     UNRECALLED (whole 0.00, best 0.00): Ama bana göre oldukça doğru görünüyor.
+     engineOut: Yapılan testler:⏎- Dün yaptığım bütün testler, özellikle biraz daha uzun testler, çalıştı⏎- Günlükleri olduğu gibi dışa aktarabileceğim
+  #2 227→135 1693ms success recall=3/5 UNRECALLED=2 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Aslında bir süredir yapılandırılmış moddayım.
+     UNRECALLED (whole 0.00, best 0.00): Ama bana göre oldukça doğru görünüyor.
+     engineOut: Yapılan testler:⏎- Dün yaptığım bütün testler, özellikle biraz daha uzun testler, çalıştı⏎- Günlükleri olduğu gibi dışa aktarabileceğim
+  #3 227→136 1973ms success recall=3/5 UNRECALLED=2 inversions=0/3 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Aslında bir süredir yapılandırılmış moddayım.
+     UNRECALLED (whole 0.00, best 0.00): Ama bana göre oldukça doğru görünüyor.
+     engineOut: Yapılmış testler:⏎- Dün yaptığım bütün testler, özellikle biraz daha uzun testler, çalıştı⏎- Günlükleri olduğu gibi dışa aktarabileceğim
+
+━━ [T5-long-test.tr] 324 chars, lang=tr
+  #1 324→249 2893ms success recall=2/7 UNRECALLED=5 inversions=0/1 LIST=4
+     UNRECALLED (whole 0.27, best 0.27): Ve şimdi ne olacağını görmek için yapılandırılmış modda uzun bir mesaj deniyoruz.
+     UNRECALLED (whole 0.00, best 0.00): Ses açısından pek iyi koşullarda olmadığımı da bilerek,
+     UNRECALLED (whole 0.00, best 0.00): çünkü telefondan oldukça uzaktayım.
+     UNRECALLED (whole 0.33, best 0.33): Yani mikrofonun kalitesi belki olağanüstü olmayacak.
+     UNRECALLED (whole 0.00, best 0.00): Bakalım testte ne verecek.
+     engineOut: Yapılandırılmış modda test deniyoruz:⏎- Testi yapılandırılmış modda denemek⏎- Mikrofonun kalitesinin olağanüstü olmayabileceğini bilmek⏎- Yanımda epey gürültü olduğunu fark etmek⏎- Testin sonucunun ilginç olup olmadığını göreceğimizin farkına varmak
+  #2 324→181 2364ms success recall=3/7 UNRECALLED=4 inversions=0/3 LIST=4
+     UNRECALLED (whole 0.27, best 0.27): Ve şimdi ne olacağını görmek için yapılandırılmış modda uzun bir mesaj deniyoruz.
+     UNRECALLED (whole 0.00, best 0.00): Ses açısından pek iyi koşullarda olmadığımı da bilerek,
+     UNRECALLED (whole 0.00, best 0.00): çünkü telefondan oldukça uzaktayım.
+     UNRECALLED (whole 0.33, best 0.33): Bakalım testte ne verecek.
+     engineOut: Yapılandırılmış modda test deniyoruz:⏎- Mikrofonun kalitesi olağanüstü olmayacak⏎- Yanımda epey gürültü var⏎- Testte ne vereceği göreceğiz⏎- Sonucun ilginç olup olmadığını göreceğiz
+  #3 324→385 3586ms success recall=2/7 UNRECALLED=5 inversions=0/1 LIST=4
+     UNRECALLED (whole 0.18, best 0.18): Ve şimdi ne olacağını görmek için yapılandırılmış modda uzun bir mesaj deniyoruz.
+     UNRECALLED (whole 0.25, best 0.25): çünkü telefondan oldukça uzaktayım.
+     UNRECALLED (whole 0.33, best 0.33): Yani mikrofonun kalitesi belki olağanüstü olmayacak.
+     UNRECALLED (whole 0.00, best 0.00): Yanımda da epey gürültü var.
+     UNRECALLED (whole 0.00, best 0.00): Bakalım testte ne verecek.
+     engineOut: Yapılandırılmış modda test denemesi:⏎- Yapılandırılmış modda test denemesi yapmak⏎- Mikrofonun kalitesinin olağanüstü olmayabileceğini bilerek ses açısından iyi koşullarda olmadığımı kabul etmek⏎- Telefonun oldukça uzakta olması nedeniyle gürültünün yanında mikrofonun kalitesinin olağanüstü olmayabileceğini belirtmek⏎- Testin sonucunun ilginç olup olmadığını göreceğimizi ifade etmek
+
+━━ [T6-project-update.tr] 637 chars, lang=tr
+  #1 637→553 4700ms success recall=12/15 UNRECALLED=3 inversions=0/66 LIST=9
+     UNRECALLED (whole 0.33, best 0.33): Evet, projeyle ilgili kısa bir güncelleme:
+     UNRECALLED (whole 0.25, best 0.25): Geriye iki şey kaldı.
+     UNRECALLED (whole 0.00, best 0.00): Rakamlara gelince,
+     engineOut: Proje güncellemesi:⏎- Abonelik kısmını geçen pazartesi geçirdik⏎- Thomas StoreKit entegrasyonunu bitirdi ve sandbox'ta çalışıyor⏎- Transkripsiyon geçmişi hiç başlanmamış⏎- Kişisel kelime dağarcığıyla ilgili bir spesifikasyonumuz var ama hiç kod yok⏎- Lansmandan bu yana 412 indirme yapmadık⏎- 7 günlük elde tutma oranı %19, bu düşük ama ilk sürüm için felaket değil⏎- Hedef, ekim sonundan önce 1000 barajını geçmek⏎- App Store kısmını ayarlamak için perşembe saat 14'te Sarah ile görüşüyorum⏎- Her şey yolunda giderse, ayın 12'si haftasında gönderiyoruz
+  #2 637→553 4392ms success recall=12/15 UNRECALLED=3 inversions=0/66 LIST=9
+     UNRECALLED (whole 0.33, best 0.33): Evet, projeyle ilgili kısa bir güncelleme:
+     UNRECALLED (whole 0.25, best 0.25): Geriye iki şey kaldı.
+     UNRECALLED (whole 0.00, best 0.00): Rakamlara gelince,
+     engineOut: Proje güncellemesi:⏎- Abonelik kısmını geçen pazartesi geçirdik⏎- Thomas StoreKit entegrasyonunu bitirdi ve sandbox'ta çalışıyor⏎- Transkripsiyon geçmişi hiç başlanmamış⏎- Kişisel kelime dağarcığıyla ilgili bir spesifikasyonumuz var ama hiç kod yok⏎- Lansmandan bu yana 412 indirme yapmadık⏎- 7 günlük elde tutma oranı %19, bu düşük ama ilk sürüm için felaket değil⏎- Hedef, ekim sonundan önce 1000 barajını geçmek⏎- App Store kısmını ayarlamak için perşembe saat 14'te Sarah ile görüşüyorum⏎- Her şey yolunda giderse, ayın 12'si haftasında gönderiyoruz
+  #3 637→553 4249ms success recall=12/15 UNRECALLED=3 inversions=0/66 LIST=9
+     UNRECALLED (whole 0.33, best 0.33): Evet, projeyle ilgili kısa bir güncelleme:
+     UNRECALLED (whole 0.25, best 0.25): Geriye iki şey kaldı.
+     UNRECALLED (whole 0.00, best 0.00): Rakamlara gelince,
+     engineOut: Proje güncellemesi:⏎- Abonelik kısmını geçen pazartesi geçirdik⏎- Thomas StoreKit entegrasyonunu bitirdi ve sandbox'ta çalışıyor⏎- Transkripsiyon geçmişi hiç başlanmamış⏎- Kişisel kelime dağarcığıyla ilgili bir spesifikasyonumuz var ama hiç kod yok⏎- Lansmandan bu yana 412 indirme yapmadık⏎- 7 günlük elde tutma oranı %19, bu düşük ama ilk sürüm için felaket değil⏎- Hedef, ekim sonundan önce 1000 barajını geçmek⏎- App Store kısmını ayarlamak için perşembe saat 14'te Sarah ile görüşüyorum⏎- Her şey yolunda giderse, ayın 12'si haftasında gönderiyoruz
+
+━━ [T1-last-transcription.vi] 50 chars, lang=vi
+  #1 50→45 1378ms success recall=2/2 dispersed=1 inversions=0/0 LIST=1
+     engineOut: Bản ghi chép cuối cùng:⏎- Tôi đã ghi chép lại
+  #2 50→45 1363ms success recall=2/2 dispersed=1 inversions=0/0 LIST=1
+     engineOut: Bản ghi chép cuối cùng:⏎- Tôi đã ghi chép lại
+  #3 50→35 1355ms success recall=2/2 inversions=1/1 LIST=1
+     engineOut: Bản ghi chép cuối cùng:⏎- Đã để xem
+
+━━ [T2-no-error.vi] 133 chars, lang=vi
+  #1 133→78 1505ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Vậy chúng ta sẽ tiếp tục thêm một lúc nữa,
+     UNRECALLED (whole 0.33, best 0.33): nhưng hiện tại nó chạy khá tốt.
+     engineOut: Trạng thái hoạt động hiện tại:⏎- Không có thông báo lỗi nào⏎- Mọi thứ có vẻ ổn
+  #2 133→77 1494ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Vậy chúng ta sẽ tiếp tục thêm một lúc nữa,
+     UNRECALLED (whole 0.33, best 0.33): nhưng hiện tại nó chạy khá tốt.
+     engineOut: Tình trạng hệ thống hiện tại:⏎- Không có thông báo lỗi nào⏎- Mọi thứ có vẻ ổn
+  #3 133→68 1376ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): Vậy chúng ta sẽ tiếp tục thêm một lúc nữa,
+     UNRECALLED (whole 0.33, best 0.33): nhưng hiện tại nó chạy khá tốt.
+     engineOut: Trạng thái hiện tại:⏎- Không có thông báo lỗi nào⏎- Mọi thứ có vẻ ổn
+
+━━ [T3-plan-mode.vi] 175 chars, lang=vi
+  #1 175→51 1300ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Được rồi,
+     UNRECALLED (whole 0.08, best 0.08): Bạn có thể chuyển sang chế độ lập kế hoạch để làm việc đó,
+     UNRECALLED (whole 0.00, best 0.00): rồi tôi sẽ duyệt khi bạn đã lập xong kế hoạch triển khai.
+     engineOut: Việc tích hợp issue:⏎- Chuẩn bị việc tích hợp issue
+  #2 175→51 1289ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Được rồi,
+     UNRECALLED (whole 0.08, best 0.08): Bạn có thể chuyển sang chế độ lập kế hoạch để làm việc đó,
+     UNRECALLED (whole 0.00, best 0.00): rồi tôi sẽ duyệt khi bạn đã lập xong kế hoạch triển khai.
+     engineOut: Việc tích hợp issue:⏎- Chuẩn bị việc tích hợp issue
+  #3 175→51 1295ms success recall=1/4 UNRECALLED=3 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): Được rồi,
+     UNRECALLED (whole 0.08, best 0.08): Bạn có thể chuyển sang chế độ lập kế hoạch để làm việc đó,
+     UNRECALLED (whole 0.00, best 0.00): rồi tôi sẽ duyệt khi bạn đã lập xong kế hoạch triển khai.
+     engineOut: Việc tích hợp issue:⏎- Chuẩn bị việc tích hợp issue
+
+━━ [T4-structured-since.vi] 250 chars, lang=vi
+  #1 250→232 2199ms success recall=6/6 inversions=0/15 LIST=4
+     engineOut: Chế độ có cấu trúc:⏎- Tôi đã dùng chế độ có cấu trúc được một lúc rồi⏎- Tất cả các bài kiểm tra tôi làm hôm qua, nhất là những bài dài hơn một chút, đều chạy được⏎- Tôi nghĩ tôi sẽ có thể xuất nhật ký nguyên như vậy⏎- Có vẻ khá đúng
+  #2 250→232 2186ms success recall=6/6 inversions=0/15 LIST=4
+     engineOut: Chế độ có cấu trúc:⏎- Tôi đã dùng chế độ có cấu trúc được một lúc rồi⏎- Tất cả các bài kiểm tra tôi làm hôm qua, nhất là những bài dài hơn một chút, đều chạy được⏎- Tôi nghĩ tôi sẽ có thể xuất nhật ký nguyên như vậy⏎- Có vẻ khá đúng
+  #3 250→232 2185ms success recall=6/6 inversions=0/15 LIST=4
+     engineOut: Chế độ có cấu trúc:⏎- Tôi đã dùng chế độ có cấu trúc được một lúc rồi⏎- Tất cả các bài kiểm tra tôi làm hôm qua, nhất là những bài dài hơn một chút, đều chạy được⏎- Tôi nghĩ tôi sẽ có thể xuất nhật ký nguyên như vậy⏎- Có vẻ khá đúng
+
+━━ [T5-long-test.vi] 333 chars, lang=vi
+  #1 333→227 2130ms success recall=6/6 dispersed=2 inversions=0/6 LIST=4
+     engineOut: Bài kiểm tra tin nhắn có cấu trúc:⏎- Biết rằng tôi không hẳn ở trong điều kiện âm thanh tốt vì tôi ở khá xa điện thoại⏎- Chất lượng micro có thể sẽ không xuất sắc lắm⏎- Bên cạnh tôi cũng khá ồn⏎- Xem kết quả có thú vị hay không
+  #2 333→226 2107ms success recall=5/6 UNRECALLED=1 inversions=0/10 LIST=4
+     UNRECALLED (whole 0.27, best 0.27): Vậy để xem bài kiểm tra cho ra kết quả gì.
+     engineOut: Thử một tin nhắn dài có cấu trúc:⏎- Biết rằng tôi không hẳn ở trong điều kiện âm thanh tốt vì tôi ở khá xa điện thoại⏎- Chất lượng micro có thể sẽ không xuất sắc lắm⏎- Bên cạnh tôi cũng khá ồn⏎- Xem kết quả có thú vị hay không
+  #3 333→279 2362ms success recall=6/6 dispersed=1 inversions=0/10 LIST=5
+     engineOut: Bài kiểm tra tin nhắn có cấu trúc:⏎- Biết rằng tôi không hẳn ở trong điều kiện âm thanh tốt vì tôi ở khá xa điện thoại⏎- Chất lượng micro có thể sẽ không xuất sắc lắm⏎- Bên cạnh tôi cũng khá ồn⏎- Để xem bài kiểm tra cho ra kết quả gì⏎- Chúng ta sẽ xem kết quả có thú vị hay không
+
+━━ [T6-project-update.vi] 664 chars, lang=vi
+  #1 664→556 4095ms success recall=15/16 UNRECALLED=1 inversions=6/105 LIST=7
+     UNRECALLED (whole 0.33, best 0.33): Còn lại hai việc.
+     engineOut: Cập nhật về dự án:⏎- Chúng tôi đã chuyển phần đăng ký, Thomas đã hoàn thành việc tích hợp StoreKit và nó chạy được trong sandbox.⏎- Lịch sử bản ghi chép hoàn toàn chưa được bắt đầu.⏎- Từ vựng tùy chỉnh có bản đặc tả nhưng chưa có mã.⏎- Chúng tôi đạt 412 lượt tải xuống kể từ khi ra mắt, với tỷ lệ giữ chân sau 7 ngày là 19%, thấp nhưng không phải thảm họa đối với phiên bản đầu tiên.⏎- Mục tiêu là vượt mốc 1000 trước cuối tháng Mười.⏎- Tôi gặp Sarah vào thứ Năm lúc 14 giờ để chốt phần App Store.⏎- Nếu mọi việc suôn sẻ, chúng tôi sẽ nộp vào tuần ngày 12.
+  #2 664→491 3745ms success recall=14/16 UNRECALLED=2 inversions=6/91 LIST=8
+     UNRECALLED (whole 0.33, best 0.33): Còn lại hai việc.
+     UNRECALLED (whole 0.33, best 0.17): thấp nhưng không phải thảm họa đối với phiên bản đầu tiên.
+     engineOut: Cập nhật về dự án:⏎- Chúng tôi đã chuyển phần đăng ký⏎- Thomas đã hoàn thành việc tích hợp StoreKit và nó chạy được trong sandbox⏎- Lịch sử bản ghi chép hoàn toàn chưa được bắt đầu⏎- Từ vựng tùy chỉnh có bản đặc tả nhưng chưa có mã⏎- Chúng tôi đạt 412 lượt tải xuống kể từ khi ra mắt, với tỷ lệ giữ chân sau 7 ngày là 19%⏎- Mục tiêu là vượt mốc 1000 trước cuối tháng Mười⏎- Tôi gặp Sarah vào thứ Năm lúc 14 giờ để chốt phần App Store⏎- Nếu mọi việc suôn sẻ, chúng tôi sẽ nộp vào tuần ngày 12
+  #3 664→488 3818ms success recall=14/16 UNRECALLED=2 inversions=6/91 LIST=9
+     UNRECALLED (whole 0.33, best 0.33): Còn lại hai việc.
+     UNRECALLED (whole 0.25, best 0.17): thấp nhưng không phải thảm họa đối với phiên bản đầu tiên.
+     engineOut: Cập nhật về dự án:⏎- Chúng tôi đã chuyển phần đăng ký⏎- Thomas đã hoàn thành việc tích hợp StoreKit và nó chạy được trong sandbox⏎- Lịch sử bản ghi chép hoàn toàn chưa được bắt đầu⏎- Từ vựng tùy chỉnh có bản đặc tả nhưng chưa có mã⏎- Chúng tôi đạt 412 lượt tải xuống kể từ khi ra mắt⏎- Tỷ lệ giữ chân sau 7 ngày là 19%⏎- Mục tiêu là vượt mốc 1000 trước cuối tháng Mười⏎- Tôi gặp Sarah vào thứ Năm lúc 14 giờ để chốt phần App Store⏎- Nếu mọi việc suôn sẻ, chúng tôi sẽ nộp vào tuần ngày 12
+
+━━ [T1-last-transcription.ja] 22 chars, lang=ja
+  #1 22→31 1455ms success recall=1/1 inversions=0/0 LIST=1
+     engineOut: 最新の文字起こし：⏎- 確認してね：これが最新の文字起こしだよ
+  #2 22→38 1559ms success recall=1/1 inversions=0/0 LIST=2
+     engineOut: 確認：最新の文字起こしです：⏎- 確認してね⏎- これは最新の文字起こしだよ
+  #3 22→31 1401ms success recall=1/1 inversions=0/0 LIST=1
+     engineOut: 最新の文字起こし：⏎- 確認すべき：これが最新の文字起こしだよ
+
+━━ [T2-no-error.ja] 59 chars, lang=ja
+  #1 59→62 1788ms success recall=2/2 inversions=0/1 LIST=3
+     engineOut: エラーメッセージなし：⏎- エラーメッセージは出ていない⏎- 全て問題ないように見える⏎- 今のところかなりうまく動いている
+  #2 59→40 1510ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=2
+     UNRECALLED (whole 0.08, best 0.08): だからもう少し続けるけど、今のところかなりうまく動いてる。
+     engineOut: エラーメッセージ：⏎- 今までエラーメッセージが出ていない⏎- 全て問題なさそう
+  #3 59→55 1687ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.31, best 0.31): だからもう少し続けるけど、今のところかなりうまく動いてる。
+     engineOut: エラーメッセージなし：⏎- エラーメッセージは出ていない⏎- 全て問題なさそう⏎- 今はかなりうまく動いている
+
+━━ [T3-plan-mode.ja] 62 chars, lang=ja
+  #1 62→47 1620ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.33, best 0.33): そのためにプランモードに切り替えていいよ。
+     engineOut: このissueの統合の準備：⏎- プランモードに切り替える⏎- 実装計画ができるまで承認しない
+  #2 62→48 1585ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.33, best 0.33): そのためにプランモードに切り替えていいよ。
+     UNRECALLED (whole 0.33, best 0.33): 実装計画ができたら、私が承認するね。
+     engineOut: このissueの統合の準備：⏎- プランモードに切り替える⏎- 実装計画を立てる⏎- 承認を得る
+  #3 62→49 1709ms success recall=1/3 UNRECALLED=2 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.33, best 0.33): そのためにプランモードに切り替えていいよ。
+     UNRECALLED (whole 0.33, best 0.33): 実装計画ができたら、私が承認するね。
+     engineOut: このissueの統合の準備：⏎- プランモードに切り替える⏎- 実装計画を作成する⏎- 承認を得る
+
+━━ [T4-structured-since.ja] 104 chars, lang=ja
+  #1 104→89 1861ms success recall=3/4 UNRECALLED=1 inversions=0/3 LIST=3
+     UNRECALLED (whole 0.33, best 0.17): でも私としてはかなり正しいように見える。
+     engineOut: 構造化モードの使い方：⏎- 構造化モードを使っているのはしばらく前から⏎- 昨日のテストは全部、特にちょっと長めのテストもうまくいった⏎- ログはそのままエクスポートできると思う
+  #2 104→84 1909ms success recall=3/4 UNRECALLED=1 inversions=0/3 LIST=3
+     UNRECALLED (whole 0.33, best 0.17): でも私としてはかなり正しいように見える。
+     engineOut: 構造化モード：⏎- 構造化モードを使ってしばらく前から⏎- 昨日やったテストはすべて、特にちょっと長めのテストもうまくいった⏎- ログをそのままエクスポートできると思う
+  #3 104→106 2013ms success recall=4/4 dispersed=1 inversions=0/3 LIST=4
+     engineOut: 構造化モードの使い方：⏎- 構造化モードを使っているのはしばらく前から⏎- 昨日やったテストは全部、特にちょっと長めのテストもうまくいった⏎- ログはそのままエクスポートできると思う⏎- 非常に正しいように見える
+
+━━ [T5-long-test.ja] 150 chars, lang=ja
+  #1 150→119 2416ms success recall=6/6 dispersed=2 inversions=0/6 LIST=6
+     engineOut: 構造化モードでのテスト：⏎- 長いメッセージを試している⏎- 音声条件は必ずしも良いわけではない⏎- マイクの品質はそれほど良くないかもしれない⏎- 隣でけっこう雑音もしている⏎- テストの結果を見てみる⏎- 結果が面白いかどうか見てみる
+  #2 150→135 2547ms success recall=6/6 dispersed=1 inversions=0/10 LIST=6
+     engineOut: 構造化モードでのテスト：⏎- 長いメッセージを試している⏎- スマホからかなり離れているので音声条件は必ずしも良いとは限らない⏎- マイクの品質はそれほど良くないかもしれない⏎- 隣でけっこう雑音もしている⏎- テストの結果を見てみる⏎- 結果が面白いかどうかを見てみる
+  #3 150→134 2651ms success recall=6/6 dispersed=1 inversions=0/10 LIST=6
+     engineOut: 構造化モードでのテスト：⏎- 長いメッセージを試している⏎- スマホからかなり離れているので音声条件は必ずしも良いとは限らない⏎- マイクの品質はそれほど良くないかもしれない⏎- 隣でけっこう雑音もしている⏎- テストの結果を見てみる⏎- 結果が面白いかどうか見てみる
+
+━━ [T6-project-update.ja] 293 chars, lang=ja
+  #1 293→238 3360ms success recall=11/11 dispersed=2 inversions=0/36 LIST=8
+     engineOut: プロジェクトの進捗：⏎- 先週の月曜日にサブスクリプションの部分を切り替えた⏎- ThomasがStoreKitの統合を終わらせて、サンドボックスで動いている⏎- 文字起こしの履歴はまったく手をつけていない⏎- カスタム語彙については仕様はあるけど、コードはまだない⏎- 412ダウンロードで、7日間の継続率は19%⏎- 目標は10月末までに1000を超えること⏎- 木曜日の14時にSarahと会ってApp Storeの部分を詰める⏎- すべて順調なら、12日の週に提出する
+  #2 293→237 3425ms success recall=11/11 dispersed=2 inversions=0/36 LIST=7
+     engineOut: プロジェクトの進捗報告：⏎- 先週の月曜日にサブスクリプションの部分を切り替えて、ThomasがStoreKitの統合を終わらせて、サンドボックスで動いてる⏎- 文字起こしの履歴はまったく手をつけていない⏎- カスタム語彙については仕様はあるけど、コードはまだない⏎- 412ダウンロードで、7日間の継続率は19%⏎- 目標は10月末までに1000を超えること⏎- 木曜日の14時にSarahと会ってApp Storeの部分を詰める⏎- すべて順調なら、12日の週に提出する
+  #3 293→237 3344ms success recall=11/11 dispersed=2 inversions=0/36 LIST=8
+     engineOut: プロジェクトの進捗：⏎- 先週の月曜日にサブスクリプションの部分を切り替えた⏎- ThomasがStoreKitの統合を終わらせて、サンドボックスで動いてる⏎- 文字起こしの履歴はまったく手をつけていない⏎- カスタム語彙については仕様はあるけど、コードはまだない⏎- 412ダウンロードで、7日間の継続率は19%⏎- 目標は10月末までに1000を超えること⏎- 木曜日の14時にSarahと会ってApp Storeの部分を詰める⏎- すべて順調なら、12日の週に提出する
+
+━━ [T1-last-transcription.ko] 21 chars, lang=ko
+  #1 21→20 1280ms rejectedGuardrail(segmentOverlap) recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): 한번 봐 줘,
+     UNRECALLED (whole 0.00, best 0.00): 이게 마지막 전사본이야.
+     engineOut: 최근 작업 상태:⏎- 문서 검토 완료
+  #2 21→22 1382ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.33, best 0.33): 이게 마지막 전사본이야.
+     engineOut: 마지막 전사본:⏎- 한번 봐 줄 것 받음
+  #3 21→17 1228ms rejectedGuardrail(segmentOverlap) recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): 한번 봐 줘,
+     UNRECALLED (whole 0.00, best 0.00): 이게 마지막 전사본이야.
+     engineOut: 최종 전사본 확인:⏎- 확인했음
+
+━━ [T2-no-error.ko] 61 chars, lang=ko
+  #1 61→45 1470ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): 다 괜찮아 보여.
+     UNRECALLED (whole 0.00, best 0.00): 그래서 조금 더 계속해 볼 건데,
+     engineOut: 오류 메시지 없음:⏎- 지금까지는 오류 메시지가 없음⏎- 지금까지는 꽤 잘 작동함
+  #2 61→39 1445ms success recall=0/4 UNRECALLED=4 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.25, best 0.25): 지금까지는 오류 메시지가 없고,
+     UNRECALLED (whole 0.00, best 0.00): 다 괜찮아 보여.
+     UNRECALLED (whole 0.00, best 0.00): 그래서 조금 더 계속해 볼 건데,
+     UNRECALLED (whole 0.25, best 0.25): 지금까지는 꽤 잘 작동해.
+     engineOut: 오류 메시지 없이 잘 작동함:⏎- 오류 메시지 없이 지금까지 잘 작동함
+  #3 61→45 1465ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): 다 괜찮아 보여.
+     UNRECALLED (whole 0.00, best 0.00): 그래서 조금 더 계속해 볼 건데,
+     engineOut: 오류 메시지 없음:⏎- 지금까지는 오류 메시지가 없음⏎- 지금까지는 꽤 잘 작동함
+
+━━ [T3-plan-mode.ko] 75 chars, lang=ko
+  #1 75→55 1580ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.33, best 0.33): 그걸 하려면 플랜 모드로 전환해도 되고,
+     engineOut: 이 이슈의 통합 준비:⏎- 플랜 모드로 전환할 수 있음⏎- 구현 계획을 다 만들면 승인받을 수 있음
+  #2 75→75 1945ms rejectedGuardrail(segmentOverlap) recall=1/3 UNRECALLED=2 inversions=0/0 LIST=3
+     UNRECALLED (whole 0.25, best 0.25): 좋아, 이 이슈의 통합 준비는 너한테 맡길게, 부탁해.
+     UNRECALLED (whole 0.33, best 0.33): 그걸 하려면 플랜 모드로 전환해도 되고,
+     engineOut: 이슈의 통합 준비:⏎- 플랜 모드로 전환을 할 수 있음⏎- 구현 계획을 다 만들 것을 할 수 있음⏎- 승인을 받을 것을 기다릴 수 있음
+  #3 75→55 1575ms success recall=2/3 UNRECALLED=1 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.33, best 0.33): 그걸 하려면 플랜 모드로 전환해도 되고,
+     engineOut: 이 이슈의 통합 준비:⏎- 플랜 모드로 전환할 수 있음⏎- 구현 계획을 다 만들면 승인받을 수 있음
+
+━━ [T4-structured-since.ko] 114 chars, lang=ko
+  #1 114→86 2037ms success recall=4/5 UNRECALLED=1 inversions=0/6 LIST=3
+     UNRECALLED (whole 0.14, best 0.14): 사실 구조화 모드를 쓴 지 좀 됐어.
+     engineOut: 구조화 모드 사용 경험:⏎- 어제 한 테스트 전부, 특히 조금 더 긴 테스트들도 다 잘 됨⏎- 로그를 그대로 내보낼 수 있을 것 같음⏎- 꽤 맞는 것 같음
+  #2 114→86 2045ms success recall=4/5 UNRECALLED=1 inversions=0/6 LIST=3
+     UNRECALLED (whole 0.14, best 0.14): 사실 구조화 모드를 쓴 지 좀 됐어.
+     engineOut: 구조화 모드 사용 경험:⏎- 어제 한 테스트 전부, 특히 조금 더 긴 테스트들도 다 잘 됨⏎- 로그를 그대로 내보낼 수 있을 것 같음⏎- 꽤 맞는 것 같음
+  #3 114→86 2046ms success recall=4/5 UNRECALLED=1 inversions=0/6 LIST=3
+     UNRECALLED (whole 0.14, best 0.14): 사실 구조화 모드를 쓴 지 좀 됐어.
+     engineOut: 구조화 모드 사용 경험:⏎- 어제 한 테스트 전부, 특히 조금 더 긴 테스트들도 다 잘 됨⏎- 로그를 그대로 내보낼 수 있을 것 같음⏎- 꽤 맞는 것 같음
+
+━━ [T5-long-test.ko] 182 chars, lang=ko
+  #1 182→75 2000ms rejectedGuardrail(segmentOverlap) recall=0/6 UNRECALLED=6 inversions=0/0 LIST=5
+     UNRECALLED (whole 0.08, best 0.08): 그래서 지금 무슨 일이 일어나는지 보려고 구조화 모드로 긴 메시지를 시험해 보고 있어.
+     UNRECALLED (whole 0.07, best 0.07): 휴대폰에서 꽤 멀리 떨어져 있어서 오디오 조건이 꼭 좋은 건 아니라는 걸 알고 있어.
+     UNRECALLED (whole 0.12, best 0.12): 그래서 마이크 품질이 아주 좋지는 않을 수도 있어.
+     UNRECALLED (whole 0.25, best 0.25): 옆에서 소음도 꽤 나.
+     UNRECALLED (whole 0.00, best 0.00): 그러니까 테스트에서 어떻게 나오는지 보자.
+     UNRECALLED (whole 0.00, best 0.00): 결과가 흥미로운지 아닌지 볼 거야.
+     engineOut: 구조화 모드 시험:⏎- 테스트 결과 보기⏎- 오디오 조건 좋지 않음⏎- 마이크 품질 좋지 않음⏎- 옆에서 소음 큼⏎- 테스트 결과 보기
+  #2 182→112 2468ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=4
+     UNRECALLED (whole 0.08, best 0.08): 그래서 지금 무슨 일이 일어나는지 보려고 구조화 모드로 긴 메시지를 시험해 보고 있어.
+     UNRECALLED (whole 0.00, best 0.00): 그러니까 테스트에서 어떻게 나오는지 보자.
+     engineOut: 구조화 모드 시험:⏎- 휴대폰에서 멀리 떨어져서 오디오 조건이 좋지 않다는 걸 알고 있음⏎- 마이크 품질이 아주 좋지 않을 수도 있음⏎- 옆에서 소음도 꽤 큼⏎- 테스트 결과가 흥미로운지 아닌지 볼 것
+  #3 182→103 2419ms success recall=3/6 UNRECALLED=3 inversions=0/3 LIST=4
+     UNRECALLED (whole 0.15, best 0.08): 그래서 지금 무슨 일이 일어나는지 보려고 구조화 모드로 긴 메시지를 시험해 보고 있어.
+     UNRECALLED (whole 0.00, best 0.00): 그러니까 테스트에서 어떻게 나오는지 보자.
+     UNRECALLED (whole 0.20, best 0.20): 결과가 흥미로운지 아닌지 볼 거야.
+     engineOut: 구조화 모드 시험:⏎- 테스트를 하고 있음: 휴대폰에서 멀리 떨어져 있어 오디오 조건이 좋지 않음⏎- 마이크 품질이 좋지 않을 수 있음⏎- 옆에서 소음이 꽤 큼⏎- 테스트 결과를 볼 것
+
+━━ [T6-project-update.ko] 319 chars, lang=ko
+  #1 319→254 3569ms success recall=10/15 UNRECALLED=5 inversions=0/45 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): 자, 프로젝트에 대해 간단히 업데이트할게.
+     UNRECALLED (whole 0.00, best 0.00): 남은 건 두 가지야.
+     UNRECALLED (whole 0.25, best 0.25): 첫 번째는 전사 기록인데,
+     UNRECALLED (whole 0.00, best 0.00): 숫자로 보면,
+     UNRECALLED (whole 0.00, best 0.00): 낮긴 하지만 첫 버전치고 최악은 아니야.
+     engineOut: 프로젝트 업데이트:⏎- 지난 월요일에 구독 부분을 전환함⏎- Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아감⏎- 전사 기록은 아직 전혀 시작하지 않음⏎- 사용자 지정 어휘는 사양은 있는데 코드는 없음⏎- 출시 이후 다운로드가 412건이고, 7일 유지율은 19%임⏎- 목표는 10월 말 전에 1000건을 넘기는 것임⏎- 목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 것임⏎- 다 잘 되면 12일 주에 제출할 것임
+  #2 319→254 3578ms success recall=10/15 UNRECALLED=5 inversions=0/45 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): 자, 프로젝트에 대해 간단히 업데이트할게.
+     UNRECALLED (whole 0.00, best 0.00): 남은 건 두 가지야.
+     UNRECALLED (whole 0.25, best 0.25): 첫 번째는 전사 기록인데,
+     UNRECALLED (whole 0.00, best 0.00): 숫자로 보면,
+     UNRECALLED (whole 0.00, best 0.00): 낮긴 하지만 첫 버전치고 최악은 아니야.
+     engineOut: 프로젝트 업데이트:⏎- 지난 월요일에 구독 부분을 전환함⏎- Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아감⏎- 전사 기록은 아직 전혀 시작하지 않음⏎- 사용자 지정 어휘는 사양은 있는데 코드는 없음⏎- 출시 이후 다운로드가 412건이고, 7일 유지율은 19%임⏎- 목표는 10월 말 전에 1000건을 넘기는 것임⏎- 목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 것임⏎- 다 잘 되면 12일 주에 제출할 것임
+  #3 319→254 3616ms success recall=10/15 UNRECALLED=5 inversions=0/45 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): 자, 프로젝트에 대해 간단히 업데이트할게.
+     UNRECALLED (whole 0.00, best 0.00): 남은 건 두 가지야.
+     UNRECALLED (whole 0.25, best 0.25): 첫 번째는 전사 기록인데,
+     UNRECALLED (whole 0.00, best 0.00): 숫자로 보면,
+     UNRECALLED (whole 0.00, best 0.00): 낮긴 하지만 첫 버전치고 최악은 아니야.
+     engineOut: 프로젝트 업데이트:⏎- 지난 월요일에 구독 부분을 전환함⏎- Thomas가 StoreKit 통합을 끝내서 샌드박스에서 잘 돌아감⏎- 전사 기록은 아직 전혀 시작하지 않음⏎- 사용자 지정 어휘는 사양은 있는데 코드는 없음⏎- 출시 이후 다운로드가 412건이고, 7일 유지율은 19%임⏎- 목표는 10월 말 전에 1000건을 넘기는 것임⏎- 목요일 오후 2시에 Sarah를 만나서 App Store 부분을 정리할 것임⏎- 다 잘 되면 12일 주에 제출할 것임
+
+━━ [T1-last-transcription.zh-Hans] 14 chars, lang=zh-Hans
+  #1 14→23 1284ms success recall=1/1 inversions=0/0 LIST=2
+     engineOut: 最新的转写：⏎- 看一下吧⏎- 这是最新的转写
+  #2 14→21 1246ms success recall=1/1 inversions=0/0 LIST=1
+     engineOut: 最新的转写：⏎- 看一下吧，这是最新的转写
+  #3 14→23 1240ms success recall=1/1 inversions=0/0 LIST=2
+     engineOut: 最新的转写：⏎- 看一下吧⏎- 这是最新的转写
+
+━━ [T2-no-error.zh-Hans] 43 chars, lang=zh-Hans
+  #1 43→27 1332ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): 所以我们再继续一会儿，不过目前运行得挺好的。
+     engineOut: 当前状态：⏎- 没有任何错误信息⏎- 一切看起来都正常
+  #2 43→38 1469ms success recall=2/2 inversions=0/1 LIST=3
+     engineOut: 当前状态：⏎- 没有任何错误信息⏎- 一切看起来都正常⏎- 目前运行得挺好的
+  #3 43→38 1456ms success recall=2/2 inversions=0/1 LIST=3
+     engineOut: 当前状态：⏎- 没有任何错误信息⏎- 一切看起来都正常⏎- 目前运行得挺好的
+
+━━ [T3-plan-mode.zh-Hans] 51 chars, lang=zh-Hans
+  #1 51→32 1350ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.18, best 0.18): 好，这个 issue 的集成就麻烦你来准备了。
+     UNRECALLED (whole 0.00, best 0.00): 你可以切换到计划模式来做，等你做好实现计划之后我再确认。
+     engineOut: 这个 issue 的准备：⏎- 准备了这个 issue 的集成就
+  #2 51→33 1348ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.18, best 0.18): 好，这个 issue 的集成就麻烦你来准备了。
+     UNRECALLED (whole 0.00, best 0.00): 你可以切换到计划模式来做，等你做好实现计划之后我再确认。
+     engineOut: 这个 issue 的集成就：⏎- 准备了这个 issue 的集成就
+  #3 51→32 1303ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.18, best 0.18): 好，这个 issue 的集成就麻烦你来准备了。
+     UNRECALLED (whole 0.00, best 0.00): 你可以切换到计划模式来做，等你做好实现计划之后我再确认。
+     engineOut: 这个 issue 的准备：⏎- 准备了这个 issue 的集成就
+
+━━ [T4-structured-since.zh-Hans] 77 chars, lang=zh-Hans
+  #1 77→51 1619ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.18, best 0.18): 其实我用结构化模式已经有一段时间了。
+     UNRECALLED (whole 0.12, best 0.12): 不过在我看来还挺正确的。
+     engineOut: 结构化模式的测试结果：⏎- 昨天做的所有测试，尤其是稍微长一点的测试，都成功了⏎- 可以把日志原样导出
+  #2 77→49 1616ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.18, best 0.18): 其实我用结构化模式已经有一段时间了。
+     UNRECALLED (whole 0.12, best 0.12): 不过在我看来还挺正确的。
+     engineOut: 结构化模式的测试：⏎- 昨天做的所有测试，尤其是稍微长一点的测试，都成功了⏎- 可以把日志原样导出
+  #3 77→46 1492ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.00, best 0.00): 其实我用结构化模式已经有一段时间了。
+     UNRECALLED (whole 0.12, best 0.12): 不过在我看来还挺正确的。
+     engineOut: 结构化模式：⏎- 昨天做的所有测试，尤其是稍微长一点的测试，都成功了⏎- 可以把日志原样导出
+
+━━ [T5-long-test.zh-Hans] 103 chars, lang=zh-Hans
+  #1 103→102 2357ms success recall=5/6 UNRECALLED=1 inversions=0/10 LIST=6
+     UNRECALLED (whole 0.00, best 0.00): 我旁边也挺吵的。
+     engineOut: 测试结构化模式：⏎- 尝试使用结构化模式发送一条长消息⏎- 知道录音条件不一定好，因为离手机挺远的⏎- 知道麦克风的质量可能不会特别好⏎- 知道旁边也挺吵的⏎- 看看测试结果怎么样⏎- 看看结果有没有意思
+  #2 103→89 2320ms rejectedGuardrail(segmentOverlap) recall=4/6 UNRECALLED=2 inversions=0/6 LIST=5
+     UNRECALLED (whole 0.00, best 0.00): 我旁边也挺吵的。
+     UNRECALLED (whole 0.33, best 0.33): 我们看看结果有没有意思。
+     engineOut: 测试结构化模式：⏎- 尝试使用结构化模式发送一条长消息⏎- 意识到录音条件可能不好，因为距离手机较远⏎- 意识到麦克风质量可能不理想⏎- 意识到周围环境较吵⏎- 看看测试结果如何
+  #3 103→93 2334ms success recall=5/6 UNRECALLED=1 inversions=0/10 LIST=5
+     UNRECALLED (whole 0.00, best 0.00): 我旁边也挺吵的。
+     engineOut: 测试结构化模式：⏎- 尝试使用结构化模式发送一条长消息⏎- 意识到录音条件可能不好因为离手机很远⏎- 意识到麦克风质量可能不佳因为旁边很吵⏎- 看看测试结果怎么样⏎- 看看结果有没有意思
+
+━━ [T6-project-update.zh-Hans] 232 chars, lang=zh-Hans
+  #1 232→199 3203ms success recall=8/9 UNRECALLED=1 inversions=0/28 LIST=7
+     UNRECALLED (whole 0.00, best 0.00): 还剩两件事。
+     engineOut: 项目进展：⏎- 上周一切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行⏎- 转写历史完全还没开始⏎- 自定义词汇我们有规格说明，但还没有代码⏎- 数据方面，上线以来一共 412 次下载，7 天留存率是 19%⏎- 目标是在十月底之前突破 1000⏎- 周四下午两点我要见 Sarah，把 App Store 的部分定下来⏎- 如果一切顺利，我们在 12 号那周提交
+  #2 232→199 3182ms success recall=8/9 UNRECALLED=1 inversions=0/28 LIST=7
+     UNRECALLED (whole 0.00, best 0.00): 还剩两件事。
+     engineOut: 项目进展：⏎- 上周一切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行⏎- 转写历史完全还没开始⏎- 自定义词汇我们有规格说明，但还没有代码⏎- 数据方面，上线以来一共 412 次下载，7 天留存率是 19%⏎- 目标是在十月底之前突破 1000⏎- 周四下午两点我要见 Sarah，把 App Store 的部分定下来⏎- 如果一切顺利，我们在 12 号那周提交
+  #3 232→199 3152ms success recall=8/9 UNRECALLED=1 inversions=0/28 LIST=7
+     UNRECALLED (whole 0.00, best 0.00): 还剩两件事。
+     engineOut: 项目进展：⏎- 上周一切换了订阅部分，Thomas 完成了 StoreKit 的集成，在沙盒里能正常运行⏎- 转写历史完全还没开始⏎- 自定义词汇我们有规格说明，但还没有代码⏎- 数据方面，上线以来一共 412 次下载，7 天留存率是 19%⏎- 目标是在十月底之前突破 1000⏎- 周四下午两点我要见 Sarah，把 App Store 的部分定下来⏎- 如果一切顺利，我们在 12 号那周提交
+
+━━ [T1-last-transcription.zh-Hant] 15 chars, lang=zh-Hant
+  #1 15→14 1160ms success recall=0/1 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): 你看一下吧，這是最新的逐字稿。
+     engineOut: 最新的逐字稿：⏎- 看一下吧
+  #2 15→14 1152ms success recall=0/1 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): 你看一下吧，這是最新的逐字稿。
+     engineOut: 最新的逐字稿：⏎- 看一下吧
+  #3 15→14 1155ms success recall=0/1 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): 你看一下吧，這是最新的逐字稿。
+     engineOut: 最新的逐字稿：⏎- 看一下吧
+
+━━ [T2-no-error.zh-Hant] 43 chars, lang=zh-Hant
+  #1 43→16 1203ms success recall=1/2 UNRECALLED=1 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): 所以我們再繼續一下，不過目前運作得還蠻好的。
+     engineOut: 目前狀態：⏎- 一切看起來都正常
+  #2 43→14 1252ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): 目前我沒有任何錯誤訊息，一切看起來都正常。
+     UNRECALLED (whole 0.00, best 0.00): 所以我們再繼續一下，不過目前運作得還蠻好的。
+     engineOut: 目前狀態：⏎- 運作還蠻好的
+  #3 43→14 1242ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.00, best 0.00): 目前我沒有任何錯誤訊息，一切看起來都正常。
+     UNRECALLED (whole 0.00, best 0.00): 所以我們再繼續一下，不過目前運作得還蠻好的。
+     engineOut: 目前狀態：⏎- 運作還蠻好的
+
+━━ [T3-plan-mode.zh-Hant] 51 chars, lang=zh-Hant
+  #1 51→32 1348ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.18, best 0.18): 好，這個 issue 的整合就麻煩你來準備了。
+     UNRECALLED (whole 0.00, best 0.00): 你可以切換到計畫模式來做，等你做好實作計畫之後我再確認。
+     engineOut: 這個 issue 的整合準備：⏎- 準備這個 issue 的整合
+  #2 51→32 1339ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.18, best 0.18): 好，這個 issue 的整合就麻煩你來準備了。
+     UNRECALLED (whole 0.00, best 0.00): 你可以切換到計畫模式來做，等你做好實作計畫之後我再確認。
+     engineOut: 這個 issue 的整合準備：⏎- 準備這個 issue 的整合
+  #3 51→32 1346ms success recall=0/2 UNRECALLED=2 inversions=0/0 LIST=1
+     UNRECALLED (whole 0.18, best 0.18): 好，這個 issue 的整合就麻煩你來準備了。
+     UNRECALLED (whole 0.00, best 0.00): 你可以切換到計畫模式來做，等你做好實作計畫之後我再確認。
+     engineOut: 這個 issue 的整合準備：⏎- 準備這個 issue 的整合
+
+━━ [T4-structured-since.zh-Hant] 80 chars, lang=zh-Hant
+  #1 80→54 1705ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.18, best 0.18): 其實我用結構化模式已經有一段時間了。
+     UNRECALLED (whole 0.12, best 0.12): 不過在我看來還蠻正確的。
+     engineOut: 結構化模式的測試結果：⏎- 昨天做的所有測試，尤其是稍微長一點的測試，都成功了⏎- 可以把日誌原封不動地匯出
+  #2 80→54 1690ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.18, best 0.18): 其實我用結構化模式已經有一段時間了。
+     UNRECALLED (whole 0.12, best 0.12): 不過在我看來還蠻正確的。
+     engineOut: 結構化模式的測試結果：⏎- 昨天做的所有測試，尤其是稍微長一點的測試，都成功了⏎- 可以把日誌原封不動地匯出
+  #3 80→54 1700ms success recall=2/4 UNRECALLED=2 inversions=0/1 LIST=2
+     UNRECALLED (whole 0.18, best 0.18): 其實我用結構化模式已經有一段時間了。
+     UNRECALLED (whole 0.12, best 0.12): 不過在我看來還蠻正確的。
+     engineOut: 結構化模式的測試結果：⏎- 昨天做的所有測試，尤其是稍微長一點的測試，都成功了⏎- 可以把日誌原封不動地匯出
+
+━━ [T5-long-test.zh-Hant] 104 chars, lang=zh-Hant
+  #1 104→85 2108ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=5
+     UNRECALLED (whole 0.28, best 0.22): 所以現在我們試著用結構化模式傳一則長訊息，看看會發生什麼事。
+     UNRECALLED (whole 0.00, best 0.00): 我旁邊也蠻吵的。
+     engineOut: 嘗試使用結構化模式傳送長訊息：⏎- 知道收音條件不一定好，因為離手機蠻遠的⏎- 麥克風品質可能不會特別好⏎- 旁邊也蠻吵的⏎- 看看測試結果怎麼樣⏎- 看看結果有沒有意思
+  #2 104→90 2131ms success recall=5/6 UNRECALLED=1 inversions=0/10 LIST=5
+     UNRECALLED (whole 0.28, best 0.22): 所以現在我們試著用結構化模式傳一則長訊息，看看會發生什麼事。
+     engineOut: 試圖使用結構化模式傳送長訊息：⏎- 知道我的收音條件不一定好，因為我離手機蠻遠的⏎- 麥克風的品質可能不會特別好⏎- 我旁邊也蠻吵的⏎- 看看測試結果怎麼樣⏎- 看看結果有沒有意思
+  #3 104→85 2107ms success recall=4/6 UNRECALLED=2 inversions=0/6 LIST=5
+     UNRECALLED (whole 0.28, best 0.22): 所以現在我們試著用結構化模式傳一則長訊息，看看會發生什麼事。
+     UNRECALLED (whole 0.00, best 0.00): 我旁邊也蠻吵的。
+     engineOut: 嘗試使用結構化模式傳送長訊息：⏎- 知道收音條件不一定好，因為離手機蠻遠的⏎- 麥克風品質可能不會特別好⏎- 旁邊也蠻吵的⏎- 看看測試結果怎麼樣⏎- 看看結果有沒有意思
+
+━━ [T6-project-update.zh-Hant] 240 chars, lang=zh-Hant
+  #1 240→227 3765ms success recall=8/9 UNRECALLED=1 inversions=0/28 LIST=7
+     UNRECALLED (whole 0.00, best 0.00): 還剩兩件事。
+     engineOut: 專案進度報告：⏎- 上週一切換訂閱的部分，Thomas 完成了 StoreKit 的整合，在沙盒裡可以正常運作⏎- 逐字稿紀錄完全還沒開始⏎- 自訂詞彙部分我們有規格文件，但還沒有程式碼⏎- 數據方面，上線以來一共 412 次下載，7 天留存率是 19%，雖然偏低，但對第一個版本來說還不算災難⏎- 目標是在十月底之前突破 1000⏎- 週四下午兩點要跟 Sarah 碰面，把 App Store 的部分敲定⏎- 如果一切順利，我們會在 12 號那週送審
+  #2 240→225 3802ms success recall=8/9 UNRECALLED=1 inversions=0/28 LIST=7
+     UNRECALLED (whole 0.00, best 0.00): 還剩兩件事。
+     engineOut: 專案進度：⏎- 上週一切換訂閱的部分，Thomas 完成了 StoreKit 的整合，在沙盒裡可以正常運作⏎- 逐字稿紀錄完全還沒開始⏎- 自訂詞彙部分我們有規格文件，但還沒有程式碼⏎- 數據方面，上線以來一共 412 次下載，7 天留存率是 19%，雖然偏低，但對第一個版本來說還不算災難⏎- 目標是在十月底之前突破 1000⏎- 週四下午兩點要跟 Sarah 碰面，把 App Store 的部分敲定⏎- 如果一切順利，我們會在 12 號那週送審
+  #3 240→197 3623ms success recall=7/9 UNRECALLED=2 inversions=0/21 LIST=8
+     UNRECALLED (whole 0.00, best 0.00): 還剩兩件事。
+     UNRECALLED (whole 0.26, best 0.21): 數據方面，上線以來一共 412 次下載，7 天留存率是 19%，雖然偏低，但對第一個版本來說還不算災難。
+     engineOut: 專案進度報告：⏎- 上週一切換了訂閱的部分⏎- Thomas完成了StoreKit的整合，在沙盒裡可以正常運作⏎- 逐字稿紀錄完全還沒開始⏎- 自訂詞彙的部分我們有規格文件，但還沒有程式碼⏎- 數據方面，上線以來一共412次下載，7天留存率是19%⏎- 目標是在十月底之前突破1000⏎- 週四下午兩點要跟Sarah碰面，把App Store的部分敲定⏎- 如果一切順利，我們會在12號那週送審
+
+
+════ AXES, per arm (bars.md §4)
+
+arm                   outputs  unrecalled  personLost  hedgeLost   hardened    fabricated  dropped     clean       noOutput
+shipping              268      207/268     16/268      3/268       0/268       0/268       0/268       55/268      2
+
+  Counts are OUTPUTS carrying at least one, not occurrences.
+  noOutput runs are in NO column and in no denominator: a run whose engine
+  produced nothing has violated nothing, whatever the outcome that caused it.
+  excluded, by outcome: engineFailed×2
+  `clean` = no defect on any of the three SCORED axes. Axis 3 and the negation
+  count are observables by declaration (bars.md §1, §4) and are in no column here.
+
+
+════ OBSERVABLES, per arm — reported, never barred
+
+arm                   inversions    dispersed     negDropped    speakerState preserved
+shipping              52            60            3/268         0/268
+
+
+════ LANGUAGE AND LISTS, per arm and expected language (#587 bars.md §4)
+
+arm                   lang      outputs  refusedLang  wrongAccepted  wrongAny  withList  incompleteness
+shipping              en        18       0            0              0         18        0
+shipping              de        18       0            0              0         18        0
+shipping              es        18       0            0              0         18        0
+shipping              it        18       0            0              0         18        0
+shipping              pt        18       0            0              0         18        0
+shipping              nl        18       0            0              0         18        0
+shipping              da        18       0            3              3         18        0
+shipping              nb        18       0            0              0         18        0
+shipping              sv        18       0            0              0         18        0
+shipping              tr        16       0            0              0         16        0
+shipping              vi        18       0            0              0         18        0
+shipping              ja        18       0            0              0         18        0
+shipping              ko        18       0            0              0         18        0
+shipping              zh-Hans   18       0            0              0         18        0
+shipping              zh-Hant   18       0            0              0         18        0
+
+  refusedLang   = refused on check=language (B1b; > 10 % in any language stops the round).
+  wrongAccepted = accepted, and the whole output or a sentence reads as another language
+                  (B1a's screen: a fragment the speaker said in that language is legitimate).
+  wrongAny      = the same screen over every output, refused or not (B1c for English).
+  withList      = outputs carrying a list line (B3 reads it on prose fixtures only).
+
+
+════ PER FIXTURE, per arm (never pooled)
+
+── shipping
+   T1-last-transcription.en U1  U1  U1
+   T2-no-error.en          U3  U3  U3
+   T3-plan-mode.en         P  P  P
+   T4-structured-since.en  U2PH  U2PH  U2PH
+   T5-long-test.en         U1P  P  P
+   T6-project-update.en    U3P  U3P  U3P
+   T1-last-transcription.de o1  U1  o1
+   T2-no-error.de          U2  U3  U3
+   T3-plan-mode.de         U2  U2  U2
+   T4-structured-since.de  U2  U3  U2
+   T5-long-test.de         U6  U3  U3
+   T6-project-update.de    U1  U1  U1
+   T1-last-transcription.es o1  o1  o1
+   T2-no-error.es          U2  U2  U2
+   T3-plan-mode.es         U1  U1  U2
+   T4-structured-since.es  U1  U1  U1
+   T5-long-test.es         U2  U2  U2
+   T6-project-update.es    U4  U4  U4
+   T1-last-transcription.it U1  U1  U1
+   T2-no-error.it          U2  U2  U2
+   T3-plan-mode.it         U1  U1  U2
+   T4-structured-since.it  U2  U2  U2
+   T5-long-test.it         ·  ·  ·
+   T6-project-update.it    U3  U3  U2
+   T1-last-transcription.pt o1  o1  U1
+   T2-no-error.pt          U3  U2o1  U2
+   T3-plan-mode.pt         ·  U1  ·
+   T4-structured-since.pt  U3  U3  U3
+   T5-long-test.pt         U2  ·  ·
+   T6-project-update.pt    U2  U2  U3o6
+   T1-last-transcription.nl U1  U1  ·
+   T2-no-error.nl          U3  U3  U3
+   T3-plan-mode.nl         U2  U2  U2
+   T4-structured-since.nl  U1  U1  U1
+   T5-long-test.nl         P  U2  U2P
+   T6-project-update.nl    U3P  U3Po1  U3
+   T1-last-transcription.da o1  o1  o1
+   T2-no-error.da          U2  ·  U2
+   T3-plan-mode.da         U2  U2  U1
+   T4-structured-since.da  U1o1  U1o1  U1o1
+   T5-long-test.da         U4o2  U4o2  U4o2
+   T6-project-update.da    U4  U4  U4
+   T1-last-transcription.nb o1  o1  o1
+   T2-no-error.nb          U3  U2  U3
+   T3-plan-mode.nb         U2  ·  U2
+   T4-structured-since.nb  U2  U1  U2
+   T5-long-test.nb         ·  ·  ·
+   T6-project-update.nb    U4  U3  U4
+   T1-last-transcription.sv o1  o1  o1
+   T2-no-error.sv          U3  U3  U3
+   T3-plan-mode.sv         U1  U3  U3
+   T4-structured-since.sv  U2  U1  U2
+   T5-long-test.sv         U1  U1  U1
+   T6-project-update.sv    U1  U2  U1
+   T1-last-transcription.tr e  ·  e
+   T2-no-error.tr          U1  U1  ·
+   T3-plan-mode.tr         U1  U1  U1
+   T4-structured-since.tr  U2  U2  U2
+   T5-long-test.tr         U5  U4  U5
+   T6-project-update.tr    U3  U3  U3
+   T1-last-transcription.vi ·  ·  o1
+   T2-no-error.vi          U2  U2  U2
+   T3-plan-mode.vi         U3  U3  U3
+   T4-structured-since.vi  ·  ·  ·
+   T5-long-test.vi         ·  U1  ·
+   T6-project-update.vi    U1o6  U2o6  U2o6
+   T1-last-transcription.ja ·  ·  ·
+   T2-no-error.ja          ·  U1  U1
+   T3-plan-mode.ja         U1  U2  U2
+   T4-structured-since.ja  U1  U1  ·
+   T5-long-test.ja         ·  ·  ·
+   T6-project-update.ja    ·  ·  ·
+   T1-last-transcription.ko U2  U1  U2
+   T2-no-error.ko          U2  U4  U2
+   T3-plan-mode.ko         U1  U2  U1
+   T4-structured-since.ko  U1  U1  U1
+   T5-long-test.ko         U6  U2  U3
+   T6-project-update.ko    U5  U5  U5
+   T1-last-transcription.zh-Hans ·  ·  ·
+   T2-no-error.zh-Hans     U1  ·  ·
+   T3-plan-mode.zh-Hans    U2  U2  U2
+   T4-structured-since.zh-Hans U2  U2  U2
+   T5-long-test.zh-Hans    U1  U2  U1
+   T6-project-update.zh-Hans U1  U1  U1
+   T1-last-transcription.zh-Hant U1  U1  U1
+   T2-no-error.zh-Hant     U1  U2  U2
+   T3-plan-mode.zh-Hant    U2  U2  U2
+   T4-structured-since.zh-Hant U2  U2  U2
+   T5-long-test.zh-Hant    U2  U1  U2
+   T6-project-update.zh-Hant U1  U1  U2
+
+   e = the engine produced no output; the run is in no denominator above.
+   U<n> unrecalled propositions · P person lost · H hedge lost · B stance hardened
+   F speaker-state fabricated · D speaker-state dropped · o<n> order inversions
+   · no defect and no observable. Order is an OBSERVABLE: `o` is not a defect.
+
+── wrote 270 runs to ../docs/research/573-liste/captures/c7-translated-structured.json

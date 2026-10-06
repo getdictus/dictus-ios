@@ -142,6 +142,8 @@ struct VoiceNoteStackView: View {
                 continue
             }
             VoiceNoteIslandDriver.shared.read(id)
+            // The keyboard keeps offering it: reading here no longer takes a note out of
+            // the keyboard, only its 15-minute window or a delete does (#639).
             marked.append(id)
         }
         if !marked.isEmpty { log("markRead", "reason=dismiss ids=\(Self.short(marked))") }

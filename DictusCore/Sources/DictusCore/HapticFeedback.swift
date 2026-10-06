@@ -133,6 +133,17 @@ public enum HapticFeedback {
         #endif
     }
 
+    /// Light impact when a shared voice note transcript reaches a keyboard on screen
+    /// (#637). Once per note, as the ☰ takes its halo (#639): something arrived,
+    /// nothing is asked of the user.
+    public static func voiceNoteArrived() {
+        #if canImport(UIKit) && !os(macOS)
+        guard isEnabled() else { return }
+        lightGenerator.impactOccurred()
+        lightGenerator.prepare()
+        #endif
+    }
+
     /// Error notification feedback when an action is refused (e.g. mic tap during a model load).
     public static func actionRefused() {
         #if canImport(UIKit) && !os(macOS)

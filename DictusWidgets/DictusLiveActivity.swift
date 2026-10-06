@@ -655,17 +655,27 @@ private struct VoiceNoteLockScreen: View {
 /// Matches brand proportions: left=43%, center=100% (gradient), right=64%.
 ///
 /// WHY not reusing DictusLogo from DictusCore:
-/// DictusLogo uses @ScaledMetric and @Environment(\.colorScheme) which behave
-/// differently in Widget extensions. This simplified version uses fixed sizes
-/// appropriate for the tiny Dynamic Island space.
+/// DictusLogo reads @Environment(\.colorScheme) to gray its side bars in light
+/// mode, while the Live Activity always sits on a dark surface. This view also
+/// animates its bars with audio levels and boosts side-bar opacity in tiny frames,
+/// which the static logo has no reason to do.
+///
+/// WHY the widths come from DictusLogoGeometry (#636):
+/// it is the app icon's own ratio table, shared with DictusLogo, so the bars here
+/// have the icon's thickness and spacing. The icon's bars and gaps add up to the
+/// tallest bar's height (3 × 9 + 2 × 7.5 = 42), so the frame width plays the role
+/// of the "height" those ratios are relative to.
 struct MiniLogoBars: View {
     let levels: [Float]
     let animated: Bool
 
     var body: some View {
         GeometryReader { geo in
-            let barWidth = max(2.5, geo.size.width / 5)
-            let spacing = (geo.size.width - barWidth * 3) / 2
+            // Floor at 2.5 pt so a bar never thins out to a hairline; when the floor
+            // kicks in, the spacing below absorbs the difference instead.
+            let barWidth = max(2.5, DictusLogoGeometry.barWidth(forHeight: geo.size.width))
+            // Equals DictusLogoGeometry.gap(forHeight:) whenever the floor is not hit.
+            let spacing = max(0, (geo.size.width - barWidth * 3) / 2)
             // Boost side bar opacity in small frames so bars stay visible
             let isSmall = geo.size.width < 16
 

@@ -261,8 +261,8 @@ final class ModelInfoTests: XCTestCase {
             let rows = ModelInfo.available(on: device)
             let runnable = Set(rows.filter { $0.isSupported(on: device) }.map(\.identifier))
 
-            XCTAssertTrue(runnable.isSubset(of: ModelInfo.a12a13SupportedIdentifiers),
-                          "\(identifier) can run \(runnable.subtracting(ModelInfo.a12a13SupportedIdentifiers))")
+            XCTAssertTrue(runnable.isSubset(of: ModelInfo.preA14SupportedIdentifiers),
+                          "\(identifier) can run \(runnable.subtracting(ModelInfo.preA14SupportedIdentifiers))")
             for unsupported in ["openai_whisper-small",
                                 "openai_whisper-small_216MB",
                                 "openai_whisper-medium",
@@ -332,7 +332,7 @@ final class ModelInfoTests: XCTestCase {
     func testIsSupportedOnA12A13AcceptsOnlyTinyAndBase() {
         let iphone11 = makeCapabilities(ramGB: 4, model: "iPhone12,1")
         for model in ModelInfo.allIncludingDeprecated {
-            let expected = ModelInfo.a12a13SupportedIdentifiers.contains(model.identifier)
+            let expected = ModelInfo.preA14SupportedIdentifiers.contains(model.identifier)
             XCTAssertEqual(model.isSupported(on: iphone11), expected,
                            "\(model.identifier) gating on iPhone 11")
         }
@@ -399,6 +399,86 @@ final class ModelInfoTests: XCTestCase {
 
         XCTAssertEqual(rows.map(\.identifier), ModelInfo.all.map(\.identifier))
         XCTAssertTrue(rows.allSatisfy { $0.isSupported(on: iphone15ProMax) })
+    }
+
+    // MARK: - Issue #612: pre-A14 iPads
+
+    /// The reported device: an iPad Pro 11" 2018 (A12X). At 4 GB the RAM rule handed
+    /// it Small; at 6 GB (1 TB 2018, every 2020 model) it handed it Parakeet. Neither
+    /// is in Argmax's matrix for that chip.
+    func testA12XAndA12ZIPadProsAreRecommendedBaseNotSmallOrParakeet() {
+        let devices = [
+            makeCapabilities(ramGB: 4, model: "iPad8,1"),
+            makeCapabilities(ramGB: 6, model: "iPad8,3"),
+            makeCapabilities(ramGB: 6, model: "iPad8,9"),
+            makeCapabilities(ramGB: 6, model: "iPad8,11")
+        ]
+        for device in devices {
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device), "openai_whisper-base",
+                           "\(device.deviceModelIdentifier) at \(device.physicalMemoryGB) GB")
+        }
+    }
+
+    func testA12AndA13IPadsAreRecommendedBase() {
+        // iPad11,3 = iPad Air 3 (A12), iPad12,1 = iPad 9th gen (A13), iPad7,5 = iPad
+        // 6th gen (A10), the oldest iPad iPadOS 17 still installs on.
+        for identifier in ["iPad11,1", "iPad11,3", "iPad11,6", "iPad12,1", "iPad12,2", "iPad7,5"] {
+            let device = makeCapabilities(ramGB: 3, model: identifier)
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: device), "openai_whisper-base", identifier)
+        }
+    }
+
+    /// The floor stops at A14: the iPad Air 4 and iPad 10th gen keep Small at 4 GB,
+    /// the M1 iPad Pro keeps Parakeet.
+    func testA14AndM1IPadsAreUnchanged() {
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: "iPad13,1")),
+                       "openai_whisper-small")
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: "iPad13,18")),
+                       "openai_whisper-small")
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 8, model: "iPad13,4")),
+                       "parakeet-tdt-0.6b-v3")
+
+        let m1 = makeCapabilities(ramGB: 8, model: "iPad13,4")
+        XCTAssertEqual(ModelInfo.available(on: m1).map(\.identifier), ModelInfo.all.map(\.identifier))
+        XCTAssertTrue(ModelInfo.available(on: m1).allSatisfy { $0.isSupported(on: m1) })
+    }
+
+    /// The iPhone side of the same rule must not move: A12/A13 keep Base, A14 keeps
+    /// Small at 4 GB and Parakeet at 6 GB (the iPhone 12 Pro / Pro Max).
+    func testIPhoneRecommendationsAreUnchangedByTheFloor() {
+        XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: "iPhone12,1")),
+                       "openai_whisper-base")
+        for identifier in ["iPhone13,1", "iPhone13,2"] {
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 4, model: identifier)),
+                           "openai_whisper-small", identifier)
+        }
+        for identifier in ["iPhone13,3", "iPhone13,4"] {
+            XCTAssertEqual(ModelInfo.recommendedIdentifier(for: makeCapabilities(ramGB: 6, model: identifier)),
+                           "parakeet-tdt-0.6b-v3", identifier)
+        }
+    }
+
+    /// Settings on a pre-A14 iPad: the whole catalogue is listed (issue #369), only
+    /// Tiny/Base can run, and every other row says it is the hardware generation —
+    /// not memory, even on a 6 GB iPad Pro where the RAM rule alone would pass.
+    func testPreA14IPadsGateEverythingButTinyAndBase() {
+        for device in [makeCapabilities(ramGB: 4, model: "iPad8,1"),
+                       makeCapabilities(ramGB: 6, model: "iPad8,3"),
+                       makeCapabilities(ramGB: 3, model: "iPad11,3"),
+                       makeCapabilities(ramGB: 3, model: "iPad12,1")] {
+            let name = "\(device.deviceModelIdentifier) at \(device.physicalMemoryGB) GB"
+            for model in ModelInfo.allIncludingDeprecated {
+                let expected: ModelInfo.IncompatibilityReason? =
+                    ModelInfo.preA14SupportedIdentifiers.contains(model.identifier) ? nil : .hardwareGeneration
+                XCTAssertEqual(model.incompatibilityReason(on: device), expected, "\(model.identifier) on \(name)")
+            }
+
+            let rows = ModelInfo.available(on: device)
+            XCTAssertEqual(Set(rows.map(\.identifier)),
+                           Set(ModelInfo.all.map(\.identifier)).union(["openai_whisper-base"]), name)
+            XCTAssertEqual(rows.filter { $0.isSupported(on: device) }.map(\.identifier),
+                           ["openai_whisper-base"], name)
+        }
     }
 
     // MARK: - Supported identifiers

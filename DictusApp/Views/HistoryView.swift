@@ -34,6 +34,15 @@ struct HistoryView: View {
     /// navigation bars, and the back button already is the way out.
     var isPushed = false
 
+    /// What the search field holds (#621). Empty shows every record.
+    @State private var query = ""
+
+    /// The records the query finds, newest first. Recomputed on every body pass,
+    /// which is a linear scan of a capped in-memory list; see `TranscriptionSearch`.
+    private var visibleRecords: [TranscriptionRecord] {
+        TranscriptionSearch.filter(history.records, query: query)
+    }
+
     var body: some View {
         if isPushed {
             content
@@ -138,12 +147,26 @@ struct HistoryView: View {
 
     // MARK: - List
 
+    /// WHY `.searchable` sits on the list and not on the whole screen: the field has
+    /// nothing to search on the locked and empty states, and a search bar above
+    /// "No transcriptions yet" would promise something the screen cannot do.
+    ///
+    /// WHY the no-results state is an overlay on the empty `List` rather than a
+    /// view swapped in for it: swapping would tear down the view that owns the
+    /// search field, and the field would lose focus on the keystroke that empties
+    /// the results.
     private var recordList: some View {
         List {
             recordRows
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
+        .searchable(text: $query, prompt: Text("Search transcriptions"))
+        .overlay {
+            if visibleRecords.isEmpty {
+                noResultsState
+            }
+        }
     }
 
     /// The Dictus Pro hub's version (#216): the feature's switch first, as in the
@@ -154,6 +177,11 @@ struct HistoryView: View {
     /// is on (`HistoryAvailability.entryPoint`), it is the place for reading, and a
     /// switch there would remove, under the user's finger, the very swipe that opened
     /// it. Turning a Pro feature on or off happens in one place, the hub.
+    ///
+    /// Search (#621) works here too, under the same rule as the sheet (no field over
+    /// an empty history) plus the hub's: no field while History is switched off, since
+    /// the records under the switch are locked. The field hangs off the hub's own
+    /// navigation bar; no second stack is nested for it.
     private var pushedList: some View {
         List {
             ProFeatureSwitchSection(feature: .history)
@@ -166,11 +194,30 @@ struct HistoryView: View {
             }
         }
         .scrollContentBackground(.hidden)
+        .modifier(HistorySearchField(isEnabled: pushedSearchIsEnabled, query: $query))
+        .overlay {
+            if pushedSearchIsEnabled && visibleRecords.isEmpty {
+                noResultsState
+            }
+        }
+        // A query left in place when the switch goes off would keep the locked list
+        // filtered by a field the user can no longer see.
+        .onChange(of: pushedSearchIsEnabled) { _, enabled in
+            if !enabled { query = "" }
+        }
+    }
+
+    /// Whether the pushed history offers its search field: records to search, and
+    /// History switched on.
+    private var pushedSearchIsEnabled: Bool {
+        !history.records.isEmpty && isAvailable
     }
 
     private var recordRows: some View {
         Group {
-            ForEach(history.records) { record in
+            // Rows act on the record's id, never on its position, so swipe-to-delete
+            // and the context menu work the same on a filtered list.
+            ForEach(visibleRecords) { record in
                 Button {
                     // Guarded as well as locked below: a switched-off history is
                     // shown, not opened (#216 decision 5).
@@ -228,7 +275,30 @@ struct HistoryView: View {
         withAnimation {
             history.delete(id: record.id)
         }
+        // A shared voice note deleted here leaves the keyboard too: a delete is the
+        // one way besides time it does (#639).
+        VoiceNoteProcessor.shared.withdrawKeyboardDeliveries([record.id], reason: "deletedInHistory")
         HapticFeedback.recordingStopped()
+    }
+
+    // MARK: - No results
+
+    /// Shown when the query finds nothing. It repeats the query so a typo is visible
+    /// without reading the field again.
+    private var noResultsState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 40))
+                .foregroundColor(.dictusAccent.opacity(0.7))
+            Text("No results")
+                .font(.dictusSubheading)
+            Text("No transcription contains “\(query.trimmingCharacters(in: .whitespacesAndNewlines))”.")
+                .font(.dictusCaption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Empty state
@@ -310,4 +380,21 @@ private struct HistoryCard: View {
     HistoryView()
         .environmentObject(TranscriptionHistoryStore.shared)
         .environmentObject(ProStatusManager())
+}
+
+/// `.searchable`, applied only when the list has something the user may search.
+///
+/// WHY a modifier and not `.searchable` with an empty prompt: a search field is a
+/// promise, and over a locked or empty list it is one the screen cannot keep (#621).
+private struct HistorySearchField: ViewModifier {
+    let isEnabled: Bool
+    @Binding var query: String
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.searchable(text: $query, prompt: Text("Search transcriptions"))
+        } else {
+            content
+        }
+    }
 }

@@ -159,12 +159,34 @@
         }
       }
     },
+    "Close" : {
+      "comment" : "Accessibility label of the keyboard voice note reader's close button (#637).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
+          }
+        }
+      }
+    },
     "Close menu" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fermer le menu"
+          }
+        }
+      }
+    },
+    "Delete voice note" : {
+      "comment" : "Accessibility label of the keyboard voice note reader's button that removes the note from the keyboard; it stays in the app (#639).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la note vocale"
           }
         }
       }
@@ -207,6 +229,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Maintiens le micro pour les modes"
+          }
+        }
+      }
+    },
+    "Insert" : {
+      "comment" : "Primary button of the keyboard's voice note reader: writes the transcript into the text field (#637).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insérer"
           }
         }
       }
@@ -263,6 +296,17 @@
         }
       }
     },
+    "Long press: languages & settings" : {
+      "comment" : "Toolbar hint, right of the menu button, teaching that a long press on it opens the keyboard panel (languages, layouts, settings). An arrow pointing at the menu button precedes it (#639).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appui long : langues et réglages"
+          }
+        }
+      }
+    },
     "Message" : {
       "comment" : "Name of the Smart Mode that rewrites a dictation as the short blocks the speaker would have typed to a person (#572).",
       "localizations" : {
@@ -270,6 +314,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Message"
+          }
+        }
+      }
+    },
+    "No recent voice note" : {
+      "comment" : "Keyboard voice note reader, opened by a long press on the menu button when no shared voice note is waiting (#639).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune note vocale récente"
           }
         }
       }
@@ -312,6 +367,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvrir Dictus"
+          }
+        }
+      }
+    },
+    "Open in Dictus" : {
+      "comment" : "Accessibility label of the keyboard voice note reader's button that opens the note in the app (#637).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir dans Dictus"
           }
         }
       }
@@ -428,6 +494,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher des Emoji"
+          }
+        }
+      }
+    },
+    "Share a voice message to Dictus from a messaging app, and its transcript will show up here." : {
+      "comment" : "Keyboard voice note reader's empty state: how a voice note gets here (#639).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partage un message vocal vers Dictus depuis une app de messagerie, et sa transcription apparaîtra ici."
           }
         }
       }
@@ -559,6 +636,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le micro est occupé par un appel. Réessayez une fois l'appel terminé."
+          }
+        }
+      }
+    },
+    "Too short for a list." : {
+      "comment" : "Shown when the List Smart Mode produced fewer than two items, so the dictation went in with the normal polish instead.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop court pour une liste."
           }
         }
       }

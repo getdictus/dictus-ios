@@ -290,6 +290,29 @@ final class LogEventTests: XCTestCase {
         XCTAssertFalse(event.payload().contains("confidence"))
     }
 
+    /// Parakeet's drift retry (#623), after the confidence: three counters, never text.
+    func testTranscriptionCompletedCarriesTheDriftRetryFields() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 3400, wordCount: 214, confidence: 0.916, retry: DriftRetryStats(spans: 3, wins: 2, durationMs: 2210)
+        )
+        XCTAssertEqual(event.message, "duration=3400ms words=214 confidence=0.916 retrySpans=3 retryWins=2 retryMs=2210")
+    }
+
+    /// A clean Parakeet dictation still prints `retrySpans=0`: the device validation reads
+    /// exactly that to confirm a clean dictation paid nothing.
+    func testTranscriptionCompletedPrintsAZeroSpanRetry() {
+        let event = LogEvent.transcriptionCompleted(
+            durationMs: 900, wordCount: 30, confidence: 0.97, retry: DriftRetryStats(spans: 0, wins: 0, durationMs: 3)
+        )
+        XCTAssertEqual(event.message, "duration=900ms words=30 confidence=0.970 retrySpans=0 retryWins=0 retryMs=3")
+    }
+
+    /// An engine without the retry prints no retry field at all.
+    func testTranscriptionCompletedWithoutARetryPrintsNoRetryField() {
+        let event = LogEvent.transcriptionCompleted(durationMs: 2500, wordCount: 42, confidence: nil)
+        XCTAssertFalse(event.payload().contains("retry"))
+    }
+
     /// No tag emitted: the field is absent rather than `detected=nil`.
     func testTranscriptionCompletedWithoutADetectedLanguagePrintsNoField() {
         let event = LogEvent.transcriptionCompleted(

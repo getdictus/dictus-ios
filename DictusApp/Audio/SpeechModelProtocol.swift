@@ -71,16 +71,23 @@ struct SpeechTranscription {
     /// The language tag the model emitted, when it emitted one (Nemotron, #558).
     let detectedLanguage: String?
 
+    /// What Parakeet's drift retry did to this transcript (#623): spans re-decoded, spans
+    /// replaced, time spent. `nil` on the engines that have no retry, and on a Parakeet
+    /// dictation whose retry failed and fell back to the first pass.
+    let retry: DriftRetryStats?
+
     init(text: String,
          confidence: Float?,
          language: String? = nil,
          promptId: Int? = nil,
-         detectedLanguage: String? = nil) {
+         detectedLanguage: String? = nil,
+         retry: DriftRetryStats? = nil) {
         self.text = text
         self.confidence = confidence
         self.language = language
         self.promptId = promptId
         self.detectedLanguage = detectedLanguage
+        self.retry = retry
     }
 }
 
@@ -209,7 +216,7 @@ class WhisperKitEngine: SpeechModelProtocol {
         let config = WhisperKitConfig(
             model: modelIdentifier,
             modelFolder: modelFolder.path,
-            // Issue #370: A12/A13 need the audio encoder off the Neural Engine.
+            // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
             computeOptions: WhisperComputeOptions.current(),
             verbose: false,
             prewarm: true,

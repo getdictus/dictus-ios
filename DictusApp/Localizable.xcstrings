@@ -2052,6 +2052,17 @@
       }
     },
     "No polish events yet. Toggle on, dictate something, then come back." : {},
+    "No results" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun résultat"
+          }
+        }
+      }
+    },
     "No terms yet. Add the words Dictus gets wrong." : {
       "comment" : "Shown when the vocabulary is empty.",
       "localizations" : {
@@ -2059,6 +2070,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun terme pour l’instant. Ajoutez les mots que Dictus écrit mal."
+          }
+        }
+      }
+    },
+    "No transcription contains “%@”." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune transcription ne contient « %@ »."
           }
         }
       }
@@ -2104,6 +2126,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun mot n’a été détecté dans ce message vocal."
+          }
+        }
+      }
+    },
+    "Not supported on this iPad" : {
+      "comment" : "Reason shown on a disabled model card on an iPad whose chip is too old to run the model (issue #612). iPad counterpart of \"Not supported on this iPhone\".",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not supported on this iPad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non compatible avec cet iPad"
           }
         }
       }
@@ -2808,6 +2847,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recherchez et exportez toutes vos transcriptions"
+          }
+        }
+      }
+    },
+    "Search transcriptions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher dans les transcriptions"
           }
         }
       }

@@ -11,8 +11,8 @@ final class KeyboardAreaModeTests: XCTestCase {
     /// switches exhaustively over this enum and every case has to set the hosting
     /// height, the bottom anchor and the grid's visibility explicitly. A case added
     /// without that is the #271 bug returning.
-    func testEnumHasExactlyFiveCases() {
-        XCTAssertEqual(KeyboardAreaMode.allCases.count, 5)
+    func testEnumHasExactlySixCases() {
+        XCTAssertEqual(KeyboardAreaMode.allCases.count, 6)
     }
 
     func testPanelCaseExistsForIssue241() {
@@ -29,6 +29,59 @@ final class KeyboardAreaModeTests: XCTestCase {
         XCTAssertEqual(KeyboardAreaMode.panel.rawValue, "panel")
         XCTAssertEqual(KeyboardAreaMode.smartModeFan.rawValue, "smartModeFan")
         XCTAssertEqual(KeyboardAreaMode.recording.rawValue, "recording")
+        // Quoted by the `hostingSet_voiceNoteResult` and `mode=` probes in device logs.
+        XCTAssertEqual(KeyboardAreaMode.voiceNoteResult.rawValue, "voiceNoteResult")
+    }
+
+    // MARK: - The voice note reader (#637)
+
+    /// A dictation entering an owning status replaces the reader: the overlay owns
+    /// the whole area while a dictation is in flight, whatever the area showed.
+    func testADictationReplacesTheVoiceNoteReader() {
+        for status in DictationStatus.allCases where status.ownsKeyboardArea {
+            XCTAssertEqual(
+                KeyboardAreaMode.resolving(status: status, current: .voiceNoteResult),
+                .recording,
+                "status=\(status.rawValue)"
+            )
+        }
+    }
+
+    /// Leaving the dictation returns to the keys, not to the reader. The notes are
+    /// still waiting — the keyboard rereads them on that transition and the ☰ ring
+    /// is back (#639) — but the surface is not taken over again under the user's thumb
+    /// (#637 decision 1).
+    func testLeavingADictationStartedFromTheReaderReturnsToTheKeys() {
+        let during = KeyboardAreaMode.resolving(status: .recording, current: .voiceNoteResult)
+        for status in [DictationStatus.idle, .ready, .failed] {
+            XCTAssertEqual(
+                KeyboardAreaMode.resolving(status: status, current: during),
+                .keys,
+                "status=\(status.rawValue)"
+            )
+        }
+    }
+
+    /// An idle status write leaves the reader alone: it is closed by its own `✕` or
+    /// `Insert`, never by a status write the keyboard re-applies on every refresh.
+    func testAnIdleStatusLeavesTheReaderOpen() {
+        for status in [DictationStatus.idle, .ready, .failed] {
+            XCTAssertEqual(
+                KeyboardAreaMode.resolving(status: status, current: .voiceNoteResult),
+                .voiceNoteResult
+            )
+        }
+    }
+
+    /// The two full-surface modes are the gated ones: a stale controller must draw
+    /// neither the overlay nor an `Insert` that writes into a text field.
+    func testOnlyTheFullSurfaceModesRequireTheVisibleOwner() {
+        XCTAssertTrue(KeyboardAreaMode.recording.requiresVisibleOwner)
+        XCTAssertTrue(KeyboardAreaMode.voiceNoteResult.requiresVisibleOwner)
+        XCTAssertFalse(KeyboardAreaMode.keys.requiresVisibleOwner)
+        XCTAssertFalse(KeyboardAreaMode.emoji.requiresVisibleOwner)
+        XCTAssertFalse(KeyboardAreaMode.panel.requiresVisibleOwner)
+        XCTAssertFalse(KeyboardAreaMode.smartModeFan.requiresVisibleOwner)
     }
 
     /// A dictation takes the area from the fan, exactly as it does from the pickers —

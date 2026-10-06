@@ -1179,6 +1179,11 @@ class DictationCoordinator: ObservableObject {
                     engineRunning: self.audioEngine.isEngineRunning
                 ))
                 self.startDictation(origin: .keyboard)
+                // A warm start from the keyboard never brings the app forward, so none
+                // of the lifecycle reconciliations run: catch up on the voice note
+                // receipts here too (#639). After the start, so it costs the recording
+                // nothing.
+                VoiceNoteProcessor.shared.reconcileKeyboardDeliveries(reason: "darwinStart")
             }
         }
 
@@ -1668,7 +1673,7 @@ private extension DictationCoordinator {
             let config = WhisperKitConfig(
                 model: modelName,
                 modelFolder: modelFolder.path,
-                // Issue #370: A12/A13 need the audio encoder off the Neural Engine.
+                // Issues #370/#612: pre-A14 chips need the audio encoder off the Neural Engine.
                 computeOptions: WhisperComputeOptions.current(),
                 verbose: false,
                 prewarm: true,

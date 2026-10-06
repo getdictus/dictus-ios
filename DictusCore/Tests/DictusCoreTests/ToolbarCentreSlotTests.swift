@@ -1,5 +1,5 @@
 // DictusCore/Tests/DictusCoreTests/ToolbarCentreSlotTests.swift
-// The centre slot's priority table (#79, #241, #266, #315).
+// The centre slot's priority table (#79, #241, #266, #315, #639).
 import XCTest
 @testable import DictusCore
 
@@ -15,6 +15,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
                          polishUnavailable: Bool = false,
                          armedModeName: String? = nil,
                          armedModeIsEffective: Bool = true,
+                         offersPanelHint: Bool = false,
                          offersDiscoveryHint: Bool = false) -> ToolbarCentreSlot {
         ToolbarCentreSlot.resolve(
             isChoosingMode: isChoosingMode,
@@ -24,6 +25,7 @@ final class ToolbarCentreSlotTests: XCTestCase {
             polishUnavailable: polishUnavailable,
             armedModeName: armedModeName,
             armedModeIsEffective: armedModeIsEffective,
+            offersPanelHint: offersPanelHint,
             offersDiscoveryHint: offersDiscoveryHint
         )
     }
@@ -61,6 +63,43 @@ final class ToolbarCentreSlotTests: XCTestCase {
             ),
             .dictationUndo
         )
+    }
+
+    /// Mid-word the suggestions win and the panel hint yields (#639); it comes back
+    /// as soon as the slot is free.
+    func testSuggestionsOutrankThePanelHint() {
+        XCTAssertEqual(
+            resolve(hasSuggestions: true, offersPanelHint: true, offersDiscoveryHint: true),
+            .suggestions
+        )
+    }
+
+    /// Same rung as the Smart Mode hint, and everything above that rung keeps
+    /// winning over it.
+    func testThePanelHintYieldsToEverythingAboveTheHintRung() {
+        XCTAssertEqual(resolve(isChoosingMode: true, offersPanelHint: true), .choosingMode)
+        XCTAssertEqual(resolve(errorMessage: "boom", offersPanelHint: true), .error("boom"))
+        XCTAssertEqual(resolve(offersDictationUndo: true, offersPanelHint: true), .dictationUndo)
+        XCTAssertEqual(resolve(polishUnavailable: true, offersPanelHint: true), .polishUnavailable)
+        XCTAssertEqual(resolve(armedModeName: "List", offersPanelHint: true), .armedMode("List"))
+        XCTAssertEqual(
+            resolve(armedModeName: "List", armedModeIsEffective: false, offersPanelHint: true),
+            .armedModeInactive("List")
+        )
+    }
+
+    /// When both hints apply, the panel one wins: it answers a change the user has
+    /// just run into (#639).
+    func testThePanelHintOutranksTheSmartModeHint() {
+        XCTAssertEqual(resolve(offersPanelHint: true, offersDiscoveryHint: true), .panelHint)
+        XCTAssertEqual(resolve(offersPanelHint: true), .panelHint)
+    }
+
+    /// No panel hint to give: the slot falls through to the Smart Mode hint, then
+    /// nothing. There is no voice note occupant left in the slot — #637's chip is gone.
+    func testNoPanelHintFallsThrough() {
+        XCTAssertEqual(resolve(offersPanelHint: false, offersDiscoveryHint: true), .discoveryHint)
+        XCTAssertEqual(resolve(offersPanelHint: false), .empty)
     }
 
     func testSuggestionsOutrankThePolishNotice() {
@@ -109,6 +148,8 @@ final class ToolbarCentreSlotTests: XCTestCase {
         XCTAssertTrue(ToolbarCentreSlot.suggestions.evictsHamburger)
 
         XCTAssertFalse(ToolbarCentreSlot.choosingMode.evictsHamburger)
+        // It points at the ☰, and teaches a long press on the ☰ (#639).
+        XCTAssertFalse(ToolbarCentreSlot.panelHint.evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.polishUnavailable.evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.armedMode("List").evictsHamburger)
         XCTAssertFalse(ToolbarCentreSlot.discoveryHint.evictsHamburger)
