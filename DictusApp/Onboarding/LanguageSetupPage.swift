@@ -213,10 +213,11 @@ struct LanguageSetupPage: View {
         let info = ModelInfo.forIdentifier(setup.recommendedModel(on: capabilities))
         return VStack(spacing: 4) {
             if let info {
-                // Verbatim: a model name and a size are not words to translate, and an
-                // interpolated key would put a meaningless "%@ · %@" in the catalog.
+                // Verbatim: both halves arrive already localized (name qualifier #665,
+                // size unit #661), and an interpolated key would put a meaningless
+                // "%@ · %@" in the catalog.
                 Label {
-                    Text(verbatim: "\(info.displayName) · \(info.sizeLabel)")
+                    Text(verbatim: "\(info.localizedDisplayName) · \(info.sizeLabel)")
                 } icon: {
                     Image(systemName: "waveform")
                 }

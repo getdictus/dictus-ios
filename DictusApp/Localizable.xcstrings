@@ -2987,6 +2987,17 @@
         }
       }
     },
+    "Small (Quantized)" : {
+      "comment" : "Model name: 'Small' is the product name, only the qualifier in parentheses is translated (#665).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Small (quantifié)"
+          }
+        }
+      }
+    },
     "Smart Mode" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3841,6 +3852,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajustement des têtes d'attention…"
+          }
+        }
+      }
+    },
+    "Turbo (Legacy)" : {
+      "comment" : "Model name of the superseded Turbo variant: 'Turbo' is the product name, only the qualifier in parentheses is translated (#665).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turbo (ancien)"
           }
         }
       }

@@ -4,6 +4,33 @@ import DictusCore
 import SwiftUI
 
 extension ModelInfo {
+    /// The model's name as the app shows it (issue #665).
+    ///
+    /// WHY a second property rather than a localized `displayName`:
+    /// DictusCore ships no string catalog, and `displayName` stays the English form
+    /// the catalogue and its tests hold. Logs never read it (they carry the
+    /// identifier), so nothing reads it as data in the app; every on-screen name
+    /// goes through here instead.
+    ///
+    /// Only the parenthesised qualifier is a word. "Small", "Turbo", "Parakeet v3"
+    /// are product names and fall through to `displayName` unchanged.
+    var localizedDisplayName: String {
+        switch identifier {
+        case "openai_whisper-small_216MB":
+            return String(
+                localized: "Small (Quantized)",
+                comment: "Model name: 'Small' is the product name, only the qualifier in parentheses is translated (#665)."
+            )
+        case "openai_whisper-large-v3_turbo_954MB":
+            return String(
+                localized: "Turbo (Legacy)",
+                comment: "Model name of the superseded Turbo variant: 'Turbo' is the product name, only the qualifier in parentheses is translated (#665)."
+            )
+        default:
+            return displayName
+        }
+    }
+
     /// Localized description for display in model cards.
     /// Source strings are in English; French provided via String Catalog.
     var localizedDescription: String {
