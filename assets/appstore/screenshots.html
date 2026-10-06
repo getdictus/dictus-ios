@@ -271,7 +271,10 @@ window.ITERATION_CAST = false;
 /* V9-B: ?art=v9-B (default) is concept B, "hands full" (art/v9-B/heroWalk9.ts): she walks with
    a coffee and a tote, her words a lettered ribbon into slide 2's panel. Its canvas is the strip
    itself (2640 x 2868 at 0, 0). ?art=v8 renders and exports V8 exactly as committed. */
-const ART = params.get("art") || "v9-B";
+/* V10-B (round 2, default): the tote in one hand, her iPhone held up in the other (its back to us),
+   the voice as thin strokes with her words lettered on them (art/v10-B/heroWalk10.ts); and the icon
+   row puts 10 icons on slide 1 and 4 on slide 2, none across the cut. */
+const ART = params.get("art") || "v10-B";
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -516,7 +519,7 @@ function addGreetings(list, i) {
    art/dictusHero.ts) and where its voice line ends, in its own pixels. */
 const ILLU = ART === "v8"
   ? { src: "art/v8/hero.png", w: 2640, h: 2000, panelIn: [1400, 1387] }   // V7 cast: art/v7/hero-${CAST}.png
-  : { src: "art/v9-B/hero.png", w: 2640, h: 2868, panelIn: [1396, 1838.5] };
+  : { src: `art/${ART}/hero.png`, w: 2640, h: 2868, panelIn: [1396, 1838.5] };
 /* The waveform's centre in the recording capture (measured: blue bars from y 2052 to 2410). */
 const CAPTURE_WAVE_Y = 2231;
 /* The icon row along the very bottom of slides 1 and 2. */
@@ -536,12 +539,18 @@ const TILE_COLOURS = [["#3D7EFF", "#fff"], ["#DCE8FF", "#2563EB"], ["#0A1628", "
 // A row along the very bottom of slides 1 and 2, below everything. startX puts icon 7
 // exactly on the cut, straddling the two slides as in Wispr's set.
 const ICON = { size: 128, step: 176, startX: PANEL_W - 7 * 176 };
+/* V10-B: Pierre judges the slides cut apart, as in the store. 10 icons on slide 1, 4 on slide 2,
+   every one whole on its own slide (no icon straddles the cut). */
+const ICON_X = ART === "v10-B"
+  ? (n) => (n < 10 ? 76 + n * 130 : PANEL_W + 100 + (n - 10) * 130)
+  : (n) => ICON.startX + n * ICON.step;
+const ICON_SIZE = ART === "v10-B" ? 112 : ICON.size;
 
 function addRibbon() {
   RIBBON_APPS.forEach((slug, n) => {
-    const x = ICON.startX + n * ICON.step, y = BAND.ribbonY + 16 * Math.sin(n * 1.3);
+    const x = ICON_X(n), y = BAND.ribbonY + 16 * Math.sin(n * 1.3);
     const d = el("ribbon-icon");
-    Object.assign(d.style, { left: `${x - ICON.size / 2}px`, top: `${y - ICON.size / 2}px`, width: `${ICON.size}px`, height: `${ICON.size}px`,
+    Object.assign(d.style, { left: `${x - ICON_SIZE / 2}px`, top: `${y - ICON_SIZE / 2}px`, width: `${ICON_SIZE}px`, height: `${ICON_SIZE}px`,
       transform: `rotate(${[-6, 4, -2, 7, -4][n % 5]}deg)` });
     if (RIBBON === "tiles") {
       const [bg, fg] = TILE_COLOURS[n % TILE_COLOURS.length];
@@ -680,11 +689,13 @@ window.VARIANTS = ART === "v8" ? [
   { name: "main", query: "art=v8" },
   { name: "nologos", query: "art=v8&ribbon=tiles" },
 ] : [{ name: "main", query: "" }];
-/* V8 and V9-B change slide 1 only; slide 2 is re-rendered because the voice strokes end on it.
+/* V8, V9-B and V10-B change slide 1 only; slide 2 is re-rendered because the voice strokes end on it.
    Slides 3 to 7 are V6's exported files. */
 window.EXPORT_SLIDES = [0, 1];
 window.REUSE_FROM = "v6";
 window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg" };
+/* V10-B: each slide alone at search-result size, a gap between them, as the store shows them. */
+window.CUT_PAIR = ART === "v10-B" ? { slides: [0, 1], width: 300, gap: 24, file: "slides-1-2-cut.jpg" } : null;
 
 if (params.has("preview")) {
   document.body.classList.add("preview");
