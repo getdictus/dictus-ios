@@ -29,6 +29,10 @@ public enum VoiceNoteAvailability {
         case accept
         /// Refuse, and say it is part of Dictus Pro (paywall reachable).
         case refuseNeedsPro
+        /// Refuse a Pro user who switched voice notes off in the Dictus Pro hub
+        /// (#216), and say so. "Part of Dictus Pro" would be false to someone who has
+        /// it, and the switch is where they turn it back on.
+        case refuseSwitchedOff
         /// Refuse without naming a subscription: while #236's flag is down the app
         /// must not look like it has one, and the extension is part of the app.
         case refuseUnavailable
@@ -39,9 +43,20 @@ public enum VoiceNoteAvailability {
         return paywallVisible ? .refuseNeedsPro : .refuseUnavailable
     }
 
+    /// What the share extension does, telling a switched-off Pro user apart from
+    /// someone without Pro (#216).
+    ///
+    /// - Parameter hasPro: `FeatureGate.isProActive`, the entitlement without the
+    ///   feature's switch.
+    public static func shareDecision(isEntitled: Bool, hasPro: Bool, paywallVisible: Bool) -> ShareDecision {
+        if !isEntitled && hasPro { return .refuseSwitchedOff }
+        return shareDecision(isEntitled: isEntitled, paywallVisible: paywallVisible)
+    }
+
     /// The live answer for this process.
     public static var shareDecision: ShareDecision {
-        shareDecision(isEntitled: isEntitled, paywallVisible: PremiumFlags.paywallVisible)
+        shareDecision(isEntitled: isEntitled, hasPro: FeatureGate.isProActive,
+                      paywallVisible: PremiumFlags.paywallVisible)
     }
 
     /// Whether the app may start transcribing a waiting note. Checked before each

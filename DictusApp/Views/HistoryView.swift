@@ -26,6 +26,14 @@ struct HistoryView: View {
     /// outside the card and take the row's tap area away from the card itself.
     @State private var selection: TranscriptionRecord?
 
+    /// Whether this screen is pushed onto someone else's stack, as the Dictus Pro hub
+    /// does (#216), rather than presented as the home screen's sheet.
+    ///
+    /// WHY the two shapes differ: the sheet owns its navigation, so it brings a stack
+    /// and a close chevron. Pushed, a second stack inside the hub's would nest two
+    /// navigation bars, and the back button already is the way out.
+    var isPushed = false
+
     /// What the search field holds (#621). Empty shows every record.
     @State private var query = ""
 
@@ -36,48 +44,75 @@ struct HistoryView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if !isEntitled {
-                    lockedState
-                } else if history.records.isEmpty {
-                    emptyState
-                } else {
-                    recordList
-                }
-            }
-            .background(Color.dictusBackground.ignoresSafeArea())
-            .navigationTitle("History")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.down")
+        if isPushed {
+            content
+        } else {
+            NavigationStack {
+                content
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button {
+                                dismiss()
+                            } label: {
+                                Image(systemName: "chevron.down")
+                            }
+                            .accessibilityLabel("Close")
+                        }
                     }
-                    .accessibilityLabel("Close")
-                }
             }
-            .navigationDestination(item: $selection) { record in
-                // A shared voice note opens on its Summary + Transcript screen (#620).
-                if record.source == .sharedFile {
-                    VoiceNoteResultView(noteID: record.id)
-                } else {
-                    TranscriptionDetailView(record: record)
-                }
-            }
+            // The grabber says the sheet is draggable, which is the same statement the
+            // hint on the home screen makes about the swipe that opened it.
+            .presentationDragIndicator(.visible)
         }
-        // The grabber says the sheet is draggable, which is the same statement the
-        // hint on the home screen makes about the swipe that opened it.
-        .presentationDragIndicator(.visible)
     }
 
-    /// Whether the user may read the history right now.
+    private var content: some View {
+        Group {
+            if !hasPro {
+                lockedState
+            } else if isPushed {
+                pushedList
+            } else if history.records.isEmpty {
+                emptyState
+            } else {
+                recordList
+            }
+        }
+        .background(Color.dictusBackground.ignoresSafeArea())
+        .navigationTitle("History")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(item: $selection) { record in
+            // A shared voice note opens on its Summary + Transcript screen (#620).
+            if record.source == .sharedFile {
+                VoiceNoteResultView(noteID: record.id)
+            } else {
+                TranscriptionDetailView(record: record)
+            }
+        }
+    }
+
+    /// Whether the user has Dictus Pro at all. Without it the screen is locked.
+    ///
+    /// WHY Pro and not `HistoryAvailability.isEntitled`, which also folds in the
+    /// feature's switch (#216): a subscriber who switched History off is not being
+    /// sold anything, and "History is part of Dictus Pro" would be false to them.
+    /// Switched off, the records stay on screen, dimmed and locked, under the switch
+    /// that brings them back.
     ///
     /// Touching the observed Pro status is what makes this react: `FeatureGate` reads
     /// the App Group, which publishes nothing. Same device as `HomeView.entryPoint`.
-    private var isEntitled: Bool {
+    private var hasPro: Bool {
+        _ = proStatus.isProActive
+        return FeatureGate.isProActive
+    }
+
+    /// The feature's switch, observed so the content dims and unlocks as it moves
+    /// (#216). The same object the switch above writes and the hub row reads.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
+
+    /// Whether the records are live: `FeatureGate.isAvailable`, the one predicate.
+    private var isAvailable: Bool {
+        _ = switches.isOn(.history)
         _ = proStatus.isProActive
         return HistoryAvailability.isEntitled
     }
@@ -122,48 +157,7 @@ struct HistoryView: View {
     /// the results.
     private var recordList: some View {
         List {
-            // Rows act on the record's id, never on its position, so swipe-to-delete
-            // and the context menu work the same on a filtered list.
-            ForEach(visibleRecords) { record in
-                Button {
-                    selection = record
-                } label: {
-                    HistoryCard(record: record)
-                }
-                .buttonStyle(GlassPressStyle(pressedScale: 0.98))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    Button(role: .destructive) {
-                        delete(record)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                    // Explicit, because the destructive role is not enough here:
-                    // MainTabView tints the whole tab hierarchy `.dictusAccent`,
-                    // the sheet inherits that environment, and it wins over the
-                    // role. Measured on the simulator — the delete action drew
-                    // brand blue, which reads as an ordinary action.
-                    .tint(.red)
-                }
-                .contextMenu {
-                    // The long-press half of the issue's "long-press or swipe to
-                    // delete", with the copy the detail screen also offers: a
-                    // long-press that only ever destroys is a trap to open by accident.
-                    Button {
-                        UIPasteboard.general.string = record.text
-                        HapticFeedback.recordingStopped()
-                    } label: {
-                        Label("Copy", systemImage: "doc.on.doc")
-                    }
-                    Button(role: .destructive) {
-                        delete(record)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                }
-            }
+            recordRows
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
@@ -173,6 +167,108 @@ struct HistoryView: View {
                 noResultsState
             }
         }
+    }
+
+    /// The Dictus Pro hub's version (#216): the feature's switch first, as in the
+    /// hub's other feature screens, then the records, dimmed and locked while it is
+    /// off.
+    ///
+    /// WHY the home screen's sheet has no switch: that sheet only opens while History
+    /// is on (`HistoryAvailability.entryPoint`), it is the place for reading, and a
+    /// switch there would remove, under the user's finger, the very swipe that opened
+    /// it. Turning a Pro feature on or off happens in one place, the hub.
+    ///
+    /// Search (#621) works here too, under the same rule as the sheet (no field over
+    /// an empty history) plus the hub's: no field while History is switched off, since
+    /// the records under the switch are locked. The field hangs off the hub's own
+    /// navigation bar; no second stack is nested for it.
+    private var pushedList: some View {
+        List {
+            ProFeatureSwitchSection(feature: .history)
+
+            if history.records.isEmpty {
+                emptyState
+                    .listRowBackground(Color.clear)
+            } else {
+                recordRows
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .modifier(HistorySearchField(isEnabled: pushedSearchIsEnabled, query: $query))
+        .overlay {
+            if pushedSearchIsEnabled && visibleRecords.isEmpty {
+                noResultsState
+            }
+        }
+        // A query left in place when the switch goes off would keep the locked list
+        // filtered by a field the user can no longer see.
+        .onChange(of: pushedSearchIsEnabled) { _, enabled in
+            if !enabled { query = "" }
+        }
+    }
+
+    /// Whether the pushed history offers its search field: records to search, and
+    /// History switched on.
+    private var pushedSearchIsEnabled: Bool {
+        !history.records.isEmpty && isAvailable
+    }
+
+    private var recordRows: some View {
+        Group {
+            // Rows act on the record's id, never on its position, so swipe-to-delete
+            // and the context menu work the same on a filtered list.
+            ForEach(visibleRecords) { record in
+                Button {
+                    // Guarded as well as locked below: a switched-off history is
+                    // shown, not opened (#216 decision 5).
+                    guard isAvailable else { return }
+                    selection = record
+                } label: {
+                    HistoryCard(record: record)
+                }
+                .buttonStyle(GlassPressStyle(pressedScale: 0.98))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                // No action at all while History is switched off (#216): the
+                // `disabled` below stops taps, and an empty builder is what stops a
+                // swipe or a long-press from offering Delete on a locked list.
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    if isAvailable {
+                        Button(role: .destructive) {
+                            delete(record)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        // Explicit, because the destructive role is not enough here:
+                        // MainTabView tints the whole tab hierarchy `.dictusAccent`,
+                        // the sheet inherits that environment, and it wins over the
+                        // role. Measured on the simulator — the delete action drew
+                        // brand blue, which reads as an ordinary action.
+                        .tint(.red)
+                    }
+                }
+                .contextMenu {
+                    // The long-press half of the issue's "long-press or swipe to
+                    // delete", with the copy the detail screen also offers: a
+                    // long-press that only ever destroys is a trap to open by accident.
+                    if isAvailable {
+                        Button {
+                            UIPasteboard.general.string = record.text
+                            HapticFeedback.recordingStopped()
+                        } label: {
+                            Label("Copy", systemImage: "doc.on.doc")
+                        }
+                        Button(role: .destructive) {
+                            delete(record)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                }
+            }
+        }
+        .proFeatureContent(isAvailable: isAvailable)
     }
 
     private func delete(_ record: TranscriptionRecord) {
@@ -284,4 +380,21 @@ private struct HistoryCard: View {
     HistoryView()
         .environmentObject(TranscriptionHistoryStore.shared)
         .environmentObject(ProStatusManager())
+}
+
+/// `.searchable`, applied only when the list has something the user may search.
+///
+/// WHY a modifier and not `.searchable` with an empty prompt: a search field is a
+/// promise, and over a locked or empty list it is one the screen cannot keep (#621).
+private struct HistorySearchField: ViewModifier {
+    let isEnabled: Bool
+    @Binding var query: String
+
+    func body(content: Content) -> some View {
+        if isEnabled {
+            content.searchable(text: $query, prompt: Text("Search transcriptions"))
+        } else {
+            content
+        }
+    }
 }
