@@ -51,6 +51,10 @@ struct ModelDownloadPage: View {
     /// behaves identically to the model manager.
     @State private var preparationGate = ModelPreparationGate()
 
+    /// Set once this page has handed over to the next step, so the several triggers of
+    /// `advanceIfReady()` cannot advance twice.
+    @State private var hasAdvanced = false
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -128,7 +132,10 @@ struct ModelDownloadPage: View {
 
             // Action button
             if downloadComplete {
-                Button(action: onNext) {
+                // Normally never tapped: the page moves on by itself the moment the model
+                // is ready (`advanceIfReady`). Kept as the way out should the preparation
+                // screen above it fail to close.
+                Button(action: advance) {
                     Text("Continue")
                         .font(.dictusSubheading)
                         .foregroundColor(.white)
@@ -176,6 +183,15 @@ struct ModelDownloadPage: View {
             }
             // If the user backgrounded the app mid-prep, surface the overlay again.
             raisePreparationIfAllowed(liveActivePrepModel)
+            advanceIfReady()
+        }
+        // The two halves of "nothing left to wait for": the model is ready, and the
+        // preparation screen covering this page has closed.
+        .onChange(of: downloadComplete) { _, _ in
+            advanceIfReady()
+        }
+        .onChange(of: preparingModelID) { _, _ in
+            advanceIfReady()
         }
         .onChange(of: liveActivePrepModel) { _, newValue in
             raisePreparationIfAllowed(newValue)
@@ -201,6 +217,29 @@ struct ModelDownloadPage: View {
                 )
             )
         }
+    }
+
+    // MARK: - Advancing
+
+    /// Moves to the first dictation as soon as the model is ready (device test, 2026-10-06).
+    ///
+    /// WHY NO "READY, CONTINUE" STOP: this page exists only to wait. Once the wait is over,
+    /// a screen announcing it and asking for a tap is a step with nothing to decide, and
+    /// Pierre's device run found it useless. A failure still stops here, on "Try again".
+    ///
+    /// WHY IT ALSO WAITS FOR `preparingModelID` TO CLEAR: the preparation screen is a
+    /// full-screen cover presented by this page, and it closes itself once the model is
+    /// loaded. Replacing the page while its cover is still up would tear the cover down
+    /// mid-animation; waiting for it lets the cover close and the page slide away after.
+    private func advanceIfReady() {
+        guard downloadComplete, preparingModelID == nil, !hasAdvanced else { return }
+        advance()
+    }
+
+    private func advance() {
+        guard !hasAdvanced else { return }
+        hasAdvanced = true
+        onNext()
     }
 
     /// Wrapper so `.fullScreenCover(item:)` works with a plain String identifier.
