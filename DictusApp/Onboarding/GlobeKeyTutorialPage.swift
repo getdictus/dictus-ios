@@ -435,11 +435,11 @@ private struct KeyboardSwitchAnimation: View {
     /// Keyboard picker popup matching iOS style.
     private func fakeKeyboardPicker(dictusHighlighted: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            pickerRow("Keyboard Settings...", dimmed: true)
+            pickerRow(String(localized: "Keyboard Settings..."), dimmed: true)
             Divider().opacity(0.2)
             pickerRow(systemKeyboardName, highlighted: !dictusHighlighted)
             Divider().opacity(0.2)
-            pickerRow("Emoji")
+            pickerRow(String(localized: "Emoji"))
             Divider().opacity(0.2)
             pickerRow("Dictus", highlighted: dictusHighlighted, accent: dictusHighlighted)
 
@@ -462,6 +462,8 @@ private struct KeyboardSwitchAnimation: View {
         )
     }
 
+    /// Takes a `String`, so it is shown verbatim: callers localize literals with
+    /// `String(localized:)` (issue #661 found "Keyboard Settings..." in English here).
     private func pickerRow(_ text: String, dimmed: Bool = false, highlighted: Bool = false, accent: Bool = false) -> some View {
         Text(text)
             .font(.callout)

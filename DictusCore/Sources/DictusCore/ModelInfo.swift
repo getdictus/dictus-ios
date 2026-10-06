@@ -42,7 +42,26 @@ public struct ModelInfo: Identifiable {
     /// `ModelManager.updateDownloadProgress` does for the `mbTotal` it logs and
     /// for the MB counter under the progress bar, so the size promised on the
     /// card and the total counted during the download print the same number.
-    public var sizeLabel: String { "~\(sizeBytes / 1_000_000) MB" }
+    ///
+    /// WHY the unit goes through a formatter (issue #661): a hard-coded "MB"
+    /// showed on French iPhones, where the unit is "Mo". The figure stays the
+    /// truncated one above; only the unit and its spacing follow the locale.
+    public var sizeLabel: String { sizeLabel(locale: .autoupdatingCurrent) }
+
+    /// `sizeLabel` rendered for an explicit locale. Tests pin the locale through
+    /// this, since `swift test` runs in whatever locale the Mac is set to.
+    public func sizeLabel(locale: Locale) -> String {
+        let formatter = MeasurementFormatter()
+        formatter.locale = locale
+        // `.providedUnit` keeps megabytes even where the formatter would pick GB.
+        formatter.unitOptions = .providedUnit
+        formatter.unitStyle = .medium
+        formatter.numberFormatter.maximumFractionDigits = 0
+        // No grouping, to match the "%lld MB of %lld MB" download counter.
+        formatter.numberFormatter.usesGroupingSeparator = false
+        let megabytes = Measurement(value: Double(sizeBytes / 1_000_000), unit: UnitInformationStorage.megabytes)
+        return "~" + formatter.string(from: megabytes)
+    }
 
     /// Speech-to-text engine this model uses (WhisperKit or Parakeet).
     public let engine: SpeechEngine

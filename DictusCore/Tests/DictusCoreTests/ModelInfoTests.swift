@@ -97,7 +97,7 @@ final class ModelInfoTests: XCTestCase {
         }
         XCTAssertEqual(nemotron.engine, .nemotron)
         XCTAssertEqual(nemotron.sizeBytes, 664_846_846, "measured 2026-09-14 from multilingual/2240ms/")
-        XCTAssertEqual(nemotron.sizeLabel, "~664 MB")
+        XCTAssertEqual(nemotron.sizeLabel(locale: Self.english), "~664 MB")
         XCTAssertEqual(nemotron.visibility, .available)
         XCTAssertEqual(nemotron.prewarmTimeoutSeconds, 300,
                        "the 120 s default would cut off the cold compile #558 exists to measure")
@@ -507,10 +507,47 @@ final class ModelInfoTests: XCTestCase {
     /// figure the download progress counts down from.
     func testSizeLabelIsDerivedFromSizeBytes() {
         for model in ModelInfo.allIncludingDeprecated {
-            XCTAssertEqual(model.sizeLabel, "~\(model.sizeBytes / 1_000_000) MB",
+            XCTAssertEqual(model.sizeLabel(locale: Self.english), "~\(model.sizeBytes / 1_000_000) MB",
                            "\(model.identifier) label and byte count disagree")
         }
-        XCTAssertEqual(ModelInfo.forIdentifier("openai_whisper-small")?.sizeLabel, "~486 MB")
+        XCTAssertEqual(ModelInfo.forIdentifier("openai_whisper-small")?.sizeLabel(locale: Self.english), "~486 MB")
+    }
+
+    // MARK: - Localized size unit (issue #661)
+
+    /// Pinned because `sizeLabel` follows the current locale, and `swift test`
+    /// inherits the Mac's: on a French Mac the English assertions would read "Mo".
+    static let english = Locale(identifier: "en_US")
+    static let french = Locale(identifier: "fr_FR")
+
+    /// A French iPhone read "~217 MB" on every model card. The unit is "Mo" there,
+    /// and the figure must stay the same truncated megabyte count as in English.
+    func testSizeLabelUsesTheFrenchUnitInFrench() throws {
+        let compact = try XCTUnwrap(ModelInfo.forIdentifier("openai_whisper-small_216MB"))
+        let figure = compact.sizeBytes / 1_000_000
+        let label = compact.sizeLabel(locale: Self.french)
+        // The separator is a narrow no-break space from ICU; its exact code point is
+        // ICU's to choose, so the assertion checks the figure and the unit around it.
+        XCTAssertTrue(label.hasPrefix("~\(figure)"), label)
+        XCTAssertTrue(label.hasSuffix("Mo"), label)
+        XCTAssertFalse(label.contains("MB"), label)
+    }
+
+    /// The formatter must not round the figure up, nor switch a large model to GB,
+    /// nor group its digits: the card has to print what the download counter prints.
+    func testSizeLabelKeepsTheTruncatedMegabyteFigure() {
+        for model in ModelInfo.allIncludingDeprecated {
+            let figure = model.sizeBytes / 1_000_000
+            XCTAssertTrue(model.sizeLabel(locale: Self.french).hasPrefix("~\(figure)"),
+                          "\(model.identifier): \(model.sizeLabel(locale: Self.french))")
+        }
+    }
+
+    /// The property is the current-locale rendering, nothing else.
+    func testSizeLabelPropertyFollowsTheCurrentLocale() {
+        for model in ModelInfo.allIncludingDeprecated {
+            XCTAssertEqual(model.sizeLabel, model.sizeLabel(locale: .autoupdatingCurrent))
+        }
     }
 
     /// A zero or negative size would render as "~0 MB" on the card and would make
@@ -536,7 +573,7 @@ final class ModelInfoTests: XCTestCase {
             return
         }
         XCTAssertEqual(turbo.sizeBytes, 645_668_913)
-        XCTAssertEqual(turbo.sizeLabel, "~645 MB")
+        XCTAssertEqual(turbo.sizeLabel(locale: Self.english), "~645 MB")
         XCTAssertEqual(turbo.displayName, "Turbo")
         XCTAssertEqual(turbo.engine, .whisperKit)
         XCTAssertEqual(turbo.visibility, .available)

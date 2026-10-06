@@ -321,7 +321,6 @@
       }
     },
     "Accuracy" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1220,7 +1219,6 @@
       }
     },
     "Emoji" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1241,7 +1239,6 @@
       }
     },
     "End" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1686,7 +1683,6 @@
       }
     },
     "Keyboard Settings..." : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3089,7 +3085,6 @@
       }
     },
     "Speed" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3100,7 +3095,6 @@
       }
     },
     "Start" : {
-      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
