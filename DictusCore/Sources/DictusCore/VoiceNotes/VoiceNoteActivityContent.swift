@@ -31,9 +31,11 @@ public enum VoiceNoteSegment: String, Codable, Hashable, Sendable {
 ///
 /// ### Why the app sends words, not counts
 ///
-/// The widget extension has no string catalog, and ActivityKit renders whatever the
-/// app last pushed even after the app is suspended. DictusApp localises the lines
-/// with its own catalog and the widget prints them.
+/// ActivityKit renders whatever the app last pushed even after the app is suspended,
+/// and the same failures are worded in the app's list and result screen. DictusApp
+/// localises the lines with its own catalog (`VoiceNoteCopy`) and the widget prints
+/// them verbatim. The widget's own catalog (#664) holds only the dictation labels it
+/// draws itself; these lines are not in it.
 public struct VoiceNoteActivityContent: Codable, Hashable, Sendable {
     /// One per note in the current set, in the order they were shared.
     public var segments: [VoiceNoteSegment]
