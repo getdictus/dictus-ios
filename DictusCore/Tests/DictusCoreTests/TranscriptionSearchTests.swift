@@ -51,6 +51,34 @@ final class TranscriptionSearchTests: XCTestCase {
         XCTAssertFalse(TranscriptionSearch.matches(record("Rappeler le plombier demain"), query: "ecole"))
     }
 
+    // MARK: - Apostrophes
+
+    /// Apple's keyboard types a curly apostrophe; the transcripts carry a straight one.
+    func testCurlyApostropheQueryFindsStraightText() {
+        XCTAssertTrue(TranscriptionSearch.matches(record("Je passe à l'école ce soir"), query: "l\u{2019}école"))
+        XCTAssertTrue(TranscriptionSearch.matches(record("Je passe à l'école ce soir"), query: "l\u{2019}ecole"))
+    }
+
+    func testStraightApostropheQueryFindsCurlyText() {
+        XCTAssertTrue(TranscriptionSearch.matches(record("Je passe à l\u{2019}école ce soir"), query: "l'ecole"))
+    }
+
+    func testLeftQuoteAndModifierApostropheFoldToo() {
+        let text = record("Je passe à l'école ce soir")
+        XCTAssertTrue(TranscriptionSearch.matches(text, query: "l\u{2018}école"))
+        XCTAssertTrue(TranscriptionSearch.matches(text, query: "l\u{02BC}école"))
+        XCTAssertTrue(TranscriptionSearch.matches(record("l\u{02BC}école"), query: "l\u{2019}ecole"))
+    }
+
+    func testFilterFoldsApostrophes() {
+        let records = [record("l'école"), record("l\u{2019}école"), record("lécole")]
+
+        let found = TranscriptionSearch.filter(records, query: "l\u{2019}ecole")
+
+        XCTAssertEqual(found.map(\.text), ["l'école", "l\u{2019}école"],
+                       "Both apostrophes match; no apostrophe at all does not.")
+    }
+
     // MARK: - Empty query
 
     func testEmptyQueryMatchesEverything() {
