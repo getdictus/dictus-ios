@@ -62,7 +62,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ : n’a pas pu s’appliquer. Réessaie."
+            "value" : "%@ : n’a pas pu s’appliquer. Réessayez."
           }
         }
       }
@@ -95,7 +95,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ : trop long. Essaie une dictée plus courte."
+            "value" : "%@ : trop long. Essayez une dictée plus courte."
           }
         }
       }
@@ -154,7 +154,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisis un mode"
+            "value" : "Choisissez un mode"
           }
         }
       }
@@ -218,7 +218,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Active l’Accès complet dans Réglages > Claviers > Dictus pour utiliser la dictée."
+            "value" : "Activez l’Accès complet dans Réglages > Claviers > Dictus pour utiliser la dictée."
           }
         }
       }
@@ -239,7 +239,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Maintiens le micro pour les modes"
+            "value" : "Maintenez le micro pour les modes"
           }
         }
       }
@@ -420,7 +420,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisis tes modes dans Dictus."
+            "value" : "Choisissez vos modes dans Dictus."
           }
         }
       }
@@ -515,7 +515,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Partage un message vocal vers Dictus depuis une app de messagerie, et sa transcription apparaîtra ici."
+            "value" : "Partagez un message vocal vers Dictus depuis une app de messagerie, et sa transcription apparaîtra ici."
           }
         }
       }
@@ -548,7 +548,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les modes sont désactivés. Réactive-les dans Dictus."
+            "value" : "Les modes sont désactivés. Réactivez-les dans Dictus."
           }
         }
       }
@@ -592,7 +592,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les modes exigent Apple Intelligence. Active-le dans Réglages."
+            "value" : "Les modes exigent Apple Intelligence. Activez-le dans Réglages."
           }
         }
       }
