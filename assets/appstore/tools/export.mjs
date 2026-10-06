@@ -101,6 +101,13 @@ for (const locale of locales) {
       // every variant's when PAIR.everyVariant.
       if (meta.pair && (v === 0 || meta.pair.everyVariant)) execFileSync("magick", [...meta.pair.slides.map((n) => files[n]), "+append", "-resize", `${meta.pair.width}x`,
         "-quality", "90", join(ROOT, "export", locale, meta.iteration, meta.pair.file.replace("{name}", asVariant(variant).name))]);
+      // The same slides cut apart, as the store's search results show them (window.PAIR.cut:
+      // { width, gap, file }): each slide alone at `width` px, a dark gap between them.
+      if (meta.pair?.cut && v === 0) {
+        const c = meta.pair.cut;
+        execFileSync("magick", [...meta.pair.slides.flatMap((n, k) => [...(k ? ["-size", `${c.gap}x${Math.round(c.width * PANEL_H / PANEL_W)}`, "xc:#1C1F26"] : []), "(", files[n], "-resize", `${c.width}x`, ")"]),
+          "+append", "-quality", "92", join(ROOT, "export", locale, meta.iteration, c.file)]);
+      }
       if (v === 0) mainFiles = files;
       // (V7 skipped the montage of secondary variants here; every variant now gets one.)
       const vname = asVariant(variant).name;

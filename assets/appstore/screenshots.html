@@ -282,10 +282,11 @@ const HERO = params.get("hero") || "comic";
    slide 2's recording panel. V7: ?cast=woman-curves (default) | woman | man picks the
    character (art/v7/). */
 const CAST = params.get("cast") || "woman-curves";
-/* V9: the hero scene. ?scene=v9a (default): concept A, "the voice that writes", the woman
-   sitting on a giant phone, her voice written on its screen (art/v9-A/). ?scene=v8 renders V8
-   exactly as exported (art/v8/hero.png, voice strokes into slide 2's panel). */
-const SCENE = params.get("scene") || "v9a";
+/* V9: the hero scene. ?scene=v10a (default): concept A round 2, the woman sitting on a giant
+   phone whose keyboard is recording her voice (art/v10-A/). ?scene=v9a: round 1, her voice
+   written as an email on its screen (art/v9-A/). ?scene=v8 renders V8 exactly as exported
+   (art/v8/hero.png, voice strokes into slide 2's panel). */
+const SCENE = params.get("scene") || "v10a";
 /* V8: Pierre chose the woman with curves; one character again, so file names drop it. */
 window.ITERATION_CAST = false;
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
@@ -583,6 +584,7 @@ function addHero(copy, i) {
   h.style.left = `${i * PANEL_W + 110}px`;
   strip.appendChild(h);
   if (SCENE === "v9a") { addHeroA(copy); return; }
+  if (SCENE === "v10a") { addHeroA10(); return; }
   const img = document.createElement("img");
   img.className = "hero-illu"; img.id = "hero-illu"; img.alt = ""; img.src = ILLU.src;
   img.style.width = `${ILLU.w}px`;
@@ -632,9 +634,26 @@ function addHeroA(copy) {
    bottom of slide 2, under its phone and recording panel. Points in strip pixels; the icons sit
    at equal arc length along the smoothed path, growing as they leave the phone. */
 const WAVE_A = { pts: [[960, 2500], [1140, 2600], [1340, 2650], [1700, 2580], [2100, 2660], [2560, 2570]], size: [100, 116] };
-function addRibbonA() {
+/* V10-A: the phone's screen is drawn in the art (the keyboard recording), so the template only
+   stacks the two layers; the icon wave runs along slide 1's bottom from its left edge, rising
+   out from under the phone's bottom end, and only the last four icons cross onto slide 2
+   (Pierre judges the slides cut apart, as the store shows them). */
+const HERO_A10 = { back: "art/v10-A/hero-back.png", front: "art/v10-A/hero-front.png", w: 2640, h: 2868 };
+// `gap`: after icon `after`, the arc skips `len` px so no icon sits on the cut, where the store
+// would show half of it on each slide.
+const WAVE_A10 = { pts: [[86, 2790], [380, 2735], [690, 2790], [1000, 2690], [1320, 2610], [1760, 2550]], size: [112, 112], gap: { after: 9, len: 100 } };
+function addHeroA10() {
+  [[HERO_A10.back, 2], [HERO_A10.front, 4]].forEach(([src, z]) => {
+    const img = document.createElement("img");
+    img.className = "hero-layer"; img.alt = ""; img.src = src;
+    Object.assign(img.style, { width: `${HERO_A10.w}px`, zIndex: z });
+    strip.appendChild(img);
+  });
+  addRibbonA(WAVE_A10);
+}
+function addRibbonA(WAVE = WAVE_A) {
   // Catmull-Rom through the points, then resample by arc length
-  const P = WAVE_A.pts, dense = [];
+  const P = WAVE.pts, dense = [];
   for (let i = 0; i < P.length - 1; i++) {
     const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1], p3 = P[Math.min(P.length - 1, i + 2)];
     for (let t = 0; t < 1; t += 0.02) {
@@ -645,13 +664,13 @@ function addRibbonA() {
   dense.push(P[P.length - 1]);
   const cum = [0];
   for (let i = 1; i < dense.length; i++) cum.push(cum[i - 1] + Math.hypot(dense[i][0] - dense[i - 1][0], dense[i][1] - dense[i - 1][1]));
-  const L = cum[cum.length - 1], n = RIBBON_APPS.length;
+  const L = cum[cum.length - 1], n = RIBBON_APPS.length, gap = WAVE.gap || { after: n, len: 0 };
   RIBBON_APPS.forEach((slug, k) => {
-    const target = (k / (n - 1)) * L;
+    const target = (k / (n - 1)) * (L - gap.len) + (k > gap.after ? gap.len : 0);
     let i = cum.findIndex((c) => c >= target); if (i < 1) i = 1;
     const f = (target - cum[i - 1]) / (cum[i] - cum[i - 1] || 1);
     const x = dense[i - 1][0] + (dense[i][0] - dense[i - 1][0]) * f, y = dense[i - 1][1] + (dense[i][1] - dense[i - 1][1]) * f;
-    const size = WAVE_A.size[0] + (WAVE_A.size[1] - WAVE_A.size[0]) * Math.min(1, k / 3);
+    const size = WAVE.size[0] + (WAVE.size[1] - WAVE.size[0]) * Math.min(1, k / 3);
     const d = el("ribbon-icon");
     Object.assign(d.style, { left: `${x - size / 2}px`, top: `${y - size / 2}px`, width: `${size}px`, height: `${size}px`,
       transform: `rotate(${[-6, 4, -2, 7, -4][k % 5]}deg)` });
@@ -757,22 +776,23 @@ window.whenReady = Promise.all([
   .then(() => document.getElementById("missing").style.display !== "flex");
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
 /* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
-window.ITERATION = SCENE === "v9a" ? "v9-A" : "v8";
+window.ITERATION = { v10a: "v10-A", v9a: "v9-A" }[SCENE] || "v8";
 /* Themes the exporter renders for this iteration (light only since V3, Pierre). */
 window.EXPORT_THEMES = ["light"];
 /* Variants: the first is the main set; the others re-export only the slides whose
    id they change, and get a montage-<name>.jpg of their own. */
-window.VARIANTS = SCENE === "v9a" ? [{ name: "main", query: "" }] : [
+window.VARIANTS = SCENE !== "v8" ? [{ name: "main", query: "" }] : [
   { name: "main", query: "" },
   { name: "nologos", query: "ribbon=tiles" },
 ];
 /* V8 changes slide 1 only; slide 2 is re-rendered because the voice strokes end on it (her
    mouth did not move, so they are V7's). Slides 3 to 7 are V6's exported files.
-   V9-A likewise: slide 2 is re-rendered because the icon wave and the phone's shadow cross onto
-   it (and V8's voice strokes no longer reach its panel). */
+   V9-A and V10-A likewise: slide 2 is re-rendered because the icon wave (and in V9-A the
+   phone's shadow) crosses onto it, and V8's voice strokes no longer reach its panel. */
 window.EXPORT_SLIDES = [0, 1];
 window.REUSE_FROM = "v6";
-window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg" };
+window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg",
+  cut: { width: 300, gap: 24, file: "slides-1-2-cut.jpg" } };
 
 if (params.has("preview")) {
   document.body.classList.add("preview");
