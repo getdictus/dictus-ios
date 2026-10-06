@@ -2,91 +2,111 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dictus — App Store gallery preview</title>
+<title>Dictus · App Store gallery preview</title>
 <!--
-  Simulates how the 5 exported screenshots look on the App Store
-  product page: side by side, rounded corners, small gap, shown on
-  both light and dark App Store backgrounds.
-  Reads the PNGs from export/en/ — re-export, then just reload.
+  How the exported screenshots look on the App Store product page (issue #643):
+  side by side, rounded corners, on the App Store's light and dark backgrounds,
+  and the first three as they appear in search results.
+
+  Reads export/<locale>/<iteration>/<theme>/. Re-export (npm run export), then reload.
+    ?locale=en-GB   (default; fr-FR has its own v15-B set)
+    ?iteration=v8   design iteration (default v15-B, the approved set; v1 to v8 are earlier rounds)
+    ?theme=navy     show one theme only (v1/v2: navy and light by default; v3: light only)
+    v3 and v4 also show their alternate variants in galleries of their own.
 -->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-  }
-  section { padding: 56px 48px 72px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; }
+  section { padding: 48px 48px 64px; }
   section.light { background: #FFFFFF; }
   section.dark  { background: #000000; }
-
-  h2 {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 6px;
-  }
+  h1 { font-size: 28px; font-weight: 700; padding: 40px 48px 0; background: #F2F2F7; color: #1d1d1f; }
+  h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
   .light h2 { color: #1d1d1f; }
-  .dark  h2 { color: #f5f5f7; }
-  p.sub {
-    font-size: 14px;
-    margin-bottom: 28px;
-  }
+  .dark h2 { color: #f5f5f7; }
+  p.sub { font-size: 14px; margin-bottom: 24px; }
   .light p.sub { color: #6e6e73; }
-  .dark  p.sub { color: #86868b; }
-
-  /* App Store-like gallery: fixed-height row, rounded cards, gap */
-  .gallery {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-  }
-  .gallery img {
-    height: 640px;
-    width: auto;
-    border-radius: 22px;
-    flex: none;
-  }
+  .dark p.sub { color: #86868b; }
+  .gallery { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 12px; }
+  .gallery img { height: 640px; width: auto; border-radius: 22px; flex: none; }
   .light .gallery img { box-shadow: 0 0 0 1px rgba(0,0,0,0.06); }
-  .dark  .gallery img { box-shadow: 0 0 0 1px rgba(255,255,255,0.10); }
-
-  /* Smaller row approximating the search-results size (first 2-3 visible) */
+  .dark .gallery img { box-shadow: 0 0 0 1px rgba(255,255,255,0.10); }
   .gallery.small img { height: 380px; border-radius: 14px; }
 </style>
 </head>
 <body>
-
-<section class="light">
-  <h2>Product page — light mode</h2>
-  <p class="sub">iPhone · gap 16px · coins arrondis comme sur l’App Store</p>
-  <div class="gallery">
-    <img src="export/en/01-dictate.png" alt="">
-    <img src="export/en/02-offline.png" alt="">
-    <img src="export/en/03-private.png" alt="">
-    <img src="export/en/04-fast.png" alt="">
-    <img src="export/en/05-keyboard.png" alt="">
-  </div>
-</section>
-
-<section class="dark">
-  <h2>Product page — dark mode</h2>
-  <p class="sub">Même galerie sur fond noir</p>
-  <div class="gallery">
-    <img src="export/en/01-dictate.png" alt="">
-    <img src="export/en/02-offline.png" alt="">
-    <img src="export/en/03-private.png" alt="">
-    <img src="export/en/04-fast.png" alt="">
-    <img src="export/en/05-keyboard.png" alt="">
-  </div>
-</section>
-
-<section class="light">
-  <h2>Search results — les 3 premières visibles</h2>
-  <p class="sub">Dans les résultats de recherche, seules ~3 captures apparaissent : les premières doivent porter le message</p>
-  <div class="gallery small">
-    <img src="export/en/01-dictate.png" alt="">
-    <img src="export/en/02-offline.png" alt="">
-    <img src="export/en/03-private.png" alt="">
-  </div>
-</section>
-
+<script>
+const params = new URLSearchParams(location.search);
+const locale = params.get("locale") || "en-GB";
+const iteration = params.get("iteration") || "v15-B";
+const themes = params.get("theme") ? [params.get("theme")] : ["v3", "v4", "v5", "v6", "v7", "v8", "v15-B"].includes(iteration) ? ["light"] : ["navy", "light"];
+const ids = ["01-dictate", "02-smart-modes", "03-voice-notes", "04-keyboard", "05-private", "06-languages"];
+// v3: slide 2 has two variants, the main set uses translate (Pierre, 2026-10-05).
+// v4: seven slides, a hero first; variants without logos (slides 1-2) and with Message.
+// An id written "v6:03-translate" is read from another iteration (v7 reuses V6's slides 3 to 7).
+const imgs = (theme, list) => list.map((id) => { const [it, name] = id.includes(":") ? id.split(":") : [iteration, id]; return `<img src="export/${locale}/${it}/${theme}/${name}.png" alt="">`; }).join("");
+let variants = [["main", ids]];
+if (iteration === "v3") {
+  ids[1] = "02-translate";
+  variants = [["main", ids], ["message", ids.map((id) => id === "02-translate" ? "02-message" : id)]];
+}
+if (iteration === "v4") {
+  const v4 = ["01-hero", "02-dictate", "03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"];
+  variants = [["main", v4], ["nologos", v4.map((id) => ["01-hero", "02-dictate"].includes(id) ? `${id}-nologos` : id)],
+              ["message", v4.map((id) => id === "03-translate" ? "03-message" : id)]];
+}
+if (iteration === "v5") {
+  // v5: two hero styles (comic is the main set), no-logos fallback, Message alternate.
+  const v5 = ["01-hero-comic", "02-dictate", "03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"];
+  variants = [["comic", v5], ["paper", v5.map((id) => id === "01-hero-comic" ? "01-hero-paper" : id)],
+              ["nologos", v5.map((id) => ["01-hero-comic", "02-dictate"].includes(id) ? `${id}-nologos` : id)],
+              ["message", v5.map((id) => id === "03-translate" ? "03-message" : id)]];
+}
+if (iteration === "v6") {
+  // v6: marker comic only (Pierre), no-logos fallback, Message alternate.
+  const v6 = ["01-hero", "02-dictate", "03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"];
+  variants = [["main", v6], ["nologos", v6.map((id) => ["01-hero", "02-dictate"].includes(id) ? `${id}-nologos` : id)],
+              ["message", v6.map((id) => id === "03-translate" ? "03-message" : id)]];
+}
+if (iteration === "v7") {
+  // v7: three characters for slide 1 (and the end of their voice strokes on slide 2);
+  // slides 3 to 7 are V6's, validated by Pierre.
+  const rest = ["03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"].map((id) => `v6:${id}`);
+  variants = ["woman-curves", "woman", "man"].map((c) => [c, [`01-hero-${c}`, `02-dictate-${c}`, ...rest]]);
+}
+if (iteration === "v8") {
+  // v8: the chosen character (woman with curves) refined; slides 3 to 7 are V6's.
+  const rest = ["03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"].map((id) => `v6:${id}`);
+  variants = [["main", ["01-hero", "02-dictate", ...rest]], ["nologos", ["01-hero-nologos", "02-dictate-nologos", ...rest]]];
+}
+if (iteration === "v15-B") {
+  // v15-B: the final hero (walking woman, voice becoming the background waveform) and slide 2
+  // without the zoom; slides 3 to 7 are V6's. Approved by Pierre on 2026-10-06.
+  // Another locale (fr-FR) renders all seven slides in v15-B itself.
+  const rest = ["03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"].map((id) => locale === "en-GB" ? `v6:${id}` : id);
+  variants = [["main", ["01-hero", "02-dictate", ...rest]], ["nologos", ["01-hero-nologos", "02-dictate-nologos", ...rest]]];
+}
+for (const theme of themes) {
+  for (const [variant, list] of variants) {
+    document.write(`
+      <h1>${locale} · ${iteration} · Pro slides: ${theme}${variant === "main" ? "" : ` · slide 2: ${variant}`}</h1>
+      <section class="light">
+        <h2>Product page, light mode</h2>
+        <p class="sub">iPhone gallery, 16 px gap, rounded corners as on the App Store</p>
+        <div class="gallery">${imgs(theme, list)}</div>
+      </section>
+      <section class="dark">
+        <h2>Product page, dark mode</h2>
+        <p class="sub">The same gallery on black</p>
+        <div class="gallery">${imgs(theme, list)}</div>
+      </section>
+      <section class="light">
+        <h2>Search results, the first three</h2>
+        <p class="sub">Only about three screenshots show in search results: they carry the 2.0.0 story</p>
+        <div class="gallery small">${imgs(theme, list.slice(0, 3))}</div>
+      </section>`);
+  }
+}
+</script>
 </body>
 </html>
