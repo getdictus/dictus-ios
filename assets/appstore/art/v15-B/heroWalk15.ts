@@ -157,6 +157,12 @@ const GLYPHS: Record<string, { w: number; s: P[][] }> = {
   R: { w: 0.58, s: [[[0, 0], [0, 1], [0.34, 1], [0.51, 0.92], [0.56, 0.77], [0.5, 0.62], [0.33, 0.54], [0, 0.54]], [[0.28, 0.54], [0.58, 0]]] },
   E: { w: 0.5, s: [[[0.5, 1], [0, 1], [0, 0], [0.5, 0]], [[0, 0.53], [0.42, 0.53]]] },
   ".": { w: 0.1, s: [[[0.0, 0.03], [0.05, -0.01], [0.1, 0.03], [0.05, 0.08], [0.0, 0.03], [0.05, -0.01]]] },
+  // fr-FR ("MERCI POUR TES NOTES..."): the five letters the French words add, in the same hand
+  M: { w: 0.74, s: [[[0, 0], [0, 1], [0.37, 0.36], [0.74, 1], [0.74, 0]]] },
+  C: { w: 0.6, s: [Array.from({ length: 11 }, (_, i) => { const a = Math.PI * (0.22 + (i / 10) * 1.56); return [0.34 + Math.cos(a) * 0.34, 0.5 + Math.sin(a) * 0.5] as P; })] },
+  I: { w: 0.08, s: [[[0.04, 1], [0.04, 0]]] },
+  P: { w: 0.54, s: [[[0, 0], [0, 1], [0.32, 1], [0.49, 0.92], [0.54, 0.77], [0.49, 0.62], [0.32, 0.54], [0, 0.54]]] },
+  U: { w: 0.6, s: [[[0, 1], [0, 0.32], [0.05, 0.11], [0.16, 0.01], [0.3, -0.01], [0.44, 0.01], [0.55, 0.11], [0.6, 0.32], [0.6, 1]]] },
 };
 const SPACE = 0.42, TRACK = 0.17;
 const textWidth = (t: string) => [...t].reduce((a, ch, i) => a + (ch === " " ? SPACE : GLYPHS[ch].w + (i < t.length - 1 ? TRACK : 0)), 0);
@@ -290,7 +296,9 @@ const phoneHand = () => {
 // (round 5: down sooner after the arch, then a long, gently sagging, almost level run)
 // (round 6: the descent eases out sooner and the strokes reach the cut level with the band)
 const voiceFor = (end: P) => pathOf([[MOUTH[0] + 14, MOUTH[1] - 16], [630, 950], [720, 904], [820, 888], [910, 904], [990, 950], [1052, 1030], [1098, 1146], [1136, 1290], [1178, 1424], [1228, 1524], [1286, 1590], [1340, end[1] + 1], [end[0], end[1]]], 30);
+// Her words, per locale: they are the first words of slide 2's email (strings/<locale>.js).
 const TEXT = "THANKS FOR THE NOTES...", CAP = 44, TEXT_AT = 76;
+export const TEXT_FR_FR = "MERCI POUR TES NOTES...";
 const spread = (s: number) => { const t = Math.min(1, s / 700), e = t * t * (3 - 2 * t); return 4 + 16 * e; };
 
 // ---------------------------------------------------------------- the head (V7 "woman, curves", V7 coordinates)
@@ -328,7 +336,7 @@ const head = (g: Gfx) => {
 const strap = (g: Gfx, pts: P[], w: number, color: string, seed: number) => { stroke(g, pts, w + 3.2, seed, INK, 0.1); stroke(g, pts, w, seed + 1, color, 0.1); };
 
 // ---------------------------------------------------------------- the picture
-const drawFor = (end: P) => (ctx: Ctx, _frame: number, env: Env) => {
+const drawFor = (end: P, text = TEXT) => (ctx: Ctx, _frame: number, env: Env) => {
   const VOICE = voiceFor(end);
   const g = new Gfx(ctx, env, 0, MARKER);
   ctx.setTransform(env.scale, 0, 0, env.scale, 0, 0);
@@ -439,7 +447,7 @@ const drawFor = (end: P) => (ctx: Ctx, _frame: number, env: Env) => {
       }
       g.pen(pts, { w: [5, 6.4, 4.2][k], color: [HIGH, ACCENT, DEEP][k], seed: 170 + k, closed: false, wobble: 0.9, boil: 0, taper: 0.9, opacity: 1, retrace: false });
     });
-    letter(g, VOICE, TEXT, TEXT_AT, CAP, INK, 4, (s) => spread(s) + 22 + CAP / 2);
+    letter(g, VOICE, text, TEXT_AT, CAP, INK, 4, (s) => spread(s) + 22 + CAP / 2);
   });
   // slide 1's frame cuts the strokes: nothing of the hero is drawn on slide 2
   ctx.save(); ctx.setTransform(env.scale, 0, 0, env.scale, 0, 0); ctx.clearRect(CUT, 0, W - CUT, H); ctx.restore();
@@ -448,4 +456,14 @@ const drawFor = (end: P) => (ctx: Ctx, _frame: number, env: Env) => {
 export const heroWalk15: Film = {
   meta: { title: "Dictus hero V15-B · hands full, round 7", W, H, fps: 30, bpm: 120, durationFrames: 1 }, assets: { images: {} },
   shots: [{ id: "heroWalk15", start: 0, end: 1, draw: drawFor(PANEL_IN) }],
+};
+
+// fr-FR: the same picture with her words in French (art/v15-B/hero-fr-FR.png; the English film's
+// md5 is unchanged by it). Build it as above, plus a film file the still tool can import:
+//   printf 'export { heroWalk15FrFR } from "./heroWalk15";\n' > /tmp/art/src/canvas-core/heroWalk15FrFR.ts
+//   printf 'import { heroWalk15FrFR } from "../canvas-core/heroWalk15";\nimport { mountFilm } from "./page";\nmountFilm(heroWalk15FrFR);\n' > /tmp/art/src/hosts/page-heroWalk15FrFR.ts
+//   node tools/still.mjs heroWalk15FrFR --out out/hero-fr-FR.png
+export const heroWalk15FrFR: Film = {
+  meta: { title: "Dictus hero V15-B · hands full, round 7, fr-FR", W, H, fps: 30, bpm: 120, durationFrames: 1 }, assets: { images: {} },
+  shots: [{ id: "heroWalk15FrFR", start: 0, end: 1, draw: drawFor(PANEL_IN, TEXT_FR_FR) }],
 };
