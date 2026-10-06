@@ -266,7 +266,8 @@ const HERO = params.get("hero") || "comic";
    slide 2's recording panel. V7: ?cast=woman-curves (default) | woman | man picks the
    character (art/v7/). */
 const CAST = params.get("cast") || "woman-curves";
-window.ITERATION_CAST = true;   // V7: slide 2's file name carries the character (its stroke ends differ)
+/* V8: Pierre chose the woman with curves; one character again, so file names drop it. */
+window.ITERATION_CAST = false;
 document.write(`<script src="strings/${LOCALE}.js"><\/script>`);
 </script>
 <script>
@@ -319,7 +320,7 @@ const KEYBOARD_BAND = { y: 1767, h: 891, radius: PANEL_RADIUS, fill: "#E2E3E7" }
 const SLIDES = [
   // V4: a hero with no phone. Illustration, brand, headline; the voice becomes the
   // BrandWaveform and the app-icon ribbon, which cross the cut into slide 2 together.
-  { id: `01-hero-${CAST}${NOLOGO}`, key: "hero", pro: false, hero: true },
+  { id: `01-hero${NOLOGO}`, key: "hero", pro: false, hero: true },
   { id: `02-dictate${window.ITERATION_CAST ? `-${CAST}` : ""}${NOLOGO}`, key: "dictate", pro: false,
     // Real capture (status bar, recording panel); the email above is drawn by composeScreen().
     // V5: smaller and higher than the other phones, so the waveform and the icon
@@ -509,7 +510,7 @@ function addGreetings(list, i) {
    ════════════════════════════════════════════════════════════ */
 /* The illustration (art/hero-illustration.png, drawn in code with anidoodle:
    art/dictusHero.ts) and where its voice line ends, in its own pixels. */
-const ILLU = { src: `art/v7/hero-${CAST}.png`, w: 2640, h: 2000, panelIn: [1400, 1387] };
+const ILLU = { src: "art/v8/hero.png", w: 2640, h: 2000, panelIn: [1400, 1387] };   // V7 cast: art/v7/hero-${CAST}.png
 /* The waveform's centre in the recording capture (measured: blue bars from y 2052 to 2410). */
 const CAPTURE_WAVE_Y = 2231;
 /* The icon row along the very bottom of slides 1 and 2. */
@@ -664,25 +665,20 @@ window.whenReady = Promise.all([
   .then(() => document.getElementById("missing").style.display !== "flex");
 window.SLIDE_IDS = SLIDES.map((s) => s.id);
 /* Design iteration: exports land in export/<locale>/<ITERATION>/ so earlier ones stay comparable. */
-window.ITERATION = "v7";
+window.ITERATION = "v8";
 /* Themes the exporter renders for this iteration (light only since V3, Pierre). */
 window.EXPORT_THEMES = ["light"];
 /* Variants: the first is the main set; the others re-export only the slides whose
    id they change, and get a montage-<name>.jpg of their own. */
 window.VARIANTS = [
-  { name: "woman-curves", query: "cast=woman-curves" },
-  { name: "woman", query: "cast=woman" },
-  { name: "man", query: "cast=man" },
+  { name: "main", query: "" },
+  { name: "nologos", query: "ribbon=tiles" },
 ];
-/* V7 changes slide 1: Pierre validated slides 2 to 7 as exported in V6. Slides 3 to 7 are
-   reused from there. Slide 2 is re-rendered per character only because the voice strokes
-   cross the cut and end on it (the last ~80 px before the panel), and they follow each
-   character's mouth; everything else on slide 2 is V6's. */
+/* V8 changes slide 1 only; slide 2 is re-rendered because the voice strokes end on it (her
+   mouth did not move, so they are V7's). Slides 3 to 7 are V6's exported files. */
 window.EXPORT_SLIDES = [0, 1];
 window.REUSE_FROM = "v6";
-/* Per character: slides 1 and 2 side by side, 1400 px wide; and one sheet of the slide 1s. */
-window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2-{name}.jpg", everyVariant: true };
-window.SHEET = { slide: 0, file: "characters.jpg" };
+window.PAIR = { slides: [0, 1], width: 1400, file: "slides-1-2.jpg" };
 
 if (params.has("preview")) {
   document.body.classList.add("preview");

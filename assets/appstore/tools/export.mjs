@@ -101,7 +101,7 @@ for (const locale of locales) {
       if (meta.pair && (v === 0 || meta.pair.everyVariant)) execFileSync("magick", [...meta.pair.slides.map((n) => files[n]), "+append", "-resize", `${meta.pair.width}x`,
         "-quality", "90", join(ROOT, "export", locale, meta.iteration, meta.pair.file.replace("{name}", asVariant(variant).name))]);
       if (v === 0) mainFiles = files;
-      if (meta.only && v > 0) { console.log(`${locale}/${meta.iteration}/${theme}/${asVariant(variant).name}: slide(s) ${meta.only.join(",")}`); continue; }
+      // (V7 skipped the montage of secondary variants here; every variant now gets one.)
       const vname = asVariant(variant).name;
       const name = asVariant(variant).montage ?? (v === 0 ? `montage${suffix}.jpg` : `montage-${vname}${suffix}.jpg`);
       montage(files, join(ROOT, "export", locale, meta.iteration, name));

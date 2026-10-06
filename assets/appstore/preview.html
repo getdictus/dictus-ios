@@ -10,7 +10,7 @@
 
   Reads export/<locale>/<iteration>/<theme>/. Re-export (npm run export), then reload.
     ?locale=en-GB   (default)
-    ?iteration=v7   design iteration (default v7; v1 to v6 are earlier rounds)
+    ?iteration=v8   design iteration (default v8; v1 to v7 are earlier rounds)
     ?theme=navy     show one theme only (v1/v2: navy and light by default; v3: light only)
     v3 and v4 also show their alternate variants in galleries of their own.
 -->
@@ -38,8 +38,8 @@
 <script>
 const params = new URLSearchParams(location.search);
 const locale = params.get("locale") || "en-GB";
-const iteration = params.get("iteration") || "v7";
-const themes = params.get("theme") ? [params.get("theme")] : ["v3", "v4", "v5", "v6", "v7"].includes(iteration) ? ["light"] : ["navy", "light"];
+const iteration = params.get("iteration") || "v8";
+const themes = params.get("theme") ? [params.get("theme")] : ["v3", "v4", "v5", "v6", "v7", "v8"].includes(iteration) ? ["light"] : ["navy", "light"];
 const ids = ["01-dictate", "02-smart-modes", "03-voice-notes", "04-keyboard", "05-private", "06-languages"];
 // v3: slide 2 has two variants, the main set uses translate (Pierre, 2026-10-05).
 // v4: seven slides, a hero first; variants without logos (slides 1-2) and with Message.
@@ -73,6 +73,11 @@ if (iteration === "v7") {
   // slides 3 to 7 are V6's, validated by Pierre.
   const rest = ["03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"].map((id) => `v6:${id}`);
   variants = ["woman-curves", "woman", "man"].map((c) => [c, [`01-hero-${c}`, `02-dictate-${c}`, ...rest]]);
+}
+if (iteration === "v8") {
+  // v8: the chosen character (woman with curves) refined; slides 3 to 7 are V6's.
+  const rest = ["03-translate", "04-voice-notes", "05-keyboard", "06-private", "07-languages"].map((id) => `v6:${id}`);
+  variants = [["main", ["01-hero", "02-dictate", ...rest]], ["nologos", ["01-hero-nologos", "02-dictate-nologos", ...rest]]];
 }
 for (const theme of themes) {
   for (const [variant, list] of variants) {
