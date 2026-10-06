@@ -3956,17 +3956,6 @@
         }
       }
     },
-    "Voice dictation, 100%% offline" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictation vocale, 100%% offline"
-          }
-        }
-      }
-    },
     "Voice model" : {
       "localizations" : {
         "fr" : {
