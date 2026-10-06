@@ -24,7 +24,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 6. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); next competitor analysis, mock-ups, PR B, PR C
 7. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
 8. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
-9. #643 — App Store listing for 2.0.0: en design approved (PR #645), fr in progress. Then #661 (English leaks in the French UI) and #662 ("vous" everywhere), in sequence; recapture fr slide 6 after #661
+9. #643 — App Store listing for 2.0.0: en design approved (PR #645), fr in progress. #661 (English leaks in the French UI) merged in PR #663; recapture fr slide 6 now. Then #662 ("vous" everywhere), #664 (widgets/Live Activity in English) and #665 ("Small (Quantized)"), in sequence
 10. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
 11. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
