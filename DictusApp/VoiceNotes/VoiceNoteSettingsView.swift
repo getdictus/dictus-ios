@@ -6,24 +6,38 @@ import DictusCore
 /// Language and mode for shared voice notes (#620 decision 4: no choice screen at
 /// share time, defaults set here instead).
 ///
-/// ### Where it is mounted, and where it is going
+/// ### Where it is mounted
 ///
-/// The decision puts this in a section of the Dictus Pro hub (#216). The hub is in
-/// open PRs (#614/#615) and not on `develop`, so this screen is self-contained and
-/// is pushed for now from Settings › Pro Features, beside "Keyboard modes" and "My
-/// terms". Once the hub lands, the hub's Voice notes card pushes this same view and
-/// adds its `ProFeatureSwitchSection` on top, as it does for the other features.
-///
-/// WHY a `List` of sections and no switch of its own: Settings already draws the
-/// feature's switch in its Pro Features section on `develop`, and the hub will draw
-/// it above this content. A second switch here would be the one too many.
+/// Pushed from the Dictus Pro hub's Voice notes row (#216), like the other Pro
+/// feature screens: the feature's switch first (`ProFeatureSwitchSection`), then the
+/// defaults, dimmed and locked while the switch is off. Settings' provisional link to
+/// it went away with its Pro Features section.
 struct VoiceNoteSettingsView: View {
 
     @State private var settings = VoiceNoteSettings.load()
 
+    /// The feature's switch, observed so the defaults dim and unlock as it moves
+    /// (#216). The same object the switch above writes and the hub row reads.
+    @ObservedObject private var switches = ProFeatureSwitches.shared
+
+    /// Observed so an entitlement that changes while this screen is open (Pro lapsing,
+    /// the DEBUG force flipped) relocks or unlocks it: `FeatureGate` reads the App
+    /// Group, which publishes nothing.
+    @EnvironmentObject private var proStatus: ProStatusManager
+
+    /// Whether the defaults are live: `FeatureGate.isAvailable`, the one predicate,
+    /// which the share extension reads too (`VoiceNoteAvailability`).
+    private var isAvailable: Bool {
+        _ = switches.isOn(.voiceNotes)
+        _ = proStatus.isProActive
+        return FeatureGate.isAvailable(.voiceNotes)
+    }
+
     var body: some View {
         List {
-            VoiceNoteSettingsSections(settings: $settings)
+            ProFeatureSwitchSection(feature: .voiceNotes)
+
+            VoiceNoteSettingsSections(settings: $settings, isAvailable: isAvailable)
         }
         .navigationTitle("Voice notes")
         .navigationBarTitleDisplayMode(.inline)
@@ -39,6 +53,10 @@ struct VoiceNoteSettingsSections: View {
 
     @Binding var settings: VoiceNoteSettings
 
+    /// Off, every section is dimmed and locked (#216 decision 5). Applied per
+    /// section rather than on the whole group, so each List section carries it.
+    var isAvailable = true
+
     var body: some View {
         Section {
             Text("Long-press a voice message in WhatsApp, Telegram, Signal or Messages, tap Share, then Dictus. Audio files from Voice Memos, Files or Mail work the same way.")
@@ -47,6 +65,7 @@ struct VoiceNoteSettingsSections: View {
         } header: {
             Text("How it works")
         }
+        .proFeatureContent(isAvailable: isAvailable)
 
         Section {
             Picker("Language", selection: $settings.language) {
@@ -58,6 +77,7 @@ struct VoiceNoteSettingsSections: View {
         } footer: {
             Text("Automatic detection transcribes each voice note in the language it was spoken in.")
         }
+        .proFeatureContent(isAvailable: isAvailable)
 
         Section {
             Picker("After transcription", selection: $settings.mode) {
@@ -69,17 +89,20 @@ struct VoiceNoteSettingsSections: View {
         } footer: {
             Text("Shown above the transcript when you open the voice note. It uses Apple Intelligence, on this iPhone, and runs when you open the result.")
         }
+        .proFeatureContent(isAvailable: isAvailable)
 
         Section {
             Text("Voice notes up to 10 minutes. The audio is deleted as soon as it is transcribed, and everything stays on this iPhone.")
                 .font(.dictusCaption)
                 .foregroundColor(.secondary)
         }
+        .proFeatureContent(isAvailable: isAvailable)
     }
 }
 
 #Preview {
     NavigationStack {
         VoiceNoteSettingsView()
+            .environmentObject(ProStatusManager())
     }
 }
