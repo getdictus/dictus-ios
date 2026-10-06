@@ -79,9 +79,11 @@ public struct PolishMetrics: Sendable, Codable {
         case unsupportedInputLanguage
         /// An armed Smart Mode declined the dictation as too short for it, and the
         /// dictation took the path it takes with nothing armed. Two rules write it:
-        /// `Structuré`'s input floor (#587, round 4), before the engine is asked, and
-        /// `Liste`'s output check (#573), after the engine returned a list of fewer
-        /// than two items. `SmartModeLengthSkip` says which.
+        /// an input floor (`Structuré`, #587 round 4; `Résumé`, #650), before the
+        /// engine is asked, and `Liste`'s output check (#573), after the engine
+        /// returned a list of fewer than two items. `SmartModeLengthSkip` says which.
+        /// A voice note whose mode declined its transcript writes the same event
+        /// (#650), so an export tells "skipped" from "never tried" on both surfaces.
         ///
         /// Its own outcome rather than a flag on the Normal event that follows: with
         /// the polish toggle off there IS no event that follows — `PolishService`
@@ -103,10 +105,10 @@ public struct PolishMetrics: Sendable, Codable {
     /// reader asking whether the rule is right needs to see what it refused, and the
     /// rule travels with the mode's record, which an export does not hold.
     ///
-    /// Two rules write it. `Structuré` declines on the input's length, before the model
-    /// runs, and fills `floor`. `Liste` declines on its output's item count, after the
-    /// model ran (#573, decision 5 amended), and fills `listItems` and
-    /// `minimumListItems` instead. Same event and same outcome either way: from the
+    /// Two rules write it. `Structuré` and `Résumé` decline on the input's length,
+    /// before the model runs, and fill `floor`. `Liste` declines on its output's item
+    /// count, after the model ran (#573, decision 5 amended), and fills `listItems`
+    /// and `minimumListItems` instead. Same event and same outcome either way: from the
     /// user's side it is one behaviour, the dictation was too short for the mode.
     public struct SmartModeLengthSkip: Sendable, Codable, Equatable {
         /// `SmartMode.id` of the mode that declined.

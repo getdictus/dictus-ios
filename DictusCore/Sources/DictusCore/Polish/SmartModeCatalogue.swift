@@ -399,7 +399,24 @@ public enum SmartModeCatalogue {
         // the context ceiling and the band's ceiling more than most. Either way the
         // floor is the speaker's own words in their own language: longer than asked
         // for, and never wrong (#270, #580).
-        floorBehaviour: .insertRawText
+        floorBehaviour: .insertRawText,
+        // Below 200 characters the mode is skipped, as `Structured` is (#650,
+        // decision 3). Under about thirty words there is nothing to condense: the
+        // doc comment above already says a one-line dictation lands on the floor
+        // by construction, and both `LanguageModelError` refusals of the voice note
+        // device run of 2026-10-01 were on one 8-second, 132-character note. The
+        // number is `Structured`'s rather than a new one, read off the same 51
+        // device dictations (#587, round 4).
+        //
+        // It lives on the mode, not on the surface, because the voice note path
+        // used to carry it as its own global constant and that constant then
+        // blocked every mode the voice note picker offers: a 7-second French note
+        // armed with `→ EN` came back untranslated and unlogged (#650). One rule,
+        // owned by the mode, read by the keyboard and the voice note alike. The
+        // keyboard therefore changes too: a short dictation armed with this mode
+        // takes the existing short-input path (Normal polish or raw, plus the
+        // "too short" notice), accepted by the maintainer on 2026-10-05.
+        minimumInputCharacters: 200
     )
 
     /// Translate → `target`.
