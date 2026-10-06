@@ -1,31 +1,36 @@
 // DictusApp/Onboarding/ModelDownloadPage.swift
-// Step 4 of onboarding: download the recommended model (RAM-based).
+// Onboarding step: wait for the model the language screen started downloading (#649).
 import SwiftUI
 import DictusCore
 
-/// Downloads the recommended model with visible progress.
+/// Waits, with visible progress, for the model the onboarding is installing.
 ///
-/// WHY dynamic recommendation:
-/// ModelInfo.recommendedIdentifier() picks the best compatible model for the device:
-/// - Pre-A14 iPhones and iPads → Whisper Base (Argmax-supported fallback, #362/#612)
-/// - >=6 GB RAM → Parakeet v3 (fast, accurate, NVIDIA)
-/// - Other <6 GB devices → Whisper Small (compact, good accuracy)
-/// The model card displays name, size, and description from the ModelInfo catalog.
+/// WHY A WAIT AND NOT AN INSTALL BUTTON (#649): the download starts when the language
+/// screen is confirmed, two steps earlier, and `OnboardingView` only shows this page when
+/// the model is still downloading or compiling by the time the keyboard is set up. So
+/// there is normally nothing to ask: the page shows where the preparation is and offers
+/// Continue once it is done. It starts the download itself only when nothing is moving —
+/// iOS killed the app between the last byte and the compile, or an earlier attempt failed
+/// and the user is retrying.
 ///
-/// WHY @StateObject for ModelManager:
-/// Each page in the TabView needs its own lifecycle. @StateObject ensures
-/// ModelManager is created once and persists through re-renders.
+/// WHICH MODEL: `modelIdentifier` is the recommendation for the user's language and this
+/// device (`ModelInfo.recommendedIdentifier(forSpokenLanguage:on:)`), chosen by the
+/// language screen. The model card displays name, size, and description from the
+/// ModelInfo catalog.
+///
+/// WHY @ObservedObject for ModelManager: `OnboardingView` owns the one manager the whole
+/// flow shares, including the language page that started this download. Building a second
+/// one here would only learn about that transfer second-hand.
 struct ModelDownloadPage: View {
+    @ObservedObject var modelManager: ModelManager
+
+    /// The model being installed for this onboarding.
+    let modelIdentifier: String
+
     let onNext: () -> Void
 
-    @StateObject private var modelManager = ModelManager()
-
-    /// The recommended model to download during onboarding.
-    /// WHY computed property: Uses ModelInfo.recommendedIdentifier() to pick
-    /// the best model for this device's RAM, instead of hardcoding "whisper-small".
-    private var recommendedModel: String {
-        ModelInfo.recommendedIdentifier()
-    }
+    /// Kept under its historical name: every expression below reads it.
+    private var recommendedModel: String { modelIdentifier }
 
     @State private var isDownloading = false
     @State private var downloadComplete = false
@@ -46,6 +51,10 @@ struct ModelDownloadPage: View {
     /// behaves identically to the model manager.
     @State private var preparationGate = ModelPreparationGate()
 
+    /// Set once this page has handed over to the next step, so the several triggers of
+    /// `advanceIfReady()` cannot advance twice.
+    @State private var hasAdvanced = false
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -63,7 +72,7 @@ struct ModelDownloadPage: View {
                 .padding(.bottom, 12)
 
             // Explanatory text
-            Text("To transcribe your voice, Dictus needs a voice model. The download may take a few minutes.")
+            Text("Your voice model is still getting ready. It only happens once.")
                 .font(.dictusBody)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -123,7 +132,10 @@ struct ModelDownloadPage: View {
 
             // Action button
             if downloadComplete {
-                Button(action: onNext) {
+                // Normally never tapped: the page moves on by itself the moment the model
+                // is ready (`advanceIfReady`). Kept as the way out should the preparation
+                // screen above it fail to close.
+                Button(action: advance) {
                     Text("Continue")
                         .font(.dictusSubheading)
                         .foregroundColor(.white)
@@ -137,9 +149,11 @@ struct ModelDownloadPage: View {
                 .padding(.horizontal, 32)
                 .padding(.bottom, 48)
             } else if !isDownloading {
+                // Only reached after a failure (the page starts the download on its own
+                // otherwise), so the action is a retry, worded as one.
                 VStack(spacing: 16) {
                     Button(action: startDownload) {
-                        Text("Install model")
+                        Text("Try again")
                             .font(.dictusSubheading)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -160,16 +174,32 @@ struct ModelDownloadPage: View {
         .onAppear {
             // Whether the model is already downloaded, and whether one is in flight.
             syncWithPreparationState()
+            // Nothing in flight, nothing ready, nothing failed: the transfer the language
+            // screen started did not survive (iOS killed the app before the compile, which
+            // waits for the foreground). Resume it; the downloader skips every file
+            // already on disk, so this costs the missing bytes and the compile only.
+            if !downloadComplete, !isDownloading, errorMessage == nil {
+                startDownload()
+            }
             // If the user backgrounded the app mid-prep, surface the overlay again.
             raisePreparationIfAllowed(liveActivePrepModel)
+            advanceIfReady()
+        }
+        // The two halves of "nothing left to wait for": the model is ready, and the
+        // preparation screen covering this page has closed.
+        .onChange(of: downloadComplete) { _, _ in
+            advanceIfReady()
+        }
+        .onChange(of: preparingModelID) { _, _ in
+            advanceIfReady()
         }
         .onChange(of: liveActivePrepModel) { _, newValue in
             raisePreparationIfAllowed(newValue)
         }
-        // A download this page did not start can be in flight: a force quit during
-        // onboarding leaves a transfer that `ModelManager` picks up on the next launch
-        // from the OTHER instance (issue #449). Without this the screen would offer
-        // "Install model" over a download that is already running.
+        // A download this page did not start is the normal case since #649: the language
+        // screen started it, and after a force quit the launch adoption resumes it
+        // (issue #449). Without this the page would not follow the transfer's state, and
+        // would offer a retry over a download that is already running.
         .onChange(of: modelManager.modelStates[recommendedModel]) { _, _ in
             syncWithPreparationState()
         }
@@ -187,6 +217,29 @@ struct ModelDownloadPage: View {
                 )
             )
         }
+    }
+
+    // MARK: - Advancing
+
+    /// Moves to the first dictation as soon as the model is ready (device test, 2026-10-06).
+    ///
+    /// WHY NO "READY, CONTINUE" STOP: this page exists only to wait. Once the wait is over,
+    /// a screen announcing it and asking for a tap is a step with nothing to decide, and
+    /// Pierre's device run found it useless. A failure still stops here, on "Try again".
+    ///
+    /// WHY IT ALSO WAITS FOR `preparingModelID` TO CLEAR: the preparation screen is a
+    /// full-screen cover presented by this page, and it closes itself once the model is
+    /// loaded. Replacing the page while its cover is still up would tear the cover down
+    /// mid-animation; waiting for it lets the cover close and the page slide away after.
+    private func advanceIfReady() {
+        guard downloadComplete, preparingModelID == nil, !hasAdvanced else { return }
+        advance()
+    }
+
+    private func advance() {
+        guard !hasAdvanced else { return }
+        hasAdvanced = true
+        onNext()
     }
 
     /// Wrapper so `.fullScreenCover(item:)` works with a plain String identifier.
@@ -250,7 +303,7 @@ struct ModelDownloadPage: View {
                     .foregroundStyle(.secondary)
             }
 
-            Text("Recommended for your iPhone")
+            Text("Recommended for your language and iPhone")
                 .font(.dictusCaption)
                 .foregroundColor(.dictusAccent)
         }
@@ -269,8 +322,9 @@ struct ModelDownloadPage: View {
     /// `activeModel` is still nil, and nothing has an engine to load. Letting onboarding
     /// move on would hand the user a keyboard whose mic answers "No model downloaded".
     /// `isModelReady` adds the missing half of the question: some model finished
-    /// preparing. Tapping "Install model" instead resumes at the interrupted compile,
-    /// because the downloader skips every file already on disk.
+    /// preparing. Starting the download again instead resumes at the interrupted compile,
+    /// because the downloader skips every file already on disk. Since #649 the page does
+    /// that on its own when nothing is moving (see `.onAppear`).
     private func syncWithPreparationState() {
         if modelManager.downloadedModels.contains(recommendedModel), modelManager.isModelReady {
             downloadComplete = true
