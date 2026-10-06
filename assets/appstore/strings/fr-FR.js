@@ -6,9 +6,9 @@
  * a non-breaking space ( ) before ? ! : ; and inside « », typographic
  * apostrophes (’), no em dashes.
  *
- * Register: "vous" (Pierre, 2026-10-06, final): DictusApp already says it and so
- * does Apple's French copy. The keyboard still says "tu" ("Choisis un mode",
- * visible in the slide 3 capture) until #662; slide 3 is recaptured then.
+ * Register: "vous" (Pierre, 2026-10-06, final), as the app and keyboard say
+ * since #662 and as Apple's French copy does. The fr captures were retaken on a
+ * build with #661 and #662 (« Choisissez un mode », « Précision », « Vitesse », « Mo »).
  *
  * The email (slide 2) is the user's own message to a colleague, so it says
  * "tu" to Sam; its first words are the hero's lettering ("MERCI POUR TES
@@ -22,7 +22,7 @@
  * "bloqué" / "arrêté" as stuck / stopped.
  *
  * Captures: captures/fr-FR/ (iPhone 17 Pro Max, iOS 26.5, system and app in
- * French). The three keyboard captures of slide 5 are en-GB's, through the
+ * French; slide 2's recording panel shot over Messages). The three keyboard captures of slide 5 are en-GB's, through the
  * template's fallback: each layout already shows its own language.
  */
 window.DICTUS_STRINGS = {
