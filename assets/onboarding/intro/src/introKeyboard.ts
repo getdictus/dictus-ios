@@ -1,4 +1,4 @@
-import { Gfx, tube, type Ctx, type Env, type Medium, type P } from "./core";
+import { Gfx, type Ctx, type Env, type Medium, type P } from "./core";
 import type { Film } from "./film";
 import { clipped, fillShape, smooth } from "./gallery";
 import { drop, mm, MM, mmPts, rrect, WAVE } from "./phoneGeometry";
@@ -7,12 +7,14 @@ import { BPM, FPS, FRAME, LOOP_C, loop, place, THEMES, type Theme } from "./them
 
 // ONBOARDING INTRO, SCENE C · "the keyboard in a note" (issue #667, headline "Dans votre
 // clavier."). The giant drawn iPhone of the App Store hero V10-A (branch chore/643-hero-a), its
-// screen now a note above the Dictus keyboard, and one whole dictation on it, in nine seconds:
+// screen now a note above the Dictus keyboard, and one whole dictation on it, in 6.5 seconds.
+// No hand: every tap is a touch indicator (an accent disc spreading into a fading ring where the
+// finger lands), with the key's own flash.
 //
-//   1. her hand, at a real hand's size, types a few keys (each key flashes as it is hit); scribbled letters appear;
-//   2. the index taps the blue mic in the keyboard's top bar;
+//   1. two keys are typed, a short beat (each key flashes as it is hit); scribbled letters appear;
+//   2. the blue mic in the keyboard's top bar is tapped;
 //   3. RECORDING: the bars follow the voice, the timer runs, the x and check pills are up;
-//   4. it taps the check;
+//   4. the check is tapped;
 //   5. TRANSCRIBING: the pills are gone, the bars stop following the voice and a sine runs
 //      across them, a bright band riding its crest;
 //   6. a scribbled paragraph lands in the note and the keyboard returns to its keys; the note
@@ -40,11 +42,9 @@ const LP = loop(LOOP_C);
 const MARKER: Medium = { nib: 2.4, taper: 0.55, pressure: 0.6, retrace: false, wobble: 0.6, rough: 0.3 };
 const LIGHT: P = [-0.6, -0.8];
 const ACCENT = "#3D7EFF", DEEP = "#2563EB", HIGH = "#6BA3FF", WHITE = "#FFFFFF", GREEN = "#22C55E";
-const SKIN = "#F1C09C", SKIN_SH = "#D59674";
 const sm = (pts: P[], per = 6) => smooth(pts, true, per);
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const ease = (t: number) => { const x = clamp(t); return x * x * (3 - 2 * x); };
-const lerp = (a: P, b: P, t: number): P => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 
 let T: Theme = THEMES.light;
 const outline = (g: Gfx, s: P[], w: number, seed: number, color = T.line) =>
@@ -60,20 +60,19 @@ const cel = (g: Gfx, s: P[], lit: string, shade: string, k = 18) => {
 // ONE cue table holds every frame number of the scene; everything below reads it. Events sit on
 // the engine's 5-frame grid (checked at load).
 const CUE = {
-  taps: [20, 30, 40, 50],    // the four keys, and the moment each one is hit
-  mic: 75,                   // the mic tapped: recording starts
-  check: 195,                // the check tapped: transcribing starts
-  land: 240,                 // the text lands, the keys come back
-  clear: [255, 270] as P,    // the note fades out for the next loop
+  taps: [10, 20],            // two keys typed, a short beat, and the moment each one is hit
+  mic: 35,                   // the mic tapped: recording starts
+  check: 125,                // the check tapped: transcribing starts
+  land: 155,                 // the text lands, the keys come back
+  clear: [175, 195] as P,    // the note fades out for the next loop
 };
-// the finger's way through the scene: [frame, where (a key name, or "away"), pressed]
-type Spot = "away" | "k0" | "k1" | "k2" | "k3" | "mic" | "check";
-const FINGER: [number, Spot, boolean][] = [
-  [0, "away", false], [12, "k0", false], [20, "k0", true], [24, "k0", false], [30, "k1", true], [34, "k1", false],
-  [40, "k2", true], [44, "k2", false], [50, "k3", true], [54, "k3", false], [70, "mic", false], [75, "mic", true],
-  [80, "mic", false], [105, "away", false], [170, "away", false], [190, "check", false], [195, "check", true],
-  [200, "check", false], [225, "away", false], [270, "away", false],
-];
+// where each touch lands, and when: the touch indicator draws them (no hand, by Pierre's call:
+// a drawn hand covered what it tapped and never looked right)
+type Spot = "k0" | "k1" | "mic" | "check";
+// the touch lands three frames before its cue, so the contact is seen on the mic or the check
+// before the overlay swaps them away
+const LEAD = 3;
+const TOUCHES: [number, Spot][] = [[CUE.taps[0], "k0"], [CUE.taps[1], "k1"], [CUE.mic - LEAD, "mic"], [CUE.check - LEAD, "check"]];
 const onGrid = (f: number) => f % 5 === 0;
 const problems = [...CUE.taps, CUE.mic, CUE.check, CUE.land, ...CUE.clear].filter((f) => !onGrid(f) || f > LOOP_C);
 if (problems.length) throw new Error(`introKeyboard cue table off the 5-frame grid or past the loop: ${problems.join(", ")}`);
@@ -95,8 +94,8 @@ const KEYS: Key[] = [
   { x0: 3.15, x1: 12.4, y: ROWS[3] }, { x0: 13.9, x1: 23.2, y: ROWS[3], icon: "emoji" },
   { x0: 24.7, x1: 56.6, y: ROWS[3] }, { x0: 58.1, x1: 74.9, y: ROWS[3], icon: "return" },
 ];
-// the four keys typed, by index into KEYS (a short word across the top two rows)
-const TYPED = [12, 2, 15, 7];
+// the two keys typed, by index into KEYS
+const TYPED = [12, 2];
 const MIC_PILL = { x0: 62.4, x1: 73.6, y0: 104.6, y1: 111.4 };
 // the recording overlay (01-recording-reminders.png): the pills in the top bar, the waveform, the
 // timer and its caption; the waveform keeps V10-A's 17 wider bars, which read at this size
@@ -134,93 +133,21 @@ const CAPTION_REC = scribbleLine(13, 1.6, 871), CAPTION_TRANS = scribbleLine(17,
 const SUGGEST = [scribbleLine(12, 2, 881), scribbleLine(11, 2, 883), scribbleLine(10, 2, 885)];
 const NOTE = { x: 7, line0: 32, lead: 7 };
 
-// ---------------------------------------------------------------- the hand
-// Her right hand at the size of a real hand next to this phone: about 19 cm from fingertip to
-// wrist against the phone's 16, the index about one and a half keys wide. At that size it comes
-// up from the frame's bottom edge, cut by it, and covers the keyboard below whatever it taps;
-// the target itself is always at the tip of the index, so it is in plain sight at the moment of
-// the tap.
-//
-// It is built the way the woman's hands are (heroWalk15.ts `fist` and `phoneHand`): a back of
-// the hand, fingers as tubes with V15-B's skin, shade and contour, the light from the upper left.
-// What a hand has and a blob does not: an index in three phalanges with the creases of its two
-// joints and a nail; the knuckles of the four fingers along the back; the middle, ring and little
-// fingers folded, each a proximal phalanx ending in its bent middle joint; a thumb in two
-// segments with its nail; the wrist; her blue sleeve. Proportions from the hand chapters of
-// Andrew Loomis' "Drawing the Head and Hands" (the palm as long as the middle finger, the index
-// reaching the middle finger's last joint), in millimetres.
-//
-// The hand's frame, in millimetres: `a` runs from the index's fingertip back toward the wrist,
-// `b` across it, positive on the thumb's side (image left: a right hand, palm down).
-const HAND_DIR: P = [0.38, 0.925];          // from the fingertip toward the wrist, on the page
-// a finger tapping glass comes down at about 45 degrees, so seen from above the hand is
-// foreshortened along its length: that is what brings its knuckles and thumb into the frame
-const FORESHORTEN = 0.68;
-const PX_PER_MM = 10.6;                     // the phone's own scale across the keyboard
-const AWAY_DROP: P = [260, 1500];           // away: the hand slid down, out of the frame
-const fingerAt = (f: number): { tip: P; press: number; lift: number } => {
-  let a = FINGER[0], b = FINGER[FINGER.length - 1];
-  for (let i = 0; i < FINGER.length - 1; i++) if (f >= FINGER[i][0] && f < FINGER[i + 1][0]) { a = FINGER[i]; b = FINGER[i + 1]; break; }
-  // a spot on the glass; "away" is below the last spot the hand left or the next it goes to
-  const target = (s: Spot, other: Spot): P => mm(...spotMM(s === "away" ? (other === "away" ? "k0" : other) : s));
-  const where = (s: Spot, pressed: boolean, other: Spot): P => { const p = target(s, other); return s === "away" ? [p[0] + AWAY_DROP[0], p[1] + AWAY_DROP[1]] : pressed ? p : [p[0] + 22, p[1] + 48]; };
-  const t = ease((f - a[0]) / Math.max(1, b[0] - a[0]));
-  const press = (a[2] ? 1 - t : 0) + (b[2] ? t : 0);
-  return { tip: lerp(where(a[1], a[2], b[1]), where(b[1], b[2], a[1]), t), press, lift: 1 - press };
-};
-type Seg = { pts: P[]; r0: number; r1: number };
-// the index: tip, end joint, middle joint, knuckle (mm), the finger a little thicker at its root
-const INDEX: Seg = { pts: [[0, 0], [22, 0.6], [47, 1.6], [92, 3.2]], r0: 7.2, r1: 9 };
-const INDEX_NAIL: Seg = { pts: [[2.5, 0], [12, 0.2]], r0: 4.6, r1: 5 };
-// the folded fingers, little to middle: from the knuckle forward to the bent middle joint
-const FOLDED: Seg[] = [
-  { pts: [[112, -50], [100, -52], [94, -50]], r0: 8, r1: 8.6 },
-  { pts: [[103, -35], [88, -37], [82, -35]], r0: 9, r1: 9.6 },
-  { pts: [[96, -18], [80, -20], [74, -18]], r0: 9.4, r1: 10 },
-];
-// the thumb, from its root at the wrist to its tip, lying along the folded middle finger
-const THUMB: Seg = { pts: [[160, 30], [122, 38], [96, 34], [78, 24]], r0: 11, r1: 8 };
-const THUMB_NAIL: Seg = { pts: [[81, 26], [90, 31]], r0: 4, r1: 4.4 };
-// the back of the hand: the index knuckle, down the thumb's web to the wrist, across the wrist,
-// up the little finger's edge, and back along the knuckles
-const BACK: P[] = [[90, 12], [112, 22], [136, 30], [168, 38], [196, 34], [200, -42], [168, -60], [130, -62], [112, -58], [104, -46], [98, -30], [92, -12]];
-const KNUCKLES: P[] = [[93, 3], [96, -17], [101, -34], [109, -49]];
-const SLEEVE: P[] = [[192, 40], [420, 56], [420, -78], [196, -48]];
-const drawHand = (g: Gfx, tip: P, press: number, lift: number) => {
-  const s = PX_PER_MM * (1 + 0.05 * lift);   // a lifted hand is a little nearer the eye
-  const [dx, dy] = HAND_DIR, nx = -dy, ny = dx;
-  const H = ([a0, b]: P): P => { const a = a0 * FORESHORTEN; return [tip[0] + (dx * a + nx * b) * s, tip[1] + (dy * a + ny * b) * s]; };
-  const seg = (q: Seg) => tube(q.pts.map(H), q.r0 * s, q.r1 * s, true);
-  const skin = (shape: P[], w: number, seed: number, k = 6) => { cel(g, shape, SKIN, SKIN_SH, k); outline(g, shape, w, seed); };
-  // a nail: one smooth pale shape, a thin contour and a glint, no cel (at this size a cel's
-  // offset reads as a dent)
-  const nailOf = (shape: P[], seed: number) => {
-    const n = sm(shape, 4);
-    fillShape(g, n, "#F7D6C2"); g.pen(n, { w: 2.6, color: SKIN_SH, seed, closed: true, wobble: 0.15, boil: 0, taper: 0.3, opacity: 1, retrace: false });
-  };
-  // its shadow on the glass, closer as the finger presses
-  const sh = 26 - 18 * press, shadow = (pts: P[]) => pts.map(([x, y]) => [x + sh, y + sh * 0.6] as P);
-  [seg(INDEX), sm(BACK.map(H)), seg(THUMB)].forEach((p) => fillShape(g, shadow(p), T.shadow, 0.1 + 0.1 * press));
-  // the sleeve at the wrist, its cuff
-  const sleeve = SLEEVE.map(H);
-  cel(g, sleeve, ACCENT, DEEP, 12); outline(g, sleeve, 6, 910);
-  stroke(g, [H([206, 42]), H([210, -50])], 5, 911, HIGH, 0.3, 0.9);
-  // the back of the hand: its knuckles, the faint lines of its tendons toward the wrist
-  const back = sm(BACK.map(H));
-  skin(back, 6, 930, 12);
-  KNUCKLES.slice(1).forEach(([a, b], k) => stroke(g, [H([a + 4, b + 5]), H([a + 1, b]), H([a + 4, b - 5])], 3, 931 + k, SKIN_SH, 0.6, 0.9));
-  KNUCKLES.forEach(([a, b], k) => stroke(g, [H([a + 14, b * 0.95]), H([a + 52, b * 0.8 + 4])], 2.4, 935 + k, SKIN_SH, 0.9, 0.45));
-  // the folded fingers, each with the crease of its bent joint
-  FOLDED.forEach((q, k) => { const f = seg(q); cel(g, f, SKIN, SKIN_SH, 3); outline(g, f, 5, 920 + k); const [a, b] = q.pts[2]; stroke(g, [H([a + 3, b + 6]), H([a + 1, b]), H([a + 3, b - 6])], 2.6, 925 + k, SKIN_SH, 0.6, 0.9); });
-  // the thumb and its nail
-  skin(seg(THUMB), 5.5, 945, 6);
-  nailOf(seg(THUMB_NAIL), 946);
-  stroke(g, [H([100, 40]), H([96, 34]), H([100, 28])], 2.6, 947, SKIN_SH, 0.6, 0.9);
-  // the index, stretched out to the glass: its nail and the creases of its two joints
-  skin(seg(INDEX), 6, 940, 6);
-  nailOf(seg(INDEX_NAIL), 941);
-  ([[22, 0.6], [47, 1.6]] as P[]).forEach(([a, b], k) => { stroke(g, [H([a, b + 6]), H([a - 1.5, b]), H([a, b - 6])], 3, 942 + k, T.line, 0.7, 0.7); stroke(g, [H([a + 3, b + 4]), H([a + 2, b - 4])], 2.2, 944 + k, SKIN_SH, 0.7, 0.8); });
-  stroke(g, [H([90, 9]), H([93, 3]), H([90, -3])], 3, 948, SKIN_SH, 0.6, 0.9);
+// ---------------------------------------------------------------- the touches
+// Where a finger lands, a soft accent disc appears on the glass and spreads out as a fading ring,
+// in perspective on the screen (drawn in the phone's millimetres): the touch indicator of screen
+// recordings, legible on the light and the dark keyboard alike, and it never hides the target.
+// It shows from two frames before the hit (the contact) to twelve after.
+const TOUCH_R = 3.6;   // mm, about a fingertip's contact
+const drawTouches = (g: Gfx, f: number) => {
+  TOUCHES.forEach(([t, s], k) => {
+    const dt = f - t;
+    if (dt < -2 || dt > 12) return;
+    const c = spotMM(s), grow = dt < 0 ? 0.7 + 0.15 * (dt + 2) : 1 + 1.2 * ease(dt / 12), fade = dt < 0 ? 0.6 + 0.2 * (dt + 2) : 1 - ease(dt / 12);
+    const ring = (r: number) => mmPts(Array.from({ length: 32 }, (_, i) => [c[0] + Math.cos((i / 32) * Math.PI * 2) * r, c[1] + Math.sin((i / 32) * Math.PI * 2) * r] as P));
+    fillShape(g, ring(TOUCH_R * grow), ACCENT, 0.34 * fade);
+    g.pen(ring(TOUCH_R * grow), { w: 4, color: ACCENT, seed: 990 + k, closed: true, wobble: 0.2, boil: 0, taper: 0, opacity: 0.9 * fade, retrace: false });
+  });
 };
 
 // ---------------------------------------------------------------- the picture
@@ -228,7 +155,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   T = theme;
   const g = new Gfx(ctx, env, frame, MARKER);
   g.push(-PLACE.o[0] * PLACE.k, -PLACE.o[1] * PLACE.k, PLACE.k);
-  const mode = modeAt(frame), finger = fingerAt(frame);
+  const mode = modeAt(frame);
   const body = rrect(0, 0, MM.w, MM.h, MM.r, 12);
   const top = mmPts(body), dropped = (k: number) => body.map(([x, y]) => { const p = mm(x, y); return [p[0], p[1] + drop(x, y) * k] as P; });
   const bottom = dropped(1);
@@ -274,10 +201,10 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
           drawScribble(g, words, p, local(x0, NOTE.line0 + i * NOTE.lead), { w: 2.8, color: T.screenInk, seed: 720 + i * 11, opacity: clearK });
         });
       }
-      // the caret: after the typed word, then after the paragraph; it blinks nine times a loop
+      // the caret: after the typed word, then after the paragraph; it blinks five times a loop
       const landed = frame >= CUE.land + 12 && frame < CUE.clear[0];
       const caret: P = landed ? [NOTE.x + 39.5, NOTE.line0 + 3 * NOTE.lead] : frame >= CUE.clear[0] ? [NOTE.x + 1.2, NOTE.line0] : [NOTE.x + wordLen + 1.2, NOTE.line0];
-      if (Math.floor(frame / 15) % 2 === 0 || mode !== "keys") stroke(g, at([[caret[0], caret[1] + 0.8], [caret[0], caret[1] - 4.4]]), 2.6, 705, T.notesAccent, 0.1);
+      if (frame % 39 < 20 || mode !== "keys") stroke(g, at([[caret[0], caret[1] + 0.8], [caret[0], caret[1] - 4.4]]), 2.6, 705, T.notesAccent, 0.1);
       // the comic glass shine across the empty part of the note
       fillShape(g, at([[0, 70], [MM.w * 0.62, 50], [MM.w * 0.78, 50], [0, 76]]), T.shine, 0.6);
 
@@ -351,8 +278,8 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
     outline(g, top, 9, 6);
   });
 
-  // the hand, over everything
-  g.group("plain", () => drawHand(g, finger.tip, finger.press, finger.lift));
+  // the touches, over everything
+  g.group("plain", () => drawTouches(g, frame));
 };
 
 const film = (theme: Theme, title: string): Film => ({
