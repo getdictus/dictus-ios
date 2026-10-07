@@ -1,23 +1,27 @@
 import { Gfx, turn, type Ctx, type Env, type P } from "./core";
+import { clearEdges } from "./edges";
 import type { Film } from "./film";
 import { fillShape } from "./gallery";
 import { BPM, FPS, FRAME, LOOP_A, loop, place, THEMES, type Theme } from "./theme";
+import { drawNoteCard, type Card } from "./noteCard";
 import {
-  ARM_NEAR, BAG_D, bobAt, drawVoice, drawWoman, FIG, LEG_FAR, LEG_NEAR, legAt, MARKER, mouthOpen, setTheme, stroke, type Pose,
+  ARM_NEAR, BAG_D, bobAt, drawVoice, drawWoman, FIG, fig, LEG_FAR, LEG_NEAR, legAt, MARKER, mouthOpen, phoneMap, setTheme, stroke, type Pose,
 } from "./woman";
 
 // ONBOARDING INTRO, SCENE A · "walking" (issue #667, headline "Parlez. Dictus écrit.").
 // The App Store hero V15-B set in motion: she walks in place on a pavement that slides back
 // under her, the phone up at her mouth (seen from the back, as V15-B drew it), talking. Her
-// voice leaves her lips as the three blue strokes and goes INTO the phone (woman.ts draws her
-// and the voice).
+// voice leaves her lips as the three blue strokes, in the App Store art's big arch, and goes
+// INTO the phone; the text comes OUT of it, on a note card that springs from the phone's edge
+// and fills with scribbled lines (woman.ts draws her and the voice, noteCard.ts the card).
 //
 // What moves, all of it periodic over the 5.5 s loop:
 // - the legs: five walk cycles (1.1 s each, about 109 steps a minute), the planted foot sliding
 //   back at the pavement's speed, the slab joints running at that speed at the feet's depth;
 // - the body rises at the passing positions and sinks at contact; the tote arm swings against
 //   the near leg and the tote follows the fist a beat late; the hair's ends sway; the phone rocks;
-// - the mouth talks; the voice's pulses travel from her lips into the phone, eleven a loop.
+// - the mouth talks; the voice's pulses travel from her lips into the phone, eleven a loop;
+// - the card springs out, writes four lines, and fades before the seam.
 
 // The source canvas is the App Store strip (2640 x 2868); the frame shows x 0..1466, y 750..2861
 // of it, the crop of the #649 mock-up (designs/onboarding-649-assets/intro-walk.png).
@@ -100,7 +104,15 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   g.push(FIG.at[0], FIG.at[1], FIG.s);
   drawWoman(g, theme, pose, () => drawVoice(g, pose, LP, frame, 11));
   g.pop();
+
+  // 3. the text, coming out of the phone onto its card
+  g.group("plain", () => drawNoteCard(g, theme, LP, frame, CARD, fig(phoneMap(pose)([[56, -6]])[0])));
+  // 4. a clean band round the frame, so the page colour decodes exactly at its edge (edges.ts)
+  clearEdges(ctx, env);
 };
+
+// the card, canvas pixels: in the empty right of the frame, under the voice's arch
+const CARD: Card = { c: [1190, 1330], w: 390, h: 300, deg: -4 };
 
 const film = (theme: Theme, title: string): Film => ({
   meta: { title: `Dictus onboarding intro A · walking · ${theme.name}`, W: FRAME.w, H: FRAME.h, fps: FPS, bpm: BPM, durationFrames: LOOP_A },

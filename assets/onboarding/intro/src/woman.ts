@@ -361,12 +361,13 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
 };
 
 // ---------------------------------------------------------------- her voice, into the phone
-/** the path of her voice, figure space: out of her lips and up to the right, over in an arch,
- *  and back down into the top of the phone, ending behind it */
+/** the path of her voice, figure space: out of her lips in the big arch of the App Store art,
+ *  up and over to the right, then curling back and down into the top of the phone, where it
+ *  ends behind it */
 export const voicePath = (pose: Pose): Path => {
   const m = mouthAt(pose), ph = phoneMap(pose), [inP] = ph([PHONE_IN]);
   const d = (x: number, y: number): P => [m[0] + x, m[1] + y];
-  return pathOf([d(14, -14), d(56, -86), d(140, -146), d(236, -140), d(262, -72), d(214, -14), [inP[0] + 30, inP[1] - 40], inP], 20);
+  return pathOf([d(14, -12), d(60, -104), d(160, -190), d(300, -214), d(410, -160), d(440, -60), d(384, 14), d(282, 26), [inP[0] + 72, inP[1] - 52], inP], 20);
 };
 /**
  * Three thin marker strokes from her lips into the phone, broken into pulses that travel along
@@ -374,9 +375,9 @@ export const voicePath = (pose: Pose): Path => {
  * fan out a little over the arch and gather again as they enter.
  */
 export const drawVoice = (g: Gfx, pose: Pose, lp: Loop, frame: number, n: number) => {
-  const path = voicePath(pose), L = path.total, period = L / 3.2, flow = (lp.tau(frame) * n) % 1;
+  const path = voicePath(pose), L = path.total, period = L / 3.6, flow = (lp.tau(frame) * n) % 1;
   [-1, 0, 1].forEach((o, j) => {
-    const lane = (s: number) => o * 9 * Math.sin(Math.PI * clamp(s / L)) + Math.sin((s / L) * Math.PI * [3, 4, 3.4][j] + j - flow * 2 * Math.PI) * 3 * Math.sin(Math.PI * clamp(s / L));
+    const lane = (s: number) => o * 14 * Math.sin(Math.PI * clamp(s / L)) + Math.sin((s / L) * Math.PI * [3, 4, 3.4][j] + j - flow * 2 * Math.PI) * 4 * Math.sin(Math.PI * clamp(s / L));
     // pulse k covers [start, start + 0.62 period]; starts advance with the flow, and a pulse is
     // cut at both ends of the path, so pulses are born at her lips and swallowed by the phone
     for (let k = -1; k <= 3; k++) {
@@ -384,7 +385,7 @@ export const drawVoice = (g: Gfx, pose: Pose, lp: Loop, frame: number, n: number
       if (s1 - s0 < 6) continue;
       const pts: P[] = [];
       for (let s = s0; s <= s1 + 0.01; s += 5) pts.push(off(path, s, lane(s)));
-      g.pen(pts, { w: [4.4, 5.6, 3.8][j], color: [HIGH, ACCENT, DEEP][j], seed: 170 + j, closed: false, wobble: 0.5, boil: 0, taper: 0.8, opacity: 1, retrace: false });
+      g.pen(pts, { w: [6.4, 8.4, 5.6][j], color: [HIGH, ACCENT, DEEP][j], seed: 170 + j, closed: false, wobble: 0.5, boil: 0, taper: 0.8, opacity: 1, retrace: false });
     }
   });
 };
