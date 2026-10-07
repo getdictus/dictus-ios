@@ -39,8 +39,9 @@ const VP_L: P = [-1700, HORIZON], VP_R: P = [3300, HORIZON];
 const toward = (vp: P, through: P, y: number): P => [vp[0] + ((through[0] - vp[0]) * (y - vp[1])) / (through[1] - vp[1]), y];
 const KERB_A: P = [0, 1806], KERB_B: P = [1320, 1948];   // the far kerb, on the line to VP_L
 const GROUND_R = 1320;                                    // V15-B's slide edge: the pavement fades out before it
-// the frame's own edges: the slabs fade out over the last 260 source pixels above its bottom
-const EDGE_FADE = { left: 160, bottom: [FRAME_BOTTOM - 260, FRAME_BOTTOM] as P };
+// the frame's own edges: the slabs are gone 120 source pixels above its bottom, so only flat page
+// meets the edge and its colour decodes exactly
+const EDGE_FADE = { left: 160, bottom: [FRAME_BOTTOM - 360, FRAME_BOTTOM - 120] as P };
 
 // One step (heel strike to the other heel strike) carries the planted foot STEP figure units
 // back; it is measured on V15-B (the near shoe's ball, planted at push-off, sits one step behind
@@ -116,7 +117,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
 };
 
 // the message, canvas pixels: in the empty right of the frame, below and right of the phone
-const CARD: Card = { style: "bubble", c: [1185, 1270], w: 400, deg: -2 };
+const CARD: Card = { style: "bubble", c: [1190, 1350], w: 400, deg: -2 };
 
 const film = (theme: Theme, title: string): Film => ({
   meta: { title: `Dictus onboarding intro A · walking · ${theme.name}`, W: FRAME.w, H: FRAME.h, fps: FPS, bpm: BPM, durationFrames: LOOP_A },

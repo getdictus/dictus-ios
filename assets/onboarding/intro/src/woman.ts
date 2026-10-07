@@ -46,13 +46,6 @@ export const outline = (g: Gfx, s: P[], w: number, seed: number, color = T.line)
 export const stroke = (g: Gfx, pts: P[], w: number, seed: number, color = T.line, taper = 0.9, op = 1) =>
   g.pen(smooth(pts, false, 8), { w: w * LW, color, seed, closed: false, wobble: 0.5, boil: 0, taper, opacity: op, retrace: false });
 export const piece = (g: Gfx, s: P[], lit: string, shade: string, k: number, w: number, seed: number) => { cel(g, s, lit, shade, k); outline(g, s, w, seed); };
-// the seat's shading: the same lit fill and the same shade strip down the side away from the
-// light as the legs (cel's horizontal offset), never along its bottom, where a band of shade read
-// as a bulge between the legs: so seat and legs read as one fabric
-const celAcross = (g: Gfx, s: P[], lit: string, shade: string, k: number) => {
-  fillShape(g, s, shade);
-  clipped(g, s, () => fillShape(g, s.map(([x, y]) => [x + LIGHT[0] * k, y] as P), lit));
-};
 
 // ---------------------------------------------------------------- path utilities (V15-B's)
 export type Path = { pts: P[]; len: number[]; total: number };
@@ -105,10 +98,11 @@ export const MOUTH_F = hv([688, 602]);   // her lips, figure space
 export const LEG_FAR = [[452, 1680], [566, 2020], [660, 2370]] as P[];    // her left, reaching forward, heel striking
 export const LEG_NEAR = [[344, 1690], [350, 2010], [200, 2296]] as P[];   // her right, behind, heel lifted
 export const ARM_NEAR = [[298, 1238], [322, 1450], [376, 1650]] as P[];   // her right, swung forward, the tote
-// her left arm holds the phone out at the height of her mouth, the forearm reaching forward, so
-// her voice has a clear gap to cross to the phone (the forearm 15 % longer than V15-B's, which
-// the eye takes for the reach)
-export const ARM_FAR = [[500, 1228], [655, 1400], [814, 1238]] as P[];
+// her left arm holds the phone out in front of her, between chin and collarbone (round 8: held at
+// her mouth it read as a selfie), the elbow low, the forearm rising forward, so her voice has a
+// clear gap to cross down to the phone (the forearm 15 % longer than V15-B's, which the eye takes
+// for the reach; the elbow solved from the bones)
+export const ARM_FAR = [[500, 1228], [645, 1407], [854, 1318]] as P[];
 export const BAG_D: P = [36, -14];
 
 const TORSO: P[] = [[368, 1160], [330, 1172], [292, 1192], [266, 1226], [262, 1290], [276, 1380], [294, 1468], [300, 1532], [482, 1528], [476, 1478], [492, 1420], [516, 1362], [524, 1300], [520, 1242], [502, 1198], [462, 1174], [428, 1162]];
@@ -116,13 +110,16 @@ const TORSO_SH: P[] = [[266, 1226], [292, 1192], [330, 1174], [320, 1260], [320,
 const NECK: P[] = [hv([506, 672]), hv([596, 686]), [430, 1174], [368, 1170]];
 const VNECK: P[] = [[362, 1162], [404, 1224], [436, 1162], [446, 1172], [404, 1252], [352, 1172]];
 
-// the seat of the high-waisted trousers, waist to crotch, over both legs' tops: its back flares
-// out from the waist into her hip (a woman's line, hips wider than the waist), its front runs
-// almost straight down into the front leg (round 7: no bulge), its bottom a shallow line; SEAT_TOP is the band of it
-// painted again, with the seat's own shading, over the near thigh so its cut end never shows
-const SEAT: P[] = [[300, 1524], [276, 1566], [256, 1622], [260, 1680], [290, 1704], [340, 1712], [404, 1716], [466, 1700], [509, 1666], [504, 1620], [495, 1572], [484, 1524]];
-const SEAT_TOP: P[] = [[300, 1524], [276, 1566], [256, 1622], [262, 1688], [404, 1712], [509, 1668], [504, 1620], [495, 1572], [484, 1524]];
-const SEAT_L: P[] = [[300, 1524], [276, 1566], [256, 1622], [262, 1690]], SEAT_R: P[] = [[484, 1524], [495, 1572], [504, 1620], [509, 1664]];
+// the seat of the high-waisted trousers: from the waistband (its two ends) its back flares out
+// into her hip, a woman's line with hips wider than the waist, and its front runs almost straight
+// down (round 7: no bulge); both then follow the legs (seatOf). Its bottom is a shallow line
+// between the legs, never outlined.
+const SEAT_BACK: P[] = [[300, 1524], [278, 1562], [262, 1606], [258, 1646]];
+const SEAT_FRONT: P[] = [[484, 1524], [494, 1566], [502, 1606]];
+const SEAT_BOTTOM: P[] = [[466, 1700], [404, 1716], [340, 1712]];
+// the side of the seat, down to SEAT_END below the hips, it follows the legs' outer edges
+const SEAT_END = 1760;
+const LEG_HW_FAR = [60, 45, 36], LEG_HW_NEAR = [62, 46, 37];
 
 // ---------------------------------------------------------------- the walk
 const TRAINER: P[] = [[0, -8], [4, -50], [28, -62], [58, -58], [98, -46], [140, -36], [172, -26], [190, -12], [188, 4], [150, 8], [80, 8], [8, 6]];
@@ -202,7 +199,7 @@ export const fist = (d: P) => {
   return { back, fingers, thumb };
 };
 // the phone sits on her wrist as V15-B's does (its centre 54 left and 128 up from the wrist)
-export const PHONE = { cx: 760, cy: 1110, w: 104, h: 208, deg: -10 };
+export const PHONE = { cx: 800, cy: 1190, w: 104, h: 208, deg: -10 };
 const phoneHand = (ph: (pts: P[]) => P[]) => {
   const back = sm(ph([[8, 36], [50, 26], [66, 66], [62, 110], [36, 132], [4, 124], [-10, 88]]), 4);
   const fingers = [0, 1, 2, 3].map((k) => { const v = 18 + k * 21, r = [92, 96, 90, 76][k]; return tube(ph([[30, v + 6], [30 - r * 0.6, v], [30 - r, v - 4]]), 10.5, 9.5, true); });
@@ -267,8 +264,7 @@ const strap = (g: Gfx, pts: P[], w: number, color: string, seed: number) => { st
 // one trouser leg: the limb's two edges from above the hip (so its cut top lies well inside the
 // seat, which covers it) down to the hem at the ankle; the far leg a half-tone back
 const trouserLeg = (g: Gfx, leg: Leg, hws: number[], far: boolean, seed: number) => {
-  const top: P = [leg.hip[0] + (leg.hip[0] - leg.knee[0]) * 0.2, leg.hip[1] - 70];
-  const { left, right } = limb([top, leg.hip, leg.knee, leg.ankle], [hws[0], ...hws]), s = sm([...left, ...[...right].reverse()], 3);
+  const { l, r } = legEdges(leg, hws), s = sm([...r, ...[...l].reverse()], 3);
   cel(g, s, PANTS, PANTS_SH, 22);
   // the far leg sits a half-tone back, fading in below the hip, so the seat over its top (the
   // nearer fabric's tone) shows no seam of tone where the two meet
@@ -278,6 +274,35 @@ const trouserLeg = (g: Gfx, leg: Leg, hws: number[], far: boolean, seed: number)
     c.fillStyle = gr; c.fillRect(leg.hip[0] - 300, leg.hip[1], 600, 1200);
   });
   outline(g, s, 5.5, seed);
+};
+// a trouser leg's two screen edges (left, right), top to bottom, as trouserLeg draws them
+// (it starts a little above the hip and narrower there, so its top lies inside the seat)
+const legEdges = (leg: Leg, hws: number[]) => {
+  const top: P = [leg.hip[0] + (leg.hip[0] - leg.knee[0]) * 0.15, leg.hip[1] - 50];
+  const { left, right } = limb([top, leg.hip, leg.knee, leg.ankle], [hws[0] - 16, ...hws]);
+  // `right` is the screen-left edge of a limb drawn downward, `left` the screen-right one
+  return { l: right, r: left };
+};
+// x of a polyline at height y (its first crossing), or undefined
+const xAt = (pts: P[], y: number): number | undefined => {
+  for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; if ((y0 - y) * (y1 - y) <= 0 && y0 !== y1) return x0 + ((x1 - x0) * (y - y0)) / (y1 - y0); }
+  return undefined;
+};
+/** the seat for a pose: its fill, and its two side contours from the waist into the legs */
+const seatOf = (far: Leg, near: Leg, bob: number, lean: number) => {
+  const ef = legEdges(far, LEG_HW_FAR), en = legEdges(near, LEG_HW_NEAR), at = (pts: P[]) => shift(pts, lean, bob);
+  const side = (pick: (a: number, b: number) => number, edges: P[][], from: P[]): P[] => {
+    const start = at(from), y0 = start[start.length - 1][1], out: P[] = [...start];
+    for (let y = y0 + 30; y <= SEAT_END + bob; y += 15) {
+      const xs = edges.map((e) => xAt(e, y)).filter((x): x is number => x !== undefined);
+      if (xs.length) out.push([xs.reduce((m, x) => pick(m, x)), y]);
+    }
+    return out;
+  };
+  const left = side(Math.min, [ef.l, en.l], SEAT_BACK), right = side(Math.max, [ef.r, en.r], SEAT_FRONT);
+  // the fill: down the left side, a little way past its end into the leg, across the bottom, up the right
+  const fill = [...left, ...at(SEAT_BOTTOM).reverse(), ...[...right].reverse()];
+  return { fill, left: smooth(left, false, 6), right: smooth(right, false, 6) };
 };
 const shoe = (g: Gfx, leg: Leg, k: number) => {
   piece(g, sm(placeShoe(TRAINER, leg.heel, leg.deg, leg.bend), 4), WHITE, T.shoeShade, 10, 5, 102 + k * 2);
@@ -316,21 +341,26 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
     g.push(lean, bob, 1); inHead(g, () => hairBack(g, pose.hairU)); g.pop();
     piece(g, limbTube(bodyFig([ARM_FAR[0], ARM_FAR[1]]), 40, 34), ACCENT, DEEP, 14, 5.5, 101);
   });
-  // the legs: the far one, the seat over its top, the near one in front, the seat's top again over
-  // the near thigh's cut end; then the top tucked into the trousers, neck, V neckline
+  // the legs, far then near, then the seat over both their tops: its sides run from the waist out
+  // over the hip and down each side into the outer edge of whichever leg is outermost there, so
+  // the contour from waist to leg is one smooth line with no corner; its bottom, between the legs,
+  // has no outline. Then the top tucked into the trousers, neck, V neckline
   layer(() => {
     shoe(g, far, 0);
-    trouserLeg(g, far, [60, 45, 36], true, 110);
+    trouserLeg(g, far, LEG_HW_FAR, true, 110);
     CREASE_FAR.forEach((c, j) => stroke(g, shift(c, far.knee[0], far.knee[1]), 3, 112 + j, T.line, 0.9, 0.7));
-    const seat = sm(bodyFig(SEAT), 3);
-    celAcross(g, seat, PANTS, PANTS_SH, 22);
     shoe(g, near, 1);
-    trouserLeg(g, near, [62, 46, 37], false, 119);
+    trouserLeg(g, near, LEG_HW_NEAR, false, 119);
     CREASE_NEAR.forEach((c, j) => stroke(g, shift(c, near.knee[0], near.knee[1]), 3.4 - j * 0.4, 113 + j * 7, T.line, 0.9, 0.8 - j * 0.2));
-    clipped(g, sm(bodyFig(SEAT_TOP), 3), () => celAcross(g, seat, PANTS, PANTS_SH, 22));
-    stroke(g, bodyFig(SEAT_L), 5.5, 117, T.line, 0.3);
-    stroke(g, bodyFig(SEAT_R), 5.5, 118, T.line, 0.3);
-    stroke(g, bodyFig([[400, 1640], [403, 1708]]), 2.6, 114, T.line, 0.9, 0.5);
+    const { fill, left, right } = seatOf(far, near, bob, lean);
+    // the seat lit all over, with the legs' shade strip only down its side away from the light: a
+    // shade cast by an offset copy (cel) would also show along its bottom, which reads as a line
+    const seatFill = sm(fill, 3);
+    fillShape(g, seatFill, PANTS);
+    clipped(g, seatFill, () => g.pen(shift(right, -7, 0), { w: 13, color: PANTS_SH, seed: 116, closed: false, wobble: 0, boil: 0, taper: 0, opacity: 1, retrace: false }));
+    stroke(g, left, 5.5, 117, T.line, 0.15);
+    stroke(g, right, 5.5, 118, T.line, 0.15);
+    stroke(g, bodyFig([[400, 1640], [402, 1690]]), 2.6, 114, T.line, 0.9, 0.45);
     piece(g, sm(bodyFig(NECK)), SKIN, SKIN_SH, 10, 5, 115);
     piece(g, sm(bodyFig(TORSO)), ACCENT, DEEP, 30, 6, 116);
     fillShape(g, sm(bodyFig(TORSO_SH)), DEEP, 0.9);
@@ -391,20 +421,23 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
 };
 
 // ---------------------------------------------------------------- her voice, into the phone
-/** the path of her voice, figure space: straight across the gap from her lips, a slight rise,
+/** the path of her voice, figure space: straight across the gap from her lips, gently down,
  *  into the near edge of the phone she holds out */
 export const voicePath = (pose: Pose): Path => {
   const m = mouthAt(pose), ph = phoneMap(pose);
   const d = (x: number, y: number): P => [m[0] + x, m[1] + y];
-  const [edge] = ph([[-56, -30]]), [into] = ph([[-20, -36]]);
-  return pathOf([d(16, -8), [(m[0] * 2 + edge[0]) / 3, m[1] - 22], [(m[0] + edge[0] * 2) / 3, edge[1] - 10], edge, into], 20);
+  const [edge] = ph([[-58, -24]]), [into] = ph([[-22, -28]]), s0 = d(18, 4);
+  // a straight line from her lips to the phone's edge, bowed up very slightly so it reads as
+  // breath carried across rather than a ruler
+  const mid = (k: number): P => [s0[0] + (edge[0] - s0[0]) * k, s0[1] + (edge[1] - s0[1]) * k - 10 * Math.sin(Math.PI * k)];
+  return pathOf([s0, mid(1 / 3), mid(2 / 3), edge, into], 20);
 };
 // Her voice as the Dictus waveform crossing the gap (Pierre's pick in round 7, over the App Store
 // art's marker strokes): small rounded bars, upright, ride the path from her lips into the phone,
 // born small, swelling mid-way with her speech, shrinking as they reach it. The row moves 17
 // bar-spacings a loop, in the blues of the BrandWaveform's centre.
 export const drawVoice = (g: Gfx, pose: Pose, lp: Loop, frame: number) => {
-  const path = voicePath(pose), L = path.total, gap = 30, n = Math.floor(L / gap), flow = (lp.tau(frame) * 17) % 1;
+  const path = voicePath(pose), L = path.total, gap = 26, n = Math.floor(L / gap), flow = (lp.tau(frame) * 17) % 1;
   for (let k = 0; k < n; k++) {
     const s = ((k + flow) / n) * L, t = s / L;
     if (t > 0.96) continue;
