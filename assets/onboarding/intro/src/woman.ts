@@ -10,7 +10,8 @@ import { THEMES, type Loop, type Theme } from "./theme";
 //
 // One thing differs from V15-B: the trousers are two legs and a seat instead of one silhouette,
 // because one outline round both legs cannot survive them crossing in the walk. Her phone is
-// V15-B's, seen from the back as she holds it to her mouth (the way anyone talks into a phone);
+// V15-B's, seen from the back, held out in front of her mouth (round 7: further out than V15-B's,
+// so her voice has a gap to cross); her hair is a jaw-length bob (round 7, replacing V15-B's);
 // her voice goes into it.
 //
 // The walk (legAt): a leg is its hip, its foot (heel point, sole angle, toe bend) and two bone
@@ -45,11 +46,12 @@ export const outline = (g: Gfx, s: P[], w: number, seed: number, color = T.line)
 export const stroke = (g: Gfx, pts: P[], w: number, seed: number, color = T.line, taper = 0.9, op = 1) =>
   g.pen(smooth(pts, false, 8), { w: w * LW, color, seed, closed: false, wobble: 0.5, boil: 0, taper, opacity: op, retrace: false });
 export const piece = (g: Gfx, s: P[], lit: string, shade: string, k: number, w: number, seed: number) => { cel(g, s, lit, shade, k); outline(g, s, w, seed); };
-// the seat's shading: the shade only down its side away from the light, never along its bottom,
-// where a band of shade read as a bulge between the legs
+// the seat's shading: the same lit fill and the same shade strip down the side away from the
+// light as the legs (cel's horizontal offset), never along its bottom, where a band of shade read
+// as a bulge between the legs: so seat and legs read as one fabric
 const celAcross = (g: Gfx, s: P[], lit: string, shade: string, k: number) => {
   fillShape(g, s, shade);
-  clipped(g, s, () => fillShape(g, s.map(([x, y]) => [x + LIGHT[0] * k, y + 40] as P), lit));
+  clipped(g, s, () => fillShape(g, s.map(([x, y]) => [x + LIGHT[0] * k, y] as P), lit));
 };
 
 // ---------------------------------------------------------------- path utilities (V15-B's)
@@ -103,27 +105,24 @@ export const MOUTH_F = hv([688, 602]);   // her lips, figure space
 export const LEG_FAR = [[452, 1680], [566, 2020], [660, 2370]] as P[];    // her left, reaching forward, heel striking
 export const LEG_NEAR = [[344, 1690], [350, 2010], [200, 2296]] as P[];   // her right, behind, heel lifted
 export const ARM_NEAR = [[298, 1238], [322, 1450], [376, 1650]] as P[];   // her right, swung forward, the tote
-const ARM_FAR_V15 = [[500, 1228], [566, 1456], [650, 1278]] as P[];    // her left, the phone up at her chin
-// EXPLORATION (round 7): the phone held further out, the forearm reaching forward, so the voice
-// has a clear gap to cross from her lips to the phone, held at the height of her mouth (the
-// forearm 15 % longer than V15-B's, which the eye takes for the reach)
-const ARM_FAR_REACH = [[500, 1228], [655, 1400], [814, 1238]] as P[];
-let ARM_FAR = ARM_FAR_V15;
+// her left arm holds the phone out at the height of her mouth, the forearm reaching forward, so
+// her voice has a clear gap to cross to the phone (the forearm 15 % longer than V15-B's, which
+// the eye takes for the reach)
+export const ARM_FAR = [[500, 1228], [655, 1400], [814, 1238]] as P[];
 export const BAG_D: P = [36, -14];
 
 const TORSO: P[] = [[368, 1160], [330, 1172], [292, 1192], [266, 1226], [262, 1290], [276, 1380], [294, 1468], [300, 1532], [482, 1528], [476, 1478], [492, 1420], [516, 1362], [524, 1300], [520, 1242], [502, 1198], [462, 1174], [428, 1162]];
 const TORSO_SH: P[] = [[266, 1226], [292, 1192], [330, 1174], [320, 1260], [320, 1360], [336, 1530], [300, 1532], [294, 1468], [276, 1380], [262, 1290]];
 const NECK: P[] = [hv([506, 672]), hv([596, 686]), [430, 1174], [368, 1170]];
 const VNECK: P[] = [[362, 1162], [404, 1224], [436, 1162], [446, 1172], [404, 1252], [352, 1172]];
-const HAIR_BACK: P[] = [[452, 620], [402, 560], [376, 470], [392, 372], [450, 296], [540, 262], [610, 270], [560, 330], [470, 420], [446, 520], [462, 640], [470, 760], [452, 880], [410, 990], [350, 1074], [296, 1102], [262, 1090], [296, 1040], [300, 960], [300, 860], [320, 760], [340, 690]];
-const HAIR_STRANDS: P[][] = [[[430, 700], [420, 840], [380, 960], [320, 1060]], [[390, 640], [370, 780], [350, 900], [300, 1000]], [[440, 560], [440, 700], [430, 820]]];
 
-// the seat of the high-waisted trousers, waist to crotch, over both legs' tops (V15-B's outline
-// there, its sides ending where the legs' outer edges leave the hips); SEAT_TOP is the band of it
+// the seat of the high-waisted trousers, waist to crotch, over both legs' tops: its back flares
+// out from the waist into her hip (a woman's line, hips wider than the waist), its front runs
+// almost straight down into the front leg (round 7: no bulge), its bottom a shallow line; SEAT_TOP is the band of it
 // painted again, with the seat's own shading, over the near thigh so its cut end never shows
-const SEAT: P[] = [[300, 1524], [280, 1572], [268, 1630], [280, 1690], [340, 1708], [404, 1716], [466, 1700], [510, 1664], [514, 1630], [500, 1572], [484, 1524]];
-const SEAT_TOP: P[] = [[300, 1524], [280, 1572], [268, 1630], [282, 1694], [404, 1712], [510, 1668], [514, 1630], [500, 1572], [484, 1524]];
-const SEAT_L: P[] = [[300, 1524], [280, 1572], [268, 1630], [282, 1690]], SEAT_R: P[] = [[484, 1524], [500, 1572], [514, 1630], [509, 1662]];
+const SEAT: P[] = [[300, 1524], [276, 1566], [256, 1622], [260, 1680], [290, 1704], [340, 1712], [404, 1716], [466, 1700], [509, 1666], [504, 1620], [495, 1572], [484, 1524]];
+const SEAT_TOP: P[] = [[300, 1524], [276, 1566], [256, 1622], [262, 1688], [404, 1712], [509, 1668], [504, 1620], [495, 1572], [484, 1524]];
+const SEAT_L: P[] = [[300, 1524], [276, 1566], [256, 1622], [262, 1690]], SEAT_R: P[] = [[484, 1524], [495, 1572], [504, 1620], [509, 1664]];
 
 // ---------------------------------------------------------------- the walk
 const TRAINER: P[] = [[0, -8], [4, -50], [28, -62], [58, -58], [98, -46], [140, -36], [172, -26], [190, -12], [188, 4], [150, 8], [80, 8], [8, 6]];
@@ -145,8 +144,8 @@ const placeShoe = (pts: P[], heel: P, deg: number, bend = 0): P[] => turn(pts.ma
 const FOOT: [number, number, number, number][] = [
   [199, 743, -24, 0],    // contact: heel strike, toes up
   [112, 735, -4, 0],     // down: the foot slaps flat
-  [25, 729, 0, 0],
-  [-61, 722, 0, 0],      // passing (the other leg swings by)
+  [25, 736, 0, 0],
+  [-61, 732, 0, 0],      // passing (the other leg swings by)
   [-139, 673, 20, 20],   // the heel peels up, the ball stays
   [-197, 617, 45, 45],   // push-off, on the ball
   [-246, 590, 65, 30],   // toe-off
@@ -169,7 +168,9 @@ const ANKLE_IN_SHOE: P = [29.8, -45];
 export const BONES_FRONT: P = [358.6, 362.4], BONES_BACK: P = [320, 323];
 const bonesAt = (u: number): P => { const d = Math.abs((((u % 1) + 1) % 1) - 0.5), w = Math.exp(-((d / 0.12) ** 2)); return [BONES_FRONT[0] + (BONES_BACK[0] - BONES_FRONT[0]) * w, BONES_FRONT[1] + (BONES_BACK[1] - BONES_FRONT[1]) * w]; };
 // the body sinks at contact and rises at passing, twice a cycle; 0 at contact, so frame 0 is V15-B
-const BOB = 7;
+// (22: enough that the stance leg straightens at the passing position instead of sitting in a
+// squat, as a walking body rises over its supporting leg)
+const BOB = 22;
 export const bobAt = (u: number) => BOB * (Math.cos(4 * Math.PI * u) - 1);
 
 export type Leg = { hip: P; knee: P; ankle: P; heel: P; deg: number; bend: number };
@@ -200,14 +201,8 @@ export const fist = (d: P) => {
   const thumb = tube(shift([[346, 1680], [372, 1684], [394, 1700]], dx, dy), 10.5, 9, true);
   return { back, fingers, thumb };
 };
-const PHONE_V15 = { cx: 596, cy: 1150, w: 104, h: 208, deg: -10 };
-// the phone sits on the wrist as on V15-B (its centre 54 left and 128 up from the wrist)
-const PHONE_REACH = { cx: 760, cy: 1110, w: 104, h: 208, deg: -10 };
-let PHONE = PHONE_V15;
-export type VoiceStyle = "arch" | "strokes" | "bars";
-let VOICE: VoiceStyle = "arch";
-/** EXPLORATION (round 7): the phone held out, and how the voice crosses to it */
-export const setReach = (reach: boolean, voice: VoiceStyle) => { ARM_FAR = reach ? ARM_FAR_REACH : ARM_FAR_V15; PHONE = reach ? PHONE_REACH : PHONE_V15; VOICE = voice; };
+// the phone sits on her wrist as V15-B's does (its centre 54 left and 128 up from the wrist)
+export const PHONE = { cx: 760, cy: 1110, w: 104, h: 208, deg: -10 };
 const phoneHand = (ph: (pts: P[]) => P[]) => {
   const back = sm(ph([[8, 36], [50, 26], [66, 66], [62, 110], [36, 132], [4, 124], [-10, 88]]), 4);
   const fingers = [0, 1, 2, 3].map((k) => { const v = 18 + k * 21, r = [92, 96, 90, 76][k]; return tube(ph([[30, v + 6], [30 - r * 0.6, v], [30 - r, v - 4]]), 10.5, 9.5, true); });
@@ -217,66 +212,28 @@ const phoneHand = (ph: (pts: P[]) => P[]) => {
 
 // ---------------------------------------------------------------- the head (V7 "woman, curves", V7 coordinates)
 const C_FACE: P[] = [[455, 366], [530, 336], [608, 346], [662, 396], [688, 460], [694, 522], [682, 582], [656, 634], [612, 674], [556, 690], [500, 678], [456, 642], [428, 586], [418, 516], [426, 440]];
-const C_HAIR_FRONT: P[] = [[422, 470], [436, 380], [490, 318], [566, 290], [640, 296], [696, 330], [720, 384], [704, 392], [664, 360], [612, 344], [566, 352], [526, 384], [492, 440], [470, 520], [460, 600], [440, 660], [420, 600]];
 const inHead = (g: Gfx, fn: () => void) => { g.push(HEAD_AT[0] - 560 * HEAD_S, HEAD_AT[1] - 500 * HEAD_S, HEAD_S); LW = 1.35; fn(); LW = 1; g.pop(); };
-// the hair's ends trail the walk: points below the nape swing back and forth with the steps,
-// more the lower they hang, a little after the body moves
-const sway = (pts: P[], u: number): P[] => pts.map(([x, y]) => { const w = clamp((y - 720) / 380); return [x - 9 * w * w * (1 + Math.cos(4 * Math.PI * u - 0.9)), y - 4 * w * Math.sin(4 * Math.PI * u - 0.9)] as P; });
 // ---- the hair, in V7's head coordinates (face oval x 418..694, y 336..690, the back of the
-// head to the left). EXPLORATION (round 7): `HAIR` picks one of the styles below; "v15" is the
-// App Store art's, kept until Pierre chooses.
-export type HairStyle = "v15" | "ponytail" | "bob" | "loose";
-let HAIR: HairStyle = "v15";
-export const setHair = (h: HairStyle) => { HAIR = h; };
+// head to the left): a jaw-length bob (Pierre's pick in round 7, over a ponytail and long loose
+// hair), which replaced V15-B's roll on top and stiff ponytail.
 const HAIR_LIT = "#3A5486", HAIR_SH = "#1E2F55", HAIR_BACK_LIT = "#2C3F66", HAIR_BACK_SH = "#18264A", HAIR_STRAND = "#5A75A8";
 // a swing that grows toward the hair's ends (below `from`), trailing the walk or the rocking
 const swing = (pts: P[], u: number, from: number, amp: number): P[] => pts.map(([x, y]) => { const w = clamp((y - from) / 300); return [x - amp * w * w * (1 + Math.cos(4 * Math.PI * u - 0.9)), y - amp * 0.45 * w * Math.sin(4 * Math.PI * u - 0.9)] as P; });
-// One front piece for all three: the hair over the crown, parted high on her right, swept over
+// The front: the hair over the crown, parted high on her right, swept over
 // the forehead and ending in two soft locks above her brows (a fringe, not a roll), down to the
 // temple in front of the ear. Strand lines follow the way the hair falls from the parting.
 const FRONT: P[] = [[452, 600], [430, 520], [428, 440], [452, 368], [504, 316], [572, 292], [640, 304], [688, 338], [704, 384], [696, 414], [680, 396], [656, 418], [630, 392], [596, 396], [556, 402], [516, 428], [486, 474], [468, 540], [462, 604]];
 const FRONT_STRANDS: P[][] = [[[600, 300], [540, 320], [490, 360], [460, 430], [450, 520]], [[620, 306], [600, 340], [588, 380]], [[650, 316], [668, 350], [676, 396]]];
-// "ponytail": the back of the head, the hair drawn back into a tail tied at the back of the
-// crown, swinging out and down behind her in an S to a pointed end
-const PT_BACK: P[] = [[600, 296], [520, 270], [446, 290], [396, 344], [372, 420], [374, 510], [394, 590], [430, 650], [456, 640], [450, 560]];
-const PT_TAIL: P[] = [[392, 430], [348, 500], [326, 600], [328, 720], [344, 830], [352, 920]];
-// "bob": the back of the head and the hair down to her jaw, its ends cut in a few soft points
+// the back of the head and the hair down to her jaw, its ends cut in a few soft points
 const BOB_BACK: P[] = [[600, 290], [520, 266], [440, 286], [388, 340], [360, 420], [352, 520], [358, 620], [374, 700], [402, 742], [424, 716], [446, 750], [470, 714], [492, 736], [496, 690], [470, 620], [452, 540]];
-// "loose": the same, falling to below the shoulders behind her neck, the ends in pointed locks
-const LOOSE_BACK: P[] = [[600, 290], [520, 266], [440, 286], [388, 340], [358, 420], [348, 540], [348, 680], [356, 820], [370, 930], [392, 990], [414, 944], [436, 1000], [456, 950], [478, 984], [482, 900], [474, 780], [470, 660], [456, 560]];
-const BACK_STRANDS: Record<string, P[][]> = {
-  bob: [[[420, 360], [392, 460], [388, 580], [404, 690]], [[460, 330], [430, 440], [430, 600]]],
-  loose: [[[420, 360], [388, 500], [384, 680], [396, 880]], [[456, 340], [424, 500], [430, 720], [446, 920]]],
-};
+const BOB_STRANDS: P[][] = [[[420, 360], [392, 460], [388, 580], [404, 690]], [[460, 330], [430, 440], [430, 600]]];
 const hairBack = (g: Gfx, u: number) => {
-  if (HAIR === "v15") {
-    piece(g, sm(sway(HAIR_BACK, u)), HAIR_BACK_LIT, HAIR_BACK_SH, 18, 7, 80);
-    HAIR_STRANDS.forEach((s, k) => stroke(g, sway(s, u), 3, 84 + k, "#4A6496", 0.9, 0.8));
-    return;
-  }
-  if (HAIR === "ponytail") {
-    // the tail first, behind the head: a tapering S, thick at the tie, pointed at its end
-    const c = smooth(swing(PT_TAIL, u, 470, 18), false, 10), n = c.length, L: P[] = [], R: P[] = [];
-    c.forEach((p, i) => {
-      const a = c[Math.max(0, i - 1)], b = c[Math.min(n - 1, i + 1)], l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, t = i / (n - 1);
-      const w = 40 * Math.sin(Math.PI * Math.min(1, 0.18 + t * 0.95)) * (1 - 0.15 * t);
-      L.push([p[0] - ((b[1] - a[1]) / l) * w, p[1] + ((b[0] - a[0]) / l) * w]); R.push([p[0] + ((b[1] - a[1]) / l) * w, p[1] - ((b[0] - a[0]) / l) * w]);
-    });
-    const tail = [...L, ...R.reverse()];
-    piece(g, smooth(tail, true, 3), HAIR_BACK_LIT, HAIR_BACK_SH, 10, 6, 80);
-    [0.3, -0.3].forEach((o, k) => stroke(g, c.slice(2, -2).map(([x, y], i) => [x + o * 40 * Math.sin((i / (n - 4)) * Math.PI), y] as P), 2.6, 84 + k, HAIR_STRAND, 0.9, 0.7));
-    piece(g, sm(PT_BACK), HAIR_BACK_LIT, HAIR_BACK_SH, 14, 7, 81);
-    return;
-  }
-  const back = HAIR === "bob" ? BOB_BACK : LOOSE_BACK, from = HAIR === "bob" ? 620 : 640;
-  piece(g, sm(swing(back, u, from, HAIR === "bob" ? 5 : 10)), HAIR_BACK_LIT, HAIR_BACK_SH, 16, 7, 80);
-  BACK_STRANDS[HAIR].forEach((s, k) => stroke(g, swing(s, u, from, HAIR === "bob" ? 5 : 10), 2.6, 84 + k, HAIR_STRAND, 0.9, 0.7));
+  piece(g, sm(swing(BOB_BACK, u, 620, 5)), HAIR_BACK_LIT, HAIR_BACK_SH, 16, 7, 80);
+  BOB_STRANDS.forEach((s, k) => stroke(g, swing(s, u, 620, 5), 2.6, 84 + k, HAIR_STRAND, 0.9, 0.7));
 };
 const hairFront = (g: Gfx) => {
-  if (HAIR === "v15") { piece(g, sm(C_HAIR_FRONT), HAIR_LIT, HAIR_SH, 16, 6, 82); return; }
   piece(g, smooth(FRONT, true, 4), HAIR_LIT, HAIR_SH, 12, 6, 82);
   FRONT_STRANDS.forEach((s, k) => stroke(g, s, 2.6, 86 + k, HAIR_STRAND, 0.9, 0.7));
-  if (HAIR === "ponytail") { const tie = tube([[392, 412], [404, 452]], 13, 13, true); fillShape(g, tie, ACCENT); outline(g, tie, 3, 89); }
 };
 // talking: the jaw opens and closes on two beats that never line up, between 70 % and 100 % of
 // the drawn mouth; the upper lip stays where V7 drew it
@@ -313,7 +270,13 @@ const trouserLeg = (g: Gfx, leg: Leg, hws: number[], far: boolean, seed: number)
   const top: P = [leg.hip[0] + (leg.hip[0] - leg.knee[0]) * 0.2, leg.hip[1] - 70];
   const { left, right } = limb([top, leg.hip, leg.knee, leg.ankle], [hws[0], ...hws]), s = sm([...left, ...[...right].reverse()], 3);
   cel(g, s, PANTS, PANTS_SH, 22);
-  if (far) clipped(g, s, () => fillShape(g, s, PANTS_SH, 0.35));
+  // the far leg sits a half-tone back, fading in below the hip, so the seat over its top (the
+  // nearer fabric's tone) shows no seam of tone where the two meet
+  if (far) clipped(g, s, () => {
+    const c = g.cur, gr = c.createLinearGradient(0, leg.hip[1], 0, leg.hip[1] + 140);
+    gr.addColorStop(0, "rgba(15,30,54,0)"); gr.addColorStop(1, "rgba(15,30,54,0.35)");
+    c.fillStyle = gr; c.fillRect(leg.hip[0] - 300, leg.hip[1], 600, 1200);
+  });
   outline(g, s, 5.5, seed);
 };
 const shoe = (g: Gfx, leg: Leg, k: number) => {
@@ -326,10 +289,6 @@ const shoe = (g: Gfx, leg: Leg, k: number) => {
 // the knee creases ride on the knees: V15-B's, relative to its knees
 const CREASE_FAR: P[][] = [[[-26, -20], [2, 0], [28, -6]]];
 const CREASE_NEAR: P[][] = [[[-34, -20], [-6, 14], [28, 8]], [[-30, 36], [-10, 50]]];
-// ---------------------------------------------------------------- the phone, front
-// her voice goes into the phone here, phone-local (u across, v down from the centre): past its
-// top edge, so the strokes end behind the phone
-export const PHONE_IN: P = [-4, -60];
 
 /** what a scene asks of her: the posed legs, the body's bob (down) and lean (forward), the walk
  *  phase her hair trails, the mouth's opening, the near arm (shoulder, elbow, wrist) and what its
@@ -432,47 +391,19 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
 };
 
 // ---------------------------------------------------------------- her voice, into the phone
-/** the path of her voice, figure space: out of her lips in the big arch of the App Store art,
- *  up and over to the right, then curling back and down into the top of the phone, where it
- *  ends behind it */
+/** the path of her voice, figure space: straight across the gap from her lips, a slight rise,
+ *  into the near edge of the phone she holds out */
 export const voicePath = (pose: Pose): Path => {
-  const m = mouthAt(pose), ph = phoneMap(pose), [inP] = ph([PHONE_IN]);
+  const m = mouthAt(pose), ph = phoneMap(pose);
   const d = (x: number, y: number): P => [m[0] + x, m[1] + y];
-  if (VOICE !== "arch") {
-    // straight across the gap: out of her lips, a slight rise, into the phone's near edge
-    const [edge] = ph([[-56, -30]]), [into] = ph([[-20, -36]]);
-    return pathOf([d(16, -8), [(m[0] * 2 + edge[0]) / 3, m[1] - 22], [(m[0] + edge[0] * 2) / 3, edge[1] - 10], edge, into], 20);
-  }
-  return pathOf([d(14, -12), d(60, -104), d(160, -190), d(300, -214), d(410, -160), d(440, -60), d(384, 14), d(282, 26), [inP[0] + 72, inP[1] - 52], inP], 20);
+  const [edge] = ph([[-56, -30]]), [into] = ph([[-20, -36]]);
+  return pathOf([d(16, -8), [(m[0] * 2 + edge[0]) / 3, m[1] - 22], [(m[0] + edge[0] * 2) / 3, edge[1] - 10], edge, into], 20);
 };
-/**
- * Three thin marker strokes from her lips into the phone, broken into pulses that travel along
- * them toward the phone: `n` pulses reach it per loop, so the stream is periodic. The strokes
- * fan out a little over the arch and gather again as they enter.
- */
-export const drawVoice = (g: Gfx, pose: Pose, lp: Loop, frame: number, n: number) => {
-  if (VOICE === "bars") { drawVoiceBars(g, pose, lp, frame); return; }
-  if (VOICE === "strokes") { drawVoiceStrokes(g, pose, lp, frame); return; }
-  const path = voicePath(pose), L = path.total, period = L / (VOICE === "strokes" ? 1.7 : 3.6), flow = (lp.tau(frame) * n) % 1;
-  [-1, 0, 1].forEach((o, j) => {
-    const lane = (s: number) => o * (VOICE === "strokes" ? 11 : 14) * Math.sin(Math.PI * clamp(s / L)) + Math.sin((s / L) * Math.PI * [3, 4, 3.4][j] + j - flow * 2 * Math.PI) * 4 * Math.sin(Math.PI * clamp(s / L));
-    // pulse k covers [start, start + 0.62 period]; starts advance with the flow, and a pulse is
-    // cut at both ends of the path, so pulses are born at her lips and swallowed by the phone
-    for (let k = -1; k <= 3; k++) {
-      const a = (k + flow + j * 0.12) * period, b = a + period * 0.62, s0 = Math.max(0, a), s1 = Math.min(L, b);
-      if (s1 - s0 < 6) continue;
-      const pts: P[] = [];
-      for (let s = s0; s <= s1 + 0.01; s += 5) pts.push(off(path, s, lane(s)));
-      g.pen(pts, { w: [6.4, 8.4, 5.6][j], color: [HIGH, ACCENT, DEEP][j], seed: 170 + j, closed: false, wobble: 0.5, boil: 0, taper: 0.8, opacity: 1, retrace: false });
-    }
-  });
-};
-
-// EXPLORATION (round 7), voice "bars": the Dictus waveform crossing the gap. Small rounded bars,
-// upright, ride the path from her lips into the phone: born small, swelling mid-way with her
-// speech, shrinking as they reach it. The row moves 17 bar-spacings a loop, in the blues of the
-// BrandWaveform's centre.
-const drawVoiceBars = (g: Gfx, pose: Pose, lp: Loop, frame: number) => {
+// Her voice as the Dictus waveform crossing the gap (Pierre's pick in round 7, over the App Store
+// art's marker strokes): small rounded bars, upright, ride the path from her lips into the phone,
+// born small, swelling mid-way with her speech, shrinking as they reach it. The row moves 17
+// bar-spacings a loop, in the blues of the BrandWaveform's centre.
+export const drawVoice = (g: Gfx, pose: Pose, lp: Loop, frame: number) => {
   const path = voicePath(pose), L = path.total, gap = 30, n = Math.floor(L / gap), flow = (lp.tau(frame) * 17) % 1;
   for (let k = 0; k < n; k++) {
     const s = ((k + flow) / n) * L, t = s / L;
@@ -483,19 +414,4 @@ const drawVoiceBars = (g: Gfx, pose: Pose, lp: Loop, frame: number) => {
     const r = 8, bar: P[] = [...Array.from({ length: 9 }, (_, i) => { const a = Math.PI + (i / 8) * Math.PI; return [x + Math.cos(a) * r, y - h / 2 + r + Math.sin(a) * r] as P; }), ...Array.from({ length: 9 }, (_, i) => { const a = (i / 8) * Math.PI; return [x + Math.cos(a) * r, y + h / 2 - r + Math.sin(a) * r] as P; })];
     fillShape(g, bar, [HIGH, ACCENT, DEEP][k % 3]);
   }
-};
-
-// EXPLORATION (round 7), voice "strokes": the App Store art's three marker strokes, whole, across
-// the gap: close together at her lips, fanning out mid-way, gathering again into the phone. A
-// ripple runs along them toward the phone, eleven waves a loop, so they are seen to flow in.
-const drawVoiceStrokes = (g: Gfx, pose: Pose, lp: Loop, frame: number) => {
-  const path = voicePath(pose), L = path.total, flow = 2 * Math.PI * ((lp.tau(frame) * 11) % 1);
-  [-1, 0, 1].forEach((o, j) => {
-    const pts: P[] = [];
-    for (let s = 0; s <= L + 0.01; s += 4) {
-      const t = s / L, env = Math.sin(Math.PI * t);
-      pts.push(off(path, s, o * 16 * env + Math.sin(t * Math.PI * 4 + j * 1.3 - flow) * 5 * env));
-    }
-    g.pen(pts, { w: [6.4, 8.4, 5.6][j], color: [HIGH, ACCENT, DEEP][j], seed: 170 + j, closed: false, wobble: 0.5, boil: 0, taper: 0.7, opacity: 1, retrace: false });
-  });
 };

@@ -24,7 +24,7 @@ import {
 // What moves, periodic over the 5.5 s loop: the tunnel lights stream past the window (three
 // speeds, nearer lights faster) and bands of their light sweep back through the carriage and
 // over her; the carriage rocks, she sways with it, feet planted and the hand closed on the pole,
-// her ponytail swinging; the grab handles swing; she talks; the voice's pulses run into the
+// her hair swinging; the grab handles swing; she talks; the voice's bars run into the
 // phone; the mail draft writes; the badge pops twice. Noise around her (a neighbour) was optional in
 // the brief and is left out: at this size a second figure takes the eye from her phone.
 
@@ -107,7 +107,7 @@ const carriage = (g: Gfx, t: Theme, frame: number, rock: number) => {
 };
 
 // the hanging grab handles: where they hang on the rail, and their swing's phase
-// the right one hangs between the voice's arch and the badge, clear of both
+// the right one hangs between her phone and the badge, clear of both
 const HANDLES: [number, number][] = [[120, 0.4], [1110, -0.6]];
 // a strap down from the rail and a rounded triangular grip, swung by `deg` about the rail
 const handle = (g: Gfx, t: Theme, x: number, deg: number, seed: number) => {
@@ -170,15 +170,15 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   ctx.save(); toFrame(); ctx.globalCompositeOperation = "destination-out";
   const fade = (x0: number, y0: number, x1: number, y1: number) => { const gr = ctx.createLinearGradient(x0, y0, x1, y1); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)"); return gr; };
   ctx.fillStyle = fade(0, 0, 170, 0); ctx.fillRect(-30, 600, 200, H);
-  ctx.fillStyle = fade(1386, 0, 1210, 0); ctx.fillRect(1200, 600, 400, H);   /* fully gone 80 px before the edge */
+  ctx.fillStyle = fade(1346, 0, 1170, 0); ctx.fillRect(1160, 600, 440, H);   /* fully gone 120 px before the edge */
   ctx.fillStyle = fade(0, TOP, 0, TOP + 150); ctx.fillRect(-30, TOP - 100, 1600, 250);
-  ctx.fillStyle = fade(0, FRAME_BOTTOM - 120, 0, FRAME_BOTTOM - 420); ctx.fillRect(-30, FRAME_BOTTOM - 420, 1600, 520);   /* fully gone 120 px before the edge */
+  ctx.fillStyle = fade(0, FRAME_BOTTOM - 160, 0, FRAME_BOTTOM - 460); ctx.fillRect(-30, FRAME_BOTTOM - 460, 1600, 560);   /* fully gone 160 px before the edge */
   ctx.restore();
 
   // 2. her, and her voice going into her phone
   const pose = poseAt(frame);
   g.push(FIG.at[0], FIG.at[1], FIG.s);
-  drawWoman(g, theme, pose, () => drawVoice(g, pose, LP, frame, 11));
+  drawWoman(g, theme, pose, () => drawVoice(g, pose, LP, frame));
   g.pop();
 
   // 3. the tunnel's light sweeping over the carriage and her; then, over everything, the text

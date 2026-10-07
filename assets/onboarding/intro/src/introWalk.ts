@@ -10,9 +10,9 @@ import {
 
 // ONBOARDING INTRO, SCENE A · "walking" (issue #667, headline "Parlez. Dictus écrit.").
 // The App Store hero V15-B set in motion: she walks in place on a pavement that slides back
-// under her, the phone up at her mouth (seen from the back, as V15-B drew it), talking. Her
-// voice leaves her lips as the three blue strokes, in the App Store art's big arch, and goes
-// INTO the phone; the text comes OUT of it, as a sent chat message that springs from the
+// under her, her phone held out in front of her mouth (seen from the back, as V15-B drew it),
+// talking. Her voice leaves her lips as small blue bars of the Dictus waveform, straight across
+// the gap and INTO the phone; the text comes OUT of it, as a sent chat message that springs from the
 // phone's edge and grows a line at a time (woman.ts draws her and the voice, noteCard.ts the
 // message).
 //
@@ -21,7 +21,7 @@ import {
 //   back at the pavement's speed, the slab joints running at that speed at the feet's depth;
 // - the body rises at the passing positions and sinks at contact; the tote arm swings against
 //   the near leg and the tote follows the fist a beat late; the hair's ends sway; the phone rocks;
-// - the mouth talks; the voice's pulses travel from her lips into the phone, eleven a loop;
+// - the mouth talks; the voice's bars travel from her lips into the phone, swelling with her speech;
 // - the message springs out, grows four lines, and fades before the seam.
 
 // The source canvas is the App Store strip (2640 x 2868); the frame shows x 0..1466 of it at the
@@ -106,7 +106,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   // 2. her, and her voice going into her phone
   const pose = poseAt(frame);
   g.push(FIG.at[0], FIG.at[1], FIG.s);
-  drawWoman(g, theme, pose, () => drawVoice(g, pose, LP, frame, 11));
+  drawWoman(g, theme, pose, () => drawVoice(g, pose, LP, frame));
   g.pop();
 
   // 3. the text, coming out of the phone as a chat message
@@ -115,7 +115,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   clearEdges(ctx, env);
 };
 
-// the message, canvas pixels: in the empty right of the frame, under the voice's arch
+// the message, canvas pixels: in the empty right of the frame, below and right of the phone
 const CARD: Card = { style: "bubble", c: [1185, 1270], w: 400, deg: -2 };
 
 const film = (theme: Theme, title: string): Film => ({
