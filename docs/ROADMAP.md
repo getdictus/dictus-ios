@@ -21,7 +21,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 3. ~~#637 — voice-note transcripts in the keyboard~~ — merged in PR #638; #639 (tap ☰ for notes, keep them 15 min) merged in PR #641; then #640 (research: quote a passage)
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; open until Pierre's verdict in real use
 5. ~~#593 — reverse trial: Pro free for a fixed period, then the paywall~~ — merged in PR #595; two device checks left (iPad, EN strings)
-6. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); next competitor analysis, mock-ups, PR B, PR C
+6. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); mock-ups done 2026-10-07; intro videos in #667 (PR #670); next PR B, then PR C
 7. #216 — the Pro hub, one screen for free / trial / paid users. `ready-for-agent`. Must land before #279.
 8. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
 9. ~~#643 — App Store listing for 2.0.0~~ — merged in PR #645 (en, fr, de, es; ASC upload at submission). Remaining French UI follow-ups: ~~#664~~ (merged in PR #668), ~~#665~~ (merged in PR #671)
