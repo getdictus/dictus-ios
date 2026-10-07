@@ -43,7 +43,17 @@ const RAIL_Y = 836;                                 // the overhead grab rail
 const WIN = { x0: 690, y0: 930, x1: 1380, y1: 1520, r: 70 };
 const BENCH = { x0: 760, x1: 1470, back: [1580, 1960] as P, seat: [1960, 2070] as P };
 // the pole her hand closes round, figure space: a vertical tube from the rail to the floor
-const POLE_X = 238, POLE_R = 13;
+let POLE_X = 238;
+const POLE_R = 13;
+// EXPLORATION (round 10): how she holds on. "low" is round 9 (the pole at her hip, arm hanging);
+// "pole" moves the pole beside her and her hand up to shoulder height round it, the elbow bent
+// and down at her side; "strap" has her reach up and hold the overhead rail (the carriage's
+// straps hang at her chin here, the rail is the bar above her head)
+export type Hold = "low" | "pole" | "strap";
+let HOLD: Hold = "low";
+export const setHold = (h: Hold) => { HOLD = h; POLE_X = h === "pole" ? 170 : 238; };
+// where she holds the overhead rail, figure space (the rail at canvas y 836)
+const RAIL_GRIP: P = [(270 - 4.8) / 1.06, (836 + 72) / 1.06];
 const POLE_FOOT = 2500;                            // it stands on the floor where she stands
 const rrect = (x0: number, y0: number, x1: number, y1: number, r: number, n = 6): P[] => {
   const out: P[] = [], c = (cx: number, cy: number, a0: number) => { for (let i = 0; i <= n; i++) { const a = a0 + (i / n) * (Math.PI / 2); out.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); } };
@@ -152,16 +162,22 @@ const BONES_ARM: P = [213.4, 207.1];   // V15-B's upper arm and forearm
 const BONES_STAND: P = [340, 343];
 
 const poseAt = (frame: number): Pose => {
-  // the carriage rocks twice a loop; she sways with it a little after it, her feet planted
-  const lean = 12 * LP.cyc(frame, 2, -0.7), bob = -1.5 + 1.5 * LP.cyc(frame, 4, 0.3);
+  // the carriage rocks twice a loop; she sways with it a little after it, her feet planted, and
+  // when she holds on above, a little toward what she holds
+  const toward = HOLD === "low" ? 0 : -6;
+  const lean = toward + 12 * LP.cyc(frame, 2, -0.7), bob = -1.5 + 1.5 * LP.cyc(frame, 4, 0.3);
   const shoulder: P = [ARM_NEAR[0][0] + lean, ARM_NEAR[0][1] + bob];
-  const elbow = twoBone(shoulder, GRIP, BONES_ARM[0], BONES_ARM[1], -1);
-  return {
-    far: legFrom(LEG_FAR[0], STAND_FAR, BONES_STAND, bob, lean), near: legFrom(LEG_NEAR[0], STAND_NEAR, BONES_STAND, bob, lean),
-    bob, lean, hairU: LP.tau(frame) - 0.06, open: mouthOpen(LP, frame), armNear: [shoulder, elbow, GRIP],
-    carry: { kind: "pole", fistD: [BAG_D[0] + GRIP[0] - ARM_NEAR[2][0], BAG_D[1] + GRIP[1] - ARM_NEAR[2][1]] },
-    phoneDeg: -10 + 1.5 * LP.cyc(frame, 2, -1.2),
-  };
+  const legs = { far: legFrom(LEG_FAR[0], STAND_FAR, BONES_STAND, bob, lean), near: legFrom(LEG_NEAR[0], STAND_NEAR, BONES_STAND, bob, lean) };
+  const rest = { bob, lean, hairU: LP.tau(frame) - 0.06, open: mouthOpen(LP, frame), phoneDeg: -10 + 1.5 * LP.cyc(frame, 2, -1.2) };
+  if (HOLD === "low") {
+    const elbow = twoBone(shoulder, GRIP, BONES_ARM[0], BONES_ARM[1], -1);
+    return { ...legs, ...rest, armNear: [shoulder, elbow, GRIP], carry: { kind: "pole", fistD: [BAG_D[0] + GRIP[0] - ARM_NEAR[2][0], BAG_D[1] + GRIP[1] - ARM_NEAR[2][1]] } };
+  }
+  // the hand is fixed on the pole or the strap; the wrist sits a hand's length off it, toward her
+  const at: P = HOLD === "pole" ? [POLE_X, 1170] : RAIL_GRIP;
+  const wrist: P = HOLD === "pole" ? [at[0] + 40, at[1] + 26] : [at[0] + 10, at[1] + 50];
+  const elbow = twoBone(shoulder, wrist, BONES_ARM[0], BONES_ARM[1], 1);
+  return { ...legs, ...rest, armNear: [shoulder, elbow, wrist], carry: { kind: "grip", at, on: HOLD === "pole" ? "pole" : "strap", poleX: POLE_X, poleR: POLE_R } };
 };
 
 // ---------------------------------------------------------------- the picture

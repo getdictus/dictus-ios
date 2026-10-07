@@ -115,7 +115,7 @@ const VNECK: P[] = [[362, 1162], [404, 1224], [436, 1162], [446, 1172], [404, 12
 // to frame as the legs swapped). Its back flares out from the waist into a modest rounded hip and
 // curves back in to the fold under the buttock; its front runs almost straight down. The legs
 // pivot at hips hidden under it and are drawn behind it, so no leg edge ever shapes the seat.
-const SEAT_BACK: P[] = [[300, 1524], [280, 1560], [266, 1604], [262, 1648], [270, 1688], [292, 1716], [322, 1732]];
+const SEAT_BACK: P[] = [[300, 1524], [280, 1560], [266, 1604], [262, 1648], [270, 1688]];
 const SEAT_FRONT: P[] = [[484, 1524], [494, 1566], [502, 1612], [508, 1660], [514, 1704]];
 const SEAT_BOTTOM: P[] = [[496, 1724], [440, 1738], [380, 1740]];
 const LEG_HW_FAR = [60, 45, 36], LEG_HW_NEAR = [62, 46, 37];
@@ -199,6 +199,77 @@ export const fist = (d: P) => {
 };
 // the phone sits on her wrist as V15-B's does (its centre 54 left and 128 up from the wrist)
 export const PHONE = { cx: 800, cy: 1190, w: 104, h: 208, deg: -10 };
+// EXPLORATION (round 10): new hands, behind a switch whose default draws the round-9 hands
+export type HandStyle = "v15" | "new" | "new2";
+let HANDS: HandStyle = "v15";
+export const setHands = (h: HandStyle) => { HANDS = h; };
+// a frame on the hand: `u` down the forearm's line from the wrist, `v` across it toward her front
+const handFrame = (wrist: P, dir: P) => { const l = Math.hypot(dir[0], dir[1]) || 1, ux = dir[0] / l, uy = dir[1] / l, vx = uy, vy = -ux; return ([u, v]: P): P => [wrist[0] + ux * u + vx * v, wrist[1] + uy * u + vy * v]; };
+// the hand carrying the tote by its handles, as a hand does: the arm hanging nearly straight, the
+// palm toward her thigh, so we see the back of the hand and its knuckles; the four fingers side
+// by side, the proximal phalanges down from the knuckles, curling at the middle joint into the
+// palm round the handles; the thumb relaxed along the index at the front. Proportions after
+// Loomis: the back of the hand (wrist to knuckles) about the length of the fingers' first two
+// phalanges; the hand as wide as the wrist and a little more at the knuckles.
+const bagHand = (wrist: P, dir: P) => {
+  const H = handFrame(wrist, dir), Hs = (pts: P[]) => pts.map(H);
+  // the back of the hand, wrist to knuckles, a little wider at the knuckles
+  const back = sm(Hs([[0, -31], [0, 31], [20, 35], [46, 38], [62, 32], [66, 12], [66, -12], [62, -32], [46, -38], [20, -35]]), 4);
+  // index (front) to little finger (back): each finger's proximal phalanx hangs from its knuckle,
+  // then the middle phalanx bends in toward the palm (forward and away from us) round the handles
+  const lanes = [22, 7, -8, -23], len = [44, 48, 44, 36], rad = [10, 10.5, 10, 9];
+  const fingers = lanes.map((v, k) => tube(Hs([[56, v], [56 + len[k] * 0.6, v + 0.5], [56 + len[k], v + 4], [56 + len[k] + 6, v + 12]]), rad[k], rad[k] - 1, true));
+  const joints = lanes.map((v, k) => Hs([[56 + len[k] - 4, v - 7], [56 + len[k] + 1, v + 1], [56 + len[k] - 2, v + 8]]));
+  // the thumb, relaxed along the index at the front, its tip toward the fingers
+  const thumb = tube(Hs([[18, 33], [44, 42], [70, 40]]), 10.5, 8.5, true), thumbNail = tube(Hs([[62, 41], [71, 40]]), 5.5, 5.5, true);
+  // where the handles hook into the crook of the fingers (they pass behind the bent fingers)
+  const hooks: P[] = Hs([[104, 14], [104, -10]]);
+  return { back, fingers, joints, knuckles: [] as P[][], thumb, thumbNail, hooks };
+};
+// the hand holding the phone, seen from the phone's back: the phone lies in her palm, the way a
+// phone is held up to talk into, so what shows on its back is the palm side of her hand: the
+// heel of the palm over the lower corner, the four fingers together, laid up and across the back
+// (the index a little steeper than the little finger), softly curved, with the creases of their
+// joints; the thumb comes round the opposite edge from the screen side. Phone-local coordinates
+// (u across, v down from the centre).
+const phoneHandNew = (ph: (pts: P[]) => P[], wrap = false) => {
+  if (wrap) return phoneHandWrap(ph);
+  const back = sm(ph([[34, 30], [54, 60], [60, 104], [50, 140], [16, 148], [-6, 126], [-14, 96], [-10, 80], [0, 62], [12, 46], [24, 34]]), 4);
+  // each finger: base (inside the palm's edge), direction, length, radius
+  const spec: [P, P, number, number][] = [[[34, 30], [-0.5, -0.87], 78, 12.5], [[18, 46], [-0.6, -0.8], 84, 13], [[2, 62], [-0.7, -0.71], 70, 12.5], [[-12, 78], [-0.8, -0.6], 46, 11]];
+  const fingers = spec.map(([b, d, l, r]) => { const n: P = [-d[1], d[0]], at = (t: number, bow: number): P => [b[0] + d[0] * l * t + n[0] * bow, b[1] + d[1] * l * t + n[1] * bow]; return tube(ph([b, at(0.5, 4), at(1, 0)]), r, r - 1.5, true); });
+  // the palm-side creases of the two joints of each finger
+  const joints = spec.flatMap(([b, d, l, r]) => [0.48, 0.76].map((t) => { const c: P = [b[0] + d[0] * l * t, b[1] + d[1] * l * t], n: P = [-d[1], d[0]]; return ph([[c[0] + n[0] * r * 0.7, c[1] + n[1] * r * 0.7], [c[0] - n[0] * r * 0.7, c[1] - n[1] * r * 0.7]]); }));
+  const tips: P[][] = [];
+  // the thumb, round the right edge from the screen side: only its outer side shows
+  const thumb = tube(ph([[50, 112], [58, 76], [58, 40]]), 11, 9, true), thumbNail = tube(ph([[59, 50], [59, 40]]), 5.5, 5.5, true);
+  return { back, fingers, joints, tips, thumb, thumbNail };
+};
+// the second take on it: the same palm side, the fingers together and nearly level, reaching across
+// the back to the far edge and curling round it (their tips show bent over the edge); the thumb
+// up the near edge, no higher than the fingers
+const phoneHandWrap = (ph: (pts: P[]) => P[]) => {
+  const back = sm(ph([[30, 22], [52, 50], [60, 100], [50, 140], [16, 150], [-4, 128], [6, 112], [14, 92], [18, 70], [22, 46]]), 4);
+  const spec: [P, number, number][] = [[[28, 30], -54, 12.5], [[24, 54], -55, 13], [[20, 78], -54, 12.5], [[16, 100], -50, 11]];
+  const fingers = spec.map(([b, e, r], i) => tube(ph([b, [(b[0] + e) / 2, b[1] - 6 + i], [e, b[1] - 2 + i * 2], [e - 8, b[1] + 10 + i * 2]]), r, r - 1, true));
+  const joints = spec.flatMap(([b, e, r], i) => [0.34 + i * 0.05, 0.66 + i * 0.05].map((t) => { const x = b[0] + (e - b[0]) * t, y = b[1] - 5; return ph([[x + 1, y - r * 0.6], [x - 1, y + r * 0.6]]); }));
+  const tips: P[][] = [];
+  const thumb = tube(ph([[48, 118], [57, 84], [58, 52]]), 11, 9, true), thumbNail = tube(ph([[59, 62], [59, 52]]), 5.5, 5.5, true);
+  return { back, fingers, joints, tips, thumb, thumbNail };
+};
+// a hand closed round a bar: the back of the hand from the wrist, the four fingers wrapped round
+// the bar side by side (seen as bands across it), the thumb round the other way over the index.
+// `bar` is the bar's direction (vertical for the pole, horizontal for the strap's grip)
+const gripHand = (wrist: P, at: P, bar: P, r: number) => {
+  const l = Math.hypot(bar[0], bar[1]) || 1, bx = bar[0] / l, by = bar[1] / l, nx = -by, ny = bx;
+  // the fingers stack along the bar, from the index (nearest the wrist side) out
+  const toward = Math.sign((wrist[0] - at[0]) * nx + (wrist[1] - at[1]) * ny) || 1;
+  const B = (a: number, n: number): P => [at[0] + bx * a + nx * n * toward, at[1] + by * a + ny * n * toward];
+  const fingers = [-27, -9, 9, 25].map((a, k) => tube([B(a, r + 18), B(a + 1, 0), B(a + 2, -r - 6)], [9.5, 10, 9.5, 8.5][k], [9.5, 10, 9.5, 8.5][k] - 0.5, true));
+  const back = sm([wrist, [wrist[0] + bx * 30, wrist[1] + by * 30], B(28, r + 24), B(-30, r + 26), [wrist[0] - bx * 30, wrist[1] - by * 30]], 4);
+  const thumb = tube([B(-40, r + 22), B(-40, 0), B(-33, -r - 4)], 11.5, 9.5, true);
+  return { back, fingers, thumb };
+};
 const phoneHand = (ph: (pts: P[]) => P[]) => {
   const back = sm(ph([[8, 36], [50, 26], [66, 66], [62, 110], [36, 132], [4, 124], [-10, 88]]), 4);
   const fingers = [0, 1, 2, 3].map((k) => { const v = 18 + k * 21, r = [92, 96, 90, 76][k]; return tube(ph([[30, v + 6], [30 - r * 0.6, v], [30 - r, v - 4]]), 10.5, 9.5, true); });
@@ -274,6 +345,11 @@ const trouserLeg = (g: Gfx, leg: Leg, hws: number[], far: boolean, seed: number)
   });
   outline(g, s, 5.5, seed);
 };
+// x of a polyline at height y (its first crossing), or undefined
+const xOn = (pts: P[], y: number): number | undefined => {
+  for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; if ((y0 - y) * (y1 - y) <= 0 && y0 !== y1) return x0 + ((x1 - x0) * (y - y0)) / (y1 - y0); }
+  return undefined;
+};
 // a trouser leg's two screen edges (left, right), top to bottom, as trouserLeg draws them
 // (it starts a little above the hip and narrower there, so its top lies inside the seat)
 const legEdges = (leg: Leg, hws: number[]) => {
@@ -296,7 +372,7 @@ const CREASE_NEAR: P[][] = [[[-34, -20], [-6, 14], [28, 8]], [[-30, 36], [-10, 5
 /** what a scene asks of her: the posed legs, the body's bob (down) and lean (forward), the walk
  *  phase her hair trails, the mouth's opening, the near arm (shoulder, elbow, wrist) and what its
  *  hand does, and the phone's tilt */
-export type Carry = { kind: "tote"; toteD: P; fistD: P } | { kind: "pole"; fistD: P };
+export type Carry = { kind: "tote"; toteD: P; fistD: P } | { kind: "pole"; fistD: P } | { kind: "grip"; at: P; on: "pole" | "strap"; poleX: number; poleR: number };
 export type Pose = { far: Leg; near: Leg; bob: number; lean: number; hairU: number; open: number; armNear: P[]; carry: Carry; phoneDeg: number };
 /** the phone's mapping from its local (u, v) to figure space, for a pose */
 export const phoneMap = (pose: Pose) => (pts: P[]): P[] => turn(pts.map(([x, y]) => [PHONE.cx + pose.lean + x, PHONE.cy + pose.bob + y] as P), PHONE.cx + pose.lean, PHONE.cy + pose.bob, pose.phoneDeg);
@@ -330,8 +406,15 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
     shoe(g, near, 1);
     trouserLeg(g, near, LEG_HW_NEAR, false, 119);
     CREASE_NEAR.forEach((c, j) => stroke(g, shift(c, near.knee[0], near.knee[1]), 3.4 - j * 0.4, 113 + j * 7, T.line, 0.9, 0.8 - j * 0.2));
-    const at = (pts: P[]) => shift(pts, lean, bob), left = smooth(at(SEAT_BACK), false, 6), right = smooth(at(SEAT_FRONT), false, 6);
-    const fill = [...at(SEAT_BACK), ...at(SEAT_BOTTOM).reverse(), ...[...at(SEAT_FRONT)].reverse()];
+    // the seat's back runs from the waist over the hip (fixed) and then, under the buttock, eases
+    // into the back of the near thigh wherever that thigh is: the near leg moves continuously, so
+    // the line does too. (Round 10: a fixed seat corner overhung the thigh for a few frames of
+    // each stride when it swung back, a dark wedge left of her fist.)
+    const at = (pts: P[]) => shift(pts, lean, bob), hip = at(SEAT_BACK.slice(0, 5));
+    const thigh = legEdges(near, LEG_HW_NEAR).l, tY = hip[4][1] + 95, tX = xOn(thigh, tY) ?? hip[4][0] + 30;
+    const bridge: P[] = [[(hip[4][0] + tX) / 2 + 4, (hip[4][1] + tY) / 2], [tX, tY]];
+    const backLine = [...hip, ...bridge], left = smooth(backLine, false, 6), right = smooth(at(SEAT_FRONT), false, 6);
+    const fill: P[] = [...backLine, [tX + 70, tY], ...at(SEAT_BOTTOM).reverse(), ...[...at(SEAT_FRONT)].reverse()];
     // the seat lit all over, with the legs' shade strip only down its side away from the light: a
     // shade cast by an offset copy (cel) would also show along its bottom, which reads as a line
     const seatFill = sm(fill, 3);
@@ -350,12 +433,19 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
   });
   // the near arm and what its hand holds: the tote (its handles up into the fist) or the pole
   layer(() => {
-    const { armNear, carry } = pose, [fx, fy] = carry.fistD;
+    const { armNear, carry } = pose, [fx, fy] = carry.kind === "grip" ? [0, 0] : carry.fistD;
     if (carry.kind === "tote") {
       const [tx, ty] = carry.toteD;
       const handle = (a: P, b: P): P[] => [[a[0] + tx, a[1] + ty], [(a[0] + tx + b[0] + fx) / 2 + 6, (a[1] + ty + b[1] + fy) / 2], [b[0] + fx, b[1] + fy]];
-      strap(g, handle([290, 1848], [352, 1754]), 5, "#ECE5D8", 130);
-      strap(g, handle([426, 1842], [366, 1756]), 5, "#ECE5D8", 132);
+      if (HANDS !== "v15") {
+        // the handles taut from the bag's mouth straight up into the crook of her fingers
+        const hk = bagHand(armNear[2], [armNear[2][0] - armNear[1][0], armNear[2][1] - armNear[1][1]]).hooks;
+        strap(g, [[290 + tx, 1848 + ty], hk[1]], 5, "#ECE5D8", 130);
+        strap(g, [[426 + tx, 1842 + ty], hk[0]], 5, "#ECE5D8", 132);
+      } else {
+        strap(g, handle([290, 1848], [352, 1754]), 5, "#ECE5D8", 130);
+        strap(g, handle([426, 1842], [366, 1756]), 5, "#ECE5D8", 132);
+      }
       const tote = shift([[262, 1846], [452, 1840], [470, 2112], [240, 2120]], tx, ty).flatMap((p, i, q) => { const r = q[(i + 1) % q.length]; return [p, [(p[0] * 2 + r[0]) / 3, (p[1] * 2 + r[1]) / 3], [(p[0] + r[0] * 2) / 3, (p[1] + r[1] * 2) / 3]] as P[]; });
       piece(g, tote, "#ECE5D8", "#D2C6B1", 16, 5.5, 134);
       clipped(g, tote, () => fillShape(g, shift([[414, 1842], [452, 1840], [470, 2112], [432, 2114]], tx, ty), "#D2C6B1", 0.9));
@@ -368,10 +458,26 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
     const cuffDir = Math.atan2(armNear[2][1] - armNear[1][1], armNear[2][0] - armNear[1][0]);
     const cuffA: P = [armNear[2][0] - Math.cos(cuffDir) * 32, armNear[2][1] - Math.sin(cuffDir) * 32];
     piece(g, tube([cuffA, armNear[2]], 35, 34, true), HIGH, DEEP, 4, 4, 138);
-    const f = fist([fx, fy]);
-    piece(g, f.back, SKIN, SKIN_SH, 8, 4.5, 140);
-    f.fingers.forEach((s, j) => piece(g, s, SKIN, SKIN_SH, 4, 3.4, 141 + j));
-    piece(g, f.thumb, SKIN, SKIN_SH, 4, 3.8, 145);
+    if (HANDS !== "v15" && carry.kind === "tote") {
+      const h = bagHand(armNear[2], [armNear[2][0] - armNear[1][0], armNear[2][1] - armNear[1][1]]);
+      piece(g, h.back, SKIN, SKIN_SH, 8, 4.5, 140);
+      h.fingers.slice().reverse().forEach((s, j) => piece(g, s, SKIN, SKIN_SH, 4, 3.4, 141 + j));
+      h.knuckles.forEach((k, j) => stroke(g, k, 2.6, 146 + j, SKIN_SH, 0.6, 0.9));
+      h.joints.forEach((k, j) => stroke(g, k, 2.6, 150 + j, T.line, 0.7, 0.7));
+      piece(g, h.thumb, SKIN, SKIN_SH, 4, 3.8, 145);
+      piece(g, h.thumbNail, "#F7D6C2", "#E8B9A0", 2, 2.4, 154);
+    } else if (carry.kind === "grip") {
+      const bar: P = carry.on === "pole" ? [0, 1] : [1, 0];
+      const h = gripHand(armNear[2], carry.at, bar, carry.poleR);
+      piece(g, h.back, SKIN, SKIN_SH, 8, 4.5, 140);
+      h.fingers.forEach((s, j) => piece(g, s, SKIN, SKIN_SH, 4, 3.4, 141 + j));
+      piece(g, h.thumb, SKIN, SKIN_SH, 4, 3.8, 145);
+    } else {
+      const f = fist([fx, fy]);
+      piece(g, f.back, SKIN, SKIN_SH, 8, 4.5, 140);
+      f.fingers.forEach((s, j) => piece(g, s, SKIN, SKIN_SH, 4, 3.4, 141 + j));
+      piece(g, f.thumb, SKIN, SKIN_SH, 4, 3.8, 145);
+    }
   });
   // the head, talking
   layer(() => { g.push(lean, bob, 1); inHead(g, () => head(g, pose.open)); g.pop(); });
@@ -392,10 +498,19 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
     piece(g, ph(softBox(-20, -66, 50, 50, 4, 24)), "#4A6496", "#2C3F66", 4, 3.5, 152);
     ([[-31, -77], [-31, -55], [-9, -66]] as P[]).forEach((c, j) => { const l = ph(circle(c, 9.5, 16)); fillShape(g, l, T.ink); outline(g, l, 2.4, 153 + j, T.ink); fillShape(g, ph(circle([c[0] + 2.5, c[1] - 2.5], 2.6, 8)), "#9DB6E0"); });
     fillShape(g, ph(circle([-8, -84], 3.6, 10)), "#E8F0FF");
-    const ch = phoneHand(ph);
-    piece(g, ch.back, SKIN, SKIN_SH, 6, 4.5, 156);
-    ch.fingers.forEach((s, j) => piece(g, s, SKIN, SKIN_SH, 4, 3.4, 157 + j));
-    piece(g, ch.thumb, SKIN, SKIN_SH, 4, 3.8, 161);
+    if (HANDS !== "v15") {
+      const ch = phoneHandNew(ph, HANDS === "new2");
+      ch.fingers.forEach((s, j) => piece(g, s, SKIN, SKIN_SH, 4, 3.4, 157 + j));
+      piece(g, ch.back, SKIN, SKIN_SH, 6, 4.5, 156);
+      ch.joints.forEach((k, j) => stroke(g, k, 2.6, 165 + j, T.line, 0.7, 0.6));
+      piece(g, ch.thumb, SKIN, SKIN_SH, 4, 3.8, 161);
+      piece(g, ch.thumbNail, "#F7D6C2", "#E8B9A0", 2, 2.4, 170);
+    } else {
+      const ch = phoneHand(ph);
+      piece(g, ch.back, SKIN, SKIN_SH, 6, 4.5, 156);
+      ch.fingers.forEach((s, j) => piece(g, s, SKIN, SKIN_SH, 4, 3.4, 157 + j));
+      piece(g, ch.thumb, SKIN, SKIN_SH, 4, 3.8, 161);
+    }
   });
 };
 
