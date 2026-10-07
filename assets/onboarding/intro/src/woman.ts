@@ -45,6 +45,12 @@ export const outline = (g: Gfx, s: P[], w: number, seed: number, color = T.line)
 export const stroke = (g: Gfx, pts: P[], w: number, seed: number, color = T.line, taper = 0.9, op = 1) =>
   g.pen(smooth(pts, false, 8), { w: w * LW, color, seed, closed: false, wobble: 0.5, boil: 0, taper, opacity: op, retrace: false });
 export const piece = (g: Gfx, s: P[], lit: string, shade: string, k: number, w: number, seed: number) => { cel(g, s, lit, shade, k); outline(g, s, w, seed); };
+// the seat's shading: the shade only down its side away from the light, never along its bottom,
+// where a band of shade read as a bulge between the legs
+const celAcross = (g: Gfx, s: P[], lit: string, shade: string, k: number) => {
+  fillShape(g, s, shade);
+  clipped(g, s, () => fillShape(g, s.map(([x, y]) => [x + LIGHT[0] * k, y + 40] as P), lit));
+};
 
 // ---------------------------------------------------------------- path utilities (V15-B's)
 export type Path = { pts: P[]; len: number[]; total: number };
@@ -110,7 +116,7 @@ const HAIR_STRANDS: P[][] = [[[430, 700], [420, 840], [380, 960], [320, 1060]], 
 // the seat of the high-waisted trousers, waist to crotch, over both legs' tops (V15-B's outline
 // there, its sides ending where the legs' outer edges leave the hips); SEAT_TOP is the band of it
 // painted again, with the seat's own shading, over the near thigh so its cut end never shows
-const SEAT: P[] = [[300, 1524], [280, 1572], [268, 1630], [280, 1690], [330, 1736], [404, 1756], [462, 1726], [510, 1664], [514, 1630], [500, 1572], [484, 1524]];
+const SEAT: P[] = [[300, 1524], [280, 1572], [268, 1630], [280, 1690], [340, 1708], [404, 1716], [466, 1700], [510, 1664], [514, 1630], [500, 1572], [484, 1524]];
 const SEAT_TOP: P[] = [[300, 1524], [280, 1572], [268, 1630], [282, 1694], [404, 1712], [510, 1668], [514, 1630], [500, 1572], [484, 1524]];
 const SEAT_L: P[] = [[300, 1524], [280, 1572], [268, 1630], [282, 1690]], SEAT_R: P[] = [[484, 1524], [500, 1572], [514, 1630], [509, 1662]];
 
@@ -237,9 +243,11 @@ const head = (g: Gfx, open: number) => {
 
 const strap = (g: Gfx, pts: P[], w: number, color: string, seed: number) => { stroke(g, pts, w + 3.2, seed, T.line, 0.1); stroke(g, pts, w, seed + 1, color, 0.1); };
 
-// one trouser leg: the limb's two edges, the hem at the ankle; the far leg a half-tone back
+// one trouser leg: the limb's two edges from above the hip (so its cut top lies well inside the
+// seat, which covers it) down to the hem at the ankle; the far leg a half-tone back
 const trouserLeg = (g: Gfx, leg: Leg, hws: number[], far: boolean, seed: number) => {
-  const { left, right } = limb([leg.hip, leg.knee, leg.ankle], hws), s = sm([...left, ...[...right].reverse()], 3);
+  const top: P = [leg.hip[0] + (leg.hip[0] - leg.knee[0]) * 0.2, leg.hip[1] - 70];
+  const { left, right } = limb([top, leg.hip, leg.knee, leg.ankle], [hws[0], ...hws]), s = sm([...left, ...[...right].reverse()], 3);
   cel(g, s, PANTS, PANTS_SH, 22);
   if (far) clipped(g, s, () => fillShape(g, s, PANTS_SH, 0.35));
   outline(g, s, 5.5, seed);
@@ -292,15 +300,14 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
     trouserLeg(g, far, [60, 45, 36], true, 110);
     CREASE_FAR.forEach((c, j) => stroke(g, shift(c, far.knee[0], far.knee[1]), 3, 112 + j, T.line, 0.9, 0.7));
     const seat = sm(bodyFig(SEAT), 3);
-    cel(g, seat, PANTS, PANTS_SH, 22);
-    outline(g, seat, 5.5, 111);
+    celAcross(g, seat, PANTS, PANTS_SH, 22);
     shoe(g, near, 1);
     trouserLeg(g, near, [62, 46, 37], false, 119);
     CREASE_NEAR.forEach((c, j) => stroke(g, shift(c, near.knee[0], near.knee[1]), 3.4 - j * 0.4, 113 + j * 7, T.line, 0.9, 0.8 - j * 0.2));
-    clipped(g, sm(bodyFig(SEAT_TOP), 3), () => cel(g, seat, PANTS, PANTS_SH, 22));
+    clipped(g, sm(bodyFig(SEAT_TOP), 3), () => celAcross(g, seat, PANTS, PANTS_SH, 22));
     stroke(g, bodyFig(SEAT_L), 5.5, 117, T.line, 0.3);
     stroke(g, bodyFig(SEAT_R), 5.5, 118, T.line, 0.3);
-    stroke(g, bodyFig([[402, 1700], [404, 1756]]), 3, 114, T.line, 0.9, 0.6);
+    stroke(g, bodyFig([[400, 1640], [403, 1708]]), 2.6, 114, T.line, 0.9, 0.5);
     piece(g, sm(bodyFig(NECK)), SKIN, SKIN_SH, 10, 5, 115);
     piece(g, sm(bodyFig(TORSO)), ACCENT, DEEP, 30, 6, 116);
     fillShape(g, sm(bodyFig(TORSO_SH)), DEEP, 0.9);

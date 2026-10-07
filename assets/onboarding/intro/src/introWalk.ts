@@ -24,10 +24,12 @@ import {
 // - the mouth talks; the voice's pulses travel from her lips into the phone, eleven a loop;
 // - the message springs out, grows four lines, and fades before the seam.
 
-// The source canvas is the App Store strip (2640 x 2868); the frame shows x 0..1466, y 750..2861
-// of it, the crop of the #649 mock-up (designs/onboarding-649-assets/intro-walk.png).
+// The source canvas is the App Store strip (2640 x 2868); the frame shows x 0..1466 of it at the
+// scale of the #649 mock-up's crop (designs/onboarding-649-assets/intro-walk.png), from y 690
+// rather than the crop's 750, so the top of her head has a clear margin under the frame's edge.
 const W = 2640, H = 2868;
-const PLACE = place([0, 750], 1466, [0, 0], 330);
+const PLACE = place([0, 690], 1466, [0, 0], 330);
+const FRAME_BOTTOM = PLACE.o[1] + FRAME.h / PLACE.k;
 const LP = loop(LOOP_A);
 
 // ---------------------------------------------------------------- the ground (V15-B's)
@@ -36,8 +38,8 @@ const VP_L: P = [-1700, HORIZON], VP_R: P = [3300, HORIZON];
 const toward = (vp: P, through: P, y: number): P => [vp[0] + ((through[0] - vp[0]) * (y - vp[1])) / (through[1] - vp[1]), y];
 const KERB_A: P = [0, 1806], KERB_B: P = [1320, 1948];   // the far kerb, on the line to VP_L
 const GROUND_R = 1320;                                    // V15-B's slide edge: the pavement fades out before it
-// the frame's own edges: the frame's bottom is source y 750 + 1440 / PLACE.k = 2861
-const EDGE_FADE = { left: 160, bottom: [2600, 2861] as P };
+// the frame's own edges: the slabs fade out over the last 260 source pixels above its bottom
+const EDGE_FADE = { left: 160, bottom: [FRAME_BOTTOM - 260, FRAME_BOTTOM] as P };
 
 // One step (heel strike to the other heel strike) carries the planted foot STEP figure units
 // back; it is measured on V15-B (the near shoe's ball, planted at push-off, sits one step behind

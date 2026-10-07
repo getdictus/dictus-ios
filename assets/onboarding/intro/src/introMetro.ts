@@ -199,9 +199,9 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
 // the page, in both appearances. Drawn in FRAME pixels (FX maps them to the source canvas), so its
 // size on screen does not depend on the scene's scale. It swells a little twice a loop.
 const BADGE = { cx: 890, cy: 112, r: 72 };
-// the mail draft, canvas pixels: below the window, over the bench, so it does not fight the
-// dark glass; clear of the badge and of the frame's bottom tenth
-const CARD: Card = { style: "mail", c: [1170, 1600], w: 390, deg: -3 };
+// the mail draft, canvas pixels: straddling the window's lower edge and the bench's back, near
+// the height of her phone; clear of the badge and of the frame's bottom tenth
+const CARD: Card = { style: "mail", c: [1170, 1390], w: 390, deg: -3 };
 const RED = "#EF4444";
 const FX = ([x, y]: P): P => [PLACE.o[0] + x / PLACE.k, PLACE.o[1] + y / PLACE.k];
 const noNetwork = (g: Gfx, t: Theme, frame: number) => {
