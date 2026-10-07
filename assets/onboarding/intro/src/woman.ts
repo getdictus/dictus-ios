@@ -110,15 +110,14 @@ const TORSO_SH: P[] = [[266, 1226], [292, 1192], [330, 1174], [320, 1260], [320,
 const NECK: P[] = [hv([506, 672]), hv([596, 686]), [430, 1174], [368, 1170]];
 const VNECK: P[] = [[362, 1162], [404, 1224], [436, 1162], [446, 1172], [404, 1252], [352, 1172]];
 
-// the seat of the high-waisted trousers: from the waistband (its two ends) its back flares out
-// into her hip, a woman's line with hips wider than the waist, and its front runs almost straight
-// down (round 7: no bulge); both then follow the legs (seatOf). Its bottom is a shallow line
-// between the legs, never outlined.
-const SEAT_BACK: P[] = [[300, 1524], [278, 1562], [262, 1606], [258, 1646]];
-const SEAT_FRONT: P[] = [[484, 1524], [494, 1566], [502, 1606]];
-const SEAT_BOTTOM: P[] = [[466, 1700], [404, 1716], [340, 1712]];
-// the side of the seat, down to SEAT_END below the hips, it follows the legs' outer edges
-const SEAT_END = 1760;
+// the seat of the high-waisted trousers: ONE fixed shape attached to the torso, moving only with
+// the body's bob (round 9: a seat whose sides followed the outermost leg changed shape from frame
+// to frame as the legs swapped). Its back flares out from the waist into a modest rounded hip and
+// curves back in to the fold under the buttock; its front runs almost straight down. The legs
+// pivot at hips hidden under it and are drawn behind it, so no leg edge ever shapes the seat.
+const SEAT_BACK: P[] = [[300, 1524], [280, 1560], [266, 1604], [262, 1648], [270, 1688], [292, 1716], [322, 1732]];
+const SEAT_FRONT: P[] = [[484, 1524], [494, 1566], [502, 1612], [508, 1660], [514, 1704]];
+const SEAT_BOTTOM: P[] = [[496, 1724], [440, 1738], [380, 1740]];
 const LEG_HW_FAR = [60, 45, 36], LEG_HW_NEAR = [62, 46, 37];
 
 // ---------------------------------------------------------------- the walk
@@ -283,27 +282,6 @@ const legEdges = (leg: Leg, hws: number[]) => {
   // `right` is the screen-left edge of a limb drawn downward, `left` the screen-right one
   return { l: right, r: left };
 };
-// x of a polyline at height y (its first crossing), or undefined
-const xAt = (pts: P[], y: number): number | undefined => {
-  for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; if ((y0 - y) * (y1 - y) <= 0 && y0 !== y1) return x0 + ((x1 - x0) * (y - y0)) / (y1 - y0); }
-  return undefined;
-};
-/** the seat for a pose: its fill, and its two side contours from the waist into the legs */
-const seatOf = (far: Leg, near: Leg, bob: number, lean: number) => {
-  const ef = legEdges(far, LEG_HW_FAR), en = legEdges(near, LEG_HW_NEAR), at = (pts: P[]) => shift(pts, lean, bob);
-  const side = (pick: (a: number, b: number) => number, edges: P[][], from: P[]): P[] => {
-    const start = at(from), y0 = start[start.length - 1][1], out: P[] = [...start];
-    for (let y = y0 + 30; y <= SEAT_END + bob; y += 15) {
-      const xs = edges.map((e) => xAt(e, y)).filter((x): x is number => x !== undefined);
-      if (xs.length) out.push([xs.reduce((m, x) => pick(m, x)), y]);
-    }
-    return out;
-  };
-  const left = side(Math.min, [ef.l, en.l], SEAT_BACK), right = side(Math.max, [ef.r, en.r], SEAT_FRONT);
-  // the fill: down the left side, a little way past its end into the leg, across the bottom, up the right
-  const fill = [...left, ...at(SEAT_BOTTOM).reverse(), ...[...right].reverse()];
-  return { fill, left: smooth(left, false, 6), right: smooth(right, false, 6) };
-};
 const shoe = (g: Gfx, leg: Leg, k: number) => {
   piece(g, sm(placeShoe(TRAINER, leg.heel, leg.deg, leg.bend), 4), WHITE, T.shoeShade, 10, 5, 102 + k * 2);
   piece(g, sm(placeShoe(T_SOLE, leg.heel, leg.deg, leg.bend), 4), T.sole, T.soleShade, 4, 4, 103 + k * 2);
@@ -352,7 +330,8 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
     shoe(g, near, 1);
     trouserLeg(g, near, LEG_HW_NEAR, false, 119);
     CREASE_NEAR.forEach((c, j) => stroke(g, shift(c, near.knee[0], near.knee[1]), 3.4 - j * 0.4, 113 + j * 7, T.line, 0.9, 0.8 - j * 0.2));
-    const { fill, left, right } = seatOf(far, near, bob, lean);
+    const at = (pts: P[]) => shift(pts, lean, bob), left = smooth(at(SEAT_BACK), false, 6), right = smooth(at(SEAT_FRONT), false, 6);
+    const fill = [...at(SEAT_BACK), ...at(SEAT_BOTTOM).reverse(), ...[...at(SEAT_FRONT)].reverse()];
     // the seat lit all over, with the legs' shade strip only down its side away from the light: a
     // shade cast by an offset copy (cel) would also show along its bottom, which reads as a line
     const seatFill = sm(fill, 3);
