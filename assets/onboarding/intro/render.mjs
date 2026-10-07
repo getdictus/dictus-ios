@@ -98,16 +98,20 @@ for (const id of only) {
 
   // Opaque HEVC: each frame laid over the theme's background colour IN RGB, then turned into
   // BT.709 limited-range 4:2:0 with exact rounding and tagged so: the page colour that comes back
-  // out of the decoder is then the app's own (#FFFFFF, #0A1628) to the code value, so the video's
+  // out of the decoder is then the page's own (#F2F2F7, #0A1628) to the code value, so the video's
   // edge never shows against the SwiftUI background. (ffmpeg's defaults, BT.601 and fast rounding,
-  // land the dark page on #081426.) x265 Main profile, tagged hvc1 so AVFoundation plays it,
-  // one keyframe per loop, no audio track. Why not HEVC with alpha: README.md.
-  const bg = id.endsWith("dark") ? "0x0A1628" : "0xFFFFFF";
+  // land the dark page on #081426.) 10-bit (HEVC Main 10): in 8 bits no Y'CbCr code decodes back
+  // to the light page's #F2F2F7 (the nearest is #F2F2F6); in 10 bits it does, for about 4 % more
+  // bytes, and every iPhone that runs iOS 17 decodes Main 10 in hardware. Tagged hvc1 so
+  // AVFoundation plays it, one keyframe per loop, no audio track. Why not HEVC with alpha: README.md.
+  // the page under the art, the same colours as theme.ts: the onboarding's grouped background in
+  // light (#F2F2F7, the #649 mock-up's page), the app's navy in dark
+  const bg = id.endsWith("dark") ? "0x0A1628" : "0xF2F2F7";
   const out = join(HERE, `intro-${id}.mp4`);
   run(FFMPEG, ["-y", "-loglevel", "error",
     "-f", "lavfi", "-i", `color=c=${bg}:s=${meta.W}x${meta.H}:r=${meta.fps},format=rgba`,
     "-framerate", String(meta.fps), "-i", join(dir, "f%04d.png"),
-    "-filter_complex", "[0:v][1:v]overlay=shortest=1:format=rgb,scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int,format=yuv420p[v]", "-map", "[v]",
+    "-filter_complex", "[0:v][1:v]overlay=shortest=1:format=rgb,scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int,format=yuv420p10le[v]", "-map", "[v]",
     "-c:v", "libx265", "-preset", "slow", "-crf", "26", "-x265-params", `log-level=error:keyint=${meta.durationFrames}:min-keyint=${meta.durationFrames}`,
     "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv",
     "-tag:v", "hvc1", "-an", "-movflags", "+faststart", out]);

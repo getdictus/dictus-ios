@@ -23,9 +23,9 @@ export const place = (src: P, srcW: number, at: P, ptW: number): Placement => {
 // The loops. 120 bpm at 30 fps is the engine's 15-frame beat grid; every loop is a whole number
 // of beats, and everything that moves turns a whole number of times over its loop, so frame LOOP
 // would be frame 0 again and the seam disappears. A and B are five walk-cycle lengths (1.1 s
-// each), C carries the keyboard's whole dictation and needs nine seconds.
+// each), C carries the keyboard's whole dictation in 6.5 seconds.
 export const FPS = 30, BPM = 120;
-export const LOOP_A = 165, LOOP_B = 165, LOOP_C = 270;
+export const LOOP_A = 165, LOOP_B = 165, LOOP_C = 195;
 export type Loop = { frames: number; tau: (frame: number) => number; cyc: (frame: number, n: number, phase?: number) => number };
 export const loop = (frames: number): Loop => ({
   frames,
@@ -36,7 +36,9 @@ export const loop = (frames: number): Loop => ({
 });
 
 // ---------------------------------------------------------------- the two appearances
-// Light is the App Store art's palette, unchanged. Dark is the app's background, #0A1628, which
+// Light is the App Store art's palette, unchanged, on the onboarding's page colour: #F2F2F7, the
+// grey the #649 mock-ups' pages measure (the issue said #FFFFFF; a white video would show as a
+// white box on that page). Dark is the app's background, #0A1628, which
 // is also the art's ink: so in dark the contour (`line`) turns light, while the marks drawn ON
 // the skin and the clothes (eyes, brows, mouth, pupils, lenses: `ink`) stay dark navy, as they
 // would on paper. The ground, the carriage and the drawn phones get their own dark tones rather
@@ -67,7 +69,7 @@ export type Theme = {
 };
 
 export const LIGHT_THEME: Theme = {
-  name: "light", bg: "#FFFFFF", line: "#0A1628", ink: "#0A1628",
+  name: "light", bg: "#F2F2F7", line: "#0A1628", ink: "#0A1628",
   road: "#D9E0EB", pave: "#E4E9F1", kerb: "#C4CEDD", joint: "#0A1628", jointK: 1,
   shadow: "#0A1628", shadowA: 0.16,
   sole: "#C4CEDD", soleShade: "#A9B6CA", shoeShade: "#D3DCEA",
