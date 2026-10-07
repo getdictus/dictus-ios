@@ -12,7 +12,7 @@ import {
 // The same woman as scene A (woman.ts), now standing in a metro carriage. One hand holds the
 // grab pole, the other her phone at her mouth. A badge in the frame's top-right corner says NO
 // NETWORK: the signal bars struck through in the recording red, drawn, never written. She talks,
-// her voice still goes into the phone and the text still comes out of it, onto its note card
+// her voice still goes into the phone and the text still comes out of it, into a mail draft
 // (noteCard.ts): dictation does not need the network.
 //
 // New art, drawn for this scene in the same marker comic: the carriage wall and floor, a bench
@@ -25,7 +25,7 @@ import {
 // speeds, nearer lights faster) and bands of their light sweep back through the carriage and
 // over her; the carriage rocks, she sways with it, feet planted and the hand closed on the pole,
 // her ponytail swinging; the grab handles swing; she talks; the voice's pulses run into the
-// phone; the card writes; the badge pops twice. Noise around her (a neighbour) was optional in
+// phone; the mail draft writes; the badge pops twice. Noise around her (a neighbour) was optional in
 // the brief and is left out: at this size a second figure takes the eye from her phone.
 
 // Scene A's scale, so she is the same size in both scenes.
@@ -107,7 +107,8 @@ const carriage = (g: Gfx, t: Theme, frame: number, rock: number) => {
 };
 
 // the hanging grab handles: where they hang on the rail, and their swing's phase
-const HANDLES: [number, number][] = [[120, 0.4], [1250, -0.6]];
+// the right one hangs between the voice's arch and the badge, clear of both
+const HANDLES: [number, number][] = [[120, 0.4], [1110, -0.6]];
 // a strap down from the rail and a rounded triangular grip, swung by `deg` about the rail
 const handle = (g: Gfx, t: Theme, x: number, deg: number, seed: number) => {
   const a = (deg * Math.PI) / 180, at = (dx: number, dy: number): P => [x + dx * Math.cos(a) - dy * Math.sin(a), RAIL_Y + dx * Math.sin(a) + dy * Math.cos(a)];
@@ -169,9 +170,9 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   ctx.save(); toFrame(); ctx.globalCompositeOperation = "destination-out";
   const fade = (x0: number, y0: number, x1: number, y1: number) => { const gr = ctx.createLinearGradient(x0, y0, x1, y1); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)"); return gr; };
   ctx.fillStyle = fade(0, 0, 170, 0); ctx.fillRect(-30, 600, 200, H);
-  ctx.fillStyle = fade(1466, 0, 1290, 0); ctx.fillRect(1280, 600, 300, H);
+  ctx.fillStyle = fade(1386, 0, 1210, 0); ctx.fillRect(1200, 600, 400, H);   /* fully gone 80 px before the edge */
   ctx.fillStyle = fade(0, TOP, 0, TOP + 150); ctx.fillRect(-30, TOP - 100, 1600, 250);
-  ctx.fillStyle = fade(0, FRAME_BOTTOM - 40, 0, FRAME_BOTTOM - 340); ctx.fillRect(-30, FRAME_BOTTOM - 340, 1600, 440);   /* fully gone 40 px before the edge */
+  ctx.fillStyle = fade(0, FRAME_BOTTOM - 120, 0, FRAME_BOTTOM - 420); ctx.fillRect(-30, FRAME_BOTTOM - 420, 1600, 520);   /* fully gone 120 px before the edge */
   ctx.restore();
 
   // 2. her, and her voice going into her phone
@@ -181,7 +182,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   g.pop();
 
   // 3. the tunnel's light sweeping over the carriage and her; then, over everything, the text
-  //    coming out of her phone onto its card, and the badge: no network
+  //    coming out of her phone into a mail draft, and the badge: no network
   // screen-blended, so the light brightens what it crosses (her navy trousers, the window) instead
   // of tinting it brown
   g.group("plain", () => lightBands(g, theme, frame), { blend: "screen" });
@@ -198,9 +199,9 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
 // the page, in both appearances. Drawn in FRAME pixels (FX maps them to the source canvas), so its
 // size on screen does not depend on the scene's scale. It swells a little twice a loop.
 const BADGE = { cx: 890, cy: 112, r: 72 };
-// the note card, canvas pixels: over the window's lower right, clear of the badge and of the
-// frame's bottom tenth
-const CARD: Card = { c: [1180, 1330], w: 390, h: 300, deg: -4 };
+// the mail draft, canvas pixels: below the window, over the bench, so it does not fight the
+// dark glass; clear of the badge and of the frame's bottom tenth
+const CARD: Card = { style: "mail", c: [1170, 1600], w: 390, deg: -3 };
 const RED = "#EF4444";
 const FX = ([x, y]: P): P => [PLACE.o[0] + x / PLACE.k, PLACE.o[1] + y / PLACE.k];
 const noNetwork = (g: Gfx, t: Theme, frame: number) => {
