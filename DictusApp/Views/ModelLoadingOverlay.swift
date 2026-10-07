@@ -388,12 +388,15 @@ struct ModelLoadingOverlay: View {
     private func phrases(for phase: Phase) -> [String] {
         switch phase {
         case .downloading:
+            // No phrase here may promise imminence. A real percentage and MB counter
+            // sit directly above this caption, so "Almost there…" and "Finishing the
+            // download…" — both gone — contradicted the bar in the same glance, a
+            // tester reading "Almost there" at 1 % (issue #673). Same rule as the
+            // `.compiling` list below (issue #432).
             return [
                 String(localized: "Downloading the model…"),
                 String(localized: "Preparing the files…"),
-                String(localized: "Getting everything ready…"),
-                String(localized: "Almost there…"),
-                String(localized: "Finishing the download…")
+                String(localized: "Getting everything ready…")
             ]
         case .compiling:
             // These change every 2.5s (`CyclingLoadingText.interval`), so eight of them

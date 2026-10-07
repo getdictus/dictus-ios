@@ -446,17 +446,6 @@
         }
       }
     },
-    "Almost there…" : {
-      "comment" : "Cycling phrase shown during model download (issue #144).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Presque arrivé…"
-          }
-        }
-      }
-    },
     "Also supported" : {
       "comment" : "Language detail sheet: section header for Parakeet's remaining documented languages (issue #240).",
       "localizations" : {
@@ -1370,17 +1359,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rapide mais imprécis"
-          }
-        }
-      }
-    },
-    "Finishing the download…" : {
-      "comment" : "Cycling phrase shown during model download (issue #144).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finalisation du téléchargement…"
           }
         }
       }
