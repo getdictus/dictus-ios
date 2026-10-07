@@ -1,31 +1,39 @@
 import { Gfx, type Ctx, type Env, type P } from "./core";
+import { clearEdges } from "./edges";
 import type { Film } from "./film";
 import { clipped, fillShape } from "./gallery";
 import { BPM, FPS, FRAME, LOOP_B, loop, place, THEMES, type Theme } from "./theme";
+import { drawNoteCard, type Card } from "./noteCard";
 import {
-  ARM_NEAR, BAG_D, cel, drawVoice, drawWoman, FIG, LEG_FAR, LEG_NEAR, legFrom, MARKER, mouthOpen, outline, setTheme, stroke, twoBone, type Pose,
+  ARM_NEAR, BAG_D, cel, drawVoice, drawWoman, FIG, fig, LEG_FAR, LEG_NEAR, legFrom, MARKER, mouthOpen, outline, phoneMap, setTheme, sm, stroke, twoBone, type Pose,
 } from "./woman";
 
 // ONBOARDING INTRO, SCENE B · "the metro, no network" (issue #667, headline "Même sans réseau.").
 // The same woman as scene A (woman.ts), now standing in a metro carriage. One hand holds the
 // grab pole, the other her phone at her mouth. A badge in the frame's top-right corner says NO
-// NETWORK: the signal bars struck through in the recording red, drawn, never written. She talks
-// and her voice still goes into the phone: dictation does not need the network.
+// NETWORK: the signal bars struck through in the recording red, drawn, never written. She talks,
+// her voice still goes into the phone and the text still comes out of it, onto its note card
+// (noteCard.ts): dictation does not need the network.
 //
 // New art, drawn for this scene in the same marker comic: the carriage wall and floor, a bench
-// under a window on the dark tunnel with its lights streaking past, the overhead rail and the pole.
+// under a window on the dark tunnel with its lights streaking past, the overhead rail with its
+// hanging grab handles, and the pole: a plain round tube, cut by the frame's top, on a round foot.
 // The carriage dissolves into the page at the frame's edges, as scene A's pavement does, so the
 // video never shows a box against the screen.
 //
 // What moves, periodic over the 5.5 s loop: the tunnel lights stream past the window (three
-// speeds, nearer lights faster); the carriage rocks and she sways with it, feet planted and the
-// hand closed on the pole; she talks; the voice's pulses run into the phone; the badge pops twice. Noise around her (a neighbour) was optional in the brief and is left out: at this
-// size a second figure takes the eye from her phone.
+// speeds, nearer lights faster) and bands of their light sweep back through the carriage and
+// over her; the carriage rocks, she sways with it, feet planted and the hand closed on the pole,
+// her ponytail swinging; the grab handles swing; she talks; the voice's pulses run into the
+// phone; the card writes; the badge pops twice. Noise around her (a neighbour) was optional in
+// the brief and is left out: at this size a second figure takes the eye from her phone.
 
-// Same source frame and placement as scene A, so she stands where she walked: the carousel
-// does not jump between the two.
+// Scene A's scale, so she is the same size in both scenes.
 const W = 2640, H = 2868;
-const PLACE = place([0, 750], 1466, [0, 0], 330);
+// Her bun would touch the frame's top edge at A's placement, so B shows the strip from y 640:
+// everything sits 75 frame pixels lower, and her head has room under the top edge.
+const PLACE = place([0, 640], 1466, [0, 0], 330);
+const TOP = PLACE.o[1];
 const LP = loop(LOOP_B);
 const FRAME_BOTTOM = 750 + FRAME.h / PLACE.k;
 
@@ -76,12 +84,53 @@ const carriage = (g: Gfx, t: Theme, frame: number, rock: number) => {
   stroke(g, [[BENCH.x0 + 330, BENCH.back[0] + 30], [BENCH.x0 + 330, BENCH.back[1] - 20]], 3, 642, t.line, 0.6, 0.4);
   // the overhead rail along the carriage, and the pole down from it to the floor
   const px = FIG.at[0] + POLE_X * FIG.s, pr = POLE_R * FIG.s;
-  const rail: P[] = [[-20, RAIL_Y - pr], [1500, RAIL_Y - pr], [1500, RAIL_Y + pr], [-20, RAIL_Y + pr]];
-  cel(g, rail, t.poleLit, t.pole, 6); outline(g, rail, 5, 650);
-  const pole: P[] = [[px - pr, RAIL_Y], [px + pr, RAIL_Y], [px + pr, POLE_FOOT], [px - pr, POLE_FOOT]];
-  cel(g, pole, t.poleLit, t.pole, 8); outline(g, pole, 5, 651);
-  // where the pole meets the rail and the floor: a collar each
-  [RAIL_Y + pr + 6, POLE_FOOT - 10].forEach((y, k) => { const c = rrect(px - pr * 1.9, y - 12, px + pr * 1.9, y + 12, 10); cel(g, c, t.poleLit, t.pole, 4); outline(g, c, 4, 652 + k); });
+  // a round tube is two parallel contours, never a closed outline: a closed one tapers into a
+  // point at its ends, which is what made the first pole a spear
+  const tubeH = (y: number, x0: number, x1: number, seed: number) => {
+    cel(g, [[x0, y - pr], [x1, y - pr], [x1, y + pr], [x0, y + pr]], t.poleLit, t.pole, 6);
+    [-pr, pr].forEach((d, k) => stroke(g, [[x0, y + d], [x1, y + d]], 5, seed + k, t.line, 0, 1));
+  };
+  const tubeV = (x: number, y0: number, y1: number, seed: number) => {
+    cel(g, [[x - pr, y0], [x + pr, y0], [x + pr, y1], [x - pr, y1]], t.poleLit, t.pole, 8);
+    [-pr, pr].forEach((d, k) => stroke(g, [[x + d, y0], [x + d, y1]], 5, seed + k, t.line, 0, 1));
+  };
+  tubeH(RAIL_Y, -40, 1520, 650);
+  // the grab handles hanging from the rail, swinging with the carriage
+  HANDLES.forEach(([x, ph], k) => handle(g, t, x, LP.cyc(frame, 2, ph) * 9, 670 + k * 4));
+  // the pole, from above the frame's top edge (cut by it) down to a round foot on the floor, and
+  // a round collar where it passes the rail
+  tubeV(px, TOP - 40, POLE_FOOT, 655);
+  const collar = rrect(px - pr * 1.8, RAIL_Y - 16, px + pr * 1.8, RAIL_Y + 16, 12);
+  cel(g, collar, t.poleLit, t.pole, 4); outline(g, collar, 4, 652);
+  const foot = Array.from({ length: 24 }, (_, i) => [px + Math.cos((i / 24) * Math.PI * 2) * pr * 2.6, POLE_FOOT + Math.sin((i / 24) * Math.PI * 2) * pr * 0.9] as P);
+  cel(g, foot, t.poleLit, t.pole, 3); outline(g, foot, 4, 653);
+};
+
+// the hanging grab handles: where they hang on the rail, and their swing's phase
+const HANDLES: [number, number][] = [[120, 0.4], [1250, -0.6]];
+// a strap down from the rail and a rounded triangular grip, swung by `deg` about the rail
+const handle = (g: Gfx, t: Theme, x: number, deg: number, seed: number) => {
+  const a = (deg * Math.PI) / 180, at = (dx: number, dy: number): P => [x + dx * Math.cos(a) - dy * Math.sin(a), RAIL_Y + dx * Math.sin(a) + dy * Math.cos(a)];
+  stroke(g, [at(0, 0), at(0, 150)], 14, seed, t.line, 0, 1);
+  stroke(g, [at(0, 0), at(0, 150)], 8, seed + 1, t.seatShade, 0, 1);
+  const grip = [at(0, 146), at(34, 214), at(26, 228), at(-26, 228), at(-34, 214)];
+  g.pen(sm(grip, 6), { w: 11, color: t.line, seed: seed + 2, closed: true, wobble: 0.3, boil: 0, taper: 0, opacity: 1, retrace: false });
+  g.pen(sm(grip, 6), { w: 6, color: t.poleLit, seed: seed + 3, closed: true, wobble: 0.3, boil: 0, taper: 0, opacity: 1, retrace: false });
+};
+
+// the tunnel's lamps sweeping through the carriage: soft slanted bands of warm light running
+// back along it (to the left, the train going right), over the wall, the window and her; two
+// sweeps a loop
+const lightBands = (g: Gfx, t: Theme, frame: number) => {
+  const c = g.cur;
+  for (let k = 0; k < 2; k++) {
+    const f = (LP.tau(frame) * 2 + k * 0.5) % 1, x = 1900 - f * 2600, w = 150, slant = 420;
+    const gr = c.createLinearGradient(x - w, 0, x + w, 0);
+    gr.addColorStop(0, "rgba(255,214,140,0)"); gr.addColorStop(0.5, t.name === "light" ? "rgba(255,214,150,0.55)" : "rgba(255,206,130,0.42)"); gr.addColorStop(1, "rgba(255,214,140,0)");
+    g.touch(x - w - slant, TOP - 20, x + w + slant, H);
+    c.fillStyle = gr; c.beginPath(); c.moveTo(x - w + slant, TOP - 20); c.lineTo(x + w + slant, TOP - 20); c.lineTo(x + w - slant, H); c.lineTo(x - w - slant, H); c.closePath();
+    c.save(); c.transform(1, 0, 0, 1, 0, 0); c.fill(); c.restore();
+  }
 };
 
 // ---------------------------------------------------------------- her, standing
@@ -96,12 +145,12 @@ const BONES_STAND: P = [340, 343];
 
 const poseAt = (frame: number): Pose => {
   // the carriage rocks twice a loop; she sways with it a little after it, her feet planted
-  const lean = 7 * LP.cyc(frame, 2, -0.7), bob = -1.5 + 1.5 * LP.cyc(frame, 4, 0.3);
+  const lean = 12 * LP.cyc(frame, 2, -0.7), bob = -1.5 + 1.5 * LP.cyc(frame, 4, 0.3);
   const shoulder: P = [ARM_NEAR[0][0] + lean, ARM_NEAR[0][1] + bob];
   const elbow = twoBone(shoulder, GRIP, BONES_ARM[0], BONES_ARM[1], -1);
   return {
     far: legFrom(LEG_FAR[0], STAND_FAR, BONES_STAND, bob, lean), near: legFrom(LEG_NEAR[0], STAND_NEAR, BONES_STAND, bob, lean),
-    bob, lean, hairU: 0.12 + 0.02 * LP.cyc(frame, 2), open: mouthOpen(LP, frame), armNear: [shoulder, elbow, GRIP],
+    bob, lean, hairU: LP.tau(frame) - 0.06, open: mouthOpen(LP, frame), armNear: [shoulder, elbow, GRIP],
     carry: { kind: "pole", fistD: [BAG_D[0] + GRIP[0] - ARM_NEAR[2][0], BAG_D[1] + GRIP[1] - ARM_NEAR[2][1]] },
     phoneDeg: -10 + 1.5 * LP.cyc(frame, 2, -1.2),
   };
@@ -121,8 +170,8 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   const fade = (x0: number, y0: number, x1: number, y1: number) => { const gr = ctx.createLinearGradient(x0, y0, x1, y1); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)"); return gr; };
   ctx.fillStyle = fade(0, 0, 170, 0); ctx.fillRect(-30, 600, 200, H);
   ctx.fillStyle = fade(1466, 0, 1290, 0); ctx.fillRect(1280, 600, 300, H);
-  ctx.fillStyle = fade(0, 750, 0, 900); ctx.fillRect(-30, 600, 1600, 300);
-  ctx.fillStyle = fade(0, FRAME_BOTTOM, 0, FRAME_BOTTOM - 300); ctx.fillRect(-30, FRAME_BOTTOM - 300, 1600, 400);
+  ctx.fillStyle = fade(0, TOP, 0, TOP + 150); ctx.fillRect(-30, TOP - 100, 1600, 250);
+  ctx.fillStyle = fade(0, FRAME_BOTTOM - 40, 0, FRAME_BOTTOM - 340); ctx.fillRect(-30, FRAME_BOTTOM - 340, 1600, 440);   /* fully gone 40 px before the edge */
   ctx.restore();
 
   // 2. her, and her voice going into her phone
@@ -131,8 +180,15 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   drawWoman(g, theme, pose, () => drawVoice(g, pose, LP, frame, 11));
   g.pop();
 
-  // 3. no network, over the picture
+  // 3. the tunnel's light sweeping over the carriage and her; then, over everything, the text
+  //    coming out of her phone onto its card, and the badge: no network
+  // screen-blended, so the light brightens what it crosses (her navy trousers, the window) instead
+  // of tinting it brown
+  g.group("plain", () => lightBands(g, theme, frame), { blend: "screen" });
+  g.group("plain", () => drawNoteCard(g, theme, LP, frame, CARD, fig(phoneMap(pose)([[56, -6]])[0])));
   g.group("plain", () => noNetwork(g, theme, frame));
+  // 4. a clean band round the frame, so the page colour decodes exactly at its edge (edges.ts)
+  clearEdges(ctx, env);
 };
 
 // ---------------------------------------------------------------- the no-network badge
@@ -142,6 +198,9 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
 // the page, in both appearances. Drawn in FRAME pixels (FX maps them to the source canvas), so its
 // size on screen does not depend on the scene's scale. It swells a little twice a loop.
 const BADGE = { cx: 890, cy: 112, r: 72 };
+// the note card, canvas pixels: over the window's lower right, clear of the badge and of the
+// frame's bottom tenth
+const CARD: Card = { c: [1180, 1330], w: 390, h: 300, deg: -4 };
 const RED = "#EF4444";
 const FX = ([x, y]: P): P => [PLACE.o[0] + x / PLACE.k, PLACE.o[1] + y / PLACE.k];
 const noNetwork = (g: Gfx, t: Theme, frame: number) => {
