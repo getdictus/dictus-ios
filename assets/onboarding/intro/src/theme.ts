@@ -57,7 +57,8 @@ export type Theme = {
   // appearances: it is a tunnel), the lights streaking past, the steel pole
   wall: string; wallShade: string; floor: string; frameFill: string;
   tunnel: string; tunnelLine: string; streak: [string, string]; pole: string; poleLit: string; seat: string; seatShade: string;
-  badge: string;          // scene B: the no-network badge's disc
+  badge: string;          // scene B: the no-network badge's disc, and the mail draft's sheet
+  received: string;       // scene A: the grey chat message already received
   // the drawn iPhones
   titan: string; titanLit: string; titanDark: string; rim: string; groundShadow: string;
   screen: string; screenInk: string; screenFaint: string;   // a screen, its writing, its quiet marks
@@ -74,7 +75,7 @@ export const LIGHT_THEME: Theme = {
   shadow: "#0A1628", shadowA: 0.16,
   sole: "#C4CEDD", soleShade: "#A9B6CA", shoeShade: "#D3DCEA",
   wall: "#E9EDF4", wallShade: "#D7DDE8", floor: "#DCE2EC", frameFill: "#C9D1DE",
-  tunnel: "#1B2538", tunnelLine: "#2C3954", streak: ["#FFD27A", "#EAF1FF"], pole: "#AEB9CB", poleLit: "#E6ECF4", seat: "#9FB3D6", seatShade: "#7F95BD", badge: "#FFFFFF",
+  tunnel: "#1B2538", tunnelLine: "#2C3954", streak: ["#FFD27A", "#EAF1FF"], pole: "#AEB9CB", poleLit: "#E6ECF4", seat: "#9FB3D6", seatShade: "#7F95BD", badge: "#FFFFFF", received: "#E1E3EA",
   titan: "#2B3A5C", titanLit: "#46577D", titanDark: "#1A2642", rim: "#7F92BC", groundShadow: "#C6CFDF",
   screen: "#FFFFFF", screenInk: "#1C2333", screenFaint: "#B4BBC8",
   panel: "#E3E5EB", panelEdge: "#C9CED9", shine: "#EAF1FF", pill: "#FFFFFF", pillGlyph: "#7B8496",
@@ -88,7 +89,7 @@ export const DARK_THEME: Theme = {
   shadow: "#000000", shadowA: 0.4,
   sole: "#AEBBD0", soleShade: "#8D9BB3", shoeShade: "#C9D3E3",
   wall: "#17243E", wallShade: "#111C33", floor: "#1B2A47", frameFill: "#2C3B58",
-  tunnel: "#050A14", tunnelLine: "#16213A", streak: ["#FFC861", "#C9D8F5"], pole: "#7D8CA8", poleLit: "#B6C3DB", seat: "#2E416B", seatShade: "#22325A", badge: "#1B2A47",
+  tunnel: "#050A14", tunnelLine: "#16213A", streak: ["#FFC861", "#C9D8F5"], pole: "#7D8CA8", poleLit: "#B6C3DB", seat: "#2E416B", seatShade: "#22325A", badge: "#1B2A47", received: "#2A3550",
   // the slab one step lighter than the light render's, so its faces separate from the page
   titan: "#34466C", titanLit: "#53668F", titanDark: "#22304F", rim: "#93A6CE", groundShadow: "#050C18",
   screen: "#141A26", screenInk: "#E3E8F2", screenFaint: "#4A5366",

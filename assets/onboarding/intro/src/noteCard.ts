@@ -2,27 +2,37 @@ import { type Gfx, type P } from "./core";
 import { fillShape } from "./gallery";
 import { drawScribble, scribbleLine } from "./scribble";
 import type { Loop, Theme } from "./theme";
-import { clamp, sm, stroke } from "./woman";
+import { clamp, sm } from "./woman";
 
 // THE TEXT COMING OUT (issue #667, scenes A and B). Her phone is seen from the back, so the
 // writing the headline promises ("Parlez. Dictus écrit.") cannot be on its screen: it comes out
-// of the phone instead, on a small note card that springs from the phone's edge and settles in
-// the empty part of the frame. Scribbled lines (scribble.ts: handwriting that spells nothing)
-// write on it while her voice goes into the phone, a row of dots runs from the phone to the card,
-// and the card fades away before the loop starts again on its own.
+// of the phone instead, onto a card that springs from the phone's edge and settles in the empty
+// part of the frame. The card evokes the apps people write in every day, as generic shapes only
+// (no second phone, no logo, no one's colours but Dictus's):
+// - "bubble" (scene A): a sent chat message, the accent blue with its tail, white scribbled lines,
+//   growing a line at a time as she talks, under a small grey message already received;
+// - "mail" (scene B): a mail draft, a small sheet with an envelope mark, a subject line, a rule,
+//   then the body writing itself.
+// Scribbled lines (scribble.ts) spell nothing. A row of dots runs from the phone to the card.
 //
-// The chain to read at phone size: mouth, blue strokes, phone, card filling with lines.
+// The chain to read at phone size: mouth, blue strokes, phone, dots, the text appearing.
 //
 // Timing, in loop time (0..1): the card springs out between 2 % and 10 %, its four lines write
 // between 12 % and 82 % (at a speed that wavers with her speech and never goes back), it fades
 // between 88 % and 97 %. Hidden at both ends, so the seam is clean.
 
-export type Card = { c: P; w: number; h: number; deg: number };
-const LINES = [0, 1, 2, 3].map((i) => scribbleLine([0.8, 0.86, 0.74, 0.46][i], 0.05, 900 + i * 13));
+export type Card = { style: "bubble" | "mail"; c: P; w: number; deg: number };
+const ACCENT = "#3D7EFF";
+// lines a little airy: a small letter height on a long line, a thin pen
+const XH = 0.042, PEN = 2.6;
+const BODY = [0, 1, 2, 3].map((i) => scribbleLine([0.8, 0.86, 0.74, 0.5][i], XH, 900 + i * 13));
+const RECEIVED = scribbleLine(0.62, XH, 951);
+const SUBJECT = scribbleLine(0.5, XH * 1.1, 957);
 const ease = (t: number) => { const x = clamp(t); return x * x * (3 - 2 * x); };
-const rrect = (w: number, h: number, r: number): P[] => {
-  const out: P[] = [], c = (cx: number, cy: number, a0: number) => { for (let i = 0; i <= 6; i++) { const a = a0 + (i / 6) * (Math.PI / 2); out.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); } };
-  c(w / 2 - r, -h / 2 + r, -Math.PI / 2); c(w / 2 - r, h / 2 - r, 0); c(-w / 2 + r, h / 2 - r, Math.PI / 2); c(-w / 2 + r, -h / 2 + r, Math.PI);
+// a rounded rectangle from its top-left corner, width and height
+const rrect = (x0: number, y0: number, w: number, h: number, r: number): P[] => {
+  const out: P[] = [], x1 = x0 + w, y1 = y0 + h, c = (cx: number, cy: number, a0: number) => { for (let i = 0; i <= 6; i++) { const a = a0 + (i / 6) * (Math.PI / 2); out.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); } };
+  c(x1 - r, y0 + r, -Math.PI / 2); c(x1 - r, y1 - r, 0); c(x0 + r, y1 - r, Math.PI / 2); c(x0 + r, y0 + r, Math.PI);
   return out;
 };
 
@@ -35,26 +45,50 @@ export const drawNoteCard = (g: Gfx, t: Theme, lp: Loop, frame: number, card: Ca
   const k = 0.3 + 0.7 * out + 0.06 * Math.sin(Math.PI * out), lift = -18 * gone;
   const c: P = [from[0] + (card.c[0] - from[0]) * out, from[1] + (card.c[1] - from[1]) * out + lift];
   const a = (card.deg * Math.PI) / 180, cos = Math.cos(a), sin = Math.sin(a);
-  const map = ([x, y]: P): P => [c[0] + (x * cos - y * sin) * k, c[1] + (x * sin + y * cos) * k];
-  const W = card.w, H = card.h;
+  // card space: x across from the card's left edge, y down from its top, centred on `c` across
+  const W = card.w, map = ([x, y]: P): P => { const u = x - W / 2; return [c[0] + (u * cos - y * sin) * k, c[1] + (u * sin + y * cos) * k]; };
+  const written = 4 * clamp((tau - 0.12) / 0.7 + 0.012 * Math.sin(2 * Math.PI * 11 * tau));
+  const pen = (pts: P[], w: number, color: string, seed: number, closed = true, op = 1) =>
+    g.pen(pts, { w, color, seed, closed, wobble: 0.15, boil: 0, taper: closed ? 0.3 : 0.6, opacity: alpha * op, retrace: false });
+  const shape = (pts: P[], fill: string, seed: number) => {
+    const s = sm(pts.map(map), 3);
+    fillShape(g, s.map(([x, y]) => [x + 12, y + 14] as P), t.shadow, t.shadowA * alpha);
+    fillShape(g, s, fill, alpha);
+    pen(s, 5, t.line, seed);
+  };
+  const lines = (words: P[][][], x0: number, y0: number, lead: number, progress: number, color: string, seed: number) =>
+    words.forEach((w, i) => drawScribble(g, w, clamp(progress - i), ([x, y]) => map([x0 + x * W, y0 + i * lead + y * W]), { w: PEN, color, seed: seed + i * 7, opacity: alpha * 0.92 }));
 
   // the trail of dots from the phone to the card: light runs along it toward the card
-  const end = map([-W / 2, H * 0.1]);
+  const end = map([0, 60]);
   for (let i = 0; i < 5; i++) {
     const s = (i + 1) / 6, p: P = [from[0] + (end[0] - from[0]) * s, from[1] + (end[1] - from[1]) * s - Math.sin(Math.PI * s) * 40];
-    const glow = 0.35 + 0.65 * Math.max(0, Math.sin(2 * Math.PI * (s - lp.tau(frame) * 11)));
-    fillShape(g, Array.from({ length: 12 }, (_, j) => [p[0] + Math.cos(j * 0.5236) * 9, p[1] + Math.sin(j * 0.5236) * 9] as P), "#3D7EFF", alpha * glow);
+    const glow = 0.35 + 0.65 * Math.max(0, Math.sin(2 * Math.PI * (s - tau * 11)));
+    fillShape(g, Array.from({ length: 12 }, (_, j) => [p[0] + Math.cos(j * 0.5236) * 9, p[1] + Math.sin(j * 0.5236) * 9] as P), ACCENT, alpha * glow);
   }
-  // the card: a paper with soft corners, its shadow, its contour, a short accent at its head
-  const body = sm(rrect(W, H, 30).map(map), 3);
-  fillShape(g, sm(rrect(W, H, 30).map(([x, y]) => map([x + 14, y + 16])), 3), t.shadow, t.shadowA * alpha);
-  fillShape(g, body, t.badge, alpha);
-  g.pen(body, { w: 5.5, color: t.line, seed: 960, closed: true, wobble: 0.15, boil: 0, taper: 0.3, opacity: alpha, retrace: false });
-  stroke(g, [map([-W / 2 + 36, -H / 2 + 40]), map([-W / 2 + 110, -H / 2 + 40])], 7, 961, t.notesAccent, 0.2, alpha);
-  // the lines writing themselves
-  const written = 4 * clamp((tau - 0.12) / 0.7 + 0.012 * Math.sin(2 * Math.PI * 11 * tau));
-  LINES.forEach((words, i) => {
-    const y = -H / 2 + 92 + i * ((H - 120) / 4);
-    drawScribble(g, words, clamp(written - i), ([x, yy]) => map([-W / 2 + 36 + x * W, y + yy * W]), { w: 4, color: t.screenInk, seed: 970 + i * 7, opacity: alpha });
-  });
+
+  if (card.style === "bubble") {
+    // a small grey message already received, top left
+    shape(rrect(0, -118, W * 0.68, 84, 40), t.received, 958);
+    lines([RECEIVED], 30, -70, 0, 1, t.screenInk, 959);
+    // the sent message, right-aligned: its height grows a line at a time as the lines come
+    const lead = 52, pad = 34, n = 1 + [1, 2, 3].reduce((s, i) => s + ease((written - i + 0.2) / 0.35), 0);
+    const h = 2 * pad + lead * (n - 1) + 24, x0 = W * 0.06, w = W * 0.94;
+    const bubble = rrect(x0, 0, w, h, 42);
+    // the tail at the bottom right, curling out of the bubble's corner
+    // (it replaces the rounded bottom-right corner: points 7 to 13 of the outline)
+    const tail: P[] = [[x0 + w, h - 44], [x0 + w + 4, h - 12], [x0 + w + 18, h + 6], [x0 + w - 24, h - 2], [x0 + w - 64, h]];
+    shape([...bubble.slice(0, 7), ...tail, ...bubble.slice(14)], ACCENT, 960);
+    lines(BODY, x0 + 32, pad + 18, lead, written, "#FFFFFF", 970);
+  } else {
+    // a mail draft: the sheet, an envelope mark and the subject on its head, a rule, the body
+    const H = 300;
+    shape(rrect(0, 0, W, H, 26), t.badge, 960);
+    const env = [[28, 26], [76, 26], [76, 60], [28, 60]] as P[];
+    pen(env.map(map), 3.6, ACCENT, 961);
+    pen(([[28, 26], [52, 46], [76, 26]] as P[]).map(map), 3.2, ACCENT, 962, false);
+    drawScribble(g, SUBJECT, clamp(written * 2), ([x, y]) => map([96 + x * W, 54 + y * W]), { w: PEN * 1.4, color: t.screenInk, seed: 963, opacity: alpha });
+    pen(([[24, 86], [W - 24, 86]] as P[]).map(map), 2.4, t.screenFaint, 964, false);
+    lines(BODY.slice(0, 3), 28, 140, 56, Math.max(0, written - 0.5) * 3 / 3.5, t.screenInk, 970);
+  }
 };

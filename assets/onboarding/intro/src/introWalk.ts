@@ -12,8 +12,9 @@ import {
 // The App Store hero V15-B set in motion: she walks in place on a pavement that slides back
 // under her, the phone up at her mouth (seen from the back, as V15-B drew it), talking. Her
 // voice leaves her lips as the three blue strokes, in the App Store art's big arch, and goes
-// INTO the phone; the text comes OUT of it, on a note card that springs from the phone's edge
-// and fills with scribbled lines (woman.ts draws her and the voice, noteCard.ts the card).
+// INTO the phone; the text comes OUT of it, as a sent chat message that springs from the
+// phone's edge and grows a line at a time (woman.ts draws her and the voice, noteCard.ts the
+// message).
 //
 // What moves, all of it periodic over the 5.5 s loop:
 // - the legs: five walk cycles (1.1 s each, about 109 steps a minute), the planted foot sliding
@@ -21,7 +22,7 @@ import {
 // - the body rises at the passing positions and sinks at contact; the tote arm swings against
 //   the near leg and the tote follows the fist a beat late; the hair's ends sway; the phone rocks;
 // - the mouth talks; the voice's pulses travel from her lips into the phone, eleven a loop;
-// - the card springs out, writes four lines, and fades before the seam.
+// - the message springs out, grows four lines, and fades before the seam.
 
 // The source canvas is the App Store strip (2640 x 2868); the frame shows x 0..1466, y 750..2861
 // of it, the crop of the #649 mock-up (designs/onboarding-649-assets/intro-walk.png).
@@ -105,14 +106,14 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   drawWoman(g, theme, pose, () => drawVoice(g, pose, LP, frame, 11));
   g.pop();
 
-  // 3. the text, coming out of the phone onto its card
+  // 3. the text, coming out of the phone as a chat message
   g.group("plain", () => drawNoteCard(g, theme, LP, frame, CARD, fig(phoneMap(pose)([[56, -6]])[0])));
   // 4. a clean band round the frame, so the page colour decodes exactly at its edge (edges.ts)
   clearEdges(ctx, env);
 };
 
-// the card, canvas pixels: in the empty right of the frame, under the voice's arch
-const CARD: Card = { c: [1190, 1330], w: 390, h: 300, deg: -4 };
+// the message, canvas pixels: in the empty right of the frame, under the voice's arch
+const CARD: Card = { style: "bubble", c: [1185, 1270], w: 400, deg: -2 };
 
 const film = (theme: Theme, title: string): Film => ({
   meta: { title: `Dictus onboarding intro A · walking · ${theme.name}`, W: FRAME.w, H: FRAME.h, fps: FPS, bpm: BPM, durationFrames: LOOP_A },
