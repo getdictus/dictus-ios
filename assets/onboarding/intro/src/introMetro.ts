@@ -132,6 +132,13 @@ const lightBands = (g: Gfx, t: Theme, frame: number) => {
     c.fillStyle = gr; c.beginPath(); c.moveTo(x - w + slant, TOP - 20); c.lineTo(x + w + slant, TOP - 20); c.lineTo(x + w - slant, H); c.lineTo(x - w - slant, H); c.closePath();
     c.save(); c.transform(1, 0, 0, 1, 0, 0); c.fill(); c.restore();
   }
+  // the bands fade out where the carriage does, at the frame's right and bottom, so they never
+  // reach the page colour around the frame
+  c.save(); c.globalCompositeOperation = "destination-out";
+  const fade = (x0: number, y0: number, x1: number, y1: number) => { const gr = c.createLinearGradient(x0, y0, x1, y1); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)"); return gr; };
+  c.fillStyle = fade(1346, 0, 1170, 0); c.fillRect(1160, TOP - 40, 600, H);
+  c.fillStyle = fade(0, FRAME_BOTTOM - 160, 0, FRAME_BOTTOM - 460); c.fillRect(-60, FRAME_BOTTOM - 460, 2000, 700);
+  c.restore();
 };
 
 // ---------------------------------------------------------------- her, standing

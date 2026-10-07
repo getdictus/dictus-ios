@@ -76,6 +76,11 @@ for (const id of ALL) {
 
 // ---------------------------------------------------------------- 3. frames, then the video
 const hash = (b) => createHash("sha256").update(b).digest("hex");
+// x265's sample adaptive offset (SAO) nudges flat areas next to detailed ones by a code value or
+// so, which left a corner of A and B one value off the page colour. Off for those two. Scene C's
+// corners decode exact with it on, and C was validated by Pierre as encoded (round 5): its
+// encoding is left exactly as it was, so its files stay byte-identical.
+const X265_EXTRA = { a: ":no-sao=1", b: ":no-sao=1", c: "" };
 const results = [];
 for (const id of only) {
   const name = filmName(id);
@@ -112,7 +117,7 @@ for (const id of only) {
     "-f", "lavfi", "-i", `color=c=${bg}:s=${meta.W}x${meta.H}:r=${meta.fps},format=rgba`,
     "-framerate", String(meta.fps), "-i", join(dir, "f%04d.png"),
     "-filter_complex", "[0:v][1:v]overlay=shortest=1:format=rgb,scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int,format=yuv420p10le[v]", "-map", "[v]",
-    "-c:v", "libx265", "-preset", "slow", "-crf", "26", "-x265-params", `log-level=error:keyint=${meta.durationFrames}:min-keyint=${meta.durationFrames}`,
+    "-c:v", "libx265", "-preset", "slow", "-crf", "26", "-x265-params", `log-level=error:keyint=${meta.durationFrames}:min-keyint=${meta.durationFrames}${X265_EXTRA[id[0]]}`,
     "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv",
     "-tag:v", "hvc1", "-an", "-movflags", "+faststart", out]);
   const probe = execFileSync(FFPROBE, ["-v", "error", "-show_entries", "stream=codec_type,codec_name,width,height,nb_frames:format=duration", "-of", "compact=p=0", out]).toString().trim();
