@@ -9,8 +9,8 @@ every language.
 
 | File | Scene (headline) | What it shows | Drawn from |
 |---|---|---|---|
-| `intro-a-{light,dark}.mp4` | A, walking ("Parlez. Dictus écrit.") | She walks and talks into her phone, held to her mouth and seen from the back, as on the App Store art. The blue strokes leave her lips in the art's big arch and go into the phone. The text comes out of it as a sent chat message: a blue bubble springs from the phone's edge, under a small grey message already received, and grows a scribbled line at a time as she talks, then fades before the loop restarts. 5.5 s. | `assets/appstore/art/v15-B/heroWalk15.ts` |
-| `intro-b-{light,dark}.mp4` | B, the metro ("Même sans réseau.") | The same woman stands in a metro carriage, one hand on the pole, before a window where the tunnel's lights streak past. The carriage rocks and she sways, her ponytail swinging; grab handles swing; bands of tunnel light sweep through the carriage and over her. A badge in the top-right corner says no network (signal bars struck through in red). Her voice still goes into the phone, and the text comes out into a mail draft (envelope mark, subject, rule, body). 5.5 s. | Her: V15-B. The carriage: new, same style. |
+| `intro-a-{light,dark}.mp4` | A, walking ("Parlez. Dictus écrit.") | She walks and talks into her phone, held out in front of her mouth and seen from the back. Her voice crosses the gap as small blue bars of the Dictus waveform and goes into the phone. The text comes out of it as a sent chat message: a blue bubble springs from the phone's edge, under a small grey message already received, and grows a scribbled line at a time as she talks, then fades before the loop restarts. 5.5 s. | `assets/appstore/art/v15-B/heroWalk15.ts` |
+| `intro-b-{light,dark}.mp4` | B, the metro ("Même sans réseau.") | The same woman stands in a metro carriage, one hand on the pole, before a window where the tunnel's lights streak past. The carriage rocks and she sways, her ponytail swinging; grab handles swing; bands of tunnel light sweep through the carriage and over her. A badge in the top-right corner says no network (signal bars struck through in red). Her voice still goes into the phone as waveform bars, and the text comes out into a mail draft (envelope mark, subject, rule, body). 5.5 s. | Her: V15-B. The carriage: new, same style. |
 | `intro-c-{light,dark}.mp4` | C, the keyboard ("Dans votre clavier.") | The drawn iPhone, a note above the Dictus keyboard, through one whole dictation: two keys typed, the blue mic tapped, recording (waveform, timer, ✕ and ✓), ✓ tapped, transcribing (the sweep), the text lands, then the note clears. No hand: each tap is a touch indicator. 6.5 s. | `assets/appstore/art/v10-A/heroSpeak10.ts`, the phone (branch `chore/643-hero-a`) |
 
 Every video is 1000 × 1440 px (the 330 × 476 pt art area at 3×), 30 fps, HEVC Main 10, 4:2:0,
@@ -56,8 +56,9 @@ Chromium build may antialias some pixels differently.
 - `src/theme.ts`: the frame, the three loops, and the two appearances.
 - `src/woman.ts`: her, posed by the scenes (V15-B's lines and colours), with:
   - the walk rig: a leg is its hip, its foot and two bones, and the knee is solved. The walk's contact position is V15-B's pose;
-  - V15-B's phone, seen from the back;
-  - her voice going into the phone, its strokes ending behind it.
+  - V15-B's phone, seen from the back, held out in front of her mouth;
+  - a jaw-length bob with a swept fringe (round 7, in place of V15-B's hair);
+  - her voice crossing the gap as waveform bars.
 - `src/scribble.ts`: handwriting that spells nothing, and the timer's digits.
 - `src/noteCard.ts`: what the text comes out on: a chat message in A, a mail draft in B.
 - `src/edges.ts`: the clean band round the frame (A and B).
@@ -81,7 +82,12 @@ The App Store art files are untouched: these sources are copies, adapted.
   - In A it is a sent chat message: the accent blue, its tail at the bottom right, white scribbled lines, growing a line at a time, under a small grey message already received.
   - In B it is a mail draft: a small sheet with an envelope mark, a subject line, a rule, then the body writing itself. It sits below the window, over the bench, so it does not fight the dark glass.
   - In both, the card springs from the phone's edge, a row of dots runs from the phone to it, and it fades before the seam. The scribbles are thinner than in round 5, so they read lighter at phone size.
-  - The voice is the App Store art's big arch, curling back into the phone.
+- **Round 7: her hair, her voice, her trousers.** These are changes to the character, accepted by Pierre; the App Store screenshots will be redone from them later, and `assets/appstore/` is untouched.
+  - The hair is a jaw-length bob with a swept fringe, chosen over a ponytail and long loose hair. It replaces V15-B's roll on top and stiff ponytail.
+  - She holds the phone out at the height of her mouth, forearm reaching forward, so her voice crosses a clear gap. It crosses as small rounded bars of the Dictus waveform, chosen over the App Store art's marker strokes; the old voice made a loop and came back to a phone held at her chin.
+  - The trousers read as one fabric: the seat between the legs has the legs' own tone and shading, and the far leg's half-tone fades in below the hip instead of starting at a hard edge. The front runs almost straight from the waistband into the front leg (no bulge), and the back flares from the waist into her hip, so the silhouette keeps a woman's hips.
+  - The walk rises more over the supporting leg at the passing position, so the stance knee straightens instead of both knees sitting bent.
+  - Scene A starts lower so her head clears the top edge.
 - **Scene B lives.** The carriage rocks and she sways with it, her ponytail swinging. Two grab handles swing from the rail; the right one hangs between the voice's arch and the badge, clear of both. Bands of the tunnel's light sweep through the carriage and over her, screen-blended so they brighten what they cross rather than tint it. The pole is a plain round tube cut by the frame's top, with a round collar at the rail and a round foot; it is drawn with two parallel contours, because a closed outline tapers to points at its ends. The scene sits 75 frame pixels lower than A so her bun clears the top edge. Her head, the badge and the mail draft stay out of the frame's bottom tenth, which the three-line subtitle of mock-up 01b crowds.
 - **Scene C has no hand.** Two drawn hands were rejected, the second at real size. Each tap is now a touch indicator, as in screen recordings: an accent disc spreading into a fading ring, in perspective on the glass, together with the key's own flash. The mic and ✓ touches land three frames before the overlay swaps them, so the contact is seen on them. The loop is 6.5 s: two keys, the mic at 1.2 s, three seconds of recording, ✓, one second of transcribing, the text lands, the note clears.
 - **No readable text.** The keys are blank caps with their icons only: shift, delete, emoji, return, globe, mic. The suggestions, the caption and the note are scribbles, and scene B's no-network badge is an icon. The one exception is the timer's digits, `00:00` to `00:02`: numerals, the same in every language the app ships, and a timer is what the brief asks for.
