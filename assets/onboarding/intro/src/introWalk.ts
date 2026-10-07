@@ -25,10 +25,11 @@ import {
 // - the message springs out, grows four lines, and fades before the seam.
 
 // The source canvas is the App Store strip (2640 x 2868); the frame shows x 0..1466 of it at the
-// scale of the #649 mock-up's crop (designs/onboarding-649-assets/intro-walk.png), from y 690
-// rather than the crop's 750, so the top of her head has a clear margin under the frame's edge.
+// scale of the #649 mock-up's crop (designs/onboarding-649-assets/intro-walk.png), from y 640
+// rather than the crop's 750, so the top of her head clears the frame's edge and the clean band
+// round it (edges.ts).
 const W = 2640, H = 2868;
-const PLACE = place([0, 690], 1466, [0, 0], 330);
+const PLACE = place([0, 640], 1466, [0, 0], 330);
 const FRAME_BOTTOM = PLACE.o[1] + FRAME.h / PLACE.k;
 const LP = loop(LOOP_A);
 
