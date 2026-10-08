@@ -1,6 +1,6 @@
 import { type Gfx, type P } from "./core";
 import { fillShape } from "./gallery";
-import { drawScribble, scribbleLine } from "./scribble";
+import { drawText } from "./pseudoText";
 import type { Loop, Theme } from "./theme";
 import { clamp, sm } from "./woman";
 
@@ -9,11 +9,12 @@ import { clamp, sm } from "./woman";
 // of the phone instead, onto a card that springs from the phone's edge and settles in the empty
 // part of the frame. The card evokes the apps people write in every day, as generic shapes only
 // (no second phone, no logo, no one's colours but Dictus's):
-// - "bubble" (scene A): a sent chat message, the accent blue with its tail, white scribbled lines,
+// - "bubble" (scene A): a sent chat message, the accent blue with its tail, white lines of text,
 //   growing a line at a time as she talks, under a small grey message already received;
 // - "mail" (scene B): a mail draft, a small sheet with an envelope mark, a subject line, a rule,
 //   then the body writing itself.
-// Scribbled lines (scribble.ts) spell nothing. A row of dots runs from the phone to the card.
+// The text is fake (pseudoText.ts): letters, but no word of any language. A row of dots runs
+// from the phone to the card.
 //
 // The chain to read at phone size: mouth, blue strokes, phone, dots, the text appearing.
 //
@@ -23,11 +24,12 @@ import { clamp, sm } from "./woman";
 
 export type Card = { style: "bubble" | "mail"; c: P; w: number; deg: number };
 const ACCENT = "#3D7EFF";
-// lines a little airy: a small letter height on a long line, a thin pen
-const XH = 0.042, PEN = 2.6;
-const BODY = [0, 1, 2, 3].map((i) => scribbleLine([0.8, 0.86, 0.74, 0.5][i], XH, 900 + i * 13));
-const RECEIVED = scribbleLine(0.62, XH, 951);
-const SUBJECT = scribbleLine(0.5, XH * 1.1, 957);
+// the fake text (pseudoText.ts: real letter shapes, made-up words), its letter size and pen
+const XH = 15, PEN = 2.8;
+const BODY = ["Tasini obrelk miscor", "faltin, trivo sapnel", "cundra moreti vilsan", "plodri unvel."];
+const RECEIVED = "Hoskim dapor,";
+const SUBJECT = "Nustri gelvo";
+const MAIL = ["Esnaru borkam ilvane", "quelbo venusk, olmabi", "Tarsiv skirel."];
 const ease = (t: number) => { const x = clamp(t); return x * x * (3 - 2 * x); };
 // a rounded rectangle from its top-left corner, width and height
 const rrect = (x0: number, y0: number, w: number, h: number, r: number): P[] => {
@@ -56,8 +58,8 @@ export const drawNoteCard = (g: Gfx, t: Theme, lp: Loop, frame: number, card: Ca
     fillShape(g, s, fill, alpha);
     pen(s, 5, t.line, seed);
   };
-  const lines = (words: P[][][], x0: number, y0: number, lead: number, progress: number, color: string, seed: number) =>
-    words.forEach((w, i) => drawScribble(g, w, clamp(progress - i), ([x, y]) => map([x0 + x * W, y0 + i * lead + y * W]), { w: PEN, color, seed: seed + i * 7, opacity: alpha * 0.92 }));
+  const lines = (texts: string[], x0: number, y0: number, lead: number, progress: number, color: string, seed: number) =>
+    texts.forEach((txt, i) => drawText(g, txt, clamp(progress - i), ([x, y]) => map([x0 + x, y0 + i * lead + y]), { h: XH, w: PEN, color, seed: seed + i * 31, opacity: alpha }));
 
   // the trail of dots from the phone to the card: light runs along it toward the card
   const end = map([0, 60]);
@@ -87,8 +89,8 @@ export const drawNoteCard = (g: Gfx, t: Theme, lp: Loop, frame: number, card: Ca
     const env = [[28, 26], [76, 26], [76, 60], [28, 60]] as P[];
     pen(env.map(map), 3.6, ACCENT, 961);
     pen(([[28, 26], [52, 46], [76, 26]] as P[]).map(map), 3.2, ACCENT, 962, false);
-    drawScribble(g, SUBJECT, clamp(written * 2), ([x, y]) => map([96 + x * W, 54 + y * W]), { w: PEN * 1.4, color: t.screenInk, seed: 963, opacity: alpha });
+    drawText(g, SUBJECT, clamp(written * 2), ([x, y]) => map([96 + x, 58 + y]), { h: XH * 1.1, w: PEN * 1.25, color: t.screenInk, seed: 963, opacity: alpha });
     pen(([[24, 86], [W - 24, 86]] as P[]).map(map), 2.4, t.screenFaint, 964, false);
-    lines(BODY.slice(0, 3), 28, 140, 56, Math.max(0, written - 0.5) * 3 / 3.5, t.screenInk, 970);
+    lines(MAIL, 28, 140, 56, Math.max(0, written - 0.5) * 3 / 3.5, t.screenInk, 970);
   }
 };

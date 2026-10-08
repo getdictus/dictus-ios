@@ -5,7 +5,7 @@ import { clipped, fillShape } from "./gallery";
 import { BPM, FPS, FRAME, LOOP_B, loop, place, THEMES, type Theme } from "./theme";
 import { drawNoteCard, type Card } from "./noteCard";
 import {
-  ARM_NEAR, BAG_D, cel, drawVoice, drawWoman, FIG, fig, LEG_FAR, LEG_NEAR, legFrom, MARKER, mouthOpen, outline, phoneMap, setTheme, sm, stroke, twoBone, type Pose,
+  ARM_NEAR, cel, drawVoice, drawWoman, FIG, fig, LEG_FAR, LEG_NEAR, legFrom, MARKER, mouthOpen, outline, phoneMap, setTheme, sm, stroke, twoBone, type Pose,
 } from "./woman";
 
 // ONBOARDING INTRO, SCENE B · "the metro, no network" (issue #667, headline "Même sans réseau.").
@@ -39,21 +39,17 @@ const FRAME_BOTTOM = 750 + FRAME.h / PLACE.k;
 
 // ---------------------------------------------------------------- the carriage (canvas pixels)
 const FLOOR_Y = 2330;                               // where the wall meets the floor
-const RAIL_Y = 836;                                 // the overhead grab rail
+// the overhead grab rail, above the frame's top edge: in a real carriage it runs high, and the
+// handles' loops hang just above an adult's head (round 10: at 836 they hung at her head, which
+// made her a giant)
+const RAIL_Y = 560;
 const WIN = { x0: 690, y0: 930, x1: 1380, y1: 1520, r: 70 };
 const BENCH = { x0: 760, x1: 1470, back: [1580, 1960] as P, seat: [1960, 2070] as P };
-// the pole her hand closes round, figure space: a vertical tube from the rail to the floor
-let POLE_X = 238;
+// the pole beside her, figure space: a vertical tube from above the frame to the floor; her near
+// hand holds it at shoulder height, the upper arm down along her side, the elbow bent, the
+// forearm rising to it (round 10, Pierre's pick over the overhead rail)
+const POLE_X = 110;
 const POLE_R = 13;
-// EXPLORATION (round 10): how she holds on. "low" is round 9 (the pole at her hip, arm hanging);
-// "pole" moves the pole beside her and her hand up to shoulder height round it, the elbow bent
-// and down at her side; "strap" has her reach up and hold the overhead rail (the carriage's
-// straps hang at her chin here, the rail is the bar above her head)
-export type Hold = "low" | "pole" | "strap";
-let HOLD: Hold = "low";
-export const setHold = (h: Hold) => { HOLD = h; POLE_X = h === "pole" ? 170 : 238; };
-// where she holds the overhead rail, figure space (the rail at canvas y 836)
-const RAIL_GRIP: P = [(270 - 4.8) / 1.06, (836 + 72) / 1.06];
 const POLE_FOOT = 2500;                            // it stands on the floor where she stands
 const rrect = (x0: number, y0: number, x1: number, y1: number, r: number, n = 6): P[] => {
   const out: P[] = [], c = (cx: number, cy: number, a0: number) => { for (let i = 0; i <= n; i++) { const a = a0 + (i / n) * (Math.PI / 2); out.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]); } };
@@ -106,7 +102,7 @@ const carriage = (g: Gfx, t: Theme, frame: number, rock: number) => {
   };
   tubeH(RAIL_Y, -40, 1520, 650);
   // the grab handles hanging from the rail, swinging with the carriage
-  HANDLES.forEach(([x, ph], k) => handle(g, t, x, LP.cyc(frame, 2, ph) * 9, 670 + k * 4));
+  HANDLES.forEach(([x, ph], k) => handle(g, t, x, LP.cyc(frame, 2, ph) * 5, 670 + k * 4));
   // the pole, from above the frame's top edge (cut by it) down to a round foot on the floor, and
   // a round collar where it passes the rail
   tubeV(px, TOP - 40, POLE_FOOT, 655);
@@ -118,7 +114,7 @@ const carriage = (g: Gfx, t: Theme, frame: number, rock: number) => {
 
 // the hanging grab handles: where they hang on the rail, and their swing's phase
 // the right one hangs between her phone and the badge, clear of both
-const HANDLES: [number, number][] = [[120, 0.4], [1110, -0.6]];
+const HANDLES: [number, number][] = [[300, 0.4], [1110, -0.6]];
 // a strap down from the rail and a rounded triangular grip, swung by `deg` about the rail
 const handle = (g: Gfx, t: Theme, x: number, deg: number, seed: number) => {
   const a = (deg * Math.PI) / 180, at = (dx: number, dy: number): P => [x + dx * Math.cos(a) - dy * Math.sin(a), RAIL_Y + dx * Math.sin(a) + dy * Math.cos(a)];
@@ -155,29 +151,23 @@ const lightBands = (g: Gfx, t: Theme, frame: number) => {
 // both feet flat, a little apart, her weight on both: foot keys relative to each hip, the way
 // FOOT keys the walk (heel x, heel y, sole angle, toe bend)
 const STAND_FAR: [number, number, number, number] = [64, 741, 0, 0], STAND_NEAR: [number, number, number, number] = [-36, 741, 0, 0];
-// her near hand on the pole, at hip height behind her (figure space)
-const GRIP: P = [POLE_X - 22, 1636];
+// her hand on the pole, at shoulder height, and the wrist straight below and toward her
+const GRIP: P = [POLE_X, 1176], WRIST: P = [POLE_X + 54, 1222];
 const BONES_ARM: P = [213.4, 207.1];   // V15-B's upper arm and forearm
 // standing, the legs are nearly straight: bones between V15-B's reaching and pushing legs
 const BONES_STAND: P = [340, 343];
 
 const poseAt = (frame: number): Pose => {
-  // the carriage rocks twice a loop; she sways with it a little after it, her feet planted, and
-  // when she holds on above, a little toward what she holds
-  const toward = HOLD === "low" ? 0 : -6;
-  const lean = toward + 12 * LP.cyc(frame, 2, -0.7), bob = -1.5 + 1.5 * LP.cyc(frame, 4, 0.3);
+  // the carriage rocks twice a loop; she sways with it a little after it, her feet planted, a
+  // little toward the pole she holds; her hand stays on the pole and the arm follows
+  const lean = -6 + 12 * LP.cyc(frame, 2, -0.7), bob = -1.5 + 1.5 * LP.cyc(frame, 4, 0.3);
   const shoulder: P = [ARM_NEAR[0][0] + lean, ARM_NEAR[0][1] + bob];
-  const legs = { far: legFrom(LEG_FAR[0], STAND_FAR, BONES_STAND, bob, lean), near: legFrom(LEG_NEAR[0], STAND_NEAR, BONES_STAND, bob, lean) };
-  const rest = { bob, lean, hairU: LP.tau(frame) - 0.06, open: mouthOpen(LP, frame), phoneDeg: -10 + 1.5 * LP.cyc(frame, 2, -1.2) };
-  if (HOLD === "low") {
-    const elbow = twoBone(shoulder, GRIP, BONES_ARM[0], BONES_ARM[1], -1);
-    return { ...legs, ...rest, armNear: [shoulder, elbow, GRIP], carry: { kind: "pole", fistD: [BAG_D[0] + GRIP[0] - ARM_NEAR[2][0], BAG_D[1] + GRIP[1] - ARM_NEAR[2][1]] } };
-  }
-  // the hand is fixed on the pole or the strap; the wrist sits a hand's length off it, toward her
-  const at: P = HOLD === "pole" ? [POLE_X, 1170] : RAIL_GRIP;
-  const wrist: P = HOLD === "pole" ? [at[0] + 40, at[1] + 26] : [at[0] + 10, at[1] + 50];
-  const elbow = twoBone(shoulder, wrist, BONES_ARM[0], BONES_ARM[1], 1);
-  return { ...legs, ...rest, armNear: [shoulder, elbow, wrist], carry: { kind: "grip", at, on: HOLD === "pole" ? "pole" : "strap", poleX: POLE_X, poleR: POLE_R } };
+  const elbow = twoBone(shoulder, WRIST, BONES_ARM[0], BONES_ARM[1], 1);
+  return {
+    far: legFrom(LEG_FAR[0], STAND_FAR, BONES_STAND, bob, lean), near: legFrom(LEG_NEAR[0], STAND_NEAR, BONES_STAND, bob, lean),
+    bob, lean, hairU: LP.tau(frame) - 0.06, open: mouthOpen(LP, frame), armNear: [shoulder, elbow, WRIST],
+    carry: { kind: "grip", at: GRIP, poleR: POLE_R }, phoneDeg: -10 + 1.5 * LP.cyc(frame, 2, -1.2),
+  };
 };
 
 // ---------------------------------------------------------------- the picture
@@ -192,9 +182,9 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
   g.group("plain", () => carriage(g, theme, frame, rock));
   ctx.save(); toFrame(); ctx.globalCompositeOperation = "destination-out";
   const fade = (x0: number, y0: number, x1: number, y1: number) => { const gr = ctx.createLinearGradient(x0, y0, x1, y1); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)"); return gr; };
-  ctx.fillStyle = fade(0, 0, 170, 0); ctx.fillRect(-30, 600, 200, H);
+  ctx.fillStyle = fade(0, 0, 90, 0); ctx.fillRect(-30, 600, 120, H);
   ctx.fillStyle = fade(1346, 0, 1170, 0); ctx.fillRect(1160, 600, 440, H);   /* fully gone 120 px before the edge */
-  ctx.fillStyle = fade(0, TOP, 0, TOP + 150); ctx.fillRect(-30, TOP - 100, 1600, 250);
+  ctx.fillStyle = fade(0, TOP, 0, TOP + 70); ctx.fillRect(-30, TOP - 100, 1600, 170);
   ctx.fillStyle = fade(0, FRAME_BOTTOM - 160, 0, FRAME_BOTTOM - 460); ctx.fillRect(-30, FRAME_BOTTOM - 460, 1600, 560);   /* fully gone 160 px before the edge */
   ctx.restore();
 

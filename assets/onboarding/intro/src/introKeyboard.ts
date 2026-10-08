@@ -2,7 +2,8 @@ import { Gfx, type Ctx, type Env, type Medium, type P } from "./core";
 import type { Film } from "./film";
 import { clipped, fillShape, smooth } from "./gallery";
 import { drop, mm, MM, mmPts, rrect, WAVE } from "./phoneGeometry";
-import { drawDigits, drawScribble, scribbleLine } from "./scribble";
+import { drawText, textWidth } from "./pseudoText";
+import { drawDigits } from "./scribble";
 import { BPM, FPS, FRAME, LOOP_C, loop, place, THEMES, type Theme } from "./theme";
 
 // ONBOARDING INTRO, SCENE C · "the keyboard in a note" (issue #667, headline "Dans votre
@@ -84,18 +85,18 @@ const modeAt = (f: number): Mode => (f >= CUE.mic && f < CUE.check ? "recording"
 // centred at 108, four rows of keys, the globe and mic row at 156
 const PANEL_TOP = 100, BAR_Y = 108, ROWS = [116.8, 126.2, 135.7, 145.4], KEY_H = 7.4, BOTTOM_Y = 155.4;
 const PITCH = 7.28, KEY_W = 6.2, X0 = 6.25;
-type Key = { x0: number; x1: number; y: number; icon?: "shift" | "delete" | "emoji" | "return" };
+type Key = { x0: number; x1: number; y: number; icon?: "shift" | "delete" | "emoji" | "return"; ch?: string };
 const KEYS: Key[] = [
-  ...Array.from({ length: 10 }, (_, i) => ({ x0: X0 + i * PITCH - KEY_W / 2, x1: X0 + i * PITCH + KEY_W / 2, y: ROWS[0] })),
-  ...Array.from({ length: 10 }, (_, i) => ({ x0: X0 + i * PITCH - KEY_W / 2, x1: X0 + i * PITCH + KEY_W / 2, y: ROWS[1] })),
+  ...[..."qwertyuiop"].map((ch, i) => ({ x0: X0 + i * PITCH - KEY_W / 2, x1: X0 + i * PITCH + KEY_W / 2, y: ROWS[0], ch })),
+  ...[..."asdfghjkl"].map((ch, i) => ({ x0: X0 + (i + 0.5) * PITCH - KEY_W / 2, x1: X0 + (i + 0.5) * PITCH + KEY_W / 2, y: ROWS[1], ch })),
   { x0: 3.15, x1: 12.4, y: ROWS[2], icon: "shift" },
-  ...Array.from({ length: 7 }, (_, i) => ({ x0: 16.4 + i * PITCH - KEY_W / 2, x1: 16.4 + i * PITCH + KEY_W / 2, y: ROWS[2] })),
+  ...[..."zxcvbnm"].map((ch, i) => ({ x0: 16.4 + i * PITCH - KEY_W / 2, x1: 16.4 + i * PITCH + KEY_W / 2, y: ROWS[2], ch })),
   { x0: 65.1, x1: 74.9, y: ROWS[2], icon: "delete" },
   { x0: 3.15, x1: 12.4, y: ROWS[3] }, { x0: 13.9, x1: 23.2, y: ROWS[3], icon: "emoji" },
   { x0: 24.7, x1: 56.6, y: ROWS[3] }, { x0: 58.1, x1: 74.9, y: ROWS[3], icon: "return" },
 ];
-// the two keys typed, by index into KEYS
-const TYPED = [12, 2];
+// the two keys typed, by index into KEYS (the letter keys run QWERTY, row by row)
+const TYPED = [17, 2];   // k, then e: the note's first word is "Ke"
 const MIC_PILL = { x0: 62.4, x1: 73.6, y0: 104.6, y1: 111.4 };
 // the recording overlay (01-recording-reminders.png): the pills in the top bar, the waveform, the
 // timer and its caption; the waveform keeps V10-A's 17 wider bars, which read at this size
@@ -126,11 +127,14 @@ const sweepLevel = (i: number, f: number) => {
 
 // ---------------------------------------------------------------- the note's text
 // the typed word: the first word of a scribbled line, and where it ends (for the caret)
-const WORD = scribbleLine(15, 2.6, 801).slice(0, 1), WORD_END = Math.max(...WORD[0].map(([x]) => x));
-const PARAGRAPH = [scribbleLine(46, 2.6, 811), scribbleLine(66, 2.6, 823), scribbleLine(62, 2.6, 835), scribbleLine(38, 2.6, 847)];
-const DATE = scribbleLine(18, 1.8, 861);
-const CAPTION_REC = scribbleLine(13, 1.6, 871), CAPTION_TRANS = scribbleLine(17, 1.6, 873);
-const SUGGEST = [scribbleLine(12, 2, 881), scribbleLine(11, 2, 883), scribbleLine(10, 2, 885)];
+// the note's text, fake (pseudoText.ts): the word typed, the paragraph dictated, the date line;
+// the keyboard's suggestions and the overlay's caption are made-up words too
+const XH = 2.2, WORD = "Ke", WORD_END = textWidth(WORD, XH);
+const PARAGRAPH = ["plodri esnaru, gelvo nustri", "borkam ilvane quelbo venusk", "olmabi skirel, Dapor tasini", "unvel hoskim."];
+const LAST_END = textWidth(PARAGRAPH[3], XH);
+const DATE = "Lorvem miscor";
+const CAPTION_REC = "Tarsiv...", CAPTION_TRANS = "Esnaru...";
+const SUGGEST = ["trivo", "sapnel", "cundra"];
 const NOTE = { x: 7, line0: 32, lead: 7 };
 
 // ---------------------------------------------------------------- the touches
@@ -189,21 +193,21 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
     clipped(g, screen, () => {
       // ---- the note (Apple Notes-like): back chevron, the date in grey, the text, the caret
       stroke(g, at([[8.6, 12.2], [6.4, 14.6], [8.6, 17]]), 3.6, 700, T.notesAccent, 0.2);
-      drawScribble(g, DATE, 1, local(30, 23), { w: 2, color: T.screenFaint, seed: 702 });
+      drawText(g, DATE, 1, local(MM.w / 2 - textWidth(DATE, 1.6) / 2, 23.5), { h: 1.6, w: 2, color: T.screenFaint, seed: 702 });
       const clearK = 1 - ease((frame - CUE.clear[0]) / (CUE.clear[1] - CUE.clear[0]));
       const typed = CUE.taps.reduce((n, t) => n + ease((frame - t) / 2), 0) / CUE.taps.length;
       const wordLen = WORD_END * typed;
       if (clearK > 0) {
-        drawScribble(g, WORD, typed, local(NOTE.x, NOTE.line0), { w: 2.8, color: T.screenInk, seed: 710, opacity: clearK });
+        drawText(g, WORD, typed, local(NOTE.x, NOTE.line0), { h: XH, w: 2.8, color: T.screenInk, seed: 710, opacity: clearK });
         // the paragraph lands line after line, fast, the way inserted text appears
-        PARAGRAPH.forEach((words, i) => {
-          const p = ease((frame - CUE.land - i * 3) / 9), x0 = i === 0 ? NOTE.x + 18 : NOTE.x;
-          drawScribble(g, words, p, local(x0, NOTE.line0 + i * NOTE.lead), { w: 2.8, color: T.screenInk, seed: 720 + i * 11, opacity: clearK });
+        PARAGRAPH.forEach((line, i) => {
+          const p = ease((frame - CUE.land - i * 3) / 9), x0 = i === 0 ? NOTE.x + WORD_END + textWidth(" ", XH) : NOTE.x;
+          drawText(g, line, p, local(x0, NOTE.line0 + i * NOTE.lead), { h: XH, w: 2.8, color: T.screenInk, seed: 720 + i * 37, opacity: clearK });
         });
       }
       // the caret: after the typed word, then after the paragraph; it blinks five times a loop
       const landed = frame >= CUE.land + 12 && frame < CUE.clear[0];
-      const caret: P = landed ? [NOTE.x + 39.5, NOTE.line0 + 3 * NOTE.lead] : frame >= CUE.clear[0] ? [NOTE.x + 1.2, NOTE.line0] : [NOTE.x + wordLen + 1.2, NOTE.line0];
+      const caret: P = landed ? [NOTE.x + LAST_END + 1, NOTE.line0 + 3 * NOTE.lead] : frame >= CUE.clear[0] ? [NOTE.x + 1.2, NOTE.line0] : [NOTE.x + wordLen + 1.2, NOTE.line0];
       if (frame % 39 < 20 || mode !== "keys") stroke(g, at([[caret[0], caret[1] + 0.8], [caret[0], caret[1] - 4.4]]), 2.6, 705, T.notesAccent, 0.1);
       // the comic glass shine across the empty part of the note
       fillShape(g, at([[0, 70], [MM.w * 0.62, 50], [MM.w * 0.78, 50], [0, 76]]), T.shine, 0.6);
@@ -214,7 +218,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
       const pill = (x: P, n: number, glyph: () => void) => { const sh = at(rrect(x[0], PILL_Y[0], x[1], PILL_Y[1], 3.4, 8)); fillShape(g, sh, T.pill); outline(g, sh, 3.2, n); glyph(); };
       if (mode === "keys") {
         // the top bar: three suggestions (scribbles) between thin dividers, the blue mic pill
-        SUGGEST.forEach((w, i) => drawScribble(g, w, 1, local(5 + i * 19.5, BAR_Y + 1.2), { w: 2.2, color: T.screenInk, seed: 730 + i, opacity: 0.75 }));
+        SUGGEST.forEach((w, i) => drawText(g, w, 1, local(11 + i * 19.5 - textWidth(w, 1.8) / 2, BAR_Y + 1), { h: 1.8, w: 2.2, color: T.screenInk, seed: 730 + i * 13, opacity: 0.8 }));
         [21, 40.5].forEach((x, i) => stroke(g, at([[x, BAR_Y - 2.6], [x, BAR_Y + 2.6]]), 2, 735 + i, T.screenFaint, 0.2));
         const hit = clamp(1 - Math.abs(frame - CUE.mic + 2) / 4);
         const mic = at(rrect(MIC_PILL.x0, MIC_PILL.y0, MIC_PILL.x1, MIC_PILL.y1, 3.4, 8));
@@ -229,6 +233,8 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
           const lip = at(rrect(k.x0, k.y - KEY_H / 2 + 0.6, k.x1, k.y + KEY_H / 2 + 0.6, 1.4, 4)), cap = at(rrect(k.x0, k.y - KEY_H / 2, k.x1, k.y + KEY_H / 2, 1.4, 4));
           fillShape(g, lip, T.keyShade); fillShape(g, cap, hitK > 0.3 ? T.keyHit : T.key);
           const c: P = [(k.x0 + k.x1) / 2, k.y], ic = (pts: P[], s: number, closed = false) => g.pen(at(pts.map(([x, y]) => [c[0] + x, c[1] + y] as P)), { w: s, color: T.glyph, seed: 760 + i, closed, wobble: 0.2, boil: 0, taper: 0.2, opacity: 0.85, retrace: false });
+          // a letter key's letter, hand-lettered, centred on the key
+          if (k.ch) { const lw = textWidth(k.ch, 2.5) - 0.5; drawText(g, k.ch, 1, ([x, y]) => mm(c[0] - lw / 2 + x, c[1] + 1.25 + y), { h: 2.5, w: 2.4, color: T.glyph, seed: 800 + i * 3, opacity: 0.9 }); }
           if (k.icon === "shift") ic([[0, -2.4], [2.2, 0], [1, 0], [1, 2], [-1, 2], [-1, 0], [-2.2, 0]], 2.2, true);
           if (k.icon === "delete") { ic([[-3, 0], [-1.6, -2], [3, -2], [3, 2], [-1.6, 2]], 2.2, true); ic([[-0.2, -0.9], [1.6, 0.9]], 2); ic([[1.6, -0.9], [-0.2, 0.9]], 2); }
           if (k.icon === "emoji") { ic(Array.from({ length: 12 }, (_, j) => [Math.cos(j * 0.5236) * 2.3, Math.sin(j * 0.5236) * 2.3] as P), 2.2, true); ic([[-1.2, 0.6], [0, 1.4], [1.2, 0.6]], 2); }
@@ -246,7 +252,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
           const wTimer = text.length * 0.7 * TIMER_H - 0.38 * TIMER_H;
           drawDigits(g, text, TIMER_H, local(MM.w / 2 - wTimer / 2, TIMER_Y), { w: 2.8, color: T.screenInk, seed: 780 });
         }
-        drawScribble(g, mode === "recording" ? CAPTION_REC : CAPTION_TRANS, 1, local(MM.w / 2 - (mode === "recording" ? 6.5 : 8.5), CAPTION_Y), { w: 2, color: T.pillGlyph, seed: 790 });
+        { const cap = mode === "recording" ? CAPTION_REC : CAPTION_TRANS; drawText(g, cap, 1, local(MM.w / 2 - textWidth(cap, 1.5) / 2, CAPTION_Y + 0.6), { h: 1.5, w: 2, color: T.pillGlyph, seed: 790 }); }
         // the BrandWaveform: flat bars, blue through the centre 40 %, grey toward the edges, each
         // with a hard darker lower half and a thin ink edge
         const n = BARS.length, pitch = (WAVE.x1 - WAVE.x0) / (n - 1);
