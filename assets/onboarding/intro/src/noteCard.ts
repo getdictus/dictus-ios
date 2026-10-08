@@ -1,6 +1,6 @@
 import { type Gfx, type P } from "./core";
 import { fillShape } from "./gallery";
-import { drawText } from "./pseudoText";
+import { drawText } from "./handLettering";
 import type { Loop, Theme } from "./theme";
 import { clamp, sm } from "./woman";
 
@@ -13,8 +13,8 @@ import { clamp, sm } from "./woman";
 //   growing a line at a time as she talks, under a small grey message already received;
 // - "mail" (scene B): a mail draft, a small sheet with an envelope mark, a subject line, a rule,
 //   then the body writing itself.
-// The text is fake (pseudoText.ts): letters, but no word of any language. A row of dots runs
-// from the phone to the card.
+// The text is short everyday English (handLettering.ts). A row of dots runs from the phone to the
+// card.
 //
 // The chain to read at phone size: mouth, blue strokes, phone, dots, the text appearing.
 //
@@ -24,12 +24,13 @@ import { clamp, sm } from "./woman";
 
 export type Card = { style: "bubble" | "mail"; c: P; w: number; deg: number };
 const ACCENT = "#3D7EFF";
-// the fake text (pseudoText.ts: real letter shapes, made-up words), its letter size and pen
+// the text (handLettering.ts), its letter size and pen: a question received and the reply she
+// dictates while walking (A); a mail she dictates in the metro (B)
 const XH = 15, PEN = 2.8;
-const BODY = ["Tasini obrelk miscor", "faltin, trivo sapnel", "cundra moreti vilsan", "plodri unvel."];
-const RECEIVED = "Hoskim dapor,";
-const SUBJECT = "Nustri gelvo";
-const MAIL = ["Esnaru borkam ilvane", "quelbo venusk, olmabi", "Tarsiv skirel."];
+const BODY = ["On my way, I'll be", "there in ten minutes.", "Can you order me", "a coffee?"];
+const RECEIVED = "Where are you?";
+const SUBJECT = "Notes from today";
+const MAIL = ["Great meeting this", "morning. Next steps", "for the launch below."];
 const ease = (t: number) => { const x = clamp(t); return x * x * (3 - 2 * x); };
 // a rounded rectangle from its top-left corner, width and height
 const rrect = (x0: number, y0: number, w: number, h: number, r: number): P[] => {

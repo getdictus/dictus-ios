@@ -2,8 +2,7 @@ import { Gfx, type Ctx, type Env, type Medium, type P } from "./core";
 import type { Film } from "./film";
 import { clipped, fillShape, smooth } from "./gallery";
 import { drop, mm, MM, mmPts, rrect, WAVE } from "./phoneGeometry";
-import { drawText, textWidth } from "./pseudoText";
-import { drawDigits } from "./scribble";
+import { drawDigits, drawText, textWidth } from "./handLettering";
 import { BPM, FPS, FRAME, LOOP_C, loop, place, THEMES, type Theme } from "./theme";
 
 // ONBOARDING INTRO, SCENE C · "the keyboard in a note" (issue #667, headline "Dans votre
@@ -12,13 +11,13 @@ import { BPM, FPS, FRAME, LOOP_C, loop, place, THEMES, type Theme } from "./them
 // No hand: every tap is a touch indicator (an accent disc spreading into a fading ring where the
 // finger lands), with the key's own flash.
 //
-//   1. two keys are typed, a short beat (each key flashes as it is hit); scribbled letters appear;
+//   1. two keys are typed, a short beat (each key flashes as it is hit); the letters appear;
 //   2. the blue mic in the keyboard's top bar is tapped;
 //   3. RECORDING: the bars follow the voice, the timer runs, the x and check pills are up;
 //   4. the check is tapped;
 //   5. TRANSCRIBING: the pills are gone, the bars stop following the voice and a sine runs
 //      across them, a bright band riding its crest;
-//   6. a scribbled paragraph lands in the note and the keyboard returns to its keys; the note
+//   6. the dictated paragraph lands in the note and the keyboard returns to its keys; the note
 //      clears, and the loop starts again on an empty note.
 //
 // The states follow the real keyboard (DictusKeyboard/Views/KeyboardWaveformView.swift,
@@ -27,10 +26,9 @@ import { BPM, FPS, FRAME, LOOP_C, loop, place, THEMES, type Theme } from "./them
 // pills and the timer while recording, an empty bar of the same height while transcribing, so the
 // waveform never moves). The layout is read off the captures (assets/appstore/captures/en-GB/
 // 04-keyboard-azerty-fr.png at rest, fr-FR/01-recording-reminders.png recording), in the phone's
-// millimetres. No key carries a letter and no label is written: the keys are blank caps with their
-// icons (shift, delete, emoji, return, globe, mic), the suggestions, the caption and the note's
-// text are scribbles. The timer's digits are the one exception: numerals, the same in every
-// language the app ships.
+// millimetres. The keys carry QWERTY letters and their icons (shift, delete, emoji, return,
+// globe, mic); the suggestions, the captions and the note are short English, hand-lettered
+// (handLettering.ts), as is the timer.
 //
 // Marker comic, like the figure (V10-A): every face a flat fill, one hard-edged shadow tone per
 // face, a heavy contour round the slab and along the glass.
@@ -96,7 +94,7 @@ const KEYS: Key[] = [
   { x0: 24.7, x1: 56.6, y: ROWS[3] }, { x0: 58.1, x1: 74.9, y: ROWS[3], icon: "return" },
 ];
 // the two keys typed, by index into KEYS (the letter keys run QWERTY, row by row)
-const TYPED = [17, 2];   // k, then e: the note's first word is "Ke"
+const TYPED = [15, 7];   // h, then i: the note's first word is "Hi"
 const MIC_PILL = { x0: 62.4, x1: 73.6, y0: 104.6, y1: 111.4 };
 // the recording overlay (01-recording-reminders.png): the pills in the top bar, the waveform, the
 // timer and its caption; the waveform keeps V10-A's 17 wider bars, which read at this size
@@ -126,15 +124,14 @@ const sweepLevel = (i: number, f: number) => {
 };
 
 // ---------------------------------------------------------------- the note's text
-// the typed word: the first word of a scribbled line, and where it ends (for the caret)
-// the note's text, fake (pseudoText.ts): the word typed, the paragraph dictated, the date line;
-// the keyboard's suggestions and the overlay's caption are made-up words too
-const XH = 2.2, WORD = "Ke", WORD_END = textWidth(WORD, XH);
-const PARAGRAPH = ["plodri esnaru, gelvo nustri", "borkam ilvane quelbo venusk", "olmabi skirel, Dapor tasini", "unvel hoskim."];
+// the note's text (handLettering.ts): the word typed, the paragraph dictated after it, the title;
+// the keyboard's suggestions for what was typed; the overlay's captions, as the keyboard says them
+const XH = 2.2, WORD = "Hi", WORD_END = textWidth(WORD, XH);
+const PARAGRAPH = ["Sam, quick reminder:", "dinner at eight tonight.", "I'll bring dessert, can", "you pick up the bread?"];
 const LAST_END = textWidth(PARAGRAPH[3], XH);
-const DATE = "Lorvem miscor";
-const CAPTION_REC = "Tarsiv...", CAPTION_TRANS = "Esnaru...";
-const SUGGEST = ["trivo", "sapnel", "cundra"];
+const DATE = "Notes";
+const CAPTION_REC = "Listening...", CAPTION_TRANS = "Transcribing...";
+const SUGGEST = ["Hi", "Hey", "Hello"];
 const NOTE = { x: 7, line0: 32, lead: 7 };
 
 // ---------------------------------------------------------------- the touches
@@ -217,7 +214,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
       fillShape(g, at([[0, PANEL_TOP - 1.4], [MM.w, PANEL_TOP - 1.4], [MM.w, PANEL_TOP + 0.2], [0, PANEL_TOP + 0.2]]), T.panelEdge);
       const pill = (x: P, n: number, glyph: () => void) => { const sh = at(rrect(x[0], PILL_Y[0], x[1], PILL_Y[1], 3.4, 8)); fillShape(g, sh, T.pill); outline(g, sh, 3.2, n); glyph(); };
       if (mode === "keys") {
-        // the top bar: three suggestions (scribbles) between thin dividers, the blue mic pill
+        // the top bar: three suggestions between thin dividers, the blue mic pill
         SUGGEST.forEach((w, i) => drawText(g, w, 1, local(11 + i * 19.5 - textWidth(w, 1.8) / 2, BAR_Y + 1), { h: 1.8, w: 2.2, color: T.screenInk, seed: 730 + i * 13, opacity: 0.8 }));
         [21, 40.5].forEach((x, i) => stroke(g, at([[x, BAR_Y - 2.6], [x, BAR_Y + 2.6]]), 2, 735 + i, T.screenFaint, 0.2));
         const hit = clamp(1 - Math.abs(frame - CUE.mic + 2) / 4);

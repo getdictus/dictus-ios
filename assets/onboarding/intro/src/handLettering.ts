@@ -1,10 +1,9 @@
 import type { Gfx, P } from "./core";
 
-// FAKE TEXT (issue #667, round 10, approved by Pierre). Every line of "text" in the intro reads as
-// writing at a glance, in real Latin letter shapes, hand-lettered in the marker line, and says
-// nothing in any language: the words are made up, checked against French, English, German and
-// Spanish so none is a real word (WORDS below). A capital opens a sentence, a comma or a period
-// falls here and there. The keyboard's keys in scene C carry real QWERTY letters.
+// HAND LETTERING (issue #667). The intro's lines of text, in short everyday English that works
+// under every locale's headline (round 10: invented words read as machine-made), hand-lettered in
+// the marker line and written letter by letter. The keyboard's keys in scene C carry QWERTY
+// letters.
 //
 // Glyphs are single marker strokes in a unit box: x from 0 to the glyph's width, y UP from the
 // baseline, x-height 1, ascenders and capitals 1.6, descenders to -0.6. drawText maps them through
@@ -16,7 +15,9 @@ const ell = (cx: number, cy: number, rx: number, ry: number, a0 = 0, a1 = Math.P
   Array.from({ length: n + 1 }, (_, i) => { const a = a0 + ((a1 - a0) * i) / n; return [cx + Math.cos(a) * rx, cy + Math.sin(a) * ry] as P; });
 const bowl = (cx: number) => ell(cx, 0.5, 0.36, 0.5);
 const G: Record<string, Glyph> = {
-  a: { w: 0.86, s: [bowl(0.4), [[0.8, 1], [0.8, 0]]] },
+  // a single-storey a: a narrower bowl and its stem standing clear of it, with a small foot,
+  // so it never reads as an o
+  a: { w: 0.9, s: [ell(0.33, 0.47, 0.29, 0.47), [[0.78, 1.04], [0.78, 0.1], [0.9, 0]]] },
   b: { w: 0.86, s: [[[0.08, 1.6], [0.08, 0]], bowl(0.46)] },
   c: { w: 0.76, s: [ell(0.42, 0.5, 0.38, 0.5, 0.7, Math.PI * 2 - 0.7)] },
   d: { w: 0.86, s: [bowl(0.4), [[0.8, 1.6], [0.8, 0]]] },
@@ -42,6 +43,28 @@ const G: Record<string, Glyph> = {
   x: { w: 0.78, s: [[[0.02, 1], [0.76, 0]], [[0.76, 1], [0.02, 0]]] },
   y: { w: 0.82, s: [[[0, 1], [0.42, 0.06]], [[0.82, 1], [0.26, -0.6]]] },
   z: { w: 0.78, s: [[[0.06, 1], [0.74, 1], [0.04, 0], [0.76, 0]]] },
+  A: { w: 0.96, s: [[[0, 0], [0.48, 1.6], [0.96, 0]], [[0.2, 0.6], [0.76, 0.6]]] },
+  B: { w: 0.84, s: [[[0.06, 0], [0.06, 1.6], [0.5, 1.6], [0.72, 1.46], [0.74, 1.08], [0.5, 0.86], [0.06, 0.86]], [[0.5, 0.86], [0.78, 0.66], [0.8, 0.22], [0.54, 0], [0.06, 0]]] },
+  C: { w: 0.92, s: [ell(0.5, 0.8, 0.46, 0.8, 0.75, Math.PI * 2 - 0.75, 18)] },
+  F: { w: 0.74, s: [[[0.72, 1.6], [0.06, 1.6], [0.06, 0]], [[0.06, 0.86], [0.58, 0.86]]] },
+  G: { w: 0.98, s: [[...ell(0.5, 0.8, 0.46, 0.8, -0.75, -Math.PI * 2 + 0.6, 18).reverse(), [0.96, 0.64], [0.56, 0.64]]] },
+  I: { w: 0.3, s: [[[0.15, 1.6], [0.15, 0]]] },
+  J: { w: 0.66, s: [[[0.58, 1.6], [0.58, 0.36], [0.44, 0.04], [0.2, 0.0], [0.02, 0.2]]] },
+  M: { w: 1.16, s: [[[0.06, 0], [0.06, 1.6], [0.58, 0.5], [1.1, 1.6], [1.1, 0]]] },
+  O: { w: 1.0, s: [ell(0.5, 0.8, 0.46, 0.8, 0, Math.PI * 2, 18)] },
+  P: { w: 0.82, s: [[[0.06, 0], [0.06, 1.6], [0.52, 1.6], [0.76, 1.42], [0.78, 1.0], [0.52, 0.78], [0.06, 0.78]]] },
+  Q: { w: 1.0, s: [ell(0.5, 0.8, 0.46, 0.8, 0, Math.PI * 2, 18), [[0.6, 0.34], [0.98, -0.08]]] },
+  R: { w: 0.86, s: [[[0.06, 0], [0.06, 1.6], [0.52, 1.6], [0.76, 1.42], [0.78, 1.04], [0.52, 0.82], [0.06, 0.82]], [[0.44, 0.82], [0.84, 0]]] },
+  S: { w: 0.8, s: [[[0.74, 1.4], [0.5, 1.6], [0.18, 1.5], [0.1, 1.16], [0.4, 0.86], [0.7, 0.6], [0.72, 0.2], [0.42, 0], [0.06, 0.16]]] },
+  U: { w: 0.92, s: [[[0.06, 1.6], [0.06, 0.4], [0.24, 0.04], [0.46, 0], [0.7, 0.06], [0.86, 0.4], [0.86, 1.6]]] },
+  W: { w: 1.36, s: [[[0, 1.6], [0.32, 0], [0.68, 1.2], [1.04, 0], [1.36, 1.6]]] },
+  X: { w: 0.9, s: [[[0.02, 1.6], [0.88, 0]], [[0.88, 1.6], [0.02, 0]]] },
+  Y: { w: 0.92, s: [[[0, 1.6], [0.46, 0.8], [0.92, 1.6]], [[0.46, 0.8], [0.46, 0]]] },
+  Z: { w: 0.86, s: [[[0.06, 1.6], [0.82, 1.6], [0.04, 0], [0.84, 0]]] },
+  "?": { w: 0.64, s: [[[0.06, 1.3], [0.24, 1.58], [0.5, 1.56], [0.62, 1.3], [0.52, 1.02], [0.32, 0.82], [0.32, 0.52]], [[0.3, 0.06], [0.34, 0.1], [0.3, 0.14], [0.26, 0.1], [0.3, 0.06]]] },
+  "!": { w: 0.3, s: [[[0.15, 1.6], [0.15, 0.5]], [[0.13, 0.06], [0.17, 0.1], [0.13, 0.14], [0.09, 0.1], [0.13, 0.06]]] },
+  ":": { w: 0.28, s: [[[0.12, 0.86], [0.16, 0.9], [0.12, 0.94], [0.08, 0.9], [0.12, 0.86]], [[0.12, 0.06], [0.16, 0.1], [0.12, 0.14], [0.08, 0.1], [0.12, 0.06]]] },
+  "'": { w: 0.22, s: [[[0.12, 1.62], [0.1, 1.24]]] },
   D: { w: 0.92, s: [[[0.06, 0], [0.06, 1.6], [0.42, 1.6], [0.76, 1.36], [0.88, 0.8], [0.76, 0.24], [0.42, 0], [0.06, 0]]] },
   E: { w: 0.78, s: [[[0.74, 1.6], [0.06, 1.6], [0.06, 0], [0.74, 0]], [[0.06, 0.82], [0.6, 0.82]]] },
   H: { w: 0.92, s: [[[0.06, 1.6], [0.06, 0]], [[0.86, 1.6], [0.86, 0]], [[0.06, 0.82], [0.86, 0.82]]] },
@@ -54,10 +77,6 @@ const G: Record<string, Glyph> = {
   ",": { w: 0.26, s: [[[0.14, 0.12], [0.12, -0.04], [0.02, -0.28]]] },
 };
 const TRACK = 0.2, SPACE = 0.55;
-
-// The made-up words, each checked not to be a word in French, English, German or Spanish.
-export const WORDS = ["Lorvem", "tasini", "obrelk", "denuva", "miscor", "faltin", "trivo", "sapnel", "cundra", "moreti", "vilsan", "plodri",
-  "Esnaru", "gelvo", "nustri", "borkam", "ilvane", "Tarsiv", "quelbo", "venusk", "olmabi", "skirel", "Dapor", "unvel", "hoskim", "Ke"];
 
 /** the width of a text at letter size `h` (its x-height), in local units */
 export const textWidth = (text: string, h: number) => [...text].reduce((x, ch) => x + (ch === " " ? SPACE : (G[ch]?.w ?? 0.6) + TRACK), 0) * h;
@@ -82,4 +101,26 @@ export const drawText = (g: Gfx, text: string, progress: number, map: (p: P) => 
     });
     x += (glyph.w + TRACK) * o.h;
   });
+};
+
+// ---------------------------------------------------------------- digits, for the recording timer
+// Single-stroke numerals in a unit box (x 0..0.6, y 0 at the top, 1 at the baseline), the order
+// a hand writes them in
+const DIGITS: Record<string, P[][]> = {
+  "0": [Array.from({ length: 15 }, (_, i) => { const a = -Math.PI / 2 - (i / 14) * Math.PI * 2; return [0.3 + Math.cos(a) * 0.28, 0.5 + Math.sin(a) * 0.48] as P; })],
+  "1": [[[0.12, 0.2], [0.34, 0.02], [0.34, 1]]],
+  "2": [[[0.04, 0.24], [0.14, 0.06], [0.32, 0.01], [0.5, 0.08], [0.56, 0.26], [0.46, 0.48], [0.04, 1], [0.58, 1]]],
+  "3": [[[0.06, 0.12], [0.24, 0.01], [0.46, 0.06], [0.52, 0.24], [0.3, 0.44], [0.52, 0.6], [0.56, 0.8], [0.42, 0.97], [0.2, 0.99], [0.04, 0.88]]],
+  "4": [[[0.44, 1], [0.44, 0.02], [0.02, 0.7], [0.6, 0.7]]],
+  "5": [[[0.54, 0.02], [0.12, 0.02], [0.08, 0.44], [0.3, 0.38], [0.52, 0.5], [0.56, 0.74], [0.42, 0.96], [0.18, 0.98], [0.04, 0.86]]],
+  ":": [[[0.1, 0.32], [0.12, 0.35]], [[0.1, 0.76], [0.12, 0.79]]],
+};
+/** a timer like 00:04, `h` tall, its top-left at the local origin; returns its width */
+export const drawDigits = (g: Gfx, text: string, h: number, map: (p: P) => P, o: { w: number; color: string; seed: number }) => {
+  let x = 0;
+  [...text].forEach((ch, i) => {
+    (DIGITS[ch] ?? []).forEach((s, k) => g.pen(s.map(([u, v]) => map([x + u * h, v * h])), { w: o.w * (ch === ":" ? 1.6 : 1), color: o.color, seed: o.seed + i * 7 + k, closed: false, wobble: 0.2, boil: 0, taper: 0.4, opacity: 1, retrace: false }));
+    x += h * (ch === ":" ? 0.32 : 0.7);
+  });
+  return x;
 };
