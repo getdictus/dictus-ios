@@ -20,7 +20,7 @@ Format of every video:
 - HEVC Main 10, 4:2:0, BT.709, tagged `hvc1`;
 - no audio track, one keyframe per loop.
 
-The light page is `#F2F2F7` and the dark page `#0A1628`, exact to the code value in the decoded corners of every frame, so the video's edge does not show against the screen behind it.
+The light page is `#F2F2F7` and the dark page `#0A1628`, exact to the code value in the decoded corners of every frame, so the video's edge does not show against the screen behind it. The dark videos are the light art faded into the dark page (see Decisions).
 
 ## Re-rendering
 
@@ -136,9 +136,20 @@ The carriage rocks and she sways with it, her hair swinging. Bands of the tunnel
   - transcribing draws the code's sine sweep, a bright band on its crest, with "Transcribing..." and no pills.
 - **Suggestions:** the bar suggests "Hi", "Hey" and "Hello" after the typed word.
 
-### Dark appearance
+### Dark appearance: the light art in a pool of light
 
-The art's ink is `#0A1628`, which is the dark page's colour. In dark, the contours turn to `#9FB0D0`, while the marks on skin and cloth stay navy. The ground, the carriage and the phones have dark tones of their own. Scene C's screen and keyboard follow the system's dark appearance.
+The dark videos show the **same light art**, with its black marker outlines and its `#F2F2F7` page, in a soft pool of light that fades into the app's dark page, `#0A1628`. This is how the light video's pavement and carriage already fade into the light page.
+
+- **Why:** a marker drawing has black outlines. A dark palette with light contours read wrong, and a feathered rectangle still read as a box with dark corners.
+- **The compositing pass:** it is a final pass in `render.mjs` (`DARK`, `POOL`).
+  - Each scene's light frames are drawn once, scaled to 70 % about the frame's centre, and merged onto the dark page through a mask.
+  - The merge runs at 16 bits per channel, so the fade has no banding.
+- **The mask:** a smooth union of soft superellipses per scene, shaped round the content (an oval in A and C, an oval plus a small lobe for B's no-network badge). There are no straight edges and no corners.
+  - Inside the pool the light is full: her whole figure, the voice, the phones, the chat thread, the mail draft and the badge in B, the whole drawn phone and its shadow in C. This was checked on every 5th frame.
+  - It fades over 165 px with a smoothstep. The pavement, the carriage, the pole and the handles fade with it.
+- **The page colour:** the frame's corners are the dark page exactly, decoded on every frame.
+
+There is no dark palette any more: `theme.ts` holds the light one only.
 
 ### No HEVC with alpha
 

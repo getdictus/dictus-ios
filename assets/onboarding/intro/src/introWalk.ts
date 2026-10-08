@@ -124,4 +124,3 @@ const film = (theme: Theme, title: string): Film => ({
   shots: [{ id: title, start: 0, end: LOOP_A, draw: drawFor(theme) }],
 });
 export const introWalkLight = film(THEMES.light, "introWalkLight");
-export const introWalkDark = film(THEMES.dark, "introWalkDark");

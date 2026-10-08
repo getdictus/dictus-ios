@@ -294,4 +294,3 @@ const film = (theme: Theme, title: string): Film => ({
   shots: [{ id: title, start: 0, end: LOOP_C, draw: drawFor(theme) }],
 });
 export const introKeyboardLight = film(THEMES.light, "introKeyboardLight");
-export const introKeyboardDark = film(THEMES.dark, "introKeyboardDark");
