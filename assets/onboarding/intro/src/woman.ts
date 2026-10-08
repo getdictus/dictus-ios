@@ -200,8 +200,10 @@ const handFrame = (wrist: P, dir: P) => { const l = Math.hypot(dir[0], dir[1]) |
 // palm round the handles; the thumb relaxed along the index at the front. Proportions after
 // Loomis: the back of the hand (wrist to knuckles) about the length of the fingers' first two
 // phalanges; the hand as wide as the wrist and a little more at the knuckles.
+// (drawn 1.25 times its first size, round 10: the hands now match, finger for finger)
+const BAG_K = 1.25;
 const bagHand = (wrist: P, dir: P) => {
-  const H = handFrame(wrist, dir), Hs = (pts: P[]) => pts.map(H);
+  const H0 = handFrame(wrist, dir), H = ([a, b]: P): P => H0([a * BAG_K, b * BAG_K]), Hs = (pts: P[]) => pts.map(H);
   // the back of the hand, wrist to knuckles, a little wider at the knuckles
   const back = sm(Hs([[0, -31], [0, 31], [20, 35], [46, 37], [60, 30], [64, 12], [64, -12], [60, -30], [46, -36], [20, -35]]), 4);
   // the fingers curled round the handles, seen from the back of the hand: one rounded mass below
@@ -211,7 +213,7 @@ const bagHand = (wrist: P, dir: P) => {
   const knuckles = [21, 7, -7, -20].map((v) => Hs([[56, v - 6], [52, v], [56, v + 6]]));
   const joints = [14, 0, -13].map((v) => Hs([[66, v], [88, v - 1]]));
   // the thumb, relaxed along the index at the front, its tip on the folded index
-  const thumb = tube(Hs([[16, 34], [44, 42], [70, 38]]), 11, 9, true), thumbNail = tube(Hs([[62, 39], [71, 38]]), 5.5, 5.5, true);
+  const thumb = tube(Hs([[16, 34], [44, 42], [70, 38]]), 11 * BAG_K, 9 * BAG_K, true), thumbNail = tube(Hs([[62, 39], [71, 38]]), 5.5 * BAG_K, 5.5 * BAG_K, true);
   // where the handles go into the hand, under the curled fingers
   const hooks: P[] = Hs([[88, 16], [88, -12]]);
   return { back, fingers, joints, knuckles, thumb, thumbNail, hooks };
@@ -223,9 +225,11 @@ const bagHand = (wrist: P, dir: P) => {
 // on the screen side, out of sight, and nothing shows under the bottom edge. One clean knuckle
 // line on each finger. Phone-local coordinates (u across from the centre, v down).
 const phoneHand = (ph: (pts: P[]) => P[]) => {
-  const palm = sm(ph([[44, 70], [60, 76], [62, 104], [50, 124], [26, 132], [30, 110], [44, 96]]), 4);
-  const spec: [number, number, number][] = [[-6, 12.5, 0], [19, 13, 1], [44, 12.5, 2], [67, 11, 3]];
-  const fingers = spec.map(([v, r, i]) => tube(ph([[48, v + 2], [0, v - 4 + i], [-52 + i * 2, v - 2 + i], [-58 + i * 2, v + 10 + i]]), r, r - 0.5, true));
+  const palm = sm(ph([[46, 92], [60, 96], [62, 110], [50, 126], [26, 132], [32, 116], [44, 106]]), 4);
+  // (round 10: the same finger width as her other hand, about a quarter of the lower half of the
+  // phone each, the tips only just round the far edge)
+  const spec: [number, number, number][] = [[22, 10.5, 0], [43, 11, 1], [64, 10.5, 2], [84, 9.5, 3]];
+  const fingers = spec.map(([v, r, i]) => tube(ph([[46, v + 2], [0, v - 3 + i], [-49 + i, v - 2 + i], [-54 + i, v + 6 + i]]), r, r - 0.5, true));
   const joints = spec.map(([v, r, i]) => ph([[-6 + i, v - 4 + i - r * 0.6], [-9 + i, v - 4 + i + r * 0.6]]));
   return { palm, fingers, joints };
 };
@@ -234,9 +238,9 @@ const phoneHand = (ph: (pts: P[]) => P[]) => {
 // of the pole, and the four fingers wrapped round it, stacked, the index on top; their tips and
 // the thumb are behind the pole
 const gripHand = (wrist: P, at: P, r: number) => {
-  const kx = at[0] + r + 12, ys = [-27, -9, 9, 26], rad = [10, 10.5, 10, 9];
+  const kx = at[0] + r + 12, ys = [-30, -10, 10, 29], rad = [10.5, 11, 10.5, 9.5];
   const fingers = ys.map((dy, k) => tube([[kx, at[1] + dy], [at[0], at[1] + dy + 2], [at[0] - r - 3, at[1] + dy + 6]], rad[k], rad[k] - 1.5, true));
-  const back = sm([[wrist[0] - 30, wrist[1] + 6], [kx - 6, at[1] + 38], [kx - 4, at[1] - 38], [wrist[0] + 4, wrist[1] - 34], [wrist[0] + 28, wrist[1] - 8], [wrist[0] + 18, wrist[1] + 22]], 4);
+  const back = sm([[wrist[0] - 30, wrist[1] + 6], [kx - 6, at[1] + 41], [kx - 4, at[1] - 41], [wrist[0] + 4, wrist[1] - 34], [wrist[0] + 28, wrist[1] - 8], [wrist[0] + 18, wrist[1] + 22]], 4);
   const knuckles = ys.map((dy) => [[kx + 4, at[1] + dy - 7], [kx + 9, at[1] + dy], [kx + 4, at[1] + dy + 7]] as P[]);
   return { back, fingers, knuckles };
 };
@@ -315,10 +319,12 @@ const xOn = (pts: P[], y: number): number | undefined => {
   return undefined;
 };
 // a trouser leg's two screen edges (left, right), top to bottom, as trouserLeg draws them
-// (it starts a little above the hip and narrower there, so its top lies inside the seat)
+// (it starts a little above the hip, straight above it and narrower, so its top always lies
+// inside the seat; round 10: a top that leaned with the thigh poked its rounded end out of the
+// seat's front for two frames of every stride, a small dark nub against the page)
 const legEdges = (leg: Leg, hws: number[]) => {
-  const top: P = [leg.hip[0] + (leg.hip[0] - leg.knee[0]) * 0.15, leg.hip[1] - 50];
-  const { left, right } = limb([top, leg.hip, leg.knee, leg.ankle], [hws[0] - 16, ...hws]);
+  const top: P = [leg.hip[0], leg.hip[1] - 50];
+  const { left, right } = limb([top, leg.hip, leg.knee, leg.ankle], [hws[0] - 22, ...hws]);
   // `right` is the screen-left edge of a limb drawn downward, `left` the screen-right one
   return { l: right, r: left };
 };

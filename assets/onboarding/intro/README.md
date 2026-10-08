@@ -108,10 +108,12 @@ A dotted trail leads from the phone to the card. The card fades before the seam.
 ### The character
 
 - **Hair:** a jaw-length bob with a swept fringe, chosen over a ponytail and long loose hair. It replaces V15-B's roll on top and stiff ponytail.
-- **Phone hand:** four fingers side by side across the phone's back, curling onto its far edge, with one knuckle line each. The thumb is on the screen side, out of sight. Only a sliver of palm shows at the bottom of the near edge.
+- **Phone hand:** four fingers side by side across the lower half of the phone's back, their tips only just curling onto its far edge, with one knuckle line each. The thumb is on the screen side, out of sight. Only a sliver of palm shows at the bottom of the near edge. Her two hands are drawn the same size, finger for finger.
+- **Phone size:** the phone is about 0.9 of her face height (chin to hairline). A real iPhone is about 15 cm against a face of about 18 cm, so about 0.8; the comic's large head accounts for the rest. The phone is V10-A's and is kept as is.
 - **Bag hand:** she holds the tote by its handles, the fingers curled together under a row of knuckles, the thumb along the index, the handles taut. One hand is busy, which is why she dictates.
 - **Trousers:** the seat is one fixed shape on the torso, flat at the front and gently rounded at the back, with the legs drawn under it.
   - Under the buttock it eases into the back of the near thigh, so no corner shows when the leg swings back.
+  - The legs' tops rise straight above the hips, inside the seat, so no rounded end pokes out of the trousers' front.
   - The seat takes the legs' own tone and shading.
   - The walk rises over the supporting leg at the passing position, so no frame shows both knees bent.
 - **Voice:** small rounded bars of the Dictus waveform, straight from her lips to the phone, swelling with her speech. This ties A and B to the keyboard of scene C.
