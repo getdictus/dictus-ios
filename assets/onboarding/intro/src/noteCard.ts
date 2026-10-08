@@ -86,7 +86,7 @@ export const drawNoteCard = (g: Gfx, t: Theme, lp: Loop, frame: number, card: Ca
   } else {
     // a mail draft: the sheet, an envelope mark and the subject on its head, a rule, the body
     const H = 300;
-    shape(rrect(0, 0, W, H, 26), t.badge, 960);
+    shape(rrect(0, 0, W, H, 26), t.card, 960);
     const env = [[28, 26], [76, 26], [76, 60], [28, 60]] as P[];
     pen(env.map(map), 3.6, ACCENT, 961);
     pen(([[28, 26], [52, 46], [76, 26]] as P[]).map(map), 3.2, ACCENT, 962, false);

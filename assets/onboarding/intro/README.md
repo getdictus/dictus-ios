@@ -138,7 +138,16 @@ The carriage rocks and she sways with it, her hair swinging. Bands of the tunnel
 
 ### Dark appearance
 
-The art's ink is `#0A1628`, which is the dark page's colour. In dark, the contours turn to `#9FB0D0`, while the marks on skin and cloth stay navy. The ground, the carriage and the phones have dark tones of their own. Scene C's screen and keyboard follow the system's dark appearance.
+The contours are black in dark too, as a marker drawing's line is: pure `#000000`, the one value darker than the `#0A1628` page, so the outline still separates the figure from it. The marks on skin and cloth (`ink`) stay navy `#0A1628`, as in light.
+
+What used to stand out by a light contour gets a lighter fill instead:
+
+- B's no-network badge is a light disc (`#E4EAF4`), so its black bars and the red slash read as they do in light;
+- B's mail draft is a lifted navy sheet (`#2B3B5E`), and A's received chat bubble is `#34436A`;
+- B's grab handles are steel straps (`#7D8CA8`, the pole's tone);
+- C's glass round the screen is `#26304A` rather than the page's navy, so the phone's black edge has something to sit on.
+
+The ground, the carriage and the phones have dark tones of their own, and the pavement joints stay light. Scene C's screen and keyboard follow the system's dark appearance.
 
 ### No HEVC with alpha
 

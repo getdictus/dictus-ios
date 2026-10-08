@@ -119,7 +119,7 @@ const HANDLES: [number, number][] = [[300, 0.4], [1110, -0.6]];
 const handle = (g: Gfx, t: Theme, x: number, deg: number, seed: number) => {
   const a = (deg * Math.PI) / 180, at = (dx: number, dy: number): P => [x + dx * Math.cos(a) - dy * Math.sin(a), RAIL_Y + dx * Math.sin(a) + dy * Math.cos(a)];
   stroke(g, [at(0, 0), at(0, 150)], 14, seed, t.line, 0, 1);
-  stroke(g, [at(0, 0), at(0, 150)], 8, seed + 1, t.seatShade, 0, 1);
+  stroke(g, [at(0, 0), at(0, 150)], 8, seed + 1, t.strap, 0, 1);
   const grip = [at(0, 146), at(34, 214), at(26, 228), at(-26, 228), at(-34, 214)];
   g.pen(sm(grip, 6), { w: 11, color: t.line, seed: seed + 2, closed: true, wobble: 0.3, boil: 0, taper: 0, opacity: 1, retrace: false });
   g.pen(sm(grip, 6), { w: 6, color: t.poleLit, seed: seed + 3, closed: true, wobble: 0.3, boil: 0, taper: 0, opacity: 1, retrace: false });

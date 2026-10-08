@@ -184,7 +184,7 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
     outline(g, bottom, 9, 4);
     const left = top.reduce((m, p, i) => (p[0] < top[m][0] ? i : m), 0);
     stroke(g, [top[left], bottom[left]], 8, 5);
-    fillShape(g, top, T.ink);
+    fillShape(g, top, T.glass);
     const screen = at(rrect(2.6, 2.6, MM.w - 2.6, MM.h - 2.6, MM.r - 2.4, 12));
     fillShape(g, screen, T.screen);
 

@@ -38,12 +38,14 @@ export const loop = (frames: number): Loop => ({
 // ---------------------------------------------------------------- the two appearances
 // Light is the App Store art's palette, unchanged, on the onboarding's page colour: #F2F2F7, the
 // grey the #649 mock-ups' pages measure (the issue said #FFFFFF; a white video would show as a
-// white box on that page). Dark is the app's background, #0A1628, which
-// is also the art's ink: so in dark the contour (`line`) turns light, while the marks drawn ON
-// the skin and the clothes (eyes, brows, mouth, pupils, lenses: `ink`) stay dark navy, as they
-// would on paper. The ground, the carriage and the drawn phones get their own dark tones rather
-// than keeping the light greys, which would glow on the dark page. A phone's screen follows the
-// system appearance, as the onboarding does.
+// white box on that page). Dark is the app's background, #0A1628. The contour (`line`) is black
+// in dark too, as a marker drawing's line is (Pierre's call: light contours read wrong); it is
+// pure #000000, the one value darker than the page, so the outline still separates the figure from
+// it. What used to stand out by its light contour gets a lighter fill instead: the no-network
+// badge is a light disc, the mail draft a lifted navy sheet, the grab handles steel straps, the
+// glass round C's screen a lifted navy band. The
+// ground, the carriage and the drawn phones keep their own dark tones; a phone's screen follows
+// the system appearance, as the onboarding does.
 export type Theme = {
   name: "light" | "dark";
   bg: string;
@@ -57,10 +59,13 @@ export type Theme = {
   // appearances: it is a tunnel), the lights streaking past, the steel pole
   wall: string; wallShade: string; floor: string; frameFill: string;
   tunnel: string; tunnelLine: string; streak: [string, string]; pole: string; poleLit: string; seat: string; seatShade: string;
-  badge: string;          // scene B: the no-network badge's disc, and the mail draft's sheet
+  badge: string;          // scene B: the no-network badge's disc
+  card: string;           // scene B: the mail draft's sheet
+  strap: string;          // scene B: the grab handles' straps
   received: string;       // scene A: the grey chat message already received
   // the drawn iPhones
   titan: string; titanLit: string; titanDark: string; rim: string; groundShadow: string;
+  glass: string;          // scene C: the black glass round the screen
   screen: string; screenInk: string; screenFaint: string;   // a screen, its writing, its quiet marks
   panel: string; panelEdge: string; shine: string; pill: string; pillGlyph: string;
   key: string; keyShade: string; keyHit: string;            // scene C: the keyboard's keys
@@ -75,24 +80,25 @@ export const LIGHT_THEME: Theme = {
   shadow: "#0A1628", shadowA: 0.16,
   sole: "#C4CEDD", soleShade: "#A9B6CA", shoeShade: "#D3DCEA",
   wall: "#E9EDF4", wallShade: "#D7DDE8", floor: "#DCE2EC", frameFill: "#C9D1DE",
-  tunnel: "#1B2538", tunnelLine: "#2C3954", streak: ["#FFD27A", "#EAF1FF"], pole: "#AEB9CB", poleLit: "#E6ECF4", seat: "#9FB3D6", seatShade: "#7F95BD", badge: "#FFFFFF", received: "#E1E3EA",
+  tunnel: "#1B2538", tunnelLine: "#2C3954", streak: ["#FFD27A", "#EAF1FF"], pole: "#AEB9CB", poleLit: "#E6ECF4", seat: "#9FB3D6", seatShade: "#7F95BD", badge: "#FFFFFF", card: "#FFFFFF", strap: "#7F95BD", received: "#E1E3EA",
   titan: "#2B3A5C", titanLit: "#46577D", titanDark: "#1A2642", rim: "#7F92BC", groundShadow: "#C6CFDF",
-  screen: "#FFFFFF", screenInk: "#1C2333", screenFaint: "#B4BBC8",
+  glass: "#0A1628", screen: "#FFFFFF", screenInk: "#1C2333", screenFaint: "#B4BBC8",
   panel: "#E3E5EB", panelEdge: "#C9CED9", shine: "#EAF1FF", pill: "#FFFFFF", pillGlyph: "#7B8496",
   key: "#FFFFFF", keyShade: "#B9BEC8", keyHit: "#C3C8D3", notesAccent: "#E2A50B",
   barLit: ["#A7ADBB", "#C3C7D1"], barShade: ["#8E95A5", "#AEB3BF"], glyph: "#0A1628",
 };
 
 export const DARK_THEME: Theme = {
-  name: "dark", bg: "#0A1628", line: "#9FB0D0", ink: "#0A1628",
+  name: "dark", bg: "#0A1628", line: "#000000", ink: "#0A1628",
   road: "#16243F", pave: "#1B2B4A", kerb: "#2A3C5E", joint: "#9FB0CF", jointK: 1.25,
   shadow: "#000000", shadowA: 0.4,
   sole: "#AEBBD0", soleShade: "#8D9BB3", shoeShade: "#C9D3E3",
   wall: "#17243E", wallShade: "#111C33", floor: "#1B2A47", frameFill: "#2C3B58",
-  tunnel: "#050A14", tunnelLine: "#16213A", streak: ["#FFC861", "#C9D8F5"], pole: "#7D8CA8", poleLit: "#B6C3DB", seat: "#2E416B", seatShade: "#22325A", badge: "#1B2A47", received: "#2A3550",
+  tunnel: "#050A14", tunnelLine: "#16213A", streak: ["#FFC861", "#C9D8F5"], pole: "#7D8CA8", poleLit: "#B6C3DB", seat: "#2E416B", seatShade: "#22325A", badge: "#E4EAF4", card: "#2B3B5E", strap: "#7D8CA8", received: "#34436A",
   // the slab one step lighter than the light render's, so its faces separate from the page
   titan: "#34466C", titanLit: "#53668F", titanDark: "#22304F", rim: "#93A6CE", groundShadow: "#050C18",
-  screen: "#141A26", screenInk: "#E3E8F2", screenFaint: "#4A5366",
+  // the glass round the screen lifted off the page, so the black contour has an edge to sit on
+  glass: "#26304A", screen: "#141A26", screenInk: "#E3E8F2", screenFaint: "#4A5366",
   panel: "#2A2F3A", panelEdge: "#1E222B", shine: "#1B2232", pill: "#3A404D", pillGlyph: "#AEB5C4",
   key: "#4A505E", keyShade: "#1C2029", keyHit: "#6E7586", notesAccent: "#E8B23A",
   barLit: ["#8A92A3", "#6C7384"], barShade: ["#6B7283", "#545B6B"], glyph: "#C9D4E8",
