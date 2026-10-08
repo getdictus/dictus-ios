@@ -133,7 +133,7 @@ const lightBands = (g: Gfx, t: Theme, frame: number) => {
   for (let k = 0; k < 2; k++) {
     const f = (LP.tau(frame) * 2 + k * 0.5) % 1, x = 1900 - f * 2600, w = 150, slant = 420;
     const gr = c.createLinearGradient(x - w, 0, x + w, 0);
-    gr.addColorStop(0, "rgba(255,214,140,0)"); gr.addColorStop(0.5, "rgba(255,214,150,0.55)"); gr.addColorStop(1, "rgba(255,214,140,0)");
+    gr.addColorStop(0, "rgba(255,214,140,0)"); gr.addColorStop(0.5, t.name === "light" ? "rgba(255,214,150,0.55)" : "rgba(255,206,130,0.42)"); gr.addColorStop(1, "rgba(255,214,140,0)");
     g.touch(x - w - slant, TOP - 20, x + w + slant, H);
     c.fillStyle = gr; c.beginPath(); c.moveTo(x - w + slant, TOP - 20); c.lineTo(x + w + slant, TOP - 20); c.lineTo(x + w - slant, H); c.lineTo(x - w - slant, H); c.closePath();
     c.save(); c.transform(1, 0, 0, 1, 0, 0); c.fill(); c.restore();
@@ -241,3 +241,4 @@ const film = (theme: Theme, title: string): Film => ({
   shots: [{ id: title, start: 0, end: LOOP_B, draw: drawFor(theme) }],
 });
 export const introMetroLight = film(THEMES.light, "introMetroLight");
+export const introMetroDark = film(THEMES.dark, "introMetroDark");

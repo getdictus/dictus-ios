@@ -35,14 +35,17 @@ export const loop = (frames: number): Loop => ({
   cyc: (frame, n, phase = 0) => Math.sin((2 * Math.PI * n * frame) / frames + phase),
 });
 
-// ---------------------------------------------------------------- the palette
-// The App Store art's palette, on the onboarding's page colour: #F2F2F7, the grey the #649
-// mock-ups' pages measure (the issue said #FFFFFF; a white video would show as a white box on that
-// page). There is one palette: the dark videos show this same art, black outlines and all, in a
-// pool of light that fades into the app's dark page (render.mjs, DARK). A drawing in marker keeps
-// its black lines; a dark palette with light contours read wrong.
+// ---------------------------------------------------------------- the two appearances
+// Light is the App Store art's palette, unchanged, on the onboarding's page colour: #F2F2F7, the
+// grey the #649 mock-ups' pages measure (the issue said #FFFFFF; a white video would show as a
+// white box on that page). Dark is the app's background, #0A1628, which
+// is also the art's ink: so in dark the contour (`line`) turns light, while the marks drawn ON
+// the skin and the clothes (eyes, brows, mouth, pupils, lenses: `ink`) stay dark navy, as they
+// would on paper. The ground, the carriage and the drawn phones get their own dark tones rather
+// than keeping the light greys, which would glow on the dark page. A phone's screen follows the
+// system appearance, as the onboarding does.
 export type Theme = {
-  name: "light";
+  name: "light" | "dark";
   bg: string;
   line: string;           // contours and construction lines
   ink: string;            // marks on skin and cloth, the mouth, pupils, lenses
@@ -80,5 +83,19 @@ export const LIGHT_THEME: Theme = {
   barLit: ["#A7ADBB", "#C3C7D1"], barShade: ["#8E95A5", "#AEB3BF"], glyph: "#0A1628",
 };
 
+export const DARK_THEME: Theme = {
+  name: "dark", bg: "#0A1628", line: "#9FB0D0", ink: "#0A1628",
+  road: "#16243F", pave: "#1B2B4A", kerb: "#2A3C5E", joint: "#9FB0CF", jointK: 1.25,
+  shadow: "#000000", shadowA: 0.4,
+  sole: "#AEBBD0", soleShade: "#8D9BB3", shoeShade: "#C9D3E3",
+  wall: "#17243E", wallShade: "#111C33", floor: "#1B2A47", frameFill: "#2C3B58",
+  tunnel: "#050A14", tunnelLine: "#16213A", streak: ["#FFC861", "#C9D8F5"], pole: "#7D8CA8", poleLit: "#B6C3DB", seat: "#2E416B", seatShade: "#22325A", badge: "#1B2A47", received: "#2A3550",
+  // the slab one step lighter than the light render's, so its faces separate from the page
+  titan: "#34466C", titanLit: "#53668F", titanDark: "#22304F", rim: "#93A6CE", groundShadow: "#050C18",
+  screen: "#141A26", screenInk: "#E3E8F2", screenFaint: "#4A5366",
+  panel: "#2A2F3A", panelEdge: "#1E222B", shine: "#1B2232", pill: "#3A404D", pillGlyph: "#AEB5C4",
+  key: "#4A505E", keyShade: "#1C2029", keyHit: "#6E7586", notesAccent: "#E8B23A",
+  barLit: ["#8A92A3", "#6C7384"], barShade: ["#6B7283", "#545B6B"], glyph: "#C9D4E8",
+};
 
-export const THEMES = { light: LIGHT_THEME };
+export const THEMES = { light: LIGHT_THEME, dark: DARK_THEME };
