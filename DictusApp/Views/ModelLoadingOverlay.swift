@@ -25,6 +25,14 @@ import DictusCore
 /// no progress for a compile, which is why there is a bar under the download and
 /// nothing under the compile.
 ///
+/// What sits under the compile instead is a coarse countdown (issue #533): "About 3
+/// minutes left", then "Less than a minute left", held. A tester who read the four-minute
+/// sentence and found it accurate still found four minutes of a looping waveform
+/// frustrating, because the screen said how long and never how far. A countdown rather
+/// than a bar because the download already ends on a full bar, and a second one starting
+/// over at 0 % would answer the complaint with a new instance of it. The rules live in
+/// `ModelPreparationCountdown`, where they are tested.
+///
 /// The overlay observes two signals to decide which copy to show:
 /// 1. `ModelManager.modelStates[id]` — `.downloading`, `.prewarming`, `.ready`
 /// 2. `ModelManager.modelLoadState` (mirrored from the App Group via Combine) —
@@ -62,6 +70,19 @@ struct ModelLoadingOverlay: View {
     /// has had a chance to flip `modelStates[id]` from `.notDownloaded` to
     /// `.downloading` — the onboarding race that surfaced after f5ba7ab.
     @State private var hasSeenWorkPhase = false
+
+    /// When this screen first saw a COLD preparation of a model measured in minutes —
+    /// the clock the countdown runs on (issue #533). Nil means no countdown at all.
+    ///
+    /// WHY NEVER RESET: a download-then-prepare goes `.compiling` → `.loading`, and to the
+    /// user that is one wait. Restarting the clock at the hand-over would add minutes back.
+    ///
+    /// WHY THE WALL CLOCK: time spent in the background keeps counting. A compile throttled
+    /// there (#472) only reaches the floor earlier and holds it longer, which is the
+    /// designed behaviour. When the screen appears mid-preparation (keyboard cold start into
+    /// a compile already running) the anchor is late and the countdown overstates what is
+    /// left — the safe direction under #432's rule, so no persisted start time is added.
+    @State private var preparationStartedAt: Date?
 
     private enum Phase {
         case downloading
@@ -146,6 +167,11 @@ struct ModelLoadingOverlay: View {
         .onAppear {
             checkForCompletion()
         }
+        // `initial: true` also runs this for the phase the screen opens on, which is the
+        // keyboard cold start's case: it can arrive with the load already in flight.
+        .onChange(of: currentPhase, initial: true) { _, _ in
+            anchorCountdownIfCold()
+        }
     }
 
     // MARK: - Sub-views
@@ -200,7 +226,31 @@ struct ModelLoadingOverlay: View {
                     }
                 }
             }
+            if let preparationStartedAt, isCountdownPhase, !loadGaveUp, !showCompletion {
+                // Same slot and style as the download's percentage: a caption, no bar, no
+                // colour. Ticks every second so a minute boundary shows within a second of
+                // being crossed; the text itself only changes at those boundaries.
+                TimelineView(.periodic(from: .now, by: 1)) { timeline in
+                    if let countdown = ModelPreparationCountdown.at(
+                        elapsedSeconds: Int(timeline.date.timeIntervalSince(preparationStartedAt)),
+                        measuredSeconds: ModelInfo.forIdentifier(modelIdentifier)?.firstPreparationSeconds
+                    ) {
+                        Text(countdownText(countdown))
+                            .font(.dictusCaption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
             CyclingLoadingText(phrases: phrases(for: currentPhase))
+        }
+    }
+
+    private func countdownText(_ countdown: ModelPreparationCountdown) -> LocalizedStringKey {
+        switch countdown {
+        case .minutesLeft(let minutes):
+            return "About \(minutes) minutes left"
+        case .underAMinute:
+            return "Less than a minute left"
         }
     }
 
@@ -337,6 +387,41 @@ struct ModelLoadingOverlay: View {
     }
 
     // MARK: - Phase logic
+
+    /// The two phases a first preparation is spent in (see `firstPreparationNotice`).
+    private var isCountdownPhase: Bool {
+        currentPhase == .compiling || currentPhase == .loading
+    }
+
+    /// Starts the countdown's clock, once, if this preparation deserves one (issue #533).
+    ///
+    /// WHY WARMTH IS PART OF IT: an ordinary launch with a warm Core ML cache also goes
+    /// through `.loading`, for about three seconds. Without this check every warm load
+    /// would flash "About 4 minutes left". `ModelWarmth` is false exactly when the cache is
+    /// cold, and it answers `true` when the install identity cannot be read — here that
+    /// means "no countdown", the safe direction.
+    ///
+    /// WHY ONLY `.minutes`: `.brief` (Medium's 32 s) would only ever show "Less than a
+    /// minute left", repeating the notice under it; `.unmeasured` has nothing to count
+    /// down from and keeps today's screen unchanged.
+    ///
+    /// Warmth is read here, when the anchor is decided, and never on a tick: by the time
+    /// the warm inference records the model as warm, the screen is on its way out.
+    private func anchorCountdownIfCold() {
+        guard preparationStartedAt == nil,
+              isCountdownPhase,
+              !loadGaveUp,
+              !showCompletion,
+              case .minutes = ModelPreparationWait.forModel(modelIdentifier) else {
+            return
+        }
+        let identity = ModelWarmth.installIdentity(
+            bundlePathComponents: Bundle.main.bundleURL.pathComponents,
+            systemVersion: UIDevice.current.systemVersion
+        )
+        guard !ModelWarmth.isWarm(modelIdentifier, identity: identity) else { return }
+        preparationStartedAt = Date()
+    }
 
     private var currentModelState: ModelState {
         modelManager.modelStates[modelIdentifier] ?? .notDownloaded
