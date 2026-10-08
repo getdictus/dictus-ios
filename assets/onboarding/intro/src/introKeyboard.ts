@@ -1,4 +1,5 @@
 import { Gfx, type Ctx, type Env, type Medium, type P } from "./core";
+import { clearEdges } from "./edges";
 import type { Film } from "./film";
 import { clipped, fillShape, smooth } from "./gallery";
 import { drop, mm, MM, mmPts, rrect, WAVE } from "./phoneGeometry";
@@ -283,6 +284,8 @@ const drawFor = (theme: Theme) => (ctx: Ctx, frame: number, env: Env) => {
 
   // the touches, over everything
   g.group("plain", () => drawTouches(g, frame));
+  // a clean band round the frame, so the page colour decodes exactly at its edge (edges.ts)
+  clearEdges(ctx, env);
 };
 
 const film = (theme: Theme, title: string): Film => ({

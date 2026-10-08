@@ -77,10 +77,11 @@ for (const id of ALL) {
 // ---------------------------------------------------------------- 3. frames, then the video
 const hash = (b) => createHash("sha256").update(b).digest("hex");
 // x265's sample adaptive offset (SAO) nudges flat areas next to detailed ones by a code value or
-// so, which left a corner of A and B one value off the page colour. Off for those two. Scene C's
-// corners decode exact with it on, and C was validated by Pierre as encoded (round 5): its
-// encoding is left exactly as it was, so its files stay byte-identical.
-const X265_EXTRA = { a: ":no-sao=1", b: ":no-sao=1", c: "" };
+// so, which left a corner of the page one value off (F2F2F8). Off for every scene.
+const X265_EXTRA = ":no-sao=1";
+// the quality per scene: C's flat page is wide around a small phone, and at CRF 26 the encoder
+// rounds its bottom right one code value off (F2F2F8); CRF 24 keeps it exact, and C stays small
+const CRF = { a: "26", b: "26", c: "24" };
 const results = [];
 for (const id of only) {
   const name = filmName(id);
@@ -117,7 +118,7 @@ for (const id of only) {
     "-f", "lavfi", "-i", `color=c=${bg}:s=${meta.W}x${meta.H}:r=${meta.fps},format=rgba`,
     "-framerate", String(meta.fps), "-i", join(dir, "f%04d.png"),
     "-filter_complex", "[0:v][1:v]overlay=shortest=1:format=rgb,scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd+full_chroma_int,format=yuv420p10le[v]", "-map", "[v]",
-    "-c:v", "libx265", "-preset", "slow", "-crf", "26", "-x265-params", `log-level=error:keyint=${meta.durationFrames}:min-keyint=${meta.durationFrames}${X265_EXTRA[id[0]]}`,
+    "-c:v", "libx265", "-preset", "slow", "-crf", CRF[id[0]], "-x265-params", `log-level=error:keyint=${meta.durationFrames}:min-keyint=${meta.durationFrames}${X265_EXTRA}`,
     "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv",
     "-tag:v", "hvc1", "-an", "-movflags", "+faststart", out]);
   const probe = execFileSync(FFPROBE, ["-v", "error", "-show_entries", "stream=codec_type,codec_name,width,height,nb_frames:format=duration", "-of", "compact=p=0", out]).toString().trim();

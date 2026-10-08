@@ -78,11 +78,9 @@ const poseAt = (frame: number): Pose => {
   const u = (LP.tau(frame) * CYCLES) % 1, bob = bobAt(u);
   const armNear = turn(ARM_NEAR.map(([x, y]) => [x, y + bob] as P), ARM_NEAR[0][0], ARM_NEAR[0][1] + bob, swing(u)) as P[];
   const lag = turn([ARM_NEAR[2]], ARM_NEAR[0][0], ARM_NEAR[0][1], swing(u - 0.06))[0];
-  // on the shoulder, the bag sits at her hip and bobs a beat after her steps
-  const bounce = 5 * Math.sin(4 * Math.PI * u - 0.8);
   return {
     far: legAt(LEG_FAR[0], u, bob), near: legAt(LEG_NEAR[0], u + 0.5, bob), bob, lean: 0, hairU: u, open: mouthOpen(LP, frame), armNear,
-    carry: { kind: "tote", toteD: [BAG_D[0] + lag[0] - ARM_NEAR[2][0], BAG_D[1] + lag[1] - ARM_NEAR[2][1] + bob], shoulderD: [-6, -282 + bob + bounce] },
+    carry: { kind: "tote", toteD: [BAG_D[0] + lag[0] - ARM_NEAR[2][0], BAG_D[1] + lag[1] - ARM_NEAR[2][1] + bob] },
     phoneDeg: -10 + 1.2 * Math.sin(4 * Math.PI * u - 0.5),
   };
 };
