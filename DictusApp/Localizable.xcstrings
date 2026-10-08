@@ -446,17 +446,6 @@
         }
       }
     },
-    "Almost there…" : {
-      "comment" : "Cycling phrase shown during model download (issue #144).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Presque arrivé…"
-          }
-        }
-      }
-    },
     "Also supported" : {
       "comment" : "Language detail sheet: section header for Parakeet's remaining documented languages (issue #240).",
       "localizations" : {
@@ -1374,17 +1363,6 @@
         }
       }
     },
-    "Finishing the download…" : {
-      "comment" : "Cycling phrase shown during model download (issue #144).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Finalisation du téléchargement…"
-          }
-        }
-      }
-    },
     "Follow keyboard language" : {
       "comment" : "Transcription language picker option: STT tracks the keyboard language, the default (issue #226).",
       "localizations" : {
@@ -1484,7 +1462,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mise en place des derniers éléments…"
+            "value" : "Tout se met en place…"
           }
         }
       }
