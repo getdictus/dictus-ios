@@ -86,6 +86,7 @@
 		AA0000A0 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A0 /* OnboardingView.swift */; };
 		AA0000A1 /* WelcomePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A1 /* WelcomePage.swift */; };
 		AA000675 /* OnboardingShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100675 /* OnboardingShell.swift */; };
+		AA000683 /* AppleIntelligencePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100683 /* AppleIntelligencePage.swift */; };
 		AA0000A2 /* MicPermissionPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A2 /* MicPermissionPage.swift */; };
 		AA0000A3 /* KeyboardSetupPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A3 /* KeyboardSetupPage.swift */; };
 		AA0000A4 /* ModelDownloadPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A4 /* ModelDownloadPage.swift */; };
@@ -295,6 +296,7 @@
 		AA1000A0 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		AA1000A1 /* WelcomePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomePage.swift; sourceTree = "<group>"; };
 		AA100675 /* OnboardingShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingShell.swift; sourceTree = "<group>"; };
+		AA100683 /* AppleIntelligencePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligencePage.swift; sourceTree = "<group>"; };
 		AA1000A2 /* MicPermissionPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicPermissionPage.swift; sourceTree = "<group>"; };
 		AA1000A3 /* KeyboardSetupPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupPage.swift; sourceTree = "<group>"; };
 		AA1000A4 /* ModelDownloadPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadPage.swift; sourceTree = "<group>"; };
@@ -700,6 +702,7 @@
 				AA1000A1 /* WelcomePage.swift */,
 				AA1000A2 /* MicPermissionPage.swift */,
 				AA1000A3 /* KeyboardSetupPage.swift */,
+				AA100683 /* AppleIntelligencePage.swift */,
 				AA1000A4 /* ModelDownloadPage.swift */,
 				AA1000A5 /* GlobeKeyTutorialPage.swift */,
 				AA1000EA /* LanguageSetupPage.swift */,
@@ -1212,6 +1215,7 @@
 				AA0000A1 /* WelcomePage.swift in Sources */,
 				AA0000A2 /* MicPermissionPage.swift in Sources */,
 				AA0000A3 /* KeyboardSetupPage.swift in Sources */,
+				AA000683 /* AppleIntelligencePage.swift in Sources */,
 				AA0000A4 /* ModelDownloadPage.swift in Sources */,
 				AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */,
 				AA0000A9 /* OnboardingSuccessView.swift in Sources */,
