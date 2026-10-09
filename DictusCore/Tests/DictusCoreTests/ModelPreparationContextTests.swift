@@ -34,6 +34,34 @@ final class ModelPreparationContextTests: XCTestCase {
         )
     }
 
+    // MARK: - The line about leaving the screen (#675)
+
+    /// The onboarding variant says the download survives leaving, and says it only while
+    /// downloading: the compile still needs the foreground (#472).
+    func testOnlyTheOnboardingDownloadSaysItContinuesInTheBackground() {
+        XCTAssertEqual(
+            ModelPreparationContext.onboarding.leaveNotice(isDownloading: true),
+            .downloadContinuesInBackground
+        )
+        XCTAssertEqual(ModelPreparationContext.onboarding.leaveNotice(isDownloading: false), .stayOnPage)
+        for context in ModelPreparationContext.allCases where context != .onboarding {
+            for isDownloading in [true, false] {
+                XCTAssertNotEqual(
+                    context.leaveNotice(isDownloading: isDownloading), .downloadContinuesInBackground,
+                    "\(context) isDownloading=\(isDownloading)"
+                )
+            }
+        }
+    }
+
+    /// The pre-#675 rule, unchanged for every context but the onboarding download (#484).
+    func testTheOtherContextsKeepTheirSentence() {
+        XCTAssertEqual(ModelPreparationContext.keyboardColdStart.leaveNotice(isDownloading: true), .waitForPreparation)
+        XCTAssertEqual(ModelPreparationContext.keyboardColdStart.leaveNotice(isDownloading: false), .waitForPreparation)
+        XCTAssertEqual(ModelPreparationContext.modelSelection.leaveNotice(isDownloading: true), .stayOnPage)
+        XCTAssertEqual(ModelPreparationContext.appRecordTap.leaveNotice(isDownloading: false), .stayOnPage)
+    }
+
     // MARK: - Gave up vs finished (#428, third review finding D)
 
     /// Both outcomes write `.idle`, so a screen that cannot tell them apart congratulates
