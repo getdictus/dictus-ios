@@ -104,7 +104,13 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         super.init()
         if usesPictureInPicture {
             configureLayer()
-            makePictureInPictureController()
+            // Checked again on its own, not through `usesPictureInPicture`: on a device
+            // without Picture in Picture the controller's initializer returns a nil object
+            // that Swift sees as non-optional, and observing it aborts the app (measured
+            // on a simulator, which reports Picture in Picture as unsupported).
+            if AVPictureInPictureController.isPictureInPictureSupported() {
+                makePictureInPictureController()
+            }
         }
         log("created", "pipSupported=\(AVPictureInPictureController.isPictureInPictureSupported()) forcedOff=\(Self.isForcedOff)")
     }

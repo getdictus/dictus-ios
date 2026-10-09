@@ -26,7 +26,7 @@ struct KeyboardSetupChecklistCard: View {
 
     /// The card's size in points. The Picture in Picture window takes its aspect ratio
     /// from the frames, so this is also the window's shape.
-    static let size = CGSize(width: 300, height: 236)
+    static let size = CGSize(width: 300, height: 220)
 
     /// The card's fill: the app's dark, a shade deeper so it reads over the dark app too.
     static let background = Color(hex: 0x0F1728)
