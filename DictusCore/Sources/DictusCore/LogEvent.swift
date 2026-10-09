@@ -325,6 +325,11 @@ public enum LogEvent: Sendable {
     case onboardingDictusKeyboardActivated
     case onboardingGlobeTutorialTextDetected
     case onboardingGlobeTutorialSkipped
+    /// The onboarding's Smart Mode pick wrote the pinned list (#677). `identifiers` is the
+    /// list in fan order, comma-separated: what the keyboard's fan should now show.
+    case onboardingSmartModesPicked(identifiers: String)
+    /// The Smart Mode pick was skipped: nothing written, the fan keeps the seed (#677).
+    case onboardingSmartModePickSkipped
 
     // MARK: Live Activity
     case liveActivityStarted(id: String)
@@ -571,7 +576,8 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
-             .onboardingGlobeTutorialSkipped:
+             .onboardingGlobeTutorialSkipped,
+             .onboardingSmartModesPicked, .onboardingSmartModePickSkipped:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
              .coldStartStranded:
@@ -635,6 +641,7 @@ public enum LogEvent: Sendable {
         case .onboardingKeyboardDetected,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped,
+             .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
              .transcriptionStarted, .transcriptionCompleted,
@@ -861,6 +868,10 @@ public enum LogEvent: Sendable {
             return ""
         case .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped:
+            return ""
+        case .onboardingSmartModesPicked(let identifiers):
+            return "identifiers=\(identifiers)"
+        case .onboardingSmartModePickSkipped:
             return ""
 
         // Live Activity
@@ -1108,6 +1119,8 @@ extension LogEvent {
         case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
         case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
         case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
+        case .onboardingSmartModesPicked: return "onboardingSmartModesPicked"
+        case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
         case .liveActivityStarted: return "liveActivityStarted"
         case .liveActivityTransition: return "liveActivityTransition"
         case .liveActivityFailed: return "liveActivityFailed"
