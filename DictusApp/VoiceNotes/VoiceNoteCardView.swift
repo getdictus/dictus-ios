@@ -385,7 +385,8 @@ struct VoiceNoteCardView: View {
             engine: content.engine ?? .parakeet,
             modelIdentifier: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? ""
         )
-        let outcome = await PolishCoordinator.shared.polish(
+        // Its own slot (#648): a dictation started while this runs must not cancel it.
+        let outcome = await PolishCoordinator.shared.polishVoiceNote(
             raw: content.transcript, languagePolicy: policy, smartMode: mode,
             // Smart tasks skip the duration gate; the value is the metrics' context.
             recordingDuration: TimeInterval(content.durationSeconds ?? 0)

@@ -29,24 +29,32 @@ import Translation
 /// Setting the binding starts the download; the modifier sets it back to nil when it is
 /// over and reports the pair's status at that moment. A refusal or a failed download is
 /// not an error the user has to see: Translate keeps working on Apple FM, and the
-/// status the callback receives is still `.notInstalled`.
+/// status the callback receives is still `.notInstalled`. Each request writes one
+/// `translationPairPrepared` line to the persistent log, with the status before and after.
+///
+/// `strategy` is `.highFidelity`, what Translate ships on, unless a caller says
+/// otherwise. Only the Polish debug screen does: with Apple Intelligence on,
+/// `.highFidelity` never needs a download (`TranslationPairStatus`), so a `.lowLatency`
+/// pair is the only way to see the system prompt this component exists to host.
 extension View {
     func translationPairDownload(
         _ pair: Binding<TranslationLanguagePair?>,
+        strategy: TranslationStrategy = .highFidelity,
         onFinished: @escaping (TranslationLanguagePair, TranslationPairStatus) -> Void = { _, _ in }
     ) -> some View {
-        modifier(TranslationPairDownloadModifier(pair: pair, onFinished: onFinished))
+        modifier(TranslationPairDownloadModifier(pair: pair, strategy: strategy, onFinished: onFinished))
     }
 }
 
 private struct TranslationPairDownloadModifier: ViewModifier {
     @Binding var pair: TranslationLanguagePair?
+    let strategy: TranslationStrategy
     let onFinished: (TranslationLanguagePair, TranslationPairStatus) -> Void
 
     func body(content: Content) -> some View {
         #if canImport(Translation)
         if #available(iOS 26.4, *) {
-            content.modifier(PrepareModifier(pair: $pair, onFinished: onFinished))
+            content.modifier(PrepareModifier(pair: $pair, strategy: strategy, onFinished: onFinished))
         } else {
             // Below 26.4 Translate runs on Apple FM only: there is nothing to download.
             content.onChange(of: pair) { _, requested in
@@ -65,33 +73,57 @@ private struct TranslationPairDownloadModifier: ViewModifier {
 @available(iOS 26.4, *)
 private struct PrepareModifier: ViewModifier {
     @Binding var pair: TranslationLanguagePair?
+    let strategy: TranslationStrategy
     let onFinished: (TranslationLanguagePair, TranslationPairStatus) -> Void
 
     @State private var configuration: TranslationSession.Configuration?
-    @State private var preparing: TranslationLanguagePair?
+    @State private var preparing: Request?
+
+    /// What is being prepared, captured when it was asked for.
+    private struct Request {
+        let pair: TranslationLanguagePair
+        let strategy: TranslationStrategy
+        let before: TranslationPairStatus
+        let start: Date
+    }
 
     func body(content: Content) -> some View {
         content
             .onChange(of: pair) { _, requested in
                 guard let requested, preparing == nil else { return }
-                preparing = requested
-                configuration = TranslationSession.Configuration(
-                    source: Locale.Language(identifier: requested.source),
-                    target: Locale.Language(identifier: requested.target.rawValue),
-                    preferredStrategy: .highFidelity
-                )
+                let strategy = self.strategy
+                Task {
+                    let before = await TranslationPairStatus.current(for: requested, strategy: strategy)
+                    preparing = Request(pair: requested, strategy: strategy, before: before, start: Date())
+                    configuration = TranslationSession.Configuration(
+                        source: Locale.Language(identifier: requested.source),
+                        target: Locale.Language(identifier: requested.target.rawValue),
+                        preferredStrategy: strategy == .lowLatency ? .lowLatency : .highFidelity
+                    )
+                }
             }
             .translationTask(configuration) { session in
-                // A refusal or a failure is not surfaced: the status read below says
-                // what happened, and Translate works on Apple FM either way.
-                try? await session.prepareTranslation()
-                guard let finished = await MainActor.run(body: { preparing }) else { return }
-                let status = await TranslationPairStatus.current(for: finished)
+                // A refusal or a failure is not surfaced to the user: the status read
+                // below says what happened, and Translate works on Apple FM either way.
+                var errorSlug = "-"
+                do {
+                    try await session.prepareTranslation()
+                } catch {
+                    errorSlug = TranslateRoutingPolishEngine.slug(of: error)
+                }
+                guard let request = await MainActor.run(body: { preparing }) else { return }
+                let after = await TranslationPairStatus.current(for: request.pair, strategy: request.strategy)
+                PersistentLog.log(.translationPairPrepared(
+                    strategy: request.strategy.rawValue, source: request.pair.source,
+                    target: request.pair.target.rawValue, before: request.before.rawValue,
+                    after: after.rawValue, ms: Int(Date().timeIntervalSince(request.start) * 1000),
+                    error: errorSlug
+                ))
                 await MainActor.run {
                     preparing = nil
                     configuration = nil
                     pair = nil
-                    onFinished(finished, status)
+                    onFinished(request.pair, after)
                 }
             }
     }

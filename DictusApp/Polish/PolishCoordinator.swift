@@ -25,6 +25,23 @@ public final class PolishCoordinator {
     private let metricsRing = PolishMetricsRing()
     private let service: PolishService
 
+    /// A second service for voice notes, so they have their own in-flight slot (#648).
+    ///
+    /// `PolishService` serialises its calls on one slot: a new call cancels the one in
+    /// flight (#361 decisions 10 and 15). That is right for dictations, where the new
+    /// one replaces the old. It was wrong for voice notes sharing the slot:
+    /// `DictationCoordinator.startDictation()` calls `cancelInflight()` for every
+    /// recording, keyboard ones included, because DictusApp records them all. A device
+    /// test on 2026-10-08 lost a 226 s voice note's translation that way: a keyboard
+    /// dictation started while it was translating, and the log reads
+    /// `polishCallSuperseded inflightMs=16812`, then `smartModeRefused outcome=cancelled`.
+    /// A voice note is not replaced by a dictation, so it does not share its slot.
+    ///
+    /// The cost is a second #315 availability gate in this process. That gate tracks
+    /// Apple's background rate limit, and voice notes run their mode when the result
+    /// is opened, with DictusApp in the foreground.
+    private let voiceNoteService: PolishService
+
     private init() {
         // No `onBecameUnavailable`: the #315 notice lives in the keyboard toolbar and
         // describes the keyboard's gate since #361. When an in-app dictation exhausts
@@ -32,16 +49,24 @@ public final class PolishCoordinator {
         // a surface in another process would be both late and wrong.
         // `appState` feeds the `translateEngineCall` line (#648). The app translates for
         // voice notes and for dictations started inside it; the keyboard does the rest.
-        self.service = PolishService(sink: metricsRing, appState: {
-            await MainActor.run {
-                switch UIApplication.shared.applicationState {
-                case .active: return "active"
-                case .inactive: return "inactive"
-                case .background: return "background"
-                @unknown default: return "unknown"
-                }
+        // `translationBudget` (#648): voice notes run minutes long, so Translate's wait
+        // scales with the input here rather than taking the keyboard's 8 s.
+        self.service = PolishService(sink: metricsRing, translationBudget: .app,
+                                     appState: Self.applicationStateName)
+        self.voiceNoteService = PolishService(sink: metricsRing, translationBudget: .app,
+                                              appState: Self.applicationStateName)
+    }
+
+    /// This app's state, for the `translateEngineCall` line.
+    private static let applicationStateName: @Sendable () async -> String = {
+        await MainActor.run {
+            switch UIApplication.shared.applicationState {
+            case .active: return "active"
+            case .inactive: return "inactive"
+            case .background: return "background"
+            @unknown default: return "unknown"
             }
-        })
+        }
     }
 
     // MARK: - Public API
@@ -82,11 +107,25 @@ public final class PolishCoordinator {
         )
     }
 
+    /// Run a voice note's Smart Mode, on the voice-note slot (#648). Same pipeline and
+    /// same contract as `polish`; a dictation starting meanwhile does not cancel it.
+    public func polishVoiceNote(raw: String,
+                                languagePolicy: TranscriptionLanguagePolicy,
+                                smartMode: SmartMode,
+                                recordingDuration: TimeInterval) async -> PolishOutcome {
+        await voiceNoteService.polish(
+            raw: raw,
+            languagePolicy: languagePolicy,
+            smartMode: smartMode,
+            recordingDuration: recordingDuration
+        )
+    }
+
     /// Record that a voice note's mode declined its transcript for length (#650). See
     /// `PolishService.recordSkippedForLength`: the voice note card decides before
     /// calling `polish`, and this is how its decision still reaches the export.
     public func recordSkippedForLength(_ mode: SmartMode, raw: String) async {
-        await service.recordSkippedForLength(mode, raw: raw)
+        await voiceNoteService.recordSkippedForLength(mode, raw: raw)
     }
 
     // MARK: - Debug ring
