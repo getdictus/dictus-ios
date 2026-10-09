@@ -1623,6 +1623,17 @@
         }
       }
     },
+    "Got it" : {
+      "comment" : "Button closing the onboarding keep-open popup (#675).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'ai compris"
+          }
+        }
+      }
+    },
     "Haptic feedback" : {
       "localizations" : {
         "fr" : {
@@ -1761,6 +1772,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dans le clavier"
+          }
+        }
+      }
+    },
+    "Keep Dictus open" : {
+      "comment" : "Onboarding popup title, raised when confirming the language screen starts the model download (#675).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gardez Dictus ouvert"
           }
         }
       }
@@ -3527,13 +3549,13 @@
         }
       }
     },
-    "The download continues if you leave the app." : {
-      "comment" : "Onboarding variant of the model preparation screen (#675): replaces 'Please stay on this page and do not leave the app.' while the onboarding's model download runs, because the download survives leaving the app (#649 decision 6).",
+    "The download continues if you leave the app, but much more slowly." : {
+      "comment" : "Onboarding variant of the model preparation screen (#675): replaces 'Please stay on this page and do not leave the app.' while the onboarding's download runs. The download survives leaving the app, but iOS throttles it in the background.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le téléchargement continue si vous quittez l'app."
+            "value" : "Le téléchargement continue si vous quittez l'app, mais beaucoup plus lentement."
           }
         }
       }
@@ -3635,6 +3657,17 @@
         }
       }
     },
+    "The model (%@) is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings." : {
+      "comment" : "Onboarding popup message (#675). The argument is the model's size (~483 MB). The next step sends the user to Settings, hence the exception.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modèle (%@) se télécharge maintenant. Il continue si vous quittez l'app, mais iOS le ralentit fortement. Pour qu'il soit prêt plus vite, restez dans Dictus, sauf pour activer le clavier dans Réglages."
+          }
+        }
+      }
+    },
     "The model download is incomplete. Please try again." : {
       "comment" : "Model download error when a required file is missing after download (issue #207).",
       "localizations" : {
@@ -3642,6 +3675,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le téléchargement du modèle est incomplet. Veuillez réessayer."
+          }
+        }
+      }
+    },
+    "The model is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings." : {
+      "comment" : "Onboarding popup message when the model's size is unknown (#675).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le modèle se télécharge maintenant. Il continue si vous quittez l'app, mais iOS le ralentit fortement. Pour qu'il soit prêt plus vite, restez dans Dictus, sauf pour activer le clavier dans Réglages."
           }
         }
       }

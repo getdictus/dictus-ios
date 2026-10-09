@@ -279,14 +279,16 @@ struct ModelLoadingOverlay: View {
     /// one there.
     ///
     /// THE THIRD is the onboarding variant (#675, #649 decision 6): while the onboarding's
-    /// download runs, it survives leaving the app, so the screen says that instead. Drawn in
+    /// download runs, it survives leaving the app, so the screen says that instead, and
+    /// says the cost (decided 2026-10-09): iOS throttles a backgrounded transfer, measured
+    /// at about 0.2 MB/s against 6.5 MB/s in front. Drawn in
     /// the accent colour in the approved mock-up, because it is the one line on this screen
     /// that gives the user something rather than asks for something.
     @ViewBuilder
     private var leaveNotice: some View {
         switch activeContext.leaveNotice(isDownloading: currentPhase == .downloading) {
         case .downloadContinuesInBackground:
-            Text("The download continues if you leave the app.")
+            Text("The download continues if you leave the app, but much more slowly.")
                 .font(.dictusCaption.weight(.semibold))
                 .foregroundStyle(Color.dictusAccent)
         case .waitForPreparation:

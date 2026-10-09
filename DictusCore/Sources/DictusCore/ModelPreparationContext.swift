@@ -88,7 +88,8 @@ public enum ModelPreparationLeaveNotice: Equatable, Sendable {
     case stayOnPage
     /// "Please wait for preparation to finish." For a user whose next move is to leave.
     case waitForPreparation
-    /// "The download continues if you leave the app." The onboarding variant.
+    /// "The download continues if you leave the app, but much more slowly." The onboarding
+    /// variant.
     case downloadContinuesInBackground
 }
 

@@ -68,7 +68,7 @@ struct LanguageSetupPage: View {
                 .pickerStyle(.segmented)
                 .padding(.bottom, 12)
 
-                LayoutPreview(layout: setup.layout)
+                LayoutPreview(layout: setup.layout, language: setup.keyboardLanguage)
                     .padding(.bottom, 24)
 
                 modelLine
@@ -251,26 +251,35 @@ struct LanguageSetupPage: View {
 
 // MARK: - Layout preview
 
-/// The top of the keyboard in the chosen layout, cropped like the mock-up's: enough rows to
-/// tell AZERTY from QWERTY from QWERTZ at a glance, without drawing a whole keyboard.
+/// The whole letter keyboard in the chosen layout, so switching AZERTY / QWERTY / QWERTZ
+/// shows the change at a glance.
+///
+/// WHY THE WHOLE KEYBOARD (decided 2026-10-09, after the first device test of #675):
+/// mock-up 02 crops it after the second row, which hid the third row exactly where the
+/// three layouts differ most (`w x c v b n` / `z x c v b n m` / `y x c v b n m`). There is
+/// room for all of it on a 6.7" screen, and the page scrolls where there is not.
 ///
 /// WHY THE ROWS ARE WRITTEN HERE FOR AZERTY ONLY: QWERTY and QWERTZ come from DictusCore,
 /// where the keyboard reads them too. AZERTY's rows live in the keyboard extension
-/// (`KeyboardLayouts`), which the app cannot import; the first two and a half rows are
-/// all this preview shows, and they are the French layout's fixed letters.
+/// (`KeyboardLayouts`), which the app cannot import.
 private struct LayoutPreview: View {
     let layout: LayoutType
+    /// The keyboard language, for the space bar's label.
+    let language: SupportedLanguage
 
-    /// Height of the visible crop: two rows and the top of the third.
-    private let visibleHeight: CGFloat = 126
+    private let keyHeight: CGFloat = 40
+    private let rowSpacing: CGFloat = 8
+    private let keySpacing: CGFloat = 5
+    private let inset: CGFloat = 6
+    private let verticalPadding: CGFloat = 12
 
-    private var rows: [[String]] {
+    private var letterRows: [[String]] {
         switch layout {
         case .azerty:
             return [
                 ["a", "z", "e", "r", "t", "y", "u", "i", "o", "p"],
                 ["q", "s", "d", "f", "g", "h", "j", "k", "l", "m"],
-                ["w", "x", "c", "v", "b", "n"]
+                ["w", "x", "c", "v", "b", "n", "'"]
             ]
         case .qwerty:
             return QWERTYLayout.lettersRows.prefix(3).map { row in row.map { $0.lowercased() } }
@@ -279,40 +288,89 @@ private struct LayoutPreview: View {
         }
     }
 
+    /// Three letter rows and the bottom row.
+    private var height: CGFloat {
+        keyHeight * 4 + rowSpacing * 3 + verticalPadding * 2
+    }
+
     var body: some View {
         GeometryReader { geometry in
             // Every key is as wide as one key of the longest row, and shorter rows are
             // centred, as on the real keyboard.
-            let spacing: CGFloat = 5
-            let longest = CGFloat(rows.map(\.count).max() ?? 10)
-            let keyWidth = (geometry.size.width - 12 - spacing * (longest - 1)) / longest
-            VStack(spacing: 8) {
-                ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
-                    HStack(spacing: spacing) {
+            let longest = CGFloat(letterRows.map(\.count).max() ?? 10)
+            let keyWidth = (geometry.size.width - inset * 2 - keySpacing * (longest - 1)) / longest
+            let rowWidth = keyWidth * longest + keySpacing * (longest - 1)
+            VStack(spacing: rowSpacing) {
+                ForEach(Array(letterRows.enumerated()), id: \.offset) { index, row in
+                    HStack(spacing: keySpacing) {
+                        // Shift and delete flank the last letter row, 1.5 keys wide, as in
+                        // the keyboard (`QWERTZLayout.flankKeyUnitWidth`).
+                        if index == 2 {
+                            functionKey(systemName: "shift", width: keyWidth * 1.5)
+                            Spacer(minLength: 0)
+                        }
                         ForEach(Array(row.enumerated()), id: \.offset) { _, letter in
-                            Text(verbatim: letter)
-                                .font(.system(size: 18))
-                                .foregroundStyle(.primary)
-                                .frame(width: keyWidth, height: 40)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                        .fill(Self.keyFill)
-                                        .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
-                                )
+                            key(Text(verbatim: letter).font(.system(size: 18)), width: keyWidth)
+                        }
+                        if index == 2 {
+                            Spacer(minLength: 0)
+                            functionKey(systemName: "delete.left", width: keyWidth * 1.5)
                         }
                     }
+                    .frame(width: index == 2 ? rowWidth : nil)
                 }
+                HStack(spacing: keySpacing) {
+                    functionKey(text: Text(verbatim: "123"), width: keyWidth * 1.5)
+                    key(
+                        Text(verbatim: language.spaceName).font(.system(size: 15)).foregroundStyle(.secondary),
+                        width: nil
+                    )
+                    functionKey(systemName: "return", width: keyWidth * 2.5)
+                }
+                .frame(width: rowWidth)
             }
             .frame(width: geometry.size.width)
-            .padding(.top, 12)
+            .padding(.vertical, verticalPadding)
         }
-        .frame(height: visibleHeight, alignment: .top)
+        .frame(height: height)
         .frame(maxWidth: .infinity)
-        .background(Self.trayFill)
-        // Cropped at the bottom: rounded on top only, cut straight across below.
-        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24, style: .continuous))
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Self.trayFill)
+        )
         .animation(.easeInOut(duration: 0.2), value: layout)
         .accessibilityHidden(true)
+    }
+
+    /// A letter key, or the space bar when `width` is nil (it takes what is left).
+    private func key(_ label: some View, width: CGFloat?) -> some View {
+        label
+            .foregroundStyle(.primary)
+            .frame(width: width, height: keyHeight)
+            .frame(maxWidth: width == nil ? .infinity : nil)
+            .background(
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(Self.keyFill)
+                    .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+            )
+    }
+
+    /// Shift, delete, 123, return: the darker keys.
+    private func functionKey(systemName: String? = nil, text: Text? = nil, width: CGFloat) -> some View {
+        Group {
+            if let systemName {
+                Image(systemName: systemName).font(.system(size: 16))
+            } else if let text {
+                text.font(.system(size: 15))
+            }
+        }
+        .foregroundStyle(.primary)
+        .frame(width: width, height: keyHeight)
+        .background(
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .fill(Self.functionKeyFill)
+                .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+        )
     }
 
     /// The tray behind the keys: the card colour, like the mock-up.
@@ -320,4 +378,7 @@ private struct LayoutPreview: View {
 
     /// The keys: a light grey on the white tray, a lifted navy on the dark one.
     private static let keyFill = Color(light: Color(hex: 0xF2F2F7), dark: Color(hex: 0x0A1628))
+
+    /// The function keys, a step darker than the letters.
+    private static let functionKeyFill = Color(light: Color(hex: 0xDCDCE2), dark: Color(hex: 0x1F2A3E))
 }

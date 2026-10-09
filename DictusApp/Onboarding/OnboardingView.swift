@@ -51,6 +51,10 @@ struct OnboardingView: View {
     /// the preparation step is shown at all.
     @StateObject private var modelManager = ModelManager()
 
+    /// The model whose download the language screen just started, while the keep-open
+    /// popup is up (`keepOpenWarning`). nil otherwise.
+    @State private var keepOpenWarningModel: String?
+
     /// Reset when the first dictation is left, so Home does not open on its transcription.
     @EnvironmentObject private var coordinator: DictationCoordinator
 
@@ -101,6 +105,11 @@ struct OnboardingView: View {
                 ))
                 .id(step) // Force SwiftUI to treat each page as a unique view for transitions
             }
+        }
+        .alert(Text("Keep Dictus open"), isPresented: keepOpenWarning) {
+            Button("Got it") {}
+        } message: {
+            keepOpenWarningMessage
         }
         // Prevent interactive dismiss (swipe down) on the fullScreenCover
         .interactiveDismissDisabled()
@@ -186,8 +195,14 @@ struct OnboardingView: View {
     /// its compile waits for the foreground (`ModelManager.waitForForegroundToCompile`).
     private func confirmLanguage(_ setup: LanguageSetup) {
         setup.apply()
-        startDownloadIfNeeded(setup.recommendedModel(on: DeviceCapabilities.current()))
-        advance()
+        let model = setup.recommendedModel(on: DeviceCapabilities.current())
+        if startDownloadIfNeeded(model) {
+            // The download is already running; the popup only asks the user to stay. Its
+            // button moves on (`keepOpenWarning`), so the flow continues as before.
+            keepOpenWarningModel = model
+        } else {
+            advance()
+        }
     }
 
     /// Starts the download of `identifier` unless it is already ready or already moving.
@@ -195,19 +210,60 @@ struct OnboardingView: View {
     /// WHY THE GUARD: this screen can be confirmed again after a relaunch, and by then the
     /// launch adoption (#449) may already be driving the transfer from this same manager.
     /// A second `downloadModel` would join the transfer but run its own compile after it.
-    private func startDownloadIfNeeded(_ identifier: String) {
-        guard !isReady(identifier) else { return }
+    ///
+    /// - Returns: whether bytes are now being transferred: false when nothing was started,
+    ///   and false for a model whose files are already on disk (`.ready`), where only the
+    ///   compile is left. That is the case the keep-open popup is about.
+    @discardableResult
+    private func startDownloadIfNeeded(_ identifier: String) -> Bool {
+        guard !isReady(identifier) else { return false }
+        let transfersBytes: Bool
         switch modelManager.modelStates[identifier] {
         case .downloading, .prewarming:
-            return
-        case .notDownloaded, .ready, .error, nil:
-            break
+            return false
+        case .ready:
+            transfersBytes = false
+        case .notDownloaded, .error, nil:
+            transfersBytes = true
         }
         Task {
             // Failures are recorded on the model's state by `downloadModel` itself, and
             // the preparation page shows them with a retry. Nothing to do here.
             try? await modelManager.downloadModel(identifier)
         }
+        return transfersBytes
+    }
+
+    // MARK: - Keep-open warning
+
+    /// The popup raised when the language screen starts a download (decided 2026-10-09).
+    ///
+    /// WHY A POPUP AND WHY HERE: the background `URLSession` survives the user leaving
+    /// (#449), but iOS throttles it hard. Measured on device: about 6.5 MB/s with Dictus in
+    /// front, about 0.2 MB/s once it is in the background. Users start the download and go
+    /// to another app; a line of text on a page is not read, a popup at the moment the
+    /// download starts is. It does not block anything: the download is already running,
+    /// and its one button continues the flow.
+    ///
+    /// WHY "EXCEPT TO TURN ON THE KEYBOARD": the very next step sends the user to Settings.
+    /// The copy must not contradict it.
+    private var keepOpenWarning: Binding<Bool> {
+        Binding(
+            get: { keepOpenWarningModel != nil },
+            set: { isPresented in
+                guard !isPresented, keepOpenWarningModel != nil else { return }
+                keepOpenWarningModel = nil
+                advance()
+            }
+        )
+    }
+
+    /// The popup's message, with the real size of the model being downloaded.
+    private var keepOpenWarningMessage: Text {
+        if let identifier = keepOpenWarningModel, let size = ModelInfo.forIdentifier(identifier)?.sizeLabel {
+            return Text("The model (\(size)) is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings.")
+        }
+        return Text("The model is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings.")
     }
 
     /// Leaves the first dictation, whether it succeeded or was skipped, for the completion
