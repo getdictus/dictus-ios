@@ -12,8 +12,8 @@ import DictusCore
 /// requests. Since the shell (#675) it is drawn as the mock-up draws it: the top of an
 /// iPhone, cropped, showing Settings > Apps > Dictus with the three things to touch
 /// numbered 1, 2, 3, and the current one lit in turn on a loop. Only iOS system UI is
-/// drawn this way (#649 decision 13). The Picture in Picture checklist over the real
-/// Settings is #682's.
+/// drawn this way (#649 decision 13). Below it, the checklist that Open Settings sends
+/// into Picture in Picture over the real Settings (#682, `KeyboardSetupChecklistPlayer`).
 struct KeyboardSetupPage: View {
     let onNext: () -> Void
 
@@ -47,6 +47,10 @@ struct KeyboardSetupPage: View {
     /// it cannot change while the page is on screen.
     private let device = DeviceCapabilities.current()
 
+    /// The checklist played under the drawing and, from the Open Settings tap, in Picture
+    /// in Picture over Settings (#682).
+    @StateObject private var checklist = KeyboardSetupChecklistPlayer()
+
     var body: some View {
         OnboardingPage(
             title: Text("Turn on the keyboard"),
@@ -54,6 +58,12 @@ struct KeyboardSetupPage: View {
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
+
+                // Floats over the cropped bottom of the drawn phone, trailing, as the
+                // window floats over Settings in mock-up 03b.
+                KeyboardSetupChecklistInline(player: checklist)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.top, -28)
 
                 detectionStatus
 
@@ -84,8 +94,10 @@ struct KeyboardSetupPage: View {
         .onAppear {
             checkKeyboardInstalled()
             startToggleAnimation()
+            checklist.start()
         }
         .onDisappear {
+            checklist.stop()
             animationTimer?.invalidate()
             animationTimer = nil
             // Cancel any pending keyboard check task to prevent UI updates
@@ -105,6 +117,11 @@ struct KeyboardSetupPage: View {
             // can fire rapidly (active → inactive → active). Cancel any in-flight
             // check when we go inactive to avoid stale tasks mutating state
             // after the view has been torn down or re-entered.
+            if newPhase == .active {
+                // Back from Settings: the Picture in Picture window has done its job.
+                checklist.appBecameActive()
+            }
+
             if newPhase != .active {
                 keyboardCheckTask?.cancel()
                 keyboardCheckTask = nil
@@ -152,6 +169,7 @@ struct KeyboardSetupPage: View {
         }
         .onChange(of: keyboardDetected) { detected in
             if detected {
+                checklist.keyboardDetected()
                 // Stop animation loop once detected
                 animationTimer?.invalidate()
                 animationTimer = nil
@@ -410,9 +428,13 @@ struct KeyboardSetupPage: View {
 
     // MARK: - Private
 
+    /// Opens the app's page in Settings. The checklist starts Picture in Picture first when
+    /// it can, and opens Settings once the window is up (#682).
     private func openSettings() {
-        if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(url)
+        checklist.openSettings {
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
         }
     }
 

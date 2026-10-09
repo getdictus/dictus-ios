@@ -88,6 +88,11 @@
 		AA000675 /* OnboardingShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100675 /* OnboardingShell.swift */; };
 		AA0000A2 /* MicPermissionPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A2 /* MicPermissionPage.swift */; };
 		AA0000A3 /* KeyboardSetupPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A3 /* KeyboardSetupPage.swift */; };
+		AA068201 /* KeyboardSetupChecklistCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168201 /* KeyboardSetupChecklistCard.swift */; };
+		AA068202 /* ChecklistFrameRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168202 /* ChecklistFrameRenderer.swift */; };
+		AA068203 /* ChecklistAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168203 /* ChecklistAudioSession.swift */; };
+		AA068204 /* KeyboardSetupChecklistPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168204 /* KeyboardSetupChecklistPlayer.swift */; };
+		AA068205 /* KeyboardSetupChecklistInline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168205 /* KeyboardSetupChecklistInline.swift */; };
 		AA0000A4 /* ModelDownloadPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A4 /* ModelDownloadPage.swift */; };
 		AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A5 /* GlobeKeyTutorialPage.swift */; };
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
@@ -297,6 +302,11 @@
 		AA100675 /* OnboardingShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingShell.swift; sourceTree = "<group>"; };
 		AA1000A2 /* MicPermissionPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicPermissionPage.swift; sourceTree = "<group>"; };
 		AA1000A3 /* KeyboardSetupPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupPage.swift; sourceTree = "<group>"; };
+		AA168201 /* KeyboardSetupChecklistCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistCard.swift; sourceTree = "<group>"; };
+		AA168202 /* ChecklistFrameRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistFrameRenderer.swift; sourceTree = "<group>"; };
+		AA168203 /* ChecklistAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistAudioSession.swift; sourceTree = "<group>"; };
+		AA168204 /* KeyboardSetupChecklistPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistPlayer.swift; sourceTree = "<group>"; };
+		AA168205 /* KeyboardSetupChecklistInline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistInline.swift; sourceTree = "<group>"; };
 		AA1000A4 /* ModelDownloadPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadPage.swift; sourceTree = "<group>"; };
 		AA1000A5 /* GlobeKeyTutorialPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeKeyTutorialPage.swift; sourceTree = "<group>"; };
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -700,6 +710,11 @@
 				AA1000A1 /* WelcomePage.swift */,
 				AA1000A2 /* MicPermissionPage.swift */,
 				AA1000A3 /* KeyboardSetupPage.swift */,
+				AA168201 /* KeyboardSetupChecklistCard.swift */,
+				AA168202 /* ChecklistFrameRenderer.swift */,
+				AA168203 /* ChecklistAudioSession.swift */,
+				AA168204 /* KeyboardSetupChecklistPlayer.swift */,
+				AA168205 /* KeyboardSetupChecklistInline.swift */,
 				AA1000A4 /* ModelDownloadPage.swift */,
 				AA1000A5 /* GlobeKeyTutorialPage.swift */,
 				AA1000EA /* LanguageSetupPage.swift */,
@@ -1212,6 +1227,11 @@
 				AA0000A1 /* WelcomePage.swift in Sources */,
 				AA0000A2 /* MicPermissionPage.swift in Sources */,
 				AA0000A3 /* KeyboardSetupPage.swift in Sources */,
+				AA068201 /* KeyboardSetupChecklistCard.swift in Sources */,
+				AA068202 /* ChecklistFrameRenderer.swift in Sources */,
+				AA068203 /* ChecklistAudioSession.swift in Sources */,
+				AA068204 /* KeyboardSetupChecklistPlayer.swift in Sources */,
+				AA068205 /* KeyboardSetupChecklistInline.swift in Sources */,
 				AA0000A4 /* ModelDownloadPage.swift in Sources */,
 				AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */,
 				AA0000A9 /* OnboardingSuccessView.swift in Sources */,
