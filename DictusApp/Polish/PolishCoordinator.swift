@@ -42,6 +42,16 @@ public final class PolishCoordinator {
     /// is opened, with DictusApp in the foreground.
     private let voiceNoteService: PolishService
 
+    /// The voice-note mode runs in flight, by note and mode (#648). A card that opens on
+    /// a note whose mode is already running attaches to it rather than starting a
+    /// second run, which would supersede the first on `voiceNoteService`'s slot.
+    private let voiceNoteRuns = InFlightCalls<VoiceNoteRunKey, PolishOutcome>()
+
+    private struct VoiceNoteRunKey: Hashable {
+        let noteID: UUID
+        let modeIdentifier: String
+    }
+
     private init() {
         // No `onBecameUnavailable`: the #315 notice lives in the keyboard toolbar and
         // describes the keyboard's gate since #361. When an in-app dictation exhausts
@@ -108,17 +118,27 @@ public final class PolishCoordinator {
     }
 
     /// Run a voice note's Smart Mode, on the voice-note slot (#648). Same pipeline and
-    /// same contract as `polish`; a dictation starting meanwhile does not cancel it.
-    public func polishVoiceNote(raw: String,
+    /// same contract as `polish`; a dictation starting meanwhile does not cancel it, and
+    /// a second card on the same note and mode awaits this run instead of starting one.
+    public func polishVoiceNote(noteID: UUID,
+                                raw: String,
                                 languagePolicy: TranscriptionLanguagePolicy,
                                 smartMode: SmartMode,
                                 recordingDuration: TimeInterval) async -> PolishOutcome {
-        await voiceNoteService.polish(
-            raw: raw,
-            languagePolicy: languagePolicy,
-            smartMode: smartMode,
-            recordingDuration: recordingDuration
-        )
+        let key = VoiceNoteRunKey(noteID: noteID, modeIdentifier: smartMode.id)
+        if voiceNoteRuns.isRunning(key) {
+            PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "summary",
+                                               action: "attached", details: "mode=\(smartMode.id)"))
+        }
+        let service = voiceNoteService
+        return await voiceNoteRuns.run(key) {
+            await service.polish(
+                raw: raw,
+                languagePolicy: languagePolicy,
+                smartMode: smartMode,
+                recordingDuration: recordingDuration
+            )
+        }
     }
 
     /// Record that a voice note's mode declined its transcript for length (#650). See

@@ -386,7 +386,11 @@ struct VoiceNoteCardView: View {
             modelIdentifier: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? ""
         )
         // Its own slot (#648): a dictation started while this runs must not cancel it.
+        // Keyed by note: a card rebuilt while this note's mode is still running (the
+        // stack dismissed in the background, the note reopened from History) attaches
+        // to that run instead of starting a second one that would supersede it.
         let outcome = await PolishCoordinator.shared.polishVoiceNote(
+            noteID: noteID,
             raw: content.transcript, languagePolicy: policy, smartMode: mode,
             // Smart tasks skip the duration gate; the value is the metrics' context.
             recordingDuration: TimeInterval(content.durationSeconds ?? 0)
