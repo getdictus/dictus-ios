@@ -248,9 +248,17 @@ struct KeyboardSetupPage: View {
     /// touch are seen at once, in order, which is what the old two-phase slide tried to say
     /// in seven seconds.
     private var settingsIllustration: some View {
-        let phoneShape = UnevenRoundedRectangle(topLeadingRadius: 44, topTrailingRadius: 44, style: .continuous)
-        let cardShape = UnevenRoundedRectangle(topLeadingRadius: 32, topTrailingRadius: 32, style: .continuous)
-        return VStack(alignment: .leading, spacing: 0) {
+        OnboardingPhoneCard {
+            settingsScreen
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("In Settings, open Keyboards, then turn on Dictus and Full Access."))
+    }
+
+    /// The drawn phone's screen: Settings > Apps > Dictus.
+    private var settingsScreen: some View {
+        VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 4) {
                 Image(systemName: "chevron.left")
                     .font(.body.weight(.semibold))
@@ -270,9 +278,11 @@ struct KeyboardSetupPage: View {
                 .padding(.bottom, 6)
 
             settingsGroup {
+                // Number first on every row, so the three numbers line up in one column
+                // (decided 2026-10-09): number, icon, label.
                 HStack(spacing: 12) {
-                    DictusIconTileSymbol(systemName: "keyboard", fill: .gray)
                     stepBadge(1)
+                    DictusIconTileSymbol(systemName: "keyboard", fill: .gray)
                     Text("Keyboards")
                         .foregroundStyle(.primary)
                     Spacer(minLength: 4)
@@ -311,26 +321,10 @@ struct KeyboardSetupPage: View {
             }
         }
         .font(.body)
-        .padding(.horizontal, 22)
+        .padding(.horizontal, 18)
         .padding(.top, 28)
         .padding(.bottom, 24)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        // The phone is drawn taller than the card (`padding(.bottom, -24)`) so the crop
-        // below cuts through it: no bottom edge, the phone runs off the card.
-        .background(phoneShape.fill(Color.dictusBackground).padding(.bottom, -24))
-        .overlay(phoneShape.strokeBorder(Self.phoneFrame, lineWidth: 7).padding(.bottom, -24))
-        .padding(.horizontal, 6)
-        .padding(.top, 8)
-        .background(cardShape.fill(Color.dictusSurface))
-        // Cropped at the bottom like the mock-up: rounded on top, cut straight below.
-        .clipShape(cardShape)
-        .allowsHitTesting(false)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("In Settings, open Keyboards, then turn on Dictus and Full Access."))
     }
-
-    /// The phone's outline: a light grey on light, a slate on dark.
-    private static let phoneFrame = Color(light: Color(hex: 0xD1D1D6), dark: Color(hex: 0x2A3346))
 
     /// A white (or dark surface) inset group, as in Settings.
     private func settingsGroup<Content: View>(@ViewBuilder content: () -> Content) -> some View {

@@ -314,6 +314,67 @@ extension View {
     }
 }
 
+// MARK: - Drawn iPhone in a card
+
+/// The top of a drawn iPhone inside a card, cropped at the bottom so the phone runs off it
+/// (#675 mock-up `03-clavier-dans-les-reglages`). `content` is the phone's screen.
+///
+/// WHY CONCENTRIC CORNERS (decided 2026-10-09): the card's corner radius is the phone's plus
+/// the gap between them (`phoneCornerRadius + phoneInset`), so the gap stays the same width
+/// all the way round the corners. The first version had a card corner tighter than the
+/// phone's, and the gap pinched at the corners. Every onboarding screen that shows a drawn
+/// iPhone uses this view, so the rule holds everywhere by construction.
+enum OnboardingPhoneMetrics {
+    /// The phone's top corner radius.
+    static let phoneCornerRadius: CGFloat = 44
+    /// The gap between the card's edge and the phone's outer edge, at the top and sides.
+    static let phoneInset: CGFloat = 10
+    /// Concentric with the phone: its radius plus the gap.
+    static let cardCornerRadius: CGFloat = phoneCornerRadius + phoneInset
+    /// The phone outline's width, drawn inside the phone's shape.
+    static let phoneFrameWidth: CGFloat = 7
+    /// How far the phone runs past the card's bottom edge, so the crop cuts through it.
+    static let overrun: CGFloat = 24
+    /// The phone's outline: a light grey on light, a slate on dark.
+    static let phoneFrame = Color(light: Color(hex: 0xD1D1D6), dark: Color(hex: 0x2A3346))
+}
+
+/// The drawn iPhone in its card. Metrics in `OnboardingPhoneMetrics` (a generic view
+/// cannot hold static stored properties).
+struct OnboardingPhoneCard<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    private typealias Metrics = OnboardingPhoneMetrics
+
+    var body: some View {
+        let phoneShape = UnevenRoundedRectangle(
+            topLeadingRadius: Metrics.phoneCornerRadius,
+            topTrailingRadius: Metrics.phoneCornerRadius,
+            style: .continuous
+        )
+        let cardShape = UnevenRoundedRectangle(
+            topLeadingRadius: Metrics.cardCornerRadius,
+            topTrailingRadius: Metrics.cardCornerRadius,
+            style: .continuous
+        )
+        content
+            .frame(maxWidth: .infinity, alignment: .leading)
+            // The phone is drawn taller than the card so the crop below cuts through it:
+            // no bottom edge, the phone runs off the card.
+            .background(phoneShape.fill(Color.dictusBackground).padding(.bottom, -Metrics.overrun))
+            .overlay(
+                phoneShape
+                    .strokeBorder(Metrics.phoneFrame, lineWidth: Metrics.phoneFrameWidth)
+                    .padding(.bottom, -Metrics.overrun)
+            )
+            .padding(.horizontal, Metrics.phoneInset)
+            .padding(.top, Metrics.phoneInset)
+            .background(cardShape.fill(Color.dictusSurface))
+            // Rounded on top, cut straight below.
+            .clipShape(cardShape)
+    }
+}
+
 /// An uppercase section label above a card, like the grouped lists of the app and of iOS.
 struct OnboardingSectionLabel: View {
     let text: Text

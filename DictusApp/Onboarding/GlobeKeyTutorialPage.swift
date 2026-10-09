@@ -30,6 +30,9 @@ struct GlobeKeyTutorialPage: View {
     /// Guard against multiple auto-advance triggers.
     @State private var hasAutoAdvanced = false
 
+    /// Set when enough text has landed: drives `successCue` until the page moves on.
+    @State private var showSuccessCue = false
+
     /// Minimum text length to trigger auto-advance.
     /// WHY 3 characters: A single keystroke shouldn't trigger success.
     /// Dictation typically produces multiple words. 3 chars filters accidental
@@ -71,6 +74,7 @@ struct GlobeKeyTutorialPage: View {
                 .frame(minHeight: 140, maxHeight: 220)
                 .padding(16)
                 .onboardingCard(cornerRadius: 20)
+                .overlay { successCue }
                 .padding(.horizontal, OnboardingMetrics.horizontalPadding)
                 .transition(.opacity)
             } else {
@@ -115,11 +119,36 @@ struct GlobeKeyTutorialPage: View {
             if dictusKeyboardActive && trimmed.count >= minTextLength && !hasAutoAdvanced {
                 hasAutoAdvanced = true
                 PersistentLog.log(.onboardingGlobeTutorialTextDetected)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                // WHY 0.6 s AND A CUE (decided 2026-10-09): the fixed 1.5 s wait read as
+                // "something is loading" on device. The field now turns green with a check
+                // the moment the text lands, and the page leaves about 0.6 s later
+                // (0.4 s here, then the 0.2 s keyboard dismissal in `advanceToSuccess`).
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    showSuccessCue = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                     advanceToSuccess()
                 }
             }
         }
+    }
+
+    /// The "it worked" cue on the text field, shown between the text landing and the page
+    /// moving on: a green outline and a check in its corner, in the app's success colour,
+    /// the same check the keyboard and microphone steps use for "detected" and "authorized".
+    private var successCue: some View {
+        ZStack(alignment: .topTrailing) {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(Color.dictusSuccess, lineWidth: 2)
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title2)
+                .foregroundStyle(.white, Color.dictusSuccess)
+                .padding(10)
+                .scaleEffect(showSuccessCue ? 1 : 0.4)
+        }
+        .opacity(showSuccessCue ? 1 : 0)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
     /// What to do now, under the title. Changes with the keyboard on screen and, on a
