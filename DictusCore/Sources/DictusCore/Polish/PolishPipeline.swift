@@ -37,19 +37,25 @@ public enum PolishPipeline {
         /// failing, or the model wrote about its own task. Carrying the word makes the rate of each countable
         /// from an export after the fact, which is what #466 asks for.
         public let rejectedCheck: PolishGuardrail.Check?
+        /// The engine that actually wrote `engineOutput` (#648), when one did. Translate
+        /// runs on the Translation framework and falls back to Apple FM, so the engine
+        /// called and the engine that wrote can differ. `nil` when no output came back.
+        public let producedBy: String?
 
         public init(engineOutput: String?,
                     outcome: PolishMetrics.Outcome,
                     engineMs: Int,
                     postprocessMs: Int,
                     failureReason: PolishFailureReason? = nil,
-                    rejectedCheck: PolishGuardrail.Check? = nil) {
+                    rejectedCheck: PolishGuardrail.Check? = nil,
+                    producedBy: String? = nil) {
             self.engineOutput = engineOutput
             self.outcome = outcome
             self.engineMs = engineMs
             self.postprocessMs = postprocessMs
             self.failureReason = failureReason
             self.rejectedCheck = rejectedCheck
+            self.producedBy = producedBy
         }
     }
 
@@ -125,9 +131,11 @@ public enum PolishPipeline {
         }
         let engineStart = Date()
         do {
-            let polishedRaw = try await engine.polish(
-                raw: engineInput, targetLanguage: job.promptLanguage, task: job.task
+            let labelled = try await engine.polishLabelled(
+                raw: engineInput, targetLanguage: job.promptLanguage, task: job.task,
+                sourceLanguageCode: job.transcriptLanguageCode
             )
+            let polishedRaw = labelled.text
             let engineMs = Int(Date().timeIntervalSince(engineStart) * 1000)
             let postStart = Date()
             // Restore newlines (+ output-language typography, when there is an
@@ -141,7 +149,8 @@ public enum PolishPipeline {
             } ?? PolishPostpass.decodeNewlines(polishedRaw))
             if Task.isCancelled {
                 let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
-                return Result(engineOutput: polished, outcome: .cancelled, engineMs: engineMs, postprocessMs: postMs)
+                return Result(engineOutput: polished, outcome: .cancelled, engineMs: engineMs, postprocessMs: postMs,
+                              producedBy: labelled.engine)
             }
             // Guardrail baseline is the preprocessed text — what the engine
             // actually saw (modulo the newline marker the post-pass undid).
@@ -187,7 +196,8 @@ public enum PolishPipeline {
                 let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
                 PolishMetrics.logGuardrailRejection(check: refused, task: job.task)
                 return Result(engineOutput: polished, outcome: .rejectedGuardrail,
-                              engineMs: engineMs, postprocessMs: postMs, rejectedCheck: refused)
+                              engineMs: engineMs, postprocessMs: postMs, rejectedCheck: refused,
+                              producedBy: labelled.engine)
             }
             // Layout only, and only after every check has accepted the model's own
             // output (#572): the guardrails judge what the model wrote, and this pass
@@ -197,7 +207,8 @@ public enum PolishPipeline {
                 PolishPostpass.tightenBlocks(polished, whenShorterThan: $0)
             } ?? polished
             let postMs = Int(Date().timeIntervalSince(postStart) * 1000)
-            return Result(engineOutput: delivered, outcome: .success, engineMs: engineMs, postprocessMs: postMs)
+            return Result(engineOutput: delivered, outcome: .success, engineMs: engineMs, postprocessMs: postMs,
+                          producedBy: labelled.engine)
         } catch is CancellationError {
             let engineMs = Int(Date().timeIntervalSince(engineStart) * 1000)
             return Result(engineOutput: nil, outcome: .cancelled, engineMs: engineMs, postprocessMs: 0)
