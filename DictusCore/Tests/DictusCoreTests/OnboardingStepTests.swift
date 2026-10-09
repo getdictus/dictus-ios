@@ -1,5 +1,5 @@
 // DictusCore/Tests/DictusCoreTests/OnboardingStepTests.swift
-// The onboarding order and where an install mid-onboarding resumes (#649).
+// The onboarding order and where an install mid-onboarding resumes (#649, #675).
 import XCTest
 @testable import DictusCore
 
@@ -22,25 +22,86 @@ final class OnboardingStepTests: XCTestCase {
         defaults.removeObject(forKey: SharedKeys.onboardingCurrentPage)
     }
 
-    func testOrderPutsLanguageBeforeMicrophoneAndHasNoPolishStep() {
+    // MARK: - The order (#675)
+
+    func testOrderPutsTheMicrophoneRightBeforeTheFirstDictation() {
         XCTAssertEqual(OnboardingStep.allCases, [
-            .welcome, .language, .microphone, .keyboardSetup, .modelPreparation, .firstDictation
+            .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .completion
         ])
+        XCTAssertEqual(OnboardingStep.microphone.next, .firstDictation)
         XCTAssertFalse(OnboardingStep.allCases.map(\.rawValue).contains { $0.lowercased().contains("polish") })
     }
 
-    func testNextWalksTheFlowAndEndsAfterTheFirstDictation() {
+    func testNextWalksTheFlowAndEndsAfterTheCompletion() {
         XCTAssertEqual(OnboardingStep.welcome.next, .language)
+        XCTAssertEqual(OnboardingStep.language.next, .keyboardSetup)
         XCTAssertEqual(OnboardingStep.keyboardSetup.next, .modelPreparation)
-        XCTAssertNil(OnboardingStep.firstDictation.next)
+        XCTAssertEqual(OnboardingStep.modelPreparation.next, .microphone)
+        XCTAssertEqual(OnboardingStep.firstDictation.next, .completion)
+        XCTAssertNil(OnboardingStep.completion.next)
     }
+
+    // MARK: - Skips
+
+    func testAReadyModelSkipsThePreparation() {
+        XCTAssertEqual(OnboardingStep.keyboardSetup.next(skipping: [.modelPreparation]), .microphone)
+    }
+
+    func testAGrantedMicrophoneSkipsItsStep() {
+        XCTAssertEqual(OnboardingStep.modelPreparation.next(skipping: [.microphone]), .firstDictation)
+    }
+
+    func testBothSkipsChain() {
+        XCTAssertEqual(
+            OnboardingStep.keyboardSetup.next(skipping: [.modelPreparation, .microphone]),
+            .firstDictation
+        )
+    }
+
+    func testOnlyTheWaitAndTheMicrophoneCanBeSkipped() {
+        XCTAssertEqual(
+            OnboardingStep.allCases.filter(\.isSkippedWhenSatisfied),
+            [.modelPreparation, .microphone]
+        )
+        // A step outside that list is shown even when the caller calls it satisfied.
+        XCTAssertEqual(OnboardingStep.language.next(skipping: [.keyboardSetup]), .keyboardSetup)
+        XCTAssertEqual(OnboardingStep.microphone.next(skipping: [.firstDictation]), .firstDictation)
+    }
+
+    // MARK: - Shell
+
+    func testProgressBarCoversEveryStepBetweenTheIntroAndTheCompletion() {
+        XCTAssertEqual(OnboardingStep.progressSteps, [
+            .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation
+        ])
+        XCTAssertNil(OnboardingStep.welcome.progressIndex)
+        XCTAssertNil(OnboardingStep.completion.progressIndex)
+        XCTAssertEqual(OnboardingStep.language.progressIndex, 0)
+        XCTAssertEqual(OnboardingStep.microphone.progressIndex, 3)
+        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex, 4)
+    }
+
+    func testOnlyTheFirstDictationOffersSkip() {
+        XCTAssertEqual(OnboardingStep.allCases.filter(\.isSkippable), [.firstDictation])
+    }
+
+    // MARK: - Persistence
 
     func testFreshInstallStartsAtWelcome() {
         XCTAssertEqual(OnboardingStep.current(), .welcome)
     }
 
-    func testSavedStepIsRestored() {
+    func testEveryStepSurvivesAKill() {
+        // What `OnboardingView` does on every step change, then what a relaunch reads.
+        for step in OnboardingStep.allCases {
+            OnboardingStep.save(step)
+            XCTAssertEqual(OnboardingStep.current(), step, "\(step)")
+        }
+    }
+
+    func testFullAccessKillOnTheKeyboardStepResumesThere() {
         OnboardingStep.save(.keyboardSetup)
+        XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), "keyboardSetup")
         XCTAssertEqual(OnboardingStep.current(), .keyboardSetup)
     }
 
@@ -49,7 +110,41 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.current(), .welcome)
     }
 
-    // MARK: - The old page index
+    // MARK: - The #649 order (before #675)
+
+    func testRawValuesWrittenBeforeTheReorderKeepTheirStep() {
+        // The five names the #649 build wrote that still exist mean the same step.
+        for raw in ["welcome", "language", "keyboardSetup", "modelPreparation", "firstDictation"] {
+            defaults.set(raw, forKey: SharedKeys.onboardingStep)
+            XCTAssertEqual(OnboardingStep.current().rawValue, raw, raw)
+        }
+    }
+
+    func testTheOldMicrophoneStepResumesAtTheKeyboard() {
+        // Before #675 the microphone came right after the language screen, so a user
+        // stored there had not added the keyboard yet.
+        defaults.set(OnboardingStep.legacyMicrophoneRawValue, forKey: SharedKeys.onboardingStep)
+        XCTAssertEqual(OnboardingStep.current(), .keyboardSetup)
+        XCTAssertEqual(
+            defaults.string(forKey: SharedKeys.onboardingStep), "keyboardSetup",
+            "the old name is rewritten, so the migration does not run again"
+        )
+    }
+
+    func testTheNewMicrophoneStepIsNotMistakenForTheOldOne() {
+        OnboardingStep.save(.microphone)
+        XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), "microphonePrompt")
+        XCTAssertEqual(OnboardingStep.current(), .microphone)
+    }
+
+    func testResumedFromStoredRawValue() {
+        XCTAssertEqual(OnboardingStep.resumed(fromStoredRawValue: "microphone"), .keyboardSetup)
+        XCTAssertEqual(OnboardingStep.resumed(fromStoredRawValue: "microphonePrompt"), .microphone)
+        XCTAssertEqual(OnboardingStep.resumed(fromStoredRawValue: "completion"), .completion)
+        XCTAssertNil(OnboardingStep.resumed(fromStoredRawValue: "polish"))
+    }
+
+    // MARK: - The old page index (before #649)
 
     func testLegacyIndexMapping() {
         XCTAssertEqual(OnboardingStep.migrated(fromLegacyPageIndex: 0), .welcome)

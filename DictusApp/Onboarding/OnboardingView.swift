@@ -1,12 +1,14 @@
 // DictusApp/Onboarding/OnboardingView.swift
 // Container for the onboarding flow with programmatic-only step advancement.
 import SwiftUI
+import AVFoundation
 import DictusCore
 
 /// Onboarding flow presented as a fullScreenCover on first launch.
-/// Steps (#649): Welcome, Language, Microphone, Keyboard setup, Model preparation (only
-/// while the model is still downloading or compiling), first dictation through the globe
-/// key. The order is `OnboardingStep.allCases`.
+/// Steps (#649, #675): intro, language, keyboard setup, model preparation (only while the
+/// model is still downloading or compiling), microphone (only while not yet granted),
+/// first dictation through the globe key, completion. The order is
+/// `OnboardingStep.allCases`; which steps are passed over is `OnboardingStep.next(skipping:)`.
 ///
 /// WHY switch/case instead of TabView:
 /// TabView(.page) allows the user to swipe between pages, which means they could
@@ -17,7 +19,7 @@ import DictusCore
 ///
 /// WHY @Binding isComplete:
 /// The parent (DictusApp.swift) owns `hasCompletedOnboarding` via @AppStorage.
-/// When the last page (GlobeKeyTutorialPage) finishes, it sets isComplete = true,
+/// When the last page (the completion step) finishes, it sets isComplete = true,
 /// which writes to App Group UserDefaults and dismisses the fullScreenCover.
 ///
 /// WHY THE POLISH PAGE IS GONE (#649 decision 2): polish adds seconds to every dictation,
@@ -49,6 +51,9 @@ struct OnboardingView: View {
     /// the preparation step is shown at all.
     @StateObject private var modelManager = ModelManager()
 
+    /// Reset when the first dictation is left, so Home does not open on its transcription.
+    @EnvironmentObject private var coordinator: DictationCoordinator
+
     var body: some View {
         ZStack {
             Color.dictusBackground
@@ -65,8 +70,6 @@ struct OnboardingView: View {
                         WelcomePage(onNext: advance)
                     case .language:
                         LanguageSetupPage(onConfirm: confirmLanguage)
-                    case .microphone:
-                        MicPermissionPage(onNext: advance)
                     case .keyboardSetup:
                         KeyboardSetupPage(onNext: advance)
                     case .modelPreparation:
@@ -75,8 +78,12 @@ struct OnboardingView: View {
                             modelIdentifier: onboardingModel,
                             onNext: advance
                         )
+                    case .microphone:
+                        MicPermissionPage(onNext: advance)
                     case .firstDictation:
-                        GlobeKeyTutorialPage(onComplete: finish)
+                        GlobeKeyTutorialPage(onComplete: leaveFirstDictation)
+                    case .completion:
+                        OnboardingSuccessView(onComplete: finish)
                     }
                 }
                 // Slide transition: new page slides in from trailing edge,
@@ -148,14 +155,28 @@ struct OnboardingView: View {
     // MARK: - Navigation
 
     private func advance() {
-        guard var next = step.next else { return }
-        // The preparation step is shown only while there is something to wait for
-        // (#649 decision 1.7). A download that finished while the user was in Settings
-        // goes straight to the first dictation.
-        if next == .modelPreparation, isReady(onboardingModel), let after = next.next {
-            next = after
-        }
+        guard let next = step.next(skipping: satisfiedSteps) else { return }
         go(to: next)
+    }
+
+    /// The steps with nothing left to ask, which `OnboardingStep.next(skipping:)` passes
+    /// over (#675). Which steps may be passed over is DictusCore's rule; this only reads
+    /// the two facts it needs from the app.
+    ///
+    /// - The preparation: shown only while there is something to wait for (#649 decision
+    ///   1.6). A download that finished while the user was in Settings goes straight on.
+    /// - The microphone: already granted on a second run, or by an install that went
+    ///   through the order before #675, where the microphone came first. A denied
+    ///   microphone is still shown, because that page says where to turn it back on.
+    private var satisfiedSteps: Set<OnboardingStep> {
+        var satisfied: Set<OnboardingStep> = []
+        if isReady(onboardingModel) {
+            satisfied.insert(.modelPreparation)
+        }
+        if AVAudioSession.sharedInstance().recordPermission == .granted {
+            satisfied.insert(.microphone)
+        }
+        return satisfied
     }
 
     private func go(to newStep: OnboardingStep) {
@@ -197,6 +218,20 @@ struct OnboardingView: View {
             // the preparation page shows them with a retry. Nothing to do here.
             try? await modelManager.downloadModel(identifier)
         }
+    }
+
+    /// Leaves the first dictation, whether it succeeded or was skipped, for the completion
+    /// screen (#675: completion is a step of its own now, persisted like the others).
+    ///
+    /// WHY reset the coordinator here:
+    /// If the user dictated during the first dictation, the DictationCoordinator holds the
+    /// last transcription in `lastResult`. Without clearing it, HomeView displays a "last
+    /// transcription card" as soon as the user lands on the main screen, which is not the
+    /// expected fresh Home state.
+    private func leaveFirstDictation() {
+        coordinator.lastResult = nil
+        coordinator.resetStatus()
+        advance()
     }
 
     private func finish() {

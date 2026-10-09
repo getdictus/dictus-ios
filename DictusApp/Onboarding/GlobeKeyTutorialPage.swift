@@ -19,18 +19,12 @@ import DictusCore
 /// State 2: Once switch detected, animation disappears → text field visible
 ///          with keyboard still open. User dictates → auto-advance to success.
 struct GlobeKeyTutorialPage: View {
+    /// Called when the page is done, by a dictation or by Skip. `OnboardingView` resets the
+    /// dictation coordinator and moves on to the completion step (#675).
     let onComplete: () -> Void
-
-    /// WHY @EnvironmentObject coordinator:
-    /// The user may dictate during this tutorial via the Dictus keyboard, which
-    /// goes through DictationCoordinator. If we don't reset the coordinator before
-    /// completing onboarding, HomeView will show the "last transcription card"
-    /// from this test dictation — which is not the desired landing screen.
-    @EnvironmentObject var coordinator: DictationCoordinator
 
     @State private var dictusKeyboardActive = false
     @State private var textFieldContent = ""
-    @State private var showSuccess = false
 
     /// Guard against multiple auto-advance triggers.
     @State private var hasAutoAdvanced = false
@@ -136,15 +130,6 @@ struct GlobeKeyTutorialPage: View {
                 Spacer(minLength: 0)
             }
         }
-        .fullScreenCover(isPresented: $showSuccess) {
-            // WHY fullScreenCover instead of ZStack overlay:
-            // When OnboardingSuccessView was overlaid inside this page's ZStack,
-            // it inherited the constrained layout from OnboardingView's VStack
-            // (which reserves space for the step indicator at the bottom). This
-            // made the success button's horizontal padding not render correctly.
-            // Using fullScreenCover guarantees a proper full-screen context.
-            OnboardingSuccessView(onComplete: finishOnboarding)
-        }
         .animation(.easeInOut(duration: 0.3), value: dictusKeyboardActive)
         .onChange(of: textFieldContent) { newValue in
             // Auto-advance when the user has dictated enough text.
@@ -164,30 +149,17 @@ struct GlobeKeyTutorialPage: View {
     // MARK: - Navigation
 
     private func advanceToSuccess() {
-        // Dismiss keyboard before showing success screen
+        // Dismiss the keyboard before the completion step slides in.
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            showSuccess = true
+            onComplete()
         }
     }
 
     private func skipTutorial() {
         PersistentLog.log(.onboardingGlobeTutorialSkipped)
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        finishOnboarding()
-    }
-
-    /// Final cleanup before dismissing onboarding.
-    ///
-    /// WHY reset the coordinator here:
-    /// If the user dictated during the globe key tutorial, the DictationCoordinator
-    /// holds the last transcription in `lastResult`. Without clearing it, HomeView
-    /// displays a "last transcription card" as soon as the user lands on the main
-    /// screen — which is not the expected fresh Home state.
-    private func finishOnboarding() {
-        coordinator.lastResult = nil
-        coordinator.resetStatus()
         onComplete()
     }
 }
