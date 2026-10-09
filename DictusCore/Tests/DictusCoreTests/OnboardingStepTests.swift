@@ -26,7 +26,8 @@ final class OnboardingStepTests: XCTestCase {
 
     func testOrderPutsTheMicrophoneRightBeforeTheFirstDictation() {
         XCTAssertEqual(OnboardingStep.allCases, [
-            .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .completion
+            .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
+            .firstDictation, .completion
         ])
         XCTAssertEqual(OnboardingStep.microphone.next, .firstDictation)
         XCTAssertFalse(OnboardingStep.allCases.map(\.rawValue).contains { $0.lowercased().contains("polish") })
@@ -35,7 +36,8 @@ final class OnboardingStepTests: XCTestCase {
     func testNextWalksTheFlowAndEndsAfterTheCompletion() {
         XCTAssertEqual(OnboardingStep.welcome.next, .language)
         XCTAssertEqual(OnboardingStep.language.next, .keyboardSetup)
-        XCTAssertEqual(OnboardingStep.keyboardSetup.next, .modelPreparation)
+        XCTAssertEqual(OnboardingStep.keyboardSetup.next, .appleIntelligence)
+        XCTAssertEqual(OnboardingStep.appleIntelligence.next, .modelPreparation)
         XCTAssertEqual(OnboardingStep.modelPreparation.next, .microphone)
         XCTAssertEqual(OnboardingStep.firstDictation.next, .completion)
         XCTAssertNil(OnboardingStep.completion.next)
@@ -44,7 +46,24 @@ final class OnboardingStepTests: XCTestCase {
     // MARK: - Skips
 
     func testAReadyModelSkipsThePreparation() {
-        XCTAssertEqual(OnboardingStep.keyboardSetup.next(skipping: [.modelPreparation]), .microphone)
+        XCTAssertEqual(OnboardingStep.appleIntelligence.next(skipping: [.modelPreparation]), .microphone)
+    }
+
+    /// #683, #649 decision 1.4: Apple Intelligence comes right after the keyboard, and
+    /// only when it has something to ask.
+    func testAppleIntelligenceComesRightAfterTheKeyboardWhenNeeded() {
+        XCTAssertEqual(OnboardingStep.keyboardSetup.next(skipping: []), .appleIntelligence)
+        XCTAssertEqual(OnboardingStep.keyboardSetup.next(skipping: [.appleIntelligence]), .modelPreparation)
+        XCTAssertEqual(
+            OnboardingStep.keyboardSetup.next(skipping: [.appleIntelligence, .modelPreparation]),
+            .microphone
+        )
+    }
+
+    func testTheAppleIntelligenceStepIsPersistedUnderItsOwnName() {
+        OnboardingStep.save(.appleIntelligence)
+        XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), "appleIntelligence")
+        XCTAssertEqual(OnboardingStep.current(), .appleIntelligence)
     }
 
     func testAGrantedMicrophoneSkipsItsStep() {
@@ -53,15 +72,15 @@ final class OnboardingStepTests: XCTestCase {
 
     func testBothSkipsChain() {
         XCTAssertEqual(
-            OnboardingStep.keyboardSetup.next(skipping: [.modelPreparation, .microphone]),
+            OnboardingStep.keyboardSetup.next(skipping: [.appleIntelligence, .modelPreparation, .microphone]),
             .firstDictation
         )
     }
 
-    func testOnlyTheWaitAndTheMicrophoneCanBeSkipped() {
+    func testOnlyAppleIntelligenceTheWaitAndTheMicrophoneCanBeSkipped() {
         XCTAssertEqual(
             OnboardingStep.allCases.filter(\.isSkippedWhenSatisfied),
-            [.modelPreparation, .microphone]
+            [.appleIntelligence, .modelPreparation, .microphone]
         )
         // A step outside that list is shown even when the caller calls it satisfied.
         XCTAssertEqual(OnboardingStep.language.next(skipping: [.keyboardSetup]), .keyboardSetup)
@@ -72,13 +91,14 @@ final class OnboardingStepTests: XCTestCase {
 
     func testProgressBarCoversEveryStepBetweenTheIntroAndTheCompletion() {
         XCTAssertEqual(OnboardingStep.progressSteps, [
-            .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation
+            .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone, .firstDictation
         ])
         XCTAssertNil(OnboardingStep.welcome.progressIndex)
         XCTAssertNil(OnboardingStep.completion.progressIndex)
         XCTAssertEqual(OnboardingStep.language.progressIndex, 0)
-        XCTAssertEqual(OnboardingStep.microphone.progressIndex, 3)
-        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex, 4)
+        XCTAssertEqual(OnboardingStep.appleIntelligence.progressIndex, 2)
+        XCTAssertEqual(OnboardingStep.microphone.progressIndex, 4)
+        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex, 5)
     }
 
     func testOnlyTheFirstDictationOffersSkip() {

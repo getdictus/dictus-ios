@@ -325,6 +325,13 @@ public enum LogEvent: Sendable {
     case onboardingDictusKeyboardActivated
     case onboardingGlobeTutorialTextDetected
     case onboardingGlobeTutorialSkipped
+    /// The Apple Intelligence step read the availability (#683). `trigger` is `appear` or
+    /// `return` (the app came back to the foreground, typically from Settings); `state`
+    /// is `PolishAvailabilityState`'s description, so a device test can tell whether
+    /// turning Apple Intelligence on moved it, and to what.
+    case onboardingAppleIntelligenceChecked(trigger: String, state: String)
+    /// The user left the Apple Intelligence step with *Later* (#683).
+    case onboardingAppleIntelligenceDeferred(state: String)
 
     // MARK: Live Activity
     case liveActivityStarted(id: String)
@@ -571,7 +578,8 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
-             .onboardingGlobeTutorialSkipped:
+             .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
+             .onboardingAppleIntelligenceDeferred:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
              .coldStartStranded:
@@ -634,7 +642,8 @@ public enum LogEvent: Sendable {
         // Info (normal operations: starts, completes, selections, configs)
         case .onboardingKeyboardDetected,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
-             .onboardingGlobeTutorialSkipped,
+             .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
+             .onboardingAppleIntelligenceDeferred,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
              .transcriptionStarted, .transcriptionCompleted,
@@ -862,6 +871,10 @@ public enum LogEvent: Sendable {
         case .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped:
             return ""
+        case .onboardingAppleIntelligenceChecked(let trigger, let state):
+            return "trigger=\(trigger) state=\(state)"
+        case .onboardingAppleIntelligenceDeferred(let state):
+            return "state=\(state)"
 
         // Live Activity
         case .liveActivityStarted(let id):
@@ -1108,6 +1121,8 @@ extension LogEvent {
         case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
         case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
         case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
+        case .onboardingAppleIntelligenceChecked: return "onboardingAppleIntelligenceChecked"
+        case .onboardingAppleIntelligenceDeferred: return "onboardingAppleIntelligenceDeferred"
         case .liveActivityStarted: return "liveActivityStarted"
         case .liveActivityTransition: return "liveActivityTransition"
         case .liveActivityFailed: return "liveActivityFailed"

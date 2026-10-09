@@ -18,11 +18,12 @@ import Foundation
 /// WHY in DictusCore: the order, the skips and the migrations are rules, and the app
 /// target has no test bundle.
 ///
-/// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, the
-/// wait for the model, the microphone, the first dictation, the completion screen. The
+/// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, Apple
+/// Intelligence (#683, only when it is not ready), the wait for the model, the microphone,
+/// the first dictation, the completion screen. The
 /// microphone sits right before the first dictation because it is the first step that
 /// uses it, and its pre-permission screen keeps the system popup out of the recording.
-/// Steps the later #649 sub-issues add (Apple Intelligence, the feature scenes, the Smart
+/// Steps the later #649 sub-issues add (the feature scenes, the Smart
 /// Mode pick, the Dynamic Island tutorial) slot in as new cases with new raw values; the
 /// existing raw values keep their meaning.
 public enum OnboardingStep: String, CaseIterable, Sendable {
@@ -33,6 +34,10 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     case language
     /// Adding the keyboard and Full Access in iOS Settings. The step iOS kills the app on.
     case keyboardSetup
+    /// Turning on Apple Intelligence (#683, #649 decision 7). Shown only on a capable
+    /// iPhone where it is not ready (`AppleIntelligenceOnboarding.isStepNeeded`); skipped
+    /// otherwise.
+    case appleIntelligence
     /// Shown only while the model is still downloading or compiling; skipped otherwise.
     case modelPreparation
     /// The pre-permission screen, then the system microphone prompt.
@@ -78,12 +83,14 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// - `modelPreparation`: there is nothing to wait for once the model is ready (#649
     ///   decision 1.6). A download that finished while the user was in Settings goes
     ///   straight on.
+    /// - `appleIntelligence`: nothing to ask when Apple Intelligence is ready, or when the
+    ///   device can never run it (#683).
     /// - `microphone`: a microphone already granted (a second run of the onboarding, or an
     ///   install that went through the old order, where the microphone came first) has
     ///   nothing to ask. A denied one is still shown: the page says where to turn it on.
     public var isSkippedWhenSatisfied: Bool {
         switch self {
-        case .modelPreparation, .microphone:
+        case .appleIntelligence, .modelPreparation, .microphone:
             return true
         case .welcome, .language, .keyboardSetup, .firstDictation, .completion:
             return false
@@ -105,7 +112,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .welcome, .completion:
             return false
-        case .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation:
+        case .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
+             .firstDictation:
             return true
         }
     }
@@ -127,7 +135,9 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// Whether the shell offers the discreet Skip in the top-right slot.
     ///
     /// Only the first dictation today: everything before it sets up something the
-    /// keyboard needs, and the completion screen is its own way out.
+    /// keyboard needs, and the completion screen is its own way out. The Apple
+    /// Intelligence step can always be skipped too (#683), but by its own *Later* button,
+    /// drawn as large as the main one, not by this discreet slot.
     public var isSkippable: Bool {
         self == .firstDictation
     }
