@@ -26,7 +26,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 8. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
 9. ~~#643 — App Store listing for 2.0.0~~ — merged in PR #645 (en, fr, de, es; ASC upload at submission). Remaining French UI follow-ups: ~~#664~~ (merged in PR #668), ~~#665~~ (merged in PR #671)
 10. ~~#673 — download screen: drop the two phrases that promise the end ("Almost there" at 1 %)~~ — merged in PR #674
-11. #533 — countdown under the model preparation (compile / load), not a second bar. `ready-for-agent`
+11. ~~#533 — countdown under the model preparation (compile / load), not a second bar~~ — merged in PR #687
 12. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points
 13. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
