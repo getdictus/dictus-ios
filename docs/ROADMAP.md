@@ -17,7 +17,7 @@ Last reviewed: 2026-10-09.
 Take the first line that is not struck through. Status (who is on what): [Project board](https://github.com/orgs/getdictus/projects/2).
 
 1. ~~#587 — Smart Mode prompt campaign~~ — last thread #592 (warn on an ungrounded name) parked in 2.1, near-spelling tolerance covers its case
-2. ~~#627 — run a voice note's Smart Mode in the background~~ — merged in PR #689 (probe 19/19, no `rateLimited`); next #628, notes over ~4 min, in 2.0.0 only if reliable and short
+2. ~~#627 — run a voice note's Smart Mode in the background~~ — merged in PR #689 (probe 19/19, no `rateLimited`); #628 (notes over ~4 min) moved to 2.1
 3. ~~#637 — voice-note transcripts in the keyboard~~ — merged in PR #638; #639 (tap ☰ for notes, keep them 15 min) merged in PR #641; then #640 (research: quote a passage)
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; open until Pierre's verdict in real use
 5. ~~#593 — reverse trial: Pro free for a fixed period, then the paywall~~ — merged in PR #595; two device checks left (iPad, EN strings)
@@ -45,6 +45,7 @@ Milestone `2.1 — after the Pro launch`, plus the unmilestoned open issues. Pic
 - #570 — meaning guardrail for the rewriting Smart Modes. Moved out of the 2.0.0 gate on Pierre's real-use verdict.
 - #512 — analyze the history to suggest vocabulary
 - #622 — translation targets from Apple FM's languages, not the keyboard's
+- #628 — Smart Modes on voice notes over ~4 min: per-mode output reserve first, then multi-call
 - #269 — custom Smart Modes
 
 ## Settled — do not reopen
