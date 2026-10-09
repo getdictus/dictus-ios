@@ -101,6 +101,9 @@ public final class AppleFoundationModelsPolishEngine: PolishEngineProtocol, Send
         // unstructured `Task`, so the drop cannot outlive the call that owns it.
         // That part is ordering; the identity check above is what closes the
         // window, and neither substitutes for the other.
+        // Counted before the call, so a refusal is counted too (#627): it is the
+        // budget being asked that the voice note probe reads.
+        AppleFMCallCounter.recordCall()
         do {
             let response = try await session.respond(to: prompt)
             await cache.dropIfStillCurrent(key, session: session)

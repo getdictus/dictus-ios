@@ -274,12 +274,14 @@ public final class PolishService {
                 reason: "\(Self.tooFewListItemsReason) floorInserted elapsedMs=\(Int(elapsed * 1000))",
                 disarmed: false
             ))
-            return PolishOutcome(degradedTo: floor, failure: failure)
+            return PolishOutcome(degradedTo: floor, failure: failure, engineMs: outcome.engineMs)
         }
         // `onEngineWillRun` is not passed on: the stage it announces was announced for
         // the mode's call, and the Normal polish that replaces it is the same wait.
         let normal = await polishDispatched(call, smartMode: nil, onEngineWillRun: nil)
-        return PolishOutcome(degradedTo: normal.text ?? floor, failure: failure)
+        // The mode's own engine time, plus the Normal call's: both ran for this outcome.
+        let engineMs = (outcome.engineMs ?? 0) + (normal.engineMs ?? 0)
+        return PolishOutcome(degradedTo: normal.text ?? floor, failure: failure, engineMs: engineMs)
     }
 
     /// Everything `polish` did before #573's output check, unchanged: the toggle gate,
@@ -444,7 +446,7 @@ public final class PolishService {
             // A one-item `Liste` output declined by #573's check never reaches this
             // line: the path returns before it, so it is not counted as a use.
             if job.task.smartMode != nil { ProTrialUsage.recordSmartModeUse() }
-            return PolishOutcome(text: returned ?? raw)
+            return PolishOutcome(text: returned ?? raw, engineMs: bundle.engineMs)
         }
         let reason = bundle.failureReason?.slug ?? "-"
         let degraded = PolishPipeline.degradesToFloor(mode, outcome: bundle.outcome)
@@ -478,8 +480,8 @@ public final class PolishService {
             reason: degraded ? "\(reason)|degraded" : reason,
             check: failure.guardrailCheck ?? "-"
         ))
-        guard degraded, let returned else { return PolishOutcome(failure: failure) }
-        return PolishOutcome(degradedTo: returned, failure: failure)
+        guard degraded, let returned else { return PolishOutcome(failure: failure, engineMs: bundle.engineMs) }
+        return PolishOutcome(degradedTo: returned, failure: failure, engineMs: bundle.engineMs)
     }
 
     // MARK: - Per-language path
@@ -902,7 +904,7 @@ public final class PolishService {
                 decline: PolishMetrics.SmartModeLengthSkip(
                     mode: mode.id, characters: raw.count, listItems: items, minimumListItems: minimum
                 ),
-                declinedOutcome: PolishOutcome(degradedTo: floor, failure: failure)
+                declinedOutcome: PolishOutcome(degradedTo: floor, failure: failure, engineMs: bundle.engineMs)
             )
         }
     }
