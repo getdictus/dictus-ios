@@ -60,6 +60,12 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
+                // The shell's top row (#675): progress bar and Skip. Outside the sliding
+                // page so it stays put while the pages change under it, and only its
+                // segments animate.
+                OnboardingTopBar(step: step, onSkip: step.isSkippable ? skip : nil)
+                    .padding(.top, 8)
+
                 // Current page content — only one page visible at a time
                 // WHY Group instead of ZStack: Group avoids stacking every page
                 // on top of each other (unnecessary view hierarchy). Only the
@@ -86,6 +92,7 @@ struct OnboardingView: View {
                         OnboardingSuccessView(onComplete: finish)
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 // Slide transition: new page slides in from trailing edge,
                 // old page slides out to leading edge — standard forward navigation feel.
                 .transition(.asymmetric(
@@ -93,10 +100,6 @@ struct OnboardingView: View {
                     removal: .move(edge: .leading)
                 ))
                 .id(step) // Force SwiftUI to treat each page as a unique view for transitions
-
-                // Step indicator dots at the bottom
-                stepIndicator
-                    .padding(.bottom, 24)
             }
         }
         // Prevent interactive dismiss (swipe down) on the fullScreenCover
@@ -104,33 +107,20 @@ struct OnboardingView: View {
         .animation(.easeInOut(duration: 0.3), value: step)
     }
 
-    // MARK: - Step Indicator
+    // MARK: - Skip
 
-    /// Row of dots showing onboarding progress.
+    /// The shell's Skip, on the steps that offer it (`OnboardingStep.isSkippable`).
     ///
-    /// WHY custom dots instead of TabView's built-in page indicator:
-    /// Since we replaced TabView with manual switch/case, we need our own dots.
-    /// Filled dot = current step, half-filled = behind the user, outlined = ahead.
-    /// The preparation step keeps its dot even when it is skipped, so the row does not
-    /// change length depending on how fast the download was.
-    private var stepIndicator: some View {
-        HStack(spacing: 8) {
-            ForEach(OnboardingStep.allCases, id: \.self) { dotStep in
-                Circle()
-                    .fill(dotColor(for: dotStep))
-                    .frame(width: 8, height: 8)
-            }
-        }
-        .padding(.top, 16)
-    }
-
-    private func dotColor(for dotStep: OnboardingStep) -> Color {
-        if dotStep == step {
-            return .dictusAccent
-        } else if dotStep.position < step.position {
-            return .dictusAccent.opacity(0.5)
-        } else {
-            return .gray.opacity(0.3)
+    /// Only the first dictation today: skipping it closes the keyboard and goes to the
+    /// completion screen, as a finished dictation does.
+    private func skip() {
+        switch step {
+        case .firstDictation:
+            PersistentLog.log(.onboardingGlobeTutorialSkipped)
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            leaveFirstDictation()
+        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .completion:
+            advance()
         }
     }
 
@@ -173,7 +163,7 @@ struct OnboardingView: View {
         if isReady(onboardingModel) {
             satisfied.insert(.modelPreparation)
         }
-        if AVAudioSession.sharedInstance().recordPermission == .granted {
+        if AVAudioApplication.shared.recordPermission == .granted {
             satisfied.insert(.microphone)
         }
         return satisfied

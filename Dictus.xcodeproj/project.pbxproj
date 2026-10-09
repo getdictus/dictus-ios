@@ -85,6 +85,7 @@
 		AA000092 /* DiagnosticDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100092 /* DiagnosticDetailView.swift */; };
 		AA0000A0 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A0 /* OnboardingView.swift */; };
 		AA0000A1 /* WelcomePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A1 /* WelcomePage.swift */; };
+		AA000675 /* OnboardingShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100675 /* OnboardingShell.swift */; };
 		AA0000A2 /* MicPermissionPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A2 /* MicPermissionPage.swift */; };
 		AA0000A3 /* KeyboardSetupPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A3 /* KeyboardSetupPage.swift */; };
 		AA0000A4 /* ModelDownloadPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A4 /* ModelDownloadPage.swift */; };
@@ -293,6 +294,7 @@
 		AA100092 /* DiagnosticDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticDetailView.swift; sourceTree = "<group>"; };
 		AA1000A0 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		AA1000A1 /* WelcomePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomePage.swift; sourceTree = "<group>"; };
+		AA100675 /* OnboardingShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingShell.swift; sourceTree = "<group>"; };
 		AA1000A2 /* MicPermissionPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicPermissionPage.swift; sourceTree = "<group>"; };
 		AA1000A3 /* KeyboardSetupPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupPage.swift; sourceTree = "<group>"; };
 		AA1000A4 /* ModelDownloadPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadPage.swift; sourceTree = "<group>"; };
@@ -694,6 +696,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1000A0 /* OnboardingView.swift */,
+				AA100675 /* OnboardingShell.swift */,
 				AA1000A1 /* WelcomePage.swift */,
 				AA1000A2 /* MicPermissionPage.swift */,
 				AA1000A3 /* KeyboardSetupPage.swift */,
@@ -1205,6 +1208,7 @@
 				AA000091 /* HomeView.swift in Sources */,
 				AA000092 /* DiagnosticDetailView.swift in Sources */,
 				AA0000A0 /* OnboardingView.swift in Sources */,
+				AA000675 /* OnboardingShell.swift in Sources */,
 				AA0000A1 /* WelcomePage.swift in Sources */,
 				AA0000A2 /* MicPermissionPage.swift in Sources */,
 				AA0000A3 /* KeyboardSetupPage.swift in Sources */,

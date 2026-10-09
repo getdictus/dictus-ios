@@ -1,5 +1,5 @@
 // DictusApp/Onboarding/GlobeKeyTutorialPage.swift
-// Step 6 of onboarding: interactive globe key tutorial + dictation test.
+// Onboarding step: interactive globe key tutorial + first dictation.
 import SwiftUI
 import UIKit
 import DictusCore
@@ -19,8 +19,9 @@ import DictusCore
 /// State 2: Once switch detected, animation disappears → text field visible
 ///          with keyboard still open. User dictates → auto-advance to success.
 struct GlobeKeyTutorialPage: View {
-    /// Called when the page is done, by a dictation or by Skip. `OnboardingView` resets the
-    /// dictation coordinator and moves on to the completion step (#675).
+    /// Called once the field holds a dictation (or, pre-A14, typed words). `OnboardingView`
+    /// resets the dictation coordinator and moves on to the completion step (#675); its
+    /// shell's Skip does the same without a dictation.
     let onComplete: () -> Void
 
     @State private var dictusKeyboardActive = false
@@ -43,92 +44,67 @@ struct GlobeKeyTutorialPage: View {
     private let keyboardCanDictate = DeviceCapabilities.current().supportsKeyboardDictation
 
     var body: some View {
-        ZStack {
-            Color.dictusBackground
-                .ignoresSafeArea()
+        // WHY ONLY THE FRAME CHANGED (#675): the first dictation is #678's to redraw in
+        // three states. Here it wears the shell: the large title, the instruction as its
+        // subtitle, the text field on a card. Skip is the shell's (`OnboardingTopBar`), and
+        // the mechanics below are untouched.
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeader(title: Text("Try it now"), subtitle: instruction)
+                .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                .padding(.top, OnboardingMetrics.titleTopPadding)
+                .padding(.bottom, 20)
 
-            VStack(spacing: 0) {
-                // Top bar with Skip button
-                HStack {
-                    Spacer()
-                    Button(action: skipTutorial) {
-                        Text("Skip")
-                            .font(.dictusBody)
-                            .foregroundColor(.dictusAccent)
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 8)
+            if dictusKeyboardActive {
+                // State 2: Text field with keyboard open
+                // WHY frame minHeight + maxHeight: The UITextView is multi-line
+                // and needs a bounded frame so SwiftUI can lay it out correctly.
+                // minHeight 140 gives room for ~5 lines of text, and the text view
+                // scrolls internally if the dictation is longer than that.
+                KeyboardDetectingTextField(
+                    text: $textFieldContent,
+                    placeholder: keyboardCanDictate
+                        ? String(localized: "Say something!")
+                        : String(localized: "Type something!"),
+                    autoFocus: true,
+                    onKeyboardChange: { _ in }
+                )
+                .frame(minHeight: 140, maxHeight: 220)
+                .padding(16)
+                .onboardingCard(cornerRadius: 20)
+                .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                .transition(.opacity)
+            } else {
+                // State 1: Animated keyboard switch illustration
 
-                // Title — changes based on state
-                Group {
-                    if !dictusKeyboardActive {
-                        Text("Hold \(Image(systemName: "globe")) and select Dictus")
-                    } else if keyboardCanDictate {
-                        Text("Tap the mic and start dictating")
-                    } else {
-                        Text("Type a few words to try the keyboard")
-                    }
-                }
-                .font(.dictusHeading)
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
-                .padding(.top, 16)
-                .padding(.bottom, 12)
+                Spacer()
 
-                if dictusKeyboardActive {
-                    // State 2: Text field with keyboard open
-                    // WHY frame minHeight + maxHeight: The UITextView is multi-line
-                    // and needs a bounded frame so SwiftUI can lay it out correctly.
-                    // minHeight 140 gives room for ~5 lines of text, and the text view
-                    // scrolls internally if the dictation is longer than that.
-                    KeyboardDetectingTextField(
-                        text: $textFieldContent,
-                        placeholder: keyboardCanDictate
-                            ? String(localized: "Say something!")
-                            : String(localized: "Type something!"),
-                        autoFocus: true,
-                        onKeyboardChange: { _ in }
-                    )
-                    .frame(minHeight: 140, maxHeight: 220)
-                    .padding(14)
-                    .dictusGlass(in: RoundedRectangle(cornerRadius: 16))
-                    .padding(.horizontal, 24)
-                    .transition(.opacity)
-                } else {
-                    // State 1: Animated keyboard switch illustration
+                // 4-frame animation showing the globe key flow
+                KeyboardSwitchAnimation()
+                    .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                    .padding(.bottom, 8)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
-                    Spacer()
-
-                    // 4-frame animation showing the globe key flow
-                    KeyboardSwitchAnimation()
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 8)
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
-
-                    // Hidden text field to bring up the real keyboard immediately.
-                    // WHY hidden: The user needs the real system keyboard visible so
-                    // they can long-press the globe key. Only the keyboard matters.
-                    KeyboardDetectingTextField(
-                        text: $textFieldContent,
-                        placeholder: "",
-                        autoFocus: true,
-                        onKeyboardChange: { isDictus in
-                            if isDictus {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    dictusKeyboardActive = true
-                                }
-                                PersistentLog.log(.onboardingDictusKeyboardActivated)
+                // Hidden text field to bring up the real keyboard immediately.
+                // WHY hidden: The user needs the real system keyboard visible so
+                // they can long-press the globe key. Only the keyboard matters.
+                KeyboardDetectingTextField(
+                    text: $textFieldContent,
+                    placeholder: "",
+                    autoFocus: true,
+                    onKeyboardChange: { isDictus in
+                        if isDictus {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                dictusKeyboardActive = true
                             }
+                            PersistentLog.log(.onboardingDictusKeyboardActivated)
                         }
-                    )
-                    .frame(height: 1)
-                    .opacity(0)
-                }
-
-                Spacer(minLength: 0)
+                    }
+                )
+                .frame(height: 1)
+                .opacity(0)
             }
+
+            Spacer(minLength: 0)
         }
         .animation(.easeInOut(duration: 0.3), value: dictusKeyboardActive)
         .onChange(of: textFieldContent) { newValue in
@@ -146,6 +122,18 @@ struct GlobeKeyTutorialPage: View {
         }
     }
 
+    /// What to do now, under the title. Changes with the keyboard on screen and, on a
+    /// pre-A14 chip, asks for typing instead of dictating (#635).
+    private var instruction: Text {
+        if !dictusKeyboardActive {
+            return Text("Hold \(Image(systemName: "globe")) and select Dictus")
+        } else if keyboardCanDictate {
+            return Text("Tap the mic and start dictating")
+        } else {
+            return Text("Type a few words to try the keyboard")
+        }
+    }
+
     // MARK: - Navigation
 
     private func advanceToSuccess() {
@@ -157,11 +145,6 @@ struct GlobeKeyTutorialPage: View {
         }
     }
 
-    private func skipTutorial() {
-        PersistentLog.log(.onboardingGlobeTutorialSkipped)
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        onComplete()
-    }
 }
 
 // MARK: - KeyboardSwitchAnimation

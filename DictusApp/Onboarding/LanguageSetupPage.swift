@@ -48,70 +48,53 @@ struct LanguageSetupPage: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        OnboardingPage(
+            title: Text("Your language"),
+            subtitle: Text("Your iPhone's language, already selected. You can change it later in Settings.")
+        ) {
+            VStack(alignment: .leading, spacing: 0) {
+                languageCard
+                    .padding(.bottom, 28)
 
-            Image(systemName: "globe")
-                .font(.system(size: 72))
-                .foregroundColor(.dictusAccent)
-                .padding(.bottom, 24)
+                OnboardingSectionLabel(text: Text("Keyboard layout"))
+                    .padding(.leading, 4)
+                    .padding(.bottom, 8)
 
-            Text("Your language")
-                .font(.dictusHeading)
-                .foregroundStyle(.primary)
+                Picker("Layout", selection: $setup.layout) {
+                    ForEach(LayoutType.allCases, id: \.self) { layout in
+                        Text(layout.displayName).tag(layout)
+                    }
+                }
+                .pickerStyle(.segmented)
                 .padding(.bottom, 12)
 
-            Text("Dictus sets up the keyboard and the voice model for the language you speak.")
-                .font(.dictusBody)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-                .padding(.bottom, 24)
+                LayoutPreview(layout: setup.layout)
+                    .padding(.bottom, 24)
 
-            languageCard
-                .padding(.horizontal, 32)
-                .padding(.bottom, 12)
-
-            Text("You can change this later in Settings.")
-                .font(.dictusCaption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-
-            Spacer()
-
-            modelLine
-                .padding(.horizontal, 32)
-                .padding(.bottom, 16)
-
-            // Same button style as the other onboarding pages (a RoundedRectangle, not
-            // `.borderedProminent`, which renders as a capsule on iOS 26 Liquid Glass).
-            Button {
-                onConfirm(setup)
-            } label: {
-                Text("Continue")
-                    .font(.dictusSubheading)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.dictusAccent)
-                    )
+                modelLine
             }
-            .padding(.horizontal, 32)
-            .padding(.bottom, 48)
+        } bottom: {
+            OnboardingPrimaryButton(Text("Continue")) {
+                onConfirm(setup)
+            }
+            .accessibilityIdentifier("onboarding.primary")
         }
     }
 
     // MARK: - Language card
 
+    /// The language the user speaks, with the keyboard that goes with it, in one white card
+    /// (#675 mock-up `02-langue-et-clavier`). "Change" opens the same pickers the screen
+    /// had before the shell (#649 PR A), as menus.
     private var languageCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text("I speak")
-                    .font(.dictusBody)
-                Spacer()
+        VStack(spacing: 0) {
+            languageRow(
+                code: setup.spokenLanguage,
+                name: Self.name(of: setup.spokenLanguage),
+                role: setup.spokenLanguageHasDictusKeyboard
+                    ? Text("Dictation and keyboard")
+                    : Text("Dictation")
+            ) {
                 Picker("I speak", selection: spokenLanguageBinding) {
                     // The four languages Dictus has a keyboard for first: they are the
                     // ones most users pick, and the ones where everything works.
@@ -126,45 +109,75 @@ struct LanguageSetupPage: View {
                         }
                     }
                 }
-                .pickerStyle(.menu)
-                .tint(.dictusAccent)
             }
 
             // Only for a spoken language without a Dictus keyboard (Chinese, Italian…):
             // the keyboard then has to be one of the four, and the user picks which.
             if !setup.spokenLanguageHasDictusKeyboard {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text("Keyboard")
-                            .font(.dictusBody)
-                        Spacer()
-                        Picker("Keyboard", selection: keyboardLanguageBinding) {
-                            ForEach(SupportedLanguage.allCases, id: \.rawValue) { language in
-                                Text(language.displayName).tag(language)
-                            }
+                Divider()
+                    .padding(.leading, 76)
+                languageRow(
+                    code: setup.keyboardLanguage.rawValue,
+                    name: setup.keyboardLanguage.displayName,
+                    role: Text("Keyboard")
+                ) {
+                    Picker("Keyboard", selection: keyboardLanguageBinding) {
+                        ForEach(SupportedLanguage.allCases, id: \.rawValue) { language in
+                            Text(language.displayName).tag(language)
                         }
-                        .pickerStyle(.menu)
-                        .tint(.dictusAccent)
                     }
-                    Text("Dictus has no keyboard in this language yet. Choose the language you type in.")
-                        .font(.dictusCaption)
-                        .foregroundStyle(.secondary)
-                        // Without this the card's leading-aligned stack lets the caption
-                        // collapse to one truncated line (seen on the simulator).
-                        .fixedSize(horizontal: false, vertical: true)
                 }
+                Text("Dictus has no keyboard in this language yet. Choose the language you type in.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    // Without this the caption can collapse to one truncated line (seen
+                    // on the simulator before the shell).
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
+            }
+        }
+        .onboardingCard()
+    }
+
+    /// One row of the language card: a round code badge, the language and what it is used
+    /// for, and "Change", a menu holding `picker`.
+    private func languageRow<Choices: View>(
+        code: String,
+        name: String,
+        role: Text,
+        @ViewBuilder picker: () -> Choices
+    ) -> some View {
+        HStack(spacing: 16) {
+            Text(verbatim: code.uppercased())
+                .font(.callout.weight(.semibold))
+                .foregroundStyle(Color.dictusAccent)
+                .frame(width: 40, height: 40)
+                .background(Circle().fill(Color.dictusAccent.opacity(0.12)))
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: name)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                role
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
 
-            Picker("Layout", selection: $setup.layout) {
-                ForEach(LayoutType.allCases, id: \.self) { layout in
-                    Text(layout.displayName).tag(layout)
-                }
+            Spacer(minLength: 8)
+
+            Menu {
+                picker()
+            } label: {
+                Text("Change")
+                    .font(.body)
+                    .foregroundStyle(Color.dictusAccent)
             }
-            .pickerStyle(.segmented)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .dictusGlass(in: RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
     }
 
     /// Writes go through `LanguageSetup` so the keyboard language and the layout follow
@@ -209,25 +222,102 @@ struct LanguageSetupPage: View {
     // MARK: - Model line
 
     /// The model that will be downloaded, in small type. Informs; asks nothing.
+    ///
+    /// WHY "your language" and not the language's name: French needs an article that
+    /// changes with the language ("le français", "l'anglais"), which a format string cannot
+    /// choose.
     private var modelLine: some View {
         let info = ModelInfo.forIdentifier(setup.recommendedModel(on: capabilities))
-        return VStack(spacing: 4) {
-            if let info {
-                // Verbatim: both halves arrive already localized (name qualifier #665,
-                // size unit #661), and an interpolated key would put a meaningless
-                // "%@ · %@" in the catalog.
-                Label {
-                    Text(verbatim: "\(info.localizedDisplayName) · \(info.sizeLabel)")
-                } icon: {
-                    Image(systemName: "waveform")
-                }
-                .font(.dictusCaption)
-                .foregroundStyle(.secondary)
-            }
-            Text("The best voice model for your language and iPhone. It downloads while you finish setting up, and you can change it in Models.")
-                .font(.dictusCaption)
+        return HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "cpu")
+                .font(.body)
                 .foregroundStyle(.tertiary)
-                .multilineTextAlignment(.center)
+                .accessibilityHidden(true)
+            Group {
+                if let info {
+                    // Both arguments arrive already localized (name qualifier #665, size
+                    // unit #661).
+                    Text("\(info.localizedDisplayName) model, the best for your language on this iPhone. \(info.sizeLabel), downloaded as soon as you continue. You can change it in Models.")
+                } else {
+                    Text("The best voice model for your language and iPhone. It downloads while you finish setting up, and you can change it in Models.")
+                }
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
+}
+
+// MARK: - Layout preview
+
+/// The top of the keyboard in the chosen layout, cropped like the mock-up's: enough rows to
+/// tell AZERTY from QWERTY from QWERTZ at a glance, without drawing a whole keyboard.
+///
+/// WHY THE ROWS ARE WRITTEN HERE FOR AZERTY ONLY: QWERTY and QWERTZ come from DictusCore,
+/// where the keyboard reads them too. AZERTY's rows live in the keyboard extension
+/// (`KeyboardLayouts`), which the app cannot import; the first two and a half rows are
+/// all this preview shows, and they are the French layout's fixed letters.
+private struct LayoutPreview: View {
+    let layout: LayoutType
+
+    /// Height of the visible crop: two rows and the top of the third.
+    private let visibleHeight: CGFloat = 126
+
+    private var rows: [[String]] {
+        switch layout {
+        case .azerty:
+            return [
+                ["a", "z", "e", "r", "t", "y", "u", "i", "o", "p"],
+                ["q", "s", "d", "f", "g", "h", "j", "k", "l", "m"],
+                ["w", "x", "c", "v", "b", "n"]
+            ]
+        case .qwerty:
+            return QWERTYLayout.lettersRows.prefix(3).map { row in row.map { $0.lowercased() } }
+        case .qwertz:
+            return QWERTZLayout.lowercasedLettersRows
+        }
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            // Every key is as wide as one key of the longest row, and shorter rows are
+            // centred, as on the real keyboard.
+            let spacing: CGFloat = 5
+            let longest = CGFloat(rows.map(\.count).max() ?? 10)
+            let keyWidth = (geometry.size.width - 12 - spacing * (longest - 1)) / longest
+            VStack(spacing: 8) {
+                ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                    HStack(spacing: spacing) {
+                        ForEach(Array(row.enumerated()), id: \.offset) { _, letter in
+                            Text(verbatim: letter)
+                                .font(.system(size: 18))
+                                .foregroundStyle(.primary)
+                                .frame(width: keyWidth, height: 40)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                        .fill(Self.keyFill)
+                                        .shadow(color: .black.opacity(0.12), radius: 0, y: 1)
+                                )
+                        }
+                    }
+                }
+            }
+            .frame(width: geometry.size.width)
+            .padding(.top, 12)
+        }
+        .frame(height: visibleHeight, alignment: .top)
+        .frame(maxWidth: .infinity)
+        .background(Self.trayFill)
+        // Cropped at the bottom: rounded on top only, cut straight across below.
+        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24, style: .continuous))
+        .animation(.easeInOut(duration: 0.2), value: layout)
+        .accessibilityHidden(true)
+    }
+
+    /// The tray behind the keys: the card colour, like the mock-up.
+    private static let trayFill = Color.dictusSurface
+
+    /// The keys: a light grey on the white tray, a lifted navy on the dark one.
+    private static let keyFill = Color(light: Color(hex: 0xF2F2F7), dark: Color(hex: 0x0A1628))
 }

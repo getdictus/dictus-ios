@@ -1,15 +1,21 @@
 // DictusApp/Onboarding/MicPermissionPage.swift
-// Step 2 of onboarding: request microphone permission.
+// Onboarding step: say why Dictus needs the microphone, then let iOS ask for it.
 import SwiftUI
 import AVFoundation
 import DictusCore
 
-/// Requests microphone permission with clear explanation of privacy.
+/// The pre-permission screen for the microphone, right before the first dictation.
+///
+/// WHY HERE (#649 decision 17, #675): no step before the first dictation uses the
+/// microphone, and this is the moment the reason is obvious. Asking on this screen, with
+/// the reason written out, also keeps the system popup from landing in the middle of the
+/// first recording. `OnboardingView` passes over this step when the microphone is already
+/// granted.
 ///
 /// WHY we don't block on denial:
 /// Apple's HIG and research best practices recommend against blocking progress
-/// on a denied permission. The user can still set up the keyboard and download
-/// a model — they just won't be able to record until they grant mic access later.
+/// on a denied permission. The user can still try the keyboard by typing — they just
+/// won't be able to record until they grant mic access later.
 struct MicPermissionPage: View {
     let onNext: () -> Void
 
@@ -18,84 +24,39 @@ struct MicPermissionPage: View {
     @State private var isRequesting = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        OnboardingCenteredPage(
+            title: Text("Dictus needs the microphone"),
+            message: Text("To hear you while you dictate. The sound is transcribed on your iPhone and never leaves it.")
+        ) {
+            VStack(spacing: 24) {
+                MicHalo()
 
-            // Mic icon
-            Image(systemName: "mic.circle.fill")
-                .font(.system(size: 72))
-                .foregroundColor(.dictusAccent)
-                .padding(.bottom, 24)
-
-            // Title
-            Text("Microphone")
-                .font(.dictusHeading)
-                .foregroundStyle(.primary)
-                .padding(.bottom, 16)
-
-            // Explanation
-            Text("Dictus needs the microphone to transcribe your voice. Your recordings stay on your device.")
-                .font(.dictusBody)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-
-            Spacer()
-
-            // Permission result feedback
-            if let granted = permissionGranted {
-                if granted {
-                    Label("Microphone authorized", systemImage: "checkmark.circle.fill")
-                        .font(.dictusBody)
-                        .foregroundColor(.dictusSuccess)
-                        .padding(.bottom, 16)
-                } else {
-                    Text("You can enable the microphone later in Settings")
-                        .font(.dictusCaption)
-                        .foregroundColor(.orange)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                        .padding(.bottom, 16)
+                // Permission result feedback
+                if let granted = permissionGranted {
+                    if granted {
+                        Label("Microphone authorized", systemImage: "checkmark.circle.fill")
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(Color.dictusSuccess)
+                    } else {
+                        Text("You can enable the microphone later in Settings")
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                            .multilineTextAlignment(.center)
+                    }
                 }
             }
-
-            // Action button
-            if permissionGranted == nil {
-                // Request permission button.
-                // WHY neutral wording ("Continue", not "Allow microphone"):
-                // App Review guideline 5.1.1(iv) forbids priming buttons that direct
-                // the user toward granting a system permission. The button only advances
-                // to the OS prompt — iOS owns the actual allow/deny choice.
-                Button(action: requestPermission) {
-                    Text("Continue")
-                        .font(.dictusSubheading)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(Color.dictusAccent)
-                        )
-                }
-                .disabled(isRequesting)
-                .padding(.horizontal, 32)
-                .padding(.bottom, 48)
-            } else {
-                // Next button (visible after permission response)
-                Button(action: onNext) {
-                    Text("Continue")
-                        .font(.dictusSubheading)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(Color.dictusAccent)
-                        )
-                }
-                .padding(.horizontal, 32)
-                .padding(.bottom, 48)
-            }
+        } bottom: {
+            // WHY neutral wording ("Continue", not "Allow microphone"):
+            // App Review guideline 5.1.1(iv) forbids priming buttons that direct
+            // the user toward granting a system permission. The button only advances
+            // to the OS prompt — iOS owns the actual allow/deny choice. The #675 mock-up
+            // draws "Autoriser le micro" here; the guideline wins.
+            OnboardingPrimaryButton(
+                Text("Continue"),
+                isEnabled: !isRequesting,
+                action: permissionGranted == nil ? requestPermission : onNext
+            )
+            .accessibilityIdentifier("onboarding.primary")
         }
     }
 
@@ -141,5 +102,36 @@ struct MicPermissionPage: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             onNext()
         }
+    }
+}
+
+/// The microphone in a blue disc, inside three pale rings (#675 mock-up `09-micro`).
+private struct MicHalo: View {
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color.dictusAccent.opacity(0.08))
+                .frame(width: 220, height: 220)
+            Circle()
+                .fill(Color.dictusAccent.opacity(0.10))
+                .frame(width: 170, height: 170)
+            Circle()
+                .fill(Color.dictusAccent.opacity(0.14))
+                .frame(width: 124, height: 124)
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [.dictusAccentHighlight, .dictusGradientEnd],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .frame(width: 96, height: 96)
+                .shadow(color: .dictusAccent.opacity(0.35), radius: 16, y: 6)
+            Image(systemName: "mic")
+                .font(.system(size: 36, weight: .medium))
+                .foregroundStyle(.white)
+        }
+        .accessibilityHidden(true)
     }
 }

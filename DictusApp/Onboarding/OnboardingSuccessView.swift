@@ -1,16 +1,17 @@
 // DictusApp/Onboarding/OnboardingSuccessView.swift
-// Full-screen success overlay shown after transcription test completes.
+// The completion step: the onboarding is done, and how to use Dictus from here.
 import SwiftUI
 import DictusCore
 
-/// Apple Pay-style animated success screen at the end of onboarding.
+/// The last onboarding step: the app icon with a check, "You're all set", and the one
+/// gesture to remember (#675 mock-up `12-termine`).
 ///
-/// WHY a dedicated view instead of inline in TestRecordingPage:
-/// The success screen replaces the entire recording view with a celebration overlay.
-/// Keeping it in its own file follows the project's single-responsibility convention
-/// (one file = one responsibility) and makes it reusable if needed elsewhere.
+/// WHY A STEP AND NOT A COVER (#675): it used to be a full-screen cover raised by the first
+/// dictation page. As a step it is persisted like the others, wears the shell, and leaves
+/// room for the steps #649 adds after the first dictation (#681). Its button sets
+/// `hasCompletedOnboarding`, which raises the trial announcement (#593) unchanged.
 ///
-/// WHY spring animation for checkmark:
+/// WHY spring animation for the check:
 /// The overshoot (scale 0 -> 1.1 -> 1.0) with spring physics mimics Apple's
 /// success checkmark from Apple Pay and other system confirmations. Users
 /// recognize this pattern as "you're done" without reading any text.
@@ -20,70 +21,50 @@ struct OnboardingSuccessView: View {
     @State private var checkmarkScale: CGFloat = 0
     @State private var showText = false
 
+    /// Whether the keyboard can dictate on this device (#635). On a pre-A14 chip the
+    /// keyboard's mic is disabled, so "hold the globe and speak" would promise what the
+    /// keyboard cannot do; the message points to the app instead.
+    private let keyboardCanDictate = DeviceCapabilities.current().supportsKeyboardDictation
+
     var body: some View {
-        ZStack {
-            Color.dictusBackground
-                .ignoresSafeArea()
+        OnboardingCenteredPage(
+            title: Text("You're all set"),
+            message: keyboardCanDictate
+                ? Text("Dictus is waiting in the keyboard of every app. Hold the globe, and speak.")
+                : Text("Dictus is waiting in the keyboard of every app. To dictate, open the Dictus app.")
+        ) {
+            ZStack(alignment: .bottomTrailing) {
+                DictusIconTile(logoHeight: 64)
+                    .shadow(color: .black.opacity(0.18), radius: 18, y: 8)
 
-            VStack(spacing: 0) {
-                Spacer()
-
-                // Animated checkmark circle
+                // The check lands on the icon's corner, ringed in the page colour so it
+                // reads as a badge on both backgrounds.
                 ZStack {
                     Circle()
                         .fill(Color.dictusSuccess)
-                        .frame(width: 120, height: 120)
-
                     Image(systemName: "checkmark")
-                        .font(.system(size: 48, weight: .bold))
-                        .foregroundColor(.white)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(.white)
                 }
+                .frame(width: 44, height: 44)
+                .overlay(Circle().strokeBorder(Color.dictusBackground, lineWidth: 4))
+                .offset(x: 14, y: 14)
                 .scaleEffect(checkmarkScale)
-                .padding(.bottom, 32)
-
-                // Title and subtitle (fade in after checkmark)
-                VStack(spacing: 12) {
-                    Text("You're all set!")
-                        .font(.dictusHeading)
-                        .foregroundStyle(.primary)
-
-                    Text("Dictus is set up and ready to use")
-                        .font(.dictusBody)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                }
-                .opacity(showText ? 1 : 0)
-
-                Spacer()
-
-                // Commencer button (same style as other onboarding pages)
-                Button(action: onComplete) {
-                    Text("Get started")
-                        .font(.dictusSubheading)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14)
-                                .fill(Color.dictusAccent)
-                        )
-                }
-                .padding(.horizontal, 32)
-                .padding(.bottom, 48)
-                .opacity(showText ? 1 : 0)
             }
+            .accessibilityHidden(true)
+        } bottom: {
+            OnboardingPrimaryButton(Text("Get started"), action: onComplete)
+                .opacity(showText ? 1 : 0)
+                .accessibilityIdentifier("onboarding.primary")
         }
         .onAppear {
-            // Step 1: Spring the checkmark in (0 -> 1.1 -> 1.0)
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+            // Step 1: Spring the check in (0 -> 1.1 -> 1.0)
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.2)) {
                 checkmarkScale = 1.0
             }
-            // Step 2: Fade in text + button after checkmark lands
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                withAnimation(.easeOut(duration: 0.4)) {
-                    showText = true
-                }
+            // Step 2: Fade in the button after the check lands
+            withAnimation(.easeOut(duration: 0.4).delay(0.6)) {
+                showText = true
             }
         }
     }

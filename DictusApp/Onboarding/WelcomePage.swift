@@ -1,9 +1,14 @@
 // DictusApp/Onboarding/WelcomePage.swift
-// Step 1 of onboarding: animated waveform, wordmark, tagline, and "Commencer" button.
+// The intro step of onboarding: animated waveform, wordmark, tagline, and "Get started".
 import SwiftUI
 import DictusCore
 
 /// Welcome page shown on first launch with animated brand waveform and tagline.
+///
+/// WHY IT IS STILL THIS PAGE (#675): the intro slot of the new shell will hold the
+/// three-scene carousel (#676). Until then, the existing welcome wears the shell: the
+/// centred layout the mock-ups draw for the intro, and the shell's primary button. No
+/// progress bar: the intro is before the work starts.
 ///
 /// WHY BrandWaveform with processing (sinusoidal) animation:
 /// A smooth traveling sine wave creates a polished first impression instead of
@@ -15,43 +20,18 @@ struct WelcomePage: View {
     @State private var showContent = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
-
+        OnboardingCenteredPage(
+            title: Text(verbatim: "Dictus"),
+            message: Text("Voice dictation, 100% offline")
+        ) {
             // Smooth sinusoidal waveform — same as the transcription processing animation
-            BrandWaveform(maxHeight: 100, animation: .sweep)
-                .opacity(0.5)
-                .padding(.bottom, 24)
-
-            // "Dictus" wordmark
-            Text("Dictus")
-                .font(.system(size: 42, weight: .ultraLight, design: .rounded))
-                .kerning(-0.5)
-                .foregroundStyle(.primary)
-                .padding(.bottom, 12)
-
-            // Tagline
-            Text("Voice dictation, 100% offline")
-                .font(.dictusBody)
-                .foregroundStyle(.secondary)
-
-            Spacer()
-
-            // "Commencer" button
-            Button(action: onNext) {
-                Text("Get started")
-                    .font(.dictusSubheading)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.dictusAccent)
-                    )
-            }
-            .padding(.horizontal, 32)
-            .padding(.bottom, 48)
-            .opacity(showContent ? 1 : 0)
+            BrandWaveform(maxHeight: 120, animation: .sweep)
+                .opacity(0.6)
+                .accessibilityHidden(true)
+        } bottom: {
+            OnboardingPrimaryButton(Text("Get started"), action: onNext)
+                .opacity(showContent ? 1 : 0)
+                .accessibilityIdentifier("onboarding.primary")
         }
         .onAppear {
             withAnimation(.easeIn(duration: 0.6).delay(0.5)) {
