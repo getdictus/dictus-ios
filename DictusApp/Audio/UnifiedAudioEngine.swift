@@ -643,9 +643,16 @@ class UnifiedAudioEngine: ObservableObject {
     /// WHY setActive every time (no sessionConfigured guard for setActive):
     /// iOS interrupts the audio session when the app goes to background. Even if the
     /// category was set, setActive(true) must be called again on foreground return.
+    ///
+    /// WHY the category is also checked, not only `sessionConfigured` (#682): the session
+    /// is the whole app's, and the keyboard step's Picture in Picture borrows it as a
+    /// silent `.playback` session while the engine is idle. `sessionConfigured` cannot
+    /// see that, so a dictation started under the borrowed category would skip
+    /// `setCategory` and try to record under `.playback`, which has no input. Re-asserting
+    /// whenever the category is not ours makes recording win over any other owner.
     func configureAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
-        if !sessionConfigured {
+        if !sessionConfigured || session.category != .playAndRecord {
             try session.setCategory(.playAndRecord, options: [.allowBluetoothA2DP, .defaultToSpeaker, .duckOthers])
         }
         try session.setActive(true)
