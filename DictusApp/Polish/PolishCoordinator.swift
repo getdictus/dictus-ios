@@ -57,12 +57,10 @@ public final class PolishCoordinator {
     /// queue running another's in the background.
     private let voiceNoteBackgroundService: PolishService
 
-    /// Background runs in flight on `voiceNoteBackgroundService`, and the reason the
-    /// queue's background task expiry cancelled them with, read by those runs so their
-    /// attempt line says why. Only set while a run is in flight, so it cannot label a
-    /// later one.
-    private var backgroundRunsInFlight = 0
-    private var backgroundCancelReason: String?
+    /// Voice note runs pending since they were requested, and whether the queue's
+    /// background task expired under one (PR #689 review). Read by a background run
+    /// before it calls the engine and when it labels its attempt line.
+    private var backgroundExpiry = VoiceNoteBackgroundExpiry()
 
     /// The voice-note mode runs in flight, by note and mode (#648). A card that opens on
     /// a note whose mode is already running attaches to it rather than starting a
@@ -188,6 +186,10 @@ public final class PolishCoordinator {
         if voiceNoteRuns.isRunning(key) {
             PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "summary",
                                                action: "attached", details: "mode=\(smartMode.id) trigger=\(trigger.rawValue)"))
+        } else {
+            // Counted here, before `run` starts its task, so an expiry in between is
+            // recorded rather than missed.
+            backgroundExpiry.runRequested()
         }
         // `self` is the process-wide singleton: capturing it strongly keeps nothing alive
         // that was not already.
@@ -197,19 +199,26 @@ public final class PolishCoordinator {
             // foreground for Apple's limit, so it takes the foreground service.
             let inBackground = UIApplication.shared.applicationState == .background
             let service = inBackground ? self.voiceNoteBackgroundService : self.voiceNoteService
-            if inBackground { self.backgroundRunsInFlight += 1 }
-            let outcome = await service.polish(
-                raw: request.raw,
-                languagePolicy: request.languagePolicy,
-                smartMode: smartMode,
-                recordingDuration: request.recordingDuration
-            )
-            var cancelReason: String?
-            if inBackground {
-                cancelReason = self.backgroundCancelReason
-                self.backgroundRunsInFlight -= 1
-                if self.backgroundRunsInFlight == 0 { self.backgroundCancelReason = nil }
+            let outcome: PolishOutcome
+            if inBackground, self.backgroundExpiry.expired {
+                // The background task expired before this run reached the engine: no
+                // call after `endBackgroundTask()`. A cancellation, so the card runs the
+                // mode on open without an error.
+                outcome = PolishOutcome(failure: SmartModeFailure(
+                    modeIdentifier: smartMode.id, modeDisplayName: smartMode.displayName,
+                    outcome: PolishMetrics.Outcome.cancelled.rawValue, reason: "-"
+                ))
+            } else {
+                outcome = await service.polish(
+                    raw: request.raw,
+                    languagePolicy: request.languagePolicy,
+                    smartMode: smartMode,
+                    recordingDuration: request.recordingDuration
+                )
             }
+            let cancelReason = inBackground && self.backgroundExpiry.expired
+                ? VoiceNoteSmartModeAttempt.backgroundTimeExpiredReason : nil
+            self.backgroundExpiry.runEnded()
             let attempt = VoiceNoteSmartModeAttempt(
                 outcome: outcome, modeIdentifier: smartMode.id, appState: appState,
                 callIndex: AppleFMCallCounter.current, trigger: trigger, cancelReason: cancelReason
@@ -225,9 +234,11 @@ public final class PolishCoordinator {
     /// that would then resume at some unknown later point. The note keeps no result and
     /// the card runs its mode on open. Synchronous, because the expiry handler must
     /// return before iOS suspends the app.
+    ///
+    /// A run requested but not yet at the engine is caught too: it checks the expiry
+    /// before calling the engine (PR #689 review).
     public func cancelBackgroundVoiceNoteRun() {
-        guard backgroundRunsInFlight > 0 else { return }
-        backgroundCancelReason = VoiceNoteSmartModeAttempt.backgroundTimeExpiredReason
+        guard backgroundExpiry.expire() else { return }
         voiceNoteBackgroundService.cancelInflight()
     }
 

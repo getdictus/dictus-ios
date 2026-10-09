@@ -194,3 +194,52 @@ private final class RateLimitedEngine: PolishEngineProtocol, @unchecked Sendable
     }
     func failureReason(for error: Error) -> PolishFailureReason { .rateLimited }
 }
+
+/// The expiry state the coordinator reads before a background run calls the engine
+/// (PR #689 review).
+final class VoiceNoteBackgroundExpiryTests: XCTestCase {
+
+    /// The review's window: requested, not yet started, and the task expires.
+    func testAnExpiryBeforeTheRunStartsIsRecorded() {
+        var expiry = VoiceNoteBackgroundExpiry()
+        expiry.runRequested()
+        XCTAssertTrue(expiry.expire())
+        XCTAssertTrue(expiry.expired, "the run must see it before calling the engine")
+    }
+
+    /// Nothing pending: nothing to cancel, and nothing left to block a later run.
+    func testAnExpiryWithNothingPendingIsIgnored() {
+        var expiry = VoiceNoteBackgroundExpiry()
+        XCTAssertFalse(expiry.expire())
+        XCTAssertFalse(expiry.expired)
+        expiry.runRequested()
+        XCTAssertFalse(expiry.expired, "an earlier expiry never labels a later run")
+    }
+
+    /// The flag lasts until the last pending run has ended, then clears.
+    func testTheFlagClearsWithTheLastPendingRun() {
+        var expiry = VoiceNoteBackgroundExpiry()
+        expiry.runRequested()
+        expiry.runRequested()
+        expiry.expire()
+        expiry.runEnded()
+        XCTAssertTrue(expiry.expired)
+        expiry.runEnded()
+        XCTAssertFalse(expiry.expired)
+        XCTAssertEqual(expiry.pendingRuns, 0)
+        expiry.runEnded()
+        XCTAssertEqual(expiry.pendingRuns, 0, "never negative")
+    }
+
+    /// What the skipped run is logged as: a deferral to the card, not an error.
+    func testAnExpiredRunDefersToOpen() {
+        let outcome = PolishOutcome(failure: SmartModeFailure(
+            modeIdentifier: "summary", modeDisplayName: "Résumé",
+            outcome: PolishMetrics.Outcome.cancelled.rawValue, reason: "-"))
+        let attempt = VoiceNoteSmartModeAttempt(
+            outcome: outcome, modeIdentifier: "summary", appState: "background", callIndex: 3,
+            trigger: .background, cancelReason: VoiceNoteSmartModeAttempt.backgroundTimeExpiredReason)
+        XCTAssertEqual(attempt.reason, "backgroundTimeExpired")
+        XCTAssertTrue(attempt.defersToOpen)
+    }
+}
