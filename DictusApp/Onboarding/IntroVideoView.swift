@@ -15,7 +15,8 @@ import DictusCore
 /// WHY THE STILL FRAME UNDERNEATH: two jobs.
 /// - A page whose video is not in the bundle shows its still instead, so the carousel
 ///   works without the files, and adding them needs no code change (the lookup is by name,
-///   `OnboardingIntroScene.videoResourceName(dark:)`).
+///   `OnboardingIntroScene.videoResourceName(dark:)`). With Reduce Motion on, every page
+///   shows its still.
 /// - While the video loads, the still covers the empty player. The video starts on the
 ///   very frame the still was taken from (`stillFrameSeconds`), so the hand-over is
 ///   invisible.
@@ -33,6 +34,7 @@ struct IntroVideoView: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Whether the player has a frame on screen, so the still can go.
     @State private var isVideoVisible = false
@@ -62,12 +64,19 @@ struct IntroVideoView: View {
             // The new file's player starts hidden; show the new still until it has a frame.
             isVideoVisible = false
         }
+        .onChange(of: reduceMotion) {
+            // Turned on: the player is gone, the still must come back. Turned off: the new
+            // player starts hidden until its first frame.
+            isVideoVisible = false
+        }
         .accessibilityHidden(true)
     }
 
-    /// The video for the current appearance, or nil when it is not in the app's bundle.
+    /// The video for the current appearance, or nil when it is not in the app's bundle, or
+    /// when Reduce Motion asks for the still frame instead (`IntroAutoAdvance.playsVideo`).
     private var videoURL: URL? {
-        Bundle.main.url(
+        guard IntroAutoAdvance.playsVideo(reduceMotion: reduceMotion) else { return nil }
+        return Bundle.main.url(
             forResource: scene.videoResourceName(dark: colorScheme == .dark),
             withExtension: OnboardingIntroScene.videoExtension
         )

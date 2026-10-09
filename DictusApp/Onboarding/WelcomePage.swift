@@ -11,13 +11,24 @@ import DictusCore
 /// (`IntroVideoView`) above a localized headline and subtitle. The user swipes between
 /// them, or taps **Get started** on any page to begin the setup.
 ///
-/// WHY A SWIPEABLE TabView HERE when `OnboardingView` refuses one for the steps: the
-/// steps are prerequisites the user must not swipe past; these three pages are a preface
-/// with nothing to set up, and the button is on every one of them.
+/// WHY THE PAGES TURN BY THEMSELVES (decided 2026-10-09 after the first device test):
+/// the tester tapped **Get started** on page 1 and never saw pages 2 and 3. Like Wispr
+/// Flow's opening carousel, this one moves 1 → 2 → 3 → 1 on its own until the button is
+/// tapped, each page staying one full pass of its scene. The rules (when, how long, the
+/// pause in the background) live in `IntroAutoAdvance` and `IntroDwellTimer`.
+///
+/// WHY SWIPEABLE PAGES HERE when `OnboardingView` refuses them for the steps: the steps
+/// are prerequisites the user must not swipe past; these three pages are a preface with
+/// nothing to set up, and the button is on every one of them.
+///
+/// WHY A PAGING ScrollView AND NOT A PAGED TabView: the swipe is the same, but a paged
+/// TabView changes page instantly when the page is set in code (measured on the iOS 26.5
+/// simulator, frame to frame at 20 fps, `withAnimation` or not), so the automatic turn
+/// would cut instead of slide. A ScrollView with `.paging` and `scrollPosition` scrolls to
+/// a page set in code with the same slide a swipe gives.
 ///
 /// WHY THE DOTS AND THE BUTTON SIT OUTSIDE THE PAGES: they stay still while the pages
-/// slide under them, as the mock-ups draw them. The system page dots are hidden because
-/// they are white, made for a dark backdrop, and vanish on the light grey.
+/// slide under them, as the mock-ups draw them.
 ///
 /// No progress bar: the intro is before the work starts (`OnboardingStep.showsProgress`).
 struct WelcomePage: View {
@@ -25,15 +36,34 @@ struct WelcomePage: View {
 
     @State private var page: OnboardingIntroScene = .walking
 
+    /// The time spent on the current page. A new one for every page landed on, whether
+    /// the carousel turned or the user swiped.
+    @State private var dwell = IntroDwellTimer(dwellSeconds: OnboardingIntroScene.walking.loopSeconds)
+    /// Bumped whenever `dwell` starts or stops, so the waiting task below restarts.
+    @State private var dwellGeneration = 0
+    /// The pages' opacity, lowered only during the fade of the 3 → 1 wrap.
+    @State private var pagesOpacity: Double = 1
+
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         VStack(spacing: 0) {
-            TabView(selection: $page) {
-                ForEach(OnboardingIntroScene.allCases, id: \.self) { scene in
-                    IntroScenePage(scene: scene, isCurrent: page == scene)
-                        .tag(scene)
+            ScrollView(.horizontal) {
+                HStack(spacing: 0) {
+                    ForEach(OnboardingIntroScene.allCases, id: \.self) { scene in
+                        IntroScenePage(scene: scene, isCurrent: page == scene)
+                            .containerRelativeFrame(.horizontal)
+                            .id(scene)
+                    }
                 }
+                .scrollTargetLayout()
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
+            .scrollTargetBehavior(.paging)
+            .scrollIndicators(.hidden)
+            .scrollPosition(id: scrolledPage)
+            .opacity(pagesOpacity)
 
             IntroPageDots(current: page)
                 .padding(.top, 20)
@@ -43,6 +73,83 @@ struct WelcomePage: View {
                 .accessibilityIdentifier("onboarding.primary")
                 .padding(.horizontal, OnboardingMetrics.horizontalPadding)
                 .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
+        }
+        .onAppear(perform: startDwellOnCurrentPage)
+        // A swipe and an automatic turn both land here: the page landed on gets its full time.
+        .onChange(of: page) { startDwellOnCurrentPage() }
+        .onChange(of: isAdvancing) { _, advancing in
+            let now = Self.now
+            if advancing {
+                dwell.resume(at: now)
+            } else {
+                dwell.pause(at: now)
+            }
+            dwellGeneration += 1
+        }
+        .task(id: dwellGeneration) {
+            guard dwell.isRunning else { return }
+            // Restarted (cancelled) by any change of page or of `isAdvancing`.
+            try? await Task.sleep(for: .seconds(dwell.remaining(at: Self.now)))
+            guard !Task.isCancelled else { return }
+            turnPage()
+        }
+    }
+
+    /// The scroll view's page, bridged to `page`. The scroll view reports nil while no
+    /// page is settled; the carousel keeps the last one.
+    private var scrolledPage: Binding<OnboardingIntroScene?> {
+        Binding(
+            get: { page },
+            set: { newPage in
+                if let newPage { page = newPage }
+            }
+        )
+    }
+
+    // MARK: - Auto-advance
+
+    /// Whether time counts on the page: the app in front, and neither VoiceOver nor Reduce
+    /// Motion on (`IntroAutoAdvance.isEnabled`). It pauses with the scene's player when the
+    /// app leaves the foreground, and resumes where it was.
+    private var isAdvancing: Bool {
+        scenePhase == .active
+            && IntroAutoAdvance.isEnabled(voiceOverRunning: voiceOverEnabled, reduceMotion: reduceMotion)
+    }
+
+    /// A monotonic clock in seconds, for `IntroDwellTimer`. Not the wall clock, which the
+    /// user or the network can move.
+    private static var now: Double { ProcessInfo.processInfo.systemUptime }
+
+    private func startDwellOnCurrentPage() {
+        dwell = IntroDwellTimer(dwellSeconds: page.loopSeconds)
+        if isAdvancing {
+            dwell.resume(at: Self.now)
+        }
+        dwellGeneration += 1
+    }
+
+    /// Moves to the next page: a slide forward, like a swipe, from 1 to 2 and 2 to 3.
+    ///
+    /// WHY A FADE FOR 3 → 1: a scroll from the last page to the first slides back across
+    /// the middle one, which reads as a rewind. The other way
+    /// to keep sliding forward is a fourth page, a copy of the first, swapped for the real
+    /// one once landed; but that copy plays its own player, and the two walking women would
+    /// rarely be on the same frame at the swap, which shows as a hitch mid-stride. A short
+    /// dip through the page colour (the videos' own background) has no such seam, and it
+    /// reads as what it is: back to the start, as the dots say at the same moment.
+    private func turnPage() {
+        let next = page.nextPage
+        guard page.wrapsToFirstPage else {
+            withAnimation(.easeInOut(duration: 0.4)) { page = next }
+            return
+        }
+        withAnimation(.easeIn(duration: 0.25)) {
+            pagesOpacity = 0
+        } completion: {
+            var jump = Transaction()
+            jump.disablesAnimations = true
+            withTransaction(jump) { page = next }
+            withAnimation(.easeOut(duration: 0.3)) { pagesOpacity = 1 }
         }
     }
 }
