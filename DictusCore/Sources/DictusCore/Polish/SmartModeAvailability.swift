@@ -337,6 +337,12 @@ public enum SmartModeNotice: Equatable, Sendable {
     /// downloaded on the iPhone. Until it is, Translate uses Apple Intelligence's chat
     /// model, as it did before #648. Recoverable from DictusApp, never the keyboard:
     /// the download shows a system prompt.
+    ///
+    /// **Not expected to appear under shipping conditions** (#648, 2026-10-09): with
+    /// Apple Intelligence on, which every Smart Mode already requires, `.highFidelity`
+    /// reports every pair installed and needs no download — Apple documents it, the Mac
+    /// measured 64 of 64 pairs, the iPhone kept reporting `installed` after its languages
+    /// were deleted. See `TranslationPairStatus`. Kept until the maintainer decides.
     case translationLanguageNotInstalled(TranslationLanguagePair)
 
     /// Stable name for logs.

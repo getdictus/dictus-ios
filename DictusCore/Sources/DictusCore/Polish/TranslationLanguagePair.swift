@@ -44,7 +44,25 @@ public struct TranslationLanguagePair: Hashable, Sendable {
     }
 }
 
+/// The framework's two strategies, as a value both processes and the debug screen share.
+/// Translate ships on `.highFidelity`; `.lowLatency` is read by the debug screen only.
+public enum TranslationStrategy: String, CaseIterable, Sendable {
+    case highFidelity
+    case lowLatency
+}
+
 /// Whether a pair is installed for the strategy Translate ships with (`.highFidelity`).
+///
+/// **On a device with Apple Intelligence, `.highFidelity` never needs a download.**
+/// Apple's documentation for the strategy: "The models are already downloaded when
+/// Apple Intelligence is enabled, so no additional language downloads are required.
+/// […] On devices without Apple Intelligence, it falls back to the traditional models
+/// used by lowLatency." Measured the same way twice: on the Mac every one of 64 pairs
+/// (16 sources × 4 targets) read `installed` under `.highFidelity` and `supported` under
+/// `.lowLatency`; on the iPhone every `.highFidelity` call read `installed`, including
+/// after the languages were deleted in iOS Settings (#648, 2026-10-08). Translate needs
+/// Apple Intelligence anyway, so `.notInstalled` is not expected under shipping
+/// conditions; it is kept as the framework's own answer, and the debug screen reads it.
 public enum TranslationPairStatus: String, Equatable, Sendable {
     /// The framework can translate this pair right now.
     case installed
@@ -56,11 +74,14 @@ public enum TranslationPairStatus: String, Equatable, Sendable {
     /// No answer: an OS below 26.4, or a build without the framework.
     case unknown
 
-    /// The framework's own verdict for `pair`, under `.highFidelity`.
-    public static func current(for pair: TranslationLanguagePair) async -> TranslationPairStatus {
+    /// The framework's own verdict for `pair`, under `strategy` (`.highFidelity` unless
+    /// a debug surface asks otherwise).
+    public static func current(for pair: TranslationLanguagePair,
+                               strategy: TranslationStrategy = .highFidelity) async -> TranslationPairStatus {
         #if canImport(Translation)
         guard #available(iOS 26.4, macOS 26.4, *) else { return .unknown }
-        let status = await LanguageAvailability(preferredStrategy: .highFidelity).status(
+        let preferred: TranslationSession.Strategy = strategy == .lowLatency ? .lowLatency : .highFidelity
+        let status = await LanguageAvailability(preferredStrategy: preferred).status(
             from: Locale.Language(identifier: pair.source),
             to: Locale.Language(identifier: pair.target.rawValue)
         )

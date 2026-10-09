@@ -72,8 +72,11 @@ public final class PolishService {
 
     /// `appState` names the caller's application state in the `translateEngineCall` log
     /// line (#648); the keyboard extension, which has none, keeps the default.
+    /// `translationBudget` is how long Translate may wait on the Translation framework in
+    /// this process: the keyboard's flat 8 s by default, DictusApp's scaled one there.
     public init(sink: PolishEventSink,
                 onBecameUnavailable: (() -> Void)? = nil,
+                translationBudget: TranslationTimeBudget = .keyboard,
                 appState: @escaping @Sendable () async -> String = { "extension" }) {
         self.defaults = AppGroup.defaults
         self.sink = sink
@@ -83,7 +86,7 @@ public final class PolishService {
             // Translate runs on Apple's Translation framework, with this Apple FM engine
             // as its fallback; every other task goes straight through (#648).
             self.appleFMEngine = TranslateRoutingPolishEngine(
-                wrapping: AppleFoundationModelsPolishEngine(), appState: appState
+                wrapping: AppleFoundationModelsPolishEngine(), budget: translationBudget, appState: appState
             )
         } else {
             self.appleFMEngine = nil
