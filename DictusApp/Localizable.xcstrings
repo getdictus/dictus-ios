@@ -1387,6 +1387,17 @@
         }
       }
     },
+    "Even offline." : {
+      "comment" : "Onboarding intro carousel, headline of the second page, under the scene of a woman dictating in the metro with no network (#676).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Même sans réseau."
+          }
+        }
+      }
+    },
     "Every term and every variant will be deleted. Your transcriptions will no longer be corrected." : {
       "comment" : "Message of the reset-vocabulary confirmation dialog.",
       "localizations" : {
@@ -1765,6 +1776,17 @@
         }
       }
     },
+    "In Notes, Messages or Mail: tap the mic, speak, and the text appears." : {
+      "comment" : "Onboarding intro carousel, subtitle of the third page: how a dictation goes from the keyboard (#676).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans Notes, Messages ou Mail : touchez le micro, parlez, le texte arrive."
+          }
+        }
+      }
+    },
     "In Settings, open Keyboards, then turn on Dictus and Full Access." : {
       "comment" : "Onboarding keyboard step subtitle (#675).",
       "localizations" : {
@@ -1776,6 +1798,17 @@
         }
       }
     },
+    "In all your apps, from the keyboard." : {
+      "comment" : "Onboarding intro carousel, subtitle of the first page, under 'Speak. Dictus writes.' (#676).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans toutes vos apps, depuis le clavier."
+          }
+        }
+      }
+    },
     "In the keyboard fan" : {
       "comment" : "Header of the section listing the Smart Modes pinned to the keyboard.",
       "localizations" : {
@@ -1783,6 +1816,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dans le clavier"
+          }
+        }
+      }
+    },
+    "In your keyboard." : {
+      "comment" : "Onboarding intro carousel, headline of the third page, under the scene of the Dictus keyboard in a note (#676).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans votre clavier."
           }
         }
       }
@@ -2436,6 +2480,17 @@
         }
       }
     },
+    "On the metro or on a plane, Dictus still writes. Everything happens on your iPhone." : {
+      "comment" : "Onboarding intro carousel, subtitle of the second page: transcription runs on the device, with no network (#676).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans le métro ou en avion, Dictus écrit quand même. Tout se passe sur votre iPhone."
+          }
+        }
+      }
+    },
     "One-time purchase" : {
       "localizations" : {
         "fr" : {
@@ -2535,6 +2590,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "PRO"
+          }
+        }
+      }
+    },
+    "Page %lld of %lld" : {
+      "comment" : "Onboarding intro carousel page dots, read by VoiceOver (#676). Arguments: the current page and the number of pages.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Page %1$lld sur %2$lld"
           }
         }
       }
@@ -3260,6 +3326,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les sons respectent le bouton silencieux de l'iPhone."
+          }
+        }
+      }
+    },
+    "Speak. Dictus writes." : {
+      "comment" : "Onboarding intro carousel, headline of the first page, under the scene of a woman dictating while walking (#676).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parlez. Dictus écrit."
           }
         }
       }
@@ -4226,17 +4303,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le vocabulaire est désactivé. Vos termes sont conservés et ne remplacent plus rien jusqu'à ce que vous le réactiviez."
-          }
-        }
-      }
-    },
-    "Voice dictation, 100% offline" : {
-      "comment" : "Welcome screen tagline, the first thing a new user reads: Dictus transcribes on the device, with no network.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictée vocale, 100 % hors ligne"
           }
         }
       }
