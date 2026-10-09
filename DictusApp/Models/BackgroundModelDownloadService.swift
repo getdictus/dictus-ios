@@ -127,12 +127,25 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
     /// only thing that can notice a transfer iOS has parked (issue #492): a background
     /// session that loses connectivity delivers no callback at all, so the state machine
     /// below is never told and never fails. Runs only while there is a run to watch.
+    ///
+    /// Its tick also drives the adopted-task watchdog (issue #690), which needs the same
+    /// two things — a clock while a transfer is live, and whether the user is looking —
+    /// and nothing else.
     private lazy var connectivity = DownloadConnectivityWatch { [weak self] observed in
         guard let self else { return }
         self.queue.addOperation { [weak self] in
+            // Offline first: a run it fails is gone before the watchdog looks, so a parked
+            // task is never replaced by one that can only park again.
             self?.reportOfflineStalls(observed: observed)
+            self?.replaceSilentAdoptedTasks()
         }
     }
+
+    /// Seconds after `restore()` at which every task's state is logged a second time.
+    /// The same ten seconds the watchdog waits, so the two lines bracket its decision:
+    /// a task that is `running` at restore and has the same `received` ten seconds later
+    /// is the wedge #690 is about.
+    static let adoptedTaskRecheckDelay: TimeInterval = AdoptedDownloadWatchdog.silenceLimit
 
     // MARK: - Public API
 
@@ -178,6 +191,13 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
     /// mean downloading half a gigabyte for a user who has not asked for anything yet.
     /// `ModelManager` decides that, from the foreground, and its call lands on the very
     /// run this rebuilt.
+    ///
+    /// WHAT IT LOGS ABOUT THE TASKS IT ADOPTS (issue #690). After iOS killed Dictus on the
+    /// Full Access change, the task adopted here delivered nothing for minutes, in the
+    /// foreground with the network up, and no line said why. Each adopted task's state,
+    /// byte count and error are logged now and again `adoptedTaskRecheckDelay` later,
+    /// which is what tells a suspended task from a running one that is not being fed.
+    /// The watchdog unblocks the run whatever the answer; these lines say what it was.
     func restore() {
         queue.addOperation { [self] in
             let manifests = ManifestStore.loadAll()
@@ -187,29 +207,118 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
             }
             session.getAllTasks { [self] tasks in
                 queue.addOperation { [self] in
-                    var adopted = 0
+                    let now = Date()
+                    var adopted: [URLSessionDownloadTask] = []
                     for task in tasks {
                         guard let download = task as? URLSessionDownloadTask,
                               let tag = ModelDownloadTaskTag.decode(task.taskDescription),
                               let run = runs[tag.modelIdentifier],
                               tag.fileIndex == run.manifest.currentFileIndex else {
-                            task.cancel()
+                            cancelUnclaimed(task)
                             continue
                         }
                         run.inFlight.insert(tag.chunkIndex)
                         run.tasks[tag.chunkIndex] = download
                         run.liveChunkBytes[tag.chunkIndex] = download.countOfBytesReceived
-                        adopted += 1
+                        // The watchdog's clock starts at adoption: no byte has arrived in
+                        // this process yet, and it cannot know when the last one did in
+                        // the previous one.
+                        run.adoptedTaskLastByte[download.taskIdentifier] = now
+                        adopted.append(download)
                     }
                     PersistentLog.log(.modelDownloadSessionRestored(
-                        tasks: adopted,
+                        tasks: adopted.count,
                         models: manifests.count
                     ))
+                    for task in adopted {
+                        logState(of: task, phase: "restore", origin: "adopted")
+                    }
                     for run in runs.values where !run.inFlight.isEmpty {
                         run.emitProgress(force: true)
                     }
+                    if !adopted.isEmpty {
+                        scheduleTaskStateRecheck(adopted: adopted)
+                    }
                 }
             }
+        }
+    }
+
+    /// Cancels a task the session handed back that no run can take, and says why.
+    ///
+    /// Two shapes, named apart in the log. `restoreUnclaimed`: no manifest on disk claims
+    /// the task, or its tag is unreadable — nothing would ever consume its bytes.
+    /// `restoreStaleFile`: the model has a run, but the task fetches a file the manifest
+    /// has moved past.
+    ///
+    /// NOT marked abandoned, deliberately unchanged by #690: a `restoreStaleFile` task's
+    /// model HAS a run, so its `-999` completion reaches `handleChunkCompletion` and, `-999`
+    /// not being retryable, ends that run. Whether that is right is a question for the
+    /// maintainer; this line makes it visible when it happens.
+    private func cancelUnclaimed(_ task: URLSessionTask) {
+        let tag = ModelDownloadTaskTag.decode(task.taskDescription)
+        let run = tag.flatMap { runs[$0.modelIdentifier] }
+        let caller: TaskCancelCaller = run == nil ? .restoreUnclaimed : .restoreStaleFile
+        PersistentLog.log(.modelDownloadTaskCancelled(
+            name: tag?.modelIdentifier ?? "?",
+            path: tag.flatMap { tag in run?.pathOfFile(tag.fileIndex) } ?? "?",
+            chunk: tag?.chunkIndex ?? -1,
+            caller: caller.rawValue
+        ))
+        task.cancel()
+    }
+
+    /// Logs every adopted task again `adoptedTaskRecheckDelay` after `restore()`, and
+    /// every other task the session holds by then, so a device log shows whether the
+    /// adopted transfer moved — and whether a task this process created is moving where
+    /// the adopted one did not, which would point at the session rather than the task.
+    ///
+    /// The adopted tasks are kept by reference rather than re-listed: one the watchdog
+    /// has cancelled meanwhile is no longer listed by `getAllTasks`, and its state at that
+    /// moment is part of the answer.
+    private func scheduleTaskStateRecheck(adopted: [URLSessionDownloadTask]) {
+        let delay = Self.adoptedTaskRecheckDelay
+        // Strong captures, like `restore()`'s: this is the process-long singleton.
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay) { [self] in
+            queue.addOperation { [self] in
+                for task in adopted {
+                    logState(of: task, phase: "restore+10s", origin: "adopted")
+                }
+                let adoptedIdentifiers = Set(adopted.map(\.taskIdentifier))
+                session.getAllTasks { [self] tasks in
+                    queue.addOperation { [self] in
+                        for task in tasks where !adoptedIdentifiers.contains(task.taskIdentifier) {
+                            logState(of: task, phase: "restore+10s", origin: "new")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// One `modelDownloadTaskState` line for a task, as URLSession describes it.
+    private func logState(of task: URLSessionTask, phase: String, origin: String) {
+        let tag = ModelDownloadTaskTag.decode(task.taskDescription)
+        let run = tag.flatMap { runs[$0.modelIdentifier] }
+        PersistentLog.log(.modelDownloadTaskState(
+            name: tag?.modelIdentifier ?? "?",
+            path: tag.flatMap { tag in run?.pathOfFile(tag.fileIndex) } ?? "?",
+            chunk: tag?.chunkIndex ?? -1,
+            phase: phase,
+            origin: origin,
+            state: Self.describe(task.state),
+            receivedBytes: task.countOfBytesReceived,
+            error: (task.error as NSError?).map { "\($0.domain)/\($0.code)" } ?? "none"
+        ))
+    }
+
+    private static func describe(_ state: URLSessionTask.State) -> String {
+        switch state {
+        case .running: return "running"
+        case .suspended: return "suspended"
+        case .canceling: return "canceling"
+        case .completed: return "completed"
+        @unknown default: return "unknown(\(state.rawValue))"
         }
     }
 
@@ -248,7 +357,7 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
     func discardStaging(for identifier: String) {
         queue.addOperation { [self] in
             if let run = runs[identifier] {
-                run.cancelAllTasks()
+                run.cancelAllTasks(caller: .discardStaging)
                 finish(run, error: CancellationError())
             }
             ManifestStore.discard(identifier)
@@ -288,7 +397,7 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
             ) {
                 return existing
             }
-            existing.cancelAllTasks()
+            existing.cancelAllTasks(caller: .listingReplaced)
             finish(existing, error: CancellationError())
             ManifestStore.discard(manifest.modelIdentifier)
         }
@@ -382,6 +491,7 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
         run.inFlight.removeAll()
         run.tasks.removeAll()
         run.liveChunkBytes.removeAll()
+        run.adoptedTaskLastByte.removeAll()
         run.attempts = 0
         ManifestStore.save(run.manifest)
         run.emitProgress(force: true)
@@ -574,11 +684,73 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
             // The parked tasks go with the run. Left alive they would deliver their
             // chunks into a run that no longer exists, which drops them anyway, and the
             // bytes would be paid for twice.
-            run.cancelAllTasks()
+            run.cancelAllTasks(caller: .offlineStall)
             finish(run, error: ModelRepoDownloader.DownloadError.stalled(
                 path: path,
                 timeoutSeconds: Int(Self.offlineStallGrace)
             ))
+        }
+    }
+
+    /// Cancels every adopted task that has gone `AdoptedDownloadWatchdog.silenceLimit`
+    /// without a byte while the app is in the foreground, and asks for its chunk again
+    /// (issue #690).
+    ///
+    /// WHY IT HAS TO BE US. Measured on device on 2026-10-09, three runs: after iOS killed
+    /// Dictus on the Full Access change — and once after a user force-quit — the relaunch
+    /// adopted the task the system kept, and that task then delivered nothing for 90 s,
+    /// then 3 min 25 s, in the foreground with the network up and no error. The 30 s
+    /// `timeoutIntervalForRequest` never fired, so URLSession did not consider the task
+    /// running. Nothing else here could notice: `restore()` never resumes an adopted task,
+    /// its chunk sits in `inFlight` so `pump` never asks for it again, and
+    /// `DownloadStallPolicy` is silent by design while there is a route.
+    ///
+    /// WHY CANCEL AND RE-ISSUE RATHER THAN `resume()`. The diagnosis is not in yet — the
+    /// lines `restore()` now logs will say whether the task was suspended or parked by
+    /// `nsurlsessiond` — and a fresh task is the remedy that holds in both cases, where
+    /// `resume()` would only answer the first (triage decision 3 on the issue).
+    ///
+    /// WHAT IT COSTS, exactly. The adopted task's bytes are gone with it —
+    /// `didFinishDownloadingTo` fires on success alone — so at most one 32 MB chunk is
+    /// downloaded again; every chunk that landed is on disk and in the manifest, and the
+    /// re-issued request starts at the chunk boundary the manifest names. The cancel goes
+    /// through the abandoned path, so its `-999` spends none of the file's attempts.
+    ///
+    /// WHY IT CANNOT LOOP. The task that replaces the adopted one is created here, and
+    /// `AdoptedDownloadWatchdog` never cancels a task this process created.
+    ///
+    /// WHY IT CANNOT BRING #449 BACK. The foreground reading is the watcher's current one,
+    /// taken on this queue a line before the decision, not the one the tick carried: an app
+    /// that has gone to the background since reads `nil` here and nothing is cancelled.
+    private func replaceSilentAdoptedTasks(now: Date = Date()) {
+        let foregroundSince = connectivity.conditions.foregroundSince
+        // A copy: `pump` can end a run, which mutates `runs`.
+        for run in Array(runs.values) where !run.isFinished {
+            var replaced = false
+            for (chunkIndex, task) in run.tasks.sorted(by: { $0.key < $1.key }) {
+                // Only `restore()` writes this map, so a task without an entry is one this
+                // process created — and the policy, not this loop, is what refuses it.
+                let adoptedLastByte = run.adoptedTaskLastByte[task.taskIdentifier]
+                let lastByteAt = adoptedLastByte ?? now
+                guard AdoptedDownloadWatchdog.shouldCancel(
+                    now: now,
+                    origin: adoptedLastByte == nil ? .createdByThisProcess : .adoptedFromPreviousProcess,
+                    lastByteAt: lastByteAt,
+                    foregroundSince: foregroundSince
+                ) else { continue }
+
+                PersistentLog.log(.modelDownloadAdoptedTaskSilent(
+                    name: run.manifest.modelIdentifier,
+                    path: run.pathOfFile(run.fileIndex(of: task) ?? -1),
+                    chunk: chunkIndex,
+                    secondsWithoutByte: Int(now.timeIntervalSince(lastByteAt))
+                ))
+                run.cancel(chunk: chunkIndex, caller: .adoptedWatchdog)
+                replaced = true
+            }
+            // The chunk has left `inFlight`, so the manifest offers it again: same span,
+            // same `If-Range`, a task of this process's own.
+            if replaced { pump(run) }
         }
     }
 
@@ -690,7 +862,7 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
             ManifestStore.discardFile(run.manifest.modelIdentifier, fileIndex: tag.fileIndex)
             run.manifest.resetFile(at: tag.fileIndex)
             ManifestStore.save(run.manifest)
-            run.cancelAllTasks()
+            run.cancelAllTasks(caller: .fileRestart)
             run.inFlight.removeAll()
             run.liveChunkBytes.removeAll()
             run.emitProgress(force: true)
@@ -762,7 +934,13 @@ extension BackgroundModelDownloadService: URLSessionDownloadDelegate {
               let run = run(for: tag) else { return }
         run.liveChunkBytes[tag.chunkIndex] = totalBytesWritten
         // Every byte is proof the transfer is alive, whatever `NWPathMonitor` believes.
-        run.lastProgressDate = Date()
+        let now = Date()
+        run.lastProgressDate = now
+        // And, for a task inherited from a previous process, proof it is not the wedge
+        // the adopted-task watchdog is there for (#690).
+        if run.adoptedTaskLastByte[downloadTask.taskIdentifier] != nil {
+            run.adoptedTaskLastByte[downloadTask.taskIdentifier] = now
+        }
         run.emitProgress(force: false)
     }
 
@@ -883,6 +1061,8 @@ extension BackgroundModelDownloadService: URLSessionDownloadDelegate {
               let run = run(for: tag) else {
             return
         }
+        // A finished task is no longer one the watchdog may act on.
+        run.adoptedTaskLastByte.removeValue(forKey: task.taskIdentifier)
         // A task this run cancelled itself (a file restart, a discarded download) is not
         // the network failing, and must not spend one of the file's three attempts.
         guard !run.isAbandoned(task) else { return }
@@ -892,6 +1072,27 @@ extension BackgroundModelDownloadService: URLSessionDownloadDelegate {
     func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
         drainBackgroundEventsIfNeeded()
     }
+}
+
+// MARK: - Who cancelled a task
+
+/// The code paths that cancel a model download task, as they appear in the
+/// `caller=` field of `modelDownloadTaskCancelled` (#690).
+private enum TaskCancelCaller: String {
+    /// `restore()`: the session handed back a task no manifest claims.
+    case restoreUnclaimed
+    /// `restore()`: the task fetches a file its model's manifest has moved past.
+    case restoreStaleFile
+    /// `discardStaging`: the user deleted the partial download or the model.
+    case discardStaging
+    /// `adopt`: a fresh listing describes a different download, which replaces the run.
+    case listingReplaced
+    /// `reportOfflineStalls`: no network path while the user watched (#492).
+    case offlineStall
+    /// A refused range that restarts the file from byte zero.
+    case fileRestart
+    /// The adopted-task watchdog (#690).
+    case adoptedWatchdog
 }
 
 // MARK: - One model's transfer
@@ -907,6 +1108,11 @@ private final class DownloadRun {
     var tasks: [Int: URLSessionDownloadTask] = [:]
     /// Tasks this run cancelled itself, whose completion must not count as a failure.
     var abandonedTaskIdentifiers: Set<Int> = []
+    /// Tasks `restore()` adopted from a previous process, keyed by `taskIdentifier`, with
+    /// when each last delivered a byte in this process — or was adopted, before the first.
+    /// The only tasks the adopted-task watchdog ever looks at (#690); a task this process
+    /// creates is never entered here, which is what keeps the watchdog from looping.
+    var adoptedTaskLastByte: [Int: Date] = [:]
     /// Bytes received so far per in-flight chunk, for the percentage between savepoints.
     var liveChunkBytes: [Int: Int64] = [:]
     /// Consecutive failures on the current file. Reset by any chunk that lands.
@@ -945,14 +1151,39 @@ private final class DownloadRun {
     /// `didCompleteWithError`, with a cancellation error, some time after this returns.
     /// Without this set the state machine would read that as the network failing and
     /// spend one of the file's three attempts on a task it killed itself.
-    func cancelAllTasks() {
-        for (_, task) in tasks {
-            abandonedTaskIdentifiers.insert(task.taskIdentifier)
-            task.cancel()
+    func cancelAllTasks(caller: TaskCancelCaller) {
+        for chunkIndex in tasks.keys.sorted() {
+            cancel(chunk: chunkIndex, caller: caller)
         }
         tasks.removeAll()
         inFlight.removeAll()
         liveChunkBytes.removeAll()
+        adoptedTaskLastByte.removeAll()
+    }
+
+    /// Stops one chunk's transfer, remembers the task as abandoned for the same reason as
+    /// `cancelAllTasks`, and frees the chunk so `pump` can ask for it again.
+    ///
+    /// The one place a run cancels a task, and it says who asked (#690): a `-999` in a
+    /// device log with no `modelDownloadTaskCancelled` line before it was not ours.
+    func cancel(chunk chunkIndex: Int, caller: TaskCancelCaller) {
+        guard let task = tasks.removeValue(forKey: chunkIndex) else { return }
+        inFlight.remove(chunkIndex)
+        liveChunkBytes.removeValue(forKey: chunkIndex)
+        adoptedTaskLastByte.removeValue(forKey: task.taskIdentifier)
+        abandonedTaskIdentifiers.insert(task.taskIdentifier)
+        PersistentLog.log(.modelDownloadTaskCancelled(
+            name: manifest.modelIdentifier,
+            path: pathOfFile(fileIndex(of: task) ?? -1),
+            chunk: chunkIndex,
+            caller: caller.rawValue
+        ))
+        task.cancel()
+    }
+
+    /// The file a task fetches, read from its tag.
+    func fileIndex(of task: URLSessionTask) -> Int? {
+        ModelDownloadTaskTag.decode(task.taskDescription)?.fileIndex
     }
 
     /// Whether this completion belongs to a task this run cancelled on purpose.
