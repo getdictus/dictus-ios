@@ -487,7 +487,7 @@ private struct GlobeLongPressCard: View {
         // Centre of the globe, and of the Dictus row (the menu's middle row), from the
         // keyboard's bottom-left corner.
         let globeCentre = CGPoint(x: globeInset + globeSize / 2, y: globeInset + globeSize / 2)
-        let dictusCentre = CGPoint(x: globeInset + menuWidth * 0.4, y: menuBottom + menuRowHeight * 1.5)
+        let dictusCentre = CGPoint(x: globeInset + menuWidth * 0.75, y: menuBottom + menuRowHeight * 1.5)
         let target: CGPoint
         let visible: Bool
         let pressed: Bool
