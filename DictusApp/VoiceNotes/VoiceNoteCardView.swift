@@ -20,11 +20,14 @@ import DictusCore
 /// the voice note queue instead, until the user has read it (`VoiceNoteQueue`).
 /// This card reads whichever holds it and writes the summary back to the same place.
 ///
-/// ### Why the summary is computed here
+/// ### Where the summary is computed
 ///
-/// Apple Foundation Models refuse a backgrounded app (#315), and the warm path
-/// transcribes in the background. So the summary runs when the card is on screen,
-/// in the foreground, once, and is stored.
+/// Since #627 the queue runs the note's Smart Mode right after transcribing it,
+/// usually in the background, so the card normally opens on a stored result. Apple
+/// Foundation Models can refuse a backgrounded app (#315); when that run was refused,
+/// or the background task expired under it, nothing is stored and this card runs the
+/// mode when it is on screen, in the foreground, once — the behaviour before #627 —
+/// without telling the user about the refusal it is recovering from.
 struct VoiceNoteCardView: View {
 
     let noteID: UUID
@@ -375,53 +378,50 @@ struct VoiceNoteCardView: View {
     }
 
     private func summarise(_ content: Content) async {
-        guard let mode = VoiceNoteSettings.load().mode.smartMode else { return }
         summaryState = .running
-        let policy = TranscriptionLanguagePolicy(
-            mode: content.language == TranscriptionRecord.autoDetectedCode
-                ? .autoDetect
-                : SupportedLanguage(rawValue: content.language).map(TranscriptionLanguageMode.explicit) ?? .autoDetect,
-            keyboardLanguage: SupportedLanguage.active,
-            engine: content.engine ?? .parakeet,
-            modelIdentifier: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? ""
-        )
-        // Its own slot (#648): a dictation started while this runs must not cancel it.
-        // Keyed by note: a card rebuilt while this note's mode is still running (the
-        // stack dismissed in the background, the note reopened from History) attaches
-        // to that run instead of starting a second one that would supersede it.
-        let outcome = await PolishCoordinator.shared.polishVoiceNote(
-            noteID: noteID,
-            raw: content.transcript, languagePolicy: policy, smartMode: mode,
-            // Smart tasks skip the duration gate; the value is the metrics' context.
-            recordingDuration: TimeInterval(content.durationSeconds ?? 0)
-        )
+        // Nil only when no mode is chosen, and `summarySection` then draws no card.
+        guard var run = await runMode(content) else {
+            summaryState = .idle
+            return
+        }
+        // Attached to the queue's background run, which Apple refused or which the
+        // background task cut short (#627): that is the fallback's case, not a failure
+        // to show. The app is in front now, so run it again here, once.
+        if run.attempt.trigger == .background, run.attempt.defersToOpen {
+            guard let rerun = await runMode(content) else {
+                summaryState = .idle
+                return
+            }
+            run = rerun
+        }
+        let outcome = run.outcome
         // A degraded outcome hands back the transcript itself: never shown as a summary.
         if let failure = outcome.smartModeFailure {
             // A decline is not a failure (#650). On a voice note it is `Liste`'s output
             // check, now reachable since short notes run their mode: a one-item list
             // was turned down, and the service has already recorded why. "Could not
             // be produced" with a "Try again" would invite the same decline again.
-            let declined = failure.outcome == PolishMetrics.Outcome.smartModeSkippedShortInput.rawValue
-            PersistentLog.log(.diagnosticProbe(component: "VoiceNote", instanceID: "summary",
-                                               action: declined ? "declined" : "failed",
-                                               details: "mode=\(mode.id) outcome=\(failure.outcome) reason=\(failure.reason)"))
-            summaryState = declined ? .declined : .failed(VoiceNoteCopy.summaryFailed(failure))
+            // The attempt itself is logged once per run, by `PolishCoordinator` (#627).
+            summaryState = run.attempt.action == .declined ? .declined : .failed(VoiceNoteCopy.summaryFailed(failure))
             return
         }
-        guard let summary = outcome.text?.trimmingCharacters(in: .whitespacesAndNewlines), !summary.isEmpty else {
+        guard run.attempt.action == .success else {
             summaryState = .failed(String(localized: "The summary could not be produced."))
             return
         }
-        if history.record(id: noteID) != nil {
-            history.updateSummary(id: noteID, to: summary, modeIdentifier: mode.id)
-        } else {
-            queueStore.mutate {
-                $0.update(noteID) {
-                    $0.summary = summary
-                    $0.summaryModeIdentifier = mode.id
-                }
-            }
-        }
+        // Stored by `runSmartMode`; the card redraws from the store.
         summaryState = .idle
+    }
+
+    /// One run of the note's mode on open, stored by the processor on success.
+    private func runMode(_ content: Content) async -> PolishCoordinator.VoiceNoteModeRun? {
+        await processor.runSmartMode(
+            noteID: noteID,
+            source: VoiceNoteProcessor.SmartModeSource(
+                transcript: content.transcript, language: content.language,
+                engine: content.engine, durationSeconds: content.durationSeconds
+            ),
+            trigger: .open
+        )
     }
 }

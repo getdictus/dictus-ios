@@ -18,6 +18,14 @@ import DictusCore
 ///   extension says "Open Dictus, your voice note is waiting", and the queue starts
 ///   here the next time the app becomes active, with the list on screen.
 ///
+/// ### The Smart Mode, right after the transcript (#627)
+///
+/// Once a note is transcribed, the queue runs its Smart Mode (Résumé by default) at
+/// once, inside the same background task, so the card opens on a result instead of a
+/// spinner. Apple's background budget can refuse that call (#315); a refusal, or the
+/// background task expiring under it, stores nothing, and the card runs the mode on
+/// open as it did before #627, without an error for the refusal itself.
+///
 /// ### What it never does
 ///
 /// Touch the dictation. No status write, no session, no App Group key the keyboard
@@ -299,6 +307,95 @@ final class VoiceNoteProcessor: ObservableObject {
         VoiceNoteIslandDriver.shared.finished(note.id, succeeded: true)
         // A result that lands while the app is in front is ready and unread too.
         evaluatePresentation()
+        // Still inside the queue's background task: the mode's result is then ready
+        // before the user opens the card (#627). The island already shows the note as
+        // ready; a card opened meanwhile attaches to this run rather than starting one.
+        await runSmartModeInBackground(noteID: note.id, source: SmartModeSource(
+            transcript: transcript, language: record.language,
+            engine: policy.engine, durationSeconds: Int(duration.rounded())
+        ))
+    }
+
+    // MARK: - The Smart Mode (#627)
+
+    /// What a note's mode runs on: its transcript and what the card shows beside it.
+    struct SmartModeSource {
+        let transcript: String
+        /// `TranscriptionRecord.language`: a language code, or the auto-detected marker.
+        let language: String
+        let engine: SpeechEngine?
+        let durationSeconds: Int?
+    }
+
+    /// Run the note's Smart Mode right after its transcription, when the card would.
+    private func runSmartModeInBackground(noteID: UUID, source: SmartModeSource) async {
+        let mode = VoiceNoteSettings.load().mode.smartMode
+        guard VoiceNoteSmartModeAttempt.runsInBackground(
+            mode: mode,
+            transcriptLength: source.transcript.count,
+            unavailableReason: VoiceNoteAvailability.summaryUnavailableReason(engineState: PolishAvailability.state),
+            isEntitled: VoiceNoteAvailability.isEntitled,
+            hasStoredResult: storedSummary(for: noteID) != nil
+        ) else { return }
+        _ = await runSmartMode(noteID: noteID, source: source, trigger: .background)
+    }
+
+    /// Run the voice note mode on a transcript and store a result, from the queue or
+    /// from the card (#627). One code path, so the card and the background build the
+    /// same request and store the same way: History when the note is there, the queue
+    /// when History is off.
+    ///
+    /// Returns nil when no mode is chosen.
+    func runSmartMode(noteID: UUID, source: SmartModeSource,
+                      trigger: VoiceNoteSmartModeTrigger) async -> PolishCoordinator.VoiceNoteModeRun? {
+        guard let mode = VoiceNoteSettings.load().mode.smartMode else { return nil }
+        let policy = TranscriptionLanguagePolicy(
+            mode: source.language == TranscriptionRecord.autoDetectedCode
+                ? .autoDetect
+                : SupportedLanguage(rawValue: source.language).map(TranscriptionLanguageMode.explicit) ?? .autoDetect,
+            keyboardLanguage: SupportedLanguage.active,
+            engine: source.engine ?? .parakeet,
+            modelIdentifier: AppGroup.defaults.string(forKey: SharedKeys.activeModel) ?? ""
+        )
+        // Its own slot (#648): a dictation started while this runs must not cancel it.
+        // Keyed by note: a caller arriving while this note's mode is still running (the
+        // card opened mid-run, the stack dismissed and the note reopened from History)
+        // attaches to that run instead of starting a second one that would supersede it.
+        let run = await PolishCoordinator.shared.polishVoiceNote(
+            PolishCoordinator.VoiceNoteModeRequest(
+                noteID: noteID, raw: source.transcript, languagePolicy: policy, smartMode: mode,
+                recordingDuration: TimeInterval(source.durationSeconds ?? 0)
+            ),
+            trigger: trigger
+        )
+        // A degraded outcome hands back the transcript itself: never stored as a result.
+        if run.attempt.action == .success,
+           let summary = run.outcome.text?.trimmingCharacters(in: .whitespacesAndNewlines), !summary.isEmpty {
+            storeSummary(summary, modeIdentifier: mode.id, for: noteID)
+        }
+        return run
+    }
+
+    /// The stored mode result for a note, from whichever store holds it.
+    private func storedSummary(for noteID: UUID) -> String? {
+        if let record = TranscriptionHistoryStore.shared.record(id: noteID) { return record.summary }
+        return store.queue.note(id: noteID)?.summary
+    }
+
+    /// Store a mode result where the note lives. A note deleted meanwhile is in neither
+    /// store, and both writes are then no-ops.
+    private func storeSummary(_ summary: String, modeIdentifier: String, for noteID: UUID) {
+        let history = TranscriptionHistoryStore.shared
+        if history.record(id: noteID) != nil {
+            history.updateSummary(id: noteID, to: summary, modeIdentifier: modeIdentifier)
+        } else {
+            store.mutate {
+                $0.update(noteID) {
+                    $0.summary = summary
+                    $0.summaryModeIdentifier = modeIdentifier
+                }
+            }
+        }
     }
 
     // MARK: - The keyboard (#637)
@@ -418,6 +515,9 @@ final class VoiceNoteProcessor: ObservableObject {
     /// iOS grants after the engine is released or the activity is stopped, so a note
     /// a few seconds from done is not lost to a suspension. If it expires, the note
     /// stays `.transcribing` on disk and is recovered on the next run.
+    ///
+    /// A Smart Mode running when it expires is cancelled (#627): the note keeps its
+    /// transcript, stores no result, and the card runs the mode on open.
     private func beginBackgroundTask() {
         guard backgroundTask == .invalid else { return }
         // The handler runs synchronously on the main thread and must end the task before
@@ -425,6 +525,7 @@ final class VoiceNoteProcessor: ObservableObject {
         backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "dictus.voiceNote") { [weak self] in
             MainActor.assumeIsolated {
                 self?.log("backgroundTimeExpired", "remaining=\(self?.store.queue.waitingCount ?? 0)")
+                PolishCoordinator.shared.cancelBackgroundVoiceNoteRun()
                 self?.endBackgroundTask()
             }
         }
