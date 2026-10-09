@@ -326,7 +326,7 @@ public enum LogEvent: Sendable {
     case onboardingGlobeTutorialTextDetected
     case onboardingGlobeTutorialSkipped
     /// The Apple Intelligence step read the availability (#683). `trigger` is `appear` or
-    /// `return` (the app came back to the foreground, typically from Settings); `state`
+    /// `active` (the app became active again, typically back from Settings); `state`
     /// is `PolishAvailabilityState`'s description, so a device test can tell whether
     /// turning Apple Intelligence on moved it, and to what.
     case onboardingAppleIntelligenceChecked(trigger: String, state: String)
