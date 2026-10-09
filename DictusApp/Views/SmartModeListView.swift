@@ -53,16 +53,6 @@ struct SmartModeListView: View {
     /// Group, which publishes nothing.
     @EnvironmentObject private var proStatus: ProStatusManager
 
-    /// The "language not installed" notice of each Translate mode that is owed one
-    /// (#648), keyed by mode identifier. Read on appear and on every return to the
-    /// foreground, because the pair can be deleted in iOS Settings while Dictus waits.
-    @State private var notices: [String: SmartModeNotice] = [:]
-
-    /// The pair being downloaded, if any. Setting it starts the system prompt.
-    @State private var download: TranslationLanguagePair?
-
-    @Environment(\.scenePhase) private var scenePhase
-
     /// Whether the list below the switch is live: `FeatureGate.isAvailable`, the one
     /// predicate. Off, the arrangement stays visible and cannot be edited, since the
     /// keyboard applies none of it (#216 decision 5).
@@ -121,13 +111,6 @@ struct SmartModeListView: View {
         }
         .navigationTitle("Smart Modes")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await refreshNotices() }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active { Task { await refreshNotices() } }
-        }
-        .translationPairDownload($download) { _, _ in
-            Task { await refreshNotices() }
-        }
         .toolbar {
             // Only useful with something to reorder, and a lone EditButton over one
             // row reads as an unfinished screen.
@@ -146,13 +129,8 @@ struct SmartModeListView: View {
                 .foregroundColor(isPinned ? .dictusSmartMode : .secondary)
                 .frame(width: 24)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(Self.listName(for: mode))
-                    .foregroundColor(.primary)
-                if let notice = notices[mode.id] {
-                    languageNotice(notice)
-                }
-            }
+            Text(Self.listName(for: mode))
+                .foregroundColor(.primary)
 
             Spacer()
 
@@ -175,38 +153,6 @@ struct SmartModeListView: View {
                     : Text("Add \(Self.listName(for: mode)) to the keyboard")
             )
         }
-    }
-
-    /// A Translate mode whose language pair is not downloaded (#648).
-    ///
-    /// A notice and not a disabled row: Translate still works, on Apple Intelligence's
-    /// chat model, as it did before Translate moved to the Translation framework. The
-    /// copy says so, so nobody reads it as "this mode is broken".
-    @ViewBuilder
-    private func languageNotice(_ notice: SmartModeNotice) -> some View {
-        switch notice {
-        case .translationLanguageNotInstalled(let pair):
-            Text("Download this language for more accurate translations. Until then, translations use Apple Intelligence.")
-                .font(.dictusCaption)
-                .foregroundColor(.secondary)
-            Button("Download") {
-                download = pair
-            }
-            // `.borderless` for the reason the row's own button has it: a plain
-            // button style in a List row makes the whole row the tap target.
-            .buttonStyle(.borderless)
-            .font(.dictusCaption)
-            .disabled(download != nil)
-        }
-    }
-
-    /// Read the notice of every Translate mode in the catalogue.
-    private func refreshNotices() async {
-        var updated: [String: SmartModeNotice] = [:]
-        for mode in SmartModeCatalogue.builtIns where TranslationLanguagePair.translateTarget(of: mode) != nil {
-            updated[mode.id] = await SmartModeAvailability.notice(for: mode)
-        }
-        notices = updated
     }
 
     /// The line a device that cannot run Smart Modes is owed, on the screen where it
@@ -249,12 +195,6 @@ struct SmartModeListView: View {
         } else {
             guard updated.count < SmartModeCatalogue.maximumPinnedModes else { return }
             updated.append(mode.id)
-            // Pinning a Translate mode whose pair is missing is the moment to offer the
-            // download (#648): the system prompt is the offer, and declining it costs
-            // nothing, since Translate falls back to Apple Intelligence.
-            if case .translationLanguageNotInstalled(let pair) = notices[mode.id], download == nil {
-                download = pair
-            }
         }
         apply(updated)
     }

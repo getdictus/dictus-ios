@@ -520,16 +520,6 @@ public enum LogEvent: Sendable {
     /// caller's state (`extension` in the keyboard, which has no application state).
     /// Memory is the process's resident footprint in MB, before / peak while the
     /// framework ran / after. Codes, timings and counters only: no text.
-    /// Issue #648: a language-pair download was asked for from DictusApp, through
-    /// `prepareTranslation()`, the framework's only path to its system prompt.
-    ///
-    /// `before` and `after` are `LanguageAvailability`'s verdicts around the call
-    /// (`installed`, `notInstalled`, `unsupported`, `unknown`), so a reader can tell a
-    /// download that happened from a prompt that was declined or a pair that needed
-    /// nothing. `error` is the framework's cause slug, or `-`. Codes only.
-    case translationPairPrepared(strategy: String, source: String, target: String,
-                                 before: String, after: String, ms: Int, error: String)
-
     case translateEngineCall(strategy: String, status: String, source: String, target: String,
                              outcome: String, reason: String, chunks: Int, ms: Int, process: String,
                              appState: String, memBeforeMB: Int, memPeakMB: Int, memAfterMB: Int)
@@ -603,7 +593,7 @@ public enum LogEvent: Sendable {
              .polishInputLanguageRefused,
              .polishInsertionRefused, .polishCallSuperseded,
              .smartModeRefused, .smartModeSkipped, .vocabularyApplied,
-             .translateEngineCall, .translationPairPrepared:
+             .translateEngineCall:
             return .transcription
         }
     }
@@ -724,7 +714,7 @@ public enum LogEvent: Sendable {
 
         // Notice: a Translate report is triaged from these lines after the keyboard
         // process is gone, and `notice` is the lowest level the unified log persists.
-        case .translateEngineCall, .translationPairPrepared:
+        case .translateEngineCall:
             return .notice
         }
     }
@@ -1001,9 +991,6 @@ public enum LogEvent: Sendable {
             return "mode=\(mode) outcome=\(outcome) reason=\(reason) check=\(check)"
         case .smartModeSkipped(let mode, let reason, let disarmed):
             return "mode=\(mode) reason=\(reason) disarmed=\(disarmed)"
-        case .translationPairPrepared(let strategy, let source, let target, let before, let after, let ms, let error):
-            return "strategy=\(strategy) source=\(source) target=\(target) before=\(before) after=\(after) "
-                + "ms=\(ms) error=\(error)"
         case .translateEngineCall(let strategy, let status, let source, let target, let outcome,
                                   let reason, let chunks, let ms, let process, let appState,
                                   let memBeforeMB, let memPeakMB, let memAfterMB):
@@ -1180,7 +1167,6 @@ extension LogEvent {
         case .smartModeRefused: return "smartModeRefused"
         case .smartModeSkipped: return "smartModeSkipped"
         case .translateEngineCall: return "translateEngineCall"
-        case .translationPairPrepared: return "translationPairPrepared"
         case .userDictionaryWordLearned: return "userDictionaryWordLearned"
         case .userDictionaryEvicted: return "userDictionaryEvicted"
         case .userDictionaryReset: return "userDictionaryReset"

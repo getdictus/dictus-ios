@@ -18,7 +18,6 @@ struct PolishDebugView: View {
 
     var body: some View {
         List {
-            TranslationAvailabilityDebugSection()
             if !entries.isEmpty {
                 Section {
                     BreakdownRow(entries: entries)
@@ -414,96 +413,5 @@ private extension PolishMetrics.Outcome {
         // has to be findable at a glance in a long export.
         case .cancelled, .engineFailed, .engineUnavailable: return .red
         }
-    }
-}
-
-// MARK: - #648: Translation framework availability
-
-/// What Apple's Translation framework says about every pair Dictus can ask it for, under
-/// both strategies, with a button per pair and strategy that runs the real download
-/// component (`.translationPairDownload`).
-///
-/// It exists because Translate's "language not installed" notice and its download had
-/// never been seen on a device: with Apple Intelligence on, `.highFidelity` reports every
-/// pair `installed`, which Apple documents (see `TranslationPairStatus`). `.lowLatency`
-/// still needs downloads, so preparing a `.lowLatency` pair here is how the system
-/// prompt and the component's log line are exercised end to end. Debug screen only:
-/// Translate itself never runs on `.lowLatency`.
-private struct TranslationAvailabilityDebugSection: View {
-
-    private struct Row: Identifiable {
-        let pair: TranslationLanguagePair
-        var highFidelity: TranslationPairStatus = .unknown
-        var lowLatency: TranslationPairStatus = .unknown
-        var id: String { "\(pair.source)>\(pair.target.rawValue)" }
-    }
-
-    @State private var rows: [Row] = []
-    @State private var download: TranslationLanguagePair?
-    @State private var downloadStrategy: TranslationStrategy = .lowLatency
-    @State private var lastResult: String?
-
-    var body: some View {
-        Section {
-            ForEach(rows) { row in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(row.pair.source) → \(row.pair.target.rawValue)")
-                        .font(.caption.monospaced().bold())
-                    HStack {
-                        Text("HF \(row.highFidelity.rawValue) · LL \(row.lowLatency.rawValue)")
-                            .font(.caption2.monospaced())
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        prepareButton("HF", row.pair, .highFidelity)
-                        prepareButton("LL", row.pair, .lowLatency)
-                    }
-                }
-            }
-            if let lastResult {
-                Text(lastResult).font(.caption2.monospaced())
-            }
-            Button("Refresh") { Task { await refresh() } }
-        } header: {
-            Text("Translation availability (#648)")
-        } footer: {
-            Text("HF = highFidelity (what Translate uses), LL = lowLatency (debug only). "
-                 + "Each prepare writes a translationPairPrepared line to the log.")
-                .font(.caption2)
-        }
-        .task { await refresh() }
-        .translationPairDownload($download, strategy: downloadStrategy) { pair, status in
-            lastResult = "\(downloadStrategy.rawValue) \(pair.source)→\(pair.target.rawValue): \(status.rawValue)"
-            Task { await refresh() }
-        }
-    }
-
-    private func prepareButton(_ label: String, _ pair: TranslationLanguagePair,
-                               _ strategy: TranslationStrategy) -> some View {
-        Button(label) {
-            downloadStrategy = strategy
-            download = pair
-        }
-        .buttonStyle(.bordered)
-        .controlSize(.mini)
-        .disabled(download != nil)
-    }
-
-    /// Every source Dictus can transcribe into a Translate mode: the four keyboard
-    /// languages plus the language the user declared, against the four targets.
-    private func refresh() async {
-        var sources = SupportedLanguage.allCases.map(\.rawValue)
-        let spoken = SpokenLanguage.forRecommendation()
-        if !sources.contains(spoken) { sources.append(spoken) }
-        var updated: [Row] = []
-        for source in sources {
-            for target in SupportedLanguage.allCases {
-                guard let pair = TranslationLanguagePair(source: source, target: target) else { continue }
-                var row = Row(pair: pair)
-                row.highFidelity = await TranslationPairStatus.current(for: pair, strategy: .highFidelity)
-                row.lowLatency = await TranslationPairStatus.current(for: pair, strategy: .lowLatency)
-                updated.append(row)
-            }
-        }
-        rows = updated
     }
 }

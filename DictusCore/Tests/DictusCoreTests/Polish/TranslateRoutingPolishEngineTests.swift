@@ -273,8 +273,8 @@ final class TranslateRoutingPolishEngineTests: XCTestCase {
     }
 }
 
-/// The language pair and the "not installed" notice (#648).
-final class TranslationLanguageNoticeTests: XCTestCase {
+/// The language pair a Translate mode needs (#648).
+final class TranslationLanguagePairTests: XCTestCase {
 
     func testAPairNeedsTwoDifferentLanguages() {
         XCTAssertNotNil(TranslationLanguagePair(source: "fr", target: .english))
@@ -282,38 +282,12 @@ final class TranslationLanguageNoticeTests: XCTestCase {
         XCTAssertNil(TranslationLanguagePair(source: "en-GB", target: .english))
     }
 
-    func testOnlyTranslateModesNeedAPair() {
+    func testOnlyTranslateModesHaveATarget() {
         for language in SupportedLanguage.allCases {
-            let mode = SmartModeCatalogue.translate(to: language)
-            XCTAssertEqual(TranslationLanguagePair.translateTarget(of: mode), language)
+            XCTAssertEqual(TranslationLanguagePair.translateTarget(of: SmartModeCatalogue.translate(to: language)),
+                           language)
         }
-        XCTAssertNil(TranslationLanguagePair(mode: SmartModeCatalogue.notes, source: "fr"))
-        XCTAssertEqual(TranslationLanguagePair(mode: SmartModeCatalogue.translate(to: .german), source: "fr")?.target,
-                       .german)
-    }
-
-    func testOnlyANotInstalledPairIsOwedANotice() throws {
-        let pair = try XCTUnwrap(TranslationLanguagePair(source: "fr", target: .english))
-        XCTAssertEqual(SmartModeAvailability.notice(pair: pair, status: .notInstalled),
-                       .translationLanguageNotInstalled(pair))
-        XCTAssertNil(SmartModeAvailability.notice(pair: pair, status: .installed))
-        // Nothing to download: a notice would offer an action that does nothing.
-        XCTAssertNil(SmartModeAvailability.notice(pair: pair, status: .unsupported))
-        XCTAssertNil(SmartModeAvailability.notice(pair: pair, status: .unknown))
-        XCTAssertNil(SmartModeAvailability.notice(pair: nil, status: .notInstalled))
-    }
-
-    /// A notice, never a refusal: the arming policy does not know about it.
-    func testTheNoticeDoesNotTouchArmability() {
-        XCTAssertEqual(
-            SmartModeAvailability.armability(engineState: .available, engineIsRefusing: false, entitlement: .entitled),
-            .armable
-        )
-    }
-
-    func testTheNoticeHasAStableSlug() throws {
-        let pair = try XCTUnwrap(TranslationLanguagePair(source: "fr", target: .spanish))
-        XCTAssertEqual(SmartModeNotice.translationLanguageNotInstalled(pair).slug, "translationLanguageNotInstalled:fr>es")
+        XCTAssertNil(TranslationLanguagePair.translateTarget(of: SmartModeCatalogue.notes))
     }
 }
 

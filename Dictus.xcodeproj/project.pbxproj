@@ -16,7 +16,6 @@
 		RT5930000001 /* ProTrialCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100001 /* ProTrialCoordinator.swift */; };
 		SS000002 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100002 /* PaywallView.swift */; };
 		AA361014 /* SmartModeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361013 /* SmartModeListView.swift */; };
-		AA648002 /* TranslationPairDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA648001 /* TranslationPairDownload.swift */; };
 		AA800081 /* VocabularyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA800181 /* VocabularyListView.swift */; };
 		SS000009 /* PaywallPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100009 /* PaywallPresentation.swift */; };
 		AA700070 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA700170 /* HistoryView.swift */; };
@@ -345,7 +344,6 @@
 		RT5930100001 /* ProTrialCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialCoordinator.swift; sourceTree = "<group>"; };
 		SS100002 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		AA361013 /* SmartModeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeListView.swift; sourceTree = "<group>"; };
-		AA648001 /* TranslationPairDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationPairDownload.swift; sourceTree = "<group>"; };
 		AA800181 /* VocabularyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyListView.swift; sourceTree = "<group>"; };
 		SS100009 /* PaywallPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallPresentation.swift; sourceTree = "<group>"; };
 		AA700170 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
@@ -655,7 +653,6 @@
 				AA100484 /* ModelPreparationPresentation.swift */,
 				SS100002 /* PaywallView.swift */,
 				AA361013 /* SmartModeListView.swift */,
-				AA648001 /* TranslationPairDownload.swift */,
 				AA800181 /* VocabularyListView.swift */,
 				SS100009 /* PaywallPresentation.swift */,
 				AA700170 /* HistoryView.swift */,
@@ -1240,7 +1237,6 @@
 				RT5930000001 /* ProTrialCoordinator.swift in Sources */,
 				SS000002 /* PaywallView.swift in Sources */,
 				AA361014 /* SmartModeListView.swift in Sources */,
-				AA648002 /* TranslationPairDownload.swift in Sources */,
 				AA800081 /* VocabularyListView.swift in Sources */,
 				SS000009 /* PaywallPresentation.swift in Sources */,
 				AA700070 /* HistoryView.swift in Sources */,

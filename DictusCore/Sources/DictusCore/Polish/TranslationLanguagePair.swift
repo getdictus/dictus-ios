@@ -25,30 +25,10 @@ public struct TranslationLanguagePair: Hashable, Sendable {
         self.target = target
     }
 
-    /// The pair a Translate mode needs for a speaker of `source`, or nil when `mode` is
-    /// not a Translate mode or its target is `source` itself.
-    public init?(mode: SmartMode, source: String) {
-        guard let target = Self.translateTarget(of: mode) else { return nil }
-        self.init(source: source, target: target)
-    }
-
     /// The target of a Translate mode, or nil for any other mode.
     public static func translateTarget(of mode: SmartMode) -> SupportedLanguage? {
         SupportedLanguage.allCases.first { SmartModeCatalogue.translateIdentifier(target: $0) == mode.id }
     }
-
-    /// The pair a settings surface should check for `mode`: from the language the user
-    /// speaks, as the model recommendation reads it (`SpokenLanguage.forRecommendation`).
-    public static func expected(for mode: SmartMode) -> TranslationLanguagePair? {
-        TranslationLanguagePair(mode: mode, source: SpokenLanguage.forRecommendation())
-    }
-}
-
-/// The framework's two strategies, as a value both processes and the debug screen share.
-/// Translate ships on `.highFidelity`; `.lowLatency` is read by the debug screen only.
-public enum TranslationStrategy: String, CaseIterable, Sendable {
-    case highFidelity
-    case lowLatency
 }
 
 /// Whether a pair is installed for the strategy Translate ships with (`.highFidelity`).
@@ -58,30 +38,29 @@ public enum TranslationStrategy: String, CaseIterable, Sendable {
 /// Apple Intelligence is enabled, so no additional language downloads are required.
 /// […] On devices without Apple Intelligence, it falls back to the traditional models
 /// used by lowLatency." Measured the same way twice: on the Mac every one of 64 pairs
-/// (16 sources × 4 targets) read `installed` under `.highFidelity` and `supported` under
-/// `.lowLatency`; on the iPhone every `.highFidelity` call read `installed`, including
-/// after the languages were deleted in iOS Settings (#648, 2026-10-08). Translate needs
-/// Apple Intelligence anyway, so `.notInstalled` is not expected under shipping
-/// conditions; it is kept as the framework's own answer, and the debug screen reads it.
+/// (16 sources × 4 targets) read `installed` under `.highFidelity`, against 60
+/// `supported` and 4 `unsupported` under `.lowLatency`; on the iPhone every
+/// `.highFidelity` call read `installed`, including after the languages were deleted
+/// in iOS Settings (#648, 2026-10-08). Translate needs Apple Intelligence anyway, so
+/// `.notInstalled` is not expected under shipping conditions. It is still read before
+/// every call, because it costs one query and covers a transient state nobody has
+/// observed: anything but `.installed` sends Translate to Apple FM. The app has no
+/// language download (removed 2026-10-09, once this was established).
 public enum TranslationPairStatus: String, Equatable, Sendable {
     /// The framework can translate this pair right now.
     case installed
-    /// Supported, but its languages have to be downloaded first. Translate runs on the
-    /// Apple FM path until they are.
+    /// Supported, but its languages are not installed. Translate runs on Apple FM.
     case notInstalled
     /// The framework cannot translate this pair at all. Translate runs on Apple FM.
     case unsupported
     /// No answer: an OS below 26.4, or a build without the framework.
     case unknown
 
-    /// The framework's own verdict for `pair`, under `strategy` (`.highFidelity` unless
-    /// a debug surface asks otherwise).
-    public static func current(for pair: TranslationLanguagePair,
-                               strategy: TranslationStrategy = .highFidelity) async -> TranslationPairStatus {
+    /// The framework's own verdict for `pair`, under `.highFidelity`.
+    public static func current(for pair: TranslationLanguagePair) async -> TranslationPairStatus {
         #if canImport(Translation)
         guard #available(iOS 26.4, macOS 26.4, *) else { return .unknown }
-        let preferred: TranslationSession.Strategy = strategy == .lowLatency ? .lowLatency : .highFidelity
-        let status = await LanguageAvailability(preferredStrategy: preferred).status(
+        let status = await LanguageAvailability(preferredStrategy: .highFidelity).status(
             from: Locale.Language(identifier: pair.source),
             to: Locale.Language(identifier: pair.target.rawValue)
         )
