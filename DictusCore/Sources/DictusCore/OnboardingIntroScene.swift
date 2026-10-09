@@ -40,6 +40,32 @@ public enum OnboardingIntroScene: String, CaseIterable, Sendable {
         "intro-\(rawValue)-still"
     }
 
+    /// Length of one pass of the scene's loop, in seconds (#667, `assets/onboarding/intro/README.md`).
+    ///
+    /// It is also how long the carousel stays on the page before moving on by itself
+    /// (`IntroAutoAdvance`), so each scene is seen once in full. A page showing only its
+    /// still keeps the same rhythm.
+    public var loopSeconds: Double {
+        switch self {
+        case .walking: return 5.5
+        case .metro: return 5.5
+        case .keyboard: return 6.5
+        }
+    }
+
+    /// The page the carousel moves to after this one: the next scene, and the first one
+    /// again after the last.
+    public var nextPage: OnboardingIntroScene {
+        let all = Self.allCases
+        let index = all.firstIndex(of: self) ?? 0
+        return all[(index + 1) % all.count]
+    }
+
+    /// Whether moving on from this page goes back to the first one rather than forward.
+    public var wrapsToFirstPage: Bool {
+        nextPage == Self.allCases.first && self != Self.allCases.first
+    }
+
     /// Where in the video the still was taken, in seconds. The video's first play starts
     /// here, so the hand-over from the still to the moving picture shows no jump.
     ///

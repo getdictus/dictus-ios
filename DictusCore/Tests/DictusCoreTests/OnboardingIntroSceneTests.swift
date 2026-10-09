@@ -26,12 +26,42 @@ final class OnboardingIntroSceneTests: XCTestCase {
     /// The video starts at the still's moment, so that moment has to fall inside the loop:
     /// 5.5 s for A and B, 6.5 s for C (`assets/onboarding/intro/README.md`).
     func testEachStillIsTakenInsideItsLoop() {
-        let loopSeconds: [OnboardingIntroScene: Double] = [.walking: 5.5, .metro: 5.5, .keyboard: 6.5]
         for scene in OnboardingIntroScene.allCases {
             let seconds = scene.stillFrameSeconds
             XCTAssertGreaterThanOrEqual(seconds, 0)
-            XCTAssertLessThan(seconds, loopSeconds[scene] ?? 0, "\(scene) still is past its loop")
+            XCTAssertLessThan(seconds, scene.loopSeconds, "\(scene) still is past its loop")
         }
+    }
+
+    /// The loop lengths are the render's (165 frames at 30 fps for A and B, 195 for C).
+    /// They are the carousel's dwell per page, so a scene re-rendered longer must change
+    /// them too: the README states them, and this pins the two together.
+    func testLoopLengthsMatchTheRenderReadme() throws {
+        XCTAssertEqual(OnboardingIntroScene.walking.loopSeconds, 5.5)
+        XCTAssertEqual(OnboardingIntroScene.metro.loopSeconds, 5.5)
+        XCTAssertEqual(OnboardingIntroScene.keyboard.loopSeconds, 6.5)
+        let readme = try String(contentsOf: repositoryRoot.appendingPathComponent("assets/onboarding/intro/README.md"), encoding: .utf8)
+        XCTAssertTrue(readme.contains("intro-a-{light,dark}.mp4"))
+        for (file, seconds) in [("intro-a-", "5.5 s"), ("intro-b-", "5.5 s"), ("intro-c-", "6.5 s")] {
+            let row = readme.split(separator: "\n").first { $0.hasPrefix("| `\(file)") }
+            XCTAssertNotNil(row, "no README row for \(file)")
+            XCTAssertTrue(row?.hasSuffix("| \(seconds) |") == true, "\(file) loop is not \(seconds) in the README")
+        }
+    }
+
+    func testThePagesTurnOneTwoThreeThenBackToOne() {
+        XCTAssertEqual(OnboardingIntroScene.walking.nextPage, .metro)
+        XCTAssertEqual(OnboardingIntroScene.metro.nextPage, .keyboard)
+        XCTAssertEqual(OnboardingIntroScene.keyboard.nextPage, .walking)
+        XCTAssertEqual(OnboardingIntroScene.allCases.filter(\.wrapsToFirstPage), [.keyboard])
+    }
+
+    private var repositoryRoot: URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent() // DictusCoreTests
+            .deletingLastPathComponent() // Tests
+            .deletingLastPathComponent() // DictusCore
+            .deletingLastPathComponent() // repository root
     }
 
     /// The app finds each video by name in its bundle and falls back to the still frame
