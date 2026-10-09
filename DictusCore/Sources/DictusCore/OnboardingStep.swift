@@ -19,12 +19,12 @@ import Foundation
 /// target has no test bundle.
 ///
 /// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, the
-/// wait for the model, the microphone, the first dictation, the completion screen. The
-/// microphone sits right before the first dictation because it is the first step that
-/// uses it, and its pre-permission screen keeps the system popup out of the recording.
-/// Steps the later #649 sub-issues add (Apple Intelligence, the feature scenes, the Smart
-/// Mode pick, the Dynamic Island tutorial) slot in as new cases with new raw values; the
-/// existing raw values keep their meaning.
+/// pick of three Smart Modes (#677), the wait for the model, the microphone, the first
+/// dictation, the completion screen. The microphone sits right before the first dictation
+/// because it is the first step that uses it, and its pre-permission screen keeps the
+/// system popup out of the recording. Steps the later #649 sub-issues add (Apple
+/// Intelligence, the feature scenes, the Dynamic Island tutorial) slot in as new cases with
+/// new raw values; the existing raw values keep their meaning.
 public enum OnboardingStep: String, CaseIterable, Sendable {
     /// The intro. Today the static welcome page; #676 replaces its content.
     case welcome
@@ -33,6 +33,14 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     case language
     /// Adding the keyboard and Full Access in iOS Settings. The step iOS kills the app on.
     case keyboardSetup
+    /// Choosing the three Smart Modes the keyboard's long-press fan holds (#677, #649
+    /// decision 16). A Pro step: hidden on a device that can never run Smart Modes.
+    ///
+    /// WHY RIGHT AFTER THE KEYBOARD, FOR NOW: decision 16 places it right after the Smart
+    /// Modes scene, which does not exist yet; #679 builds that scene and moves this step
+    /// behind it. Here it still falls within the model download, which is what decision 16
+    /// asks of it.
+    case smartModePick
     /// Shown only while the model is still downloading or compiling; skipped otherwise.
     case modelPreparation
     /// The pre-permission screen, then the system microphone prompt.
@@ -48,29 +56,56 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// The "you're all set" screen. Its button ends the onboarding.
     case completion
 
-    /// The step after this one, or nil for the last.
+    /// The step after this one in the whole flow, as a capable device with nothing yet
+    /// done walks it, or nil for the last.
     public var next: OnboardingStep? {
-        next(skipping: [])
+        next(skipping: [], deviceCanRunSmartModes: true)
     }
 
-    /// The step after this one, passing over every step in `satisfied`, or nil for the
-    /// last.
+    /// The step after this one, passing over every step in `satisfied` and, on a device
+    /// that can never run Smart Modes, every Pro step; nil for the last.
     ///
     /// WHY THE CALLER SAYS WHAT IS SATISFIED: whether the model is ready or the microphone
     /// already granted is read from `ModelManager` and `AVAudioSession`, which DictusCore
     /// does not see. Which steps CAN be passed over is a rule, and lives here
     /// (`isSkippedWhenSatisfied`): a step outside that list is shown even if the caller
     /// puts it in `satisfied`.
-    public func next(skipping satisfied: Set<OnboardingStep>) -> OnboardingStep? {
+    ///
+    /// WHY THE CAPABILITY HAS NO DEFAULT: it is `SmartModeAvailability.deviceIsCapable`,
+    /// and a default of `true` is exactly the iPhone 13 shown a Smart Mode step it can
+    /// never use (#593 decision 2).
+    public func next(skipping satisfied: Set<OnboardingStep>, deviceCanRunSmartModes: Bool) -> OnboardingStep? {
         let all = Self.allCases
         guard var index = all.firstIndex(of: self) else { return nil }
         while index + 1 < all.count {
             index += 1
             let candidate = all[index]
+            if !candidate.isShown(deviceCanRunSmartModes: deviceCanRunSmartModes) { continue }
             if candidate.isSkippedWhenSatisfied, satisfied.contains(candidate) { continue }
             return candidate
         }
         return nil
+    }
+
+    /// Whether this step sells or sets up a Pro feature (#649).
+    ///
+    /// Pro steps are hidden on a device that can never run Smart Modes, for the reason the
+    /// reverse trial is withheld there (#593 decision 2): on such an iPhone Pro is History
+    /// and Vocabulary only, and a step about Smart Modes would describe a feature the user
+    /// cannot have. A capable iPhone with Apple Intelligence switched off still sees them.
+    public var isProStep: Bool {
+        switch self {
+        case .smartModePick:
+            return true
+        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .completion:
+            return false
+        }
+    }
+
+    /// Whether this step is part of the flow on this device: every step on a device that
+    /// can run Smart Modes, every step but the Pro ones otherwise.
+    public func isShown(deviceCanRunSmartModes: Bool) -> Bool {
+        deviceCanRunSmartModes || !isProStep
     }
 
     /// Whether this step is passed over when what it asks for is already done.
@@ -85,7 +120,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .modelPreparation, .microphone:
             return true
-        case .welcome, .language, .keyboardSetup, .firstDictation, .completion:
+        case .welcome, .language, .keyboardSetup, .smartModePick, .firstDictation, .completion:
             return false
         }
     }
@@ -105,31 +140,45 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .welcome, .completion:
             return false
-        case .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation:
+        case .language, .keyboardSetup, .smartModePick, .modelPreparation, .microphone, .firstDictation:
             return true
         }
     }
 
-    /// The steps that own a segment of the progress bar, in order.
+    /// The steps that own a segment of the progress bar on this device, in order.
     ///
     /// WHY a skipped step keeps its segment: the bar would otherwise change length
     /// depending on how fast the download was. A passed-over step reads as done, like the
     /// old dots did.
-    public static var progressSteps: [OnboardingStep] {
-        allCases.filter(\.showsProgress)
+    ///
+    /// WHY A HIDDEN PRO STEP DOES NOT: whether the device can run Smart Modes is known
+    /// before the first segment is drawn and never changes during the flow, so leaving its
+    /// segment in would only draw a step that device never sees.
+    public static func progressSteps(deviceCanRunSmartModes: Bool) -> [OnboardingStep] {
+        allCases.filter { $0.showsProgress && $0.isShown(deviceCanRunSmartModes: deviceCanRunSmartModes) }
     }
 
-    /// This step's segment in `progressSteps`, or nil for a step without the bar.
-    public var progressIndex: Int? {
-        Self.progressSteps.firstIndex(of: self)
+    /// This step's segment in `progressSteps(deviceCanRunSmartModes:)`, or nil for a step
+    /// without the bar.
+    public func progressIndex(deviceCanRunSmartModes: Bool) -> Int? {
+        Self.progressSteps(deviceCanRunSmartModes: deviceCanRunSmartModes).firstIndex(of: self)
     }
 
     /// Whether the shell offers the discreet Skip in the top-right slot.
     ///
-    /// Only the first dictation today: everything before it sets up something the
-    /// keyboard needs, and the completion screen is its own way out.
+    /// - The Smart Mode pick: skipping it keeps the seed (`defaultPinnedIdentifiers`), so
+    ///   the fan is never left empty (#677).
+    /// - The first dictation.
+    ///
+    /// Everything else sets up something the keyboard needs, and the completion screen is
+    /// its own way out.
     public var isSkippable: Bool {
-        self == .firstDictation
+        switch self {
+        case .smartModePick, .firstDictation:
+            return true
+        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .completion:
+            return false
+        }
     }
 
     // MARK: - Migration from the page index (before #649)
