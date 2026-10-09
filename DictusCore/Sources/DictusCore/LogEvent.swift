@@ -184,6 +184,36 @@ public enum LogEvent: Sendable {
     /// server was slow and not because the app was backgrounded, both of which the
     /// predicate in `DownloadStallPolicy` excludes before this is emitted.
     case modelDownloadOffline(name: String, path: String, secondsWithoutProgress: Int)
+    /// One task the background session handed back after a relaunch, as URLSession
+    /// describes it (#690). Logged for every adopted task when the session is restored
+    /// (`phase=restore`) and again ten seconds later (`phase=restore+10s`), when every
+    /// task the session holds is listed, adopted or not (`origin`).
+    ///
+    /// WHY IT EXISTS. After iOS killed Dictus on the Full Access change, the adopted task
+    /// delivered nothing for minutes with the app in front and the network up, and no
+    /// line said what state it was in. `state` (`running`, `suspended`, `canceling`,
+    /// `completed`), `received` (bytes, as the task counts them) and `error` (domain and
+    /// code only, `none` when there is none) answer it: a `suspended` task, or a
+    /// `running` one whose `received` has not moved in ten seconds, is the wedge.
+    case modelDownloadTaskState(
+        name: String,
+        path: String,
+        chunk: Int,
+        phase: String,
+        origin: String,
+        state: String,
+        receivedBytes: Int64,
+        error: String
+    )
+    /// An adopted task went `secondsWithoutByte` without delivering anything while the
+    /// app was in the foreground, and was cancelled so its chunk could be asked for again
+    /// from the manifest (#690, `AdoptedDownloadWatchdog`). A line here means a transfer
+    /// that would otherwise have frozen the progress bar was replaced.
+    case modelDownloadAdoptedTaskSilent(name: String, path: String, chunk: Int, secondsWithoutByte: Int)
+    /// This process cancelled a download task, and `caller` names the code path that did
+    /// it (#690). Every `cancel()` on a model download task goes through a line like this,
+    /// so a `-999` with no such line before it was not ours: it came from the system.
+    case modelDownloadTaskCancelled(name: String, path: String, chunk: Int, caller: String)
 
     // MARK: Keyboard
     case keyboardDidAppear
@@ -548,7 +578,8 @@ public enum LogEvent: Sendable {
              .modelReconciledFromDisk,
              .modelDownloadResumed, .modelDownloadRangeRejected, .modelDownloadChunk,
              .modelDownloadIntegrityFailed, .modelDownloadSessionRestored,
-             .modelDownloadOffline:
+             .modelDownloadOffline, .modelDownloadTaskState, .modelDownloadAdoptedTaskSilent,
+             .modelDownloadTaskCancelled:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .hostReturn,
@@ -628,7 +659,7 @@ public enum LogEvent: Sendable {
              .audioInterruptionBegan, .audioMediaServicesReset,
              .modelDownloadStalled, .audioHapticsAllowanceFailed,
              .modelDownloadSizeMismatch, .modelDownloadRangeRejected,
-             .modelDownloadOffline:
+             .modelDownloadOffline, .modelDownloadAdoptedTaskSilent:
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
@@ -643,6 +674,9 @@ public enum LogEvent: Sendable {
              .modelDeleted, .modelPrewarmStarted, .modelCleanupPerformed,
              .modelReconciledFromDisk,
              .modelDownloadResumed, .modelDownloadSessionRestored,
+             // A handful of lines per relaunch and per cancel, never per byte: they are
+             // the diagnosis #690 is waiting on, so they must survive a level filter.
+             .modelDownloadTaskState, .modelDownloadTaskCancelled,
              .modelPrewarmPeakMemory, .modelLoadStateChanged, .transcriptionPerformance,
              .keyboardDidAppear, .keyboardMicTapped,
              .dictationMessageSet, .dictationMessageDisplayed,
@@ -820,6 +854,15 @@ public enum LogEvent: Sendable {
             return "tasks=\(tasks) models=\(models)"
         case .modelDownloadOffline(let name, let path, let secondsWithoutProgress):
             return "name=\(name) path=\(path) noProgress=\(secondsWithoutProgress)s"
+        case .modelDownloadTaskState(
+            let name, let path, let chunk, let phase, let origin, let state, let receivedBytes, let error
+        ):
+            return "name=\(name) path=\(path) chunk=\(chunk) phase=\(phase) origin=\(origin) "
+                + "state=\(state) received=\(receivedBytes)B error=\(error)"
+        case .modelDownloadAdoptedTaskSilent(let name, let path, let chunk, let secondsWithoutByte):
+            return "name=\(name) path=\(path) chunk=\(chunk) noByte=\(secondsWithoutByte)s"
+        case .modelDownloadTaskCancelled(let name, let path, let chunk, let caller):
+            return "name=\(name) path=\(path) chunk=\(chunk) caller=\(caller)"
 
         // Keyboard (no content parameters -- privacy)
         case .keyboardDidAppear, .keyboardDidDisappear,
@@ -1157,6 +1200,9 @@ extension LogEvent {
         case .modelDownloadIntegrityFailed: return "modelDownloadIntegrityFailed"
         case .modelDownloadSessionRestored: return "modelDownloadSessionRestored"
         case .modelDownloadOffline: return "modelDownloadOffline"
+        case .modelDownloadTaskState: return "modelDownloadTaskState"
+        case .modelDownloadAdoptedTaskSilent: return "modelDownloadAdoptedTaskSilent"
+        case .modelDownloadTaskCancelled: return "modelDownloadTaskCancelled"
         case .polishEngineFailed: return "polishEngineFailed"
         case .vocabularyApplied: return "vocabularyApplied"
         case .polishEngineUnavailable: return "polishEngineUnavailable"
