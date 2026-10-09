@@ -5,10 +5,11 @@ import AVFoundation
 import DictusCore
 
 /// Onboarding flow presented as a fullScreenCover on first launch.
-/// Steps (#649, #675): intro, language, keyboard setup, model preparation (only while the
-/// model is still downloading or compiling), microphone (only while not yet granted),
-/// first dictation through the globe key, completion. The order is
-/// `OnboardingStep.allCases`; which steps are passed over is `OnboardingStep.next(skipping:)`.
+/// Steps (#649, #675): intro, language, keyboard setup, the pick of three Smart Modes (#677,
+/// only where Smart Modes can run), model preparation (only while the model is still
+/// downloading or compiling), microphone (only while not yet granted), first dictation
+/// through the globe key, completion. The order is `OnboardingStep.allCases`; which steps
+/// are passed over is `OnboardingStep.next(skipping:deviceCanRunSmartModes:)`.
 ///
 /// WHY switch/case instead of TabView:
 /// TabView(.page) allows the user to swipe between pages, which means they could
@@ -55,6 +56,11 @@ struct OnboardingView: View {
     /// popup is up (`keepOpenWarning`). nil otherwise.
     @State private var keepOpenWarningModel: String?
 
+    /// Whether this iPhone could ever run Smart Modes, which decides whether the Pro steps
+    /// are part of the flow (#677, #593 decision 2). Read once: hardware, OS and SDK do
+    /// not change during an onboarding, and the progress bar must not change length.
+    @State private var deviceCanRunSmartModes = SmartModeAvailability.deviceIsCapable
+
     /// Reset when the first dictation is left, so Home does not open on its transcription.
     @EnvironmentObject private var coordinator: DictationCoordinator
 
@@ -67,7 +73,11 @@ struct OnboardingView: View {
                 // The shell's top row (#675): progress bar and Skip. Outside the sliding
                 // page so it stays put while the pages change under it, and only its
                 // segments animate.
-                OnboardingTopBar(step: step, onSkip: step.isSkippable ? skip : nil)
+                OnboardingTopBar(
+                    step: step,
+                    deviceCanRunSmartModes: deviceCanRunSmartModes,
+                    onSkip: step.isSkippable ? skip : nil
+                )
                     .padding(.top, 8)
 
                 // Current page content — only one page visible at a time
@@ -82,6 +92,12 @@ struct OnboardingView: View {
                         LanguageSetupPage(onConfirm: confirmLanguage)
                     case .keyboardSetup:
                         KeyboardSetupPage(onNext: advance)
+                    case .smartModePick:
+                        SmartModePickPage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onContinue: advance
+                        )
                     case .modelPreparation:
                         ModelDownloadPage(
                             modelManager: modelManager,
@@ -120,10 +136,14 @@ struct OnboardingView: View {
 
     /// The shell's Skip, on the steps that offer it (`OnboardingStep.isSkippable`).
     ///
-    /// Only the first dictation today: skipping it closes the keyboard and goes to the
-    /// completion screen, as a finished dictation does.
+    /// - The Smart Mode pick: moves on writing nothing, so the fan keeps the seed (#677).
+    /// - The first dictation: closes the keyboard and goes to the completion screen, as a
+    ///   finished dictation does.
     private func skip() {
         switch step {
+        case .smartModePick:
+            PersistentLog.log(.onboardingSmartModePickSkipped)
+            advance()
         case .firstDictation:
             PersistentLog.log(.onboardingGlobeTutorialSkipped)
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -154,11 +174,13 @@ struct OnboardingView: View {
     // MARK: - Navigation
 
     private func advance() {
-        guard let next = step.next(skipping: satisfiedSteps) else { return }
+        guard let next = step.next(skipping: satisfiedSteps, deviceCanRunSmartModes: deviceCanRunSmartModes) else {
+            return
+        }
         go(to: next)
     }
 
-    /// The steps with nothing left to ask, which `OnboardingStep.next(skipping:)` passes
+    /// The steps with nothing left to ask, which `OnboardingStep.next(skipping:deviceCanRunSmartModes:)` passes
     /// over (#675). Which steps may be passed over is DictusCore's rule; this only reads
     /// the two facts it needs from the app.
     ///
