@@ -312,20 +312,43 @@ struct ModelLoadingOverlay: View {
             }
 
             if !(showCompletion && activeContext.isPrepareOnly) {
-                // WHICH OF THE TWO, and why it is not `isPrepareOnly` (#484): "stay on this
-                // page" is only sayable to someone who is on it. The keyboard cold start
-                // brings a user whose next move is to leave, so it asks for patience instead.
-                // The in-app tap does not — and staying in the foreground is what keeps the
-                // compile off the system's background throttle (#472), so it is the stronger
-                // of the two sentences and the right one here.
-                Text(activeContext.startedFromAnotherApp
-                     ? "Please wait for preparation to finish."
-                     : "Please stay on this page and do not leave the app.")
-                    .font(.dictusCaption)
-                    .foregroundStyle(.secondary)
+                leaveNotice
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 48)
             }
+        }
+    }
+
+    /// The line about leaving this screen. Which one is `ModelPreparationContext.leaveNotice`.
+    ///
+    /// WHICH OF THE FIRST TWO, and why it is not `isPrepareOnly` (#484): "stay on this
+    /// page" is only sayable to someone who is on it. The keyboard cold start brings a user
+    /// whose next move is to leave, so it asks for patience instead. The in-app tap does
+    /// not — and staying in the foreground is what keeps the compile off the system's
+    /// background throttle (#472), so it is the stronger of the two sentences and the right
+    /// one there.
+    ///
+    /// THE THIRD is the onboarding variant (#675, #649 decision 6): while the onboarding's
+    /// download runs, it survives leaving the app, so the screen says that instead, and
+    /// says the cost (decided 2026-10-09): iOS throttles a backgrounded transfer, measured
+    /// at about 0.2 MB/s against 6.5 MB/s in front. Drawn in
+    /// the accent colour in the approved mock-up, because it is the one line on this screen
+    /// that gives the user something rather than asks for something.
+    @ViewBuilder
+    private var leaveNotice: some View {
+        switch activeContext.leaveNotice(isDownloading: currentPhase == .downloading) {
+        case .downloadContinuesInBackground:
+            Text("The download continues if you leave the app, but much more slowly.")
+                .font(.dictusCaption.weight(.semibold))
+                .foregroundStyle(Color.dictusAccent)
+        case .waitForPreparation:
+            Text("Please wait for preparation to finish.")
+                .font(.dictusCaption)
+                .foregroundStyle(.secondary)
+        case .stayOnPage:
+            Text("Please stay on this page and do not leave the app.")
+                .font(.dictusCaption)
+                .foregroundStyle(.secondary)
         }
     }
 

@@ -1,12 +1,14 @@
 // DictusApp/Onboarding/OnboardingView.swift
 // Container for the onboarding flow with programmatic-only step advancement.
 import SwiftUI
+import AVFoundation
 import DictusCore
 
 /// Onboarding flow presented as a fullScreenCover on first launch.
-/// Steps (#649): Welcome, Language, Microphone, Keyboard setup, Model preparation (only
-/// while the model is still downloading or compiling), first dictation through the globe
-/// key. The order is `OnboardingStep.allCases`.
+/// Steps (#649, #675): intro, language, keyboard setup, model preparation (only while the
+/// model is still downloading or compiling), microphone (only while not yet granted),
+/// first dictation through the globe key, completion. The order is
+/// `OnboardingStep.allCases`; which steps are passed over is `OnboardingStep.next(skipping:)`.
 ///
 /// WHY switch/case instead of TabView:
 /// TabView(.page) allows the user to swipe between pages, which means they could
@@ -17,7 +19,7 @@ import DictusCore
 ///
 /// WHY @Binding isComplete:
 /// The parent (DictusApp.swift) owns `hasCompletedOnboarding` via @AppStorage.
-/// When the last page (GlobeKeyTutorialPage) finishes, it sets isComplete = true,
+/// When the last page (the completion step) finishes, it sets isComplete = true,
 /// which writes to App Group UserDefaults and dismisses the fullScreenCover.
 ///
 /// WHY THE POLISH PAGE IS GONE (#649 decision 2): polish adds seconds to every dictation,
@@ -49,12 +51,25 @@ struct OnboardingView: View {
     /// the preparation step is shown at all.
     @StateObject private var modelManager = ModelManager()
 
+    /// The model whose download the language screen just started, while the keep-open
+    /// popup is up (`keepOpenWarning`). nil otherwise.
+    @State private var keepOpenWarningModel: String?
+
+    /// Reset when the first dictation is left, so Home does not open on its transcription.
+    @EnvironmentObject private var coordinator: DictationCoordinator
+
     var body: some View {
         ZStack {
             Color.dictusBackground
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
+                // The shell's top row (#675): progress bar and Skip. Outside the sliding
+                // page so it stays put while the pages change under it, and only its
+                // segments animate.
+                OnboardingTopBar(step: step, onSkip: step.isSkippable ? skip : nil)
+                    .padding(.top, 8)
+
                 // Current page content — only one page visible at a time
                 // WHY Group instead of ZStack: Group avoids stacking every page
                 // on top of each other (unnecessary view hierarchy). Only the
@@ -65,8 +80,6 @@ struct OnboardingView: View {
                         WelcomePage(onNext: advance)
                     case .language:
                         LanguageSetupPage(onConfirm: confirmLanguage)
-                    case .microphone:
-                        MicPermissionPage(onNext: advance)
                     case .keyboardSetup:
                         KeyboardSetupPage(onNext: advance)
                     case .modelPreparation:
@@ -75,10 +88,15 @@ struct OnboardingView: View {
                             modelIdentifier: onboardingModel,
                             onNext: advance
                         )
+                    case .microphone:
+                        MicPermissionPage(onNext: advance)
                     case .firstDictation:
-                        GlobeKeyTutorialPage(onComplete: finish)
+                        GlobeKeyTutorialPage(onComplete: leaveFirstDictation)
+                    case .completion:
+                        OnboardingSuccessView(onComplete: finish)
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 // Slide transition: new page slides in from trailing edge,
                 // old page slides out to leading edge — standard forward navigation feel.
                 .transition(.asymmetric(
@@ -86,44 +104,32 @@ struct OnboardingView: View {
                     removal: .move(edge: .leading)
                 ))
                 .id(step) // Force SwiftUI to treat each page as a unique view for transitions
-
-                // Step indicator dots at the bottom
-                stepIndicator
-                    .padding(.bottom, 24)
             }
+        }
+        .alert(Text("Keep Dictus open"), isPresented: keepOpenWarning) {
+            Button("Got it") {}
+        } message: {
+            keepOpenWarningMessage
         }
         // Prevent interactive dismiss (swipe down) on the fullScreenCover
         .interactiveDismissDisabled()
         .animation(.easeInOut(duration: 0.3), value: step)
     }
 
-    // MARK: - Step Indicator
+    // MARK: - Skip
 
-    /// Row of dots showing onboarding progress.
+    /// The shell's Skip, on the steps that offer it (`OnboardingStep.isSkippable`).
     ///
-    /// WHY custom dots instead of TabView's built-in page indicator:
-    /// Since we replaced TabView with manual switch/case, we need our own dots.
-    /// Filled dot = current step, half-filled = behind the user, outlined = ahead.
-    /// The preparation step keeps its dot even when it is skipped, so the row does not
-    /// change length depending on how fast the download was.
-    private var stepIndicator: some View {
-        HStack(spacing: 8) {
-            ForEach(OnboardingStep.allCases, id: \.self) { dotStep in
-                Circle()
-                    .fill(dotColor(for: dotStep))
-                    .frame(width: 8, height: 8)
-            }
-        }
-        .padding(.top, 16)
-    }
-
-    private func dotColor(for dotStep: OnboardingStep) -> Color {
-        if dotStep == step {
-            return .dictusAccent
-        } else if dotStep.position < step.position {
-            return .dictusAccent.opacity(0.5)
-        } else {
-            return .gray.opacity(0.3)
+    /// Only the first dictation today: skipping it closes the keyboard and goes to the
+    /// completion screen, as a finished dictation does.
+    private func skip() {
+        switch step {
+        case .firstDictation:
+            PersistentLog.log(.onboardingGlobeTutorialSkipped)
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            leaveFirstDictation()
+        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .completion:
+            advance()
         }
     }
 
@@ -148,14 +154,28 @@ struct OnboardingView: View {
     // MARK: - Navigation
 
     private func advance() {
-        guard var next = step.next else { return }
-        // The preparation step is shown only while there is something to wait for
-        // (#649 decision 1.7). A download that finished while the user was in Settings
-        // goes straight to the first dictation.
-        if next == .modelPreparation, isReady(onboardingModel), let after = next.next {
-            next = after
-        }
+        guard let next = step.next(skipping: satisfiedSteps) else { return }
         go(to: next)
+    }
+
+    /// The steps with nothing left to ask, which `OnboardingStep.next(skipping:)` passes
+    /// over (#675). Which steps may be passed over is DictusCore's rule; this only reads
+    /// the two facts it needs from the app.
+    ///
+    /// - The preparation: shown only while there is something to wait for (#649 decision
+    ///   1.6). A download that finished while the user was in Settings goes straight on.
+    /// - The microphone: already granted on a second run, or by an install that went
+    ///   through the order before #675, where the microphone came first. A denied
+    ///   microphone is still shown, because that page says where to turn it back on.
+    private var satisfiedSteps: Set<OnboardingStep> {
+        var satisfied: Set<OnboardingStep> = []
+        if isReady(onboardingModel) {
+            satisfied.insert(.modelPreparation)
+        }
+        if AVAudioApplication.shared.recordPermission == .granted {
+            satisfied.insert(.microphone)
+        }
+        return satisfied
     }
 
     private func go(to newStep: OnboardingStep) {
@@ -175,8 +195,14 @@ struct OnboardingView: View {
     /// its compile waits for the foreground (`ModelManager.waitForForegroundToCompile`).
     private func confirmLanguage(_ setup: LanguageSetup) {
         setup.apply()
-        startDownloadIfNeeded(setup.recommendedModel(on: DeviceCapabilities.current()))
-        advance()
+        let model = setup.recommendedModel(on: DeviceCapabilities.current())
+        if startDownloadIfNeeded(model) {
+            // The download is already running; the popup only asks the user to stay. Its
+            // button moves on (`keepOpenWarning`), so the flow continues as before.
+            keepOpenWarningModel = model
+        } else {
+            advance()
+        }
     }
 
     /// Starts the download of `identifier` unless it is already ready or already moving.
@@ -184,19 +210,74 @@ struct OnboardingView: View {
     /// WHY THE GUARD: this screen can be confirmed again after a relaunch, and by then the
     /// launch adoption (#449) may already be driving the transfer from this same manager.
     /// A second `downloadModel` would join the transfer but run its own compile after it.
-    private func startDownloadIfNeeded(_ identifier: String) {
-        guard !isReady(identifier) else { return }
+    ///
+    /// - Returns: whether bytes are now being transferred: false when nothing was started,
+    ///   and false for a model whose files are already on disk (`.ready`), where only the
+    ///   compile is left. That is the case the keep-open popup is about.
+    @discardableResult
+    private func startDownloadIfNeeded(_ identifier: String) -> Bool {
+        guard !isReady(identifier) else { return false }
+        let transfersBytes: Bool
         switch modelManager.modelStates[identifier] {
         case .downloading, .prewarming:
-            return
-        case .notDownloaded, .ready, .error, nil:
-            break
+            return false
+        case .ready:
+            transfersBytes = false
+        case .notDownloaded, .error, nil:
+            transfersBytes = true
         }
         Task {
             // Failures are recorded on the model's state by `downloadModel` itself, and
             // the preparation page shows them with a retry. Nothing to do here.
             try? await modelManager.downloadModel(identifier)
         }
+        return transfersBytes
+    }
+
+    // MARK: - Keep-open warning
+
+    /// The popup raised when the language screen starts a download (decided 2026-10-09).
+    ///
+    /// WHY A POPUP AND WHY HERE: the background `URLSession` survives the user leaving
+    /// (#449), but iOS throttles it hard. Measured on device: about 6.5 MB/s with Dictus in
+    /// front, about 0.2 MB/s once it is in the background. Users start the download and go
+    /// to another app; a line of text on a page is not read, a popup at the moment the
+    /// download starts is. It does not block anything: the download is already running,
+    /// and its one button continues the flow.
+    ///
+    /// WHY "EXCEPT TO TURN ON THE KEYBOARD": the very next step sends the user to Settings.
+    /// The copy must not contradict it.
+    private var keepOpenWarning: Binding<Bool> {
+        Binding(
+            get: { keepOpenWarningModel != nil },
+            set: { isPresented in
+                guard !isPresented, keepOpenWarningModel != nil else { return }
+                keepOpenWarningModel = nil
+                advance()
+            }
+        )
+    }
+
+    /// The popup's message, with the real size of the model being downloaded.
+    private var keepOpenWarningMessage: Text {
+        if let identifier = keepOpenWarningModel, let size = ModelInfo.forIdentifier(identifier)?.sizeLabel {
+            return Text("The model (\(size)) is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings.")
+        }
+        return Text("The model is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings.")
+    }
+
+    /// Leaves the first dictation, whether it succeeded or was skipped, for the completion
+    /// screen (#675: completion is a step of its own now, persisted like the others).
+    ///
+    /// WHY reset the coordinator here:
+    /// If the user dictated during the first dictation, the DictationCoordinator holds the
+    /// last transcription in `lastResult`. Without clearing it, HomeView displays a "last
+    /// transcription card" as soon as the user lands on the main screen, which is not the
+    /// expected fresh Home state.
+    private func leaveFirstDictation() {
+        coordinator.lastResult = nil
+        coordinator.resetStatus()
+        advance()
     }
 
     private func finish() {

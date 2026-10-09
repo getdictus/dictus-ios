@@ -1,5 +1,5 @@
 // DictusApp/Onboarding/GlobeKeyTutorialPage.swift
-// Step 6 of onboarding: interactive globe key tutorial + dictation test.
+// Onboarding step: interactive globe key tutorial + first dictation.
 import SwiftUI
 import UIKit
 import DictusCore
@@ -19,21 +19,19 @@ import DictusCore
 /// State 2: Once switch detected, animation disappears → text field visible
 ///          with keyboard still open. User dictates → auto-advance to success.
 struct GlobeKeyTutorialPage: View {
+    /// Called once the field holds a dictation (or, pre-A14, typed words). `OnboardingView`
+    /// resets the dictation coordinator and moves on to the completion step (#675); its
+    /// shell's Skip does the same without a dictation.
     let onComplete: () -> Void
-
-    /// WHY @EnvironmentObject coordinator:
-    /// The user may dictate during this tutorial via the Dictus keyboard, which
-    /// goes through DictationCoordinator. If we don't reset the coordinator before
-    /// completing onboarding, HomeView will show the "last transcription card"
-    /// from this test dictation — which is not the desired landing screen.
-    @EnvironmentObject var coordinator: DictationCoordinator
 
     @State private var dictusKeyboardActive = false
     @State private var textFieldContent = ""
-    @State private var showSuccess = false
 
     /// Guard against multiple auto-advance triggers.
     @State private var hasAutoAdvanced = false
+
+    /// Set when enough text has landed: drives `successCue` until the page moves on.
+    @State private var showSuccessCue = false
 
     /// Minimum text length to trigger auto-advance.
     /// WHY 3 characters: A single keystroke shouldn't trigger success.
@@ -49,101 +47,68 @@ struct GlobeKeyTutorialPage: View {
     private let keyboardCanDictate = DeviceCapabilities.current().supportsKeyboardDictation
 
     var body: some View {
-        ZStack {
-            Color.dictusBackground
-                .ignoresSafeArea()
+        // WHY ONLY THE FRAME CHANGED (#675): the first dictation is #678's to redraw in
+        // three states. Here it wears the shell: the large title, the instruction as its
+        // subtitle, the text field on a card. Skip is the shell's (`OnboardingTopBar`), and
+        // the mechanics below are untouched.
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeader(title: Text("Try it now"), subtitle: instruction)
+                .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                .padding(.top, OnboardingMetrics.titleTopPadding)
+                .padding(.bottom, 20)
 
-            VStack(spacing: 0) {
-                // Top bar with Skip button
-                HStack {
-                    Spacer()
-                    Button(action: skipTutorial) {
-                        Text("Skip")
-                            .font(.dictusBody)
-                            .foregroundColor(.dictusAccent)
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 8)
+            if dictusKeyboardActive {
+                // State 2: Text field with keyboard open
+                // WHY frame minHeight + maxHeight: The UITextView is multi-line
+                // and needs a bounded frame so SwiftUI can lay it out correctly.
+                // minHeight 140 gives room for ~5 lines of text, and the text view
+                // scrolls internally if the dictation is longer than that.
+                KeyboardDetectingTextField(
+                    text: $textFieldContent,
+                    placeholder: keyboardCanDictate
+                        ? String(localized: "Say something!")
+                        : String(localized: "Type something!"),
+                    autoFocus: true,
+                    onKeyboardChange: { _ in }
+                )
+                .frame(minHeight: 140, maxHeight: 220)
+                .padding(16)
+                .onboardingCard(cornerRadius: 20)
+                .overlay { successCue }
+                .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                .transition(.opacity)
+            } else {
+                // State 1: Animated keyboard switch illustration
 
-                // Title — changes based on state
-                Group {
-                    if !dictusKeyboardActive {
-                        Text("Hold \(Image(systemName: "globe")) and select Dictus")
-                    } else if keyboardCanDictate {
-                        Text("Tap the mic and start dictating")
-                    } else {
-                        Text("Type a few words to try the keyboard")
-                    }
-                }
-                .font(.dictusHeading)
-                .foregroundStyle(.primary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 24)
-                .padding(.top, 16)
-                .padding(.bottom, 12)
+                Spacer()
 
-                if dictusKeyboardActive {
-                    // State 2: Text field with keyboard open
-                    // WHY frame minHeight + maxHeight: The UITextView is multi-line
-                    // and needs a bounded frame so SwiftUI can lay it out correctly.
-                    // minHeight 140 gives room for ~5 lines of text, and the text view
-                    // scrolls internally if the dictation is longer than that.
-                    KeyboardDetectingTextField(
-                        text: $textFieldContent,
-                        placeholder: keyboardCanDictate
-                            ? String(localized: "Say something!")
-                            : String(localized: "Type something!"),
-                        autoFocus: true,
-                        onKeyboardChange: { _ in }
-                    )
-                    .frame(minHeight: 140, maxHeight: 220)
-                    .padding(14)
-                    .dictusGlass(in: RoundedRectangle(cornerRadius: 16))
-                    .padding(.horizontal, 24)
-                    .transition(.opacity)
-                } else {
-                    // State 1: Animated keyboard switch illustration
+                // 4-frame animation showing the globe key flow
+                KeyboardSwitchAnimation()
+                    .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                    .padding(.bottom, 8)
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
-                    Spacer()
-
-                    // 4-frame animation showing the globe key flow
-                    KeyboardSwitchAnimation()
-                        .padding(.horizontal, 24)
-                        .padding(.bottom, 8)
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
-
-                    // Hidden text field to bring up the real keyboard immediately.
-                    // WHY hidden: The user needs the real system keyboard visible so
-                    // they can long-press the globe key. Only the keyboard matters.
-                    KeyboardDetectingTextField(
-                        text: $textFieldContent,
-                        placeholder: "",
-                        autoFocus: true,
-                        onKeyboardChange: { isDictus in
-                            if isDictus {
-                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                    dictusKeyboardActive = true
-                                }
-                                PersistentLog.log(.onboardingDictusKeyboardActivated)
+                // Hidden text field to bring up the real keyboard immediately.
+                // WHY hidden: The user needs the real system keyboard visible so
+                // they can long-press the globe key. Only the keyboard matters.
+                KeyboardDetectingTextField(
+                    text: $textFieldContent,
+                    placeholder: "",
+                    autoFocus: true,
+                    onKeyboardChange: { isDictus in
+                        if isDictus {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                dictusKeyboardActive = true
                             }
+                            PersistentLog.log(.onboardingDictusKeyboardActivated)
                         }
-                    )
-                    .frame(height: 1)
-                    .opacity(0)
-                }
-
-                Spacer(minLength: 0)
+                    }
+                )
+                .frame(height: 1)
+                .opacity(0)
             }
-        }
-        .fullScreenCover(isPresented: $showSuccess) {
-            // WHY fullScreenCover instead of ZStack overlay:
-            // When OnboardingSuccessView was overlaid inside this page's ZStack,
-            // it inherited the constrained layout from OnboardingView's VStack
-            // (which reserves space for the step indicator at the bottom). This
-            // made the success button's horizontal padding not render correctly.
-            // Using fullScreenCover guarantees a proper full-screen context.
-            OnboardingSuccessView(onComplete: finishOnboarding)
+
+            Spacer(minLength: 0)
         }
         .animation(.easeInOut(duration: 0.3), value: dictusKeyboardActive)
         .onChange(of: textFieldContent) { newValue in
@@ -154,42 +119,61 @@ struct GlobeKeyTutorialPage: View {
             if dictusKeyboardActive && trimmed.count >= minTextLength && !hasAutoAdvanced {
                 hasAutoAdvanced = true
                 PersistentLog.log(.onboardingGlobeTutorialTextDetected)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                // WHY 0.6 s AND A CUE (decided 2026-10-09): the fixed 1.5 s wait read as
+                // "something is loading" on device. The field now turns green with a check
+                // the moment the text lands, and the page leaves about 0.6 s later
+                // (0.4 s here, then the 0.2 s keyboard dismissal in `advanceToSuccess`).
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    showSuccessCue = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                     advanceToSuccess()
                 }
             }
         }
     }
 
-    // MARK: - Navigation
+    /// The "it worked" cue on the text field, shown between the text landing and the page
+    /// moving on: a green outline and a check in its corner, in the app's success colour,
+    /// the same check the keyboard and microphone steps use for "detected" and "authorized".
+    private var successCue: some View {
+        ZStack(alignment: .topTrailing) {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(Color.dictusSuccess, lineWidth: 2)
+            Image(systemName: "checkmark.circle.fill")
+                .font(.title2)
+                .foregroundStyle(.white, Color.dictusSuccess)
+                .padding(10)
+                .scaleEffect(showSuccessCue ? 1 : 0.4)
+        }
+        .opacity(showSuccessCue ? 1 : 0)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
 
-    private func advanceToSuccess() {
-        // Dismiss keyboard before showing success screen
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            showSuccess = true
+    /// What to do now, under the title. Changes with the keyboard on screen and, on a
+    /// pre-A14 chip, asks for typing instead of dictating (#635).
+    private var instruction: Text {
+        if !dictusKeyboardActive {
+            return Text("Hold \(Image(systemName: "globe")) and select Dictus")
+        } else if keyboardCanDictate {
+            return Text("Tap the mic and start dictating")
+        } else {
+            return Text("Type a few words to try the keyboard")
         }
     }
 
-    private func skipTutorial() {
-        PersistentLog.log(.onboardingGlobeTutorialSkipped)
+    // MARK: - Navigation
+
+    private func advanceToSuccess() {
+        // Dismiss the keyboard before the completion step slides in.
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        finishOnboarding()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            onComplete()
+        }
     }
 
-    /// Final cleanup before dismissing onboarding.
-    ///
-    /// WHY reset the coordinator here:
-    /// If the user dictated during the globe key tutorial, the DictationCoordinator
-    /// holds the last transcription in `lastResult`. Without clearing it, HomeView
-    /// displays a "last transcription card" as soon as the user lands on the main
-    /// screen — which is not the expected fresh Home state.
-    private func finishOnboarding() {
-        coordinator.lastResult = nil
-        coordinator.resetStatus()
-        onComplete()
-    }
 }
 
 // MARK: - KeyboardSwitchAnimation

@@ -57,6 +57,40 @@ public enum ModelPreparationContext: String, Codable, CaseIterable, Sendable {
         }
     }
 
+    /// The line at the foot of the preparation screen about leaving it.
+    ///
+    /// WHY THE ONBOARDING HAS ITS OWN LINE, AND ONLY WHILE DOWNLOADING (#675, #649 decision
+    /// 6): "stay on this page" stopped being true of the download once it moved to a
+    /// background `URLSession` (#449), which survives the user leaving and even iOS killing
+    /// the app. The onboarding is where a user is most likely to leave (the keyboard step
+    /// sends them to Settings), so it says so. It is still true of the compile and the
+    /// load: the compile does not start while the app is in the background (#472), so
+    /// those phases keep asking the user to stay. The other contexts are unchanged; a
+    /// download from the Models screen would also survive, but that screen is not the
+    /// named onboarding variant this was approved for.
+    ///
+    /// - Parameter isDownloading: whether the screen is in its download phase.
+    public func leaveNotice(isDownloading: Bool) -> ModelPreparationLeaveNotice {
+        switch self {
+        case .onboarding where isDownloading:
+            return .downloadContinuesInBackground
+        case .keyboardColdStart:
+            return .waitForPreparation
+        case .onboarding, .modelSelection, .appRecordTap:
+            return .stayOnPage
+        }
+    }
+}
+
+/// Which sentence the preparation screen says about leaving it (#484, #675).
+public enum ModelPreparationLeaveNotice: Equatable, Sendable {
+    /// "Please stay on this page and do not leave the app."
+    case stayOnPage
+    /// "Please wait for preparation to finish." For a user whose next move is to leave.
+    case waitForPreparation
+    /// "The download continues if you leave the app, but much more slowly." The onboarding
+    /// variant.
+    case downloadContinuesInBackground
 }
 
 /// How a preparation ends, for the screen that is watching it (issue #428).
