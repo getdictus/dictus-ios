@@ -320,6 +320,17 @@
         }
       }
     },
+    "About %lld minutes left" : {
+      "comment" : "Preparation screen countdown, above the cycling phrases, during a first model compile (issue #533). The argument is a number of minutes, always 2 or more: the countdown goes from 2 straight to 'Less than a minute left'. An estimate, not a measurement.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environ %lld minutes restantes"
+          }
+        }
+      }
+    },
     "Accuracy" : {
       "localizations" : {
         "fr" : {
@@ -1747,6 +1758,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Disposition"
+          }
+        }
+      }
+    },
+    "Less than a minute left" : {
+      "comment" : "Preparation screen countdown, the floor it holds for as long as a first model compile overruns its estimate (issue #533). Must never promise the end is near: no 'almost ready'.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moins d'une minute restante"
           }
         }
       }
