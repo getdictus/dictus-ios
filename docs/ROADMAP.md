@@ -22,7 +22,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; closed 2026-10-10, real-use verdict left to user feedback
 5. ~~#593 — reverse trial: Pro free for a fixed period, then the paywall~~ — merged in PR #595; its two device checks (iPad, EN strings) moved to #279 step 6
 6. #690 — model download freezes after iOS kills Dictus on the Full Access change (onboarding); `ready-for-agent` 10-09: one PR, adopted-task watchdog 10 s + restore() instrumentation; 100% wait split to #693
-7. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); mock-ups done 2026-10-07; split into sub-issues #675-#686 (#675 merged in PR #688; next #676-#678, #682, #683 in parallel); intro videos #667 merged in PR #670 (2026-10-09); #676 merged in PR #697 (2026-10-10); #700 back to intro next
+7. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); mock-ups done 2026-10-07; split into sub-issues #675-#686 (#675 merged in PR #688; next #676-#678, #682, #683 in parallel); intro videos #667 merged in PR #670 (2026-10-09); #676 merged in PR #697 (2026-10-10); #677 merged in PR #695 (2026-10-10); #700 back to intro next
 8. ~~#216 — the Pro hub, one screen for free / trial / paid users~~ — closed 2026-10-06
 9. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
 10. ~~#643 — App Store listing for 2.0.0~~ — merged in PR #645 (en, fr, de, es; ASC upload at submission). Remaining French UI follow-ups: ~~#664~~ (merged in PR #668), ~~#665~~ (merged in PR #671)
