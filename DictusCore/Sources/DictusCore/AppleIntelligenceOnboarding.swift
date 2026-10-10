@@ -33,4 +33,38 @@ public enum AppleIntelligenceOnboarding {
     public static var isStepNeeded: Bool {
         isStepNeeded(engineState: PolishAvailability.state)
     }
+
+    // MARK: - Where the Siri language lives
+
+    /// The row of the Settings root that leads to Siri's language.
+    ///
+    /// Read on devices and simulators on 2026-10-10 (#683): on iOS 26 the root row is
+    /// *Apple Intelligence et Siri* / *Apple Intelligence & Siri*, and its page opens on
+    /// the Siri language. On iOS 27 the root row is *Siri*, its page has the same language
+    /// row, and there is no Apple Intelligence switch any more: matching Siri's language
+    /// to the iPhone's is what turns it on.
+    public enum SettingsRoute: Equatable, Sendable {
+        /// iOS 26: Settings > Apple Intelligence & Siri > Language, plus a switch.
+        case appleIntelligenceAndSiri
+        /// iOS 27 and later: Settings > Siri > Language.
+        case siri
+
+        /// Whether the page also carries an Apple Intelligence switch to turn on.
+        public var hasAppleIntelligenceSwitch: Bool {
+            self == .appleIntelligenceAndSiri
+        }
+    }
+
+    /// The route on an iOS of major version `osMajorVersion`.
+    ///
+    /// WHY THE OS VERSION AND NOT A GUESS: the two layouts were each read on that version,
+    /// and an iOS later than 27 is assumed to keep 27's until someone reads otherwise.
+    public static func settingsRoute(osMajorVersion: Int) -> SettingsRoute {
+        osMajorVersion >= 27 ? .siri : .appleIntelligenceAndSiri
+    }
+
+    /// `settingsRoute` for this device.
+    public static var settingsRoute: SettingsRoute {
+        settingsRoute(osMajorVersion: ProcessInfo.processInfo.operatingSystemVersion.majorVersion)
+    }
 }

@@ -39,4 +39,21 @@ final class AppleIntelligenceOnboardingTests: XCTestCase {
             XCTAssertTrue(SmartModeAvailability.isCapable(engineState: state), "\(state)")
         }
     }
+
+    // MARK: - Settings route
+
+    func testIOS26GoesThroughAppleIntelligenceAndSiriWithASwitch() {
+        let route = AppleIntelligenceOnboarding.settingsRoute(osMajorVersion: 26)
+        XCTAssertEqual(route, .appleIntelligenceAndSiri)
+        XCTAssertTrue(route.hasAppleIntelligenceSwitch)
+    }
+
+    /// iOS 27 has no Apple Intelligence switch: the Siri language is the whole fix.
+    func testIOS27AndLaterGoThroughSiriWithoutASwitch() {
+        for major in [27, 28] {
+            let route = AppleIntelligenceOnboarding.settingsRoute(osMajorVersion: major)
+            XCTAssertEqual(route, .siri, "\(major)")
+            XCTAssertFalse(route.hasAppleIntelligenceSwitch, "\(major)")
+        }
+    }
 }
