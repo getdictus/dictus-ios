@@ -259,9 +259,7 @@ struct LanguageSetupPage: View {
 /// three layouts differ most (`w x c v b n` / `z x c v b n m` / `y x c v b n m`). There is
 /// room for all of it on a 6.7" screen, and the page scrolls where there is not.
 ///
-/// WHY THE ROWS ARE WRITTEN HERE FOR AZERTY ONLY: QWERTY and QWERTZ come from DictusCore,
-/// where the keyboard reads them too. AZERTY's rows live in the keyboard extension
-/// (`KeyboardLayouts`), which the app cannot import.
+/// The letters come from `KeyboardLetterRows`, which the Smart Modes scene draws too.
 private struct LayoutPreview: View {
     let layout: LayoutType
     /// The keyboard language, for the space bar's label.
@@ -274,18 +272,7 @@ private struct LayoutPreview: View {
     private let verticalPadding: CGFloat = 12
 
     private var letterRows: [[String]] {
-        switch layout {
-        case .azerty:
-            return [
-                ["a", "z", "e", "r", "t", "y", "u", "i", "o", "p"],
-                ["q", "s", "d", "f", "g", "h", "j", "k", "l", "m"],
-                ["w", "x", "c", "v", "b", "n", "'"]
-            ]
-        case .qwerty:
-            return QWERTYLayout.lettersRows.prefix(3).map { row in row.map { $0.lowercased() } }
-        case .qwertz:
-            return QWERTZLayout.lowercasedLettersRows
-        }
+        KeyboardLetterRows.rows(for: layout)
     }
 
     /// Three letter rows and the bottom row.
@@ -381,4 +368,29 @@ private struct LayoutPreview: View {
 
     /// The function keys, a step darker than the letters.
     private static let functionKeyFill = Color(light: Color(hex: 0xDCDCE2), dark: Color(hex: 0x1F2A3E))
+}
+
+// MARK: - Letter rows
+
+/// The three letter rows of a layout, lowercase, as the onboarding draws the keyboard: on
+/// the language screen's preview and in the Smart Modes scene's keyboard at rest (#679).
+///
+/// WHY THE ROWS ARE WRITTEN HERE FOR AZERTY ONLY: QWERTY and QWERTZ come from DictusCore,
+/// where the keyboard reads them too. AZERTY's rows live in the keyboard extension
+/// (`KeyboardLayouts`), which the app cannot import.
+enum KeyboardLetterRows {
+    static func rows(for layout: LayoutType) -> [[String]] {
+        switch layout {
+        case .azerty:
+            return [
+                ["a", "z", "e", "r", "t", "y", "u", "i", "o", "p"],
+                ["q", "s", "d", "f", "g", "h", "j", "k", "l", "m"],
+                ["w", "x", "c", "v", "b", "n", "'"]
+            ]
+        case .qwerty:
+            return QWERTYLayout.lettersRows.prefix(3).map { row in row.map { $0.lowercased() } }
+        case .qwertz:
+            return QWERTZLayout.lowercasedLettersRows
+        }
+    }
 }

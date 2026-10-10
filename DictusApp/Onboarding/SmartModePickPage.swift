@@ -19,7 +19,8 @@ import DictusCore
 /// WHY BLUE: Smart Modes are the app's accent here, never the purple `dictusSmartMode`
 /// token (#649 mock-ups).
 struct SmartModePickPage: View {
-    /// The flow's model manager, read for the download pill at the bottom.
+    /// The flow's model manager, read for the download pill at the bottom
+    /// (`OnboardingDownloadPill`).
     @ObservedObject var modelManager: ModelManager
     /// The model the onboarding installs.
     let modelIdentifier: String
@@ -35,7 +36,10 @@ struct SmartModePickPage: View {
     var body: some View {
         OnboardingPage(
             title: Text("Your 3 Smart Modes"),
-            subtitle: Text("Pick three. They will be waiting for you when you hold down the microphone.")
+            // "You have just seen them" (mock-up 06): the Smart Modes scene comes right
+            // before this step (#679).
+            subtitle: Text("You have just seen them: pick three. They will be waiting for you when you hold down the microphone.",
+                           comment: "Onboarding Smart Mode pick: subtitle under the title. It follows the Smart Modes scene (#677, #679).")
         ) {
             counter
         } content: {
@@ -47,7 +51,7 @@ struct SmartModePickPage: View {
                     .padding(.top, 8)
             }
         } bottom: {
-            downloadPill
+            OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
             OnboardingPrimaryButton(Text("Continue"), isEnabled: pick.canContinue, action: commit)
                 .accessibilityIdentifier("onboarding.primary")
         }
@@ -207,41 +211,6 @@ struct SmartModePickPage: View {
         .accessibilityLabel(Text(SmartModeListView.listName(for: mode)))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
         .accessibilityIdentifier("onboarding.smartModePick.\(mode.id)")
-    }
-
-    // MARK: - Download pill
-
-    /// "Parakeet v3 · 34 %" while the model downloads, as the mock-up draws it: this step
-    /// falls within the download (decision 16), and the pill says it is still moving.
-    /// Nothing once the download is over or before it starts.
-    @ViewBuilder
-    private var downloadPill: some View {
-        if modelManager.modelStates[modelIdentifier] == .downloading,
-           let model = ModelInfo.forIdentifier(modelIdentifier) {
-            let fraction = Double(modelManager.downloadProgress[modelIdentifier] ?? 0)
-            HStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .stroke(Color.primary.opacity(0.12), lineWidth: 2.5)
-                    Circle()
-                        .trim(from: 0, to: max(0.02, fraction))
-                        .stroke(Color.dictusAccent, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                }
-                .frame(width: 16, height: 16)
-                .animation(.easeInOut(duration: 0.3), value: fraction)
-
-                (Text(verbatim: "\(model.displayName) · ")
-                    + Text(fraction, format: .percent.precision(.fractionLength(0))))
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(Capsule().fill(Color.dictusSurface))
-            .accessibilityElement(children: .combine)
-            .transition(.opacity)
-        }
     }
 
     // MARK: - Actions
