@@ -30,6 +30,11 @@ final class FirstDictationStageTests: XCTestCase {
         XCTAssertFalse(FirstDictationStage.isDictusInputMode(identifier: "com.apple.dictation"))
     }
 
+    func testAnIdentifierThatOnlyContainsThePrefixIsNotDictus() {
+        XCTAssertFalse(FirstDictationStage.isDictusInputMode(identifier: "com.example.com.pivi.dictus.keyboard"))
+        XCTAssertFalse(FirstDictationStage.isDictusInputMode(identifier: "com.pivi.dictusplus.keyboard"))
+    }
+
     func testAnUnreadableIdentifierIsNotDictus() {
         XCTAssertFalse(FirstDictationStage.isDictusInputMode(identifier: nil))
         XCTAssertFalse(FirstDictationStage.isDictusInputMode(identifier: ""))

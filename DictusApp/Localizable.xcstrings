@@ -1366,6 +1366,23 @@
         }
       }
     },
+    "English" : {
+      "comment" : "Drawn globe menu row: the English keyboard, named in English (#678).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "English"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "English"
+          }
+        }
+      }
+    },
     "English (US)" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1532,6 +1549,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Offre fondateur jusqu'au %@."
+          }
+        }
+      }
+    },
+    "Français" : {
+      "comment" : "Drawn globe menu row: the French keyboard, named in French (#678).",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Français"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Français"
           }
         }
       }

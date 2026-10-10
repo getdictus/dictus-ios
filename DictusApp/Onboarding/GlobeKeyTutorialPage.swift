@@ -311,10 +311,13 @@ private struct GlobeLongPressCard: View {
     /// The current keyboard's row in the menu, in the iPhone's language. The real menu
     /// lists the enabled keyboards by their own names; the language follows the system,
     /// like the keyboard the user will actually see (not `SharedKeys.language`, which is
-    /// the transcription language).
+    /// the transcription language). Each name is a catalog entry, spelled the same in
+    /// both locales, like the real menu, which names a keyboard in its own language.
     private let systemKeyboardName: String = {
         let preferred = Locale.preferredLanguages.first ?? "en"
-        return preferred.hasPrefix("fr") ? "Français" : "English"
+        return preferred.hasPrefix("fr")
+            ? String(localized: "Français", comment: "Drawn globe menu row: the French keyboard, named in French (#678).")
+            : String(localized: "English", comment: "Drawn globe menu row: the English keyboard, named in English (#678).")
     }()
 
     // Geometry of the drawn keyboard, in points from its bottom-left corner.
