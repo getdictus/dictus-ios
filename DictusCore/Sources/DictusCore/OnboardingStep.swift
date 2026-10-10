@@ -26,7 +26,8 @@ import Foundation
 /// Mode pick, the Dynamic Island tutorial) slot in as new cases with new raw values; the
 /// existing raw values keep their meaning.
 public enum OnboardingStep: String, CaseIterable, Sendable {
-    /// The intro. Today the static welcome page; #676 replaces its content.
+    /// The intro: the three-page carousel of looping scenes (#676, `OnboardingIntroScene`).
+    /// Which page of it is on screen is not persisted: the carousel sets nothing up.
     case welcome
     /// Spoken language, keyboard language and layout. Confirming it starts the model
     /// download.
