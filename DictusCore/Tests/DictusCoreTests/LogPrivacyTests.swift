@@ -63,6 +63,30 @@ final class LogPrivacyTests: XCTestCase {
                 path: "Encoder.mlmodelc/weights/weight.bin",
                 secondsWithoutProgress: 15
             ),
+            // Adopted-task diagnosis (#690): task state, byte counts and an error domain
+            // and code. Nothing the user said or typed.
+            .modelDownloadTaskState(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                chunk: 0,
+                phase: "restore",
+                origin: "adopted",
+                state: "suspended",
+                receivedBytes: 11_534_336,
+                error: "none"
+            ),
+            .modelDownloadAdoptedTaskSilent(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                chunk: 0,
+                secondsWithoutByte: 10
+            ),
+            .modelDownloadTaskCancelled(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                chunk: 0,
+                caller: "adoptedWatchdog"
+            ),
             .modelSelected(name: "base"),
             .modelCompilationStarted(name: "base"),
             .modelCompilationCompleted(name: "base", durationMs: 5000),
