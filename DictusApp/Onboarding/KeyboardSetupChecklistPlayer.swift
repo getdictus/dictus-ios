@@ -93,9 +93,8 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
 
     /// Frame clock: 10 per second, enough for the tick's pop.
     private static let tickInterval: TimeInterval = 0.1
-    /// How long a just-ticked line stays up with its check before the next one takes its
-    /// place in the one-step Picture in Picture card. The check pops over its first third.
-    private static let justTickedHold: TimeInterval = 1.2
+    /// How long a tick takes to pop in.
+    private static let tickPopDuration: TimeInterval = 0.4
     /// A frame at least this often even when nothing changed, so the layer never sits on a
     /// stale timestamp.
     private static let refreshInterval: TimeInterval = 1
@@ -114,13 +113,6 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         super.init()
         if usesPictureInPicture {
             configureLayer()
-            // Checked again on its own, not through `usesPictureInPicture`: on a device
-            // without Picture in Picture the controller's initializer returns a nil object
-            // that Swift sees as non-optional, and observing it aborts the app (measured
-            // on a simulator, which reports Picture in Picture as unsupported).
-            if AVPictureInPictureController.isPictureInPictureSupported() {
-                makePictureInPictureController()
-            }
         }
         log("created", "pipSupported=\(AVPictureInPictureController.isPictureInPictureSupported()) forcedOff=\(Self.isForcedOff)")
     }
@@ -128,12 +120,22 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
     // MARK: - Page lifecycle
 
     /// Starts the loop. Called when the keyboard step appears.
+    ///
+    /// WHY THE KEYBOARD IS CHECKED FIRST (device log, 2026-10-10): the step is shown again
+    /// when iOS relaunches the app after the Full Access kill, with the keyboard already
+    /// there. The page then only offers Continue, so Picture in Picture will never start:
+    /// the player goes straight to `.complete`, builds no controller and borrows no audio
+    /// session. Borrowing there used to fail anyway (`OSStatus 560557684`, cannot interrupt
+    /// others) right after the engine had configured its own session at launch.
     func start() {
         guard timer == nil else { return }
         demoStartedAt = Date()
-        if usesPictureInPicture {
-            let outcome = audioSession.borrow(engineIsRunning: DictationCoordinator.shared.isAudioEngineRunning)
-            log("audioSession", outcome)
+        if Self.isDictusKeyboardActive() {
+            mode = .complete
+            keyboardAdded = true
+            log("startedComplete")
+        } else if usesPictureInPicture {
+            preparePictureInPicture()
         }
         let timer = Timer(timeInterval: Self.tickInterval, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.tick() }
@@ -155,11 +157,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
             stopReason = "pageLeft"
             pipController.stopPictureInPicture()
         }
-        if let outcome = audioSession.giveBack(restoreEngineSession: {
-            try DictationCoordinator.shared.configureAudioSessionForWarmUp()
-        }) {
-            log("audioSession", outcome)
-        }
+        giveBackAudioSession()
         displayLayer.sampleBufferRenderer.flush(removingDisplayedImage: true, completionHandler: nil)
     }
 
@@ -230,6 +228,11 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         keyboardAdded = true
         log("complete")
         tick(forceFrame: true)
+        // Nothing will start Picture in Picture from here (the page offers Continue), so
+        // the session goes back to the engine now rather than when the step is left.
+        if !isPictureInPictureActive {
+            giveBackAudioSession()
+        }
     }
 
     // MARK: - Clock
@@ -260,7 +263,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
                 doneAt[index] = nil
             }
             newProgress[index] = doneAt[index].map {
-                min(1, now.timeIntervalSince($0) / Self.justTickedHold)
+                min(1, now.timeIntervalSince($0) / Self.tickPopDuration)
             } ?? 1
         }
 
@@ -333,6 +336,28 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
     }
 
     // MARK: - Picture in Picture
+
+    /// Builds the controller and borrows the audio session, once, for a step where Picture
+    /// in Picture may start.
+    private func preparePictureInPicture() {
+        // Checked again on its own, not through `usesPictureInPicture`: on a device without
+        // Picture in Picture the controller's initializer returns a nil object that Swift
+        // sees as non-optional, and observing it aborts the app (measured on a simulator,
+        // which reports Picture in Picture as unsupported).
+        if pipController == nil, AVPictureInPictureController.isPictureInPictureSupported() {
+            makePictureInPictureController()
+        }
+        let outcome = audioSession.borrow(engineIsRunning: DictationCoordinator.shared.isAudioEngineRunning)
+        log("audioSession", outcome)
+    }
+
+    private func giveBackAudioSession() {
+        if let outcome = audioSession.giveBack(restoreEngineSession: {
+            try DictationCoordinator.shared.configureAudioSessionForWarmUp()
+        }) {
+            log("audioSession", outcome)
+        }
+    }
 
     private func makePictureInPictureController() {
         let source = AVPictureInPictureController.ContentSource(

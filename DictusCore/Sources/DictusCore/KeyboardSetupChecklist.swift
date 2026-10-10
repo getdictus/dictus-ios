@@ -12,10 +12,12 @@ public enum KeyboardSetupChecklistLine: Int, CaseIterable, Sendable {
     case tapKeyboards
     /// "Turn on Dictus": the keyboard switch.
     case turnOnDictus
-    /// "Turn on Full Access": the second switch.
-    case turnOnFullAccess
-    /// "Tap Allow, then come back": iOS's confirmation alert, then the return to Dictus.
-    case allowAndComeBack
+    /// "Turn on Full Access, then Allow": the second switch and iOS's confirmation alert.
+    ///
+    /// WHY ONE LINE FOR BOTH (decided by Pierre after the device test of 2026-10-10): the
+    /// alert follows the switch at once, and the app is terminated on Allow, so a separate
+    /// "come back" line was never reachable and only made the window taller.
+    case turnOnFullAccessAndAllow
 }
 
 /// How one line is drawn: not reached yet, the one to do now, or done (ticked).
@@ -33,7 +35,7 @@ public enum KeyboardSetupChecklist {
 
     /// What drives the lines.
     public enum Phase: Equatable, Sendable {
-        /// Before the user has gone to Settings: a loop that walks the four lines in time
+        /// Before the user has gone to Settings: a loop that walks the three lines in time
         /// with the drawn Settings page above it. `elapsed` is the time since the loop
         /// started; it wraps every `demoCycle`.
         case demo(elapsed: TimeInterval)
@@ -43,8 +45,8 @@ public enum KeyboardSetupChecklist {
         /// (`UITextInputMode.activeInputModes`), and nothing else. The Keyboards row has
         /// no trace, and Full Access is visible only to the keyboard extension itself; the
         /// app learns it by being terminated by iOS, which is also what ends the Picture
-        /// in Picture. So adding the keyboard ticks the first two lines and lights the
-        /// third, and the third and fourth are never ticked live.
+        /// in Picture (measured on device, 2026-10-10). So adding the keyboard ticks the
+        /// first two lines and lights the third, which is never ticked live.
         case guide(keyboardAdded: Bool)
         /// The page has detected the keyboard on return: everything ticked, the same final
         /// state the drawn Settings page shows (both switches on).
@@ -54,14 +56,14 @@ public enum KeyboardSetupChecklist {
     /// Length of one demo loop, the same as the drawn Settings loop on the keyboard step.
     public static let demoCycle: TimeInterval = 6
 
-    /// When each line becomes the current one inside a demo loop. Line `i - 1` is ticked
-    /// at the moment line `i` lights.
+    /// When each line becomes the current one inside a demo loop, then (last entry) when
+    /// every line is ticked. Line `i - 1` is ticked at the moment line `i` lights.
     ///
     /// WHY THESE TIMES: they are the drawn Settings loop's (`KeyboardSetupPage`): the
     /// Keyboards row lights at 0.8 s, the Dictus switch at 2.0 s, the Full Access switch
-    /// at 3.2 s, and the drawing holds its final state from 4.6 s. The checklist lights
-    /// the matching line at the same instant, so the two read as one animation, and its
-    /// fourth line ("Allow, then come back") takes the hold.
+    /// at 3.2 s, and the drawing holds its final state, both switches on, from 4.6 s. The
+    /// checklist lights the matching line at the same instant and is all ticked during the
+    /// hold, so the two read as one animation.
     public static let demoSchedule: [TimeInterval] = [0.8, 2.0, 3.2, 4.6]
 
     /// The state of every line, in `KeyboardSetupChecklistLine.allCases` order.
@@ -72,7 +74,7 @@ public enum KeyboardSetupChecklist {
             return states(currentIndex: demoCurrentIndex(elapsed: elapsed), count: lineCount)
         case .guide(let keyboardAdded):
             let current = keyboardAdded
-                ? KeyboardSetupChecklistLine.turnOnFullAccess.rawValue
+                ? KeyboardSetupChecklistLine.turnOnFullAccessAndAllow.rawValue
                 : KeyboardSetupChecklistLine.tapKeyboards.rawValue
             return states(currentIndex: current, count: lineCount)
         case .complete:
@@ -86,7 +88,8 @@ public enum KeyboardSetupChecklist {
     }
 
     /// The index of the current line in a demo loop, or nil before the first one lights
-    /// (the loop's reset, where every line is pending).
+    /// (the loop's reset, where every line is pending). An index equal to the line count
+    /// means every line is ticked.
     static func demoCurrentIndex(elapsed: TimeInterval) -> Int? {
         // A negative elapsed (a clock read before the loop's start) is the reset.
         guard elapsed >= 0 else { return nil }
@@ -94,7 +97,8 @@ public enum KeyboardSetupChecklist {
         return demoSchedule.lastIndex(where: { $0 <= inCycle })
     }
 
-    /// Lines before `currentIndex` done, the line at it current, the rest pending.
+    /// Lines before `currentIndex` done, the line at it current, the rest pending. An index
+    /// past the last line ticks them all.
     private static func states(currentIndex: Int?, count: Int) -> [KeyboardSetupChecklistLineState] {
         (0..<count).map { index in
             guard let currentIndex else { return .pending }

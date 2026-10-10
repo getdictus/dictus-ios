@@ -4,12 +4,13 @@ import SwiftUI
 import DictusCore
 
 /// The checklist card of mock-up `03b-pip-checklist-sur-reglages`: the Dictus icon and a
-/// title, then the four taps to make in Settings, ticked as they are done.
+/// title, then the three taps to make in Settings, ticked as they are done (three since
+/// the device test of 2026-10-10: Full Access and Allow are one line).
 ///
 /// WHERE IT SHOWS: only in the fallback, inline under the drawn Settings page, when
 /// Picture in Picture is unavailable or failed to start. The Picture in Picture window
-/// draws the same states in a wide, one-step form (`KeyboardSetupChecklistPictureCard`),
-/// because this four-line card made the window tall enough to cover the Full Access
+/// draws the same states in a short, title-less form (`KeyboardSetupChecklistPictureCard`),
+/// because a card with a title made the window tall enough to cover the Full Access
 /// alert's buttons (device test, 2026-10-10).
 ///
 /// WHY FIXED COLOURS AND SIZES: the mock-up draws the card dark in light and dark mode
@@ -20,12 +21,12 @@ import DictusCore
 struct KeyboardSetupChecklistCard: View {
     /// One state per line, in `KeyboardSetupChecklistLine.allCases` order.
     let lines: [KeyboardSetupChecklistLineState]
-    /// How far each line's tick has gone, 0 to 1, over the player's hold. A line that is
-    /// not done, or done for a while, reads 1 (no animation).
+    /// How far each line's tick has popped in, 0 to 1. A line that is not done, or done
+    /// for a while, reads 1 (no animation).
     var tickProgress: [Double] = []
 
     /// The card's size in points.
-    static let size = CGSize(width: 300, height: 220)
+    static let size = CGSize(width: 300, height: 184)
 
     /// The card's fill: the app's dark, a shade deeper so it reads over the dark app too.
     static let background = Color(hex: 0x0F1728)
@@ -61,54 +62,67 @@ struct KeyboardSetupChecklistCard: View {
     private func row(_ line: KeyboardSetupChecklistLine) -> some View {
         let state = state(of: line)
         return HStack(spacing: 12) {
-            badge(line, state: state)
+            KeyboardSetupChecklistBadge(
+                number: line.rawValue + 1,
+                state: state,
+                tickProgress: progress(of: line),
+                diameter: 26
+            )
             line.title
                 .font(.system(size: 15, weight: state == .current ? .semibold : .regular))
-                .foregroundStyle(textColor(for: state))
+                .foregroundStyle(KeyboardSetupChecklistBadge.textColor(for: state))
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
+}
 
-    /// Green with a check once done, accent with the number while current, a faint disc
-    /// with the number before.
-    @ViewBuilder
-    private func badge(_ line: KeyboardSetupChecklistLine, state: KeyboardSetupChecklistLineState) -> some View {
-        let diameter: CGFloat = 26
+// MARK: - Badge
+
+/// A line's number disc, shared by the inline card and the Picture in Picture frames:
+/// green with a check once done, accent with the number while current, a faint disc with
+/// the number before.
+struct KeyboardSetupChecklistBadge: View {
+    let number: Int
+    let state: KeyboardSetupChecklistLineState
+    /// How far the tick has popped in, 0 to 1.
+    let tickProgress: Double
+    let diameter: CGFloat
+
+    var body: some View {
         switch state {
         case .done:
-            // The pop runs over the first third of the player's hold.
-            let progress = min(1, progress(of: line) * 3)
             Circle()
                 .fill(Color.dictusSuccess)
                 .frame(width: diameter, height: diameter)
                 .overlay(
                     Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: diameter * 0.46, weight: .bold))
                         .foregroundStyle(.white)
                         // The tick pops in: from half size to a slight overshoot, then
                         // settles. Driven by the frame clock, not a SwiftUI animation,
                         // because the frames sent to Picture in Picture are rendered one
                         // by one and SwiftUI animations do not run there.
-                        .scaleEffect(Self.popScale(progress))
-                        .opacity(min(1, progress * 2))
+                        .scaleEffect(Self.popScale(tickProgress))
+                        .opacity(min(1, tickProgress * 2))
                 )
         case .current:
-            Text(verbatim: "\(line.rawValue + 1)")
-                .font(.system(size: 13, weight: .bold))
+            Text(verbatim: "\(number)")
+                .font(.system(size: diameter * 0.5, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: diameter, height: diameter)
                 .background(Circle().fill(Color.dictusAccent))
         case .pending:
-            Text(verbatim: "\(line.rawValue + 1)")
-                .font(.system(size: 13, weight: .semibold))
+            Text(verbatim: "\(number)")
+                .font(.system(size: diameter * 0.5, weight: .semibold))
                 .foregroundStyle(Color.white.opacity(0.45))
                 .frame(width: diameter, height: diameter)
                 .background(Circle().fill(Color.white.opacity(0.08)))
         }
     }
 
-    private func textColor(for state: KeyboardSetupChecklistLineState) -> Color {
+    /// The line's text colour for its state.
+    static func textColor(for state: KeyboardSetupChecklistLineState) -> Color {
         switch state {
         case .done: return Color.white.opacity(0.45)
         case .current: return .white
@@ -136,10 +150,8 @@ extension KeyboardSetupChecklistLine {
             return Text("Tap Keyboards", comment: "Checklist line over iOS Settings during keyboard setup (#682): tap the Keyboards row.")
         case .turnOnDictus:
             return Text("Turn on Dictus", comment: "Checklist line over iOS Settings during keyboard setup (#682): turn on the Dictus keyboard switch.")
-        case .turnOnFullAccess:
-            return Text("Turn on Full Access", comment: "Checklist line over iOS Settings during keyboard setup (#682): turn on the Full Access switch.")
-        case .allowAndComeBack:
-            return Text("Tap Allow, then come back", comment: "Checklist line over iOS Settings during keyboard setup (#682): confirm iOS's alert, then return to Dictus.")
+        case .turnOnFullAccessAndAllow:
+            return Text("Turn on Full Access, then Allow", comment: "Checklist line over iOS Settings during keyboard setup (#682): turn on the Full Access switch, then confirm iOS's alert. One line in a small window: keep it short.")
         }
     }
 
@@ -150,10 +162,8 @@ extension KeyboardSetupChecklistLine {
             return String(localized: "Tap Keyboards", comment: "Checklist line over iOS Settings during keyboard setup (#682): tap the Keyboards row.")
         case .turnOnDictus:
             return String(localized: "Turn on Dictus", comment: "Checklist line over iOS Settings during keyboard setup (#682): turn on the Dictus keyboard switch.")
-        case .turnOnFullAccess:
-            return String(localized: "Turn on Full Access", comment: "Checklist line over iOS Settings during keyboard setup (#682): turn on the Full Access switch.")
-        case .allowAndComeBack:
-            return String(localized: "Tap Allow, then come back", comment: "Checklist line over iOS Settings during keyboard setup (#682): confirm iOS's alert, then return to Dictus.")
+        case .turnOnFullAccessAndAllow:
+            return String(localized: "Turn on Full Access, then Allow", comment: "Checklist line over iOS Settings during keyboard setup (#682): turn on the Full Access switch, then confirm iOS's alert. One line in a small window: keep it short.")
         }
     }
 }

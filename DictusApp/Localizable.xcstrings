@@ -3475,17 +3475,6 @@
         }
       }
     },
-    "Tap Allow, then come back" : {
-      "comment" : "Checklist line over iOS Settings during keyboard setup (#682): confirm iOS's alert, then return to Dictus.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Touchez Autoriser, puis revenez"
-          }
-        }
-      }
-    },
     "Tap and hold \\(Image(systemName: \"globe\")), then" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4207,13 +4196,13 @@
         }
       }
     },
-    "Turn on Full Access" : {
-      "comment" : "Checklist line over iOS Settings during keyboard setup (#682): turn on the Full Access switch.",
+    "Turn on Full Access, then Allow" : {
+      "comment" : "Checklist line over iOS Settings during keyboard setup (#682): turn on the Full Access switch, then confirm iOS's alert. One line in a small window: keep it short.",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activez l'accès complet"
+            "value" : "Activez l'accès complet, puis Autoriser"
           }
         }
       }
