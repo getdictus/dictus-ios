@@ -251,10 +251,16 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
     /// `restoreStaleFile`: the model has a run, but the task fetches a file the manifest
     /// has moved past.
     ///
-    /// NOT marked abandoned, deliberately unchanged by #690: a `restoreStaleFile` task's
-    /// model HAS a run, so its `-999` completion reaches `handleChunkCompletion` and, `-999`
-    /// not being retryable, ends that run. Whether that is right is a question for the
-    /// maintainer; this line makes it visible when it happens.
+    /// WHY A `restoreStaleFile` TASK IS MARKED ABANDONED (issue #701). Its model HAS a
+    /// run, so without the mark its `-999` completion would reach `handleChunkCompletion`,
+    /// and two things would go wrong there. `-999` is not retryable, so `retryOrFail` would
+    /// fail the whole download over a cancel of our own. And before that, the chunk index
+    /// would be cleared from `inFlight`, `tasks` and `liveChunkBytes`, which are keyed by
+    /// chunk of the CURRENT file — freeing the slot of a live chunk that happens to share
+    /// the number. The mark makes `didCompleteWithError` drop the completion at its
+    /// `isAbandoned` guard, exactly like a cancel from `DownloadRun.cancel(chunk:caller:)`.
+    ///
+    /// A `restoreUnclaimed` task needs no mark: no run will ever receive its completion.
     private func cancelUnclaimed(_ task: URLSessionTask) {
         let tag = ModelDownloadTaskTag.decode(task.taskDescription)
         let run = tag.flatMap { runs[$0.modelIdentifier] }
@@ -265,6 +271,8 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
             chunk: tag?.chunkIndex ?? -1,
             caller: caller.rawValue
         ))
+        // Before `cancel()`, so the mark is in place whenever the completion arrives.
+        run?.abandonedTaskIdentifiers.insert(task.taskIdentifier)
         task.cancel()
     }
 
@@ -1106,7 +1114,8 @@ private final class DownloadRun {
     var inFlight: Set<Int> = []
     /// The live task per in-flight chunk, so a restart can stop them.
     var tasks: [Int: URLSessionDownloadTask] = [:]
-    /// Tasks this run cancelled itself, whose completion must not count as a failure.
+    /// Tasks this run cancelled itself, whose completion must not count as a failure —
+    /// including a stale-file task `restore()` cancelled on its behalf (#701).
     var abandonedTaskIdentifiers: Set<Int> = []
     /// Tasks `restore()` adopted from a previous process, keyed by `taskIdentifier`, with
     /// when each last delivered a byte in this process — or was adopted, before the first.
