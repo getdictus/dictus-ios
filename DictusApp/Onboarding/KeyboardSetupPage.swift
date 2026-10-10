@@ -329,8 +329,7 @@ struct KeyboardSetupPage: View {
     /// A white (or dark surface) inset group, as in Settings.
     private func settingsGroup<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         content()
-            .background(Color.dictusSurface)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .onboardingSettingsGroup()
     }
 
     /// A numbered row with a switch.
@@ -350,13 +349,7 @@ struct KeyboardSetupPage: View {
     /// The step number in a circle: accent while it is the step the loop points at, grey
     /// otherwise.
     private func stepBadge(_ step: Int) -> some View {
-        let isLit = litSettingsStep == step
-        return Text(verbatim: "\(step)")
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(isLit ? Color.white : Color.secondary)
-            .frame(width: 26, height: 26)
-            .background(Circle().fill(isLit ? Color.dictusAccent : Color.primary.opacity(0.08)))
-            .animation(.easeInOut(duration: 0.25), value: isLit)
+        OnboardingStepBadge(number: step, isLit: litSettingsStep == step)
     }
 
     // MARK: - Animation Loop
@@ -478,20 +471,5 @@ private struct DrawnSwitch: View {
             )
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isOn)
             .animation(.easeInOut(duration: 0.25), value: isLit)
-    }
-}
-
-/// A Settings row icon: a white symbol on a coloured rounded square. Also drawn by the
-/// Apple Intelligence step's Settings path (#683).
-struct DictusIconTileSymbol: View {
-    let systemName: String
-    let fill: Color
-
-    var body: some View {
-        Image(systemName: systemName)
-            .font(.system(size: 14, weight: .medium))
-            .foregroundStyle(.white)
-            .frame(width: 30, height: 30)
-            .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(fill))
     }
 }
