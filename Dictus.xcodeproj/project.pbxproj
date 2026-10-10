@@ -93,6 +93,8 @@
 		AA068203 /* ChecklistAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168203 /* ChecklistAudioSession.swift */; };
 		AA068204 /* KeyboardSetupChecklistPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168204 /* KeyboardSetupChecklistPlayer.swift */; };
 		AA068205 /* KeyboardSetupChecklistInline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168205 /* KeyboardSetupChecklistInline.swift */; };
+		AA068206 /* KeyboardSetupChecklistPictureCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168206 /* KeyboardSetupChecklistPictureCard.swift */; };
+		AA068207 /* ChecklistPictureSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168207 /* ChecklistPictureSource.swift */; };
 		AA0000A4 /* ModelDownloadPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A4 /* ModelDownloadPage.swift */; };
 		AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A5 /* GlobeKeyTutorialPage.swift */; };
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
@@ -307,6 +309,8 @@
 		AA168203 /* ChecklistAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistAudioSession.swift; sourceTree = "<group>"; };
 		AA168204 /* KeyboardSetupChecklistPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistPlayer.swift; sourceTree = "<group>"; };
 		AA168205 /* KeyboardSetupChecklistInline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistInline.swift; sourceTree = "<group>"; };
+		AA168206 /* KeyboardSetupChecklistPictureCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistPictureCard.swift; sourceTree = "<group>"; };
+		AA168207 /* ChecklistPictureSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistPictureSource.swift; sourceTree = "<group>"; };
 		AA1000A4 /* ModelDownloadPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadPage.swift; sourceTree = "<group>"; };
 		AA1000A5 /* GlobeKeyTutorialPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeKeyTutorialPage.swift; sourceTree = "<group>"; };
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -715,6 +719,8 @@
 				AA168203 /* ChecklistAudioSession.swift */,
 				AA168204 /* KeyboardSetupChecklistPlayer.swift */,
 				AA168205 /* KeyboardSetupChecklistInline.swift */,
+				AA168206 /* KeyboardSetupChecklistPictureCard.swift */,
+				AA168207 /* ChecklistPictureSource.swift */,
 				AA1000A4 /* ModelDownloadPage.swift */,
 				AA1000A5 /* GlobeKeyTutorialPage.swift */,
 				AA1000EA /* LanguageSetupPage.swift */,
@@ -1232,6 +1238,8 @@
 				AA068203 /* ChecklistAudioSession.swift in Sources */,
 				AA068204 /* KeyboardSetupChecklistPlayer.swift in Sources */,
 				AA068205 /* KeyboardSetupChecklistInline.swift in Sources */,
+				AA068206 /* KeyboardSetupChecklistPictureCard.swift in Sources */,
+				AA068207 /* ChecklistPictureSource.swift in Sources */,
 				AA0000A4 /* ModelDownloadPage.swift in Sources */,
 				AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */,
 				AA0000A9 /* OnboardingSuccessView.swift in Sources */,

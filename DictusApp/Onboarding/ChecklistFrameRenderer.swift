@@ -13,16 +13,17 @@ import DictusCore
 /// layer (`AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer:…)`). No
 /// recorded video ships, so the card stays localized and follows the line states live.
 ///
-/// WHY `ImageRenderer`: it draws the very SwiftUI view the fallback shows inline
-/// (`KeyboardSetupChecklistCard`), off screen, into a `CGImage`. It runs on the main actor.
+/// WHY `ImageRenderer`: it draws a SwiftUI view (`KeyboardSetupChecklistPictureCard`), off
+/// screen, into a `CGImage`, with the same line states and copy as the inline card of the
+/// fallback. It runs on the main actor.
 @MainActor
 final class ChecklistFrameRenderer {
     /// Pixels per point. 2 keeps the text sharp in a Picture in Picture window, which is
     /// smaller than the card, at a quarter of a 3× frame's memory.
     private static let scale: CGFloat = 2
 
-    private let pixelWidth = Int(KeyboardSetupChecklistCard.size.width * scale)
-    private let pixelHeight = Int(KeyboardSetupChecklistCard.size.height * scale)
+    private let pixelWidth = Int(KeyboardSetupChecklistPictureCard.size.width * scale)
+    private let pixelHeight = Int(KeyboardSetupChecklistPictureCard.size.height * scale)
 
     private var pool: CVPixelBufferPool?
     private var formatDescription: CMVideoFormatDescription?
@@ -34,7 +35,7 @@ final class ChecklistFrameRenderer {
         tickProgress: [Double],
         at time: CMTime
     ) -> CMSampleBuffer? {
-        let renderer = ImageRenderer(content: KeyboardSetupChecklistCard(lines: lines, tickProgress: tickProgress))
+        let renderer = ImageRenderer(content: KeyboardSetupChecklistPictureCard(lines: lines, tickProgress: tickProgress))
         renderer.scale = Self.scale
         guard let image = renderer.cgImage,
               let pixelBuffer = makePixelBuffer(drawing: image) else {

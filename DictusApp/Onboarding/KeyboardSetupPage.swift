@@ -12,8 +12,9 @@ import DictusCore
 /// requests. Since the shell (#675) it is drawn as the mock-up draws it: the top of an
 /// iPhone, cropped, showing Settings > Apps > Dictus with the three things to touch
 /// numbered 1, 2, 3, and the current one lit in turn on a loop. Only iOS system UI is
-/// drawn this way (#649 decision 13). Below it, the checklist that Open Settings sends
-/// into Picture in Picture over the real Settings (#682, `KeyboardSetupChecklistPlayer`).
+/// drawn this way (#649 decision 13). Open Settings sends a checklist into Picture in
+/// Picture over the real Settings (#682, `KeyboardSetupChecklistPlayer`); the page itself
+/// shows it only in the fallback, under the drawing.
 struct KeyboardSetupPage: View {
     let onNext: () -> Void
 
@@ -58,12 +59,21 @@ struct KeyboardSetupPage: View {
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
+                    // The Picture in Picture source, behind the drawn phone that covers it.
+                    .background {
+                        if checklist.usesPictureInPicture {
+                            ChecklistPictureSource(layer: checklist.displayLayer)
+                        }
+                    }
 
-                // Floats over the cropped bottom of the drawn phone, trailing, as the
-                // window floats over Settings in mock-up 03b.
-                KeyboardSetupChecklistInline(player: checklist)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.top, -28)
+                // The fallback only: floats over the cropped bottom of the drawn phone,
+                // trailing, as the window floats over Settings in mock-up 03b.
+                if checklist.showsInlineCard {
+                    KeyboardSetupChecklistInline(player: checklist)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.top, -28)
+                        .transition(.opacity)
+                }
 
                 detectionStatus
 

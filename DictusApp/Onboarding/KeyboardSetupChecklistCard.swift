@@ -6,26 +6,25 @@ import DictusCore
 /// The checklist card of mock-up `03b-pip-checklist-sur-reglages`: the Dictus icon and a
 /// title, then the four taps to make in Settings, ticked as they are done.
 ///
-/// WHY ONE VIEW FOR TWO RENDERERS: the same card is drawn inline by SwiftUI (the fallback,
-/// on a device without Picture in Picture) and rendered frame by frame into the sample
-/// buffers that Picture in Picture shows (`ChecklistFrameRenderer`). One view means the
-/// two can never drift apart.
+/// WHERE IT SHOWS: only in the fallback, inline under the drawn Settings page, when
+/// Picture in Picture is unavailable or failed to start. The Picture in Picture window
+/// draws the same states in a wide, one-step form (`KeyboardSetupChecklistPictureCard`),
+/// because this four-line card made the window tall enough to cover the Full Access
+/// alert's buttons (device test, 2026-10-10).
 ///
 /// WHY FIXED COLOURS AND SIZES: the mock-up draws the card dark in light and dark mode
 /// alike, as Wispr Flow's floating guide is, because it sits over whatever Settings looks
-/// like. Its type does not follow Dynamic Type either: the card is rendered into a picture
-/// of a fixed size that the Picture in Picture window scales, and text that grew would
-/// overflow it. The card is full-bleed (square corners): the Picture in Picture window
-/// rounds its own, and the inline container clips the same frame to a rounded card.
+/// like, and the Picture in Picture form keeps the same look. Its type does not follow
+/// Dynamic Type, so the fixed frame never overflows. The card is full-bleed (square
+/// corners); the inline container clips it to a rounded card.
 struct KeyboardSetupChecklistCard: View {
     /// One state per line, in `KeyboardSetupChecklistLine.allCases` order.
     let lines: [KeyboardSetupChecklistLineState]
-    /// How far each line's tick has popped in, 0 to 1. A line that is not done, or done
-    /// for a while, reads 1 (no animation).
+    /// How far each line's tick has gone, 0 to 1, over the player's hold. A line that is
+    /// not done, or done for a while, reads 1 (no animation).
     var tickProgress: [Double] = []
 
-    /// The card's size in points. The Picture in Picture window takes its aspect ratio
-    /// from the frames, so this is also the window's shape.
+    /// The card's size in points.
     static let size = CGSize(width: 300, height: 220)
 
     /// The card's fill: the app's dark, a shade deeper so it reads over the dark app too.
@@ -78,7 +77,8 @@ struct KeyboardSetupChecklistCard: View {
         let diameter: CGFloat = 26
         switch state {
         case .done:
-            let progress = progress(of: line)
+            // The pop runs over the first third of the player's hold.
+            let progress = min(1, progress(of: line) * 3)
             Circle()
                 .fill(Color.dictusSuccess)
                 .frame(width: diameter, height: diameter)

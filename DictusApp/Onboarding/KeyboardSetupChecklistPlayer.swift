@@ -11,8 +11,8 @@ import DictusCore
 /// and the Picture in Picture window that carries it over iOS Settings (#649 decision 10).
 ///
 /// HOW IT PLAYS
-/// - On the page, the checklist loops in time with the drawn Settings page
-///   (`KeyboardSetupChecklist.Phase.demo`).
+/// - Before the tap, the clock loops in time with the drawn Settings page
+///   (`KeyboardSetupChecklist.Phase.demo`); only the fallback's inline card shows it.
 /// - Tapping Open Settings is the user action Apple requires to start Picture in Picture.
 ///   The player starts it, then opens Settings once the window is up. From then on the
 ///   lines follow what the app can observe (`.guide`): the backgrounded app polls the
@@ -21,11 +21,17 @@ import DictusCore
 ///   iOS terminates the app when that permission changes; nothing else in the app can see
 ///   Full Access.
 ///
+/// NOTHING SHOWS IN THE PAGE ON THE PICTURE IN PICTURE PATH (decided by Pierre after the
+/// device test of 2026-10-10): competitors show the guide only once the user is in
+/// Settings, and a card under the drawn Settings page repeated its numbered steps. The
+/// sample-buffer layer still has to be in the window for Picture in Picture to start
+/// from it, so it sits behind the drawn phone, covered (`ChecklistPictureSource`).
+///
 /// THE FALLBACK: when Picture in Picture is unsupported, cannot start, or fails to, the
-/// same checklist plays inline in the page (SwiftUI, `KeyboardSetupChecklistCard`),
-/// Settings opens anyway, and the page's existing return-from-Settings detection takes
-/// over. `usesPictureInPicture` decides which inline renderer is used; a failed start on
-/// a supported device keeps the sample-buffer layer inline, which shows the same frames.
+/// checklist plays inline in the page (SwiftUI, `KeyboardSetupChecklistCard`), Settings
+/// opens anyway, and the page's existing return-from-Settings detection takes over.
+/// `showsInlineCard` says when the page shows it: from the start where Picture in Picture
+/// is unavailable, and from the first failure where it was expected to work.
 ///
 /// Everything it does is logged under `component=onboardingChecklist`, so a device run
 /// answers the spike's questions from `dictus_debug.log`.
@@ -37,13 +43,15 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
     @Published private(set) var tickProgress: [Double]
     /// Whether the Picture in Picture window is up.
     @Published private(set) var isPictureInPictureActive = false
+    /// Whether the page shows the inline card: the fallback is in use.
+    @Published private(set) var showsInlineCard: Bool
 
-    /// Whether the inline card is the sample-buffer layer that feeds Picture in Picture
-    /// (true) or the SwiftUI card of the fallback (false).
+    /// Whether the frames are rendered for Picture in Picture (true), or the fallback is
+    /// used from the start (false).
     let usesPictureInPicture: Bool
 
-    /// The layer the frames go to. Shown inline, and the content source of the Picture in
-    /// Picture window.
+    /// The layer the frames go to: the content source of the Picture in Picture window,
+    /// hosted out of sight in the page.
     let displayLayer = AVSampleBufferDisplayLayer()
 
     /// A launch argument that forces the fallback (`-DictusChecklistPiPOff YES`), so the
@@ -85,8 +93,9 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
 
     /// Frame clock: 10 per second, enough for the tick's pop.
     private static let tickInterval: TimeInterval = 0.1
-    /// How long a tick takes to pop in.
-    private static let tickPopDuration: TimeInterval = 0.35
+    /// How long a just-ticked line stays up with its check before the next one takes its
+    /// place in the one-step Picture in Picture card. The check pops over its first third.
+    private static let justTickedHold: TimeInterval = 1.2
     /// A frame at least this often even when nothing changed, so the layer never sits on a
     /// stale timestamp.
     private static let refreshInterval: TimeInterval = 1
@@ -101,6 +110,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         tickProgress = Array(repeating: 1, count: lineCount)
         doneAt = Array(repeating: nil, count: lineCount)
         usesPictureInPicture = AVPictureInPictureController.isPictureInPictureSupported() && !Self.isForcedOff
+        showsInlineCard = !usesPictureInPicture
         super.init()
         if usesPictureInPicture {
             configureLayer()
@@ -173,7 +183,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         switch trip {
         case .pictureInPictureThenSettings:
             guard let pipController else {
-                log("fallback", "reason=noController")
+                fallBackInline(reason: "noController")
                 open()
                 return
             }
@@ -185,7 +195,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
             let deadline = DispatchWorkItem { [weak self] in
                 MainActor.assumeIsolated {
                     guard let self, self.pendingSettingsOpen != nil else { return }
-                    self.log("fallback", "reason=startTimeout")
+                    self.fallBackInline(reason: "startTimeout")
                     self.openPendingSettings()
                 }
             }
@@ -193,7 +203,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
             DispatchQueue.main.asyncAfter(deadline: .now() + Self.startTimeout, execute: deadline)
             pipController.startPictureInPicture()
         case .settingsOnly(let reason):
-            log("fallback", "reason=\(reason)")
+            fallBackInline(reason: reason)
             open()
         }
     }
@@ -250,7 +260,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
                 doneAt[index] = nil
             }
             newProgress[index] = doneAt[index].map {
-                min(1, now.timeIntervalSince($0) / Self.tickPopDuration)
+                min(1, now.timeIntervalSince($0) / Self.justTickedHold)
             } ?? 1
         }
 
@@ -342,6 +352,12 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         pipController = controller
     }
 
+    /// Picture in Picture will not carry the checklist this time: the page shows it.
+    private func fallBackInline(reason: String) {
+        log("fallback", "reason=\(reason)")
+        showsInlineCard = true
+    }
+
     private func openPendingSettings() {
         settingsOpenDeadline?.cancel()
         settingsOpenDeadline = nil
@@ -393,7 +409,7 @@ extension KeyboardSetupChecklistPlayer: AVPictureInPictureControllerDelegate {
     ) {
         MainActor.assumeIsolated {
             isPictureInPictureActive = false
-            log("fallback", "reason=failedToStart error=\(error.localizedDescription)")
+            fallBackInline(reason: "failedToStart error=\(error.localizedDescription)")
             openPendingSettings()
         }
     }
