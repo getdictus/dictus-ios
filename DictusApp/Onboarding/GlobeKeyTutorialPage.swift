@@ -223,8 +223,10 @@ struct GlobeKeyTutorialPage: View {
 // MARK: - Banner
 
 /// The coach banner above the keyboard (#678, mock-ups `10b` and `10c`): a capsule in the
-/// opposite of the page's appearance, so it reads against both the page and the keyboard.
-/// Dark navy with white text on light, white with navy text on dark.
+/// Dictus blue with white text and symbols, in light and dark alike (decided by Pierre on
+/// 2026-10-10 after testing on device: the first version, navy on light and white on dark,
+/// read as foreign to the app). Same pairing as the onboarding's primary button: the accent
+/// with white on top, and its accent-tinted shadow (a black shadow under blue reads muddy).
 private struct FirstDictationBanner: View {
     struct Content {
         let leadingSymbol: String
@@ -246,11 +248,11 @@ private struct FirstDictationBanner: View {
             Image(systemName: content.trailingSymbol)
                 .font(.body.weight(.medium))
         }
-        .foregroundStyle(Self.foreground)
+        .foregroundStyle(.white)
         .padding(.horizontal, 18)
         .padding(.vertical, 12)
-        .background(Capsule().fill(Self.fill))
-        .shadow(color: .black.opacity(0.15), radius: 8, y: 2)
+        .background(Capsule().fill(Color.dictusAccent))
+        .shadow(color: .dictusAccent.opacity(0.3), radius: 12, y: 4)
         // A new banner per state, so the page's stage animation cross-fades them.
         .id(content.leadingSymbol)
         .transition(.opacity)
@@ -259,9 +261,6 @@ private struct FirstDictationBanner: View {
         .accessibilityLabel(content.text)
         .accessibilityIdentifier("onboarding.firstDictation.banner")
     }
-
-    private static let fill = Color(light: Color(hex: 0x0A1628), dark: .white)
-    private static let foreground = Color(light: .white, dark: Color(hex: 0x0A1628))
 }
 
 // MARK: - GlobeLongPressCard
