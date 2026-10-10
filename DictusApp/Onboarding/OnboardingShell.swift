@@ -341,6 +341,49 @@ private struct PrimaryCapsuleBackground: ViewModifier {
     }
 }
 
+// MARK: - Download pill
+
+/// "Parakeet v3 · 34 %" above the button while the model downloads, as mock-ups 05 and 06
+/// draw it: the Smart Modes scene and the pick fall within the download (decision 16), and
+/// the pill says it is still moving. Nothing once the download is over or before it starts.
+///
+/// WHY IN THE SHELL (#679): the pick drew it alone until the Smart Modes scene needed the
+/// same pill on the step before; one view keeps the two from drifting apart.
+struct OnboardingDownloadPill: View {
+    @ObservedObject var modelManager: ModelManager
+    /// The model the onboarding installs.
+    let modelIdentifier: String
+
+    var body: some View {
+        if modelManager.modelStates[modelIdentifier] == .downloading,
+           let model = ModelInfo.forIdentifier(modelIdentifier) {
+            let fraction = Double(modelManager.downloadProgress[modelIdentifier] ?? 0)
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .stroke(Color.primary.opacity(0.12), lineWidth: 2.5)
+                    Circle()
+                        .trim(from: 0, to: max(0.02, fraction))
+                        .stroke(Color.dictusAccent, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                }
+                .frame(width: 16, height: 16)
+                .animation(.easeInOut(duration: 0.3), value: fraction)
+
+                (Text(verbatim: "\(model.displayName) · ")
+                    + Text(fraction, format: .percent.precision(.fractionLength(0))))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(Color.dictusSurface))
+            .accessibilityElement(children: .combine)
+            .transition(.opacity)
+        }
+    }
+}
+
 // MARK: - Cards
 
 extension View {
@@ -355,8 +398,13 @@ extension View {
 
 // MARK: - Drawn iPhone in a card
 
-/// The top of a drawn iPhone inside a card, cropped at the bottom so the phone runs off it
-/// (#675 mock-up `03-clavier-dans-les-reglages`). `content` is the phone's screen.
+/// A drawn iPhone inside a card, cropped so the phone runs off one edge of it. `content` is
+/// the phone's screen.
+///
+/// - `.top` (mock-up `03-clavier-dans-les-reglages`): the top of the phone, cut at the
+///   card's bottom edge.
+/// - `.bottom` (mock-up `05-scene-smart-modes`, #679): the bottom of the phone, where the
+///   keyboard is, cut at the card's top edge.
 ///
 /// WHY CONCENTRIC CORNERS (decided 2026-10-09): the card's corner radius is the phone's plus
 /// the gap between them (`phoneCornerRadius + phoneInset`), so the gap stays the same width
@@ -364,52 +412,75 @@ extension View {
 /// phone's, and the gap pinched at the corners. Every onboarding screen that shows a drawn
 /// iPhone uses this view, so the rule holds everywhere by construction.
 enum OnboardingPhoneMetrics {
-    /// The phone's top corner radius.
+    /// The phone's corner radius, at the end the card shows.
     static let phoneCornerRadius: CGFloat = 44
-    /// The gap between the card's edge and the phone's outer edge, at the top and sides.
+    /// The gap between the card's edge and the phone's outer edge, at the sides and at the
+    /// end the card shows.
     static let phoneInset: CGFloat = 10
     /// Concentric with the phone: its radius plus the gap.
     static let cardCornerRadius: CGFloat = phoneCornerRadius + phoneInset
     /// The phone outline's width, drawn inside the phone's shape.
     static let phoneFrameWidth: CGFloat = 7
-    /// How far the phone runs past the card's bottom edge, so the crop cuts through it.
+    /// How far the phone runs past the card's cut edge, so the crop cuts through it.
     static let overrun: CGFloat = 24
     /// The phone's outline: a light grey on light, a slate on dark.
     static let phoneFrame = Color(light: Color(hex: 0xD1D1D6), dark: Color(hex: 0x2A3346))
 }
 
+/// Which end of the drawn iPhone an `OnboardingPhoneCard` shows.
+enum OnboardingPhoneEnd {
+    /// The status bar end; the phone runs off the card's bottom edge.
+    case top
+    /// The home indicator end; the phone runs off the card's top edge.
+    case bottom
+}
+
 /// The drawn iPhone in its card. Metrics in `OnboardingPhoneMetrics` (a generic view
 /// cannot hold static stored properties).
 struct OnboardingPhoneCard<Content: View>: View {
+    /// The end of the phone the card shows.
+    var end: OnboardingPhoneEnd = .top
     @ViewBuilder let content: Content
 
     private typealias Metrics = OnboardingPhoneMetrics
 
     var body: some View {
+        let showsTop = end == .top
+        let phoneRadius = Metrics.phoneCornerRadius
         let phoneShape = UnevenRoundedRectangle(
-            topLeadingRadius: Metrics.phoneCornerRadius,
-            topTrailingRadius: Metrics.phoneCornerRadius,
+            topLeadingRadius: showsTop ? phoneRadius : 0,
+            bottomLeadingRadius: showsTop ? 0 : phoneRadius,
+            bottomTrailingRadius: showsTop ? 0 : phoneRadius,
+            topTrailingRadius: showsTop ? phoneRadius : 0,
             style: .continuous
         )
+        // Concentric at the end that shows the phone. At the cut edge the card is a plain
+        // card: rounded like the shell's others when the phone runs off its top (#679,
+        // mock-up 05), straight when it runs off its bottom (mock-up 03).
+        let concentric = Metrics.cardCornerRadius
+        let cutEdge = OnboardingMetrics.cardCornerRadius
         let cardShape = UnevenRoundedRectangle(
-            topLeadingRadius: Metrics.cardCornerRadius,
-            topTrailingRadius: Metrics.cardCornerRadius,
+            topLeadingRadius: showsTop ? concentric : cutEdge,
+            bottomLeadingRadius: showsTop ? 0 : concentric,
+            bottomTrailingRadius: showsTop ? 0 : concentric,
+            topTrailingRadius: showsTop ? concentric : cutEdge,
             style: .continuous
         )
+        let overrunEdge: Edge.Set = showsTop ? .bottom : .top
         content
             .frame(maxWidth: .infinity, alignment: .leading)
             // The phone is drawn taller than the card so the crop below cuts through it:
-            // no bottom edge, the phone runs off the card.
-            .background(phoneShape.fill(Color.dictusBackground).padding(.bottom, -Metrics.overrun))
+            // no edge at the cut, the phone runs off the card.
+            .background(phoneShape.fill(Color.dictusBackground).padding(overrunEdge, -Metrics.overrun))
             .overlay(
                 phoneShape
                     .strokeBorder(Metrics.phoneFrame, lineWidth: Metrics.phoneFrameWidth)
-                    .padding(.bottom, -Metrics.overrun)
+                    .padding(overrunEdge, -Metrics.overrun)
             )
             .padding(.horizontal, Metrics.phoneInset)
-            .padding(.top, Metrics.phoneInset)
+            .padding(showsTop ? .top : .bottom, Metrics.phoneInset)
             .background(cardShape.fill(Color.dictusSurface))
-            // Rounded on top, cut straight below.
+            // Rounded where the phone shows, cut through the phone at the other edge.
             .clipShape(cardShape)
     }
 }
