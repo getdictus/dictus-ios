@@ -481,8 +481,9 @@ private struct DrawnSwitch: View {
     }
 }
 
-/// A Settings row icon: a white symbol on a coloured rounded square.
-private struct DictusIconTileSymbol: View {
+/// A Settings row icon: a white symbol on a coloured rounded square. Also drawn by the
+/// Apple Intelligence step's Settings path (#683).
+struct DictusIconTileSymbol: View {
     let systemName: String
     let fill: Color
 

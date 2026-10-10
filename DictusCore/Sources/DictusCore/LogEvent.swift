@@ -355,6 +355,13 @@ public enum LogEvent: Sendable {
     case onboardingDictusKeyboardActivated
     case onboardingGlobeTutorialTextDetected
     case onboardingGlobeTutorialSkipped
+    /// The Apple Intelligence step read the availability (#683). `trigger` is `appear` or
+    /// `active` (the app became active again, typically back from Settings); `state`
+    /// is `PolishAvailabilityState`'s description, so a device test can tell whether
+    /// turning Apple Intelligence on moved it, and to what.
+    case onboardingAppleIntelligenceChecked(trigger: String, state: String)
+    /// The user left the Apple Intelligence step with *Later* (#683).
+    case onboardingAppleIntelligenceDeferred(state: String)
     /// The onboarding's Smart Mode pick wrote the pinned list (#677). `identifiers` is the
     /// list in fan order, comma-separated: what the keyboard's fan should now show.
     case onboardingSmartModesPicked(identifiers: String)
@@ -607,7 +614,8 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
-             .onboardingGlobeTutorialSkipped,
+             .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
+             .onboardingAppleIntelligenceDeferred,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
@@ -671,7 +679,8 @@ public enum LogEvent: Sendable {
         // Info (normal operations: starts, completes, selections, configs)
         case .onboardingKeyboardDetected,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
-             .onboardingGlobeTutorialSkipped,
+             .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
+             .onboardingAppleIntelligenceDeferred,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
@@ -912,6 +921,10 @@ public enum LogEvent: Sendable {
         case .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped:
             return ""
+        case .onboardingAppleIntelligenceChecked(let trigger, let state):
+            return "trigger=\(trigger) state=\(state)"
+        case .onboardingAppleIntelligenceDeferred(let state):
+            return "state=\(state)"
         case .onboardingSmartModesPicked(let identifiers):
             return "identifiers=\(identifiers)"
         case .onboardingSmartModePickSkipped:
@@ -1162,6 +1175,8 @@ extension LogEvent {
         case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
         case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
         case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
+        case .onboardingAppleIntelligenceChecked: return "onboardingAppleIntelligenceChecked"
+        case .onboardingAppleIntelligenceDeferred: return "onboardingAppleIntelligenceDeferred"
         case .onboardingSmartModesPicked: return "onboardingSmartModesPicked"
         case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
         case .liveActivityStarted: return "liveActivityStarted"

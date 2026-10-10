@@ -18,12 +18,13 @@ import Foundation
 /// WHY in DictusCore: the order, the skips and the migrations are rules, and the app
 /// target has no test bundle.
 ///
-/// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, the
-/// pick of three Smart Modes (#677), the wait for the model, the microphone, the first
+/// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, Apple
+/// Intelligence (#683, only when it is not ready), the pick of three Smart Modes (#677),
+/// the wait for the model, the microphone, the first
 /// dictation, the completion screen. The microphone sits right before the first dictation
 /// because it is the first step that uses it, and its pre-permission screen keeps the
-/// system popup out of the recording. Steps the later #649 sub-issues add (Apple
-/// Intelligence, the feature scenes, the Dynamic Island tutorial) slot in as new cases with
+/// system popup out of the recording. Steps the later #649 sub-issues add (the feature
+/// scenes, the Dynamic Island tutorial) slot in as new cases with
 /// new raw values; the existing raw values keep their meaning.
 public enum OnboardingStep: String, CaseIterable, Sendable {
     /// The intro: the three-page carousel of looping scenes (#676, `OnboardingIntroScene`).
@@ -34,6 +35,10 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     case language
     /// Adding the keyboard and Full Access in iOS Settings. The step iOS kills the app on.
     case keyboardSetup
+    /// Turning on Apple Intelligence (#683, #649 decision 7). Shown only on a capable
+    /// iPhone where it is not ready (`AppleIntelligenceOnboarding.isStepNeeded`); skipped
+    /// otherwise. A Pro step: the Smart Modes are what it is for.
+    case appleIntelligence
     /// Choosing the three Smart Modes the keyboard's long-press fan holds (#677, #649
     /// decision 16). A Pro step: hidden on a device that can never run Smart Modes.
     ///
@@ -96,7 +101,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// cannot have. A capable iPhone with Apple Intelligence switched off still sees them.
     public var isProStep: Bool {
         switch self {
-        case .smartModePick:
+        case .appleIntelligence, .smartModePick:
             return true
         case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .completion:
             return false
@@ -114,12 +119,14 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// - `modelPreparation`: there is nothing to wait for once the model is ready (#649
     ///   decision 1.6). A download that finished while the user was in Settings goes
     ///   straight on.
+    /// - `appleIntelligence`: nothing to ask when Apple Intelligence is ready (#683). On a
+    ///   device that can never run it the step is already hidden as a Pro step.
     /// - `microphone`: a microphone already granted (a second run of the onboarding, or an
     ///   install that went through the old order, where the microphone came first) has
     ///   nothing to ask. A denied one is still shown: the page says where to turn it on.
     public var isSkippedWhenSatisfied: Bool {
         switch self {
-        case .modelPreparation, .microphone:
+        case .appleIntelligence, .modelPreparation, .microphone:
             return true
         case .welcome, .language, .keyboardSetup, .smartModePick, .firstDictation, .completion:
             return false
@@ -141,7 +148,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .welcome, .completion:
             return false
-        case .language, .keyboardSetup, .smartModePick, .modelPreparation, .microphone, .firstDictation:
+        case .language, .keyboardSetup, .appleIntelligence, .smartModePick, .modelPreparation, .microphone,
+             .firstDictation:
             return true
         }
     }
@@ -172,12 +180,14 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// - The first dictation.
     ///
     /// Everything else sets up something the keyboard needs, and the completion screen is
-    /// its own way out.
+    /// its own way out. The Apple Intelligence step can always be skipped too (#683), but
+    /// by its own *Later* button, drawn as large as the main one, not by this discreet slot.
     public var isSkippable: Bool {
         switch self {
         case .smartModePick, .firstDictation:
             return true
-        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .completion:
+        case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
+             .completion:
             return false
         }
     }

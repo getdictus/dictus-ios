@@ -313,9 +313,13 @@ public enum SmartModeAvailability {
     /// `isRecoverable` read as a capability question rather than a second table that
     /// could drift from the first.
     public static var deviceIsCapable: Bool {
-        switch armability(
-            engineState: PolishAvailability.state, engineIsRefusing: false, entitlement: .entitled
-        ) {
+        isCapable(engineState: PolishAvailability.state)
+    }
+
+    /// `deviceIsCapable` for a given engine state, so a rule built on it can be tested
+    /// without the device (#683: the onboarding's Apple Intelligence step).
+    public static func isCapable(engineState: PolishAvailabilityState) -> Bool {
+        switch armability(engineState: engineState, engineIsRefusing: false, entitlement: .entitled) {
         case .armable: return true
         case .unavailable(let reason): return reason.isRecoverable
         }

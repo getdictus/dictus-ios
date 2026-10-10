@@ -341,6 +341,79 @@ private struct PrimaryCapsuleBackground: ViewModifier {
     }
 }
 
+/// The large secondary button under the primary one, for a way out that must stay as
+/// visible as the way forward (#683: *Later* on the Apple Intelligence step).
+///
+/// WHY THE SAME SIZE AS THE PRIMARY: the mock-up draws both capsules at full width and the
+/// same height. A small text link would read as "you are not supposed to tap this", which
+/// is the opposite of what an optional step means.
+struct OnboardingSecondaryButton: View {
+    let title: Text
+    let action: () -> Void
+
+    init(_ title: Text, action: @escaping () -> Void) {
+        self.title = title
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            title
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity)
+                .frame(height: OnboardingMetrics.buttonHeight)
+                .background(Capsule().fill(Color.dictusSurface))
+                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08), lineWidth: 1))
+                .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(GlassPressStyle(pressedScale: 0.97))
+    }
+}
+
+// MARK: - Download pill
+
+/// A small capsule above the buttons with the model's name and download progress, so a
+/// step the user spends time on still shows the download running (mock-up
+/// `04-apple-intelligence`). Absent when nothing is downloading.
+struct OnboardingDownloadPill: View {
+    @ObservedObject var modelManager: ModelManager
+    let modelIdentifier: String
+
+    var body: some View {
+        if modelManager.modelStates[modelIdentifier] == .downloading,
+           let progress = modelManager.downloadProgress[modelIdentifier],
+           let name = ModelInfo.forIdentifier(modelIdentifier)?.displayName {
+            HStack(spacing: 8) {
+                // A ring drawn by hand: a determinate circular `ProgressView` is not drawn
+                // as a ring on every iOS version the app supports.
+                ZStack {
+                    Circle()
+                        .stroke(Color.primary.opacity(0.12), lineWidth: 2.5)
+                    Circle()
+                        .trim(from: 0, to: CGFloat(progress))
+                        .stroke(Color.dictusAccent, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                }
+                .frame(width: 16, height: 16)
+                .animation(.linear(duration: 0.3), value: progress)
+                .accessibilityHidden(true)
+                Text(verbatim: "\(name) · ") + Text("\(Int(progress * 100)) %")
+            }
+            .font(.subheadline.monospacedDigit())
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(Color.dictusSurface))
+            .frame(maxWidth: .infinity)
+            .transition(.opacity)
+        }
+    }
+}
+
 // MARK: - Cards
 
 extension View {

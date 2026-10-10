@@ -5,11 +5,12 @@ import AVFoundation
 import DictusCore
 
 /// Onboarding flow presented as a fullScreenCover on first launch.
-/// Steps (#649, #675): intro, language, keyboard setup, the pick of three Smart Modes (#677,
-/// only where Smart Modes can run), model preparation (only while the model is still
-/// downloading or compiling), microphone (only while not yet granted), first dictation
-/// through the globe key, completion. The order is `OnboardingStep.allCases`; which steps
-/// are passed over is `OnboardingStep.next(skipping:deviceCanRunSmartModes:)`.
+/// Steps (#649, #675): intro, language, keyboard setup, Apple Intelligence (#683, only on a
+/// capable iPhone where it is not ready), the pick of three Smart Modes (#677, only where
+/// Smart Modes can run), model preparation (only while the model is still downloading or
+/// compiling), microphone (only while not yet granted), first dictation through the globe
+/// key, completion. The order is `OnboardingStep.allCases`; which steps are passed over is
+/// `OnboardingStep.next(skipping:deviceCanRunSmartModes:)`.
 ///
 /// WHY switch/case instead of TabView:
 /// TabView(.page) allows the user to swipe between pages, which means they could
@@ -92,6 +93,12 @@ struct OnboardingView: View {
                         LanguageSetupPage(onConfirm: confirmLanguage)
                     case .keyboardSetup:
                         KeyboardSetupPage(onNext: advance)
+                    case .appleIntelligence:
+                        AppleIntelligencePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
                     case .smartModePick:
                         SmartModePickPage(
                             modelManager: modelManager,
@@ -148,7 +155,8 @@ struct OnboardingView: View {
             PersistentLog.log(.onboardingGlobeTutorialSkipped)
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             leaveFirstDictation()
-        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .completion:
+        case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
+             .completion:
             advance()
         }
     }
@@ -182,8 +190,11 @@ struct OnboardingView: View {
 
     /// The steps with nothing left to ask, which `OnboardingStep.next(skipping:deviceCanRunSmartModes:)` passes
     /// over (#675). Which steps may be passed over is DictusCore's rule; this only reads
-    /// the two facts it needs from the app.
+    /// the facts it needs from the app and the system.
     ///
+    /// - Apple Intelligence: shown only on a capable iPhone where it is not ready (#683,
+    ///   #649 decision 7). Read when the keyboard step moves on, so a user who turned it on
+    ///   earlier, or an iPhone that can never run it, never sees the step.
     /// - The preparation: shown only while there is something to wait for (#649 decision
     ///   1.6). A download that finished while the user was in Settings goes straight on.
     /// - The microphone: already granted on a second run, or by an install that went
@@ -191,6 +202,9 @@ struct OnboardingView: View {
     ///   microphone is still shown, because that page says where to turn it back on.
     private var satisfiedSteps: Set<OnboardingStep> {
         var satisfied: Set<OnboardingStep> = []
+        if !AppleIntelligenceOnboarding.isStepNeeded {
+            satisfied.insert(.appleIntelligence)
+        }
         if isReady(onboardingModel) {
             satisfied.insert(.modelPreparation)
         }
