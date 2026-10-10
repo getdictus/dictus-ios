@@ -19,8 +19,8 @@ import Foundation
 /// target has no test bundle.
 ///
 /// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, the
-/// pick of three Smart Modes (#677), the wait for the model, the microphone, the first
-/// dictation, the completion screen. The microphone sits right before the first dictation
+/// Smart Modes scene (#679), the pick of three Smart Modes (#677), the wait for the model,
+/// the microphone, the first dictation, the completion screen. The microphone sits right before the first dictation
 /// because it is the first step that uses it, and its pre-permission screen keeps the
 /// system popup out of the recording. Steps the later #649 sub-issues add (Apple
 /// Intelligence, the feature scenes, the Dynamic Island tutorial) slot in as new cases with
@@ -34,13 +34,17 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     case language
     /// Adding the keyboard and Full Access in iOS Settings. The step iOS kills the app on.
     case keyboardSetup
+    /// The Smart Modes scene (#679, #649 decisions 8, 9 and 14): a looping drawing of the
+    /// keyboard's long-press fan, with Next and a Skip that jumps the whole scene sequence.
+    /// The first of the feature scenes; the later ones (voice notes, vocabulary, history)
+    /// slot in after the pick. A Pro step.
+    case smartModesScene
     /// Choosing the three Smart Modes the keyboard's long-press fan holds (#677, #649
     /// decision 16). A Pro step: hidden on a device that can never run Smart Modes.
     ///
-    /// WHY RIGHT AFTER THE KEYBOARD, FOR NOW: decision 16 places it right after the Smart
-    /// Modes scene, which does not exist yet; #679 builds that scene and moves this step
-    /// behind it. Here it still falls within the model download, which is what decision 16
-    /// asks of it.
+    /// WHY RIGHT AFTER THE SMART MODES SCENE (#679, decision 16 as moved on 2026-10-07):
+    /// the user has just seen what a mode does, so the choice means something. It still
+    /// falls within the model download, which is what decision 16 asks of it.
     case smartModePick
     /// Shown only while the model is still downloading or compiling; skipped otherwise.
     case modelPreparation
@@ -96,11 +100,41 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// cannot have. A capable iPhone with Apple Intelligence switched off still sees them.
     public var isProStep: Bool {
         switch self {
-        case .smartModePick:
+        case .smartModesScene, .smartModePick:
             return true
         case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .completion:
             return false
         }
+    }
+
+    /// Whether this step is part of the feature-scene sequence that the scenes' Skip
+    /// jumps as a whole (#649 decision 8).
+    ///
+    /// WHY THE PICK IS PART OF IT: it sits inside the sequence (decision 9 as amended: the
+    /// Smart Modes scene, the pick, then the other scenes), and it asks the user to choose
+    /// among modes the scene was there to show. A user who skipped the scenes has not seen
+    /// them; landing on "you have just seen them, pick three" would be false. Skipping it
+    /// writes nothing, so the fan keeps the seed, exactly as the pick's own Skip does.
+    public var isInSceneSequence: Bool {
+        switch self {
+        case .smartModesScene, .smartModePick:
+            return true
+        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .completion:
+            return false
+        }
+    }
+
+    /// Where the scenes' Skip lands: the first step after the last step of the scene
+    /// sequence, with the same skips `next(skipping:deviceCanRunSmartModes:)` applies.
+    ///
+    /// WHY FROM THE LAST MEMBER AND NOT FROM SELF: Skip jumps the whole sequence, wherever
+    /// in it the user taps it (decision 8), not just the scene on screen.
+    public func stepAfterSceneSequence(skipping satisfied: Set<OnboardingStep>,
+                                       deviceCanRunSmartModes: Bool) -> OnboardingStep? {
+        guard isInSceneSequence, let last = Self.allCases.last(where: \.isInSceneSequence) else {
+            return next(skipping: satisfied, deviceCanRunSmartModes: deviceCanRunSmartModes)
+        }
+        return last.next(skipping: satisfied, deviceCanRunSmartModes: deviceCanRunSmartModes)
     }
 
     /// Whether this step is part of the flow on this device: every step on a device that
@@ -121,7 +155,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .modelPreparation, .microphone:
             return true
-        case .welcome, .language, .keyboardSetup, .smartModePick, .firstDictation, .completion:
+        case .welcome, .language, .keyboardSetup, .smartModesScene, .smartModePick, .firstDictation, .completion:
             return false
         }
     }
@@ -141,7 +175,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .welcome, .completion:
             return false
-        case .language, .keyboardSetup, .smartModePick, .modelPreparation, .microphone, .firstDictation:
+        case .language, .keyboardSetup, .smartModesScene, .smartModePick, .modelPreparation, .microphone,
+             .firstDictation:
             return true
         }
     }
@@ -167,6 +202,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
 
     /// Whether the shell offers the discreet Skip in the top-right slot.
     ///
+    /// - The Smart Modes scene: Skip jumps the whole scene sequence
+    ///   (`stepAfterSceneSequence`, #649 decision 8).
     /// - The Smart Mode pick: skipping it keeps the seed (`defaultPinnedIdentifiers`), so
     ///   the fan is never left empty (#677).
     /// - The first dictation.
@@ -175,7 +212,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// its own way out.
     public var isSkippable: Bool {
         switch self {
-        case .smartModePick, .firstDictation:
+        case .smartModesScene, .smartModePick, .firstDictation:
             return true
         case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .completion:
             return false

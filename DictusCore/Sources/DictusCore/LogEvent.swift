@@ -360,6 +360,9 @@ public enum LogEvent: Sendable {
     case onboardingSmartModesPicked(identifiers: String)
     /// The Smart Mode pick was skipped: nothing written, the fan keeps the seed (#677).
     case onboardingSmartModePickSkipped
+    /// The Skip of a feature scene jumped the whole scene sequence (#679, #649 decision 8).
+    /// `from` is the step it was tapped on, `to` the step it landed on.
+    case onboardingSceneSequenceSkipped(from: String, to: String)
 
     // MARK: Live Activity
     case liveActivityStarted(id: String)
@@ -608,7 +611,8 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped,
-             .onboardingSmartModesPicked, .onboardingSmartModePickSkipped:
+             .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
+             .onboardingSceneSequenceSkipped:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
              .coldStartStranded:
@@ -673,6 +677,7 @@ public enum LogEvent: Sendable {
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
+             .onboardingSceneSequenceSkipped,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
              .transcriptionStarted, .transcriptionCompleted,
@@ -916,6 +921,8 @@ public enum LogEvent: Sendable {
             return "identifiers=\(identifiers)"
         case .onboardingSmartModePickSkipped:
             return ""
+        case .onboardingSceneSequenceSkipped(let from, let to):
+            return "from=\(from) to=\(to)"
 
         // Live Activity
         case .liveActivityStarted(let id):
@@ -1164,6 +1171,7 @@ extension LogEvent {
         case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
         case .onboardingSmartModesPicked: return "onboardingSmartModesPicked"
         case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
+        case .onboardingSceneSequenceSkipped: return "onboardingSceneSequenceSkipped"
         case .liveActivityStarted: return "liveActivityStarted"
         case .liveActivityTransition: return "liveActivityTransition"
         case .liveActivityFailed: return "liveActivityFailed"
