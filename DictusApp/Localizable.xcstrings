@@ -1300,6 +1300,17 @@
         }
       }
     },
+    "done" : {
+      "comment" : "VoiceOver state of a ticked line of the keyboard setup checklist (#682).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fait"
+          }
+        }
+      }
+    },
     "Download a model to get started" : {
       "localizations" : {
         "fr" : {
@@ -3230,6 +3241,17 @@
         }
       }
     },
+    "Set up Dictus" : {
+      "comment" : "Title of the checklist card that floats over iOS Settings during keyboard setup (#682).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer Dictus"
+          }
+        }
+      }
+    },
     "Setting up offline transcription…" : {
       "localizations" : {
         "fr" : {
@@ -3649,6 +3671,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Touchez ici pour écrire"
+          }
+        }
+      }
+    },
+    "Tap Keyboards" : {
+      "comment" : "Checklist line over iOS Settings during keyboard setup (#682): tap the Keyboards row.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez Claviers"
           }
         }
       }
@@ -4393,6 +4426,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Activez Apple Intelligence dans les Réglages de l'iPhone pour utiliser les modes intelligents."
+          }
+        }
+      }
+    },
+    "Turn on Dictus" : {
+      "comment" : "Checklist line over iOS Settings during keyboard setup (#682): turn on the Dictus keyboard switch.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activez Dictus"
+          }
+        }
+      }
+    },
+    "Turn on Full Access, then Allow" : {
+      "comment" : "Checklist line over iOS Settings during keyboard setup (#682): turn on the Full Access switch, then confirm iOS's alert. One line in a small window: keep it short.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activez l'accès complet, puis Autoriser"
           }
         }
       }
