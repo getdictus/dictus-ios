@@ -358,10 +358,13 @@ public enum LogEvent: Sendable {
     case onboardingDictusKeyboardActivated
     case onboardingGlobeTutorialTextDetected
     case onboardingGlobeTutorialSkipped
-    /// The Apple Intelligence step read the availability (#683). `trigger` is `appear` or
-    /// `active` (the app became active again, typically back from Settings); `state`
-    /// is `PolishAvailabilityState`'s description, so a device test can tell whether
-    /// turning Apple Intelligence on moved it, and to what.
+    /// The Apple Intelligence step read the availability (#683). `trigger` is `appear`;
+    /// `returnFromBackground` (active after a real trip to the background, typically back
+    /// from Settings, or a launch onto the step); `activeFromInactive` (active after a
+    /// screenshot, Control Center or Notification Center, which changes nothing on the
+    /// page); or `recheck` (the getting-ready screen's quiet re-read). `state` is
+    /// `PolishAvailabilityState`'s description, so a device test can tell whether turning
+    /// Apple Intelligence on moved it, and to what.
     case onboardingAppleIntelligenceChecked(trigger: String, state: String)
     /// The user left the Apple Intelligence step with *Later* (#683).
     case onboardingAppleIntelligenceDeferred(state: String)

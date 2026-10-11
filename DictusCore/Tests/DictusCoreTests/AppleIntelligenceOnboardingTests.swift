@@ -56,4 +56,36 @@ final class AppleIntelligenceOnboardingTests: XCTestCase {
             XCTAssertFalse(route.hasAppleIntelligenceSwitch, "\(major)")
         }
     }
+
+    // MARK: - Siri language label
+
+    private let french = Locale(identifier: "fr_FR")
+    private let english = Locale(identifier: "en_US")
+
+    /// Device test of 2026-10-11: iPhone in English, region France. Siri has no
+    /// "English (France)"; the row names the language alone.
+    func testAnEnglishIPhoneInFranceReadsEnglishNotEnglishFrance() {
+        XCTAssertEqual(AppleIntelligenceOnboarding.siriLanguageLabel(preferredLanguage: "en-FR", displayLocale: english), "English")
+    }
+
+    func testTheNameIsInTheDisplayLanguageAndCapitalized() {
+        XCTAssertEqual(AppleIntelligenceOnboarding.siriLanguageLabel(preferredLanguage: "fr-FR", displayLocale: french), "Français")
+        XCTAssertEqual(AppleIntelligenceOnboarding.siriLanguageLabel(preferredLanguage: "en-GB", displayLocale: french), "Anglais")
+        XCTAssertEqual(AppleIntelligenceOnboarding.siriLanguageLabel(preferredLanguage: "de-AT", displayLocale: english), "German")
+    }
+
+    func testAScriptOrABareCodeStillGivesTheLanguage() {
+        XCTAssertEqual(AppleIntelligenceOnboarding.siriLanguageLabel(preferredLanguage: "zh-Hans-CN", displayLocale: english), "Chinese")
+        XCTAssertEqual(AppleIntelligenceOnboarding.siriLanguageLabel(preferredLanguage: "es", displayLocale: english), "Spanish")
+    }
+
+    /// Whatever the tag, the label never carries a region in parentheses.
+    func testTheLabelNeverNamesARegion() {
+        for tag in ["en-FR", "en-US", "fr-CA", "pt-BR", "es-419", "it-CH"] {
+            for locale in [french, english] {
+                let label = AppleIntelligenceOnboarding.siriLanguageLabel(preferredLanguage: tag, displayLocale: locale)
+                XCTAssertFalse(label.contains("("), "\(tag) in \(locale.identifier): \(label)")
+            }
+        }
+    }
 }

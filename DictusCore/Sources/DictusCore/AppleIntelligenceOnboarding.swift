@@ -67,4 +67,25 @@ public enum AppleIntelligenceOnboarding {
     public static var settingsRoute: SettingsRoute {
         settingsRoute(osMajorVersion: ProcessInfo.processInfo.operatingSystemVersion.majorVersion)
     }
+
+    // MARK: - The language to pick
+
+    /// The language the drawn Siri language list shows checked: the iPhone's language,
+    /// named on its own ("English", "Français"), in `displayLocale`.
+    ///
+    /// WHY THE LANGUAGE ALONE (device test of 2026-10-11): built from the iPhone's
+    /// language and region, the row read "English (France)", an entry Siri's list does
+    /// not have. Read on iOS 26.5 and 27.0 simulators on 2026-10-11, FR and EN: Siri lists
+    /// English and French only by country it supports ("English (United Kingdom)",
+    /// "English (United States)", "French (France)", "French (Canada)"…), and nothing ties
+    /// that list to the iPhone's region. A language name alone matches every entry of that
+    /// language and never names one that does not exist.
+    ///
+    /// - Parameter preferredLanguage: the iPhone's first preferred language, a BCP 47 tag
+    ///   ("en-FR", "fr-FR", "zh-Hans-CN").
+    public static func siriLanguageLabel(preferredLanguage: String, displayLocale: Locale) -> String {
+        let code = Locale.Language(identifier: preferredLanguage).languageCode?.identifier ?? preferredLanguage
+        let name = displayLocale.localizedString(forLanguageCode: code) ?? code
+        return name.prefix(1).uppercased(with: displayLocale) + name.dropFirst()
+    }
 }
