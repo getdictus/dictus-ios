@@ -341,6 +341,85 @@ private struct PrimaryCapsuleBackground: ViewModifier {
     }
 }
 
+/// The large secondary button under the primary one, for a way out that must stay as
+/// visible as the way forward (#683: *Later* on the Apple Intelligence step).
+///
+/// WHY THE SAME SIZE AS THE PRIMARY: the mock-up draws both capsules at full width and the
+/// same height. A small text link would read as "you are not supposed to tap this", which
+/// is the opposite of what an optional step means.
+struct OnboardingSecondaryButton: View {
+    let title: Text
+    let action: () -> Void
+
+    init(_ title: Text, action: @escaping () -> Void) {
+        self.title = title
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            title
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity)
+                .frame(height: OnboardingMetrics.buttonHeight)
+                .background(Capsule().fill(Color.dictusSurface))
+                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.08), lineWidth: 1))
+                .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(GlassPressStyle(pressedScale: 0.97))
+    }
+}
+
+// MARK: - Download pill
+
+/// "Parakeet v3 · 34 %" in a small capsule above the buttons, while the model downloads
+/// (mock-ups `04-apple-intelligence`, `06-vos-3-smart-modes`). The steps that fall within
+/// the download show it, so the user sees the transfer still moving. Nothing once the
+/// download is over or before it starts.
+///
+/// WHY ONE VIEW: the Smart Mode pick (#677) and the Apple Intelligence step (#683) were
+/// built side by side with a copy each.
+struct OnboardingDownloadPill: View {
+    @ObservedObject var modelManager: ModelManager
+    let modelIdentifier: String
+
+    var body: some View {
+        if modelManager.modelStates[modelIdentifier] == .downloading,
+           let model = ModelInfo.forIdentifier(modelIdentifier) {
+            let fraction = Double(modelManager.downloadProgress[modelIdentifier] ?? 0)
+            HStack(spacing: 8) {
+                // A ring drawn by hand: a determinate circular `ProgressView` is not drawn
+                // as a ring on every iOS version the app supports. A sliver at 0 % so the
+                // ring reads as started.
+                ZStack {
+                    Circle()
+                        .stroke(Color.primary.opacity(0.12), lineWidth: 2.5)
+                    Circle()
+                        .trim(from: 0, to: max(0.02, fraction))
+                        .stroke(Color.dictusAccent, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                }
+                .frame(width: 16, height: 16)
+                .animation(.easeInOut(duration: 0.3), value: fraction)
+
+                (Text(verbatim: "\(model.displayName) · ")
+                    + Text(fraction, format: .percent.precision(.fractionLength(0))))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(Capsule().fill(Color.dictusSurface))
+            .accessibilityElement(children: .combine)
+            .transition(.opacity)
+        }
+    }
+}
+
 // MARK: - Cards
 
 extension View {
@@ -411,6 +490,59 @@ struct OnboardingPhoneCard<Content: View>: View {
             .background(cardShape.fill(Color.dictusSurface))
             // Rounded on top, cut straight below.
             .clipShape(cardShape)
+    }
+}
+
+// MARK: - Drawn Settings pieces
+
+// The parts of a drawn iOS Settings page that more than one step draws: the keyboard step
+// (Settings > Apps > Dictus) and the Apple Intelligence step (Settings > Siri > Language,
+// #683). Only iOS system UI is drawn this way (#649 decision 13).
+
+/// A step number in a circle: accent while the loop points at it, grey otherwise.
+struct OnboardingStepBadge: View {
+    let number: Int
+    let isLit: Bool
+
+    var body: some View {
+        Text(verbatim: "\(number)")
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(isLit ? Color.white : Color.secondary)
+            .frame(width: 26, height: 26)
+            .background(Circle().fill(isLit ? Color.dictusAccent : Color.primary.opacity(0.08)))
+            .animation(.easeInOut(duration: 0.25), value: isLit)
+    }
+}
+
+/// A Settings row icon: a white symbol on a coloured (or gradient) rounded square.
+struct DictusIconTileSymbol: View {
+    let systemName: String
+    let fill: AnyShapeStyle
+
+    init(systemName: String, fill: Color) {
+        self.systemName = systemName
+        self.fill = AnyShapeStyle(fill)
+    }
+
+    init(systemName: String, fill: some ShapeStyle) {
+        self.systemName = systemName
+        self.fill = AnyShapeStyle(fill)
+    }
+
+    var body: some View {
+        Image(systemName: systemName)
+            .font(.system(size: 14, weight: .medium))
+            .foregroundStyle(.white)
+            .frame(width: 30, height: 30)
+            .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(fill))
+    }
+}
+
+extension View {
+    /// A white (or dark surface) inset group, as in Settings.
+    func onboardingSettingsGroup() -> some View {
+        background(Color.dictusSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 

@@ -26,8 +26,8 @@ final class OnboardingStepTests: XCTestCase {
 
     func testOrderPutsTheMicrophoneRightBeforeTheFirstDictation() {
         XCTAssertEqual(OnboardingStep.allCases, [
-            .welcome, .language, .keyboardSetup, .smartModePick, .modelPreparation, .microphone,
-            .firstDictation, .completion
+            .welcome, .language, .keyboardSetup, .appleIntelligence, .smartModePick, .modelPreparation,
+            .microphone, .firstDictation, .completion
         ])
         XCTAssertEqual(OnboardingStep.microphone.next, .firstDictation)
         XCTAssertFalse(OnboardingStep.allCases.map(\.rawValue).contains { $0.lowercased().contains("polish") })
@@ -36,7 +36,8 @@ final class OnboardingStepTests: XCTestCase {
     func testNextWalksTheFlowAndEndsAfterTheCompletion() {
         XCTAssertEqual(OnboardingStep.welcome.next, .language)
         XCTAssertEqual(OnboardingStep.language.next, .keyboardSetup)
-        XCTAssertEqual(OnboardingStep.keyboardSetup.next, .smartModePick)
+        XCTAssertEqual(OnboardingStep.keyboardSetup.next, .appleIntelligence)
+        XCTAssertEqual(OnboardingStep.appleIntelligence.next, .smartModePick)
         XCTAssertEqual(OnboardingStep.smartModePick.next, .modelPreparation)
         XCTAssertEqual(OnboardingStep.modelPreparation.next, .microphone)
         XCTAssertEqual(OnboardingStep.firstDictation.next, .completion)
@@ -66,10 +67,10 @@ final class OnboardingStepTests: XCTestCase {
         )
     }
 
-    func testOnlyTheWaitAndTheMicrophoneCanBeSkipped() {
+    func testOnlyAppleIntelligenceTheWaitAndTheMicrophoneCanBeSkipped() {
         XCTAssertEqual(
             OnboardingStep.allCases.filter(\.isSkippedWhenSatisfied),
-            [.modelPreparation, .microphone]
+            [.appleIntelligence, .modelPreparation, .microphone]
         )
         // A step outside that list is shown even when the caller calls it satisfied.
         XCTAssertEqual(
@@ -80,7 +81,8 @@ final class OnboardingStepTests: XCTestCase {
         )
         // Calling the pick "satisfied" does not hide it: only the device decides that.
         XCTAssertEqual(
-            OnboardingStep.keyboardSetup.next(skipping: [.smartModePick], deviceCanRunSmartModes: true), .smartModePick
+            OnboardingStep.appleIntelligence.next(skipping: [.smartModePick], deviceCanRunSmartModes: true),
+            .smartModePick
         )
     }
 
@@ -88,8 +90,29 @@ final class OnboardingStepTests: XCTestCase {
 
     func testTheSmartModePickComesRightAfterTheKeyboardOnACapableDevice() {
         XCTAssertEqual(
-            OnboardingStep.keyboardSetup.next(skipping: [], deviceCanRunSmartModes: true), .smartModePick
+            OnboardingStep.keyboardSetup.next(skipping: [.appleIntelligence], deviceCanRunSmartModes: true),
+            .smartModePick
         )
+    }
+
+    /// #683, #649 decision 1.4: Apple Intelligence comes right after the keyboard, and
+    /// only when it has something to ask.
+    func testAppleIntelligenceComesRightAfterTheKeyboardWhenNeeded() {
+        XCTAssertEqual(
+            OnboardingStep.keyboardSetup.next(skipping: [], deviceCanRunSmartModes: true), .appleIntelligence
+        )
+        XCTAssertEqual(OnboardingStep.appleIntelligence.next(skipping: [], deviceCanRunSmartModes: true), .smartModePick)
+    }
+
+    func testTheAppleIntelligenceStepIsHiddenWhereSmartModesCanNeverRun() {
+        XCTAssertFalse(OnboardingStep.appleIntelligence.isShown(deviceCanRunSmartModes: false))
+        XCTAssertNil(OnboardingStep.appleIntelligence.progressIndex(deviceCanRunSmartModes: false))
+    }
+
+    func testAKillOnTheAppleIntelligenceStepResumesThere() {
+        OnboardingStep.save(.appleIntelligence)
+        XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), "appleIntelligence")
+        XCTAssertEqual(OnboardingStep.current(), .appleIntelligence)
     }
 
     func testTheSmartModePickIsHiddenWhereSmartModesCanNeverRun() {
@@ -105,7 +128,7 @@ final class OnboardingStepTests: XCTestCase {
     }
 
     func testOnlyProStepsDependOnTheDevice() {
-        XCTAssertEqual(OnboardingStep.allCases.filter(\.isProStep), [.smartModePick])
+        XCTAssertEqual(OnboardingStep.allCases.filter(\.isProStep), [.appleIntelligence, .smartModePick])
         for step in OnboardingStep.allCases where !step.isProStep {
             XCTAssertTrue(step.isShown(deviceCanRunSmartModes: false), "\(step)")
         }
@@ -115,14 +138,16 @@ final class OnboardingStepTests: XCTestCase {
 
     func testProgressBarCoversEveryStepBetweenTheIntroAndTheCompletion() {
         XCTAssertEqual(OnboardingStep.progressSteps(deviceCanRunSmartModes: true), [
-            .language, .keyboardSetup, .smartModePick, .modelPreparation, .microphone, .firstDictation
+            .language, .keyboardSetup, .appleIntelligence, .smartModePick, .modelPreparation, .microphone,
+            .firstDictation
         ])
         XCTAssertNil(OnboardingStep.welcome.progressIndex(deviceCanRunSmartModes: true))
         XCTAssertNil(OnboardingStep.completion.progressIndex(deviceCanRunSmartModes: true))
         XCTAssertEqual(OnboardingStep.language.progressIndex(deviceCanRunSmartModes: true), 0)
-        XCTAssertEqual(OnboardingStep.smartModePick.progressIndex(deviceCanRunSmartModes: true), 2)
-        XCTAssertEqual(OnboardingStep.microphone.progressIndex(deviceCanRunSmartModes: true), 4)
-        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: true), 5)
+        XCTAssertEqual(OnboardingStep.appleIntelligence.progressIndex(deviceCanRunSmartModes: true), 2)
+        XCTAssertEqual(OnboardingStep.smartModePick.progressIndex(deviceCanRunSmartModes: true), 3)
+        XCTAssertEqual(OnboardingStep.microphone.progressIndex(deviceCanRunSmartModes: true), 5)
+        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: true), 6)
     }
 
     func testAHiddenProStepHasNoSegment() {
