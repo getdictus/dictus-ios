@@ -32,11 +32,12 @@ import DictusCore
 /// Any number would be wrong for someone, so the page says "sometimes a long time" and
 /// re-checks when the user comes back.
 ///
-/// WHY A CHECK ON RETURN (decided 2026-10-11, after the second device test): coming back
-/// from Settings with Apple Intelligence still setting up used to show the very same page,
-/// which read as "it did not work". The return now starts a visible fifteen-second check;
-/// it ends on ready, or on a calm "getting ready" screen that lets the user go on. The
-/// rules are `AppleIntelligenceStepState`. Nothing advances on its own.
+/// WHY A DIFFERENT SCREEN ON RETURN (decided 2026-10-11, after the second device test):
+/// coming back from Settings with Apple Intelligence still setting up used to show the
+/// very same page, which read as "it did not work". A return now shows ready, or a calm
+/// "getting ready" screen that lets the user go on and re-checks quietly. A fifteen-second
+/// countdown was tried first and dropped after the next device test: it only added a wait.
+/// The rules are `AppleIntelligenceStepState`. Nothing advances on its own.
 ///
 /// WHY "LATER" IS AS LARGE AS THE MAIN BUTTON: dictation does not need Apple Intelligence.
 /// The step must never feel like a gate, so leaving it is as easy as following it.
@@ -52,8 +53,8 @@ struct AppleIntelligencePage: View {
     /// (`AppleIntelligenceStepState`, #683). Built from the first read in `onAppear`.
     @State private var state = AppleIntelligenceStepState(isAvailable: false)
 
-    /// The check's clock: a tick a second, a read of availability every
-    /// `recheckInterval`, until the countdown ends or the page leaves the check.
+    /// The reads after a return: one `returnRecheckDelay` later, then every
+    /// `settingUpRecheckInterval` while the setting-up screen is up and the app active.
     @State private var checkTask: Task<Void, Never>?
 
     /// Which drawn Settings screen the loop shows, and which of its numbered rows is lit
@@ -73,8 +74,6 @@ struct AppleIntelligencePage: View {
             switch state.phase {
             case .instructions, .ready:
                 instructionsPage
-            case .checking:
-                checkingPage
             case .settingUp:
                 settingUpPage
             }
@@ -95,14 +94,14 @@ struct AppleIntelligencePage: View {
                 stopCheck()
                 return
             }
-            // Back on the step, from Settings or after a relaunch on it: a visible check
-            // while Apple Intelligence is still not ready, so the user does not find the
-            // same screen and conclude it failed (device test of 2026-10-11).
+            // Back on the step, from Settings or after a relaunch on it: ready, or the
+            // getting-ready screen, so the user does not find the same page and conclude
+            // it failed (device test of 2026-10-11).
             let engineState = PolishAvailability.state
             logCheck(trigger: "active", engineState: engineState)
             let transition = state.appBecameActive(isAvailable: engineState == .available, at: Date())
             log(transition, engineState: engineState)
-            if case .checking = state.phase { runCheck() }
+            if state.rechecksQuietly { runRechecks() }
         }
         .animation(.easeInOut(duration: 0.3), value: state.phase)
     }
@@ -149,28 +148,12 @@ struct AppleIntelligencePage: View {
             .transition(.opacity)
     }
 
-    // MARK: - Checking
-
-    /// Back from Settings, Apple Intelligence not ready yet: what is happening, and for how
-    /// long the page keeps looking. Later stays as large as ever.
-    private var checkingPage: some View {
-        OnboardingCenteredPage(
-            title: Text("Dictus is checking Apple Intelligence"),
-            message: Text("It can take a moment to start after a change in Settings. This page updates on its own.")
-        ) {
-            CheckCountdownRing(state: state)
-        } bottom: {
-            OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
-            OnboardingSecondaryButton(Text("Later"), action: later)
-                .accessibilityIdentifier("onboarding.later")
-        }
-    }
-
     // MARK: - Setting up
 
-    /// The countdown ended without Apple Intelligence. Calm on purpose: nothing failed that
-    /// the user can see, Apple finishes in the background, and the onboarding goes on. No
-    /// duration is promised.
+    /// Back in the app and Apple Intelligence not available. Calm on purpose: nothing
+    /// failed that the user can see, Apple finishes in the background, and the onboarding
+    /// goes on. No duration is promised. It turns ready on its own if a quiet re-read finds
+    /// Apple Intelligence available.
     ///
     /// WHY THE LANGUAGE HINT STAYS: the copy cannot depend on the reason, and a language
     /// that still does not match is one of the reasons. It is the one thing to check if
@@ -494,29 +477,23 @@ struct AppleIntelligencePage: View {
         }
     }
 
-    // MARK: - Check
+    // MARK: - Re-checks
 
-    /// Ticks twice a second while the page is checking: a read of availability every
-    /// `recheckInterval`, and one when the countdown is over, which is what ends it. Half
-    /// a second so the end lands within that of the ring reaching zero (measured on a
-    /// simulator: a one-second tick ended it a second late).
-    private func runCheck() {
+    /// After a return: a second read `returnRecheckDelay` later (a language just changed
+    /// may not show yet), then a read every `settingUpRecheckInterval` for as long as the
+    /// setting-up screen is up. Stopped when the app leaves the foreground or the page
+    /// disappears, and restarted by the next return.
+    private func runRechecks() {
         stopCheck()
         checkTask = Task { @MainActor in
-            var tick = 0
-            let tickSeconds = 0.5
-            let readEvery = Int(AppleIntelligenceStepState.recheckInterval / tickSeconds)
+            var delay = AppleIntelligenceStepState.returnRecheckDelay
             while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(tickSeconds))
-                guard !Task.isCancelled, case .checking(let startedAt) = state.phase else { return }
-                tick += 1
-                let now = Date()
-                let isOver = now.timeIntervalSince(startedAt) >= AppleIntelligenceStepState.checkDuration
-                guard isOver || tick % readEvery == 0 else { continue }
+                try? await Task.sleep(for: .seconds(delay))
+                guard !Task.isCancelled, state.rechecksQuietly else { return }
                 let engineState = PolishAvailability.state
-                logCheck(trigger: "check", engineState: engineState)
-                let transition = state.availabilityRead(isAvailable: engineState == .available, at: now)
-                log(transition, engineState: engineState)
+                logCheck(trigger: "recheck", engineState: engineState)
+                log(state.availabilityRead(isAvailable: engineState == .available, at: Date()), engineState: engineState)
+                delay = AppleIntelligenceStepState.settingUpRecheckInterval
             }
         }
     }
@@ -536,12 +513,10 @@ struct AppleIntelligencePage: View {
         guard let transition else { return }
         let engine = String(describing: engineState)
         switch transition {
-        case .checkingStarted:
-            PersistentLog.log(.onboardingAppleIntelligenceCheckingStarted(state: engine))
+        case .settingUpShown:
+            PersistentLog.log(.onboardingAppleIntelligenceSettingUpShown(state: engine))
         case .becameAvailable(let afterSeconds):
             PersistentLog.log(.onboardingAppleIntelligenceBecameAvailable(afterSeconds: afterSeconds ?? -1))
-        case .countdownElapsed:
-            PersistentLog.log(.onboardingAppleIntelligenceCountdownElapsed(state: engine))
         }
     }
 
@@ -566,48 +541,13 @@ struct AppleIntelligencePage: View {
     }
 
     private func showStepsAgain() {
+        stopCheck()
         state.showInstructionsAgain()
         startAnimation()
     }
 }
 
-// MARK: - Check visuals
-
-/// The fifteen-second countdown: a ring that fills as the time runs, the seconds left in
-/// its middle.
-private struct CheckCountdownRing: View {
-    let state: AppleIntelligenceStepState
-
-    var body: some View {
-        // A redraw four times a second: the number changes once a second, the ring moves
-        // smoothly in between.
-        TimelineView(.periodic(from: .now, by: 0.25)) { context in
-            let fraction = state.elapsedFraction(at: context.date)
-            let secondsLeft = state.secondsLeft(at: context.date)
-            ZStack {
-                Circle()
-                    .fill(Color.dictusAccent.opacity(0.08))
-                    .frame(width: 200, height: 200)
-                Circle()
-                    .stroke(Color.dictusAccent.opacity(0.15), lineWidth: 10)
-                    .frame(width: 150, height: 150)
-                Circle()
-                    .trim(from: 0, to: fraction)
-                    .stroke(Color.dictusAccent, style: StrokeStyle(lineWidth: 10, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .frame(width: 150, height: 150)
-                    .animation(.linear(duration: 0.25), value: fraction)
-                Text(verbatim: "\(secondsLeft)")
-                    .font(.system(size: 48, weight: .semibold, design: .rounded).monospacedDigit())
-                    .foregroundStyle(.primary)
-                    .contentTransition(.numericText(countsDown: true))
-                    .animation(.easeInOut(duration: 0.2), value: secondsLeft)
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text("\(secondsLeft) seconds left"))
-        }
-    }
-}
+// MARK: - Setting-up visuals
 
 /// The setting-up screen's illustration: the Apple Intelligence glyph in the app's pale
 /// rings, like the microphone step's halo.
