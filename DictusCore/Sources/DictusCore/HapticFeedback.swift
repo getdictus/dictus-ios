@@ -24,7 +24,7 @@ import UIKit
 /// WHY three distinct patterns:
 /// - recordingStarted: medium impact -- user needs to feel that recording is actively happening
 /// - recordingStopped: light impact -- subtle confirmation that recording stopped
-/// - textInserted: success notification -- distinct "done" feel when transcribed text appears
+/// - textInserted: soft impact -- one rounded tap when transcribed text appears (#711)
 /// - keyTapped: light impact -- matches native iOS keyboard tactile feel
 /// - trackpadActivated: medium impact -- confirms spacebar trackpad mode activation
 public enum HapticFeedback {
@@ -39,7 +39,11 @@ public enum HapticFeedback {
     /// Medium impact generator for recording events and trackpad activation.
     private static let mediumGenerator = UIImpactFeedbackGenerator(style: .medium)
 
-    /// Notification generator for success/error feedback (e.g., text inserted).
+    /// Soft impact generator for text insertion: one rounded tap, unlike any other
+    /// event's feel (#711).
+    private static let softGenerator = UIImpactFeedbackGenerator(style: .soft)
+
+    /// Notification generator for success/error feedback (purchase done, action refused).
     private static let notificationGenerator = UINotificationFeedbackGenerator()
 
     /// Selection feedback generator for cursor movement during trackpad drag.
@@ -101,6 +105,7 @@ public enum HapticFeedback {
         #if canImport(UIKit) && !os(macOS)
         lightGenerator.prepare()
         mediumGenerator.prepare()
+        softGenerator.prepare()
         notificationGenerator.prepare()
         selectionGenerator.prepare()
         #endif
@@ -124,8 +129,23 @@ public enum HapticFeedback {
         #endif
     }
 
-    /// Success notification feedback when transcribed text is inserted into the text field.
+    /// Soft impact feedback when transcribed text is inserted into the text field.
+    ///
+    /// WHY soft, not the success notification (#711): `.success` is a double tap, one
+    /// of the strongest patterns UIKit has, and it played on every dictation right
+    /// after the stop tap. Picked on device among all nine UIKit presets.
     public static func textInserted() {
+        #if canImport(UIKit) && !os(macOS)
+        guard isEnabled() else { return }
+        softGenerator.impactOccurred()
+        softGenerator.prepare()
+        #endif
+    }
+
+    /// Success notification when a Pro purchase completes, as the paywall's checkmark
+    /// settles. Kept on `.success` when insertion moved to `.soft` (#711): a purchase
+    /// is rare and notable, which is what the double tap is for.
+    public static func purchaseSucceeded() {
         #if canImport(UIKit) && !os(macOS)
         guard isEnabled() else { return }
         notificationGenerator.notificationOccurred(.success)
