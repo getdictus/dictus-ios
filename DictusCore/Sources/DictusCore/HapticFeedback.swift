@@ -43,7 +43,7 @@ public enum HapticFeedback {
     /// event's feel (#711).
     private static let softGenerator = UIImpactFeedbackGenerator(style: .soft)
 
-    /// Notification generator for error feedback (action refused).
+    /// Notification generator for success/error feedback (purchase done, action refused).
     private static let notificationGenerator = UINotificationFeedbackGenerator()
 
     /// Selection feedback generator for cursor movement during trackpad drag.
@@ -139,6 +139,17 @@ public enum HapticFeedback {
         guard isEnabled() else { return }
         softGenerator.impactOccurred()
         softGenerator.prepare()
+        #endif
+    }
+
+    /// Success notification when a Pro purchase completes, as the paywall's checkmark
+    /// settles. Kept on `.success` when insertion moved to `.soft` (#711): a purchase
+    /// is rare and notable, which is what the double tap is for.
+    public static func purchaseSucceeded() {
+        #if canImport(UIKit) && !os(macOS)
+        guard isEnabled() else { return }
+        notificationGenerator.notificationOccurred(.success)
+        notificationGenerator.prepare()
         #endif
     }
 
