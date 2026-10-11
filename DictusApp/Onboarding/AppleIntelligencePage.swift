@@ -66,6 +66,14 @@ struct AppleIntelligencePage: View {
     /// edge, which would read as a fourth screen.
     @State private var isRewinding = false
 
+    /// Whether the app has really left the foreground since the page last saw it active:
+    /// set by `.background`, and on a launch onto this step (the user left, iOS ended the
+    /// app, the user came back). `.inactive` alone does not set it: a screenshot, Control
+    /// Center or Notification Center only make the scene inactive, and on the device test
+    /// of 2026-10-11 a screenshot switched the page as if the user had come back from
+    /// Settings.
+    @State private var returnPending = false
+
     /// Where Siri's language lives on this iOS. It cannot change while the page is up.
     private let route = AppleIntelligenceOnboarding.settingsRoute
 
@@ -82,6 +90,10 @@ struct AppleIntelligencePage: View {
             let engineState = PolishAvailability.state
             logCheck(trigger: "appear", engineState: engineState)
             state = AppleIntelligenceStepState(isAvailable: engineState == .available)
+            // Appearing while the app is not yet active is a launch onto this step, after
+            // iOS ended the app: its first `.active` is a return. Arriving from the
+            // keyboard step happens with the app active, and is not.
+            returnPending = UIApplication.shared.applicationState != .active
             startAnimation()
         }
         .onDisappear {
@@ -90,18 +102,17 @@ struct AppleIntelligencePage: View {
             animationTimer = nil
         }
         .onChange(of: scenePhase) { newPhase in
-            guard newPhase == .active else {
+            switch newPhase {
+            case .background:
+                returnPending = true
                 stopCheck()
-                return
+            case .active:
+                sceneBecameActive()
+            default:
+                // Inactive: a screenshot, Control Center, a system alert, or the way to
+                // the background. The quiet re-reads pause; nothing else changes.
+                stopCheck()
             }
-            // Back on the step, from Settings or after a relaunch on it: ready, or the
-            // getting-ready screen, so the user does not find the same page and conclude
-            // it failed (device test of 2026-10-11).
-            let engineState = PolishAvailability.state
-            logCheck(trigger: "active", engineState: engineState)
-            let transition = state.appBecameActive(isAvailable: engineState == .available, at: Date())
-            log(transition, engineState: engineState)
-            if state.rechecksQuietly { runRechecks() }
         }
         .animation(.easeInOut(duration: 0.3), value: state.phase)
     }
@@ -415,12 +426,13 @@ struct AppleIntelligencePage: View {
         endPoint: .bottomTrailing
     )
 
-    /// The iPhone's language as Siri's list writes it ("Français (France)", "English
-    /// (United States)"): the value the user has to pick.
+    /// The iPhone's language, named on its own ("English", "Français"): the entry to pick,
+    /// whatever country Siri lists it under (`AppleIntelligenceOnboarding.siriLanguageLabel`).
     private static var iPhoneLanguageName: String {
-        let identifier = Locale.preferredLanguages.first ?? Locale.current.identifier
-        let name = Locale.current.localizedString(forIdentifier: identifier) ?? identifier
-        return name.prefix(1).uppercased() + name.dropFirst()
+        AppleIntelligenceOnboarding.siriLanguageLabel(
+            preferredLanguage: Locale.preferredLanguages.first ?? Locale.current.identifier,
+            displayLocale: Locale.current
+        )
     }
 
     private var accessibilitySummary: Text {
@@ -478,6 +490,30 @@ struct AppleIntelligencePage: View {
     }
 
     // MARK: - Re-checks
+
+    /// The scene is active again.
+    ///
+    /// - After a real trip to the background (`returnPending`): back from Settings, or a
+    ///   launch onto this step. Ready, or the getting-ready screen, so the user does not
+    ///   find the same page and conclude it failed (device test of 2026-10-11).
+    /// - After `.inactive` only (a screenshot, Control Center, Notification Center): the
+    ///   page stays as it is. Availability is still read, and only turns it ready.
+    ///
+    /// Each case logs its own trigger, so a device log says which one fired.
+    private func sceneBecameActive() {
+        let engineState = PolishAvailability.state
+        let transition: AppleIntelligenceStepState.Transition?
+        if returnPending {
+            returnPending = false
+            logCheck(trigger: "returnFromBackground", engineState: engineState)
+            transition = state.appBecameActive(isAvailable: engineState == .available, at: Date())
+        } else {
+            logCheck(trigger: "activeFromInactive", engineState: engineState)
+            transition = state.availabilityRead(isAvailable: engineState == .available, at: Date())
+        }
+        log(transition, engineState: engineState)
+        if state.rechecksQuietly { runRechecks() }
+    }
 
     /// After a return: a second read `returnRecheckDelay` later (a language just changed
     /// may not show yet), then a read every `settingUpRecheckInterval` for as long as the
