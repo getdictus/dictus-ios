@@ -462,6 +462,21 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.subsystem, .lifecycle)
     }
 
+    /// The state is what tells a relaunch by iOS from a launch by the user (#707).
+    func testAppLaunchStateIsInfoLifecycle() {
+        let event = LogEvent.appLaunchState(state: "background")
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.message, "state=background")
+    }
+
+    func testBackgroundSessionEventsIsInfoLifecycle() {
+        let event = LogEvent.appBackgroundSessionEvents(identifier: "com.pivi.dictus.model-download")
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.message, "identifier=com.pivi.dictus.model-download")
+    }
+
     func testAppDidBecomeActiveIsDebugLifecycle() {
         let event = LogEvent.appDidBecomeActive
         XCTAssertEqual(event.level, .debug)

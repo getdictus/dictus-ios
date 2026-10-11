@@ -419,6 +419,31 @@ public enum LogEvent: Sendable {
 
     // MARK: Lifecycle
     case appLaunched(version: String)
+    /// The application state one main-loop turn after `didFinishLaunching` (#707), so a
+    /// launch iOS made in the background — to deliver the download session's events, with
+    /// `sessionSendsLaunchEvents = true` — reads apart from one the user made.
+    ///
+    /// WHY ITS OWN LINE, AND NOT A FIELD ON `appLaunched` as #707's triage first asked.
+    /// Measured on the iOS 27 simulator on 2026-10-11, on both launch kinds (a user launch,
+    /// and a background relaunch iOS made after the process was killed with transfers in
+    /// flight): `applicationState` reads `active` when `appLaunched` is written, in
+    /// `App.init`, and `background` in `didFinishLaunching` — the same value for both kinds
+    /// at both points. One turn later it reads `inactive` for the user's launch and
+    /// `background` for iOS's. Writing `appLaunched` that late would let other lines of the
+    /// new process land before the line every reader splits a log on, so the reading gets
+    /// a line of its own, right behind it.
+    case appLaunchState(state: String)
+    /// iOS called `application(_:handleEventsForBackgroundURLSession:completionHandler:)`:
+    /// it has a background session's events to deliver to this process (#707).
+    /// `identifier` is the session's, which is ours unless another component ever adds a
+    /// background session. Two launches in #707's second capture never became active, and
+    /// without this line nothing could say whether iOS or the user had made them.
+    ///
+    /// Not a launch kind on its own. Seen on the iOS 27 simulator on 2026-10-11 in three
+    /// shapes: a launch iOS made in the background, a suspended process woken in place, and
+    /// a launch by the user while events were waiting. `appLaunchState` is the line that
+    /// tells a launch by iOS from one by the user.
+    case appBackgroundSessionEvents(identifier: String)
     case appDidBecomeActive
     case appWillResignActive
     case appDidEnterBackground
@@ -641,7 +666,8 @@ public enum LogEvent: Sendable {
         case .liveActivityStarted, .liveActivityTransition, .liveActivityFailed, .liveActivityEnded,
              .liveActivityStandbySkipped:
             return .lifecycle
-        case .appLaunched, .appDidBecomeActive, .appWillResignActive,
+        case .appLaunched, .appLaunchState, .appBackgroundSessionEvents, .appDidBecomeActive,
+             .appWillResignActive,
              .appDidEnterBackground, .appWhisperKitLoaded, .deviceCapabilitySnapshot:
             return .lifecycle
         // Polish is the stage after the STT result and before the App Group
@@ -710,7 +736,8 @@ public enum LogEvent: Sendable {
              .modelPrewarmPeakMemory, .modelLoadStateChanged, .transcriptionPerformance,
              .keyboardDidAppear, .keyboardMicTapped,
              .dictationMessageSet, .dictationMessageDisplayed,
-             .appLaunched, .appWhisperKitLoaded, .logExportCompleted,
+             .appLaunched, .appLaunchState, .appBackgroundSessionEvents, .appWhisperKitLoaded,
+             .logExportCompleted,
              .deviceCapabilitySnapshot,
              .liveActivityStarted, .liveActivityTransition, .liveActivityEnded,
              .liveActivityStandbySkipped,
@@ -962,6 +989,10 @@ public enum LogEvent: Sendable {
         // Lifecycle
         case .appLaunched(let version):
             return "version=\(version)"
+        case .appLaunchState(let state):
+            return "state=\(state)"
+        case .appBackgroundSessionEvents(let identifier):
+            return "identifier=\(identifier)"
         case .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground:
             return ""
         case .appWhisperKitLoaded(let modelName):
@@ -1204,6 +1235,8 @@ extension LogEvent {
         case .liveActivityEnded: return "liveActivityEnded"
         case .liveActivityStandbySkipped: return "liveActivityStandbySkipped"
         case .appLaunched: return "appLaunched"
+        case .appLaunchState: return "appLaunchState"
+        case .appBackgroundSessionEvents: return "appBackgroundSessionEvents"
         case .appDidBecomeActive: return "appDidBecomeActive"
         case .appWillResignActive: return "appWillResignActive"
         case .appDidEnterBackground: return "appDidEnterBackground"

@@ -37,7 +37,21 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         BackgroundModelDownloadService.shared.restore()
+        // The launch kind, one main-loop turn from now (#707). See `appLaunchState`.
+        DispatchQueue.main.async {
+            PersistentLog.log(.appLaunchState(state: Self.applicationStateName))
+        }
         return true
+    }
+
+    /// `UIApplication.applicationState` as the log spells it.
+    private static var applicationStateName: String {
+        switch UIApplication.shared.applicationState {
+        case .active: return "active"
+        case .inactive: return "inactive"
+        case .background: return "background"
+        @unknown default: return "unknown"
+        }
     }
 
     /// iOS relaunched (or resumed) the app to deliver background transfer events.
@@ -51,6 +65,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         handleEventsForBackgroundURLSession identifier: String,
         completionHandler: @escaping () -> Void
     ) {
+        // First, and for any identifier: two launches in #707's second capture logged
+        // `appLaunched` and never became active, and nothing in the log could say whether
+        // iOS had made them to deliver this session's events or the user had.
+        PersistentLog.log(.appBackgroundSessionEvents(identifier: identifier))
         guard identifier == BackgroundModelDownloadService.sessionIdentifier else {
             completionHandler()
             return
