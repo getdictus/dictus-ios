@@ -365,6 +365,14 @@ public enum LogEvent: Sendable {
     case onboardingAppleIntelligenceChecked(trigger: String, state: String)
     /// The user left the Apple Intelligence step with *Later* (#683).
     case onboardingAppleIntelligenceDeferred(state: String)
+    /// Back on the step with Apple Intelligence not ready: the countdown check started
+    /// (#683, `AppleIntelligenceStepState`).
+    case onboardingAppleIntelligenceCheckingStarted(state: String)
+    /// Apple Intelligence read as available on the step. `afterSeconds` is the time into
+    /// the countdown check, -1 when it was found outside one.
+    case onboardingAppleIntelligenceBecameAvailable(afterSeconds: Int)
+    /// The countdown ended without Apple Intelligence: the setting-up screen is shown.
+    case onboardingAppleIntelligenceCountdownElapsed(state: String)
     /// The onboarding's Smart Mode pick wrote the pinned list (#677). `identifiers` is the
     /// list in fan order, comma-separated: what the keyboard's fan should now show.
     case onboardingSmartModesPicked(identifiers: String)
@@ -618,7 +626,8 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
-             .onboardingAppleIntelligenceDeferred,
+             .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceCheckingStarted,
+             .onboardingAppleIntelligenceBecameAvailable, .onboardingAppleIntelligenceCountdownElapsed,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
@@ -683,7 +692,8 @@ public enum LogEvent: Sendable {
         case .onboardingKeyboardDetected,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
-             .onboardingAppleIntelligenceDeferred,
+             .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceCheckingStarted,
+             .onboardingAppleIntelligenceBecameAvailable, .onboardingAppleIntelligenceCountdownElapsed,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
@@ -926,8 +936,12 @@ public enum LogEvent: Sendable {
             return ""
         case .onboardingAppleIntelligenceChecked(let trigger, let state):
             return "trigger=\(trigger) state=\(state)"
-        case .onboardingAppleIntelligenceDeferred(let state):
+        case .onboardingAppleIntelligenceDeferred(let state),
+             .onboardingAppleIntelligenceCheckingStarted(let state),
+             .onboardingAppleIntelligenceCountdownElapsed(let state):
             return "state=\(state)"
+        case .onboardingAppleIntelligenceBecameAvailable(let afterSeconds):
+            return "afterSeconds=\(afterSeconds)"
         case .onboardingSmartModesPicked(let identifiers):
             return "identifiers=\(identifiers)"
         case .onboardingSmartModePickSkipped:
@@ -1180,6 +1194,9 @@ extension LogEvent {
         case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
         case .onboardingAppleIntelligenceChecked: return "onboardingAppleIntelligenceChecked"
         case .onboardingAppleIntelligenceDeferred: return "onboardingAppleIntelligenceDeferred"
+        case .onboardingAppleIntelligenceCheckingStarted: return "onboardingAppleIntelligenceCheckingStarted"
+        case .onboardingAppleIntelligenceBecameAvailable: return "onboardingAppleIntelligenceBecameAvailable"
+        case .onboardingAppleIntelligenceCountdownElapsed: return "onboardingAppleIntelligenceCountdownElapsed"
         case .onboardingSmartModesPicked: return "onboardingSmartModesPicked"
         case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
         case .liveActivityStarted: return "liveActivityStarted"
