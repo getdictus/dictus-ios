@@ -477,6 +477,46 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.message, "identifier=com.pivi.dictus.model-download")
     }
 
+    // MARK: - Model download task diagnosis (#707)
+
+    func testTaskStateNamesItsSession() {
+        let event = LogEvent.modelDownloadTaskState(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Encoder.mlmodelc/weights/weight.bin",
+            chunk: 6,
+            phase: "start+10s",
+            origin: "new",
+            session: "bg",
+            state: "running",
+            receivedBytes: 0,
+            error: "none"
+        )
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .model)
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin chunk=6 "
+                + "phase=start+10s origin=new session=bg state=running received=0B error=none"
+        )
+    }
+
+    func testBackgroundTaskSilentIsAWarningWithItsOrigin() {
+        let event = LogEvent.modelDownloadBackgroundTaskSilent(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Encoder.mlmodelc/weights/weight.bin",
+            chunk: 7,
+            origin: "new",
+            secondsWithoutByte: 31
+        )
+        XCTAssertEqual(event.level, .warning)
+        XCTAssertEqual(event.subsystem, .model)
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin chunk=7 "
+                + "origin=new noByte=31s"
+        )
+    }
+
     func testAppDidBecomeActiveIsDebugLifecycle() {
         let event = LogEvent.appDidBecomeActive
         XCTAssertEqual(event.level, .debug)

@@ -187,32 +187,49 @@ public enum LogEvent: Sendable {
     /// server was slow and not because the app was backgrounded, both of which the
     /// predicate in `DownloadStallPolicy` excludes before this is emitted.
     case modelDownloadOffline(name: String, path: String, secondsWithoutProgress: Int)
-    /// One task the background session handed back after a relaunch, as URLSession
-    /// describes it (#690). Logged for every adopted task when the session is restored
-    /// (`phase=restore`) and again ten seconds later (`phase=restore+10s`), when every
-    /// task the session holds is listed, adopted or not (`origin`).
+    /// One model download task, as URLSession describes it (#690, #707).
+    ///
+    /// Logged for every task the background session hands back after a relaunch
+    /// (`phase=restore`, `origin=adopted`) and again ten seconds later
+    /// (`phase=restore+10s`); and, since #707, for every task `start()` creates, right
+    /// after `resume()` (`phase=start`, `origin=new`) and ten seconds later
+    /// (`phase=start+10s`). `session` is the session that holds it: `bg` for the
+    /// background one, `fg` for the foreground fallback.
     ///
     /// WHY IT EXISTS. After iOS killed Dictus on the Full Access change, the adopted task
     /// delivered nothing for minutes with the app in front and the network up, and no
     /// line said what state it was in. `state` (`running`, `suspended`, `canceling`,
     /// `completed`), `received` (bytes, as the task counts them) and `error` (domain and
     /// code only, `none` when there is none) answer it: a `suspended` task, or a
-    /// `running` one whose `received` has not moved in ten seconds, is the wedge.
+    /// `running` one whose `received` has not moved in ten seconds, is the wedge. #707
+    /// then found the replacement task wedged too, and only `restore()` logged states, so
+    /// nothing could say whether it sat `suspended` or `running` with no bytes.
     case modelDownloadTaskState(
         name: String,
         path: String,
         chunk: Int,
         phase: String,
         origin: String,
+        session: String,
         state: String,
         receivedBytes: Int64,
         error: String
     )
-    /// An adopted task went `secondsWithoutByte` without delivering anything while the
-    /// app was in the foreground, and was cancelled so its chunk could be asked for again
-    /// from the manifest (#690, `AdoptedDownloadWatchdog`). A line here means a transfer
-    /// that would otherwise have frozen the progress bar was replaced.
-    case modelDownloadAdoptedTaskSilent(name: String, path: String, chunk: Int, secondsWithoutByte: Int)
+    /// A background-session task went `secondsWithoutByte` without delivering anything
+    /// while the app was in the foreground, and was cancelled so its chunk could be asked
+    /// for again on the foreground session (#707, `SilentDownloadTaskWatchdog`). `origin`
+    /// says whether the task was adopted from a previous process or created by this one.
+    /// A line here means a transfer that would otherwise have frozen the progress bar was
+    /// moved, and that the foreground fallback is engaged until the app is backgrounded.
+    ///
+    /// Replaces #690's `modelDownloadAdoptedTaskSilent`, which watched adopted tasks only.
+    case modelDownloadBackgroundTaskSilent(
+        name: String,
+        path: String,
+        chunk: Int,
+        origin: String,
+        secondsWithoutByte: Int
+    )
     /// This process cancelled a download task, and `caller` names the code path that did
     /// it (#690). Every `cancel()` on a model download task goes through a line like this,
     /// so a `-999` with no such line before it was not ours: it came from the system.
@@ -627,7 +644,7 @@ public enum LogEvent: Sendable {
              .modelReconciledFromDisk,
              .modelDownloadResumed, .modelDownloadRangeRejected, .modelDownloadChunk,
              .modelDownloadIntegrityFailed, .modelDownloadSessionRestored,
-             .modelDownloadOffline, .modelDownloadTaskState, .modelDownloadAdoptedTaskSilent,
+             .modelDownloadOffline, .modelDownloadTaskState, .modelDownloadBackgroundTaskSilent,
              .modelDownloadTaskCancelled:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
@@ -712,7 +729,7 @@ public enum LogEvent: Sendable {
              .audioInterruptionBegan, .audioMediaServicesReset,
              .modelDownloadStalled, .audioHapticsAllowanceFailed,
              .modelDownloadSizeMismatch, .modelDownloadRangeRejected,
-             .modelDownloadOffline, .modelDownloadAdoptedTaskSilent:
+             .modelDownloadOffline, .modelDownloadBackgroundTaskSilent:
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
@@ -912,12 +929,16 @@ public enum LogEvent: Sendable {
         case .modelDownloadOffline(let name, let path, let secondsWithoutProgress):
             return "name=\(name) path=\(path) noProgress=\(secondsWithoutProgress)s"
         case .modelDownloadTaskState(
-            let name, let path, let chunk, let phase, let origin, let state, let receivedBytes, let error
+            let name, let path, let chunk, let phase, let origin, let session, let state,
+            let receivedBytes, let error
         ):
             return "name=\(name) path=\(path) chunk=\(chunk) phase=\(phase) origin=\(origin) "
-                + "state=\(state) received=\(receivedBytes)B error=\(error)"
-        case .modelDownloadAdoptedTaskSilent(let name, let path, let chunk, let secondsWithoutByte):
-            return "name=\(name) path=\(path) chunk=\(chunk) noByte=\(secondsWithoutByte)s"
+                + "session=\(session) state=\(state) received=\(receivedBytes)B error=\(error)"
+        case .modelDownloadBackgroundTaskSilent(
+            let name, let path, let chunk, let origin, let secondsWithoutByte
+        ):
+            return "name=\(name) path=\(path) chunk=\(chunk) origin=\(origin) "
+                + "noByte=\(secondsWithoutByte)s"
         case .modelDownloadTaskCancelled(let name, let path, let chunk, let caller):
             return "name=\(name) path=\(path) chunk=\(chunk) caller=\(caller)"
 
@@ -1281,7 +1302,7 @@ extension LogEvent {
         case .modelDownloadSessionRestored: return "modelDownloadSessionRestored"
         case .modelDownloadOffline: return "modelDownloadOffline"
         case .modelDownloadTaskState: return "modelDownloadTaskState"
-        case .modelDownloadAdoptedTaskSilent: return "modelDownloadAdoptedTaskSilent"
+        case .modelDownloadBackgroundTaskSilent: return "modelDownloadBackgroundTaskSilent"
         case .modelDownloadTaskCancelled: return "modelDownloadTaskCancelled"
         case .polishEngineFailed: return "polishEngineFailed"
         case .vocabularyApplied: return "vocabularyApplied"
