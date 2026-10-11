@@ -229,8 +229,22 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
     /// `nsurlsessiond` has never been seen to stall. A task created in the background — the
     /// hand-off's re-issue — runs normally, so the hand-off can be seen to carry the
     /// download on. Adopted tasks are untouched: they belong to the system's daemon.
-    private static let holdsBackgroundTasks =
-        ProcessInfo.processInfo.arguments.contains("-DictusDebugHoldBackgroundTasks")
+    ///
+    /// Remembered across launches: `-DictusDebugHoldBackgroundTasks YES` turns it on and
+    /// `NO` turns it off for good. A launch iOS makes in the background carries no launch
+    /// argument, and on the simulator one follows almost every backgrounding (the process
+    /// is killed on its first background wake), so an argument read once would silently
+    /// stop holding halfway through a run.
+    private static let holdsBackgroundTasks: Bool = {
+        let key = "DictusDebugHoldBackgroundTasks"
+        let defaults = UserDefaults.standard
+        // `bool(forKey:)` reads the argument domain first; writing it back to the app's
+        // own domain is what the next launch, with no argument, reads.
+        if ProcessInfo.processInfo.arguments.contains("-\(key)") {
+            defaults.set(defaults.bool(forKey: key), forKey: key)
+        }
+        return defaults.bool(forKey: key)
+    }()
     #endif
 
     // MARK: - Public API
