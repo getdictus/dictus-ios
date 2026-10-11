@@ -1,5 +1,5 @@
 // DictusCore/Tests/DictusCoreTests/AppleIntelligenceStepStateTests.swift
-// The Apple Intelligence step's check on return and its countdown (#683).
+// What a return to the Apple Intelligence step shows (#683).
 import XCTest
 @testable import DictusCore
 
@@ -21,89 +21,89 @@ final class AppleIntelligenceStepStateTests: XCTestCase {
         XCTAssertEqual(AppleIntelligenceStepState(isAvailable: true).phase, .ready)
     }
 
+    func testTheInstructionsDoNotRecheckOnTheirOwn() {
+        XCTAssertFalse(AppleIntelligenceStepState(isAvailable: false).rechecksQuietly)
+    }
+
     // MARK: - Return
 
-    func testComingBackNotReadyStartsTheCheck() {
+    /// Device test of 2026-10-10: Apple's model in place, the first read on return is
+    /// already `available`.
+    func testComingBackReadyIsReadyAtOnce() {
         var state = AppleIntelligenceStepState(isAvailable: false)
-        XCTAssertEqual(state.appBecameActive(isAvailable: false, at: start), .checkingStarted)
-        XCTAssertEqual(state.phase, .checking(startedAt: start))
-        XCTAssertEqual(state.secondsLeft(at: start), 15)
-    }
-
-    func testComingBackReadyGoesStraightToReady() {
-        var state = AppleIntelligenceStepState(isAvailable: false)
-        XCTAssertEqual(state.appBecameActive(isAvailable: true, at: start), .becameAvailable(afterSeconds: nil))
+        XCTAssertEqual(state.appBecameActive(isAvailable: true, at: start), .becameAvailable(afterSeconds: 0))
         XCTAssertEqual(state.phase, .ready)
     }
 
-    func testAnotherReturnStartsTheCountdownOver() {
+    /// No countdown: not available goes straight to the setting-up screen.
+    func testComingBackNotReadyShowsSettingUpAtOnce() {
         var state = AppleIntelligenceStepState(isAvailable: false)
-        state.appBecameActive(isAvailable: false, at: start)
-        state.appBecameActive(isAvailable: false, at: at(9))
-        XCTAssertEqual(state.secondsLeft(at: at(9)), 15)
-    }
-
-    func testAReturnFromTheSettingUpScreenChecksAgain() {
-        var state = AppleIntelligenceStepState(isAvailable: false)
-        state.appBecameActive(isAvailable: false, at: start)
-        state.availabilityRead(isAvailable: false, at: at(15))
+        XCTAssertEqual(state.appBecameActive(isAvailable: false, at: start), .settingUpShown)
         XCTAssertEqual(state.phase, .settingUp)
-        XCTAssertEqual(state.appBecameActive(isAvailable: false, at: at(60)), .checkingStarted)
+        XCTAssertTrue(state.rechecksQuietly)
     }
 
-    // MARK: - During the check
-
-    func testAvailableDuringTheCheckIsReady() {
+    func testTheSecondReadAfterAReturnCanStillTurnReady() {
         var state = AppleIntelligenceStepState(isAvailable: false)
         state.appBecameActive(isAvailable: false, at: start)
-        XCTAssertNil(state.availabilityRead(isAvailable: false, at: at(2)))
-        XCTAssertEqual(state.availabilityRead(isAvailable: true, at: at(4)), .becameAvailable(afterSeconds: 4))
+        XCTAssertEqual(
+            state.availabilityRead(isAvailable: true, at: at(AppleIntelligenceStepState.returnRecheckDelay)),
+            .becameAvailable(afterSeconds: 2)
+        )
+        XCTAssertEqual(state.phase, .ready)
+        XCTAssertFalse(state.rechecksQuietly)
+    }
+
+    func testAnotherReturnWhileSettingUpIsNotLoggedAgain() {
+        var state = AppleIntelligenceStepState(isAvailable: false)
+        state.appBecameActive(isAvailable: false, at: start)
+        XCTAssertNil(state.appBecameActive(isAvailable: false, at: at(30)))
+        XCTAssertEqual(state.phase, .settingUp)
+    }
+
+    // MARK: - Setting up
+
+    /// Device test of 2026-10-11: Apple Intelligence turned ready a while later. The quiet
+    /// re-reads catch it, measured from the return.
+    func testAQuietReReadTurnsReadyLater() {
+        var state = AppleIntelligenceStepState(isAvailable: false)
+        state.appBecameActive(isAvailable: false, at: start)
+        XCTAssertNil(state.availabilityRead(isAvailable: false, at: at(5)))
+        XCTAssertEqual(state.availabilityRead(isAvailable: true, at: at(95)), .becameAvailable(afterSeconds: 95))
         XCTAssertEqual(state.phase, .ready)
     }
-
-    func testTheCountdownRunsFifteenToOne() {
-        var state = AppleIntelligenceStepState(isAvailable: false)
-        state.appBecameActive(isAvailable: false, at: start)
-        XCTAssertEqual(state.secondsLeft(at: at(0.1)), 15)
-        XCTAssertEqual(state.secondsLeft(at: at(14.2)), 1)
-        XCTAssertEqual(state.elapsedFraction(at: at(7.5)), 0.5, accuracy: 0.0001)
-    }
-
-    func testNoTransitionBeforeTheEnd() {
-        var state = AppleIntelligenceStepState(isAvailable: false)
-        state.appBecameActive(isAvailable: false, at: start)
-        XCTAssertNil(state.availabilityRead(isAvailable: false, at: at(14.9)))
-        XCTAssertEqual(state.phase, .checking(startedAt: start))
-    }
-
-    func testTheEndOfTheCountdownIsTheSettingUpScreen() {
-        var state = AppleIntelligenceStepState(isAvailable: false)
-        state.appBecameActive(isAvailable: false, at: start)
-        XCTAssertEqual(state.availabilityRead(isAvailable: false, at: at(15)), .countdownElapsed)
-        XCTAssertEqual(state.phase, .settingUp)
-        XCTAssertEqual(state.secondsLeft(at: at(16)), 0)
-    }
-
-    // MARK: - After the check
 
     func testSeeTheStepsAgainGoesBackToTheInstructions() {
         var state = AppleIntelligenceStepState(isAvailable: false)
         state.appBecameActive(isAvailable: false, at: start)
-        state.availabilityRead(isAvailable: false, at: at(15))
         state.showInstructionsAgain()
         XCTAssertEqual(state.phase, .instructions)
+        XCTAssertFalse(state.rechecksQuietly)
     }
 
-    func testReadsOutsideTheCheckChangeNothingUnlessAvailable() {
+    func testAReturnFromTheInstructionsShownAgainIsSettingUpAgain() {
         var state = AppleIntelligenceStepState(isAvailable: false)
-        XCTAssertNil(state.availabilityRead(isAvailable: false, at: at(100)))
-        XCTAssertEqual(state.phase, .instructions)
-        XCTAssertEqual(state.availabilityRead(isAvailable: true, at: at(101)), .becameAvailable(afterSeconds: nil))
+        state.appBecameActive(isAvailable: false, at: start)
+        state.showInstructionsAgain()
+        XCTAssertEqual(state.appBecameActive(isAvailable: false, at: at(60)), .settingUpShown)
+    }
+
+    // MARK: - Ready
+
+    func testAvailableBeforeAnyReturnHasNoDelay() {
+        var state = AppleIntelligenceStepState(isAvailable: false)
+        XCTAssertEqual(state.availabilityRead(isAvailable: true, at: start), .becameAvailable(afterSeconds: nil))
     }
 
     func testReadyIsLoggedOnce() {
         var state = AppleIntelligenceStepState(isAvailable: true)
         XCTAssertNil(state.availabilityRead(isAvailable: true, at: start))
         XCTAssertNil(state.appBecameActive(isAvailable: true, at: start))
+    }
+
+    func testReadsThatAreNotAvailableChangeNothing() {
+        var state = AppleIntelligenceStepState(isAvailable: false)
+        XCTAssertNil(state.availabilityRead(isAvailable: false, at: start))
+        XCTAssertEqual(state.phase, .instructions)
     }
 }
