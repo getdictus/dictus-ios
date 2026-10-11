@@ -40,13 +40,16 @@ enum OnboardingMetrics {
 ///
 /// WHY SEGMENTS FROM `OnboardingStep.progressSteps`: the bar shows the steps that wear
 /// it, in order, so a step added later by a #649 sub-issue gets its segment by existing.
-/// A skipped step keeps its segment and reads as done once passed.
+/// A skipped step keeps its segment and reads as done once passed; a Pro step hidden on a
+/// device that can never run Smart Modes has none (#677).
 struct OnboardingProgressBar: View {
     let step: OnboardingStep
+    /// `SmartModeAvailability.deviceIsCapable`, which decides whether the Pro steps exist.
+    let deviceCanRunSmartModes: Bool
 
     var body: some View {
-        let steps = OnboardingStep.progressSteps
-        let current = step.progressIndex ?? 0
+        let steps = OnboardingStep.progressSteps(deviceCanRunSmartModes: deviceCanRunSmartModes)
+        let current = step.progressIndex(deviceCanRunSmartModes: deviceCanRunSmartModes) ?? 0
         HStack(spacing: 6) {
             ForEach(Array(steps.enumerated()), id: \.element) { index, _ in
                 Capsule()
@@ -83,13 +86,14 @@ struct OnboardingProgressBar: View {
 /// that has it, and stays put while the pages slide.
 struct OnboardingTopBar: View {
     let step: OnboardingStep
+    let deviceCanRunSmartModes: Bool
     /// nil when the step has no Skip.
     let onSkip: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 16) {
             if step.showsProgress {
-                OnboardingProgressBar(step: step)
+                OnboardingProgressBar(step: step, deviceCanRunSmartModes: deviceCanRunSmartModes)
             } else {
                 Spacer()
             }
@@ -116,20 +120,25 @@ struct OnboardingTopBar: View {
 /// (iPhone SE, every iPad in compatibility mode), the language and keyboard pages would
 /// clip; a scroll view that only bounces when it overflows keeps the button reachable
 /// and costs nothing where everything fits.
-struct OnboardingPage<Content: View, Bottom: View>: View {
+struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
     let title: Text
     let subtitle: Text?
+    @ViewBuilder let titleAccessory: TitleAccessory
     @ViewBuilder let content: Content
     @ViewBuilder let bottom: Bottom
 
+    /// - Parameter titleAccessory: drawn at the trailing end of the title's first line,
+    ///   like the Smart Mode pick's `n / 3` counter (#677).
     init(
         title: Text,
         subtitle: Text? = nil,
+        @ViewBuilder titleAccessory: () -> TitleAccessory,
         @ViewBuilder content: () -> Content,
         @ViewBuilder bottom: () -> Bottom
     ) {
         self.title = title
         self.subtitle = subtitle
+        self.titleAccessory = titleAccessory()
         self.content = content()
         self.bottom = bottom()
     }
@@ -138,7 +147,7 @@ struct OnboardingPage<Content: View, Bottom: View>: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    OnboardingHeader(title: title, subtitle: subtitle)
+                    OnboardingHeader(title: title, subtitle: subtitle) { titleAccessory }
                         .padding(.top, OnboardingMetrics.titleTopPadding)
                         .padding(.bottom, 24)
                     content
@@ -158,18 +167,42 @@ struct OnboardingPage<Content: View, Bottom: View>: View {
     }
 }
 
-/// The large left-aligned title and its subtitle.
-struct OnboardingHeader: View {
+extension OnboardingPage where TitleAccessory == EmptyView {
+    /// A page with nothing beside its title, which is every page but the Smart Mode pick.
+    init(
+        title: Text,
+        subtitle: Text? = nil,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder bottom: () -> Bottom
+    ) {
+        self.init(title: title, subtitle: subtitle, titleAccessory: { EmptyView() }, content: content, bottom: bottom)
+    }
+}
+
+/// The large left-aligned title and its subtitle, with an optional accessory at the
+/// trailing end of the title.
+struct OnboardingHeader<Accessory: View>: View {
     let title: Text
     let subtitle: Text?
+    @ViewBuilder let accessory: Accessory
+
+    init(title: Text, subtitle: Text?, @ViewBuilder accessory: () -> Accessory) {
+        self.title = title
+        self.subtitle = subtitle
+        self.accessory = accessory()
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            title
-                .font(.largeTitle.weight(.bold))
-                .foregroundStyle(.primary)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityAddTraits(.isHeader)
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                title
+                    .font(.largeTitle.weight(.bold))
+                    .foregroundStyle(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                accessory
+            }
             if let subtitle {
                 subtitle
                     .font(.title3)
@@ -178,6 +211,12 @@ struct OnboardingHeader: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+extension OnboardingHeader where Accessory == EmptyView {
+    init(title: Text, subtitle: Text?) {
+        self.init(title: title, subtitle: subtitle) { EmptyView() }
     }
 }
 

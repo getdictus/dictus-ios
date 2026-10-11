@@ -394,12 +394,16 @@ export const drawWoman = (g: Gfx, theme: Theme, pose: Pose, voice: () => void) =
     stroke(g, right, 5.5, 118, T.line, 0.15);
     stroke(g, bodyFig([[400, 1640], [402, 1690]]), 2.6, 114, T.line, 0.9, 0.45);
     piece(g, sm(bodyFig(NECK)), SKIN, SKIN_SH, 10, 5, 115);
-    piece(g, sm(bodyFig(TORSO)), ACCENT, DEEP, 30, 6, 116);
+    const torso = sm(bodyFig(TORSO));
+    piece(g, torso, ACCENT, DEEP, 30, 6, 116);
     fillShape(g, sm(bodyFig(TORSO_SH)), DEEP, 0.9);
-    outline(g, sm(bodyFig(TORSO)), 6, 116);
+    // the fold across the belly, clipped to the sweater and drawn under its contour: its tip
+    // reaches past the sweater's side, and unclipped it stuck out beyond the black line under
+    // the raised arm (Pierre's device test of PR #697, #676)
+    clipped(g, torso, () => fillShape(g, sm(bodyFig([[380, 1372], [440, 1390], [506, 1384], [516, 1404], [460, 1418], [392, 1408]])), DEEP, 0.55));
+    outline(g, torso, 6, 116);
     stroke(g, bodyFig([[300, 1530], [482, 1526]]), 4.5, 117);
     piece(g, sm(bodyFig(VNECK)), HIGH, DEEP, 4, 3.5, 118);
-    fillShape(g, sm(bodyFig([[380, 1372], [440, 1390], [506, 1384], [516, 1404], [460, 1418], [392, 1408]])), DEEP, 0.55);
   });
   // the near arm and what its hand holds: the tote by its handles (scene A), the pole (scene B)
   layer(() => {
