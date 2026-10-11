@@ -32,6 +32,12 @@ import DictusCore
 /// Any number would be wrong for someone, so the page says "sometimes a long time" and
 /// re-checks when the user comes back.
 ///
+/// WHY A CHECK ON RETURN (decided 2026-10-11, after the second device test): coming back
+/// from Settings with Apple Intelligence still setting up used to show the very same page,
+/// which read as "it did not work". The return now starts a visible fifteen-second check;
+/// it ends on ready, or on a calm "getting ready" screen that lets the user go on. The
+/// rules are `AppleIntelligenceStepState`. Nothing advances on its own.
+///
 /// WHY "LATER" IS AS LARGE AS THE MAIN BUTTON: dictation does not need Apple Intelligence.
 /// The step must never feel like a gate, so leaving it is as easy as following it.
 struct AppleIntelligencePage: View {
@@ -42,12 +48,13 @@ struct AppleIntelligencePage: View {
 
     @Environment(\.scenePhase) private var scenePhase
 
-    /// Whether Apple Intelligence was found ready by the last check. The page then offers
-    /// Continue instead of the path.
-    @State private var isReady = false
+    /// What the page shows: the instructions, the check on return, ready, or setting up
+    /// (`AppleIntelligenceStepState`, #683). Built from the first read in `onAppear`.
+    @State private var state = AppleIntelligenceStepState(isAvailable: false)
 
-    /// The delayed second check after a return to the app.
-    @State private var recheckTask: Task<Void, Never>?
+    /// The check's clock: a tick a second, a read of availability every
+    /// `recheckInterval`, until the countdown ends or the page leaves the check.
+    @State private var checkTask: Task<Void, Never>?
 
     /// Which drawn Settings screen the loop shows, and which of its numbered rows is lit
     /// (0: none).
@@ -62,6 +69,47 @@ struct AppleIntelligencePage: View {
     private let route = AppleIntelligenceOnboarding.settingsRoute
 
     var body: some View {
+        Group {
+            switch state.phase {
+            case .instructions, .ready:
+                instructionsPage
+            case .checking:
+                checkingPage
+            case .settingUp:
+                settingUpPage
+            }
+        }
+        .onAppear {
+            let engineState = PolishAvailability.state
+            logCheck(trigger: "appear", engineState: engineState)
+            state = AppleIntelligenceStepState(isAvailable: engineState == .available)
+            startAnimation()
+        }
+        .onDisappear {
+            stopCheck()
+            animationTimer?.invalidate()
+            animationTimer = nil
+        }
+        .onChange(of: scenePhase) { newPhase in
+            guard newPhase == .active else {
+                stopCheck()
+                return
+            }
+            // Back on the step, from Settings or after a relaunch on it: a visible check
+            // while Apple Intelligence is still not ready, so the user does not find the
+            // same screen and conclude it failed (device test of 2026-10-11).
+            let engineState = PolishAvailability.state
+            logCheck(trigger: "active", engineState: engineState)
+            let transition = state.appBecameActive(isAvailable: engineState == .available, at: Date())
+            log(transition, engineState: engineState)
+            if case .checking = state.phase { runCheck() }
+        }
+        .animation(.easeInOut(duration: 0.3), value: state.phase)
+    }
+
+    // MARK: - Instructions (first visit) and ready
+
+    private var instructionsPage: some View {
         OnboardingPage(
             title: Text("Set Siri's language"),
             subtitle: Text("Smart Modes run on Apple Intelligence, which turns on only when Siri speaks your iPhone's language. Dictation already works without it.")
@@ -69,12 +117,8 @@ struct AppleIntelligencePage: View {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
 
-                if isReady {
-                    Label("Apple Intelligence is ready", systemImage: "checkmark.circle.fill")
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(Color.dictusSuccess)
-                        .frame(maxWidth: .infinity)
-                        .transition(.opacity)
+                if state.phase == .ready {
+                    readyLabel
                 } else {
                     guidance
                 }
@@ -82,7 +126,7 @@ struct AppleIntelligencePage: View {
         } bottom: {
             OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
 
-            if isReady {
+            if state.phase == .ready {
                 OnboardingPrimaryButton(Text("Continue"), action: onNext)
                     .accessibilityIdentifier("onboarding.primary")
                     .transition(.opacity)
@@ -95,36 +139,60 @@ struct AppleIntelligencePage: View {
                     .transition(.opacity)
             }
         }
-        .onAppear {
-            check(trigger: "appear")
-            startAnimation()
+    }
+
+    private var readyLabel: some View {
+        Label("Apple Intelligence is ready", systemImage: "checkmark.circle.fill")
+            .font(.body.weight(.medium))
+            .foregroundStyle(Color.dictusSuccess)
+            .frame(maxWidth: .infinity)
+            .transition(.opacity)
+    }
+
+    // MARK: - Checking
+
+    /// Back from Settings, Apple Intelligence not ready yet: what is happening, and for how
+    /// long the page keeps looking. Later stays as large as ever.
+    private var checkingPage: some View {
+        OnboardingCenteredPage(
+            title: Text("Dictus is checking Apple Intelligence"),
+            message: Text("It can take a moment to start after a change in Settings. This page updates on its own.")
+        ) {
+            CheckCountdownRing(state: state)
+        } bottom: {
+            OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
+            OnboardingSecondaryButton(Text("Later"), action: later)
+                .accessibilityIdentifier("onboarding.later")
         }
-        .onDisappear {
-            recheckTask?.cancel()
-            recheckTask = nil
-            animationTimer?.invalidate()
-            animationTimer = nil
+    }
+
+    // MARK: - Setting up
+
+    /// The countdown ended without Apple Intelligence. Calm on purpose: nothing failed that
+    /// the user can see, Apple finishes in the background, and the onboarding goes on. No
+    /// duration is promised.
+    ///
+    /// WHY THE LANGUAGE HINT STAYS: the copy cannot depend on the reason, and a language
+    /// that still does not match is one of the reasons. It is the one thing to check if
+    /// Smart Modes never come.
+    private var settingUpPage: some View {
+        OnboardingCenteredPage(
+            title: Text("Apple Intelligence is getting ready"),
+            message: Text("It finishes setting up in the background. Smart Modes will work as soon as it is ready. You can go on.")
+        ) {
+            SettingUpHalo()
+        } bottom: {
+            Text("If Smart Modes stay unavailable, check that Siri speaks your iPhone's language.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
+            OnboardingPrimaryButton(Text("Continue"), action: continueWhileSettingUp)
+                .accessibilityIdentifier("onboarding.primary")
+            OnboardingSecondaryButton(Text("See the steps again"), action: showStepsAgain)
+                .accessibilityIdentifier("onboarding.seeStepsAgain")
         }
-        .onChange(of: scenePhase) { newPhase in
-            guard newPhase == .active else {
-                recheckTask?.cancel()
-                recheckTask = nil
-                return
-            }
-            check(trigger: "active")
-            // A second look shortly after: a language just changed in Settings may not be
-            // reflected by the time the app is active again. Same reasoning as the
-            // keyboard step's retry.
-            recheckTask?.cancel()
-            recheckTask = Task {
-                try? await Task.sleep(for: .seconds(2))
-                guard !Task.isCancelled else { return }
-                await MainActor.run {
-                    check(trigger: "active")
-                }
-            }
-        }
-        .animation(.easeInOut(duration: 0.3), value: isReady)
     }
 
     // MARK: - Guidance
@@ -426,17 +494,58 @@ struct AppleIntelligencePage: View {
         }
     }
 
-    // MARK: - Actions
+    // MARK: - Check
 
-    /// Reads the availability and records what it found.
-    private func check(trigger: String) {
-        let state = PolishAvailability.state
-        PersistentLog.log(.onboardingAppleIntelligenceChecked(trigger: trigger, state: String(describing: state)))
-        // `.available` rather than `!isStepNeeded`: a device that can never run Apple
-        // Intelligence is not "ready", and only lands here if its state changed under a
-        // resumed onboarding. It keeps the path and Later.
-        isReady = state == .available
+    /// Ticks twice a second while the page is checking: a read of availability every
+    /// `recheckInterval`, and one when the countdown is over, which is what ends it. Half
+    /// a second so the end lands within that of the ring reaching zero (measured on a
+    /// simulator: a one-second tick ended it a second late).
+    private func runCheck() {
+        stopCheck()
+        checkTask = Task { @MainActor in
+            var tick = 0
+            let tickSeconds = 0.5
+            let readEvery = Int(AppleIntelligenceStepState.recheckInterval / tickSeconds)
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(tickSeconds))
+                guard !Task.isCancelled, case .checking(let startedAt) = state.phase else { return }
+                tick += 1
+                let now = Date()
+                let isOver = now.timeIntervalSince(startedAt) >= AppleIntelligenceStepState.checkDuration
+                guard isOver || tick % readEvery == 0 else { continue }
+                let engineState = PolishAvailability.state
+                logCheck(trigger: "check", engineState: engineState)
+                let transition = state.availabilityRead(isAvailable: engineState == .available, at: now)
+                log(transition, engineState: engineState)
+            }
+        }
     }
+
+    private func stopCheck() {
+        checkTask?.cancel()
+        checkTask = nil
+    }
+
+    // MARK: - Logs
+
+    private func logCheck(trigger: String, engineState: PolishAvailabilityState) {
+        PersistentLog.log(.onboardingAppleIntelligenceChecked(trigger: trigger, state: String(describing: engineState)))
+    }
+
+    private func log(_ transition: AppleIntelligenceStepState.Transition?, engineState: PolishAvailabilityState) {
+        guard let transition else { return }
+        let engine = String(describing: engineState)
+        switch transition {
+        case .checkingStarted:
+            PersistentLog.log(.onboardingAppleIntelligenceCheckingStarted(state: engine))
+        case .becameAvailable(let afterSeconds):
+            PersistentLog.log(.onboardingAppleIntelligenceBecameAvailable(afterSeconds: afterSeconds ?? -1))
+        case .countdownElapsed:
+            PersistentLog.log(.onboardingAppleIntelligenceCountdownElapsed(state: engine))
+        }
+    }
+
+    // MARK: - Actions
 
     private func openSettings() {
         if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -445,7 +554,76 @@ struct AppleIntelligencePage: View {
     }
 
     private func later() {
+        stopCheck()
         PersistentLog.log(.onboardingAppleIntelligenceDeferred(state: String(describing: PolishAvailability.state)))
         onNext()
+    }
+
+    /// Continue on the setting-up screen: the user goes on while Apple finishes. Logged
+    /// like Later, since Apple Intelligence is still not ready.
+    private func continueWhileSettingUp() {
+        later()
+    }
+
+    private func showStepsAgain() {
+        state.showInstructionsAgain()
+        startAnimation()
+    }
+}
+
+// MARK: - Check visuals
+
+/// The fifteen-second countdown: a ring that fills as the time runs, the seconds left in
+/// its middle.
+private struct CheckCountdownRing: View {
+    let state: AppleIntelligenceStepState
+
+    var body: some View {
+        // A redraw four times a second: the number changes once a second, the ring moves
+        // smoothly in between.
+        TimelineView(.periodic(from: .now, by: 0.25)) { context in
+            let fraction = state.elapsedFraction(at: context.date)
+            let secondsLeft = state.secondsLeft(at: context.date)
+            ZStack {
+                Circle()
+                    .fill(Color.dictusAccent.opacity(0.08))
+                    .frame(width: 200, height: 200)
+                Circle()
+                    .stroke(Color.dictusAccent.opacity(0.15), lineWidth: 10)
+                    .frame(width: 150, height: 150)
+                Circle()
+                    .trim(from: 0, to: fraction)
+                    .stroke(Color.dictusAccent, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .frame(width: 150, height: 150)
+                    .animation(.linear(duration: 0.25), value: fraction)
+                Text(verbatim: "\(secondsLeft)")
+                    .font(.system(size: 48, weight: .semibold, design: .rounded).monospacedDigit())
+                    .foregroundStyle(.primary)
+                    .contentTransition(.numericText(countsDown: true))
+                    .animation(.easeInOut(duration: 0.2), value: secondsLeft)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("\(secondsLeft) seconds left"))
+        }
+    }
+}
+
+/// The setting-up screen's illustration: the Apple Intelligence glyph in the app's pale
+/// rings, like the microphone step's halo.
+private struct SettingUpHalo: View {
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(Color.dictusAccent.opacity(0.08))
+                .frame(width: 200, height: 200)
+            Circle()
+                .fill(Color.dictusAccent.opacity(0.12))
+                .frame(width: 140, height: 140)
+            Image(systemName: UIImage(systemName: "apple.intelligence") != nil ? "apple.intelligence" : "sparkles")
+                .font(.system(size: 52, weight: .medium))
+                .foregroundStyle(Color.dictusAccent)
+        }
+        .accessibilityHidden(true)
     }
 }
