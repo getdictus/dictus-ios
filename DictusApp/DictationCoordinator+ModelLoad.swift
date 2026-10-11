@@ -593,8 +593,9 @@ extension DictationCoordinator {
     /// all, Parakeet included. #558's device test compares Nemotron's warm load against
     /// Parakeet's, and a comparison needs the same line from both. It is the same event with
     /// the same fields; what tells the two paths apart in a log is what surrounds it: here it
-    /// follows `<Engine>Load localModelResolved`, on the download path it is followed by
-    /// `modelPrewarmPeakMemory` and `modelDownloadCompleted`.
+    /// follows `<Engine>Load localModelResolved`, on the download path it follows
+    /// `modelDownloadCompleted` and `modelPrewarmStarted` and is followed by
+    /// `modelPrewarmPeakMemory` (#693).
     ///
     /// Only on success: a failed load already logs `loadFailed`, and a duration next to it
     /// would read as a compile that finished.

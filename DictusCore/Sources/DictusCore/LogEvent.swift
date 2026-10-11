@@ -114,6 +114,9 @@ public enum LogEvent: Sendable {
 
     // MARK: Model
     case modelDownloadStarted(name: String, sizeMB: Int)
+    /// The transfer is finished and every file is published on disk, for every engine
+    /// (#693). It does NOT mean the model is usable: the Core ML compile that follows is
+    /// bracketed by `modelPrewarmStarted` / `modelCompilationCompleted`.
     case modelDownloadCompleted(name: String)
     case modelDownloadFailed(name: String, error: String)
     case modelSelected(name: String)

@@ -1061,6 +1061,13 @@ class ModelManager: ObservableObject {
                 }
             }
 
+            // The transfer is over and every file is published: that, and only that, is
+            // what `modelDownloadCompleted` means, for every engine (#693). It used to be
+            // logged here after the compile, so the 17 to 28 s of Core ML compile read as a
+            // download stuck at 100% in the debug log. The compile has its own bracket,
+            // `modelPrewarmStarted` / `modelCompilationCompleted`, as on the WhisperKit path.
+            PersistentLog.log(.modelDownloadCompleted(name: identifier))
+
             // Same foreground gate as the WhisperKit path (#472, #649).
             try await waitForForegroundToCompile(identifier)
 
@@ -1191,7 +1198,6 @@ class ModelManager: ObservableObject {
 
             PersistentLog.log(.modelCompilationCompleted(name: identifier, durationMs: prewarmDurationMs))
             PersistentLog.log(.modelPrewarmPeakMemory(modelName: identifier, peakMB: consumedMB))
-            PersistentLog.log(.modelDownloadCompleted(name: identifier))
             PersistentLog.log(.modelSelected(name: identifier))
 
             // Released early for the same reason as the WhisperKit path above.
