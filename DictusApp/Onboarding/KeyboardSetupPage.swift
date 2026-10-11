@@ -202,14 +202,30 @@ struct KeyboardSetupPage: View {
     /// daemon terminates Dictus to enforce the new permission. That looks like a crash;
     /// saying it is expected prevents support tickets and anxiety. The onboarding resumes
     /// on this step (`OnboardingStep` is persisted).
+    ///
+    /// WHY A LINK UNDER "KEYBOARD DETECTED" (#709): detected only means Dictus is in the
+    /// keyboards list. Whether Full Access is on, only the keyboard knows, so a user who
+    /// reinstalled, or set the keyboard up long ago, may land here with it off and no other
+    /// way back to Settings from the onboarding.
     @ViewBuilder
     private var detectionStatus: some View {
         if keyboardDetected {
-            Label("Keyboard detected", systemImage: "checkmark.circle.fill")
-                .font(.body.weight(.medium))
-                .foregroundStyle(Color.dictusSuccess)
-                .frame(maxWidth: .infinity)
-                .transition(.opacity)
+            VStack(spacing: 8) {
+                Label("Keyboard detected", systemImage: "checkmark.circle.fill")
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(Color.dictusSuccess)
+
+                Button(action: openSettingsToCheckFullAccess) {
+                    Text("Check Full Access in Settings")
+                        .font(.footnote)
+                        .foregroundStyle(Color.dictusAccent)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .accessibilityIdentifier("onboarding.checkFullAccess")
+            }
+            .frame(maxWidth: .infinity)
+            .transition(.opacity)
         } else {
             VStack(spacing: 4) {
                 Text("The keyboard will be detected automatically")
@@ -441,10 +457,23 @@ struct KeyboardSetupPage: View {
     /// Opens the app's page in Settings. The checklist starts Picture in Picture first when
     /// it can, and opens Settings once the window is up (#682).
     private func openSettings() {
-        checklist.openSettings {
-            if let url = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(url)
-            }
+        checklist.openSettings(using: Self.openDictusSettings)
+    }
+
+    /// The link under "Keyboard detected" (#709). Straight to Settings, never through the
+    /// checklist: the user has added the keyboard before, so no Picture in Picture starts
+    /// and the audio session is not borrowed. The checklist window stays the main
+    /// button's, for the not-yet-detected state (#682).
+    private func openSettingsToCheckFullAccess() {
+        PersistentLog.log(.onboardingFullAccessLinkOpened)
+        Self.openDictusSettings()
+    }
+
+    /// Dictus' own page in Settings, where both its Keyboards row and, behind it, Full
+    /// Access live. One URL for the main button and the link.
+    private static func openDictusSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
         }
     }
 
