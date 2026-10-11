@@ -8,7 +8,8 @@ import Foundation
 ///
 /// THE STORY, two passes of the same gesture so the loop closes on itself:
 /// 1. A finger lands on the mic pill and holds. After the fan's real long-press delay the
-///    rows replace the keys. The finger slides down to `→ EN` and lets go: the fan closes,
+///    rows replace the keys. The finger moves along the toolbar to the rows' column, then
+///    straight down the fan to `→ EN`, and lets go: the fan closes,
 ///    the mic pill wears the `EN` badge and the toolbar names the armed mode.
 /// 2. The same gesture again, down to `Normal`: the badge goes, the keyboard is back where
 ///    the loop started.
@@ -44,7 +45,12 @@ public enum SmartModesSceneScript {
         static let fingerIn: Double = 0.6
         static let press: Double = 0.9
         static let fanOpens: Double = press + longPressSeconds
+        /// The first leg: along the toolbar, from the mic to the rows' column. The finger
+        /// stays level with the mic, above the rows, so no row lights on the way.
         static let slideStart: Double = 1.55
+        static let columnReached: Double = 2.05
+        /// The second leg: straight down the column to the target row.
+        static let descentStart: Double = 2.15
         static let slideEnd: Double = 3.05
         static let release: Double = 3.55
         static let fingerOut: Double = 3.85
@@ -79,9 +85,14 @@ public enum SmartModesSceneScript {
         /// Vertical position in the fan's coordinates: 0 is the top of the first row,
         /// negative is up on the toolbar, where the mic is.
         public let y: CGFloat
-        /// 0 on the mic, 1 on the row it is heading for. The view moves the finger
-        /// sideways with it.
-        public let travel: Double
+        /// How far along the toolbar it is: 0 over the mic, 1 in the rows' column. The view
+        /// turns it into the horizontal position.
+        ///
+        /// WHY TWO LEGS AND NOT ONE DIAGONAL (device feedback on PR #705, 2026-10-11): a
+        /// finger cutting across the rows reads as choosing among them sideways. It first
+        /// reaches the column, still level with the mic, then goes straight down the fan,
+        /// so the only movement over the rows is the vertical one that chooses.
+        public let columnTravel: Double
         /// Whether it is touching the screen.
         public let isPressed: Bool
         /// 0 to 1, for its fade in and out.
@@ -156,13 +167,14 @@ public enum SmartModesSceneScript {
                                micY: CGFloat) -> Finger? {
         guard local >= Beat.fingerIn, local < Beat.fingerOut else { return nil }
 
-        let travel = smoothStep(from: Beat.slideStart, to: Beat.slideEnd, at: local)
+        let columnTravel = smoothStep(from: Beat.slideStart, to: Beat.columnReached, at: local)
+        let descent = smoothStep(from: Beat.descentStart, to: Beat.slideEnd, at: local)
         let rowHeight = SmartModeFanLayout.rowHeight(
             availableHeight: fanAreaHeight, entryCount: entryCount, showsReason: false
         )
         // The middle of the target row: where a thumb choosing it rests.
         let targetY = rowHeight * (CGFloat(target) + 0.5)
-        let y = micY + (targetY - micY) * CGFloat(travel)
+        let y = micY + (targetY - micY) * CGFloat(descent)
 
         let opacity: Double
         if local < Beat.fingerIn + Beat.fade {
@@ -175,7 +187,7 @@ public enum SmartModesSceneScript {
 
         return Finger(
             y: y,
-            travel: travel,
+            columnTravel: columnTravel,
             isPressed: local >= Beat.press && local < Beat.release,
             opacity: min(1, max(0, opacity))
         )

@@ -131,13 +131,13 @@ struct SmartModesScene: View {
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: frame.armedIndex)
     }
 
-    /// The finger's centre on the screen: from the mic to the middle of the rows' width,
-    /// moving down and a little left as a thumb does.
+    /// The finger's centre on the screen: along the toolbar from the mic to the rows'
+    /// column, then straight down it (`SmartModesSceneScript.Finger.columnTravel`).
     private func fingerPoint(_ finger: SmartModesSceneScript.Finger) -> CGPoint {
         let startX = Metrics.micCentre.x
         let endX = Metrics.screenWidth * 0.62
         return CGPoint(
-            x: startX + (endX - startX) * CGFloat(finger.travel),
+            x: startX + (endX - startX) * CGFloat(finger.columnTravel),
             y: Metrics.keyboardTop + Metrics.toolbarHeight + finger.y
         )
     }

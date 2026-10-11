@@ -94,13 +94,36 @@ final class SmartModesSceneScriptTests: XCTestCase {
     func testTheFingerRestsOnTheRowItChooses() {
         // Where it lets go, the keyboard's own mapping says it is on that row.
         let finger = frame(at: SmartModesSceneScript.Beat.release - 0.01).finger
-        XCTAssertEqual(finger?.travel ?? 0, 1, accuracy: 0.0001)
+        XCTAssertEqual(finger?.columnTravel ?? 0, 1, accuracy: 0.0001)
         XCTAssertEqual(
             finger.flatMap {
                 SmartModeFanLayout.entryIndex(atY: $0.y, availableHeight: areaHeight, entryCount: entryCount, showsReason: false)
             },
             3
         )
+    }
+
+    func testTheFingerNeverCutsAcrossTheRows() {
+        // Device feedback on PR #705: along the toolbar first, then straight down the
+        // column. At no moment of either pass do the two coordinates move together.
+        for passStart in [0, SmartModesSceneScript.passSeconds] {
+            var previous: SmartModesSceneScript.Finger?
+            var time = passStart + SmartModesSceneScript.Beat.fingerIn
+            while time < passStart + SmartModesSceneScript.Beat.fingerOut {
+                let current = frame(at: time)
+                if let finger = current.finger, let before = previous {
+                    let movedAcross = abs(finger.columnTravel - before.columnTravel) > 1e-9
+                    let movedDown = abs(finger.y - before.y) > 1e-9
+                    XCTAssertFalse(movedAcross && movedDown, "diagonal at \(time)")
+                    // Over the rows, the finger is in the column.
+                    if finger.y >= 0 { XCTAssertEqual(finger.columnTravel, 1, accuracy: 1e-9, "\(time)") }
+                    // Along the toolbar, no row lights.
+                    if movedAcross { XCTAssertNil(current.highlightedIndex, "\(time)") }
+                }
+                previous = current.finger
+                time += 0.01
+            }
+        }
     }
 
     func testTheStillFrameIsTheFanOpenOnTheTranslation() {
