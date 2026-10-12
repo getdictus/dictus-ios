@@ -1875,6 +1875,17 @@
         }
       }
     },
+    "I'll be there in ten minutes." : {
+      "comment" : "Onboarding Smart Modes scene: the short sentence dictated in the drawn keyboard, shown as dictated, then translated by the → EN or → FR Smart Mode. Natural spoken message (#679).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J'arrive dans dix minutes."
+          }
+        }
+      }
+    },
     "In Notes, Messages or Mail: tap the mic, speak, and the text appears." : {
       "comment" : "Onboarding intro carousel, subtitle of the third page: how a dictation goes from the keyboard (#676).",
       "localizations" : {

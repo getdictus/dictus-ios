@@ -18,6 +18,8 @@ struct OnboardingScenePage<Scene: View>: View {
     /// The end of the drawn iPhone the scene shows (`OnboardingPhoneCard`).
     var phoneEnd: OnboardingPhoneEnd = .bottom
     let loopSeconds: Double
+    /// Where the loop starts when the page appears.
+    var startSeconds: Double = 0
     let stillSeconds: Double
     /// The flow's model manager, read for the download pill.
     @ObservedObject var modelManager: ModelManager
@@ -31,7 +33,12 @@ struct OnboardingScenePage<Scene: View>: View {
     var body: some View {
         OnboardingPage(title: title, subtitle: line) {
             OnboardingPhoneCard(end: phoneEnd) {
-                AnimatedScenePlayer(loopSeconds: loopSeconds, stillSeconds: stillSeconds, content: scene)
+                AnimatedScenePlayer(
+                    loopSeconds: loopSeconds,
+                    startSeconds: startSeconds,
+                    stillSeconds: stillSeconds,
+                    content: scene
+                )
                     // The phone's screen: inside its outline, rounded like it at the end
                     // the card shows, so the drawing never sits under the frame.
                     .clipShape(screenShape)

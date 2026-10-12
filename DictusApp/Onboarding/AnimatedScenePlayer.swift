@@ -30,6 +30,8 @@ import DictusCore
 struct AnimatedScenePlayer<Content: View>: View {
     /// One pass of the scene, in seconds.
     let loopSeconds: Double
+    /// Where the loop starts when the scene first appears.
+    let startSeconds: Double
     /// The moment shown with Reduce Motion on.
     let stillSeconds: Double
     /// The drawing at a moment of the loop, in seconds from its start.
@@ -40,11 +42,15 @@ struct AnimatedScenePlayer<Content: View>: View {
 
     @State private var clock: SceneLoopClock
 
-    init(loopSeconds: Double, stillSeconds: Double, @ViewBuilder content: @escaping (Double) -> Content) {
+    init(loopSeconds: Double,
+         startSeconds: Double = 0,
+         stillSeconds: Double,
+         @ViewBuilder content: @escaping (Double) -> Content) {
         self.loopSeconds = loopSeconds
+        self.startSeconds = startSeconds
         self.stillSeconds = stillSeconds
         self.content = content
-        _clock = State(initialValue: SceneLoopClock(loopSeconds: loopSeconds))
+        _clock = State(initialValue: SceneLoopClock(loopSeconds: loopSeconds, startSeconds: startSeconds))
     }
 
     var body: some View {

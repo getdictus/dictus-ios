@@ -22,6 +22,11 @@ struct SmartModesScenePage: View {
     /// The layout the keyboard at rest is drawn in: the one the language screen set.
     private let layout = LayoutType.active
 
+    /// The dictated sentence and its translation (`SmartModesSceneSentence`).
+    private let sentences = SmartModesSceneSentence.pair(
+        spokenLanguage: AppGroup.defaults.string(forKey: SharedKeys.spokenLanguage)
+    )
+
     var body: some View {
         OnboardingScenePage(
             title: Text("One long press, one Smart Mode",
@@ -29,18 +34,70 @@ struct SmartModesScenePage: View {
             line: Text("Hold the mic, slide to a mode, let go. Dictus writes in that mode.",
                        comment: "Onboarding Smart Modes scene: the line under the title, describing the long-press gesture on the keyboard's mic (#679)."),
             loopSeconds: SmartModesSceneScript.loopSeconds,
+            startSeconds: SmartModesSceneScript.openingSeconds,
             stillSeconds: SmartModesSceneScript.stillSeconds,
             modelManager: modelManager,
             modelIdentifier: modelIdentifier,
             onNext: onNext
         ) { time in
-            SmartModesScene(time: time, entries: entries, layout: layout)
+            SmartModesScene(time: time, entries: entries, layout: layout, sentences: sentences)
         }
     }
 }
 
+// MARK: - Sentence
+
+/// The sentence the scene dictates, and the same sentence translated (#679).
+///
+/// WHY LOOKED UP PER LANGUAGE: the two sentences are in two different languages on the
+/// same screen, whatever the interface language. Each is read from that language's own
+/// table of the app's catalog; `SmartModesSceneScript.sentenceLanguages` decides which.
+enum SmartModesSceneSentence {
+    struct Pair: Equatable {
+        let original: String
+        let translated: String
+    }
+
+    static func pair(spokenLanguage: String?) -> Pair {
+        let languages = SmartModesSceneScript.sentenceLanguages(
+            spokenLanguage: spokenLanguage,
+            interfaceLanguage: Bundle.main.preferredLocalizations.first
+        )
+        return Pair(original: sentence(in: languages.original), translated: sentence(in: languages.translated))
+    }
+
+    /// The sentence in `language`, from that language's table.
+    private static func sentence(in language: String) -> String {
+        let bundle = Bundle.main.path(forResource: language, ofType: "lproj").flatMap(Bundle.init(path:)) ?? .main
+        return String(
+            localized: "I'll be there in ten minutes.",
+            bundle: bundle,
+            comment: "Onboarding Smart Modes scene: the short sentence dictated in the drawn keyboard, shown as dictated, then translated by the → EN or → FR Smart Mode. Natural spoken message (#679)."
+        )
+    }
+}
+
+// MARK: - Keyboard strings
+
+/// Strings the scene shows exactly as the keyboard does, read from the keyboard
+/// extension's own catalog: the app's catalog words some of them differently for its own
+/// recording screen ("Écoute en cours..." against the keyboard's "En écoute...").
+///
+/// WHY `localizedString(forKey:)` AND NOT `String(localized:)`: the latter would be
+/// extracted into the app's catalog as new or changed keys; these belong to the keyboard.
+enum KeyboardStrings {
+    private static let bundle: Bundle = Bundle.main.builtInPlugInsURL
+        .map { $0.appendingPathComponent("DictusKeyboard.appex") }
+        .flatMap(Bundle.init(url:)) ?? .main
+
+    static func text(_ key: String) -> String {
+        bundle.localizedString(forKey: key, value: key, table: "Localizable")
+    }
+}
+
 /// The scene: a Messages-like host above the Dictus keyboard, and a finger performing the
-/// long-press fan (`SmartModesSceneScript`).
+/// long-press fan and the dictation it starts (`SmartModesSceneScript`): recording,
+/// transcription, a Smart Mode's processing, and the sentence landing in the field.
 ///
 /// WHY DRAWN AT THE KEYBOARD'S REAL SIZE, THEN SCALED: the fan has to read as the real one
 /// (#649 decision 13: the app's own screens are shown as they are today). Its proportions
@@ -49,9 +106,10 @@ struct SmartModesScenePage: View {
 /// so the rows, the pill and the text keep the keyboard's ratios exactly.
 ///
 /// WHAT IS REAL AND WHAT IS DRAWN: the mic pill and its badge are the keyboard's own
-/// `AnimatedMicButton`; the rows, the toolbar and the keys repeat `SmartModeFanView` and
-/// `ToolbarView`, which live in the keyboard target the app cannot import, with the same
-/// fonts, paddings and glass; which row is lit and what the toolbar's centre shows come
+/// `AnimatedMicButton`; the rows, the toolbar, the keys and the recording screen repeat
+/// `SmartModeFanView`, `ToolbarView` and `RecordingOverlay` / `KeyboardWaveformView`,
+/// which live in the keyboard target the app cannot import, with the same fonts, paddings
+/// and glass, and the keyboard's own captions (`KeyboardStrings`); which row is lit and what the toolbar's centre shows come
 /// from DictusCore (`SmartModeFanLayout`, `ToolbarCentreSlot`), exactly as the keyboard
 /// decides them. Only iOS's own parts are invented: the host app and the bar under the
 /// keyboard with the globe.
@@ -62,6 +120,8 @@ struct SmartModesScene: View {
     let entries: [SmartModeFanEntry]
     /// The layout of the keys at rest.
     let layout: LayoutType
+    /// The sentence as dictated and translated.
+    let sentences: SmartModesSceneSentence.Pair
 
     private typealias Metrics = SmartModesSceneMetrics
 
@@ -85,27 +145,35 @@ struct SmartModesScene: View {
     private func screen(_ frame: SmartModesSceneScript.Frame) -> some View {
         let armed = frame.armedIndex.flatMap { entries.indices.contains($0) ? entries[$0].smartMode : nil }
         return VStack(spacing: 0) {
-            SceneMessagesHost()
+            SceneMessagesHost(text: fieldText(frame.fieldText))
                 .frame(height: Metrics.hostHeight)
 
             VStack(spacing: 0) {
-                SceneToolbar(isFanOpen: frame.isFanOpen, armed: armed)
-                    .frame(height: Metrics.toolbarHeight)
-
-                ZStack {
-                    if frame.isFanOpen {
-                        SceneFan(
-                            entries: entries,
-                            highlightedIndex: frame.highlightedIndex,
-                            armedIdentifier: armed?.id
-                        )
+                if frame.keyboard.isOverlay {
+                    // `RecordingOverlay` fills the toolbar and the keys together, as in
+                    // the keyboard (`KeyboardRootView`, `.recording`).
+                    SceneRecordingOverlay(phase: frame.keyboard, armed: armed)
+                        .frame(height: Metrics.toolbarHeight + Metrics.fanAreaHeight)
                         .transition(.opacity)
-                    } else {
-                        SceneKeys(layout: layout)
+                } else {
+                    SceneToolbar(isFanOpen: frame.isFanOpen, offersUndo: frame.offersUndo, armed: armed)
+                        .frame(height: Metrics.toolbarHeight)
+
+                    ZStack {
+                        if frame.isFanOpen {
+                            SceneFan(
+                                entries: entries,
+                                highlightedIndex: frame.highlightedIndex,
+                                armedIdentifier: armed?.id
+                            )
                             .transition(.opacity)
+                        } else {
+                            SceneKeys(layout: layout)
+                                .transition(.opacity)
+                        }
                     }
+                    .frame(height: Metrics.fanAreaHeight)
                 }
-                .frame(height: Metrics.fanAreaHeight)
 
                 SceneSystemBar()
                     .frame(height: Metrics.systemBarHeight)
@@ -128,12 +196,25 @@ struct SmartModesScene: View {
             }
         }
         .animation(.easeOut(duration: 0.18), value: frame.isFanOpen)
+        .animation(.easeOut(duration: 0.18), value: frame.keyboard.isOverlay)
+        .animation(.easeOut(duration: 0.2), value: frame.fieldText)
         .animation(.spring(response: 0.3, dampingFraction: 0.7), value: frame.armedIndex)
+    }
+
+    private func fieldText(_ text: SmartModesSceneScript.FieldText?) -> String? {
+        switch text {
+        case .original: return sentences.original
+        case .translated: return sentences.translated
+        case nil: return nil
+        }
     }
 
     /// The finger's centre on the screen: along the toolbar from the mic to the rows'
     /// column, then straight down it (`SmartModesSceneScript.Finger.columnTravel`).
     private func fingerPoint(_ finger: SmartModesSceneScript.Finger) -> CGPoint {
+        if finger.place == .undoButton {
+            return Metrics.undoCentre
+        }
         let startX = Metrics.micCentre.x
         let endX = Metrics.screenWidth * 0.62
         return CGPoint(
@@ -190,7 +271,15 @@ enum SmartModesSceneMetrics {
     static var keyboardTop: CGFloat { hostHeight }
     static var screenHeight: CGFloat { hostHeight + toolbarHeight + fanAreaHeight + systemBarHeight }
 
-    /// The mic pill's centre: the `AnimatedMicButton` halo (`DictusHalo.size`, 66 pt wide)
+    /// The centre of the toolbar's Undo capsule, at its leading end. Its width follows its
+    /// label; this is the middle of the French and English ones.
+    static var undoCentre: CGPoint {
+        CGPoint(x: toolbarSidePadding + 48, y: micCentre.y)
+    }
+
+    /// The mic pill's centre, which is also the centre of `RecordingOverlay`'s ✓ (trailing
+    /// padding 17 plus half of 56, against 12 plus half of the 66 pt halo; top padding 10
+    /// plus half of 36, against 4 plus half of 48): the `AnimatedMicButton` halo (`DictusHalo.size`, 66 pt wide)
     /// sits against the toolbar's trailing padding, centred in the bar below its top
     /// padding.
     static var micCentre: CGPoint {
@@ -207,6 +296,9 @@ enum SmartModesSceneMetrics {
 /// A Messages-like host: an empty conversation and the input bar. iOS's own UI, so drawn
 /// (#649 decision 13), in the mock-up's colours.
 private struct SceneMessagesHost: View {
+    /// The text in the field, nil for the placeholder.
+    let text: String?
+
     var body: some View {
         VStack(spacing: 0) {
             Spacer(minLength: 0)
@@ -219,11 +311,21 @@ private struct SceneMessagesHost: View {
                     .overlay(Circle().strokeBorder(Self.fieldBorder, lineWidth: 1))
 
                 HStack {
-                    // The host's own placeholder, the same word in every language iOS
-                    // ships, so not localized.
-                    Text(verbatim: "iMessage")
-                        .font(.system(size: 17))
-                        .foregroundStyle(.tertiary)
+                    if let text {
+                        Text(verbatim: text)
+                            .font(.system(size: 17))
+                            .foregroundStyle(.primary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .transition(.opacity)
+                    } else {
+                        // The host's own placeholder, the same word in every language iOS
+                        // ships, so not localized.
+                        Text(verbatim: "iMessage")
+                            .font(.system(size: 17))
+                            .foregroundStyle(.tertiary)
+                            .transition(.opacity)
+                    }
                     Spacer(minLength: 0)
                     Image(systemName: "mic")
                         .font(.system(size: 15))
@@ -250,6 +352,8 @@ private struct SceneMessagesHost: View {
 /// `ToolbarView.dictationBar`: ☰, the centre slot, the mic pill.
 private struct SceneToolbar: View {
     let isFanOpen: Bool
+    /// Whether the keyboard offers to undo the dictation it just inserted.
+    let offersUndo: Bool
     /// The armed mode, nil for none.
     let armed: SmartMode?
 
@@ -257,11 +361,12 @@ private struct SceneToolbar: View {
 
     var body: some View {
         // What the centre shows is the keyboard's own decision, made in DictusCore. A new
-        // user's keyboard has no message, no undo and no suggestions in an empty field.
+        // user's keyboard has no message and no suggestions; it offers Undo after a
+        // dictation, as the real one does for 8 s.
         let slot = ToolbarCentreSlot.resolve(
             isChoosingMode: isFanOpen,
             errorMessage: nil,
-            offersDictationUndo: false,
+            offersDictationUndo: offersUndo,
             hasSuggestions: false,
             dictationUnavailable: false,
             polishUnavailable: false,
@@ -308,9 +413,28 @@ private struct SceneToolbar: View {
         case .armedMode(let name):
             // `ToolbarView.armedModeLabel`.
             label(icon: armed?.icon ?? "sparkles", Text(verbatim: name))
+        case .dictationUndo:
+            undo
+            Spacer()
         default:
             Spacer()
         }
+    }
+
+    /// `ToolbarView.dictationUndoButton`'s look.
+    private var undo: some View {
+        HStack(spacing: 5) {
+            Image(systemName: "arrow.uturn.backward")
+                .font(.system(size: 13, weight: .semibold))
+            Text(verbatim: KeyboardStrings.text("Undo"))
+                .font(.system(size: 15, weight: .semibold))
+                .lineLimit(1)
+        }
+        .foregroundColor(.dictusAccent)
+        .padding(.horizontal, 14)
+        .frame(height: Metrics.pillHeight)
+        .background(Capsule().fill(Color.dictusAccent.opacity(0.12)))
+        .frame(height: 44)
     }
 
     private func label(icon: String, _ text: Text) -> some View {
@@ -459,6 +583,177 @@ private struct SceneKeys: View {
     /// The vendored theme's keys on iOS 26: white on light, rgb(61, 61, 61) on dark
     /// (`Theme.makeColors`).
     private static let keyFill = Color(light: .white, dark: Color(red: 61 / 255, green: 61 / 255, blue: 61 / 255))
+}
+
+// MARK: - Recording
+
+/// `RecordingOverlay` as the keyboard draws it: the top bar (✕ and ✓ while recording, an
+/// empty bar of the same height after), the armed mode's capsule over it, the waveform,
+/// and the timer or the stage's caption.
+private struct SceneRecordingOverlay: View {
+    let phase: SmartModesSceneScript.KeyboardPhase
+    let armed: SmartMode?
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// `RecordingOverlay.timerFontSize`'s base size.
+    private let timerFontSize: CGFloat = 20
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack {
+                topBar
+                if let armed {
+                    // `RecordingOverlay.armedModeBadge`.
+                    HStack(spacing: 5) {
+                        Image(systemName: armed.icon)
+                            .font(.system(size: 12, weight: .semibold))
+                        Text(verbatim: armed.localizedDisplayName)
+                            .font(.system(size: 14, weight: .semibold))
+                            .lineLimit(1)
+                    }
+                    .foregroundColor(.dictusAccent)
+                    .padding(.horizontal, 12)
+                    .frame(height: 28)
+                    .background(Capsule().fill(Color.dictusAccent.opacity(0.14)))
+                    .offset(y: 2)
+                }
+            }
+
+            VStack(spacing: 8) {
+                Spacer(minLength: 0)
+                SceneWaveform(phase: phase, maxHeight: 120)
+                    .padding(.horizontal, 2)
+                Spacer(minLength: 0)
+            }
+            .frame(maxHeight: .infinity)
+
+            footer
+        }
+    }
+
+    @ViewBuilder
+    private var topBar: some View {
+        if case .recording = phase {
+            HStack {
+                pill("xmark", color: .dictusPillIconSecondary)
+                Spacer()
+                pill("checkmark", color: .dictusSuccess)
+            }
+            .padding(.leading, 12)
+            .padding(.trailing, 17)
+            .padding(.top, 10)
+            .padding(.bottom, 6)
+        } else {
+            Color.clear
+                .frame(height: 36)
+                .padding(.horizontal, 12)
+                .padding(.top, 10)
+                .padding(.bottom, 6)
+        }
+    }
+
+    @ViewBuilder
+    private var footer: some View {
+        switch phase {
+        case .recording(let elapsed):
+            Text(verbatim: String(format: "%02d:%02d", Int(elapsed) / 60, Int(elapsed) % 60))
+                .font(.system(size: timerFontSize, weight: .medium, design: .monospaced))
+                .foregroundColor(colorScheme == .dark ? .white : Color(white: 0.15))
+                .padding(.bottom, 4)
+            caption("Listening...")
+        case .transcribing:
+            Color.clear.frame(height: timerFontSize).padding(.bottom, 4)
+            caption("Transcribing...")
+        case .processing:
+            Color.clear.frame(height: timerFontSize).padding(.bottom, 4)
+            caption("Processing...")
+        case .keys, .fan:
+            EmptyView()
+        }
+    }
+
+    /// `.dictusCaption` in `dictusPillIconSecondary`, in the keyboard's own words.
+    private func caption(_ key: String) -> some View {
+        Text(verbatim: KeyboardStrings.text(key))
+            .font(.system(.caption))
+            .foregroundColor(.dictusPillIconSecondary)
+            .padding(.bottom, 8)
+    }
+
+    /// `RecordingOverlay.PillButton`'s look.
+    private func pill(_ icon: String, color: Color) -> some View {
+        Image(systemName: icon)
+            .font(.system(size: 18, weight: .semibold))
+            .foregroundColor(color)
+            .frame(width: 56, height: 36)
+            .dictusGlass(in: Capsule())
+    }
+}
+
+/// `KeyboardWaveformView`: 30 capsules, 2 pt apart, the middle ones in the brand blue.
+/// The levels are the scene's (`SmartModesSceneScript.recordingLevels`) while recording,
+/// and the keyboard's own motion after: `KeyboardWaveformDriver.processingEnergy`'s sweep
+/// for the transcription, `ProcessingWaveform`'s travelling peak for a Smart Mode.
+private struct SceneWaveform: View {
+    let phase: SmartModesSceneScript.KeyboardPhase
+    let maxHeight: CGFloat
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    private let barCount = ProcessingWaveform.barCount
+
+    var body: some View {
+        let levels = recordingLevels
+        HStack(spacing: 2) {
+            ForEach(0..<barCount, id: \.self) { index in
+                Capsule()
+                    .fill(color(at: index))
+                    .frame(height: height(at: index, recording: levels))
+            }
+        }
+        .frame(height: maxHeight)
+    }
+
+    private var recordingLevels: [Float] {
+        if case .recording(let elapsed) = phase {
+            return SmartModesSceneScript.recordingLevels(elapsed: elapsed)
+        }
+        return []
+    }
+
+    /// `KeyboardWaveformView.barHeight`.
+    private func height(at index: Int, recording: [Float]) -> CGFloat {
+        let energy: Float
+        let minHeight: CGFloat
+        switch phase {
+        case .transcribing(let elapsed):
+            // The phase starts centred and advances at the driver's rate.
+            let phase = ProcessingWaveform.centredPhase + elapsed * ProcessingWaveform.sweepPhaseRate
+            let normalized = Double(index) / Double(max(barCount - 1, 1))
+            energy = Float(0.2 + 0.25 * (sin(2 * .pi * (normalized + phase)) + 1))
+            minHeight = 4
+        case .processing(let elapsed):
+            let phase = ProcessingWaveform.centredPhase + elapsed * ProcessingWaveform.phaseRate
+            energy = ProcessingWaveform.level(at: index, peakPosition: ProcessingWaveform.peakPosition(phase: phase))
+            minHeight = 4
+        case .recording, .keys, .fan:
+            energy = index < recording.count ? recording[index] : 0
+            minHeight = 2
+        }
+        return max(minHeight + CGFloat(energy) * (maxHeight - minHeight), minHeight)
+    }
+
+    /// `KeyboardWaveformView.resolvedBarColor`.
+    private func color(at index: Int) -> Color {
+        let center = Float(barCount - 1) / 2
+        let distance = abs(Float(index) - center) / center
+        if distance < 0.4 {
+            return .dictusGradientStart
+        }
+        let opacity = Double(1 - distance) * 0.9 + 0.15
+        return (colorScheme == .dark ? Color.white : Color.gray).opacity(opacity)
+    }
 }
 
 // MARK: - System bar
