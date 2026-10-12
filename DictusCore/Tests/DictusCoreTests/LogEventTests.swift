@@ -462,6 +462,61 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.subsystem, .lifecycle)
     }
 
+    /// The state is what tells a relaunch by iOS from a launch by the user (#707).
+    func testAppLaunchStateIsInfoLifecycle() {
+        let event = LogEvent.appLaunchState(state: "background")
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.message, "state=background")
+    }
+
+    func testBackgroundSessionEventsIsInfoLifecycle() {
+        let event = LogEvent.appBackgroundSessionEvents(identifier: "com.pivi.dictus.model-download")
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.message, "identifier=com.pivi.dictus.model-download")
+    }
+
+    // MARK: - Model download task diagnosis (#707)
+
+    func testTaskStateNamesItsSession() {
+        let event = LogEvent.modelDownloadTaskState(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Encoder.mlmodelc/weights/weight.bin",
+            chunk: 6,
+            phase: "start+10s",
+            origin: "new",
+            session: "bg",
+            state: "running",
+            receivedBytes: 0,
+            error: "none"
+        )
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .model)
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin chunk=6 "
+                + "phase=start+10s origin=new session=bg state=running received=0B error=none"
+        )
+    }
+
+    func testBackgroundTaskSilentIsAWarningWithItsOrigin() {
+        let event = LogEvent.modelDownloadBackgroundTaskSilent(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Encoder.mlmodelc/weights/weight.bin",
+            chunk: 7,
+            origin: "new",
+            secondsWithoutByte: 31
+        )
+        XCTAssertEqual(event.level, .warning)
+        XCTAssertEqual(event.subsystem, .model)
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin chunk=7 "
+                + "origin=new noByte=31s"
+        )
+    }
+
     func testAppDidBecomeActiveIsDebugLifecycle() {
         let event = LogEvent.appDidBecomeActive
         XCTAssertEqual(event.level, .debug)
@@ -484,6 +539,18 @@ final class LogEventTests: XCTestCase {
         let event = LogEvent.appWhisperKitLoaded(modelName: "base")
         XCTAssertEqual(event.level, .info)
         XCTAssertEqual(event.subsystem, .lifecycle)
+    }
+
+    // MARK: - Full Access link on the keyboard step (#709)
+
+    /// Info, not debug: the device check of #709 greps it, and it must survive a level
+    /// filter next to `onboardingKeyboardDetected`.
+    func testFullAccessLinkOpenedIsInfoLifecycle() {
+        let event = LogEvent.onboardingFullAccessLinkOpened
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.name, "onboardingFullAccessLinkOpened")
+        XCTAssertTrue(event.formatted().contains("onboardingFullAccessLinkOpened"))
     }
 
     // MARK: - User dictionary events (#307)

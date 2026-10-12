@@ -6,10 +6,11 @@ import DictusCore
 
 /// Onboarding flow presented as a fullScreenCover on first launch.
 /// Steps (#649, #675): intro, language, keyboard setup, Apple Intelligence (#683, only on a
-/// capable iPhone where it is not ready), the pick of three Smart Modes (#677, only where
-/// Smart Modes can run), model preparation (only while the model is still downloading or
-/// compiling), microphone (only while not yet granted), first dictation through the globe
-/// key, completion. The order is `OnboardingStep.allCases`; which steps are passed over is
+/// capable iPhone where it is not ready), the Smart Modes scene (#679) and right after it
+/// the pick of three Smart Modes (#677), both only where Smart Modes can run, model
+/// preparation (only while the model is still downloading or compiling), microphone (only
+/// while not yet granted), first dictation through the globe key, completion. The order is
+/// `OnboardingStep.allCases`; which steps are passed over is
 /// `OnboardingStep.next(skipping:deviceCanRunSmartModes:)`.
 ///
 /// WHY switch/case instead of TabView:
@@ -99,6 +100,12 @@ struct OnboardingView: View {
                             modelIdentifier: onboardingModel,
                             onNext: advance
                         )
+                    case .smartModesScene:
+                        SmartModesScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
                     case .smartModePick:
                         SmartModePickPage(
                             modelManager: modelManager,
@@ -143,11 +150,19 @@ struct OnboardingView: View {
 
     /// The shell's Skip, on the steps that offer it (`OnboardingStep.isSkippable`).
     ///
+    /// - The Smart Modes scene: jumps the whole scene sequence, the pick inside it included
+    ///   (#679, #649 decision 8). Nothing is written, so the fan keeps the seed.
     /// - The Smart Mode pick: moves on writing nothing, so the fan keeps the seed (#677).
     /// - The first dictation: closes the keyboard and goes to the completion screen, as a
     ///   finished dictation does.
     private func skip() {
         switch step {
+        case .smartModesScene:
+            guard let next = step.stepAfterSceneSequence(
+                skipping: satisfiedSteps, deviceCanRunSmartModes: deviceCanRunSmartModes
+            ) else { return }
+            PersistentLog.log(.onboardingSceneSequenceSkipped(from: step.rawValue, to: next.rawValue))
+            go(to: next)
         case .smartModePick:
             PersistentLog.log(.onboardingSmartModePickSkipped)
             advance()
