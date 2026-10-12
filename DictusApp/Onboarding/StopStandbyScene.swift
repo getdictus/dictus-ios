@@ -168,15 +168,19 @@ private struct StopStandbyChips: View {
 /// widget does not choose them.
 private enum StopStandbyMetrics {
     static let screenWidth: CGFloat = 402
-    /// The part of the screen the card shows, from the top.
-    static let screenHeight: CGFloat = 560
+    /// The part of the screen the card shows, from the top. Sized so the whole card, the
+    /// steps above the phone included, sits above the button on a 874 pt iPhone without
+    /// scrolling; the Lock Screen has no steps, so it shows more of its screen.
+    static func screenHeight(_ variant: StopStandbySceneScript.Variant) -> CGFloat {
+        variant == .island ? 470 : 550
+    }
 
     // The Dynamic Island.
     static let islandTop: CGFloat = 11
     /// The bare camera cut-out, with no activity.
     static let bareSize = CGSize(width: 126, height: 37)
     /// The compact island holding the logo bars and "On".
-    static let compactSize = CGSize(width: 236, height: 37)
+    static let compactSize = CGSize(width: 196, height: 37)
     /// The expanded island with the standby layout (leading and trailing regions only).
     static let expandedSize = CGSize(width: 372, height: 84)
     static let expandedCornerRadius: CGFloat = 42
@@ -233,13 +237,15 @@ private struct StopStandbyIslandScreen: View {
     var body: some View {
         GeometryReader { geometry in
             screen
-                .frame(width: Metrics.screenWidth, height: Metrics.screenHeight)
+                .frame(width: Metrics.screenWidth, height: Metrics.screenHeight(.island), alignment: .top)
                 .scaleEffect(geometry.size.width / Metrics.screenWidth, anchor: .topLeading)
         }
-        .aspectRatio(Metrics.screenWidth / Metrics.screenHeight, contentMode: .fit)
+        .aspectRatio(Metrics.screenWidth / Metrics.screenHeight(.island), contentMode: .fit)
     }
 
     private var screen: some View {
+        // WHY CLIPPED AND TOP-ALIGNED: the icon grid runs past the part of the screen the
+        // card shows; without it the overflow would be centred and push the island up.
         ZStack(alignment: .top) {
             LinearGradient(colors: [Self.wallpaperTop, Self.wallpaperBottom], startPoint: .top, endPoint: .bottom)
             SceneHomeIcons()
@@ -401,18 +407,20 @@ private struct StopStandbyLockScreen: View {
     var body: some View {
         GeometryReader { geometry in
             screen
-                .frame(width: Metrics.screenWidth, height: Metrics.screenHeight)
+                .frame(width: Metrics.screenWidth, height: Metrics.screenHeight(.lockScreen), alignment: .top)
                 .scaleEffect(geometry.size.width / Metrics.screenWidth, anchor: .topLeading)
         }
-        .aspectRatio(Metrics.screenWidth / Metrics.screenHeight, contentMode: .fit)
+        .aspectRatio(Metrics.screenWidth / Metrics.screenHeight(.lockScreen), contentMode: .fit)
     }
 
     private var screen: some View {
         ZStack(alignment: .top) {
             LinearGradient(colors: [Self.wallpaperTop, Self.wallpaperBottom], startPoint: .top, endPoint: .bottom)
             VStack(spacing: 0) {
-                // Today's date in the app's language, as the Lock Screen writes it.
-                Text(Date.now, format: .dateTime.weekday(.wide).day().month(.wide))
+                // Today's date in the app's language, as the Lock Screen writes it: in
+                // French "lundi 12 octobre", not "Lundi", hence the sentence context.
+                Text(Date.now, format: Date.FormatStyle(capitalizationContext: .middleOfSentence)
+                    .weekday(.wide).day().month(.wide))
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(.white.opacity(0.85))
                 Text(verbatim: "9:41")
