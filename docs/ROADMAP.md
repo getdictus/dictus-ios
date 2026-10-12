@@ -10,7 +10,7 @@ Where we are going, and which issue to work on next. Nothing else.
 - Whole file under 60 lines. If an edit pushes it past that, something belongs on an issue instead.
 - The [Project board](https://github.com/orgs/getdictus/projects/2) moves by itself on a branch push, a PR and a merge. Two moves are by hand: an issue added to **Now** is added to the board in the same edit (`gh project item-add 2 --owner getdictus --url <issue-url>`), and work with no branch (a grilling, a measurement) is set to In progress when it starts.
 
-Last reviewed: 2026-10-11.
+Last reviewed: 2026-10-12.
 
 ## Now — 2.0.0, the Pro launch
 
@@ -30,8 +30,11 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 12. ~~#673 — download screen: drop the two phrases that promise the end ("Almost there" at 1 %)~~ — merged in PR #674
 13. ~~#533 — countdown under the model preparation (compile / load), not a second bar~~ — merged in PR #687
 14. ~~#708 — rebuild the model preparation screen (ring with logo, two-step card, no layout jumps)~~ — merged in PR #716 (2026-10-12)
-15. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
-16. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
+15. #723 — add a word to Personal Vocabulary from a history entry (monetization grilling 2026-10-12)
+16. #512 — suggest vocabulary from history: time-boxed trial, go/no-go on the issue
+17. #724 — paywall: yearly + lifetime visible, monthly behind a link and in the end-of-trial dismiss sheet, no-commitment line
+18. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
+19. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
 Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215, #620 voice notes. Closed 2026-10-10 as done or superseded: #79, #439.
 
