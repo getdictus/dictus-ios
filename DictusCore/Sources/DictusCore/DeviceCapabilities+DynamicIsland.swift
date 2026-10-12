@@ -54,6 +54,6 @@ public extension DeviceCapabilities {
         "iPhone17,5",
         // iPhone 17e: notch (2026). Its tech specs (https://support.apple.com/126470) list
         // the same 2532 × 1170 display as the 16e's and no Dynamic Island.
-        "iPhone18,5",
+        "iPhone18,5"
     ]
 }
