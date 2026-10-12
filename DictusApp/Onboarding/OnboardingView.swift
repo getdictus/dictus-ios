@@ -7,7 +7,8 @@ import DictusCore
 /// Onboarding flow presented as a fullScreenCover on first launch.
 /// Steps (#649, #675): intro, language, keyboard setup, Apple Intelligence (#683, only on a
 /// capable iPhone where it is not ready), the Smart Modes scene (#679) and right after it
-/// the pick of three Smart Modes (#677), both only where Smart Modes can run, model
+/// the pick of three Smart Modes (#677), then the voice notes, vocabulary and history
+/// scenes (#680), all only where Smart Modes can run, model
 /// preparation (only while the model is still downloading or compiling), microphone (only
 /// while not yet granted), first dictation through the globe key, completion. The order is
 /// `OnboardingStep.allCases`; which steps are passed over is
@@ -112,6 +113,24 @@ struct OnboardingView: View {
                             modelIdentifier: onboardingModel,
                             onContinue: advance
                         )
+                    case .voiceNotesScene:
+                        VoiceNotesScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .vocabularyScene:
+                        VocabularyScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .historyScene:
+                        HistoryScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
                     case .modelPreparation:
                         ModelDownloadPage(
                             modelManager: modelManager,
@@ -150,22 +169,26 @@ struct OnboardingView: View {
 
     /// The shell's Skip, on the steps that offer it (`OnboardingStep.isSkippable`).
     ///
-    /// - The Smart Modes scene: jumps the whole scene sequence, the pick inside it included
-    ///   (#679, #649 decision 8). Nothing is written, so the fan keeps the seed.
-    /// - The Smart Mode pick: moves on writing nothing, so the fan keeps the seed (#677).
+    /// - A feature scene (Smart Modes, voice notes, vocabulary, history): jumps the whole
+    ///   scene sequence, the pick inside it included (#679, #680, #649 decision 8). Nothing
+    ///   is written, so the fan keeps the seed.
+    /// - The Smart Mode pick: writes nothing, so the fan keeps the seed (#677), and jumps
+    ///   the rest of the sequence like the scenes around it.
+    ///
+    ///   WHY THE PICK JUMPS TOO (#680): the shell draws one Skip at one place on every page
+    ///   of the sequence, and decision 8 gives it one meaning. Before #680 the pick was the
+    ///   sequence's last step, so its plain "next" and the jump landed on the same step;
+    ///   with the three scenes after it, keeping a plain "next" would make the same button
+    ///   leave the sequence on one page and stay in it on the next.
     /// - The first dictation: closes the keyboard and goes to the completion screen, as a
     ///   finished dictation does.
     private func skip() {
         switch step {
-        case .smartModesScene:
-            guard let next = step.stepAfterSceneSequence(
-                skipping: satisfiedSteps, deviceCanRunSmartModes: deviceCanRunSmartModes
-            ) else { return }
-            PersistentLog.log(.onboardingSceneSequenceSkipped(from: step.rawValue, to: next.rawValue))
-            go(to: next)
+        case .smartModesScene, .voiceNotesScene, .vocabularyScene, .historyScene:
+            skipSceneSequence()
         case .smartModePick:
             PersistentLog.log(.onboardingSmartModePickSkipped)
-            advance()
+            skipSceneSequence()
         case .firstDictation:
             PersistentLog.log(.onboardingGlobeTutorialSkipped)
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -174,6 +197,15 @@ struct OnboardingView: View {
              .completion:
             advance()
         }
+    }
+
+    /// Leaves the scene sequence for the first step after it (`stepAfterSceneSequence`).
+    private func skipSceneSequence() {
+        guard let next = step.stepAfterSceneSequence(
+            skipping: satisfiedSteps, deviceCanRunSmartModes: deviceCanRunSmartModes
+        ) else { return }
+        PersistentLog.log(.onboardingSceneSequenceSkipped(from: step.rawValue, to: next.rawValue))
+        go(to: next)
     }
 
     // MARK: - Model

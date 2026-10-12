@@ -27,7 +27,7 @@ final class OnboardingStepTests: XCTestCase {
     func testOrderPutsTheMicrophoneRightBeforeTheFirstDictation() {
         XCTAssertEqual(OnboardingStep.allCases, [
             .welcome, .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick,
-            .modelPreparation,
+            .voiceNotesScene, .vocabularyScene, .historyScene, .modelPreparation,
             .microphone, .firstDictation, .completion
         ])
         XCTAssertEqual(OnboardingStep.microphone.next, .firstDictation)
@@ -40,7 +40,10 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.keyboardSetup.next, .appleIntelligence)
         XCTAssertEqual(OnboardingStep.appleIntelligence.next, .smartModesScene)
         XCTAssertEqual(OnboardingStep.smartModesScene.next, .smartModePick)
-        XCTAssertEqual(OnboardingStep.smartModePick.next, .modelPreparation)
+        XCTAssertEqual(OnboardingStep.smartModePick.next, .voiceNotesScene)
+        XCTAssertEqual(OnboardingStep.voiceNotesScene.next, .vocabularyScene)
+        XCTAssertEqual(OnboardingStep.vocabularyScene.next, .historyScene)
+        XCTAssertEqual(OnboardingStep.historyScene.next, .modelPreparation)
         XCTAssertEqual(OnboardingStep.modelPreparation.next, .microphone)
         XCTAssertEqual(OnboardingStep.firstDictation.next, .completion)
         XCTAssertNil(OnboardingStep.completion.next)
@@ -50,7 +53,7 @@ final class OnboardingStepTests: XCTestCase {
 
     func testAReadyModelSkipsThePreparation() {
         XCTAssertEqual(
-            OnboardingStep.smartModePick.next(skipping: [.modelPreparation], deviceCanRunSmartModes: true),
+            OnboardingStep.historyScene.next(skipping: [.modelPreparation], deviceCanRunSmartModes: true),
             .microphone
         )
     }
@@ -64,7 +67,7 @@ final class OnboardingStepTests: XCTestCase {
 
     func testBothSkipsChain() {
         XCTAssertEqual(
-            OnboardingStep.smartModePick.next(skipping: [.modelPreparation, .microphone], deviceCanRunSmartModes: true),
+            OnboardingStep.historyScene.next(skipping: [.modelPreparation, .microphone], deviceCanRunSmartModes: true),
             .firstDictation
         )
     }
@@ -90,6 +93,12 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(
             OnboardingStep.smartModesScene.next(skipping: [.smartModePick], deviceCanRunSmartModes: true),
             .smartModePick
+        )
+        XCTAssertEqual(
+            OnboardingStep.smartModePick.next(
+                skipping: [.voiceNotesScene, .vocabularyScene, .historyScene], deviceCanRunSmartModes: true
+            ),
+            .voiceNotesScene
         )
     }
 
@@ -145,9 +154,21 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertFalse(OnboardingStep.smartModesScene.isShown(deviceCanRunSmartModes: false))
     }
 
+    /// #680: the three scenes show Pro features, and #593 decision 2 withholds every Pro
+    /// promotion where no trial starts.
+    func testTheFeatureScenesAreHiddenWhereSmartModesCanNeverRun() {
+        for step in [OnboardingStep.voiceNotesScene, .vocabularyScene, .historyScene] {
+            XCTAssertFalse(step.isShown(deviceCanRunSmartModes: false), "\(step)")
+            XCTAssertTrue(step.isShown(deviceCanRunSmartModes: true), "\(step)")
+        }
+    }
+
     func testOnlyProStepsDependOnTheDevice() {
         XCTAssertEqual(
-            OnboardingStep.allCases.filter(\.isProStep), [.appleIntelligence, .smartModesScene, .smartModePick]
+            OnboardingStep.allCases.filter(\.isProStep), [
+                .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene,
+                .historyScene
+            ]
         )
         for step in OnboardingStep.allCases where !step.isProStep {
             XCTAssertTrue(step.isShown(deviceCanRunSmartModes: false), "\(step)")
@@ -158,9 +179,8 @@ final class OnboardingStepTests: XCTestCase {
 
     func testProgressBarCoversEveryStepBetweenTheIntroAndTheCompletion() {
         XCTAssertEqual(OnboardingStep.progressSteps(deviceCanRunSmartModes: true), [
-            .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .modelPreparation,
-            .microphone,
-            .firstDictation
+            .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene,
+            .vocabularyScene, .historyScene, .modelPreparation, .microphone, .firstDictation
         ])
         XCTAssertNil(OnboardingStep.welcome.progressIndex(deviceCanRunSmartModes: true))
         XCTAssertNil(OnboardingStep.completion.progressIndex(deviceCanRunSmartModes: true))
@@ -168,8 +188,11 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.appleIntelligence.progressIndex(deviceCanRunSmartModes: true), 2)
         XCTAssertEqual(OnboardingStep.smartModesScene.progressIndex(deviceCanRunSmartModes: true), 3)
         XCTAssertEqual(OnboardingStep.smartModePick.progressIndex(deviceCanRunSmartModes: true), 4)
-        XCTAssertEqual(OnboardingStep.microphone.progressIndex(deviceCanRunSmartModes: true), 6)
-        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: true), 7)
+        XCTAssertEqual(OnboardingStep.voiceNotesScene.progressIndex(deviceCanRunSmartModes: true), 5)
+        XCTAssertEqual(OnboardingStep.vocabularyScene.progressIndex(deviceCanRunSmartModes: true), 6)
+        XCTAssertEqual(OnboardingStep.historyScene.progressIndex(deviceCanRunSmartModes: true), 7)
+        XCTAssertEqual(OnboardingStep.microphone.progressIndex(deviceCanRunSmartModes: true), 9)
+        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: true), 10)
     }
 
     func testAHiddenProStepHasNoSegment() {
@@ -181,23 +204,37 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: false), 4)
     }
 
-    func testTheScenePickAndFirstDictationOfferSkip() {
+    func testTheScenesThePickAndFirstDictationOfferSkip() {
         XCTAssertEqual(
-            OnboardingStep.allCases.filter(\.isSkippable), [.smartModesScene, .smartModePick, .firstDictation]
+            OnboardingStep.allCases.filter(\.isSkippable), [
+                .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene, .historyScene, .firstDictation
+            ]
         )
     }
 
-    // MARK: - The scene sequence (#679)
+    // MARK: - The scene sequence (#679, #680)
 
-    func testTheSceneSequenceIsTheSceneAndThePick() {
-        XCTAssertEqual(OnboardingStep.allCases.filter(\.isInSceneSequence), [.smartModesScene, .smartModePick])
+    func testTheSceneSequenceIsTheFourScenesAndThePick() {
+        XCTAssertEqual(OnboardingStep.allCases.filter(\.isInSceneSequence), [
+            .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene, .historyScene
+        ])
+    }
+
+    /// #680, decision 9: voice notes, vocabulary, history, in that order, right after the pick.
+    func testTheThreeFeatureScenesFollowThePickInOrder() {
+        let pick = OnboardingStep.smartModePick.position
+        XCTAssertEqual(OnboardingStep.voiceNotesScene.position, pick + 1)
+        XCTAssertEqual(OnboardingStep.vocabularyScene.position, pick + 2)
+        XCTAssertEqual(OnboardingStep.historyScene.position, pick + 3)
     }
 
     func testSkippingTheScenesJumpsTheWholeSequence() {
-        XCTAssertEqual(
-            OnboardingStep.smartModesScene.stepAfterSceneSequence(skipping: [], deviceCanRunSmartModes: true),
-            .modelPreparation
-        )
+        // From every member, the pick included: Skip lands after the history scene.
+        for step in OnboardingStep.allCases where step.isInSceneSequence {
+            XCTAssertEqual(
+                step.stepAfterSceneSequence(skipping: [], deviceCanRunSmartModes: true), .modelPreparation, "\(step)"
+            )
+        }
         // The usual skips still apply after the jump.
         XCTAssertEqual(
             OnboardingStep.smartModesScene.stepAfterSceneSequence(
@@ -229,6 +266,15 @@ final class OnboardingStepTests: XCTestCase {
         OnboardingStep.save(.smartModesScene)
         XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), "smartModesScene")
         XCTAssertEqual(OnboardingStep.current(), .smartModesScene)
+    }
+
+    func testAKillOnAFeatureSceneResumesThere() {
+        for (step, raw) in [(OnboardingStep.voiceNotesScene, "voiceNotesScene"),
+                            (.vocabularyScene, "vocabularyScene"), (.historyScene, "historyScene")] {
+            OnboardingStep.save(step)
+            XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), raw)
+            XCTAssertEqual(OnboardingStep.current(), step)
+        }
     }
 
     func testAKillOnTheSmartModePickResumesThere() {
