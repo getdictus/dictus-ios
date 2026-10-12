@@ -4,7 +4,7 @@ import Foundation
 
 /// The script of the voice notes scene (#680, #649 decision 9.2, mock-up
 /// `07a-scene-memos-vocaux`): Dictus added to the share sheet's favourites once, then a
-/// voice message shared to Dictus and its transcript inserted from the keyboard.
+/// voice message shared to Dictus and its transcript waiting in the keyboard.
 ///
 /// TWO CHAPTERS, SEPARATED ON SCREEN (decided by Pierre after the device test of
 /// 2026-10-12): the first version chained "share through *More*, insert" and "add to
@@ -19,11 +19,13 @@ import Foundation
 ///    voice message; the context menu opens; *Share*. Dictus is already in the row: one
 ///    tap. The finger taps the message field; the Dictus keyboard opens on its voice note
 ///    reader (it opens by itself on a note it has not shown yet,
-///    `VoiceNoteKeyboardPresentation.onAppearance`); *Insert* writes the transcript in the
-///    field and closes the reader, as `KeyboardVoiceNoteState.insert` does. The scene
-///    ends there, on the text in the field.
+///    `VoiceNoteKeyboardPresentation.onAppearance`), with the duration, the language and
+///    the transcript. The scene ends there, and holds it.
 ///
-/// The loop fades out on the inserted text and back in on the first chapter.
+/// WHY IT ENDS ON THE READER AND NOT ON *INSERT* (Pierre, second device test,
+/// 2026-10-12): the feature's strength is the transcript already sitting in the keyboard.
+/// *Insert* explains itself; tapping it only took the picture away. The reader stays on
+/// screen about three seconds, longer than any other beat, before the loop fades out.
 public enum VoiceNotesSceneScript {
 
     /// What the drawn finger taps.
@@ -44,8 +46,6 @@ public enum VoiceNotesSceneScript {
         case dictusInRow
         /// The host's message field, which brings up the keyboard.
         case messageField
-        /// The reader's *Insert*.
-        case insert
     }
 
     /// The scene's two chapters, each with its caption and its step chips.
@@ -64,14 +64,6 @@ public enum VoiceNotesSceneScript {
         case apps(isEditing: Bool)
     }
 
-    /// What the Dictus keyboard shows, when it is up.
-    public enum Keyboard: Equatable, Sendable {
-        /// `VoiceNoteReaderView`: header, transcript, *Insert*.
-        case reader
-        /// The keys under the toolbar, after the insert closed the reader.
-        case keys
-    }
-
     /// Everything the scene draws at one moment.
     public struct Frame: Equatable, Sendable {
         /// The chapter on screen, which picks the caption and the chips.
@@ -85,10 +77,9 @@ public enum VoiceNotesSceneScript {
         public let sheet: Sheet?
         /// Whether Dictus is among the share sheet's favourites.
         public let dictusIsFavourite: Bool
-        /// The keyboard, nil while it is down.
-        public let keyboard: Keyboard?
-        /// Whether the transcript is in the message field.
-        public let fieldHasTranscript: Bool
+        /// Whether the Dictus keyboard is up, open on its voice note reader
+        /// (`VoiceNoteReaderView`: header, transcript, *Insert*).
+        public let readerIsOpen: Bool
         /// The finger, nil while it is off screen.
         public let finger: SceneTapFinger<Target>?
     }
@@ -122,10 +113,9 @@ public enum VoiceNotesSceneScript {
         static let tapShare = SceneTap(Target.shareAction, press: 9.7, release: 9.9)
         static let tapDictus = SceneTap(Target.dictusInRow, press: 10.8, release: 11.0)
         static let tapField = SceneTap(Target.messageField, press: 11.8, release: 12.0)
-        static let tapInsert = SceneTap(Target.insert, press: 13.3, release: 13.5)
-        /// The inserted text holds until here, then the screen fades out and the loop
-        /// starts again.
-        static let loopFadeOut: Double = 16.0
+        /// The reader holds the transcript until here (3 s), then the screen fades out
+        /// and the loop starts again.
+        static let loopFadeOut: Double = 15.0
     }
 
     /// How long a fade takes, each way.
@@ -134,15 +124,15 @@ public enum VoiceNotesSceneScript {
     /// Every tap, in order. They never overlap (tested).
     static let taps: [SceneTap<Target>] = [
         Beat.tapMore, Beat.tapEdit, Beat.tapAdd, Beat.tapDone,
-        Beat.holdMessage, Beat.tapShare, Beat.tapDictus, Beat.tapField, Beat.tapInsert
+        Beat.holdMessage, Beat.tapShare, Beat.tapDictus, Beat.tapField
     ]
 
-    /// One pass: 16.3 s, inside decision 14's 10 to 20.
+    /// One pass: 15.3 s, inside decision 14's 10 to 20.
     public static let loopSeconds: Double = Beat.loopFadeOut + fade
 
     /// The moment shown with Reduce Motion on: the reader open on the transcript, the
-    /// frame mock-up 07a draws, in the second chapter.
-    public static let stillSeconds: Double = 12.7
+    /// frame mock-up 07a draws and the one the scene ends on.
+    public static let stillSeconds: Double = 13.5
 
     /// The scene at `time` seconds into the loop.
     public static func frame(at time: Double) -> Frame {
@@ -155,8 +145,8 @@ public enum VoiceNotesSceneScript {
             // Added in the first chapter and kept through the second, which is the point:
             // the second never goes through *More*.
             dictusIsFavourite: time >= Beat.tapAdd.release,
-            keyboard: keyboard(at: time),
-            fieldHasTranscript: time >= Beat.tapInsert.release,
+            // Up from the tap on the field to the end of the loop, which fades out on it.
+            readerIsOpen: time >= Beat.tapField.release,
             finger: taps.finger(at: time)
         )
     }
@@ -182,14 +172,6 @@ public enum VoiceNotesSceneScript {
         // Held through the fade out: the chapter ends on the row with Dictus in it.
         case Beat.tapDone.release..<(Beat.setUpFadeOut + fade): return .share
         case Beat.tapShare.release..<Beat.tapDictus.release: return .share
-        default: return nil
-        }
-    }
-
-    private static func keyboard(at time: Double) -> Keyboard? {
-        switch time {
-        case Beat.tapField.release..<Beat.tapInsert.release: return .reader
-        case Beat.tapInsert.release...: return .keys
         default: return nil
         }
     }

@@ -58,7 +58,7 @@ final class FeatureScenesScriptTests: XCTestCase {
     func testVoiceNotesAddsTheFavouriteThenSharesAndInserts() {
         XCTAssertEqual(VoiceNotes.taps.map(\.target), [
             .moreApps, .editApps, .addDictus, .doneEditing,
-            .voiceMessage, .shareAction, .dictusInRow, .messageField, .insert
+            .voiceMessage, .shareAction, .dictusInRow, .messageField
         ])
     }
 
@@ -97,7 +97,7 @@ final class FeatureScenesScriptTests: XCTestCase {
             if previous.sheet != nil, frame.sheet == nil, previous.chapter == .setUp {
                 XCTAssertEqual(frame.screenOpacity, 0, "the setup's sheet leaves at \(time)")
             }
-            if previous.keyboard != nil, frame.keyboard == nil {
+            if previous.readerIsOpen, !frame.readerIsOpen {
                 XCTAssertEqual(frame.screenOpacity, 0, "the keyboard leaves at \(time)")
             }
             previous = frame
@@ -167,40 +167,44 @@ final class FeatureScenesScriptTests: XCTestCase {
                 XCTAssertTrue(frame.dictusIsFavourite)
             case .messageField:
                 XCTAssertNil(frame.sheet)
-                XCTAssertNil(frame.keyboard)
-            case .insert:
-                XCTAssertEqual(frame.keyboard, .reader)
+                XCTAssertFalse(frame.readerIsOpen)
             }
         }
     }
 
-    /// The scene ends on the insertion (Pierre, 2026-10-12, replacing "ends on the
-    /// favourites").
-    func testTheSceneEndsOnTheInsertedText() {
-        let insert = VoiceNotes.taps.first { $0.target == .insert }
-        XCTAssertEqual(VoiceNotes.taps.last?.target, .insert)
-        for time in times(VoiceNotes.loopSeconds) where time >= (insert?.release ?? 0) {
+    /// The scene ends on the reader holding the transcript (Pierre, second device test of
+    /// 2026-10-12): no tap on *Insert*, the reader stays up to the loop's fade out.
+    func testTheSceneEndsOnTheReaderHoldingTheTranscript() {
+        let field = VoiceNotes.taps.first { $0.target == .messageField }
+        XCTAssertEqual(VoiceNotes.taps.last?.target, .messageField)
+        let held = times(VoiceNotes.loopSeconds).filter { $0 >= (field?.release ?? 0) }
+        for time in held {
             let frame = VoiceNotes.frame(at: time)
-            XCTAssertEqual(frame.keyboard, .keys, "\(time)")
-            XCTAssertTrue(frame.fieldHasTranscript, "\(time)")
+            XCTAssertTrue(frame.readerIsOpen, "\(time)")
             XCTAssertNil(frame.sheet, "\(time)")
+            XCTAssertEqual(frame.chapter, .everyNote, "\(time)")
         }
-        XCTAssertFalse(VoiceNotes.frame(at: insert?.press ?? 0).fieldHasTranscript)
+        // Held noticeably longer than any other beat: about three seconds in full view,
+        // once the finger has gone.
+        let fullyShown = held.filter {
+            let frame = VoiceNotes.frame(at: $0)
+            return frame.screenOpacity == 1 && frame.finger == nil
+        }
+        XCTAssertGreaterThanOrEqual(Double(fullyShown.count) * 0.01, 2.6)
     }
 
     func testTheVoiceNotesLoopStartsClean() {
         let start = VoiceNotes.frame(at: 0)
         XCTAssertEqual(start.chapter, .setUp)
         XCTAssertNil(start.sheet)
-        XCTAssertNil(start.keyboard)
-        XCTAssertFalse(start.fieldHasTranscript)
+        XCTAssertFalse(start.readerIsOpen)
         XCTAssertFalse(start.dictusIsFavourite)
         XCTAssertNil(start.finger)
     }
 
     func testTheVoiceNotesStillIsTheReader() {
         let still = VoiceNotes.frame(at: VoiceNotes.stillSeconds)
-        XCTAssertEqual(still.keyboard, .reader)
+        XCTAssertTrue(still.readerIsOpen)
         XCTAssertEqual(still.chapter, .everyNote)
         XCTAssertEqual(still.screenOpacity, 1)
         XCTAssertNil(still.finger)

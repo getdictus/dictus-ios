@@ -12,9 +12,6 @@ struct VoiceNotesScenePage: View {
     let modelIdentifier: String
     let onNext: () -> Void
 
-    /// The layout the keyboard at rest is drawn in: the one the language screen set.
-    private let layout = LayoutType.active
-
     var body: some View {
         OnboardingScenePage(
             title: Text("Your voice notes, transcribed",
@@ -30,7 +27,7 @@ struct VoiceNotesScenePage: View {
         ) { time in
             VoiceNotesChapterHeader(chapter: VoiceNotesSceneScript.frame(at: time).chapter)
         } scene: { time in
-            VoiceNotesScene(time: time, layout: layout)
+            VoiceNotesScene(time: time)
         }
     }
 }
@@ -88,8 +85,14 @@ private struct VoiceNotesChapterHeader: View {
                 Text("Add Dictus", comment: "Onboarding voice notes scene: third step of the one-time setup, tapping the green + beside Dictus in the share sheet's list of apps (#680).")
             ]
         case .everyNote:
-            // Dictus is already a favourite, so the second step is just its name.
-            return [Text("Share"), Text(verbatim: "Dictus"), Text("Insert")]
+            // Dictus is already a favourite, so the second step is just its name. The
+            // third names the outcome, not a tap: the transcript waiting in the keyboard,
+            // where the scene ends.
+            return [
+                Text("Share"),
+                Text(verbatim: "Dictus"),
+                Text("Text in your keyboard", comment: "Onboarding voice notes scene: last step of the chips above the drawn iPhone, the transcript of the shared voice note waiting in the Dictus keyboard. Short (#680).")
+            ]
         }
     }
 
@@ -143,8 +146,6 @@ private struct VoiceNotesChapterHeader: View {
 struct VoiceNotesScene: View {
     /// Seconds into the loop.
     let time: Double
-    /// The layout of the keys at rest.
-    let layout: LayoutType
 
     private typealias Metrics = SmartModesSceneMetrics
 
@@ -168,9 +169,9 @@ struct VoiceNotesScene: View {
             VStack(spacing: 0) {
                 VoiceNotesConversation(isLifted: frame.contextMenuIsOpen)
                     .frame(maxHeight: .infinity)
-                VoiceNotesInputBar(text: frame.fieldHasTranscript ? VoiceNotesSceneText.transcript : nil)
-                if let keyboard = frame.keyboard {
-                    VoiceNotesKeyboard(state: keyboard, layout: layout)
+                VoiceNotesInputBar()
+                if frame.readerIsOpen {
+                    VoiceNotesKeyboard()
                         .transition(.move(edge: .bottom))
                 } else {
                     // The home indicator's strip under the input bar, with no keyboard up.
@@ -205,12 +206,9 @@ struct VoiceNotesScene: View {
         // The fades between the chapters and at the loop's end: the screen goes dark on
         // the phone's own background, not on the card.
         .opacity(frame.screenOpacity)
-        // The keyboard rising and leaving is animated; the reader giving way to the keys
-        // is not, as in the keyboard (`VoiceNoteReaderView`: "never animated").
-        .animation(.easeOut(duration: 0.3), value: frame.keyboard != nil)
+        .animation(.easeOut(duration: 0.3), value: frame.readerIsOpen)
         .animation(.easeOut(duration: 0.3), value: frame.sheet)
         .animation(.easeOut(duration: 0.2), value: frame.contextMenuIsOpen)
-        .animation(.easeOut(duration: 0.2), value: frame.fieldHasTranscript)
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: frame.dictusIsFavourite)
     }
 }
@@ -219,7 +217,7 @@ struct VoiceNotesScene: View {
 
 /// The scene's localized content: what the voice note says, and its language.
 enum VoiceNotesSceneText {
-    /// The transcript the reader shows and *Insert* writes, the one mock-up 07a draws.
+    /// The transcript the reader shows, the one mock-up 07a draws.
     static var transcript: String {
         String(localized: "Site meeting: the window delivery is pushed back to Monday, the plumber comes on Wednesday morning, and the electrician's quote has to be approved before Friday.",
                comment: "Onboarding voice notes scene: the transcript of a shared voice note, shown in the drawn keyboard's reader and inserted in the message field. A natural spoken work message (#680).")
@@ -282,13 +280,10 @@ private struct VoiceNotesConversation: View {
     private static let receivedBubble = Color(light: Color(hex: 0xE9E9EB), dark: Color(hex: 0x26262A))
 }
 
-/// The input bar: +, the field, which holds the transcript once inserted.
+/// The input bar: +, then the empty field the finger taps to bring up the keyboard.
 private struct VoiceNotesInputBar: View {
-    /// The text in the field, nil for the placeholder.
-    let text: String?
-
     var body: some View {
-        HStack(alignment: .bottom, spacing: 10) {
+        HStack(spacing: 10) {
             Image(systemName: "plus")
                 .font(.system(size: 18, weight: .medium))
                 .foregroundStyle(.primary)
@@ -296,32 +291,21 @@ private struct VoiceNotesInputBar: View {
                 .background(Circle().fill(Self.field))
                 .overlay(Circle().strokeBorder(Self.fieldBorder, lineWidth: 1))
 
-            HStack(alignment: .bottom) {
-                if let text {
-                    Text(verbatim: text)
-                        .font(.system(size: 17))
-                        .foregroundStyle(.primary)
-                        .lineLimit(2)
-                        .transition(.opacity)
-                } else {
-                    // The host's own placeholder, the same word in every language iOS
-                    // ships, so not localized.
-                    Text(verbatim: "iMessage")
-                        .font(.system(size: 17))
-                        .foregroundStyle(.tertiary)
-                        .transition(.opacity)
-                }
+            HStack {
+                // The host's own placeholder, the same word in every language iOS
+                // ships, so not localized.
+                Text(verbatim: "iMessage")
+                    .font(.system(size: 17))
+                    .foregroundStyle(.tertiary)
                 Spacer(minLength: 0)
                 Image(systemName: "mic")
                     .font(.system(size: 15))
                     .foregroundStyle(.tertiary)
-                    .padding(.bottom, 2)
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .frame(minHeight: 38)
-            .background(RoundedRectangle(cornerRadius: 19, style: .continuous).fill(Self.field))
-            .overlay(RoundedRectangle(cornerRadius: 19, style: .continuous).strokeBorder(Self.fieldBorder, lineWidth: 1))
+            .frame(height: 38)
+            .background(Capsule().fill(Self.field))
+            .overlay(Capsule().strokeBorder(Self.fieldBorder, lineWidth: 1))
             .sceneTapTarget(VoiceNotesSceneScript.Target.messageField)
         }
         .padding(.horizontal, 12)
@@ -653,27 +637,14 @@ private struct VoiceNotesSheetShape: Shape {
 
 // MARK: - Keyboard
 
-/// The Dictus keyboard: the voice note reader, or the keys once *Insert* closed it.
+/// The Dictus keyboard, open on its voice note reader, with iOS's bar under it.
 private struct VoiceNotesKeyboard: View {
-    let state: VoiceNotesSceneScript.Keyboard
-    let layout: LayoutType
-
     private typealias Metrics = SmartModesSceneMetrics
 
     var body: some View {
         VStack(spacing: 0) {
-            switch state {
-            case .reader:
-                VoiceNotesReader()
-                    .frame(height: Metrics.toolbarHeight + Metrics.fanAreaHeight)
-            case .keys:
-                // The note stays in the keyboard after an insert (#640), so the ☰ keeps
-                // its ring.
-                SceneToolbar(isFanOpen: false, offersUndo: false, armed: nil, ringsMenu: true)
-                    .frame(height: Metrics.toolbarHeight)
-                SceneKeys(layout: layout)
-                    .frame(height: Metrics.fanAreaHeight)
-            }
+            VoiceNotesReader()
+                .frame(height: Metrics.toolbarHeight + Metrics.fanAreaHeight)
             SceneSystemBar()
                 .frame(height: Metrics.systemBarHeight)
         }
@@ -778,7 +749,6 @@ private struct VoiceNotesReader: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 44)
                 .background(Capsule().fill(Color.dictusAccent))
-                .sceneTapTarget(VoiceNotesSceneScript.Target.insert)
         }
         .padding(.horizontal, 12)
         .padding(.top, 4)

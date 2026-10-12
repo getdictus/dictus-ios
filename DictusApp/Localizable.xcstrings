@@ -1469,17 +1469,6 @@
         }
       }
     },
-    "Insert" : {
-      "comment" : "Onboarding voice notes scene: last step of the chips above the drawn iPhone, inserting the transcript from the keyboard. Same word as the keyboard's button (#680).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Insérer"
-          }
-        }
-      }
-    },
     "Just once" : {
       "comment" : "Onboarding voice notes scene: caption above the drawn iPhone while it shows the one-time setup, adding Dictus to the share sheet's favorites (#680).",
       "localizations" : {
@@ -1629,6 +1618,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Suggestions"
+          }
+        }
+      }
+    },
+    "Text in your keyboard" : {
+      "comment" : "Onboarding voice notes scene: last step of the chips above the drawn iPhone, the transcript of the shared voice note waiting in the Dictus keyboard. Short (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Texte dans le clavier"
           }
         }
       }
