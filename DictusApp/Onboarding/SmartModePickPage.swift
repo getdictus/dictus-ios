@@ -19,7 +19,8 @@ import DictusCore
 /// WHY BLUE: Smart Modes are the app's accent here, never the purple `dictusSmartMode`
 /// token (#649 mock-ups).
 struct SmartModePickPage: View {
-    /// The flow's model manager, read for the download pill at the bottom.
+    /// The flow's model manager, read for the download pill at the bottom
+    /// (`OnboardingDownloadPill`).
     @ObservedObject var modelManager: ModelManager
     /// The model the onboarding installs.
     let modelIdentifier: String
@@ -35,7 +36,10 @@ struct SmartModePickPage: View {
     var body: some View {
         OnboardingPage(
             title: Text("Your 3 Smart Modes"),
-            subtitle: Text("Pick three. They will be waiting for you when you hold down the microphone.")
+            // "You have just seen them" (mock-up 06): the Smart Modes scene comes right
+            // before this step (#679).
+            subtitle: Text("You have just seen them: pick three. They will be waiting for you when you hold down the microphone.",
+                           comment: "Onboarding Smart Mode pick: subtitle under the title. It follows the Smart Modes scene (#677, #679).")
         ) {
             counter
         } content: {
