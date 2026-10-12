@@ -37,6 +37,9 @@ enum OnboardingMetrics {
     /// same height empty in the app, where there is no bar, so its ring sits at the same y
     /// in the onboarding and in the app (#708).
     static let topRowHeight: CGFloat = topBarTopPadding + topBarHeight
+    /// The font of the top row's Skip, which also sizes both of the row's side slots
+    /// (`OnboardingTopBarSlot`).
+    static let skipFont: Font = .body
 }
 
 // MARK: - Progress bar
@@ -90,6 +93,13 @@ struct OnboardingProgressBar: View {
 ///
 /// WHY THE SHELL DRAWS SKIP AND BACK, NOT THE PAGE: each slot sits at the same place on
 /// every step that has it, and stays put while the pages slide.
+///
+/// WHY TWO SLOTS ON EVERY STEP, OF THE SAME WIDTH (#700, decided after the device test of
+/// the back chevron): the bar used to take whatever width the controls left, so it
+/// shrank and moved right when the chevron appeared, and left when Skip did. Like an iOS
+/// navigation bar, the row now always reserves a leading and a trailing slot, empty when
+/// the step has no control there, and both are as wide as each other: the bar is centred
+/// and has the same frame on every step. Nothing moves; only the segments' colours change.
 struct OnboardingTopBar: View {
     let step: OnboardingStep
     let deviceCanRunSmartModes: Bool
@@ -100,42 +110,75 @@ struct OnboardingTopBar: View {
 
     var body: some View {
         HStack(spacing: 16) {
-            if let onBack {
-                // A standard iOS back chevron at the leading edge (#700). The bar makes
-                // room for it the way it makes room for Skip.
-                Button(action: onBack) {
-                    Image(systemName: "chevron.backward")
-                        .font(.body.weight(.semibold))
-                        // The accent, as the system tints its own back chevron.
-                        .foregroundStyle(Color.dictusAccent)
-                        // Leading-aligned: the chevron lines up with the page's title.
-                        .frame(
-                            width: OnboardingMetrics.topBarHeight,
-                            height: OnboardingMetrics.topBarHeight,
-                            alignment: .leading
-                        )
-                        // The row is 32 pt high; the tap area reaches the 44 pt minimum.
-                        .contentShape(Rectangle().inset(by: -6))
+            OnboardingTopBarSlot(alignment: .leading) {
+                if let onBack {
+                    // A standard iOS back chevron (#700), leading-aligned in its slot so it
+                    // lines up with the page's title.
+                    Button(action: onBack) {
+                        Image(systemName: "chevron.backward")
+                            .font(.body.weight(.semibold))
+                            // The accent, as the system tints its own back chevron.
+                            .foregroundStyle(Color.dictusAccent)
+                            .frame(
+                                width: OnboardingMetrics.topBarHeight,
+                                height: OnboardingMetrics.topBarHeight,
+                                alignment: .leading
+                            )
+                            // The row is 32 pt high; the tap area reaches the 44 pt minimum.
+                            .contentShape(Rectangle().inset(by: -6))
+                    }
+                    .accessibilityLabel(Text("Back"))
+                    .accessibilityIdentifier("onboarding.back")
                 }
-                .accessibilityLabel(Text("Back"))
-                .accessibilityIdentifier("onboarding.back")
             }
             if step.showsProgress {
                 OnboardingProgressBar(step: step, deviceCanRunSmartModes: deviceCanRunSmartModes)
             } else {
                 Spacer()
             }
-            if let onSkip {
-                Button(action: onSkip) {
-                    Text("Skip")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
+            OnboardingTopBarSlot(alignment: .trailing) {
+                if let onSkip {
+                    Button(action: onSkip) {
+                        Text("Skip")
+                            .font(OnboardingMetrics.skipFont)
+                            .lineLimit(1)
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityIdentifier("onboarding.skip")
                 }
-                .accessibilityIdentifier("onboarding.skip")
             }
         }
         .frame(height: OnboardingMetrics.topBarHeight)
         .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+    }
+}
+
+/// One side slot of `OnboardingTopBar`, the same width on both sides and on every step.
+///
+/// WHY SIZED BY A HIDDEN "Skip": Skip is the wider control, and its width depends on the
+/// language ("Skip", "Passer") and on the text size. Both slots lay out the same hidden
+/// label in the same font, so they come out equal in every language and at every Dynamic
+/// Type size, with no width in points to keep up to date. The chevron's 32 pt is the floor,
+/// for a language whose word would be narrower than the chevron. The hidden views are
+/// invisible and not in the accessibility tree; an empty slot is just space.
+private struct OnboardingTopBarSlot<Control: View>: View {
+    let alignment: Alignment
+    @ViewBuilder let control: Control
+
+    var body: some View {
+        ZStack(alignment: alignment) {
+            Text("Skip")
+                .font(OnboardingMetrics.skipFont)
+                .lineLimit(1)
+                .hidden()
+                .accessibilityHidden(true)
+            Color.clear
+                .frame(width: OnboardingMetrics.topBarHeight, height: 1)
+                .accessibilityHidden(true)
+            control
+        }
+        // Never squeezed by the bar: the slot keeps the width it measured.
+        .fixedSize(horizontal: true, vertical: false)
     }
 }
 
