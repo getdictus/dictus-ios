@@ -165,21 +165,13 @@ public enum StopStandbySceneScript {
         let isPowerLit = time >= Beat.travelStart && time < Beat.tapRelease
 
         var finger: Finger?
-        if time >= Beat.fingerIn && time < Beat.tapRelease + fade {
-            let opacity: Double
-            if time < Beat.fingerIn + fade {
-                opacity = (time - Beat.fingerIn) / fade
-            } else if time >= Beat.tapRelease {
-                opacity = 1 - (time - Beat.tapRelease) / fade
-            } else {
-                opacity = 1
-            }
+        if let opacity = fingerOpacity(at: time, in: Beat.fingerIn, out: Beat.tapRelease) {
             let pressed = (time >= Beat.press && time < Beat.lift)
                 || (time >= Beat.tapPress && time < Beat.tapRelease)
             finger = Finger(
                 travel: progress(time, from: Beat.travelStart, to: Beat.travelEnd),
                 isPressed: pressed,
-                opacity: clamped(opacity)
+                opacity: opacity
             )
         }
 
@@ -194,19 +186,11 @@ public enum StopStandbySceneScript {
         let isPowerLit = time >= Beat.fingerIn && time < Beat.tapRelease
 
         var finger: Finger?
-        if time >= Beat.fingerIn && time < Beat.tapRelease + fade {
-            let opacity: Double
-            if time < Beat.fingerIn + fade {
-                opacity = (time - Beat.fingerIn) / fade
-            } else if time >= Beat.tapRelease {
-                opacity = 1 - (time - Beat.tapRelease) / fade
-            } else {
-                opacity = 1
-            }
+        if let opacity = fingerOpacity(at: time, in: Beat.fingerIn, out: Beat.tapRelease) {
             finger = Finger(
                 travel: 1,
                 isPressed: time >= Beat.tapPress && time < Beat.tapRelease,
-                opacity: clamped(opacity)
+                opacity: opacity
             )
         }
 
@@ -214,6 +198,16 @@ public enum StopStandbySceneScript {
     }
 
     // MARK: - Helpers
+
+    /// The finger's opacity at `time`: fading in from `fadeIn`, fading out from `fadeOut`
+    /// (the tap's release, in both scenes), fully there in between; nil when it is not on
+    /// screen.
+    private static func fingerOpacity(at time: Double, in fadeIn: Double, out fadeOut: Double) -> Double? {
+        guard time >= fadeIn && time < fadeOut + fade else { return nil }
+        if time < fadeIn + fade { return clamped((time - fadeIn) / fade) }
+        if time >= fadeOut { return clamped(1 - (time - fadeOut) / fade) }
+        return 1
+    }
 
     private static func wrapped(_ time: Double) -> Double {
         let remainder = time.truncatingRemainder(dividingBy: loopSeconds)

@@ -51,5 +51,4 @@ struct OnboardingScenePage<Scene: View>: View {
                 .accessibilityIdentifier("onboarding.primary")
         }
     }
-
 }

@@ -152,8 +152,8 @@ private struct StopStandbyChips: View {
             .foregroundStyle(.tertiary)
     }
 
-    /// A step at rest: the grouped grey on light, the page's navy on dark.
-    private static let fill = Color(light: Color(hex: 0xF2F2F7), dark: Color(hex: 0x0A1628))
+    /// A step at rest: the page's own background, grouped grey on light, navy on dark.
+    private static let fill = Color.dictusBackground
     /// The step on screen: a pale accent, as the mock-up's third chip.
     private static let litFill = Color.dictusAccent.opacity(0.14)
 }
@@ -474,6 +474,8 @@ private struct StopStandbyLockScreen: View {
         }
         .padding(Metrics.bannerPadding)
         .frame(height: Metrics.bannerHeight)
+        // The widget's own fixed navy, not `dictusBackground`: the real banner is dark in
+        // light mode too (`lockScreenView` fills it with #0A1628 whatever the appearance).
         .background(
             RoundedRectangle(cornerRadius: Metrics.bannerCornerRadius, style: .continuous)
                 .fill(Color(hex: 0x0A1628))
@@ -551,7 +553,7 @@ private struct SceneLogoBars: View {
         switch index {
         case 1:
             return AnyShapeStyle(LinearGradient(
-                colors: [Color(hex: 0x6BA3FF), Color(hex: 0x2563EB)], startPoint: .top, endPoint: .bottom
+                colors: [.dictusGradientStart, .dictusGradientEnd], startPoint: .top, endPoint: .bottom
             ))
         case 0:
             return AnyShapeStyle(Color.white.opacity(0.45))
