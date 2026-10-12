@@ -80,7 +80,7 @@ struct OnboardingView: View {
                     deviceCanRunSmartModes: deviceCanRunSmartModes,
                     onSkip: step.isSkippable ? skip : nil
                 )
-                    .padding(.top, 8)
+                    .padding(.top, OnboardingMetrics.topBarTopPadding)
 
                 // Current page content — only one page visible at a time
                 // WHY Group instead of ZStack: Group avoids stacking every page

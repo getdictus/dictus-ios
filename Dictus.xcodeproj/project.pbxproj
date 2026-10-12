@@ -133,7 +133,7 @@
 		AA0000E2 /* GaugeBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000E2 /* GaugeBarView.swift */; };
 		AA0000E3 /* ModelCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000E3 /* ModelCardView.swift */; };
 		AA0000E4 /* SwipeBackOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000E4 /* SwipeBackOverlayView.swift */; };
-		AA000300 /* CyclingLoadingText.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100300 /* CyclingLoadingText.swift */; };
+		AA000300 /* ModelPreparationParts.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100300 /* ModelPreparationParts.swift */; };
 		AA000301 /* ModelLoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100301 /* ModelLoadingOverlay.swift */; };
 		AA000484 /* ModelPreparationPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100484 /* ModelPreparationPresentation.swift */; };
 		AA000302 /* ModelLanguageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100302 /* ModelLanguageDetailView.swift */; };
@@ -362,7 +362,7 @@
 		AA1000E2 /* GaugeBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GaugeBarView.swift; sourceTree = "<group>"; };
 		AA1000E3 /* ModelCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCardView.swift; sourceTree = "<group>"; };
 		AA1000E4 /* SwipeBackOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeBackOverlayView.swift; sourceTree = "<group>"; };
-		AA100300 /* CyclingLoadingText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclingLoadingText.swift; sourceTree = "<group>"; };
+		AA100300 /* ModelPreparationParts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPreparationParts.swift; sourceTree = "<group>"; };
 		AA100301 /* ModelLoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLoadingOverlay.swift; sourceTree = "<group>"; };
 		AA100484 /* ModelPreparationPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPreparationPresentation.swift; sourceTree = "<group>"; };
 		AA100302 /* ModelLanguageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelLanguageDetailView.swift; sourceTree = "<group>"; };
@@ -690,7 +690,7 @@
 				AA100302 /* ModelLanguageDetailView.swift */,
 				AA1000E4 /* SwipeBackOverlayView.swift */,
 				AA1000F3 /* SoundSettingsView.swift */,
-				AA100300 /* CyclingLoadingText.swift */,
+				AA100300 /* ModelPreparationParts.swift */,
 				AA100301 /* ModelLoadingOverlay.swift */,
 				AA100484 /* ModelPreparationPresentation.swift */,
 				SS100002 /* PaywallView.swift */,
@@ -1313,7 +1313,7 @@
 				AA0000E2 /* GaugeBarView.swift in Sources */,
 				AA0000E3 /* ModelCardView.swift in Sources */,
 				AA0000E4 /* SwipeBackOverlayView.swift in Sources */,
-				AA000300 /* CyclingLoadingText.swift in Sources */,
+				AA000300 /* ModelPreparationParts.swift in Sources */,
 				AA000301 /* ModelLoadingOverlay.swift in Sources */,
 				AA000484 /* ModelPreparationPresentation.swift in Sources */,
 				AA000302 /* ModelLanguageDetailView.swift in Sources */,
