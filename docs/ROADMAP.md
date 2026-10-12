@@ -29,7 +29,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 11. ~~#643 — App Store listing for 2.0.0~~ — merged in PR #645 (en, fr, de, es; ASC upload at submission). Remaining French UI follow-ups: ~~#664~~ (merged in PR #668), ~~#665~~ (merged in PR #671)
 12. ~~#673 — download screen: drop the two phrases that promise the end ("Almost there" at 1 %)~~ — merged in PR #674
 13. ~~#533 — countdown under the model preparation (compile / load), not a second bar~~ — merged in PR #687
-14. #708 — rebuild the model preparation screen: circular progress, no waveform, no layout jumps; mock-up first
+14. #708 — rebuild the model preparation screen (ring with logo, two-step card, no layout jumps); mock-up validated 2026-10-12, in dev
 15. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
 16. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
