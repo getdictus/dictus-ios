@@ -3,56 +3,57 @@
 import Foundation
 
 /// The script of the voice notes scene (#680, #649 decision 9.2, mock-up
-/// `07a-scene-memos-vocaux`): a voice message shared to Dictus, its transcript inserted
-/// from the keyboard, then Dictus added to the share sheet's favourites.
+/// `07a-scene-memos-vocaux`): Dictus added to the share sheet's favourites once, then a
+/// voice message shared to Dictus and its transcript inserted from the keyboard.
 ///
-/// The card's chips above the drawn iPhone name the everyday path once Dictus is set up:
-/// Share, Dictus (a favourite, so in the sheet's row), Insert. The loop plays the first
-/// time instead, which is how a user meets it, and ends on what makes the next times
-/// that short.
+/// TWO CHAPTERS, SEPARATED ON SCREEN (decided by Pierre after the device test of
+/// 2026-10-12): the first version chained "share through *More*, insert" and "add to
+/// the favourites" in one movement, and even knowing the feature he could not tell where
+/// one ended and the other began. Each chapter now has its own caption and its own step
+/// chips above the drawn iPhone, and the scene fades between them.
+/// 1. **Just once** (`Chapter.setUp`). The share sheet comes up; Dictus is not in its row
+///    of apps. The finger opens *More*, taps *Edit*, the green + beside Dictus, *Done*.
+///    Dictus now leads the row, and stays there long enough to be seen. No API does this
+///    for the user, which is why the scene shows it.
+/// 2. **Then, for every voice note** (`Chapter.everyNote`). The finger holds a received
+///    voice message; the context menu opens; *Share*. Dictus is already in the row: one
+///    tap. The finger taps the message field; the Dictus keyboard opens on its voice note
+///    reader (it opens by itself on a note it has not shown yet,
+///    `VoiceNoteKeyboardPresentation.onAppearance`); *Insert* writes the transcript in the
+///    field and closes the reader, as `KeyboardVoiceNoteState.insert` does. The scene
+///    ends there, on the text in the field.
 ///
-/// THE STORY, three movements:
-/// 1. **Share.** In a conversation, the finger holds a received voice message; the
-///    context menu opens; it taps *Share*. The share sheet comes up; Dictus is not in its
-///    row of apps, so the finger opens *More* and picks Dictus from the list.
-/// 2. **Insert.** The finger taps the message field. The Dictus keyboard opens on its
-///    voice note reader (it opens by itself on a note it has not shown yet,
-///    `VoiceNoteKeyboardPresentation.onAppearance`), with the duration, the language and
-///    the transcript. The finger taps *Insert*: the transcript lands in the field and the
-///    reader closes, as `KeyboardVoiceNoteState.insert` does.
-/// 3. **Dictus as a favourite.** The share sheet again, for the next note: *More*,
-///    *Edit*, the green + beside Dictus, *Done*. Dictus is now in the sheet's row, one
-///    tap away from any app. The scene ends there (#680: "the scene ends on adding Dictus
-///    to the share sheet's favourites"), because no API does it for the user.
-///
-/// WHY THE FAVOURITES LAST AND NOT IN THE MIDDLE: the brief asks the scene to end on
-/// them, and it is the one step a user has to be shown: sharing and inserting explain
-/// themselves once seen, a list behind *More* → *Edit* does not.
-///
-/// The loop closes on itself: the sheet goes down on the conversation the scene opens
-/// on, the field empty.
+/// The loop fades out on the inserted text and back in on the first chapter.
 public enum VoiceNotesSceneScript {
 
     /// What the drawn finger taps.
     public enum Target: Hashable, Sendable {
-        /// The received voice message, held for the context menu.
-        case voiceMessage
-        /// *Share* in that menu.
-        case shareAction
         /// *More* at the end of the share sheet's row of apps.
         case moreApps
-        /// Dictus in the list *More* opens.
-        case dictusInList
-        /// The host's message field, which brings up the keyboard.
-        case messageField
-        /// The reader's *Insert*.
-        case insert
-        /// *Edit* at the top of the list.
+        /// *Edit* at the top of the list *More* opens.
         case editApps
         /// The green + beside Dictus, in edit mode.
         case addDictus
         /// *Done*, which leaves edit mode and the list.
         case doneEditing
+        /// The received voice message, held for the context menu.
+        case voiceMessage
+        /// *Share* in that menu.
+        case shareAction
+        /// Dictus in the share sheet's row of apps, once it is a favourite.
+        case dictusInRow
+        /// The host's message field, which brings up the keyboard.
+        case messageField
+        /// The reader's *Insert*.
+        case insert
+    }
+
+    /// The scene's two chapters, each with its caption and its step chips.
+    public enum Chapter: Equatable, Sendable {
+        /// Adding Dictus to the share sheet's favourites, done once.
+        case setUp
+        /// Sharing a voice note to Dictus and inserting it, every time.
+        case everyNote
     }
 
     /// The system sheet over the host.
@@ -73,6 +74,11 @@ public enum VoiceNotesSceneScript {
 
     /// Everything the scene draws at one moment.
     public struct Frame: Equatable, Sendable {
+        /// The chapter on screen, which picks the caption and the chips.
+        public let chapter: Chapter
+        /// How visible the drawn screen is: 1 inside a chapter, down to 0 at the fades
+        /// between the chapters and at the loop's end.
+        public let screenOpacity: Double
         /// Whether the voice message's context menu is open.
         public let contextMenuIsOpen: Bool
         /// The system sheet, nil for none.
@@ -88,65 +94,94 @@ public enum VoiceNotesSceneScript {
     }
 
     /// The beats, in seconds from the start of the loop.
+    ///
+    /// WHY THE SCREEN STAYS DARK A MOMENT AT EACH CHAPTER'S START: what the previous
+    /// chapter left on screen (the share sheet, the keyboard) leaves while nothing is
+    /// visible, so the new chapter fades in on a clean conversation instead of on a sheet
+    /// sliding away.
     enum Beat {
-        // 1. Share.
-        static let holdMessage = SceneTap(Target.voiceMessage, press: 0.7, release: 1.3)
+        // 1. Just once.
+        /// The screen fades in from here.
+        static let setUpFadeIn: Double = 0.4
+        /// The share sheet comes up on its own: the chapter is about what is behind *More*.
+        static let shareSheetUp: Double = 0.9
+        static let tapMore = SceneTap(Target.moreApps, press: 1.8, release: 2.0)
+        static let tapEdit = SceneTap(Target.editApps, press: 2.8, release: 3.0)
+        static let tapAdd = SceneTap(Target.addDictus, press: 3.8, release: 4.0)
+        static let tapDone = SceneTap(Target.doneEditing, press: 4.9, release: 5.1)
+        /// The share sheet with Dictus leading the row holds until here (1.6 s), then the
+        /// screen fades out.
+        static let setUpFadeOut: Double = 6.7
+        /// The second chapter starts and the screen fades back in: the caption and the
+        /// chips change here, after the sheet left in the dark.
+        static let everyNoteStarts: Double = 7.4
+        // 2. Every voice note.
+        static let holdMessage = SceneTap(Target.voiceMessage, press: 8.4, release: 9.0)
         /// The context menu opens while the finger is still down, as a long press does.
-        static let menuOpens: Double = 1.2
-        static let tapShare = SceneTap(Target.shareAction, press: 2.0, release: 2.2)
-        static let tapMore = SceneTap(Target.moreApps, press: 3.1, release: 3.3)
-        static let tapDictus = SceneTap(Target.dictusInList, press: 4.1, release: 4.3)
-        // 2. Insert.
-        static let tapField = SceneTap(Target.messageField, press: 5.2, release: 5.4)
-        static let tapInsert = SceneTap(Target.insert, press: 6.7, release: 6.9)
-        /// The keyboard goes down and the share sheet of the next note comes up.
-        static let nextShare: Double = 8.6
-        // 3. Dictus as a favourite.
-        static let tapMoreAgain = SceneTap(Target.moreApps, press: 9.4, release: 9.6)
-        static let tapEdit = SceneTap(Target.editApps, press: 10.4, release: 10.6)
-        static let tapAdd = SceneTap(Target.addDictus, press: 11.4, release: 11.6)
-        static let tapDone = SceneTap(Target.doneEditing, press: 12.6, release: 12.8)
-        /// The share sheet with Dictus in its row stays on screen until here, then goes
-        /// down on the opening conversation.
-        static let sheetCloses: Double = 15.4
+        static let menuOpens: Double = 8.9
+        static let tapShare = SceneTap(Target.shareAction, press: 9.7, release: 9.9)
+        static let tapDictus = SceneTap(Target.dictusInRow, press: 10.8, release: 11.0)
+        static let tapField = SceneTap(Target.messageField, press: 11.8, release: 12.0)
+        static let tapInsert = SceneTap(Target.insert, press: 13.3, release: 13.5)
+        /// The inserted text holds until here, then the screen fades out and the loop
+        /// starts again.
+        static let loopFadeOut: Double = 16.0
     }
+
+    /// How long a fade takes, each way.
+    static let fade: Double = 0.3
 
     /// Every tap, in order. They never overlap (tested).
     static let taps: [SceneTap<Target>] = [
-        Beat.holdMessage, Beat.tapShare, Beat.tapMore, Beat.tapDictus, Beat.tapField, Beat.tapInsert,
-        Beat.tapMoreAgain, Beat.tapEdit, Beat.tapAdd, Beat.tapDone
+        Beat.tapMore, Beat.tapEdit, Beat.tapAdd, Beat.tapDone,
+        Beat.holdMessage, Beat.tapShare, Beat.tapDictus, Beat.tapField, Beat.tapInsert
     ]
 
-    /// One pass: 16 s, inside decision 14's 10 to 20.
-    public static let loopSeconds: Double = 16
+    /// One pass: 16.3 s, inside decision 14's 10 to 20.
+    public static let loopSeconds: Double = Beat.loopFadeOut + fade
 
     /// The moment shown with Reduce Motion on: the reader open on the transcript, the
-    /// frame mock-up 07a draws. The text *in the keyboard* is what the page's line
-    /// promises, so it is the picture that stands for the scene.
-    public static let stillSeconds: Double = 6.0
+    /// frame mock-up 07a draws, in the second chapter.
+    public static let stillSeconds: Double = 12.7
 
     /// The scene at `time` seconds into the loop.
     public static func frame(at time: Double) -> Frame {
-        Frame(
+        let chapter: Chapter = time < Beat.everyNoteStarts ? .setUp : .everyNote
+        return Frame(
+            chapter: chapter,
+            screenOpacity: screenOpacity(at: time),
             contextMenuIsOpen: time >= Beat.menuOpens && time < Beat.tapShare.release,
             sheet: sheet(at: time),
+            // Added in the first chapter and kept through the second, which is the point:
+            // the second never goes through *More*.
             dictusIsFavourite: time >= Beat.tapAdd.release,
             keyboard: keyboard(at: time),
-            // Cleared under the next share sheet, once it covers the field, so the loop
-            // can start again on an empty one.
-            fieldHasTranscript: time >= Beat.tapInsert.release && time < Beat.tapMoreAgain.release,
+            fieldHasTranscript: time >= Beat.tapInsert.release,
             finger: taps.finger(at: time)
         )
     }
 
+    private static func screenOpacity(at time: Double) -> Double {
+        for start in [Beat.setUpFadeIn, Beat.everyNoteStarts] where time >= start && time < start + fade {
+            return (time - start) / fade
+        }
+        for start in [Beat.setUpFadeOut, Beat.loopFadeOut] where time >= start && time < start + fade {
+            return 1 - (time - start) / fade
+        }
+        let isDark = time < Beat.setUpFadeIn
+            || (time >= Beat.setUpFadeOut + fade && time < Beat.everyNoteStarts)
+            || time >= Beat.loopFadeOut + fade
+        return isDark ? 0 : 1
+    }
+
     private static func sheet(at time: Double) -> Sheet? {
         switch time {
-        case Beat.tapShare.release..<Beat.tapMore.release: return .share
-        case Beat.tapMore.release..<Beat.tapDictus.release: return .apps(isEditing: false)
-        case Beat.nextShare..<Beat.tapMoreAgain.release: return .share
-        case Beat.tapMoreAgain.release..<Beat.tapEdit.release: return .apps(isEditing: false)
+        case Beat.shareSheetUp..<Beat.tapMore.release: return .share
+        case Beat.tapMore.release..<Beat.tapEdit.release: return .apps(isEditing: false)
         case Beat.tapEdit.release..<Beat.tapDone.release: return .apps(isEditing: true)
-        case Beat.tapDone.release..<Beat.sheetCloses: return .share
+        // Held through the fade out: the chapter ends on the row with Dictus in it.
+        case Beat.tapDone.release..<(Beat.setUpFadeOut + fade): return .share
+        case Beat.tapShare.release..<Beat.tapDictus.release: return .share
         default: return nil
         }
     }
@@ -154,7 +189,7 @@ public enum VoiceNotesSceneScript {
     private static func keyboard(at time: Double) -> Keyboard? {
         switch time {
         case Beat.tapField.release..<Beat.tapInsert.release: return .reader
-        case Beat.tapInsert.release..<Beat.nextShare: return .keys
+        case Beat.tapInsert.release...: return .keys
         default: return nil
         }
     }
