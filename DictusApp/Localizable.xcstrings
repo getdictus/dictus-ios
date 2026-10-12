@@ -780,6 +780,17 @@
         }
       }
     },
+    "Check Full Access in Settings" : {
+      "comment" : "Onboarding keyboard step, discreet link under \"Keyboard detected\" (#709): opens Dictus' page in iOS Settings so the user can check Full Access, which the app cannot see.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifier l'accès complet dans les Réglages"
+          }
+        }
+      }
+    },
     "Checking the model…" : {
       "localizations" : {
         "fr" : {

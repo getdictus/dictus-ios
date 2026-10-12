@@ -541,6 +541,18 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.subsystem, .lifecycle)
     }
 
+    // MARK: - Full Access link on the keyboard step (#709)
+
+    /// Info, not debug: the device check of #709 greps it, and it must survive a level
+    /// filter next to `onboardingKeyboardDetected`.
+    func testFullAccessLinkOpenedIsInfoLifecycle() {
+        let event = LogEvent.onboardingFullAccessLinkOpened
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.name, "onboardingFullAccessLinkOpened")
+        XCTAssertTrue(event.formatted().contains("onboardingFullAccessLinkOpened"))
+    }
+
     // MARK: - User dictionary events (#307)
 
     func testUserDictionaryWordLearnedIsDebugKeyboard() {
