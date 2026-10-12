@@ -18,10 +18,10 @@ import Foundation
 /// WHY in DictusCore: the order, the skips and the migrations are rules, and the app
 /// target has no test bundle.
 ///
-/// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, Apple
-/// Intelligence (#683, only when it is not ready), the Smart Modes scene (#679), the pick
-/// of three Smart Modes (#677), the wait for the model, the microphone, the first
-/// dictation, the completion screen. The microphone sits right before the first dictation
+/// THE ORDER (#675, #649 decisions 1 and 17): intro, language, why Full Access (#704),
+/// keyboard in Settings, Apple Intelligence (#683, only when it is not ready), the Smart
+/// Modes scene (#679), the pick of three Smart Modes (#677), the wait for the model, the
+/// microphone, the first dictation, the completion screen. The microphone sits right before the first dictation
 /// because it is the first step that uses it, and its pre-permission screen keeps the
 /// system popup out of the recording. Steps the later #649 sub-issues add (the feature
 /// scenes, the Dynamic Island tutorial) slot in as new cases with
@@ -33,6 +33,16 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// Spoken language, keyboard language and layout. Confirming it starts the model
     /// download.
     case language
+    /// Why the keyboard asks for Full Access (#704): Apple's alert drawn ahead of time, what
+    /// Dictus uses it for and what it does not.
+    ///
+    /// WHY RIGHT BEFORE THE KEYBOARD STEP: testers declined to set Dictus up on Apple's
+    /// alert ("the developer of this keyboard can transmit anything you type"), reading it
+    /// as something Dictus does. Seen and explained here, it is no surprise in Settings.
+    ///
+    /// Passed over where the keyboard cannot dictate (pre-A14, #635): the page says Full
+    /// Access is what lets the keyboard dictate, which is not true on that hardware.
+    case fullAccessExplainer
     /// Adding the keyboard and Full Access in iOS Settings. The step iOS kills the app on.
     case keyboardSetup
     /// Turning on Apple Intelligence (#683, #649 decision 7). Shown only on a capable
@@ -107,7 +117,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .appleIntelligence, .smartModesScene, .smartModePick:
             return true
-        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .completion:
+        case .welcome, .language, .fullAccessExplainer, .keyboardSetup, .modelPreparation, .microphone, .firstDictation,
+             .completion:
             return false
         }
     }
@@ -124,8 +135,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .smartModesScene, .smartModePick:
             return true
-        case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone, .firstDictation,
-             .completion:
+        case .welcome, .language, .fullAccessExplainer, .keyboardSetup, .appleIntelligence, .modelPreparation,
+             .microphone, .firstDictation, .completion:
             return false
         }
     }
@@ -159,9 +170,11 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// - `microphone`: a microphone already granted (a second run of the onboarding, or an
     ///   install that went through the old order, where the microphone came first) has
     ///   nothing to ask. A denied one is still shown: the page says where to turn it on.
+    /// - `fullAccessExplainer`: nothing true to say where the keyboard cannot dictate
+    ///   (pre-A14, #635), since the page explains Full Access as what lets it dictate.
     public var isSkippedWhenSatisfied: Bool {
         switch self {
-        case .appleIntelligence, .modelPreparation, .microphone:
+        case .fullAccessExplainer, .appleIntelligence, .modelPreparation, .microphone:
             return true
         case .welcome, .language, .keyboardSetup, .smartModesScene, .smartModePick, .firstDictation, .completion:
             return false
@@ -183,9 +196,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .welcome, .completion:
             return false
-        case .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .modelPreparation,
-             .microphone,
-             .firstDictation:
+        case .language, .fullAccessExplainer, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick,
+             .modelPreparation, .microphone, .firstDictation:
             return true
         }
     }
@@ -224,8 +236,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .smartModesScene, .smartModePick, .firstDictation:
             return true
-        case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
-             .completion:
+        case .welcome, .language, .fullAccessExplainer, .keyboardSetup, .appleIntelligence, .modelPreparation,
+             .microphone, .completion:
             return false
         }
     }

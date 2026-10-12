@@ -26,8 +26,8 @@ final class OnboardingStepTests: XCTestCase {
 
     func testOrderPutsTheMicrophoneRightBeforeTheFirstDictation() {
         XCTAssertEqual(OnboardingStep.allCases, [
-            .welcome, .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick,
-            .modelPreparation,
+            .welcome, .language, .fullAccessExplainer, .keyboardSetup, .appleIntelligence, .smartModesScene,
+            .smartModePick, .modelPreparation,
             .microphone, .firstDictation, .completion
         ])
         XCTAssertEqual(OnboardingStep.microphone.next, .firstDictation)
@@ -36,7 +36,8 @@ final class OnboardingStepTests: XCTestCase {
 
     func testNextWalksTheFlowAndEndsAfterTheCompletion() {
         XCTAssertEqual(OnboardingStep.welcome.next, .language)
-        XCTAssertEqual(OnboardingStep.language.next, .keyboardSetup)
+        XCTAssertEqual(OnboardingStep.language.next, .fullAccessExplainer)
+        XCTAssertEqual(OnboardingStep.fullAccessExplainer.next, .keyboardSetup)
         XCTAssertEqual(OnboardingStep.keyboardSetup.next, .appleIntelligence)
         XCTAssertEqual(OnboardingStep.appleIntelligence.next, .smartModesScene)
         XCTAssertEqual(OnboardingStep.smartModesScene.next, .smartModePick)
@@ -72,11 +73,12 @@ final class OnboardingStepTests: XCTestCase {
     func testOnlyAppleIntelligenceTheWaitAndTheMicrophoneCanBeSkipped() {
         XCTAssertEqual(
             OnboardingStep.allCases.filter(\.isSkippedWhenSatisfied),
-            [.appleIntelligence, .modelPreparation, .microphone]
+            [.fullAccessExplainer, .appleIntelligence, .modelPreparation, .microphone]
         )
         // A step outside that list is shown even when the caller calls it satisfied.
         XCTAssertEqual(
-            OnboardingStep.language.next(skipping: [.keyboardSetup], deviceCanRunSmartModes: true), .keyboardSetup
+            OnboardingStep.fullAccessExplainer.next(skipping: [.keyboardSetup], deviceCanRunSmartModes: true),
+            .keyboardSetup
         )
         XCTAssertEqual(
             OnboardingStep.microphone.next(skipping: [.firstDictation], deviceCanRunSmartModes: true), .firstDictation
@@ -91,6 +93,46 @@ final class OnboardingStepTests: XCTestCase {
             OnboardingStep.smartModesScene.next(skipping: [.smartModePick], deviceCanRunSmartModes: true),
             .smartModePick
         )
+    }
+
+    // MARK: - Why Full Access (#704)
+
+    func testTheFullAccessExplainerSitsRightBeforeTheKeyboardStep() {
+        XCTAssertEqual(OnboardingStep.fullAccessExplainer.position + 1, OnboardingStep.keyboardSetup.position)
+        XCTAssertEqual(OnboardingStep.language.next(skipping: [], deviceCanRunSmartModes: true), .fullAccessExplainer)
+        XCTAssertEqual(OnboardingStep.language.next(skipping: [], deviceCanRunSmartModes: false), .fullAccessExplainer)
+    }
+
+    func testAKeyboardThatCannotDictatePassesOverTheExplainer() {
+        // Pre-A14 (#635): the caller marks it satisfied, and the keyboard step follows.
+        XCTAssertEqual(
+            OnboardingStep.language.next(skipping: [.fullAccessExplainer], deviceCanRunSmartModes: false),
+            .keyboardSetup
+        )
+    }
+
+    func testTheExplainerIsNotAProStepAndHasNoSkip() {
+        XCTAssertFalse(OnboardingStep.fullAccessExplainer.isProStep)
+        XCTAssertFalse(OnboardingStep.fullAccessExplainer.isSkippable)
+        XCTAssertFalse(OnboardingStep.fullAccessExplainer.isInSceneSequence)
+    }
+
+    func testTheExplainerHasItsOwnSegmentOnEveryDevice() {
+        XCTAssertEqual(OnboardingStep.fullAccessExplainer.progressIndex(deviceCanRunSmartModes: true), 1)
+        XCTAssertEqual(OnboardingStep.fullAccessExplainer.progressIndex(deviceCanRunSmartModes: false), 1)
+        XCTAssertEqual(OnboardingStep.keyboardSetup.progressIndex(deviceCanRunSmartModes: true), 2)
+    }
+
+    func testAKillOnTheExplainerResumesThere() {
+        OnboardingStep.save(.fullAccessExplainer)
+        XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), "fullAccessExplainer")
+        XCTAssertEqual(OnboardingStep.current(), .fullAccessExplainer)
+    }
+
+    func testAnInstallStoredOnTheKeyboardStepBeforeTheExplainerResumesThere() {
+        // Written by a build without the explainer: the user is past it, nothing to show.
+        defaults.set("keyboardSetup", forKey: SharedKeys.onboardingStep)
+        XCTAssertEqual(OnboardingStep.current(), .keyboardSetup)
     }
 
     // MARK: - Pro steps (#677)
@@ -158,27 +200,27 @@ final class OnboardingStepTests: XCTestCase {
 
     func testProgressBarCoversEveryStepBetweenTheIntroAndTheCompletion() {
         XCTAssertEqual(OnboardingStep.progressSteps(deviceCanRunSmartModes: true), [
-            .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .modelPreparation,
-            .microphone,
+            .language, .fullAccessExplainer, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick,
+            .modelPreparation, .microphone,
             .firstDictation
         ])
         XCTAssertNil(OnboardingStep.welcome.progressIndex(deviceCanRunSmartModes: true))
         XCTAssertNil(OnboardingStep.completion.progressIndex(deviceCanRunSmartModes: true))
         XCTAssertEqual(OnboardingStep.language.progressIndex(deviceCanRunSmartModes: true), 0)
-        XCTAssertEqual(OnboardingStep.appleIntelligence.progressIndex(deviceCanRunSmartModes: true), 2)
-        XCTAssertEqual(OnboardingStep.smartModesScene.progressIndex(deviceCanRunSmartModes: true), 3)
-        XCTAssertEqual(OnboardingStep.smartModePick.progressIndex(deviceCanRunSmartModes: true), 4)
-        XCTAssertEqual(OnboardingStep.microphone.progressIndex(deviceCanRunSmartModes: true), 6)
-        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: true), 7)
+        XCTAssertEqual(OnboardingStep.appleIntelligence.progressIndex(deviceCanRunSmartModes: true), 3)
+        XCTAssertEqual(OnboardingStep.smartModesScene.progressIndex(deviceCanRunSmartModes: true), 4)
+        XCTAssertEqual(OnboardingStep.smartModePick.progressIndex(deviceCanRunSmartModes: true), 5)
+        XCTAssertEqual(OnboardingStep.microphone.progressIndex(deviceCanRunSmartModes: true), 7)
+        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: true), 8)
     }
 
     func testAHiddenProStepHasNoSegment() {
         XCTAssertEqual(OnboardingStep.progressSteps(deviceCanRunSmartModes: false), [
-            .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation
+            .language, .fullAccessExplainer, .keyboardSetup, .modelPreparation, .microphone, .firstDictation
         ])
         XCTAssertNil(OnboardingStep.smartModePick.progressIndex(deviceCanRunSmartModes: false))
         XCTAssertNil(OnboardingStep.smartModesScene.progressIndex(deviceCanRunSmartModes: false))
-        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: false), 4)
+        XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: false), 5)
     }
 
     func testTheScenePickAndFirstDictationOfferSkip() {
