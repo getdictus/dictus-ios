@@ -349,13 +349,17 @@ private struct SceneMessagesHost: View {
 
 // MARK: - Toolbar
 
-/// `ToolbarView.dictationBar`: ☰, the centre slot, the mic pill.
-private struct SceneToolbar: View {
+/// `ToolbarView.dictationBar`: ☰, the centre slot, the mic pill. Shared with the voice
+/// notes scene (#680), whose keyboard is the same one at rest.
+struct SceneToolbar: View {
     let isFanOpen: Bool
     /// Whether the keyboard offers to undo the dictation it just inserted.
     let offersUndo: Bool
     /// The armed mode, nil for none.
     let armed: SmartMode?
+    /// Whether the ☰ wears its "voice notes are in the keyboard" ring (#639), as it does
+    /// while a shared note is still in the keyboard (`showsMenuHalo`).
+    var ringsMenu = false
 
     private typealias Metrics = SmartModesSceneMetrics
 
@@ -393,13 +397,20 @@ private struct SceneToolbar: View {
         .padding(.top, Metrics.toolbarTopPadding)
     }
 
-    /// `ToolbarView.hamburgerButton`'s look.
+    /// `ToolbarView.hamburgerButton`'s look, ringed as `ToolbarView.barIcon` draws it:
+    /// the mic pill's own halo behind the capsule, the glyph in the accent.
     private var hamburger: some View {
         Image(systemName: "line.3.horizontal")
             .font(.system(size: 17, weight: .medium))
-            .foregroundColor(.dictusPillIconSecondary)
+            .foregroundColor(ringsMenu ? .dictusAccent : .dictusPillIconSecondary)
             .frame(width: Metrics.pillWidth, height: Metrics.pillHeight)
             .dictusGlass(in: Capsule())
+            .background {
+                if ringsMenu {
+                    // `ToolbarView.haloOpacity` and its 2 pt line.
+                    DictusHalo(isPill: true, color: .dictusAccent, opacity: 0.45, lineWidth: 2)
+                }
+            }
             .frame(width: max(Metrics.pillWidth, 44), height: 44)
     }
 
@@ -522,7 +533,7 @@ private struct SceneFan: View {
 
 /// The keyboard at rest: three letter rows and the bottom row, at `KeyMetrics`' sizes,
 /// in the vendored theme's key colours.
-private struct SceneKeys: View {
+struct SceneKeys: View {
     let layout: LayoutType
 
     private typealias Metrics = SmartModesSceneMetrics
@@ -760,7 +771,7 @@ private struct SceneWaveform: View {
 
 /// iOS's bar under a third-party keyboard: the globe on the left, the system dictation mic
 /// on the right. iOS's own UI, so drawn.
-private struct SceneSystemBar: View {
+struct SceneSystemBar: View {
     var body: some View {
         HStack {
             Image(systemName: "globe")
@@ -779,7 +790,7 @@ private struct SceneSystemBar: View {
 
 /// The drawn finger: a soft grey disc, as screen recordings show touches. Smaller and
 /// darker while pressed.
-private struct SceneFinger: View {
+struct SceneFinger: View {
     let isPressed: Bool
 
     var body: some View {

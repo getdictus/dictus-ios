@@ -629,6 +629,17 @@
         }
       }
     },
+    "Apps" : {
+      "comment" : "Onboarding voice notes scene: title of the drawn list of apps behind the share sheet's More. As iOS words it (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps"
+          }
+        }
+      }
+    },
     "At least one model must stay on your device" : {
       "comment" : "Disabled overflow-menu row explaining why the last downloaded model cannot be deleted (issue #193).",
       "localizations" : {
@@ -1154,6 +1165,17 @@
         }
       }
     },
+    "Dictus in Favorites" : {
+      "comment" : "Onboarding voice notes scene: second step of the path, Dictus added to the share sheet's favorites so it sits in its row of apps (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus en favori"
+          }
+        }
+      }
+    },
     "Dictus is waiting in the keyboard of every app. Hold the globe, and speak." : {
       "comment" : "Onboarding completion message (#675).",
       "localizations" : {
@@ -1359,6 +1381,72 @@
         }
       }
     },
+    "Edit" : {
+      "comment" : "Button that turns a list into edit mode, as iOS words it: drawn in the onboarding's voice notes and vocabulary scenes (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier"
+          }
+        }
+      }
+    },
+    "Every dictation stays on your iPhone. Search for a word, find the text." : {
+      "comment" : "Onboarding history scene: the line under the title (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque dictée reste sur votre iPhone. Cherchez un mot, retrouvez le texte."
+          }
+        }
+      }
+    },
+    "Everything is easy to find" : {
+      "comment" : "Onboarding history scene: title (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout se retrouve"
+          }
+        }
+      }
+    },
+    "Favorites" : {
+      "comment" : "Onboarding voice notes scene: header of the drawn list of favorite apps behind the share sheet's More. As iOS words it (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favoris"
+          }
+        }
+      }
+    },
+    "Hello Mrs Kowalczyk, I'm confirming our appointment on Tuesday at 10 a.m." : {
+      "comment" : "Onboarding history scene: a saved dictation. Must NOT contain the searched word 'dentist' (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonjour Madame Kowalczyk, je vous confirme notre rendez-vous de mardi à 10 heures."
+          }
+        }
+      }
+    },
+    "Hi! Yes, we're still having dinner together tonight. I booked a table at Nonna's for 7:30, but my train is running about ten minutes late." : {
+      "comment" : "Onboarding history scene: a saved dictation, today. Must NOT contain the searched word 'dentist' (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coucou ! Oui, on dîne toujours ensemble ce soir. J’ai réservé chez Nonna pour 19 h 30, mais mon train a une dizaine de minutes de retard."
+          }
+        }
+      }
+    },
     "Hold the mic, slide to a mode, let go. Dictus writes in that mode." : {
       "comment" : "Onboarding Smart Modes scene: the line under the title, describing the long-press gesture on the keyboard's mic (#679).",
       "localizations" : {
@@ -1377,6 +1465,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "J'arrive dans dix minutes."
+          }
+        }
+      }
+    },
+    "Insert" : {
+      "comment" : "Onboarding voice notes scene: third step of the path, inserting the transcript from the keyboard. Same word as the keyboard's button (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Insérer"
+          }
+        }
+      }
+    },
+    "More" : {
+      "comment" : "Onboarding voice notes scene: the drawn share sheet's last item, which opens the list of every app. As iOS words it (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus"
           }
         }
       }
@@ -1402,6 +1512,17 @@
         }
       }
     },
+    "Note a name and the way Dictus gets it wrong. Next time, it will write it your way." : {
+      "comment" : "Onboarding vocabulary scene: the line under the title (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notez un nom et la façon dont Dictus l’écrit de travers. La prochaine fois, il l’écrira à votre façon."
+          }
+        }
+      }
+    },
     "One long press, one Smart Mode" : {
       "comment" : "Onboarding Smart Modes scene: title (#679).",
       "localizations" : {
@@ -1413,6 +1534,105 @@
         }
       }
     },
+    "Remember to call the dentist to move Thursday's appointment." : {
+      "comment" : "Onboarding history scene: a saved dictation, today. Contains the searched word 'dentist' (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Penser à rappeler le dentiste pour décaler le rendez-vous de jeudi."
+          }
+        }
+      }
+    },
+    "Reminders" : {
+      "comment" : "Onboarding voice notes scene: Apple's Reminders app in the drawn share sheet. Its name as iOS shows it in each language (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rappels"
+          }
+        }
+      }
+    },
+    "Reply" : {
+      "comment" : "Onboarding voice notes scene: an item of the drawn context menu of a received voice message (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répondre"
+          }
+        }
+      }
+    },
+    "Save to Files" : {
+      "comment" : "Onboarding voice notes scene: an action of the drawn share sheet, as iOS words it (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer dans Fichiers"
+          }
+        }
+      }
+    },
+    "Share a voice note to Dictus from any app. The text is waiting for you in the keyboard." : {
+      "comment" : "Onboarding voice notes scene: the line under the title (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partagez un mémo vocal à Dictus depuis n’importe quelle app. Le texte vous attend dans le clavier."
+          }
+        }
+      }
+    },
+    "Shopping list: pharmacy, dentist, dry cleaner, and the groceries for the weekend." : {
+      "comment" : "Onboarding history scene: a saved dictation. Contains the searched word 'dentist' (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste de courses : pharmacie, dentiste, pressing, et les courses pour le week-end."
+          }
+        }
+      }
+    },
+    "Site meeting: the window delivery is pushed back to Monday, the plumber comes on Wednesday morning, and the electrician's quote has to be approved before Friday." : {
+      "comment" : "Onboarding voice notes scene: the transcript of a shared voice note, shown in the drawn keyboard's reader and inserted in the message field. A natural spoken work message (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réunion de chantier : la livraison des fenêtres est repoussée à lundi, le plombier passe mercredi matin, et il faut valider le devis de l’électricien avant vendredi."
+          }
+        }
+      }
+    },
+    "Suggestions" : {
+      "comment" : "Onboarding voice notes scene: header of the drawn list of suggested apps behind the share sheet's More. As iOS words it (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suggestions"
+          }
+        }
+      }
+    },
+    "The dentist said to come back in six months for a check-up." : {
+      "comment" : "Onboarding history scene: a saved dictation. Contains the searched word 'dentist' (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le dentiste a dit de revenir dans six mois pour un contrôle."
+          }
+        }
+      }
+    },
     "You have just seen them: pick three. They will be waiting for you when you hold down the microphone." : {
       "comment" : "Onboarding Smart Mode pick: subtitle under the title. It follows the Smart Modes scene (#677, #679).",
       "localizations" : {
@@ -1420,6 +1640,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous venez de les voir : choisissez-en trois. Ils vous attendront d'un appui long sur le micro."
+          }
+        }
+      }
+    },
+    "Your voice notes, transcribed" : {
+      "comment" : "Onboarding voice notes scene: title (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos mémos vocaux, transcrits"
+          }
+        }
+      }
+    },
+    "Your words, spelled right" : {
+      "comment" : "Onboarding vocabulary scene: title (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos mots, bien écrits"
+          }
+        }
+      }
+    },
+    "dentist" : {
+      "comment" : "Onboarding history scene: the word typed in the drawn search bar. It must appear in three of the scene's six transcriptions: the dentist reminder, the shopping list and the check-up (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dentiste"
+          }
+        }
+      }
+    },
+    "doctor Nguyen" : {
+      "comment" : "Onboarding vocabulary scene: how the transcription writes the title 'Dr Nguyen' out in full, typed as the variant the term replaces (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "docteur Nguyen"
           }
         }
       }

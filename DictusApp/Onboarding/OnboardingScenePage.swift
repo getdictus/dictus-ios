@@ -10,13 +10,16 @@ import DictusCore
 /// does, and only on the preparation step. The shell's **Skip** (top right) jumps the
 /// whole sequence (`OnboardingStep.stepAfterSceneSequence`); `OnboardingView` owns it.
 ///
-/// The scenes after this one (voice notes, vocabulary, history) are the same page with
-/// another title, line and scene.
-struct OnboardingScenePage<Scene: View>: View {
+/// Every scene of the sequence (Smart Modes, voice notes, vocabulary, history, #680) is
+/// this page with another title, line and scene.
+struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
     let title: Text
     let line: Text
     /// The end of the drawn iPhone the scene shows (`OnboardingPhoneCard`).
     var phoneEnd: OnboardingPhoneEnd = .bottom
+    /// Drawn in the card above the phone (`OnboardingPhoneCard.header`), nothing for most
+    /// scenes.
+    let cardHeader: () -> CardHeader
     let loopSeconds: Double
     /// Where the loop starts when the page appears.
     var startSeconds: Double = 0
@@ -26,13 +29,37 @@ struct OnboardingScenePage<Scene: View>: View {
     /// The model the onboarding installs.
     let modelIdentifier: String
     let onNext: () -> Void
-    @ViewBuilder let scene: (Double) -> Scene
+    let scene: (Double) -> Scene
 
     private typealias Phone = OnboardingPhoneMetrics
 
+    init(title: Text,
+         line: Text,
+         phoneEnd: OnboardingPhoneEnd = .bottom,
+         loopSeconds: Double,
+         startSeconds: Double = 0,
+         stillSeconds: Double,
+         modelManager: ModelManager,
+         modelIdentifier: String,
+         onNext: @escaping () -> Void,
+         @ViewBuilder cardHeader: @escaping () -> CardHeader,
+         @ViewBuilder scene: @escaping (Double) -> Scene) {
+        self.title = title
+        self.line = line
+        self.phoneEnd = phoneEnd
+        self.cardHeader = cardHeader
+        self.loopSeconds = loopSeconds
+        self.startSeconds = startSeconds
+        self.stillSeconds = stillSeconds
+        self.modelManager = modelManager
+        self.modelIdentifier = modelIdentifier
+        self.onNext = onNext
+        self.scene = scene
+    }
+
     var body: some View {
         OnboardingPage(title: title, subtitle: line) {
-            OnboardingPhoneCard(end: phoneEnd) {
+            OnboardingPhoneCard(end: phoneEnd, header: cardHeader) {
                 AnimatedScenePlayer(
                     loopSeconds: loopSeconds,
                     startSeconds: startSeconds,
@@ -63,5 +90,23 @@ struct OnboardingScenePage<Scene: View>: View {
             topTrailingRadius: showsBottom ? 0 : radius,
             style: .continuous
         )
+    }
+}
+
+extension OnboardingScenePage where CardHeader == EmptyView {
+    /// A scene with nothing above its phone, which is every scene but voice notes.
+    init(title: Text,
+         line: Text,
+         phoneEnd: OnboardingPhoneEnd = .bottom,
+         loopSeconds: Double,
+         startSeconds: Double = 0,
+         stillSeconds: Double,
+         modelManager: ModelManager,
+         modelIdentifier: String,
+         onNext: @escaping () -> Void,
+         @ViewBuilder scene: @escaping (Double) -> Scene) {
+        self.init(title: title, line: line, phoneEnd: phoneEnd, loopSeconds: loopSeconds,
+                  startSeconds: startSeconds, stillSeconds: stillSeconds, modelManager: modelManager,
+                  modelIdentifier: modelIdentifier, onNext: onNext, cardHeader: { EmptyView() }, scene: scene)
     }
 }

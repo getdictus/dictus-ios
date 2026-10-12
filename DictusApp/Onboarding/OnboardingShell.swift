@@ -479,12 +479,28 @@ enum OnboardingPhoneEnd {
 
 /// The drawn iPhone in its card. Metrics in `OnboardingPhoneMetrics` (a generic view
 /// cannot hold static stored properties).
-struct OnboardingPhoneCard<Content: View>: View {
+///
+/// `header` sits inside the card, above the phone, which then runs off under it instead
+/// of off the card's edge: the voice notes scene's chips (#680, mock-up
+/// `07a-scene-memos-vocaux`). Most cards have none.
+struct OnboardingPhoneCard<Content: View, Header: View>: View {
     /// The end of the phone the card shows.
     var end: OnboardingPhoneEnd = .top
+    @ViewBuilder let header: Header
     @ViewBuilder let content: Content
 
     private typealias Metrics = OnboardingPhoneMetrics
+
+    init(end: OnboardingPhoneEnd = .top,
+         @ViewBuilder header: () -> Header,
+         @ViewBuilder content: () -> Content) {
+        self.end = end
+        self.header = header()
+        self.content = content()
+    }
+
+    /// Whether `header` draws anything. `EmptyView` is the type of "no header".
+    private var hasHeader: Bool { Header.self != EmptyView.self }
 
     var body: some View {
         let showsTop = end == .top
@@ -509,7 +525,7 @@ struct OnboardingPhoneCard<Content: View>: View {
             style: .continuous
         )
         let overrunEdge: Edge.Set = showsTop ? .bottom : .top
-        content
+        let phone = content
             .frame(maxWidth: .infinity, alignment: .leading)
             // The phone is drawn taller than the card so the crop below cuts through it:
             // no edge at the cut, the phone runs off the card.
@@ -519,11 +535,28 @@ struct OnboardingPhoneCard<Content: View>: View {
                     .strokeBorder(Metrics.phoneFrame, lineWidth: Metrics.phoneFrameWidth)
                     .padding(overrunEdge, -Metrics.overrun)
             )
-            .padding(.horizontal, Metrics.phoneInset)
-            .padding(showsTop ? .top : .bottom, Metrics.phoneInset)
-            .background(cardShape.fill(Color.dictusSurface))
-            // Rounded where the phone shows, cut through the phone at the other edge.
-            .clipShape(cardShape)
+        VStack(spacing: 0) {
+            if hasHeader {
+                header
+                // Under a header the phone is cut at its own edge, so its overrun does
+                // not run up over the header.
+                phone.clipped()
+            } else {
+                phone
+            }
+        }
+        .padding(.horizontal, Metrics.phoneInset)
+        .padding(showsTop ? .top : .bottom, Metrics.phoneInset)
+        .background(cardShape.fill(Color.dictusSurface))
+        // Rounded where the phone shows, cut through the phone at the other edge.
+        .clipShape(cardShape)
+    }
+}
+
+extension OnboardingPhoneCard where Header == EmptyView {
+    /// A card with the phone alone, which is every card but the voice notes scene's.
+    init(end: OnboardingPhoneEnd = .top, @ViewBuilder content: () -> Content) {
+        self.init(end: end, header: { EmptyView() }, content: content)
     }
 }
 
