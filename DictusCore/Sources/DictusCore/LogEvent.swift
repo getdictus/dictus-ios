@@ -436,19 +436,27 @@ public enum LogEvent: Sendable {
 
     // MARK: Lifecycle
     case appLaunched(version: String)
-    /// The application state one main-loop turn after `didFinishLaunching` (#707), so a
-    /// launch iOS made in the background — to deliver the download session's events, with
-    /// `sessionSendsLaunchEvents = true` — reads apart from one the user made.
+    /// The application state one main-loop turn after `didFinishLaunching` (#707), as a
+    /// hint at who made the launch.
+    ///
+    /// HOW TO READ IT. `inactive` means the user made the launch: the scene was already
+    /// coming to the foreground. `background` does NOT settle it. iOS's own background
+    /// launches read `background`, but so does a user launch that is slow to attach its
+    /// scene. Measured on the iOS 27 simulator on 2026-10-12: a `simctl launch` read
+    /// `background` with `appDidBecomeActive` 3 s later. On device, a `devicectl process
+    /// launch` read `background` and became active in the same second. What decides is
+    /// whether `appDidBecomeActive` follows. A launch that never logs it is a background
+    /// launch, and `appBackgroundSessionEvents` says whether the download session caused it.
     ///
     /// WHY ITS OWN LINE, AND NOT A FIELD ON `appLaunched` as #707's triage first asked.
-    /// Measured on the iOS 27 simulator on 2026-10-11, on both launch kinds (a user launch,
-    /// and a background relaunch iOS made after the process was killed with transfers in
-    /// flight): `applicationState` reads `active` when `appLaunched` is written, in
-    /// `App.init`, and `background` in `didFinishLaunching` — the same value for both kinds
-    /// at both points. One turn later it reads `inactive` for the user's launch and
-    /// `background` for iOS's. Writing `appLaunched` that late would let other lines of the
-    /// new process land before the line every reader splits a log on, so the reading gets
-    /// a line of its own, right behind it.
+    /// Measured on the simulator on 2026-10-11, on both launch kinds:
+    /// - in `App.init`, where `appLaunched` is written, `applicationState` reads `active`
+    ///   for both;
+    /// - in `didFinishLaunching`, it reads `background` for both;
+    /// - one turn later is the first point that ever reads differently.
+    ///
+    /// Writing `appLaunched` that late would let other lines of the new process land
+    /// before the line every reader splits a log on.
     case appLaunchState(state: String)
     /// iOS called `application(_:handleEventsForBackgroundURLSession:completionHandler:)`:
     /// it has a background session's events to deliver to this process (#707).
@@ -458,8 +466,8 @@ public enum LogEvent: Sendable {
     ///
     /// Not a launch kind on its own. Seen on the iOS 27 simulator on 2026-10-11 in three
     /// shapes: a launch iOS made in the background, a suspended process woken in place, and
-    /// a launch by the user while events were waiting. `appLaunchState` is the line that
-    /// tells a launch by iOS from one by the user.
+    /// a launch by the user while events were waiting. Read it with `appLaunchState` and
+    /// with whether `appDidBecomeActive` follows.
     case appBackgroundSessionEvents(identifier: String)
     case appDidBecomeActive
     case appWillResignActive

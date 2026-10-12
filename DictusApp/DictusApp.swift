@@ -37,7 +37,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         BackgroundModelDownloadService.shared.restore()
-        // The launch kind, one main-loop turn from now (#707). See `appLaunchState`.
+        // A hint at the launch kind, one main-loop turn from now (#707). `background` alone
+        // does not settle it: see `appLaunchState`.
         DispatchQueue.main.async {
             PersistentLog.log(.appLaunchState(state: Self.applicationStateName))
         }
