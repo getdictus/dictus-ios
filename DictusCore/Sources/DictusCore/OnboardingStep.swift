@@ -230,6 +230,38 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         }
     }
 
+    // MARK: - Going back (#700)
+
+    /// The step the shell's back control returns to, or nil for a step without one.
+    ///
+    /// Only the language step has one, and it returns to the intro: a reflex tap on the
+    /// intro's button should not cost the user the three scenes.
+    ///
+    /// WHY NOT FURTHER: confirming the language step starts the model download. From the
+    /// keyboard setup on, going back would mean cancelling or duplicating that download,
+    /// and the keyboard setup is the step iOS kills the app on.
+    public var stepBack: OnboardingStep? {
+        switch self {
+        case .language:
+            return .welcome
+        case .welcome, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .modelPreparation,
+             .microphone, .firstDictation, .completion:
+            return nil
+        }
+    }
+
+    /// Goes back from `step`: records `stepBack` as the step to resume at and returns it,
+    /// or returns nil and records nothing for a step without a back control.
+    ///
+    /// WHY THE WRITE IS HERE: an app killed after going back must resume on the intro, not
+    /// on the step the user left (#700), and the app target has no test bundle.
+    @discardableResult
+    public static func goBack(from step: OnboardingStep, defaults: UserDefaults = AppGroup.defaults) -> OnboardingStep? {
+        guard let back = step.stepBack else { return nil }
+        save(back, defaults: defaults)
+        return back
+    }
+
     // MARK: - Migration from the page index (before #649)
 
     /// Where an install that was mid-onboarding on the old page numbering resumes.

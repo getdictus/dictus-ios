@@ -296,6 +296,35 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertNil(OnboardingStep.resumed(fromStoredRawValue: "polish"))
     }
 
+    // MARK: - Going back (#700)
+
+    func testOnlyTheLanguageStepGoesBackAndItGoesToTheIntro() {
+        XCTAssertEqual(OnboardingStep.allCases.filter { $0.stepBack != nil }, [.language])
+        XCTAssertEqual(OnboardingStep.language.stepBack, .welcome)
+    }
+
+    func testNoStepFromTheKeyboardSetupOnGoesBack() {
+        // Confirming the language starts the model download: going back from here on
+        // would cancel or duplicate it.
+        for step in OnboardingStep.allCases where step.position >= OnboardingStep.keyboardSetup.position {
+            XCTAssertNil(step.stepBack, "\(step)")
+        }
+    }
+
+    func testGoingBackFromTheLanguageStepResumesOnTheIntroAfterAKill() {
+        OnboardingStep.save(.language)
+        XCTAssertEqual(OnboardingStep.goBack(from: .language), .welcome)
+        XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), "welcome")
+        // A relaunch reads the step afresh.
+        XCTAssertEqual(OnboardingStep.current(), .welcome)
+    }
+
+    func testGoingBackWhereThereIsNoBackRecordsNothing() {
+        OnboardingStep.save(.keyboardSetup)
+        XCTAssertNil(OnboardingStep.goBack(from: .keyboardSetup))
+        XCTAssertEqual(OnboardingStep.current(), .keyboardSetup)
+    }
+
     // MARK: - The old page index (before #649)
 
     func testLegacyIndexMapping() {

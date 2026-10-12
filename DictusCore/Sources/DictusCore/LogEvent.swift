@@ -403,6 +403,9 @@ public enum LogEvent: Sendable {
     /// The Skip of a feature scene jumped the whole scene sequence (#679, #649 decision 8).
     /// `from` is the step it was tapped on, `to` the step it landed on.
     case onboardingSceneSequenceSkipped(from: String, to: String)
+    /// The back control of the onboarding shell was tapped (#700). `from` is the step it
+    /// was tapped on, `to` the step it returned to.
+    case onboardingWentBack(from: String, to: String)
 
     // MARK: Live Activity
     case liveActivityStarted(id: String)
@@ -688,7 +691,7 @@ public enum LogEvent: Sendable {
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped:
+             .onboardingSceneSequenceSkipped, .onboardingWentBack:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
              .coldStartStranded:
@@ -756,7 +759,7 @@ public enum LogEvent: Sendable {
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped,
+             .onboardingSceneSequenceSkipped, .onboardingWentBack,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
              .transcriptionStarted, .transcriptionCompleted,
@@ -1012,7 +1015,8 @@ public enum LogEvent: Sendable {
             return "identifiers=\(identifiers)"
         case .onboardingSmartModePickSkipped:
             return ""
-        case .onboardingSceneSequenceSkipped(let from, let to):
+        case .onboardingSceneSequenceSkipped(let from, let to),
+             .onboardingWentBack(let from, let to):
             return "from=\(from) to=\(to)"
 
         // Live Activity
@@ -1272,6 +1276,7 @@ extension LogEvent {
         case .onboardingSmartModesPicked: return "onboardingSmartModesPicked"
         case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
         case .onboardingSceneSequenceSkipped: return "onboardingSceneSequenceSkipped"
+        case .onboardingWentBack: return "onboardingWentBack"
         case .liveActivityStarted: return "liveActivityStarted"
         case .liveActivityTransition: return "liveActivityTransition"
         case .liveActivityFailed: return "liveActivityFailed"
