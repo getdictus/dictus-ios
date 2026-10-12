@@ -17,10 +17,18 @@ public extension DeviceCapabilities {
     /// WHY THE IPAD PREFIX: Dictus is an iPhone app, but it runs on an iPad in
     /// compatibility mode (#612), and no iPad has an island. Every iPad is a known model
     /// without one, so the whole product line answers false rather than falling into the
-    /// "unknown, so a future iPhone" branch it does not belong to.
+    /// "unknown, so a future iPhone" branch it does not belong to. The onboarding never
+    /// asks on an iPad anyway: iPadOS shows no Live Activity, island or Lock Screen, so
+    /// the step that reads this is passed over there (`OnboardingStep.passedOver(on:)`).
     var hasDynamicIsland: Bool {
-        if deviceModelIdentifier.hasPrefix("iPad") { return false }
+        if isIPad { return false }
         return !Self.identifiersWithoutDynamicIsland.contains(deviceModelIdentifier)
+    }
+
+    /// Whether this is an iPad, where Dictus runs in iPhone compatibility mode (#612).
+    /// Read from the identifier's product line, which is all the app can see.
+    var isIPad: Bool {
+        deviceModelIdentifier.hasPrefix("iPad")
     }
 
     /// The iPhones that run iOS 17 (Dictus's floor) and have no Dynamic Island: a notch,

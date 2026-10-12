@@ -63,13 +63,48 @@ final class OnboardingStepTests: XCTestCase {
         }
     }
 
-    /// Nothing the caller reports as satisfied passes over it: it asks for nothing, it shows
-    /// something.
-    func testTheStopStepIsNeverPassedOver() {
-        XCTAssertFalse(OnboardingStep.stopStandby.isSkippedWhenSatisfied)
-        XCTAssertEqual(
-            OnboardingStep.firstDictation.next(skipping: [.stopStandby], deviceCanRunSmartModes: true), .stopStandby
-        )
+    private func device(_ identifier: String) -> DeviceCapabilities {
+        DeviceCapabilities(physicalMemoryGB: 8, availableMemoryMB: 0, deviceModelIdentifier: identifier,
+                           thermalState: .nominal)
+    }
+
+    /// Every iPhone sees it, with an island (`iPhone16,2`, 15 Pro Max) or without one
+    /// (`iPhone14,7`, 14), and an iPhone this build does not know yet.
+    func testEveryIPhoneIsShownTheStopStep() {
+        for identifier in ["iPhone16,2", "iPhone14,7", "iPhone17,5", "iPhone99,1"] {
+            let passedOver = OnboardingStep.passedOver(on: device(identifier))
+            XCTAssertTrue(passedOver.isEmpty, identifier)
+            for capable in [true, false] {
+                XCTAssertEqual(
+                    OnboardingStep.firstDictation.next(skipping: passedOver, deviceCanRunSmartModes: capable),
+                    .stopStandby, identifier
+                )
+            }
+        }
+    }
+
+    /// iPadOS shows no Live Activity: neither picture is true there, so the first dictation
+    /// goes straight to the completion screen, its Skip included (both call `next`).
+    func testAnIPadPassesOverTheStopStep() {
+        for identifier in ["iPad8,1", "iPad13,4", "iPad16,3"] {
+            let passedOver = OnboardingStep.passedOver(on: device(identifier))
+            XCTAssertEqual(passedOver, [.stopStandby], identifier)
+            for capable in [true, false] {
+                XCTAssertEqual(
+                    OnboardingStep.firstDictation.next(skipping: passedOver, deviceCanRunSmartModes: capable),
+                    .completion, identifier
+                )
+            }
+        }
+    }
+
+    /// The iPad rule adds to what the app reports, it does not replace it.
+    func testTheIPadRuleCombinesWithTheOtherSkips() {
+        let satisfied = OnboardingStep.passedOver(on: device("iPad13,4")).union([.microphone])
+        XCTAssertEqual(OnboardingStep.modelPreparation.next(skipping: satisfied, deviceCanRunSmartModes: true),
+                       .firstDictation)
+        XCTAssertEqual(OnboardingStep.firstDictation.next(skipping: satisfied, deviceCanRunSmartModes: true),
+                       .completion)
     }
 
     func testTheStopStepIsNeitherProNorAScene() {
@@ -109,10 +144,10 @@ final class OnboardingStepTests: XCTestCase {
         )
     }
 
-    func testOnlyAppleIntelligenceTheWaitAndTheMicrophoneCanBeSkipped() {
+    func testOnlyAppleIntelligenceTheWaitTheMicrophoneAndTheStopStepCanBeSkipped() {
         XCTAssertEqual(
             OnboardingStep.allCases.filter(\.isSkippedWhenSatisfied),
-            [.appleIntelligence, .modelPreparation, .microphone]
+            [.appleIntelligence, .modelPreparation, .microphone, .stopStandby]
         )
         // A step outside that list is shown even when the caller calls it satisfied.
         XCTAssertEqual(

@@ -218,6 +218,8 @@ struct OnboardingView: View {
     /// - The microphone: already granted on a second run, or by an install that went
     ///   through the order before #675, where the microphone came first. A denied
     ///   microphone is still shown, because that page says where to turn it back on.
+    /// - How to stop Dictus: passed over on an iPad, where iPadOS shows no Live Activity
+    ///   (#681, `OnboardingStep.passedOver(on:)`). Every iPhone sees it.
     private var satisfiedSteps: Set<OnboardingStep> {
         var satisfied: Set<OnboardingStep> = []
         if !AppleIntelligenceOnboarding.isStepNeeded {
@@ -229,6 +231,8 @@ struct OnboardingView: View {
         if AVAudioApplication.shared.recordPermission == .granted {
             satisfied.insert(.microphone)
         }
+        // How to stop Dictus: nothing to show on an iPad, which has no Live Activity (#681).
+        satisfied.formUnion(OnboardingStep.passedOver(on: DeviceCapabilities.current()))
         return satisfied
     }
 

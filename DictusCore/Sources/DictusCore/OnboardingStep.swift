@@ -69,7 +69,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     ///
     /// WHY RIGHT AFTER THE FIRST DICTATION: that dictation is what puts the standby island
     /// up for real, so it is the moment the orange dot the user will ask about appears.
-    /// Shown on every device: every iPhone gets the standby, the Lock Screen view at least.
+    /// Shown on every iPhone: every iPhone gets the standby, the Lock Screen view at least.
+    /// Passed over on an iPad (`passedOver(on:)`), where iPadOS shows no Live Activity.
     case stopStandby
     /// The "you're all set" screen. Its button ends the onboarding.
     case completion
@@ -168,14 +169,31 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// - `microphone`: a microphone already granted (a second run of the onboarding, or an
     ///   install that went through the old order, where the microphone came first) has
     ///   nothing to ask. A denied one is still shown: the page says where to turn it on.
+    /// - `stopStandby`: nothing to show on a device without the standby Live Activity, which
+    ///   is what `passedOver(on:)` reports (#681).
     public var isSkippedWhenSatisfied: Bool {
         switch self {
-        case .appleIntelligence, .modelPreparation, .microphone:
+        case .appleIntelligence, .modelPreparation, .microphone, .stopStandby:
             return true
-        case .welcome, .language, .keyboardSetup, .smartModesScene, .smartModePick, .firstDictation, .stopStandby,
-             .completion:
+        case .welcome, .language, .keyboardSetup, .smartModesScene, .smartModePick, .firstDictation, .completion:
             return false
         }
+    }
+
+    /// The steps this hardware has nothing to show for, to add to what the caller passes to
+    /// `next(skipping:deviceCanRunSmartModes:)`.
+    ///
+    /// - `stopStandby` on an iPad (#681): the step teaches the power button of the standby
+    ///   Live Activity, in the Dynamic Island or on the Lock Screen, and iPadOS shows no
+    ///   Live Activity at all. Either picture would describe a control the user does not
+    ///   have, so the first dictation goes straight to the completion screen there.
+    ///
+    /// WHY HERE AND NOT IN `isShown`: the step is shown or not by hardware, like the Pro
+    /// steps, but iPads are a fringe of an iPhone app (#612). Passing the step over keeps
+    /// one signature for every caller, at the cost of an iPad keeping that step's progress
+    /// segment, which it only ever sees ahead on the first dictation, as an iPhone does.
+    public static func passedOver(on device: DeviceCapabilities) -> Set<OnboardingStep> {
+        device.isIPad ? [.stopStandby] : []
     }
 
     /// Position in the flow.

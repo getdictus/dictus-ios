@@ -99,4 +99,12 @@ final class DeviceCapabilitiesDynamicIslandTests: XCTestCase {
         XCTAssertFalse(device("iPad13,4").hasDynamicIsland)
         XCTAssertFalse(device("iPad16,3").hasDynamicIsland)
     }
+
+    func testIsIPadReadsTheProductLine() {
+        XCTAssertTrue(device("iPad8,1").isIPad)
+        XCTAssertTrue(device("iPad16,3").isIPad)
+        XCTAssertFalse(device("iPhone16,2").isIPad)
+        XCTAssertFalse(device("iPhone14,7").isIPad)
+        XCTAssertFalse(device("arm64").isIPad)
+    }
 }
