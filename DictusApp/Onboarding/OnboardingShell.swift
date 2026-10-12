@@ -85,19 +85,41 @@ struct OnboardingProgressBar: View {
     private static let remaining = Color(light: Color(hex: 0xE2E2E8), dark: Color(hex: 0x232D40))
 }
 
-/// The row above every page: the progress bar, and the discreet Skip where the step
-/// allows it (#675).
+/// The row above every page: the back chevron where the step has one (#700), the
+/// progress bar, and the discreet Skip where the step allows it (#675).
 ///
-/// WHY THE SHELL DRAWS SKIP, NOT THE PAGE: the slot sits at the same place on every step
-/// that has it, and stays put while the pages slide.
+/// WHY THE SHELL DRAWS SKIP AND BACK, NOT THE PAGE: each slot sits at the same place on
+/// every step that has it, and stays put while the pages slide.
 struct OnboardingTopBar: View {
     let step: OnboardingStep
     let deviceCanRunSmartModes: Bool
+    /// nil when the step has no back control (`OnboardingStep.stepBack`).
+    let onBack: (() -> Void)?
     /// nil when the step has no Skip.
     let onSkip: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 16) {
+            if let onBack {
+                // A standard iOS back chevron at the leading edge (#700). The bar makes
+                // room for it the way it makes room for Skip.
+                Button(action: onBack) {
+                    Image(systemName: "chevron.backward")
+                        .font(.body.weight(.semibold))
+                        // The accent, as the system tints its own back chevron.
+                        .foregroundStyle(Color.dictusAccent)
+                        // Leading-aligned: the chevron lines up with the page's title.
+                        .frame(
+                            width: OnboardingMetrics.topBarHeight,
+                            height: OnboardingMetrics.topBarHeight,
+                            alignment: .leading
+                        )
+                        // The row is 32 pt high; the tap area reaches the 44 pt minimum.
+                        .contentShape(Rectangle().inset(by: -6))
+                }
+                .accessibilityLabel(Text("Back"))
+                .accessibilityIdentifier("onboarding.back")
+            }
             if step.showsProgress {
                 OnboardingProgressBar(step: step, deviceCanRunSmartModes: deviceCanRunSmartModes)
             } else {

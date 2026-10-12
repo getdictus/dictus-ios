@@ -63,6 +63,18 @@ struct OnboardingView: View {
     /// not change during an onboarding, and the progress bar must not change length.
     @State private var deviceCanRunSmartModes = SmartModeAvailability.deviceIsCapable
 
+    /// The language step's choices as the user left them by going back to the intro
+    /// (#700), so the step shows them again instead of the prefill. nil until then.
+    ///
+    /// WHY HERE: the page is rebuilt on every visit (`.id(step)`), and its own state goes
+    /// with it. Held in memory only: nothing is written before the step is confirmed,
+    /// because confirming is what applies the setup and starts the download.
+    @State private var languageDraft: LanguageSetup?
+
+    /// Whether the last step change went back (#700), which turns the slide around: the
+    /// intro comes in from the leading edge and the language page leaves by the trailing one.
+    @State private var isGoingBack = false
+
     /// Reset when the first dictation is left, so Home does not open on its transcription.
     @EnvironmentObject private var coordinator: DictationCoordinator
 
@@ -78,6 +90,7 @@ struct OnboardingView: View {
                 OnboardingTopBar(
                     step: step,
                     deviceCanRunSmartModes: deviceCanRunSmartModes,
+                    onBack: step.stepBack != nil ? goBack : nil,
                     onSkip: step.isSkippable ? skip : nil
                 )
                     .padding(.top, OnboardingMetrics.topBarTopPadding)
@@ -91,7 +104,7 @@ struct OnboardingView: View {
                     case .welcome:
                         WelcomePage(onNext: advance)
                     case .language:
-                        LanguageSetupPage(onConfirm: confirmLanguage)
+                        LanguageSetupPage(draft: $languageDraft, onConfirm: confirmLanguage)
                     case .keyboardSetup:
                         KeyboardSetupPage(onNext: advance)
                     case .appleIntelligence:
@@ -129,9 +142,10 @@ struct OnboardingView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 // Slide transition: new page slides in from trailing edge,
                 // old page slides out to leading edge — standard forward navigation feel.
+                // Going back (#700) runs it the other way round.
                 .transition(.asymmetric(
-                    insertion: .move(edge: .trailing),
-                    removal: .move(edge: .leading)
+                    insertion: .move(edge: isGoingBack ? .leading : .trailing),
+                    removal: .move(edge: isGoingBack ? .trailing : .leading)
                 ))
                 .id(step) // Force SwiftUI to treat each page as a unique view for transitions
             }
@@ -231,8 +245,37 @@ struct OnboardingView: View {
 
     private func go(to newStep: OnboardingStep) {
         OnboardingStep.save(newStep)
-        withAnimation {
-            step = newStep
+        show(newStep, goingBack: false)
+    }
+
+    /// The shell's back control (#700): from the language step to the intro, which starts
+    /// again at its first page (`WelcomePage` is rebuilt). `OnboardingStep.goBack` records
+    /// the intro first, so an app killed now resumes there.
+    private func goBack() {
+        let from = step
+        guard let back = OnboardingStep.goBack(from: from) else { return }
+        PersistentLog.log(.onboardingWentBack(from: from.rawValue, to: back.rawValue))
+        show(back, goingBack: true)
+    }
+
+    /// Puts `newStep` on screen with the slide that matches the direction.
+    ///
+    /// WHY THE STEP CHANGES ONE TURN LATER WHEN THE DIRECTION FLIPS: a page that leaves
+    /// slides out with the transition it was last drawn with. Changing the direction and
+    /// the step together would send the leaving page off with the old direction's edge,
+    /// against the page coming in. The new direction is drawn first, then the step changes.
+    private func show(_ newStep: OnboardingStep, goingBack: Bool) {
+        guard goingBack != isGoingBack else {
+            withAnimation {
+                step = newStep
+            }
+            return
+        }
+        isGoingBack = goingBack
+        DispatchQueue.main.async {
+            withAnimation {
+                step = newStep
+            }
         }
     }
 
