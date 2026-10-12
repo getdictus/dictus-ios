@@ -31,6 +31,12 @@ enum OnboardingMetrics {
     /// Height of the top row (progress bar and Skip), kept on steps without a bar so the
     /// content below does not shift when the bar appears.
     static let topBarHeight: CGFloat = 32
+    /// Gap between the safe area and the top row.
+    static let topBarTopPadding: CGFloat = 8
+    /// Everything the top row takes above a page. The model preparation screen leaves the
+    /// same height empty in the app, where there is no bar, so its ring sits at the same y
+    /// in the onboarding and in the app (#708).
+    static let topRowHeight: CGFloat = topBarTopPadding + topBarHeight
 }
 
 // MARK: - Progress bar

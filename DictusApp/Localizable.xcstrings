@@ -17,6 +17,17 @@
         }
       }
     },
+    "%@ runs on your iPhone. Dictation works even without a network." : {
+      "comment" : "Model preparation screen subtitle, once ready. The placeholder is the model's name (Parakeet v3) (#708).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tourne sur votre iPhone. La dictée marche même sans réseau."
+          }
+        }
+      }
+    },
     "%@, one payment" : {
       "comment" : "Dictus Pro hub: under 'Upgrade to lifetime'. The placeholder is the lifetime price from the App Store (#216).",
       "localizations" : {
@@ -24,6 +35,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@, un seul paiement"
+          }
+        }
+      }
+    },
+    "%@, picked for %@ and this iPhone. After that, everything runs offline." : {
+      "comment" : "Onboarding model preparation subtitle (#708). First placeholder: the model's name (Parakeet v3). Second: the spoken language with its article in French (le français, l'anglais).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, choisi pour %2$@ et cet iPhone. Ensuite, tout se passe hors ligne."
+          }
+        }
+      }
+    },
+    "%@, picked for your language and this iPhone. After that, everything runs offline." : {
+      "comment" : "Onboarding model preparation subtitle when the language cannot be named in the sentence (#708). The placeholder is the model's name.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, choisi pour votre langue et cet iPhone. Ensuite, tout se passe hors ligne."
+          }
+        }
+      }
+    },
+    "%@. Once ready, everything runs offline." : {
+      "comment" : "Model preparation screen subtitle in the app (model switch, keyboard cold start). The placeholder is the model's name (#708).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Une fois prêt, tout se passe hors ligne."
           }
         }
       }
@@ -460,16 +504,6 @@
         }
       }
     },
-    "Adapting the model to your iPhone…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Adaptation du modèle à votre iPhone…"
-          }
-        }
-      }
-    },
     "Add %@ to the keyboard" : {
       "comment" : "Accessibility label for the button that pins a Smart Mode to the keyboard fan.",
       "localizations" : {
@@ -780,16 +814,6 @@
         }
       }
     },
-    "Checking the model…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vérification du modèle…"
-          }
-        }
-      }
-    },
     "Clear" : {
       "localizations" : {
         "fr" : {
@@ -850,16 +874,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compilation pour le Neural Engine…"
-          }
-        }
-      }
-    },
-    "Configuring voice transcription…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Configuration de la transcription vocale…"
           }
         }
       }
@@ -1204,17 +1218,6 @@
         }
       }
     },
-    "Dictus is preparing this model for offline dictation." : {
-      "comment" : "Preparation screen subtitle when the user picked a model in Settings (issue #432). Replaces a line claiming the preparation takes 'a moment'.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus prépare ce modèle pour la dictée hors ligne."
-          }
-        }
-      }
-    },
     "Dictus is set up and ready to use" : {
       "localizations" : {
         "fr" : {
@@ -1263,16 +1266,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictus a besoin du microphone pour transcrire votre voix. Vos enregistrements restent sur votre appareil."
-          }
-        }
-      }
-    },
-    "Dictus prepares your transcription model for offline dictation." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus prépare votre modèle de transcription pour la dictée hors ligne."
           }
         }
       }
@@ -1365,6 +1358,17 @@
         }
       }
     },
+    "Download complete" : {
+      "comment" : "Model preparation step, download done, when the model's size is unknown (#708).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargement terminé"
+          }
+        }
+      }
+    },
     "Download incomplete. Tap to finish it." : {
       "comment" : "Model card, for a model listed as downloaded whose files are incomplete on disk (issue #558). Tapping the card downloads only the missing files.",
       "localizations" : {
@@ -1386,6 +1390,17 @@
         }
       }
     },
+    "Downloaded · %@" : {
+      "comment" : "Model preparation step, download done. The placeholder is the model's size (483 MB) (#708).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargé · %@"
+          }
+        }
+      }
+    },
     "Downloading" : {
       "comment" : "Phase label on the model loading overlay (issue #144).",
       "localizations" : {
@@ -1393,17 +1408,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Téléchargement"
-          }
-        }
-      }
-    },
-    "Downloading the model…" : {
-      "comment" : "Cycling phrase shown during model download (issue #144).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Téléchargement du modèle…"
           }
         }
       }
@@ -1719,36 +1723,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Commencer"
-          }
-        }
-      }
-    },
-    "Getting Dictus ready…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Préparation de Dictus…"
-          }
-        }
-      }
-    },
-    "Getting everything ready…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tout se met en place…"
-          }
-        }
-      }
-    },
-    "Getting transcription ready…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Préparation de la transcription…"
           }
         }
       }
@@ -2223,17 +2197,6 @@
       "comment" : "A toggle that enables or disables live activity tracking.",
       "isCommentAutoGenerated" : true
     },
-    "Loading" : {
-      "comment" : "Phase label on the model loading overlay (issue #144).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chargement"
-          }
-        }
-      }
-    },
     "Loading into memory…" : {
       "comment" : "Cycling phrase shown during model RAM load (issue #144).",
       "extractionState" : "stale",
@@ -2246,12 +2209,13 @@
         }
       }
     },
-    "Loading the model…" : {
+    "Loading the model" : {
+      "comment" : "Model preparation step: the model loading into memory (#708).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Chargement du modèle…"
+            "value" : "Chargement du modèle"
           }
         }
       }
@@ -2376,17 +2340,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Options du modèle"
-          }
-        }
-      }
-    },
-    "Model ready" : {
-      "comment" : "Brief confirmation when a model finishes loading into RAM (issue #144).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modèle prêt"
           }
         }
       }
@@ -2747,24 +2700,24 @@
         }
       }
     },
-    "Optimizing" : {
-      "comment" : "Phase label on the model loading overlay (issue #144).",
+    "Optimized for this iPhone" : {
+      "comment" : "Model preparation step, done (#708).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optimisation"
+            "value" : "Optimisé pour cet iPhone"
           }
         }
       }
     },
-    "Optimizing for your iPhone…" : {
-      "comment" : "Cycling phrase shown during model compilation (issue #144).",
+    "Optimizing for this iPhone" : {
+      "comment" : "Model preparation step: the Core ML compile, pending or running (#708).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Optimisation pour votre iPhone…"
+            "value" : "Optimisation pour cet iPhone"
           }
         }
       }
@@ -2812,6 +2765,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choisissez-en trois. Ils vous attendront d'un appui long sur le micro."
+          }
+        }
+      }
+    },
+    "Preparing your model" : {
+      "comment" : "Model preparation screen title, while downloading, optimizing or loading (#708).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On prépare votre modèle"
           }
         }
       }
@@ -2918,37 +2882,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finition du dernier passage…"
-          }
-        }
-      }
-    },
-    "Preparing dictation…" : {
-      "comment" : "Cycling phrase shown during model RAM load (issue #144).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Préparation de la dictée…"
-          }
-        }
-      }
-    },
-    "Preparing the files…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Préparation des fichiers…"
-          }
-        }
-      }
-    },
-    "Preparing the model…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Préparation du modèle…"
           }
         }
       }
@@ -3391,26 +3324,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Activer Dictus"
-          }
-        }
-      }
-    },
-    "Setting up offline transcription…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mise en place de la transcription hors ligne…"
-          }
-        }
-      }
-    },
-    "Setting up the transcription engine…" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mise en place de la transcription…"
           }
         }
       }
@@ -3981,13 +3894,13 @@
         }
       }
     },
-    "The download continues if you leave the app, but much more slowly." : {
-      "comment" : "Onboarding variant of the model preparation screen (#675): replaces 'Please stay on this page and do not leave the app.' while the onboarding's download runs. The download survives leaving the app, but iOS throttles it in the background.",
+    "The download continues if you leave the app." : {
+      "comment" : "Onboarding model preparation, while downloading (#675, #708).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le téléchargement continue si vous quittez l'app, mais beaucoup plus lentement."
+            "value" : "Le téléchargement continue si vous quittez l'app."
           }
         }
       }
@@ -3999,28 +3912,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le téléchargement s'est interrompu. Vérifiez votre connexion Internet et réessayez."
-          }
-        }
-      }
-    },
-    "After each update, the first preparation of this model takes about %lld minutes. Later ones take a few seconds." : {
-      "comment" : "Preparation screen: names how long a first Core ML compile takes for models where it has been measured (issue #432). The argument is a number of minutes, always 2 or more. The wait returns after every install, app update and OS update (issue #542).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Après chaque mise à jour, la première préparation de ce modèle prend environ %lld minutes. Les suivantes ne prennent que quelques secondes."
-          }
-        }
-      }
-    },
-    "After each update, the first preparation of this model takes under a minute. Later ones take a few seconds." : {
-      "comment" : "Preparation screen: shown for a model whose measured first compile is under a minute, such as Medium at 32s (issue #432). The wait returns after every install, app update and OS update (issue #542).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Après chaque mise à jour, la première préparation de ce modèle prend moins d'une minute. Les suivantes ne prennent que quelques secondes."
           }
         }
       }
@@ -4309,17 +4200,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ce modèle nécessite une version plus récente d'iOS. Ouvrez Dictus et choisissez un autre modèle."
-          }
-        }
-      }
-    },
-    "This preparation runs again after each update. Later ones take a few seconds." : {
-      "comment" : "Preparation screen: shown for a model whose first compile nobody has timed. Says when the wait comes back and invents no duration (issues #432, #542).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette préparation recommence après chaque mise à jour. Les suivantes ne prennent que quelques secondes."
           }
         }
       }
@@ -5078,6 +4958,17 @@
         }
       }
     },
+    "Your model is ready" : {
+      "comment" : "Model preparation screen title, once the model is ready (#708).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre modèle est prêt"
+          }
+        }
+      }
+    },
     "Your Pro trial ends in %lld days" : {
       "comment" : "Home banner in the last two days of the free Dictus Pro trial (#593). The number is the days left, 1 or 2.",
       "localizations" : {
@@ -5119,17 +5010,6 @@
         }
       }
     },
-    "Your dictation cannot start yet: Dictus is preparing your model. This is usually an exceptional step." : {
-      "comment" : "Explanation on the model preparation screen raised by an in-app record tap (issue #484). Names why the tap did not start a recording.",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre dictée ne peut pas encore démarrer : Dictus prépare votre modèle. Cette étape est normalement exceptionnelle."
-          }
-        }
-      }
-    },
     "Your dictations are saved here automatically. The last 200 are kept, on this device only." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5159,16 +5039,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre langue"
-          }
-        }
-      }
-    },
-    "Your model needs to be prepared before this dictation. This is usually an exceptional step." : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Votre modèle doit être préparé avant cette dictée. Cette étape est généralement exceptionnelle."
           }
         }
       }

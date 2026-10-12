@@ -1,6 +1,6 @@
 // DictusApp/Views/ModelLoadingOverlay.swift
-// Full-screen blocking overlay shown while a model is downloading, compiling
-// for the Neural Engine, or being loaded into RAM. Issue #144.
+// Full-screen blocking screen shown while a model is downloading, compiling
+// for the Neural Engine, or being loaded into RAM. Issues #144, #708.
 import SwiftUI
 import DictusCore
 
@@ -18,22 +18,25 @@ import DictusCore
 /// model interaction until `modelLoadState == .ready`.
 ///
 /// Refusing to let the user act made it this screen's job to SAY how long the wait is
-/// (issue #432). The maintainer sat through a Turbo preparation and could not tell a
-/// normal wait from a stuck app, which is the correct reading of a screen that names
-/// no duration and looks identical for a model that is ready in thirty seconds.
-/// `firstPreparationNotice` is that sentence, and it stays a sentence: Core ML reports
-/// no progress for a compile, which is why there is a bar under the download and
-/// nothing under the compile.
+/// (issue #432), and then how far along it is: a coarse countdown under the compile,
+/// "About 3 minutes left", then "Less than a minute left", held (issue #533). The rules
+/// live in `ModelPreparationCountdown`, where they are tested.
 ///
-/// What sits under the compile instead is a coarse countdown (issue #533): "About 3
-/// minutes left", then "Less than a minute left", held. A tester who read the four-minute
-/// sentence and found it accurate still found four minutes of a looping waveform
-/// frustrating, because the screen said how long and never how far. A countdown rather
-/// than a bar because the download already ends on a full bar, and a second one starting
-/// over at 0 % would answer the complaint with a new instance of it. The rules live in
-/// `ModelPreparationCountdown`, where they are tested.
+/// WHAT IT LOOKS LIKE, AND WHY (#708, mock-up validated 2026-10-12): every new user waits
+/// on this screen, and the onboarding shows it under its new shell (#649, #675), next to
+/// which the old one looked like a different app and moved three times between phases.
+/// From top to bottom: a ring around the Dictus logo, a title, a subtitle, a card with the
+/// two steps of the wait, and a two-line caption. Every block has a fixed height
+/// (`ModelPreparationMetrics`), so a phase change only swaps content, and the ring sits at
+/// the same y in every phase and every context. No waveform, no button.
 ///
-/// The overlay observes two signals to decide which copy to show:
+/// WHAT IS GONE FROM IT: the rotating phrases (`CyclingLoadingText`, deleted) and the
+/// #432 duration sentence. The phrases were the screen's way of looking alive; the ring
+/// and the step card do that now and say something true while doing it. The duration
+/// sentence is replaced by the #533 countdown in the caption, which says how long without
+/// a second line saying it again.
+///
+/// The overlay observes two signals to decide which phase to show:
 /// 1. `ModelManager.modelStates[id]` — `.downloading`, `.prewarming`, `.ready`
 /// 2. `ModelManager.modelLoadState` (mirrored from the App Group via Combine) —
 ///    `.loading` once `DictationCoordinator.preloadActiveModel` is in flight.
@@ -71,6 +74,20 @@ struct ModelLoadingOverlay: View {
     /// `.downloading` — the onboarding race that surfaced after f5ba7ab.
     @State private var hasSeenWorkPhase = false
 
+    /// Whether every file the model needs was on disk when the screen opened (#708).
+    ///
+    /// Decides the phase drawn before any work has been seen: the optimization frame for a
+    /// model already downloaded, the download frame otherwise. Read once, in `init`, so the
+    /// very first frame is already the right one; an `onAppear` would come one frame late,
+    /// and one frame of a download that does not happen is the defect this fixes.
+    @State private var filesOnDiskAtOpen: Bool
+
+    /// The last work phase drawn, held while the model state already reads `.ready` but
+    /// the completion has not been decided yet (`checkForCompletion` runs in `onChange`,
+    /// after the frame that saw the change). Without it that frame would draw the ready
+    /// copy without the ready ring, or flash back to the opening phase.
+    @State private var lastWorkPhase: ModelPreparationPhase
+
     /// When this screen first saw a COLD preparation of a model measured in minutes —
     /// the clock the countdown runs on (issue #533). Nil means no countdown at all.
     ///
@@ -84,12 +101,8 @@ struct ModelLoadingOverlay: View {
     /// left — the safe direction under #432's rule, so no persisted start time is added.
     @State private var preparationStartedAt: Date?
 
-    private enum Phase {
-        case downloading
-        case compiling
-        case loading
-        case ready
-    }
+    private typealias Phase = ModelPreparationPhase
+    private typealias Metrics = ModelPreparationMetrics
 
     init(
         modelManager: ModelManager,
@@ -102,6 +115,13 @@ struct ModelLoadingOverlay: View {
         self.context = context
         self._isPresented = isPresented
         self._activeContext = State(initialValue: context)
+        let filesOnDisk = ModelManager.hasCompleteFilesOnDisk(modelIdentifier)
+        self._filesOnDiskAtOpen = State(initialValue: filesOnDisk)
+        self._lastWorkPhase = State(initialValue: Phase.displayed(
+            raw: .ready,
+            hasSeenWorkPhase: false,
+            filesOnDisk: filesOnDisk
+        ))
     }
 
     var body: some View {
@@ -111,43 +131,21 @@ struct ModelLoadingOverlay: View {
             Color.dictusBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                Spacer(minLength: 24)
-
-                modelTitleHeader
-                    .padding(.top, 24)
-
-                Spacer()
-
-                // Waveform lives in the vertical flow, ABOVE the progress area.
-                // It used to be a ZStack background centered on the screen, which
-                // collided with the (also centered) progress bar on squat aspect
-                // ratios — iPad letterboxed compatibility mode, iPhone SE. Same
-                // height/opacity as the onboarding welcome screen; edge-to-edge
-                // width, no horizontal padding.
-                BrandWaveform(maxHeight: 100, animation: .sweep)
-                    .opacity(0.55)
-                    .allowsHitTesting(false)
-
-                // Fixed-height swap area so toggling between active and completion
-                // states doesn't reflow the surrounding layout (and shift the
-                // waveform above).
-                ZStack {
-                    if showCompletion {
-                        completionView
-                            .transition(.opacity.combined(with: .scale(scale: 0.94)))
-                    } else {
-                        activeView
-                            .transition(.opacity)
-                    }
+                // WHY THIS INSET (#708): in the onboarding the shell's progress bar row sits
+                // above this screen, outside it. The in-app contexts have no bar, so their
+                // content is pushed down by the bar row's height and the ring lands at the
+                // same y in both. The context the screen was raised with decides it, not
+                // `activeContext`: a keyboard request arriving mid-way turns one in-app
+                // context into another and must not move anything.
+                if context != .onboarding {
+                    Color.clear.frame(height: OnboardingMetrics.topRowHeight)
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: activeContext.isPrepareOnly ? 164 : 140)
-                .padding(.top, 24)
 
-                Spacer()
-
-                stayOnPageNotice
-                    .padding(.bottom, 40)
+                // Centred in the height left, with fixed blocks between the two spacers, so
+                // the spacers never change size between phases.
+                Spacer(minLength: 0)
+                content
+                Spacer(minLength: 0)
             }
         }
         .interactiveDismissDisabled(true)
@@ -169,79 +167,229 @@ struct ModelLoadingOverlay: View {
         }
         // `initial: true` also runs this for the phase the screen opens on, which is the
         // keyboard cold start's case: it can arrive with the load already in flight.
-        .onChange(of: currentPhase, initial: true) { _, _ in
+        .onChange(of: currentPhase, initial: true) { _, newPhase in
+            if newPhase != .ready {
+                lastWorkPhase = newPhase
+            }
             anchorCountdownIfCold()
         }
     }
 
-    // MARK: - Sub-views
+    // MARK: - Layout
 
-    private var modelTitleHeader: some View {
-        // Tracking value used on the phase label. Pulled out so the leading
-        // compensation padding stays in sync — `.tracking()` adds half its width
-        // of trailing space after the last character, which shifts the optical
-        // center off relative to the un-tracked model name above. We add the
-        // same width as a leading offset to push the label back to true center.
-        let labelTracking: CGFloat = 1.4
+    private var content: some View {
+        let phase = displayedPhase
+        return VStack(spacing: 0) {
+            ModelPreparationRingView(ring: ModelPreparationRing(
+                phase: phase,
+                downloadFraction: downloadFraction
+            ))
 
-        return VStack(spacing: 8) {
-            if let info = ModelInfo.forIdentifier(modelIdentifier) {
-                Text(info.localizedDisplayName)
-                    .font(.dictusSubheading)
-                    .foregroundStyle(.primary)
-                    .frame(maxWidth: .infinity)
-                    .multilineTextAlignment(.center)
-            }
-            Text(phaseLabel)
-                .font(.caption.weight(.semibold))
-                .textCase(.uppercase)
-                .foregroundStyle(Color.dictusAccent)
-                .tracking(labelTracking)
-                .padding(.leading, labelTracking)
-                .frame(maxWidth: .infinity)
+            title(for: phase)
+                .font(.system(size: 30, weight: .bold))
+                .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+                .accessibilityAddTraits(.isHeader)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .frame(height: Metrics.titleHeight)
+                .padding(.top, Metrics.ringToTitle)
+
+            subtitle(for: phase)
+                .font(.system(size: 17))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(3)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .frame(height: Metrics.subtitleHeight)
+                .padding(.top, Metrics.titleToSubtitle)
+
+            stepsCard(for: phase)
+                .padding(.top, Metrics.subtitleToCard)
+
+            caption(for: phase)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .frame(height: Metrics.captionHeight)
+                .padding(.top, Metrics.cardToCaption)
         }
-        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.horizontal, Metrics.horizontalPadding)
+        // Every text block above is a fixed slot: a phase change swaps what is in it, so
+        // the fade is the only movement, and nothing slides.
+        .animation(.easeInOut(duration: 0.25), value: phase)
+    }
+
+    // MARK: - Title and subtitle
+
+    private func title(for phase: Phase) -> Text {
+        phase == .ready
+            ? Text("Your model is ready", comment: "Model preparation screen title, once the model is ready (#708).")
+            : Text("Preparing your model", comment: "Model preparation screen title, while downloading, optimizing or loading (#708).")
+    }
+
+    /// The subtitle names the model, and in the onboarding the language it was picked for
+    /// (#649 decision 4: the screen says the model is the best one for the user's language
+    /// and iPhone).
+    private func subtitle(for phase: Phase) -> Text {
+        if phase == .ready {
+            return Text(
+                "\(modelName) runs on your iPhone. Dictation works even without a network.",
+                comment: "Model preparation screen subtitle, once ready. The placeholder is the model's name (Parakeet v3) (#708)."
+            )
+        }
+        guard context == .onboarding else {
+            return Text(
+                "\(modelName). Once ready, everything runs offline.",
+                comment: "Model preparation screen subtitle in the app (model switch, keyboard cold start). The placeholder is the model's name (#708)."
+            )
+        }
+        if let language = spokenLanguagePhrase {
+            return Text(
+                "\(modelName), picked for \(language) and this iPhone. After that, everything runs offline.",
+                comment: "Onboarding model preparation subtitle (#708). First placeholder: the model's name (Parakeet v3). Second: the spoken language with its article in French (le français, l'anglais)."
+            )
+        }
+        return Text(
+            "\(modelName), picked for your language and this iPhone. After that, everything runs offline.",
+            comment: "Onboarding model preparation subtitle when the language cannot be named in the sentence (#708). The placeholder is the model's name."
+        )
+    }
+
+    private var modelName: String {
+        ModelInfo.forIdentifier(modelIdentifier)?.localizedDisplayName ?? String(localized: "Voice model")
+    }
+
+    /// The language the onboarding picked this model for, ready to slot into the sentence,
+    /// or nil for the sentence that does not name it. The rules are
+    /// `ModelPreparationLanguagePhrase`'s.
+    ///
+    /// WHY `SpokenLanguage.forRecommendation()`: it is the input
+    /// `ModelInfo.recommendedIdentifier()` chose this model from, so the sentence names the
+    /// language that actually decided it. Named in the interface's language, which is the
+    /// app's localization and not the device locale: a German iPhone reads the app in
+    /// English, and "picked for Französisch" would be wrong twice.
+    private var spokenLanguagePhrase: String? {
+        let interfaceLanguage = Bundle.main.preferredLocalizations.first ?? "en"
+        let name = Locale(identifier: interfaceLanguage)
+            .localizedString(forLanguageCode: SpokenLanguage.forRecommendation())
+        return ModelPreparationLanguagePhrase.phrase(languageName: name, interfaceLanguage: interfaceLanguage)
+    }
+
+    // MARK: - Steps card
+
+    private func stepsCard(for phase: Phase) -> some View {
+        let steps = ModelPreparationSteps(phase: phase)
+        return VStack(spacing: Metrics.rowSpacing) {
+            ModelPreparationStepRow(
+                state: steps.download,
+                label: downloadLabel(steps.download),
+                value: steps.download == .running ? downloadPercentage : nil
+            )
+            ModelPreparationStepRow(
+                state: steps.second,
+                label: secondLabel(steps.secondLabel)
+            )
+        }
+        .padding(.vertical, Metrics.cardVerticalPadding)
+        .padding(.horizontal, Metrics.cardHorizontalPadding)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: Metrics.cardCornerRadius, style: .continuous)
+                .fill(Color.dictusSurface)
+        )
+    }
+
+    private func downloadLabel(_ state: ModelPreparationStepState) -> Text {
+        guard state == .done else {
+            return Text("Downloading")
+        }
+        // The catalogue's size, the same figure the model card and the language screen
+        // show. The byte counter's total is gone by then: it is cleared with the bar.
+        guard let size = ModelInfo.forIdentifier(modelIdentifier)?.sizeLabel else {
+            return Text("Download complete", comment: "Model preparation step, download done, when the model's size is unknown (#708).")
+        }
+        return Text("Downloaded · \(size)", comment: "Model preparation step, download done. The placeholder is the model's size (483 MB) (#708).")
+    }
+
+    private func secondLabel(_ step: ModelPreparationSecondStep) -> Text {
+        switch step {
+        case .optimizing:
+            return Text("Optimizing for this iPhone", comment: "Model preparation step: the Core ML compile, pending or running (#708).")
+        case .loading:
+            return Text("Loading the model", comment: "Model preparation step: the model loading into memory (#708).")
+        case .optimized:
+            return Text("Optimized for this iPhone", comment: "Model preparation step, done (#708).")
+        }
+    }
+
+    /// "34 %", formatted for the locale (a narrow space before the sign in French).
+    private var downloadPercentage: Text {
+        Text(downloadFraction ?? 0, format: .percent.precision(.fractionLength(0)))
+    }
+
+    private var downloadFraction: Double? {
+        modelManager.downloadProgress[modelIdentifier].map(Double.init)
+    }
+
+    // MARK: - Caption
+
+    /// Line 1: the MB counter while downloading, the #533 countdown while optimizing or
+    /// loading. Line 2: the line about leaving the screen, or, once ready, what to do next.
+    ///
+    /// WHY LINE 2 MAY WRAP ONLY WHEN LINE 1 IS EMPTY: the slot is two lines tall, and the
+    /// completion instructions of the prepare-only contexts are a full sentence each.
+    private func caption(for phase: Phase) -> some View {
+        let hasFirstLine = phase != .ready
+        return VStack(spacing: 4) {
+            if hasFirstLine {
+                captionFirstLine(for: phase)
+                    .font(.system(size: 14).monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            captionSecondLine(for: phase)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.dictusAccent)
+                .multilineTextAlignment(.center)
+                .lineLimit(hasFirstLine ? 1 : 2)
+                .minimumScaleFactor(0.75)
+        }
     }
 
     @ViewBuilder
-    private var activeView: some View {
-        VStack(spacing: 24) {
-            if currentPhase == .downloading,
-               let progress = modelManager.downloadProgress[modelIdentifier] {
-                VStack(spacing: 6) {
-                    ProgressView(value: Double(progress), total: 1.0)
-                        .progressViewStyle(.linear)
-                        .tint(.dictusAccent)
-                        .frame(maxWidth: 240)
-                    Text("\(Int(progress * 100)) %")
-                        .font(.dictusCaption.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                    // Moving byte counter — reads as alive even while the
-                    // percentage crawls through the 445 MB Encoder file (#207).
-                    if let bytes = modelManager.downloadByteInfo[modelIdentifier] {
-                        Text("\(bytes.downloadedMB) MB of \(bytes.totalMB) MB")
-                            .font(.dictusCaption.monospacedDigit())
-                            .foregroundStyle(.tertiary)
-                    }
-                }
+    private func captionFirstLine(for phase: Phase) -> some View {
+        switch phase {
+        case .downloading:
+            // Moving byte counter — reads as alive even while the percentage crawls
+            // through the 445 MB Encoder file (#207). An empty line before the first tick:
+            // the slot keeps its height either way.
+            if let bytes = modelManager.downloadByteInfo[modelIdentifier] {
+                Text("\(bytes.downloadedMB) MB of \(bytes.totalMB) MB")
+            } else {
+                Text(verbatim: " ")
             }
-            if let preparationStartedAt, isCountdownPhase, !loadGaveUp, !showCompletion {
-                // Same slot and style as the download's percentage: a caption, no bar, no
-                // colour. Ticks every second so a minute boundary shows within a second of
-                // being crossed; the text itself only changes at those boundaries.
+        case .compiling, .loading:
+            if let preparationStartedAt, !loadGaveUp {
+                // Ticks every second so a minute boundary shows within a second of being
+                // crossed; the text itself only changes at those boundaries. Empty when
+                // there is no countdown: an unmeasured or brief model, or a warm cache.
                 TimelineView(.periodic(from: .now, by: 1)) { timeline in
                     if let countdown = ModelPreparationCountdown.at(
                         elapsedSeconds: Int(timeline.date.timeIntervalSince(preparationStartedAt)),
                         measuredSeconds: ModelInfo.forIdentifier(modelIdentifier)?.firstPreparationSeconds
                     ) {
                         Text(countdownText(countdown))
-                            .font(.dictusCaption.monospacedDigit())
-                            .foregroundStyle(.secondary)
+                    } else {
+                        Text(verbatim: " ")
                     }
                 }
+            } else {
+                Text(verbatim: " ")
             }
-            CyclingLoadingText(phrases: phrases(for: currentPhase))
+        case .ready:
+            EmptyView()
         }
     }
 
@@ -254,22 +402,14 @@ struct ModelLoadingOverlay: View {
         }
     }
 
-    private var completionView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 48, weight: .semibold))
-                .foregroundStyle(Color.dictusAccent)
-            Text("Model ready")
-                .font(.dictusSubheading)
-                .foregroundStyle(.primary)
-
+    @ViewBuilder
+    private func captionSecondLine(for phase: Phase) -> some View {
+        if phase == .ready {
             if let completionInstruction {
                 Text(completionInstruction)
-                    .font(.dictusCaption)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
             }
+        } else {
+            leaveNotice(isDownloading: phase == .downloading)
         }
     }
 
@@ -280,6 +420,11 @@ struct ModelLoadingOverlay: View {
     /// the action that does. Which sentence is a question about where they came from, not
     /// about the prepare-only rule — hence `startedFromAnotherApp` and not `isPrepareOnly`
     /// (#484). Onboarding and model selection dismiss into the screen the user was already on.
+    ///
+    /// WHY IT SURVIVED #708: the brief leaves the caption empty once ready, drawn for the
+    /// onboarding, which has no instruction to give. For a user who tapped the keyboard's mic
+    /// and was sent here, the instruction is the only thing on the ready screen that says the
+    /// tap did not start a dictation, so it keeps the caption's second line there.
     private var completionInstruction: LocalizedStringKey? {
         switch activeContext {
         case .onboarding, .modelSelection:
@@ -288,34 +433,6 @@ struct ModelLoadingOverlay: View {
             return "Return to your app and tap the microphone again."
         case .appRecordTap:
             return "Tap again to start your dictation."
-        }
-    }
-
-    private var stayOnPageNotice: some View {
-        VStack(spacing: 8) {
-            Text(explanationText)
-                .font(.dictusCaption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-
-            // The one line that answers "how long am I here for" (issue #432).
-            // Semibold rather than a colour or a larger size: it has to be the line
-            // the eye lands on among three captions, and this screen deliberately
-            // carries no alarm colour of any kind.
-            if let firstPreparationNotice {
-                Text(firstPreparationNotice)
-                    .font(.dictusCaption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-            }
-
-            if !(showCompletion && activeContext.isPrepareOnly) {
-                leaveNotice
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 48)
-            }
         }
     }
 
@@ -329,91 +446,38 @@ struct ModelLoadingOverlay: View {
     /// one there.
     ///
     /// THE THIRD is the onboarding variant (#675, #649 decision 6): while the onboarding's
-    /// download runs, it survives leaving the app, so the screen says that instead, and
-    /// says the cost (decided 2026-10-09): iOS throttles a backgrounded transfer, measured
-    /// at about 0.2 MB/s against 6.5 MB/s in front. Drawn in
-    /// the accent colour in the approved mock-up, because it is the one line on this screen
-    /// that gives the user something rather than asks for something.
-    @ViewBuilder
-    private var leaveNotice: some View {
-        switch activeContext.leaveNotice(isDownloading: currentPhase == .downloading) {
+    /// download runs, it survives leaving the app, so the screen says that instead.
+    ///
+    /// WHY ALL THREE IN THE ACCENT COLOUR NOW (#708): the mock-up draws the caption's second
+    /// line as one style, whatever it says. It used to be the onboarding line alone, drawn
+    /// apart because it is the one that gives the user something rather than asks for
+    /// something; on the new screen the line is the caption's call to the user, so it reads
+    /// as one.
+    ///
+    /// WHY THE ONBOARDING LINE IS SHORTER THAN IT WAS: it said "…but much more slowly" (the
+    /// cost of a backgrounded transfer, decided 2026-10-09). The validated #708 brief and
+    /// mock-up give the line as "The download continues if you leave the app." and hold the
+    /// caption to two single lines, which the longer sentence did not fit.
+    private func leaveNotice(isDownloading: Bool) -> Text {
+        switch activeContext.leaveNotice(isDownloading: isDownloading) {
         case .downloadContinuesInBackground:
-            Text("The download continues if you leave the app, but much more slowly.")
-                .font(.dictusCaption.weight(.semibold))
-                .foregroundStyle(Color.dictusAccent)
+            return Text("The download continues if you leave the app.", comment: "Onboarding model preparation, while downloading (#675, #708).")
         case .waitForPreparation:
-            Text("Please wait for preparation to finish.")
-                .font(.dictusCaption)
-                .foregroundStyle(.secondary)
+            return Text("Please wait for preparation to finish.")
         case .stayOnPage:
-            Text("Please stay on this page and do not leave the app.")
-                .font(.dictusCaption)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    private var explanationText: LocalizedStringKey {
-        switch activeContext {
-        case .onboarding:
-            return "Dictus prepares your transcription model for offline dictation."
-        case .modelSelection:
-            // This used to read "This preparation may take a moment and is usually not
-            // needed for every dictation". `firstPreparationNotice` now says both
-            // halves better, and "a moment" was actively false for the model that made
-            // issue #432 necessary.
-            return "Dictus is preparing this model for offline dictation."
-        case .keyboardColdStart:
-            return "Your model needs to be prepared before this dictation. This is usually an exceptional step."
-        case .appRecordTap:
-            // Says out loud why the tap did nothing, which is the whole of #484: the button
-            // used to swallow it in silence. The keyboard's wording cannot be reused as is —
-            // it is written for someone who arrived from another app.
-            return "Your dictation cannot start yet: Dictus is preparing your model. This is usually an exceptional step."
-        }
-    }
-
-    /// How long this model's first preparation takes, said out loud (issue #432).
-    ///
-    /// WHY only under the compile and the load, and never under the download:
-    /// those two phases are the ones with nothing moving on screen. The download has a
-    /// bar and a byte counter that already answer "is this stuck", and its duration
-    /// belongs to the network rather than to the model, so a sentence about the
-    /// model's preparation shown there would be read as a claim about the download.
-    ///
-    /// WHAT IT NO LONGER SAYS, AND WHY (issue #542): these three sentences used to end
-    /// "It happens only once". That is false, and it is false in the direction that costs
-    /// the most trust — iOS discards the compiled Core ML artefacts at every install, every
-    /// app update and every OS update, so the user who read "once" meets the same
-    /// multi-minute wait the next time Dictus updates. One wording for all of it, not a
-    /// first-install and an update variant: that nuance would cost two more translated
-    /// strings for a distinction nobody verifies.
-    ///
-    /// WHY both of the other two, which took reading `rawPhase` to see: a
-    /// download-then-prepare spends the compile in `.compiling`, but a launch that
-    /// finds the model already on disk spends it in `.loading` — and that second case
-    /// is the one issue #432 was filed from, an app opened after an install with Turbo
-    /// active. Wording it as a fact about the model rather than about this particular
-    /// wait keeps it true in the ordinary `.loading` case too, where the Core ML cache
-    /// exists and the screen is gone in three seconds.
-    private var firstPreparationNotice: String? {
-        guard currentPhase == .compiling || currentPhase == .loading else { return nil }
-        switch ModelPreparationWait.forModel(modelIdentifier) {
-        case .minutes(let minutes):
-            return String(localized: "After each update, the first preparation of this model takes about \(minutes) minutes. Later ones take a few seconds.")
-        case .brief:
-            return String(localized: "After each update, the first preparation of this model takes under a minute. Later ones take a few seconds.")
-        case .unmeasured:
-            // No number is invented for a model nobody has timed. The half of the
-            // message that matters most is true of every model and is still said.
-            return String(localized: "This preparation runs again after each update. Later ones take a few seconds.")
+            return Text("Please stay on this page and do not leave the app.")
         }
     }
 
     // MARK: - Phase logic
 
-    /// The two phases a first preparation is spent in (see `firstPreparationNotice`).
-    private var isCountdownPhase: Bool {
-        currentPhase == .compiling || currentPhase == .loading
+    /// The phase the screen draws: the completion once it has been decided, otherwise the
+    /// current work phase, holding the last one through the frame where the model state
+    /// already reads ready but `checkForCompletion` has not run yet.
+    private var displayedPhase: Phase {
+        if showCompletion { return .ready }
+        let phase = currentPhase
+        return phase == .ready ? lastWorkPhase : phase
     }
 
     /// Starts the countdown's clock, once, if this preparation deserves one (issue #533).
@@ -425,14 +489,18 @@ struct ModelLoadingOverlay: View {
     /// means "no countdown", the safe direction.
     ///
     /// WHY ONLY `.minutes`: `.brief` (Medium's 32 s) would only ever show "Less than a
-    /// minute left", repeating the notice under it; `.unmeasured` has nothing to count
-    /// down from and keeps today's screen unchanged.
+    /// minute left"; `.unmeasured` has nothing to count down from.
+    ///
+    /// WHY `rawPhase` AND NOT THE PHASE ON SCREEN (#708): a model already on disk is drawn
+    /// as optimizing from the first frame, before any work has started — and when that
+    /// model turns out to be loaded already, no work ever starts. The clock waits for the
+    /// model's state to say a compile or a load is really running.
     ///
     /// Warmth is read here, when the anchor is decided, and never on a tick: by the time
     /// the warm inference records the model as warm, the screen is on its way out.
     private func anchorCountdownIfCold() {
         guard preparationStartedAt == nil,
-              isCountdownPhase,
+              rawPhase == .compiling || rawPhase == .loading,
               !loadGaveUp,
               !showCompletion,
               case .minutes = ModelPreparationWait.forModel(modelIdentifier) else {
@@ -450,16 +518,13 @@ struct ModelLoadingOverlay: View {
         modelManager.modelStates[modelIdentifier] ?? .notDownloaded
     }
 
+    /// The phase, with the opening frame decided by `ModelPreparationPhase.displayed`:
+    /// before any work has been seen, a resting state is drawn as the work about to start
+    /// (the download, or the optimization for a model already on disk) rather than as done.
+    /// This is the seam that fixes the onboarding presentation race (commit f5ba7ab
+    /// follow-up) and the download that did not happen (#708).
     private var currentPhase: Phase {
-        let raw = rawPhase
-        // While we have not yet seen a real work phase, treat `.ready` as the
-        // initial download phase so the copy doesn't briefly flash "ready"
-        // before the parent's async download Task starts. This is the seam
-        // that fixes the onboarding presentation race (commit f5ba7ab follow-up).
-        if !hasSeenWorkPhase && raw == .ready {
-            return .downloading
-        }
-        return raw
+        Phase.displayed(raw: rawPhase, hasSeenWorkPhase: hasSeenWorkPhase, filesOnDisk: filesOnDiskAtOpen)
     }
 
     private var rawPhase: Phase {
@@ -484,71 +549,6 @@ struct ModelLoadingOverlay: View {
         }
     }
 
-    private var phaseLabel: LocalizedStringKey {
-        switch currentPhase {
-        case .downloading: return "Downloading"
-        case .compiling: return "Optimizing"
-        case .loading: return "Loading"
-        case .ready: return "Ready"
-        }
-    }
-
-    private func phrases(for phase: Phase) -> [String] {
-        switch phase {
-        case .downloading:
-            // No phrase here may promise imminence. A real percentage and MB counter
-            // sit directly above this caption, so "Almost there…" and "Finishing the
-            // download…" — both gone — contradicted the bar in the same glance, a
-            // tester reading "Almost there" at 1 % (issue #673). Same rule as the
-            // `.compiling` list below (issue #432).
-            return [
-                String(localized: "Downloading the model…"),
-                String(localized: "Preparing the files…"),
-                String(localized: "Getting everything ready…")
-            ]
-        case .compiling:
-            // These change every 2.5s (`CyclingLoadingText.interval`), so eight of them
-            // come round about every 20s and a Turbo compile sees the list ten times
-            // over. The comment that used to sit here claimed twelve phrases were
-            // "enough variety so the copy doesn't visibly loop" within Turbo's window;
-            // twelve never were either, at 30s a cycle against a compile of minutes.
-            // Repetition is not the problem worth solving here. The duration is, and
-            // `firstPreparationNotice` is what answers it (issue #432).
-            //
-            // WHAT IS GONE and why: every phrase that promised imminence. "Almost
-            // ready…" and "A few more seconds…" arriving on a 2.5s loop for three and a
-            // half minutes are the copy version of the bug in issue #432 — they tell a
-            // waiting user the end is near, over and over, while it is not — and they
-            // would now contradict a line directly underneath naming four minutes.
-            return [
-                String(localized: "Preparing the model…"),
-                String(localized: "Optimizing for your iPhone…"),
-                String(localized: "Setting up offline transcription…"),
-                String(localized: "Adapting the model to your iPhone…"),
-                String(localized: "Configuring voice transcription…"),
-                String(localized: "Getting Dictus ready…"),
-                String(localized: "Setting up the transcription engine…"),
-                String(localized: "Checking the model…")
-            ]
-        case .loading:
-            // A load that finds the Core ML cache is over in seconds, so this list is
-            // short on purpose. It drops the same two imminence phrases ("Almost
-            // ready…", "One last step…") for a sharper reason than the compile list
-            // does: the first launch after any install has no cache, so this phase and
-            // not `.compiling` is where the maintainer's three and a half minutes were
-            // actually spent (issue #432). It borrows a compile phrase rather than
-            // inventing a new one.
-            return [
-                String(localized: "Loading the model…"),
-                String(localized: "Preparing dictation…"),
-                String(localized: "Getting transcription ready…"),
-                String(localized: "Setting up the transcription engine…")
-            ]
-        case .ready:
-            return []
-        }
-    }
-
     private func checkForCompletion() {
         // A failed download must dismiss the cover immediately — without this,
         // `.error` falls into rawPhase's `.ready` mapping below and flashes the
@@ -560,7 +560,7 @@ struct ModelLoadingOverlay: View {
         }
         // Latch the work-phase flag the first time we observe real activity.
         // We read `rawPhase` here (not the user-facing `currentPhase`) because
-        // the latter masquerades the initial `.ready` state as `.downloading`
+        // the latter masquerades the initial `.ready` state as a work phase
         // until this flag flips, which would cause an infinite loop.
         if rawPhase != .ready {
             hasSeenWorkPhase = true
@@ -593,11 +593,13 @@ struct ModelLoadingOverlay: View {
             return
         }
 
-        withAnimation(.easeInOut(duration: 0.35)) {
-            showCompletion = true
-        }
+        // No `withAnimation` here: the content animates its own phase change in place
+        // (`content`), and the ring times its own close and colour (#708). A transaction
+        // around this flag used to drive a scale transition between two layouts.
+        showCompletion = true
 
-        // Brief celebration moment before the cover slides away.
+        // The ready state holds for a moment, then the screen dismisses itself and the
+        // onboarding moves on by itself (#708: no Continue button).
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 1_500_000_000)
             withAnimation(.easeOut(duration: 0.4)) {
@@ -611,11 +613,12 @@ struct ModelLoadingOverlay: View {
     ModelLoadingOverlay(
         modelManager: {
             let m = ModelManager()
-            m.modelStates["openai_whisper-large-v3-v20240930_turbo_632MB"] = .downloading
-            m.downloadProgress["openai_whisper-large-v3-v20240930_turbo_632MB"] = 0.42
+            m.modelStates["parakeet-tdt-0.6b-v3"] = .downloading
+            m.downloadProgress["parakeet-tdt-0.6b-v3"] = 0.34
             return m
         }(),
-        modelIdentifier: "openai_whisper-large-v3-v20240930_turbo_632MB",
+        modelIdentifier: "parakeet-tdt-0.6b-v3",
+        context: .onboarding,
         isPresented: .constant(true)
     )
     .preferredColorScheme(.light)
