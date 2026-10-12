@@ -383,6 +383,17 @@
         }
       }
     },
+    "Allow" : {
+      "comment" : "Drawn copy of the iOS Full Access alert's accept button, in the onboarding explainer (#704). Apple's own wording.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autoriser"
+          }
+        }
+      }
+    },
     "Allow Dictus to access" : {
       "comment" : "Onboarding keyboard step: section header of the drawn iOS Settings page, as iOS writes it (#675).",
       "localizations" : {
@@ -390,6 +401,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Autoriser Dictus à accéder à"
+          }
+        }
+      }
+    },
+    "Allow Full Access for “Dictus” Keyboards?" : {
+      "comment" : "Drawn copy of the alert iOS shows when Full Access is turned on, in the onboarding explainer (#704). Apple's own wording, copied from iOS 26.5: keep it identical to what iOS shows.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donner un accès complet au clavier « Dictus » ?"
+          }
+        }
+      }
+    },
+    "Anyone can check." : {
+      "comment" : "Onboarding Full Access explainer, third point, bold lead. The row opens the GitHub repository (#704).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiable par tous."
           }
         }
       }
@@ -423,6 +456,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apple Intelligence est prête"
+          }
+        }
+      }
+    },
+    "Apple shows this message for every keyboard that asks for Full Access. It is all or nothing: iOS offers no partial access." : {
+      "comment" : "Onboarding Full Access explainer subtitle, above the drawn Apple alert (#704).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple affiche ce message pour tous les claviers qui demandent l'accès complet. C'est tout ou rien : iOS ne propose pas d'accès partiel."
           }
         }
       }
@@ -1154,6 +1198,17 @@
         }
       }
     },
+    "Dictus is open source: anyone can read its code on GitHub." : {
+      "comment" : "Onboarding Full Access explainer, third point, detail (#704).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le code de Dictus est open source : n'importe qui peut le lire sur GitHub."
+          }
+        }
+      }
+    },
     "Dictus is waiting in the keyboard of every app. Hold the globe, and speak." : {
       "comment" : "Onboarding completion message (#675).",
       "localizations" : {
@@ -1336,6 +1391,17 @@
         }
       }
     },
+    "Dictus uses it to reach the Dictus app." : {
+      "comment" : "Onboarding Full Access explainer, first point, bold lead (#704).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictus s'en sert pour joindre l'app Dictus."
+          }
+        }
+      }
+    },
     "Does nothing yet. Add what Dictus writes instead." : {
       "comment" : "Subtitle of a vocabulary row stored before variants became required (#536): it has no variant, so it replaces nothing.",
       "localizations" : {
@@ -1355,6 +1421,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Don’t Allow" : {
+      "comment" : "Drawn copy of the iOS Full Access alert's refuse button, in the onboarding explainer (#704). Apple's own wording.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refuser"
+          }
+        }
+      }
+    },
+    "Full access allows the developer of this keyboard to transmit anything you type, including things you have previously typed with this keyboard. This could include sensitive information such as your credit card number or street address." : {
+      "comment" : "Drawn copy of the message of the iOS Full Access alert, in the onboarding explainer (#704). Apple's own wording, copied from iOS 26.5: keep it identical to what iOS shows.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’accès complet permet au développeur de ce clavier de transmettre toute votre saisie, notamment celle effectuée précédemment sur ce clavier. Ceci peut inclure des informations sensibles telles que des numéros bancaires ou votre adresse postale."
           }
         }
       }
@@ -1391,6 +1479,17 @@
         }
       }
     },
+    "No location, no contacts, and your dictations never leave your iPhone: transcription happens on the device." : {
+      "comment" : "Onboarding Full Access explainer, second point, detail. A public promise, verified on #704 against what the keyboard links.",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de position, pas de contacts, et vos dictées ne quittent pas votre iPhone : la transcription se fait sur l'appareil."
+          }
+        }
+      }
+    },
     "Normal" : {
       "comment" : "The Smart Mode fan row that clears the armed mode and returns to the free polish. Same text as the keyboard's (#679).",
       "localizations" : {
@@ -1409,6 +1508,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Un appui long, un Smart Mode"
+          }
+        }
+      }
+    },
+    "The app is what listens and transcribes. Without Full Access, the keyboard types but cannot dictate." : {
+      "comment" : "Onboarding Full Access explainer, first point, detail (#704).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C'est elle qui écoute et transcrit. Sans accès complet, le clavier tape mais ne peut pas dicter."
+          }
+        }
+      }
+    },
+    "The rest, Dictus does not use." : {
+      "comment" : "Onboarding Full Access explainer, second point, bold lead (#704).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le reste, Dictus ne s'en sert pas."
+          }
+        }
+      }
+    },
+    "Why Full Access?" : {
+      "comment" : "Onboarding Full Access explainer title, right before the keyboard step (#704).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourquoi l'accès complet ?"
           }
         }
       }
