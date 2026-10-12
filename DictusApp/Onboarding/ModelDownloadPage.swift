@@ -71,7 +71,7 @@ struct ModelDownloadPage: View {
                     context: .onboarding,
                     isPresented: Binding(
                         get: { self.preparingModelID != nil },
-                        set: { if !$0 { self.preparingModelID = nil } }
+                        set: { if !$0 { closePreparation() } }
                     )
                 )
                 .transition(.opacity)
@@ -181,6 +181,23 @@ struct ModelDownloadPage: View {
     private func advanceIfReady() {
         guard downloadComplete, preparingModelID == nil, !hasAdvanced else { return }
         advance()
+    }
+
+    /// The preparation screen closing itself.
+    ///
+    /// WHY IT ADVANCES STRAIGHT FROM THE READY SCREEN (#708): clearing `preparingModelID`
+    /// first cross-faded the waiting page ("Voice model", the model card) in under the
+    /// ready state for the 0.3 s the step took to slide away, a third screen flashed
+    /// between "Your model is ready" and the next step. When the model is ready the page
+    /// has nothing left to show, so the ready screen is what slides away. A close without
+    /// a ready model (a failure, a load the app gave up on) still lands on the waiting
+    /// page, which is where "Try again" lives.
+    private func closePreparation() {
+        if downloadComplete, !hasAdvanced {
+            advance()
+        } else {
+            preparingModelID = nil
+        }
     }
 
     private func advance() {

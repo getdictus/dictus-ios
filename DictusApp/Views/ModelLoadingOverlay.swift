@@ -306,9 +306,12 @@ struct ModelLoadingOverlay: View {
         }
         // The catalogue's size, the same figure the model card and the language screen
         // show. The byte counter's total is gone by then: it is cleared with the bar.
-        guard let size = ModelInfo.forIdentifier(modelIdentifier)?.sizeLabel else {
+        // Without the card's "~": the mock-up writes a finished download as a size, not an
+        // estimate of one ("Downloaded · 483 MB").
+        guard let label = ModelInfo.forIdentifier(modelIdentifier)?.sizeLabel else {
             return Text("Download complete", comment: "Model preparation step, download done, when the model's size is unknown (#708).")
         }
+        let size = label.hasPrefix("~") ? String(label.dropFirst()) : label
         return Text("Downloaded · \(size)", comment: "Model preparation step, download done. The placeholder is the model's size (483 MB) (#708).")
     }
 
