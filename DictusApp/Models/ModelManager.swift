@@ -675,18 +675,8 @@ class ModelManager: ObservableObject {
             throw ModelManagerError.noContainer
         }
 
-        setState(.downloading, for: identifier)
-        seedDownloadProgress(for: identifier)
-        lastLoggedDeciles[identifier] = -1
-        // One "started" line per TRANSFER, not per attempt (#449). A resume after a
-        // relaunch re-enters this method, and so does a retry, so a single download was
-        // announcing itself three times — which made acceptance criterion 2 ("exactly
-        // one modelDownloadStarted line") unverifiable by its own method. A manifest
-        // already on disk means the transfer is under way and has been announced.
-        if !BackgroundModelDownloadService.hasUnfinishedTransfer(for: identifier) {
-            let catalogSizeMB = Int((ModelInfo.forIdentifier(identifier)?.sizeBytes ?? 0) / 1_000_000)
-            PersistentLog.log(.modelDownloadStarted(name: identifier, sizeMB: catalogSizeMB))
-        }
+        // `.downloading`, or `.prewarming` when every file is already here (#708).
+        publishOpeningState(for: identifier)
 
         // Tracks which phase a failure (if any) belongs to. Download-phase failures
         // keep files on disk (every file is complete thanks to atomic per-file
@@ -1023,18 +1013,8 @@ class ModelManager: ObservableObject {
         // chose to download. A failed first download is never listed (the identifier is
         // appended after the prewarm), so this cannot mistake one for the other.
         let isCompletingInstalledModel = downloadedModels.contains(identifier)
-        setState(.downloading, for: identifier)
-        seedDownloadProgress(for: identifier)
-        lastLoggedDeciles[identifier] = -1
-        // One "started" line per TRANSFER, not per attempt (#449). A resume after a
-        // relaunch re-enters this method, and so does a retry, so a single download was
-        // announcing itself three times — which made acceptance criterion 2 ("exactly
-        // one modelDownloadStarted line") unverifiable by its own method. A manifest
-        // already on disk means the transfer is under way and has been announced.
-        if !BackgroundModelDownloadService.hasUnfinishedTransfer(for: identifier) {
-            let catalogSizeMB = Int((ModelInfo.forIdentifier(identifier)?.sizeBytes ?? 0) / 1_000_000)
-            PersistentLog.log(.modelDownloadStarted(name: identifier, sizeMB: catalogSizeMB))
-        }
+        // `.downloading`, or `.prewarming` when every file is already here (#708).
+        publishOpeningState(for: identifier)
 
         do {
             // Step 1: Download all raw model files with REAL byte-level progress
@@ -1253,6 +1233,12 @@ class ModelManager: ObservableObject {
     /// decile-throttled persistent logging (~10 log lines per download).
     /// Shared by the WhisperKit and Parakeet download paths (issue #210).
     private func updateDownloadProgress(_ progress: ModelRepoDownloader.Progress, identifier: String) {
+        // A tick belongs to a download on screen (#708). Two kinds arrive without one: the
+        // downloader verifying a model whose files were all on disk, which opened on
+        // `.prewarming` (`publishOpeningState`), and the last tick of a real transfer, which
+        // hops to the main actor and can land after the state moved to `.prewarming` and
+        // the bar was removed. Either would write a bar back under a compile.
+        guard modelStates[identifier] == .downloading else { return }
         downloadProgress[identifier] = Float(progress.fraction)
         let bytes = ModelDownloadBytes(progress)
         downloadByteInfo[identifier] = bytes
@@ -1461,6 +1447,73 @@ class ModelManager: ObservableObject {
         // chooses it. The stricter definition is the one the flag has always claimed.
         defaults.set(isModelReady, forKey: SharedKeys.modelReady)
         defaults.synchronize()
+    }
+}
+
+// MARK: - Opening state of a download (#708)
+
+// An extension so the class body stays within SwiftLint's `type_body_length` budget, as
+// `DictationCoordinator` does for its engine initialization. Same file, so it still
+// reaches the class's private members.
+extension ModelManager {
+    /// Whether every file `identifier` needs to load is already on disk.
+    ///
+    /// The same completeness question each engine already answers elsewhere: WhisperKit's
+    /// `hasCompleteDownload` (#433) and the FluidAudio engines' `missingEntries` (#558).
+    /// Cheap enough to ask from a view: a directory listing and a handful of file checks.
+    static func hasCompleteFilesOnDisk(_ identifier: String) -> Bool {
+        switch ModelInfo.forIdentifier(identifier)?.engine {
+        case .parakeet:
+            return FluidAudioDownloadRoute(engine: .parakeet).missingEntries().isEmpty
+        case .nemotron:
+            return FluidAudioDownloadRoute(engine: .nemotron).missingEntries().isEmpty
+        case .whisperKit, nil:
+            return WhisperModelRepository.hasCompleteDownload(identifier)
+        }
+    }
+
+    /// Publishes the state a download opens on, and says whether bytes are expected.
+    ///
+    /// WHY NOT ALWAYS `.downloading` (#708, defect 1): this used to set `.downloading` and
+    /// seed the bar at 0 % before the downloader had even listed the repository, which
+    /// takes a network round trip, and only then find every file already on disk. The
+    /// preparation screen drew a download that did not happen: 0 %, then 100 %, then
+    /// *Optimizing*. Every caller that re-enters `downloadModel` for a complete model went
+    /// through it: the onboarding resuming after iOS killed the app between the last byte
+    /// and the compile, "Retry" on a model whose compile failed, the launch repair. A model
+    /// whose files are complete opens on `.prewarming` instead, which is what it is about
+    /// to do. The downloader still runs: it is what checks the repository's own file list,
+    /// and it skips every file present, so the sequence after it is unchanged.
+    ///
+    /// The one line left out in that case is `modelDownloadStarted`: no transfer starts,
+    /// and the debug log's reader is an agent that takes it at its word (#255).
+    ///
+    /// - Returns: true when the download phase is shown, false when it was skipped.
+    @discardableResult
+    private func publishOpeningState(for identifier: String) -> Bool {
+        lastLoggedDeciles[identifier] = -1
+        guard !Self.hasCompleteFilesOnDisk(identifier) else {
+            setState(.prewarming, for: identifier)
+            PersistentLog.log(.diagnosticProbe(
+                component: "ModelDownload",
+                instanceID: identifier,
+                action: "downloadPhaseSkipped",
+                details: "reason=filesOnDisk"
+            ))
+            return false
+        }
+        setState(.downloading, for: identifier)
+        seedDownloadProgress(for: identifier)
+        // One "started" line per TRANSFER, not per attempt (#449). A resume after a
+        // relaunch re-enters this method, and so does a retry, so a single download was
+        // announcing itself three times — which made acceptance criterion 2 ("exactly
+        // one modelDownloadStarted line") unverifiable by its own method. A manifest
+        // already on disk means the transfer is under way and has been announced.
+        if !BackgroundModelDownloadService.hasUnfinishedTransfer(for: identifier) {
+            let catalogSizeMB = Int((ModelInfo.forIdentifier(identifier)?.sizeBytes ?? 0) / 1_000_000)
+            PersistentLog.log(.modelDownloadStarted(name: identifier, sizeMB: catalogSizeMB))
+        }
+        return true
     }
 }
 
