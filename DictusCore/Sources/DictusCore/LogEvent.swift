@@ -187,32 +187,49 @@ public enum LogEvent: Sendable {
     /// server was slow and not because the app was backgrounded, both of which the
     /// predicate in `DownloadStallPolicy` excludes before this is emitted.
     case modelDownloadOffline(name: String, path: String, secondsWithoutProgress: Int)
-    /// One task the background session handed back after a relaunch, as URLSession
-    /// describes it (#690). Logged for every adopted task when the session is restored
-    /// (`phase=restore`) and again ten seconds later (`phase=restore+10s`), when every
-    /// task the session holds is listed, adopted or not (`origin`).
+    /// One model download task, as URLSession describes it (#690, #707).
+    ///
+    /// Logged for every task the background session hands back after a relaunch
+    /// (`phase=restore`, `origin=adopted`) and again ten seconds later
+    /// (`phase=restore+10s`); and, since #707, for every task `start()` creates, right
+    /// after `resume()` (`phase=start`, `origin=new`) and ten seconds later
+    /// (`phase=start+10s`). `session` is the session that holds it: `bg` for the
+    /// background one, `fg` for the foreground fallback.
     ///
     /// WHY IT EXISTS. After iOS killed Dictus on the Full Access change, the adopted task
     /// delivered nothing for minutes with the app in front and the network up, and no
     /// line said what state it was in. `state` (`running`, `suspended`, `canceling`,
     /// `completed`), `received` (bytes, as the task counts them) and `error` (domain and
     /// code only, `none` when there is none) answer it: a `suspended` task, or a
-    /// `running` one whose `received` has not moved in ten seconds, is the wedge.
+    /// `running` one whose `received` has not moved in ten seconds, is the wedge. #707
+    /// then found the replacement task wedged too, and only `restore()` logged states, so
+    /// nothing could say whether it sat `suspended` or `running` with no bytes.
     case modelDownloadTaskState(
         name: String,
         path: String,
         chunk: Int,
         phase: String,
         origin: String,
+        session: String,
         state: String,
         receivedBytes: Int64,
         error: String
     )
-    /// An adopted task went `secondsWithoutByte` without delivering anything while the
-    /// app was in the foreground, and was cancelled so its chunk could be asked for again
-    /// from the manifest (#690, `AdoptedDownloadWatchdog`). A line here means a transfer
-    /// that would otherwise have frozen the progress bar was replaced.
-    case modelDownloadAdoptedTaskSilent(name: String, path: String, chunk: Int, secondsWithoutByte: Int)
+    /// A background-session task went `secondsWithoutByte` without delivering anything
+    /// while the app was in the foreground, and was cancelled so its chunk could be asked
+    /// for again on the foreground session (#707, `SilentDownloadTaskWatchdog`). `origin`
+    /// says whether the task was adopted from a previous process or created by this one.
+    /// A line here means a transfer that would otherwise have frozen the progress bar was
+    /// moved, and that the foreground fallback is engaged until the app is backgrounded.
+    ///
+    /// Replaces #690's `modelDownloadAdoptedTaskSilent`, which watched adopted tasks only.
+    case modelDownloadBackgroundTaskSilent(
+        name: String,
+        path: String,
+        chunk: Int,
+        origin: String,
+        secondsWithoutByte: Int
+    )
     /// This process cancelled a download task, and `caller` names the code path that did
     /// it (#690). Every `cancel()` on a model download task goes through a line like this,
     /// so a `-999` with no such line before it was not ours: it came from the system.
@@ -422,6 +439,39 @@ public enum LogEvent: Sendable {
 
     // MARK: Lifecycle
     case appLaunched(version: String)
+    /// The application state one main-loop turn after `didFinishLaunching` (#707), as a
+    /// hint at who made the launch.
+    ///
+    /// HOW TO READ IT. `inactive` means the user made the launch: the scene was already
+    /// coming to the foreground. `background` does NOT settle it. iOS's own background
+    /// launches read `background`, but so does a user launch that is slow to attach its
+    /// scene. Measured on the iOS 27 simulator on 2026-10-12: a `simctl launch` read
+    /// `background` with `appDidBecomeActive` 3 s later. On device, a `devicectl process
+    /// launch` read `background` and became active in the same second. What decides is
+    /// whether `appDidBecomeActive` follows. A launch that never logs it is a background
+    /// launch, and `appBackgroundSessionEvents` says whether the download session caused it.
+    ///
+    /// WHY ITS OWN LINE, AND NOT A FIELD ON `appLaunched` as #707's triage first asked.
+    /// Measured on the simulator on 2026-10-11, on both launch kinds:
+    /// - in `App.init`, where `appLaunched` is written, `applicationState` reads `active`
+    ///   for both;
+    /// - in `didFinishLaunching`, it reads `background` for both;
+    /// - one turn later is the first point that ever reads differently.
+    ///
+    /// Writing `appLaunched` that late would let other lines of the new process land
+    /// before the line every reader splits a log on.
+    case appLaunchState(state: String)
+    /// iOS called `application(_:handleEventsForBackgroundURLSession:completionHandler:)`:
+    /// it has a background session's events to deliver to this process (#707).
+    /// `identifier` is the session's, which is ours unless another component ever adds a
+    /// background session. Two launches in #707's second capture never became active, and
+    /// without this line nothing could say whether iOS or the user had made them.
+    ///
+    /// Not a launch kind on its own. Seen on the iOS 27 simulator on 2026-10-11 in three
+    /// shapes: a launch iOS made in the background, a suspended process woken in place, and
+    /// a launch by the user while events were waiting. Read it with `appLaunchState` and
+    /// with whether `appDidBecomeActive` follows.
+    case appBackgroundSessionEvents(identifier: String)
     case appDidBecomeActive
     case appWillResignActive
     case appDidEnterBackground
@@ -605,7 +655,7 @@ public enum LogEvent: Sendable {
              .modelReconciledFromDisk,
              .modelDownloadResumed, .modelDownloadRangeRejected, .modelDownloadChunk,
              .modelDownloadIntegrityFailed, .modelDownloadSessionRestored,
-             .modelDownloadOffline, .modelDownloadTaskState, .modelDownloadAdoptedTaskSilent,
+             .modelDownloadOffline, .modelDownloadTaskState, .modelDownloadBackgroundTaskSilent,
              .modelDownloadTaskCancelled:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
@@ -645,7 +695,8 @@ public enum LogEvent: Sendable {
         case .liveActivityStarted, .liveActivityTransition, .liveActivityFailed, .liveActivityEnded,
              .liveActivityStandbySkipped:
             return .lifecycle
-        case .appLaunched, .appDidBecomeActive, .appWillResignActive,
+        case .appLaunched, .appLaunchState, .appBackgroundSessionEvents, .appDidBecomeActive,
+             .appWillResignActive,
              .appDidEnterBackground, .appWhisperKitLoaded, .deviceCapabilitySnapshot:
             return .lifecycle
         // Polish is the stage after the STT result and before the App Group
@@ -690,7 +741,7 @@ public enum LogEvent: Sendable {
              .audioInterruptionBegan, .audioMediaServicesReset,
              .modelDownloadStalled, .audioHapticsAllowanceFailed,
              .modelDownloadSizeMismatch, .modelDownloadRangeRejected,
-             .modelDownloadOffline, .modelDownloadAdoptedTaskSilent:
+             .modelDownloadOffline, .modelDownloadBackgroundTaskSilent:
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
@@ -715,7 +766,8 @@ public enum LogEvent: Sendable {
              .modelPrewarmPeakMemory, .modelLoadStateChanged, .transcriptionPerformance,
              .keyboardDidAppear, .keyboardMicTapped,
              .dictationMessageSet, .dictationMessageDisplayed,
-             .appLaunched, .appWhisperKitLoaded, .logExportCompleted,
+             .appLaunched, .appLaunchState, .appBackgroundSessionEvents, .appWhisperKitLoaded,
+             .logExportCompleted,
              .deviceCapabilitySnapshot,
              .liveActivityStarted, .liveActivityTransition, .liveActivityEnded,
              .liveActivityStandbySkipped,
@@ -890,12 +942,16 @@ public enum LogEvent: Sendable {
         case .modelDownloadOffline(let name, let path, let secondsWithoutProgress):
             return "name=\(name) path=\(path) noProgress=\(secondsWithoutProgress)s"
         case .modelDownloadTaskState(
-            let name, let path, let chunk, let phase, let origin, let state, let receivedBytes, let error
+            let name, let path, let chunk, let phase, let origin, let session, let state,
+            let receivedBytes, let error
         ):
             return "name=\(name) path=\(path) chunk=\(chunk) phase=\(phase) origin=\(origin) "
-                + "state=\(state) received=\(receivedBytes)B error=\(error)"
-        case .modelDownloadAdoptedTaskSilent(let name, let path, let chunk, let secondsWithoutByte):
-            return "name=\(name) path=\(path) chunk=\(chunk) noByte=\(secondsWithoutByte)s"
+                + "session=\(session) state=\(state) received=\(receivedBytes)B error=\(error)"
+        case .modelDownloadBackgroundTaskSilent(
+            let name, let path, let chunk, let origin, let secondsWithoutByte
+        ):
+            return "name=\(name) path=\(path) chunk=\(chunk) origin=\(origin) "
+                + "noByte=\(secondsWithoutByte)s"
         case .modelDownloadTaskCancelled(let name, let path, let chunk, let caller):
             return "name=\(name) path=\(path) chunk=\(chunk) caller=\(caller)"
 
@@ -969,6 +1025,10 @@ public enum LogEvent: Sendable {
         // Lifecycle
         case .appLaunched(let version):
             return "version=\(version)"
+        case .appLaunchState(let state):
+            return "state=\(state)"
+        case .appBackgroundSessionEvents(let identifier):
+            return "identifier=\(identifier)"
         case .appDidBecomeActive, .appWillResignActive, .appDidEnterBackground:
             return ""
         case .appWhisperKitLoaded(let modelName):
@@ -1212,6 +1272,8 @@ extension LogEvent {
         case .liveActivityEnded: return "liveActivityEnded"
         case .liveActivityStandbySkipped: return "liveActivityStandbySkipped"
         case .appLaunched: return "appLaunched"
+        case .appLaunchState: return "appLaunchState"
+        case .appBackgroundSessionEvents: return "appBackgroundSessionEvents"
         case .appDidBecomeActive: return "appDidBecomeActive"
         case .appWillResignActive: return "appWillResignActive"
         case .appDidEnterBackground: return "appDidEnterBackground"
@@ -1256,7 +1318,7 @@ extension LogEvent {
         case .modelDownloadSessionRestored: return "modelDownloadSessionRestored"
         case .modelDownloadOffline: return "modelDownloadOffline"
         case .modelDownloadTaskState: return "modelDownloadTaskState"
-        case .modelDownloadAdoptedTaskSilent: return "modelDownloadAdoptedTaskSilent"
+        case .modelDownloadBackgroundTaskSilent: return "modelDownloadBackgroundTaskSilent"
         case .modelDownloadTaskCancelled: return "modelDownloadTaskCancelled"
         case .polishEngineFailed: return "polishEngineFailed"
         case .vocabularyApplied: return "vocabularyApplied"

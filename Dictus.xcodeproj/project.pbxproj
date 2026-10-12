@@ -72,6 +72,7 @@
 		AA055802 /* JointDecisionv3.mlmodelc in Resources */ = {isa = PBXBuildFile; fileRef = AA155802 /* JointDecisionv3.mlmodelc */; };
 		AA000449 /* BackgroundModelDownloadService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100449 /* BackgroundModelDownloadService.swift */; };
 		AA000492 /* DownloadConnectivityWatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100492 /* DownloadConnectivityWatch.swift */; };
+		AA000707 /* ModelDownloadManifestStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100707 /* ModelDownloadManifestStore.swift */; };
 		AA000051 /* ModelManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100051 /* ModelManagerView.swift */; };
 		AA000060 /* ToolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100060 /* ToolbarView.swift */; };
 		AA00006L /* KeyboardPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10006L /* KeyboardPanelView.swift */; };
@@ -300,6 +301,7 @@
 		AA155802 /* JointDecisionv3.mlmodelc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = JointDecisionv3.mlmodelc; path = DictusApp/ParakeetMigration/JointDecisionv3.mlmodelc; sourceTree = SOURCE_ROOT; };
 		AA100449 /* BackgroundModelDownloadService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundModelDownloadService.swift; sourceTree = "<group>"; };
 		AA100492 /* DownloadConnectivityWatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadConnectivityWatch.swift; sourceTree = "<group>"; };
+		AA100707 /* ModelDownloadManifestStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadManifestStore.swift; sourceTree = "<group>"; };
 		AA100051 /* ModelManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManagerView.swift; sourceTree = "<group>"; };
 		AA100060 /* ToolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarView.swift; sourceTree = "<group>"; };
 		AA10006L /* KeyboardPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardPanelView.swift; sourceTree = "<group>"; };
@@ -726,6 +728,7 @@
 				AA155804 /* FluidAudioDownloadRoute.swift */,
 				AA100449 /* BackgroundModelDownloadService.swift */,
 				AA100492 /* DownloadConnectivityWatch.swift */,
+				AA100707 /* ModelDownloadManifestStore.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1273,6 +1276,7 @@
 				AA055804 /* FluidAudioDownloadRoute.swift in Sources */,
 				AA000449 /* BackgroundModelDownloadService.swift in Sources */,
 				AA000492 /* DownloadConnectivityWatch.swift in Sources */,
+				AA000707 /* ModelDownloadManifestStore.swift in Sources */,
 				AA000051 /* ModelManagerView.swift in Sources */,
 				AA000071 /* TestDictationView.swift in Sources */,
 				AA000090 /* MainTabView.swift in Sources */,

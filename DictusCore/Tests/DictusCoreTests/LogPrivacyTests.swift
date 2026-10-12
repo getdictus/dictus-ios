@@ -63,29 +63,42 @@ final class LogPrivacyTests: XCTestCase {
                 path: "Encoder.mlmodelc/weights/weight.bin",
                 secondsWithoutProgress: 15
             ),
-            // Adopted-task diagnosis (#690): task state, byte counts and an error domain
-            // and code. Nothing the user said or typed.
+            // Task diagnosis (#690, #707): task state, the session that holds it, byte
+            // counts and an error domain and code. Nothing the user said or typed.
             .modelDownloadTaskState(
                 name: "parakeet-tdt-0.6b-v3",
                 path: "Encoder.mlmodelc/weights/weight.bin",
                 chunk: 0,
                 phase: "restore",
                 origin: "adopted",
+                session: "bg",
                 state: "suspended",
                 receivedBytes: 11_534_336,
                 error: "none"
             ),
-            .modelDownloadAdoptedTaskSilent(
+            .modelDownloadTaskState(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                chunk: 6,
+                phase: "start+10s",
+                origin: "new",
+                session: "fg",
+                state: "running",
+                receivedBytes: 0,
+                error: "none"
+            ),
+            .modelDownloadBackgroundTaskSilent(
                 name: "parakeet-tdt-0.6b-v3",
                 path: "Encoder.mlmodelc/weights/weight.bin",
                 chunk: 0,
-                secondsWithoutByte: 10
+                origin: "new",
+                secondsWithoutByte: 30
             ),
             .modelDownloadTaskCancelled(
                 name: "parakeet-tdt-0.6b-v3",
                 path: "Encoder.mlmodelc/weights/weight.bin",
                 chunk: 0,
-                caller: "adoptedWatchdog"
+                caller: "silentTaskWatchdog"
             ),
             .modelSelected(name: "base"),
             .modelCompilationStarted(name: "base"),
@@ -97,6 +110,9 @@ final class LogPrivacyTests: XCTestCase {
             .keyRepeatStarted,
             .keyRepeatStopped(ticks: 12, reason: "touch"),
             .appLaunched(version: "1.2"),
+            .appLaunchState(state: "background"),
+            // The background session's identifier, a constant of the app (#707).
+            .appBackgroundSessionEvents(identifier: "com.pivi.dictus.model-download"),
             .appDidBecomeActive,
             .appWillResignActive,
             .appDidEnterBackground,
