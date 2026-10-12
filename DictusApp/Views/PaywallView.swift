@@ -921,7 +921,7 @@ struct PaywallView: View {
             // scene focus, where sensoryFeedback is silently dropped. The
             // delay lands the haptic as the checkmark spring settles.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                HapticFeedback.textInserted()
+                HapticFeedback.purchaseSucceeded()
             }
         }
     }

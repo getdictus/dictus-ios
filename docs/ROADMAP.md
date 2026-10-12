@@ -10,7 +10,7 @@ Where we are going, and which issue to work on next. Nothing else.
 - Whole file under 60 lines. If an edit pushes it past that, something belongs on an issue instead.
 - The [Project board](https://github.com/orgs/getdictus/projects/2) moves by itself on a branch push, a PR and a merge. Two moves are by hand: an issue added to **Now** is added to the board in the same edit (`gh project item-add 2 --owner getdictus --url <issue-url>`), and work with no branch (a grilling, a measurement) is set to In progress when it starts.
 
-Last reviewed: 2026-10-09.
+Last reviewed: 2026-10-11.
 
 ## Now — 2.0.0, the Pro launch
 
@@ -21,15 +21,17 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 3. ~~#637 — voice-note transcripts in the keyboard~~ — merged in PR #638; #639 (tap ☰ for notes, keep them 15 min) merged in PR #641; then #640 (research: quote a passage)
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; closed 2026-10-10, real-use verdict left to user feedback
 5. ~~#593 — reverse trial: Pro free for a fixed period, then the paywall~~ — merged in PR #595; its two device checks (iPad, EN strings) moved to #279 step 6
-6. ~~#690 — model download freezes after iOS kills Dictus on the Full Access change~~ — merged in PR #694; follow-up #701 (stale-task cancel fails the run) merged in PR #702
-7. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); mock-ups done 2026-10-07; split into sub-issues #675-#686 (#675 merged in PR #688; next #676-#678, #682, #683 in parallel); intro videos #667 merged in PR #670 (2026-10-09); #676 merged in PR #697 (2026-10-10); #677 merged in PR #695 (2026-10-10); #678 merged in PR #696 (2026-10-10); #700 back to intro next
-8. ~~#216 — the Pro hub, one screen for free / trial / paid users~~ — closed 2026-10-06
-9. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
-10. ~~#643 — App Store listing for 2.0.0~~ — merged in PR #645 (en, fr, de, es; ASC upload at submission). Remaining French UI follow-ups: ~~#664~~ (merged in PR #668), ~~#665~~ (merged in PR #671)
-11. ~~#673 — download screen: drop the two phrases that promise the end ("Almost there" at 1 %)~~ — merged in PR #674
-12. ~~#533 — countdown under the model preparation (compile / load), not a second bar~~ — merged in PR #687
-13. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
-14. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
+6. ~~#690 — model download freezes after iOS kills Dictus on the Full Access change~~ — merged in PR #694; follow-up #701 (stale-task cancel fails the run) merged in PR #702; residual #707
+7. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); mock-ups done 2026-10-07; split into sub-issues #675-#686 (#675 merged in PR #688; next #676-#678, #682, #683 in parallel); intro videos #667 merged in PR #670 (2026-10-09); #676 merged in PR #697 (2026-10-10); #677 merged in PR #695 (2026-10-10); #678 merged in PR #696 (2026-10-10); #682 merged in PR #698 (2026-10-11), follow-ups #704 (explain Full Access, needs mock-up) and #709 (Settings link when keyboard already detected); #683 merged in PR #699 (2026-10-11), follow-up #706 (PiP guide); #700 back to intro next
+8. #707 — model download: #690's watchdog replacement stalls on the same background session (ready-for-agent 2026-10-11: foreground-session fallback, 10 simulator force-kill runs)
+9. ~~#216 — the Pro hub, one screen for free / trial / paid users~~ — closed 2026-10-06
+10. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
+11. ~~#643 — App Store listing for 2.0.0~~ — merged in PR #645 (en, fr, de, es; ASC upload at submission). Remaining French UI follow-ups: ~~#664~~ (merged in PR #668), ~~#665~~ (merged in PR #671)
+12. ~~#673 — download screen: drop the two phrases that promise the end ("Almost there" at 1 %)~~ — merged in PR #674
+13. ~~#533 — countdown under the model preparation (compile / load), not a second bar~~ — merged in PR #687
+14. #708 — rebuild the model preparation screen: circular progress, no waveform, no layout jumps; mock-up first
+15. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
+16. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
 Done in this lane: #530, #414, #490, #518, #80, #536, #523 `Structuré`, #572 `Message`, #571 `Résumé`, #575, #215, #620 voice notes. Closed 2026-10-10 as done or superseded: #79, #439.
 

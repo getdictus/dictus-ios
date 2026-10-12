@@ -114,6 +114,9 @@ public enum LogEvent: Sendable {
 
     // MARK: Model
     case modelDownloadStarted(name: String, sizeMB: Int)
+    /// The transfer is finished and every file is published on disk, for every engine
+    /// (#693). It does NOT mean the model is usable: the Core ML compile that follows is
+    /// bracketed by `modelPrewarmStarted` / `modelCompilationCompleted`.
     case modelDownloadCompleted(name: String)
     case modelDownloadFailed(name: String, error: String)
     case modelSelected(name: String)
@@ -355,6 +358,22 @@ public enum LogEvent: Sendable {
     case onboardingDictusKeyboardActivated
     case onboardingGlobeTutorialTextDetected
     case onboardingGlobeTutorialSkipped
+    /// The Apple Intelligence step read the availability (#683). `trigger` is `appear`;
+    /// `returnFromBackground` (active after a real trip to the background, typically back
+    /// from Settings, or a launch onto the step); `activeFromInactive` (active after a
+    /// screenshot, Control Center or Notification Center, which changes nothing on the
+    /// page); or `recheck` (the getting-ready screen's quiet re-read). `state` is
+    /// `PolishAvailabilityState`'s description, so a device test can tell whether turning
+    /// Apple Intelligence on moved it, and to what.
+    case onboardingAppleIntelligenceChecked(trigger: String, state: String)
+    /// The user left the Apple Intelligence step with *Later* (#683).
+    case onboardingAppleIntelligenceDeferred(state: String)
+    /// Back on the step with Apple Intelligence not available: the "getting ready" screen
+    /// is shown (#683, `AppleIntelligenceStepState`).
+    case onboardingAppleIntelligenceSettingUpShown(state: String)
+    /// Apple Intelligence read as available on the step. `afterSeconds` is the time since
+    /// the last return to the app, -1 when it was found before any return.
+    case onboardingAppleIntelligenceBecameAvailable(afterSeconds: Int)
     /// The onboarding's Smart Mode pick wrote the pinned list (#677). `identifiers` is the
     /// list in fan order, comma-separated: what the keyboard's fan should now show.
     case onboardingSmartModesPicked(identifiers: String)
@@ -610,7 +629,9 @@ public enum LogEvent: Sendable {
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
-             .onboardingGlobeTutorialSkipped,
+             .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
+             .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
+             .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
              .onboardingSceneSequenceSkipped:
             return .lifecycle
@@ -675,7 +696,9 @@ public enum LogEvent: Sendable {
         // Info (normal operations: starts, completes, selections, configs)
         case .onboardingKeyboardDetected,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
-             .onboardingGlobeTutorialSkipped,
+             .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
+             .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
+             .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
              .onboardingSceneSequenceSkipped,
              .dictationStarted, .dictationCompleted,
@@ -917,6 +940,13 @@ public enum LogEvent: Sendable {
         case .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped:
             return ""
+        case .onboardingAppleIntelligenceChecked(let trigger, let state):
+            return "trigger=\(trigger) state=\(state)"
+        case .onboardingAppleIntelligenceDeferred(let state),
+             .onboardingAppleIntelligenceSettingUpShown(let state):
+            return "state=\(state)"
+        case .onboardingAppleIntelligenceBecameAvailable(let afterSeconds):
+            return "afterSeconds=\(afterSeconds)"
         case .onboardingSmartModesPicked(let identifiers):
             return "identifiers=\(identifiers)"
         case .onboardingSmartModePickSkipped:
@@ -1169,6 +1199,10 @@ extension LogEvent {
         case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
         case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
         case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
+        case .onboardingAppleIntelligenceChecked: return "onboardingAppleIntelligenceChecked"
+        case .onboardingAppleIntelligenceDeferred: return "onboardingAppleIntelligenceDeferred"
+        case .onboardingAppleIntelligenceSettingUpShown: return "onboardingAppleIntelligenceSettingUpShown"
+        case .onboardingAppleIntelligenceBecameAvailable: return "onboardingAppleIntelligenceBecameAvailable"
         case .onboardingSmartModesPicked: return "onboardingSmartModesPicked"
         case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
         case .onboardingSceneSequenceSkipped: return "onboardingSceneSequenceSkipped"

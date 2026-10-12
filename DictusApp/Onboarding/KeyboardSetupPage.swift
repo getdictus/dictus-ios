@@ -12,8 +12,9 @@ import DictusCore
 /// requests. Since the shell (#675) it is drawn as the mock-up draws it: the top of an
 /// iPhone, cropped, showing Settings > Apps > Dictus with the three things to touch
 /// numbered 1, 2, 3, and the current one lit in turn on a loop. Only iOS system UI is
-/// drawn this way (#649 decision 13). The Picture in Picture checklist over the real
-/// Settings is #682's.
+/// drawn this way (#649 decision 13). Open Settings sends a checklist into Picture in
+/// Picture over the real Settings (#682, `KeyboardSetupChecklistPlayer`); the page itself
+/// shows it only in the fallback, under the drawing.
 struct KeyboardSetupPage: View {
     let onNext: () -> Void
 
@@ -47,6 +48,10 @@ struct KeyboardSetupPage: View {
     /// it cannot change while the page is on screen.
     private let device = DeviceCapabilities.current()
 
+    /// The checklist played under the drawing and, from the Open Settings tap, in Picture
+    /// in Picture over Settings (#682).
+    @StateObject private var checklist = KeyboardSetupChecklistPlayer()
+
     var body: some View {
         OnboardingPage(
             title: Text("Turn on the keyboard"),
@@ -54,6 +59,21 @@ struct KeyboardSetupPage: View {
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
+                    // The Picture in Picture source, behind the drawn phone that covers it.
+                    .background {
+                        if checklist.usesPictureInPicture {
+                            ChecklistPictureSource(layer: checklist.displayLayer)
+                        }
+                    }
+
+                // The fallback only: floats over the cropped bottom of the drawn phone,
+                // trailing, as the window floats over Settings in mock-up 03b.
+                if checklist.showsInlineCard {
+                    KeyboardSetupChecklistInline(player: checklist)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.top, -28)
+                        .transition(.opacity)
+                }
 
                 detectionStatus
 
@@ -84,8 +104,10 @@ struct KeyboardSetupPage: View {
         .onAppear {
             checkKeyboardInstalled()
             startToggleAnimation()
+            checklist.start()
         }
         .onDisappear {
+            checklist.stop()
             animationTimer?.invalidate()
             animationTimer = nil
             // Cancel any pending keyboard check task to prevent UI updates
@@ -105,6 +127,11 @@ struct KeyboardSetupPage: View {
             // can fire rapidly (active → inactive → active). Cancel any in-flight
             // check when we go inactive to avoid stale tasks mutating state
             // after the view has been torn down or re-entered.
+            if newPhase == .active {
+                // Back from Settings: the Picture in Picture window has done its job.
+                checklist.appBecameActive()
+            }
+
             if newPhase != .active {
                 keyboardCheckTask?.cancel()
                 keyboardCheckTask = nil
@@ -152,6 +179,7 @@ struct KeyboardSetupPage: View {
         }
         .onChange(of: keyboardDetected) { detected in
             if detected {
+                checklist.keyboardDetected()
                 // Stop animation loop once detected
                 animationTimer?.invalidate()
                 animationTimer = nil
@@ -329,8 +357,7 @@ struct KeyboardSetupPage: View {
     /// A white (or dark surface) inset group, as in Settings.
     private func settingsGroup<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         content()
-            .background(Color.dictusSurface)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .onboardingSettingsGroup()
     }
 
     /// A numbered row with a switch.
@@ -350,13 +377,7 @@ struct KeyboardSetupPage: View {
     /// The step number in a circle: accent while it is the step the loop points at, grey
     /// otherwise.
     private func stepBadge(_ step: Int) -> some View {
-        let isLit = litSettingsStep == step
-        return Text(verbatim: "\(step)")
-            .font(.footnote.weight(.semibold))
-            .foregroundStyle(isLit ? Color.white : Color.secondary)
-            .frame(width: 26, height: 26)
-            .background(Circle().fill(isLit ? Color.dictusAccent : Color.primary.opacity(0.08)))
-            .animation(.easeInOut(duration: 0.25), value: isLit)
+        OnboardingStepBadge(number: step, isLit: litSettingsStep == step)
     }
 
     // MARK: - Animation Loop
@@ -410,9 +431,13 @@ struct KeyboardSetupPage: View {
 
     // MARK: - Private
 
+    /// Opens the app's page in Settings. The checklist starts Picture in Picture first when
+    /// it can, and opens Settings once the window is up (#682).
     private func openSettings() {
-        if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.open(url)
+        checklist.openSettings {
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
         }
     }
 
@@ -478,19 +503,5 @@ private struct DrawnSwitch: View {
             )
             .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isOn)
             .animation(.easeInOut(duration: 0.25), value: isLit)
-    }
-}
-
-/// A Settings row icon: a white symbol on a coloured rounded square.
-private struct DictusIconTileSymbol: View {
-    let systemName: String
-    let fill: Color
-
-    var body: some View {
-        Image(systemName: systemName)
-            .font(.system(size: 14, weight: .medium))
-            .foregroundStyle(.white)
-            .frame(width: 30, height: 30)
-            .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(fill))
     }
 }
