@@ -372,6 +372,17 @@
         }
       }
     },
+    "Add Dictus" : {
+      "comment" : "Onboarding voice notes scene: third step of the one-time setup, tapping the green + beside Dictus in the share sheet's list of apps (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter Dictus"
+          }
+        }
+      }
+    },
     "All Pro features are off" : {
       "comment" : "Home Pro card for a subscriber who switched every Pro feature off in the hub (#216 decision 16).",
       "localizations" : {
@@ -1165,17 +1176,6 @@
         }
       }
     },
-    "Dictus in Favorites" : {
-      "comment" : "Onboarding voice notes scene: second step of the path, Dictus added to the share sheet's favorites so it sits in its row of apps (#680).",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dictus en favori"
-          }
-        }
-      }
-    },
     "Dictus is waiting in the keyboard of every app. Hold the globe, and speak." : {
       "comment" : "Onboarding completion message (#675).",
       "localizations" : {
@@ -1470,12 +1470,23 @@
       }
     },
     "Insert" : {
-      "comment" : "Onboarding voice notes scene: third step of the path, inserting the transcript from the keyboard. Same word as the keyboard's button (#680).",
+      "comment" : "Onboarding voice notes scene: last step of the chips above the drawn iPhone, inserting the transcript from the keyboard. Same word as the keyboard's button (#680).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Insérer"
+          }
+        }
+      }
+    },
+    "Just once" : {
+      "comment" : "Onboarding voice notes scene: caption above the drawn iPhone while it shows the one-time setup, adding Dictus to the share sheet's favorites (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une seule fois"
           }
         }
       }
@@ -1629,6 +1640,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le dentiste a dit de revenir dans six mois pour un contrôle."
+          }
+        }
+      }
+    },
+    "Then, for every voice note" : {
+      "comment" : "Onboarding voice notes scene: caption above the drawn iPhone while it shows what happens for each voice note once Dictus is a favorite (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensuite, à chaque vocal"
           }
         }
       }

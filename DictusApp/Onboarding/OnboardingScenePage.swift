@@ -17,9 +17,10 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
     let line: Text
     /// The end of the drawn iPhone the scene shows (`OnboardingPhoneCard`).
     var phoneEnd: OnboardingPhoneEnd = .bottom
-    /// Drawn in the card above the phone (`OnboardingPhoneCard.header`), nothing for most
-    /// scenes.
-    let cardHeader: () -> CardHeader
+    /// Drawn in the card above the phone (`OnboardingPhoneCard.header`) at a moment of the
+    /// loop, nothing for most scenes. The voice notes scene's caption and chips change
+    /// with its chapter (#680), so they follow the scene's clock.
+    let cardHeader: (Double) -> CardHeader
     let loopSeconds: Double
     /// Where the loop starts when the page appears.
     var startSeconds: Double = 0
@@ -42,7 +43,7 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
          modelManager: ModelManager,
          modelIdentifier: String,
          onNext: @escaping () -> Void,
-         @ViewBuilder cardHeader: @escaping () -> CardHeader,
+         @ViewBuilder cardHeader: @escaping (Double) -> CardHeader,
          @ViewBuilder scene: @escaping (Double) -> Scene) {
         self.title = title
         self.line = line
@@ -59,18 +60,23 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
 
     var body: some View {
         OnboardingPage(title: title, subtitle: line) {
-            OnboardingPhoneCard(end: phoneEnd, header: cardHeader) {
-                AnimatedScenePlayer(
-                    loopSeconds: loopSeconds,
-                    startSeconds: startSeconds,
-                    stillSeconds: stillSeconds,
-                    content: scene
-                )
-                    // The phone's screen: inside its outline, rounded like it at the end
-                    // the card shows, so the drawing never sits under the frame.
-                    .clipShape(screenShape)
-                    .padding(.horizontal, Phone.phoneFrameWidth)
-                    .padding(phoneEnd == .bottom ? .bottom : .top, Phone.phoneFrameWidth)
+            // One player for the whole card, so the header above the phone and the scene
+            // inside it read the same clock.
+            AnimatedScenePlayer(
+                loopSeconds: loopSeconds,
+                startSeconds: startSeconds,
+                stillSeconds: stillSeconds
+            ) { time in
+                OnboardingPhoneCard(end: phoneEnd) {
+                    cardHeader(time)
+                } content: {
+                    scene(time)
+                        // The phone's screen: inside its outline, rounded like it at the
+                        // end the card shows, so the drawing never sits under the frame.
+                        .clipShape(screenShape)
+                        .padding(.horizontal, Phone.phoneFrameWidth)
+                        .padding(phoneEnd == .bottom ? .bottom : .top, Phone.phoneFrameWidth)
+                }
             }
         } bottom: {
             OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
@@ -107,6 +113,6 @@ extension OnboardingScenePage where CardHeader == EmptyView {
          @ViewBuilder scene: @escaping (Double) -> Scene) {
         self.init(title: title, line: line, phoneEnd: phoneEnd, loopSeconds: loopSeconds,
                   startSeconds: startSeconds, stillSeconds: stillSeconds, modelManager: modelManager,
-                  modelIdentifier: modelIdentifier, onNext: onNext, cardHeader: { EmptyView() }, scene: scene)
+                  modelIdentifier: modelIdentifier, onNext: onNext, cardHeader: { _ in EmptyView() }, scene: scene)
     }
 }

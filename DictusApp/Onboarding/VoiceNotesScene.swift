@@ -27,41 +27,78 @@ struct VoiceNotesScenePage: View {
             modelManager: modelManager,
             modelIdentifier: modelIdentifier,
             onNext: onNext
-        ) {
-            VoiceNotesPathChips()
+        ) { time in
+            VoiceNotesChapterHeader(chapter: VoiceNotesSceneScript.frame(at: time).chapter)
         } scene: { time in
             VoiceNotesScene(time: time, layout: layout)
         }
     }
 }
 
-// MARK: - Chips
+// MARK: - Chapter header
 
-/// "1 Share › 2 Dictus in Favorites › 3 Insert", above the drawn iPhone (mock-up 07a): the
-/// everyday path once Dictus is set up. The onboarding's own drawing, not the app's.
-private struct VoiceNotesPathChips: View {
+/// Above the drawn iPhone (mock-up 07a): the chapter's caption, then its steps as chips.
+/// The onboarding's own drawing, not the app's.
+///
+/// WHY A CAPTION AND TWO SETS OF CHIPS (Pierre's device test, 2026-10-12): the scene has
+/// two chapters, a setup done once and the gesture of every voice note. Without a
+/// boundary on screen they read as one confusing sequence. The caption says which one is
+/// playing, and the chips name its steps; both change while the screen is faded out
+/// between the chapters (`VoiceNotesSceneScript.Frame.screenOpacity`).
+private struct VoiceNotesChapterHeader: View {
+    let chapter: VoiceNotesSceneScript.Chapter
+
     var body: some View {
-        // The largest size that fits on one line: the chips are wider in some languages
-        // and on narrow iPhones, and a truncated step would say nothing.
-        ViewThatFits(in: .horizontal) {
-            row(font: .subheadline, spacing: 8)
-            row(font: .footnote, spacing: 6)
-            row(font: .caption, spacing: 4)
+        VStack(spacing: 10) {
+            caption
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+            // The largest size that fits on one line: the chips are wider in some
+            // languages and on narrow iPhones, and a truncated step would say nothing.
+            ViewThatFits(in: .horizontal) {
+                row(font: .subheadline, spacing: 8)
+                row(font: .footnote, spacing: 6)
+                row(font: .caption, spacing: 4)
+            }
         }
         .frame(maxWidth: .infinity)
-        .padding(.top, 18)
-        .padding(.bottom, 16)
-        // One sentence for VoiceOver; the scene under it is hidden from it.
-        .accessibilityElement(children: .combine)
+        .padding(.top, 16)
+        .padding(.bottom, 14)
+        .id(chapter)
+        .transition(.opacity)
+        .animation(.easeInOut(duration: 0.3), value: chapter)
+    }
+
+    private var caption: Text {
+        switch chapter {
+        case .setUp:
+            return Text("Just once", comment: "Onboarding voice notes scene: caption above the drawn iPhone while it shows the one-time setup, adding Dictus to the share sheet's favorites (#680).")
+        case .everyNote:
+            return Text("Then, for every voice note", comment: "Onboarding voice notes scene: caption above the drawn iPhone while it shows what happens for each voice note once Dictus is a favorite (#680).")
+        }
+    }
+
+    private var steps: [Text] {
+        switch chapter {
+        case .setUp:
+            // The share sheet's own words, then the action on Dictus.
+            return [
+                Text("More"),
+                Text("Edit"),
+                Text("Add Dictus", comment: "Onboarding voice notes scene: third step of the one-time setup, tapping the green + beside Dictus in the share sheet's list of apps (#680).")
+            ]
+        case .everyNote:
+            // Dictus is already a favourite, so the second step is just its name.
+            return [Text("Share"), Text(verbatim: "Dictus"), Text("Insert")]
+        }
     }
 
     private func row(font: Font, spacing: CGFloat) -> some View {
         HStack(spacing: spacing) {
-            chip(1, Text("Share"))
-            chevron
-            chip(2, Text("Dictus in Favorites", comment: "Onboarding voice notes scene: second step of the path, Dictus added to the share sheet's favorites so it sits in its row of apps (#680)."))
-            chevron
-            chip(3, Text("Insert", comment: "Onboarding voice notes scene: third step of the path, inserting the transcript from the keyboard. Same word as the keyboard's button (#680)."))
+            ForEach(Array(steps.enumerated()), id: \.offset) { index, label in
+                if index > 0 { chevron }
+                chip(index + 1, label)
+            }
         }
         .font(font)
         .lineLimit(1)
@@ -85,7 +122,6 @@ private struct VoiceNotesPathChips: View {
         Image(systemName: "chevron.right")
             .font(.caption.weight(.semibold))
             .foregroundStyle(.tertiary)
-            .accessibilityHidden(true)
     }
 }
 
@@ -166,6 +202,9 @@ struct VoiceNotesScene: View {
             }
         }
         .sceneFinger(frame.finger)
+        // The fades between the chapters and at the loop's end: the screen goes dark on
+        // the phone's own background, not on the card.
+        .opacity(frame.screenOpacity)
         // The keyboard rising and leaving is animated; the reader giving way to the keys
         // is not, as in the keyboard (`VoiceNoteReaderView`: "never animated").
         .animation(.easeOut(duration: 0.3), value: frame.keyboard != nil)
@@ -376,7 +415,9 @@ private enum ShareApp: CaseIterable, Hashable {
 
     /// The favourites before Dictus is added, and the suggestions after them.
     static func favourites(dictusIsFavourite: Bool) -> [ShareApp] {
-        dictusIsFavourite ? [.messages, .mail, .dictus] : [.messages, .mail]
+        // A new favourite leads the row (decided with Pierre, 2026-10-12): the chapter
+        // ends on Dictus first in line, where the next share finds it.
+        dictusIsFavourite ? [.dictus, .messages, .mail] : [.messages, .mail]
     }
 
     static func suggestions(dictusIsFavourite: Bool) -> [ShareApp] {
@@ -439,6 +480,7 @@ private struct VoiceNotesShareSheet: View {
         return HStack(alignment: .top, spacing: 0) {
             ForEach(apps, id: \.self) { app in
                 appCell(icon: app.icon(side: 60), name: app.name)
+                    .modifier(DictusInRowTarget(isTarget: app == .dictus))
                     .frame(maxWidth: .infinity)
             }
             appCell(
@@ -570,7 +612,6 @@ private struct VoiceNotesAppsList: View {
         }
         .padding(.horizontal, 16)
         .frame(height: 46)
-        .modifier(DictusRowTarget(isTarget: !isEditing && app == .dictus))
     }
 
     /// iOS's tint for its own buttons, which a share sheet keeps whatever the app's accent.
@@ -590,13 +631,13 @@ private struct AddDictusTarget: ViewModifier {
     }
 }
 
-/// Marks Dictus's row, outside edit mode, as the tap target that shares to it.
-private struct DictusRowTarget: ViewModifier {
+/// Marks Dictus in the share sheet's row, once a favourite, as the tap that shares to it.
+private struct DictusInRowTarget: ViewModifier {
     let isTarget: Bool
 
     func body(content: Content) -> some View {
         if isTarget {
-            content.sceneTapTarget(VoiceNotesSceneScript.Target.dictusInList)
+            content.sceneTapTarget(VoiceNotesSceneScript.Target.dictusInRow)
         } else {
             content
         }
