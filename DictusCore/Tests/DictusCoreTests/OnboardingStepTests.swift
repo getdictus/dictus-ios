@@ -28,7 +28,7 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.allCases, [
             .welcome, .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick,
             .modelPreparation,
-            .microphone, .firstDictation, .completion
+            .microphone, .firstDictation, .stopStandby, .completion
         ])
         XCTAssertEqual(OnboardingStep.microphone.next, .firstDictation)
         XCTAssertFalse(OnboardingStep.allCases.map(\.rawValue).contains { $0.lowercased().contains("polish") })
@@ -42,8 +42,48 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.smartModesScene.next, .smartModePick)
         XCTAssertEqual(OnboardingStep.smartModePick.next, .modelPreparation)
         XCTAssertEqual(OnboardingStep.modelPreparation.next, .microphone)
-        XCTAssertEqual(OnboardingStep.firstDictation.next, .completion)
+        XCTAssertEqual(OnboardingStep.firstDictation.next, .stopStandby)
+        XCTAssertEqual(OnboardingStep.stopStandby.next, .completion)
         XCTAssertNil(OnboardingStep.completion.next)
+    }
+
+    // MARK: - How to stop Dictus (#681)
+
+    /// #649 decision 19: right after the first dictation, which is what puts the standby
+    /// island up for real.
+    func testTheStopStepFollowsTheFirstDictationOnEveryDevice() {
+        for capable in [true, false] {
+            XCTAssertEqual(
+                OnboardingStep.firstDictation.next(skipping: [], deviceCanRunSmartModes: capable), .stopStandby
+            )
+            XCTAssertEqual(
+                OnboardingStep.stopStandby.next(skipping: [], deviceCanRunSmartModes: capable), .completion
+            )
+            XCTAssertTrue(OnboardingStep.stopStandby.isShown(deviceCanRunSmartModes: capable))
+        }
+    }
+
+    /// Nothing the caller reports as satisfied passes over it: it asks for nothing, it shows
+    /// something.
+    func testTheStopStepIsNeverPassedOver() {
+        XCTAssertFalse(OnboardingStep.stopStandby.isSkippedWhenSatisfied)
+        XCTAssertEqual(
+            OnboardingStep.firstDictation.next(skipping: [.stopStandby], deviceCanRunSmartModes: true), .stopStandby
+        )
+    }
+
+    func testTheStopStepIsNeitherProNorAScene() {
+        XCTAssertFalse(OnboardingStep.stopStandby.isProStep)
+        XCTAssertFalse(OnboardingStep.stopStandby.isInSceneSequence)
+        XCTAssertFalse(OnboardingStep.stopStandby.isSkippable, "its own button moves on (mock-up 11)")
+    }
+
+    /// A new name: no build before #681 wrote it, and it survives the Full Access kill
+    /// like every other step.
+    func testTheStopStepPersistsUnderItsOwnName() {
+        OnboardingStep.save(.stopStandby)
+        XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), "stopStandby")
+        XCTAssertEqual(OnboardingStep.current(), .stopStandby)
     }
 
     // MARK: - Skips
@@ -160,7 +200,7 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.progressSteps(deviceCanRunSmartModes: true), [
             .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .modelPreparation,
             .microphone,
-            .firstDictation
+            .firstDictation, .stopStandby
         ])
         XCTAssertNil(OnboardingStep.welcome.progressIndex(deviceCanRunSmartModes: true))
         XCTAssertNil(OnboardingStep.completion.progressIndex(deviceCanRunSmartModes: true))
@@ -170,11 +210,12 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.smartModePick.progressIndex(deviceCanRunSmartModes: true), 4)
         XCTAssertEqual(OnboardingStep.microphone.progressIndex(deviceCanRunSmartModes: true), 6)
         XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: true), 7)
+        XCTAssertEqual(OnboardingStep.stopStandby.progressIndex(deviceCanRunSmartModes: true), 8)
     }
 
     func testAHiddenProStepHasNoSegment() {
         XCTAssertEqual(OnboardingStep.progressSteps(deviceCanRunSmartModes: false), [
-            .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation
+            .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .stopStandby
         ])
         XCTAssertNil(OnboardingStep.smartModePick.progressIndex(deviceCanRunSmartModes: false))
         XCTAssertNil(OnboardingStep.smartModesScene.progressIndex(deviceCanRunSmartModes: false))

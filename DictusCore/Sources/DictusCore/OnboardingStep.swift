@@ -21,11 +21,11 @@ import Foundation
 /// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, Apple
 /// Intelligence (#683, only when it is not ready), the Smart Modes scene (#679), the pick
 /// of three Smart Modes (#677), the wait for the model, the microphone, the first
-/// dictation, the completion screen. The microphone sits right before the first dictation
-/// because it is the first step that uses it, and its pre-permission screen keeps the
-/// system popup out of the recording. Steps the later #649 sub-issues add (the feature
-/// scenes, the Dynamic Island tutorial) slot in as new cases with
-/// new raw values; the existing raw values keep their meaning.
+/// dictation, how to stop Dictus (#681), the completion screen. The microphone sits right
+/// before the first dictation because it is the first step that uses it, and its
+/// pre-permission screen keeps the system popup out of the recording. Steps the later #649
+/// sub-issues add (the feature scenes) slot in as new cases with new raw values; the
+/// existing raw values keep their meaning.
 public enum OnboardingStep: String, CaseIterable, Sendable {
     /// The intro: the three-page carousel of looping scenes (#676, `OnboardingIntroScene`).
     /// Which page of it is on screen is not persisted: the carousel sets nothing up.
@@ -63,6 +63,14 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     case microphone = "microphonePrompt"
     /// The first dictation through the globe key.
     case firstDictation
+    /// How to stop Dictus's standby (#681, #649 decision 19): a looping drawing of the
+    /// standby Live Activity's power button, in the Dynamic Island or, on an iPhone without
+    /// one (`DeviceCapabilities.hasDynamicIsland`), on the Lock Screen.
+    ///
+    /// WHY RIGHT AFTER THE FIRST DICTATION: that dictation is what puts the standby island
+    /// up for real, so it is the moment the orange dot the user will ask about appears.
+    /// Shown on every device: every iPhone gets the standby, the Lock Screen view at least.
+    case stopStandby
     /// The "you're all set" screen. Its button ends the onboarding.
     case completion
 
@@ -107,7 +115,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .appleIntelligence, .smartModesScene, .smartModePick:
             return true
-        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .completion:
+        case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .stopStandby,
+             .completion:
             return false
         }
     }
@@ -125,7 +134,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         case .smartModesScene, .smartModePick:
             return true
         case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone, .firstDictation,
-             .completion:
+             .stopStandby, .completion:
             return false
         }
     }
@@ -163,7 +172,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .appleIntelligence, .modelPreparation, .microphone:
             return true
-        case .welcome, .language, .keyboardSetup, .smartModesScene, .smartModePick, .firstDictation, .completion:
+        case .welcome, .language, .keyboardSetup, .smartModesScene, .smartModePick, .firstDictation, .stopStandby,
+             .completion:
             return false
         }
     }
@@ -185,7 +195,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
             return false
         case .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .modelPreparation,
              .microphone,
-             .firstDictation:
+             .firstDictation, .stopStandby:
             return true
         }
     }
@@ -218,14 +228,15 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// - The first dictation.
     ///
     /// Everything else sets up something the keyboard needs, and the completion screen is
-    /// its own way out. The Apple Intelligence step can always be skipped too (#683), but
+    /// its own way out. So is the stop-Dictus step (#681): one screen whose only button
+    /// already moves on, as the mock-up draws it. The Apple Intelligence step can always be skipped too (#683), but
     /// by its own *Later* button, drawn as large as the main one, not by this discreet slot.
     public var isSkippable: Bool {
         switch self {
         case .smartModesScene, .smartModePick, .firstDictation:
             return true
         case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
-             .completion:
+             .stopStandby, .completion:
             return false
         }
     }
