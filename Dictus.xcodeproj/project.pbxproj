@@ -90,6 +90,11 @@
 		AA000679 /* AnimatedScenePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100679 /* AnimatedScenePlayer.swift */; };
 		AA00679A /* OnboardingScenePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679A /* OnboardingScenePage.swift */; };
 		AA00679B /* SmartModesScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679B /* SmartModesScene.swift */; };
+		AA00704A /* FullAccessExplainerPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10704A /* FullAccessExplainerPage.swift */; };
+		AA006800 /* SceneTapTargets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106800 /* SceneTapTargets.swift */; };
+		AA006801 /* VoiceNotesScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106801 /* VoiceNotesScene.swift */; };
+		AA006802 /* VocabularyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106802 /* VocabularyScene.swift */; };
+		AA006803 /* HistoryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106803 /* HistoryScene.swift */; };
 		AA000681 /* StopStandbyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100681 /* StopStandbyScene.swift */; };
 		AA0676A1 /* intro-a-light.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AA1676A1 /* intro-a-light.mp4 */; };
 		AA0676A2 /* intro-a-dark.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AA1676A2 /* intro-a-dark.mp4 */; };
@@ -320,6 +325,11 @@
 		AA100679 /* AnimatedScenePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedScenePlayer.swift; sourceTree = "<group>"; };
 		AA10679A /* OnboardingScenePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScenePage.swift; sourceTree = "<group>"; };
 		AA10679B /* SmartModesScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModesScene.swift; sourceTree = "<group>"; };
+		AA10704A /* FullAccessExplainerPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullAccessExplainerPage.swift; sourceTree = "<group>"; };
+		AA106800 /* SceneTapTargets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneTapTargets.swift; sourceTree = "<group>"; };
+		AA106801 /* VoiceNotesScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNotesScene.swift; sourceTree = "<group>"; };
+		AA106802 /* VocabularyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyScene.swift; sourceTree = "<group>"; };
+		AA106803 /* HistoryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryScene.swift; sourceTree = "<group>"; };
 		AA100681 /* StopStandbyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopStandbyScene.swift; sourceTree = "<group>"; };
 		AA1676A1 /* intro-a-light.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-a-light.mp4"; path = "assets/onboarding/intro/intro-a-light.mp4"; sourceTree = SOURCE_ROOT; };
 		AA1676A2 /* intro-a-dark.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-a-dark.mp4"; path = "assets/onboarding/intro/intro-a-dark.mp4"; sourceTree = SOURCE_ROOT; };
@@ -745,6 +755,11 @@
 				AA100679 /* AnimatedScenePlayer.swift */,
 				AA10679A /* OnboardingScenePage.swift */,
 				AA10679B /* SmartModesScene.swift */,
+				AA10704A /* FullAccessExplainerPage.swift */,
+				AA106800 /* SceneTapTargets.swift */,
+				AA106801 /* VoiceNotesScene.swift */,
+				AA106802 /* VocabularyScene.swift */,
+				AA106803 /* HistoryScene.swift */,
 				AA100681 /* StopStandbyScene.swift */,
 				AA4676A0 /* Intro videos */,
 				AA1000A2 /* MicPermissionPage.swift */,
@@ -1292,6 +1307,11 @@
 				AA000679 /* AnimatedScenePlayer.swift in Sources */,
 				AA00679A /* OnboardingScenePage.swift in Sources */,
 				AA00679B /* SmartModesScene.swift in Sources */,
+				AA00704A /* FullAccessExplainerPage.swift in Sources */,
+				AA006800 /* SceneTapTargets.swift in Sources */,
+				AA006801 /* VoiceNotesScene.swift in Sources */,
+				AA006802 /* VocabularyScene.swift in Sources */,
+				AA006803 /* HistoryScene.swift in Sources */,
 				AA000681 /* StopStandbyScene.swift in Sources */,
 				AA0000A2 /* MicPermissionPage.swift in Sources */,
 				6770A1B2C3D4E5F600000001 /* SmartModePickPage.swift in Sources */,

@@ -33,7 +33,6 @@ struct SmartModesScenePage: View {
                         comment: "Onboarding Smart Modes scene: title (#679)."),
             line: Text("Hold the mic, slide to a mode, let go. Dictus writes in that mode.",
                        comment: "Onboarding Smart Modes scene: the line under the title, describing the long-press gesture on the keyboard's mic (#679)."),
-            sceneAspectRatio: SmartModesSceneMetrics.screenWidth / SmartModesSceneMetrics.screenHeight,
             loopSeconds: SmartModesSceneScript.loopSeconds,
             startSeconds: SmartModesSceneScript.openingSeconds,
             stillSeconds: SmartModesSceneScript.stillSeconds,
@@ -761,7 +760,7 @@ private struct SceneWaveform: View {
 
 /// iOS's bar under a third-party keyboard: the globe on the left, the system dictation mic
 /// on the right. iOS's own UI, so drawn.
-private struct SceneSystemBar: View {
+struct SceneSystemBar: View {
     var body: some View {
         HStack {
             Image(systemName: "globe")
@@ -779,7 +778,7 @@ private struct SceneSystemBar: View {
 // MARK: - Finger
 
 /// The drawn finger: a soft grey disc, as screen recordings show touches. Smaller and
-/// darker while pressed. Shared by every drawn scene (#679, #681).
+/// darker while pressed. Shared by every drawn scene (#679, #680, #681).
 struct SceneFinger: View {
     let isPressed: Bool
 

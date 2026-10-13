@@ -379,6 +379,8 @@ public enum LogEvent: Sendable {
     /// (#709). It goes straight to Settings, so no `onboardingChecklist` line (no Picture
     /// in Picture, no audio session) should follow it.
     case onboardingFullAccessLinkOpened
+    /// The "Why Full Access?" link on the keyboard step opened its explainer sheet (#704).
+    case onboardingFullAccessExplainerOpened
     case onboardingDictusKeyboardActivated
     case onboardingGlobeTutorialTextDetected
     case onboardingGlobeTutorialSkipped
@@ -693,7 +695,7 @@ public enum LogEvent: Sendable {
         case .onboardingScenePhaseChanged, .onboardingKeyboardCheckStarted,
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
-             .onboardingFullAccessLinkOpened,
+             .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
@@ -761,7 +763,7 @@ public enum LogEvent: Sendable {
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
-        case .onboardingKeyboardDetected, .onboardingFullAccessLinkOpened,
+        case .onboardingKeyboardDetected, .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
@@ -1012,7 +1014,7 @@ public enum LogEvent: Sendable {
             return "modeCount=\(modeCount)"
         case .onboardingKeyboardCheckSkipped(let reason):
             return "reason=\(reason)"
-        case .onboardingKeyboardRetry, .onboardingFullAccessLinkOpened:
+        case .onboardingKeyboardRetry, .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened:
             return ""
         case .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped:
@@ -1282,6 +1284,7 @@ extension LogEvent {
         case .onboardingKeyboardCheckSkipped: return "onboardingKeyboardCheckSkipped"
         case .onboardingKeyboardRetry: return "onboardingKeyboardRetry"
         case .onboardingFullAccessLinkOpened: return "onboardingFullAccessLinkOpened"
+        case .onboardingFullAccessExplainerOpened: return "onboardingFullAccessExplainerOpened"
         case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
         case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
         case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"

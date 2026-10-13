@@ -553,6 +553,15 @@ final class LogEventTests: XCTestCase {
         XCTAssertTrue(event.formatted().contains("onboardingFullAccessLinkOpened"))
     }
 
+    /// Same level and subsystem as its sibling link (#709), for the same grep (#704).
+    func testFullAccessExplainerOpenedIsInfoLifecycle() {
+        let event = LogEvent.onboardingFullAccessExplainerOpened
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.name, "onboardingFullAccessExplainerOpened")
+        XCTAssertTrue(event.formatted().contains("onboardingFullAccessExplainerOpened"))
+    }
+
     // MARK: - User dictionary events (#307)
 
     func testUserDictionaryWordLearnedIsDebugKeyboard() {
