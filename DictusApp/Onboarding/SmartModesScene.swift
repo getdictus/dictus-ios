@@ -6,6 +6,9 @@ import DictusCore
 /// The onboarding step that plays the Smart Modes scene (#679, mock-up
 /// `05-scene-smart-modes`). The pick of three modes comes right after it.
 struct SmartModesScenePage: View {
+    /// A small label above the title, nil for none: What's new names itself with it, on
+    /// its first scene (#685).
+    var eyebrow: Text?
     /// The flow's model manager, read for the download pill.
     @ObservedObject var modelManager: ModelManager
     /// The model the onboarding installs.
@@ -29,6 +32,7 @@ struct SmartModesScenePage: View {
 
     var body: some View {
         OnboardingScenePage(
+            eyebrow: eyebrow,
             title: Text("One long press, one Smart Mode",
                         comment: "Onboarding Smart Modes scene: title (#679)."),
             line: Text("Hold the mic, slide to a mode, let go. Dictus writes in that mode.",
