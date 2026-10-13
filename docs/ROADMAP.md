@@ -34,7 +34,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 16. #512 — suggest vocabulary from history: time-boxed trial, go/no-go on the issue
 17. #724 — paywall: yearly + lifetime visible, monthly behind a link and in the end-of-trial dismiss sheet, no-commitment line
 18. #726 — end-of-trial recap: words dictated + time saved, dictation counter for every user
-19. #727 — README: free dictation + optional Pro, no free-forever promise (merges with #279)
+19. ~~#727 — README: free dictation + optional Pro, no free-forever promise~~ — merged in PR #729 (2026-10-13), ahead of #279: promote to main only with #279
 20. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
 21. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 
