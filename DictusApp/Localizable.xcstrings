@@ -405,6 +405,17 @@
         }
       }
     },
+    "Also in Pro" : {
+      "comment" : "Onboarding: small label above the title of the voice notes, vocabulary and history scenes, which come after the Smart Modes and show the other Dictus Pro features (#680).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aussi dans Pro"
+          }
+        }
+      }
+    },
     "Apple Intelligence & Siri" : {
       "comment" : "Onboarding Apple Intelligence step (#683). Name of the Settings row on iOS 26 (the root row, and the title of its page), as iOS writes it. On iOS 27 the row is called Siri.",
       "localizations" : {

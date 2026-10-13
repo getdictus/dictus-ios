@@ -14,6 +14,8 @@ struct VocabularyScenePage: View {
 
     var body: some View {
         OnboardingScenePage(
+            eyebrow: Text("Also in Pro",
+                          comment: "Onboarding: small label above the title of the voice notes, vocabulary and history scenes, which come after the Smart Modes and show the other Dictus Pro features (#680)."),
             title: Text("Your words, spelled right",
                         comment: "Onboarding vocabulary scene: title (#680)."),
             line: Text("Note a name and the way Dictus gets it wrong. Next time, it will write it your way.",
