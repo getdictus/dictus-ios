@@ -467,6 +467,20 @@ enum OnboardingPhoneMetrics {
     static let overrun: CGFloat = 24
     /// The phone's outline: a light grey on light, a slate on dark.
     static let phoneFrame = Color(light: Color(hex: 0xD1D1D6), dark: Color(hex: 0x2A3346))
+
+    /// The phone's screen: the outline's inner curve at the end the card shows, square at
+    /// the cut. A scene clipped to it never sits under the frame (#679, #681).
+    static func screenShape(end: OnboardingPhoneEnd) -> UnevenRoundedRectangle {
+        let radius = phoneCornerRadius - phoneFrameWidth
+        let showsBottom = end == .bottom
+        return UnevenRoundedRectangle(
+            topLeadingRadius: showsBottom ? 0 : radius,
+            bottomLeadingRadius: showsBottom ? radius : 0,
+            bottomTrailingRadius: showsBottom ? radius : 0,
+            topTrailingRadius: showsBottom ? 0 : radius,
+            style: .continuous
+        )
+    }
 }
 
 /// Which end of the drawn iPhone an `OnboardingPhoneCard` shows.

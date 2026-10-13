@@ -28,7 +28,7 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.allCases, [
             .welcome, .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick,
             .voiceNotesScene, .vocabularyScene, .historyScene, .modelPreparation,
-            .microphone, .firstDictation, .completion
+            .microphone, .firstDictation, .stopStandby, .completion
         ])
         XCTAssertEqual(OnboardingStep.microphone.next, .firstDictation)
         XCTAssertFalse(OnboardingStep.allCases.map(\.rawValue).contains { $0.lowercased().contains("polish") })
@@ -45,8 +45,83 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.vocabularyScene.next, .historyScene)
         XCTAssertEqual(OnboardingStep.historyScene.next, .modelPreparation)
         XCTAssertEqual(OnboardingStep.modelPreparation.next, .microphone)
-        XCTAssertEqual(OnboardingStep.firstDictation.next, .completion)
+        XCTAssertEqual(OnboardingStep.firstDictation.next, .stopStandby)
+        XCTAssertEqual(OnboardingStep.stopStandby.next, .completion)
         XCTAssertNil(OnboardingStep.completion.next)
+    }
+
+    // MARK: - How to stop Dictus (#681)
+
+    /// #649 decision 19: right after the first dictation, which is what puts the standby
+    /// island up for real.
+    func testTheStopStepFollowsTheFirstDictationOnEveryDevice() {
+        for capable in [true, false] {
+            XCTAssertEqual(
+                OnboardingStep.firstDictation.next(skipping: [], deviceCanRunSmartModes: capable), .stopStandby
+            )
+            XCTAssertEqual(
+                OnboardingStep.stopStandby.next(skipping: [], deviceCanRunSmartModes: capable), .completion
+            )
+            XCTAssertTrue(OnboardingStep.stopStandby.isShown(deviceCanRunSmartModes: capable))
+        }
+    }
+
+    private func device(_ identifier: String) -> DeviceCapabilities {
+        DeviceCapabilities(physicalMemoryGB: 8, availableMemoryMB: 0, deviceModelIdentifier: identifier,
+                           thermalState: .nominal)
+    }
+
+    /// Every iPhone sees it, with an island (`iPhone16,2`, 15 Pro Max) or without one
+    /// (`iPhone14,7`, 14), and an iPhone this build does not know yet.
+    func testEveryIPhoneIsShownTheStopStep() {
+        for identifier in ["iPhone16,2", "iPhone14,7", "iPhone17,5", "iPhone99,1"] {
+            let passedOver = OnboardingStep.passedOver(on: device(identifier))
+            XCTAssertTrue(passedOver.isEmpty, identifier)
+            for capable in [true, false] {
+                XCTAssertEqual(
+                    OnboardingStep.firstDictation.next(skipping: passedOver, deviceCanRunSmartModes: capable),
+                    .stopStandby, identifier
+                )
+            }
+        }
+    }
+
+    /// iPadOS shows no Live Activity: neither picture is true there, so the first dictation
+    /// goes straight to the completion screen, its Skip included (both call `next`).
+    func testAnIPadPassesOverTheStopStep() {
+        for identifier in ["iPad8,1", "iPad13,4", "iPad16,3"] {
+            let passedOver = OnboardingStep.passedOver(on: device(identifier))
+            XCTAssertEqual(passedOver, [.stopStandby], identifier)
+            for capable in [true, false] {
+                XCTAssertEqual(
+                    OnboardingStep.firstDictation.next(skipping: passedOver, deviceCanRunSmartModes: capable),
+                    .completion, identifier
+                )
+            }
+        }
+    }
+
+    /// The iPad rule adds to what the app reports, it does not replace it.
+    func testTheIPadRuleCombinesWithTheOtherSkips() {
+        let satisfied = OnboardingStep.passedOver(on: device("iPad13,4")).union([.microphone])
+        XCTAssertEqual(OnboardingStep.modelPreparation.next(skipping: satisfied, deviceCanRunSmartModes: true),
+                       .firstDictation)
+        XCTAssertEqual(OnboardingStep.firstDictation.next(skipping: satisfied, deviceCanRunSmartModes: true),
+                       .completion)
+    }
+
+    func testTheStopStepIsNeitherProNorAScene() {
+        XCTAssertFalse(OnboardingStep.stopStandby.isProStep)
+        XCTAssertFalse(OnboardingStep.stopStandby.isInSceneSequence)
+        XCTAssertFalse(OnboardingStep.stopStandby.isSkippable, "its own button moves on (mock-up 11)")
+    }
+
+    /// A new name: no build before #681 wrote it, and it survives the Full Access kill
+    /// like every other step.
+    func testTheStopStepPersistsUnderItsOwnName() {
+        OnboardingStep.save(.stopStandby)
+        XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), "stopStandby")
+        XCTAssertEqual(OnboardingStep.current(), .stopStandby)
     }
 
     // MARK: - Skips
@@ -72,10 +147,10 @@ final class OnboardingStepTests: XCTestCase {
         )
     }
 
-    func testOnlyAppleIntelligenceTheWaitAndTheMicrophoneCanBeSkipped() {
+    func testOnlyAppleIntelligenceTheWaitTheMicrophoneAndTheStopStepCanBeSkipped() {
         XCTAssertEqual(
             OnboardingStep.allCases.filter(\.isSkippedWhenSatisfied),
-            [.appleIntelligence, .modelPreparation, .microphone]
+            [.appleIntelligence, .modelPreparation, .microphone, .stopStandby]
         )
         // A step outside that list is shown even when the caller calls it satisfied.
         XCTAssertEqual(
@@ -180,7 +255,7 @@ final class OnboardingStepTests: XCTestCase {
     func testProgressBarCoversEveryStepBetweenTheIntroAndTheCompletion() {
         XCTAssertEqual(OnboardingStep.progressSteps(deviceCanRunSmartModes: true), [
             .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene,
-            .vocabularyScene, .historyScene, .modelPreparation, .microphone, .firstDictation
+            .vocabularyScene, .historyScene, .modelPreparation, .microphone, .firstDictation, .stopStandby
         ])
         XCTAssertNil(OnboardingStep.welcome.progressIndex(deviceCanRunSmartModes: true))
         XCTAssertNil(OnboardingStep.completion.progressIndex(deviceCanRunSmartModes: true))
@@ -193,11 +268,12 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertEqual(OnboardingStep.historyScene.progressIndex(deviceCanRunSmartModes: true), 7)
         XCTAssertEqual(OnboardingStep.microphone.progressIndex(deviceCanRunSmartModes: true), 9)
         XCTAssertEqual(OnboardingStep.firstDictation.progressIndex(deviceCanRunSmartModes: true), 10)
+        XCTAssertEqual(OnboardingStep.stopStandby.progressIndex(deviceCanRunSmartModes: true), 11)
     }
 
     func testAHiddenProStepHasNoSegment() {
         XCTAssertEqual(OnboardingStep.progressSteps(deviceCanRunSmartModes: false), [
-            .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation
+            .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .stopStandby
         ])
         XCTAssertNil(OnboardingStep.smartModePick.progressIndex(deviceCanRunSmartModes: false))
         XCTAssertNil(OnboardingStep.smartModesScene.progressIndex(deviceCanRunSmartModes: false))

@@ -758,6 +758,28 @@
         }
       }
     },
+    "Between dictations, Dictus stays ready. To stop it, tap the power button on the Lock Screen." : {
+      "comment" : "Onboarding, how to stop Dictus step, iPhone without a Dynamic Island: the line under the title (#681).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre deux dictées, Dictus reste prêt. Pour l'arrêter, touchez le bouton d'arrêt sur l'écran verrouillé."
+          }
+        }
+      }
+    },
+    "Between dictations, Dictus stays ready: that's the orange dot. To stop it, touch and hold the island." : {
+      "comment" : "Onboarding, how to stop Dictus step, iPhone with a Dynamic Island: the line under the title. 'The island' is the Dynamic Island; the orange dot is iOS's microphone indicator (#681).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entre deux dictées, Dictus reste prêt : c'est le point orange. Pour l'arrêter, appuyez longuement sur l'île."
+          }
+        }
+      }
+    },
     "Building the inference graph…" : {
       "comment" : "Cycling phrase shown during model compilation (issue #144).",
       "extractionState" : "stale",
@@ -1480,6 +1502,17 @@
         }
       }
     },
+    "Island" : {
+      "comment" : "Onboarding, how to stop Dictus step: first of three steps above the drawing, the Dynamic Island. One short word (#681).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Île"
+          }
+        }
+      }
+    },
     "Just once" : {
       "comment" : "Onboarding voice notes scene: caption above the drawn iPhone while it shows the one-time setup, adding Dictus to the share sheet's favorites (#680).",
       "localizations" : {
@@ -1487,6 +1520,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une seule fois"
+          }
+        }
+      }
+    },
+    "Long press" : {
+      "comment" : "Onboarding, how to stop Dictus step: second of three steps above the drawing, touching and holding the island. Two short words (#681).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appui long"
           }
         }
       }
@@ -1622,6 +1666,17 @@
         }
       }
     },
+    "Stop" : {
+      "comment" : "Onboarding, how to stop Dictus step: third of three steps above the drawing, tapping the power button. One short word (#681).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêt"
+          }
+        }
+      }
+    },
     "Suggestions" : {
       "comment" : "Onboarding voice notes scene: header of the drawn list of suggested apps behind the share sheet's More. As iOS words it (#680).",
       "localizations" : {
@@ -1662,6 +1717,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ensuite, à chaque vocal"
+          }
+        }
+      }
+    },
+    "To stop Dictus" : {
+      "comment" : "Onboarding, how to stop Dictus step: title (#681).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour arrêter Dictus"
           }
         }
       }
@@ -2148,7 +2214,7 @@
       }
     },
     "Got it" : {
-      "comment" : "Button closing the onboarding keep-open popup (#675).",
+      "comment" : "Button closing the onboarding keep-open popup (#675), and the button of the how to stop Dictus step (#681).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

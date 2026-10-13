@@ -255,7 +255,13 @@ extension DictationCoordinator {
                 context: "didBecomeActive",
                 attemptLog: .beforeModelLoad
             )
-            PersistentLog.log(.engineWarmUpSuccess(context: "didBecomeActive"))
+            // The model is loaded either way, but the engine is cold when the warm-up
+            // skipped for the record permission (#715), and that path has already logged
+            // `engineWarmUpSkipped`. A success line after it would tell the log's reader
+            // the opposite of what happened.
+            if isAudioEngineRunning {
+                PersistentLog.log(.engineWarmUpSuccess(context: "didBecomeActive"))
+            }
             // Claim before publishing, as the launch preload does: this warm-up can be
             // abandoned mid-flight too, and `.ready` would then announce an engine that
             // was discarded before it was installed (finding 5).

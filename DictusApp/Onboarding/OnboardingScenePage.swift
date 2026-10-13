@@ -172,24 +172,11 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
                 scene(time)
                     // The phone's screen: inside its outline, rounded like it at the
                     // end the card shows, so the drawing never sits under the frame.
-                    .clipShape(screenShape)
+                    .clipShape(Phone.screenShape(end: phoneEnd))
                     .padding(.horizontal, Phone.phoneFrameWidth)
                     .padding(phoneEnd == .bottom ? .bottom : .top, Phone.phoneFrameWidth)
             }
         }
-    }
-
-    /// The phone's screen: the outline's inner curve at the end the card shows.
-    private var screenShape: UnevenRoundedRectangle {
-        let radius = Phone.phoneCornerRadius - Phone.phoneFrameWidth
-        let showsBottom = phoneEnd == .bottom
-        return UnevenRoundedRectangle(
-            topLeadingRadius: showsBottom ? 0 : radius,
-            bottomLeadingRadius: showsBottom ? radius : 0,
-            bottomTrailingRadius: showsBottom ? radius : 0,
-            topTrailingRadius: showsBottom ? 0 : radius,
-            style: .continuous
-        )
     }
 }
 
