@@ -33,6 +33,7 @@ struct SmartModesScenePage: View {
                         comment: "Onboarding Smart Modes scene: title (#679)."),
             line: Text("Hold the mic, slide to a mode, let go. Dictus writes in that mode.",
                        comment: "Onboarding Smart Modes scene: the line under the title, describing the long-press gesture on the keyboard's mic (#679)."),
+            sceneAspectRatio: SmartModesSceneMetrics.screenWidth / SmartModesSceneMetrics.screenHeight,
             loopSeconds: SmartModesSceneScript.loopSeconds,
             startSeconds: SmartModesSceneScript.openingSeconds,
             stillSeconds: SmartModesSceneScript.stillSeconds,
