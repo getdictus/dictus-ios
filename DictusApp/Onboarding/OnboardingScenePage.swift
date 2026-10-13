@@ -40,7 +40,25 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
     let onNext: () -> Void
     let scene: (Double) -> Scene
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private typealias Phone = OnboardingPhoneMetrics
+
+    /// Whether the download pill is on screen: the model is still downloading.
+    private var isDownloading: Bool {
+        modelManager.modelStates[modelIdentifier] == .downloading
+    }
+
+    /// How the page moves when the pill comes or goes (#680, device test of 039aa622): the
+    /// pill fades while the card grows or shrinks to its new scale, in one movement,
+    /// instead of the phone jumping to its new size when the download ends. With Reduce
+    /// Motion on, the change is immediate.
+    ///
+    /// The scene's loop is not disturbed: its clock lives in the player's state, and a
+    /// resize keeps the player's identity.
+    private var pillAnimation: Animation? {
+        reduceMotion ? nil : .easeInOut(duration: 0.45)
+    }
 
     init(eyebrow: Text? = nil,
          title: Text,
@@ -97,6 +115,7 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
             .padding(.horizontal, OnboardingMetrics.horizontalPadding)
             .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
         }
+        .animation(pillAnimation, value: isDownloading)
     }
 
     /// The drawn iPhone in its card, with the header above it.
