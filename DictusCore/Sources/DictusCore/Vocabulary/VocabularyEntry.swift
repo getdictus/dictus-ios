@@ -138,6 +138,19 @@ public struct VocabularyEntry: Codable, Identifiable, Equatable, Sendable {
         ) ?? self
     }
 
+    /// The same entry with more variants, appended after its own (#723).
+    ///
+    /// Used when a variant picked in History belongs to a term already stored: the
+    /// user means "Dictus also writes this one", not "make a second entry". Routed
+    /// through `init?` so a variant already present, or equal to the term, is cleaned
+    /// away exactly as the add sheet would clean it. The id, the date and the
+    /// per-entry switch are kept: the entry is the same entry.
+    public func addingVariants(_ newVariants: [String]) -> VocabularyEntry {
+        VocabularyEntry(
+            term: term, variants: variants + newVariants, isEnabled: isEnabled, id: id, dateAdded: dateAdded
+        ) ?? self
+    }
+
     /// The variants as the add sheet writes them: one comma-separated line.
     public var variantsLine: String {
         variants.joined(separator: ", ")
