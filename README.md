@@ -74,6 +74,15 @@ Join via TestFlight: **[Install Dictus Beta →](https://testflight.apple.com/jo
 - Sound feedback for recording start / stop
 - iOS 26 Liquid Glass design
 
+## Dictus Pro
+
+Dictation and the keyboard are free. Dictus Pro is an optional upgrade in the app that adds:
+
+- **Smart Modes**: turn your dictation into the text you need (Translate, Message, List, Structured, Summary), with on-device AI. Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26).
+- **History**: search and export your transcriptions.
+- **Vocabulary**: teach Dictus your names and technical terms.
+- **Voice notes**: transcribe the voice messages you receive, shared to Dictus from your chat app.
+
 ## Roadmap
 
 - [x] On-device Whisper transcription (FR / EN / DE)
