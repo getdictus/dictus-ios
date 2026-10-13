@@ -41,6 +41,13 @@ import DictusCore
 ///
 /// WHY "LATER" IS AS LARGE AS THE MAIN BUTTON: dictation does not need Apple Intelligence.
 /// The step must never feel like a gate, so leaving it is as easy as following it.
+///
+/// THE CHECKLIST OVER SETTINGS (#706): Open Settings also sends the drawn path into Picture
+/// in Picture over Settings, from that same tap, as the keyboard step does (#682,
+/// `AppleIntelligenceChecklistScript`). It ends when Apple Intelligence reads `available`,
+/// and in every case when the user comes back. The page itself is unchanged: where Picture
+/// in Picture cannot start, Settings opens as before, and the return check below is the
+/// same either way.
 struct AppleIntelligencePage: View {
     @ObservedObject var modelManager: ModelManager
     /// The model the onboarding is downloading, for the progress pill.
@@ -77,6 +84,10 @@ struct AppleIntelligencePage: View {
     /// Where Siri's language lives on this iOS. It cannot change while the page is up.
     private let route = AppleIntelligenceOnboarding.settingsRoute
 
+    /// The checklist sent into Picture in Picture over Settings from the Open Settings tap
+    /// (#706).
+    @StateObject private var checklist = SettingsChecklistPlayer(script: AppleIntelligenceChecklistScript())
+
     var body: some View {
         Group {
             switch state.phase {
@@ -95,8 +106,10 @@ struct AppleIntelligencePage: View {
             // keyboard step happens with the app active, and is not.
             returnPending = UIApplication.shared.applicationState != .active
             startAnimation()
+            checklist.start()
         }
         .onDisappear {
+            checklist.stop()
             stopCheck()
             animationTimer?.invalidate()
             animationTimer = nil
@@ -107,11 +120,20 @@ struct AppleIntelligencePage: View {
                 returnPending = true
                 stopCheck()
             case .active:
+                // Back from Settings: the Picture in Picture window has done its job,
+                // whether or not Apple Intelligence is ready yet.
+                checklist.appBecameActive()
                 sceneBecameActive()
             default:
                 // Inactive: a screenshot, Control Center, a system alert, or the way to
                 // the background. The quiet re-reads pause; nothing else changes.
                 stopCheck()
+            }
+        }
+        .onChange(of: state.phase) { phase in
+            // Ready, by any read: nothing will start Picture in Picture again.
+            if phase == .ready {
+                checklist.markComplete()
             }
         }
         .animation(.easeInOut(duration: 0.3), value: state.phase)
@@ -126,6 +148,12 @@ struct AppleIntelligencePage: View {
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
+                    // The Picture in Picture source, behind the drawn phone that covers it.
+                    .background {
+                        if checklist.usesPictureInPicture {
+                            ChecklistPictureSource(layer: checklist.displayLayer)
+                        }
+                    }
 
                 if state.phase == .ready {
                     readyLabel
@@ -428,7 +456,8 @@ struct AppleIntelligencePage: View {
 
     /// The iPhone's language, named on its own ("English", "Français"): the entry to pick,
     /// whatever country Siri lists it under (`AppleIntelligenceOnboarding.siriLanguageLabel`).
-    private static var iPhoneLanguageName: String {
+    /// The checklist over Settings names the same entry (#706).
+    static var iPhoneLanguageName: String {
         AppleIntelligenceOnboarding.siriLanguageLabel(
             preferredLanguage: Locale.preferredLanguages.first ?? Locale.current.identifier,
             displayLocale: Locale.current
@@ -558,7 +587,13 @@ struct AppleIntelligencePage: View {
 
     // MARK: - Actions
 
+    /// Opens the app's page in Settings. The checklist starts Picture in Picture first when
+    /// it can (#706), then opens Settings itself.
     private func openSettings() {
+        checklist.openSettings(using: Self.openAppSettings)
+    }
+
+    private static func openAppSettings() {
         if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.open(url)
         }
