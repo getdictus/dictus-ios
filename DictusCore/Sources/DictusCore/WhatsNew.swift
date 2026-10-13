@@ -96,6 +96,12 @@ public enum WhatsNew {
 
     // MARK: - Persistence
 
+    /// The running app's marketing version, or the edition if the bundle has none. Never
+    /// "?": it is compared as a version, and a placeholder would sort above every number.
+    public static var runningVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? edition
+    }
+
     /// Whether What's new is due for this install, read from the App Group.
     public static func isDue(defaults: UserDefaults = AppGroup.defaults) -> Bool {
         isDue(
@@ -108,14 +114,14 @@ public enum WhatsNew {
     /// date unless What's new is due, which is what keeps a new install from ever seeing
     /// it. A due What's new is recorded when it appears (`recordSeen`) instead, so a launch
     /// that cannot show it (a dictation started from the keyboard) leaves it for the next.
-    public static func recordLaunch(currentVersion: String, defaults: UserDefaults = AppGroup.defaults) {
+    public static func recordLaunch(currentVersion: String = runningVersion, defaults: UserDefaults = AppGroup.defaults) {
         guard !isDue(defaults: defaults) else { return }
         recordSeen(currentVersion: currentVersion, defaults: defaults)
     }
 
     /// Records What's new as seen: written when it appears, so it is shown once even if the
     /// app is closed halfway through.
-    public static func recordSeen(currentVersion: String, defaults: UserDefaults = AppGroup.defaults) {
+    public static func recordSeen(currentVersion: String = runningVersion, defaults: UserDefaults = AppGroup.defaults) {
         let recorded = recordedVersion(
             lastVersionSeen: defaults.string(forKey: SharedKeys.lastVersionSeen),
             currentVersion: currentVersion
