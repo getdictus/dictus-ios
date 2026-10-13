@@ -815,7 +815,7 @@
       }
     },
     "Back" : {
-      "comment" : "Onboarding: accessibility label of the back chevron at the top leading edge of the language step, which returns to the intro (#700).",
+      "comment" : "Onboarding: accessibility label of the back chevron at the top leading edge, on the language step (returns to the intro, #700) and on the steps of the feature-scene sequence after its first (returns to the previous step, #725).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

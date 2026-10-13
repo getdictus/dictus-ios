@@ -428,19 +428,59 @@ final class OnboardingStepTests: XCTestCase {
         )
     }
 
-    // MARK: - Going back (#700)
+    // MARK: - Going back (#700, #725)
 
-    func testOnlyTheLanguageStepGoesBackAndItGoesToTheIntro() {
-        XCTAssertEqual(OnboardingStep.allCases.filter { $0.stepBack != nil }, [.language])
-        XCTAssertEqual(OnboardingStep.language.stepBack, .welcome)
+    func testTheStepsThatGoBackAndWhereTo() {
+        let backs = Dictionary(uniqueKeysWithValues: OnboardingStep.allCases.compactMap { step in
+            step.stepBack.map { (step, $0) }
+        })
+        XCTAssertEqual(backs, [
+            .language: .welcome,
+            .smartModePick: .smartModesScene,
+            .voiceNotesScene: .smartModePick,
+            .vocabularyScene: .voiceNotesScene,
+            .historyScene: .vocabularyScene
+        ])
     }
 
-    func testNoStepFromTheKeyboardSetupOnGoesBack() {
-        // Confirming the language starts the model download: going back from here on
-        // would cancel or duplicate it.
-        for step in OnboardingStep.allCases where step.position >= OnboardingStep.keyboardSetup.position {
+    func testNoStepOutsideTheSceneSequenceGoesBackFromTheKeyboardSetupOn() {
+        // Confirming the language starts the model download: going back to it would cancel
+        // or duplicate it.
+        for step in OnboardingStep.allCases
+        where step.position >= OnboardingStep.keyboardSetup.position && !step.isInSceneSequence {
             XCTAssertNil(step.stepBack, "\(step)")
         }
+    }
+
+    func testEverySceneStepButTheFirstGoesBackToTheStepBeforeItInTheSequence() {
+        // #725: the first scene has no back control, so going back never leaves the
+        // sequence for the keyboard setup or the language step.
+        let sequence = OnboardingStep.allCases.filter(\.isInSceneSequence)
+        XCTAssertEqual(sequence.first, .smartModesScene)
+        XCTAssertNil(OnboardingStep.smartModesScene.stepBack)
+        for (previous, step) in zip(sequence, sequence.dropFirst()) {
+            XCTAssertEqual(step.stepBack, previous, "\(step)")
+            // The step before is the one forward navigation came from, on the device that
+            // shows the sequence at all.
+            XCTAssertEqual(previous.next(skipping: [], deviceCanRunSmartModes: true), step, "\(previous)")
+        }
+    }
+
+    func testGoingBackInTheSceneSequenceResumesThereAfterAKill() {
+        for step in OnboardingStep.allCases where step.isInSceneSequence {
+            guard let back = step.stepBack else { continue }
+            OnboardingStep.save(step)
+            XCTAssertEqual(OnboardingStep.goBack(from: step), back, "\(step)")
+            XCTAssertEqual(defaults.string(forKey: SharedKeys.onboardingStep), back.rawValue, "\(step)")
+            // A relaunch reads the step afresh.
+            XCTAssertEqual(OnboardingStep.current(), back, "\(step)")
+        }
+    }
+
+    func testTheSmartModesSceneRecordsNothingOnGoingBack() {
+        OnboardingStep.save(.smartModesScene)
+        XCTAssertNil(OnboardingStep.goBack(from: .smartModesScene))
+        XCTAssertEqual(OnboardingStep.current(), .smartModesScene)
     }
 
     func testGoingBackFromTheLanguageStepResumesOnTheIntroAfterAKill() {
