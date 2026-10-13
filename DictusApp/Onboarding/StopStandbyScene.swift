@@ -27,9 +27,16 @@ struct StopStandbyPage: View {
     }
 
     var body: some View {
+        // WHY THE PAGE DOES NOT SCROLL (#700): as on the Smart Modes scene, the drawing fits
+        // the height left above the button instead of running under it on a short screen
+        // (iPhone SE: the Lock Screen variant scrolled by about half its phone).
         OnboardingPage(title: Text("To stop Dictus", comment: "Onboarding, how to stop Dictus step: title (#681)."),
-                       subtitle: line) {
-            StopStandbyCard(variant: variant)
+                       subtitle: line,
+                       scrolls: false) {
+            GeometryReader { geometry in
+                StopStandbyCard(variant: variant, room: geometry.size)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            }
         } bottom: {
             OnboardingPrimaryButton(Text("Got it"), action: onNext)
                 .accessibilityIdentifier("onboarding.primary")
@@ -64,8 +71,26 @@ struct StopStandbyPage: View {
 /// part of the drawing, paused and stilled with it.
 private struct StopStandbyCard: View {
     let variant: StopStandbySceneScript.Variant
+    /// The space the page leaves the card (#700).
+    let room: CGSize
+
+    /// The height of the steps above the phone (island variant), measured, so the phone
+    /// fits in what they leave.
+    @State private var chipsHeight: CGFloat = 0
 
     private typealias Phone = OnboardingPhoneMetrics
+
+    /// The drawn iPhone's card width: the page's width where the height allows it, narrower
+    /// on a short screen so the whole card sits above the button (`OnboardingPhoneFit`).
+    private var phoneWidth: CGFloat {
+        CGFloat(OnboardingPhoneFit.cardWidth(
+            availableWidth: Double(room.width),
+            availableHeight: Double(room.height - (variant == .island ? chipsHeight : 0)),
+            sceneAspectRatio: Double(StopStandbyMetrics.screenWidth / StopStandbyMetrics.screenHeight(variant)),
+            horizontalChrome: Double((Phone.phoneInset + Phone.phoneFrameWidth) * 2),
+            verticalChrome: Double(Phone.phoneInset + Phone.phoneFrameWidth)
+        ))
+    }
 
     var body: some View {
         AnimatedScenePlayer(
@@ -78,6 +103,7 @@ private struct StopStandbyCard: View {
                     StopStandbyChips(lit: frame.chip)
                         .padding(.top, 18)
                         .padding(.bottom, 8)
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { chipsHeight = $0 }
                 }
                 OnboardingPhoneCard(end: .top) {
                     screen(frame)
@@ -85,8 +111,12 @@ private struct StopStandbyCard: View {
                         .padding(.horizontal, Phone.phoneFrameWidth)
                         .padding(.top, Phone.phoneFrameWidth)
                 }
+                .frame(width: phoneWidth)
             }
         }
+        // The Lock Screen card is the phone's card: it narrows with it. The island card
+        // keeps the page's width for the steps above the phone.
+        .frame(width: variant == .island ? room.width : phoneWidth)
         .background(Color.dictusSurface)
         // Rounded at the bottom too, as both mock-ups draw it. At the top: concentric with
         // the phone when the phone is the first thing in the card, the shell's card radius
