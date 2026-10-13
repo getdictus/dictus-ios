@@ -102,6 +102,12 @@ public enum SharedKeys {
     /// a page was added or removed, so a persisted value had to be reinterpreted on every
     /// change to the flow. A step name means the same thing for as long as the step exists.
     public static let onboardingStep = "dictus.onboardingStep"
+    /// The app version this install is up to date with (#685), as a marketing version
+    /// string ("2.0.0"). It gates What's new: an install that completed onboarding and is
+    /// behind `WhatsNew.edition` sees it once. Absent on every install from before 2.0.0,
+    /// which is how an existing user is told apart on the first launch that has the key.
+    /// Read and written only through `WhatsNew`.
+    public static let lastVersionSeen = "dictus.lastVersionSeen"
     /// The language the user said they speak, as an ISO 639-1 code (#649). Written by the
     /// onboarding language screen. Can be a language with no Dictus keyboard ("zh").
     ///
