@@ -725,6 +725,25 @@ class UnifiedAudioEngine: ObservableObject {
         }
     }
 
+    /// The record permission, read without asking for it.
+    ///
+    /// `AVAudioApplication` rather than the session's `recordPermission`, which iOS 17
+    /// deprecated; the onboarding already reads it this way.
+    static func currentRecordPermission() -> MicrophonePermissionState {
+        switch AVAudioApplication.shared.recordPermission {
+        case .granted:
+            return .granted
+        case .denied:
+            return .denied
+        case .undetermined:
+            return .undetermined
+        @unknown default:
+            // An unknown future state is not a grant, and treating it as undetermined
+            // keeps the warm-up from opening an input iOS may answer with a prompt.
+            return .undetermined
+        }
+    }
+
     // MARK: - Engine Lifecycle
 
     /// Start the engine in idle mode (running but not recording).
@@ -752,6 +771,22 @@ class UnifiedAudioEngine: ObservableObject {
             // whatever was pending, and leaving without re-arming is how the
             // engine used to end up warm forever.
             scheduleIdleRelease(after: Self.warmUpIdleReleaseInterval)
+            return
+        }
+
+        // The one gate every warm-up door goes through (#715). Starting the input with
+        // the record permission undetermined makes iOS show its prompt, wherever the user
+        // happens to be: during onboarding that was some step before the microphone one,
+        // minutes after the model finished downloading. So a warm-up never asks; the
+        // dictation start paths do, through `ensureMicrophonePermission()`.
+        //
+        // WHY return and not throw: a skip is not a failure. Both callers of this method
+        // treat a throw as the load failing and write the model's state from it (#486),
+        // while the model here is fine. Returning lets the load publish `.ready`, and the
+        // log line is what says why the engine is cold. No idle release is armed, for the
+        // same reason as on a failed start below: there is no warm state to bound.
+        if let reason = WarmUpPermissionGate.skipReason(for: Self.currentRecordPermission()) {
+            PersistentLog.log(.engineWarmUpSkipped(context: "unifiedEngine-warmUp", reason: reason))
             return
         }
         try startEngine(context: "warmUp")

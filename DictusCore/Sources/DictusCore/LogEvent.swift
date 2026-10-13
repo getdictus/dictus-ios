@@ -341,6 +341,9 @@ public enum LogEvent: Sendable {
     case engineWarmUpAttempt(context: String)
     case engineWarmUpSuccess(context: String)
     case engineWarmUpFailed(context: String, error: String)
+    /// The warm-up left the engine cold on purpose (#715): starting the input with the
+    /// record permission not granted would raise the system prompt. Not a failure.
+    case engineWarmUpSkipped(context: String, reason: String)
     case engineStateSnapshot(engineRunning: Bool, isRecording: Bool, hasWhisperKit: Bool, sessionConfigured: Bool, allowsHaptics: Bool, context: String)
     case engineCollectResult(sampleCount: Int, engineRunning: Bool)
     case engineDarwinStartReceived(appState: String, engineRunning: Bool)
@@ -406,6 +409,10 @@ public enum LogEvent: Sendable {
     /// The back control of the onboarding shell was tapped (#700). `from` is the step it
     /// was tapped on, `to` the step it returned to.
     case onboardingWentBack(from: String, to: String)
+    /// The "how to stop Dictus" step appeared (#681). `variant` is `island` or `lockScreen`
+    /// (`DeviceCapabilities.hasDynamicIsland`), `model` the identifier it was read from, so
+    /// a device test can tell which picture a given iPhone was shown, and why.
+    case onboardingStopStandbyShown(variant: String, model: String)
 
     // MARK: Live Activity
     case liveActivityStarted(id: String)
@@ -680,6 +687,7 @@ public enum LogEvent: Sendable {
         case .statusChanged, .watchdogReset, .idleInvariantViolation:
             return .dictation
         case .engineWarmUpAttempt, .engineWarmUpSuccess, .engineWarmUpFailed,
+             .engineWarmUpSkipped,
              .engineStateSnapshot, .engineCollectResult, .engineDarwinStartReceived:
             return .audio
         case .onboardingScenePhaseChanged, .onboardingKeyboardCheckStarted,
@@ -691,7 +699,7 @@ public enum LogEvent: Sendable {
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped, .onboardingWentBack:
+             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
              .coldStartStranded:
@@ -759,9 +767,12 @@ public enum LogEvent: Sendable {
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped, .onboardingWentBack,
+             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
+             // Info, not debug like its siblings: it is the one line that says why the
+             // engine is cold, and a reader of the log has to find it (#715).
+             .engineWarmUpSkipped,
              .transcriptionStarted, .transcriptionCompleted,
              .modelDownloadStarted, .modelDownloadCompleted, .modelDownloadProgress,
              .modelSelected, .modelCompilationStarted, .modelCompilationCompleted,
@@ -981,6 +992,8 @@ public enum LogEvent: Sendable {
             return "context=\(context)"
         case .engineWarmUpFailed(let context, let error):
             return "context=\(context) error=\(error)"
+        case .engineWarmUpSkipped(let context, let reason):
+            return "context=\(context) reason=\(reason)"
         case .engineStateSnapshot(let engineRunning, let isRecording, let hasWhisperKit, let sessionConfigured, let allowsHaptics, let context):
             return "engineRunning=\(engineRunning) isRecording=\(isRecording) hasWhisperKit=\(hasWhisperKit) sessionConfigured=\(sessionConfigured) allowsHaptics=\(allowsHaptics) context=\(context)"
         case .engineCollectResult(let sampleCount, let engineRunning):
@@ -1018,6 +1031,8 @@ public enum LogEvent: Sendable {
         case .onboardingSceneSequenceSkipped(let from, let to),
              .onboardingWentBack(let from, let to):
             return "from=\(from) to=\(to)"
+        case .onboardingStopStandbyShown(let variant, let model):
+            return "variant=\(variant) model=\(model)"
 
         // Live Activity
         case .liveActivityStarted(let id):
@@ -1256,6 +1271,7 @@ extension LogEvent {
         case .engineWarmUpAttempt: return "engineWarmUpAttempt"
         case .engineWarmUpSuccess: return "engineWarmUpSuccess"
         case .engineWarmUpFailed: return "engineWarmUpFailed"
+        case .engineWarmUpSkipped: return "engineWarmUpSkipped"
         case .engineStateSnapshot: return "engineStateSnapshot"
         case .engineCollectResult: return "engineCollectResult"
         case .engineDarwinStartReceived: return "engineDarwinStartReceived"
@@ -1277,6 +1293,7 @@ extension LogEvent {
         case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
         case .onboardingSceneSequenceSkipped: return "onboardingSceneSequenceSkipped"
         case .onboardingWentBack: return "onboardingWentBack"
+        case .onboardingStopStandbyShown: return "onboardingStopStandbyShown"
         case .liveActivityStarted: return "liveActivityStarted"
         case .liveActivityTransition: return "liveActivityTransition"
         case .liveActivityFailed: return "liveActivityFailed"

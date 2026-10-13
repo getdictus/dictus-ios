@@ -779,8 +779,8 @@ private struct SceneSystemBar: View {
 // MARK: - Finger
 
 /// The drawn finger: a soft grey disc, as screen recordings show touches. Smaller and
-/// darker while pressed.
-private struct SceneFinger: View {
+/// darker while pressed. Shared by every drawn scene (#679, #681).
+struct SceneFinger: View {
     let isPressed: Bool
 
     var body: some View {
