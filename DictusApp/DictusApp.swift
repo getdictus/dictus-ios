@@ -163,6 +163,12 @@ struct DictusApp: App {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         PersistentLog.log(.appLaunched(version: version))
 
+        // What's new's key (#685), before `MainTabView` asks whether it is due. A launch
+        // that has not completed onboarding is a new install: recorded as up to date now,
+        // so its onboarding is never followed by What's new. An existing user's first
+        // launch of 2.0.0 is left due, and recorded once What's new is on screen.
+        WhatsNew.recordLaunch()
+
         // Complete a Parakeet cache the 0.15 loader cannot use, before the coordinator's
         // launch preload can reach it (#558): layer 0 moves a 0.12 cache into the folder 0.15
         // reads, then layer 2 restores the new joint from the app bundle. A no-op on a
