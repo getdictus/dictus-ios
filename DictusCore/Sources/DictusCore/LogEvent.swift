@@ -234,6 +234,19 @@ public enum LogEvent: Sendable {
     /// it (#690). Every `cancel()` on a model download task goes through a line like this,
     /// so a `-999` with no such line before it was not ours: it came from the system.
     case modelDownloadTaskCancelled(name: String, path: String, chunk: Int, caller: String)
+    /// Chunks found durably on disk but never folded into their file were absorbed by
+    /// `pump`, with no completion to do it (#732), or refused for the wrong length and
+    /// deleted so they are asked for again. `file` is the file's index in the manifest,
+    /// `absorbed` the chunk indices appended, `discarded` one `<chunk>:<reason>` per chunk
+    /// thrown away. A line here means a process died between a chunk landing and its
+    /// append, and the relaunch recovered instead of freezing.
+    case modelDownloadOrphanedChunks(
+        name: String,
+        path: String,
+        file: Int,
+        absorbed: [Int],
+        discarded: [String]
+    )
 
     // MARK: Keyboard
     case keyboardDidAppear
@@ -663,7 +676,7 @@ public enum LogEvent: Sendable {
              .modelDownloadResumed, .modelDownloadRangeRejected, .modelDownloadChunk,
              .modelDownloadIntegrityFailed, .modelDownloadSessionRestored,
              .modelDownloadOffline, .modelDownloadTaskState, .modelDownloadBackgroundTaskSilent,
-             .modelDownloadTaskCancelled:
+             .modelDownloadTaskCancelled, .modelDownloadOrphanedChunks:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .hostReturn,
@@ -729,6 +742,12 @@ public enum LogEvent: Sendable {
         // catch (#261), so it is findable by level and not only by reading the count.
         case .dictationMessageCleared(_, let displayedCount):
             return displayedCount == 0 ? .warning : .info
+
+        // Notice at least, the lowest level the unified log persists: this line is read
+        // from a device capture taken after the process that wrote it is gone (#732). A
+        // chunk refused for its length is the rarer, worse half, so it reads as a warning.
+        case .modelDownloadOrphanedChunks(_, _, _, _, let discarded):
+            return discarded.isEmpty ? .notice : .warning
 
         // Errors
         case .dictationFailed, .audioSessionFailed, .transcriptionFailed,
@@ -966,6 +985,10 @@ public enum LogEvent: Sendable {
                 + "noByte=\(secondsWithoutByte)s"
         case .modelDownloadTaskCancelled(let name, let path, let chunk, let caller):
             return "name=\(name) path=\(path) chunk=\(chunk) caller=\(caller)"
+        case .modelDownloadOrphanedChunks(let name, let path, let file, let absorbed, let discarded):
+            let absorbedList = absorbed.isEmpty ? "none" : absorbed.map(String.init).joined(separator: ",")
+            let discardedList = discarded.isEmpty ? "none" : discarded.joined(separator: ",")
+            return "name=\(name) path=\(path) file=\(file) absorbed=\(absorbedList) discarded=\(discardedList)"
 
         // Keyboard (no content parameters -- privacy)
         case .keyboardDidAppear, .keyboardDidDisappear,
@@ -1336,6 +1359,7 @@ extension LogEvent {
         case .modelDownloadTaskState: return "modelDownloadTaskState"
         case .modelDownloadBackgroundTaskSilent: return "modelDownloadBackgroundTaskSilent"
         case .modelDownloadTaskCancelled: return "modelDownloadTaskCancelled"
+        case .modelDownloadOrphanedChunks: return "modelDownloadOrphanedChunks"
         case .polishEngineFailed: return "polishEngineFailed"
         case .vocabularyApplied: return "vocabularyApplied"
         case .polishEngineUnavailable: return "polishEngineUnavailable"
