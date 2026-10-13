@@ -306,6 +306,10 @@ class DictationCoordinator: ObservableObject {
     /// Compile if needed, load into RAM, warm the audio path. Returns the model that
     /// ended up loaded, for the log.
     ///
+    /// The audio warm-up leaves the engine cold, without throwing, while the record
+    /// permission is not granted (#715). Returning normally therefore means the MODEL is
+    /// loaded; whether the engine runs is `isAudioEngineRunning`'s to say.
+    ///
     /// WHY it exists as a seam rather than being inlined where it is used: the callers
     /// live in `DictationCoordinator+ModelLoad.swift`, because this file is at the
     /// length budget issue #146 calibrated against it. One named entry point is a
