@@ -493,12 +493,28 @@ enum OnboardingPhoneEnd {
 
 /// The drawn iPhone in its card. Metrics in `OnboardingPhoneMetrics` (a generic view
 /// cannot hold static stored properties).
-struct OnboardingPhoneCard<Content: View>: View {
+///
+/// `header` sits inside the card, above the phone, which then runs off under it instead
+/// of off the card's edge: the voice notes scene's chips (#680, mock-up
+/// `07a-scene-memos-vocaux`). Most cards have none.
+struct OnboardingPhoneCard<Content: View, Header: View>: View {
     /// The end of the phone the card shows.
     var end: OnboardingPhoneEnd = .top
+    @ViewBuilder let header: Header
     @ViewBuilder let content: Content
 
     private typealias Metrics = OnboardingPhoneMetrics
+
+    init(end: OnboardingPhoneEnd = .top,
+         @ViewBuilder header: () -> Header,
+         @ViewBuilder content: () -> Content) {
+        self.end = end
+        self.header = header()
+        self.content = content()
+    }
+
+    /// Whether `header` draws anything. `EmptyView` is the type of "no header".
+    private var hasHeader: Bool { Header.self != EmptyView.self }
 
     var body: some View {
         let showsTop = end == .top
@@ -523,7 +539,7 @@ struct OnboardingPhoneCard<Content: View>: View {
             style: .continuous
         )
         let overrunEdge: Edge.Set = showsTop ? .bottom : .top
-        content
+        let phone = content
             .frame(maxWidth: .infinity, alignment: .leading)
             // The phone is drawn taller than the card so the crop below cuts through it:
             // no edge at the cut, the phone runs off the card.
@@ -533,11 +549,64 @@ struct OnboardingPhoneCard<Content: View>: View {
                     .strokeBorder(Metrics.phoneFrame, lineWidth: Metrics.phoneFrameWidth)
                     .padding(overrunEdge, -Metrics.overrun)
             )
-            .padding(.horizontal, Metrics.phoneInset)
-            .padding(showsTop ? .top : .bottom, Metrics.phoneInset)
-            .background(cardShape.fill(Color.dictusSurface))
-            // Rounded where the phone shows, cut through the phone at the other edge.
-            .clipShape(cardShape)
+        VStack(spacing: 0) {
+            if hasHeader {
+                header
+                // Under a header the phone is cut at its own edge, so its overrun does
+                // not run up over the header.
+                phone.clipped()
+            } else {
+                phone
+            }
+        }
+        .padding(.horizontal, Metrics.phoneInset)
+        .padding(showsTop ? .top : .bottom, Metrics.phoneInset)
+        .background(cardShape.fill(Color.dictusSurface))
+        // Rounded where the phone shows, cut through the phone at the other edge.
+        .clipShape(cardShape)
+    }
+}
+
+extension OnboardingPhoneCard where Header == EmptyView {
+    /// A card with the phone alone, which is every card but the voice notes scene's.
+    init(end: OnboardingPhoneEnd = .top, @ViewBuilder content: () -> Content) {
+        self.init(end: end, header: { EmptyView() }, content: content)
+    }
+}
+
+// MARK: - Fit to height
+
+/// Shows `content` whole in the height it is given: at its natural size when that fits,
+/// scaled down uniformly, from its top centre, when it does not. Never clipped.
+///
+/// WHY (#680, Pierre's device test of 18dc4e99): a scene page used to scroll its card like
+/// any other page. While the model downloads, the download pill takes a row above *Next*,
+/// the scroll view gets shorter, and the bottom of the drawn iPhone went under the page's
+/// edge: on an iPhone 15 Pro Max the keyboard's globe row touched the card's edge and the
+/// phone's frame was gone. A picture of a phone must read as a whole phone, pill or no
+/// pill, on every screen, so the card shrinks instead.
+///
+/// WHY SCALE AND NOT RE-LAYOUT: the scenes are drawn at fixed point sizes and scaled as one
+/// picture (`SmartModesScene`); the card around them is drawn the same way. Scaling the
+/// card as a whole keeps the phone, its frame and the card's corners in proportion.
+struct OnboardingFitToHeight<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    /// The content's height at the full width, measured.
+    @State private var naturalHeight: CGFloat = 0
+
+    var body: some View {
+        GeometryReader { geometry in
+            let scale = naturalHeight > geometry.size.height && naturalHeight > 0
+                ? geometry.size.height / naturalHeight
+                : 1
+            content
+                .frame(width: geometry.size.width)
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { naturalHeight = $0 }
+                .scaleEffect(scale, anchor: .top)
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+        }
     }
 }
 
