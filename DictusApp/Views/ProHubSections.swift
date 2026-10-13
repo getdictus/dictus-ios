@@ -13,6 +13,12 @@ import DictusCore
 /// row opens (`ProFeatureSwitchSection`).
 ///
 /// **Always opens**, switched off included: that screen is where the switch is.
+///
+/// **The feature's scene plays above the row** (#686, layout decided on the issue on
+/// 2026-10-13): the onboarding's own scene in its drawn iPhone (`ProFeatureSceneCard`),
+/// fitted into a fixed height. Active cards only: the cards a free user is sold, and the
+/// end-of-trial page, are the validated paywall and stay as they are. The row under the
+/// scene is unchanged, and the whole card still opens the feature.
 struct ProHubFeatureCard: View {
     let feature: ProFeature
 
@@ -23,54 +29,20 @@ struct ProHubFeatureCard: View {
     /// Pushes the feature's screen onto the hub's stack.
     let open: () -> Void
 
+    /// Whether the scene shows any of itself in the hub's scroll view. Every card stays
+    /// alive in the hub's plain stack, so without it the four scenes would all run,
+    /// those scrolled away included.
+    @State private var sceneIsVisible = true
+
+    /// The scene's height, fixed whatever the scene: the phone card shrinks into it as
+    /// one picture (`OnboardingFitToHeight`), so it is seen whole, as in the onboarding.
+    private static let sceneHeight: CGFloat = 200
+
     var body: some View {
         Button(action: open) {
-            HStack(spacing: 12) {
-                Image(systemName: feature.icon)
-                    .font(.title3)
-                    .foregroundColor(iconColor)
-                    .frame(width: 28)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(LocalizedStringKey(feature.displayName))
-                        .font(.dictusBody.weight(.semibold))
-                        .foregroundColor(.primary)
-                    Text(LocalizedStringKey(feature.paywallDescription))
-                        .font(.dictusCaption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-
-                    // Kept on the active card too: a user on a device that cannot
-                    // run Smart Modes still owns the switch and the mode list, which
-                    // is durable across phones (see `SmartModeListView`), and the
-                    // line is what says why nothing happens in the keyboard.
-                    if !feature.isSupportedByThisDevice {
-                        HStack(spacing: 4) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.system(size: 10))
-                            Text("Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)")
-                                .font(.dictusCaption)
-                                .lineLimit(2)
-                                .multilineTextAlignment(.leading)
-                        }
-                        .foregroundColor(.secondary)
-                        .padding(.top, 2)
-                    }
-                }
-
-                Spacer(minLength: 8)
-
-                stateValue
-                    .font(.dictusBody)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .layoutPriority(1)
-
-                Image(systemName: "chevron.forward")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-                    .accessibilityHidden(true)
+            VStack(spacing: 12) {
+                scene
+                row
             }
             .padding(12)
             .dictusGlass()
@@ -80,6 +52,73 @@ struct ProHubFeatureCard: View {
         .buttonStyle(GlassPressStyle(pressedScale: 0.97))
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
+    }
+
+    /// The feature's scene, playing only while some of it is in the scroll view's bounds.
+    /// Outside a scroll view (`bounds(of:)` is nil) it counts as visible.
+    private var scene: some View {
+        OnboardingFitToHeight {
+            ProFeatureSceneCard(feature: feature)
+        }
+        .frame(height: Self.sceneHeight)
+        .environment(\.sceneIsOnScreen, sceneIsVisible)
+        .onGeometryChange(for: Bool.self) { proxy in
+            guard let viewport = proxy.bounds(of: .scrollView) else { return true }
+            return proxy.frame(in: .local).intersects(viewport)
+        } action: { isVisible in
+            sceneIsVisible = isVisible
+        }
+    }
+
+    /// The Settings-style row of #216: the feature, its state, a chevron.
+    private var row: some View {
+        HStack(spacing: 12) {
+            Image(systemName: feature.icon)
+                .font(.title3)
+                .foregroundColor(iconColor)
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(LocalizedStringKey(feature.displayName))
+                    .font(.dictusBody.weight(.semibold))
+                    .foregroundColor(.primary)
+                Text(LocalizedStringKey(feature.paywallDescription))
+                    .font(.dictusCaption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+
+                // Kept on the active card too: a user on a device that cannot
+                // run Smart Modes still owns the switch and the mode list, which
+                // is durable across phones (see `SmartModeListView`), and the
+                // line is what says why nothing happens in the keyboard.
+                if !feature.isSupportedByThisDevice {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 10))
+                        Text("Requires Apple Intelligence (iPhone 15 Pro or later, iOS 26)")
+                            .font(.dictusCaption)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .foregroundColor(.secondary)
+                    .padding(.top, 2)
+                }
+            }
+
+            Spacer(minLength: 8)
+
+            stateValue
+                .font(.dictusBody)
+                .foregroundColor(.secondary)
+                .lineLimit(1)
+                .layoutPriority(1)
+
+            Image(systemName: "chevron.forward")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.tertiary)
+                .accessibilityHidden(true)
+        }
     }
 
     private var stateValue: Text {
