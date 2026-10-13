@@ -1,11 +1,12 @@
 // DictusApp/Onboarding/ChecklistPictureSource.swift
-// Hosts the Picture in Picture source layer in the page, out of sight (#682).
+// Hosts the Picture in Picture source layer in the page, out of sight (#682, #706).
 import AVFoundation
 import SwiftUI
 import UIKit
 
 /// The sample-buffer layer the Picture in Picture window is started from, placed behind the
-/// drawn Settings phone so nobody sees it.
+/// drawn Settings phone so nobody sees it: the keyboard step's (#682) and the Apple
+/// Intelligence step's (#706).
 ///
 /// WHY IT IS IN THE PAGE AT ALL: `AVPictureInPictureController` starts from a layer that
 /// is in the window and playing; it cannot start from a layer that is not attached.
@@ -17,7 +18,7 @@ import UIKit
 /// can check intact. Whether iOS accepts it is a device question: the player logs
 /// `pipPossible`, then `pipStarted` or `fallback reason=…` on the tap.
 ///
-/// It keeps the window's aspect ratio (`KeyboardSetupChecklistPictureCard.size`), so the
+/// It keeps the window's aspect ratio (`SettingsChecklistPictureCard.size`), so the
 /// start animation grows from a frame of the right shape.
 struct ChecklistPictureSource: View {
     let layer: AVSampleBufferDisplayLayer
@@ -26,7 +27,7 @@ struct ChecklistPictureSource: View {
     private static let width: CGFloat = 280
 
     var body: some View {
-        let size = KeyboardSetupChecklistPictureCard.size
+        let size = SettingsChecklistPictureCard.size
         SampleBufferLayerView(layer: layer)
             .frame(width: Self.width, height: Self.width * size.height / size.width)
             .allowsHitTesting(false)

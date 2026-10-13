@@ -13,7 +13,7 @@ import DictusCore
 /// iPhone, cropped, showing Settings > Apps > Dictus with the three things to touch
 /// numbered 1, 2, 3, and the current one lit in turn on a loop. Only iOS system UI is
 /// drawn this way (#649 decision 13). Open Settings sends a checklist into Picture in
-/// Picture over the real Settings (#682, `KeyboardSetupChecklistPlayer`); the page itself
+/// Picture over the real Settings (#682, `KeyboardSetupChecklistScript`); the page itself
 /// shows it only in the fallback, under the drawing.
 struct KeyboardSetupPage: View {
     let onNext: () -> Void
@@ -50,7 +50,7 @@ struct KeyboardSetupPage: View {
 
     /// The checklist played under the drawing and, from the Open Settings tap, in Picture
     /// in Picture over Settings (#682).
-    @StateObject private var checklist = KeyboardSetupChecklistPlayer()
+    @StateObject private var checklist = SettingsChecklistPlayer(script: KeyboardSetupChecklistScript())
 
     var body: some View {
         OnboardingPage(
@@ -179,7 +179,7 @@ struct KeyboardSetupPage: View {
         }
         .onChange(of: keyboardDetected) { detected in
             if detected {
-                checklist.keyboardDetected()
+                checklist.markComplete()
                 // Stop animation loop once detected
                 animationTimer?.invalidate()
                 animationTimer = nil

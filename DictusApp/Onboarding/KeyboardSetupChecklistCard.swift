@@ -9,7 +9,7 @@ import DictusCore
 ///
 /// WHERE IT SHOWS: only in the fallback, inline under the drawn Settings page, when
 /// Picture in Picture is unavailable or failed to start. The Picture in Picture window
-/// draws the same states in a short, title-less form (`KeyboardSetupChecklistPictureCard`),
+/// draws the same states in a short, title-less form (`SettingsChecklistPictureCard`),
 /// because a card with a title made the window tall enough to cover the Full Access
 /// alert's buttons (device test, 2026-10-10).
 ///
@@ -28,9 +28,6 @@ struct KeyboardSetupChecklistCard: View {
     /// The card's size in points.
     static let size = CGSize(width: 300, height: 184)
 
-    /// The card's fill: the app's dark, a shade deeper so it reads over the dark app too.
-    static let background = Color(hex: 0x0F1728)
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
@@ -47,7 +44,7 @@ struct KeyboardSetupChecklistCard: View {
         }
         .padding(18)
         .frame(width: Self.size.width, height: Self.size.height, alignment: .topLeading)
-        .background(Self.background)
+        .background(SettingsChecklistPictureCard.background)
         .environment(\.colorScheme, .dark)
     }
 
@@ -62,7 +59,7 @@ struct KeyboardSetupChecklistCard: View {
     private func row(_ line: KeyboardSetupChecklistLine) -> some View {
         let state = state(of: line)
         return HStack(spacing: 12) {
-            KeyboardSetupChecklistBadge(
+            SettingsChecklistBadge(
                 number: line.rawValue + 1,
                 state: state,
                 tickProgress: progress(of: line),
@@ -70,73 +67,10 @@ struct KeyboardSetupChecklistCard: View {
             )
             line.title
                 .font(.system(size: 15, weight: state == .current ? .semibold : .regular))
-                .foregroundStyle(KeyboardSetupChecklistBadge.textColor(for: state))
+                .foregroundStyle(SettingsChecklistBadge.textColor(for: state))
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
-    }
-}
-
-// MARK: - Badge
-
-/// A line's number disc, shared by the inline card and the Picture in Picture frames:
-/// green with a check once done, accent with the number while current, a faint disc with
-/// the number before.
-struct KeyboardSetupChecklistBadge: View {
-    let number: Int
-    let state: SettingsChecklistLineState
-    /// How far the tick has popped in, 0 to 1.
-    let tickProgress: Double
-    let diameter: CGFloat
-
-    var body: some View {
-        switch state {
-        case .done:
-            Circle()
-                .fill(Color.dictusSuccess)
-                .frame(width: diameter, height: diameter)
-                .overlay(
-                    Image(systemName: "checkmark")
-                        .font(.system(size: diameter * 0.46, weight: .bold))
-                        .foregroundStyle(.white)
-                        // The tick pops in: from half size to a slight overshoot, then
-                        // settles. Driven by the frame clock, not a SwiftUI animation,
-                        // because the frames sent to Picture in Picture are rendered one
-                        // by one and SwiftUI animations do not run there.
-                        .scaleEffect(Self.popScale(tickProgress))
-                        .opacity(min(1, tickProgress * 2))
-                )
-        case .current:
-            Text(verbatim: "\(number)")
-                .font(.system(size: diameter * 0.5, weight: .bold))
-                .foregroundStyle(.white)
-                .frame(width: diameter, height: diameter)
-                .background(Circle().fill(Color.dictusAccent))
-        case .pending:
-            Text(verbatim: "\(number)")
-                .font(.system(size: diameter * 0.5, weight: .semibold))
-                .foregroundStyle(Color.white.opacity(0.45))
-                .frame(width: diameter, height: diameter)
-                .background(Circle().fill(Color.white.opacity(0.08)))
-        }
-    }
-
-    /// The line's text colour for its state.
-    static func textColor(for state: SettingsChecklistLineState) -> Color {
-        switch state {
-        case .done: return Color.white.opacity(0.45)
-        case .current: return .white
-        case .pending: return Color.white.opacity(0.62)
-        }
-    }
-
-    /// 0.5 → 1.15 over the first 70 % of the pop, then back to 1.
-    static func popScale(_ progress: Double) -> Double {
-        let clamped = min(max(progress, 0), 1)
-        if clamped < 0.7 {
-            return 0.5 + (1.15 - 0.5) * (clamped / 0.7)
-        }
-        return 1.15 - 0.15 * ((clamped - 0.7) / 0.3)
     }
 }
 
