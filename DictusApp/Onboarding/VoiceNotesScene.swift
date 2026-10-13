@@ -20,12 +20,23 @@ struct VoiceNotesScenePage: View {
                         comment: "Onboarding voice notes scene: title (#680)."),
             line: Text("Share a voice note to Dictus from any app. The text is waiting for you in the keyboard.",
                        comment: "Onboarding voice notes scene: the line under the title (#680)."),
-            phoneEnd: .bottom,
-            loopSeconds: VoiceNotesSceneScript.loopSeconds,
-            stillSeconds: VoiceNotesSceneScript.stillSeconds,
             modelManager: modelManager,
             modelIdentifier: modelIdentifier,
             onNext: onNext
+        ) {
+            VoiceNotesSceneCard()
+        }
+    }
+}
+
+/// The voice notes scene in its drawn iPhone, with its chapter header above the phone: the
+/// onboarding page's card and the Pro hub's voice notes card (#686).
+struct VoiceNotesSceneCard: View {
+    var body: some View {
+        FeatureSceneCard(
+            phoneEnd: .bottom,
+            loopSeconds: VoiceNotesSceneScript.loopSeconds,
+            stillSeconds: VoiceNotesSceneScript.stillSeconds
         ) { time in
             VoiceNotesChapterHeader(chapter: VoiceNotesSceneScript.frame(at: time).chapter)
         } scene: { time in

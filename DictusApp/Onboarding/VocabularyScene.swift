@@ -20,12 +20,23 @@ struct VocabularyScenePage: View {
                         comment: "Onboarding vocabulary scene: title (#680)."),
             line: Text("Note a name and the way Dictus gets it wrong. Next time, it will write it your way.",
                        comment: "Onboarding vocabulary scene: the line under the title (#680)."),
-            phoneEnd: .top,
-            loopSeconds: VocabularySceneScript.loopSeconds,
-            stillSeconds: VocabularySceneScript.stillSeconds,
             modelManager: modelManager,
             modelIdentifier: modelIdentifier,
             onNext: onNext
+        ) {
+            VocabularySceneCard()
+        }
+    }
+}
+
+/// The vocabulary scene in its drawn iPhone: the onboarding page's card and the Pro hub's
+/// vocabulary card (#686).
+struct VocabularySceneCard: View {
+    var body: some View {
+        FeatureSceneCard(
+            phoneEnd: .top,
+            loopSeconds: VocabularySceneScript.loopSeconds,
+            stillSeconds: VocabularySceneScript.stillSeconds
         ) { time in
             VocabularyScene(time: time)
         }

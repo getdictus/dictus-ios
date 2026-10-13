@@ -12,9 +12,6 @@ struct HistoryScenePage: View {
     let modelIdentifier: String
     let onNext: () -> Void
 
-    /// The cards, built once: their dates are relative to today.
-    private let records = HistorySceneText.records(now: Date())
-
     var body: some View {
         OnboardingScenePage(
             eyebrow: Text("Also in Pro",
@@ -23,12 +20,26 @@ struct HistoryScenePage: View {
                         comment: "Onboarding history scene: title (#680)."),
             line: Text("Every dictation stays on your iPhone. Search for a word, find the text.",
                        comment: "Onboarding history scene: the line under the title (#680)."),
-            phoneEnd: .top,
-            loopSeconds: HistorySceneScript.loopSeconds,
-            stillSeconds: HistorySceneScript.stillSeconds,
             modelManager: modelManager,
             modelIdentifier: modelIdentifier,
             onNext: onNext
+        ) {
+            HistorySceneCard()
+        }
+    }
+}
+
+/// The history scene in its drawn iPhone: the onboarding page's card and the Pro hub's
+/// history card (#686).
+struct HistorySceneCard: View {
+    /// The cards, built once: their dates are relative to today.
+    private let records = HistorySceneText.records(now: Date())
+
+    var body: some View {
+        FeatureSceneCard(
+            phoneEnd: .top,
+            loopSeconds: HistorySceneScript.loopSeconds,
+            stillSeconds: HistorySceneScript.stillSeconds
         ) { time in
             HistoryScene(time: time, records: records)
         }

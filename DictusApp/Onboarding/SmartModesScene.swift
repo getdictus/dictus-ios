@@ -12,9 +12,27 @@ struct SmartModesScenePage: View {
     let modelIdentifier: String
     let onNext: () -> Void
 
+    var body: some View {
+        OnboardingScenePage(
+            title: Text("One long press, one Smart Mode",
+                        comment: "Onboarding Smart Modes scene: title (#679)."),
+            line: Text("Hold the mic, slide to a mode, let go. Dictus writes in that mode.",
+                       comment: "Onboarding Smart Modes scene: the line under the title, describing the long-press gesture on the keyboard's mic (#679)."),
+            modelManager: modelManager,
+            modelIdentifier: modelIdentifier,
+            onNext: onNext
+        ) {
+            SmartModesSceneCard()
+        }
+    }
+}
+
+/// The Smart Modes scene in its drawn iPhone: the onboarding page's card and the Pro hub's
+/// Smart Modes card (#686).
+struct SmartModesSceneCard: View {
     /// The fan the scene draws, its translation row picked for the language the user said
     /// they speak (`SmartModesSceneScript.entries`). Read once: it was written on the
-    /// language screen and does not change while this page is on screen.
+    /// language screen and does not change while the card is on screen.
     private let entries = SmartModesSceneScript.entries(
         spokenLanguage: AppGroup.defaults.string(forKey: SharedKeys.spokenLanguage)
     )
@@ -28,17 +46,10 @@ struct SmartModesScenePage: View {
     )
 
     var body: some View {
-        OnboardingScenePage(
-            title: Text("One long press, one Smart Mode",
-                        comment: "Onboarding Smart Modes scene: title (#679)."),
-            line: Text("Hold the mic, slide to a mode, let go. Dictus writes in that mode.",
-                       comment: "Onboarding Smart Modes scene: the line under the title, describing the long-press gesture on the keyboard's mic (#679)."),
+        FeatureSceneCard(
             loopSeconds: SmartModesSceneScript.loopSeconds,
             startSeconds: SmartModesSceneScript.openingSeconds,
-            stillSeconds: SmartModesSceneScript.stillSeconds,
-            modelManager: modelManager,
-            modelIdentifier: modelIdentifier,
-            onNext: onNext
+            stillSeconds: SmartModesSceneScript.stillSeconds
         ) { time in
             SmartModesScene(time: time, entries: entries, layout: layout, sentences: sentences)
         }

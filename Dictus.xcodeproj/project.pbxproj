@@ -90,6 +90,7 @@
 		AA000676 /* IntroVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100676 /* IntroVideoView.swift */; };
 		AA000679 /* AnimatedScenePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100679 /* AnimatedScenePlayer.swift */; };
 		AA00679A /* OnboardingScenePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679A /* OnboardingScenePage.swift */; };
+		AA000686 /* FeatureSceneCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100686 /* FeatureSceneCard.swift */; };
 		AA00679B /* SmartModesScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679B /* SmartModesScene.swift */; };
 		AA00704A /* FullAccessExplainerPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10704A /* FullAccessExplainerPage.swift */; };
 		AA006800 /* SceneTapTargets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106800 /* SceneTapTargets.swift */; };
@@ -325,6 +326,7 @@
 		AA100676 /* IntroVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroVideoView.swift; sourceTree = "<group>"; };
 		AA100679 /* AnimatedScenePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedScenePlayer.swift; sourceTree = "<group>"; };
 		AA10679A /* OnboardingScenePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScenePage.swift; sourceTree = "<group>"; };
+		AA100686 /* FeatureSceneCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureSceneCard.swift; sourceTree = "<group>"; };
 		AA10679B /* SmartModesScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModesScene.swift; sourceTree = "<group>"; };
 		AA10704A /* FullAccessExplainerPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullAccessExplainerPage.swift; sourceTree = "<group>"; };
 		AA106800 /* SceneTapTargets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneTapTargets.swift; sourceTree = "<group>"; };
@@ -757,6 +759,7 @@
 				AA100676 /* IntroVideoView.swift */,
 				AA100679 /* AnimatedScenePlayer.swift */,
 				AA10679A /* OnboardingScenePage.swift */,
+				AA100686 /* FeatureSceneCard.swift */,
 				AA10679B /* SmartModesScene.swift */,
 				AA10704A /* FullAccessExplainerPage.swift */,
 				AA106800 /* SceneTapTargets.swift */,
@@ -1309,6 +1312,7 @@
 				AA000676 /* IntroVideoView.swift in Sources */,
 				AA000679 /* AnimatedScenePlayer.swift in Sources */,
 				AA00679A /* OnboardingScenePage.swift in Sources */,
+				AA000686 /* FeatureSceneCard.swift in Sources */,
 				AA00679B /* SmartModesScene.swift in Sources */,
 				AA00704A /* FullAccessExplainerPage.swift in Sources */,
 				AA006800 /* SceneTapTargets.swift in Sources */,
