@@ -22,8 +22,8 @@ import DictusCore
 /// first gesture of the lesson.
 struct GlobeKeyTutorialPage: View {
     /// Called once the field holds a dictation (or, pre-A14, typed words). `OnboardingView`
-    /// resets the dictation coordinator and moves on to the completion step (#675); its
-    /// shell's Skip does the same without a dictation.
+    /// resets the dictation coordinator and moves on to the completion step (#675); the
+    /// shell's Skip, at the bottom of the page, does the same without a dictation.
     let onComplete: () -> Void
 
     @State private var isFieldFocused = false
@@ -64,6 +64,9 @@ struct GlobeKeyTutorialPage: View {
 
             field
                 .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                // Takes what the rest leaves (#700): the card is sized first, and only
+                // shrinks once the field is down to its minimum.
+                .layoutPriority(-1)
 
             switch stage {
             case .beforeTap:
@@ -71,7 +74,8 @@ struct GlobeKeyTutorialPage: View {
                 GlobeLongPressCard()
                     .padding(.horizontal, OnboardingMetrics.horizontalPadding)
                     .padding(.top, 16)
-                    .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
+                    // The gap the other steps keep between their button and the Skip row.
+                    .padding(.bottom, OnboardingMetrics.skipRowSpacing)
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
             case .otherKeyboard, .dictusKeyboard:
                 // States 2 and 3: the banner, right above the keyboard.
@@ -81,6 +85,13 @@ struct GlobeKeyTutorialPage: View {
                     .padding(.vertical, 14)
                     .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .bottom)))
             }
+
+            // Skip, the step's only way out without a dictation (#700). The page has no
+            // button, so it sits alone in the row other steps keep under theirs, at the
+            // same place. With a keyboard up it follows the page's bottom edge, between the
+            // banner and the keyboard: it never goes under the keyboard.
+            OnboardingSkipRow()
+                .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
         }
         .animation(.easeInOut(duration: 0.3), value: stage)
         .onChange(of: textFieldContent) { newValue in
@@ -112,6 +123,12 @@ struct GlobeKeyTutorialPage: View {
     /// WHY frame minHeight + maxHeight .infinity: the field takes the height the hint
     /// leaves it, which is everything above the keyboard once one is up. The UITextView
     /// scrolls internally if the dictation is longer than that.
+    ///
+    /// WHY 60 PT AT LEAST (#700): with the Skip row now at the bottom of the page, the
+    /// title, the field at its old 88 pt minimum and the drawn card overflowed a 667 pt
+    /// screen (iPhone SE) by about 26 pt, which pushed the progress bar under the status
+    /// bar and Skip off the screen. Before a keyboard is up the field only holds its
+    /// one-line placeholder, so it gives up the height rather than the drawing.
     private var field: some View {
         KeyboardDetectingTextField(
             text: $textFieldContent,
@@ -130,7 +147,7 @@ struct GlobeKeyTutorialPage: View {
             }
         )
         .accessibilityIdentifier("onboarding.firstDictation.field")
-        .frame(minHeight: 88, maxHeight: .infinity)
+        .frame(minHeight: 60, maxHeight: .infinity)
         .padding(16)
         .onboardingCard(cornerRadius: 20)
         .overlay {
@@ -351,10 +368,14 @@ private struct GlobeLongPressCard: View {
                 }
                 finger
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            // `minHeight: 0` lets the drawing be cut at its top when the card shrinks.
+            .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .bottom)
         }
-        // Sized so the page fits a 667 pt screen (iPhone SE) with the title and the field.
-        .frame(height: 284)
+        // Sized so the page fits a 667 pt screen (iPhone SE) with the title, the field and
+        // Skip. At a large text size the card gives up height instead (#700): the drawing is
+        // anchored at its bottom (the globe) and loses its top, but Skip, the step's only way
+        // out, stays on screen.
+        .frame(maxHeight: 284)
         .onboardingCard()
         .clipShape(RoundedRectangle(cornerRadius: OnboardingMetrics.cardCornerRadius, style: .continuous))
         .animation(.easeInOut(duration: 0.3), value: phase)

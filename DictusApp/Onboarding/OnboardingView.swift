@@ -84,14 +84,13 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // The shell's top row (#675): progress bar and Skip. Outside the sliding
-                // page so it stays put while the pages change under it, and only its
-                // segments animate.
+                // The shell's top row (#675, #700): back chevron and progress bar. Outside
+                // the sliding page so it stays put while the pages change under it, and
+                // only its segments animate.
                 OnboardingTopBar(
                     step: step,
                     deviceCanRunSmartModes: deviceCanRunSmartModes,
-                    onBack: step.stepBack != nil ? goBack : nil,
-                    onSkip: step.isSkippable ? skip : nil
+                    onBack: step.stepBack != nil ? goBack : nil
                 )
                     .padding(.top, OnboardingMetrics.topBarTopPadding)
 
@@ -140,6 +139,9 @@ struct OnboardingView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // The Skip under the primary button (#700), drawn by the page's shell
+                // (`OnboardingSkipRow`) on the steps that offer it.
+                .environment(\.onboardingSkip, step.isSkippable ? OnboardingSkipAction(perform: skip) : nil)
                 // Slide transition: new page slides in from trailing edge,
                 // old page slides out to leading edge — standard forward navigation feel.
                 // Going back (#700) runs it the other way round.
@@ -162,7 +164,8 @@ struct OnboardingView: View {
 
     // MARK: - Skip
 
-    /// The shell's Skip, on the steps that offer it (`OnboardingStep.isSkippable`).
+    /// The shell's Skip, under the primary button on the steps that offer it
+    /// (`OnboardingStep.isSkippable`, `OnboardingSkipRow`).
     ///
     /// - The Smart Modes scene: jumps the whole scene sequence, the pick inside it included
     ///   (#679, #649 decision 8). Nothing is written, so the fan keeps the seed.

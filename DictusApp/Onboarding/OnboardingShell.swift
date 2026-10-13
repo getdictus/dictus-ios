@@ -28,8 +28,9 @@ enum OnboardingMetrics {
     static let buttonBottomPadding: CGFloat = 8
     /// Corner radius of the white cards.
     static let cardCornerRadius: CGFloat = 24
-    /// Height of the top row (progress bar and Skip), kept on steps without a bar so the
-    /// content below does not shift when the bar appears.
+    /// Height of the top row (back chevron and progress bar), kept on steps without a bar
+    /// so the content below does not shift when the bar appears. Also the width of each of
+    /// the row's two side slots (#700).
     static let topBarHeight: CGFloat = 32
     /// Gap between the safe area and the top row.
     static let topBarTopPadding: CGFloat = 8
@@ -37,9 +38,8 @@ enum OnboardingMetrics {
     /// same height empty in the app, where there is no bar, so its ring sits at the same y
     /// in the onboarding and in the app (#708).
     static let topRowHeight: CGFloat = topBarTopPadding + topBarHeight
-    /// The font of the top row's Skip, which also sizes both of the row's side slots
-    /// (`OnboardingTopBarSlot`).
-    static let skipFont: Font = .body
+    /// Gap between the primary button and the Skip row under it (#700).
+    static let skipRowSpacing: CGFloat = 12
 }
 
 // MARK: - Progress bar
@@ -88,29 +88,25 @@ struct OnboardingProgressBar: View {
     private static let remaining = Color(light: Color(hex: 0xE2E2E8), dark: Color(hex: 0x232D40))
 }
 
-/// The row above every page: the back chevron where the step has one (#700), the
-/// progress bar, and the discreet Skip where the step allows it (#675).
-///
-/// WHY THE SHELL DRAWS SKIP AND BACK, NOT THE PAGE: each slot sits at the same place on
-/// every step that has it, and stays put while the pages slide.
+/// The row above every page: the back chevron where the step has one (#700) and the
+/// progress bar.
 ///
 /// WHY TWO SLOTS ON EVERY STEP, OF THE SAME WIDTH (#700, decided after the device test of
-/// the back chevron): the bar used to take whatever width the controls left, so it
-/// shrank and moved right when the chevron appeared, and left when Skip did. Like an iOS
-/// navigation bar, the row now always reserves a leading and a trailing slot, empty when
-/// the step has no control there, and both are as wide as each other: the bar is centred
-/// and has the same frame on every step. Nothing moves; only the segments' colours change.
+/// the back chevron): the bar used to take whatever width the controls left, so it shrank
+/// and moved when the chevron or Skip appeared. Like an iOS navigation bar, the row now
+/// reserves a leading and a trailing slot of the chevron's width on every step, empty when
+/// there is nothing to put in them, so the bar is centred and has the same frame on every
+/// step. Skip left this row for `OnboardingSkipRow`, under the primary button: with it
+/// gone, the trailing slot only balances the leading one.
 struct OnboardingTopBar: View {
     let step: OnboardingStep
     let deviceCanRunSmartModes: Bool
     /// nil when the step has no back control (`OnboardingStep.stepBack`).
     let onBack: (() -> Void)?
-    /// nil when the step has no Skip.
-    let onSkip: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 16) {
-            OnboardingTopBarSlot(alignment: .leading) {
+            Group {
                 if let onBack {
                     // A standard iOS back chevron (#700), leading-aligned in its slot so it
                     // lines up with the page's title.
@@ -129,71 +125,115 @@ struct OnboardingTopBar: View {
                     }
                     .accessibilityLabel(Text("Back"))
                     .accessibilityIdentifier("onboarding.back")
+                } else {
+                    Color.clear
                 }
             }
+            .frame(width: OnboardingMetrics.topBarHeight)
             if step.showsProgress {
                 OnboardingProgressBar(step: step, deviceCanRunSmartModes: deviceCanRunSmartModes)
             } else {
                 Spacer()
             }
-            OnboardingTopBarSlot(alignment: .trailing) {
-                if let onSkip {
-                    Button(action: onSkip) {
-                        Text("Skip")
-                            .font(OnboardingMetrics.skipFont)
-                            .lineLimit(1)
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityIdentifier("onboarding.skip")
-                }
-            }
+            Color.clear
+                .frame(width: OnboardingMetrics.topBarHeight)
         }
         .frame(height: OnboardingMetrics.topBarHeight)
         .padding(.horizontal, OnboardingMetrics.horizontalPadding)
     }
 }
 
-/// One side slot of `OnboardingTopBar`, the same width on both sides and on every step.
+// MARK: - Skip row
+
+/// What the Skip link under the primary button does, set by `OnboardingView` on the step
+/// that offers it (`OnboardingStep.isSkippable`), nil elsewhere.
 ///
-/// WHY SIZED BY A HIDDEN "Skip": Skip is the wider control, and its width depends on the
-/// language ("Skip", "Passer") and on the text size. Both slots lay out the same hidden
-/// label in the same font, so they come out equal in every language and at every Dynamic
-/// Type size, with no width in points to keep up to date. The chevron's 32 pt is the floor,
-/// for a language whose word would be narrower than the chevron. The hidden views are
-/// invisible and not in the accessibility tree; an empty slot is just space.
-private struct OnboardingTopBarSlot<Control: View>: View {
-    let alignment: Alignment
-    @ViewBuilder let control: Control
+/// WHY THE ENVIRONMENT: the action belongs to the flow (it decides where Skip lands), while
+/// the row is drawn by the page's shell, several views down. Passing it through every
+/// page's initializer would make each page carry a parameter only the shell reads.
+struct OnboardingSkipAction {
+    let perform: () -> Void
+}
+
+private struct OnboardingSkipActionKey: EnvironmentKey {
+    static let defaultValue: OnboardingSkipAction? = nil
+}
+
+extension EnvironmentValues {
+    var onboardingSkip: OnboardingSkipAction? {
+        get { self[OnboardingSkipActionKey.self] }
+        set { self[OnboardingSkipActionKey.self] = newValue }
+    }
+}
+
+/// The row under the primary button: the discreet Skip, centred, on the steps that offer
+/// it, and the same row left empty on every other step (#700).
+///
+/// WHY RESERVED ON EVERY STEP: the row takes the same height whether Skip is there or not,
+/// so the primary button sits at the same height on every step. An empty row is a hidden
+/// label: invisible, out of the accessibility tree, and as tall as the link would be at the
+/// current text size.
+///
+/// WHY `.footnote` IN GREY: the bottom block's other small print (*Nothing you type leaves
+/// your iPhone*) is footnote secondary, and Skip is the least important thing on the step.
+/// It is also the smallest row that still reads: about 16 pt at the default size, where
+/// `.body` would take 21.
+///
+/// WHY THE TAP AREA REACHES PAST THE ROW: the label is about 16 pt high, short of the
+/// 44 pt minimum. The area grows by the 12 pt gap above (up to the button's edge, never
+/// over it) and 16 pt below, into the bottom padding, without making the row any taller.
+struct OnboardingSkipRow: View {
+    @Environment(\.onboardingSkip) private var skip
 
     var body: some View {
-        ZStack(alignment: alignment) {
+        ZStack {
             Text("Skip")
-                .font(OnboardingMetrics.skipFont)
+                .font(.footnote)
                 .lineLimit(1)
                 .hidden()
                 .accessibilityHidden(true)
-            Color.clear
-                .frame(width: OnboardingMetrics.topBarHeight, height: 1)
-                .accessibilityHidden(true)
-            control
+            if let skip {
+                Button(action: skip.perform) {
+                    Text("Skip")
+                        .font(.footnote)
+                        .lineLimit(1)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 16)
+                        .padding(.top, OnboardingMetrics.skipRowSpacing)
+                        .padding(.bottom, 16)
+                        .contentShape(Rectangle())
+                        .padding(.horizontal, -16)
+                        .padding(.top, -OnboardingMetrics.skipRowSpacing)
+                        .padding(.bottom, -16)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("onboarding.skip")
+            }
         }
-        // Never squeezed by the bar: the slot keeps the width it measured.
-        .fixedSize(horizontal: true, vertical: false)
+        .frame(maxWidth: .infinity)
     }
 }
 
 // MARK: - Page layout
 
 /// A page of the shell: large left-aligned title and subtitle, the page's content, then
-/// an optional footnote and the buttons pinned to the bottom (#675).
+/// an optional footnote, the buttons pinned to the bottom, and the Skip row under them
+/// (#675, #700).
 ///
 /// WHY THE CONTENT SCROLLS: the mock-ups are drawn at 402 × 874 pt. On a 667 pt screen
 /// (iPhone SE, every iPad in compatibility mode), the language and keyboard pages would
 /// clip; a scroll view that only bounces when it overflows keeps the button reachable
 /// and costs nothing where everything fits.
+///
+/// WHY A PAGE CAN OPT OUT (`scrolls: false`, #700): a scene whose subject sits at the
+/// bottom of its drawing (the mic of the Smart Modes scene) loses that subject under the
+/// fold on a short screen. Such a page gets the height left under the title instead, and
+/// fits its drawing into it (`OnboardingScenePage`).
 struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
     let title: Text
     let subtitle: Text?
+    /// False for a page whose content fits itself into the height left under the title.
+    var scrolls = true
     @ViewBuilder let titleAccessory: TitleAccessory
     @ViewBuilder let content: Content
     @ViewBuilder let bottom: Bottom
@@ -203,12 +243,14 @@ struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
     init(
         title: Text,
         subtitle: Text? = nil,
+        scrolls: Bool = true,
         @ViewBuilder titleAccessory: () -> TitleAccessory,
         @ViewBuilder content: () -> Content,
         @ViewBuilder bottom: () -> Bottom
     ) {
         self.title = title
         self.subtitle = subtitle
+        self.scrolls = scrolls
         self.titleAccessory = titleAccessory()
         self.content = content()
         self.bottom = bottom()
@@ -216,25 +258,37 @@ struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    OnboardingHeader(title: title, subtitle: subtitle) { titleAccessory }
-                        .padding(.top, OnboardingMetrics.titleTopPadding)
-                        .padding(.bottom, 24)
-                    content
+            if scrolls {
+                ScrollView {
+                    page
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-                .padding(.bottom, 16)
+                .scrollBounceBehavior(.basedOnSize)
+            } else {
+                page
+                    .frame(maxHeight: .infinity, alignment: .top)
             }
-            .scrollBounceBehavior(.basedOnSize)
 
             VStack(spacing: 12) {
                 bottom
+                OnboardingSkipRow()
             }
             .padding(.horizontal, OnboardingMetrics.horizontalPadding)
             .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
         }
+    }
+
+    /// The title, then the content: in the scroll view, or in the height left above the
+    /// buttons when the page does not scroll.
+    private var page: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeader(title: title, subtitle: subtitle) { titleAccessory }
+                .padding(.top, OnboardingMetrics.titleTopPadding)
+                .padding(.bottom, 24)
+            content
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+        .padding(.bottom, 16)
     }
 }
 
@@ -243,10 +297,18 @@ extension OnboardingPage where TitleAccessory == EmptyView {
     init(
         title: Text,
         subtitle: Text? = nil,
+        scrolls: Bool = true,
         @ViewBuilder content: () -> Content,
         @ViewBuilder bottom: () -> Bottom
     ) {
-        self.init(title: title, subtitle: subtitle, titleAccessory: { EmptyView() }, content: content, bottom: bottom)
+        self.init(
+            title: title,
+            subtitle: subtitle,
+            scrolls: scrolls,
+            titleAccessory: { EmptyView() },
+            content: content,
+            bottom: bottom
+        )
     }
 }
 
@@ -346,6 +408,7 @@ struct OnboardingCenteredPage<Illustration: View, Bottom: View>: View {
 
             VStack(spacing: 12) {
                 bottom
+                OnboardingSkipRow()
             }
             .padding(.horizontal, OnboardingMetrics.horizontalPadding)
             .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
