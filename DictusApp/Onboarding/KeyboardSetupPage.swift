@@ -59,12 +59,6 @@ struct KeyboardSetupPage: View {
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
-                    // The Picture in Picture source, behind the drawn phone that covers it.
-                    .background {
-                        if checklist.usesPictureInPicture {
-                            ChecklistPictureSource(layer: checklist.displayLayer)
-                        }
-                    }
 
                 // The fallback only: floats over the cropped bottom of the drawn phone,
                 // trailing, as the window floats over Settings in mock-up 03b.
@@ -101,6 +95,8 @@ struct KeyboardSetupPage: View {
                     .transition(.opacity)
             }
         }
+        // The Picture in Picture source, covered, where the window stops into it.
+        .checklistPictureSource(checklist)
         .onAppear {
             checkKeyboardInstalled()
             startToggleAnimation()

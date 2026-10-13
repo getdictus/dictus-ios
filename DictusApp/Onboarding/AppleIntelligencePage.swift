@@ -97,6 +97,10 @@ struct AppleIntelligencePage: View {
                 settingUpPage
             }
         }
+        // The Picture in Picture source, covered, where the window stops into it. On the
+        // page rather than on the instructions, so it stays in the window when a return
+        // switches to the setting-up screen while the window is stopping.
+        .checklistPictureSource(checklist)
         .onAppear {
             let engineState = PolishAvailability.state
             logCheck(trigger: "appear", engineState: engineState)
@@ -148,12 +152,6 @@ struct AppleIntelligencePage: View {
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
-                    // The Picture in Picture source, behind the drawn phone that covers it.
-                    .background {
-                        if checklist.usesPictureInPicture {
-                            ChecklistPictureSource(layer: checklist.displayLayer)
-                        }
-                    }
 
                 if state.phase == .ready {
                     readyLabel
