@@ -18,15 +18,34 @@ import DictusCore
 ///
 /// WHY BLUE: Smart Modes are the app's accent here, never the purple `dictusSmartMode`
 /// token (#649 mock-ups).
+///
+/// WHY A DRAFT (#725): the shell's back control returns here from the voice notes scene,
+/// and to the Smart Modes scene from here, and this page is rebuilt on every visit. Every
+/// change is mirrored into `draft`, which `OnboardingView` keeps, so the page reopens on
+/// the user's selection instead of empty.
 struct SmartModePickPage: View {
     /// The flow's model manager, read for the download pill at the bottom
     /// (`OnboardingDownloadPill`).
     @ObservedObject var modelManager: ModelManager
     /// The model the onboarding installs.
     let modelIdentifier: String
+    /// The pick as last left on this page, nil before any.
+    @Binding var draft: SmartModePick?
     let onContinue: () -> Void
 
-    @State private var pick = SmartModePick()
+    @State private var pick: SmartModePick
+
+    init(modelManager: ModelManager,
+         modelIdentifier: String,
+         draft: Binding<SmartModePick?>,
+         onContinue: @escaping () -> Void) {
+        self.modelManager = modelManager
+        self.modelIdentifier = modelIdentifier
+        _draft = draft
+        self.onContinue = onContinue
+        // A first visit opens empty (#677): every mode in the fan is one the user asked for.
+        _pick = State(initialValue: draft.wrappedValue ?? SmartModePick())
+    }
 
     /// The language the user said they speak on the language screen, which removes its
     /// own translation target. Read once: it was written two steps ago and does not change
@@ -54,6 +73,9 @@ struct SmartModePickPage: View {
             OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
             OnboardingPrimaryButton(Text("Continue"), isEnabled: pick.canContinue, action: commit)
                 .accessibilityIdentifier("onboarding.primary")
+        }
+        .onChange(of: pick) { _, newPick in
+            draft = newPick
         }
     }
 

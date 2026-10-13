@@ -55,6 +55,23 @@ public struct SmartModePick: Equatable, Sendable {
         self.selected = Array(selected.prefix(Self.maximum))
     }
 
+    /// The pick as Continue last wrote it, for the step returned to by going back (#725)
+    /// when the flow no longer holds it in memory: after a kill on a later scene.
+    ///
+    /// Only the modes this step offers are kept, in their stored order: the list may come
+    /// from an earlier run, or from the app's mode list, with modes the pick cannot draw
+    /// (a translation into the language the user speaks). A user who never chose gets the
+    /// empty pick the step opens with, never the seed.
+    ///
+    /// - Parameter spokenLanguage: as for `translateTargets(spokenLanguage:)`.
+    public static func committed(spokenLanguage: String?) -> SmartModePick {
+        let offered = Set(cardModes.map(\.id) + translateTargets(spokenLanguage: spokenLanguage).map {
+            SmartModeCatalogue.translateIdentifier(target: $0)
+        })
+        let stored = SmartModeStore.storedPinnedIdentifiers ?? []
+        return SmartModePick(selected: stored.filter { offered.contains($0) })
+    }
+
     /// Whether `identifier` is picked.
     public func isSelected(_ identifier: String) -> Bool {
         selected.contains(identifier)

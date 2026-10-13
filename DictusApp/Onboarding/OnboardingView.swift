@@ -73,6 +73,14 @@ struct OnboardingView: View {
     /// because confirming is what applies the setup and starts the download.
     @State private var languageDraft: LanguageSetup?
 
+    /// The Smart Mode pick as the user left it (#725), so going back to the pick, or
+    /// coming forward to it again, shows that selection instead of an empty pick. nil until
+    /// the user has touched it.
+    ///
+    /// WHY HERE: like `languageDraft`, the page goes with its state on every step change.
+    /// After a kill on a later scene, `goBack` fills it from what the pick's Continue wrote.
+    @State private var smartModePickDraft: SmartModePick?
+
     /// Whether the last step change went back (#700, #725), which turns the slide around:
     /// the step gone back to comes in from the leading edge and the one left goes out by the
     /// trailing one.
@@ -125,6 +133,7 @@ struct OnboardingView: View {
                         SmartModePickPage(
                             modelManager: modelManager,
                             modelIdentifier: onboardingModel,
+                            draft: $smartModePickDraft,
                             onContinue: advance
                         )
                     case .voiceNotesScene:
@@ -303,6 +312,13 @@ struct OnboardingView: View {
         let from = step
         guard let back = OnboardingStep.goBack(from: from) else { return }
         PersistentLog.log(.onboardingWentBack(from: from.rawValue, to: back.rawValue))
+        if back == .smartModePick, smartModePickDraft == nil {
+            // The pick was left by its Continue, which wrote the selection, but the draft
+            // went with an app kill since. Reopen on what was written.
+            smartModePickDraft = SmartModePick.committed(
+                spokenLanguage: AppGroup.defaults.string(forKey: SharedKeys.spokenLanguage)
+            )
+        }
         show(back, goingBack: true)
     }
 
