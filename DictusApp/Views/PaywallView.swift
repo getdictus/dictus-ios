@@ -36,6 +36,13 @@ struct PaywallView: View {
     /// Set by "See all plans": the monthly row joins the two in view (#724).
     @State private var showsAllPlans = false
 
+    /// The end-of-trial paywall's monthly offer, on screen (#724 decision 2).
+    @State private var showsMonthlyOffer = false
+
+    /// Whether this presentation already made that offer. Once: closing the offer
+    /// closes everything.
+    @State private var monthlyOfferMade = false
+
     /// Whether the user can still claim the yearly intro offer (7-day trial).
     /// StoreKit grants it once per Apple ID. Defaults to false so the CTA never
     /// over-promises.
@@ -207,6 +214,9 @@ struct PaywallView: View {
                 withAnimation(.easeOut(duration: 0.25)) {
                     showPurchaseSuccess = true
                 }
+                // Bought from the monthly offer: it steps aside for the thank-you
+                // screen rather than closing the paywall with it.
+                showsMonthlyOffer = false
             }
         }
         .overlay {
@@ -215,11 +225,20 @@ struct PaywallView: View {
                     .transition(.opacity)
             }
         }
-        .alert("Purchase Error", isPresented: showErrorAlert) {
+        .alert("Purchase Error", isPresented: showsErrorAlert(fromOffer: false)) {
             Button("OK") { subscriptionManager.resetState() }
         } message: {
             Text(errorMessage)
         }
+        // Closing it any way but a purchase closes the paywall too (#724): the user
+        // has now declined twice, and a third screen would be the nag the decision
+        // rules out. A purchase leaves `showPurchaseSuccess` set, and the thank-you
+        // screen underneath takes over.
+        .sheet(isPresented: $showsMonthlyOffer, onDismiss: {
+            if !showPurchaseSuccess { dismiss() }
+        }, content: {
+            monthlyOfferSheet
+        })
     }
 
     // MARK: - Hub state (#216)
@@ -340,7 +359,7 @@ struct PaywallView: View {
         ToolbarItem(placement: .topBarLeading) {
             if !showPurchaseSuccess {
                 Button {
-                    dismiss()
+                    close()
                 } label: {
                     Image(systemName: "xmark")
                         .font(.body.weight(.semibold))
@@ -786,7 +805,13 @@ struct PaywallView: View {
     /// out per branch: the period belongs to the price, so one localized
     /// sentence serves every plan and there is no branch left to fall through.
     private var ctaLabel: Text {
-        guard let product = selectedProduct else { return Text(verbatim: "...") }
+        ctaLabel(for: selectedProduct)
+    }
+
+    /// The CTA sentence for any plan, so the monthly offer (#724) reads exactly like
+    /// the paywall's own button would for the same plan.
+    private func ctaLabel(for product: Product?) -> Text {
+        guard let product else { return Text(verbatim: "...") }
         let price = priceLabel(for: product)
 
         // No `subscription` means a non-consumable, and "Subscribe" would
@@ -834,6 +859,49 @@ struct PaywallView: View {
         }
     }
 
+    // MARK: - Monthly offer on close (#724)
+
+    /// Every way out of the paywall the user can take: the cross and "Continue for
+    /// free". On the end-of-trial paywall, the first one shows the monthly offer
+    /// instead of closing (`ProPaywallPlans.offersMonthlyOnClose`); everywhere else,
+    /// and the second time, it closes.
+    private func close() {
+        guard ProPaywallPlans.offersMonthlyOnClose(
+            isEndOfTrialPaywall: framing == .trialEnded,
+            isPaid: proStatus.isPaid,
+            monthlyLoaded: subscriptionManager.monthlyProduct != nil,
+            alreadyOffered: monthlyOfferMade
+        ) else {
+            dismiss()
+            return
+        }
+        monthlyOfferMade = true
+        showsMonthlyOffer = true
+    }
+
+    /// The offer's content. Its price is the monthly product's `displayPrice`, through
+    /// the same CTA sentence as the paywall.
+    @ViewBuilder
+    private var monthlyOfferSheet: some View {
+        if let monthly = subscriptionManager.monthlyProduct {
+            MonthlyPlanOfferSheet(
+                ctaLabel: ctaLabel(for: monthly),
+                isPurchasing: subscriptionManager.purchaseState == .purchasing,
+                buy: { Task { await subscriptionManager.purchase(monthly) } },
+                decline: { showsMonthlyOffer = false }
+            )
+            .presentationDetents([.medium, .large])
+            // A swipe mid-purchase would close the paywall under a payment still in
+            // flight, and its thank-you screen with it.
+            .interactiveDismissDisabled(subscriptionManager.purchaseState == .purchasing)
+            .alert("Purchase Error", isPresented: showsErrorAlert(fromOffer: true)) {
+                Button("OK") { subscriptionManager.resetState() }
+            } message: {
+                Text(errorMessage)
+            }
+        }
+    }
+
     // MARK: - Continue for free
 
     /// The end-of-trial paywall's way out, as obvious as the way in (#593).
@@ -844,7 +912,7 @@ struct PaywallView: View {
     /// and nothing the user saved is deleted.
     private var continueForFreeButton: some View {
         Button {
-            dismiss()
+            close()
         } label: {
             Text("Continue for free")
                 .font(.dictusSubheading)
@@ -859,12 +927,13 @@ struct PaywallView: View {
     // MARK: - Bottom Links
 
     // Apple requires functional Terms of Use and Privacy Policy links for
-    // auto-renewable subscriptions (guideline 3.1.2). Force unwrap is safe:
+    // auto-renewable subscriptions (guideline 3.1.2). Not private: the monthly
+    // offer sheet (#724) shows them too. Force unwrap is safe:
     // compile-time constant URLs that cannot be malformed.
     // swiftlint:disable:next force_unwrapping
-    private static let termsURL = URL(string: "https://getdictus.com/terms")!
+    static let termsURL = URL(string: "https://getdictus.com/terms")!
     // swiftlint:disable:next force_unwrapping
-    private static let privacyURL = URL(string: "https://getdictus.com/privacy")!
+    static let privacyURL = URL(string: "https://getdictus.com/privacy")!
 
     private var bottomLinks: some View {
         VStack(spacing: 8) {
@@ -968,10 +1037,16 @@ struct PaywallView: View {
 
     // MARK: - Error Handling
 
-    private var showErrorAlert: Binding<Bool> {
+    /// Whether a purchase error is up, on the screen that is in front.
+    ///
+    /// WHY two bindings over one state: a purchase can fail from the monthly offer
+    /// (#724), and an alert asked of a view that is already presenting a sheet is
+    /// dropped by UIKit. So the error shows on the offer while it is up, and on the
+    /// paywall otherwise.
+    private func showsErrorAlert(fromOffer: Bool) -> Binding<Bool> {
         Binding(
             get: {
-                if case .failed = subscriptionManager.purchaseState { return true }
+                if case .failed = subscriptionManager.purchaseState { return showsMonthlyOffer == fromOffer }
                 return false
             },
             set: { _ in }
