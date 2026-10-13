@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Free, open-source iOS keyboard for voice dictation — 100% on-device.</strong><br />
-  Speak in any app. No cloud, no account, no subscription.
+  Speak in any app. No cloud, no account. Dictation is free, Dictus Pro is optional.
 </p>
 
 <p align="center">
@@ -27,12 +27,12 @@
 
 ---
 
-Dictus is a free, open-source iOS keyboard that adds voice dictation to any app. All speech recognition runs on-device via [WhisperKit](https://github.com/argmaxinc/WhisperKit) (Apple CoreML) — no server, no account, no subscription. French-first, with English and German support.
+Dictus is a free, open-source iOS keyboard that adds voice dictation to any app. All speech recognition runs on-device via [WhisperKit](https://github.com/argmaxinc/WhisperKit) (Apple CoreML), with no server and no account. Dictation is free; an optional [Dictus Pro](#dictus-pro) adds Smart Modes, History, Vocabulary and voice notes. French-first, with English and German support.
 
 ## Why Dictus?
 
 - 🔒 **100% on-device** — your voice never leaves the iPhone. No cloud, no telemetry, no account.
-- 🆓 **Free & open source** — MIT licensed, no subscription, fully auditable code.
+- 🆓 **Free dictation, open source**: MIT licensed, fully auditable code. [Dictus Pro](#dictus-pro) is optional.
 - ⌨️ **Works in every app** — system-wide keyboard with AZERTY / QWERTY / QWERTZ layouts.
 - 🇫🇷 **French-first** — built for FR, with EN & DE; multiple Whisper sizes (tiny / base / small).
 - ✨ **Native iOS feel** — iOS 26 Liquid Glass design.
@@ -41,7 +41,7 @@ Dictus is a free, open-source iOS keyboard that adds voice dictation to any app.
 
 | Feature | **Dictus** | Apple Dictation | Wispr Flow | SuperWhisper | MacWhisper |
 | --- | :---: | :---: | :---: | :---: | :---: |
-| Price | **Free** | Built-in | Free / $15/mo | Free / $8.49/mo | Free / $6.99/mo |
+| Price | **Free** dictation + optional Pro | Built-in | Free / $15/mo | Free / $8.49/mo | Free / $6.99/mo |
 | 100% offline | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ |
 | Privacy-first | ✅ | ⚠️ | ❌ | ⚠️ | ⚠️ |
 | Open source | ✅ | ❌ | ❌ | ❌ | ❌ |
@@ -145,7 +145,7 @@ Dictus collects no user data. All speech processing happens on your device. See 
 
 ## Support the project
 
-Dictus is free and will stay free. If it helps you every day, consider [supporting development](https://getdictus.com/donate) — it directly funds new features and platform support.
+Dictation in Dictus is free and the code is open source. If it helps you every day, there are two ways to support it: [Dictus Pro](#dictus-pro) in the iOS app, or a [donation](https://getdictus.com/donate). Donations fund development across Dictus, including [Dictus Desktop](https://github.com/getdictus/dictus-desktop), which is free.
 
 ## Community
 
