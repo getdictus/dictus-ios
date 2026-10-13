@@ -52,6 +52,9 @@ struct KeyboardSetupPage: View {
     /// in Picture over Settings (#682).
     @StateObject private var checklist = KeyboardSetupChecklistPlayer()
 
+    /// Whether the "Why Full Access?" sheet is up (#704).
+    @State private var showsFullAccessExplainer = false
+
     var body: some View {
         OnboardingPage(
             title: Text("Turn on the keyboard"),
@@ -82,6 +85,8 @@ struct KeyboardSetupPage: View {
                 }
             }
         } bottom: {
+            fullAccessWarning
+
             Text("Nothing you type leaves your iPhone.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
@@ -100,6 +105,10 @@ struct KeyboardSetupPage: View {
                     .accessibilityIdentifier("onboarding.openSettings")
                     .transition(.opacity)
             }
+        }
+        .sheet(isPresented: $showsFullAccessExplainer) {
+            FullAccessExplainerPage { showsFullAccessExplainer = false }
+                .presentationDragIndicator(.visible)
         }
         .onAppear {
             checkKeyboardInstalled()
@@ -243,6 +252,51 @@ struct KeyboardSetupPage: View {
         }
     }
 
+    // MARK: - Full Access warning (#704)
+
+    /// Above the button: Apple's alert is coming, and it is the same for every keyboard.
+    /// Then the link to the sheet that says what Dictus does with Full Access.
+    ///
+    /// WHY THE WARNING NEEDS NO TAP: the user who will be scared by the alert does not know
+    /// it is coming, so would never tap a link to find out. One line read on the way to
+    /// Settings is enough to turn the surprise into something expected. The reasons sit
+    /// behind the link, for the user who wants them (amended brief, 2026-10-13).
+    ///
+    /// WHY PINNED ABOVE THE BUTTON AND NOT IN THE DRAWING: the drawing is iOS's Settings
+    /// page, and Settings has no such link. It replaces the drawing's old caption, "Full
+    /// Access is for the keyboard's microphone", which the sheet now says properly. Pinned
+    /// with the button, the line is on screen on every iPhone size and on both checklist
+    /// paths; under the drawing, the fallback card (#682) pushed it below the fold.
+    ///
+    /// WHY THE LINK IS HIDDEN BEFORE THE A14 (#635): the sheet's first point says that
+    /// without Full Access the keyboard types but cannot dictate, as if Full Access were
+    /// what makes it dictate. Such a keyboard cannot dictate at all, and the notice below
+    /// says so. The warning stays: Apple shows the alert there too, it is just as true.
+    private var fullAccessWarning: some View {
+        VStack(spacing: 4) {
+            Text("At step 3, Apple will show an alert, the same for every keyboard.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if device.supportsKeyboardDictation {
+                Button(action: openFullAccessExplainer) {
+                    Text("Why Full Access?")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Color.dictusAccent)
+                }
+                .accessibilityIdentifier("onboarding.fullAccess.why")
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func openFullAccessExplainer() {
+        PersistentLog.log(.onboardingFullAccessExplainerOpened)
+        showsFullAccessExplainer = true
+    }
+
     // MARK: - Pre-A14 notice (#635)
 
     /// Tells a pre-A14 user, before they finish onboarding, that the keyboard they are
@@ -353,16 +407,6 @@ struct KeyboardSetupPage: View {
                 }
             }
 
-            // Why Full Access is asked for. Only where it is true: a pre-A14 keyboard has
-            // no microphone (#635), and the notice below the drawing says so.
-            if device.supportsKeyboardDictation {
-                Text("Full Access is for the keyboard's microphone.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.leading, 4)
-                    .padding(.top, 8)
-            }
         }
         .font(.body)
         .padding(.horizontal, 18)

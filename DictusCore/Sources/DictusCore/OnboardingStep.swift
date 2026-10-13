@@ -303,6 +303,11 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// language screen (#649 PR A).
     public static let legacyMicrophoneRawValue = "microphone"
 
+    /// The raw value of the Full Access explainer while it was a step of its own, right
+    /// before the keyboard (#704, on test builds only). It is a sheet on the keyboard step
+    /// now, so a phone stored there resumes at the keyboard, where the sheet's link is.
+    public static let legacyFullAccessExplainerRawValue = "fullAccessExplainer"
+
     /// Where a step name written by an earlier build resumes, or nil for a name this build
     /// does not know.
     ///
@@ -310,9 +315,10 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// mean the same thing in the new order (what was done before them is still done
     /// before them, the microphone apart, and the microphone step is shown later). The one
     /// exception is the old microphone name: the user had confirmed the language and not
-    /// yet added the keyboard, so they resume at the keyboard.
+    /// yet added the keyboard, so they resume at the keyboard. The removed Full Access
+    /// explainer step (#704) sat at that same place and resumes there too.
     public static func resumed(fromStoredRawValue raw: String) -> OnboardingStep? {
-        if raw == legacyMicrophoneRawValue { return .keyboardSetup }
+        if raw == legacyMicrophoneRawValue || raw == legacyFullAccessExplainerRawValue { return .keyboardSetup }
         return OnboardingStep(rawValue: raw)
     }
 

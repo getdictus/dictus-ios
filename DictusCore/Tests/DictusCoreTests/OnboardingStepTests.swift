@@ -418,6 +418,16 @@ final class OnboardingStepTests: XCTestCase {
         XCTAssertNil(OnboardingStep.resumed(fromStoredRawValue: "polish"))
     }
 
+    func testTheRemovedFullAccessExplainerStepResumesAtTheKeyboard() {
+        // #704: a step on test builds only, now a sheet on the keyboard step.
+        defaults.set(OnboardingStep.legacyFullAccessExplainerRawValue, forKey: SharedKeys.onboardingStep)
+        XCTAssertEqual(OnboardingStep.current(), .keyboardSetup)
+        XCTAssertEqual(
+            defaults.string(forKey: SharedKeys.onboardingStep), "keyboardSetup",
+            "the old name is rewritten, so the migration does not run again"
+        )
+    }
+
     // MARK: - The old page index (before #649)
 
     func testLegacyIndexMapping() {
