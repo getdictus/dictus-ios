@@ -20,12 +20,12 @@ import Foundation
 ///
 /// THE ORDER (#675, #649 decisions 1 and 17): intro, language, keyboard in Settings, Apple
 /// Intelligence (#683, only when it is not ready), the Smart Modes scene (#679), the pick
-/// of three Smart Modes (#677), the wait for the model, the microphone, the first
-/// dictation, how to stop Dictus (#681), the completion screen. The microphone sits right
-/// before the first dictation because it is the first step that uses it, and its
-/// pre-permission screen keeps the system popup out of the recording. Steps the later #649
-/// sub-issues add (the feature scenes) slot in as new cases with new raw values; the
-/// existing raw values keep their meaning.
+/// of three Smart Modes (#677), the voice notes, vocabulary and history scenes (#680), the
+/// wait for the model, the microphone, the first dictation, how to stop Dictus (#681), the
+/// completion screen. The microphone sits right before the first dictation because it is
+/// the first step that uses it, and its pre-permission screen keeps the system popup out of
+/// the recording. Steps added later slot in as new cases with new raw values; the existing
+/// raw values keep their meaning.
 public enum OnboardingStep: String, CaseIterable, Sendable {
     /// The intro: the three-page carousel of looping scenes (#676, `OnboardingIntroScene`).
     /// Which page of it is on screen is not persisted: the carousel sets nothing up.
@@ -41,8 +41,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     case appleIntelligence
     /// The Smart Modes scene (#679, #649 decisions 8, 9 and 14): a looping drawing of the
     /// keyboard's long-press fan, with Next and a Skip that jumps the whole scene sequence.
-    /// The first of the feature scenes; the later ones (voice notes, vocabulary, history)
-    /// slot in after the pick. A Pro step.
+    /// The first of the feature scenes; the other three follow the pick (#680). A Pro step.
     case smartModesScene
     /// Choosing the three Smart Modes the keyboard's long-press fan holds (#677, #649
     /// decision 16). A Pro step: hidden on a device that can never run Smart Modes.
@@ -51,6 +50,16 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// the user has just seen what a mode does, so the choice means something. It still
     /// falls within the model download, which is what decision 16 asks of it.
     case smartModePick
+    /// The voice notes scene (#680, #649 decision 9.2): a voice message shared to Dictus,
+    /// its transcript inserted from the keyboard's reader, then Dictus added to the share
+    /// sheet's favourites, which no API does for the user. A Pro step.
+    case voiceNotesScene
+    /// The vocabulary scene (#680, decision 9.3): a term added to the real Vocabulary list,
+    /// with what Dictus writes instead. A Pro step.
+    case vocabularyScene
+    /// The history scene (#680, decision 9.4, #621): the real History sheet, searched for a
+    /// word from the search bar at its bottom. The last of the scene sequence. A Pro step.
+    case historyScene
     /// Shown only while the model is still downloading or compiling; skipped otherwise.
     case modelPreparation
     /// The pre-permission screen, then the system microphone prompt.
@@ -112,9 +121,15 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// reverse trial is withheld there (#593 decision 2): on such an iPhone Pro is History
     /// and Vocabulary only, and a step about Smart Modes would describe a feature the user
     /// cannot have. A capable iPhone with Apple Intelligence switched off still sees them.
+    ///
+    /// WHY THE VOICE NOTES, VOCABULARY AND HISTORY SCENES TOO (#680): those features run on
+    /// every iPhone, but they are Pro, and decision 2 also says no Pro promotion where no
+    /// trial starts (#593 acceptance: "no trial starts and no Pro promotion appears"). A
+    /// scene showing a feature the user would have to buy, on the one device the trial
+    /// skips, is that promotion.
     public var isProStep: Bool {
         switch self {
-        case .appleIntelligence, .smartModesScene, .smartModePick:
+        case .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene, .historyScene:
             return true
         case .welcome, .language, .keyboardSetup, .modelPreparation, .microphone, .firstDictation, .stopStandby,
              .completion:
@@ -123,7 +138,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     }
 
     /// Whether this step is part of the feature-scene sequence that the scenes' Skip
-    /// jumps as a whole (#649 decision 8).
+    /// jumps as a whole (#649 decision 8): the Smart Modes scene, the pick, then the voice
+    /// notes, vocabulary and history scenes (#680).
     ///
     /// WHY THE PICK IS PART OF IT: it sits inside the sequence (decision 9 as amended: the
     /// Smart Modes scene, the pick, then the other scenes), and it asks the user to choose
@@ -132,7 +148,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// writes nothing, so the fan keeps the seed, exactly as the pick's own Skip does.
     public var isInSceneSequence: Bool {
         switch self {
-        case .smartModesScene, .smartModePick:
+        case .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene, .historyScene:
             return true
         case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone, .firstDictation,
              .stopStandby, .completion:
@@ -175,7 +191,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .appleIntelligence, .modelPreparation, .microphone, .stopStandby:
             return true
-        case .welcome, .language, .keyboardSetup, .smartModesScene, .smartModePick, .firstDictation, .completion:
+        case .welcome, .language, .keyboardSetup, .smartModesScene, .smartModePick, .voiceNotesScene,
+             .vocabularyScene, .historyScene, .firstDictation, .completion:
             return false
         }
     }
@@ -211,9 +228,8 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         switch self {
         case .welcome, .completion:
             return false
-        case .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .modelPreparation,
-             .microphone,
-             .firstDictation, .stopStandby:
+        case .language, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene,
+             .vocabularyScene, .historyScene, .modelPreparation, .microphone, .firstDictation, .stopStandby:
             return true
         }
     }
@@ -239,10 +255,10 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
 
     /// Whether the shell offers the discreet Skip in the top-right slot.
     ///
-    /// - The Smart Modes scene: Skip jumps the whole scene sequence
-    ///   (`stepAfterSceneSequence`, #649 decision 8).
+    /// - The feature scenes (Smart Modes, voice notes, vocabulary, history): Skip jumps the
+    ///   whole scene sequence (`stepAfterSceneSequence`, #649 decision 8).
     /// - The Smart Mode pick: skipping it keeps the seed (`defaultPinnedIdentifiers`), so
-    ///   the fan is never left empty (#677).
+    ///   the fan is never left empty (#677). Inside the sequence, so it jumps it too.
     /// - The first dictation.
     ///
     /// Everything else sets up something the keyboard needs, and the completion screen is
@@ -251,7 +267,7 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// by its own *Later* button, drawn as large as the main one, not by this discreet slot.
     public var isSkippable: Bool {
         switch self {
-        case .smartModesScene, .smartModePick, .firstDictation:
+        case .smartModesScene, .smartModePick, .voiceNotesScene, .vocabularyScene, .historyScene, .firstDictation:
             return true
         case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
              .stopStandby, .completion:
