@@ -560,6 +560,42 @@ extension OnboardingPhoneCard where Header == EmptyView {
     }
 }
 
+// MARK: - Fit to height
+
+/// Shows `content` whole in the height it is given: at its natural size when that fits,
+/// scaled down uniformly, from its top centre, when it does not. Never clipped.
+///
+/// WHY (#680, Pierre's device test of 18dc4e99): a scene page used to scroll its card like
+/// any other page. While the model downloads, the download pill takes a row above *Next*,
+/// the scroll view gets shorter, and the bottom of the drawn iPhone went under the page's
+/// edge: on an iPhone 15 Pro Max the keyboard's globe row touched the card's edge and the
+/// phone's frame was gone. A picture of a phone must read as a whole phone, pill or no
+/// pill, on every screen, so the card shrinks instead.
+///
+/// WHY SCALE AND NOT RE-LAYOUT: the scenes are drawn at fixed point sizes and scaled as one
+/// picture (`SmartModesScene`); the card around them is drawn the same way. Scaling the
+/// card as a whole keeps the phone, its frame and the card's corners in proportion.
+struct OnboardingFitToHeight<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    /// The content's height at the full width, measured.
+    @State private var naturalHeight: CGFloat = 0
+
+    var body: some View {
+        GeometryReader { geometry in
+            let scale = naturalHeight > geometry.size.height && naturalHeight > 0
+                ? geometry.size.height / naturalHeight
+                : 1
+            content
+                .frame(width: geometry.size.width)
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { naturalHeight = $0 }
+                .scaleEffect(scale, anchor: .top)
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+        }
+    }
+}
+
 // MARK: - Drawn Settings pieces
 
 // The parts of a drawn iOS Settings page that more than one step draws: the keyboard step

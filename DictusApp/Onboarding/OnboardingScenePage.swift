@@ -12,7 +12,15 @@ import DictusCore
 ///
 /// Every scene of the sequence (Smart Modes, voice notes, vocabulary, history, #680) is
 /// this page with another title, line and scene.
+///
+/// WHY NOT `OnboardingPage` (#680, device test of 18dc4e99): that page scrolls, so when the
+/// download pill took its row the drawn iPhone ran under the page's edge. Here the card
+/// takes the height left between the header and the buttons, and shrinks to fit it
+/// (`OnboardingFitToHeight`), so the phone is always seen whole.
 struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
+    /// A small label above the title, nil for none: "Also in Pro" on the scenes after the
+    /// Smart Mode pick (#680), which leave Smart Modes for the other Pro features.
+    var eyebrow: Text?
     let title: Text
     let line: Text
     /// The end of the drawn iPhone the scene shows (`OnboardingPhoneCard`).
@@ -34,7 +42,8 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
 
     private typealias Phone = OnboardingPhoneMetrics
 
-    init(title: Text,
+    init(eyebrow: Text? = nil,
+         title: Text,
          line: Text,
          phoneEnd: OnboardingPhoneEnd = .bottom,
          loopSeconds: Double,
@@ -45,6 +54,7 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
          onNext: @escaping () -> Void,
          @ViewBuilder cardHeader: @escaping (Double) -> CardHeader,
          @ViewBuilder scene: @escaping (Double) -> Scene) {
+        self.eyebrow = eyebrow
         self.title = title
         self.line = line
         self.phoneEnd = phoneEnd
@@ -59,29 +69,55 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
     }
 
     var body: some View {
-        OnboardingPage(title: title, subtitle: line) {
-            // One player for the whole card, so the header above the phone and the scene
-            // inside it read the same clock.
-            AnimatedScenePlayer(
-                loopSeconds: loopSeconds,
-                startSeconds: startSeconds,
-                stillSeconds: stillSeconds
-            ) { time in
-                OnboardingPhoneCard(end: phoneEnd) {
-                    cardHeader(time)
-                } content: {
-                    scene(time)
-                        // The phone's screen: inside its outline, rounded like it at the
-                        // end the card shows, so the drawing never sits under the frame.
-                        .clipShape(screenShape)
-                        .padding(.horizontal, Phone.phoneFrameWidth)
-                        .padding(phoneEnd == .bottom ? .bottom : .top, Phone.phoneFrameWidth)
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 6) {
+                if let eyebrow {
+                    eyebrow
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.dictusAccent)
                 }
+                OnboardingHeader(title: title, subtitle: line)
             }
-        } bottom: {
-            OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
-            OnboardingPrimaryButton(Text("Next"), action: onNext)
-                .accessibilityIdentifier("onboarding.primary")
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, OnboardingMetrics.titleTopPadding)
+            .padding(.bottom, 24)
+            .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+
+            OnboardingFitToHeight {
+                card
+            }
+            .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+            .padding(.bottom, 16)
+
+            VStack(spacing: 12) {
+                OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
+                OnboardingPrimaryButton(Text("Next"), action: onNext)
+                    .accessibilityIdentifier("onboarding.primary")
+            }
+            .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+            .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
+        }
+    }
+
+    /// The drawn iPhone in its card, with the header above it.
+    private var card: some View {
+        // One player for the whole card, so the header above the phone and the scene
+        // inside it read the same clock.
+        AnimatedScenePlayer(
+            loopSeconds: loopSeconds,
+            startSeconds: startSeconds,
+            stillSeconds: stillSeconds
+        ) { time in
+            OnboardingPhoneCard(end: phoneEnd) {
+                cardHeader(time)
+            } content: {
+                scene(time)
+                    // The phone's screen: inside its outline, rounded like it at the
+                    // end the card shows, so the drawing never sits under the frame.
+                    .clipShape(screenShape)
+                    .padding(.horizontal, Phone.phoneFrameWidth)
+                    .padding(phoneEnd == .bottom ? .bottom : .top, Phone.phoneFrameWidth)
+            }
         }
     }
 
@@ -101,7 +137,8 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
 
 extension OnboardingScenePage where CardHeader == EmptyView {
     /// A scene with nothing above its phone, which is every scene but voice notes.
-    init(title: Text,
+    init(eyebrow: Text? = nil,
+         title: Text,
          line: Text,
          phoneEnd: OnboardingPhoneEnd = .bottom,
          loopSeconds: Double,
@@ -111,7 +148,7 @@ extension OnboardingScenePage where CardHeader == EmptyView {
          modelIdentifier: String,
          onNext: @escaping () -> Void,
          @ViewBuilder scene: @escaping (Double) -> Scene) {
-        self.init(title: title, line: line, phoneEnd: phoneEnd, loopSeconds: loopSeconds,
+        self.init(eyebrow: eyebrow, title: title, line: line, phoneEnd: phoneEnd, loopSeconds: loopSeconds,
                   startSeconds: startSeconds, stillSeconds: stillSeconds, modelManager: modelManager,
                   modelIdentifier: modelIdentifier, onNext: onNext, cardHeader: { _ in EmptyView() }, scene: scene)
     }
