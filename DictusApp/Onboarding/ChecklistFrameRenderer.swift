@@ -31,7 +31,7 @@ final class ChecklistFrameRenderer {
     /// A frame showing `lines`, stamped at `time` on the layer's timebase, or nil when a
     /// Core Video or Core Media call fails (the caller keeps the previous frame up).
     func sampleBuffer(
-        lines: [KeyboardSetupChecklistLineState],
+        lines: [SettingsChecklistLineState],
         tickProgress: [Double],
         at time: CMTime
     ) -> CMSampleBuffer? {

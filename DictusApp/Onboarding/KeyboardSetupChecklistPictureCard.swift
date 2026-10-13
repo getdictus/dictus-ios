@@ -23,7 +23,7 @@ import DictusCore
 /// picture of a fixed size that the window scales.
 struct KeyboardSetupChecklistPictureCard: View {
     /// One state per line, in `KeyboardSetupChecklistLine.allCases` order.
-    let lines: [KeyboardSetupChecklistLineState]
+    let lines: [SettingsChecklistLineState]
     /// How far each line's tick has popped in, 0 to 1.
     var tickProgress: [Double] = []
 
@@ -42,7 +42,7 @@ struct KeyboardSetupChecklistPictureCard: View {
         .environment(\.colorScheme, .dark)
     }
 
-    private func state(of line: KeyboardSetupChecklistLine) -> KeyboardSetupChecklistLineState {
+    private func state(of line: KeyboardSetupChecklistLine) -> SettingsChecklistLineState {
         lines.indices.contains(line.rawValue) ? lines[line.rawValue] : .pending
     }
 

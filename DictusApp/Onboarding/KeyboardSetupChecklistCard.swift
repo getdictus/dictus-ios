@@ -20,7 +20,7 @@ import DictusCore
 /// corners); the inline container clips it to a rounded card.
 struct KeyboardSetupChecklistCard: View {
     /// One state per line, in `KeyboardSetupChecklistLine.allCases` order.
-    let lines: [KeyboardSetupChecklistLineState]
+    let lines: [SettingsChecklistLineState]
     /// How far each line's tick has popped in, 0 to 1. A line that is not done, or done
     /// for a while, reads 1 (no animation).
     var tickProgress: [Double] = []
@@ -51,7 +51,7 @@ struct KeyboardSetupChecklistCard: View {
         .environment(\.colorScheme, .dark)
     }
 
-    private func state(of line: KeyboardSetupChecklistLine) -> KeyboardSetupChecklistLineState {
+    private func state(of line: KeyboardSetupChecklistLine) -> SettingsChecklistLineState {
         lines.indices.contains(line.rawValue) ? lines[line.rawValue] : .pending
     }
 
@@ -84,7 +84,7 @@ struct KeyboardSetupChecklistCard: View {
 /// the number before.
 struct KeyboardSetupChecklistBadge: View {
     let number: Int
-    let state: KeyboardSetupChecklistLineState
+    let state: SettingsChecklistLineState
     /// How far the tick has popped in, 0 to 1.
     let tickProgress: Double
     let diameter: CGFloat
@@ -122,7 +122,7 @@ struct KeyboardSetupChecklistBadge: View {
     }
 
     /// The line's text colour for its state.
-    static func textColor(for state: KeyboardSetupChecklistLineState) -> Color {
+    static func textColor(for state: SettingsChecklistLineState) -> Color {
         switch state {
         case .done: return Color.white.opacity(0.45)
         case .current: return .white

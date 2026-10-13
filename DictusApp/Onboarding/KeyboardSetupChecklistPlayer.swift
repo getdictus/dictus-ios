@@ -38,7 +38,7 @@ import DictusCore
 @MainActor
 final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
     /// The line states, for the SwiftUI card and the VoiceOver label.
-    @Published private(set) var lines: [KeyboardSetupChecklistLineState]
+    @Published private(set) var lines: [SettingsChecklistLineState]
     /// How far each line's tick has popped in, 0 to 1.
     @Published private(set) var tickProgress: [Double]
     /// Whether the Picture in Picture window is up.

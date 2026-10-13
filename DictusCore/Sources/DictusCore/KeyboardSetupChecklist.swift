@@ -20,13 +20,6 @@ public enum KeyboardSetupChecklistLine: Int, CaseIterable, Sendable {
     case turnOnFullAccessAndAllow
 }
 
-/// How one line is drawn: not reached yet, the one to do now, or done (ticked).
-public enum KeyboardSetupChecklistLineState: Sendable, Equatable {
-    case pending
-    case current
-    case done
-}
-
 /// The rules behind the checklist: which line is ticked when.
 ///
 /// WHY IN DICTUSCORE: the same states are drawn by two renderers (the inline SwiftUI card
@@ -67,7 +60,7 @@ public enum KeyboardSetupChecklist {
     public static let demoSchedule: [TimeInterval] = [0.8, 2.0, 3.2, 4.6]
 
     /// The state of every line, in `KeyboardSetupChecklistLine.allCases` order.
-    public static func states(for phase: Phase) -> [KeyboardSetupChecklistLineState] {
+    public static func states(for phase: Phase) -> [SettingsChecklistLineState] {
         let lineCount = KeyboardSetupChecklistLine.allCases.count
         switch phase {
         case .demo(let elapsed):
@@ -83,7 +76,7 @@ public enum KeyboardSetupChecklist {
     }
 
     /// The state of one line.
-    public static func state(of line: KeyboardSetupChecklistLine, in phase: Phase) -> KeyboardSetupChecklistLineState {
+    public static func state(of line: KeyboardSetupChecklistLine, in phase: Phase) -> SettingsChecklistLineState {
         states(for: phase)[line.rawValue]
     }
 
@@ -99,7 +92,7 @@ public enum KeyboardSetupChecklist {
 
     /// Lines before `currentIndex` done, the line at it current, the rest pending. An index
     /// past the last line ticks them all.
-    private static func states(currentIndex: Int?, count: Int) -> [KeyboardSetupChecklistLineState] {
+    private static func states(currentIndex: Int?, count: Int) -> [SettingsChecklistLineState] {
         (0..<count).map { index in
             guard let currentIndex else { return .pending }
             if index < currentIndex { return .done }
@@ -110,27 +103,12 @@ public enum KeyboardSetupChecklist {
 
     // MARK: - The trip to Settings
 
-    /// What tapping Open Settings does.
-    public enum SettingsTrip: Equatable, Sendable {
-        /// Start Picture in Picture from the tap, then open Settings once it is up.
-        case pictureInPictureThenSettings
-        /// Open Settings straight away; the checklist stays in the app (the fallback) and
-        /// the page's return-from-Settings detection does the rest. `reason` is logged.
-        case settingsOnly(reason: String)
-    }
+    /// What tapping Open Settings does. Shared with the Apple Intelligence step (#706).
+    public typealias SettingsTrip = SettingsChecklist.SettingsTrip
 
     /// Picture in Picture when the device supports it and the system says it can start
-    /// now; the fallback otherwise.
-    ///
-    /// - Parameters:
-    ///   - isSupported: `AVPictureInPictureController.isPictureInPictureSupported()`.
-    ///   - isPossible: the controller's `isPictureInPicturePossible` at the tap.
-    ///   - isForcedOff: a debug switch that forces the fallback, so it can be tested on a
-    ///     device that supports Picture in Picture.
+    /// now; the fallback otherwise (`SettingsChecklist.settingsTrip`).
     public static func settingsTrip(isSupported: Bool, isPossible: Bool, isForcedOff: Bool) -> SettingsTrip {
-        if isForcedOff { return .settingsOnly(reason: "forcedOff") }
-        guard isSupported else { return .settingsOnly(reason: "unsupported") }
-        guard isPossible else { return .settingsOnly(reason: "notPossible") }
-        return .pictureInPictureThenSettings
+        SettingsChecklist.settingsTrip(isSupported: isSupported, isPossible: isPossible, isForcedOff: isForcedOff)
     }
 }
