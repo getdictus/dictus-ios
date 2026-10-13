@@ -781,6 +781,17 @@
         }
       }
     },
+    "Back" : {
+      "comment" : "Onboarding: accessibility label of the back chevron at the top leading edge of the language step, which returns to the intro (#700).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour"
+          }
+        }
+      }
+    },
     "Because of its chip, this iPad cannot dictate from the keyboard. Dictation inside the Dictus app works." : {
       "comment" : "Onboarding notice on the keyboard setup page, shown only on an iPad whose chip predates the A14 (#635).",
       "localizations" : {

@@ -408,6 +408,9 @@ public enum LogEvent: Sendable {
     /// The Skip of a feature scene jumped the whole scene sequence (#679, #649 decision 8).
     /// `from` is the step it was tapped on, `to` the step it landed on.
     case onboardingSceneSequenceSkipped(from: String, to: String)
+    /// The back control of the onboarding shell was tapped (#700). `from` is the step it
+    /// was tapped on, `to` the step it returned to.
+    case onboardingWentBack(from: String, to: String)
     /// The "how to stop Dictus" step appeared (#681). `variant` is `island` or `lockScreen`
     /// (`DeviceCapabilities.hasDynamicIsland`), `model` the identifier it was read from, so
     /// a device test can tell which picture a given iPhone was shown, and why.
@@ -698,7 +701,7 @@ public enum LogEvent: Sendable {
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped, .onboardingStopStandbyShown:
+             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
              .coldStartStranded:
@@ -766,7 +769,7 @@ public enum LogEvent: Sendable {
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped, .onboardingStopStandbyShown,
+             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
              // Info, not debug like its siblings: it is the one line that says why the
@@ -1027,7 +1030,8 @@ public enum LogEvent: Sendable {
             return "identifiers=\(identifiers)"
         case .onboardingSmartModePickSkipped:
             return ""
-        case .onboardingSceneSequenceSkipped(let from, let to):
+        case .onboardingSceneSequenceSkipped(let from, let to),
+             .onboardingWentBack(let from, let to):
             return "from=\(from) to=\(to)"
         case .onboardingStopStandbyShown(let variant, let model):
             return "variant=\(variant) model=\(model)"
@@ -1291,6 +1295,7 @@ extension LogEvent {
         case .onboardingSmartModesPicked: return "onboardingSmartModesPicked"
         case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
         case .onboardingSceneSequenceSkipped: return "onboardingSceneSequenceSkipped"
+        case .onboardingWentBack: return "onboardingWentBack"
         case .onboardingStopStandbyShown: return "onboardingStopStandbyShown"
         case .liveActivityStarted: return "liveActivityStarted"
         case .liveActivityTransition: return "liveActivityTransition"
