@@ -29,6 +29,9 @@ struct VocabularyListView: View {
     /// The entry being added or edited, or nil when the sheet is closed.
     @State private var editing: VocabularyEditorSubject?
 
+    /// Whether the suggestions from History are open (#512).
+    @State private var showSuggestions = false
+
     /// Confirmation for the destructive reset, on the model of "Reset learned words".
     @State private var showResetConfirmation = false
 
@@ -106,6 +109,19 @@ struct VocabularyListView: View {
             }
             .proFeatureContent(isAvailable: isAvailable)
 
+            // The #512 trial: words from History the vocabulary may be missing.
+            // Below **Add a term** because it is another way of adding one.
+            Section {
+                Button {
+                    showSuggestions = true
+                } label: {
+                    Label("Suggestions from History", systemImage: "text.magnifyingglass")
+                }
+            } footer: {
+                Text("Words from your History that Dictus may be getting wrong.")
+            }
+            .proFeatureContent(isAvailable: isAvailable)
+
             if !store.isEmpty {
                 Section {
                     Button("Reset vocabulary", role: .destructive) {
@@ -126,6 +142,11 @@ struct VocabularyListView: View {
         .sheet(item: $editing) { subject in
             NavigationStack {
                 VocabularyEditorView(subject: subject)
+            }
+        }
+        .sheet(isPresented: $showSuggestions) {
+            NavigationStack {
+                VocabularySuggestionsView()
             }
         }
         .confirmationDialog(
