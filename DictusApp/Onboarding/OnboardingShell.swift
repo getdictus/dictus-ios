@@ -225,15 +225,18 @@ struct OnboardingSkipRow: View {
 /// clip; a scroll view that only bounces when it overflows keeps the button reachable
 /// and costs nothing where everything fits.
 ///
-/// WHY A PAGE CAN OPT OUT (`scrolls: false`, #700): a scene whose subject sits at the
-/// bottom of its drawing (the mic of the Smart Modes scene) loses that subject under the
-/// fold on a short screen. Such a page gets the height left under the title instead, and
-/// fits its drawing into it (`OnboardingScenePage`).
+/// WHY A PAGE CAN FIT ITS CONTENT INSTEAD (`fittedContentMinimumHeight`, #700): a drawing
+/// that runs under the fold on a short screen, like the stop-Dictus step's phone once the
+/// Skip row is reserved, is better shrunk than scrolled. Such a page gives its content the
+/// height left under the title (the content shrinks into it, `OnboardingFitToHeight`), and
+/// scrolls only when the title alone leaves less than the given minimum, the same two
+/// layouts the scene pages use (`OnboardingScenePage`, #680).
 struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
     let title: Text
     let subtitle: Text?
-    /// False for a page whose content fits itself into the height left under the title.
-    var scrolls = true
+    /// nil for a page whose content scrolls; otherwise the least height the content is
+    /// given when it fits into the height left under the title.
+    var fittedContentMinimumHeight: CGFloat?
     @ViewBuilder let titleAccessory: TitleAccessory
     @ViewBuilder let content: Content
     @ViewBuilder let bottom: Bottom
@@ -243,14 +246,14 @@ struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
     init(
         title: Text,
         subtitle: Text? = nil,
-        scrolls: Bool = true,
+        fittedContentMinimumHeight: CGFloat? = nil,
         @ViewBuilder titleAccessory: () -> TitleAccessory,
         @ViewBuilder content: () -> Content,
         @ViewBuilder bottom: () -> Bottom
     ) {
         self.title = title
         self.subtitle = subtitle
-        self.scrolls = scrolls
+        self.fittedContentMinimumHeight = fittedContentMinimumHeight
         self.titleAccessory = titleAccessory()
         self.content = content()
         self.bottom = bottom()
@@ -258,14 +261,21 @@ struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if scrolls {
+            if let minimum = fittedContentMinimumHeight {
+                // The content takes the height left, down to `minimum`; under that, the
+                // same page scrolls with the content at `minimum` (#680's two layouts).
+                ViewThatFits(in: .vertical) {
+                    page(contentHeight: .atLeast(minimum))
+                    ScrollView {
+                        page(contentHeight: .exactly(minimum))
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
+                }
+            } else {
                 ScrollView {
-                    page
+                    page(contentHeight: .natural)
                 }
                 .scrollBounceBehavior(.basedOnSize)
-            } else {
-                page
-                    .frame(maxHeight: .infinity, alignment: .top)
             }
 
             VStack(spacing: 12) {
@@ -277,14 +287,33 @@ struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
         }
     }
 
-    /// The title, then the content: in the scroll view, or in the height left above the
-    /// buttons when the page does not scroll.
-    private var page: some View {
+    /// How tall the content is drawn.
+    private enum ContentHeight {
+        /// Its own height, in a scroll view.
+        case natural
+        /// The height left under the title, at least this much.
+        case atLeast(CGFloat)
+        /// This much, in a scroll view.
+        case exactly(CGFloat)
+    }
+
+    /// The title, then the content.
+    @ViewBuilder
+    private func page(contentHeight: ContentHeight) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             OnboardingHeader(title: title, subtitle: subtitle) { titleAccessory }
                 .padding(.top, OnboardingMetrics.titleTopPadding)
                 .padding(.bottom, 24)
-            content
+            switch contentHeight {
+            case .natural:
+                content
+            case .atLeast(let minimum):
+                content
+                    .frame(minHeight: minimum, maxHeight: .infinity, alignment: .top)
+            case .exactly(let height):
+                content
+                    .frame(height: height, alignment: .top)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, OnboardingMetrics.horizontalPadding)
@@ -297,14 +326,14 @@ extension OnboardingPage where TitleAccessory == EmptyView {
     init(
         title: Text,
         subtitle: Text? = nil,
-        scrolls: Bool = true,
+        fittedContentMinimumHeight: CGFloat? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder bottom: () -> Bottom
     ) {
         self.init(
             title: title,
             subtitle: subtitle,
-            scrolls: scrolls,
+            fittedContentMinimumHeight: fittedContentMinimumHeight,
             titleAccessory: { EmptyView() },
             content: content,
             bottom: bottom
