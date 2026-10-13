@@ -16,7 +16,8 @@ import DictusCore
 /// WHY NOT `OnboardingPage` (#680, device test of 18dc4e99): that page scrolls, so when the
 /// download pill took its row the drawn iPhone ran under the page's edge. Here the card
 /// takes the height left between the header and the buttons, and shrinks to fit it
-/// (`OnboardingFitToHeight`), so the phone is always seen whole.
+/// (`OnboardingFitToHeight`), so the phone is always seen whole. It scrolls only when the
+/// text alone leaves no room for a readable card.
 struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
     /// A small label above the title, nil for none: "Also in Pro" on the scenes after the
     /// Smart Mode pick (#680), which leave Smart Modes for the other Pro features.
@@ -86,26 +87,48 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
         self.scene = scene
     }
 
+    /// The least height the card is drawn at. Under it the phone would be too small to
+    /// read, so the page scrolls instead (`body`).
+    ///
+    /// WHY 160: it must stay under what the smallest supported iPhone leaves at the
+    /// default text size with the download pill showing (about 230 pt on an iPhone SE,
+    /// measured on #680's captures), or that ordinary case would scroll and the phone would
+    /// run under the pill again. 260 did exactly that.
+    private static var minimumCardHeight: CGFloat { 160 }
+
     var body: some View {
         VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 6) {
-                if let eyebrow {
-                    eyebrow
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.dictusAccent)
+            // WHY TWO LAYOUTS (CodeRabbit on PR #722): the fitted one does not scroll, so
+            // a title and line taller than the screen (the accessibility text sizes, a
+            // small iPhone) used to push everything below them off the page. When the
+            // header and a card of at least `minimumCardHeight` fit, the card takes the
+            // rest of the height, as before. When they do not, the same content scrolls,
+            // with the card at that minimum height. Next is outside both, pinned, so it
+            // is always reachable; the shell's Skip is in the top bar.
+            ViewThatFits(in: .vertical) {
+                VStack(spacing: 0) {
+                    header
+                    OnboardingFitToHeight {
+                        card
+                    }
+                    .frame(minHeight: Self.minimumCardHeight)
+                    .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                    .padding(.bottom, 16)
                 }
-                OnboardingHeader(title: title, subtitle: line)
-            }
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.top, OnboardingMetrics.titleTopPadding)
-            .padding(.bottom, 24)
-            .padding(.horizontal, OnboardingMetrics.horizontalPadding)
 
-            OnboardingFitToHeight {
-                card
+                ScrollView {
+                    VStack(spacing: 0) {
+                        header
+                        OnboardingFitToHeight {
+                            card
+                        }
+                        .frame(height: Self.minimumCardHeight)
+                        .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                        .padding(.bottom, 16)
+                    }
+                }
+                .scrollBounceBehavior(.basedOnSize)
             }
-            .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-            .padding(.bottom, 16)
 
             VStack(spacing: 12) {
                 OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
@@ -116,6 +139,22 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
             .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
         }
         .animation(pillAnimation, value: isDownloading)
+    }
+
+    /// The eyebrow, the title and the line.
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if let eyebrow {
+                eyebrow
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.dictusAccent)
+            }
+            OnboardingHeader(title: title, subtitle: line)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(.top, OnboardingMetrics.titleTopPadding)
+        .padding(.bottom, 24)
+        .padding(.horizontal, OnboardingMetrics.horizontalPadding)
     }
 
     /// The drawn iPhone in its card, with the header above it.
