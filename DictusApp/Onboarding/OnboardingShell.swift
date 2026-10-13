@@ -28,8 +28,9 @@ enum OnboardingMetrics {
     static let buttonBottomPadding: CGFloat = 8
     /// Corner radius of the white cards.
     static let cardCornerRadius: CGFloat = 24
-    /// Height of the top row (progress bar and Skip), kept on steps without a bar so the
-    /// content below does not shift when the bar appears.
+    /// Height of the top row (back chevron and progress bar), kept on steps without a bar
+    /// so the content below does not shift when the bar appears. Also the width of each of
+    /// the row's two side slots (#700).
     static let topBarHeight: CGFloat = 32
     /// Gap between the safe area and the top row.
     static let topBarTopPadding: CGFloat = 8
@@ -37,6 +38,8 @@ enum OnboardingMetrics {
     /// same height empty in the app, where there is no bar, so its ring sits at the same y
     /// in the onboarding and in the app (#708).
     static let topRowHeight: CGFloat = topBarTopPadding + topBarHeight
+    /// Gap between the primary button and the Skip row under it (#700).
+    static let skipRowSpacing: CGFloat = 12
 }
 
 // MARK: - Progress bar
@@ -85,50 +88,155 @@ struct OnboardingProgressBar: View {
     private static let remaining = Color(light: Color(hex: 0xE2E2E8), dark: Color(hex: 0x232D40))
 }
 
-/// The row above every page: the progress bar, and the discreet Skip where the step
-/// allows it (#675).
+/// The row above every page: the back chevron where the step has one (#700) and the
+/// progress bar.
 ///
-/// WHY THE SHELL DRAWS SKIP, NOT THE PAGE: the slot sits at the same place on every step
-/// that has it, and stays put while the pages slide.
+/// WHY TWO SLOTS ON EVERY STEP, OF THE SAME WIDTH (#700, decided after the device test of
+/// the back chevron): the bar used to take whatever width the controls left, so it shrank
+/// and moved when the chevron or Skip appeared. Like an iOS navigation bar, the row now
+/// reserves a leading and a trailing slot of the chevron's width on every step, empty when
+/// there is nothing to put in them, so the bar is centred and has the same frame on every
+/// step. Skip left this row for `OnboardingSkipRow`, under the primary button: with it
+/// gone, the trailing slot only balances the leading one.
 struct OnboardingTopBar: View {
     let step: OnboardingStep
     let deviceCanRunSmartModes: Bool
-    /// nil when the step has no Skip.
-    let onSkip: (() -> Void)?
+    /// nil when the step has no back control (`OnboardingStep.stepBack`).
+    let onBack: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 16) {
+            Group {
+                if let onBack {
+                    // A standard iOS back chevron (#700), leading-aligned in its slot so it
+                    // lines up with the page's title.
+                    Button(action: onBack) {
+                        Image(systemName: "chevron.backward")
+                            .font(.body.weight(.semibold))
+                            // The accent, as the system tints its own back chevron.
+                            .foregroundStyle(Color.dictusAccent)
+                            .frame(
+                                width: OnboardingMetrics.topBarHeight,
+                                height: OnboardingMetrics.topBarHeight,
+                                alignment: .leading
+                            )
+                            // The row is 32 pt high; the tap area reaches the 44 pt minimum.
+                            .contentShape(Rectangle().inset(by: -6))
+                    }
+                    .accessibilityLabel(Text("Back"))
+                    .accessibilityIdentifier("onboarding.back")
+                } else {
+                    Color.clear
+                }
+            }
+            .frame(width: OnboardingMetrics.topBarHeight)
             if step.showsProgress {
                 OnboardingProgressBar(step: step, deviceCanRunSmartModes: deviceCanRunSmartModes)
             } else {
                 Spacer()
             }
-            if let onSkip {
-                Button(action: onSkip) {
-                    Text("Skip")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                }
-                .accessibilityIdentifier("onboarding.skip")
-            }
+            Color.clear
+                .frame(width: OnboardingMetrics.topBarHeight)
         }
         .frame(height: OnboardingMetrics.topBarHeight)
         .padding(.horizontal, OnboardingMetrics.horizontalPadding)
     }
 }
 
+// MARK: - Skip row
+
+/// What the Skip link under the primary button does, set by `OnboardingView` on the step
+/// that offers it (`OnboardingStep.isSkippable`), nil elsewhere.
+///
+/// WHY THE ENVIRONMENT: the action belongs to the flow (it decides where Skip lands), while
+/// the row is drawn by the page's shell, several views down. Passing it through every
+/// page's initializer would make each page carry a parameter only the shell reads.
+struct OnboardingSkipAction {
+    let perform: () -> Void
+}
+
+private struct OnboardingSkipActionKey: EnvironmentKey {
+    static let defaultValue: OnboardingSkipAction? = nil
+}
+
+extension EnvironmentValues {
+    var onboardingSkip: OnboardingSkipAction? {
+        get { self[OnboardingSkipActionKey.self] }
+        set { self[OnboardingSkipActionKey.self] = newValue }
+    }
+}
+
+/// The row under the primary button: the discreet Skip, centred, on the steps that offer
+/// it, and the same row left empty on every other step (#700).
+///
+/// WHY RESERVED ON EVERY STEP: the row takes the same height whether Skip is there or not,
+/// so the primary button sits at the same height on every step. An empty row is a hidden
+/// label: invisible, out of the accessibility tree, and as tall as the link would be at the
+/// current text size.
+///
+/// WHY `.footnote` IN GREY: the bottom block's other small print (*Nothing you type leaves
+/// your iPhone*) is footnote secondary, and Skip is the least important thing on the step.
+/// It is also the smallest row that still reads: about 16 pt at the default size, where
+/// `.body` would take 21.
+///
+/// WHY THE TAP AREA REACHES PAST THE ROW: the label is about 16 pt high, short of the
+/// 44 pt minimum. The area grows by the 12 pt gap above (up to the button's edge, never
+/// over it) and 16 pt below, into the bottom padding, without making the row any taller.
+struct OnboardingSkipRow: View {
+    @Environment(\.onboardingSkip) private var skip
+
+    var body: some View {
+        ZStack {
+            Text("Skip")
+                .font(.footnote)
+                .lineLimit(1)
+                .hidden()
+                .accessibilityHidden(true)
+            if let skip {
+                Button(action: skip.perform) {
+                    Text("Skip")
+                        .font(.footnote)
+                        .lineLimit(1)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 16)
+                        .padding(.top, OnboardingMetrics.skipRowSpacing)
+                        .padding(.bottom, 16)
+                        .contentShape(Rectangle())
+                        .padding(.horizontal, -16)
+                        .padding(.top, -OnboardingMetrics.skipRowSpacing)
+                        .padding(.bottom, -16)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("onboarding.skip")
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
 // MARK: - Page layout
 
 /// A page of the shell: large left-aligned title and subtitle, the page's content, then
-/// an optional footnote and the buttons pinned to the bottom (#675).
+/// an optional footnote, the buttons pinned to the bottom, and the Skip row under them
+/// (#675, #700).
 ///
 /// WHY THE CONTENT SCROLLS: the mock-ups are drawn at 402 × 874 pt. On a 667 pt screen
 /// (iPhone SE, every iPad in compatibility mode), the language and keyboard pages would
 /// clip; a scroll view that only bounces when it overflows keeps the button reachable
 /// and costs nothing where everything fits.
+///
+/// WHY A PAGE CAN FIT ITS CONTENT INSTEAD (`fittedContentMinimumHeight`, #700): a drawing
+/// that runs under the fold on a short screen, like the stop-Dictus step's phone once the
+/// Skip row is reserved, is better shrunk than scrolled. Such a page gives its content the
+/// height left under the title (the content shrinks into it, `OnboardingFitToHeight`), and
+/// scrolls only when the title alone leaves less than the given minimum, the same two
+/// layouts the scene pages use (`OnboardingScenePage`, #680).
 struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
     let title: Text
     let subtitle: Text?
+    /// nil for a page whose content scrolls; otherwise the least height the content is
+    /// given when it fits into the height left under the title.
+    var fittedContentMinimumHeight: CGFloat?
     @ViewBuilder let titleAccessory: TitleAccessory
     @ViewBuilder let content: Content
     @ViewBuilder let bottom: Bottom
@@ -138,12 +246,14 @@ struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
     init(
         title: Text,
         subtitle: Text? = nil,
+        fittedContentMinimumHeight: CGFloat? = nil,
         @ViewBuilder titleAccessory: () -> TitleAccessory,
         @ViewBuilder content: () -> Content,
         @ViewBuilder bottom: () -> Bottom
     ) {
         self.title = title
         self.subtitle = subtitle
+        self.fittedContentMinimumHeight = fittedContentMinimumHeight
         self.titleAccessory = titleAccessory()
         self.content = content()
         self.bottom = bottom()
@@ -151,25 +261,63 @@ struct OnboardingPage<Content: View, Bottom: View, TitleAccessory: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    OnboardingHeader(title: title, subtitle: subtitle) { titleAccessory }
-                        .padding(.top, OnboardingMetrics.titleTopPadding)
-                        .padding(.bottom, 24)
-                    content
+            if let minimum = fittedContentMinimumHeight {
+                // The content takes the height left, down to `minimum`; under that, the
+                // same page scrolls with the content at `minimum` (#680's two layouts).
+                ViewThatFits(in: .vertical) {
+                    page(contentHeight: .atLeast(minimum))
+                    ScrollView {
+                        page(contentHeight: .exactly(minimum))
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-                .padding(.bottom, 16)
+            } else {
+                ScrollView {
+                    page(contentHeight: .natural)
+                }
+                .scrollBounceBehavior(.basedOnSize)
             }
-            .scrollBounceBehavior(.basedOnSize)
 
             VStack(spacing: 12) {
                 bottom
+                OnboardingSkipRow()
             }
             .padding(.horizontal, OnboardingMetrics.horizontalPadding)
             .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
         }
+    }
+
+    /// How tall the content is drawn.
+    private enum ContentHeight {
+        /// Its own height, in a scroll view.
+        case natural
+        /// The height left under the title, at least this much.
+        case atLeast(CGFloat)
+        /// This much, in a scroll view.
+        case exactly(CGFloat)
+    }
+
+    /// The title, then the content.
+    @ViewBuilder
+    private func page(contentHeight: ContentHeight) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            OnboardingHeader(title: title, subtitle: subtitle) { titleAccessory }
+                .padding(.top, OnboardingMetrics.titleTopPadding)
+                .padding(.bottom, 24)
+            switch contentHeight {
+            case .natural:
+                content
+            case .atLeast(let minimum):
+                content
+                    .frame(minHeight: minimum, maxHeight: .infinity, alignment: .top)
+            case .exactly(let height):
+                content
+                    .frame(height: height, alignment: .top)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+        .padding(.bottom, 16)
     }
 }
 
@@ -178,10 +326,18 @@ extension OnboardingPage where TitleAccessory == EmptyView {
     init(
         title: Text,
         subtitle: Text? = nil,
+        fittedContentMinimumHeight: CGFloat? = nil,
         @ViewBuilder content: () -> Content,
         @ViewBuilder bottom: () -> Bottom
     ) {
-        self.init(title: title, subtitle: subtitle, titleAccessory: { EmptyView() }, content: content, bottom: bottom)
+        self.init(
+            title: title,
+            subtitle: subtitle,
+            fittedContentMinimumHeight: fittedContentMinimumHeight,
+            titleAccessory: { EmptyView() },
+            content: content,
+            bottom: bottom
+        )
     }
 }
 
@@ -281,6 +437,7 @@ struct OnboardingCenteredPage<Illustration: View, Bottom: View>: View {
 
             VStack(spacing: 12) {
                 bottom
+                OnboardingSkipRow()
             }
             .padding(.horizontal, OnboardingMetrics.horizontalPadding)
             .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
@@ -467,6 +624,20 @@ enum OnboardingPhoneMetrics {
     static let overrun: CGFloat = 24
     /// The phone's outline: a light grey on light, a slate on dark.
     static let phoneFrame = Color(light: Color(hex: 0xD1D1D6), dark: Color(hex: 0x2A3346))
+
+    /// The phone's screen: the outline's inner curve at the end the card shows, square at
+    /// the cut. A scene clipped to it never sits under the frame (#679, #681).
+    static func screenShape(end: OnboardingPhoneEnd) -> UnevenRoundedRectangle {
+        let radius = phoneCornerRadius - phoneFrameWidth
+        let showsBottom = end == .bottom
+        return UnevenRoundedRectangle(
+            topLeadingRadius: showsBottom ? 0 : radius,
+            bottomLeadingRadius: showsBottom ? radius : 0,
+            bottomTrailingRadius: showsBottom ? radius : 0,
+            topTrailingRadius: showsBottom ? 0 : radius,
+            style: .continuous
+        )
+    }
 }
 
 /// Which end of the drawn iPhone an `OnboardingPhoneCard` shows.
@@ -479,12 +650,28 @@ enum OnboardingPhoneEnd {
 
 /// The drawn iPhone in its card. Metrics in `OnboardingPhoneMetrics` (a generic view
 /// cannot hold static stored properties).
-struct OnboardingPhoneCard<Content: View>: View {
+///
+/// `header` sits inside the card, above the phone, which then runs off under it instead
+/// of off the card's edge: the voice notes scene's chips (#680, mock-up
+/// `07a-scene-memos-vocaux`). Most cards have none.
+struct OnboardingPhoneCard<Content: View, Header: View>: View {
     /// The end of the phone the card shows.
     var end: OnboardingPhoneEnd = .top
+    @ViewBuilder let header: Header
     @ViewBuilder let content: Content
 
     private typealias Metrics = OnboardingPhoneMetrics
+
+    init(end: OnboardingPhoneEnd = .top,
+         @ViewBuilder header: () -> Header,
+         @ViewBuilder content: () -> Content) {
+        self.end = end
+        self.header = header()
+        self.content = content()
+    }
+
+    /// Whether `header` draws anything. `EmptyView` is the type of "no header".
+    private var hasHeader: Bool { Header.self != EmptyView.self }
 
     var body: some View {
         let showsTop = end == .top
@@ -509,7 +696,7 @@ struct OnboardingPhoneCard<Content: View>: View {
             style: .continuous
         )
         let overrunEdge: Edge.Set = showsTop ? .bottom : .top
-        content
+        let phone = content
             .frame(maxWidth: .infinity, alignment: .leading)
             // The phone is drawn taller than the card so the crop below cuts through it:
             // no edge at the cut, the phone runs off the card.
@@ -519,11 +706,64 @@ struct OnboardingPhoneCard<Content: View>: View {
                     .strokeBorder(Metrics.phoneFrame, lineWidth: Metrics.phoneFrameWidth)
                     .padding(overrunEdge, -Metrics.overrun)
             )
-            .padding(.horizontal, Metrics.phoneInset)
-            .padding(showsTop ? .top : .bottom, Metrics.phoneInset)
-            .background(cardShape.fill(Color.dictusSurface))
-            // Rounded where the phone shows, cut through the phone at the other edge.
-            .clipShape(cardShape)
+        VStack(spacing: 0) {
+            if hasHeader {
+                header
+                // Under a header the phone is cut at its own edge, so its overrun does
+                // not run up over the header.
+                phone.clipped()
+            } else {
+                phone
+            }
+        }
+        .padding(.horizontal, Metrics.phoneInset)
+        .padding(showsTop ? .top : .bottom, Metrics.phoneInset)
+        .background(cardShape.fill(Color.dictusSurface))
+        // Rounded where the phone shows, cut through the phone at the other edge.
+        .clipShape(cardShape)
+    }
+}
+
+extension OnboardingPhoneCard where Header == EmptyView {
+    /// A card with the phone alone, which is every card but the voice notes scene's.
+    init(end: OnboardingPhoneEnd = .top, @ViewBuilder content: () -> Content) {
+        self.init(end: end, header: { EmptyView() }, content: content)
+    }
+}
+
+// MARK: - Fit to height
+
+/// Shows `content` whole in the height it is given: at its natural size when that fits,
+/// scaled down uniformly, from its top centre, when it does not. Never clipped.
+///
+/// WHY (#680, Pierre's device test of 18dc4e99): a scene page used to scroll its card like
+/// any other page. While the model downloads, the download pill takes a row above *Next*,
+/// the scroll view gets shorter, and the bottom of the drawn iPhone went under the page's
+/// edge: on an iPhone 15 Pro Max the keyboard's globe row touched the card's edge and the
+/// phone's frame was gone. A picture of a phone must read as a whole phone, pill or no
+/// pill, on every screen, so the card shrinks instead.
+///
+/// WHY SCALE AND NOT RE-LAYOUT: the scenes are drawn at fixed point sizes and scaled as one
+/// picture (`SmartModesScene`); the card around them is drawn the same way. Scaling the
+/// card as a whole keeps the phone, its frame and the card's corners in proportion.
+struct OnboardingFitToHeight<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    /// The content's height at the full width, measured.
+    @State private var naturalHeight: CGFloat = 0
+
+    var body: some View {
+        GeometryReader { geometry in
+            let scale = naturalHeight > geometry.size.height && naturalHeight > 0
+                ? geometry.size.height / naturalHeight
+                : 1
+            content
+                .frame(width: geometry.size.width)
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { naturalHeight = $0 }
+                .scaleEffect(scale, anchor: .top)
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
+        }
     }
 }
 

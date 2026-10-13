@@ -25,7 +25,13 @@ import DictusCore
 ///
 /// Confirming hands the setup to `OnboardingView`, which writes it and starts the model
 /// download before moving on.
+///
+/// WHY A DRAFT (#700): the shell's back control returns to the intro, and this page is
+/// rebuilt when the user comes back. Every change is mirrored into `draft`, which
+/// `OnboardingView` keeps, so the page reopens on the choices the user left.
 struct LanguageSetupPage: View {
+    /// The choices as last left on this page, nil before any.
+    @Binding var draft: LanguageSetup?
     let onConfirm: (LanguageSetup) -> Void
 
     /// The iPhone's preferred languages, read once: they cannot change while this screen
@@ -37,11 +43,12 @@ struct LanguageSetupPage: View {
 
     @State private var setup: LanguageSetup
 
-    init(onConfirm: @escaping (LanguageSetup) -> Void) {
+    init(draft: Binding<LanguageSetup?>, onConfirm: @escaping (LanguageSetup) -> Void) {
+        _draft = draft
         self.onConfirm = onConfirm
         // `KeyboardLayoutPreference.layout(for:)` rather than `defaultLayout`: a user who
         // runs the onboarding again keeps the layout they already chose for a language.
-        _setup = State(initialValue: LanguageSetup.prefilled(
+        _setup = State(initialValue: draft.wrappedValue ?? LanguageSetup.prefilled(
             preferredLanguages: Locale.preferredLanguages,
             layoutFor: { KeyboardLayoutPreference.layout(for: $0) }
         ))
@@ -78,6 +85,9 @@ struct LanguageSetupPage: View {
                 onConfirm(setup)
             }
             .accessibilityIdentifier("onboarding.primary")
+        }
+        .onChange(of: setup) { _, newSetup in
+            draft = newSetup
         }
     }
 

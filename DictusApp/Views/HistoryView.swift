@@ -327,7 +327,10 @@ struct HistoryView: View {
 
 /// One saved dictation: two lines of the text, then the date, the language and how
 /// long the recording was.
-private struct HistoryCard: View {
+///
+/// Not private: the onboarding's history scene (#680) shows this very card, so the
+/// scene and the screen it stands for cannot drift apart.
+struct HistoryCard: View {
 
     let record: TranscriptionRecord
 

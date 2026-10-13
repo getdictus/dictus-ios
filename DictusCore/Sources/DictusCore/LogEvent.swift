@@ -379,6 +379,8 @@ public enum LogEvent: Sendable {
     /// (#709). It goes straight to Settings, so no `onboardingChecklist` line (no Picture
     /// in Picture, no audio session) should follow it.
     case onboardingFullAccessLinkOpened
+    /// The "Why Full Access?" link on the keyboard step opened its explainer sheet (#704).
+    case onboardingFullAccessExplainerOpened
     case onboardingDictusKeyboardActivated
     case onboardingGlobeTutorialTextDetected
     case onboardingGlobeTutorialSkipped
@@ -406,6 +408,13 @@ public enum LogEvent: Sendable {
     /// The Skip of a feature scene jumped the whole scene sequence (#679, #649 decision 8).
     /// `from` is the step it was tapped on, `to` the step it landed on.
     case onboardingSceneSequenceSkipped(from: String, to: String)
+    /// The back control of the onboarding shell was tapped (#700). `from` is the step it
+    /// was tapped on, `to` the step it returned to.
+    case onboardingWentBack(from: String, to: String)
+    /// The "how to stop Dictus" step appeared (#681). `variant` is `island` or `lockScreen`
+    /// (`DeviceCapabilities.hasDynamicIsland`), `model` the identifier it was read from, so
+    /// a device test can tell which picture a given iPhone was shown, and why.
+    case onboardingStopStandbyShown(variant: String, model: String)
 
     // MARK: Live Activity
     case liveActivityStarted(id: String)
@@ -686,13 +695,13 @@ public enum LogEvent: Sendable {
         case .onboardingScenePhaseChanged, .onboardingKeyboardCheckStarted,
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
-             .onboardingFullAccessLinkOpened,
+             .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped:
+             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
              .coldStartStranded:
@@ -754,13 +763,13 @@ public enum LogEvent: Sendable {
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
-        case .onboardingKeyboardDetected, .onboardingFullAccessLinkOpened,
+        case .onboardingKeyboardDetected, .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped,
+             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
              // Info, not debug like its siblings: it is the one line that says why the
@@ -1005,7 +1014,7 @@ public enum LogEvent: Sendable {
             return "modeCount=\(modeCount)"
         case .onboardingKeyboardCheckSkipped(let reason):
             return "reason=\(reason)"
-        case .onboardingKeyboardRetry, .onboardingFullAccessLinkOpened:
+        case .onboardingKeyboardRetry, .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened:
             return ""
         case .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped:
@@ -1021,8 +1030,11 @@ public enum LogEvent: Sendable {
             return "identifiers=\(identifiers)"
         case .onboardingSmartModePickSkipped:
             return ""
-        case .onboardingSceneSequenceSkipped(let from, let to):
+        case .onboardingSceneSequenceSkipped(let from, let to),
+             .onboardingWentBack(let from, let to):
             return "from=\(from) to=\(to)"
+        case .onboardingStopStandbyShown(let variant, let model):
+            return "variant=\(variant) model=\(model)"
 
         // Live Activity
         case .liveActivityStarted(let id):
@@ -1272,6 +1284,7 @@ extension LogEvent {
         case .onboardingKeyboardCheckSkipped: return "onboardingKeyboardCheckSkipped"
         case .onboardingKeyboardRetry: return "onboardingKeyboardRetry"
         case .onboardingFullAccessLinkOpened: return "onboardingFullAccessLinkOpened"
+        case .onboardingFullAccessExplainerOpened: return "onboardingFullAccessExplainerOpened"
         case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
         case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
         case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
@@ -1282,6 +1295,8 @@ extension LogEvent {
         case .onboardingSmartModesPicked: return "onboardingSmartModesPicked"
         case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
         case .onboardingSceneSequenceSkipped: return "onboardingSceneSequenceSkipped"
+        case .onboardingWentBack: return "onboardingWentBack"
+        case .onboardingStopStandbyShown: return "onboardingStopStandbyShown"
         case .liveActivityStarted: return "liveActivityStarted"
         case .liveActivityTransition: return "liveActivityTransition"
         case .liveActivityFailed: return "liveActivityFailed"
