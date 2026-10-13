@@ -1,9 +1,9 @@
 // DictusApp/Onboarding/FullAccessExplainerPage.swift
-// Onboarding step: why the keyboard asks for Full Access, right before the keyboard step (#704).
+// Why the keyboard asks for Full Access: a sheet opened from the keyboard step (#704).
 import SwiftUI
 import DictusCore
 
-/// Says the truth about Full Access before the user meets Apple's alert in Settings.
+/// Says the truth about Full Access, for the user who wants to know before turning it on.
 ///
 /// WHY THIS PAGE EXISTS (#704): testers declined to set Dictus up because of the alert
 /// iOS raises when Full Access is turned on ("the developer of this keyboard can
@@ -12,15 +12,20 @@ import DictusCore
 /// or nothing. Shown here, drawn, with what Dictus uses it for and what it does not, the
 /// alert is no surprise in Settings, and the open source line lets anyone check.
 ///
+/// WHY A SHEET AND NOT A STEP (amended 2026-10-13, after a device test of the step): most
+/// users are not worried by the alert, and a whole step made every one of them read about
+/// it. The keyboard step warns in one line that the alert is coming, which needs no tap,
+/// and its "Why Full Access?" link opens this page for the user who wants the reasons.
+///
 /// WHY THE ALERT IS DRAWN: only iOS system UI is drawn in the onboarding (#649 decision
-/// 13), like the Settings page on the next step. A screenshot would not follow the
+/// 13), like the Settings page behind this sheet. A screenshot would not follow the
 /// appearance or the language.
 ///
 /// WHAT THE COPY RESTS ON: "your dictations never leave your iPhone" was checked against
 /// what the keyboard links before it shipped (written on #704). If that ever changes,
 /// the sentence changes.
 struct FullAccessExplainerPage: View {
-    let onNext: () -> Void
+    let onClose: () -> Void
 
     var body: some View {
         OnboardingPage(
@@ -32,9 +37,10 @@ struct FullAccessExplainerPage: View {
                 points
             }
         } bottom: {
-            OnboardingPrimaryButton(Text("Continue"), action: onNext)
-                .accessibilityIdentifier("onboarding.primary")
+            OnboardingPrimaryButton(Text("Close"), action: onClose)
+                .accessibilityIdentifier("onboarding.fullAccess.close")
         }
+        .background(Color.dictusBackground.ignoresSafeArea())
     }
 
     // MARK: - The three points
