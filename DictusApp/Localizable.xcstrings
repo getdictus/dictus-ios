@@ -947,16 +947,6 @@
         }
       }
     },
-    "Cancel anytime" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annulable à tout moment"
-          }
-        }
-      }
-    },
     "Change" : {
       "comment" : "Onboarding language screen: opens the menu of languages (#675).",
       "localizations" : {
@@ -1695,6 +1685,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Suivant"
+          }
+        }
+      }
+    },
+    "No commitment, cancel anytime" : {
+      "comment" : "Paywall line under the CTA when a subscription is selected; hidden for the lifetime purchase (#724).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans engagement, annulable à tout moment"
           }
         }
       }
@@ -3884,6 +3885,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher dans les transcriptions"
+          }
+        }
+      }
+    },
+    "See all plans" : {
+      "comment" : "Paywall link that reveals the monthly plan next to the yearly and lifetime ones (#724).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir toutes les formules"
           }
         }
       }
