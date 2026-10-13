@@ -53,6 +53,14 @@ struct ProTrialDebugSection: View {
             } label: {
                 Text(verbatim: "Forget the trial (Keychain, mirror, counters, paywall)")
             }
+            // What's new comes before the existing-user announcement (#685), and is shown
+            // once per install. Forgetting it, with the trial, replays the whole chain at
+            // the next launch without deleting the app and its models.
+            Button(role: .destructive) {
+                AppGroup.defaults.removeObject(forKey: SharedKeys.lastVersionSeen)
+            } label: {
+                Text(verbatim: "Forget What's new (#685), then relaunch")
+            }
         } header: {
             Text(verbatim: "Reverse trial (#593)")
         } footer: {
