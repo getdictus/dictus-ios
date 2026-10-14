@@ -97,3 +97,50 @@ jobs:
             build/DerivedData/Logs/Build
           retention-days: 7
           if-no-files-found: ignore
+
+  # The DictusCore suite, run with the repository's one canonical test command (#534).
+  # PR descriptions — increasingly written by agents — report `swift test` results;
+  # this job replays that claim instead of trusting it. It is its own job, not a step
+  # of `build`, so a red test is reported as a test failure rather than folded into a
+  # compilation failure, and a green build or lint cannot mask it.
+  test:
+    name: DictusCore Tests
+    # macOS, no simulator: the suite runs on the Mac directly. The iOS Simulator
+    # destination passes too since #301 but executes exactly the same tests while
+    # paying for a simulator boot (CLAUDE.md, "Build, test, lint").
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      # On a pull request, test the PR's head commit itself rather than the
+      # `refs/pull/N/merge` commit checkout defaults to, so the result reported on
+      # that SHA is a result FOR that SHA. Branch protection is strict (the branch
+      # must be up to date with its base before merging), so the merge-ref check
+      # would add nothing the head-SHA check does not already cover at merge time.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Show tested commit
+        run: git rev-parse HEAD
+
+      # Same toolchain as the build job, for the same reasons (see its comment).
+      - name: Select Xcode 26.4.1
+        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      # No SwiftPM cache here, deliberately. DictusCore/Package.swift declares no
+      # package dependencies, so `swift test` fetches nothing — there is nothing a
+      # dependency cache could save. Caching `.build` instead would trade a minute of
+      # compilation for the risk of testing stale artifacts, which is the one thing
+      # this check exists to rule out.
+      #
+      # #560: on a Mac, `AppGroup.containerURL` is nil for an unentitled process like
+      # the test host, so nothing here touches a Group Container — on the runner or
+      # on a developer machine.
+      - name: Run DictusCore tests (swift test)
+        working-directory: DictusCore
+        run: swift test
