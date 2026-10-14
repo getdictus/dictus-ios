@@ -141,6 +141,44 @@ jobs:
       # #560: on a Mac, `AppGroup.containerURL` is nil for an unentitled process like
       # the test host, so nothing here touches a Group Container — on the runner or
       # on a developer machine.
+      # TEMPORARY (#534) diagnostic: what NLTagger's nameType returns on this runner.
+      - name: NLTagger diagnostic (temporary)
+        continue-on-error: true
+        run: |
+          cat > /tmp/nldiag.swift <<'SWIFT'
+          import Foundation
+          import NaturalLanguage
+
+          print("os:", ProcessInfo.processInfo.operatingSystemVersionString)
+          print("locale:", Locale.current.identifier, "preferred:", Locale.preferredLanguages)
+          for lang in [NLLanguage.french, .english, .german] {
+              let schemes = NLTagger.availableTagSchemes(for: .word, language: lang).map(\.rawValue)
+              print("schemes[\(lang.rawValue)]:", schemes.contains("NameType") ? "NameType present" : "NameType MISSING", schemes)
+          }
+          func names(_ text: String, _ lang: NLLanguage?) -> [String] {
+              let t = NLTagger(tagSchemes: [.nameType]); t.string = text
+              if let lang { t.setLanguage(lang, range: text.startIndex..<text.endIndex) }
+              var out: [String] = []
+              t.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType,
+                              options: [.omitPunctuation, .omitWhitespace, .joinNames]) { tag, r in
+                  if let tag, tag == .personalName || tag == .placeName || tag == .organizationName { out.append(String(text[r])) }
+                  return true
+              }
+              return out
+          }
+          let fr = "Récupérer les chiffres de janvier auprès de Marion. Appeler Sophie avant : elle a les données de décembre."
+          let en = "Send the file to Alice Smith and call John in Paris tomorrow."
+          print("fr+fr :", names(fr, .french))
+          print("fr+nil:", names(fr, nil))
+          print("en+en :", names(en, .english))
+          print("line  :", names("- Appeler Sophie avant : elle a les données de décembre", .french))
+          print("line2 :", names("Appeler Sophie avant", .french))
+          print("lea   :", names("- Demander à Léa de valider", .french))
+          SWIFT
+          swift /tmp/nldiag.swift
+          ls /System/Library/LinguisticData 2>/dev/null | head -50 || true
+          ls ~/Library/Assets* 2>/dev/null | head || true
+
       - name: Run DictusCore tests (swift test)
         working-directory: DictusCore
         run: swift test
