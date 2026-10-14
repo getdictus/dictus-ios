@@ -107,8 +107,19 @@ public enum KeyboardSetupChecklist {
     public typealias SettingsTrip = SettingsChecklist.SettingsTrip
 
     /// Picture in Picture when the device supports it and the system says it can start
-    /// now; the fallback otherwise (`SettingsChecklist.settingsTrip`).
-    public static func settingsTrip(isSupported: Bool, isPossible: Bool, isForcedOff: Bool) -> SettingsTrip {
-        SettingsChecklist.settingsTrip(isSupported: isSupported, isPossible: isPossible, isForcedOff: isForcedOff)
+    /// now, or may shortly because the tap has just prepared it; the fallback otherwise
+    /// (`SettingsChecklist.settingsTrip`).
+    public static func settingsTrip(
+        isSupported: Bool,
+        isPossible: Bool,
+        isForcedOff: Bool,
+        preparedByTheTap: Bool = false
+    ) -> SettingsTrip {
+        SettingsChecklist.settingsTrip(
+            isSupported: isSupported,
+            isPossible: isPossible,
+            isForcedOff: isForcedOff,
+            preparedByTheTap: preparedByTheTap
+        )
     }
 }

@@ -517,6 +517,41 @@ final class LogEventTests: XCTestCase {
         )
     }
 
+    func testOrphanedChunksAbsorbedIsANoticeTheUnifiedLogKeeps() {
+        // `notice` is the lowest level the unified log persists: the next device capture
+        // has to show a relaunch that recovered (#732).
+        let event = LogEvent.modelDownloadOrphanedChunks(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Decoder.mlmodelc/coremldata.bin",
+            file: 3,
+            absorbed: [0],
+            discarded: []
+        )
+        XCTAssertEqual(event.level, .notice)
+        XCTAssertEqual(event.subsystem, .model)
+        XCTAssertEqual(event.name, "modelDownloadOrphanedChunks")
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Decoder.mlmodelc/coremldata.bin file=3 absorbed=0 discarded=none"
+        )
+    }
+
+    func testOrphanedChunksWithADiscardIsAWarning() {
+        let event = LogEvent.modelDownloadOrphanedChunks(
+            name: "parakeet-tdt-0.6b-v3",
+            path: "Encoder.mlmodelc/weights/weight.bin",
+            file: 7,
+            absorbed: [0, 1],
+            discarded: ["2:chunk-length-100-expected-33554432"]
+        )
+        XCTAssertEqual(event.level, .warning)
+        XCTAssertEqual(
+            event.message,
+            "name=parakeet-tdt-0.6b-v3 path=Encoder.mlmodelc/weights/weight.bin file=7 absorbed=0,1 "
+                + "discarded=2:chunk-length-100-expected-33554432"
+        )
+    }
+
     func testAppDidBecomeActiveIsDebugLifecycle() {
         let event = LogEvent.appDidBecomeActive
         XCTAssertEqual(event.level, .debug)
@@ -551,6 +586,15 @@ final class LogEventTests: XCTestCase {
         XCTAssertEqual(event.subsystem, .lifecycle)
         XCTAssertEqual(event.name, "onboardingFullAccessLinkOpened")
         XCTAssertTrue(event.formatted().contains("onboardingFullAccessLinkOpened"))
+    }
+
+    /// Same level and subsystem as its sibling link (#709), for the same grep (#704).
+    func testFullAccessExplainerOpenedIsInfoLifecycle() {
+        let event = LogEvent.onboardingFullAccessExplainerOpened
+        XCTAssertEqual(event.level, .info)
+        XCTAssertEqual(event.subsystem, .lifecycle)
+        XCTAssertEqual(event.name, "onboardingFullAccessExplainerOpened")
+        XCTAssertTrue(event.formatted().contains("onboardingFullAccessExplainerOpened"))
     }
 
     // MARK: - User dictionary events (#307)

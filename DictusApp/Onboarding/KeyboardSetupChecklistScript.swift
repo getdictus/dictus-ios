@@ -50,6 +50,10 @@ final class KeyboardSetupChecklistScript: SettingsChecklistScript {
         keyboardAdded = true
     }
 
+    func markIncomplete() {
+        keyboardAdded = false
+    }
+
     func states(for phase: SettingsChecklistPhase) -> [SettingsChecklistLineState] {
         switch phase {
         case .idle(let elapsed): return KeyboardSetupChecklist.states(for: .demo(elapsed: elapsed))
@@ -62,9 +66,9 @@ final class KeyboardSetupChecklistScript: SettingsChecklistScript {
     /// detection (`KeyboardSetupPage.checkKeyboardInstalled`), without its logging, which
     /// would write a line a second here.
     static func isDictusKeyboardActive() -> Bool {
-        UITextInputMode.activeInputModes.contains { mode in
-            // value(forKey:) is KVO; anything but a String is ignored.
-            (mode.value(forKey: "identifier") as? String)?.contains("com.pivi.dictus") == true
-        }
+        // value(forKey:) is KVO; anything but a String is ignored.
+        DictusKeyboardPresence(inputModeIdentifiers: UITextInputMode.activeInputModes.compactMap {
+            $0.value(forKey: "identifier") as? String
+        }).isListed
     }
 }

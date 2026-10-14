@@ -58,6 +58,12 @@ final class AppleIntelligenceChecklistScript: SettingsChecklistScript {
         engineState = .available
     }
 
+    /// Not reached on this step: the page never goes back from ready. Reads the state
+    /// afresh all the same, so the fact in the log stays true.
+    func markIncomplete() {
+        engineState = PolishAvailability.state
+    }
+
     func states(for phase: SettingsChecklistPhase) -> [SettingsChecklistLineState] {
         AppleIntelligenceChecklist.states(lineCount: lines.count, isComplete: phase == .complete)
     }

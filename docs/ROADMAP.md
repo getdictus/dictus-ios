@@ -22,7 +22,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 4. ~~#573 — rebuild `Liste` as a summary in bullets~~ — merged in PR #629; closed 2026-10-10, real-use verdict left to user feedback
 5. ~~#593 — reverse trial: Pro free for a fixed period, then the paywall~~ — merged in PR #595; its two device checks (iPad, EN strings) moved to #279 step 6
 6. ~~#690 — model download freezes after iOS kills Dictus on the Full Access change~~ — merged in PR #694; follow-up #701 (stale-task cancel fails the run) merged in PR #702; residual #707
-7. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); mock-ups done 2026-10-07; split into sub-issues #675-#686 (#675 merged in PR #688; next #676-#678, #682, #683 in parallel); intro videos #667 merged in PR #670 (2026-10-09); #676 merged in PR #697 (2026-10-10); #677 merged in PR #695 (2026-10-10); #678 merged in PR #696 (2026-10-10); #682 merged in PR #698 (2026-10-11), follow-ups #704 (explain Full Access, needs mock-up) and #709 (Settings link when keyboard already detected, merged in PR #710 2026-10-12; follow-ups #713, #715 merged in PR #717 2026-10-12); #683 merged in PR #699 (2026-10-11), follow-up #706 (PiP guide); #679 merged in PR #705 (2026-10-12); #700 back to intro next
+7. #649 — onboarding rebuild: PR A merged in PR #654 (#653 in PR #655); mock-ups done 2026-10-07; split into sub-issues #675-#686 (#675 merged in PR #688; next #676-#678, #682, #683 in parallel); intro videos #667 merged in PR #670 (2026-10-09); #676 merged in PR #697 (2026-10-10); #677 merged in PR #695 (2026-10-10); #678 merged in PR #696 (2026-10-10); #682 merged in PR #698 (2026-10-11), follow-ups #704 (explain Full Access, merged in PR #721 2026-10-13 as a sheet from the keyboard step) and #709 (Settings link when keyboard already detected, merged in PR #710 2026-10-12; follow-ups #713 merged in PR #719 2026-10-14, #715 merged in PR #717 2026-10-12); #683 merged in PR #699 (2026-10-11), follow-up #706 (PiP guide); #679 merged in PR #705 (2026-10-12); #680 merged in PR #722 (2026-10-13), follow-up #725 (back between scenes); #681 merged in PR #720 (2026-10-13, step skipped on iPad); #700 merged in PR #718 (2026-10-13, Skip moved under the primary button on every step)
 8. ~~#707 — model download: #690's watchdog replacement stalls on the same background session~~ — merged in PR #714 (2026-10-12), closed: mechanism proven on simulator, real stall not reproduced (0/23); reopen if a log shows `Silent` without `fg` bytes
 9. ~~#216 — the Pro hub, one screen for free / trial / paid users~~ — closed 2026-10-06
 10. ~~#621 — search the history: the paywall already sells it~~ — merged in PR #652
@@ -30,11 +30,11 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 12. ~~#673 — download screen: drop the two phrases that promise the end ("Almost there" at 1 %)~~ — merged in PR #674
 13. ~~#533 — countdown under the model preparation (compile / load), not a second bar~~ — merged in PR #687
 14. ~~#708 — rebuild the model preparation screen (ring with logo, two-step card, no layout jumps)~~ — merged in PR #716 (2026-10-12)
-15. #723 — add a word to Personal Vocabulary from a history entry (monetization grilling 2026-10-12)
+15. ~~#723 — add a word to Personal Vocabulary from a history entry~~ — merged in PR #730 (2026-10-13); discoverability tip #738 parked in 2.1, depends on #512
 16. #512 — suggest vocabulary from history: time-boxed trial, go/no-go on the issue
 17. #724 — paywall: yearly + lifetime visible, monthly behind a link and in the end-of-trial dismiss sheet, no-commitment line
 18. #726 — end-of-trial recap: words dictated + time saved, dictation counter for every user
-19. #727 — README: free dictation + optional Pro, no free-forever promise (merges with #279)
+19. ~~#727 — README: free dictation + optional Pro, no free-forever promise~~ — merged in PR #729 (2026-10-13), ahead of #279: promote to main only with #279
 20. #279 — flip `PremiumFlags.paywallVisible` and walk all four entry points, plus #593's iPad and EN checks
 21. Cut chore: remove the bundled `JointDecisionv3.mlmodelc` from DictusApp
 

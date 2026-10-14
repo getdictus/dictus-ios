@@ -760,7 +760,7 @@ private struct SceneWaveform: View {
 
 /// iOS's bar under a third-party keyboard: the globe on the left, the system dictation mic
 /// on the right. iOS's own UI, so drawn.
-private struct SceneSystemBar: View {
+struct SceneSystemBar: View {
     var body: some View {
         HStack {
             Image(systemName: "globe")
@@ -778,8 +778,8 @@ private struct SceneSystemBar: View {
 // MARK: - Finger
 
 /// The drawn finger: a soft grey disc, as screen recordings show touches. Smaller and
-/// darker while pressed.
-private struct SceneFinger: View {
+/// darker while pressed. Shared by every drawn scene (#679, #680, #681).
+struct SceneFinger: View {
     let isPressed: Bool
 
     var body: some View {

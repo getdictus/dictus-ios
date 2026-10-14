@@ -44,6 +44,9 @@ struct VoiceNoteCardView: View {
     @State private var summaryState: SummaryState = .idle
     @State private var copiedTarget: String?
 
+    /// The vocabulary sheet started from a selection in the transcript (#723).
+    @State private var vocabularySubject: VocabularyEditorSubject?
+
     private enum SummaryState: Equatable {
         case idle
         case running
@@ -120,7 +123,8 @@ struct VoiceNoteCardView: View {
                 case .result(let content):
                     metadata(date: content.date, language: content.language, duration: content.durationLabel)
                     summarySection(content)
-                    textBlock(title: Text("Transcript"), text: content.transcript, target: "transcript")
+                    textBlock(title: Text("Transcript"), text: content.transcript, target: "transcript",
+                              offersVocabulary: true)
                 case .pending(let note):
                     metadata(date: note.receivedAt, language: nil, duration: note.durationLabel)
                     pendingCard(note)
@@ -134,6 +138,11 @@ struct VoiceNoteCardView: View {
             .padding()
         }
         .task(id: activationKey) { await activate() }
+        .sheet(item: $vocabularySubject) { subject in
+            NavigationStack {
+                VocabularyEditorView(subject: subject)
+            }
+        }
     }
 
     // MARK: - Activation
@@ -297,7 +306,14 @@ struct VoiceNoteCardView: View {
         .dictusGlass()
     }
 
-    private func textBlock(title: Text, text: String, target: String) -> some View {
+    /// One titled block of text with its copy and share buttons.
+    ///
+    /// `offersVocabulary` is true for the transcript only (#723). The transcript is
+    /// what the engine wrote, so a word misheard there is a variant worth teaching
+    /// Dictus; the summary is the model's own rewrite of it, and a word picked there
+    /// is not something the engine will ever write again.
+    private func textBlock(title: Text, text: String, target: String,
+                           offersVocabulary: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 title.font(.dictusSubheading)
@@ -321,12 +337,19 @@ struct VoiceNoteCardView: View {
                 .accessibilityLabel(Text("Share"))
             }
 
-            Text(text)
-                .font(.dictusBody)
-                .foregroundColor(.primary)
-                .multilineTextAlignment(.leading)
+            if offersVocabulary {
+                TranscriptTextView(text: text) { variant in
+                    vocabularySubject = .observed(variant: variant)
+                }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .textSelection(.enabled)
+            } else {
+                Text(text)
+                    .font(.dictusBody)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .textSelection(.enabled)
+            }
         }
         .padding()
         .dictusGlass()

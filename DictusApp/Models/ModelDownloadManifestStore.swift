@@ -53,16 +53,12 @@ enum ManifestStore {
         directory(model)?.appendingPathComponent(manifestFileName)
     }
 
-    /// The partial being assembled for one file. Empty path when the container is
-    /// unreachable, which every caller turns into a plain file-system failure.
-    static func partialURL(_ model: String, fileIndex: Int) -> URL {
-        directory(model)?.appendingPathComponent("\(fileIndex).part")
-            ?? URL(fileURLWithPath: "/dev/null/\(fileIndex).part")
-    }
-
-    static func chunkURL(_ model: String, fileIndex: Int, chunkIndex: Int) -> URL {
-        directory(model)?.appendingPathComponent("\(fileIndex)-\(chunkIndex).chunk")
-            ?? URL(fileURLWithPath: "/dev/null/\(fileIndex)-\(chunkIndex).chunk")
+    /// The disk half of one model's staging area: chunks, partials, absorb, publish
+    /// (issue #732 moved it to DictusCore, where it is tested). A `/dev/null` directory
+    /// when the container is unreachable, which every caller turns into a plain
+    /// file-system failure.
+    static func staging(_ model: String) -> ModelDownloadStaging {
+        ModelDownloadStaging(directory: directory(model) ?? URL(fileURLWithPath: "/dev/null"))
     }
 
     // MARK: Manifest
@@ -110,75 +106,6 @@ enum ManifestStore {
     /// Drops one file's partial and every chunk of it, leaving the rest of the download
     /// intact. Used when a range was refused or an assembled file failed its checksum.
     static func discardFile(_ model: String, fileIndex: Int) {
-        try? FileManager.default.removeItem(at: partialURL(model, fileIndex: fileIndex))
-        for index in storedChunkIndices(model, fileIndex: fileIndex) {
-            try? FileManager.default.removeItem(
-                at: chunkURL(model, fileIndex: fileIndex, chunkIndex: index)
-            )
-        }
-    }
-
-    // MARK: Chunks
-
-    /// Chunk indices whose bytes are durably on disk for this file.
-    static func storedChunkIndices(_ model: String, fileIndex: Int) -> Set<Int> {
-        guard let directory = directory(model),
-              let entries = try? FileManager.default.contentsOfDirectory(atPath: directory.path)
-        else { return [] }
-        let prefix = "\(fileIndex)-"
-        let suffix = ".chunk"
-        var result: Set<Int> = []
-        for entry in entries where entry.hasPrefix(prefix) && entry.hasSuffix(suffix) {
-            let middle = entry.dropFirst(prefix.count).dropLast(suffix.count)
-            if let index = Int(middle) { result.insert(index) }
-        }
-        return result
-    }
-
-    /// Moves a completed chunk out of the system's temporary location, which is emptied
-    /// the instant `didFinishDownloadingTo` returns. This move is the whole reason the
-    /// download is chunked: it is where in-flight bytes become durable ones.
-    static func store(chunkAt location: URL, model: String, fileIndex: Int, chunkIndex: Int) throws {
-        guard let directory = directory(model) else {
-            throw CocoaError(.fileNoSuchFile)
-        }
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let destination = chunkURL(model, fileIndex: fileIndex, chunkIndex: chunkIndex)
-        if FileManager.default.fileExists(atPath: destination.path) {
-            try FileManager.default.removeItem(at: destination)
-        }
-        try FileManager.default.moveItem(at: location, to: destination)
-    }
-
-    /// Appends chunks, in the order given, to the file's partial and deletes them.
-    ///
-    /// Streamed in 1 MB reads: a chunk is 32 MB and this runs in an app iOS already
-    /// watches for memory (issues #104, #362).
-    static func append(chunks: [Int], ofFile fileIndex: Int, model: String, startingAt: Int64) throws {
-        guard !chunks.isEmpty else { return }
-        let partial = partialURL(model, fileIndex: fileIndex)
-        if !FileManager.default.fileExists(atPath: partial.path) {
-            FileManager.default.createFile(atPath: partial.path, contents: nil)
-        }
-        let writer = try FileHandle(forWritingTo: partial)
-        defer { try? writer.close() }
-        // Everything past the manifest's offset is unaccounted for — bytes a process
-        // that died mid-append wrote and never recorded. Dropping them is what makes an
-        // append idempotent, and an append that is not idempotent silently doubles a
-        // chunk inside a 445 MB file.
-        try writer.truncate(atOffset: UInt64(max(0, startingAt)))
-        try writer.seekToEnd()
-
-        for chunkIndex in chunks {
-            let source = chunkURL(model, fileIndex: fileIndex, chunkIndex: chunkIndex)
-            let reader = try FileHandle(forReadingFrom: source)
-            defer { try? reader.close() }
-            while let data = try reader.read(upToCount: 1 << 20), !data.isEmpty {
-                try writer.write(contentsOf: data)
-            }
-            try? reader.close()
-            try? FileManager.default.removeItem(at: source)
-        }
-        try writer.synchronize()
+        staging(model).discardFile(fileIndex: fileIndex)
     }
 }

@@ -7,9 +7,11 @@ import DictusCore
 /// Onboarding flow presented as a fullScreenCover on first launch.
 /// Steps (#649, #675): intro, language, keyboard setup, Apple Intelligence (#683, only on a
 /// capable iPhone where it is not ready), the Smart Modes scene (#679) and right after it
-/// the pick of three Smart Modes (#677), both only where Smart Modes can run, model
+/// the pick of three Smart Modes (#677), then the voice notes, vocabulary and history
+/// scenes (#680), all only where Smart Modes can run, model
 /// preparation (only while the model is still downloading or compiling), microphone (only
-/// while not yet granted), first dictation through the globe key, completion. The order is
+/// while not yet granted), first dictation through the globe key, how to stop Dictus from the
+/// Dynamic Island or the Lock Screen (#681), completion. The order is
 /// `OnboardingStep.allCases`; which steps are passed over is
 /// `OnboardingStep.next(skipping:deviceCanRunSmartModes:)`.
 ///
@@ -63,6 +65,18 @@ struct OnboardingView: View {
     /// not change during an onboarding, and the progress bar must not change length.
     @State private var deviceCanRunSmartModes = SmartModeAvailability.deviceIsCapable
 
+    /// The language step's choices as the user left them by going back to the intro
+    /// (#700), so the step shows them again instead of the prefill. nil until then.
+    ///
+    /// WHY HERE: the page is rebuilt on every visit (`.id(step)`), and its own state goes
+    /// with it. Held in memory only: nothing is written before the step is confirmed,
+    /// because confirming is what applies the setup and starts the download.
+    @State private var languageDraft: LanguageSetup?
+
+    /// Whether the last step change went back (#700), which turns the slide around: the
+    /// intro comes in from the leading edge and the language page leaves by the trailing one.
+    @State private var isGoingBack = false
+
     /// Reset when the first dictation is left, so Home does not open on its transcription.
     @EnvironmentObject private var coordinator: DictationCoordinator
 
@@ -72,13 +86,13 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // The shell's top row (#675): progress bar and Skip. Outside the sliding
-                // page so it stays put while the pages change under it, and only its
-                // segments animate.
+                // The shell's top row (#675, #700): back chevron and progress bar. Outside
+                // the sliding page so it stays put while the pages change under it, and
+                // only its segments animate.
                 OnboardingTopBar(
                     step: step,
                     deviceCanRunSmartModes: deviceCanRunSmartModes,
-                    onSkip: step.isSkippable ? skip : nil
+                    onBack: step.stepBack != nil ? goBack : nil
                 )
                     .padding(.top, OnboardingMetrics.topBarTopPadding)
 
@@ -91,7 +105,7 @@ struct OnboardingView: View {
                     case .welcome:
                         WelcomePage(onNext: advance)
                     case .language:
-                        LanguageSetupPage(onConfirm: confirmLanguage)
+                        LanguageSetupPage(draft: $languageDraft, onConfirm: confirmLanguage)
                     case .keyboardSetup:
                         KeyboardSetupPage(onNext: advance)
                     case .appleIntelligence:
@@ -112,6 +126,24 @@ struct OnboardingView: View {
                             modelIdentifier: onboardingModel,
                             onContinue: advance
                         )
+                    case .voiceNotesScene:
+                        VoiceNotesScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .vocabularyScene:
+                        VocabularyScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
+                    case .historyScene:
+                        HistoryScenePage(
+                            modelManager: modelManager,
+                            modelIdentifier: onboardingModel,
+                            onNext: advance
+                        )
                     case .modelPreparation:
                         ModelDownloadPage(
                             modelManager: modelManager,
@@ -122,16 +154,22 @@ struct OnboardingView: View {
                         MicPermissionPage(onNext: advance)
                     case .firstDictation:
                         GlobeKeyTutorialPage(onComplete: leaveFirstDictation)
+                    case .stopStandby:
+                        StopStandbyPage(onNext: advance)
                     case .completion:
                         OnboardingSuccessView(onComplete: finish)
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // The Skip under the primary button (#700), drawn by the page's shell
+                // (`OnboardingSkipRow`) on the steps that offer it.
+                .environment(\.onboardingSkip, step.isSkippable ? OnboardingSkipAction(perform: skip) : nil)
                 // Slide transition: new page slides in from trailing edge,
                 // old page slides out to leading edge — standard forward navigation feel.
+                // Going back (#700) runs it the other way round.
                 .transition(.asymmetric(
-                    insertion: .move(edge: .trailing),
-                    removal: .move(edge: .leading)
+                    insertion: .move(edge: isGoingBack ? .leading : .trailing),
+                    removal: .move(edge: isGoingBack ? .trailing : .leading)
                 ))
                 .id(step) // Force SwiftUI to treat each page as a unique view for transitions
             }
@@ -148,32 +186,46 @@ struct OnboardingView: View {
 
     // MARK: - Skip
 
-    /// The shell's Skip, on the steps that offer it (`OnboardingStep.isSkippable`).
+    /// The shell's Skip, under the primary button on the steps that offer it
+    /// (`OnboardingStep.isSkippable`, `OnboardingSkipRow`).
     ///
-    /// - The Smart Modes scene: jumps the whole scene sequence, the pick inside it included
-    ///   (#679, #649 decision 8). Nothing is written, so the fan keeps the seed.
-    /// - The Smart Mode pick: moves on writing nothing, so the fan keeps the seed (#677).
-    /// - The first dictation: closes the keyboard and goes to the completion screen, as a
-    ///   finished dictation does.
+    /// - A feature scene (Smart Modes, voice notes, vocabulary, history): jumps the whole
+    ///   scene sequence, the pick inside it included (#679, #680, #649 decision 8). Nothing
+    ///   is written, so the fan keeps the seed.
+    /// - The Smart Mode pick: writes nothing, so the fan keeps the seed (#677), and jumps
+    ///   the rest of the sequence like the scenes around it.
+    ///
+    ///   WHY THE PICK JUMPS TOO (#680): the shell draws one Skip at one place on every page
+    ///   of the sequence, and decision 8 gives it one meaning. Before #680 the pick was the
+    ///   sequence's last step, so its plain "next" and the jump landed on the same step;
+    ///   with the three scenes after it, keeping a plain "next" would make the same button
+    ///   leave the sequence on one page and stay in it on the next.
+    /// - The first dictation: closes the keyboard and moves on, as a finished dictation
+    ///   does, to how to stop Dictus (#681).
     private func skip() {
         switch step {
-        case .smartModesScene:
-            guard let next = step.stepAfterSceneSequence(
-                skipping: satisfiedSteps, deviceCanRunSmartModes: deviceCanRunSmartModes
-            ) else { return }
-            PersistentLog.log(.onboardingSceneSequenceSkipped(from: step.rawValue, to: next.rawValue))
-            go(to: next)
+        case .smartModesScene, .voiceNotesScene, .vocabularyScene, .historyScene:
+            skipSceneSequence()
         case .smartModePick:
             PersistentLog.log(.onboardingSmartModePickSkipped)
-            advance()
+            skipSceneSequence()
         case .firstDictation:
             PersistentLog.log(.onboardingGlobeTutorialSkipped)
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             leaveFirstDictation()
         case .welcome, .language, .keyboardSetup, .appleIntelligence, .modelPreparation, .microphone,
-             .completion:
+             .stopStandby, .completion:
             advance()
         }
+    }
+
+    /// Leaves the scene sequence for the first step after it (`stepAfterSceneSequence`).
+    private func skipSceneSequence() {
+        guard let next = step.stepAfterSceneSequence(
+            skipping: satisfiedSteps, deviceCanRunSmartModes: deviceCanRunSmartModes
+        ) else { return }
+        PersistentLog.log(.onboardingSceneSequenceSkipped(from: step.rawValue, to: next.rawValue))
+        go(to: next)
     }
 
     // MARK: - Model
@@ -215,6 +267,8 @@ struct OnboardingView: View {
     /// - The microphone: already granted on a second run, or by an install that went
     ///   through the order before #675, where the microphone came first. A denied
     ///   microphone is still shown, because that page says where to turn it back on.
+    /// - How to stop Dictus: passed over on an iPad, where iPadOS shows no Live Activity
+    ///   (#681, `OnboardingStep.passedOver(on:)`). Every iPhone sees it.
     private var satisfiedSteps: Set<OnboardingStep> {
         var satisfied: Set<OnboardingStep> = []
         if !AppleIntelligenceOnboarding.isStepNeeded {
@@ -226,13 +280,44 @@ struct OnboardingView: View {
         if AVAudioApplication.shared.recordPermission == .granted {
             satisfied.insert(.microphone)
         }
+        // How to stop Dictus: nothing to show on an iPad, which has no Live Activity (#681).
+        satisfied.formUnion(OnboardingStep.passedOver(on: DeviceCapabilities.current()))
         return satisfied
     }
 
     private func go(to newStep: OnboardingStep) {
         OnboardingStep.save(newStep)
-        withAnimation {
-            step = newStep
+        show(newStep, goingBack: false)
+    }
+
+    /// The shell's back control (#700): from the language step to the intro, which starts
+    /// again at its first page (`WelcomePage` is rebuilt). `OnboardingStep.goBack` records
+    /// the intro first, so an app killed now resumes there.
+    private func goBack() {
+        let from = step
+        guard let back = OnboardingStep.goBack(from: from) else { return }
+        PersistentLog.log(.onboardingWentBack(from: from.rawValue, to: back.rawValue))
+        show(back, goingBack: true)
+    }
+
+    /// Puts `newStep` on screen with the slide that matches the direction.
+    ///
+    /// WHY THE STEP CHANGES ONE TURN LATER WHEN THE DIRECTION FLIPS: a page that leaves
+    /// slides out with the transition it was last drawn with. Changing the direction and
+    /// the step together would send the leaving page off with the old direction's edge,
+    /// against the page coming in. The new direction is drawn first, then the step changes.
+    private func show(_ newStep: OnboardingStep, goingBack: Bool) {
+        guard goingBack != isGoingBack else {
+            withAnimation {
+                step = newStep
+            }
+            return
+        }
+        isGoingBack = goingBack
+        DispatchQueue.main.async {
+            withAnimation {
+                step = newStep
+            }
         }
     }
 
@@ -317,8 +402,8 @@ struct OnboardingView: View {
         return Text("The model is downloading now. It continues if you leave the app, but iOS slows it down a lot. To have it ready sooner, stay in Dictus, except to turn on the keyboard in Settings.")
     }
 
-    /// Leaves the first dictation, whether it succeeded or was skipped, for the completion
-    /// screen (#675: completion is a step of its own now, persisted like the others).
+    /// Leaves the first dictation, whether it succeeded or was skipped, for the next step:
+    /// how to stop Dictus (#681), then the completion screen (#675).
     ///
     /// WHY reset the coordinator here:
     /// If the user dictated during the first dictation, the DictationCoordinator holds the

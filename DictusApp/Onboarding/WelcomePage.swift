@@ -72,6 +72,12 @@ struct WelcomePage: View {
             OnboardingPrimaryButton(Text("Get started"), action: onNext)
                 .accessibilityIdentifier("onboarding.primary")
                 .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+
+            // The shell's Skip row, empty here (#700): the intro does not use the shell's
+            // page, so it reserves the row by hand, and its button sits at the same
+            // height as every other step's.
+            OnboardingSkipRow()
+                .padding(.top, OnboardingMetrics.skipRowSpacing)
                 .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
         }
         .onAppear(perform: startDwellOnCurrentPage)

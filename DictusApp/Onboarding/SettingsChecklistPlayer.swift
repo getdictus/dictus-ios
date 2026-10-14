@@ -33,6 +33,8 @@ protocol SettingsChecklistScript: AnyObject {
     func pollInBackground(sinceSettings: Int) -> SettingsChecklistPoll
     /// The page has seen the step done: the fact is now final.
     func markComplete()
+    /// The page no longer sees the step done (the keyboard removed, #713): the fact is reset.
+    func markIncomplete()
     /// The line states in `phase`.
     func states(for phase: SettingsChecklistPhase) -> [SettingsChecklistLineState]
 }
@@ -71,12 +73,15 @@ enum SettingsChecklistPoll: Equatable {
 ///   stops it too, because iOS terminates the app when that permission changes. On the
 ///   Apple Intelligence step, availability turning `available` ticks every line, and the
 ///   window goes a moment later (`stopsWhenComplete`).
+/// - If the keyboard is removed after the page detected it, the loop starts again as on
+///   first arrival (#713), but nothing is borrowed until the next tap (see
+///   `markIncomplete`).
 ///
 /// NOTHING SHOWS IN THE PAGE ON THE PICTURE IN PICTURE PATH (decided by Pierre after the
 /// device test of 2026-10-10): competitors show the guide only once the user is in
 /// Settings, and a card under the drawn Settings page repeated its numbered steps. The
 /// sample-buffer layer still has to be in the window for Picture in Picture to start
-/// from it, so it sits behind the drawn phone, covered (`ChecklistPictureSource`).
+/// from it, so it sits at the bottom of the page, covered (`ChecklistPictureSource`).
 ///
 /// THE FALLBACK: when Picture in Picture is unsupported, cannot start, or fails to,
 /// Settings opens anyway, and the page's existing return-from-Settings detection takes
@@ -140,6 +145,12 @@ final class SettingsChecklistPlayer: NSObject, ObservableObject {
 
     /// Opens Settings once the Picture in Picture window is up (or failed to come up).
     private var pendingSettingsOpen: (() -> Void)?
+    /// The step went back to "not detected" without the audio session (#713): the next tap
+    /// borrows it before starting Picture in Picture.
+    private var preparesOnTap = false
+    /// The tap is waiting for `isPictureInPicturePossible` before starting the window
+    /// (`.pictureInPictureOnceReady`), within the tap's deadline.
+    private var startsWhenPossible = false
     private var settingsOpenDeadline: DispatchWorkItem?
     /// Why the window was asked to stop, for the log. nil when the system or the user
     /// closed it.
@@ -210,6 +221,7 @@ final class SettingsChecklistPlayer: NSObject, ObservableObject {
         settingsOpenDeadline?.cancel()
         settingsOpenDeadline = nil
         pendingSettingsOpen = nil
+        startsWhenPossible = false
         if let pipController, pipController.isPictureInPictureActive {
             stopReason = "pageLeft"
             pipController.stopPictureInPicture()
@@ -230,19 +242,29 @@ final class SettingsChecklistPlayer: NSObject, ObservableObject {
         // The frame the window opens on is the guide's, not a demo frame.
         tick(forceFrame: true)
 
+        // Back in the not-detected state (#713), this tap is the user action that may
+        // borrow the audio session again.
+        let preparedByTheTap = preparesOnTap
+        if preparesOnTap {
+            preparesOnTap = false
+            preparePictureInPicture()
+        }
+
         let trip = SettingsChecklist.settingsTrip(
             isSupported: AVPictureInPictureController.isPictureInPictureSupported(),
             isPossible: pipController?.isPictureInPicturePossible ?? false,
-            isForcedOff: Self.isForcedOff
+            isForcedOff: Self.isForcedOff,
+            preparedByTheTap: preparedByTheTap
         )
         switch trip {
-        case .pictureInPictureThenSettings:
+        case .pictureInPictureThenSettings, .pictureInPictureOnceReady:
             guard let pipController else {
                 fallBackInline(reason: "noController")
                 open()
                 return
             }
-            log("pipStartRequested", script.factDetails)
+            let waits = trip == .pictureInPictureOnceReady
+            log("pipStartRequested", "\(script.factDetails) waitsForPossible=\(waits)")
             pendingSettingsOpen = open
             // Never leave the user on the page: if the window has not answered in time,
             // Settings opens anyway and the inline checklist plus the return detection take
@@ -250,13 +272,20 @@ final class SettingsChecklistPlayer: NSObject, ObservableObject {
             let deadline = DispatchWorkItem { [weak self] in
                 MainActor.assumeIsolated {
                     guard let self, self.pendingSettingsOpen != nil else { return }
+                    // A window that never became possible must not start after Settings.
+                    self.startsWhenPossible = false
                     self.fallBackInline(reason: "startTimeout")
                     self.openPendingSettings()
                 }
             }
             settingsOpenDeadline = deadline
             DispatchQueue.main.asyncAfter(deadline: .now() + Self.startTimeout, execute: deadline)
-            pipController.startPictureInPicture()
+            if waits {
+                // Started from the `isPictureInPicturePossible` observation.
+                startsWhenPossible = true
+            } else {
+                pipController.startPictureInPicture()
+            }
         case .settingsOnly(let reason):
             fallBackInline(reason: reason)
             open()
@@ -285,12 +314,41 @@ final class SettingsChecklistPlayer: NSObject, ObservableObject {
         }
     }
 
+    /// The page no longer finds what it had detected (the keyboard removed, #713): back to
+    /// the loop of first arrival, in time with the drawn page restarting above it.
+    ///
+    /// WHY NOTHING IS BORROWED HERE (decided by Pierre, 2026-10-12): Apple starts Picture in
+    /// Picture only from a user action, and the audio session must not be taken without one.
+    /// So the window waits for the next tap on Open Settings, which borrows the session
+    /// (`preparesOnTap`). The controller is built now, since building it borrows nothing and
+    /// lets the system get it ready before that tap. A session still held from an earlier
+    /// tap stays held: it is not borrowed again.
+    func markIncomplete() {
+        guard mode == .complete else { return }
+        mode = .demo
+        script.markIncomplete()
+        demoStartedAt = Date()
+        // As on first arrival: inline only where Picture in Picture is not used. A failure
+        // earlier in this visit shows the card again at the next tap's fallback.
+        showsInlineCard = !usesPictureInPicture
+        if usesPictureInPicture {
+            // Same guard as `preparePictureInPicture`: no controller where it is unsupported.
+            if pipController == nil, AVPictureInPictureController.isPictureInPictureSupported() {
+                makePictureInPictureController()
+            }
+            preparesOnTap = !audioSession.isBorrowed
+        }
+        log("reverted", "controller=\(pipController != nil) audioBorrowed=\(audioSession.isBorrowed)")
+        tick(forceFrame: true)
+    }
+
     /// The page has seen the step done (the keyboard detected, Apple Intelligence ready):
     /// everything is ticked, as the drawing shows.
     func markComplete() {
         guard mode != .complete else { return }
         mode = .complete
         script.markComplete()
+        preparesOnTap = false
         log("complete")
         tick(forceFrame: true)
         // Nothing will start Picture in Picture from here (the page offers Continue), so
@@ -457,9 +515,20 @@ final class SettingsChecklistPlayer: NSObject, ObservableObject {
         controller.canStartPictureInPictureAutomaticallyFromInline = false
         possibleObservation = controller.observe(\.isPictureInPicturePossible, options: [.initial, .new]) { [weak self] controller, _ in
             let possible = controller.isPictureInPicturePossible
-            Task { @MainActor in self?.log("pipPossible", "value=\(possible)") }
+            Task { @MainActor in
+                self?.log("pipPossible", "value=\(possible)")
+                if possible { self?.startIfWaiting() }
+            }
         }
         pipController = controller
+    }
+
+    /// Starts the window a tap is waiting for (`.pictureInPictureOnceReady`, #713).
+    private func startIfWaiting() {
+        guard startsWhenPossible, let pipController else { return }
+        startsWhenPossible = false
+        log("pipStartRequestedWhenPossible")
+        pipController.startPictureInPicture()
     }
 
     /// Picture in Picture will not carry the checklist this time: the page shows it.

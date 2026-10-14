@@ -9,25 +9,30 @@ import DictusCore
 /// so this screen is where a long dictation is read — and often only part of it is
 /// wanted. A copy button that can only take the whole thing makes the user paste and
 /// then delete.
+///
+/// It is also where a misrecognised word is noticed, so the selection's menu offers
+/// **Add to Vocabulary** beside Copy (#723), which opens the vocabulary sheet right
+/// here with the selection as the variant.
 struct TranscriptionDetailView: View {
 
     let record: TranscriptionRecord
 
     @State private var showCopiedFeedback = false
 
+    /// The vocabulary sheet started from a selection, or nil when it is closed.
+    @State private var vocabularySubject: VocabularyEditorSubject?
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 metadataRow
 
-                Text(record.text)
-                    .font(.dictusBody)
-                    .foregroundColor(.primary)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
-                    .padding()
-                    .dictusGlass()
+                TranscriptTextView(text: record.text) { variant in
+                    vocabularySubject = .observed(variant: variant)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+                .dictusGlass()
 
                 actions
             }
@@ -36,6 +41,14 @@ struct TranscriptionDetailView: View {
         .background(Color.dictusBackground.ignoresSafeArea())
         .navigationTitle("Transcription")
         .navigationBarTitleDisplayMode(.inline)
+        // Presented here, over the transcript, rather than by sending the user to
+        // the Vocabulary screen: the word they just selected is the context, and the
+        // sheet is the same one Vocabulary's own Add a term opens.
+        .sheet(item: $vocabularySubject) { subject in
+            NavigationStack {
+                VocabularyEditorView(subject: subject)
+            }
+        }
     }
 
     // MARK: - Metadata
