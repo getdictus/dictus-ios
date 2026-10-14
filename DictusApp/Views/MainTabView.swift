@@ -99,19 +99,13 @@ struct MainTabView: View {
     }
 
     /// What's new's steps on this device if it is due and has something to show, nil
-    /// otherwise (#685). A due What's new with nothing to show (an iPad that can never run
-    /// Smart Modes) is recorded as seen here, so the question is settled for good.
+    /// otherwise (#685). A device with nothing to show (one that can never run Smart Modes)
+    /// was already recorded at launch (`WhatsNew.recordLaunch`); the empty check only makes
+    /// sure no path can ever put an empty What's new on screen.
     private static func dueWhatsNewSteps() -> [OnboardingStep]? {
         guard WhatsNew.isDue() else { return nil }
-        let steps = WhatsNew.steps(
-            deviceCanRunSmartModes: SmartModeAvailability.deviceIsCapable,
-            device: DeviceCapabilities.current()
-        )
-        guard !steps.isEmpty else {
-            WhatsNew.recordSeen()
-            return nil
-        }
-        return steps
+        let steps = WhatsNew.steps(deviceCanRunSmartModes: SmartModeAvailability.deviceIsCapable)
+        return steps.isEmpty ? nil : steps
     }
 
     /// The active model as persisted in the App Group, with the shipped default.

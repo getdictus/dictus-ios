@@ -21,11 +21,6 @@ final class WhatsNewTests: XCTestCase {
         super.tearDown()
     }
 
-    private func device(_ identifier: String) -> DeviceCapabilities {
-        DeviceCapabilities(physicalMemoryGB: 8, availableMemoryMB: 0, deviceModelIdentifier: identifier,
-                           thermalState: .nominal)
-    }
-
     // MARK: - The rule
 
     func testTheEditionIsTwoPointZero() {
@@ -70,19 +65,19 @@ final class WhatsNewTests: XCTestCase {
     // MARK: - The key, launch after launch
 
     func testANewInstallIsRecordedAtItsFirstLaunchSoItsOnboardingNeverLeadsToWhatsNew() {
-        WhatsNew.recordLaunch(currentVersion: "2.0.0", defaults: defaults)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: true, currentVersion: "2.0.0", defaults: defaults)
         XCTAssertEqual(defaults.string(forKey: SharedKeys.lastVersionSeen), "2.0.0")
 
         // Onboarding completes, then the next launch.
         defaults.set(true, forKey: SharedKeys.hasCompletedOnboarding)
-        WhatsNew.recordLaunch(currentVersion: "2.0.0", defaults: defaults)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: true, currentVersion: "2.0.0", defaults: defaults)
         XCTAssertFalse(WhatsNew.isDue(defaults: defaults))
     }
 
     func testANewInstallOnADevelopmentBuildNeverSeesItEither() {
-        WhatsNew.recordLaunch(currentVersion: "1.9.0", defaults: defaults)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: true, currentVersion: "1.9.0", defaults: defaults)
         defaults.set(true, forKey: SharedKeys.hasCompletedOnboarding)
-        WhatsNew.recordLaunch(currentVersion: "2.0.0", defaults: defaults)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: true, currentVersion: "2.0.0", defaults: defaults)
         XCTAssertFalse(WhatsNew.isDue(defaults: defaults))
     }
 
@@ -91,12 +86,12 @@ final class WhatsNewTests: XCTestCase {
         defaults.set(true, forKey: SharedKeys.hasCompletedOnboarding)
 
         // The first launch of 2.0.0 leaves the key alone: What's new is due.
-        WhatsNew.recordLaunch(currentVersion: "2.0.0", defaults: defaults)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: true, currentVersion: "2.0.0", defaults: defaults)
         XCTAssertNil(defaults.string(forKey: SharedKeys.lastVersionSeen))
         XCTAssertTrue(WhatsNew.isDue(defaults: defaults))
 
         // A launch that could not show it (a dictation from the keyboard) leaves it due.
-        WhatsNew.recordLaunch(currentVersion: "2.0.0", defaults: defaults)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: true, currentVersion: "2.0.0", defaults: defaults)
         XCTAssertTrue(WhatsNew.isDue(defaults: defaults))
 
         // It appears.
@@ -105,49 +100,37 @@ final class WhatsNewTests: XCTestCase {
         XCTAssertFalse(WhatsNew.isDue(defaults: defaults))
 
         // Later launches, and later versions, keep it seen.
-        WhatsNew.recordLaunch(currentVersion: "2.0.0", defaults: defaults)
-        WhatsNew.recordLaunch(currentVersion: "2.0.1", defaults: defaults)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: true, currentVersion: "2.0.0", defaults: defaults)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: true, currentVersion: "2.0.1", defaults: defaults)
         XCTAssertEqual(defaults.string(forKey: SharedKeys.lastVersionSeen), "2.0.1")
         XCTAssertFalse(WhatsNew.isDue(defaults: defaults))
     }
 
     // MARK: - The steps
 
-    func testACapableIPhoneReplaysTheFourScenesThenTheStopTutorialAndNoSetupStep() {
-        let steps = WhatsNew.steps(deviceCanRunSmartModes: true, device: device("iPhone16,2"))
-        XCTAssertEqual(steps, [.smartModesScene, .voiceNotesScene, .vocabularyScene, .historyScene, .stopStandby])
+    func testACapableDeviceReplaysTheFourScenesAndNoSetupOrStopStep() {
+        // How to stop Dictus left What's new on 2026-10-14: it is not new (Pierre, PR #741).
+        let steps = WhatsNew.steps(deviceCanRunSmartModes: true)
+        XCTAssertEqual(steps, [.smartModesScene, .voiceNotesScene, .vocabularyScene, .historyScene])
         XCTAssertFalse(steps.contains(.smartModePick))
+        XCTAssertFalse(steps.contains(.stopStandby))
     }
 
-    func testAnIPhoneWithoutAnIslandStillGetsTheStopTutorial() {
-        // The Lock Screen variant: the page picks it, What's new keeps the step.
-        let steps = WhatsNew.steps(deviceCanRunSmartModes: true, device: device("iPhone14,7"))
-        XCTAssertEqual(steps.last, .stopStandby)
+    func testADeviceThatCanNeverRunSmartModesHasNothingToShowAndIsRecordedAtLaunch() {
+        XCTAssertTrue(WhatsNew.steps(deviceCanRunSmartModes: false).isEmpty)
+
+        // An existing user on such a device: due, but nothing to show, so the launch
+        // records it and What's new never appears, not even as an empty screen.
+        defaults.set(true, forKey: SharedKeys.hasCompletedOnboarding)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: false, currentVersion: "2.0.0", defaults: defaults)
+        XCTAssertEqual(defaults.string(forKey: SharedKeys.lastVersionSeen), "2.0.0")
+        XCTAssertFalse(WhatsNew.isDue(defaults: defaults))
     }
 
-    func testADeviceThatCanNeverRunSmartModesGetsOnlyTheStopTutorial() {
-        XCTAssertEqual(WhatsNew.steps(deviceCanRunSmartModes: false, device: device("iPhone13,2")), [.stopStandby])
-    }
-
-    func testAnIPadGetsTheScenesWithoutTheStopTutorial() {
-        XCTAssertEqual(WhatsNew.steps(deviceCanRunSmartModes: true, device: device("iPad13,4")),
-                       [.smartModesScene, .voiceNotesScene, .vocabularyScene, .historyScene])
-        XCTAssertTrue(WhatsNew.steps(deviceCanRunSmartModes: false, device: device("iPad13,4")).isEmpty)
-    }
-
-    func testNextWalksTheStepsAndEndsAfterTheLast() {
-        let steps = WhatsNew.steps(deviceCanRunSmartModes: true, device: device("iPhone16,2"))
+    func testNextWalksTheScenesAndEndsAfterHistory() {
+        let steps = WhatsNew.steps(deviceCanRunSmartModes: true)
         XCTAssertEqual(WhatsNew.next(after: .smartModesScene, in: steps), .voiceNotesScene)
-        XCTAssertEqual(WhatsNew.next(after: .historyScene, in: steps), .stopStandby)
-        XCTAssertNil(WhatsNew.next(after: .stopStandby, in: steps))
-    }
-
-    func testSkipFromAnySceneLandsOnTheStopTutorialOrEnds() {
-        let iPhone = WhatsNew.steps(deviceCanRunSmartModes: true, device: device("iPhone16,2"))
-        for scene in [OnboardingStep.smartModesScene, .voiceNotesScene, .vocabularyScene, .historyScene] {
-            XCTAssertEqual(WhatsNew.stepAfterScenes(from: scene, in: iPhone), .stopStandby, scene.rawValue)
-        }
-        let iPad = WhatsNew.steps(deviceCanRunSmartModes: true, device: device("iPad13,4"))
-        XCTAssertNil(WhatsNew.stepAfterScenes(from: .smartModesScene, in: iPad))
+        XCTAssertEqual(WhatsNew.next(after: .vocabularyScene, in: steps), .historyScene)
+        XCTAssertNil(WhatsNew.next(after: .historyScene, in: steps))
     }
 }

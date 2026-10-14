@@ -166,8 +166,9 @@ struct DictusApp: App {
         // What's new's key (#685), before `MainTabView` asks whether it is due. A launch
         // that has not completed onboarding is a new install: recorded as up to date now,
         // so its onboarding is never followed by What's new. An existing user's first
-        // launch of 2.0.0 is left due, and recorded once What's new is on screen.
-        WhatsNew.recordLaunch()
+        // launch of 2.0.0 is left due, and recorded once What's new is on screen. A device
+        // that can never run Smart Modes has no scene to show, and is recorded now.
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: SmartModeAvailability.deviceIsCapable)
 
         // Complete a Parakeet cache the 0.15 loader cannot use, before the coordinator's
         // launch preload can reach it (#558): layer 0 moves a 0.12 cache into the folder 0.15

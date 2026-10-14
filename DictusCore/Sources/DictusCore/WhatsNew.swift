@@ -2,10 +2,14 @@
 // Who sees What's new, once, and which onboarding scenes it replays (#685).
 import Foundation
 
-/// What's new for existing users (#685, #649 decisions 11 and 19): at the first launch of
-/// 2.0.0, an install that completed onboarding on an earlier version replays the feature
-/// scenes, without the setup steps, and the stop-Dictus tutorial. The existing-user trial
-/// announcement (#593) follows it.
+/// What's new for existing users (#685, #649 decision 11): at the first launch of 2.0.0, an
+/// install that completed onboarding on an earlier version replays the four feature
+/// scenes, without the setup steps. The existing-user trial announcement (#593) follows it.
+///
+/// WHY NOT HOW TO STOP DICTUS (#649 decision 19 said it was part of it; Pierre dropped it
+/// on 2026-10-14 after testing PR #741): stopping the standby from the island has existed
+/// since the app's first version. It is a reminder for new users, in the onboarding, not
+/// news for existing ones.
 ///
 /// WHY IN DICTUSCORE: who is an existing user, and when the key is written, are rules, and
 /// the app target has no test bundle.
@@ -28,13 +32,12 @@ public enum WhatsNew {
     /// The release whose What's new this is.
     public static let edition = "2.0.0"
 
-    /// The steps What's new plays, in onboarding order: the four feature scenes, then how
-    /// to stop Dictus.
+    /// The steps What's new plays, in onboarding order: the four feature scenes.
     ///
     /// WHY NOT THE SMART MODE PICK: it is a setup step. It writes the keyboard's pinned
     /// modes, and an existing user already has a fan, possibly chosen by hand.
     static let candidateSteps: [OnboardingStep] = [
-        .smartModesScene, .voiceNotesScene, .vocabularyScene, .historyScene, .stopStandby
+        .smartModesScene, .voiceNotesScene, .vocabularyScene, .historyScene
     ]
 
     // MARK: - The rule
@@ -71,27 +74,17 @@ public enum WhatsNew {
     /// The steps What's new plays on this device, in order. Empty when there is nothing to
     /// show, and then What's new is recorded as seen without appearing.
     ///
-    /// The onboarding's own rules decide: the four scenes are Pro steps, hidden on a device
-    /// that can never run Smart Modes (#593 decision 2), and how to stop Dictus is passed
-    /// over on an iPad, which shows no Live Activity (#681).
-    public static func steps(deviceCanRunSmartModes: Bool, device: DeviceCapabilities) -> [OnboardingStep] {
-        let passedOver = OnboardingStep.passedOver(on: device)
-        return candidateSteps.filter {
-            $0.isShown(deviceCanRunSmartModes: deviceCanRunSmartModes) && !passedOver.contains($0)
-        }
+    /// The onboarding's own rule decides: the four scenes are Pro steps, hidden on a device
+    /// that can never run Smart Modes (#593 decision 2). Such a device therefore has nothing
+    /// to show, and gets no trial announcement either.
+    public static func steps(deviceCanRunSmartModes: Bool) -> [OnboardingStep] {
+        candidateSteps.filter { $0.isShown(deviceCanRunSmartModes: deviceCanRunSmartModes) }
     }
 
     /// The step after `step` in `steps`, or nil when What's new ends.
     public static func next(after step: OnboardingStep, in steps: [OnboardingStep]) -> OnboardingStep? {
         guard let index = steps.firstIndex(of: step), index + 1 < steps.count else { return nil }
         return steps[index + 1]
-    }
-
-    /// Where a scene's Skip lands: the first step after the scenes, as in the onboarding
-    /// (#649 decision 8), or nil when What's new ends.
-    public static func stepAfterScenes(from step: OnboardingStep, in steps: [OnboardingStep]) -> OnboardingStep? {
-        guard let index = steps.firstIndex(of: step) else { return nil }
-        return steps[(index + 1)...].first { !$0.isInSceneSequence }
     }
 
     // MARK: - Persistence
@@ -111,11 +104,20 @@ public enum WhatsNew {
     }
 
     /// Called once per launch, before anything reads the key. Records the user as up to
-    /// date unless What's new is due, which is what keeps a new install from ever seeing
-    /// it. A due What's new is recorded when it appears (`recordSeen`) instead, so a launch
-    /// that cannot show it (a dictation started from the keyboard) leaves it for the next.
-    public static func recordLaunch(currentVersion: String = runningVersion, defaults: UserDefaults = AppGroup.defaults) {
-        guard !isDue(defaults: defaults) else { return }
+    /// date unless What's new is due and has something to show, which is what keeps a new
+    /// install from ever seeing it. A due What's new is recorded when it appears
+    /// (`recordSeen`) instead, so a launch that cannot show it (a dictation started from the
+    /// keyboard) leaves it for the next.
+    ///
+    /// - Parameter deviceCanRunSmartModes: `SmartModeAvailability.deviceIsCapable`. On a
+    ///   device that can never run Smart Modes What's new has no step (`steps`), so it is
+    ///   recorded here and never appears: no empty screen, and nothing left due for good.
+    public static func recordLaunch(deviceCanRunSmartModes: Bool,
+                                    currentVersion: String = runningVersion,
+                                    defaults: UserDefaults = AppGroup.defaults) {
+        guard !isDue(defaults: defaults) || steps(deviceCanRunSmartModes: deviceCanRunSmartModes).isEmpty else {
+            return
+        }
         recordSeen(currentVersion: currentVersion, defaults: defaults)
     }
 

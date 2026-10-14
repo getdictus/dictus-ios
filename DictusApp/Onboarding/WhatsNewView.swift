@@ -1,13 +1,13 @@
 // DictusApp/Onboarding/WhatsNewView.swift
-// What's new for existing users: the onboarding's feature scenes and how to stop Dictus (#685).
+// What's new for existing users: the onboarding's four feature scenes (#685).
 import SwiftUI
 import DictusCore
 
-/// What's new (#685, #649 decisions 11, 12 and 19): shown once, at the first launch of 2.0.0,
-/// to an install that completed onboarding on an earlier version. It replays the
-/// onboarding's own pages, without the setup steps: the Smart Modes, voice notes,
-/// vocabulary and history scenes, then how to stop Dictus, the question existing users ask
-/// most. Which pages, and who sees them, is `WhatsNew` in DictusCore.
+/// What's new (#685, #649 decisions 11 and 12): shown once, at the first launch of 2.0.0, to
+/// an install that completed onboarding on an earlier version. It replays the onboarding's
+/// own pages, without the setup steps: the Smart Modes, voice notes, vocabulary and history
+/// scenes. How to stop Dictus is not part of it (Pierre, 2026-10-14): it is not new. Which
+/// pages, and who sees them, is `WhatsNew` in DictusCore.
 ///
 /// WHY THE ONBOARDING'S PAGES AND NOT COPIES: decision 12, one feature-scene component for
 /// the onboarding, What's new and the hub. The pages already carry the shell's Next and
@@ -19,13 +19,13 @@ import DictusCore
 /// raises it once What's new is done. A cover would also have to wait for its own
 /// dismissal before the sheet could go up.
 struct WhatsNewView: View {
-    /// `WhatsNew.steps(deviceCanRunSmartModes:device:)`, never empty.
+    /// `WhatsNew.steps(deviceCanRunSmartModes:)`, never empty.
     let steps: [OnboardingStep]
     /// The app's model manager, read by the scene pages' download pill.
     @ObservedObject var modelManager: ModelManager
     /// The active model, the one the pill would show downloading.
     let modelIdentifier: String
-    /// The last page was left, by its button or by a Skip with nothing after it.
+    /// What's new was left: Next on the last scene, or Skip on any.
     let onFinish: () -> Void
 
     @State private var step: OnboardingStep
@@ -38,7 +38,7 @@ struct WhatsNewView: View {
         self.modelManager = modelManager
         self.modelIdentifier = modelIdentifier
         self.onFinish = onFinish
-        _step = State(initialValue: steps.first ?? .stopStandby)
+        _step = State(initialValue: steps.first ?? .smartModesScene)
     }
 
     var body: some View {
@@ -54,7 +54,8 @@ struct WhatsNewView: View {
                     page
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                // A scene's Skip jumps the scenes, as in the onboarding (#649 decision 8).
+                // A scene's Skip jumps the scenes, as in the onboarding (#649 decision 8),
+                // which here is the whole of What's new.
                 .environment(\.onboardingSkip, step.isInSceneSequence ? OnboardingSkipAction(perform: skip) : nil)
                 .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
                 .id(step)
@@ -107,11 +108,9 @@ struct WhatsNewView: View {
             VocabularyScenePage(modelManager: modelManager, modelIdentifier: modelIdentifier, onNext: advance)
         case .historyScene:
             HistoryScenePage(modelManager: modelManager, modelIdentifier: modelIdentifier, onNext: advance)
-        case .stopStandby:
-            StopStandbyPage(onNext: advance)
         case .welcome, .language, .keyboardSetup, .appleIntelligence, .smartModePick, .modelPreparation,
-             .microphone, .firstDictation, .completion:
-            // Setup steps: never in `WhatsNew.steps`.
+             .microphone, .firstDictation, .stopStandby, .completion:
+            // Never in `WhatsNew.steps`: the setup steps, and how to stop Dictus.
             EmptyView()
         }
     }
@@ -124,16 +123,10 @@ struct WhatsNewView: View {
         step = next
     }
 
+    /// Every page is a scene, so Skip leaves What's new, as it leaves the scene sequence in
+    /// the onboarding.
     private func skip() {
-        guard let next = WhatsNew.stepAfterScenes(from: step, in: steps) else {
-            finish(action: "skipped")
-            return
-        }
-        PersistentLog.log(.diagnosticProbe(
-            component: "whatsNew", instanceID: "0", action: "scenesSkipped",
-            details: "from=\(step.rawValue) to=\(next.rawValue)"
-        ))
-        step = next
+        finish(action: "skipped")
     }
 
     private func finish(action: String) {
