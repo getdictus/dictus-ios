@@ -25,6 +25,7 @@
 		SS000003 /* ProBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100003 /* ProBannerView.swift */; };
 		AA0000L1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L1 /* Localizable.xcstrings */; };
 		AA0000L2 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L2 /* Localizable.xcstrings */; };
+		AA0000L3 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L3 /* InfoPlist.xcstrings */; };
 		4647AD302F76AAA5003C3546 /* RecordingView.swift in Frameworks */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
 		4647AD312F76AAA5003C3546 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = AA900030 /* FluidAudio */; };
 		AA000001 /* DictusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001 /* DictusApp.swift */; };
@@ -258,6 +259,7 @@
 		AA1000L0 /* ModelInfo+Localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModelInfo+Localized.swift"; sourceTree = "<group>"; };
 		AA1000L1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		AA1000L2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		AA1000L3 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		AA100001 /* DictusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusApp.swift; sourceTree = "<group>"; };
 		AA100002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA100003 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
@@ -550,6 +552,7 @@
 				AA40000F /* Services */,
 				AA40000L /* Extensions */,
 				AA1000L1 /* Localizable.xcstrings */,
+				AA1000L3 /* InfoPlist.xcstrings */,
 				AA1000C0 /* Assets.xcassets */,
 				AA1000C1 /* Settings.bundle */,
 				AA1000F4 /* Sounds */,
@@ -1142,6 +1145,7 @@
 				AA0676A6 /* intro-c-dark.mp4 in Resources */,
 				AA000P10 /* PrivacyInfo.xcprivacy in Resources */,
 				AA0000L1 /* Localizable.xcstrings in Resources */,
+				AA0000L3 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
