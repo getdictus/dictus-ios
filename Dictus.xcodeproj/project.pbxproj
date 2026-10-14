@@ -20,6 +20,7 @@
 		SS000009 /* PaywallPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100009 /* PaywallPresentation.swift */; };
 		AA700070 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA700170 /* HistoryView.swift */; };
 		AA700071 /* TranscriptionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA700171 /* TranscriptionDetailView.swift */; };
+		AA723071 /* TranscriptTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA723171 /* TranscriptTextView.swift */; };
 		AA700072 /* SwipeUpHintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA700172 /* SwipeUpHintView.swift */; };
 		SS000003 /* ProBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100003 /* ProBannerView.swift */; };
 		AA0000L1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L1 /* Localizable.xcstrings */; };
@@ -91,6 +92,7 @@
 		AA000679 /* AnimatedScenePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100679 /* AnimatedScenePlayer.swift */; };
 		AA00679A /* OnboardingScenePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679A /* OnboardingScenePage.swift */; };
 		AA00679B /* SmartModesScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679B /* SmartModesScene.swift */; };
+		AA00704A /* FullAccessExplainerPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10704A /* FullAccessExplainerPage.swift */; };
 		AA006800 /* SceneTapTargets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106800 /* SceneTapTargets.swift */; };
 		AA006801 /* VoiceNotesScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106801 /* VoiceNotesScene.swift */; };
 		AA006802 /* VocabularyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106802 /* VocabularyScene.swift */; };
@@ -326,6 +328,7 @@
 		AA100679 /* AnimatedScenePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedScenePlayer.swift; sourceTree = "<group>"; };
 		AA10679A /* OnboardingScenePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScenePage.swift; sourceTree = "<group>"; };
 		AA10679B /* SmartModesScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModesScene.swift; sourceTree = "<group>"; };
+		AA10704A /* FullAccessExplainerPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullAccessExplainerPage.swift; sourceTree = "<group>"; };
 		AA106800 /* SceneTapTargets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneTapTargets.swift; sourceTree = "<group>"; };
 		AA106801 /* VoiceNotesScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNotesScene.swift; sourceTree = "<group>"; };
 		AA106802 /* VocabularyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyScene.swift; sourceTree = "<group>"; };
@@ -402,6 +405,7 @@
 		SS100009 /* PaywallPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallPresentation.swift; sourceTree = "<group>"; };
 		AA700170 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		AA700171 /* TranscriptionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionDetailView.swift; sourceTree = "<group>"; };
+		AA723171 /* TranscriptTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptTextView.swift; sourceTree = "<group>"; };
 		AA700172 /* SwipeUpHintView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeUpHintView.swift; sourceTree = "<group>"; };
 		SS100003 /* ProBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProBannerView.swift; sourceTree = "<group>"; };
 		SS100004 /* StoreKitConfig.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = StoreKitConfig.storekit; sourceTree = "<group>"; };
@@ -712,6 +716,7 @@
 				SS100009 /* PaywallPresentation.swift */,
 				AA700170 /* HistoryView.swift */,
 				AA700171 /* TranscriptionDetailView.swift */,
+				AA723171 /* TranscriptTextView.swift */,
 				AA700172 /* SwipeUpHintView.swift */,
 				SS100003 /* ProBannerView.swift */,
 				RT5930100004 /* ProTrialDebugSection.swift */,
@@ -756,6 +761,7 @@
 				AA100679 /* AnimatedScenePlayer.swift */,
 				AA10679A /* OnboardingScenePage.swift */,
 				AA10679B /* SmartModesScene.swift */,
+				AA10704A /* FullAccessExplainerPage.swift */,
 				AA106800 /* SceneTapTargets.swift */,
 				AA106801 /* VoiceNotesScene.swift */,
 				AA106802 /* VocabularyScene.swift */,
@@ -1308,6 +1314,7 @@
 				AA000679 /* AnimatedScenePlayer.swift in Sources */,
 				AA00679A /* OnboardingScenePage.swift in Sources */,
 				AA00679B /* SmartModesScene.swift in Sources */,
+				AA00704A /* FullAccessExplainerPage.swift in Sources */,
 				AA006800 /* SceneTapTargets.swift in Sources */,
 				AA006801 /* VoiceNotesScene.swift in Sources */,
 				AA006802 /* VocabularyScene.swift in Sources */,
@@ -1357,6 +1364,7 @@
 				SS000009 /* PaywallPresentation.swift in Sources */,
 				AA700070 /* HistoryView.swift in Sources */,
 				AA700071 /* TranscriptionDetailView.swift in Sources */,
+				AA723071 /* TranscriptTextView.swift in Sources */,
 				AA700072 /* SwipeUpHintView.swift in Sources */,
 				SS000003 /* ProBannerView.swift in Sources */,
 				VN6200000001 /* VoiceNoteProcessor.swift in Sources */,

@@ -7,7 +7,7 @@ import DictusCore
 /// and its line, the scene in a drawn iPhone, the download pill, and **Next**.
 ///
 /// WHY NEXT IS NEVER DISABLED: decision 8, a scene never blocks the flow; only the model
-/// does, and only on the preparation step. The shell's **Skip** (top right) jumps the
+/// does, and only on the preparation step. The shell's **Skip** (under **Next**, #700) jumps the
 /// whole sequence (`OnboardingStep.stepAfterSceneSequence`); `OnboardingView` owns it.
 ///
 /// Every scene of the sequence (Smart Modes, voice notes, vocabulary, history, #680) is
@@ -104,7 +104,7 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
             // header and a card of at least `minimumCardHeight` fit, the card takes the
             // rest of the height, as before. When they do not, the same content scrolls,
             // with the card at that minimum height. Next is outside both, pinned, so it
-            // is always reachable; the shell's Skip is in the top bar.
+            // is always reachable, and so is the shell's Skip under it (#700).
             ViewThatFits(in: .vertical) {
                 VStack(spacing: 0) {
                     header
@@ -134,6 +134,9 @@ struct OnboardingScenePage<Scene: View, CardHeader: View>: View {
                 OnboardingDownloadPill(modelManager: modelManager, modelIdentifier: modelIdentifier)
                 OnboardingPrimaryButton(Text("Next"), action: onNext)
                     .accessibilityIdentifier("onboarding.primary")
+                // The shell's Skip row (#700): reserved on every step, so Next sits at the
+                // same height as every other step's button.
+                OnboardingSkipRow()
             }
             .padding(.horizontal, OnboardingMetrics.horizontalPadding)
             .padding(.bottom, OnboardingMetrics.buttonBottomPadding)

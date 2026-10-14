@@ -52,6 +52,9 @@ struct KeyboardSetupPage: View {
     /// in Picture over Settings (#682).
     @StateObject private var checklist = KeyboardSetupChecklistPlayer()
 
+    /// Whether the "Why Full Access?" sheet is up (#704).
+    @State private var showsFullAccessExplainer = false
+
     var body: some View {
         OnboardingPage(
             title: Text("Turn on the keyboard"),
@@ -82,6 +85,8 @@ struct KeyboardSetupPage: View {
                 }
             }
         } bottom: {
+            fullAccessWarning
+
             Text("Nothing you type leaves your iPhone.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
@@ -100,6 +105,10 @@ struct KeyboardSetupPage: View {
                     .accessibilityIdentifier("onboarding.openSettings")
                     .transition(.opacity)
             }
+        }
+        .sheet(isPresented: $showsFullAccessExplainer) {
+            FullAccessExplainerPage { showsFullAccessExplainer = false }
+                .presentationDragIndicator(.visible)
         }
         .onAppear {
             checkKeyboardInstalled()
@@ -157,20 +166,17 @@ struct KeyboardSetupPage: View {
                     checkKeyboardInstalled()
                 }
 
-                // If not detected, retry at 2s (covers slow Settings sync)
-                if !keyboardDetected && !Task.isCancelled {
-                    try? await Task.sleep(for: .milliseconds(1200))
-                    if Task.isCancelled { return }
-                    await MainActor.run {
-                        guard !Task.isCancelled else { return }
-                        PersistentLog.log(.onboardingKeyboardRetry)
-                        checkKeyboardInstalled()
-                        isCheckingKeyboard = false
-                    }
-                } else {
-                    await MainActor.run {
-                        isCheckingKeyboard = false
-                    }
+                // Retry at 2s whatever the first check found (covers slow Settings sync).
+                // WHY EVEN WHEN DETECTED (#713): detection now goes both ways, and the list
+                // can lag behind a removed keyboard as it lags behind an added one.
+                if Task.isCancelled { return }
+                try? await Task.sleep(for: .milliseconds(1200))
+                if Task.isCancelled { return }
+                await MainActor.run {
+                    guard !Task.isCancelled else { return }
+                    PersistentLog.log(.onboardingKeyboardRetry)
+                    checkKeyboardInstalled()
+                    isCheckingKeyboard = false
                 }
             }
             #if DEBUG
@@ -189,6 +195,15 @@ struct KeyboardSetupPage: View {
                     dictusToggleOn = true
                     fullAccessToggleOn = true
                 }
+            } else {
+                // Dictus was removed while the step showed it detected (#713): back to the
+                // first-arrival presentation, the drawn loop and the checklist restarting
+                // together. Nothing starts Picture in Picture or borrows the audio session
+                // here; the next tap on Open Settings does.
+                checklist.keyboardRemoved()
+                animationTimer?.invalidate()
+                animationTimer = nil
+                startToggleAnimation()
             }
         }
         .animation(.easeInOut(duration: 0.3), value: keyboardDetected)
@@ -241,6 +256,51 @@ struct KeyboardSetupPage: View {
             .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity)
         }
+    }
+
+    // MARK: - Full Access warning (#704)
+
+    /// Above the button: Apple's alert is coming, and it is the same for every keyboard.
+    /// Then the link to the sheet that says what Dictus does with Full Access.
+    ///
+    /// WHY THE WARNING NEEDS NO TAP: the user who will be scared by the alert does not know
+    /// it is coming, so would never tap a link to find out. One line read on the way to
+    /// Settings is enough to turn the surprise into something expected. The reasons sit
+    /// behind the link, for the user who wants them (amended brief, 2026-10-13).
+    ///
+    /// WHY PINNED ABOVE THE BUTTON AND NOT IN THE DRAWING: the drawing is iOS's Settings
+    /// page, and Settings has no such link. It replaces the drawing's old caption, "Full
+    /// Access is for the keyboard's microphone", which the sheet now says properly. Pinned
+    /// with the button, the line is on screen on every iPhone size and on both checklist
+    /// paths; under the drawing, the fallback card (#682) pushed it below the fold.
+    ///
+    /// WHY THE LINK IS HIDDEN BEFORE THE A14 (#635): the sheet's first point says that
+    /// without Full Access the keyboard types but cannot dictate, as if Full Access were
+    /// what makes it dictate. Such a keyboard cannot dictate at all, and the notice below
+    /// says so. The warning stays: Apple shows the alert there too, it is just as true.
+    private var fullAccessWarning: some View {
+        VStack(spacing: 4) {
+            Text("At step 3, Apple will show an alert, the same for every keyboard.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if device.supportsKeyboardDictation {
+                Button(action: openFullAccessExplainer) {
+                    Text("Why Full Access?")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Color.dictusAccent)
+                }
+                .accessibilityIdentifier("onboarding.fullAccess.why")
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func openFullAccessExplainer() {
+        PersistentLog.log(.onboardingFullAccessExplainerOpened)
+        showsFullAccessExplainer = true
     }
 
     // MARK: - Pre-A14 notice (#635)
@@ -353,16 +413,6 @@ struct KeyboardSetupPage: View {
                 }
             }
 
-            // Why Full Access is asked for. Only where it is true: a pre-A14 keyboard has
-            // no microphone (#635), and the notice below the drawing says so.
-            if device.supportsKeyboardDictation {
-                Text("Full Access is for the keyboard's microphone.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.leading, 4)
-                    .padding(.top, 8)
-            }
         }
         .font(.body)
         .padding(.horizontal, 18)
@@ -482,23 +532,27 @@ struct KeyboardSetupPage: View {
     /// UITextInputMode.activeInputModes can be unstable during rapid scenePhase
     /// transitions (e.g., returning from Settings). value(forKey:) is KVO and
     /// can return unexpected types. Guard against both to prevent crashes.
+    ///
+    /// WHY BOTH WAYS (#713): the step used to stay on "Keyboard detected" once it had
+    /// shown it, even after Dictus was removed, and the user went on to a first dictation
+    /// whose hint led nowhere. A list read without Dictus now takes the step back; an
+    /// unreadable (empty) list changes nothing (`DictusKeyboardPresence`).
     private func checkKeyboardInstalled() {
         let modes = UITextInputMode.activeInputModes
         PersistentLog.log(.onboardingKeyboardCheckStarted(modeCount: modes.count))
 
-        for mode in modes {
-            // value(forKey:) is KVO — guard against unexpected nil or type mismatch
-            guard let identifier = mode.value(forKey: "identifier") as? String else {
-                continue
-            }
-            if identifier.contains("com.pivi.dictus") {
-                PersistentLog.log(.onboardingKeyboardDetected(identifier: identifier))
-                keyboardDetected = true
-                return
-            }
+        // value(forKey:) is KVO — guard against unexpected nil or type mismatch
+        let identifiers = modes.compactMap { $0.value(forKey: "identifier") as? String }
+        switch DictusKeyboardPresence(inputModeIdentifiers: identifiers) {
+        case .listed(let identifier):
+            PersistentLog.log(.onboardingKeyboardDetected(identifier: identifier))
+            keyboardDetected = true
+        case .notListed:
+            PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
+            keyboardDetected = false
+        case .unreadable:
+            PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
         }
-
-        PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
     }
 }
 

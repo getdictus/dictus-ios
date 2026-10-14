@@ -234,6 +234,19 @@ public enum LogEvent: Sendable {
     /// it (#690). Every `cancel()` on a model download task goes through a line like this,
     /// so a `-999` with no such line before it was not ours: it came from the system.
     case modelDownloadTaskCancelled(name: String, path: String, chunk: Int, caller: String)
+    /// Chunks found durably on disk but never folded into their file were absorbed by
+    /// `pump`, with no completion to do it (#732), or refused for the wrong length and
+    /// deleted so they are asked for again. `file` is the file's index in the manifest,
+    /// `absorbed` the chunk indices appended, `discarded` one `<chunk>:<reason>` per chunk
+    /// thrown away. A line here means a process died between a chunk landing and its
+    /// append, and the relaunch recovered instead of freezing.
+    case modelDownloadOrphanedChunks(
+        name: String,
+        path: String,
+        file: Int,
+        absorbed: [Int],
+        discarded: [String]
+    )
 
     // MARK: Keyboard
     case keyboardDidAppear
@@ -379,6 +392,8 @@ public enum LogEvent: Sendable {
     /// (#709). It goes straight to Settings, so no `onboardingChecklist` line (no Picture
     /// in Picture, no audio session) should follow it.
     case onboardingFullAccessLinkOpened
+    /// The "Why Full Access?" link on the keyboard step opened its explainer sheet (#704).
+    case onboardingFullAccessExplainerOpened
     case onboardingDictusKeyboardActivated
     case onboardingGlobeTutorialTextDetected
     case onboardingGlobeTutorialSkipped
@@ -406,6 +421,9 @@ public enum LogEvent: Sendable {
     /// The Skip of a feature scene jumped the whole scene sequence (#679, #649 decision 8).
     /// `from` is the step it was tapped on, `to` the step it landed on.
     case onboardingSceneSequenceSkipped(from: String, to: String)
+    /// The back control of the onboarding shell was tapped (#700). `from` is the step it
+    /// was tapped on, `to` the step it returned to.
+    case onboardingWentBack(from: String, to: String)
     /// The "how to stop Dictus" step appeared (#681). `variant` is `island` or `lockScreen`
     /// (`DeviceCapabilities.hasDynamicIsland`), `model` the identifier it was read from, so
     /// a device test can tell which picture a given iPhone was shown, and why.
@@ -667,7 +685,7 @@ public enum LogEvent: Sendable {
              .modelDownloadResumed, .modelDownloadRangeRejected, .modelDownloadChunk,
              .modelDownloadIntegrityFailed, .modelDownloadSessionRestored,
              .modelDownloadOffline, .modelDownloadTaskState, .modelDownloadBackgroundTaskSilent,
-             .modelDownloadTaskCancelled:
+             .modelDownloadTaskCancelled, .modelDownloadOrphanedChunks:
             return .model
         case .keyboardDidAppear, .keyboardDidDisappear, .keyboardMicTapped, .keyboardTextInserted,
              .hostReturn,
@@ -690,13 +708,13 @@ public enum LogEvent: Sendable {
         case .onboardingScenePhaseChanged, .onboardingKeyboardCheckStarted,
              .onboardingKeyboardDetected, .onboardingKeyboardNotFound,
              .onboardingKeyboardCheckSkipped, .onboardingKeyboardRetry,
-             .onboardingFullAccessLinkOpened,
+             .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped, .onboardingStopStandbyShown:
+             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown:
             return .lifecycle
         case .coldStartURLReceived, .coldStartFlagSet, .coldStartRetry, .coldStartDarwinFallback,
              .coldStartStranded:
@@ -734,6 +752,12 @@ public enum LogEvent: Sendable {
         case .dictationMessageCleared(_, let displayedCount):
             return displayedCount == 0 ? .warning : .info
 
+        // Notice at least, the lowest level the unified log persists: this line is read
+        // from a device capture taken after the process that wrote it is gone (#732). A
+        // chunk refused for its length is the rarer, worse half, so it reads as a warning.
+        case .modelDownloadOrphanedChunks(_, _, _, _, let discarded):
+            return discarded.isEmpty ? .notice : .warning
+
         // Errors
         case .dictationFailed, .audioSessionFailed, .transcriptionFailed,
              .modelDownloadFailed, .modelDeleteFailed,
@@ -758,13 +782,13 @@ public enum LogEvent: Sendable {
             return .warning
 
         // Info (normal operations: starts, completes, selections, configs)
-        case .onboardingKeyboardDetected, .onboardingFullAccessLinkOpened,
+        case .onboardingKeyboardDetected, .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened,
              .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped, .onboardingAppleIntelligenceChecked,
              .onboardingAppleIntelligenceDeferred, .onboardingAppleIntelligenceSettingUpShown,
              .onboardingAppleIntelligenceBecameAvailable,
              .onboardingSmartModesPicked, .onboardingSmartModePickSkipped,
-             .onboardingSceneSequenceSkipped, .onboardingStopStandbyShown,
+             .onboardingSceneSequenceSkipped, .onboardingWentBack, .onboardingStopStandbyShown,
              .dictationStarted, .dictationCompleted,
              .audioEngineStarted, .audioSessionConfigured,
              // Info, not debug like its siblings: it is the one line that says why the
@@ -970,6 +994,10 @@ public enum LogEvent: Sendable {
                 + "noByte=\(secondsWithoutByte)s"
         case .modelDownloadTaskCancelled(let name, let path, let chunk, let caller):
             return "name=\(name) path=\(path) chunk=\(chunk) caller=\(caller)"
+        case .modelDownloadOrphanedChunks(let name, let path, let file, let absorbed, let discarded):
+            let absorbedList = absorbed.isEmpty ? "none" : absorbed.map(String.init).joined(separator: ",")
+            let discardedList = discarded.isEmpty ? "none" : discarded.joined(separator: ",")
+            return "name=\(name) path=\(path) file=\(file) absorbed=\(absorbedList) discarded=\(discardedList)"
 
         // Keyboard (no content parameters -- privacy)
         case .keyboardDidAppear, .keyboardDidDisappear,
@@ -1009,7 +1037,7 @@ public enum LogEvent: Sendable {
             return "modeCount=\(modeCount)"
         case .onboardingKeyboardCheckSkipped(let reason):
             return "reason=\(reason)"
-        case .onboardingKeyboardRetry, .onboardingFullAccessLinkOpened:
+        case .onboardingKeyboardRetry, .onboardingFullAccessLinkOpened, .onboardingFullAccessExplainerOpened:
             return ""
         case .onboardingDictusKeyboardActivated, .onboardingGlobeTutorialTextDetected,
              .onboardingGlobeTutorialSkipped:
@@ -1025,7 +1053,8 @@ public enum LogEvent: Sendable {
             return "identifiers=\(identifiers)"
         case .onboardingSmartModePickSkipped:
             return ""
-        case .onboardingSceneSequenceSkipped(let from, let to):
+        case .onboardingSceneSequenceSkipped(let from, let to),
+             .onboardingWentBack(let from, let to):
             return "from=\(from) to=\(to)"
         case .onboardingStopStandbyShown(let variant, let model):
             return "variant=\(variant) model=\(model)"
@@ -1278,6 +1307,7 @@ extension LogEvent {
         case .onboardingKeyboardCheckSkipped: return "onboardingKeyboardCheckSkipped"
         case .onboardingKeyboardRetry: return "onboardingKeyboardRetry"
         case .onboardingFullAccessLinkOpened: return "onboardingFullAccessLinkOpened"
+        case .onboardingFullAccessExplainerOpened: return "onboardingFullAccessExplainerOpened"
         case .onboardingDictusKeyboardActivated: return "onboardingDictusKeyboardActivated"
         case .onboardingGlobeTutorialTextDetected: return "onboardingGlobeTutorialTextDetected"
         case .onboardingGlobeTutorialSkipped: return "onboardingGlobeTutorialSkipped"
@@ -1288,6 +1318,7 @@ extension LogEvent {
         case .onboardingSmartModesPicked: return "onboardingSmartModesPicked"
         case .onboardingSmartModePickSkipped: return "onboardingSmartModePickSkipped"
         case .onboardingSceneSequenceSkipped: return "onboardingSceneSequenceSkipped"
+        case .onboardingWentBack: return "onboardingWentBack"
         case .onboardingStopStandbyShown: return "onboardingStopStandbyShown"
         case .liveActivityStarted: return "liveActivityStarted"
         case .liveActivityTransition: return "liveActivityTransition"
@@ -1343,6 +1374,7 @@ extension LogEvent {
         case .modelDownloadTaskState: return "modelDownloadTaskState"
         case .modelDownloadBackgroundTaskSilent: return "modelDownloadBackgroundTaskSilent"
         case .modelDownloadTaskCancelled: return "modelDownloadTaskCancelled"
+        case .modelDownloadOrphanedChunks: return "modelDownloadOrphanedChunks"
         case .polishEngineFailed: return "polishEngineFailed"
         case .vocabularyApplied: return "vocabularyApplied"
         case .polishEngineUnavailable: return "polishEngineUnavailable"

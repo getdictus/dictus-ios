@@ -26,10 +26,21 @@ struct StopStandbyPage: View {
         StopStandbySceneScript.Variant(hasDynamicIsland: device.hasDynamicIsland)
     }
 
+    /// The least height the card is drawn at before the page scrolls instead, the scene
+    /// pages' figure (`OnboardingScenePage.minimumCardHeight`, #680).
+    private static let minimumCardHeight: CGFloat = 160
+
     var body: some View {
+        // WHY FITTED (#700): with the Skip row reserved under the button, the Lock Screen
+        // variant ran under the button by about half its phone on a 667 pt screen
+        // (iPhone SE). Like the scene pages (#680), the card now shrinks to the height left
+        // under the title, and the page scrolls only below a readable size.
         OnboardingPage(title: Text("To stop Dictus", comment: "Onboarding, how to stop Dictus step: title (#681)."),
-                       subtitle: line) {
-            StopStandbyCard(variant: variant)
+                       subtitle: line,
+                       fittedContentMinimumHeight: Self.minimumCardHeight) {
+            OnboardingFitToHeight {
+                StopStandbyCard(variant: variant)
+            }
         } bottom: {
             OnboardingPrimaryButton(Text("Got it"), action: onNext)
                 .accessibilityIdentifier("onboarding.primary")

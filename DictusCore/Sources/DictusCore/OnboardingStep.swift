@@ -275,6 +275,39 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         }
     }
 
+    // MARK: - Going back (#700)
+
+    /// The step the shell's back control returns to, or nil for a step without one.
+    ///
+    /// Only the language step has one, and it returns to the intro: a reflex tap on the
+    /// intro's button should not cost the user the three scenes.
+    ///
+    /// WHY NOT FURTHER: confirming the language step starts the model download. From the
+    /// keyboard setup on, going back would mean cancelling or duplicating that download,
+    /// and the keyboard setup is the step iOS kills the app on.
+    public var stepBack: OnboardingStep? {
+        switch self {
+        case .language:
+            return .welcome
+        case .welcome, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene,
+             .vocabularyScene, .historyScene, .modelPreparation, .microphone, .firstDictation, .stopStandby,
+             .completion:
+            return nil
+        }
+    }
+
+    /// Goes back from `step`: records `stepBack` as the step to resume at and returns it,
+    /// or returns nil and records nothing for a step without a back control.
+    ///
+    /// WHY THE WRITE IS HERE: an app killed after going back must resume on the intro, not
+    /// on the step the user left (#700), and the app target has no test bundle.
+    @discardableResult
+    public static func goBack(from step: OnboardingStep, defaults: UserDefaults = AppGroup.defaults) -> OnboardingStep? {
+        guard let back = step.stepBack else { return nil }
+        save(back, defaults: defaults)
+        return back
+    }
+
     // MARK: - Migration from the page index (before #649)
 
     /// Where an install that was mid-onboarding on the old page numbering resumes.
@@ -303,6 +336,11 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// language screen (#649 PR A).
     public static let legacyMicrophoneRawValue = "microphone"
 
+    /// The raw value of the Full Access explainer while it was a step of its own, right
+    /// before the keyboard (#704, on test builds only). It is a sheet on the keyboard step
+    /// now, so a phone stored there resumes at the keyboard, where the sheet's link is.
+    public static let legacyFullAccessExplainerRawValue = "fullAccessExplainer"
+
     /// Where a step name written by an earlier build resumes, or nil for a name this build
     /// does not know.
     ///
@@ -310,9 +348,10 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// mean the same thing in the new order (what was done before them is still done
     /// before them, the microphone apart, and the microphone step is shown later). The one
     /// exception is the old microphone name: the user had confirmed the language and not
-    /// yet added the keyboard, so they resume at the keyboard.
+    /// yet added the keyboard, so they resume at the keyboard. The removed Full Access
+    /// explainer step (#704) sat at that same place and resumes there too.
     public static func resumed(fromStoredRawValue raw: String) -> OnboardingStep? {
-        if raw == legacyMicrophoneRawValue { return .keyboardSetup }
+        if raw == legacyMicrophoneRawValue || raw == legacyFullAccessExplainerRawValue { return .keyboardSetup }
         return OnboardingStep(rawValue: raw)
     }
 
