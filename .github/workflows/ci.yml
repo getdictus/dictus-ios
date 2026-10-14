@@ -132,6 +132,49 @@ jobs:
           xcodebuild -version
           swift --version
 
+      # Polish grounding (#414) finds names with NLTagger's `.nameType` scheme, and
+      # the suite asserts on what it finds in French. That scheme needs a per-language
+      # Natural Language asset that macOS downloads on demand. The runner image is an
+      # en_US install that carries it for English only — measured on macos-26 / 26.6.2:
+      # `availableTagSchemes` for French and German was [Language, Script, TokenType],
+      # and eight French grounding tests failed on an empty name list. A Mac set up in
+      # French has the asset, which is why the same tests pass locally.
+      #
+      # So fetch the asset for every `SupportedLanguage` before testing, and fail HERE,
+      # with a message, if it cannot be had — a missing asset must not read as a
+      # grounding regression in the test step below.
+      - name: Install Natural Language name-tagging assets
+        run: |
+          cat > "$RUNNER_TEMP/nl-assets.swift" <<'SWIFT'
+          import Foundation
+          import NaturalLanguage
+
+          var missing: [String] = []
+          for code in ["fr", "en", "es", "de"] {
+              let language = NLLanguage(rawValue: code)
+              let done = DispatchSemaphore(value: 0)
+              var outcome = "timed out"
+              NLTagger.requestAssets(for: language, tagScheme: .nameType) { result, error in
+                  switch result {
+                  case .available: outcome = "available"
+                  case .notAvailable: outcome = "not available"
+                  case .error: outcome = "error: \(error.map { "\($0)" } ?? "unknown")"
+                  @unknown default: outcome = "unknown result"
+                  }
+                  done.signal()
+              }
+              _ = done.wait(timeout: .now() + 300)
+              let ready = NLTagger.availableTagSchemes(for: .word, language: language).contains(.nameType)
+              print("\(code): requestAssets -> \(outcome); nameType available: \(ready)")
+              if !ready { missing.append(code) }
+          }
+          if !missing.isEmpty {
+              print("::error::NLTagger nameType asset missing for \(missing). DictusCore grounding tests would fail for an environment reason, not a code one.")
+              exit(1)
+          }
+          SWIFT
+          swift "$RUNNER_TEMP/nl-assets.swift"
+
       # No SwiftPM cache here, deliberately. DictusCore/Package.swift declares no
       # package dependencies, so `swift test` fetches nothing — there is nothing a
       # dependency cache could save. Caching `.build` instead would trade a minute of
