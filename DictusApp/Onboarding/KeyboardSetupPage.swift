@@ -166,20 +166,17 @@ struct KeyboardSetupPage: View {
                     checkKeyboardInstalled()
                 }
 
-                // If not detected, retry at 2s (covers slow Settings sync)
-                if !keyboardDetected && !Task.isCancelled {
-                    try? await Task.sleep(for: .milliseconds(1200))
-                    if Task.isCancelled { return }
-                    await MainActor.run {
-                        guard !Task.isCancelled else { return }
-                        PersistentLog.log(.onboardingKeyboardRetry)
-                        checkKeyboardInstalled()
-                        isCheckingKeyboard = false
-                    }
-                } else {
-                    await MainActor.run {
-                        isCheckingKeyboard = false
-                    }
+                // Retry at 2s whatever the first check found (covers slow Settings sync).
+                // WHY EVEN WHEN DETECTED (#713): detection now goes both ways, and the list
+                // can lag behind a removed keyboard as it lags behind an added one.
+                if Task.isCancelled { return }
+                try? await Task.sleep(for: .milliseconds(1200))
+                if Task.isCancelled { return }
+                await MainActor.run {
+                    guard !Task.isCancelled else { return }
+                    PersistentLog.log(.onboardingKeyboardRetry)
+                    checkKeyboardInstalled()
+                    isCheckingKeyboard = false
                 }
             }
             #if DEBUG
@@ -198,6 +195,15 @@ struct KeyboardSetupPage: View {
                     dictusToggleOn = true
                     fullAccessToggleOn = true
                 }
+            } else {
+                // Dictus was removed while the step showed it detected (#713): back to the
+                // first-arrival presentation, the drawn loop and the checklist restarting
+                // together. Nothing starts Picture in Picture or borrows the audio session
+                // here; the next tap on Open Settings does.
+                checklist.keyboardRemoved()
+                animationTimer?.invalidate()
+                animationTimer = nil
+                startToggleAnimation()
             }
         }
         .animation(.easeInOut(duration: 0.3), value: keyboardDetected)
@@ -526,23 +532,27 @@ struct KeyboardSetupPage: View {
     /// UITextInputMode.activeInputModes can be unstable during rapid scenePhase
     /// transitions (e.g., returning from Settings). value(forKey:) is KVO and
     /// can return unexpected types. Guard against both to prevent crashes.
+    ///
+    /// WHY BOTH WAYS (#713): the step used to stay on "Keyboard detected" once it had
+    /// shown it, even after Dictus was removed, and the user went on to a first dictation
+    /// whose hint led nowhere. A list read without Dictus now takes the step back; an
+    /// unreadable (empty) list changes nothing (`DictusKeyboardPresence`).
     private func checkKeyboardInstalled() {
         let modes = UITextInputMode.activeInputModes
         PersistentLog.log(.onboardingKeyboardCheckStarted(modeCount: modes.count))
 
-        for mode in modes {
-            // value(forKey:) is KVO — guard against unexpected nil or type mismatch
-            guard let identifier = mode.value(forKey: "identifier") as? String else {
-                continue
-            }
-            if identifier.contains("com.pivi.dictus") {
-                PersistentLog.log(.onboardingKeyboardDetected(identifier: identifier))
-                keyboardDetected = true
-                return
-            }
+        // value(forKey:) is KVO — guard against unexpected nil or type mismatch
+        let identifiers = modes.compactMap { $0.value(forKey: "identifier") as? String }
+        switch DictusKeyboardPresence(inputModeIdentifiers: identifiers) {
+        case .listed(let identifier):
+            PersistentLog.log(.onboardingKeyboardDetected(identifier: identifier))
+            keyboardDetected = true
+        case .notListed:
+            PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
+            keyboardDetected = false
+        case .unreadable:
+            PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
         }
-
-        PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
     }
 }
 
