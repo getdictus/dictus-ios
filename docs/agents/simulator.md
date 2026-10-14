@@ -4,6 +4,8 @@ How an agent gets DictusApp running on an iOS Simulator and produces a screensho
 
 Every command below was executed on this machine (Xcode 26.4.1, iOS 26.5 runtime, iPhone 17). The outputs shown are the ones they produced.
 
+**To check that the app and keyboard still work end to end, run the smoke test rather than following this file by hand:** `scripts/simulator-smoke-test.sh`. See [`simulator-smoke-test.md`](simulator-smoke-test.md) for when to run it and what a pass does and does not prove.
+
 **Never bring a Simulator window to the front.** Pierre works on this machine and a foregrounded window steals his focus. `open -a Simulator` is therefore forbidden — but `open -g -a Simulator` is not, and section 5 needs it: `-g` starts the app without foregrounding it. Verified 2026-08-22 by reading the frontmost process before and after; it did not change. If a command foregrounds a window anyway, stop and record it here.
 
 ## 1. Choose and boot a device
@@ -361,7 +363,7 @@ The row reads `Dictus, <declared language>` in the device's language. Since #653
 
 **A control missing from the accessibility tree needs `--tap-style physical`.** With the default `automatic` style, `axe` falls back to a simulator tap and such a control does not react. Measured 2026-08-23 on the Full Access switch, which `describe-ui` does not report at all (section 8); expect the same wherever a control you can see in a screenshot has no element in the tree.
 
-Xcode 27 replaces this attachment dance with Device Hub and drops the Simulator.app requirement, per AXe's own compatibility notes. Until this machine moves to it, `open -g -a Simulator` is the price of a tap.
+Xcode 27 replaces this attachment dance with Device Hub and drops the Simulator.app requirement, per AXe's own compatibility notes. **Measured 2026-10-14, now that this machine runs Xcode 27.0 (27A266a):** there is no Simulator.app in the Xcode bundle any more (`Contents/Applications` holds `DeviceHub.app`), and `axe` 1.8.0 taps, long-presses and dumps the tree on a freshly booted device with nothing else running. `open -g -a Simulator` is now only needed on an Xcode 26 machine. Whichever Xcode you have, probe with `axe describe-ui` before deciding; the smoke test does exactly that.
 
 ## 6. Control the frame
 
@@ -462,6 +464,8 @@ d['AppleKeyboards'] = [
 ]
 ```
 
+**On a fresh or erased device, add `AppleKeyboardsExpanded = 1` in the same write.** Without it, iOS ignores `AppleKeyboards` and rebuilds the list from `AppleLanguages`, without Dictus. Measured 2026-10-14 on iOS 26.5: Settings showed Français, Anglais (R.-U.) and Emoji while the plist still held the list above. Reading it back from inside the device works: `xcrun simctl spawn <udid> defaults read -g AppleKeyboards`.
+
 Then boot, attach Simulator.app (section 5), install, and open any text field. Tapping through Settings → Général → Clavier → Claviers → Ajouter un clavier → Dictus reaches the same state and also works. `defaults write` from the host does not land, and neither does the `com.apple.Preferences` domain — `AppleKeyboards` does not live there; the version of this file before #378 made both mistakes at once and concluded from them that the keyboard could not be enabled at all.
 
 **Full Access.** Granted by tap, in Réglages → Général → Clavier → Claviers → Dictus. The switch is not in the accessibility tree, so `axe`'s default `automatic` style falls back to a simulator tap and the toggle does not move; `--tap-style physical` moves it:
@@ -472,6 +476,8 @@ axe tap --label "Autoriser" --udid <udid>                  # the confirmation al
 ```
 
 The log then carries `fullAccess=true`.
+
+Fired the instant the page or the alert has been pushed, either tap can be swallowed by the transition, and the grant then silently does not happen. The keyboard comes up showing `Accès complet requis` and logs `fullAccess=false` (measured 2026-10-14, the smoke test's second run). Pause before each tap, and check that the alert appears and then goes away.
 
 **What the extension then gives you.** It runs, and it writes: `<KBD> diagnosticProbe` lines carrying `inputBounds`, `keyboardFrame`, `hostingConst`, `heightConst`, `memMB`, `status`, `mode` and `coldStart`. Tapping the mic fires the whole keyboard → app dictation chain, which on a device with no model installed ends where it should:
 
