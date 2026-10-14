@@ -152,8 +152,7 @@ jobs:
           var missing: [String] = []
           for code in ["fr", "en", "es", "de"] {
               let language = NLLanguage(rawValue: code)
-              let done = DispatchSemaphore(value: 0)
-              var outcome = "timed out"
+              var outcome: String?
               NLTagger.requestAssets(for: language, tagScheme: .nameType) { result, error in
                   switch result {
                   case .available: outcome = "available"
@@ -161,11 +160,16 @@ jobs:
                   case .error: outcome = "error: \(error.map { "\($0)" } ?? "unknown")"
                   @unknown default: outcome = "unknown result"
                   }
-                  done.signal()
               }
-              _ = done.wait(timeout: .now() + 300)
+              // Spin the main run loop rather than block on a semaphore: the
+              // completion handler can be delivered on the main queue, and a
+              // blocked main thread never receives it (the first CI attempt hung).
+              let deadline = Date().addingTimeInterval(120)
+              while outcome == nil && Date() < deadline {
+                  RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+              }
               let ready = NLTagger.availableTagSchemes(for: .word, language: language).contains(.nameType)
-              print("\(code): requestAssets -> \(outcome); nameType available: \(ready)")
+              print("\(code): requestAssets -> \(outcome ?? "timed out"); nameType available: \(ready)")
               if !ready { missing.append(code) }
           }
           if !missing.isEmpty {
