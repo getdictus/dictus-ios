@@ -54,6 +54,14 @@ struct WhatsNewView: View {
                     page
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // WHY `geometryGroup` (Pierre's device test of PR #741): without it, the page
+                // coming in had its title and drawn phone, which a scene page lays out through
+                // `ViewThatFits` and a `GeometryReader`, drawn straight at their final place,
+                // while only its button slid in. The two pages overlapped for the length of
+                // the slide. Captured frame by frame on the simulator; the same pages slide
+                // whole in the onboarding's cover, so the onboarding is left as it is. The
+                // group resolves the page's geometry as one block, which the slide then moves.
+                .geometryGroup()
                 // A scene's Skip jumps the scenes, as in the onboarding (#649 decision 8),
                 // which here is the whole of What's new.
                 .environment(\.onboardingSkip, step.isInSceneSequence ? OnboardingSkipAction(perform: skip) : nil)
@@ -120,7 +128,10 @@ struct WhatsNewView: View {
             finish(action: "finished")
             return
         }
-        step = next
+        // In an explicit animation, as `OnboardingView.show` does.
+        withAnimation {
+            step = next
+        }
     }
 
     /// Every page is a scene, so Skip leaves What's new, as it leaves the scene sequence in
