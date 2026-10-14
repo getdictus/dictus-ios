@@ -161,9 +161,11 @@ jobs:
                   @unknown default: outcome = "unknown result"
                   }
               }
-              // Spin the main run loop rather than block on a semaphore: the
-              // completion handler can be delivered on the main queue, and a
-              // blocked main thread never receives it (the first CI attempt hung).
+              // Spin the main run loop rather than block on a semaphore. Measured on
+              // this runner: the semaphore version printed nothing for ten minutes
+              // until it was cancelled; this one fetched all four in about 30 s. The
+              // likeliest reason is a completion delivered on the main queue, which
+              // a blocked main thread never runs — inferred, not confirmed.
               let deadline = Date().addingTimeInterval(120)
               while outcome == nil && Date() < deadline {
                   RunLoop.main.run(until: Date().addingTimeInterval(0.5))
