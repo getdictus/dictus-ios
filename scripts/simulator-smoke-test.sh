@@ -46,6 +46,16 @@ DEVICE_TYPE="${DICTUS_SMOKE_DEVICE_TYPE:-com.apple.CoreSimulator.SimDeviceType.i
 RUNTIME="${DICTUS_SMOKE_RUNTIME:-com.apple.CoreSimulator.SimRuntime.iOS-26-5}"
 OUT_ROOT="${DICTUS_SMOKE_OUT:-${TMPDIR:-/tmp}/dictus-smoke}"
 
+# The device is erased on every run, so a name must not be able to reach a simulator
+# someone else uses. Only names in this script's own namespace are accepted.
+case "$DEVICE_NAME" in
+  "Dictus Smoke"*) ;;
+  *)
+    echo "error: DICTUS_SMOKE_DEVICE_NAME must start with 'Dictus Smoke' (got '$DEVICE_NAME'): the device is erased on every run." >&2
+    exit 2
+    ;;
+esac
+
 APP_ID=com.pivi.dictus
 KEYBOARD_ID=com.pivi.dictus.keyboard
 APP_GROUP=group.solutions.pivi.dictus
@@ -69,8 +79,15 @@ mkdir -p "$RUN_DIR"
 REPORT="$RUN_DIR/report.txt"
 
 UDID=""
+RUNTIME_NAME=""
 STEP="0 setup"
 GROUP_DIR=""
+# Set to "checked" once the catalogs' state before the build is known; see cleanup.
+XCSTRINGS_STATE=""
+XCSTRINGS_BEFORE=""
+INSTALLED=no
+BOOTED=no
+PASSED=no
 
 # --- Output -----------------------------------------------------------------
 
@@ -87,17 +104,41 @@ fail() {
 }
 
 frontmost_app() {
-  # Needs Automation permission for System Events; "unknown" rather than a failure
-  # when it is missing, because the check is evidence, not the thing under test.
+  # Needs Automation permission for System Events; "unknown" when it is missing.
   osascript -e 'tell application "System Events" to get name of first process whose frontmost is true' \
     2>/dev/null || echo unknown
 }
 
+# Reports the frontmost Mac app, and says so plainly when it could not be read: without
+# Automation permission the "never in front" check has checked nothing, and a report
+# that stayed silent about it would read as a pass. Not a failure: what is under test is
+# Dictus, not this Mac's privacy settings.
+report_frontmost() {
+  local front
+  front=$(frontmost_app)
+  if [ "$front" = unknown ]; then
+    say "frontmost app $1: foreground check NOT performed (no Automation permission for System Events)"
+  else
+    say "frontmost app $1: $front"
+  fi
+}
+
 # --- Cleanup: only what this run created ----------------------------------
 
+# Runs on every exit, pass or fail. `SMOKE PASS` is printed here and only here, after
+# the cleanup has succeeded: a run that leaves Dictus installed or the device booted has
+# not finished, and its last word must not be a pass.
 cleanup() {
-  local status=$?
+  local status=$? problems=""
   set +e
+  # Xcode rewrites Localizable.xcstrings during the build. It is build noise (CLAUDE.md);
+  # put it back so the run leaves the working tree as it found it, a failed build
+  # included. Only when the catalogs were clean before the build, so an uncommitted edit
+  # is never thrown away.
+  if [ "$XCSTRINGS_STATE" = checked ] && [ -z "$XCSTRINGS_BEFORE" ] \
+    && [ -n "$(git status --porcelain -- '*.xcstrings')" ]; then
+    git checkout -- '*.xcstrings' || problems="$problems could not restore the .xcstrings catalogs;"
+  fi
   if [ -n "$UDID" ]; then
     # Read the whole log before uninstalling: uninstall deletes the App Group container.
     if [ -n "$GROUP_DIR" ] && [ -f "$GROUP_DIR/dictus_debug.log" ]; then
@@ -108,11 +149,25 @@ cleanup() {
         && say "failure screenshot: $RUN_DIR/failure.png"
       axe describe-ui --udid "$UDID" >"$RUN_DIR/failure-ui.json" 2>/dev/null
     fi
-    xcrun simctl uninstall "$UDID" "$APP_ID" >/dev/null 2>&1
-    xcrun simctl shutdown "$UDID" >/dev/null 2>&1
+    if [ "$INSTALLED" = yes ]; then
+      xcrun simctl uninstall "$UDID" "$APP_ID" >/dev/null 2>&1 \
+        || problems="$problems could not uninstall $APP_ID;"
+    fi
+    if [ "$BOOTED" = yes ]; then
+      xcrun simctl shutdown "$UDID" >/dev/null 2>&1 \
+        || problems="$problems could not shut down $UDID;"
+    fi
   fi
-  say "frontmost app at end: $(frontmost_app)"
+  report_frontmost "at end"
   say "artifacts: $RUN_DIR"
+  if [ $status -eq 0 ] && [ -n "$problems" ]; then
+    say "SMOKE FAIL step 11 cleanup:$problems"
+    exit 1
+  fi
+  if [ $status -eq 0 ] && [ "$PASSED" = yes ]; then
+    say "SMOKE PASS commit=$COMMIT device=$UDID runtime=$RUNTIME_NAME"
+  fi
+  [ -n "$problems" ] && say "cleanup also failed:$problems"
   exit $status
 }
 trap cleanup EXIT
@@ -196,12 +251,19 @@ center() { python3 -c "print(round($1 + $2 / 2))"; }
 
 LOG_FILE=""
 
-# wait_log <regex> [timeout] [from line] — waits for a line in the App Group log.
+# wait_log <regex> [timeout] [from line] — waits for a line in the App Group log at or
+# after line `from`, and prints the absolute line number of the first match, so that the
+# next assertion can start after it.
 wait_log() {
-  local pattern=$1 timeout=${2:-20} from=${3:-1} waited=0
+  local pattern=$1 timeout=${2:-20} from=${3:-1} waited=0 line
   while [ "$waited" -lt "$timeout" ]; do
-    if [ -f "$LOG_FILE" ] && tail -n +"$from" "$LOG_FILE" | grep -E "$pattern" >/dev/null; then
-      return 0
+    if [ -f "$LOG_FILE" ]; then
+      line=$(PATTERN="$pattern" awk -v from="$from" \
+        'NR >= from && $0 ~ ENVIRON["PATTERN"] { print NR; exit }' "$LOG_FILE")
+      if [ -n "$line" ]; then
+        echo "$line"
+        return 0
+      fi
     fi
     sleep 1
     waited=$((waited + 1))
@@ -214,7 +276,7 @@ wait_log() {
 say "Dictus simulator smoke test"
 say "commit: $COMMIT ($(git rev-parse --abbrev-ref HEAD))"
 say "xcode: $(xcodebuild -version | tr '\n' ' ')"
-say "frontmost app at start: $(frontmost_app)"
+report_frontmost "at start"
 
 command -v axe >/dev/null || fail "axe is not installed (brew install cameroncooke/axe/axe)"
 
@@ -266,6 +328,7 @@ plistlib.dump(prefs, open(path, "wb"))
 PY
 
 xcrun simctl boot "$UDID" || fail "could not boot $UDID"
+BOOTED=yes
 xcrun simctl bootstatus "$UDID" >/dev/null || fail "bootstatus did not finish for $UDID"
 
 RUNTIME_NAME=$(xcrun simctl list devices -j | python3 -c '
@@ -296,6 +359,7 @@ done
 step "2 build"
 
 XCSTRINGS_BEFORE=$(git status --porcelain -- '*.xcstrings')
+XCSTRINGS_STATE=checked
 
 # No patch step: FluidAudio 0.15.7 builds unpatched since #558. A checkout that resolved
 # FluidAudio 0.12 fails here; delete $DERIVED_DATA/SourcePackages and run again (CLAUDE.md).
@@ -312,18 +376,14 @@ xcodebuild build \
   -derivedDataPath "$DERIVED_DATA" >"$RUN_DIR/build.log" 2>&1 \
   || fail "build failed, see $RUN_DIR/build.log"
 
-# Xcode rewrites Localizable.xcstrings during the build. It is build noise (CLAUDE.md);
-# put it back so the run leaves the working tree as it found it — but only when the
-# catalogs were clean before the build, so an uncommitted edit is never thrown away.
-if [ -z "$XCSTRINGS_BEFORE" ]; then
-  git checkout -- '*.xcstrings' 2>/dev/null || true
-fi
+# Xcode rewrites Localizable.xcstrings during the build; cleanup puts it back.
 
 [ -d "$APP_PATH/PlugIns/DictusKeyboard.appex" ] || fail "built app has no DictusKeyboard.appex"
 
 # --- 3. Install and launch ---------------------------------------------------
 step "3 install and launch"
 
+INSTALLED=yes
 xcrun simctl install "$UDID" "$APP_PATH" || fail "install failed"
 # Captured before grepping, here and below: with pipefail, `grep -q` closing the pipe
 # early fails the producer with SIGPIPE, and the pipeline with it.
@@ -346,7 +406,7 @@ step "4 liveness"
 # section 3). Wait for the first screen, then check the pid itself.
 wait_for id onboarding.primary 30 >/dev/null || fail "the onboarding intro never appeared"
 ps -p "$APP_PID" >/dev/null || fail "DictusApp pid $APP_PID is gone after launch"
-wait_log '<APP> appLaunched' 10 || fail "no '<APP> appLaunched' line in $LOG_FILE"
+wait_log '<APP> appLaunched' 10 >/dev/null || fail "no '<APP> appLaunched' line in $LOG_FILE"
 say "pid $APP_PID alive, appLaunched logged"
 
 # --- 5. Navigation -----------------------------------------------------------
@@ -371,7 +431,23 @@ say "intro -> language -> intro"
 # Terminated on purpose: the mic tap below then always takes the cold-start path
 # (Darwin post unanswered, URL fallback, app launched by the keyboard), instead of
 # depending on whether iOS happened to keep a backgrounded process running.
+#
+# terminate's exit code is not the check: it is non-zero for an app that is already
+# gone, which is the outcome wanted. What is checked is that the process is gone —
+# launchd no longer lists it and the launch pid has exited — and step 9 then requires
+# the cold-start marker, so a warm hand-off cannot pass for this one.
 xcrun simctl terminate "$UDID" "$APP_ID" >/dev/null 2>&1 || true
+waited=0
+while :; do
+  SERVICES=$(xcrun simctl spawn "$UDID" launchctl list 2>/dev/null || true)
+  if ! grep -q "UIKitApplication:$APP_ID\[" <<<"$SERVICES" && ! ps -p "$APP_PID" >/dev/null; then
+    break
+  fi
+  [ "$waited" -lt 10 ] || fail "DictusApp is still running after terminate: the hand-off would not be a cold start"
+  sleep 1
+  waited=$((waited + 1))
+done
+say "DictusApp terminated: the mic tap will cold-start it"
 
 # --- 6. Full Access ----------------------------------------------------------
 step "6 full access"
@@ -441,7 +517,7 @@ axe batch --udid "$UDID" \
   || fail "could not long-press the globe key"
 tap label "Dictus, multilingue"
 
-wait_log '<KBD> .*fullAccess=true' 15 || fail "the Dictus keyboard never logged fullAccess=true"
+wait_log '<KBD> .*fullAccess=true' 15 >/dev/null || fail "the Dictus keyboard never logged fullAccess=true"
 
 # --- 8. Mic tap --------------------------------------------------------------
 step "8 tap the mic"
@@ -460,17 +536,32 @@ axe tap -x "$(python3 -c "print(round($x + $w - 45))")" -y "$(python3 -c "print(
 # --- 9. Assertions -----------------------------------------------------------
 step "9 assert the no-model failure"
 
-# Each line is one link of the chain, in order: the keyboard took the tap, the app
-# received the hand-off and refused it for want of a model, and the keyboard learned of
-# the failure through the App Group.
-wait_log '<KBD> keyboardMicTapped' 15 "$LOG_FROM" \
+# Each line is one link of the chain: the keyboard took the tap, the app was cold-started
+# by the keyboard's URL and refused the dictation for want of a model, and the keyboard
+# learned of the failure through the App Group. Each search starts after the line the
+# previous one matched, so a line from before its cause cannot satisfy it.
+#
+# WHY THE LAST LINK STARTS AFTER THE HAND-OFF AND NOT AFTER THE APP'S FAILURE LINE: each
+# process appends to the log from its own asynchronous queue, so across processes the
+# file order is the order of the writes, not of the events. The keyboard's `to=failed`
+# landed in the file BEFORE the app's `dictationFailed` in 7 of the 9 runs that produced
+# both (measured 2026-10-15), although it can only follow it: the keyboard reaches
+# `failed` from `requested` solely by adopting the status the app wrote to the App Group
+# (its watchdog resets to idle, never to failed). Requiring file order there would fail
+# most runs and prove nothing more. Within one process the order is the event order, and
+# the keyboard's line is still required after the app's cold start.
+TAP_LINE=$(wait_log '<KBD> keyboardMicTapped' 15 "$LOG_FROM") \
   || fail "no '<KBD> keyboardMicTapped': the mic tap did not reach the keyboard"
-wait_log '<APP> (dictationStarted|coldStartURLReceived)' 20 "$LOG_FROM" \
-  || fail "DictusApp never received the hand-off"
-wait_log '<APP> dictationFailed error=No model downloaded' 20 "$LOG_FROM" \
-  || fail "no '<APP> dictationFailed error=No model downloaded'"
-wait_log '<KBD> statusChanged from=[a-z]+ to=failed' 15 "$LOG_FROM" \
-  || fail "the keyboard never saw the failure ('<KBD> statusChanged … to=failed')"
+# `isColdStart=true` and not the bare marker: the app logs `coldStartURLReceived` for
+# every keyboard URL, a live process whose engine is down included (`isColdStart=false
+# isEngineDead=true`). Only `true` says the URL launched the process.
+URL_LINE=$(wait_log '<APP> coldStartURLReceived isColdStart=true' 20 $((TAP_LINE + 1))) \
+  || fail "no '<APP> coldStartURLReceived isColdStart=true' after the tap: DictusApp was not cold-started by the keyboard's URL"
+APP_FAILED_LINE=$(wait_log '<APP> dictationFailed error=No model downloaded' 20 $((URL_LINE + 1))) \
+  || fail "no '<APP> dictationFailed error=No model downloaded' after the hand-off"
+KBD_FAILED_LINE=$(wait_log '<KBD> statusChanged from=requested to=failed' 15 $((URL_LINE + 1))) \
+  || fail "the keyboard never saw the failure ('<KBD> statusChanged from=requested to=failed' after the hand-off)"
+say "chain at log lines: tap $TAP_LINE, cold start $URL_LINE, app failure $APP_FAILED_LINE, keyboard failure $KBD_FAILED_LINE"
 
 # And nothing died on the way: the app is still running, and SpringBoard recorded no
 # crash of any Dictus process during the run.
@@ -503,10 +594,12 @@ say "screenshots: $RUN_DIR/keyboard.png $RUN_DIR/final.png"
 say "evidence: $RUN_DIR/evidence.log"
 
 # The run must not have put a simulator window in front of the maintainer's work.
+# An unreadable frontmost app is reported by cleanup, not failed here.
 FRONT_END=$(frontmost_app)
 case "$FRONT_END" in
   Simulator | DeviceHub) fail "$FRONT_END is the frontmost app" ;;
 esac
 
-STEP="11 cleanup"
-say "SMOKE PASS commit=$COMMIT device=$UDID runtime=$RUNTIME_NAME"
+# --- 11. Cleanup: in the EXIT trap, which prints the result line ---------------
+step "11 cleanup"
+PASSED=yes
