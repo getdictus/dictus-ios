@@ -556,16 +556,21 @@ step "9 assert the no-model failure"
 # the keyboard's line is still required after the app's cold start.
 TAP_LINE=$(wait_log '<KBD> keyboardMicTapped' 15 "$LOG_FROM") \
   || fail "no '<KBD> keyboardMicTapped': the mic tap did not reach the keyboard"
-# `isColdStart=true` and not the bare marker: the app logs `coldStartURLReceived` for
-# every keyboard URL, a live process whose engine is down included (`isColdStart=false
-# isEngineDead=true`). Only `true` says the URL launched the process.
-URL_LINE=$(wait_log '<APP> coldStartURLReceived isColdStart=true' 20 $((TAP_LINE + 1))) \
-  || fail "no '<APP> coldStartURLReceived isColdStart=true' after the tap: DictusApp was not cold-started by the keyboard's URL"
+# A new process first: `<APP> appLaunched` after the tap is the one line only a process
+# started by this hand-off can write. The URL marker alone does not prove it — the app
+# logs `coldStartURLReceived` for every keyboard URL, and its `isColdStart=true` means
+# "this process has never been active", which a process launched in the background and
+# still alive also satisfies (measured 2026-10-15 with the terminate removed: same pid,
+# no new appLaunched, `isColdStart=true`).
+LAUNCH_LINE=$(wait_log '<APP> appLaunched' 20 $((TAP_LINE + 1))) \
+  || fail "no '<APP> appLaunched' after the tap: the hand-off reached a DictusApp that was already running, not a cold start"
+URL_LINE=$(wait_log '<APP> coldStartURLReceived isColdStart=true' 20 $((LAUNCH_LINE + 1))) \
+  || fail "no '<APP> coldStartURLReceived isColdStart=true' after the launch: DictusApp was not cold-started by the keyboard's URL"
 APP_FAILED_LINE=$(wait_log '<APP> dictationFailed error=No model downloaded' 20 $((URL_LINE + 1))) \
   || fail "no '<APP> dictationFailed error=No model downloaded' after the hand-off"
 KBD_FAILED_LINE=$(wait_log '<KBD> statusChanged from=requested to=failed' 15 $((URL_LINE + 1))) \
   || fail "the keyboard never saw the failure ('<KBD> statusChanged from=requested to=failed' after the hand-off)"
-say "chain at log lines: tap $TAP_LINE, cold start $URL_LINE, app failure $APP_FAILED_LINE, keyboard failure $KBD_FAILED_LINE"
+say "chain at log lines: tap $TAP_LINE, app launch $LAUNCH_LINE, cold start $URL_LINE, app failure $APP_FAILED_LINE, keyboard failure $KBD_FAILED_LINE"
 
 # And nothing died on the way: the app is still running, and SpringBoard recorded no
 # crash of any Dictus process during the run.
