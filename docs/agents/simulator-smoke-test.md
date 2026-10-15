@@ -31,7 +31,7 @@ The steps follow `simulator.md`, which remains the authority on what the simulat
 3. **Install and launch.** It checks that `pluginkit` lists `com.pivi.dictus.keyboard`.
 4. **Liveness.** It waits for the onboarding intro to appear, then checks that the launched pid is still alive and that `<APP> appLaunched` is in the log. `simctl launch` alone exits 0 for an app that crashes a second later.
 5. **Navigation.** On the onboarding screens it goes intro → language step → Back → intro, using the `onboarding.primary` and `onboarding.back` identifiers. It never taps the language step's Continue button, because that button starts a model download.
-6. **Full Access.** It goes Settings → Général → Clavier → Claviers → Dictus, taps the switch with a physical tap, then taps Autoriser. Each tap is checked against the screen it should produce, and the sequence is retried up to three times.
+6. **Full Access.** It goes Settings → Général → Clavier → Claviers → Dictus. Each tap must reach the screen it leads to; when it does not, the script goes back and retries. On a heavily loaded Mac, Settings' root moved a row under the tap and sent it to Siri in two runs of five. Then it taps the switch with a physical tap, then taps Autoriser. Each tap is checked against the screen it should produce, and the sequence is retried up to three times.
 7. **Keyboard.** It first terminates DictusApp and checks that it is gone: launchd no longer lists it and the launch pid has exited. If the app is still alive after 10 seconds, the run fails. The mic tap then always takes the cold-start path (see below). Granting Full Access in step 6 already kills the app (`domain:tcc(11)` in SpringBoard's log, measured 2026-10-15), but the test does not rely on that. It then focuses Safari's address field and dismisses the two first-run "Continuer" splashes. It long-presses the globe and picks `Dictus, multilingue`, then asserts that the keyboard logged `fullAccess=true`.
 8. **Mic.** It taps the Dictus mic with no model installed. The mic is not in the accessibility tree, so the tap is placed from the frame of the keyboard's `inputView`, and the log assertions below are what prove it landed.
 9. **Assertions**, in the App Group log (`dictus_debug.log`). Each search starts after the line the previous one matched, and the report records the line numbers:
@@ -56,6 +56,7 @@ Everything goes under `$DICTUS_SMOKE_OUT` (default `$TMPDIR/dictus-smoke`), in a
 | `report.txt` | The run's output: commit, Xcode version, device, runtime, each step, the result line |
 | `keyboard.png` | The Dictus keyboard in Safari, just before the mic tap |
 | `final.png` | DictusApp after the hand-off |
+| `nav-1-intro.png`, `nav-2-language.png` | The onboarding screens before each navigation tap |
 | `full-access.png` | The Settings screen after the grant |
 | `evidence.log` | The `fullAccess=true` line and the hand-off lines after the tap |
 | `dictus_debug.full.log` | The whole App Group log, copied before the uninstall deletes it |

@@ -247,6 +247,31 @@ tap() {
 
 center() { python3 -c "print(round($1 + $2 / 2))"; }
 
+# tap_until <kind> <value> <expect-kind> <expect-value> — taps an element and requires
+# that the next screen shows the expected one. When it does not, it goes back with the
+# navigation bar's BackButton if there is one and tries again, three times in all.
+#
+# WHY: a frame read while a screen is still settling sends the tap to whatever moves into
+# that spot. Settings' root inserts its Apple Intelligence row late, and on a loaded Mac
+# late enough to outlast `stable_frame`: on 2026-10-15 (load average
+# ~90), two runs of five tapped "Siri" instead of "Général". Checking where the tap led, and undoing it,
+# is what holds whatever the load.
+tap_until() {
+  local kind=$1 value=$2 expect_kind=$3 expect_value=$4 attempt
+  for attempt in 1 2 3; do
+    sleep 1
+    tap "$kind" "$value"
+    if wait_for "$expect_kind" "$expect_value" 10 >/dev/null; then
+      return 0
+    fi
+    say "  tap on $kind '$value' did not reach '$expect_value' (attempt $attempt)"
+    if is_present id BackButton; then
+      tap id BackButton
+    fi
+  done
+  fail "tapping $kind '$value' never reached $expect_kind '$expect_value'"
+}
+
 # --- Log helpers ------------------------------------------------------------
 
 LOG_FILE=""
@@ -414,9 +439,20 @@ step "5 navigation"
 
 # Intro -> language step -> back. Not "Continuer" on the language step: that starts a
 # model download, which this test must never do.
+#
+# Screenshots of each screen go to the run directory: on 2026-10-15, on a heavily loaded
+# Mac, one run left this step for Siri's settings page ("◀ Dictus") without a log line
+# saying how. The next occurrence should leave the screens behind it.
+sleep 2
 is_present id onboarding.back && fail "the intro already shows a back control"
+xcrun simctl io "$UDID" screenshot "$RUN_DIR/nav-1-intro.png" >/dev/null 2>&1 || true
 tap id onboarding.primary
 wait_for id onboarding.back 10 >/dev/null || fail "Get started did not reach the language step"
+# The back control exists only on the language step (`OnboardingStep.stepBack`), which is
+# what makes it the proof of where the tap landed. Let the push finish before tapping it.
+sleep 1
+xcrun simctl io "$UDID" screenshot "$RUN_DIR/nav-2-language.png" >/dev/null 2>&1 || true
+is_present id onboarding.back || fail "the language step went away before Back was tapped"
 tap id onboarding.back
 waited=0
 while is_present id onboarding.back; do
@@ -433,10 +469,11 @@ say "intro -> language -> intro"
 step "6 full access"
 
 xcrun simctl launch "$UDID" com.apple.Preferences >/dev/null || fail "could not open Settings"
-tap id com.apple.settings.general
-tap id Keyboard
-tap id KEYBOARDS
-tap id "$KEYBOARD_ID"
+wait_for id com.apple.settings.general 20 >/dev/null || fail "Settings did not show its root screen"
+tap_until id com.apple.settings.general id Keyboard
+tap_until id Keyboard id KEYBOARDS
+tap_until id KEYBOARDS id "$KEYBOARD_ID"
+tap_until id "$KEYBOARD_ID" id "Autoriser l’accès complet"
 
 # The switch is not in the accessibility tree, only its row is; the switch sits at the
 # row's trailing edge. A simulator-style tap does not move it: physical does
