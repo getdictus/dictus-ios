@@ -428,26 +428,6 @@ wait_for id onboarding.primary 10 >/dev/null || fail "the intro's Get started is
 ps -p "$APP_PID" >/dev/null || fail "DictusApp pid $APP_PID died during navigation"
 say "intro -> language -> intro"
 
-# Terminated on purpose: the mic tap below then always takes the cold-start path
-# (Darwin post unanswered, URL fallback, app launched by the keyboard), instead of
-# depending on whether iOS happened to keep a backgrounded process running.
-#
-# terminate's exit code is not the check: it is non-zero for an app that is already
-# gone, which is the outcome wanted. What is checked is that the process is gone —
-# launchd no longer lists it and the launch pid has exited — and step 9 then requires
-# the cold-start marker, so a warm hand-off cannot pass for this one.
-xcrun simctl terminate "$UDID" "$APP_ID" >/dev/null 2>&1 || true
-waited=0
-while :; do
-  SERVICES=$(xcrun simctl spawn "$UDID" launchctl list 2>/dev/null || true)
-  if ! grep -q "UIKitApplication:$APP_ID\[" <<<"$SERVICES" && ! ps -p "$APP_PID" >/dev/null; then
-    break
-  fi
-  [ "$waited" -lt 10 ] || fail "DictusApp is still running after terminate: the hand-off would not be a cold start"
-  sleep 1
-  waited=$((waited + 1))
-done
-say "DictusApp terminated: the mic tap will cold-start it"
 
 # --- 6. Full Access ----------------------------------------------------------
 step "6 full access"
@@ -492,6 +472,30 @@ xcrun simctl io "$UDID" screenshot "$RUN_DIR/full-access.png" >/dev/null 2>&1 ||
 
 # --- 7. Keyboard in a host app -----------------------------------------------
 step "7 select the Dictus keyboard"
+
+# DictusApp is terminated on purpose, right before the host app opens: the mic tap below
+# then always takes the cold-start path (Darwin post unanswered, URL fallback, app
+# launched by the keyboard), instead of depending on whether iOS happened to keep a
+# backgrounded process running. Granting Full Access in step 6 already kills the app
+# (SpringBoard logs its exit as `domain:tcc(11)`, measured 2026-10-15), but that is
+# iOS's behaviour, not a guarantee this test should lean on.
+#
+# terminate's exit code is not the check: it is non-zero for an app that is already
+# gone, which is the outcome wanted. What is checked is that the process is gone —
+# launchd no longer lists it and the launch pid has exited — and step 9 then requires
+# the cold-start marker, so a warm hand-off cannot pass for this one.
+xcrun simctl terminate "$UDID" "$APP_ID" >/dev/null 2>&1 || true
+waited=0
+while :; do
+  SERVICES=$(xcrun simctl spawn "$UDID" launchctl list 2>/dev/null || true)
+  if ! grep -q "UIKitApplication:$APP_ID\[" <<<"$SERVICES" && ! ps -p "$APP_PID" >/dev/null; then
+    break
+  fi
+  [ "$waited" -lt 10 ] || fail "DictusApp is still running after terminate: the hand-off would not be a cold start"
+  sleep 1
+  waited=$((waited + 1))
+done
+say "DictusApp terminated: the mic tap will cold-start it"
 
 xcrun simctl launch "$UDID" com.apple.mobilesafari >/dev/null || fail "could not open Safari"
 tap id TabBarItemTitle
