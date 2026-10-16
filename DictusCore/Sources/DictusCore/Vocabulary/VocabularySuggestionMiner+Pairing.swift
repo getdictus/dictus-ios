@@ -62,7 +62,8 @@ extension VocabularySuggestionMiner {
                     if singleMatches[word] == nil {
                         singleMatches[word] = Self.closestLearnedWord(to: word, in: learned)
                     }
-                    if let target = singleMatches[word] ?? nil {
+                    // Flattened: the cache holds "no match" as a stored nil.
+                    if let target = singleMatches[word].flatMap({ $0 }) {
                         tallies[target, default: PairTally(learned: target)]
                             .add(variant: word, record: record.id, date: record.createdAt)
                     }
