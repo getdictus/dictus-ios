@@ -23,9 +23,6 @@ import DictusCore
 /// - It pauses when the app leaves the foreground and resumes where it was
 ///   (`SceneLoopClock`), like the intro's videos.
 /// - With Reduce Motion on, it shows the scene's still moment and never moves.
-/// - It pauses while its container says it is off screen (`sceneIsOnScreen`): the Pro
-///   hub's cards sit in a plain stack, which keeps every card alive however far it is
-///   scrolled away (#686).
 /// - It is silent, decorative and takes no touches: the page's title and line carry the
 ///   meaning for VoiceOver, and a tap on a drawn key must not look like it should work.
 /// - It never gates anything. The page around it decides when Next is enabled, and for a
@@ -42,7 +39,6 @@ struct AnimatedScenePlayer<Content: View>: View {
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.sceneIsOnScreen) private var isOnScreen
 
     @State private var clock: SceneLoopClock
 
@@ -72,10 +68,9 @@ struct AnimatedScenePlayer<Content: View>: View {
 
     // MARK: - Private
 
-    /// Whether the loop is running: the app in front, the scene on screen, and Reduce
-    /// Motion off.
+    /// Whether the loop is running: the app in front and Reduce Motion off.
     private var isPlaying: Bool {
-        scenePhase == .active && isOnScreen && !reduceMotion
+        scenePhase == .active && !reduceMotion
     }
 
     private var currentTime: Double {
@@ -93,22 +88,4 @@ struct AnimatedScenePlayer<Content: View>: View {
     /// A monotonic clock in seconds. Not the wall clock, which the user or the network
     /// can move.
     private static var now: Double { ProcessInfo.processInfo.systemUptime }
-}
-
-// MARK: - On screen
-
-private struct SceneIsOnScreenKey: EnvironmentKey {
-    static let defaultValue = true
-}
-
-extension EnvironmentValues {
-    /// Whether the scenes below are on screen, true unless a container says otherwise.
-    ///
-    /// WHY THE CONTAINER SAYS IT: `onDisappear` only fires when a view leaves the
-    /// hierarchy. A page of the onboarding does; a card scrolled out of a plain `VStack`
-    /// does not, so only the scroll view around it can tell (`ProHubFeatureCard`, #686).
-    var sceneIsOnScreen: Bool {
-        get { self[SceneIsOnScreenKey.self] }
-        set { self[SceneIsOnScreenKey.self] = newValue }
-    }
 }
