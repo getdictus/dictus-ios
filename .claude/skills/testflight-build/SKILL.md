@@ -31,7 +31,7 @@ The bare form is the default and is right almost always. Pass a version only whe
 
 The script bumps all three plists together, commits, tags `build/N` and pushes. It refuses a dirty tree, a branch other than `develop`, and a duplicate `build/N`.
 
-**Before cutting, the lane must be empty.** [`docs/ROADMAP.md`](../../../docs/ROADMAP.md) holds the ordered queue and says what a cycle contains. Check the milestone has no open issues, run `cd DictusCore && swift test`, and run `swiftlint lint --strict --no-cache`. CI does not run the tests, so nobody else will.
+**Before cutting, the lane must be empty.** [`docs/ROADMAP.md`](../../../docs/ROADMAP.md) holds the ordered queue and says what a cycle contains. Check the milestone has no open issues, run `cd DictusCore && swift test`, and run `swiftlint lint --strict --no-cache`. CI runs the same suite on every pull request and every push to `develop` (#534); the local run checks the exact commit you are about to cut, before a build number is spent on it.
 
 ## 2. Upload
 

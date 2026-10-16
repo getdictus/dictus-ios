@@ -1,41 +1,40 @@
 // DictusApp/Onboarding/ChecklistFrameRenderer.swift
-// Renders the checklist card into the video frames Picture in Picture shows (#682).
+// Renders a checklist card into the video frames Picture in Picture shows (#682, #706).
 import AVFoundation
 import CoreMedia
 import CoreVideo
 import SwiftUI
 import DictusCore
 
-/// Turns a checklist state into a `CMSampleBuffer` for an `AVSampleBufferDisplayLayer`.
+/// Turns a checklist card into a `CMSampleBuffer` for an `AVSampleBufferDisplayLayer`.
 ///
 /// WHY FRAMES AT ALL (#649 decision 10): Picture in Picture only shows video. A checklist
 /// drawn in code reaches it by being rendered, frame by frame, into a sample-buffer display
 /// layer (`AVPictureInPictureController.ContentSource(sampleBufferDisplayLayer:…)`). No
 /// recorded video ships, so the card stays localized and follows the line states live.
 ///
-/// WHY `ImageRenderer`: it draws a SwiftUI view (`KeyboardSetupChecklistPictureCard`), off
-/// screen, into a `CGImage`, with the same line states and copy as the inline card of the
-/// fallback. It runs on the main actor.
+/// WHY `ImageRenderer`: it draws a SwiftUI view (a `SettingsChecklistPictureCard`, built by
+/// the step's `SettingsChecklistScript`), off screen, into a `CGImage`. It runs on the main
+/// actor.
 @MainActor
 final class ChecklistFrameRenderer {
     /// Pixels per point. 2 keeps the text sharp in a Picture in Picture window, which is
     /// smaller than the card, at a quarter of a 3× frame's memory.
     private static let scale: CGFloat = 2
 
-    private let pixelWidth = Int(KeyboardSetupChecklistPictureCard.size.width * scale)
-    private let pixelHeight = Int(KeyboardSetupChecklistPictureCard.size.height * scale)
+    private let pixelWidth = Int(SettingsChecklistPictureCard.size.width * scale)
+    private let pixelHeight = Int(SettingsChecklistPictureCard.size.height * scale)
 
     private var pool: CVPixelBufferPool?
     private var formatDescription: CMVideoFormatDescription?
 
-    /// A frame showing `lines`, stamped at `time` on the layer's timebase, or nil when a
+    /// A frame showing `card`, stamped at `time` on the layer's timebase, or nil when a
     /// Core Video or Core Media call fails (the caller keeps the previous frame up).
-    func sampleBuffer(
-        lines: [KeyboardSetupChecklistLineState],
-        tickProgress: [Double],
-        at time: CMTime
-    ) -> CMSampleBuffer? {
-        let renderer = ImageRenderer(content: KeyboardSetupChecklistPictureCard(lines: lines, tickProgress: tickProgress))
+    ///
+    /// `card` is drawn at `SettingsChecklistPictureCard.size`, the size the pixel buffers
+    /// are made for.
+    func sampleBuffer(drawing card: some View, at time: CMTime) -> CMSampleBuffer? {
+        let renderer = ImageRenderer(content: card)
         renderer.scale = Self.scale
         guard let image = renderer.cgImage,
               let pixelBuffer = makePixelBuffer(drawing: image) else {

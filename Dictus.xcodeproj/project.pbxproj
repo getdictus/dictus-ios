@@ -27,6 +27,7 @@
 		SS000003 /* ProBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100003 /* ProBannerView.swift */; };
 		AA0000L1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L1 /* Localizable.xcstrings */; };
 		AA0000L2 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L2 /* Localizable.xcstrings */; };
+		AA0000L3 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L3 /* InfoPlist.xcstrings */; };
 		4647AD302F76AAA5003C3546 /* RecordingView.swift in Frameworks */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
 		4647AD312F76AAA5003C3546 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = AA900030 /* FluidAudio */; };
 		AA000001 /* DictusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001 /* DictusApp.swift */; };
@@ -113,10 +114,12 @@
 		AA068201 /* KeyboardSetupChecklistCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168201 /* KeyboardSetupChecklistCard.swift */; };
 		AA068202 /* ChecklistFrameRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168202 /* ChecklistFrameRenderer.swift */; };
 		AA068203 /* ChecklistAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168203 /* ChecklistAudioSession.swift */; };
-		AA068204 /* KeyboardSetupChecklistPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168204 /* KeyboardSetupChecklistPlayer.swift */; };
+		AA068204 /* SettingsChecklistPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168204 /* SettingsChecklistPlayer.swift */; };
 		AA068205 /* KeyboardSetupChecklistInline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168205 /* KeyboardSetupChecklistInline.swift */; };
-		AA068206 /* KeyboardSetupChecklistPictureCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168206 /* KeyboardSetupChecklistPictureCard.swift */; };
+		AA068206 /* SettingsChecklistPictureCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168206 /* SettingsChecklistPictureCard.swift */; };
 		AA068207 /* ChecklistPictureSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168207 /* ChecklistPictureSource.swift */; };
+		AA070601 /* KeyboardSetupChecklistScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA170601 /* KeyboardSetupChecklistScript.swift */; };
+		AA070602 /* AppleIntelligenceChecklistScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA170602 /* AppleIntelligenceChecklistScript.swift */; };
 		AA0000A4 /* ModelDownloadPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A4 /* ModelDownloadPage.swift */; };
 		AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A5 /* GlobeKeyTutorialPage.swift */; };
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
@@ -260,6 +263,7 @@
 		AA1000L0 /* ModelInfo+Localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModelInfo+Localized.swift"; sourceTree = "<group>"; };
 		AA1000L1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		AA1000L2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		AA1000L3 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		AA100001 /* DictusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusApp.swift; sourceTree = "<group>"; };
 		AA100002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA100003 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
@@ -348,10 +352,12 @@
 		AA168201 /* KeyboardSetupChecklistCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistCard.swift; sourceTree = "<group>"; };
 		AA168202 /* ChecklistFrameRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistFrameRenderer.swift; sourceTree = "<group>"; };
 		AA168203 /* ChecklistAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistAudioSession.swift; sourceTree = "<group>"; };
-		AA168204 /* KeyboardSetupChecklistPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistPlayer.swift; sourceTree = "<group>"; };
+		AA168204 /* SettingsChecklistPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsChecklistPlayer.swift; sourceTree = "<group>"; };
 		AA168205 /* KeyboardSetupChecklistInline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistInline.swift; sourceTree = "<group>"; };
-		AA168206 /* KeyboardSetupChecklistPictureCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistPictureCard.swift; sourceTree = "<group>"; };
+		AA168206 /* SettingsChecklistPictureCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsChecklistPictureCard.swift; sourceTree = "<group>"; };
 		AA168207 /* ChecklistPictureSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistPictureSource.swift; sourceTree = "<group>"; };
+		AA170601 /* KeyboardSetupChecklistScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistScript.swift; sourceTree = "<group>"; };
+		AA170602 /* AppleIntelligenceChecklistScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceChecklistScript.swift; sourceTree = "<group>"; };
 		AA1000A4 /* ModelDownloadPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadPage.swift; sourceTree = "<group>"; };
 		AA1000A5 /* GlobeKeyTutorialPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeKeyTutorialPage.swift; sourceTree = "<group>"; };
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -554,6 +560,7 @@
 				AA40000F /* Services */,
 				AA40000L /* Extensions */,
 				AA1000L1 /* Localizable.xcstrings */,
+				AA1000L3 /* InfoPlist.xcstrings */,
 				AA1000C0 /* Assets.xcassets */,
 				AA1000C1 /* Settings.bundle */,
 				AA1000F4 /* Sounds */,
@@ -778,10 +785,12 @@
 				AA168201 /* KeyboardSetupChecklistCard.swift */,
 				AA168202 /* ChecklistFrameRenderer.swift */,
 				AA168203 /* ChecklistAudioSession.swift */,
-				AA168204 /* KeyboardSetupChecklistPlayer.swift */,
+				AA168204 /* SettingsChecklistPlayer.swift */,
 				AA168205 /* KeyboardSetupChecklistInline.swift */,
-				AA168206 /* KeyboardSetupChecklistPictureCard.swift */,
+				AA168206 /* SettingsChecklistPictureCard.swift */,
 				AA168207 /* ChecklistPictureSource.swift */,
+				AA170601 /* KeyboardSetupChecklistScript.swift */,
+				AA170602 /* AppleIntelligenceChecklistScript.swift */,
 				AA1000A4 /* ModelDownloadPage.swift */,
 				AA1000A5 /* GlobeKeyTutorialPage.swift */,
 				AA1000EA /* LanguageSetupPage.swift */,
@@ -1148,6 +1157,7 @@
 				AA0676A6 /* intro-c-dark.mp4 in Resources */,
 				AA000P10 /* PrivacyInfo.xcprivacy in Resources */,
 				AA0000L1 /* Localizable.xcstrings in Resources */,
+				AA0000L3 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1329,10 +1339,12 @@
 				AA068201 /* KeyboardSetupChecklistCard.swift in Sources */,
 				AA068202 /* ChecklistFrameRenderer.swift in Sources */,
 				AA068203 /* ChecklistAudioSession.swift in Sources */,
-				AA068204 /* KeyboardSetupChecklistPlayer.swift in Sources */,
+				AA068204 /* SettingsChecklistPlayer.swift in Sources */,
 				AA068205 /* KeyboardSetupChecklistInline.swift in Sources */,
-				AA068206 /* KeyboardSetupChecklistPictureCard.swift in Sources */,
+				AA068206 /* SettingsChecklistPictureCard.swift in Sources */,
 				AA068207 /* ChecklistPictureSource.swift in Sources */,
+				AA070601 /* KeyboardSetupChecklistScript.swift in Sources */,
+				AA070602 /* AppleIntelligenceChecklistScript.swift in Sources */,
 				AA0000A4 /* ModelDownloadPage.swift in Sources */,
 				AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */,
 				AA0000A9 /* OnboardingSuccessView.swift in Sources */,
