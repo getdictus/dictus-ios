@@ -67,6 +67,11 @@ struct MainTabView: View {
     /// screen. Set once per install, by `presentWhatsNewIfDue`.
     @State private var whatsNewSteps: [OnboardingStep]?
 
+    /// Whether a URL opened this activation, which defers What's new to the next one
+    /// (`WhatsNew.mayAppear`, #685). Seeded from the launch, set by `.onOpenURL`, cleared
+    /// when the app goes to the background.
+    @State private var activationOpenedByURL: Bool
+
     /// The shared voice notes (#620): what the Live Activity link or the cold path
     /// asked to show.
     @ObservedObject private var voiceNotes = VoiceNoteProcessor.shared
@@ -93,9 +98,24 @@ struct MainTabView: View {
                 : nil
         )
         // What's new is decided here too, for the same first frame: an existing user's
-        // first launch of 2.0.0 opens on it, not on one frame of Home. A launch from the
-        // keyboard leaves it for a later activation (`presentWhatsNewIfDue`).
-        _whatsNewSteps = State(initialValue: launchIntent == nil ? Self.dueWhatsNewSteps() : nil)
+        // first launch of 2.0.0 from the icon opens on it, not on one frame of Home. Two
+        // launches leave it to the activation instead (`presentWhatsNewIfDue`), which runs
+        // after the URL handlers:
+        // - a launch through any URL (a dictation from the keyboard, the voice note link,
+        //   the Pro entry), whose URL is handled after this frame;
+        // - a launch in the background (iOS prewarming the process, measured on the
+        //   simulator): its URL, if any, is not in the scene's connection options but comes
+        //   later through `.onOpenURL`, so this frame cannot know it. Nothing is on screen
+        //   in the background, so waiting costs no frame of Home.
+        let openedByURL = ColdStartLaunch.carriedURL
+        let launchedInForeground = UIApplication.shared.applicationState != .background
+        _activationOpenedByURL = State(initialValue: openedByURL)
+        _whatsNewSteps = State(
+            initialValue: launchedInForeground
+                && WhatsNew.mayAppear(displayIsFree: true, activationOpenedByURL: openedByURL)
+                ? Self.dueWhatsNewSteps()
+                : nil
+        )
     }
 
     /// What's new's steps on this device if it is due and has something to show, nil
@@ -148,10 +168,11 @@ struct MainTabView: View {
     @discardableResult
     private func presentWhatsNewIfDue() -> Bool {
         if whatsNewSteps != nil { return true }
-        guard mayRaiseWhatsNew,
-              trialCoordinator.announcement == nil,
-              !trialCoordinator.showsEndOfTrialPaywall,
-              voiceNotes.presentation == nil,
+        let displayIsFree = mayRaiseWhatsNew
+            && trialCoordinator.announcement == nil
+            && !trialCoordinator.showsEndOfTrialPaywall
+            && voiceNotes.presentation == nil
+        guard WhatsNew.mayAppear(displayIsFree: displayIsFree, activationOpenedByURL: activationOpenedByURL),
               let steps = Self.dueWhatsNewSteps() else { return false }
         whatsNewSteps = steps
         return true
@@ -299,6 +320,14 @@ struct MainTabView: View {
             voiceNotes.mainScreenBlocked = blocked
         }
         .onOpenURL { url in
+            // Whatever this URL asks for, What's new does not take its place (#685). If it
+            // was drawn before the URL was known, it has not been recorded yet (it is, once
+            // the app is active), so it steps aside and stays due for the next activation.
+            activationOpenedByURL = true
+            if whatsNewSteps != nil, WhatsNew.isDue() {
+                whatsNewSteps = nil
+            }
+
             // The keyboard's Pro entries (#241's panel pill, #404's fan row). Until
             // 2026-08-29 nothing routed on `dictus://open` at all, so both of them
             // brought the app forward on whatever screen it happened to be showing and
@@ -402,6 +431,7 @@ struct MainTabView: View {
             }
             if newPhase == .background {
                 isColdStartMode = false
+                activationOpenedByURL = false
                 // The launch intent describes the frame this process launched into.
                 // Forgetting it here keeps a view rebuilt later in the same process
                 // from replaying the cold-start overlay (issue #264).

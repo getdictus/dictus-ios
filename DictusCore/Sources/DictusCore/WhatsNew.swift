@@ -52,6 +52,23 @@ public enum WhatsNew {
         onboardingCompleted && isOlder(lastVersionSeen, than: edition)
     }
 
+    /// Whether What's new may take the screen now, when it is due.
+    ///
+    /// - Parameters:
+    ///   - displayIsFree: nothing else owns the screen: no dictation, preparation, paywall,
+    ///     voice note or trial screen.
+    ///   - activationOpenedByURL: this activation was opened by a URL (the Live Activity's
+    ///     voice note link, the keyboard's Pro entry, a widget), whether it launched the
+    ///     process or reached it running.
+    ///
+    /// WHY A URL DEFERS IT (CodeRabbit on PR #741): the URL is handled after the first frame
+    /// is drawn, so What's new would take the screen the user asked for, and be recorded as
+    /// seen on the way. It waits for the next activation instead, and is recorded only when
+    /// it is actually on screen.
+    public static func mayAppear(displayIsFree: Bool, activationOpenedByURL: Bool) -> Bool {
+        displayIsFree && !activationOpenedByURL
+    }
+
     /// The value to write once the user is up to date: the latest of what was stored, the
     /// running version and the edition. It never goes down, so a rollback to an older
     /// build cannot make What's new due again.
