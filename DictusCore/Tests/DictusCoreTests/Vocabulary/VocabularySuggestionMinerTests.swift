@@ -220,3 +220,136 @@ final class VocabularySuggestionMinerTests: XCTestCase {
         XCTAssertEqual(calls, 2, "one call for `zorgblat`, one for `teste`")
     }
 }
+
+// MARK: - Paired with the keyboard's learned words (#512, reshaped 2026-10-16)
+
+final class VocabularySuggestionPairingTests: XCTestCase {
+
+    /// The app's predicate counts learned words as known, so this one does too.
+    private static let dictionary: Set<String> = [
+        "je", "vois", "demain", "avec", "le", "projet", "her", "mes", "air", "on", "a",
+        "parlé", "de", "et", "la", "une", "réunion", "pour", "the", "is", "with", "cloud",
+        "code", "maison", "raison", "écrit", "sur", "whisper", "kit", "dit", "tu"
+    ]
+
+    private let learned = ["hermes", "parakeet", "whisperkit", "dictus"]
+
+    private var miner: VocabularySuggestionMiner {
+        let learnedSet = Set(learned)
+        return VocabularySuggestionMiner { word in
+            Self.dictionary.contains(word.lowercased()) || learnedSet.contains(word.lowercased())
+        }
+    }
+
+    private func mine(_ texts: [String],
+                      learned: [String]? = nil,
+                      vocabulary: [VocabularyEntry] = [],
+                      ignored: Set<String> = []) -> [VocabularySuggestion] {
+        let records = texts.enumerated().map { offset, text in
+            TranscriptionRecord(
+                text: text, language: "fr", durationSeconds: 5,
+                createdAt: Date(timeIntervalSince1970: 1_000_000 - Double(offset) * 60), sttProvider: "PK"
+            )
+        }
+        return miner.suggestions(
+            from: records, learnedWords: learned ?? self.learned, vocabulary: vocabulary, ignored: ignored
+        )
+    }
+
+    func testAMisheardLearnedWordIsSuggestedWithItsSpellingPrefilled() throws {
+        let result = mine(["je vois airmes demain", "réunion avec airmes"])
+        let suggestion = try XCTUnwrap(result.first)
+        XCTAssertEqual(suggestion.term, "hermes")
+        XCTAssertEqual(suggestion.forms, ["airmes"])
+        XCTAssertEqual(suggestion.dictationCount, 2)
+        XCTAssertEqual(suggestion.id, "learned:hermes")
+    }
+
+    func testOneDictationIsEnoughWhenTheSpellingIsTheUsers() {
+        XCTAssertEqual(mine(["je vois airmes demain"]).map(\.term), ["hermes"])
+    }
+
+    func testALearnedWordWrittenRightIsNotASuggestion() {
+        // The `dictus` case from the device trial.
+        XCTAssertEqual(mine(["Dictus marche", "avec Dictus et dictus"]), [])
+    }
+
+    func testTheTermTakesTheUsersCapitalisationFromHistory() throws {
+        let result = mine(["réunion avec Hermes demain", "je vois airmes", "Hermes est là"])
+        XCTAssertEqual(try XCTUnwrap(result.first).term, "Hermes")
+    }
+
+    func testACapitalOnlyAtTheStartOfASentenceIsNotTheUsersCapitalisation() throws {
+        let result = mine(["Hermes est là", "je vois airmes"])
+        XCTAssertEqual(try XCTUnwrap(result.first).term, "hermes")
+    }
+
+    func testWithoutAnExactOccurrenceTheTermIsTheLowercaseLearnedWord() throws {
+        XCTAssertEqual(try XCTUnwrap(mine(["avec Parakit"]).first).term, "parakeet")
+    }
+
+    func testAWordHeardAsTwoWordsIsSuggestedAsOneVariant() throws {
+        let result = mine(["on a parlé de whisper kit", "avec her mes demain"])
+        XCTAssertEqual(Set(result.compactMap(\.term)), ["whisperkit", "hermes"])
+        XCTAssertEqual(result.first { $0.term == "whisperkit" }?.forms, ["whisper kit"])
+        XCTAssertEqual(result.first { $0.term == "hermes" }?.forms, ["her mes"])
+    }
+
+    func testSpellingsOfOneLearnedWordAreGroupedUnderIt() throws {
+        let result = mine(["je vois airmes", "avec her mes", "pour airmès", "je vois airmes"])
+        let suggestion = try XCTUnwrap(result.first)
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(suggestion.forms, ["airmes", "airmès", "her mes"], "most frequent first, then alphabetical")
+        XCTAssertEqual(suggestion.dictationCount, 4)
+        XCTAssertEqual(suggestion.occurrences, 4)
+    }
+
+    func testOrdinaryWordsNeverPairWithALearnedWord() {
+        // `maison` and `raison` are words; `dit tu` is two words a couple of edits from
+        // `dictus`; `cloud code` is real words too. None of them may become a rule.
+        XCTAssertEqual(mine(["la maison et la raison", "dit tu", "cloud code"]), [])
+    }
+
+    func testASpanDoesNotCrossASentence() {
+        XCTAssertEqual(mine(["Je vois her. Mes projets"]), [])
+    }
+
+    func testPairedSuggestionsRankBeforeHistoryOnlyOnes() {
+        let result = mine(["zorgblat zorgblat", "zorgblat et zorgblat", "zorgblat", "je vois airmes"])
+        XCTAssertEqual(result.map(\.isPaired), [true, false])
+        XCTAssertEqual(result.last?.forms, ["zorgblat"])
+    }
+
+    func testAPairedSpellingIsNotShownAgainAsAnUnknownWord() {
+        let result = mine(["je vois airmes", "réunion avec airmes"])
+        XCTAssertEqual(result.count, 1)
+        XCTAssertTrue(result[0].isPaired)
+    }
+
+    func testIgnoringAPairedSuggestionHidesIt() throws {
+        let suiteName = "VocabularySuggestionPairingTests-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let list = VocabularySuggestionIgnoreList(defaults: defaults)
+
+        list.ignore(try XCTUnwrap(mine(["je vois airmes"]).first))
+        XCTAssertEqual(mine(["je vois airmes", "avec her mes"], ignored: list.keys), [])
+    }
+
+    func testAVariantAlreadyStoredIsNotSuggestedAgain() throws {
+        let entry = try XCTUnwrap(VocabularyEntry(term: "Hermes", variants: ["airmes"]))
+        XCTAssertEqual(mine(["je vois airmes"], vocabulary: [entry]), [])
+        // A new spelling of a stored term is still offered; the sheet merges it.
+        XCTAssertEqual(mine(["avec her mes"], vocabulary: [entry]).map(\.forms), [["her mes"]])
+    }
+
+    func testANewLearnedWordIsReadInLowercaseComposedForm() throws {
+        let result = mine(["je vois airmes"], learned: ["HERME\u{0300}S"])
+        XCTAssertEqual(try XCTUnwrap(result.first).term, "hermès")
+    }
+
+    func testNoLearnedWordsLeavesOnlyTheHistoryOnlyPath() {
+        let result = mine(["zorgblat", "zorgblat"], learned: [])
+        XCTAssertEqual(result.map(\.isPaired), [false])
+    }
+}

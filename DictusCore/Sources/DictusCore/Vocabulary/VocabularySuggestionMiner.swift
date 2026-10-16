@@ -1,18 +1,28 @@
 // DictusCore/Sources/DictusCore/Vocabulary/VocabularySuggestionMiner.swift
-// Words in the History that Dictus may be getting wrong, ranked for review (#512 trial).
+// Words in the History that Dictus may be getting wrong, ranked for review (#512).
 import Foundation
 
 /// One word the History suggests adding to the vocabulary (#512).
 ///
 /// The forms are the evidence: what the engine actually wrote. They become the
-/// variants of the entry the user creates on **Accept**, and the user types the
-/// correct spelling, exactly as with a selection in History (#723). The miner never
-/// proposes a canonical spelling: it has no way of knowing it.
+/// variants of the entry the user creates on **Accept** (#723's sheet).
+///
+/// Two kinds, told apart by `term`. A **paired** suggestion was anchored on a word
+/// the keyboard learned from the user's typing: that word is the correct spelling,
+/// so it is prefilled. A **history-only** suggestion is an unknown spelling with
+/// nothing to anchor it: the user types the correct spelling, and it ranks after
+/// every paired one.
 public struct VocabularySuggestion: Identifiable, Equatable, Sendable {
 
-    /// The folded form of the group's leading spelling. Stable across two runs over
-    /// the same History, which is what SwiftUI's list identity needs.
+    /// Stable across two runs over the same History, which is what SwiftUI's list
+    /// identity needs: `learned:` plus the learned word for a paired suggestion, the
+    /// folded leading spelling for a history-only one.
     public let id: String
+
+    /// The correct spelling to prefill, for a paired suggestion; nil otherwise.
+    /// Capitalised as the user's own History writes it when it does, lowercase
+    /// otherwise, since that is how the keyboard stores what it learns.
+    public let term: String?
 
     /// The spellings seen, distinct ignoring case, most frequent first.
     public let forms: [String]
@@ -36,17 +46,29 @@ public struct VocabularySuggestion: Identifiable, Equatable, Sendable {
     public var variantsLine: String {
         forms.joined(separator: ", ")
     }
+
+    /// Whether the correct spelling came from the keyboard's learned words.
+    public var isPaired: Bool {
+        term != nil
+    }
 }
 
 /// The deterministic miner behind **Suggestions from History** (#512, 2.0.0 trial).
 ///
-/// ### What the trial is, and is not
+/// ### Two sources of evidence, in this order (reshaped plan, 2026-10-16)
 ///
-/// The slice decided on 2026-10-12: History only, no model, no recognition biasing.
-/// A word is a candidate when it is **not a dictionary word**, not part of a URL or an
-/// e-mail address, carries no digit, is not already in the vocabulary, and was not
-/// ignored. Near spellings are grouped, the groups counted, and the ones seen in at
-/// least two dictations ranked. Everything else on #512's body waits for 2.1.
+/// 1. **Paired** (`pairedSuggestions`): the words the keyboard learned are spellings
+///    the user typed and the base dictionary does not know (#288). Each is the
+///    canonical; History is searched for the engine's attempts at it, one word or a
+///    span of up to three. The first trial, History alone, found one suggestion on a
+///    real device and it was a name already spelled right: the engine's mistakes are
+///    real words, and History never holds the correct spelling. This path is the fix.
+/// 2. **History-only**: a word that is **not a dictionary word**, not part of a URL or
+///    an e-mail address, carries no digit, is not already in the vocabulary, and was
+///    not ignored. Near spellings are grouped, and groups seen in at least two
+///    dictations kept. Weaker evidence, ranked after every paired suggestion.
+///
+/// No model and no recognition biasing in either: that is the plan's step 2.
 ///
 /// ### Why the dictionary is injected
 ///
@@ -96,15 +118,31 @@ public struct VocabularySuggestionMiner {
     ///   - ignored: folded spellings the user dismissed (`VocabularySuggestionIgnoreList`).
     ///   - limit: how many to return.
     public func suggestions(from records: [TranscriptionRecord],
+                            learnedWords: [String] = [],
                             vocabulary: [VocabularyEntry],
                             ignored: Set<String>,
                             limit: Int = VocabularySuggestionMiner.defaultLimit) -> [VocabularySuggestion] {
         let excluded = Self.vocabularyKeys(vocabulary).union(ignored)
         var knownCache: [String: Bool] = [:]
-        var tallies: [String: Tally] = [:]
+        let tokenized = records.map { (record: $0, tokens: Self.tokens(in: $0.text)) }
 
-        for record in records {
-            for token in Self.tokens(in: record.text) {
+        let paired = pairedSuggestions(
+            tokenized, learnedWords: learnedWords, excluded: excluded, ignored: ignored, cache: &knownCache
+        )
+        // A spelling already explained by a learned word is not shown a second time,
+        // as an unknown word with no correction.
+        let explained = excluded.union(paired.flatMap { $0.forms.map(Self.fold) })
+        let historyOnly = historyOnlySuggestions(tokenized, excluded: explained, cache: &knownCache)
+        return Array((paired + historyOnly).prefix(max(0, limit)))
+    }
+
+    /// The history-only path: unknown spellings, grouped and counted, ranked.
+    private func historyOnlySuggestions(_ tokenized: [(record: TranscriptionRecord, tokens: [Token])],
+                                        excluded: Set<String>,
+                                        cache knownCache: inout [String: Bool]) -> [VocabularySuggestion] {
+        var tallies: [String: Tally] = [:]
+        for (record, tokens) in tokenized {
+            for token in tokens {
                 guard let word = candidateWord(token.text, cache: &knownCache) else { continue }
                 let key = Self.fold(word)
                 guard !excluded.contains(key) else { continue }
@@ -117,10 +155,10 @@ public struct VocabularySuggestionMiner {
             }
         }
 
-        let groups = Self.group(Array(tallies.values))
+        return Self.group(Array(tallies.values))
             .filter { $0.records.count >= Self.minimumDictations }
             .map { $0.suggestion }
-        return Array(groups.sorted(by: Self.ranksBefore).prefix(max(0, limit)))
+            .sorted(by: Self.ranksBefore)
     }
 
     // MARK: - Filtering one token
@@ -128,7 +166,7 @@ public struct VocabularySuggestionMiner {
     /// The word a token stands for, or nil when it is not a candidate.
     ///
     /// The order matters only for cost: the dictionary is asked last.
-    private func candidateWord(_ raw: String, cache: inout [String: Bool]) -> String? {
+    func candidateWord(_ raw: String, cache: inout [String: Bool]) -> String? {
         guard !raw.contains(where: { $0.isNumber }) else { return nil }
         guard let word = strippedWord(raw, cache: &cache) else { return nil }
         guard word.count >= Self.minimumLength else { return nil }
@@ -153,7 +191,7 @@ public struct VocabularySuggestionMiner {
         return raw
     }
 
-    private func known(_ word: String, cache: inout [String: Bool]) -> Bool {
+    func known(_ word: String, cache: inout [String: Bool]) -> Bool {
         if let hit = cache[word] { return hit }
         let answer = isKnownWord(word)
         cache[word] = answer
@@ -230,8 +268,7 @@ public struct VocabularySuggestionMiner {
     /// The comparison form: case and diacritics folded, so `Parakít`, `parakit` and
     /// `PARAKIT` are one spelling for grouping, exclusion and ignoring.
     public static func fold(_ word: String) -> String {
-        word.precomposedStringWithCanonicalMapping
-            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+        SpellingSimilarity.fold(word)
     }
 
     /// Every word of every term and variant, folded, plus each whole field.
@@ -251,37 +288,6 @@ public struct VocabularySuggestionMiner {
 
     // MARK: - Grouping
 
-    /// Whether two folded spellings are close enough to be one word misheard twice.
-    ///
-    /// One edit up to six characters, two from seven: `parakit` / `parakeet` is two
-    /// edits apart, and at that length two edits still leave most of the word.
-    static func areNearSpellings(_ lhs: String, _ rhs: String) -> Bool {
-        let shorter = min(lhs.count, rhs.count)
-        let allowed = shorter >= 7 ? 2 : 1
-        guard abs(lhs.count - rhs.count) <= allowed else { return false }
-        return editDistance(lhs, rhs, atMost: allowed) <= allowed
-    }
-
-    /// Levenshtein distance, giving up past `atMost` (the answer is then `atMost + 1`).
-    static func editDistance(_ lhs: String, _ rhs: String, atMost limit: Int) -> Int {
-        let left = Array(lhs), right = Array(rhs)
-        if left.isEmpty { return right.count }
-        if right.isEmpty { return left.count }
-        var previous = Array(0...right.count)
-        for (i, leftChar) in left.enumerated() {
-            var current = [i + 1] + Array(repeating: 0, count: right.count)
-            var rowMinimum = current[0]
-            for (j, rightChar) in right.enumerated() {
-                let substitution = previous[j] + (leftChar == rightChar ? 0 : 1)
-                current[j + 1] = min(previous[j + 1] + 1, current[j] + 1, substitution)
-                rowMinimum = min(rowMinimum, current[j + 1])
-            }
-            if rowMinimum > limit { return limit + 1 }
-            previous = current
-        }
-        return previous[right.count]
-    }
-
     /// Near spellings joined behind the most frequent one.
     ///
     /// Leader-based rather than transitive on purpose: with chaining, `abcd` - `abce`
@@ -296,7 +302,7 @@ public struct VocabularySuggestionMiner {
         }
         var leaders: [Tally] = []
         for tally in ordered {
-            if let index = leaders.firstIndex(where: { areNearSpellings($0.key, tally.key) }) {
+            if let index = leaders.firstIndex(where: { SpellingSimilarity.areNearSpellings($0.key, tally.key) }) {
                 leaders[index].absorb(tally)
             } else {
                 leaders.append(tally)
@@ -377,6 +383,7 @@ public struct VocabularySuggestionMiner {
                 .map(\.spelling)
             return VocabularySuggestion(
                 id: key,
+                term: nil,
                 forms: forms,
                 occurrences: occurrences,
                 dictationCount: records.count,
