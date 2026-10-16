@@ -14,10 +14,8 @@ struct SmartModesScenePage: View {
 
     var body: some View {
         OnboardingScenePage(
-            title: Text("One long press, one Smart Mode",
-                        comment: "Onboarding Smart Modes scene: title (#679)."),
-            line: Text("Hold the mic, slide to a mode, let go. Dictus writes in that mode.",
-                       comment: "Onboarding Smart Modes scene: the line under the title, describing the long-press gesture on the keyboard's mic (#679)."),
+            title: SmartModesSceneCard.title,
+            line: SmartModesSceneCard.line,
             modelManager: modelManager,
             modelIdentifier: modelIdentifier,
             onNext: onNext
@@ -27,9 +25,22 @@ struct SmartModesScenePage: View {
     }
 }
 
-/// The Smart Modes scene in its drawn iPhone: the onboarding page's card and the Pro hub's
-/// Smart Modes card (#686).
+/// The Smart Modes scene in its drawn iPhone: the onboarding page's card and the
+/// Smart Modes screen's "See how it works" sheet (#686).
 struct SmartModesSceneCard: View {
+    /// The title of the onboarding step, also the title of the feature screen's "See how
+    /// it works" sheet (#686): one string for both.
+    static var title: Text {
+        Text("One long press, one Smart Mode",
+             comment: "Onboarding Smart Modes scene: title (#679).")
+    }
+
+    /// The line under the title, shared the same way.
+    static var line: Text {
+        Text("Hold the mic, slide to a mode, let go. Dictus writes in that mode.",
+             comment: "Onboarding Smart Modes scene: the line under the title, describing the long-press gesture on the keyboard's mic (#679).")
+    }
+
     /// The fan the scene draws, its translation row picked for the language the user said
     /// they speak (`SmartModesSceneScript.entries`). Read once: it was written on the
     /// language screen and does not change while the card is on screen.

@@ -67,47 +67,10 @@ struct OnboardingScenePage<Card: View>: View {
         self.card = card()
     }
 
-    /// The least height the card is drawn at. Under it the phone would be too small to
-    /// read, so the page scrolls instead (`body`).
-    ///
-    /// WHY 160: it must stay under what the smallest supported iPhone leaves at the
-    /// default text size with the download pill showing (about 230 pt on an iPhone SE,
-    /// measured on #680's captures), or that ordinary case would scroll and the phone would
-    /// run under the pill again. 260 did exactly that.
-    private static var minimumCardHeight: CGFloat { 160 }
-
     var body: some View {
         VStack(spacing: 0) {
-            // WHY TWO LAYOUTS (CodeRabbit on PR #722): the fitted one does not scroll, so
-            // a title and line taller than the screen (the accessibility text sizes, a
-            // small iPhone) used to push everything below them off the page. When the
-            // header and a card of at least `minimumCardHeight` fit, the card takes the
-            // rest of the height, as before. When they do not, the same content scrolls,
-            // with the card at that minimum height. Next is outside both, pinned, so it
-            // is always reachable, and so is the shell's Skip under it (#700).
-            ViewThatFits(in: .vertical) {
-                VStack(spacing: 0) {
-                    header
-                    OnboardingFitToHeight {
-                        card
-                    }
-                    .frame(minHeight: Self.minimumCardHeight)
-                    .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-                    .padding(.bottom, 16)
-                }
-
-                ScrollView {
-                    VStack(spacing: 0) {
-                        header
-                        OnboardingFitToHeight {
-                            card
-                        }
-                        .frame(height: Self.minimumCardHeight)
-                        .padding(.horizontal, OnboardingMetrics.horizontalPadding)
-                        .padding(.bottom, 16)
-                    }
-                }
-                .scrollBounceBehavior(.basedOnSize)
+            OnboardingSceneLayout(eyebrow: eyebrow, title: title, line: line) {
+                card
             }
 
             VStack(spacing: 12) {
@@ -122,6 +85,67 @@ struct OnboardingScenePage<Card: View>: View {
             .padding(.bottom, OnboardingMetrics.buttonBottomPadding)
         }
         .animation(pillAnimation, value: isDownloading)
+    }
+}
+
+/// The top of a scene page: the eyebrow, the title and its line, then the scene's card in
+/// the height that is left. The onboarding's scene pages and the "See how it works" sheet
+/// of the Pro feature screens (#686) both use it, each with its own buttons under it.
+struct OnboardingSceneLayout<Card: View>: View {
+    /// A small label above the title, nil for none.
+    var eyebrow: Text?
+    let title: Text
+    let line: Text
+    let card: Card
+
+    init(eyebrow: Text? = nil, title: Text, line: Text, @ViewBuilder card: () -> Card) {
+        self.eyebrow = eyebrow
+        self.title = title
+        self.line = line
+        self.card = card()
+    }
+
+    /// The least height the card is drawn at. Under it the phone would be too small to
+    /// read, so the page scrolls instead (`body`).
+    ///
+    /// WHY 160: it must stay under what the smallest supported iPhone leaves at the
+    /// default text size with the download pill showing (about 230 pt on an iPhone SE,
+    /// measured on #680's captures), or that ordinary case would scroll and the phone would
+    /// run under the pill again. 260 did exactly that.
+    private static var minimumCardHeight: CGFloat { 160 }
+
+    var body: some View {
+        // WHY TWO LAYOUTS (CodeRabbit on PR #722): the fitted one does not scroll, so
+        // a title and line taller than the screen (the accessibility text sizes, a
+        // small iPhone) used to push everything below them off the page. When the
+        // header and a card of at least `minimumCardHeight` fit, the card takes the
+        // rest of the height, as before. When they do not, the same content scrolls,
+        // with the card at that minimum height. The buttons under this view are
+        // outside both, pinned, so they are always reachable.
+        ViewThatFits(in: .vertical) {
+            VStack(spacing: 0) {
+                header
+                OnboardingFitToHeight {
+                    card
+                }
+                .frame(minHeight: Self.minimumCardHeight)
+                .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                .padding(.bottom, 16)
+            }
+
+            ScrollView {
+                VStack(spacing: 0) {
+                    header
+                    OnboardingFitToHeight {
+                        card
+                    }
+                    .frame(height: Self.minimumCardHeight)
+                    .padding(.horizontal, OnboardingMetrics.horizontalPadding)
+                    .padding(.bottom, 16)
+                }
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
     }
 
     /// The eyebrow, the title and the line.

@@ -1,15 +1,15 @@
 // DictusApp/Onboarding/FeatureSceneCard.swift
-// A feature scene playing in its drawn iPhone: one view for the onboarding and the Pro hub (#686).
+// A feature scene playing in its drawn iPhone: one view for the onboarding and the feature screens (#686).
 import SwiftUI
 import DictusCore
 
 /// A scene playing in the drawn iPhone card (#649 decision 12, #686): the player and the
 /// phone around it, nothing else.
 ///
-/// WHY ITS OWN VIEW: the onboarding's scene pages (#679, #680) and the Pro hub's feature
-/// cards (#216) show the same scene in the same phone. The page adds its title, the
-/// download pill and Next; the hub card adds its Settings row under it. Neither carries a
-/// copy of the scene's timing or drawing.
+/// WHY ITS OWN VIEW: the onboarding's scene pages (#679, #680) and the "See how it works"
+/// sheet of each Pro feature screen (#686) show the same scene in the same phone, and What's
+/// new (#685) will too. The page adds the download pill, Next and Skip; the sheet adds OK.
+/// Neither carries a copy of the scene's timing or drawing.
 struct FeatureSceneCard<Scene: View, Header: View>: View {
     /// The end of the drawn iPhone the scene shows (`OnboardingPhoneCard`).
     var phoneEnd: OnboardingPhoneEnd = .bottom
@@ -72,9 +72,10 @@ extension FeatureSceneCard where Header == EmptyView {
     }
 }
 
-/// The scene of a Pro feature, by feature: what a hub card plays (#686) and what each
-/// onboarding scene page shows. Each scene's own card (`SmartModesSceneCard` and the
-/// others) holds its timing and its data, next to its drawing.
+/// The scene of a Pro feature, by feature: what each onboarding scene page shows and what
+/// the feature screen's "See how it works" sheet plays (#686). Each scene's own card
+/// (`SmartModesSceneCard` and the others) holds its timing, its data and its title, next
+/// to its drawing.
 struct ProFeatureSceneCard: View {
     let feature: ProFeature
 
@@ -84,6 +85,28 @@ struct ProFeatureSceneCard: View {
         case .voiceNotes: VoiceNotesSceneCard()
         case .vocabulary: VocabularySceneCard()
         case .history: HistorySceneCard()
+        }
+    }
+}
+
+extension ProFeatureSceneCard {
+    /// The scene's title: its onboarding step's, so the sheet and the step say the same.
+    static func title(for feature: ProFeature) -> Text {
+        switch feature {
+        case .smartMode: return SmartModesSceneCard.title
+        case .voiceNotes: return VoiceNotesSceneCard.title
+        case .vocabulary: return VocabularySceneCard.title
+        case .history: return HistorySceneCard.title
+        }
+    }
+
+    /// The line under the title, from the same step.
+    static func line(for feature: ProFeature) -> Text {
+        switch feature {
+        case .smartMode: return SmartModesSceneCard.line
+        case .voiceNotes: return VoiceNotesSceneCard.line
+        case .vocabulary: return VocabularySceneCard.line
+        case .history: return HistorySceneCard.line
         }
     }
 }
