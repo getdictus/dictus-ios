@@ -22,7 +22,9 @@ import DictusCore
 /// ### Words the user typed
 ///
 /// A word the keyboard learned (`UserDictionary`) is one the user wrote themselves
-/// twice: its spelling is theirs, so seeing it in a dictation is not a mistake.
+/// twice: its spelling is theirs, so seeing it in a dictation is not a mistake. It
+/// never surfaces as an unknown word; the paired path uses it as the correct spelling
+/// instead (`VocabularySuggestionMiner.pairedSuggestions`).
 @MainActor
 struct VocabularySuggestionDictionary {
 

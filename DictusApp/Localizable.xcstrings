@@ -384,6 +384,17 @@
         }
       }
     },
+    "Add opens a new term with your spelling and what Dictus wrote instead, both filled in. Ignore hides the suggestion for good." : {
+      "comment" : "Footer of the vocabulary suggestions anchored on learned words, explaining its two buttons (#512).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter ouvre un nouveau terme avec votre orthographe et ce que Dictus a écrit à la place, déjà remplis. Ignorer masque la suggestion définitivement."
+          }
+        }
+      }
+    },
     "Add to Vocabulary" : {
       "comment" : "Edit menu item on a selection in a saved transcript: opens the vocabulary sheet with the selection as the variant (#723).",
       "localizations" : {
@@ -1795,13 +1806,13 @@
         }
       }
     },
-    "No suggestions for now. A word appears here once it is missing from the dictionary and seen in at least two dictations." : {
+    "No suggestions for now. A word appears here when Dictus writes differently a word you typed on the keyboard, or when an unknown word comes back in at least two dictations." : {
       "comment" : "Empty state of the vocabulary suggestions sheet (#512).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucune suggestion pour l'instant. Un mot apparaît ici quand il est absent du dictionnaire et vu dans au moins deux dictées."
+            "value" : "Aucune suggestion pour l'instant. Un mot apparaît ici quand Dictus écrit autrement un mot que vous avez tapé au clavier, ou quand un mot inconnu revient dans au moins deux dictées."
           }
         }
       }
@@ -2044,6 +2055,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Des mots de votre historique que Dictus écrit peut-être mal."
+          }
+        }
+      }
+    },
+    "Words you typed that Dictus writes differently" : {
+      "comment" : "Header of the vocabulary suggestions anchored on words the keyboard learned from the user's typing (#512).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des mots que vous tapez et que Dictus écrit autrement"
+          }
+        }
+      }
+    },
+    "Written as: %@" : {
+      "comment" : "Vocabulary suggestion row: how Dictus wrote a word the user typed on the keyboard, comma-separated (#512).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrit : %@"
           }
         }
       }
