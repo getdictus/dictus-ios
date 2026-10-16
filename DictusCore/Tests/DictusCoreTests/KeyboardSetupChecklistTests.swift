@@ -91,6 +91,30 @@ final class KeyboardSetupChecklistTests: XCTestCase {
         )
     }
 
+    /// The step went back to "not detected" (#713) and the tap borrowed the session itself:
+    /// a "not possible" at that instant is waited out, not taken as a failure.
+    func testATapThatJustPreparedPictureInPictureWaitsForIt() {
+        XCTAssertEqual(
+            Checklist.settingsTrip(isSupported: true, isPossible: false, isForcedOff: false, preparedByTheTap: true),
+            .pictureInPictureOnceReady
+        )
+        XCTAssertEqual(
+            Checklist.settingsTrip(isSupported: true, isPossible: true, isForcedOff: false, preparedByTheTap: true),
+            .pictureInPictureThenSettings
+        )
+    }
+
+    func testATapThatJustPreparedStillFallsBackWhereItCannotWork() {
+        XCTAssertEqual(
+            Checklist.settingsTrip(isSupported: false, isPossible: false, isForcedOff: false, preparedByTheTap: true),
+            .settingsOnly(reason: "unsupported")
+        )
+        XCTAssertEqual(
+            Checklist.settingsTrip(isSupported: true, isPossible: false, isForcedOff: true, preparedByTheTap: true),
+            .settingsOnly(reason: "forcedOff")
+        )
+    }
+
     func testForcedFallbackWinsOverAnAvailablePictureInPicture() {
         XCTAssertEqual(
             Checklist.settingsTrip(isSupported: true, isPossible: true, isForcedOff: true),

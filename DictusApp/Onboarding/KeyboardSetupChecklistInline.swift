@@ -4,17 +4,17 @@ import SwiftUI
 import DictusCore
 
 /// The checklist card in the page, shown only when Picture in Picture will not carry it
-/// (`KeyboardSetupChecklistPlayer.showsInlineCard`). On the Picture in Picture path the page
+/// (`SettingsChecklistPlayer.showsInlineCard`). On the Picture in Picture path the page
 /// shows nothing extra: the drawn Settings page already numbers the steps.
 struct KeyboardSetupChecklistInline: View {
-    @ObservedObject var player: KeyboardSetupChecklistPlayer
+    @ObservedObject var player: SettingsChecklistPlayer
 
     private static let cornerRadius: CGFloat = 22
 
     var body: some View {
         KeyboardSetupChecklistCard(lines: player.lines, tickProgress: player.tickProgress)
         .frame(width: KeyboardSetupChecklistCard.size.width, height: KeyboardSetupChecklistCard.size.height)
-        .background(KeyboardSetupChecklistCard.background)
+        .background(SettingsChecklistPictureCard.background)
         .clipShape(RoundedRectangle(cornerRadius: Self.cornerRadius, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: Self.cornerRadius, style: .continuous)
