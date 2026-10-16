@@ -13,7 +13,7 @@ import DictusCore
 /// iPhone, cropped, showing Settings > Apps > Dictus with the three things to touch
 /// numbered 1, 2, 3, and the current one lit in turn on a loop. Only iOS system UI is
 /// drawn this way (#649 decision 13). Open Settings sends a checklist into Picture in
-/// Picture over the real Settings (#682, `KeyboardSetupChecklistPlayer`); the page itself
+/// Picture over the real Settings (#682, `KeyboardSetupChecklistScript`); the page itself
 /// shows it only in the fallback, under the drawing.
 struct KeyboardSetupPage: View {
     let onNext: () -> Void
@@ -50,7 +50,7 @@ struct KeyboardSetupPage: View {
 
     /// The checklist played under the drawing and, from the Open Settings tap, in Picture
     /// in Picture over Settings (#682).
-    @StateObject private var checklist = KeyboardSetupChecklistPlayer()
+    @StateObject private var checklist = SettingsChecklistPlayer(script: KeyboardSetupChecklistScript())
 
     /// Whether the "Why Full Access?" sheet is up (#704).
     @State private var showsFullAccessExplainer = false
@@ -62,12 +62,6 @@ struct KeyboardSetupPage: View {
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
-                    // The Picture in Picture source, behind the drawn phone that covers it.
-                    .background {
-                        if checklist.usesPictureInPicture {
-                            ChecklistPictureSource(layer: checklist.displayLayer)
-                        }
-                    }
 
                 // The fallback only: floats over the cropped bottom of the drawn phone,
                 // trailing, as the window floats over Settings in mock-up 03b.
@@ -106,6 +100,8 @@ struct KeyboardSetupPage: View {
                     .transition(.opacity)
             }
         }
+        // The Picture in Picture source, covered, where the window stops into it.
+        .checklistPictureSource(checklist)
         .sheet(isPresented: $showsFullAccessExplainer) {
             FullAccessExplainerPage { showsFullAccessExplainer = false }
                 .presentationDragIndicator(.visible)
@@ -166,20 +162,17 @@ struct KeyboardSetupPage: View {
                     checkKeyboardInstalled()
                 }
 
-                // If not detected, retry at 2s (covers slow Settings sync)
-                if !keyboardDetected && !Task.isCancelled {
-                    try? await Task.sleep(for: .milliseconds(1200))
-                    if Task.isCancelled { return }
-                    await MainActor.run {
-                        guard !Task.isCancelled else { return }
-                        PersistentLog.log(.onboardingKeyboardRetry)
-                        checkKeyboardInstalled()
-                        isCheckingKeyboard = false
-                    }
-                } else {
-                    await MainActor.run {
-                        isCheckingKeyboard = false
-                    }
+                // Retry at 2s whatever the first check found (covers slow Settings sync).
+                // WHY EVEN WHEN DETECTED (#713): detection now goes both ways, and the list
+                // can lag behind a removed keyboard as it lags behind an added one.
+                if Task.isCancelled { return }
+                try? await Task.sleep(for: .milliseconds(1200))
+                if Task.isCancelled { return }
+                await MainActor.run {
+                    guard !Task.isCancelled else { return }
+                    PersistentLog.log(.onboardingKeyboardRetry)
+                    checkKeyboardInstalled()
+                    isCheckingKeyboard = false
                 }
             }
             #if DEBUG
@@ -188,7 +181,7 @@ struct KeyboardSetupPage: View {
         }
         .onChange(of: keyboardDetected) { detected in
             if detected {
-                checklist.keyboardDetected()
+                checklist.markComplete()
                 // Stop animation loop once detected
                 animationTimer?.invalidate()
                 animationTimer = nil
@@ -198,6 +191,15 @@ struct KeyboardSetupPage: View {
                     dictusToggleOn = true
                     fullAccessToggleOn = true
                 }
+            } else {
+                // Dictus was removed while the step showed it detected (#713): back to the
+                // first-arrival presentation, the drawn loop and the checklist restarting
+                // together. Nothing starts Picture in Picture or borrows the audio session
+                // here; the next tap on Open Settings does.
+                checklist.markIncomplete()
+                animationTimer?.invalidate()
+                animationTimer = nil
+                startToggleAnimation()
             }
         }
         .animation(.easeInOut(duration: 0.3), value: keyboardDetected)
@@ -526,23 +528,27 @@ struct KeyboardSetupPage: View {
     /// UITextInputMode.activeInputModes can be unstable during rapid scenePhase
     /// transitions (e.g., returning from Settings). value(forKey:) is KVO and
     /// can return unexpected types. Guard against both to prevent crashes.
+    ///
+    /// WHY BOTH WAYS (#713): the step used to stay on "Keyboard detected" once it had
+    /// shown it, even after Dictus was removed, and the user went on to a first dictation
+    /// whose hint led nowhere. A list read without Dictus now takes the step back; an
+    /// unreadable (empty) list changes nothing (`DictusKeyboardPresence`).
     private func checkKeyboardInstalled() {
         let modes = UITextInputMode.activeInputModes
         PersistentLog.log(.onboardingKeyboardCheckStarted(modeCount: modes.count))
 
-        for mode in modes {
-            // value(forKey:) is KVO — guard against unexpected nil or type mismatch
-            guard let identifier = mode.value(forKey: "identifier") as? String else {
-                continue
-            }
-            if identifier.contains("com.pivi.dictus") {
-                PersistentLog.log(.onboardingKeyboardDetected(identifier: identifier))
-                keyboardDetected = true
-                return
-            }
+        // value(forKey:) is KVO — guard against unexpected nil or type mismatch
+        let identifiers = modes.compactMap { $0.value(forKey: "identifier") as? String }
+        switch DictusKeyboardPresence(inputModeIdentifiers: identifiers) {
+        case .listed(let identifier):
+            PersistentLog.log(.onboardingKeyboardDetected(identifier: identifier))
+            keyboardDetected = true
+        case .notListed:
+            PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
+            keyboardDetected = false
+        case .unreadable:
+            PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
         }
-
-        PersistentLog.log(.onboardingKeyboardNotFound(modeCount: modes.count))
     }
 }
 
