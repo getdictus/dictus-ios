@@ -5,19 +5,19 @@ import XCTest
 
 final class WhatsNewTests: XCTestCase {
 
-    /// A suite of its own, so the tests never read or write the App Group.
-    private var defaults: UserDefaults!
+    /// A suite of its own, so the tests never read or write the App Group. Replaced in
+    /// `setUpWithError` before any test reads it.
+    private var defaults = UserDefaults.standard
     private let suiteName = "WhatsNewTests"
 
-    override func setUp() {
-        super.setUp()
-        defaults = UserDefaults(suiteName: suiteName)
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
     }
 
     override func tearDown() {
         defaults.removePersistentDomain(forName: suiteName)
-        defaults = nil
         super.tearDown()
     }
 
@@ -42,6 +42,25 @@ final class WhatsNewTests: XCTestCase {
         XCTAssertFalse(WhatsNew.isDue(lastVersionSeen: "2.0.0", onboardingCompleted: true))
         XCTAssertFalse(WhatsNew.isDue(lastVersionSeen: "2.0.1", onboardingCompleted: true))
         XCTAssertFalse(WhatsNew.isDue(lastVersionSeen: "2.1.0", onboardingCompleted: true))
+    }
+
+    func testWhatsNewOnlyAppearsOnAFreeScreenAndNeverOnAnActivationOpenedByAURL() {
+        // An ordinary launch from the icon, nothing else on screen.
+        XCTAssertTrue(WhatsNew.mayAppear(displayIsFree: true, activationOpenedByURL: false))
+        // The voice note link, the keyboard's Pro entry, a dictation: the URL's screen wins,
+        // and What's new waits for the next activation (CodeRabbit on PR #741).
+        XCTAssertFalse(WhatsNew.mayAppear(displayIsFree: true, activationOpenedByURL: true))
+        // A dictation, a preparation, a paywall, a voice note or a trial screen up.
+        XCTAssertFalse(WhatsNew.mayAppear(displayIsFree: false, activationOpenedByURL: false))
+    }
+
+    func testADeferredWhatsNewStaysDueUntilItIsOnScreen() {
+        // A launch through a URL does not show it: nothing is recorded, so it is still due
+        // at the next activation.
+        defaults.set(true, forKey: SharedKeys.hasCompletedOnboarding)
+        WhatsNew.recordLaunch(deviceCanRunSmartModes: true, currentVersion: "2.0.0", defaults: defaults)
+        XCTAssertFalse(WhatsNew.mayAppear(displayIsFree: true, activationOpenedByURL: true))
+        XCTAssertTrue(WhatsNew.isDue(defaults: defaults))
     }
 
     func testVersionsCompareByNumberNotByText() {
