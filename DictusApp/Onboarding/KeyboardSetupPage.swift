@@ -13,7 +13,7 @@ import DictusCore
 /// iPhone, cropped, showing Settings > Apps > Dictus with the three things to touch
 /// numbered 1, 2, 3, and the current one lit in turn on a loop. Only iOS system UI is
 /// drawn this way (#649 decision 13). Open Settings sends a checklist into Picture in
-/// Picture over the real Settings (#682, `KeyboardSetupChecklistPlayer`); the page itself
+/// Picture over the real Settings (#682, `KeyboardSetupChecklistScript`); the page itself
 /// shows it only in the fallback, under the drawing.
 struct KeyboardSetupPage: View {
     let onNext: () -> Void
@@ -50,7 +50,7 @@ struct KeyboardSetupPage: View {
 
     /// The checklist played under the drawing and, from the Open Settings tap, in Picture
     /// in Picture over Settings (#682).
-    @StateObject private var checklist = KeyboardSetupChecklistPlayer()
+    @StateObject private var checklist = SettingsChecklistPlayer(script: KeyboardSetupChecklistScript())
 
     /// Whether the "Why Full Access?" sheet is up (#704).
     @State private var showsFullAccessExplainer = false
@@ -62,12 +62,6 @@ struct KeyboardSetupPage: View {
         ) {
             VStack(alignment: .leading, spacing: 16) {
                 settingsIllustration
-                    // The Picture in Picture source, behind the drawn phone that covers it.
-                    .background {
-                        if checklist.usesPictureInPicture {
-                            ChecklistPictureSource(layer: checklist.displayLayer)
-                        }
-                    }
 
                 // The fallback only: floats over the cropped bottom of the drawn phone,
                 // trailing, as the window floats over Settings in mock-up 03b.
@@ -106,6 +100,8 @@ struct KeyboardSetupPage: View {
                     .transition(.opacity)
             }
         }
+        // The Picture in Picture source, covered, where the window stops into it.
+        .checklistPictureSource(checklist)
         .sheet(isPresented: $showsFullAccessExplainer) {
             FullAccessExplainerPage { showsFullAccessExplainer = false }
                 .presentationDragIndicator(.visible)
@@ -185,7 +181,7 @@ struct KeyboardSetupPage: View {
         }
         .onChange(of: keyboardDetected) { detected in
             if detected {
-                checklist.keyboardDetected()
+                checklist.markComplete()
                 // Stop animation loop once detected
                 animationTimer?.invalidate()
                 animationTimer = nil
@@ -200,7 +196,7 @@ struct KeyboardSetupPage: View {
                 // first-arrival presentation, the drawn loop and the checklist restarting
                 // together. Nothing starts Picture in Picture or borrows the audio session
                 // here; the next tap on Open Settings does.
-                checklist.keyboardRemoved()
+                checklist.markIncomplete()
                 animationTimer?.invalidate()
                 animationTimer = nil
                 startToggleAnimation()

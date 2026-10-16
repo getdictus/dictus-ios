@@ -1,5 +1,5 @@
-// DictusApp/Onboarding/KeyboardSetupChecklistPlayer.swift
-// Plays the keyboard step's checklist inline, and in Picture in Picture over Settings (#682).
+// DictusApp/Onboarding/SettingsChecklistPlayer.swift
+// Plays an onboarding step's checklist in Picture in Picture over Settings (#682, #706).
 import AVFoundation
 import AVKit
 import CoreMedia
@@ -7,41 +7,95 @@ import SwiftUI
 import UIKit
 import DictusCore
 
-/// Drives the checklist the keyboard step shows: the clock, the line states, the frames,
+/// What one onboarding step's checklist brings to the player: its lines, the fact the
+/// backgrounded app can observe, and what ends it. The keyboard step's is
+/// `KeyboardSetupChecklistScript` (#682), the Apple Intelligence step's
+/// `AppleIntelligenceChecklistScript` (#706).
+@MainActor
+protocol SettingsChecklistScript: AnyObject {
+    /// The `component=` of every log line, so a device log tells the steps apart.
+    var logComponent: String { get }
+    /// The observed fact, for the log ("keyboardAdded=true").
+    var factDetails: String { get }
+    /// How often the backgrounded app reads the fact while the window is up.
+    var backgroundPollInterval: TimeInterval { get }
+    /// Whether the window goes by itself once the step is complete in the background, after
+    /// the ticks have shown (`SettingsChecklistPlayer.completionHold`).
+    var stopsWhenComplete: Bool { get }
+    /// The text of each line, in order.
+    var titles: [Text] { get }
+    /// Reads the fact when the page appears, and answers whether the step is already done:
+    /// the player then goes straight to `.complete`, with no controller and no audio borrow.
+    func checkAlreadyComplete() -> Bool
+    /// The tap on Open Settings: reads the fact afresh.
+    func refreshFact()
+    /// A read from the background while the window is up.
+    func pollInBackground(sinceSettings: Int) -> SettingsChecklistPoll
+    /// The page has seen the step done: the fact is now final.
+    func markComplete()
+    /// The page no longer sees the step done (the keyboard removed, #713): the fact is reset.
+    func markIncomplete()
+    /// The line states in `phase`.
+    func states(for phase: SettingsChecklistPhase) -> [SettingsChecklistLineState]
+}
+
+/// What drives a checklist's lines, as the player sees it.
+enum SettingsChecklistPhase: Equatable {
+    /// Before the tap. `elapsed` is the time since the page appeared.
+    case idle(elapsed: TimeInterval)
+    /// After the tap on Open Settings: the lines follow the observed fact.
+    case guide
+    /// The step is done: every line ticked.
+    case complete
+}
+
+/// What a background read found.
+enum SettingsChecklistPoll: Equatable {
+    case unchanged
+    /// The fact moved without completing the step; logged as `action details`.
+    case progressed(action: String, details: String)
+    /// The step is done; logged as `action details`.
+    case completed(action: String, details: String)
+}
+
+/// Drives the checklist an onboarding step shows: the clock, the line states, the frames,
 /// and the Picture in Picture window that carries it over iOS Settings (#649 decision 10).
+/// What the lines say and what ends them is the step's `SettingsChecklistScript`.
 ///
 /// HOW IT PLAYS
-/// - Before the tap, the clock loops in time with the drawn Settings page
-///   (`KeyboardSetupChecklist.Phase.demo`); only the fallback's inline card shows it.
+/// - Before the tap, the clock runs the script's idle lines (the keyboard step loops in
+///   time with its drawn Settings page); only the keyboard fallback's inline card shows it.
 /// - Tapping Open Settings is the user action Apple requires to start Picture in Picture.
 ///   The player starts it, then opens Settings once the window is up. From then on the
-///   lines follow what the app can observe (`.guide`): the backgrounded app polls the
-///   keyboard list once a second, and adding Dictus ticks the first two lines.
-/// - Coming back to the app stops the window. Enabling Full Access stops it too, because
-///   iOS terminates the app when that permission changes; nothing else in the app can see
-///   Full Access.
+///   lines follow what the app can observe (`.guide`): the backgrounded app reads the
+///   script's fact (the keyboard list once a second, Apple Intelligence's availability).
+/// - Coming back to the app stops the window. On the keyboard step, enabling Full Access
+///   stops it too, because iOS terminates the app when that permission changes. On the
+///   Apple Intelligence step, availability turning `available` ticks every line, and the
+///   window goes a moment later (`stopsWhenComplete`).
 /// - If the keyboard is removed after the page detected it, the loop starts again as on
 ///   first arrival (#713), but nothing is borrowed until the next tap (see
-///   `keyboardRemoved`).
+///   `markIncomplete`).
 ///
 /// NOTHING SHOWS IN THE PAGE ON THE PICTURE IN PICTURE PATH (decided by Pierre after the
 /// device test of 2026-10-10): competitors show the guide only once the user is in
 /// Settings, and a card under the drawn Settings page repeated its numbered steps. The
 /// sample-buffer layer still has to be in the window for Picture in Picture to start
-/// from it, so it sits behind the drawn phone, covered (`ChecklistPictureSource`).
+/// from it, so it sits at the bottom of the page, covered (`ChecklistPictureSource`).
 ///
-/// THE FALLBACK: when Picture in Picture is unsupported, cannot start, or fails to, the
-/// checklist plays inline in the page (SwiftUI, `KeyboardSetupChecklistCard`), Settings
-/// opens anyway, and the page's existing return-from-Settings detection takes over.
-/// `showsInlineCard` says when the page shows it: from the start where Picture in Picture
-/// is unavailable, and from the first failure where it was expected to work.
+/// THE FALLBACK: when Picture in Picture is unsupported, cannot start, or fails to,
+/// Settings opens anyway, and the page's existing return-from-Settings detection takes
+/// over. `showsInlineCard` says when the page may show the checklist instead: from the
+/// start where Picture in Picture is unavailable, and from the first failure where it was
+/// expected to work. The keyboard step shows its inline card then
+/// (`KeyboardSetupChecklistCard`); the Apple Intelligence step keeps its page as it is.
 ///
-/// Everything it does is logged under `component=onboardingChecklist`, so a device run
-/// answers the spike's questions from `dictus_debug.log`.
+/// Everything it does is logged under the script's `component=` (`onboardingChecklist` on
+/// the keyboard step), so a device run answers from `dictus_debug.log`.
 @MainActor
-final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
+final class SettingsChecklistPlayer: NSObject, ObservableObject {
     /// The line states, for the SwiftUI card and the VoiceOver label.
-    @Published private(set) var lines: [KeyboardSetupChecklistLineState]
+    @Published private(set) var lines: [SettingsChecklistLineState]
     /// How far each line's tick has popped in, 0 to 1.
     @Published private(set) var tickProgress: [Double]
     /// Whether the Picture in Picture window is up.
@@ -70,9 +124,11 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         case demo, guide, complete
     }
 
+    private let script: SettingsChecklistScript
     private var mode: Mode = .demo
-    private var keyboardAdded = false
     private var demoStartedAt = Date()
+    /// When the step was found complete in the background, for `completionHold`.
+    private var completedInBackgroundAt: Date?
     private var doneAt: [Date?]
 
     private var pipController: AVPictureInPictureController?
@@ -82,7 +138,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
 
     private var timer: Timer?
     private var lastEnqueuedAt = Date.distantPast
-    private var lastKeyboardPollAt = Date.distantPast
+    private var lastFactPollAt = Date.distantPast
     private var lastBackgroundHeartbeatAt = Date.distantPast
     private var backgroundTicks = 0
     private var settingsOpenedAt: Date?
@@ -107,14 +163,17 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
     /// A frame at least this often even when nothing changed, so the layer never sits on a
     /// stale timestamp.
     private static let refreshInterval: TimeInterval = 1
-    /// How often the backgrounded app looks for the keyboard.
-    private static let keyboardPollInterval: TimeInterval = 1
     /// How long the tap waits for the window before opening Settings anyway.
     private static let startTimeout: TimeInterval = 1.5
+    /// How long the ticks stay up before a complete step's window goes
+    /// (`SettingsChecklistScript.stopsWhenComplete`): long enough to see them pop.
+    static let completionHold: TimeInterval = 1.5
 
-    override init() {
-        let lineCount = KeyboardSetupChecklistLine.allCases.count
-        lines = KeyboardSetupChecklist.states(for: .demo(elapsed: 0))
+    init(script: SettingsChecklistScript) {
+        self.script = script
+        let initialLines = script.states(for: .idle(elapsed: 0))
+        let lineCount = initialLines.count
+        lines = initialLines
         tickProgress = Array(repeating: 1, count: lineCount)
         doneAt = Array(repeating: nil, count: lineCount)
         usesPictureInPicture = AVPictureInPictureController.isPictureInPictureSupported() && !Self.isForcedOff
@@ -128,20 +187,20 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
 
     // MARK: - Page lifecycle
 
-    /// Starts the loop. Called when the keyboard step appears.
+    /// Starts the loop. Called when the step appears.
     ///
-    /// WHY THE KEYBOARD IS CHECKED FIRST (device log, 2026-10-10): the step is shown again
-    /// when iOS relaunches the app after the Full Access kill, with the keyboard already
-    /// there. The page then only offers Continue, so Picture in Picture will never start:
-    /// the player goes straight to `.complete`, builds no controller and borrows no audio
-    /// session. Borrowing there used to fail anyway (`OSStatus 560557684`, cannot interrupt
-    /// others) right after the engine had configured its own session at launch.
+    /// WHY THE STEP IS CHECKED FIRST (device log, 2026-10-10): the keyboard step is shown
+    /// again when iOS relaunches the app after the Full Access kill, with the keyboard
+    /// already there, and the Apple Intelligence step shows Continue when it is already
+    /// available. The page then only offers Continue, so Picture in Picture will never
+    /// start: the player goes straight to `.complete`, builds no controller and borrows no
+    /// audio session. Borrowing there used to fail anyway (`OSStatus 560557684`, cannot
+    /// interrupt others) right after the engine had configured its own session at launch.
     func start() {
         guard timer == nil else { return }
         demoStartedAt = Date()
-        if Self.isDictusKeyboardActive() {
+        if script.checkAlreadyComplete() {
             mode = .complete
-            keyboardAdded = true
             log("startedComplete")
         } else if usesPictureInPicture {
             preparePictureInPicture()
@@ -176,7 +235,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
     func openSettings(using open: @escaping () -> Void) {
         if mode != .complete {
             mode = .guide
-            keyboardAdded = Self.isDictusKeyboardActive()
+            script.refreshFact()
         }
         settingsOpenedAt = Date()
         backgroundTicks = 0
@@ -191,7 +250,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
             preparePictureInPicture()
         }
 
-        let trip = KeyboardSetupChecklist.settingsTrip(
+        let trip = SettingsChecklist.settingsTrip(
             isSupported: AVPictureInPictureController.isPictureInPictureSupported(),
             isPossible: pipController?.isPictureInPicturePossible ?? false,
             isForcedOff: Self.isForcedOff,
@@ -205,7 +264,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
                 return
             }
             let waits = trip == .pictureInPictureOnceReady
-            log("pipStartRequested", "keyboardAdded=\(keyboardAdded) waitsForPossible=\(waits)")
+            log("pipStartRequested", "\(script.factDetails) waitsForPossible=\(waits)")
             pendingSettingsOpen = open
             // Never leave the user on the page: if the window has not answered in time,
             // Settings opens anyway and the inline checklist plus the return detection take
@@ -239,17 +298,24 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         log(
             "returnedFromSettings",
             "after=\(Int(Date().timeIntervalSince(settingsOpenedAt)))s pipActive=\(isPictureInPictureActive) " +
-            "backgroundTicks=\(backgroundTicks) keyboardAdded=\(keyboardAdded)"
+            "backgroundTicks=\(backgroundTicks) \(script.factDetails)"
         )
         self.settingsOpenedAt = nil
         if let pipController, pipController.isPictureInPictureActive {
             stopReason = "appActive"
             pipController.stopPictureInPicture()
         }
+        // Completed in the background (the Apple Intelligence step): nothing will start
+        // Picture in Picture again, and the session could not be given back from there
+        // (`ChecklistAudioSession.giveBack` needs the foreground).
+        if completedInBackgroundAt != nil {
+            completedInBackgroundAt = nil
+            giveBackAudioSession()
+        }
     }
 
-    /// The page no longer finds the keyboard it had detected (#713): back to the loop of
-    /// first arrival, in time with the drawn page restarting above it.
+    /// The page no longer finds what it had detected (the keyboard removed, #713): back to
+    /// the loop of first arrival, in time with the drawn page restarting above it.
     ///
     /// WHY NOTHING IS BORROWED HERE (decided by Pierre, 2026-10-12): Apple starts Picture in
     /// Picture only from a user action, and the audio session must not be taken without one.
@@ -257,10 +323,10 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
     /// (`preparesOnTap`). The controller is built now, since building it borrows nothing and
     /// lets the system get it ready before that tap. A session still held from an earlier
     /// tap stays held: it is not borrowed again.
-    func keyboardRemoved() {
+    func markIncomplete() {
         guard mode == .complete else { return }
         mode = .demo
-        keyboardAdded = false
+        script.markIncomplete()
         demoStartedAt = Date()
         // As on first arrival: inline only where Picture in Picture is not used. A failure
         // earlier in this visit shows the card again at the next tap's fallback.
@@ -276,11 +342,12 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         tick(forceFrame: true)
     }
 
-    /// The page has detected the keyboard: everything is ticked, as the drawing shows.
-    func keyboardDetected() {
+    /// The page has seen the step done (the keyboard detected, Apple Intelligence ready):
+    /// everything is ticked, as the drawing shows.
+    func markComplete() {
         guard mode != .complete else { return }
         mode = .complete
-        keyboardAdded = true
+        script.markComplete()
         preparesOnTap = false
         log("complete")
         tick(forceFrame: true)
@@ -300,15 +367,16 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         if inBackground {
             // Nothing is visible in the background without the window: no work at all.
             guard isPictureInPictureActive else { return }
-            pollKeyboardInBackground(now: now)
+            pollFactInBackground(now: now)
             backgroundTicks += 1
             if now.timeIntervalSince(lastBackgroundHeartbeatAt) >= 5 {
                 lastBackgroundHeartbeatAt = now
-                log("backgroundTick", "ticks=\(backgroundTicks) keyboardAdded=\(keyboardAdded)")
+                log("backgroundTick", "ticks=\(backgroundTicks) \(script.factDetails)")
             }
+            stopIfCompleteAndShown(now: now)
         }
 
-        let newLines = KeyboardSetupChecklist.states(for: currentPhase(now: now))
+        let newLines = script.states(for: currentPhase(now: now))
         var newProgress = tickProgress
         for index in newLines.indices {
             if newLines[index] == .done {
@@ -334,24 +402,42 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         }
     }
 
-    private func currentPhase(now: Date) -> KeyboardSetupChecklist.Phase {
+    private func currentPhase(now: Date) -> SettingsChecklistPhase {
         switch mode {
-        case .demo: return .demo(elapsed: now.timeIntervalSince(demoStartedAt))
-        case .guide: return .guide(keyboardAdded: keyboardAdded)
+        case .demo: return .idle(elapsed: now.timeIntervalSince(demoStartedAt))
+        case .guide: return .guide
         case .complete: return .complete
         }
     }
 
-    /// The spike's measurement: can the backgrounded app see the keyboard being added?
-    private func pollKeyboardInBackground(now: Date) {
-        guard mode == .guide, !keyboardAdded,
-              now.timeIntervalSince(lastKeyboardPollAt) >= Self.keyboardPollInterval else { return }
-        lastKeyboardPollAt = now
-        if Self.isDictusKeyboardActive() {
-            keyboardAdded = true
-            let since = settingsOpenedAt.map { Int(now.timeIntervalSince($0)) } ?? -1
-            log("keyboardAddedSeen", "background=true sinceSettings=\(since)s")
+    /// The spike's measurement: can the backgrounded app see the step's fact change (the
+    /// keyboard being added, Apple Intelligence turning available)?
+    private func pollFactInBackground(now: Date) {
+        guard mode == .guide,
+              now.timeIntervalSince(lastFactPollAt) >= script.backgroundPollInterval else { return }
+        let since = settingsOpenedAt.map { Int(now.timeIntervalSince($0)) } ?? -1
+        switch script.pollInBackground(sinceSettings: since) {
+        case .unchanged:
+            break
+        case .progressed(let action, let details):
+            log(action, details)
+        case .completed(let action, let details):
+            log(action, details)
+            mode = .complete
+            completedInBackgroundAt = now
         }
+        lastFactPollAt = now
+    }
+
+    /// A step completed in the background closes its window once the ticks have shown, when
+    /// its script says so. The keyboard step's never does: iOS ends the app on Full Access.
+    private func stopIfCompleteAndShown(now: Date) {
+        guard script.stopsWhenComplete, let completedInBackgroundAt,
+              now.timeIntervalSince(completedInBackgroundAt) >= Self.completionHold,
+              stopReason == nil,
+              let pipController, pipController.isPictureInPictureActive else { return }
+        stopReason = "complete"
+        pipController.stopPictureInPicture()
     }
 
     // MARK: - Frames
@@ -376,7 +462,8 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
     private func enqueueFrame(now: Date) {
         let time = displayLayer.controlTimebase.map { CMTimebaseGetTime($0) }
             ?? CMClockGetTime(CMClockGetHostTimeClock())
-        guard let sampleBuffer = renderer.sampleBuffer(lines: lines, tickProgress: tickProgress, at: time) else {
+        let card = SettingsChecklistPictureCard(titles: script.titles, lines: lines, tickProgress: tickProgress)
+        guard let sampleBuffer = renderer.sampleBuffer(drawing: card, at: time) else {
             log("frameFailed")
             return
         }
@@ -458,23 +545,11 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
         open()
     }
 
-    // MARK: - Keyboard
-
-    /// Whether the Dictus keyboard is in the user's keyboard list. Same test as the page's
-    /// detection (`KeyboardSetupPage.checkKeyboardInstalled`), without its logging, which
-    /// would write a line a second here.
-    static func isDictusKeyboardActive() -> Bool {
-        // value(forKey:) is KVO; anything but a String is ignored.
-        DictusKeyboardPresence(inputModeIdentifiers: UITextInputMode.activeInputModes.compactMap {
-            $0.value(forKey: "identifier") as? String
-        }).isListed
-    }
-
     // MARK: - Log
 
     private func log(_ action: String, _ details: String = "") {
         PersistentLog.log(.diagnosticProbe(
-            component: "onboardingChecklist",
+            component: script.logComponent,
             instanceID: usesPictureInPicture ? "pip" : "inline",
             action: action,
             details: "\(details) mode=\(mode.rawValue)"
@@ -484,7 +559,7 @@ final class KeyboardSetupChecklistPlayer: NSObject, ObservableObject {
 
 // MARK: - AVPictureInPictureControllerDelegate
 
-extension KeyboardSetupChecklistPlayer: AVPictureInPictureControllerDelegate {
+extension SettingsChecklistPlayer: AVPictureInPictureControllerDelegate {
     // AVKit calls these on the main thread; the class is @MainActor.
 
     nonisolated func pictureInPictureControllerDidStartPictureInPicture(_ controller: AVPictureInPictureController) {
@@ -526,7 +601,7 @@ extension KeyboardSetupChecklistPlayer: AVPictureInPictureControllerDelegate {
 
 // MARK: - AVPictureInPictureSampleBufferPlaybackDelegate
 
-extension KeyboardSetupChecklistPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
+extension SettingsChecklistPlayer: AVPictureInPictureSampleBufferPlaybackDelegate {
     // The checklist is live content that never pauses: the window shows no scrubber and
     // its play button does nothing.
 
