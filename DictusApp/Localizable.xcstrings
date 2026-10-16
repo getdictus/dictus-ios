@@ -3888,6 +3888,17 @@
         }
       }
     },
+    "See how it works" : {
+      "comment" : "Row at the top of each Dictus Pro feature screen (Smart Modes, History, Vocabulary, Voice notes); opens the feature's animated demo from the onboarding (#686).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir comment ça marche"
+          }
+        }
+      }
+    },
     "See the steps again" : {
       "comment" : "Onboarding Apple Intelligence step (#683). Secondary button of the getting-ready screen: back to the instructions.",
       "localizations" : {

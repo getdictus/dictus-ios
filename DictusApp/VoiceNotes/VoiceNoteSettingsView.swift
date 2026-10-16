@@ -9,8 +9,9 @@ import DictusCore
 /// ### Where it is mounted
 ///
 /// Pushed from the Dictus Pro hub's Voice notes row (#216), like the other Pro
-/// feature screens: the feature's switch first (`ProFeatureSwitchSection`), then the
-/// defaults, dimmed and locked while the switch is off. Settings' provisional link to
+/// feature screens: "See how it works" first (`ProFeatureHowItWorksSection`, #686), the
+/// feature's switch (`ProFeatureSwitchSection`), then the defaults, dimmed and locked while
+/// the switch is off. Settings' provisional link to
 /// it went away with its Pro Features section.
 struct VoiceNoteSettingsView: View {
 
@@ -35,6 +36,9 @@ struct VoiceNoteSettingsView: View {
 
     var body: some View {
         List {
+            // How the feature works, first (#686): its onboarding scene, in a sheet.
+            ProFeatureHowItWorksSection(feature: .voiceNotes)
+
             ProFeatureSwitchSection(feature: .voiceNotes)
 
             VoiceNoteSettingsSections(settings: $settings, isAvailable: isAvailable)
