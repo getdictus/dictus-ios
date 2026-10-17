@@ -334,6 +334,9 @@ public enum SharedKeys {
     public static let historyEnabled = "dictus.historyEnabled"
     /// Bool: per-feature toggle for Vocabulary. Seeded like `smartModeEnabled` above.
     public static let vocabularyEnabled = "dictus.vocabularyEnabled"
+    /// [String]: folded spellings the user dismissed from the vocabulary suggestions
+    /// (#512). Read and written only through `VocabularySuggestionIgnoreList`.
+    public static let vocabularySuggestionsIgnored = "dictus.vocabularySuggestionsIgnored"
     /// Bool: per-feature toggle for shared voice notes (#620). Seeded like
     /// `smartModeEnabled` above, and read by the share extension.
     public static let voiceNotesEnabled = "dictus.voiceNotesEnabled"

@@ -29,6 +29,9 @@ struct VocabularyListView: View {
     /// The entry being added or edited, or nil when the sheet is closed.
     @State private var editing: VocabularyEditorSubject?
 
+    /// Whether the suggestions from History are open (#512).
+    @State private var showSuggestions = false
+
     /// Confirmation for the destructive reset, on the model of "Reset learned words".
     @State private var showResetConfirmation = false
 
@@ -106,6 +109,19 @@ struct VocabularyListView: View {
             }
             .proFeatureContent(isAvailable: isAvailable)
 
+            // The #512 trial: words from History the vocabulary may be missing.
+            // Below **Add a term** because it is another way of adding one.
+            Section {
+                Button {
+                    showSuggestions = true
+                } label: {
+                    Label("Suggestions from History", systemImage: "text.magnifyingglass")
+                }
+            } footer: {
+                Text("Words from your History that Dictus may be getting wrong.")
+            }
+            .proFeatureContent(isAvailable: isAvailable)
+
             if !store.isEmpty {
                 Section {
                     Button("Reset vocabulary", role: .destructive) {
@@ -126,6 +142,11 @@ struct VocabularyListView: View {
         .sheet(item: $editing) { subject in
             NavigationStack {
                 VocabularyEditorView(subject: subject)
+            }
+        }
+        .sheet(isPresented: $showSuggestions) {
+            NavigationStack {
+                VocabularySuggestionsView()
             }
         }
         .confirmationDialog(
@@ -196,14 +217,16 @@ enum VocabularyEditorSubject: Identifiable {
     case new
     case existing(VocabularyEntry)
     /// A new term started from History (#723): the variant is what the user selected
-    /// in a saved transcript, and the term is theirs to type.
-    case observed(variant: String)
+    /// in a saved transcript, and the term is theirs to type. A vocabulary suggestion
+    /// anchored on a word the keyboard learned (#512) also passes that word as `term`,
+    /// prefilled; the user can still edit it.
+    case observed(variant: String, term: String = "")
 
     var id: String {
         switch self {
         case .new: return "new"
         case .existing(let entry): return entry.id.uuidString
-        case .observed(let variant): return "observed-\(variant)"
+        case let .observed(variant, term): return "observed-\(term)-\(variant)"
         }
     }
 
@@ -216,7 +239,13 @@ enum VocabularyEditorSubject: Identifiable {
 
     /// The variant the sheet opens with, when it was started from History.
     var observedVariant: String? {
-        if case .observed(let variant) = self { return variant }
+        if case let .observed(variant, _) = self { return variant }
+        return nil
+    }
+
+    /// The term the sheet opens with, when a suggestion already knows it (#512).
+    var observedTerm: String? {
+        if case let .observed(_, term) = self, !term.isEmpty { return term }
         return nil
     }
 }
@@ -244,7 +273,7 @@ struct VocabularyEditorView: View {
 
     init(subject: VocabularyEditorSubject) {
         self.subject = subject
-        _term = State(initialValue: subject.entry?.term ?? "")
+        _term = State(initialValue: subject.entry?.term ?? subject.observedTerm ?? "")
         _variantsLine = State(initialValue: subject.entry?.variantsLine ?? subject.observedVariant ?? "")
     }
 
