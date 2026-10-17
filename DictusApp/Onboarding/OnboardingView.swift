@@ -73,8 +73,17 @@ struct OnboardingView: View {
     /// because confirming is what applies the setup and starts the download.
     @State private var languageDraft: LanguageSetup?
 
-    /// Whether the last step change went back (#700), which turns the slide around: the
-    /// intro comes in from the leading edge and the language page leaves by the trailing one.
+    /// The Smart Mode pick as the user left it (#725), so going back to the pick, or
+    /// coming forward to it again, shows that selection instead of an empty pick. nil until
+    /// the user has touched it.
+    ///
+    /// WHY HERE: like `languageDraft`, the page goes with its state on every step change.
+    /// After a kill on a later scene, `goBack` fills it from what the pick's Continue wrote.
+    @State private var smartModePickDraft: SmartModePick?
+
+    /// Whether the last step change went back (#700, #725), which turns the slide around:
+    /// the step gone back to comes in from the leading edge and the one left goes out by the
+    /// trailing one.
     @State private var isGoingBack = false
 
     /// Reset when the first dictation is left, so Home does not open on its transcription.
@@ -86,7 +95,7 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // The shell's top row (#675, #700): back chevron and progress bar. Outside
+                // The shell's top row (#675, #700, #725): back chevron and progress bar. Outside
                 // the sliding page so it stays put while the pages change under it, and
                 // only its segments animate.
                 OnboardingTopBar(
@@ -124,6 +133,7 @@ struct OnboardingView: View {
                         SmartModePickPage(
                             modelManager: modelManager,
                             modelIdentifier: onboardingModel,
+                            draft: $smartModePickDraft,
                             onContinue: advance
                         )
                     case .voiceNotesScene:
@@ -290,13 +300,25 @@ struct OnboardingView: View {
         show(newStep, goingBack: false)
     }
 
-    /// The shell's back control (#700): from the language step to the intro, which starts
-    /// again at its first page (`WelcomePage` is rebuilt). `OnboardingStep.goBack` records
-    /// the intro first, so an app killed now resumes there.
+    /// The shell's back control (#700, #725): from the language step to the intro, which
+    /// starts again at its first page (`WelcomePage` is rebuilt), and inside the scene
+    /// sequence to the step before (`OnboardingStep.stepBack`), whose scene starts its loop
+    /// again from the beginning (the page is rebuilt, and its player's clock with it).
+    /// `OnboardingStep.goBack` records the step first, so an app killed now resumes there.
+    ///
+    /// Nothing here touches the model download: `modelManager` belongs to this view, not
+    /// to the pages, so the transfer and the pages' download pill carry on across it.
     private func goBack() {
         let from = step
         guard let back = OnboardingStep.goBack(from: from) else { return }
         PersistentLog.log(.onboardingWentBack(from: from.rawValue, to: back.rawValue))
+        if back == .smartModePick, smartModePickDraft == nil {
+            // The pick was left by its Continue, which wrote the selection, but the draft
+            // went with an app kill since. Reopen on what was written.
+            smartModePickDraft = SmartModePick.committed(
+                spokenLanguage: AppGroup.defaults.string(forKey: SharedKeys.spokenLanguage)
+            )
+        }
         show(back, goingBack: true)
     }
 
