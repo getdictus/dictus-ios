@@ -52,24 +52,38 @@ enum OnboardingMetrics {
 /// A skipped step keeps its segment and reads as done once passed; a Pro step hidden on a
 /// device that can never run Smart Modes has none (#677).
 struct OnboardingProgressBar: View {
-    let step: OnboardingStep
-    /// `SmartModeAvailability.deviceIsCapable`, which decides whether the Pro steps exist.
-    let deviceCanRunSmartModes: Bool
+    /// How many segments the bar draws.
+    let segmentCount: Int
+    /// The segment of the step on screen.
+    let current: Int
+
+    /// The onboarding's bar: one segment per step that wears it on this device.
+    ///
+    /// - Parameter deviceCanRunSmartModes: `SmartModeAvailability.deviceIsCapable`, which
+    ///   decides whether the Pro steps exist.
+    init(step: OnboardingStep, deviceCanRunSmartModes: Bool) {
+        segmentCount = OnboardingStep.progressSteps(deviceCanRunSmartModes: deviceCanRunSmartModes).count
+        current = step.progressIndex(deviceCanRunSmartModes: deviceCanRunSmartModes) ?? 0
+    }
+
+    /// A bar over another sequence of the same pages: What's new (#685).
+    init(segmentCount: Int, current: Int) {
+        self.segmentCount = segmentCount
+        self.current = current
+    }
 
     var body: some View {
-        let steps = OnboardingStep.progressSteps(deviceCanRunSmartModes: deviceCanRunSmartModes)
-        let current = step.progressIndex(deviceCanRunSmartModes: deviceCanRunSmartModes) ?? 0
         HStack(spacing: 6) {
-            ForEach(Array(steps.enumerated()), id: \.element) { index, _ in
+            ForEach(0..<segmentCount, id: \.self) { index in
                 Capsule()
                     .fill(color(forSegment: index, current: current))
                     .frame(height: 4)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: step)
+        .animation(.easeInOut(duration: 0.3), value: current)
         // One element for VoiceOver instead of five silent capsules.
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("Step \(current + 1) of \(steps.count)"))
+        .accessibilityLabel(Text("Step \(current + 1) of \(segmentCount)"))
     }
 
     private func color(forSegment index: Int, current: Int) -> Color {

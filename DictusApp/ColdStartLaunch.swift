@@ -36,11 +36,18 @@ enum ColdStartLaunch {
     /// rendering its tab navigation immediately.
     private(set) static var intent: KeyboardDictationIntent?
 
+    /// Whether the launch carried any URL at all, dictation or not: the Live Activity's
+    /// voice note link, the keyboard's Pro entry, a widget. Such a launch was opened to show
+    /// something, so What's new does not take its first frame (#685); `MainTabView` leaves it
+    /// for the next activation.
+    private(set) static var carriedURL = false
+
     /// Records the launch URL handed to the scene at connection time.
     ///
     /// WHY only the first match: a scene connects with a set of URL contexts, and the
     /// dictation URL is the only one we care about. Anything else leaves `intent` nil.
     static func capture(_ urlContexts: Set<UIOpenURLContext>) {
+        carriedURL = !urlContexts.isEmpty
         guard let launchIntent = urlContexts.lazy
             .compactMap({ KeyboardDictationURL.intent(from: $0.url) })
             .first
@@ -63,6 +70,7 @@ enum ColdStartLaunch {
     /// background, so a view rebuilt later in the same process never replays a cold start.
     static func clear() {
         intent = nil
+        carriedURL = false
     }
 }
 
