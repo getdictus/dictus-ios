@@ -28,7 +28,7 @@ struct HistoryScenePage: View {
 }
 
 /// The history scene in its drawn iPhone: the onboarding page's card and the
-/// history screen's "See how it works" sheet (#686).
+/// history screen's "See the demo" sheet (#686).
 struct HistorySceneCard: View {
     /// The title of the onboarding step, also the title of the feature screen's "See how
     /// it works" sheet (#686): one string for both.

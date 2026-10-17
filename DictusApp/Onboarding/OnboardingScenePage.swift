@@ -89,7 +89,7 @@ struct OnboardingScenePage<Card: View>: View {
 }
 
 /// The top of a scene page: the eyebrow, the title and its line, then the scene's card in
-/// the height that is left. The onboarding's scene pages and the "See how it works" sheet
+/// the height that is left. The onboarding's scene pages and the "See the demo" sheet
 /// of the Pro feature screens (#686) both use it, each with its own buttons under it.
 struct OnboardingSceneLayout<Card: View>: View {
     /// A small label above the title, nil for none.

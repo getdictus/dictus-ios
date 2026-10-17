@@ -6,7 +6,7 @@ import DictusCore
 /// A scene playing in the drawn iPhone card (#649 decision 12, #686): the player and the
 /// phone around it, nothing else.
 ///
-/// WHY ITS OWN VIEW: the onboarding's scene pages (#679, #680) and the "See how it works"
+/// WHY ITS OWN VIEW: the onboarding's scene pages (#679, #680) and the "See the demo"
 /// sheet of each Pro feature screen (#686) show the same scene in the same phone, and What's
 /// new (#685) will too. The page adds the download pill, Next and Skip; the sheet adds OK.
 /// Neither carries a copy of the scene's timing or drawing.
@@ -73,7 +73,7 @@ extension FeatureSceneCard where Header == EmptyView {
 }
 
 /// The scene of a Pro feature, by feature: what each onboarding scene page shows and what
-/// the feature screen's "See how it works" sheet plays (#686). Each scene's own card
+/// the feature screen's "See the demo" sheet plays (#686). Each scene's own card
 /// (`SmartModesSceneCard` and the others) holds its timing, its data and its title, next
 /// to its drawing.
 struct ProFeatureSceneCard: View {

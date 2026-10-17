@@ -26,7 +26,7 @@ struct SmartModesScenePage: View {
 }
 
 /// The Smart Modes scene in its drawn iPhone: the onboarding page's card and the
-/// Smart Modes screen's "See how it works" sheet (#686).
+/// Smart Modes screen's "See the demo" sheet (#686).
 struct SmartModesSceneCard: View {
     /// The title of the onboarding step, also the title of the feature screen's "See how
     /// it works" sheet (#686): one string for both.

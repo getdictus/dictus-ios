@@ -1,38 +1,44 @@
 // DictusApp/Views/ProFeatureSceneSheet.swift
-// "See how it works" on each Pro feature screen: the onboarding's scene, in a sheet (#686).
+// "See the demo" on each Pro feature screen: the onboarding's scene, in a sheet (#686).
 import SwiftUI
 import DictusCore
 
-/// The first section of each Pro feature screen the hub opens (#686, decided on the issue
-/// on 2026-10-16): one row that plays the feature's onboarding scene in a sheet.
+/// A plain text link, "See the demo", that plays the feature's onboarding scene in a
+/// sheet (#686, decided on the issue on 2026-10-17). One component, so the four Pro
+/// feature screens carry the same words, colour and sheet.
 ///
-/// WHY HERE AND NOT ON THE HUB CARDS (Pierre's device test of PR #743): scenes inside the
-/// hub's cards turned the hub into a sales page for someone who already pays, made the
-/// Settings row the smallest thing on each card, cropped each scene differently, and lost
-/// the title and sentence that explain them. On the feature's own screen, the scene is
-/// asked for, shown whole, and keeps its words.
-struct ProFeatureHowItWorksSection: View {
+/// WHERE IT SITS: at the end of the screen's own "How it works" explanation, or, on a
+/// screen without one, at the end of the footer under the feature's switch
+/// (`ProFeatureSwitchSection`). That is Apple's "Learn more…" footer link: the switch
+/// stays the first row (#216 decision 4), and nothing reads as a media player.
+///
+/// WHY NOT A ROW OF ITS OWN (Pierre's device test of `7a8274fa`): a first row with a play
+/// icon read as a media player, repeated the "How it works" header below it, and pushed
+/// the switch off first place.
+///
+/// Always live, switched off included: the demo is how someone decides to turn the
+/// feature on. Callers keep it out of `proFeatureContent(isAvailable:)`.
+///
+/// The font is the caller's: a footer's footnote, or the explanation's caption.
+struct ProFeatureDemoLink: View {
     let feature: ProFeature
 
     @State private var showsScene = false
 
     var body: some View {
-        Section {
-            Button {
-                showsScene = true
-            } label: {
-                Label {
-                    Text("See how it works",
-                         comment: "Row at the top of each Dictus Pro feature screen (Smart Modes, History, Vocabulary, Voice notes); opens the feature's animated demo from the onboarding (#686).")
-                        .foregroundStyle(Color.dictusAccent)
-                } icon: {
-                    Image(systemName: "play.circle.fill")
-                        .foregroundStyle(Color.dictusAccent)
-                }
-            }
-            .sheet(isPresented: $showsScene) {
-                ProFeatureSceneSheet(feature: feature)
-            }
+        Button {
+            showsScene = true
+        } label: {
+            Text("See the demo",
+                 comment: "Text link at the end of each Dictus Pro feature screen's explanation or switch footer (Smart Modes, History, Vocabulary, Voice notes); opens the feature's animated demo from the onboarding (#686).")
+                .foregroundStyle(Color.dictusAccent)
+        }
+        // Borderless, so only the link's own words take the tap, not the whole row or
+        // footer it ends.
+        .buttonStyle(.borderless)
+        .accessibilityIdentifier("proFeatureDemoLink")
+        .sheet(isPresented: $showsScene) {
+            ProFeatureSceneSheet(feature: feature)
         }
     }
 }

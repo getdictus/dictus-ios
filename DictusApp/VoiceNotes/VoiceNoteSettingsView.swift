@@ -9,9 +9,9 @@ import DictusCore
 /// ### Where it is mounted
 ///
 /// Pushed from the Dictus Pro hub's Voice notes row (#216), like the other Pro
-/// feature screens: "See how it works" first (`ProFeatureHowItWorksSection`, #686), the
-/// feature's switch (`ProFeatureSwitchSection`), then the defaults, dimmed and locked while
-/// the switch is off. Settings' provisional link to
+/// feature screens: the feature's switch first (`ProFeatureSwitchSection`), then the
+/// defaults, dimmed and locked while the switch is off. The "How it works" explanation
+/// ends with "See the demo" (`ProFeatureDemoLink`, #686). Settings' provisional link to
 /// it went away with its Pro Features section.
 struct VoiceNoteSettingsView: View {
 
@@ -36,10 +36,9 @@ struct VoiceNoteSettingsView: View {
 
     var body: some View {
         List {
-            // How the feature works, first (#686): its onboarding scene, in a sheet.
-            ProFeatureHowItWorksSection(feature: .voiceNotes)
-
-            ProFeatureSwitchSection(feature: .voiceNotes)
+            // The demo link ends the "How it works" explanation below, not this
+            // footer (#686).
+            ProFeatureSwitchSection(feature: .voiceNotes, offersDemo: false)
 
             VoiceNoteSettingsSections(settings: $settings, isAvailable: isAvailable)
         }
@@ -63,13 +62,19 @@ struct VoiceNoteSettingsSections: View {
 
     var body: some View {
         Section {
-            Text("Long-press a voice message in WhatsApp, Telegram, Signal or Messages, tap Share, then Dictus. Audio files from Voice Memos, Files or Mail work the same way.")
-                .font(.dictusCaption)
-                .foregroundColor(.secondary)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Long-press a voice message in WhatsApp, Telegram, Signal or Messages, tap Share, then Dictus. Audio files from Voice Memos, Files or Mail work the same way.")
+                    .foregroundColor(.secondary)
+                    .proFeatureContent(isAvailable: isAvailable)
+
+                // Outside `proFeatureContent`: the demo stays live with the feature
+                // off (#686), since it is how someone decides to turn it on.
+                ProFeatureDemoLink(feature: .voiceNotes)
+            }
+            .font(.dictusCaption)
         } header: {
             Text("How it works")
         }
-        .proFeatureContent(isAvailable: isAvailable)
 
         Section {
             Picker("Language", selection: $settings.language) {

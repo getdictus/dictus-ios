@@ -103,17 +103,25 @@ struct ProHubFeatureCard: View {
 /// on its own `UserDefaults` instance, did not redraw together on the simulator.
 /// One owner, observed by all three.
 ///
-/// WHY the footer only speaks when the switch is off: on, the screen below says what
-/// the feature does. Off, the content under it is dimmed and locked
+/// WHY the footer's sentence only shows while the switch is off: on, the screen below
+/// says what the feature does. Off, the content under it is dimmed and locked
 /// (`proFeatureContent(isAvailable:)`), and the user is owed why, and that nothing
 /// was deleted.
+///
+/// `offersDemo` ends the footer with "See the demo" (`ProFeatureDemoLink`, #686) on a
+/// screen with no "How it works" explanation of its own to carry it. Required, so each
+/// screen states where its link sits.
 struct ProFeatureSwitchSection: View {
     let feature: ProFeature
 
+    /// Whether the footer ends with the feature's demo link (#686).
+    let offersDemo: Bool
+
     @ObservedObject private var switches = ProFeatureSwitches.shared
 
-    init(feature: ProFeature) {
+    init(feature: ProFeature, offersDemo: Bool) {
         self.feature = feature
+        self.offersDemo = offersDemo
     }
 
     private var isOn: Bool {
@@ -130,8 +138,16 @@ struct ProFeatureSwitchSection: View {
             }
             .tint(.dictusAccent)
         } footer: {
-            if !isOn {
-                offFooter
+            VStack(alignment: .leading, spacing: 6) {
+                if !isOn {
+                    offFooter
+                }
+                if offersDemo {
+                    // Footnote set here: a button in a footer was drawn at body size
+                    // instead of the footnote the footer gives its text (simulator).
+                    ProFeatureDemoLink(feature: feature)
+                        .font(.footnote)
+                }
             }
         }
     }

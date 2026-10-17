@@ -57,12 +57,11 @@ struct VocabularyListView: View {
 
     var body: some View {
         List {
-            // How the feature works, first (#686): its onboarding scene, in a sheet.
-            ProFeatureHowItWorksSection(feature: .vocabulary)
-
-            // The feature's switch, right under it (#216): this screen is reached from the
-            // Dictus Pro hub's Vocabulary row, which carries no switch of its own.
-            ProFeatureSwitchSection(feature: .vocabulary)
+            // The feature's switch, first (#216): this screen is reached from the
+            // Dictus Pro hub's Vocabulary row, which carries no switch of its own. The
+            // screen has no "How it works" explanation, so the demo link ends the
+            // switch's footer (#686).
+            ProFeatureSwitchSection(feature: .vocabulary, offersDemo: true)
 
             Section {
                 if store.isEmpty {

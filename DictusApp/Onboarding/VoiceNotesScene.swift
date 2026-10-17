@@ -28,7 +28,7 @@ struct VoiceNotesScenePage: View {
 }
 
 /// The voice notes scene in its drawn iPhone, with its chapter header above the phone: the
-/// onboarding page's card and the voice notes screen's "See how it works" sheet (#686).
+/// onboarding page's card and the voice notes screen's "See the demo" sheet (#686).
 struct VoiceNotesSceneCard: View {
     /// The title of the onboarding step, also the title of the feature screen's "See how
     /// it works" sheet (#686): one string for both.
