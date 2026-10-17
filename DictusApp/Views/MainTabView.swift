@@ -323,8 +323,10 @@ struct MainTabView: View {
             // Whatever this URL asks for, What's new does not take its place (#685). If it
             // was drawn before the URL was known, it has not been recorded yet (it is, once
             // the app is active), so it steps aside and stays due for the next activation.
+            // If it was already on screen and recorded, it steps aside all the same: the
+            // voice note sheet hangs off the tab bar, which What's new replaces.
             activationOpenedByURL = true
-            if whatsNewSteps != nil, WhatsNew.isDue() {
+            if whatsNewSteps != nil {
                 whatsNewSteps = nil
             }
 
