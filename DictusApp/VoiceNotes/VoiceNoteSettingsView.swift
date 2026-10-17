@@ -10,8 +10,8 @@ import DictusCore
 ///
 /// Pushed from the Dictus Pro hub's Voice notes row (#216), like the other Pro
 /// feature screens: the feature's switch first (`ProFeatureSwitchSection`), then the
-/// defaults, dimmed and locked while the switch is off. The "How it works" explanation
-/// ends with "See the demo" (`ProFeatureDemoLink`, #686). Settings' provisional link to
+/// defaults, dimmed and locked while the switch is off. The "How it works" section
+/// (`ProFeatureHowItWorksSection`, #686) ends with "See the demo". Settings' provisional link to
 /// it went away with its Pro Features section.
 struct VoiceNoteSettingsView: View {
 
@@ -36,9 +36,7 @@ struct VoiceNoteSettingsView: View {
 
     var body: some View {
         List {
-            // The demo link ends the "How it works" explanation below, not this
-            // footer (#686).
-            ProFeatureSwitchSection(feature: .voiceNotes, offersDemo: false)
+            ProFeatureSwitchSection(feature: .voiceNotes)
 
             VoiceNoteSettingsSections(settings: $settings, isAvailable: isAvailable)
         }
@@ -61,20 +59,13 @@ struct VoiceNoteSettingsSections: View {
     var isAvailable = true
 
     var body: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Long-press a voice message in WhatsApp, Telegram, Signal or Messages, tap Share, then Dictus. Audio files from Voice Memos, Files or Mail work the same way.")
-                    .foregroundColor(.secondary)
-                    .proFeatureContent(isAvailable: isAvailable)
-
-                // Outside `proFeatureContent`: the demo stays live with the feature
-                // off (#686), since it is how someone decides to turn it on.
-                ProFeatureDemoLink(feature: .voiceNotes)
-            }
-            .font(.dictusCaption)
-        } header: {
-            Text("How it works")
-        }
+        // Voice notes keeps its own paragraph: the share steps say more here than the
+        // onboarding's line, which the other three screens reuse (#686).
+        ProFeatureHowItWorksSection(
+            feature: .voiceNotes,
+            explanation: Text("Long-press a voice message in WhatsApp, Telegram, Signal or Messages, tap Share, then Dictus. Audio files from Voice Memos, Files or Mail work the same way."),
+            isAvailable: isAvailable
+        )
 
         Section {
             Picker("Language", selection: $settings.language) {

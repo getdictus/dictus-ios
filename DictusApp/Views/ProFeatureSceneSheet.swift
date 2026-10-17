@@ -3,23 +3,58 @@
 import SwiftUI
 import DictusCore
 
-/// A plain text link, "See the demo", that plays the feature's onboarding scene in a
-/// sheet (#686, decided on the issue on 2026-10-17). One component, so the four Pro
-/// feature screens carry the same words, colour and sheet.
+/// The "How it works" section of each Pro feature screen, right under the feature's
+/// switch (#686, amended on the issue on 2026-10-17): a short paragraph, then the
+/// "See the demo" link inside the same card. One component, so the four screens carry
+/// the same header, sizes, colours and sheet.
 ///
-/// WHERE IT SITS: at the end of the screen's own "How it works" explanation, or, on a
-/// screen without one, at the end of the footer under the feature's switch
-/// (`ProFeatureSwitchSection`). That is Apple's "Learn more…" footer link: the switch
-/// stays the first row (#216 decision 4), and nothing reads as a media player.
+/// WHY A SECTION AND NOT A FOOTER LINK (Pierre's device test of `e45d29f6`): Voice notes
+/// already had this card and its link read right; on the three other screens a lone
+/// footnote link under the switch was too small and looked orphaned.
 ///
-/// WHY NOT A ROW OF ITS OWN (Pierre's device test of `7a8274fa`): a first row with a play
-/// icon read as a media player, repeated the "How it works" header below it, and pushed
-/// the switch off first place.
+/// WHY NOT A FIRST ROW (device test of `7a8274fa`): a row with a play icon read as a
+/// media player and pushed the switch off first place (#216 decision 4).
 ///
-/// Always live, switched off included: the demo is how someone decides to turn the
-/// feature on. Callers keep it out of `proFeatureContent(isAvailable:)`.
-///
-/// The font is the caller's: a footer's footnote, or the explanation's caption.
+/// Off, the paragraph dims with the rest of the locked content
+/// (`proFeatureContent(isAvailable:)`), but the link stays live: the demo is how someone
+/// decides to turn the feature on.
+struct ProFeatureHowItWorksSection: View {
+    let feature: ProFeature
+
+    /// The paragraph above the link.
+    let explanation: Text
+
+    /// `FeatureGate.isAvailable(feature)`, the one predicate, read by the screen.
+    let isAvailable: Bool
+
+    /// The paragraph defaults to the line under the feature's onboarding title
+    /// (`ProFeatureSceneCard.line(for:)`): the sentence the demo itself opens with, so no
+    /// copy of its own.
+    init(feature: ProFeature, explanation: Text? = nil, isAvailable: Bool) {
+        self.feature = feature
+        self.explanation = explanation ?? ProFeatureSceneCard.line(for: feature)
+        self.isAvailable = isAvailable
+    }
+
+    var body: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 8) {
+                explanation
+                    .foregroundColor(.secondary)
+                    .proFeatureContent(isAvailable: isAvailable)
+
+                ProFeatureDemoLink(feature: feature)
+            }
+            .font(.dictusCaption)
+        } header: {
+            Text("How it works")
+        }
+    }
+}
+
+/// The plain text link, "See the demo", that plays the feature's onboarding scene in a
+/// sheet (#686). Lives at the end of `ProFeatureHowItWorksSection`; the font is the
+/// section's.
 struct ProFeatureDemoLink: View {
     let feature: ProFeature
 
@@ -30,11 +65,10 @@ struct ProFeatureDemoLink: View {
             showsScene = true
         } label: {
             Text("See the demo",
-                 comment: "Text link at the end of each Dictus Pro feature screen's explanation or switch footer (Smart Modes, History, Vocabulary, Voice notes); opens the feature's animated demo from the onboarding (#686).")
+                 comment: "Text link at the end of the \"How it works\" card of each Dictus Pro feature screen (Smart Modes, History, Vocabulary, Voice notes); opens the feature's animated demo from the onboarding (#686).")
                 .foregroundStyle(Color.dictusAccent)
         }
-        // Borderless, so only the link's own words take the tap, not the whole row or
-        // footer it ends.
+        // Borderless, so only the link's own words take the tap, not the whole row.
         .buttonStyle(.borderless)
         .accessibilityIdentifier("proFeatureDemoLink")
         .sheet(isPresented: $showsScene) {

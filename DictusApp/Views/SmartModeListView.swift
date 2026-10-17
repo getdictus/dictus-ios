@@ -65,10 +65,11 @@ struct SmartModeListView: View {
     var body: some View {
         List {
             // The feature's switch, first (#216): this screen is reached from the
-            // Dictus Pro hub's Smart Mode row, which carries no switch of its own. The
-            // screen has no "How it works" explanation, so the demo link ends the
-            // switch's footer (#686).
-            ProFeatureSwitchSection(feature: .smartMode, offersDemo: true)
+            // Dictus Pro hub's Smart Mode row, which carries no switch of its own.
+            ProFeatureSwitchSection(feature: .smartMode)
+
+            // What the feature does, and its demo (#686).
+            ProFeatureHowItWorksSection(feature: .smartMode, isAvailable: isAvailable)
 
             if !deviceIsCapable {
                 Section {

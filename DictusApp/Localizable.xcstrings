@@ -3933,7 +3933,7 @@
       }
     },
     "See the demo" : {
-      "comment" : "Text link at the end of each Dictus Pro feature screen's explanation or switch footer (Smart Modes, History, Vocabulary, Voice notes); opens the feature's animated demo from the onboarding (#686).",
+      "comment" : "Text link at the end of the \"How it works\" card of each Dictus Pro feature screen (Smart Modes, History, Vocabulary, Voice notes); opens the feature's animated demo from the onboarding (#686).",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
