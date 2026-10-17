@@ -16,16 +16,38 @@ struct VocabularyScenePage: View {
         OnboardingScenePage(
             eyebrow: Text("Also in Pro",
                           comment: "Onboarding: small label above the title of the voice notes, vocabulary and history scenes, which come after the Smart Modes and show the other Dictus Pro features (#680)."),
-            title: Text("Your words, spelled right",
-                        comment: "Onboarding vocabulary scene: title (#680)."),
-            line: Text("Note a name and the way Dictus gets it wrong. Next time, it will write it your way.",
-                       comment: "Onboarding vocabulary scene: the line under the title (#680)."),
-            phoneEnd: .top,
-            loopSeconds: VocabularySceneScript.loopSeconds,
-            stillSeconds: VocabularySceneScript.stillSeconds,
+            title: VocabularySceneCard.title,
+            line: VocabularySceneCard.line,
             modelManager: modelManager,
             modelIdentifier: modelIdentifier,
             onNext: onNext
+        ) {
+            VocabularySceneCard()
+        }
+    }
+}
+
+/// The vocabulary scene in its drawn iPhone: the onboarding page's card and the
+/// vocabulary screen's "See the demo" sheet (#686).
+struct VocabularySceneCard: View {
+    /// The title of the onboarding step, also the title of the feature screen's "See the
+    /// demo" sheet (#686): one string for both.
+    static var title: Text {
+        Text("Your words, spelled right",
+             comment: "Onboarding vocabulary scene: title (#680).")
+    }
+
+    /// The line under the title, shared the same way.
+    static var line: Text {
+        Text("Note a name and the way Dictus gets it wrong. Next time, it will write it your way.",
+             comment: "Onboarding vocabulary scene: the line under the title (#680).")
+    }
+
+    var body: some View {
+        FeatureSceneCard(
+            phoneEnd: .top,
+            loopSeconds: VocabularySceneScript.loopSeconds,
+            stillSeconds: VocabularySceneScript.stillSeconds
         ) { time in
             VocabularyScene(time: time)
         }

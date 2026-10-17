@@ -61,6 +61,9 @@ struct VocabularyListView: View {
             // Dictus Pro hub's Vocabulary row, which carries no switch of its own.
             ProFeatureSwitchSection(feature: .vocabulary)
 
+            // What the feature does, and its demo (#686).
+            ProFeatureHowItWorksSection(feature: .vocabulary, isAvailable: isAvailable)
+
             Section {
                 if store.isEmpty {
                     Text("No terms yet. Add the words Dictus gets wrong.")

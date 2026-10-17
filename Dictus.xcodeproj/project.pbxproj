@@ -12,6 +12,7 @@
 		RT5930000004 /* ProTrialDebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100004 /* ProTrialDebugSection.swift */; };
 		RT5930000003 /* ProTrialPaywallSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100003 /* ProTrialPaywallSections.swift */; };
 		PH2160000001 /* ProHubSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = PH2160100001 /* ProHubSections.swift */; };
+		AA000687 /* ProFeatureSceneSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100687 /* ProFeatureSceneSheet.swift */; };
 		RT5930000002 /* ProTrialAnnouncementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100002 /* ProTrialAnnouncementView.swift */; };
 		RT5930000001 /* ProTrialCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100001 /* ProTrialCoordinator.swift */; };
 		SS000002 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100002 /* PaywallView.swift */; };
@@ -91,6 +92,7 @@
 		AA000676 /* IntroVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100676 /* IntroVideoView.swift */; };
 		AA000679 /* AnimatedScenePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100679 /* AnimatedScenePlayer.swift */; };
 		AA00679A /* OnboardingScenePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679A /* OnboardingScenePage.swift */; };
+		AA000686 /* FeatureSceneCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100686 /* FeatureSceneCard.swift */; };
 		AA00679B /* SmartModesScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679B /* SmartModesScene.swift */; };
 		AA00704A /* FullAccessExplainerPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10704A /* FullAccessExplainerPage.swift */; };
 		AA006800 /* SceneTapTargets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106800 /* SceneTapTargets.swift */; };
@@ -330,6 +332,7 @@
 		AA100676 /* IntroVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroVideoView.swift; sourceTree = "<group>"; };
 		AA100679 /* AnimatedScenePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedScenePlayer.swift; sourceTree = "<group>"; };
 		AA10679A /* OnboardingScenePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScenePage.swift; sourceTree = "<group>"; };
+		AA100686 /* FeatureSceneCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureSceneCard.swift; sourceTree = "<group>"; };
 		AA10679B /* SmartModesScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModesScene.swift; sourceTree = "<group>"; };
 		AA10704A /* FullAccessExplainerPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullAccessExplainerPage.swift; sourceTree = "<group>"; };
 		AA106800 /* SceneTapTargets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneTapTargets.swift; sourceTree = "<group>"; };
@@ -403,6 +406,7 @@
 		RT5930100004 /* ProTrialDebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialDebugSection.swift; sourceTree = "<group>"; };
 		RT5930100003 /* ProTrialPaywallSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialPaywallSections.swift; sourceTree = "<group>"; };
 		PH2160100001 /* ProHubSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProHubSections.swift; sourceTree = "<group>"; };
+		AA100687 /* ProFeatureSceneSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProFeatureSceneSheet.swift; sourceTree = "<group>"; };
 		RT5930100002 /* ProTrialAnnouncementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialAnnouncementView.swift; sourceTree = "<group>"; };
 		RT5930100001 /* ProTrialCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialCoordinator.swift; sourceTree = "<group>"; };
 		SS100002 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
@@ -728,6 +732,7 @@
 				RT5930100004 /* ProTrialDebugSection.swift */,
 				RT5930100003 /* ProTrialPaywallSections.swift */,
 				PH2160100001 /* ProHubSections.swift */,
+				AA100687 /* ProFeatureSceneSheet.swift */,
 				RT5930100002 /* ProTrialAnnouncementView.swift */,
 			);
 			path = Views;
@@ -766,6 +771,7 @@
 				AA100676 /* IntroVideoView.swift */,
 				AA100679 /* AnimatedScenePlayer.swift */,
 				AA10679A /* OnboardingScenePage.swift */,
+				AA100686 /* FeatureSceneCard.swift */,
 				AA10679B /* SmartModesScene.swift */,
 				AA10704A /* FullAccessExplainerPage.swift */,
 				AA106800 /* SceneTapTargets.swift */,
@@ -1322,6 +1328,7 @@
 				AA000676 /* IntroVideoView.swift in Sources */,
 				AA000679 /* AnimatedScenePlayer.swift in Sources */,
 				AA00679A /* OnboardingScenePage.swift in Sources */,
+				AA000686 /* FeatureSceneCard.swift in Sources */,
 				AA00679B /* SmartModesScene.swift in Sources */,
 				AA00704A /* FullAccessExplainerPage.swift in Sources */,
 				AA006800 /* SceneTapTargets.swift in Sources */,
@@ -1368,6 +1375,7 @@
 				RT5930000004 /* ProTrialDebugSection.swift in Sources */,
 				RT5930000003 /* ProTrialPaywallSections.swift in Sources */,
 				PH2160000001 /* ProHubSections.swift in Sources */,
+				AA000687 /* ProFeatureSceneSheet.swift in Sources */,
 				RT5930000002 /* ProTrialAnnouncementView.swift in Sources */,
 				RT5930000001 /* ProTrialCoordinator.swift in Sources */,
 				SS000002 /* PaywallView.swift in Sources */,

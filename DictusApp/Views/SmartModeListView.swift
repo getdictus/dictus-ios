@@ -68,6 +68,9 @@ struct SmartModeListView: View {
             // Dictus Pro hub's Smart Mode row, which carries no switch of its own.
             ProFeatureSwitchSection(feature: .smartMode)
 
+            // What the feature does, and its demo (#686).
+            ProFeatureHowItWorksSection(feature: .smartMode, isAvailable: isAvailable)
+
             if !deviceIsCapable {
                 Section {
                     unsupportedNotice
