@@ -3063,6 +3063,17 @@
         }
       }
     },
+    "New in Dictus" : {
+      "comment" : "What's new for existing users: small label above the title of its first page, the Smart Modes scene (#685).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau dans Dictus"
+          }
+        }
+      }
+    },
     "New term" : {
       "comment" : "Title of the sheet that creates a vocabulary entry.",
       "localizations" : {
