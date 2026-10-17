@@ -30,8 +30,8 @@ struct HistoryScenePage: View {
 /// The history scene in its drawn iPhone: the onboarding page's card and the
 /// history screen's "See the demo" sheet (#686).
 struct HistorySceneCard: View {
-    /// The title of the onboarding step, also the title of the feature screen's "See how
-    /// it works" sheet (#686): one string for both.
+    /// The title of the onboarding step, also the title of the feature screen's "See the
+    /// demo" sheet (#686): one string for both.
     static var title: Text {
         Text("Everything is easy to find",
              comment: "Onboarding history scene: title (#680).")

@@ -30,8 +30,8 @@ struct VocabularyScenePage: View {
 /// The vocabulary scene in its drawn iPhone: the onboarding page's card and the
 /// vocabulary screen's "See the demo" sheet (#686).
 struct VocabularySceneCard: View {
-    /// The title of the onboarding step, also the title of the feature screen's "See how
-    /// it works" sheet (#686): one string for both.
+    /// The title of the onboarding step, also the title of the feature screen's "See the
+    /// demo" sheet (#686): one string for both.
     static var title: Text {
         Text("Your words, spelled right",
              comment: "Onboarding vocabulary scene: title (#680).")
