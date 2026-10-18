@@ -1823,7 +1823,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucune suggestion pour l'instant. Un mot apparaît ici quand Dictus écrit autrement un mot que vous avez tapé au clavier, ou quand un mot inconnu revient dans au moins deux dictées."
+            "value" : "Aucune suggestion pour l’instant. Un mot apparaît ici quand Dictus écrit autrement un mot que vous avez tapé au clavier, ou quand un mot inconnu revient dans au moins deux dictées."
           }
         }
       }
@@ -1966,7 +1966,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suggestions depuis l'historique"
+            "value" : "Suggestions depuis l’historique"
           }
         }
       }
