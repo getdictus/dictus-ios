@@ -31,7 +31,7 @@ Take the first line that is not struck through. Status (who is on what): [Projec
 13. ~~#533 — countdown under the model preparation (compile / load), not a second bar~~ — merged in PR #687
 14. ~~#708 — rebuild the model preparation screen (ring with logo, two-step card, no layout jumps)~~ — merged in PR #716 (2026-10-12)
 15. ~~#723 — add a word to Personal Vocabulary from a history entry~~ — merged in PR #730 (2026-10-13); discoverability tip #738 parked in 2.1, depends on #512
-16. #512 — suggest vocabulary from history: time-boxed trial, go/no-go on the issue
+16. #512 — suggest vocabulary from history: step 1 (keyboard-learned × History) GO, merged in PR #742 (2026-10-18); next step 2, Apple FM judge trial
 17. #724 — paywall: yearly + lifetime visible, monthly behind a link and in the end-of-trial dismiss sheet, no-commitment line
 18. #726 — end-of-trial recap: words dictated + time saved, dictation counter for every user
 19. ~~#727 — README: free dictation + optional Pro, no free-forever promise~~ — merged in PR #729 (2026-10-13), ahead of #279: promote to main only with #279
