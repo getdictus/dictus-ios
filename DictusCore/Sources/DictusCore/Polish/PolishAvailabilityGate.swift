@@ -83,7 +83,7 @@ public struct PolishAvailabilityGate: Sendable, Equatable {
 
         case .cancelled, .exceededContextBudget, .engineUnavailable,
              .unsupportedInputLanguage, .smartModeSkippedShortInput,
-             .skipped, .skippedShort, .skippedAutoMode:
+             .skipped, .skippedShort, .skippedAutoMode, .skippedToggleOff:
             // No evidence either way: the engine was never reached, or the call
             // was cut short before it could answer. Leaving the run untouched is
             // what lets a flash dictation in the middle of a refusal run avoid
