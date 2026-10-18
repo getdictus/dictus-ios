@@ -143,6 +143,31 @@ final class PolishToggleOffJournalTests: XCTestCase {
 
     // MARK: - Counts over polish runs
 
+    /// The export's aggregates: a toggle-off event counts under its own key and in
+    /// nothing else, so every count a refusal rate is computed from is the same with
+    /// or without them.
+    func testTheTallyCountsToggleOffEventsUnderTheirOwnKeyOnly() {
+        let runs = [
+            Self.event(.success),
+            Self.event(.engineFailed, reason: .rateLimited),
+            Self.event(.rejectedGuardrail, check: .length)
+        ]
+        let toggleOff = Array(repeating: Self.event(.skippedToggleOff), count: 29)
+
+        let withoutOff = PolishEventTally(entries: runs)
+        let withOff = PolishEventTally(entries: runs + toggleOff)
+
+        XCTAssertEqual(withOff.outcomes["skippedToggleOff"], 29)
+        XCTAssertEqual(withoutOff.outcomes["skippedToggleOff"], 0, "seeded, so a zero reads as 'did not happen'")
+        var expected = withoutOff.outcomes
+        expected["skippedToggleOff"] = 29
+        XCTAssertEqual(withOff.outcomes, expected, "no other outcome moves")
+        XCTAssertEqual(withOff.failureReasons, withoutOff.failureReasons)
+        XCTAssertEqual(withOff.failureReasonsByWriter, withoutOff.failureReasonsByWriter)
+        XCTAssertEqual(withOff.guardrailChecks, withoutOff.guardrailChecks)
+        XCTAssertEqual(withOff.smartModesSkippedForLength, withoutOff.smartModesSkippedForLength)
+    }
+
     /// The one rate computed in code, the #315 refusal run, is not touched either: a
     /// toggle-off dictation between two refusals neither counts nor resets.
     func testAToggleOffEventLeavesTheRefusalRunAlone() {
