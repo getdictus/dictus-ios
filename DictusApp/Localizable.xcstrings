@@ -167,13 +167,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Plus que %lld jour d'essai gratuit"
+                  "value" : "Plus que %lld jour d’essai gratuit"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "Plus que %lld jours d'essai gratuit"
+                  "value" : "Plus que %lld jours d’essai gratuit"
                 }
               }
             }
@@ -353,7 +353,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un fichier du modèle n'a pas pu être téléchargé (erreur %lld)."
+            "value" : "Un fichier du modèle n’a pas pu être téléchargé (erreur %lld)."
           }
         }
       }
@@ -565,7 +565,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple affiche ce message pour tous les claviers qui demandent l'accès complet. C'est tout ou rien : iOS ne propose pas d'accès partiel."
+            "value" : "Apple affiche ce message pour tous les claviers qui demandent l’accès complet. C’est tout ou rien : iOS ne propose pas d’accès partiel."
           }
         }
       }
@@ -587,7 +587,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "À l'étape 3, Apple affichera une alerte, la même pour tous les claviers."
+            "value" : "À l’étape 3, Apple affichera une alerte, la même pour tous les claviers."
           }
         }
       }
@@ -739,7 +739,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Autoriser l'accès complet"
+            "value" : "Autoriser l’accès complet"
           }
         }
       }
@@ -822,7 +822,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La détection automatique vous permet de dicter dans toutes les langues prises en charge par Whisper. L'amélioration du texte s'adapte à la langue parlée."
+            "value" : "La détection automatique vous permet de dicter dans toutes les langues prises en charge par Whisper. L’amélioration du texte s’adapte à la langue parlée."
           }
         }
       }
@@ -907,7 +907,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Entre deux dictées, Dictus reste prêt. Pour l'arrêter, touchez le bouton d'arrêt sur l'écran verrouillé."
+            "value" : "Entre deux dictées, Dictus reste prêt. Pour l’arrêter, touchez le bouton d’arrêt sur l’écran verrouillé."
           }
         }
       }
@@ -918,7 +918,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Entre deux dictées, Dictus reste prêt : c'est le point orange. Pour l'arrêter, appuyez longuement sur l'île."
+            "value" : "Entre deux dictées, Dictus reste prêt : c’est le point orange. Pour l’arrêter, appuyez longuement sur l’île."
           }
         }
       }
@@ -930,7 +930,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Construction du graphe d'inférence…"
+            "value" : "Construction du graphe d’inférence…"
           }
         }
       }
@@ -1018,7 +1018,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vérifier l'accès complet dans les Réglages"
+            "value" : "Vérifier l’accès complet dans les Réglages"
           }
         }
       }
@@ -1336,7 +1336,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La dictée n'a pas pu démarrer. Touchez à nouveau le micro."
+            "value" : "La dictée n’a pas pu démarrer. Touchez à nouveau le micro."
           }
         }
       }
@@ -1369,7 +1369,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le code de Dictus est open source : n'importe qui peut le lire sur GitHub."
+            "value" : "Le code de Dictus est open source : n’importe qui peut le lire sur GitHub."
           }
         }
       }
@@ -1391,7 +1391,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus vous attend dans le clavier de chaque app. Pour dicter, ouvrez l'app Dictus."
+            "value" : "Dictus vous attend dans le clavier de chaque app. Pour dicter, ouvrez l’app Dictus."
           }
         }
       }
@@ -1402,7 +1402,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus peut se relancer tout seul, c'est normal."
+            "value" : "Dictus peut se relancer tout seul, c’est normal."
           }
         }
       }
@@ -1455,7 +1455,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus n'a pas encore de clavier dans cette langue. Choisissez la langue dans laquelle vous écrivez."
+            "value" : "Dictus n’a pas encore de clavier dans cette langue. Choisissez la langue dans laquelle vous écrivez."
           }
         }
       }
@@ -1465,7 +1465,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus est configuré et prêt à l'emploi"
+            "value" : "Dictus est configuré et prêt à l’emploi"
           }
         }
       }
@@ -1486,7 +1486,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus peut se relancer automatiquement — c'est normal"
+            "value" : "Dictus peut se relancer automatiquement — c’est normal"
           }
         }
       }
@@ -1497,7 +1497,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus a besoin d'accéder au micro. Activez-le dans les Réglages de l'iPhone."
+            "value" : "Dictus a besoin d’accéder au micro. Activez-le dans les Réglages de l’iPhone."
           }
         }
       }
@@ -1562,7 +1562,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dictus s'en sert pour joindre l'app Dictus."
+            "value" : "Dictus s’en sert pour joindre l’app Dictus."
           }
         }
       }
@@ -1684,7 +1684,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gardez le doigt sur le micro, glissez jusqu'au mode, relâchez. Dictus écrit dans ce mode."
+            "value" : "Gardez le doigt sur le micro, glissez jusqu’au mode, relâchez. Dictus écrit dans ce mode."
           }
         }
       }
@@ -1695,7 +1695,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "J'arrive dans dix minutes."
+            "value" : "J’arrive dans dix minutes."
           }
         }
       }
@@ -1812,7 +1812,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pas de position, pas de contacts, et vos dictées ne quittent pas votre iPhone : la transcription se fait sur l'appareil."
+            "value" : "Pas de position, pas de contacts, et vos dictées ne quittent pas votre iPhone : la transcription se fait sur l’appareil."
           }
         }
       }
@@ -1823,7 +1823,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucune suggestion pour l'instant. Un mot apparaît ici quand Dictus écrit autrement un mot que vous avez tapé au clavier, ou quand un mot inconnu revient dans au moins deux dictées."
+            "value" : "Aucune suggestion pour l’instant. Un mot apparaît ici quand Dictus écrit autrement un mot que vous avez tapé au clavier, ou quand un mot inconnu revient dans au moins deux dictées."
           }
         }
       }
@@ -1966,7 +1966,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Suggestions depuis l'historique"
+            "value" : "Suggestions depuis l’historique"
           }
         }
       }
@@ -1977,7 +1977,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "C'est elle qui écoute et transcrit. Sans accès complet, le clavier tape mais ne peut pas dicter."
+            "value" : "C’est elle qui écoute et transcrit. Sans accès complet, le clavier tape mais ne peut pas dicter."
           }
         }
       }
@@ -1988,7 +1988,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le reste, Dictus ne s'en sert pas."
+            "value" : "Le reste, Dictus ne s’en sert pas."
           }
         }
       }
@@ -2054,7 +2054,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pourquoi l'accès complet ?"
+            "value" : "Pourquoi l’accès complet ?"
           }
         }
       }
@@ -2098,7 +2098,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vous venez de les voir : choisissez-en trois. Ils vous attendront d'un appui long sur le micro."
+            "value" : "Vous venez de les voir : choisissez-en trois. Ils vous attendront d’un appui long sur le micro."
           }
         }
       }
@@ -2367,7 +2367,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tout Dictus Pro est débloqué gratuitement, dès aujourd'hui."
+            "value" : "Tout Dictus Pro est débloqué gratuitement, dès aujourd’hui."
           }
         }
       }
@@ -2483,7 +2483,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Offre fondateur jusqu'au %@."
+            "value" : "Offre fondateur jusqu’au %@."
           }
         }
       }
@@ -2557,7 +2557,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allez dans l'onglet Modèles pour télécharger votre premier modèle de transcription."
+            "value" : "Allez dans l’onglet Modèles pour télécharger votre premier modèle de transcription."
           }
         }
       }
@@ -2590,7 +2590,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "J'ai compris"
+            "value" : "J’ai compris"
           }
         }
       }
@@ -2622,7 +2622,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'historique est désactivé : les nouvelles dictées ne sont plus enregistrées. Celles déjà enregistrées sont conservées."
+            "value" : "L’historique est désactivé : les nouvelles dictées ne sont plus enregistrées. Celles déjà enregistrées sont conservées."
           }
         }
       }
@@ -2753,7 +2753,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dans Réglages, ouvrez Claviers, puis activez Dictus et l'accès complet."
+            "value" : "Dans Réglages, ouvrez Claviers, puis activez Dictus et l’accès complet."
           }
         }
       }
@@ -2808,7 +2808,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elle termine sa mise en route en arrière-plan. Les Smart Modes fonctionneront dès qu'elle sera prête. Vous pouvez continuer."
+            "value" : "Elle termine sa mise en route en arrière-plan. Les Smart Modes fonctionneront dès qu’elle sera prête. Vous pouvez continuer."
           }
         }
       }
@@ -2957,7 +2957,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Moins d'une minute restante"
+            "value" : "Moins d’une minute restante"
           }
         }
       }
@@ -3101,7 +3101,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gérer l'abonnement"
+            "value" : "Gérer l’abonnement"
           }
         }
       }
@@ -3516,7 +3516,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "« Ouvrir les Réglages » arrive sur la page de Dictus : revenez d'abord à l'accueil de Réglages. Raccourci : cherchez « Apple Intelligence » dans Réglages."
+            "value" : "« Ouvrir les Réglages » arrive sur la page de Dictus : revenez d’abord à l’accueil de Réglages. Raccourci : cherchez « Apple Intelligence » dans Réglages."
           }
         }
       }
@@ -3527,7 +3527,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'optimisation n'a pas fini en %lld s. Elle continue, réessayez dans un instant."
+            "value" : "L’optimisation n’a pas fini en %lld s. Elle continue, réessayez dans un instant."
           }
         }
       }
@@ -3627,7 +3627,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Parakeet détecte automatiquement la langue parlée. Ce réglage s'applique uniquement aux modèles Whisper."
+            "value" : "Parakeet détecte automatiquement la langue parlée. Ce réglage s’applique uniquement aux modèles Whisper."
           }
         }
       }
@@ -3661,7 +3661,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restez sur cette page, ne quittez pas l'application."
+            "value" : "Restez sur cette page, ne quittez pas l’application."
           }
         }
       }
@@ -3808,7 +3808,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erreur d'achat"
+            "value" : "Erreur d’achat"
           }
         }
       }
@@ -4317,7 +4317,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les Smart Modes s'appuient sur Apple Intelligence, qui ne s'active que si Siri parle la langue de votre iPhone. La dictée marche déjà sans elle."
+            "value" : "Les Smart Modes s’appuient sur Apple Intelligence, qui ne s’active que si Siri parle la langue de votre iPhone. La dictée marche déjà sans elle."
           }
         }
       }
@@ -4347,7 +4347,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les sons respectent le bouton silencieux de l'iPhone."
+            "value" : "Les sons respectent le bouton silencieux de l’iPhone."
           }
         }
       }
@@ -4426,7 +4426,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arrêter l'enregistrement"
+            "value" : "Arrêter l’enregistrement"
           }
         }
       }
@@ -4459,7 +4459,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "S'abonner pour %@"
+            "value" : "S’abonner pour %@"
           }
         }
       }
@@ -4679,7 +4679,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Conditions d'utilisation"
+            "value" : "Conditions d’utilisation"
           }
         }
       }
@@ -4743,7 +4743,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le téléchargement continue si vous quittez l'app."
+            "value" : "Le téléchargement continue si vous quittez l’app."
           }
         }
       }
@@ -4754,7 +4754,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le téléchargement s'est interrompu. Vérifiez votre connexion Internet et réessayez."
+            "value" : "Le téléchargement s’est interrompu. Vérifiez votre connexion Internet et réessayez."
           }
         }
       }
@@ -4765,7 +4765,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le téléchargement n'a pas pu reprendre. Réessayez."
+            "value" : "Le téléchargement n’a pas pu reprendre. Réessayez."
           }
         }
       }
@@ -4776,7 +4776,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'essentiel en quelques phrases."
+            "value" : "L’essentiel en quelques phrases."
           }
         }
       }
@@ -4796,7 +4796,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'achat à vie couvre toutes les fonctionnalités Pro, actuelles et futures, qui s'exécutent sur votre appareil ou sur un serveur que vous fournissez. Toute fonctionnalité reposant sur l'infrastructure Dictus relève d'une offre distincte."
+            "value" : "L’achat à vie couvre toutes les fonctionnalités Pro, actuelles et futures, qui s’exécutent sur votre appareil ou sur un serveur que vous fournissez. Toute fonctionnalité reposant sur l’infrastructure Dictus relève d’une offre distincte."
           }
         }
       }
@@ -4807,7 +4807,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le micro est occupé par un appel. Réessayez une fois l'appel terminé."
+            "value" : "Le micro est occupé par un appel. Réessayez une fois l’appel terminé."
           }
         }
       }
@@ -4818,7 +4818,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le micro n'est pas disponible pour le moment. Réessayez dans un instant."
+            "value" : "Le micro n’est pas disponible pour le moment. Réessayez dans un instant."
           }
         }
       }
@@ -4840,7 +4840,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le modèle (%@) se télécharge maintenant. Il continue si vous quittez l'app, mais iOS le ralentit fortement. Pour qu'il soit prêt plus vite, restez dans Dictus, sauf pour activer le clavier dans Réglages."
+            "value" : "Le modèle (%@) se télécharge maintenant. Il continue si vous quittez l’app, mais iOS le ralentit fortement. Pour qu’il soit prêt plus vite, restez dans Dictus, sauf pour activer le clavier dans Réglages."
           }
         }
       }
@@ -4862,7 +4862,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le modèle se télécharge maintenant. Il continue si vous quittez l'app, mais iOS le ralentit fortement. Pour qu'il soit prêt plus vite, restez dans Dictus, sauf pour activer le clavier dans Réglages."
+            "value" : "Le modèle se télécharge maintenant. Il continue si vous quittez l’app, mais iOS le ralentit fortement. Pour qu’il soit prêt plus vite, restez dans Dictus, sauf pour activer le clavier dans Réglages."
           }
         }
       }
@@ -4905,7 +4905,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La rangée de chiffres s'affiche uniquement sur iPhone, en mode portrait."
+            "value" : "La rangée de chiffres s’affiche uniquement sur iPhone, en mode portrait."
           }
         }
       }
@@ -4951,7 +4951,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le moteur de transcription n'est pas prêt. Ouvrez Dictus et réessayez."
+            "value" : "Le moteur de transcription n’est pas prêt. Ouvrez Dictus et réessayez."
           }
         }
       }
@@ -4985,7 +4985,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le modèle de transcription n'a pas pu être chargé. Ouvrez Dictus et réessayez."
+            "value" : "Le modèle de transcription n’a pas pu être chargé. Ouvrez Dictus et réessayez."
           }
         }
       }
@@ -4996,7 +4996,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le modèle vocal n'a pas pu être préparé."
+            "value" : "Le modèle vocal n’a pas pu être préparé."
           }
         }
       }
@@ -5031,7 +5031,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce modèle n'est pas installé. Ouvrez Dictus et téléchargez-le dans l'onglet Modèles."
+            "value" : "Ce modèle n’est pas installé. Ouvrez Dictus et téléchargez-le dans l’onglet Modèles."
           }
         }
       }
@@ -5042,7 +5042,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce modèle nécessite une version plus récente d'iOS. Ouvrez Dictus et choisissez un autre modèle."
+            "value" : "Ce modèle nécessite une version plus récente d’iOS. Ouvrez Dictus et choisissez un autre modèle."
           }
         }
       }
@@ -5099,7 +5099,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour vous entendre pendant la dictée. Le son est transcrit sur votre iPhone et n'en sort jamais."
+            "value" : "Pour vous entendre pendant la dictée. Le son est transcrit sur votre iPhone et n’en sort jamais."
           }
         }
       }
@@ -5110,7 +5110,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour garder ensuite les modes intelligents, l'historique et le vocabulaire, il faudra un abonnement Dictus Pro."
+            "value" : "Pour garder ensuite les modes intelligents, l’historique et le vocabulaire, il faudra un abonnement Dictus Pro."
           }
         }
       }
@@ -5121,7 +5121,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour passer à vie, résiliez d'abord votre abonnement dans Gérer l'abonnement."
+            "value" : "Pour passer à vie, résiliez d’abord votre abonnement dans Gérer l’abonnement."
           }
         }
       }
@@ -5264,7 +5264,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajustement des têtes d'attention…"
+            "value" : "Ajustement des têtes d’attention…"
           }
         }
       }
@@ -5302,7 +5302,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activez Apple Intelligence dans les Réglages de l'iPhone pour utiliser les modes intelligents."
+            "value" : "Activez Apple Intelligence dans les Réglages de l’iPhone pour utiliser les modes intelligents."
           }
         }
       }
@@ -5324,7 +5324,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Activez l'accès complet, puis Autoriser"
+            "value" : "Activez l’accès complet, puis Autoriser"
           }
         }
       }
@@ -5414,7 +5414,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le vocabulaire est désactivé. Vos termes sont conservés et ne remplacent plus rien jusqu'à ce que vous le réactiviez."
+            "value" : "Le vocabulaire est désactivé. Vos termes sont conservés et ne remplacent plus rien jusqu’à ce que vous le réactiviez."
           }
         }
       }
@@ -5523,7 +5523,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les messages vocaux sont désactivés : un message vocal partagé vers Dictus n'est pas transcrit. Vos réglages sont conservés."
+            "value" : "Les messages vocaux sont désactivés : un message vocal partagé vers Dictus n’est pas transcrit. Vos réglages sont conservés."
           }
         }
       }
@@ -5742,7 +5742,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "C'est prêt"
+            "value" : "C’est prêt"
           }
         }
       }
@@ -5752,7 +5752,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "C'est prêt !"
+            "value" : "C’est prêt !"
           }
         }
       }
@@ -5903,7 +5903,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre abonnement est toujours facturé. Pour l'arrêter, résiliez-le dans Gérer l'abonnement. Votre achat à vie reste acquis."
+            "value" : "Votre abonnement est toujours facturé. Pour l’arrêter, résiliez-le dans Gérer l’abonnement. Votre achat à vie reste acquis."
           }
         }
       }
@@ -5947,7 +5947,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Votre modèle vocal est encore en préparation. Cela n'arrive qu'une fois."
+            "value" : "Votre modèle vocal est encore en préparation. Cela n’arrive qu’une fois."
           }
         }
       }
