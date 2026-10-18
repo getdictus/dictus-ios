@@ -646,7 +646,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le micro est occupé par un appel. Réessayez une fois l'appel terminé."
+            "value" : "Le micro est occupé par un appel. Réessayez une fois l’appel terminé."
           }
         }
       }
@@ -689,7 +689,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Annuler l'insertion de la dictée"
+            "value" : "Annuler l’insertion de la dictée"
           }
         }
       }
