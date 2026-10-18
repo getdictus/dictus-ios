@@ -169,9 +169,9 @@ struct HistoryView: View {
         }
     }
 
-    /// The Dictus Pro hub's version (#216): the feature's switch first, as in the
-    /// hub's other feature screens, then the records, dimmed and locked while it is
-    /// off.
+    /// The Dictus Pro hub's version (#216): the feature's switch first, as in the hub's
+    /// other feature screens, then "How it works" and its demo (#686), then the records,
+    /// dimmed and locked while it is off.
     ///
     /// WHY the home screen's sheet has no switch: that sheet only opens while History
     /// is on (`HistoryAvailability.entryPoint`), it is the place for reading, and a
@@ -185,6 +185,9 @@ struct HistoryView: View {
     private var pushedList: some View {
         List {
             ProFeatureSwitchSection(feature: .history)
+
+            // What the feature does, and its demo (#686).
+            ProFeatureHowItWorksSection(feature: .history, isAvailable: isAvailable)
 
             if history.records.isEmpty {
                 emptyState

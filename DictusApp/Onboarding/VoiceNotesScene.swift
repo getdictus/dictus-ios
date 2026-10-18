@@ -16,16 +16,38 @@ struct VoiceNotesScenePage: View {
         OnboardingScenePage(
             eyebrow: Text("Also in Pro",
                           comment: "Onboarding: small label above the title of the voice notes, vocabulary and history scenes, which come after the Smart Modes and show the other Dictus Pro features (#680)."),
-            title: Text("Your voice notes, transcribed",
-                        comment: "Onboarding voice notes scene: title (#680)."),
-            line: Text("Share a voice note to Dictus from any app. The text is waiting for you in the keyboard.",
-                       comment: "Onboarding voice notes scene: the line under the title (#680)."),
-            phoneEnd: .bottom,
-            loopSeconds: VoiceNotesSceneScript.loopSeconds,
-            stillSeconds: VoiceNotesSceneScript.stillSeconds,
+            title: VoiceNotesSceneCard.title,
+            line: VoiceNotesSceneCard.line,
             modelManager: modelManager,
             modelIdentifier: modelIdentifier,
             onNext: onNext
+        ) {
+            VoiceNotesSceneCard()
+        }
+    }
+}
+
+/// The voice notes scene in its drawn iPhone, with its chapter header above the phone: the
+/// onboarding page's card and the voice notes screen's "See the demo" sheet (#686).
+struct VoiceNotesSceneCard: View {
+    /// The title of the onboarding step, also the title of the feature screen's "See the
+    /// demo" sheet (#686): one string for both.
+    static var title: Text {
+        Text("Your voice notes, transcribed",
+             comment: "Onboarding voice notes scene: title (#680).")
+    }
+
+    /// The line under the title, shared the same way.
+    static var line: Text {
+        Text("Share a voice note to Dictus from any app. The text is waiting for you in the keyboard.",
+             comment: "Onboarding voice notes scene: the line under the title (#680).")
+    }
+
+    var body: some View {
+        FeatureSceneCard(
+            phoneEnd: .bottom,
+            loopSeconds: VoiceNotesSceneScript.loopSeconds,
+            stillSeconds: VoiceNotesSceneScript.stillSeconds
         ) { time in
             VoiceNotesChapterHeader(chapter: VoiceNotesSceneScript.frame(at: time).chapter)
         } scene: { time in
