@@ -147,7 +147,23 @@ struct MonthlyPlanOfferSheet: View {
     let buy: () -> Void
     let decline: () -> Void
 
+    /// The content's own height, which the sheet takes as its only detent.
+    ///
+    /// WHY not `.medium`: a detent taller than the content leaves the rest of the
+    /// sheet to iOS 26's translucent material, which showed the paywall blurred above
+    /// and below the offer (device test of #724). Sized to its content, the sheet has
+    /// no empty band to fill.
+    @State private var contentHeight: CGFloat = 360
+
     var body: some View {
+        content
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+            .presentationDetents([.height(contentHeight)])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Color.dictusBackground)
+    }
+
+    private var content: some View {
         VStack(spacing: 16) {
             VStack(spacing: 8) {
                 Text("Not ready for a year?")
@@ -210,8 +226,8 @@ struct MonthlyPlanOfferSheet: View {
             .foregroundColor(.secondary)
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.top, 28)
+        .padding(.bottom, 12)
         .frame(maxWidth: .infinity)
-        .background(Color.dictusBackground.ignoresSafeArea())
     }
 }

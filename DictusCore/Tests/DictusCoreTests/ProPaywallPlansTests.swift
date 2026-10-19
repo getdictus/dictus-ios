@@ -43,20 +43,25 @@ final class ProPaywallPlansTests: XCTestCase {
 
     func testClosingTheEndOfTrialPaywallOffersMonthlyOnce() {
         XCTAssertTrue(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: true, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
+            isEndOfTrialPaywall: true, sawPlans: true, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
         XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: true, isPaid: false, monthlyLoaded: true, alreadyOffered: true), "once")
+            isEndOfTrialPaywall: true, sawPlans: true, isPaid: false, monthlyLoaded: true, alreadyOffered: true), "once")
+    }
+
+    func testNoOfferWhenLeavingFromTheRecap() {
+        XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
+            isEndOfTrialPaywall: true, sawPlans: false, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
     }
 
     func testNoOfferFromAnyOtherEntryPoint() {
         XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: false, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
+            isEndOfTrialPaywall: false, sawPlans: true, isPaid: false, monthlyLoaded: true, alreadyOffered: false))
     }
 
     func testNoOfferToABuyerOrWithoutAMonthlyPrice() {
         XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: true, isPaid: true, monthlyLoaded: true, alreadyOffered: false), "bought")
+            isEndOfTrialPaywall: true, sawPlans: true, isPaid: true, monthlyLoaded: true, alreadyOffered: false), "bought")
         XCTAssertFalse(ProPaywallPlans.offersMonthlyOnClose(
-            isEndOfTrialPaywall: true, isPaid: false, monthlyLoaded: false, alreadyOffered: false), "no price")
+            isEndOfTrialPaywall: true, sawPlans: true, isPaid: false, monthlyLoaded: false, alreadyOffered: false), "no price")
     }
 }

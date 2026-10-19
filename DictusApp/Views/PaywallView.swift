@@ -862,12 +862,14 @@ struct PaywallView: View {
     // MARK: - Monthly offer on close (#724)
 
     /// Every way out of the paywall the user can take: the cross and "Continue for
-    /// free". On the end-of-trial paywall, the first one shows the monthly offer
-    /// instead of closing (`ProPaywallPlans.offersMonthlyOnClose`); everywhere else,
-    /// and the second time, it closes.
+    /// free". On the end-of-trial paywall, once the user has seen the plans, the first
+    /// one shows the monthly offer instead of closing
+    /// (`ProPaywallPlans.offersMonthlyOnClose`); from the recap, everywhere else, and
+    /// the second time, it closes.
     private func close() {
         guard ProPaywallPlans.offersMonthlyOnClose(
             isEndOfTrialPaywall: framing == .trialEnded,
+            sawPlans: showsOffers,
             isPaid: proStatus.isPaid,
             monthlyLoaded: subscriptionManager.monthlyProduct != nil,
             alreadyOffered: monthlyOfferMade
@@ -890,7 +892,6 @@ struct PaywallView: View {
                 buy: { Task { await subscriptionManager.purchase(monthly) } },
                 decline: { showsMonthlyOffer = false }
             )
-            .presentationDetents([.medium, .large])
             // A swipe mid-purchase would close the paywall under a payment still in
             // flight, and its thank-you screen with it.
             .interactiveDismissDisabled(subscriptionManager.purchaseState == .purchasing)

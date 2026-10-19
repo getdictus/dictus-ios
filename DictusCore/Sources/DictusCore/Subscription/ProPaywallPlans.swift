@@ -48,16 +48,23 @@ public enum ProPaywallPlans {
     /// shown once (`ProTrialPolicy.endOfTrialPaywallDue`), and `alreadyOffered` makes
     /// the offer once within it, so a user meets it at most once, ever.
     ///
+    /// WHY only once the plans were seen: the end-of-trial paywall opens on a recap
+    /// that names no price. A user who leaves from there has declined nothing yet, and
+    /// "not ready for a year?" would answer a yearly price they never saw (device test
+    /// of #724).
+    ///
     /// - Parameters:
     ///   - isEndOfTrialPaywall: the paywall the app opened when the trial ended.
+    ///   - sawPlans: the user moved past the recap to the plans and their prices.
     ///   - isPaid: a user who bought, or restored, has nothing left to be offered.
     ///   - monthlyLoaded: the offer names a StoreKit price, never a written one, so
     ///     with no monthly product there is nothing to offer.
     ///   - alreadyOffered: the offer was shown during this presentation.
     public static func offersMonthlyOnClose(isEndOfTrialPaywall: Bool,
+                                            sawPlans: Bool,
                                             isPaid: Bool,
                                             monthlyLoaded: Bool,
                                             alreadyOffered: Bool) -> Bool {
-        isEndOfTrialPaywall && !isPaid && monthlyLoaded && !alreadyOffered
+        isEndOfTrialPaywall && sawPlans && !isPaid && monthlyLoaded && !alreadyOffered
     }
 }
