@@ -32,7 +32,7 @@ public struct PolishEventTally: Equatable, Sendable {
     public static let seededOutcomes: [PolishMetrics.Outcome] = [
         .success, .rejectedGuardrail, .skipped, .skippedShort, .skippedAutoMode,
         .cancelled, .engineFailed, .engineUnavailable, .exceededContextBudget,
-        .smartModeSkippedShortInput, .skippedToggleOff
+        .unsupportedInputLanguage, .smartModeSkippedShortInput, .skippedToggleOff
     ]
 
     public init(entries: [PolishDebugEntry]) {
