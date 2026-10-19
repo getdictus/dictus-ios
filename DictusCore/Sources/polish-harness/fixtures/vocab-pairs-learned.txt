@@ -1,0 +1,2 @@
+# Synthetic keyboard-learned words (#288), one per line.
+hermes
