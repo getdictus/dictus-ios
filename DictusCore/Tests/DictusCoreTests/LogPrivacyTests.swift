@@ -100,6 +100,14 @@ final class LogPrivacyTests: XCTestCase {
                 chunk: 0,
                 caller: "silentTaskWatchdog"
             ),
+            // Orphaned chunks (#732): indices and a length reason. No bytes, no URL.
+            .modelDownloadOrphanedChunks(
+                name: "parakeet-tdt-0.6b-v3",
+                path: "Encoder.mlmodelc/weights/weight.bin",
+                file: 7,
+                absorbed: [0, 1],
+                discarded: ["2:chunk-length-100-expected-33554432"]
+            ),
             .modelSelected(name: "base"),
             .modelCompilationStarted(name: "base"),
             .modelCompilationCompleted(name: "base", durationMs: 5000),

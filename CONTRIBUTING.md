@@ -49,10 +49,11 @@ swift test
 
 ## Continuous Integration
 
-Every pull request runs through GitHub Actions. Two checks must pass before a PR can be merged:
+Every pull request runs through GitHub Actions. Three checks run, each reported separately, and all three must pass before a PR can be merged:
 
 - **SwiftLint** -- enforces style rules defined in `.swiftlint.yml`. Runs on Linux, completes in under a minute.
-- **Build** -- compiles the `DictusApp` scheme (which embeds `DictusKeyboard`, `DictusWidgets`, and depends on `DictusCore`) for iOS Simulator. Runs on macOS, takes 5-10 minutes.
+- **Build (iOS Simulator)** -- compiles the `DictusApp` scheme (which embeds `DictusKeyboard`, `DictusWidgets`, and depends on `DictusCore`) for iOS Simulator. Runs on macOS, takes 5-10 minutes.
+- **DictusCore Tests** -- runs the command above, `cd DictusCore && swift test`, on the pull request's head commit. Runs on macOS with the same Xcode as the build, no simulator.
 
 To check locally before pushing:
 
@@ -72,7 +73,7 @@ file. If you need a force unwrap, keep it and write a
 saying why the value cannot be nil — that is the project convention, not a
 workaround.
 
-The CI does **not** sign builds, run tests, or upload to TestFlight. Its only job is to catch broken compilations and obvious style regressions.
+The CI does **not** sign builds, run the app or the keyboard extension (no simulator, no UI tests), or upload to TestFlight. It catches broken compilations, style regressions and `DictusCore` test failures. A green CI is not a device test: keyboard behaviour still has to be checked on a physical iPhone.
 
 ## Adding an App to Auto-Return
 

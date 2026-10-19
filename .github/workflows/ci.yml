@@ -97,3 +97,99 @@ jobs:
             build/DerivedData/Logs/Build
           retention-days: 7
           if-no-files-found: ignore
+
+  # The DictusCore suite, run with the repository's one canonical test command (#534).
+  # PR descriptions — increasingly written by agents — report `swift test` results;
+  # this job replays that claim instead of trusting it. It is its own job, not a step
+  # of `build`, so a red test is reported as a test failure rather than folded into a
+  # compilation failure, and a green build or lint cannot mask it.
+  test:
+    name: DictusCore Tests
+    # macOS, no simulator: the suite runs on the Mac directly. The iOS Simulator
+    # destination passes too since #301 but executes exactly the same tests while
+    # paying for a simulator boot (CLAUDE.md, "Build, test, lint").
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      # On a pull request, test the PR's head commit itself rather than the
+      # `refs/pull/N/merge` commit checkout defaults to, so the result reported on
+      # that SHA is a result FOR that SHA. Branch protection is strict (the branch
+      # must be up to date with its base before merging), so the merge-ref check
+      # would add nothing the head-SHA check does not already cover at merge time.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Show tested commit
+        run: git rev-parse HEAD
+
+      # Same toolchain as the build job, for the same reasons (see its comment).
+      - name: Select Xcode 26.4.1
+        run: sudo xcode-select -s /Applications/Xcode_26.4.1.app
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      # Polish grounding (#414) finds names with NLTagger's `.nameType` scheme, and
+      # the suite asserts on what it finds in French. That scheme needs a per-language
+      # Natural Language asset that macOS downloads on demand. The runner image is an
+      # en_US install that carries it for English only — measured on macos-26 / 26.6.2:
+      # `availableTagSchemes` for French and German was [Language, Script, TokenType],
+      # and eight French grounding tests failed on an empty name list. A Mac set up in
+      # French has the asset, which is why the same tests pass locally.
+      #
+      # So fetch the asset for every `SupportedLanguage` before testing, and fail HERE,
+      # with a message, if it cannot be had — a missing asset must not read as a
+      # grounding regression in the test step below.
+      - name: Install Natural Language name-tagging assets
+        run: |
+          cat > "$RUNNER_TEMP/nl-assets.swift" <<'SWIFT'
+          import Foundation
+          import NaturalLanguage
+
+          var missing: [String] = []
+          for code in ["fr", "en", "es", "de"] {
+              let language = NLLanguage(rawValue: code)
+              var outcome: String?
+              NLTagger.requestAssets(for: language, tagScheme: .nameType) { result, error in
+                  switch result {
+                  case .available: outcome = "available"
+                  case .notAvailable: outcome = "not available"
+                  case .error: outcome = "error: \(error.map { "\($0)" } ?? "unknown")"
+                  @unknown default: outcome = "unknown result"
+                  }
+              }
+              // Spin the main run loop rather than block on a semaphore. Measured on
+              // this runner: the semaphore version printed nothing for ten minutes
+              // until it was cancelled; this one fetched all four in about 30 s. The
+              // likeliest reason is a completion delivered on the main queue, which
+              // a blocked main thread never runs — inferred, not confirmed.
+              let deadline = Date().addingTimeInterval(120)
+              while outcome == nil && Date() < deadline {
+                  RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+              }
+              let ready = NLTagger.availableTagSchemes(for: .word, language: language).contains(.nameType)
+              print("\(code): requestAssets -> \(outcome ?? "timed out"); nameType available: \(ready)")
+              if !ready { missing.append(code) }
+          }
+          if !missing.isEmpty {
+              print("::error::NLTagger nameType asset missing for \(missing). DictusCore grounding tests would fail for an environment reason, not a code one.")
+              exit(1)
+          }
+          SWIFT
+          swift "$RUNNER_TEMP/nl-assets.swift"
+
+      # No SwiftPM cache here, deliberately. DictusCore/Package.swift declares no
+      # package dependencies, so `swift test` fetches nothing — there is nothing a
+      # dependency cache could save. Caching `.build` instead would trade a minute of
+      # compilation for the risk of testing stale artifacts, which is the one thing
+      # this check exists to rule out.
+      #
+      # #560: on a Mac, `AppGroup.containerURL` is nil for an unentitled process like
+      # the test host, so nothing here touches a Group Container — on the runner or
+      # on a developer machine.
+      - name: Run DictusCore tests (swift test)
+        working-directory: DictusCore
+        run: swift test

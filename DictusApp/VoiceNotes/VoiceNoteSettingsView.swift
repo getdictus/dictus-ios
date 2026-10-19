@@ -10,7 +10,8 @@ import DictusCore
 ///
 /// Pushed from the Dictus Pro hub's Voice notes row (#216), like the other Pro
 /// feature screens: the feature's switch first (`ProFeatureSwitchSection`), then the
-/// defaults, dimmed and locked while the switch is off. Settings' provisional link to
+/// defaults, dimmed and locked while the switch is off. The "How it works" section
+/// (`ProFeatureHowItWorksSection`, #686) ends with "See the demo". Settings' provisional link to
 /// it went away with its Pro Features section.
 struct VoiceNoteSettingsView: View {
 
@@ -58,14 +59,13 @@ struct VoiceNoteSettingsSections: View {
     var isAvailable = true
 
     var body: some View {
-        Section {
-            Text("Long-press a voice message in WhatsApp, Telegram, Signal or Messages, tap Share, then Dictus. Audio files from Voice Memos, Files or Mail work the same way.")
-                .font(.dictusCaption)
-                .foregroundColor(.secondary)
-        } header: {
-            Text("How it works")
-        }
-        .proFeatureContent(isAvailable: isAvailable)
+        // Voice notes keeps its own paragraph: the share steps say more here than the
+        // onboarding's line, which the other three screens reuse (#686).
+        ProFeatureHowItWorksSection(
+            feature: .voiceNotes,
+            explanation: Text("Long-press a voice message in WhatsApp, Telegram, Signal or Messages, tap Share, then Dictus. Audio files from Voice Memos, Files or Mail work the same way."),
+            isAvailable: isAvailable
+        )
 
         Section {
             Picker("Language", selection: $settings.language) {

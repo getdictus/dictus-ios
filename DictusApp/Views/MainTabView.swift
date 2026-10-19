@@ -63,6 +63,15 @@ struct MainTabView: View {
     /// on stops mattering.
     @State private var showsPaywall = false
 
+    /// The steps What's new is playing in place of the tabs (#685), nil when it is not on
+    /// screen. Set once per install, by `presentWhatsNewIfDue`.
+    @State private var whatsNewSteps: [OnboardingStep]?
+
+    /// Whether a URL opened this activation, which defers What's new to the next one
+    /// (`WhatsNew.mayAppear`, #685). Seeded from the launch, set by `.onOpenURL`, cleared
+    /// when the app goes to the background.
+    @State private var activationOpenedByURL: Bool
+
     /// The shared voice notes (#620): what the Live Activity link or the cold path
     /// asked to show.
     @ObservedObject private var voiceNotes = VoiceNoteProcessor.shared
@@ -88,6 +97,35 @@ struct MainTabView: View {
                 )
                 : nil
         )
+        // What's new is decided here too, for the same first frame: an existing user's
+        // first launch of 2.0.0 from the icon opens on it, not on one frame of Home. Two
+        // launches leave it to the activation instead (`presentWhatsNewIfDue`), which runs
+        // after the URL handlers:
+        // - a launch through any URL (a dictation from the keyboard, the voice note link,
+        //   the Pro entry), whose URL is handled after this frame;
+        // - a launch in the background (iOS prewarming the process, measured on the
+        //   simulator): its URL, if any, is not in the scene's connection options but comes
+        //   later through `.onOpenURL`, so this frame cannot know it. Nothing is on screen
+        //   in the background, so waiting costs no frame of Home.
+        let openedByURL = ColdStartLaunch.carriedURL
+        let launchedInForeground = UIApplication.shared.applicationState != .background
+        _activationOpenedByURL = State(initialValue: openedByURL)
+        _whatsNewSteps = State(
+            initialValue: launchedInForeground
+                && WhatsNew.mayAppear(displayIsFree: true, activationOpenedByURL: openedByURL)
+                ? Self.dueWhatsNewSteps()
+                : nil
+        )
+    }
+
+    /// What's new's steps on this device if it is due and has something to show, nil
+    /// otherwise (#685). A device with nothing to show (one that can never run Smart Modes)
+    /// was already recorded at launch (`WhatsNew.recordLaunch`); the empty check only makes
+    /// sure no path can ever put an empty What's new on screen.
+    private static func dueWhatsNewSteps() -> [OnboardingStep]? {
+        guard WhatsNew.isDue() else { return nil }
+        let steps = WhatsNew.steps(deviceCanRunSmartModes: SmartModeAvailability.deviceIsCapable)
+        return steps.isEmpty ? nil : steps
     }
 
     /// The active model as persisted in the App Group, with the shipped default.
@@ -107,8 +145,45 @@ struct MainTabView: View {
     /// display: a cold-start dictation, a model preparation screen, a recording or a
     /// paywall the user opened. The trial is announced openly, but never by
     /// interrupting a dictation.
+    ///
+    /// Not while What's new is up either (#685): the existing-user announcement comes
+    /// after it, when the tabs come back.
     private var mayRaiseTrialScreens: Bool {
+        mayRaiseWhatsNew && whatsNewSteps == nil
+    }
+
+    /// Whether nothing owns the display, so What's new may replace the tabs (#685): the
+    /// trial screens' own conditions. `presentWhatsNewIfDue` adds what sits on top of the
+    /// tabs and would be torn down with them.
+    private var mayRaiseWhatsNew: Bool {
         !isColdStartMode && preparation == nil && coordinator.status == .idle && !showsPaywall
+    }
+
+    /// Shows What's new if it is due and nothing owns the display (#685). Returns whether
+    /// it is on screen, in which case the trial screens wait for it.
+    ///
+    /// WHY ALSO ON ACTIVATION: an existing user's first launch of 2.0.0 is often a dictation
+    /// started from the keyboard, which What's new must not interrupt. It then waits for the
+    /// next time the app comes to the front on its own.
+    @discardableResult
+    private func presentWhatsNewIfDue() -> Bool {
+        if whatsNewSteps != nil { return true }
+        let displayIsFree = mayRaiseWhatsNew
+            && trialCoordinator.announcement == nil
+            && !trialCoordinator.showsEndOfTrialPaywall
+            && voiceNotes.presentation == nil
+        guard WhatsNew.mayAppear(displayIsFree: displayIsFree, activationOpenedByURL: activationOpenedByURL),
+              let steps = Self.dueWhatsNewSteps() else { return false }
+        whatsNewSteps = steps
+        return true
+    }
+
+    /// What's new is done: the tabs come back, and their `onAppear` raises the trial
+    /// announcement in its existing-user form (#593, #685).
+    private func finishWhatsNew() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            whatsNewSteps = nil
+        }
     }
 
     /// The voice note sheet's presentation, read from and written back to the
@@ -138,6 +213,16 @@ struct MainTabView: View {
                 // The overlay has its own animation state and bilingual logic -- keeping it
                 // in a separate file follows "one file = one responsibility".
                 SwipeBackOverlayView()
+            } else if let whatsNewSteps {
+                // What's new for existing users (#685), in place of the tabs. Below the
+                // two branches above: a dictation from the keyboard still takes the screen.
+                WhatsNewView(
+                    steps: whatsNewSteps,
+                    modelManager: modelManager,
+                    modelIdentifier: activeModelIdentifier,
+                    onFinish: finishWhatsNew
+                )
+                .transition(.opacity)
             } else {
                 // Main tab navigation (normal launch path)
                 TabView(selection: $selectedTab) {
@@ -229,11 +314,22 @@ struct MainTabView: View {
         .paywallCover(isPresented: $showsPaywall)
         // The preparation screen and the cold-start overlay replace the tab bar without
         // being sheets; the voice note stack waits for them to go.
-        .onAppear { voiceNotes.mainScreenBlocked = preparation != nil || isColdStartMode }
-        .onChange(of: preparation != nil || isColdStartMode) { _, blocked in
+        // What's new replaces it too (#685).
+        .onAppear { voiceNotes.mainScreenBlocked = preparation != nil || isColdStartMode || whatsNewSteps != nil }
+        .onChange(of: preparation != nil || isColdStartMode || whatsNewSteps != nil) { _, blocked in
             voiceNotes.mainScreenBlocked = blocked
         }
         .onOpenURL { url in
+            // Whatever this URL asks for, What's new does not take its place (#685). If it
+            // was drawn before the URL was known, it has not been recorded yet (it is, once
+            // the app is active), so it steps aside and stays due for the next activation.
+            // If it was already on screen and recorded, it steps aside all the same: the
+            // voice note sheet hangs off the tab bar, which What's new replaces.
+            activationOpenedByURL = true
+            if whatsNewSteps != nil {
+                whatsNewSteps = nil
+            }
+
             // The keyboard's Pro entries (#241's panel pill, #404's fan row). Until
             // 2026-08-29 nothing routed on `dictus://open` at all, so both of them
             // brought the app forward on whatever screen it happened to be showing and
@@ -330,10 +426,14 @@ struct MainTabView: View {
             // Every return to the foreground can be "the next launch" #593 speaks of:
             // the trial may have ended while the app sat suspended.
             if newPhase == .active {
-                trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
+                // What's new first (#685): the existing-user announcement follows it.
+                if !presentWhatsNewIfDue() {
+                    trialCoordinator.evaluate(canPresent: mayRaiseTrialScreens)
+                }
             }
             if newPhase == .background {
                 isColdStartMode = false
+                activationOpenedByURL = false
                 // The launch intent describes the frame this process launched into.
                 // Forgetting it here keeps a view rebuilt later in the same process
                 // from replaying the cold-start overlay (issue #264).

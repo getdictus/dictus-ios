@@ -12,11 +12,14 @@
 		RT5930000004 /* ProTrialDebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100004 /* ProTrialDebugSection.swift */; };
 		RT5930000003 /* ProTrialPaywallSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100003 /* ProTrialPaywallSections.swift */; };
 		PH2160000001 /* ProHubSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = PH2160100001 /* ProHubSections.swift */; };
+		AA000687 /* ProFeatureSceneSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100687 /* ProFeatureSceneSheet.swift */; };
 		RT5930000002 /* ProTrialAnnouncementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100002 /* ProTrialAnnouncementView.swift */; };
 		RT5930000001 /* ProTrialCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = RT5930100001 /* ProTrialCoordinator.swift */; };
 		SS000002 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100002 /* PaywallView.swift */; };
 		AA361014 /* SmartModeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA361013 /* SmartModeListView.swift */; };
 		AA800081 /* VocabularyListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA800181 /* VocabularyListView.swift */; };
+		AA512071 /* VocabularySuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA512171 /* VocabularySuggestionsView.swift */; };
+		AA512072 /* VocabularySuggestionDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA512172 /* VocabularySuggestionDictionary.swift */; };
 		SS000009 /* PaywallPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100009 /* PaywallPresentation.swift */; };
 		AA700070 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA700170 /* HistoryView.swift */; };
 		AA700071 /* TranscriptionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA700171 /* TranscriptionDetailView.swift */; };
@@ -25,6 +28,7 @@
 		SS000003 /* ProBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SS100003 /* ProBannerView.swift */; };
 		AA0000L1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L1 /* Localizable.xcstrings */; };
 		AA0000L2 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L2 /* Localizable.xcstrings */; };
+		AA0000L3 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA1000L3 /* InfoPlist.xcstrings */; };
 		4647AD302F76AAA5003C3546 /* RecordingView.swift in Frameworks */ = {isa = PBXBuildFile; fileRef = AA100043 /* RecordingView.swift */; };
 		4647AD312F76AAA5003C3546 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = AA900030 /* FluidAudio */; };
 		AA000001 /* DictusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100001 /* DictusApp.swift */; };
@@ -90,6 +94,7 @@
 		AA000676 /* IntroVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100676 /* IntroVideoView.swift */; };
 		AA000679 /* AnimatedScenePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100679 /* AnimatedScenePlayer.swift */; };
 		AA00679A /* OnboardingScenePage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679A /* OnboardingScenePage.swift */; };
+		AA000686 /* FeatureSceneCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100686 /* FeatureSceneCard.swift */; };
 		AA00679B /* SmartModesScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10679B /* SmartModesScene.swift */; };
 		AA00704A /* FullAccessExplainerPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA10704A /* FullAccessExplainerPage.swift */; };
 		AA006800 /* SceneTapTargets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106800 /* SceneTapTargets.swift */; };
@@ -97,6 +102,7 @@
 		AA006802 /* VocabularyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106802 /* VocabularyScene.swift */; };
 		AA006803 /* HistoryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA106803 /* HistoryScene.swift */; };
 		AA000681 /* StopStandbyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100681 /* StopStandbyScene.swift */; };
+		AA000685 /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100685 /* WhatsNewView.swift */; };
 		AA0676A1 /* intro-a-light.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AA1676A1 /* intro-a-light.mp4 */; };
 		AA0676A2 /* intro-a-dark.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AA1676A2 /* intro-a-dark.mp4 */; };
 		AA0676A3 /* intro-b-light.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = AA1676A3 /* intro-b-light.mp4 */; };
@@ -111,10 +117,12 @@
 		AA068201 /* KeyboardSetupChecklistCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168201 /* KeyboardSetupChecklistCard.swift */; };
 		AA068202 /* ChecklistFrameRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168202 /* ChecklistFrameRenderer.swift */; };
 		AA068203 /* ChecklistAudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168203 /* ChecklistAudioSession.swift */; };
-		AA068204 /* KeyboardSetupChecklistPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168204 /* KeyboardSetupChecklistPlayer.swift */; };
+		AA068204 /* SettingsChecklistPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168204 /* SettingsChecklistPlayer.swift */; };
 		AA068205 /* KeyboardSetupChecklistInline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168205 /* KeyboardSetupChecklistInline.swift */; };
-		AA068206 /* KeyboardSetupChecklistPictureCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168206 /* KeyboardSetupChecklistPictureCard.swift */; };
+		AA068206 /* SettingsChecklistPictureCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168206 /* SettingsChecklistPictureCard.swift */; };
 		AA068207 /* ChecklistPictureSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA168207 /* ChecklistPictureSource.swift */; };
+		AA070601 /* KeyboardSetupChecklistScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA170601 /* KeyboardSetupChecklistScript.swift */; };
+		AA070602 /* AppleIntelligenceChecklistScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA170602 /* AppleIntelligenceChecklistScript.swift */; };
 		AA0000A4 /* ModelDownloadPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A4 /* ModelDownloadPage.swift */; };
 		AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A5 /* GlobeKeyTutorialPage.swift */; };
 		AA0000A6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1000A6 /* SettingsView.swift */; };
@@ -258,6 +266,7 @@
 		AA1000L0 /* ModelInfo+Localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ModelInfo+Localized.swift"; sourceTree = "<group>"; };
 		AA1000L1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		AA1000L2 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		AA1000L3 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		AA100001 /* DictusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DictusApp.swift; sourceTree = "<group>"; };
 		AA100002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA100003 /* KeyboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
@@ -325,6 +334,7 @@
 		AA100676 /* IntroVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroVideoView.swift; sourceTree = "<group>"; };
 		AA100679 /* AnimatedScenePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedScenePlayer.swift; sourceTree = "<group>"; };
 		AA10679A /* OnboardingScenePage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingScenePage.swift; sourceTree = "<group>"; };
+		AA100686 /* FeatureSceneCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureSceneCard.swift; sourceTree = "<group>"; };
 		AA10679B /* SmartModesScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModesScene.swift; sourceTree = "<group>"; };
 		AA10704A /* FullAccessExplainerPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullAccessExplainerPage.swift; sourceTree = "<group>"; };
 		AA106800 /* SceneTapTargets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneTapTargets.swift; sourceTree = "<group>"; };
@@ -332,6 +342,7 @@
 		AA106802 /* VocabularyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyScene.swift; sourceTree = "<group>"; };
 		AA106803 /* HistoryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryScene.swift; sourceTree = "<group>"; };
 		AA100681 /* StopStandbyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopStandbyScene.swift; sourceTree = "<group>"; };
+		AA100685 /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		AA1676A1 /* intro-a-light.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-a-light.mp4"; path = "assets/onboarding/intro/intro-a-light.mp4"; sourceTree = SOURCE_ROOT; };
 		AA1676A2 /* intro-a-dark.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-a-dark.mp4"; path = "assets/onboarding/intro/intro-a-dark.mp4"; sourceTree = SOURCE_ROOT; };
 		AA1676A3 /* intro-b-light.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = "intro-b-light.mp4"; path = "assets/onboarding/intro/intro-b-light.mp4"; sourceTree = SOURCE_ROOT; };
@@ -346,10 +357,12 @@
 		AA168201 /* KeyboardSetupChecklistCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistCard.swift; sourceTree = "<group>"; };
 		AA168202 /* ChecklistFrameRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistFrameRenderer.swift; sourceTree = "<group>"; };
 		AA168203 /* ChecklistAudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistAudioSession.swift; sourceTree = "<group>"; };
-		AA168204 /* KeyboardSetupChecklistPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistPlayer.swift; sourceTree = "<group>"; };
+		AA168204 /* SettingsChecklistPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsChecklistPlayer.swift; sourceTree = "<group>"; };
 		AA168205 /* KeyboardSetupChecklistInline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistInline.swift; sourceTree = "<group>"; };
-		AA168206 /* KeyboardSetupChecklistPictureCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistPictureCard.swift; sourceTree = "<group>"; };
+		AA168206 /* SettingsChecklistPictureCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsChecklistPictureCard.swift; sourceTree = "<group>"; };
 		AA168207 /* ChecklistPictureSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistPictureSource.swift; sourceTree = "<group>"; };
+		AA170601 /* KeyboardSetupChecklistScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardSetupChecklistScript.swift; sourceTree = "<group>"; };
+		AA170602 /* AppleIntelligenceChecklistScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleIntelligenceChecklistScript.swift; sourceTree = "<group>"; };
 		AA1000A4 /* ModelDownloadPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloadPage.swift; sourceTree = "<group>"; };
 		AA1000A5 /* GlobeKeyTutorialPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobeKeyTutorialPage.swift; sourceTree = "<group>"; };
 		AA1000A6 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -395,11 +408,14 @@
 		RT5930100004 /* ProTrialDebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialDebugSection.swift; sourceTree = "<group>"; };
 		RT5930100003 /* ProTrialPaywallSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialPaywallSections.swift; sourceTree = "<group>"; };
 		PH2160100001 /* ProHubSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProHubSections.swift; sourceTree = "<group>"; };
+		AA100687 /* ProFeatureSceneSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProFeatureSceneSheet.swift; sourceTree = "<group>"; };
 		RT5930100002 /* ProTrialAnnouncementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialAnnouncementView.swift; sourceTree = "<group>"; };
 		RT5930100001 /* ProTrialCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProTrialCoordinator.swift; sourceTree = "<group>"; };
 		SS100002 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		AA361013 /* SmartModeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartModeListView.swift; sourceTree = "<group>"; };
 		AA800181 /* VocabularyListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyListView.swift; sourceTree = "<group>"; };
+		AA512171 /* VocabularySuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySuggestionsView.swift; sourceTree = "<group>"; };
+		AA512172 /* VocabularySuggestionDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularySuggestionDictionary.swift; sourceTree = "<group>"; };
 		SS100009 /* PaywallPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallPresentation.swift; sourceTree = "<group>"; };
 		AA700170 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		AA700171 /* TranscriptionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionDetailView.swift; sourceTree = "<group>"; };
@@ -550,6 +566,7 @@
 				AA40000F /* Services */,
 				AA40000L /* Extensions */,
 				AA1000L1 /* Localizable.xcstrings */,
+				AA1000L3 /* InfoPlist.xcstrings */,
 				AA1000C0 /* Assets.xcassets */,
 				AA1000C1 /* Settings.bundle */,
 				AA1000F4 /* Sounds */,
@@ -710,6 +727,8 @@
 				SS100002 /* PaywallView.swift */,
 				AA361013 /* SmartModeListView.swift */,
 				AA800181 /* VocabularyListView.swift */,
+				AA512171 /* VocabularySuggestionsView.swift */,
+				AA512172 /* VocabularySuggestionDictionary.swift */,
 				SS100009 /* PaywallPresentation.swift */,
 				AA700170 /* HistoryView.swift */,
 				AA700171 /* TranscriptionDetailView.swift */,
@@ -719,6 +738,7 @@
 				RT5930100004 /* ProTrialDebugSection.swift */,
 				RT5930100003 /* ProTrialPaywallSections.swift */,
 				PH2160100001 /* ProHubSections.swift */,
+				AA100687 /* ProFeatureSceneSheet.swift */,
 				RT5930100002 /* ProTrialAnnouncementView.swift */,
 			);
 			path = Views;
@@ -757,6 +777,7 @@
 				AA100676 /* IntroVideoView.swift */,
 				AA100679 /* AnimatedScenePlayer.swift */,
 				AA10679A /* OnboardingScenePage.swift */,
+				AA100686 /* FeatureSceneCard.swift */,
 				AA10679B /* SmartModesScene.swift */,
 				AA10704A /* FullAccessExplainerPage.swift */,
 				AA106800 /* SceneTapTargets.swift */,
@@ -764,6 +785,7 @@
 				AA106802 /* VocabularyScene.swift */,
 				AA106803 /* HistoryScene.swift */,
 				AA100681 /* StopStandbyScene.swift */,
+				AA100685 /* WhatsNewView.swift */,
 				AA4676A0 /* Intro videos */,
 				AA1000A2 /* MicPermissionPage.swift */,
 				6770A1B2C3D4E5F600000002 /* SmartModePickPage.swift */,
@@ -772,10 +794,12 @@
 				AA168201 /* KeyboardSetupChecklistCard.swift */,
 				AA168202 /* ChecklistFrameRenderer.swift */,
 				AA168203 /* ChecklistAudioSession.swift */,
-				AA168204 /* KeyboardSetupChecklistPlayer.swift */,
+				AA168204 /* SettingsChecklistPlayer.swift */,
 				AA168205 /* KeyboardSetupChecklistInline.swift */,
-				AA168206 /* KeyboardSetupChecklistPictureCard.swift */,
+				AA168206 /* SettingsChecklistPictureCard.swift */,
 				AA168207 /* ChecklistPictureSource.swift */,
+				AA170601 /* KeyboardSetupChecklistScript.swift */,
+				AA170602 /* AppleIntelligenceChecklistScript.swift */,
 				AA1000A4 /* ModelDownloadPage.swift */,
 				AA1000A5 /* GlobeKeyTutorialPage.swift */,
 				AA1000EA /* LanguageSetupPage.swift */,
@@ -1142,6 +1166,7 @@
 				AA0676A6 /* intro-c-dark.mp4 in Resources */,
 				AA000P10 /* PrivacyInfo.xcprivacy in Resources */,
 				AA0000L1 /* Localizable.xcstrings in Resources */,
+				AA0000L3 /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1309,6 +1334,7 @@
 				AA000676 /* IntroVideoView.swift in Sources */,
 				AA000679 /* AnimatedScenePlayer.swift in Sources */,
 				AA00679A /* OnboardingScenePage.swift in Sources */,
+				AA000686 /* FeatureSceneCard.swift in Sources */,
 				AA00679B /* SmartModesScene.swift in Sources */,
 				AA00704A /* FullAccessExplainerPage.swift in Sources */,
 				AA006800 /* SceneTapTargets.swift in Sources */,
@@ -1316,6 +1342,7 @@
 				AA006802 /* VocabularyScene.swift in Sources */,
 				AA006803 /* HistoryScene.swift in Sources */,
 				AA000681 /* StopStandbyScene.swift in Sources */,
+				AA000685 /* WhatsNewView.swift in Sources */,
 				AA0000A2 /* MicPermissionPage.swift in Sources */,
 				6770A1B2C3D4E5F600000001 /* SmartModePickPage.swift in Sources */,
 				AA0000A3 /* KeyboardSetupPage.swift in Sources */,
@@ -1323,10 +1350,12 @@
 				AA068201 /* KeyboardSetupChecklistCard.swift in Sources */,
 				AA068202 /* ChecklistFrameRenderer.swift in Sources */,
 				AA068203 /* ChecklistAudioSession.swift in Sources */,
-				AA068204 /* KeyboardSetupChecklistPlayer.swift in Sources */,
+				AA068204 /* SettingsChecklistPlayer.swift in Sources */,
 				AA068205 /* KeyboardSetupChecklistInline.swift in Sources */,
-				AA068206 /* KeyboardSetupChecklistPictureCard.swift in Sources */,
+				AA068206 /* SettingsChecklistPictureCard.swift in Sources */,
 				AA068207 /* ChecklistPictureSource.swift in Sources */,
+				AA070601 /* KeyboardSetupChecklistScript.swift in Sources */,
+				AA070602 /* AppleIntelligenceChecklistScript.swift in Sources */,
 				AA0000A4 /* ModelDownloadPage.swift in Sources */,
 				AA0000A5 /* GlobeKeyTutorialPage.swift in Sources */,
 				AA0000A9 /* OnboardingSuccessView.swift in Sources */,
@@ -1352,11 +1381,14 @@
 				RT5930000004 /* ProTrialDebugSection.swift in Sources */,
 				RT5930000003 /* ProTrialPaywallSections.swift in Sources */,
 				PH2160000001 /* ProHubSections.swift in Sources */,
+				AA000687 /* ProFeatureSceneSheet.swift in Sources */,
 				RT5930000002 /* ProTrialAnnouncementView.swift in Sources */,
 				RT5930000001 /* ProTrialCoordinator.swift in Sources */,
 				SS000002 /* PaywallView.swift in Sources */,
 				AA361014 /* SmartModeListView.swift in Sources */,
 				AA800081 /* VocabularyListView.swift in Sources */,
+				AA512071 /* VocabularySuggestionsView.swift in Sources */,
+				AA512072 /* VocabularySuggestionDictionary.swift in Sources */,
 				SS000009 /* PaywallPresentation.swift in Sources */,
 				AA700070 /* HistoryView.swift in Sources */,
 				AA700071 /* TranscriptionDetailView.swift in Sources */,
