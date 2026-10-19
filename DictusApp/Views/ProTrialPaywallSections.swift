@@ -156,9 +156,14 @@ struct MonthlyPlanOfferSheet: View {
     @State private var contentHeight: CGFloat = 360
 
     var body: some View {
-        content
-            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
-            .presentationDetents([.height(contentHeight)])
+        // Scrolls only when the content outgrows the screen (large Dynamic Type), where
+        // iOS clamps the detent and would otherwise cut off the way out and the terms.
+        ScrollView {
+            content
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+        }
+        .scrollBounceBehavior(.basedOnSize)
+        .presentationDetents([.height(contentHeight)])
             .presentationDragIndicator(.visible)
             .presentationBackground(Color.dictusBackground)
     }
