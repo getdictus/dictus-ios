@@ -130,6 +130,21 @@ Version: 0.9.0 ou plus récent
 Targets: DictusApp + DictusKeyboard
 ```
 
+### Bibliothèques Swift de compatibilité
+
+L'app doit conserver `@executable_path/Frameworks` dans
+`LD_RUNPATH_SEARCH_PATHS` pour Debug et Release. Xcode peut ajouter des
+bibliothèques Swift de compatibilité dans `DictusApp.app/Frameworks`, notamment
+`libswiftCompatibilitySpan.dylib` lorsque les dépendances utilisent les types
+Span. Sans ce chemin, le binaire ne cherche que dans `/usr/lib/swift` et ne
+trouve pas la copie embarquée sur les systèmes qui en ont besoin.
+
+Après une mise à jour de toolchain ou de dépendance, vérifier le binaire produit
+avec `otool -L` et `otool -l`, ainsi que les bibliothèques présentes dans
+`Frameworks`. Ne pas supprimer une bibliothèque encore référencée et ne pas
+désactiver la disponibilité Mac pour masquer une erreur de packaging.
+Contexte : [swift-collections #732](https://github.com/apple/swift-collections/issues/732).
+
 ---
 
 ## 3. Workflow de développement quotidien

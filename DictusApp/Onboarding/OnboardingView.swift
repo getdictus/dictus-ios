@@ -73,8 +73,18 @@ struct OnboardingView: View {
     /// because confirming is what applies the setup and starts the download.
     @State private var languageDraft: LanguageSetup?
 
-    /// Whether the last step change went back (#700), which turns the slide around: the
-    /// intro comes in from the leading edge and the language page leaves by the trailing one.
+    /// The Smart Mode pick as the user left it (#725), so going back to the pick, or
+    /// coming forward to it again, shows that selection instead of an empty pick. nil until
+    /// the user has touched it.
+    ///
+    /// WHY HERE: like `languageDraft`, the page goes with its state on every step change.
+    /// After a kill it is nil again, and the page opens on what this run's Continue wrote
+    /// (`SmartModePick.committed(spokenLanguage:)`), whichever way it is reached.
+    @State private var smartModePickDraft: SmartModePick?
+
+    /// Whether the last step change went back (#700, #725), which turns the slide around:
+    /// the step gone back to comes in from the leading edge and the one left goes out by the
+    /// trailing one.
     @State private var isGoingBack = false
 
     /// Reset when the first dictation is left, so Home does not open on its transcription.
@@ -86,7 +96,7 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // The shell's top row (#675, #700): back chevron and progress bar. Outside
+                // The shell's top row (#675, #700, #725): back chevron and progress bar. Outside
                 // the sliding page so it stays put while the pages change under it, and
                 // only its segments animate.
                 OnboardingTopBar(
@@ -124,6 +134,7 @@ struct OnboardingView: View {
                         SmartModePickPage(
                             modelManager: modelManager,
                             modelIdentifier: onboardingModel,
+                            draft: $smartModePickDraft,
                             onContinue: advance
                         )
                     case .voiceNotesScene:
@@ -191,9 +202,10 @@ struct OnboardingView: View {
     ///
     /// - A feature scene (Smart Modes, voice notes, vocabulary, history): jumps the whole
     ///   scene sequence, the pick inside it included (#679, #680, #649 decision 8). Nothing
-    ///   is written, so the fan keeps the seed.
-    /// - The Smart Mode pick: writes nothing, so the fan keeps the seed (#677), and jumps
-    ///   the rest of the sequence like the scenes around it.
+    ///   is written, so the fan keeps the seed, or the pick's list if Continue wrote one.
+    /// - The Smart Mode pick: writes nothing, so the fan keeps the seed (#677), or the list
+    ///   this run's Continue already wrote when the user came back to the pick (#725), and
+    ///   jumps the rest of the sequence like the scenes around it.
     ///
     ///   WHY THE PICK JUMPS TOO (#680): the shell draws one Skip at one place on every page
     ///   of the sequence, and decision 8 gives it one meaning. Before #680 the pick was the
@@ -290,9 +302,14 @@ struct OnboardingView: View {
         show(newStep, goingBack: false)
     }
 
-    /// The shell's back control (#700): from the language step to the intro, which starts
-    /// again at its first page (`WelcomePage` is rebuilt). `OnboardingStep.goBack` records
-    /// the intro first, so an app killed now resumes there.
+    /// The shell's back control (#700, #725): from the language step to the intro, which
+    /// starts again at its first page (`WelcomePage` is rebuilt), and inside the scene
+    /// sequence to the step before (`OnboardingStep.stepBack`), whose scene starts its loop
+    /// again from the beginning (the page is rebuilt, and its player's clock with it).
+    /// `OnboardingStep.goBack` records the step first, so an app killed now resumes there.
+    ///
+    /// Nothing here touches the model download: `modelManager` belongs to this view, not
+    /// to the pages, so the transfer and the pages' download pill carry on across it.
     private func goBack() {
         let from = step
         guard let back = OnboardingStep.goBack(from: from) else { return }
@@ -420,6 +437,7 @@ struct OnboardingView: View {
         // Reset to the first step on completion so a future onboarding reset starts
         // cleanly from the welcome screen instead of resuming here.
         OnboardingStep.save(.welcome)
+        SmartModePick.endOnboardingRun()
         isComplete = true
     }
 }
