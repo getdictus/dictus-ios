@@ -255,9 +255,10 @@ words that sound or spell like it: `cloud code` for `Claude Code`.
 ```sh
 # 1. List: the first 20 pairs of a device journal export, ranked by similarity, to a
 #    file OUTSIDE any git repository (the command refuses a path inside one, and an
-#    existing file). Drives no model; prints counts only.
+#    existing file). Drives no model; prints counts only. `--learned` is optional:
+#    drop it to pair the Personal Vocabulary terms alone.
 swift run polish-harness vocabpairs ~/Downloads/dictus-polish-debug-….json \
-  --terms ~/Documents/512/terms.txt [--learned ~/Documents/512/learned.txt] \
+  --terms ~/Documents/512/terms.txt --learned ~/Documents/512/learned.txt \
   --out ~/Documents/512/pairs.txt
 
 # 2. Label: prefix every pair line with `v` (true) or `f` (false), blind.

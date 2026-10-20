@@ -89,7 +89,10 @@ enum VocabularyPairsRound {
     /// are comments. The export carries no vocabulary, hence a file.
     static func vocabulary(fromFile path: String) -> [VocabularyEntry] {
         lines(ofFile: path).compactMap { line in
-            let halves = line.split(separator: "=", maxSplits: 1).map(String.init)
+            // Empty halves are kept so a line of `=` alone reaches the entry check below
+            // as an empty term instead of trapping on `halves[0]`.
+            let halves = line.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: false)
+                .map(String.init)
             let term = halves[0].trimmingCharacters(in: .whitespaces)
             guard VocabularyPairsFile.isWritable(canonical: term) else {
                 print("error: the term `\(term)` holds a `|`, which the pairs file uses as its separator")
@@ -221,10 +224,21 @@ func runVocabularyPairs() {
             observed: pair.observed, sentence: pair.sentence
         )
     }
+    // Owner-only (0600) from the moment the file exists: it holds dictation text, and
+    // `--out` may name a shared directory. `O_EXCL` also refuses a file that appeared
+    // since the existence check above, so labels are never overwritten.
+    let contents = Data((VocabularyPairsFile.header + "\n" + lines.joined(separator: "\n") + "\n").utf8)
+    let descriptor = open(outURL.path, O_WRONLY | O_CREAT | O_EXCL, 0o600)
+    guard descriptor >= 0 else {
+        print("error: cannot create \(outURL.path): \(String(cString: strerror(errno)))")
+        exit(1)
+    }
+    let handle = FileHandle(fileDescriptor: descriptor, closeOnDealloc: true)
     do {
-        try (VocabularyPairsFile.header + "\n" + lines.joined(separator: "\n") + "\n")
-            .write(to: outURL, atomically: true, encoding: .utf8)
+        try handle.write(contentsOf: contents)
+        try handle.close()
     } catch {
+        try? FileManager.default.removeItem(at: outURL)
         print("error: cannot write \(outURL.path): \(error)")
         exit(1)
     }
