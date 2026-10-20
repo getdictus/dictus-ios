@@ -55,6 +55,34 @@ public struct SmartModePick: Equatable, Sendable {
         self.selected = Array(selected.prefix(Self.maximum))
     }
 
+    /// The pick as Continue last wrote it during this onboarding run, for the step shown
+    /// again (#725) when the flow no longer holds it in memory: after a kill on the pick
+    /// or on a later scene, whether the user then comes back to it or forward to it.
+    ///
+    /// Empty unless this run's Continue wrote the list (`SharedKeys.onboardingSmartModePickCommitted`):
+    /// a list stored by an earlier run, or by the app's mode list, is not a choice made on
+    /// this step, and the step's first visit opens empty (#677). Only the modes this step
+    /// offers are kept, in their stored order, so a mode the pick cannot draw (a
+    /// translation into the language the user speaks) is left out.
+    ///
+    /// - Parameter spokenLanguage: as for `translateTargets(spokenLanguage:)`.
+    public static func committed(spokenLanguage: String?) -> SmartModePick {
+        guard AppGroup.defaults.bool(forKey: SharedKeys.onboardingSmartModePickCommitted) else {
+            return SmartModePick()
+        }
+        let offered = Set(cardModes.map(\.id) + translateTargets(spokenLanguage: spokenLanguage).map {
+            SmartModeCatalogue.translateIdentifier(target: $0)
+        })
+        let stored = SmartModeStore.storedPinnedIdentifiers ?? []
+        return SmartModePick(selected: stored.filter { offered.contains($0) })
+    }
+
+    /// Forgets that this run's Continue wrote the list, when the onboarding finishes, so
+    /// a later run (an onboarding reset) opens the step empty. The pinned list stays.
+    public static func endOnboardingRun() {
+        AppGroup.defaults.removeObject(forKey: SharedKeys.onboardingSmartModePickCommitted)
+    }
+
     /// Whether `identifier` is picked.
     public func isSelected(_ identifier: String) -> Bool {
         selected.contains(identifier)
@@ -94,11 +122,13 @@ public struct SmartModePick: Equatable, Sendable {
         !selected.isEmpty
     }
 
-    /// Writes the pick to the pinned list, replacing the seed or any earlier list.
+    /// Writes the pick to the pinned list, replacing the seed or any earlier list, and
+    /// records that this onboarding run made that choice (`committed(spokenLanguage:)`).
     /// Nothing is written while `canContinue` is false.
     public func commit() {
         guard canContinue else { return }
         SmartModeStore.setPinned(selected)
+        AppGroup.defaults.set(true, forKey: SharedKeys.onboardingSmartModePickCommitted)
     }
 
     private static func isTranslate(_ identifier: String) -> Bool {

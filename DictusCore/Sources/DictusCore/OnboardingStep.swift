@@ -275,23 +275,40 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
         }
     }
 
-    // MARK: - Going back (#700)
+    // MARK: - Going back (#700, #725)
 
     /// The step the shell's back control returns to, or nil for a step without one.
     ///
-    /// Only the language step has one, and it returns to the intro: a reflex tap on the
-    /// intro's button should not cost the user the three scenes.
+    /// - The language step returns to the intro (#700): a reflex tap on the intro's button
+    ///   should not cost the user the three scenes.
+    /// - Every step of the scene sequence but its first returns to the one before it
+    ///   (#725): the pick to the Smart Modes scene, then each scene to the step before it.
+    ///   A reflex tap on Next should not cost the user a scene either.
     ///
-    /// WHY NOT FURTHER: confirming the language step starts the model download. From the
-    /// keyboard setup on, going back would mean cancelling or duplicating that download,
-    /// and the keyboard setup is the step iOS kills the app on.
+    /// WHY NOT FROM THE KEYBOARD SETUP ON: confirming the language step starts the model
+    /// download. Going back to the language step would mean cancelling or duplicating that
+    /// download, and the keyboard setup is the step iOS kills the app on.
+    ///
+    /// WHY THE SCENE SEQUENCE ANYWAY (#725): it is the download #700 protects, not the
+    /// steps after it. The scenes are presentation only and the pick only writes the pinned
+    /// Smart Modes; moving between them neither cancels nor starts a download. The first
+    /// scene has no back control, so going back never leaves the sequence. Every step of it
+    /// is a Pro step, shown or hidden together (`isShown`), so the step before is always
+    /// on screen where the step is.
     public var stepBack: OnboardingStep? {
         switch self {
         case .language:
             return .welcome
-        case .welcome, .keyboardSetup, .appleIntelligence, .smartModesScene, .smartModePick, .voiceNotesScene,
-             .vocabularyScene, .historyScene, .modelPreparation, .microphone, .firstDictation, .stopStandby,
-             .completion:
+        case .smartModePick:
+            return .smartModesScene
+        case .voiceNotesScene:
+            return .smartModePick
+        case .vocabularyScene:
+            return .voiceNotesScene
+        case .historyScene:
+            return .vocabularyScene
+        case .welcome, .keyboardSetup, .appleIntelligence, .smartModesScene, .modelPreparation, .microphone,
+             .firstDictation, .stopStandby, .completion:
             return nil
         }
     }
@@ -299,8 +316,9 @@ public enum OnboardingStep: String, CaseIterable, Sendable {
     /// Goes back from `step`: records `stepBack` as the step to resume at and returns it,
     /// or returns nil and records nothing for a step without a back control.
     ///
-    /// WHY THE WRITE IS HERE: an app killed after going back must resume on the intro, not
-    /// on the step the user left (#700), and the app target has no test bundle.
+    /// WHY THE WRITE IS HERE: an app killed after going back must resume on the step the
+    /// user went back to, not on the one they left (#700, #725), and the app target has no
+    /// test bundle.
     @discardableResult
     public static func goBack(from step: OnboardingStep, defaults: UserDefaults = AppGroup.defaults) -> OnboardingStep? {
         guard let back = step.stepBack else { return nil }

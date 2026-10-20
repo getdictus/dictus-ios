@@ -12,10 +12,12 @@ final class SmartModePickTests: XCTestCase {
     override func setUp() {
         super.setUp()
         defaults.removeObject(forKey: SharedKeys.smartModePinned)
+        defaults.removeObject(forKey: SharedKeys.onboardingSmartModePickCommitted)
     }
 
     override func tearDown() {
         defaults.removeObject(forKey: SharedKeys.smartModePinned)
+        defaults.removeObject(forKey: SharedKeys.onboardingSmartModePickCommitted)
         super.tearDown()
     }
 
@@ -137,5 +139,45 @@ final class SmartModePickTests: XCTestCase {
         _ = SmartModePick() // the page builds one and Skip never commits it
         XCTAssertNil(defaults.stringArray(forKey: SharedKeys.smartModePinned))
         XCTAssertEqual(SmartModeCatalogue.pinnedModes.map(\.id), SmartModeCatalogue.defaultPinnedIdentifiers)
+    }
+
+    // MARK: - Returning to the step (#725)
+
+    func testTheCommittedPickIsWhatContinueWrote() {
+        var pick = SmartModePick()
+        pick.toggle("summary")
+        pick.toggle("translate.en")
+        pick.commit()
+        XCTAssertEqual(SmartModePick.committed(spokenLanguage: "fr").selected, ["summary", "translate.en"])
+    }
+
+    func testTheCommittedPickIsEmptyNotTheSeedWhenTheUserNeverChose() {
+        XCTAssertNil(SmartModeStore.storedPinnedIdentifiers)
+        XCTAssertEqual(SmartModePick.committed(spokenLanguage: "fr"), SmartModePick())
+    }
+
+    func testTheCommittedPickDropsWhatTheStepDoesNotOffer() {
+        // A list from the app's mode list, with a translation into the spoken language
+        // and an identifier the pick has no card or chip for.
+        SmartModePick(selected: ["message"]).commit()
+        SmartModeStore.setPinned(["translate.fr", "message", "custom.mine"])
+        XCTAssertEqual(SmartModePick.committed(spokenLanguage: "fr").selected, ["message"])
+        XCTAssertEqual(SmartModePick.committed(spokenLanguage: "en").selected, ["translate.fr", "message"])
+    }
+
+    func testAListThisRunDidNotWriteIsNotReloaded() {
+        // A list from an earlier run or from the app's mode list: the step opens empty.
+        SmartModeStore.setPinned(["summary", "message"])
+        XCTAssertEqual(SmartModePick.committed(spokenLanguage: "fr"), SmartModePick())
+    }
+
+    func testTheCommittedPickSurvivesAKillUntilTheOnboardingEnds() {
+        // A relaunch rebuilds the flow with no draft: only the App Group is left.
+        SmartModePick(selected: ["structured", "translate.en"]).commit()
+        XCTAssertEqual(SmartModePick.committed(spokenLanguage: "fr").selected, ["structured", "translate.en"])
+
+        SmartModePick.endOnboardingRun()
+        XCTAssertEqual(SmartModePick.committed(spokenLanguage: "fr"), SmartModePick())
+        XCTAssertEqual(SmartModeStore.storedPinnedIdentifiers, ["structured", "translate.en"])
     }
 }
