@@ -2,8 +2,8 @@
 # drive.sh — drive the launched simulator by accessibility identifier, label or recipe.
 #
 # Usage:
-#   .claude/skills/verify-dictus-ios/scripts/drive.sh <command> [args]   (latest run)
-#   DICTUS_VERIFY_RUN=<run-dir> drive.sh <command> [args]                (another run)
+#   .claude/skills/verify-dictus-ios/scripts/drive.sh <command> [args]   (this session's run)
+#   DICTUS_VERIFY_RUN=<run-dir> drive.sh <command> [args]                (a given run)
 #
 # Primitives (exit non-zero when the element never appears):
 #   tap-id <identifier>            tap the first element whose AXUniqueId matches
@@ -24,6 +24,8 @@
 #                                  press a Dictus keyboard control (none is in the a11y tree):
 #                                  ☰ tap = voice-note reader, ☰ hold = panel, 😀 = emoji,
 #                                  ABC = back to keys, mic tap = dictation, mic hold+drag = fan
+#   type <word>                    type lowercase a–z on the Dictus AZERTY keyboard, key by key
+#   space                          press the Dictus space bar (autocorrect runs on space)
 #   set-default <key> <-bool|-string|-int> <value>
 #                                  write an App Group default, then relaunch DictusApp
 set -euo pipefail
@@ -134,6 +136,29 @@ case "$cmd" in
       *) die "unknown keyboard control '$1'" ;;
     esac
     echo "pressed keyboard $1" ;;
+
+  type | space)
+    # Typed through the Dictus keyboard itself, key by key: `axe type` sends hardware
+    # keyboard events, which reach the text field without going through the extension and
+    # so never trigger its autocorrect. AZERTY, letters page, measured on iPhone 17 / iOS
+    # 26.5: ten keys per row on a 40.2 pt pitch; rows 80, 132, 187 pt below inputView's
+    # top; row 3 holds w x c v b n between shift and backspace; space at (220, +239).
+    frame=$(stable_frame id inputView) || die "no inputView: the Dictus keyboard is not on screen"
+    read -r x y w h <<<"$frame"
+    press() { axe tap -x "$(python3 -c "print(round($x + $1))")" -y "$(python3 -c "print(round($y + $2))")" --udid "$UDID" >/dev/null; sleep 0.35; }
+    if [ "$cmd" = space ]; then press 220 239; echo "pressed space"; exit 0; fi
+    word=${1:?word}
+    for ((i = 0; i < ${#word}; i++)); do
+      c=${word:$i:1}
+      pos=$(python3 -c "
+import sys
+c=sys.argv[1]; p=40.2
+for row,keys,y,x0 in ((0,'azertyuiop',80,20.1),(1,'qsdfghjklm',132,20.1),(2,'wxcvbn',187,80.4)):
+    if c in keys: print(round(x0+p*keys.index(c)), y); sys.exit(0)
+sys.exit(1)" "$c") || die "'$c' is not a lowercase a–z letter on the AZERTY letters page"
+      press $pos
+    done
+    echo "typed $word" ;;
 
   set-default)
     # App Group defaults (`dictus.*`) live in the group's plist, which a launch argument

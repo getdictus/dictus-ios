@@ -18,16 +18,24 @@ APP_PATH="$DERIVED_DATA/Build/Products/Debug-iphonesimulator/DictusApp.app"
 # these scripts — cleanup.sh included.
 EVIDENCE_ROOT="${DICTUS_VERIFY_EVIDENCE:-$HOME/dev/dictus-evidence/verify-skill}"
 
+# Each session gets its own pointer to its current run, so parallel sessions on this Mac
+# never resolve each other's run (and cleanup.sh never deletes another session's device).
+# A session is a worktree by default; set DICTUS_VERIFY_SESSION to split one worktree
+# between several sessions. There is deliberately no shared `latest` link.
+SESSION_ID="${DICTUS_VERIFY_SESSION:-$(basename "$REPO_ROOT")-$(printf '%s' "$REPO_ROOT" | shasum | cut -c1-8)}"
+SESSION_LINK="$EVIDENCE_ROOT/sessions/$SESSION_ID"
+
 # Devices this skill creates carry this prefix, and cleanup.sh refuses to delete any
 # device whose name does not start with it.
 DEVICE_PREFIX="Dictus Verify"
 
 die() { echo "error: $*" >&2; exit 1; }
 
-# load_run [run-dir] — loads run.env from the given run, or from the `latest` link.
+# load_run [run-dir] — loads run.env from the given run, else from $DICTUS_VERIFY_RUN, else
+# from this session's pointer. Never from another session's.
 load_run() {
-  local dir=${1:-$EVIDENCE_ROOT/latest}
-  [ -f "$dir/run.env" ] || die "no run.env in $dir (run launch.sh first)"
+  local dir=${1:-${DICTUS_VERIFY_RUN:-$SESSION_LINK}}
+  [ -f "$dir/run.env" ] || die "no run.env in $dir (run launch.sh first, or pass the run dir from its READY line)"
   # shellcheck disable=SC1091
   . "$dir/run.env"
   RUN_DIR=$(cd "$dir" && pwd -P)

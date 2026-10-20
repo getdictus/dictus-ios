@@ -38,7 +38,8 @@ COMMIT=$(git rev-parse --short HEAD)
 RUN_ID="$(date +%Y%m%d-%H%M%S)-$COMMIT"
 RUN_DIR="$EVIDENCE_ROOT/$RUN_ID"
 mkdir -p "$RUN_DIR"
-ln -sfn "$RUN_DIR" "$EVIDENCE_ROOT/latest"
+mkdir -p "$EVIDENCE_ROOT/sessions"
+ln -sfn "$RUN_DIR" "$SESSION_LINK"
 REPORT="$RUN_DIR/report.txt"
 say() { echo "$*" | tee -a "$REPORT"; }
 
@@ -58,6 +59,7 @@ cat >"$RUN_DIR/run.env" <<EOF
 UDID=$UDID
 DEVICE_NAME="$DEVICE_NAME"
 COMMIT=$COMMIT
+SESSION_ID=$SESSION_ID
 XCSTRINGS_CLEAN_AT_LAUNCH=$([ -z "$XCSTRINGS_BEFORE" ] && echo yes || echo no)
 EOF
 say "created $DEVICE_NAME $UDID"
@@ -114,9 +116,17 @@ xcodebuild build -project Dictus.xcodeproj -scheme DictusApp -configuration Debu
   -derivedDataPath "$DERIVED_DATA" >"$RUN_DIR/build.log" 2>&1 \
   || die "build failed, see $RUN_DIR/build.log"
 # The build may rewrite Localizable.xcstrings: build noise, never committed (CLAUDE.md).
-if [ -z "$XCSTRINGS_BEFORE" ] && [ -n "$(git status --porcelain -- '*.xcstrings')" ]; then
-  git checkout -- '*.xcstrings'
-  say "restored the .xcstrings catalogs the build rewrote"
+# Only when the catalogs were clean before the build is the diff known to be the build's.
+# The hash of each file as the build left it is kept, so cleanup.sh can tell a later
+# rebuild's output (restored) from a human or agent edit (kept, with a warning).
+if [ -z "$XCSTRINGS_BEFORE" ]; then
+  git diff --name-only -- '*.xcstrings' | while read -r f; do
+    echo "$(shasum -a 256 "$f" | cut -d' ' -f1) $f"
+  done >"$RUN_DIR/xcstrings-build.sha"
+  if [ -s "$RUN_DIR/xcstrings-build.sha" ]; then
+    git checkout -- $(cut -d' ' -f2- "$RUN_DIR/xcstrings-build.sha")
+    say "restored the .xcstrings catalogs the build rewrote ($(wc -l <"$RUN_DIR/xcstrings-build.sha" | tr -d ' '))"
+  fi
 fi
 [ -d "$APP_PATH/PlugIns/DictusKeyboard.appex" ] || die "built app has no DictusKeyboard.appex"
 say "built $(git rev-parse --short HEAD)"

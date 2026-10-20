@@ -4,7 +4,7 @@
 # Usage:
 #   .claude/skills/verify-dictus-ios/scripts/doctor.sh [run-dir]
 #
-# Without a run directory it checks the `latest` run, or only the toolchain when there
+# Without a run directory it checks this session's run, or only the toolchain when there
 # is none. It creates, boots, taps, installs and deletes nothing. Every line is
 # `OK`, `WARN` or `FAIL`; the last line is `DOCTOR OK` or `DOCTOR FAIL <n>`.
 set -uo pipefail
@@ -40,7 +40,7 @@ LEFTOVER=$(xcrun simctl list devices 2>/dev/null | grep -c "$DEVICE_PREFIX" || t
   || warn "$LEFTOVER '$DEVICE_PREFIX' devices present: earlier runs were not cleaned up (cleanup.sh <run-dir>)"
 
 # --- Run ----------------------------------------------------------------------
-DIR=${1:-$EVIDENCE_ROOT/latest}
+DIR=${1:-${DICTUS_VERIFY_RUN:-$SESSION_LINK}}
 if [ ! -f "$DIR/run.env" ]; then
   warn "no run to inspect at $DIR (toolchain only)"
 else

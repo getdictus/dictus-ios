@@ -4,10 +4,10 @@
 # Usage:
 #   .claude/skills/verify-dictus-ios/scripts/cleanup.sh [run-dir]
 #
-# Defaults to the `latest` run. It deletes exactly one device: the UDID recorded in the
-# run's run.env, and only if that device's name starts with "Dictus Verify". It never
-# kills a process by name, never touches another simulator, and never removes anything
-# under the evidence directory. Last line: `CLEANUP OK udid=<udid> deleted=yes`.
+# Defaults to this session's run (see lib.sh), never to another session's. It deletes
+# exactly one device: the UDID recorded in the run's run.env, and only if that device's
+# name starts with "Dictus Verify". It never kills a process by name, never touches
+# another simulator, and never removes anything under the evidence directory. Last line: `CLEANUP OK udid=<udid> deleted=yes`.
 set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 
@@ -37,11 +37,20 @@ else
   xcrun simctl delete "$UDID"
 fi
 
-# Build noise from launch.sh, restored only if the catalogs were clean at launch.
+# .xcstrings: restore a catalog only if it is byte-identical to what a build of this run
+# produced (xcstrings-build.sha, written by launch.sh). Anything else was edited after the
+# launch — by a person or an agent — and is kept, with a warning.
 cd "$REPO_ROOT"
-if [ "${XCSTRINGS_CLEAN_AT_LAUNCH:-no}" = yes ] && [ -n "$(git status --porcelain -- '*.xcstrings')" ]; then
-  git checkout -- '*.xcstrings'
-  echo "restored the .xcstrings catalogs"
+if [ "${XCSTRINGS_CLEAN_AT_LAUNCH:-no}" = yes ]; then
+  for f in $(git diff --name-only -- '*.xcstrings'); do
+    sha=$(shasum -a 256 "$f" | cut -d' ' -f1)
+    if grep -qx "$sha $f" "$RUN_DIR/xcstrings-build.sha" 2>/dev/null; then
+      git checkout -- "$f"
+      echo "restored $f (identical to the build's output)"
+    else
+      echo "warning: $f changed since launch and is not the build's output: left untouched" >&2
+    fi
+  done
 fi
 
 if xcrun simctl list devices | grep -q "$UDID"; then
