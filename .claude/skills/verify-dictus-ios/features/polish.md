@@ -1,0 +1,35 @@
+# Polish (clean-up of the transcript)
+
+- **ID:** `polish`
+- **Tier:** Gratuit (Free) — needs Apple Intelligence
+- **Targets:** DictusApp + DictusKeyboard + DictusCore
+- **Screens:** `app.settings` — see [screens.md](screens.md)
+
+## Sub-features
+
+- Toggle « Polir la transcription » in Réglages → Transcription.
+- After transcription, Apple Foundation Models rewrites fillers and punctuation without changing meaning (ADR 0002, 0003); runs in the app and in the keyboard.
+- Polish debug screen: tap « Version » five times in À propos.
+- Files: `DictusApp/Polish/PolishCoordinator.swift`, `DictusKeyboard/KeyboardPolishCoordinator.swift`, `DictusCore/Sources/DictusCore/Polish/`.
+
+## How to get to it (user POV)
+
+1. Turn on Apple Intelligence in the iPhone's Settings.
+2. Dictus → Réglages → turn on « Polir la transcription».
+3. Dictate as usual; the text arrives cleaned up.
+
+## Driving it with axe + Argent
+
+```bash
+.claude/skills/verify-dictus-ios/scripts/launch.sh --skip-onboarding
+.claude/skills/verify-dictus-ios/scripts/drive.sh tab Réglages
+.claude/skills/verify-dictus-ios/scripts/drive.sh tap-label "Polir la transcription"
+.claude/skills/verify-dictus-ios/scripts/drive.sh tree | grep -A3 '"Polir la transcription"'   # AXValue flips
+```
+
+Debug builds show the toggle even without Apple Intelligence (`DICTUS_POLISH_DEBUG_VISIBLE`).
+
+## Gotchas
+
+- **Not drivable in the simulator:** the polish itself. Apple Intelligence is unavailable there (the keyboard's Smart Mode fan reads « Les modes exigent Apple Intelligence »), so toggling it changes a preference and nothing else.
+- The explanatory text under the toggle and « Open iPhone Settings » are English on a French device (missing translations).
