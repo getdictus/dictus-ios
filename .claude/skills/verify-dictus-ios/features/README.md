@@ -184,7 +184,7 @@ Every ID in this map, in one table: the 18 features first, then their 109 sub-fe
 | `app.models` | Gratuit | non |
 | `app.models.languages` | Gratuit | non |
 | `app.models.loading` | Gratuit | non |
-| `app.settings` | Gratuit | oui |
+| `app.settings` | Gratuit | non |
 | `app.settings.sounds` | Gratuit | non |
 | `app.settings.diagnostic` | Gratuit | oui |
 | `app.settings.debug-logs` | Gratuit | non |

@@ -28,7 +28,7 @@ Captures are in [`docs/agents/screens/`](../../../../docs/agents/screens/), one 
 | `app.models` | Tab Modèles | tab Modèles | models.transcription | [oui](../../../../docs/agents/screens/app.models.png) |
 | `app.models.languages` | Supported languages sheet | Modèles → tap-label « Langues prises en charge » | models.transcription | [oui](../../../../docs/agents/screens/app.models.languages.png) |
 | `app.models.loading` | Full-screen model preparation overlay | select a downloaded model | models.transcription | non |
-| `app.settings` | Tab Réglages | tab Réglages | polish, keyboard.languages, typing.*, live-activity, diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.png) |
+| `app.settings` | Tab Réglages | tab Réglages | keyboard.languages, polish, typing.*, live-activity, diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.png) |
 | `app.settings.sounds` | Réglages → Sons | Réglages, scroll, tap-label Sons | feedback.sounds-haptics | [oui](../../../../docs/agents/screens/app.settings.sounds.png) |
 | `app.settings.diagnostic` | Réglages → Diagnostic | Réglages, scroll to À propos, tap-label Diagnostic | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.diagnostic.png) |
 | `app.settings.debug-logs` | Réglages → Debug Logs | … tap-label « Debug Logs » | diagnostics.logs | [oui](../../../../docs/agents/screens/app.settings.debug-logs.png) |
