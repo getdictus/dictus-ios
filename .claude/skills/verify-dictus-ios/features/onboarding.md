@@ -7,12 +7,19 @@
 
 ## Sub-features
 
-- 14 steps: welcome, language, keyboardSetup, appleIntelligence, smartModesScene, smartModePick, voiceNotesScene, vocabularyScene, historyScene, modelPreparation, microphonePrompt, firstDictation, stopStandby, completion.
-- Pro steps (appleIntelligence → historyScene) only on devices that can run Smart Modes; satisfied steps (Apple Intelligence, model, microphone, standby) are skipped.
-- Back on language and the Pro scenes; « Passer » on the scenes and the first dictation.
-- What's new: an existing user behind edition 2.0.0 sees the four Pro scenes once.
-- State: `dictus.hasCompletedOnboarding`, `dictus.onboardingStep`, `dictus.lastVersionSeen` (App Group).
-- Files: `DictusApp/Onboarding/`, `DictusCore/Sources/DictusCore/OnboardingStep.swift`, `DictusCore/Sources/DictusCore/WhatsNew.swift`.
+- `onboarding.welcome`: Intro carousel, « Commencer ».
+- `onboarding.language`: Language and keyboard layout.
+- `onboarding.keyboard-setup`: Add the keyboard and turn on Full Access, with an explainer.
+- `onboarding.apple-intelligence`: Wait for Apple Intelligence to be ready.
+- `onboarding.pro-scenes`: Scenes for Smart Modes, voice notes, vocabulary and history.
+- `onboarding.smart-mode-pick`: Pick three Smart Modes.
+- `onboarding.model-download`: Download and prepare the recommended model.
+- `onboarding.microphone`: Microphone permission.
+- `onboarding.first-dictation`: A first dictation in a practice field.
+- `onboarding.stop-standby`: How to stop Dictus from the Dynamic Island.
+- `onboarding.completion`: « C'est prêt ».
+- `onboarding.resume`: An interrupted onboarding resumes at the same step.
+- `onboarding.whats-new`: An existing user sees the new Pro scenes once.
 
 ## How to get to it (user POV)
 

@@ -7,10 +7,11 @@
 
 ## Sub-features
 
-- Standby activity « On » while Dictus is ready, then Rec, Transcribing, Ready, Error; buttons stop standby (`StopStandbyIntent`), dictate (`dictus://dictate`), stop (`dictus://stop`).
-- A voice-note activity.
-- « Live Activity » toggle in Réglages → Clavier.
-- Files: `DictusWidgets/DictusLiveActivity.swift`, `DictusWidgets/StopStandbyIntent.swift`, `DictusApp/LiveActivityManager.swift`.
+- `live-activity.standby`: An « On » pill in the Dynamic Island while Dictus is ready.
+- `live-activity.states`: Rec, Transcribing, Ready, Error during a dictation.
+- `live-activity.stop-standby`: Stop Dictus between dictations from the island.
+- `live-activity.controls`: Dictate and stop buttons in the expanded island.
+- `live-activity.toggle`: « Live Activity » switch in Réglages → Clavier.
 
 ## How to get to it (user POV)
 

@@ -7,10 +7,13 @@
 
 ## Sub-features
 
-- « Vos termes »: add a term with its correct spelling and how Dictus mishears it (« Ajouter un terme »), edit, delete, « Réinitialiser le vocabulaire ».
-- « Suggestions depuis l'historique »: words the user corrected, offered, never imposed (ADR 0004).
-- Applied after transcription.
-- Files: `DictusApp/Views/VocabularyListView.swift`, `VocabularySuggestionsView.swift`, `DictusCore/Sources/DictusCore/Vocabulary/`.
+- `vocabulary.add`: « Ajouter un terme »: the correct spelling and how Dictus mishears it.
+- `vocabulary.edit`: Edit a term.
+- `vocabulary.delete`: Delete a term.
+- `vocabulary.reset`: « Réinitialiser le vocabulaire ».
+- `vocabulary.suggestions`: « Suggestions depuis l'historique »: words the user corrected, offered, never imposed.
+- `vocabulary.apply`: Terms are applied to every transcription.
+- `vocabulary.toggle`: « Vocabulaire » on/off switch.
 
 ## How to get to it (user POV)
 

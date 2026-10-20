@@ -7,9 +7,10 @@
 
 ## Sub-features
 
-- « Activer les sons », volume, a sound per event (Début, Fin, Annuler).
-- « Retour haptique » on key presses.
-- Files: `DictusApp/Views/SoundSettingsView.swift`, `DictusApp/Views/SettingsView.swift`.
+- `sounds.toggle`: « Activer les sons ».
+- `sounds.volume`: Volume.
+- `sounds.per-event`: A sound per event: Début, Fin, Annuler.
+- `haptics.toggle`: « Retour haptique » on key presses.
 
 ## How to get to it (user POV)
 

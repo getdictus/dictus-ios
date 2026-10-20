@@ -7,12 +7,14 @@
 
 ## Sub-features
 
-- Mic pill in the keyboard toolbar starts a dictation; the keyboard hands off to DictusApp, which records and transcribes (the extension's ~50 MB limit keeps audio out of it).
-- Recording overlay in the keyboard: ✕ cancels, ✓ stops; states Starting / Listening / Transcribing / Processing.
-- Transcript inserted at the cursor; an undo chip ("Undo dictation insertion") appears after insertion.
-- Warm path (app alive, Darwin notification) and cold-start path (URL `dictus://dictate?source=keyboard`, after a 500 ms fallback).
-- Disabled without Full Access ("Accès complet requis") and on A12/A13 iPhones ("Dictation unavailable on this device").
-- Files: `DictusKeyboard/Views/ToolbarView.swift`, `DictusKeyboard/Views/RecordingOverlay.swift`, `DictusKeyboard/KeyboardState.swift`, `DictusApp/DictationCoordinator.swift`, `DictusApp/DictusApp.swift`.
+- `dictation.start`: Tap the mic in the keyboard toolbar to start a dictation.
+- `dictation.stop`: Stop with ✓: the transcript is inserted at the cursor.
+- `dictation.cancel`: Cancel with ✕: nothing is inserted.
+- `dictation.status`: Recording overlay states: starting, listening, transcribing, processing.
+- `dictation.undo-insert`: An undo chip after insertion removes the inserted text.
+- `dictation.handoff`: The keyboard hands the recording to the app (warm through a notification, cold through the `dictus://dictate` URL after 500 ms), because the extension's memory limit keeps audio out of it.
+- `dictation.requires-full-access`: Without Full Access the mic is disabled and the bar reads « Accès complet requis ».
+- `dictation.device-gating`: Refused on devices too old to transcribe (A12/A13 iPhones: « Dictation unavailable on this device »).
 
 ## How to get to it (user POV)
 

@@ -7,12 +7,15 @@
 
 ## Sub-features
 
-- Catalogue in two sections, « Téléchargés » and « Disponibles »: WhisperKit Tiny, Base, Small, Small (quantifié), Medium, Turbo; Parakeet v3 (recommended), Nemotron 3.5.
-- Tap a card to download, tap a downloaded card to select it; « Model options » menu: delete, delete partial download; retry after a failure.
-- ⓘ « Langues prises en charge » opens the per-model language sheet.
-- Full-screen preparation overlay while a model compiles for the Neural Engine.
-- Device gating: Turbo needs ≥ 6 GB RAM; some models are refused on A12/A13.
-- Files: `DictusApp/Views/ModelManagerView.swift`, `ModelCardView.swift`, `ModelLanguageDetailView.swift`, `ModelLoadingOverlay.swift`, `DictusCore/Sources/DictusCore/ModelInfo.swift`.
+- `models.catalogue`: Downloaded and available models, each with size, precision and speed.
+- `models.recommended`: One model is marked « Recommandé » for the device.
+- `models.download`: Tap an available model to download it.
+- `models.select`: Tap a downloaded model to make it the active one.
+- `models.delete`: Delete a downloaded model (« Model options »).
+- `models.retry`: Retry a failed download, or delete a partial one.
+- `models.languages`: ⓘ shows the languages a model supports.
+- `models.preparation`: A full-screen overlay while a model is prepared for on-device acceleration.
+- `models.device-gating`: Models too heavy for the device are refused (memory, chip).
 
 ## How to get to it (user POV)
 

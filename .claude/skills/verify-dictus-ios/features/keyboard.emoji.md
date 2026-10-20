@@ -7,8 +7,10 @@
 
 ## Sub-features
 
-- Emoji picker with categories, recents, search (« Rechercher des Emoji », French keywords), ABC key back to letters.
-- Files: `DictusKeyboard/Views/EmojiPickerView.swift`, `EmojiCategoryBar.swift`, `DictusKeyboard/Models/EmojiData.swift`.
+- `emoji.picker`: Emoji by category.
+- `emoji.recents`: Recently used emoji.
+- `emoji.search`: « Rechercher des Emoji », with French keywords.
+- `emoji.back-to-letters`: ABC returns to the letters.
 
 ## How to get to it (user POV)
 

@@ -7,11 +7,10 @@
 
 ## Sub-features
 
-- « Debug Logs »: the App Group `dictus_debug.log`, shared by app and keyboard (tags `<APP>`, `<KBD>`).
-- « Exporter les logs »: share sheet with the log.
-- « Diagnostic »: App Group reachability (read/write).
-- Version row, GitHub link, Licences.
-- Files: `DictusApp/Views/DebugLogView.swift`, `DictusApp/Views/SettingsView.swift`, `DictusCore/Sources/DictusCore/PersistentLog.swift`.
+- `diagnostics.log-view`: « Debug Logs »: the shared app and keyboard log.
+- `diagnostics.log-export`: « Exporter les logs » through the share sheet.
+- `diagnostics.app-group-check`: « Diagnostic »: checks the storage shared by app and keyboard (App Group).
+- `diagnostics.about`: Version, GitHub link, Licences.
 
 ## How to get to it (user POV)
 

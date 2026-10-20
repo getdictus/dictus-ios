@@ -7,10 +7,10 @@
 
 ## Sub-features
 
-- Toggle « Polir la transcription » in Réglages → Transcription.
-- After transcription, Apple Foundation Models rewrites fillers and punctuation without changing meaning (ADR 0002, 0003); runs in the app and in the keyboard.
-- Polish debug screen: tap « Version » five times in À propos.
-- Files: `DictusApp/Polish/PolishCoordinator.swift`, `DictusKeyboard/KeyboardPolishCoordinator.swift`, `DictusCore/Sources/DictusCore/Polish/`.
+- `polish.toggle`: « Polir la transcription » switch in Réglages → Transcription.
+- `polish.clean-up`: After transcription, fillers and punctuation are cleaned up without changing the meaning.
+- `polish.in-keyboard`: The same clean-up runs for dictations made from the keyboard.
+- `polish.debug`: A hidden debug screen (tap « Version » five times).
 
 ## How to get to it (user POV)
 

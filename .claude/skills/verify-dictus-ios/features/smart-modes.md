@@ -7,11 +7,14 @@
 
 ## Sub-features
 
-- Long-press the mic, drag up, release on a mode: the dictation is rewritten in that mode.
-- Five modes: Structuré (`structured`), Liste (`notes`), Message (`message`), Résumé (`summary`), Traduction → FR/EN/ES/DE (`translate.xx`); « Normal » clears the mode.
-- Up to three modes pinned to the keyboard (default: Structuré, Liste, Traduction → EN), edited in Pro hub → Mode intelligent (add/remove, reorder via « Modifier»).
-- Gate: Pro (`FeatureGate.isAvailable(.smartMode)`) AND Apple Intelligence available (`SmartModeEntitlement`).
-- Files: `DictusCore/Sources/DictusCore/Polish/SmartModeCatalogue.swift`, `DictusKeyboard/KeyboardSmartModeFan.swift`, `DictusKeyboard/Views/SmartModeFanView.swift`, `DictusApp/Views/SmartModeListView.swift`.
+- `smart-modes.fan`: Hold the mic, drag up, release on a mode: the dictation is rewritten in it; « Normal » clears it.
+- `smart-modes.structured`: Structuré: a long dictation put in order.
+- `smart-modes.list`: Liste: ideas as bullet points.
+- `smart-modes.message`: Message: a clear message, ready to send.
+- `smart-modes.summary`: Résumé: the gist in a few sentences.
+- `smart-modes.translate`: Traduction → FR / EN / ES / DE.
+- `smart-modes.pin`: Choose up to three modes shown in the keyboard (add, remove, reorder).
+- `smart-modes.toggle`: « Mode intelligent » on/off switch.
 
 ## How to get to it (user POV)
 

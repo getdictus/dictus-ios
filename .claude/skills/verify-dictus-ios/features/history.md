@@ -7,11 +7,13 @@
 
 ## Sub-features
 
-- List of the last 200 dictations, stored on the phone only; search « Rechercher dans les transcriptions ».
-- Swipe or context menu to delete; tap for detail with Copy, Share, add a word to the vocabulary.
-- « Effacer l'historique » in Réglages → Transcription; on/off switch in Pro hub → Historique.
-- Home entry: a « Historique » button (swipe up) when entitled; locked or hidden otherwise.
-- Files: `DictusApp/Views/HistoryView.swift`, `TranscriptionDetailView.swift`, `DictusCore/Sources/DictusCore/History/`.
+- `history.list`: The last 200 dictations, kept on the phone only.
+- `history.search`: « Rechercher dans les transcriptions ».
+- `history.delete`: Delete one entry (swipe or context menu).
+- `history.detail`: An entry's detail: copy, share, add a word to the vocabulary.
+- `history.clear`: « Effacer l'historique » in Réglages → Transcription.
+- `history.toggle`: « Historique » on/off switch.
+- `history.home-entry`: « Historique » button on Home (swipe up).
 
 ## How to get to it (user POV)
 

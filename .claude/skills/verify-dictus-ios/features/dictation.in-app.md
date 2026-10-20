@@ -7,11 +7,10 @@
 
 ## Sub-features
 
-- "New dictation" / « Nouvelle dictée » on the Home tab opens the full-screen `RecordingView`.
-- Stop with « Arrêter l'enregistrement »; the transcript appears in the "Last transcription" card, which copies on tap.
-- `dictus://dictate` with no `source` (from the widget) starts the same in-app dictation.
-- Without a model, Home shows « Télécharger un modèle pour commencer » instead of the button.
-- Files: `DictusApp/Views/HomeView.swift`, `DictusApp/Views/RecordingView.swift`.
+- `dictation.start-in-app`: « Nouvelle dictée » on Home opens a full-screen recording.
+- `dictation.copy-last`: The last transcription card copies its text on tap.
+- `dictation.download-prompt`: Without a model, Home asks to download one instead of offering a dictation.
+- `dictation.from-widget`: A dictation started from the widget opens the same in-app recording.
 
 ## How to get to it (user POV)
 

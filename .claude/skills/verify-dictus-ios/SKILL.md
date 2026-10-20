@@ -24,7 +24,7 @@ What it does, in order:
 1. Creates a new device `Dictus Verify <date>-<time>-<sha>` (iPhone 17, iOS 26.5 — not iOS 27, where the system may mount no third-party keyboard). It never reuses or erases an existing device.
 2. Writes the device language and the keyboard list (`AppleKeyboards` with `com.pivi.dictus.keyboard`, plus `AppleKeyboardsExpanded = 1`) into its `.GlobalPreferences.plist` while it is shut down.
 3. `simslim on <udid> --keep com.apple.remindd`, which boots it slimmed (~850 MB instead of ~3 GB), then `bootstatus`. Probes `axe describe-ui`.
-4. `xcodebuild -resolvePackageDependencies` then `xcodebuild build -scheme DictusApp -configuration Debug -destination platform=iOS Simulator,id=<udid> -derivedDataPath build/DerivedData`, **without** CI's `CODE_SIGNING_ALLOWED=NO` (an unsigned build gets no App Group container, so no `dictus_debug.log`). Restores `Localizable.xcstrings` if the build rewrote it.
+4. `xcodebuild -resolvePackageDependencies` then `xcodebuild build -scheme DictusApp -configuration Debug -destination platform=iOS Simulator,id=<udid> -derivedDataPath build/DerivedData`, **without** CI's `CODE_SIGNING_ALLOWED=NO` (an unsigned build gets no App Group container, so no `dictus_debug.log`). If the catalogs were clean before the build, records the hash of each `.xcstrings` the build rewrote (`xcstrings-build.sha`) and restores it.
 5. Installs, checks `pluginkit` lists `com.pivi.dictus.keyboard`, launches `com.pivi.dictus`.
 
 **Ready means all three**, because `simctl launch` exits 0 for an app that crashes a second later:
@@ -39,12 +39,12 @@ Last line on success, and the only one to rely on:
 READY udid=<udid> run=/Users/…/dev/dictus-evidence/verify-skill/<run-id> pid=<pid> screen=<onboarding|home>
 ```
 
-The run directory holds `run.env` (UDID, App Group path, log path, pid) that every other script reads; `~/dev/dictus-evidence/verify-skill/latest` points at it. A cold `build/DerivedData` takes about 10 minutes (FluidAudio, WhisperKit); an incremental build about one.
+The run directory holds `run.env` (UDID, App Group path, log path, pid) that every other script reads. **There is no shared `latest` link**: each session has its own pointer, `~/dev/dictus-evidence/verify-skill/sessions/<session>`, where the session is the worktree (its name plus a hash of its path) unless `DICTUS_VERIFY_SESSION` names it. Two sessions on this Mac therefore never resolve, drive or delete each other's run. To be explicit, export the run directory from the `READY` line: `export DICTUS_VERIFY_RUN=<run-dir>`. A cold `build/DerivedData` takes about 10 minutes (FluidAudio, WhisperKit); an incremental build about one.
 
 ## Doctor
 
 ```bash
-.claude/skills/verify-dictus-ios/scripts/doctor.sh            # latest run
+.claude/skills/verify-dictus-ios/scripts/doctor.sh            # this session's run
 .claude/skills/verify-dictus-ios/scripts/doctor.sh <run-dir>  # a given run
 ```
 
@@ -95,6 +95,7 @@ $D set-default dictus.debugProEntitlementForced -bool YES   # Pro on (Debug buil
 $D full-access                        # Réglages → Général → Clavier → Claviers → Dictus → Accès complet
 $D select-keyboard                    # Safari address bar, long-press the globe, "Dictus, multilingue"
 $D kbd mic                            # also: menu, menu-hold, emoji, abc, mic-fan
+$D type bonjoru && $D space           # type through the Dictus keys (not `axe type`, which bypasses the keyboard)
 $D log-mark                           # next log line number, to assert only on what follows
 $D wait-log '<KBD> keyboardMicTapped' 15 <mark>
 ```
@@ -147,11 +148,11 @@ Capture at least: the screen before the action, the screen after it, and the log
 ## Cleanup
 
 ```bash
-.claude/skills/verify-dictus-ios/scripts/cleanup.sh            # latest run
+.claude/skills/verify-dictus-ios/scripts/cleanup.sh            # this session's run
 .claude/skills/verify-dictus-ios/scripts/cleanup.sh <run-dir>  # a given run
 ```
 
-It copies `dictus_debug.full.log` out of the App Group, then `xcrun simctl shutdown` and `xcrun simctl delete` on **the UDID in the run's `run.env` and only that one** — and refuses if that device's name does not start with `Dictus Verify`. It restores `Localizable.xcstrings` if the build rewrote it and it was clean at launch. Last line: `CLEANUP OK udid=<udid> deleted=yes`.
+It copies `dictus_debug.full.log` out of the App Group, then `xcrun simctl shutdown` and `xcrun simctl delete` on **the UDID in the run's `run.env` and only that one** — and refuses if that device's name does not start with `Dictus Verify`. For `.xcstrings`, it restores a catalog **only if it is byte-identical to what a build of this run produced** (`xcstrings-build.sha`); any other change was made after the launch, by a person or an agent, and is kept with a `warning: … left untouched` line. Last line: `CLEANUP OK udid=<udid> deleted=yes`.
 
 - Never kill a process by name (`killall Simulator`, `pkill -f simctl`): other sessions and the smoke test's `Dictus Smoke` device share this Mac. Quitting Simulator.app shuts down every device it owns.
 - Never delete anything under `~/dev/dictus-evidence/`: Cleanup does not, and nothing else should.
@@ -159,15 +160,15 @@ It copies `dictus_debug.full.log` out of the App Group, then `xcrun simctl shutd
 
 ## Helpers
 
-All executable, all run from the repository root, all read the run from `~/dev/dictus-evidence/verify-skill/latest` unless given a run directory (`drive.sh` reads `DICTUS_VERIFY_RUN`).
+All executable, all run from the repository root, all read the run from the argument, else `DICTUS_VERIFY_RUN`, else this session's pointer `~/dev/dictus-evidence/verify-skill/sessions/<session>` (never another session's).
 
 | Script | Invocation | Ends with |
 | --- | --- | --- |
 | `scripts/launch.sh` | `launch.sh [--skip-onboarding] [--lang fr\|en]` | `READY udid=… run=… pid=… screen=…` |
 | `scripts/doctor.sh` | `doctor.sh [run-dir]` | `DOCTOR OK` / `DOCTOR FAIL <n>` |
-| `scripts/drive.sh` | `drive.sh <tap-id\|tap-label\|wait-id\|wait-label\|gone-id\|tab\|tree\|log-mark\|wait-log\|relaunch\|set-default\|full-access\|select-keyboard\|kbd> [args]` | one line per action; exit 1 with `error:` when an element never appears |
+| `scripts/drive.sh` | `drive.sh <tap-id\|tap-label\|wait-id\|wait-label\|gone-id\|tab\|tree\|log-mark\|wait-log\|relaunch\|set-default\|full-access\|select-keyboard\|kbd\|type\|space> [args]` | one line per action; exit 1 with `error:` when an element never appears |
 | `scripts/evidence.sh` | `evidence.sh <name> [run-dir]` | `evidence <name>: <path>.png` |
 | `scripts/cleanup.sh` | `cleanup.sh [run-dir]` | `CLEANUP OK udid=… deleted=yes` |
 | `scripts/lib.sh` | sourced, not run | `find_frame`, `wait_for`, `stable_frame`, `tap`, `tap_until`, `wait_log` |
 
-Overrides: `DICTUS_VERIFY_EVIDENCE` (evidence root), `DICTUS_VERIFY_DEVICE_TYPE`, `DICTUS_VERIFY_RUNTIME`.
+Overrides: `DICTUS_VERIFY_RUN` (run directory), `DICTUS_VERIFY_SESSION` (session name), `DICTUS_VERIFY_EVIDENCE` (evidence root), `DICTUS_VERIFY_DEVICE_TYPE`, `DICTUS_VERIFY_RUNTIME`.

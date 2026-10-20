@@ -7,11 +7,12 @@
 
 ## Sub-features
 
-- Four keyboard languages: Français, English, Español, Deutsch, each with AZERTY / QWERTY / QWERTZ.
-- Keyboard panel (☰ held): language rows, layout pills, gear « Ouvrir Dictus ».
-- Réglages → Clavier: « Langue du clavier », default page ABC / 123, « Disposition », « Rangée de chiffres».
-- Transcription language: « Suivre la langue du clavier » or fixed.
-- Files: `DictusKeyboard/Views/KeyboardPanelView.swift`, `DictusKeyboard/KeyboardLayouts.swift`, `DictusCore/Sources/DictusCore/SupportedLanguage.swift`, `DictusApp/Views/KeyboardModePicker.swift`.
+- `keyboard.language-switch`: Français, English, Español, Deutsch, switched from the keyboard panel (☰ held).
+- `keyboard.layout`: AZERTY / QWERTY / QWERTZ per language.
+- `keyboard.number-row`: « Rangée de chiffres » above the letters.
+- `keyboard.default-page`: Default page ABC or 123.
+- `keyboard.transcription-language`: Transcription language: « Suivre la langue du clavier » or fixed.
+- `keyboard.open-app`: The panel's gear opens Dictus.
 
 ## How to get to it (user POV)
 

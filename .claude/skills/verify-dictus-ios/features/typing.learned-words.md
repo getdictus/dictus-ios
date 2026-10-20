@@ -7,9 +7,8 @@
 
 ## Sub-features
 
-- The keyboard learns a correction the user rejected and an unknown word typed repeatedly, and stops correcting it.
-- « Reset learned words » in Réglages → Clavier clears them.
-- Files: `DictusCore/Sources/DictusCore/UserDictionary.swift`, `DictusApp/Views/SettingsView.swift`.
+- `learned-words.learn`: A rejected correction or a word typed repeatedly is learned and no longer corrected.
+- `learned-words.reset`: « Reset learned words » in Réglages → Clavier.
 
 ## How to get to it (user POV)
 

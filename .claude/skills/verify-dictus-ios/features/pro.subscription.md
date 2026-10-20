@@ -7,11 +7,12 @@
 
 ## Sub-features
 
-- Pro hub (Réglages → « Dictus Pro »): the four Pro features with their on/off state, links to Conditions and Confidentialité.
-- Paywall with three plans (products `solutions.pivi.dictus.pro.*`), restore purchases.
-- 14-day reverse trial: announcement sheet at the end of onboarding, end-of-trial paywall.
-- Hidden at compile time: `PremiumFlags.paywallVisible = false` (`DictusCore/Sources/DictusCore/PremiumFlags.swift:27`).
-- Files: `DictusApp/Views/PaywallView.swift`, `ProHubSections.swift`, `ProTrialAnnouncementView.swift`, `DictusApp/Subscription/`, `DictusCore/Sources/DictusCore/Subscription/`.
+- `pro.hub`: Dictus Pro hub: the four Pro features with their state and settings.
+- `pro.paywall`: Three plans to buy Pro.
+- `pro.restore`: Restore purchases.
+- `pro.trial`: A 14-day trial announced at the end of onboarding.
+- `pro.trial-end`: End-of-trial paywall.
+- `pro.demo`: « Voir la démonstration » on each Pro feature's page.
 
 ## How to get to it (user POV)
 

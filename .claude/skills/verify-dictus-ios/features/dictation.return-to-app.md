@@ -7,9 +7,8 @@
 
 ## Sub-features
 
-- After a cold start from the keyboard, DictusApp shows a « swipe back » overlay telling the user to go back to the host app.
-- Auto-return to the host app after dictation where the host is detected (`docs/auto-return-catalogue.md`).
-- Files: `DictusApp/Views/SwipeBackOverlayView.swift`, `DictusApp/DictusApp.swift` (`returnToHostApp`).
+- `return.swipe-back`: After a cold start from the keyboard, an overlay tells the user to swipe back to the app they were typing in.
+- `return.auto-return`: Where the host app is recognised, Dictus returns to it by itself after the dictation.
 
 ## How to get to it (user POV)
 
