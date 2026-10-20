@@ -55,6 +55,8 @@ xcrun simctl io <udid> screenshot <run>/undo.png    # at once: « Annuler » las
 
 The proof is the sequence `<KBD> statusChanged … to=recording`, `<APP> transcriptionStarted`, `<APP> transcriptionCompleted … words=N`, `<KBD> keyboardTextInserted`, `<APP> polishHandoff step=finished outcome=inserted chars=N`. The log never prints the text; `dictus.lastPolishedTranscription` in the App Group plist holds it (`plutil -p "$GROUP_DIR/Library/Preferences/group.solutions.pivi.dictus.plist"`). Screenshot `kbd.transcribing` with `simctl io … screenshot` in a loop right after ✓: `evidence.sh` is too slow for a state that lasts a few seconds.
 
+This recipe proves the insertion and captures the undo **state** only: it does not tap « Annuler », so `dictation.undo-insert` itself (the inserted text removed) is not verified by it. « Annuler » sits in the bar's left slot, where ☰ is (`kbd menu` taps that spot); a run that wants the proof taps it within the 8 s and checks the field is back to what it held before the dictation.
+
 ## Gotchas
 
 - **A recording is the room.** A simulator records the Mac's microphone: what `say` plays through the speakers, and whatever else is said nearby, which ends up in the transcript. Do not start one unless the task asks, keep takes short, and never publish a transcript without reading it. Transcript quality is not a measurement: through speakers and a built-in mic, Small (quantifié) heard « Bonjour, si c'est un test de tes aiselles, c'est mieux le teur. » for the sentence above, after a sentence picked up from the room, and « *MUSIQUE*. » at the Mac's default input volume (34). Transcription timing is Mac silicon (~10 s for 9 s of audio here).

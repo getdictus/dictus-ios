@@ -8,7 +8,7 @@ Each file has the same four sections: **Sub-features** (each with its own stable
 
 | ID | Feature | Tier | Drivable in the simulator |
 | --- | --- | --- | --- |
-| [`dictation.keyboard`](dictation.keyboard.md) | Dictation from the keyboard | Gratuit | Yes with a model: a real recording of the Mac's mic, transcription, insertion, undo |
+| [`dictation.keyboard`](dictation.keyboard.md) | Dictation from the keyboard | Gratuit | Yes with a model: a real recording of the Mac's mic, transcription, insertion, the undo state (the undo tap itself not driven) |
 | [`dictation.in-app`](dictation.in-app.md) | Dictation inside the app | Gratuit | Home state only; recording = the Mac's mic |
 | [`dictation.return-to-app`](dictation.return-to-app.md) | Return to the app you were typing in | Gratuit | Cold start only; return = device |
 | [`models.transcription`](models.transcription.md) | Transcription models | Gratuit | Yes (download is real traffic); RAM gates no |

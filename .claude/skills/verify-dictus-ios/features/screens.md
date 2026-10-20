@@ -101,7 +101,8 @@ stateDiagram-v2
     Recording --> Idle: ✕ (nothing inserted)
     Transcribing --> DictationUndo: text inserted
     Transcribing --> Error: transcription fails
-    DictationUndo --> Idle: tap Annuler (text removed), 8 s, or a keystroke
+    DictationUndo --> Idle: tap Annuler (text removed), 8 s, a caret move, or a keystroke with nothing to suggest
+    DictationUndo --> Suggestions: a keystroke, when there is something to suggest
     Error --> Idle: about 3 s
 ```
 
