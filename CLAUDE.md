@@ -54,6 +54,7 @@ Les issues du milestone `Someday` sont hors de vue volontairement. Ne pas les re
 - Merge, jamais squash.
 - Les trois targets partagent un numéro de version et de build. Ne jamais les bumper hors d'une coupe TestFlight (`scripts/cut-testflight.sh`).
 - Une PR n'est pas validée par une CI verte : elle passe par une relecture indépendante et un test sur device avant merge.
+- Après le merge (ou la fermeture) d'une PR, et avant de créer un nouveau worktree : `scripts/prune-worktrees.sh` liste ce qu'il retirerait, `--apply` le fait, `--apply <chemin>` vise un seul worktree. Il supprime le worktree, son `build/DerivedData`, les DerivedData Xcode qui pointent dedans et le simulateur qui porte **exactement le nom de la branche**, ce qui exécute la suppression au merge exigée pour les simulateurs de PR. Il garde, en disant pourquoi, le checkout principal, `device`, toute branche sans PR ou dont une PR est ouverte, et tout worktree avec un changement non commité ou un commit non poussé. Relancer ne fait rien de plus.
 
 ## Build, test, lint
 
@@ -74,6 +75,8 @@ Pierre travaille sur cette machine : toute fenêtre qui s'ouvre lui vole le focu
 - Un agent ne peut pas valider sur device physique : ce qui l'exige part dans la liste de validation manuelle, avec les étapes exactes.
 - Le simulateur se pilote au tap, au clavier et par l'arbre d'accessibilité avec `axe`. Le clavier Dictus **s'y affiche**, y prend le Full Access et y déclenche toute la chaîne clavier → app. On l'atteint en **appuyant longuement** sur le globe puis en le choisissant dans le menu : un tap simple fait défiler les claviers et saute les claviers tiers. La recette complète est dans `docs/agents/simulator.md`, qui fait autorité sur ce que le simulateur sait faire.
 - Pour vérifier qu'un changement de DictusApp, DictusKeyboard, de l'onboarding ou du passage par l'App Group n'a pas cassé la chaîne app → clavier : `scripts/simulator-smoke-test.sh` (headless, ~2 min, `SMOKE PASS` ou `SMOKE FAIL step N`). Il ne remplace pas le test sur device : voir `docs/agents/simulator-smoke-test.md`.
+- Tout simulateur se lance allégé avec simslim (`brew install mobai-app/tap/simslim`) : `simslim on <udid> --keep com.apple.remindd`, avant le premier build. L'allègement vit dans les overrides launchd du device : il est **par simulateur**, survit au reboot et à `simctl erase`, et il n'existe pas de réglage global (seul `simslim watch`, qui doit tourner en continu, allège chaque device qui boote). Mesuré le 2026-10-19 (iOS 26.5, iPhone 17, Dictus installé, au repos) : 3,01 Go et 205 processus en normal, 850 Mo et 64 en allégé. En allégé, le clavier Dictus s'affiche, tape, prend l'Accès complet et lance la chaîne micro comme en normal, et le smoke test passe. `--keep com.apple.remindd` sert seulement à Rappels, que la catégorie `pim` casse (aucune liste, bouton « + » grisé) ; Safari et Dictus n'ont besoin d'aucune exception. Non mesuré : un test de Live Activity demande `--except widgets`, un test StoreKit ou push `--except store`. `simslim off <udid>` rend le device d'origine.
+- Un simulateur créé pour une PR se supprime au merge de cette PR : `xcrun simctl delete <udid>`. Le device du smoke test (`Dictus Smoke`) est permanent et fait exception ; le script le recrée en version d'origine s'il manque, il faut donc l'alléger une fois après sa création.
 
 ## Contexte utilisateur
 

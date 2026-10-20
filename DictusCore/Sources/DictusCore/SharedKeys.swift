@@ -102,6 +102,12 @@ public enum SharedKeys {
     /// a page was added or removed, so a persisted value had to be reinterpreted on every
     /// change to the flow. A step name means the same thing for as long as the step exists.
     public static let onboardingStep = "dictus.onboardingStep"
+    /// Bool: whether the onboarding's Smart Mode pick was confirmed by its Continue during
+    /// the onboarding run in progress (#725). Set by `SmartModePick.commit()`, removed when
+    /// the onboarding finishes. Absent means the pinned list, if any, was not written by
+    /// this run, so the pick opens empty instead of reloading it.
+    /// Read and written only through `SmartModePick`.
+    public static let onboardingSmartModePickCommitted = "dictus.onboardingSmartModePickCommitted"
     /// The app version this install is up to date with (#685), as a marketing version
     /// string ("2.0.0"). It gates What's new: an install that completed onboarding and is
     /// behind `WhatsNew.edition` sees it once. Absent on every install from before 2.0.0,
