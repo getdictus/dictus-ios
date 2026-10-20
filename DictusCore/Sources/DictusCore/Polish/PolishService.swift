@@ -5,6 +5,7 @@ import NaturalLanguage
 /// Orchestrates the polish layer:
 /// 1. Honour the global toggle (`SharedKeys.polishEnabled`) — unless a Smart Mode
 ///    is armed, which is a narrower and later instruction (#79, `PolishGatePolicy`).
+///    A dictation the toggle stops is still recorded (#747).
 /// 2. Branch on the resolved prompt selection (#239): per-language path for
 ///    follow/explicit modes, language-agnostic auto path for Auto-detect.
 /// 3. Detect the language of the raw STT output via `NLLanguageRecognizer`;
@@ -190,6 +191,9 @@ public final class PolishService {
     /// language detection skips, when the engine throws/cancels, or when the
     /// guardrail rejects the output.
     ///
+    /// Every call writes at least one journal event, the toggle-off one included
+    /// (`skippedToggleOff`, #747).
+    ///
     /// `languagePolicy` is the per-dictation snapshot captured by
     /// DictationCoordinator at transcription start (#226). It carries the STT
     /// engine, the model identifier (e.g. "openai_whisper-small",
@@ -296,6 +300,7 @@ public final class PolishService {
             task: task ?? .natural,
             polishEnabled: defaults.bool(forKey: SharedKeys.polishEnabled)
         ) else {
+            await recordToggleOff(call)
             return PolishOutcome(text: raw)
         }
 
@@ -1034,6 +1039,38 @@ public final class PolishService {
                 )
             ),
             raw: raw, engineRaw: engineRaw, polished: nil
+        )
+    }
+
+    /// Record a dictation the polish toggle stopped (#747), so the journal holds it.
+    ///
+    /// Without this the toggle-off path wrote nothing, and a user who keeps polish off
+    /// exported an empty journal: the engine output and the vocabulary rewrite (#80)
+    /// are kept as text nowhere else, the debug log being counts only.
+    ///
+    /// Nothing is measured that the dictation did not already pay for. No language
+    /// detection, no timings (nil, not zero: nothing ran, so nothing was timed), no
+    /// mode and no target, because no task was chosen. `polished` is nil, which is
+    /// what the entry already means by "the engine produced no output". The policy
+    /// snapshot is in hand, so the event still says which STT model and which
+    /// language settings produced the text.
+    private func recordToggleOff(_ call: PolishCall) async {
+        let policy = call.languagePolicy
+        await emit(
+            PolishMetrics(
+                engine: activeEngine.identifier,
+                mode: nil,
+                targetLanguage: nil,
+                detectedLanguage: nil,
+                rawCharCount: call.raw.count,
+                polishedCharCount: call.raw.count,
+                latencyMs: 0,
+                outcome: .skippedToggleOff,
+                sttEngine: policy.engine.rawValue,
+                sttModelID: policy.modelIdentifier,
+                languageResolution: PolishMetrics.LanguageResolution(policy: policy)
+            ),
+            raw: call.raw, engineRaw: call.engineRaw, polished: nil
         )
     }
 

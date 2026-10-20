@@ -132,9 +132,10 @@ struct PolishDebugExport: Codable {
         /// On a `smartModeSkippedShortInput` event: which mode declined, on how many
         /// characters, against which floor (#587). Absent on every other event.
         ///
-        /// The dictation's own result is the **next** event, the Normal polish that ran
-        /// in the mode's place — or no event at all when the polish toggle is off, which
-        /// is exactly why the skip needed one of its own.
+        /// The dictation's own result is the **next** event: the Normal polish that ran
+        /// in the mode's place, or a `skippedToggleOff` when the polish toggle is off
+        /// (#747). Before #747 that second case wrote no event at all, which is why
+        /// the skip needed one of its own.
         let smartModeLengthSkip: PolishMetrics.SmartModeLengthSkip?
         let latencyMs: Int
         /// Latency breakdown — `latencyMs` ≈ preprocess + engine + postprocess.
@@ -195,31 +196,10 @@ enum PolishDebugExporter {
             appleFMState: String(describing: PolishAvailability.state)
         )
 
-        var outcomes: [String: Int] = [
-            "success": 0, "rejectedGuardrail": 0, "skipped": 0,
-            "skippedShort": 0, "skippedAutoMode": 0, "cancelled": 0, "engineFailed": 0,
-            "engineUnavailable": 0, "exceededContextBudget": 0,
-            // Seeded like the rest so a zero reads as "did not happen" rather than as
-            // "this build does not know about it" (#587).
-            "smartModeSkippedShortInput": 0
-        ]
-        var failureReasons: [String: Int] = [:]
-        var failureReasonsByWriter: [String: [String: Int]] = [:]
-        var guardrailChecks: [String: Int] = [:]
-        var smartModesSkippedForLength: [String: Int] = [:]
-        for e in entries {
-            if let skip = e.metrics.smartModeLengthSkip {
-                smartModesSkippedForLength[skip.mode, default: 0] += 1
-            }
-            outcomes[e.metrics.outcome.rawValue, default: 0] += 1
-            if let reason = e.metrics.failureReason {
-                failureReasons[reason.slug, default: 0] += 1
-                failureReasonsByWriter[e.writer ?? "unrecorded", default: [:]][reason.slug, default: 0] += 1
-            }
-            if let check = e.metrics.guardrailCheck {
-                guardrailChecks[check.rawValue, default: 0] += 1
-            }
-        }
+        // The aggregates live in DictusCore since #747, where a test pins that a
+        // dictation the polish toggle stopped counts under its own outcome and in
+        // nothing else.
+        let tally = PolishEventTally(entries: entries)
 
         let events = entries.map { entry in
             PolishDebugExport.Event(
@@ -259,11 +239,11 @@ enum PolishDebugExporter {
             exportedAt: formatter.string(from: Date()),
             device: device,
             settings: settings,
-            outcomes: outcomes,
-            failureReasons: failureReasons,
-            guardrailChecks: guardrailChecks,
-            smartModesSkippedForLength: smartModesSkippedForLength,
-            failureReasonsByWriter: failureReasonsByWriter,
+            outcomes: tally.outcomes,
+            failureReasons: tally.failureReasons,
+            guardrailChecks: tally.guardrailChecks,
+            smartModesSkippedForLength: tally.smartModesSkippedForLength,
+            failureReasonsByWriter: tally.failureReasonsByWriter,
             events: events
         )
     }
