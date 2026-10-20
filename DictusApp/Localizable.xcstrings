@@ -991,16 +991,6 @@
         }
       }
     },
-    "Cancel anytime" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annulable à tout moment"
-          }
-        }
-      }
-    },
     "Change" : {
       "comment" : "Onboarding language screen: opens the menu of languages (#675).",
       "localizations" : {
@@ -1802,6 +1792,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Suivant"
+          }
+        }
+      }
+    },
+    "No commitment, cancel anytime" : {
+      "comment" : "Paywall line under the CTA when a subscription is selected; hidden for the lifetime purchase (#724).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans engagement, annulable à tout moment"
           }
         }
       }
@@ -3369,6 +3370,17 @@
         }
       }
     },
+    "Not ready for a year?" : {
+      "comment" : "Title of the sheet offering the monthly plan when the end-of-trial paywall is closed without buying (#724).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un an, c'est trop pour l'instant ?"
+          }
+        }
+      }
+    },
     "Not supported on this iPad" : {
       "comment" : "Reason shown on a disabled model card on an iPad whose chip is too old to run the model (issue #612). iPad counterpart of \"Not supported on this iPhone\".",
       "localizations" : {
@@ -4090,6 +4102,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher dans les transcriptions"
+          }
+        }
+      }
+    },
+    "See all plans" : {
+      "comment" : "Paywall link that reveals the monthly plan next to the yearly and lifetime ones (#724).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir toutes les formules"
           }
         }
       }
@@ -4997,6 +5020,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le modèle vocal n’a pas pu être préparé."
+          }
+        }
+      }
+    },
+    "There is also a monthly plan." : {
+      "comment" : "Body of the sheet offering the monthly plan when the end-of-trial paywall is closed without buying (#724).",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il existe aussi un abonnement mensuel."
           }
         }
       }
