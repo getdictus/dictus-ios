@@ -12,23 +12,45 @@ struct HistoryScenePage: View {
     let modelIdentifier: String
     let onNext: () -> Void
 
-    /// The cards, built once: their dates are relative to today.
-    private let records = HistorySceneText.records(now: Date())
-
     var body: some View {
         OnboardingScenePage(
             eyebrow: Text("Also in Pro",
                           comment: "Onboarding: small label above the title of the voice notes, vocabulary and history scenes, which come after the Smart Modes and show the other Dictus Pro features (#680)."),
-            title: Text("Everything is easy to find",
-                        comment: "Onboarding history scene: title (#680)."),
-            line: Text("Every dictation stays on your iPhone. Search for a word, find the text.",
-                       comment: "Onboarding history scene: the line under the title (#680)."),
-            phoneEnd: .top,
-            loopSeconds: HistorySceneScript.loopSeconds,
-            stillSeconds: HistorySceneScript.stillSeconds,
+            title: HistorySceneCard.title,
+            line: HistorySceneCard.line,
             modelManager: modelManager,
             modelIdentifier: modelIdentifier,
             onNext: onNext
+        ) {
+            HistorySceneCard()
+        }
+    }
+}
+
+/// The history scene in its drawn iPhone: the onboarding page's card and the
+/// history screen's "See the demo" sheet (#686).
+struct HistorySceneCard: View {
+    /// The title of the onboarding step, also the title of the feature screen's "See the
+    /// demo" sheet (#686): one string for both.
+    static var title: Text {
+        Text("Everything is easy to find",
+             comment: "Onboarding history scene: title (#680).")
+    }
+
+    /// The line under the title, shared the same way.
+    static var line: Text {
+        Text("Every dictation stays on your iPhone. Search for a word, find the text.",
+             comment: "Onboarding history scene: the line under the title (#680).")
+    }
+
+    /// The cards, built once: their dates are relative to today.
+    private let records = HistorySceneText.records(now: Date())
+
+    var body: some View {
+        FeatureSceneCard(
+            phoneEnd: .top,
+            loopSeconds: HistorySceneScript.loopSeconds,
+            stillSeconds: HistorySceneScript.stillSeconds
         ) { time in
             HistoryScene(time: time, records: records)
         }

@@ -581,6 +581,25 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
                 continue
             }
 
+            // The disk wins over a missing completion (#732). A chunk that landed in a
+            // process killed before its completion appended it is on disk, unabsorbed,
+            // with no task left to complete: without this, `chunksToEnqueue` steps over it
+            // as "already stored" and the file never moves again. Chunks still in flight
+            // are left to their own completion, so this only ever folds in orphans.
+            guard let orphans = absorbStoredChunks(ofFile: fileIndex, in: run, excluding: run.inFlight) else {
+                return
+            }
+            if !orphans.isEmpty {
+                PersistentLog.log(.modelDownloadOrphanedChunks(
+                    name: run.manifest.modelIdentifier,
+                    path: file.path,
+                    file: fileIndex,
+                    absorbed: orphans.absorbed,
+                    discarded: orphans.discarded.map { "\($0.chunk):\($0.reason)" }
+                ))
+                run.emitProgress(force: true)
+            }
+
             if run.manifest.isFileFullyReceived(at: fileIndex) {
                 // A refused publication has already decided what happens next — a
                 // scheduled retry or the end of the run — and must not fall through into
@@ -593,10 +612,8 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
             let next = run.manifest.chunksToEnqueue(
                 ofFileAt: fileIndex,
                 inFlight: run.inFlight,
-                alreadyStored: ManifestStore.storedChunkIndices(
-                    run.manifest.modelIdentifier,
-                    fileIndex: fileIndex
-                ),
+                alreadyStored: ManifestStore.staging(run.manifest.modelIdentifier)
+                    .storedChunkIndices(fileIndex: fileIndex),
                 window: Self.chunksInFlight
             )
             for chunkIndex in next {
@@ -619,6 +636,39 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
         run.attempts = 0
         ManifestStore.save(run.manifest)
         run.emitProgress(force: true)
+    }
+
+    /// Absorb → append → save: folds the file's stored chunks that are contiguous with its
+    /// partial into it and makes the manifest say so durably. The one step both a chunk's
+    /// completion and `pump` take (#732).
+    ///
+    /// WHY THE TWO CANNOT APPEND A CHUNK TWICE. Both run on the delegate queue, so they
+    /// never interleave; whichever comes second finds the chunk already deleted by the
+    /// first one's append. And a process that died between the append and the save left
+    /// bytes past `appendedBytes`, which the next append truncates before writing.
+    ///
+    /// - Returns: what was absorbed and discarded, or `nil` when the append failed and
+    ///   the run is over.
+    private func absorbStoredChunks(
+        ofFile fileIndex: Int,
+        in run: DownloadRun,
+        excluding: Set<Int>
+    ) -> ModelDownloadStaging.Absorption? {
+        let absorption: ModelDownloadStaging.Absorption
+        do {
+            absorption = try ManifestStore.staging(run.manifest.modelIdentifier).absorbStoredChunks(
+                into: &run.manifest,
+                fileAt: fileIndex,
+                excluding: excluding
+            )
+        } catch {
+            finish(run, error: error)
+            return nil
+        }
+        if !absorption.isEmpty {
+            ManifestStore.save(run.manifest)
+        }
+        return absorption
     }
 
     private func start(chunk chunkIndex: Int, ofFile fileIndex: Int, in run: DownloadRun) {
@@ -700,14 +750,20 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
     @discardableResult
     private func publish(file index: Int, in run: DownloadRun) -> Bool {
         let file = run.manifest.files[index]
-        let partial = ManifestStore.partialURL(run.manifest.modelIdentifier, fileIndex: index)
         let destination = run.destination.appendingPathComponent(file.path)
 
-        if let failure = ModelFileIntegrity.verify(
-            fileAt: partial,
-            expectedSize: file.size,
-            expectedSHA256: file.sha256
-        ) {
+        let refusal: ModelFileIntegrity.Failure?
+        do {
+            refusal = try ManifestStore.staging(run.manifest.modelIdentifier).publish(
+                fileAt: index,
+                of: run.manifest,
+                to: destination
+            )
+        } catch {
+            finish(run, error: error)
+            return false
+        }
+        if let failure = refusal {
             PersistentLog.log(.modelDownloadIntegrityFailed(
                 name: run.manifest.modelIdentifier,
                 path: file.path,
@@ -720,23 +776,6 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
                 run,
                 error: ModelRepoDownloader.DownloadError.integrityFailed(path: file.path)
             )
-            return false
-        }
-
-        do {
-            try FileManager.default.createDirectory(
-                at: destination.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-            // Remove any stale destination, then move — atomically publishing a complete
-            // file or nothing. The property everything downstream leans on: a file that
-            // exists is a file that finished (see `WhisperModelRepository`).
-            if FileManager.default.fileExists(atPath: destination.path) {
-                try FileManager.default.removeItem(at: destination)
-            }
-            try FileManager.default.moveItem(at: partial, to: destination)
-        } catch {
-            finish(run, error: error)
             return false
         }
 
@@ -1033,33 +1072,27 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
         switch outcome {
         case .stored(let validator):
             run.manifest.setValidator(validator, ofFileAt: tag.fileIndex)
-            // The offset the partial is authoritative up to, read BEFORE the manifest
-            // advances. `append` truncates to it first, which is what makes the whole
-            // operation replayable: a process that died between writing bytes and saving
-            // the manifest left bytes past this point, and they are dropped rather than
-            // appended to a second time.
-            let appendAt = run.manifest.files[tag.fileIndex].appendedBytes
-            let absorbed = run.manifest.absorbContiguousChunks(
-                ofFileAt: tag.fileIndex,
-                available: ManifestStore.storedChunkIndices(
-                    run.manifest.modelIdentifier,
-                    fileIndex: tag.fileIndex
-                )
-            )
-            do {
-                try ManifestStore.append(
-                    chunks: absorbed,
-                    ofFile: tag.fileIndex,
-                    model: run.manifest.modelIdentifier,
-                    startingAt: appendAt
-                )
-            } catch {
-                finish(run, error: error)
+            // Every chunk on disk counts, not only this one: a later chunk that landed
+            // first is folded in behind it.
+            guard let absorption = absorbStoredChunks(ofFile: tag.fileIndex, in: run, excluding: []) else {
                 return
             }
+            if !absorption.discarded.isEmpty {
+                // A stored chunk behind this one had the wrong length. Rare enough, and
+                // telling enough, to be worth the same line `pump` writes.
+                PersistentLog.log(.modelDownloadOrphanedChunks(
+                    name: run.manifest.modelIdentifier,
+                    path: run.pathOfFile(tag.fileIndex),
+                    file: tag.fileIndex,
+                    absorbed: absorption.absorbed,
+                    discarded: absorption.discarded.map { "\($0.chunk):\($0.reason)" }
+                ))
+            }
             run.attempts = 0
+            // Unconditional: the validator alone has to be durable too, even when this
+            // chunk landed out of order and nothing could be absorbed yet.
             ManifestStore.save(run.manifest)
-            run.emitProgress(force: !absorbed.isEmpty)
+            run.emitProgress(force: !absorption.absorbed.isEmpty)
             pump(run)
 
         case .restartFile:
@@ -1080,22 +1113,6 @@ final class BackgroundModelDownloadService: NSObject, @unchecked Sendable {
             // URLSession only does for a cancelled task.
             retryOrFail(run, error: ModelRepoDownloader.DownloadError.invalidResponse)
         }
-    }
-
-    /// The assembled chunk is not the length the span asked for, or `nil` when it is.
-    ///
-    /// This is what validates a span the client resumed itself, where the response header
-    /// only describes the final leg. A short chunk appended into the partial would leave
-    /// a file of the wrong length made of misaligned bytes, and nothing downstream but
-    /// the SHA-256 would notice.
-    private static func lengthMismatch(at location: URL, span: ModelDownloadChunkSpan) -> String? {
-        guard let end = span.end else { return nil }
-        let expected = end - span.start + 1
-        guard let attributes = try? FileManager.default.attributesOfItem(atPath: location.path),
-              let actual = (attributes[.size] as? NSNumber)?.int64Value else {
-            return "chunk-length-unreadable"
-        }
-        return actual == expected ? nil : "chunk-length-\(actual)-expected-\(expected)"
     }
 
     /// Turns a URLSession transport error into the vocabulary the model card speaks.
@@ -1196,7 +1213,7 @@ extension BackgroundModelDownloadService: URLSessionDownloadDelegate {
                     details: "chunk=\(tag.chunkIndex) asked=\(span.start) lastLeg=\(legStart)"
                 ))
             }
-            if let reason = Self.lengthMismatch(at: location, span: span) {
+            if let reason = ModelDownloadStaging.lengthMismatch(at: location, span: span) {
                 PersistentLog.log(.modelDownloadRangeRejected(
                     name: run.manifest.modelIdentifier,
                     path: path,
@@ -1212,9 +1229,8 @@ extension BackgroundModelDownloadService: URLSessionDownloadDelegate {
                 return
             }
             do {
-                try ManifestStore.store(
+                try ManifestStore.staging(run.manifest.modelIdentifier).store(
                     chunkAt: location,
-                    model: run.manifest.modelIdentifier,
                     fileIndex: tag.fileIndex,
                     chunkIndex: tag.chunkIndex
                 )

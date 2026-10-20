@@ -45,7 +45,7 @@ Les issues du milestone `Someday` sont hors de vue volontairement. Ne pas les re
 
 **`docs/ROADMAP.md` et `docs/RELEASE-PLAN.md` se committent directement sur `develop`.** Ce sont des fichiers de pilotage : ils ne compilent pas, ne cassent rien, et une PR sur eux n'a ni relecture indépendante utile ni test device — les deux seules choses qui valident une PR ici. Ils restent versionnés parce qu'un worktree ne voit que ce qui est dans git, et que ce fichier pointe dessus.
 
-`develop` est protégé (PR requise, 2 status checks) et le compte de Pierre a le droit de contournement, donc le push passe en affichant `Bypassed rule violations`. **C'est délibéré pour ces deux fichiers et pour eux seuls** : faire tourner deux builds iOS sur une modification de markdown coûte des minutes pour zéro information, et de toute façon — la CI ne teste rien. Tout le reste, y compris la moindre ligne de Swift, passe par une PR.
+`develop` est protégé (PR requise, status checks requis) et le compte de Pierre a le droit de contournement, donc le push passe en affichant `Bypassed rule violations`. **C'est délibéré pour ces deux fichiers et pour eux seuls** : faire tourner le build iOS et la suite de tests `DictusCore` sur une modification de markdown coûte des minutes pour zéro information — aucun de ces fichiers n'est compilé, et aucun test ne les lit. Tout le reste, y compris la moindre ligne de Swift, passe par une PR.
 
 ## Git et releases
 
@@ -70,9 +70,10 @@ Pierre travaille sur cette machine : toute fenêtre qui s'ouvre lui vole le focu
 
 - `xcrun simctl boot <udid>` est headless, donc autorisé.
 - La suite de tests n'a besoin d'aucun simulateur (`cd DictusCore && swift test`). Seuls les builds d'app en demandent un.
-- Ne jamais mettre une fenêtre Simulator au premier plan : `open -a Simulator` est interdit. `open -g -a Simulator` ne l'est pas, et il est requis pour piloter l'UI (`axe` ne peut taper que si Simulator.app est attaché au device booté). Mesuré : `-g` ne change pas l'app au premier plan.
+- Ne jamais mettre une fenêtre Simulator au premier plan : `open -a Simulator` est interdit. `open -g -a Simulator` ne l'est pas, et sous Xcode 26 il est requis pour piloter l'UI (`axe` ne peut taper que si Simulator.app est attaché au device booté). Mesuré : `-g` ne change pas l'app au premier plan. Sous Xcode 27, installé ici (mesuré le 2026-10-14), il n'y a plus de Simulator.app et `axe` fonctionne sans.
 - Un agent ne peut pas valider sur device physique : ce qui l'exige part dans la liste de validation manuelle, avec les étapes exactes.
 - Le simulateur se pilote au tap, au clavier et par l'arbre d'accessibilité avec `axe`. Le clavier Dictus **s'y affiche**, y prend le Full Access et y déclenche toute la chaîne clavier → app. On l'atteint en **appuyant longuement** sur le globe puis en le choisissant dans le menu : un tap simple fait défiler les claviers et saute les claviers tiers. La recette complète est dans `docs/agents/simulator.md`, qui fait autorité sur ce que le simulateur sait faire.
+- Pour vérifier qu'un changement de DictusApp, DictusKeyboard, de l'onboarding ou du passage par l'App Group n'a pas cassé la chaîne app → clavier : `scripts/simulator-smoke-test.sh` (headless, ~2 min, `SMOKE PASS` ou `SMOKE FAIL step N`). Il ne remplace pas le test sur device : voir `docs/agents/simulator-smoke-test.md`.
 
 ## Contexte utilisateur
 
@@ -126,6 +127,8 @@ Single-context — `CONTEXT.md` + `docs/adr/` at the repo root (created lazily b
 ### Headless simulator
 
 Boot, build, install, launch, capture, and what a simulator cannot show. See `docs/agents/simulator.md`.
+
+**Smoke test:** `scripts/simulator-smoke-test.sh` runs the app → keyboard → app path headlessly in about two minutes and ends with `SMOKE PASS` or `SMOKE FAIL step N`. Run it while verifying any change to DictusApp, DictusKeyboard, onboarding or the App Group hand-off, and before a TestFlight cut. A pass is not a device validation. See `docs/agents/simulator-smoke-test.md`.
 
 ### Releasing
 
