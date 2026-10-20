@@ -245,6 +245,10 @@ private struct EntryDetailView: View {
     /// (#587). That reader is usually an agent triaging a report (#255), so the line
     /// carries the two numbers the decision was made on rather than only the verdict.
     private var engineOutputPlaceholder: String {
+        // Same lie, same fix (#747): with polish off the engine was not asked.
+        if entry.metrics.outcome == .skippedToggleOff {
+            return "(polish off: engine not called)"
+        }
         guard let skip = entry.metrics.smartModeLengthSkip else {
             return "(engine did not run successfully)"
         }
@@ -377,7 +381,7 @@ private extension PolishMetrics.Outcome {
     static var allDisplayCases: [PolishMetrics.Outcome] {
         [.success, .rejectedGuardrail, .skipped, .skippedShort, .skippedAutoMode,
          .cancelled, .engineFailed, .engineUnavailable, .exceededContextBudget,
-         .unsupportedInputLanguage, .smartModeSkippedShortInput]
+         .unsupportedInputLanguage, .smartModeSkippedShortInput, .skippedToggleOff]
     }
 
     var shortLabel: String {
@@ -393,6 +397,7 @@ private extension PolishMetrics.Outcome {
         case .exceededContextBudget: return "too long"
         case .unsupportedInputLanguage: return "language"
         case .smartModeSkippedShortInput: return "mode skipped"
+        case .skippedToggleOff: return "polish off"
         }
     }
 
@@ -412,6 +417,10 @@ private extension PolishMetrics.Outcome {
         // of the process, which is the worst state on this list and the one that
         // has to be findable at a glance in a long export.
         case .cancelled, .engineFailed, .engineUnavailable: return .red
+        // Grey, apart from both groups (#747): nothing was refused and nothing failed.
+        // The user turned polish off, and the event is only here so the journal holds
+        // the dictation.
+        case .skippedToggleOff: return .gray
         }
     }
 }

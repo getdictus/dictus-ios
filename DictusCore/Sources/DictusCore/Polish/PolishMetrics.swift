@@ -85,17 +85,29 @@ public struct PolishMetrics: Sendable, Codable {
         /// A voice note whose mode declined its transcript writes the same event
         /// (#650), so an export tells "skipped" from "never tried" on both surfaces.
         ///
-        /// Its own outcome rather than a flag on the Normal event that follows: with
-        /// the polish toggle off there IS no event that follows — `PolishService`
-        /// returns the raw text before writing anything — and the first export of this
-        /// behaviour (2026-09-23) therefore showed a short dictation as no event at
-        /// all. An outcome is also what `outcomes` in the debug export counts, which is
-        /// the number that answers "how often did the mode I armed decline to run".
+        /// Its own outcome rather than a flag on the Normal event that follows: until
+        /// #747 there was no event that followed with the polish toggle off, and the
+        /// first export of this behaviour (2026-09-23) therefore showed a short
+        /// dictation as no event at all. The event that follows is now a
+        /// `skippedToggleOff`, which says nothing about the mode. An outcome is also
+        /// what `outcomes` in the debug export counts, which is the number that answers
+        /// "how often did the mode I armed decline to run".
         ///
         /// Distinct from `skippedShort`, which is the **recording-duration** gate on
         /// the free polish (#141): that one is about how long the user spoke, this one
         /// about how much they said, and they can fire on different dictations.
         case smartModeSkippedShortInput
+        /// The polish toggle is off, so no polish was attempted (#747). Written so the
+        /// journal holds every dictation, not only the polished ones: it is the one
+        /// place the engine output and the custom-vocabulary rewrite (#80) are kept as
+        /// text, and a user with polish off used to export an empty file.
+        ///
+        /// Its own outcome rather than `skipped`, which is the gibberish gate *inside*
+        /// a polish that was asked for. A reader of an export has to tell "polish off"
+        /// from "polish ran and fell back", and every count and rate over polish runs
+        /// has to be able to leave these out: nothing ran, nothing was timed
+        /// (`timings` is nil), nothing was refused.
+        case skippedToggleOff
     }
 
     /// Why an armed Smart Mode declined a dictation for length (#587), on the event
