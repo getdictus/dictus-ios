@@ -54,6 +54,7 @@ Les issues du milestone `Someday` sont hors de vue volontairement. Ne pas les re
 - Merge, jamais squash.
 - Les trois targets partagent un numéro de version et de build. Ne jamais les bumper hors d'une coupe TestFlight (`scripts/cut-testflight.sh`).
 - Une PR n'est pas validée par une CI verte : elle passe par une relecture indépendante et un test sur device avant merge.
+- Après le merge (ou la fermeture) d'une PR, et avant de créer un nouveau worktree : `scripts/prune-worktrees.sh` liste ce qu'il retirerait, `--apply` le fait, `--apply <chemin>` vise un seul worktree. Il supprime le worktree, son `build/DerivedData`, les DerivedData Xcode qui pointent dedans et le simulateur qui porte **exactement le nom de la branche**, ce qui exécute la suppression au merge exigée pour les simulateurs de PR. Il garde, en disant pourquoi, le checkout principal, `device`, toute branche sans PR ou dont une PR est ouverte, et tout worktree avec un changement non commité ou un commit non poussé. Relancer ne fait rien de plus.
 
 ## Build, test, lint
 
