@@ -423,6 +423,10 @@ Put the device back the way you found it. This one is `fr_FR` with `AppleLanguag
 
 ## 7. Clean up
 
+A device created for a PR is deleted when that PR is merged (`CLAUDE.md`). Name it exactly like the branch, `xcrun simctl create "fix/123-short-slug" <device type> <runtime>`, and `scripts/prune-worktrees.sh --apply` deletes it with the worktree; a device named anything else is never touched by that script.
+
+For a device you keep:
+
 ```bash
 xcrun simctl status_bar <udid> clear
 xcrun simctl ui <udid> appearance light
