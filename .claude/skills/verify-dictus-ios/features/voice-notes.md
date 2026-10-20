@@ -7,11 +7,15 @@
 
 ## Sub-features
 
-- Share an audio message from WhatsApp, Telegram, Signal or Messages to Dictus; it is transcribed and shown as result cards (optionally passed through a Smart Mode, « Après la transcription »).
-- Keyboard reader: tap ☰ in the Dictus keyboard to read the latest voice note, « Insérer » it, open it in Dictus, delete it.
-- Settings: language (« Détecter automatiquement » or fixed), after-transcription mode; on/off switch.
-- A Live Activity follows a voice note in progress.
-- Files: `DictusShare/ShareViewController.swift`, `DictusApp/VoiceNotes/`, `DictusKeyboard/KeyboardVoiceNotes.swift`, `DictusKeyboard/Views/VoiceNoteReaderView.swift`.
+- `voice-notes.share-in`: Share a received audio message from a messaging app to Dictus.
+- `voice-notes.transcribe`: The shared audio is transcribed into result cards.
+- `voice-notes.after-mode`: « Après la transcription »: transcript only, or passed through a Smart Mode.
+- `voice-notes.language`: Transcription language: « Détecter automatiquement » or fixed.
+- `voice-notes.reader`: ☰ in the keyboard opens the latest voice note.
+- `voice-notes.insert`: « Insérer » puts the transcript in the current field.
+- `voice-notes.delete`: Delete a voice note from the reader.
+- `voice-notes.toggle`: « Messages vocaux » on/off switch.
+- `voice-notes.progress-activity`: A Live Activity follows a voice note being transcribed.
 
 ## How to get to it (user POV)
 
@@ -31,5 +35,5 @@ Settings page: Pro on, then Réglages → `Dictus Pro, Pro actif` → `Messages 
 
 ## Gotchas
 
-- **Not drivable in the simulator:** the share sheet from a messaging app (none is installed), hence any transcription result. While `PremiumFlags.paywallVisible = false` the share extension refuses with "…not available in this version of Dictus." even in Debug.
+- **Not drivable in the simulator:** sharing from a messaging app (none is installed), so the share-in and the transcription that follows cannot be driven. The share extension itself is not the blocker: with `dictus.debugProEntitlementForced` set and `dictus.voiceNotesEnabled` on, it accepts the request even while `PremiumFlags.paywallVisible = false`. In a Release build, where the forced entitlement does not exist, it refuses with "…not available in this version of Dictus."
 - The reader's identifiers (`voiceNoteReaderInsert`…) live inside the keyboard and do not appear in the host's tree.
