@@ -984,6 +984,11 @@ class DictationCoordinator: ObservableObject {
                 let transcript = DictationTranscript.corrected(
                     try await transcriptionService.transcribe(audioSamples: samples, languagePolicy: languagePolicy)
                 )
+                // Counted here, for every user and both origins (#726): the keyboard's
+                // dictations transcribe in this process too, and this is the one line
+                // both tails below share. Counted once the transcript exists, so a
+                // dictation cancelled during polish still counts what was said.
+                DictationTally.record(transcript.text, audioDuration: audioDuration)
                 // Polish and the hand-off below do not touch the speech engine.
                 releaseEngine()
 
